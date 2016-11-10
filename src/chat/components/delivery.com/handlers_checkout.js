@@ -215,7 +215,7 @@ handlers['food.admin.order.pay'] = function * (message) {
 
   // base response
   var response = {
-    text: `Checkout for ${foodSession.chosen_restaurant.name} - $${foodSession.order.total}`,
+    text: `Checkout for ${foodSession.chosen_restaurant.name} - ${(foodSession.order.total + foodSession.tipAmount).$}`,
     fallback: `Unable to pay for order`,
     callback_id: `food.admin.order.pay`,
     attachments: [{
@@ -298,7 +298,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'guest_token': foodSession.guest_token,
     'order': {
       'total': foodSession.order.total * 100,
-      'tip': foodSession.tipAmount,
+      'tip': foodSession.tipAmount * 100,
       'order_type': foodSession.fulfillment_method
     }
   }
@@ -322,9 +322,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'callback_id': `food.admin.add_new_card`,
     'color': `#3AA3E3`,
     'attachment_type': `default`,
-    'attachments': [{
-      'image_url': 'http://tidepools.co/kip/stripe_powered.png'
-    },
+    'attachments': [{'image_url': 'http://tidepools.co/kip/stripe_powered.png'},
     {
       'title': '',
       'mrkdwn_in': ['text'],
@@ -368,7 +366,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
     'guest_token': foodSession.guest_token,
     'order': {
       'total': foodSession.order.total * 100,
-      'tip': (foodSession.tip === `cash`) ? 0.00 : Number(foodSession.tip.slice(0, 2)) * 0.01,
+      'tip': foodSession.tipAmount * 100,
       'order_type': foodSession.fulfillment_method
     },
     'saved_card': {
