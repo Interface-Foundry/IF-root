@@ -323,12 +323,15 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'color': `#3AA3E3`,
     'attachment_type': `default`,
     'attachments': [{
+      'image_url': 'http://tidepools.co/kip/stripe_powered.png'
+    },
+    {
       'title': '',
       'mrkdwn_in': ['text'],
-      'text': `Cool, <${foodSession.payment.url}|➤ Click Here to add cart and pay>`,
+      'text': `Great, <${foodSession.payment.url}|➤ Click to pay with Stripe>`,
       'fallback': `You are unable to follow this link to confirm order`,
       'callback_id': `food.admin.add_new_card`,
-      'color': `#3AA3E3`,
+      'color': `#49d63a`,
       'attachment_type': `default`
     }]
   }
