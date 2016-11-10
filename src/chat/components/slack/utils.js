@@ -12,6 +12,36 @@ var eachSeries = require('async-co/eachSeries');
 *
 */
 
+
+/*
+* returns sets admin user for a slackbot team, creates chat users
+* @param {Object} slackbot object
+* @returns {Object} slackbot object
+*                   
+*/
+function * initializeTeam(team) {
+ var res_auth = yield request('https://slack.com/api/auth.test?token=' + team.bot.bot_access_token); 
+ res_auth = JSON.parse(res_auth);
+ if (!res_auth.user_id) {
+    return kip.error('Could not find the user who added slackbot ' + bot._id)
+ }
+ team.meta.addedBy = res_auth.user_id;
+ team.meta.office_assistants = [res_auth.user_id];
+ var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
+ res_chan = JSON.parse(res_chan);
+ var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
+ team.meta.cart_channels.push(generalChannel.id);
+ team.meta.all_channels = res_chan.channels.map(c => {return c.id});
+  kip.debug('\n\n\n\n\n\n utils:initializeTeam:team:',team,' \n res_auth: ',res_auth, ' \n\n\n\n\n\n');
+ yield team.save();
+ yield getTeamMembers(team);
+ return team;
+}
+
+
+
+
+
 /*
 * returns admins of a team or false if there are none. will appropriately update chatusers based on latest slackbot.meta.office_assistants field
 * @param {Object} slackbot object
@@ -94,29 +124,6 @@ function * getChannelMembers(team, channelId) {
 * @returns {array} returns channel objects 
 *                   
 */
-
- // [
- //    {
- //        "id": "C024BE91L",
- //        "name": "fun",
- //        "created": 1360782804,
- //        "creator": "U024BE7LH",
- //        "is_archived": false,
- //        "is_member": false,
- //        "num_members": 6,
- //        "topic": {
- //            "value": "Fun times",
- //            "creator": "U024BE7LV",
- //            "last_set": 1369677212
- //        },
- //        "purpose": {
- //            "value": "This channel is for fun",
- //            "creator": "U024BE7LH",
- //            "last_set": 1360782804
- //        }
- //    },
- //    ....
- //    ]
 function * getChannels(team) {
     var channels = [];
     var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
@@ -212,6 +219,7 @@ function * addCartChannel(message, channel_name) {
 
 
 module.exports = {
+  initializeTeam: initializeTeam,
   findAdmins: findAdmins,
   getTeamMembers: getTeamMembers,
   getChannels: getChannels,

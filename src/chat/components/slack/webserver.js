@@ -8,7 +8,6 @@ var refresh_team = require('../refresh_team');
 var express = require('express');
 var co = require('co');
 var next = require("co-next")
-var app = express();
 var bodyParser = require('body-parser');
 var cart = require('./cart');
 var kipcart = require('../cart');
@@ -16,6 +15,15 @@ var _ = require('lodash');
 var slackConnections = require('./slack').slackConnections
 var cardTemplate = require('./card_templates');
 var utils = require('./utils');
+var next = require('co-next');
+var cookieParser = require('cookie-parser')
+var uuid = require('uuid')
+// var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
+// var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
+var request = require('request')
+var requestPromise = require('request-promise');
+// var init_team = require("../init_team.js");
+var app = express();
 app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
@@ -174,7 +182,6 @@ app.post('/slackaction', next(function * (req, res) {
           })
       }
       else if (simple_command == 'channel_btn') {
-        kip.debug(' \n\n\n\n webserver:channel_btn:parsedIn: ', parsedIn,' \n\n\n\n');
         var channelId = _.get(parsedIn,'actions[0].value');
         var team_id = message.source.team;
         team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
@@ -382,89 +389,43 @@ app.post('/slackaction', next(function * (req, res) {
   }
 }))
 
-var cookieParser = require('cookie-parser')
-var uuid = require('uuid')
-// var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
-// var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
-var request = require('request')
 
 app.get('/authorize', function (req, res) {
   console.log('button click')
   res.redirect('https://slack.com/oauth/authorize?scope=commands+bot+users:read&client_id=' + kip.config.slack.client_id)
 })
 
-app.get('/newslack', function (req, res) {
+app.get('/newslack', next(function * (req, res) {
   console.log('new slack integration request')
-  // TODO post in our slack #dev channel
-  // TODO check that "state" property matches
-  res.redirect('/thanks.html')
-
   if (!req.query.code) {
     console.error(new Date())
     console.error('no code in the callback url, cannot proceed with new slack integration')
     return
   }
-
   var body = {
     code: req.query.code,
     redirect_uri: kip.config.slack.redirect_uri
   }
+  var res_auth = yield requestPromise({ url: 'https://' + kip.config.slack.client_id + ':' + kip.config.slack.client_secret + '@slack.com/api/oauth.access',method: 'POST',form: body})
+  res_auth = JSON.parse(res_auth);
+  if (_.get(res_auth,'ok')) {
+     var existingTeam = yield db.Slackbots.findOne({'team_id': _.get(res_auth,'team_id'), 'deleted': { $ne:true } }).exec();
+     kip.debug('webserver414:existingTeam:..', existingTeam)
+     if ( _.get(existingTeam, 'team_id')) {
+        kip.debug('webserver415:newslack:team already exists..', existingTeam)
+        _.merge(existingTeam, res_auth);
+        yield existingTeam.save();
+        refresh_team(existingTeam.team_id)
+     } else {
+      var bot = new db.Slackbot(res_auth);
+      yield bot.save();
+      yield utils.initializeTeam(bot);
+      refresh_team(bot.team_id)
+     }
+  }
 
-  request({
-    url: 'https://' + kip.config.slack.client_id + ':' + kip.config.slack.client_secret + '@slack.com/api/oauth.access',
-    method: 'POST',
-    form: body
-  }, function (e, r, b) {
-    if (e) {
-      console.log('error connecting to slack api')
-      console.log(e)
-    }
-    if (typeof b === 'string') {
-      b = JSON.parse(b)
-    }
-    if (!b.ok) {
-      console.error('error connecting with slack, ok = false')
-      console.error('body was', body)
-      console.error('response was', b)
-      return
-    } else if (!b.access_token || !b.scope) {
-      console.error('error connecting with slack, missing prop')
-      console.error('body was', body)
-      console.error('response was', b)
-      return
-    }
-
-    console.log('got positive response from slack')
-    console.log('body was', body)
-    console.log('response was', b)
-    var bot = new db.Slackbot(b)
-    db.Slackbots.findOne({
-      team_id: b.team_id,
-      deleted: {
-        $ne: true
-      }
-    }, function (e, old_bot) {
-      if (e) {
-        kip.error(e)
-      }
-
-      if (old_bot) {
-        kip.debug('already have a bot for this team', b.team_id)
-        kip.debug('updating i guess')
-        _.merge(old_bot, b)
-        old_bot.save(e => {
-          kip.err(e)
-          refresh_team(old_bot.team_id)
-        })
-      } else {
-        bot.save(function (e) {
-          kip.err(e)
-          refresh_team(bot.team_id)
-        })
-      }
-    })
-  })
-})
+    res.redirect('/thanks.html')
+}))
 
 // app.get('/*', function(req, res, next) {
 //     res.sendfile(defaultPage)
