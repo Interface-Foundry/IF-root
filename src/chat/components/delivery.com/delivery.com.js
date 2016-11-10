@@ -8,14 +8,15 @@ var sleep = require('co-sleep')
 var api = require('./api-wrapper')
 var queue = require('../queue-mongo')
 var utils = require('./utils')
-var address_utils = require('./address_utils')
+
 var team_utils = require('./team_utils.js')
+var parseAddress = require('parse-address')
 var mailer_transport = require('../../../mail/IF_mail.js')
 
 var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)
 
-//turn feedback buttons on/off
+// turn feedback buttons on/off
 var feedbackOn = true
 var feedbackTracker = {}
 
@@ -293,9 +294,8 @@ handlers['food.choose_address'] = function * (session) {
     }
     replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: msg_json})
 
-
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
-    var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession,'data.input');
+    var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession, 'data.input')
     var res = yield api.searchNearby({addr: addr})
     foodSession.merchants = _.get(res, 'merchants')
     foodSession.cuisines = _.get(res, 'cuisines')
@@ -310,41 +310,53 @@ handlers['food.choose_address'] = function * (session) {
 //
 // the user's intent is to create a new address
 //
-handlers['address.new'] = function * (session) {
+handlers['address.new'] = function * (message) {
   kip.debug(' 🌆🏙 enter a new address')
   // session.state = {}
   var msg_json = {
     'text': "What's the address for the order?",
     'attachments': [{
       'text': '✎ Type your address below (Example: _902 Broadway 10010_)',
-      'mrkdwn_in': [
-          'text'
-      ]
+      'mrkdwn_in': ['text']
     }]
   }
-  replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json})
+  replyChannel.send(message, 'address.confirm', {type: message.origin, data: msg_json})
 }
 
 //
 // the user seeks to confirm their possibly updated/validated address
 //
-handlers['address.confirm'] = function * (session) {
-  var input = session.text;
+handlers['address.confirm'] = function * (message) {
+  // ✐✐✐
+  // send response since this is slow
+  replyChannel.sendReplace(message, 'address.save', {type: message.origin, data: {text: 'Thanks! We need to process that address real quick.'}})
+  try {
+    var res = yield api.searchNearby({addr: message.text})
+    logging.data('address broh', _.keys(res))
+    var location = {
+      address_1: res.search_address.street,
+      address_2: res.search_address.unit,
+      zip: res.search_address.zip,
+      zip_code: res.search_address.zip_code,
+      postal_code: res.search_address.postal_code,
+      state: res.search_address.state,
+      city: res.search_address.city,
+      sublocality: res.search_address.sublocality,
+      latitude: res.search_address.latitude,
+      longitude: res.search_address.longitude,
+      neighborhood: res.search_address.neighborhood
+    }
+  } catch (err) {
+    logging.error('error searching that address', err)
+    replyChannel.sendReplace(message, 'address.new', {
+      type: message.origin,
+      data: {text: `Sorry, I can't find that address! Try typing something like: "902 Broadway New York, NY 10010"`}
+    })
+    return
+  }
 
-  //✐✐✐
-  //this process is slow, we need to send a "Processing..." text message here
-
-  var res = yield api.searchNearby({addr: input})
-  if (!res) return utils.send_text_reply(session, 'Sorry, I can\'t find that address! Try typing something like: "902 Broadway New York, NY 10010"');
-  var res_loc = res.search_address;
-  res_loc.input = input;
-
-  // format the address nicely
-  var location = yield address_utils.parseAddress(res_loc);
-
-  var prompt = 'Is `' + location.address_1 + ' ' + location.city + ', ' + location.state + ' ' + location.zip_code +'` your address?'
   var msg_json = {
-    'text': prompt,
+    'text': `Is ${location.address_1} ${location.city}, ${location.state}, ${location.zip_code} your address?`,
     'attachments': [
       {
         'mrkdwn_in': [
@@ -373,8 +385,8 @@ handlers['address.confirm'] = function * (session) {
     ]
   }
 
-  //collect feedback on this feature
-  if(feedbackOn && msg_json){
+  // collect feedback on this feature
+  if (feedbackOn && msg_json) {
     msg_json.attachments[0].actions.push({
       name: 'feedback.new',
       text: '⇲ Send feedback',
@@ -383,7 +395,7 @@ handlers['address.confirm'] = function * (session) {
     })
   }
 
-  replyChannel.send(session, 'address.save', {type: session.origin, data: msg_json})
+  replyChannel.send(message, 'address.save', {type: message.origin, data: msg_json})
 }
 
 // Save the address to the db after the user confirms it
