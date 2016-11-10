@@ -32,7 +32,6 @@ function * initializeTeam(team) {
  var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
  team.meta.cart_channels.push(generalChannel.id);
  team.meta.all_channels = res_chan.channels.map(c => {return c.id});
-  kip.debug('\n\n\n\n\n\n utils:initializeTeam:team:',team,' \n res_auth: ',res_auth, ' \n\n\n\n\n\n');
  yield team.save();
  yield getTeamMembers(team);
  return team;

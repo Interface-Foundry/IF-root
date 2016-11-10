@@ -92,20 +92,23 @@ function isCancelIntent(message) {
 function switchMode(message) {
   var input = message.text ? message.text.toLowerCase().trim() : '';
   var modes = {
-    'shopping': function () {
-      return 'shopping';
-    },
-    'food': function () {
-      return 'food';
-    },
     'onboarding': function () {
       return 'onboarding';
+    },
+    'shopping': function () {
+      return 'shopping';
     },
     'settings': function () {
       return 'settings';
     },
     'team': function () {
       return 'team';
+    },
+    'food': function () {
+      return 'food';
+    },
+    'address': function () {
+      return 'address';
     },
     'default': function () {
       return false;
@@ -132,6 +135,9 @@ function printMode(message) {
       break
     case 'food':
       winston.debug('In', 'FOOD'.blue, 'mode 👋')
+      break
+    case 'address':
+      winston.debug('In', 'ADDRESS'.purple, 'mode 👋')
       break
     default:
       winston.debug('no mode known such mystery 🕵 ')
