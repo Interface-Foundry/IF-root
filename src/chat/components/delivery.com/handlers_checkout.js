@@ -183,7 +183,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': ['text'],
         'text': `*Delivery Instructions:*\n` +
-                `${foodSession.data.instructions}`,
+          _.get(foodSession, 'data.instructions') ? foodSession.data.instructions : ``,
         'fallback': `You are unable to edit instructions`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#49d63a`,
