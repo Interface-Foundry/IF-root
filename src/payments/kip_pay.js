@@ -176,8 +176,8 @@ app.post('/charge', jsonParser, function (req, res) {
     if (body.saved_card && body.saved_card.customer_id) {
       // we have card to charge
       if (body.saved_card.card_id) {
-        chargeById(p, function (r) {
-          console.log('SAVED CHARGE RESULT ', r)
+        chargeById(payment, function (r) {
+          logging.info('SAVED CHARGE RESULT ', r)
         })
         var v = {
           newAcct: false,
@@ -188,7 +188,7 @@ app.post('/charge', jsonParser, function (req, res) {
         res.status(200).send(JSON.stringify(v))
       } else {
         // NEED A CARD ID!
-        console.log('NEED CARD ID!')
+        logging.info('NEED CARD ID!')
         v = {
           newAcct: false,
           processing: false,
