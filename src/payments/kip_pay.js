@@ -243,7 +243,7 @@ app.post('/process', jsonParser, function (req, res) {
         }).then(function (customer) {
           customer_id = customer.id
           return stripe.charges.create({
-            amount: parseInt(pay.order.order.total) + parseInt(pay.order.tipAmount) * 100, // Amount in cents + tip
+            amount: pay.order.order.total + roundUp(pay.order.tipAmount * 100, 10), // Amount in cents + tip
             currency: 'usd',
             customer: customer.id
           })
@@ -341,7 +341,7 @@ function pay_delivery_com (pay, callback) {
 
   // payment amounts should match
   // NOTE: THIS MUST BE THE TOTAL PAYMENT + TOP TO COMPARE TO CHARGE VAL
-  if (pay.charge.amount == parseInt(pay.order.order.total) + parseInt(pay.order.tipAmount) * 100) {
+  if (pay.charge.amount == pay.order.order.total + roundUp(pay.order.tipAmount * 100, 10)) {
     if (!pay.order.chosen_location.addr.special_instructions) {
       pay.order.chosen_location.addr.special_instructions = ''
     }
@@ -412,6 +412,11 @@ function pay_delivery_com (pay, callback) {
     err = 'ERROR: Charge amounts dont match D:'
     callback(err)
   }
+}
+
+// precision is 10 for 10ths, 100 for 100ths, etc.
+function roundUp(number, precision) {
+  Math.ceil(num * precision) / precision
 }
 
 var port = process.env.PORT || 8080
