@@ -62,7 +62,7 @@ console.log('heheh', __dirname)
 app.post('/charge', jsonParser, function (req, res) {
 
   // include KEY with new POST req to /charge to verify authentic kip request
-  var kip_secret = 'mooseLogicalthirteen$*optimumNimble!Cake'
+  var kipSecret = 'mooseLogicalthirteen$*optimumNimble!Cake'
 
   // SAMPLE BODY:
   var prunedPay = {
@@ -157,14 +157,16 @@ app.post('/charge', jsonParser, function (req, res) {
 
   // NEED TO IP RESTRICT TO ONLY OUR ECOSYSTEM
 
-  if (_.get(req, 'body') && (req.body.kip_token === kip_secret) && _.get(req, 'body.order.total')) {
+  if (_.get(req, 'body') && (req.body.kip_token === kipSecret) && _.get(req, 'body.order.total')) {
     var body = req.body
+
     // new payment
-    var p = new Payment({
+    var payment = new Payment({
       session_token: crypto.randomBytes(256).toString('hex'), // gen key inside object
       order: body
     })
-    p.save(function (err, data) {
+
+    payment.save(function (err, data) {
       if (err) {
         logging.error('error with saving', err)
       }
@@ -174,7 +176,7 @@ app.post('/charge', jsonParser, function (req, res) {
     if (body.saved_card && body.saved_card.customer_id) {
       // we have card to charge
       if (body.saved_card.card_id) {
-        charge_by_id(p, function (r) {
+        chargeById(p, function (r) {
           console.log('SAVED CHARGE RESULT ', r)
         })
         var v = {
@@ -200,7 +202,7 @@ app.post('/charge', jsonParser, function (req, res) {
       v = {
         newAcct: true,
         processing: false,
-        url: baseURL + '?k=' + p.session_token
+        url: baseURL + '?k=' + payment.session_token
       }
 
       res.status(200).send(JSON.stringify(v))
@@ -306,7 +308,7 @@ app.post('/process', jsonParser, function (req, res) {
 })
 
 // make a charge
-function charge_by_id (payment) {
+function chargeById (payment) {
   // STRIPE CHARGE BY ID
   // When it's time to charge the customer again, retrieve the customer ID!
   stripe.charges.create({
@@ -364,8 +366,7 @@ function * payDeliveryDotCom (pay, callback) {
   // payment amounts should match
   // NOTE: THIS MUST BE THE TOTAL PAYMENT + TOP TO COMPARE TO CHARGE VAL
 
-  if (pay.charge.amount == pay.order.order.total + roundUp(pay.order.tipAmount * 100, 10)) {
-
+  if (pay.charge.amount === pay.order.order.total + roundUp(pay.order.tipAmount * 100, 10)) {
     // add special instructions
     pay.order.chosen_location.special_instructions = _.get(pay, 'order.chosen_location.special_instructions') ? pay.order.chosen_location.special_instructions : ''
     // build guest checkout obj
