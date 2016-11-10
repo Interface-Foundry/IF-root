@@ -15,6 +15,7 @@ var kipcart = require('../cart');
 var _ = require('lodash');
 var slackConnections = require('./slack').slackConnections
 var cardTemplate = require('./card_templates');
+var utils = require('./utils');
 app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
@@ -46,12 +47,8 @@ function simple_action_handler (action) {
       return action.value
     case 'more':
       return 'more'
-    //
-    // Item info buttons
-    //
-    //
-    // Other buttons
-    //
+    case 'cafe_btn':
+      return 'cafe_btn';
     case 'home_btn':
       return 'home_btn';
     case 'back_btn':
@@ -62,6 +59,8 @@ function simple_action_handler (action) {
       return 'view_cart_btn';
     case 'team':
       return 'team';
+    case 'channel_btn':
+      return 'channel_btn';
     case 'settings':
       return 'settings';
     case 'exit':
@@ -74,6 +73,7 @@ function simple_action_handler (action) {
       return 'address_confirm_btn'
     case 'send_last_call_btn':
       return 'send_last_call_btn'
+
     case 'passthrough':
       return action.value
   }
@@ -119,12 +119,10 @@ app.post('/slackaction', next(function * (req, res) {
         origin: 'slack',
         source: parsedIn
       });
-
       // inject source.team and source.user because fuck the fuck out of slack message formats
       message.source.team = message.source.team.id;
       message.source.user = message.source.user.id;
       message.source.channel = message.source.channel.id;
-
       if (simple_command == 'home_btn') {
         var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
         var last_message = history[0];
@@ -141,6 +139,14 @@ app.post('/slackaction', next(function * (req, res) {
           body: JSON.stringify(json)
         })
         return res.sendStatus(200)
+      }
+      else if (simple_command == 'cafe_btn') {
+          message.mode = 'food'
+          message.action = 'begin'
+          message.text = 'food'
+          message.save().then(() => {
+            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          })
       }
       else if (simple_command == 'back_btn') {
         var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
@@ -162,11 +168,40 @@ app.post('/slackaction', next(function * (req, res) {
       else if (simple_command == 'help_btn') {
           message.mode = 'banter'
           message.action = 'reply'
-          // inject source.team and source.user because fuck the fuck out of slack message formats
           message.text = 'help'
           message.save().then(() => {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
+      }
+      else if (simple_command == 'channel_btn') {
+        kip.debug(' \n\n\n\n webserver:channel_btn:parsedIn: ', parsedIn,' \n\n\n\n');
+        var channelId = _.get(parsedIn,'actions[0].value');
+        var team_id = message.source.team;
+        team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+        if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
+          _.remove(team.meta.cart_channels, function(c) { return c == channelId; });
+        } else {
+          team.meta.cart_channels.push(channelId);
+        }
+        yield team.save();
+        var channels = yield utils.getChannels(team);
+        var buttons = channels.map(channel => {
+        var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
+          return {
+            name: 'channel_btn',
+            text: checkbox + channel.name ,
+            type: 'button',
+            value: channel.id
+          }
+        });
+        var json = parsedIn.original_message;
+        json.attachments[json.attachments.length-2] = {text: 'Channels: ', actions: buttons, callback_id: "none"}
+        request({
+          method: 'POST',
+          uri: message.source.response_url,
+          body: JSON.stringify(json)
+        })
+        return res.sendStatus(200)
       }
       else if (simple_command == 'view_cart_btn') {
           message.mode = 'shopping'

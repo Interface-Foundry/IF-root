@@ -15,11 +15,11 @@ var slack_home_default = module.exports.slack_home_default = [{
 
 
 var slack_home = module.exports.slack_home =[{
-     name: "help_btn",
-     text: "Help",
+     name: "cafe_btn",
+     text: "Kip Cafe",
      style: "default",
      type: "button",
-     value: "help_btn"
+     value: "cafe_btn"
    },
    {
      name: "settings",
@@ -73,11 +73,11 @@ var slack_settings_default = module.exports.slack_settings_default = [{
 
 
 var slack_settings = module.exports.slack_settings = [{
-     name: "help_btn",
-     text: "Help",
+     name: "cafe_btn",
+     text: "Kip Cafe",
      style: "default",
      type: "button",
-     value: "help_btn"
+     value: "cafe_btn"
    },
    {
      name: "team",
@@ -102,7 +102,7 @@ var slack_settings = module.exports.slack_settings = [{
    }];
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = [{
-     pretext: "Ok thanks! Going back to Shopping Mode ☺️",
+     pretext: "Going back to Shopping Mode ☺️",
      image_url:"http://kipthis.com/kip_modes/mode_shopping.png",
      text:"",
      mrkdwn_in: [

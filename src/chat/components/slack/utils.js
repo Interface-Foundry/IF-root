@@ -89,6 +89,43 @@ function * getChannelMembers(team, channelId) {
 
 
 /*
+* returns all channel objects for a given a slackbot(team) 
+* @param {Object} slackbot object
+* @returns {array} returns channel objects 
+*                   
+*/
+
+ // [
+ //    {
+ //        "id": "C024BE91L",
+ //        "name": "fun",
+ //        "created": 1360782804,
+ //        "creator": "U024BE7LH",
+ //        "is_archived": false,
+ //        "is_member": false,
+ //        "num_members": 6,
+ //        "topic": {
+ //            "value": "Fun times",
+ //            "creator": "U024BE7LV",
+ //            "last_set": 1369677212
+ //        },
+ //        "purpose": {
+ //            "value": "This channel is for fun",
+ //            "creator": "U024BE7LH",
+ //            "last_set": 1360782804
+ //        }
+ //    },
+ //    ....
+ //    ]
+function * getChannels(team) {
+    var channels = [];
+    var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
+    res_chan = JSON.parse(res_chan);
+    return res_chan.channels
+}
+
+
+/*
 * returns members of a team given a slackbot object, creates chatuser objects if they do not exist in db
 * @param {Object} slackbot object
 * @returns {array} returns chatuser objects 
@@ -176,8 +213,9 @@ function * addCartChannel(message, channel_name) {
 
 module.exports = {
   findAdmins: findAdmins,
-  getChannelMembers: getChannelMembers,
   getTeamMembers: getTeamMembers,
+  getChannels: getChannels,
+  getChannelMembers: getChannelMembers,
   addCartChannel: addCartChannel,
   removeCartChannel: removeCartChannel
 };

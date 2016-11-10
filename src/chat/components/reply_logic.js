@@ -30,7 +30,6 @@ var settings = require('./modes/settings');
 var team = require('./modes/team');
 var shopping = require('./modes/shopping').handlers;
 var food = require('./delivery.com/delivery.com').handlers;
-// var slack = require('./slack/slack');
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
@@ -115,7 +114,6 @@ function switchMode(message) {
   };
   var mode = (modes[input] || modes['default'])();
   if (!mode) return false 
-
   return mode
 }
 
@@ -127,11 +125,14 @@ function printMode(message) {
     case 'onboarding':
       winston.debug('In', 'ONBOARDING'.green, 'mode 👋')
       break
+     case 'team':
+      winston.debug('In', 'TEAM'.yellow, 'mode 👋')
+      break
      case 'settings':
-      winston.debug('In', 'SETTINGS'.green, 'mode 👋')
+      winston.debug('In', 'SETTINGS'.red, 'mode 👋')
       break
     case 'food':
-      winston.debug('In', 'FOOD'.green, 'mode 👋')
+      winston.debug('In', 'FOOD'.blue, 'mode 👋')
       break
     default:
       winston.debug('no mode known such mystery 🕵 ')
