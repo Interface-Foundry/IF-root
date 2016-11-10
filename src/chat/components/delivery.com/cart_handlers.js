@@ -238,12 +238,13 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
   // ------------------------------------
   // set up final attachment and tip stuff if total price isnt enough
   var finalAttachment
+  var tipAmount
   if (totalPrice < foodSession.chosen_restaurant.minimum) {
     if (foodSession.tipPercent === 'cash') {
       foodSession.tipAmount = 0.00
     } else {
       // set up tip stuff since we dont have order submitted
-      foodSession.tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) * 0.01 * totalPrice).toFixed(2)
+      foodSession.tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) / 100 * totalPrice).toFixed(2)
     }
     yield foodSession.save()
       // food order minimum not met, let admin add more items i guess
@@ -254,34 +255,40 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       attachment_type: 'default'
     }
   } else {
-    foodSession.order = yield api.createCartForSession(foodSession)
-    foodSession.markModified('order')
-    yield foodSession.save()
+    try {
+      foodSession.order = yield api.createCartForSession(foodSession)
+      foodSession.markModified('order')
 
-    if (foodSession.tipPercent === 'cash') {
-      foodSession.tipAmount = 0.00
-    } else {
-      foodSession.tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) * 0.01 * totalPrice).toFixed(2)
-    }
+      if (foodSession.tipPercent === 'cash') {
+        tipAmount = 0.00
+        foodSession.tipAmount = tipAmount
+      } else {
+        tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) / 100 * totalPrice).toFixed(2)
+        foodSession.tipAmount = tipAmount
+      }
+      yield foodSession.save()
 
-    yield foodSession.save()
-    // final attachment with everything
-    finalAttachment = {
-      text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
-            `*Taxes:* ${foodSession.order.tax.$}\n` +
-            `*Team Cart Total:* ${foodSession.order.total.$}`,
-      fallback: 'Confirm Choice',
-      callback_id: 'foodConfrimOrder_callbackID',
-      color: '#49d63a',
-      attachment_type: 'default',
-      mrkdwn_in: ['text'],
-      actions: [{
-        'name': `food.admin.order.checkout.confirm`,
-        'text': `Checkout ${foodSession.order.total.$}`,
-        'type': `button`,
-        'style': `primary`,
-        'value': `checkout`
-      }]
+      // final attachment with everything
+      finalAttachment = {
+        text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
+              `*Taxes:* ${foodSession.order.tax.$}\n` +
+              `*Tip:* ${foodSession.tipAmount.$}\n` +
+              `*Team Cart Total:* ${foodSession.order.total.$}`,
+        fallback: 'Confirm Choice',
+        callback_id: 'foodConfrimOrder_callbackID',
+        color: '#49d63a',
+        attachment_type: 'default',
+        mrkdwn_in: ['text'],
+        actions: [{
+          'name': `food.admin.order.checkout.confirm`,
+          'text': `Checkout ${(foodSession.order.total + foodSession.tipAmount).$}`,
+          'type': `button`,
+          'style': `primary`,
+          'value': `checkout`
+        }]
+      }
+    } catch (err) {
+      logging.error('error with creating cart payment for some reason', err)
     }
   }
 
