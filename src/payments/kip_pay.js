@@ -16,7 +16,6 @@
           Mirugai                Tamago                   Ebi
        (Giant Clam)            (Cooked Egg)             (Shrimp)
 */
-
 require('kip')
 
 var pay_const = require('./pay_const.js')
@@ -49,12 +48,12 @@ var jsonParser = bodyParser.json()
 var cc = require('./secrets/kip_cc.js')
 var pay_utils = require('./pay_utils.js')
 
-// this serves the checkout page for new credit card
-// app.get("/", function(req, res) {
-//  //GENERATE LINK that has amount
-//  res.sendFile(path.join(__dirname + '/web', 'index.html'))
-
-// })
+// VARIOUS STUFF TO POST BACK TO USER EASILY
+// --------------------------------------------
+var queue = require('../chat/components/queue-mongo')
+var UserChannel = require('../chat/components/delivery.com/UserChannel')
+var replyChannel = new UserChannel(queue)
+// --------------------------------------------
 
 app.use('/', express.static(path.join(__dirname, 'web')))
 console.log('heheh', __dirname)
@@ -158,21 +157,23 @@ app.post('/charge', jsonParser, function (req, res) {
 
   // NEED TO IP RESTRICT TO ONLY OUR ECOSYSTEM
 
-  if (req.body && (req.body.kip_token === kip_secret) && req.body.order && req.body.order.total) {
-    var o = req.body
+  if (_.get(req, 'body') && (req.body.kip_token === kip_secret) && _.get(req, 'body.order.total')) {
+    var body = req.body
     // new payment
     var p = new Payment({
       session_token: crypto.randomBytes(256).toString('hex'), // gen key inside object
-      order: o
+      order: body
     })
     p.save(function (err, data) {
-      if (err) console.log(err)
+      if (err) {
+        logging.error('error with saving', err)
+      }
     })
 
     // ALREADY A STRIPE USER
-    if (o.saved_card && o.saved_card.customer_id) {
+    if (body.saved_card && body.saved_card.customer_id) {
       // we have card to charge
-      if (o.saved_card.card_id) {
+      if (body.saved_card.card_id) {
         charge_by_id(p, function (r) {
           console.log('SAVED CHARGE RESULT ', r)
         })
@@ -186,19 +187,17 @@ app.post('/charge', jsonParser, function (req, res) {
       } else {
         // NEED A CARD ID!
         console.log('NEED CARD ID!')
-        var v = {
+        v = {
           newAcct: false,
           processing: false,
           msg: 'Error: Card ID Missing!'
         }
         res.status(500).send(JSON.stringify(v))
       }
-    }
-
-    // NEW STRIPE USER
-    else {
+    } else {
+      // NEW STRIPE USER
       // return checkout LINK
-      var v = {
+      v = {
         newAcct: true,
         processing: false,
         url: baseURL + '?k=' + p.session_token
@@ -216,6 +215,7 @@ app.post('/session', jsonParser, function (req, res) {
   if (req.body && req.body.session_token) {
     var t = req.body.session_token.replace(/[^\w\s]/gi, '') // clean special char
     Payment.findOne({session_token: t}, function (err, obj) {
+      if (err) logging.error('catching error in session ', err)
       res.send(JSON.stringify(obj))
     })
   }
@@ -234,7 +234,7 @@ app.post('/process', jsonParser, function (req, res) {
     Payment.findOne({session_token: t}, function (err, pay) {
       if (err) {
         console.log(err)
-      }else {
+      } else {
         var customer_id
         // create stripe customer
         stripe.customers.create({
@@ -306,29 +306,51 @@ app.post('/process', jsonParser, function (req, res) {
 })
 
 // make a charge
-function charge_by_id (p) {
-
+function charge_by_id (payment) {
   // STRIPE CHARGE BY ID
   // When it's time to charge the customer again, retrieve the customer ID!
   stripe.charges.create({
-    amount: p.order.order.total, // Amount in cents
+    amount: payment.order.order.total, // Amount in cents
     currency: 'usd',
-    customer: p.order.saved_card.customer_id, // Previously stored, then retrieved
-    card: p.order.saved_card.card_id
+    customer: payment.order.saved_card.customer_id, // Previously stored, then retrieved
+    card: payment.order.saved_card.card_id
   }).then(function (charge) {
     if (charge) {
-      p.charge = charge
-      p.save(function (err, z) {
+      payment.charge = charge
+      payment.save(function (err, z) {
         if (err) {
           console.error('ERROR!')
         }
       })
     }
 
-    if (charge.status == 'succeeded') {
+    if (charge.status === 'succeeded') {
       // POST TO MONGO QUEUE SUCCESS PAYMENT
-      pay_delivery_com(p)
-    }else {
+      try {
+        co(function * () {
+          var paymentResponse = yield payDeliveryDotCom(payment)
+
+          // look up user and the last message sent to us in relation to this order
+          var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
+          var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `done`, incoming: false}).sort('-ts').limit(1)
+          finalFoodMessage = finalFoodMessage[0]
+
+          // send message to user
+          replyChannel.send(
+            finalFoodMessage,
+            'food.payment_info',
+            {
+              type: finalFoodMessage.origin,
+              data: {
+                orderInfo: paymentResponse,
+                text: `looks like everything went through on this order`
+              }
+            })
+        })
+      } catch (err) {
+        logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
+      }
+    } else {
       console.log('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
       console.log('OUTCOME: ', charge.outcome)
     }
@@ -336,16 +358,15 @@ function charge_by_id (p) {
 }
 
 // pay delivery.com
-function pay_delivery_com (pay, callback) {
-  var err = null // lol idk
+function * payDeliveryDotCom (pay, callback) {
+  var err = null
 
   // payment amounts should match
   // NOTE: THIS MUST BE THE TOTAL PAYMENT + TOP TO COMPARE TO CHARGE VAL
   if (pay.charge.amount == pay.order.order.total + roundUp(pay.order.tipAmount * 100, 10)) {
-    if (!pay.order.chosen_location.addr.special_instructions) {
-      pay.order.chosen_location.addr.special_instructions = ''
-    }
 
+    // add special instructions
+    pay.order.chosen_location.special_instructions = _.get(pay, 'order.chosen_location.special_instructions') ? pay.order.chosen_location.special_instructions : ''
     // build guest checkout obj
     var guestCheckout = {
       'client_id': pay_const.delivery_com_client_id,
@@ -386,7 +407,7 @@ function pay_delivery_com (pay, callback) {
         si = si.substring(0, 100)
       }
       guestCheckout.instructions = si
-    }else {
+    } else {
       guestCheckout.instructions = ''
     }
 
@@ -407,7 +428,7 @@ function pay_delivery_com (pay, callback) {
     }).catch(function (err) {
       console.error(err.stack)
     })
-  }else {
+  } else {
     console.error('ERROR: Charge amounts dont match D:')
     err = 'ERROR: Charge amounts dont match D:'
     callback(err)
@@ -415,8 +436,8 @@ function pay_delivery_com (pay, callback) {
 }
 
 // precision is 10 for 10ths, 100 for 100ths, etc.
-function roundUp(number, precision) {
-  Math.ceil(num * precision) / precision
+function roundUp (number, precision) {
+  Math.ceil(number * precision) / precision
 }
 
 var port = process.env.PORT || 8080
