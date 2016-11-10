@@ -223,21 +223,71 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 handlers['food.admin.order.confirm'] = function * (message, replace) {
   // show admin final confirm of ting
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  foodSession.order = yield api.createCartForSession(foodSession)
-  foodSession.markModified('order')
-  yield foodSession.save()
 
+  // check for minimum price
   var menu = Menu(foodSession.menu)
-  var response = {
-    text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    attachments: [
-      {
-        'title': '',
-        'image_url': `https://storage.googleapis.com/kip-random/kip-team-cafe-cart.png`
-      }]
+  var totalPrice = foodSession.cart.reduce((sum, i) => {
+    return sum + menu.getCartItemPrice(i)
+  }, 0)
+
+  var mainAttachment = {
+    'title': '',
+    'image_url': `https://storage.googleapis.com/kip-random/kip-team-cafe-cart.png`
   }
 
-  response.attachments = response.attachments.concat(foodSession.cart.map((item) => {
+  // ------------------------------------
+  // set up final attachment and tip stuff if total price isnt enough
+  var finalAttachment
+  if (totalPrice < foodSession.chosen_restaurant.minimum) {
+    if (foodSession.tipPercent === 'cash') {
+      foodSession.tipAmount = 0.00
+    } else {
+      // set up tip stuff since we dont have order submitted
+      foodSession.tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) * 0.01 * totalPrice).toFixed(2)
+    }
+    yield foodSession.save()
+      // food order minimum not met, let admin add more items i guess
+    finalAttachment = {
+      text: 'final amount not enough, add more',
+      fallback: 'Confirm Choice',
+      callback_id: 'foodConfrimOrder_callbackID',
+      attachment_type: 'default'
+    }
+  } else {
+    foodSession.order = yield api.createCartForSession(foodSession)
+    foodSession.markModified('order')
+    yield foodSession.save()
+
+    if (foodSession.tipPercent === 'cash') {
+      foodSession.tipAmount = 0.00
+    } else {
+      foodSession.tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) * 0.01 * totalPrice).toFixed(2)
+    }
+
+    yield foodSession.save()
+    // final attachment with everything
+    finalAttachment = {
+      text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
+            `*Taxes:* ${foodSession.order.tax.$}\n` +
+            `*Team Cart Total:* ${foodSession.order.total.$}`,
+      fallback: 'Confirm Choice',
+      callback_id: 'foodConfrimOrder_callbackID',
+      color: '#49d63a',
+      attachment_type: 'default',
+      mrkdwn_in: ['text'],
+      actions: [{
+        'name': `food.admin.order.checkout.confirm`,
+        'text': `Checkout ${foodSession.order.total.$}`,
+        'type': `button`,
+        'style': `primary`,
+        'value': `checkout`
+      }]
+    }
+  }
+
+  // ------------------------------------
+  // item attachment with items and prices
+  var itemAttachments = foodSession.cart.map((item) => {
     var foodInfo = menu.getItemById(String(item.item.item_id))
     var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
     var textForItem = `*${foodInfo.name} - ${menu.getCartItemPrice(item).$}*\n`
@@ -265,48 +315,34 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         'value': item._id.toString()
       }]
     }
-  }))
-
-  // tip stuff
-  var tipButtons = [`15%`, `20%`, `25%`, `Cash`].map((t) => {
-    var baseTipButton = (foodSession.tipPercent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `￮ ${t}`
-    return {
-      'name': 'food.admin.cart.tip',
-      'text': baseTipButton,
-      'type': `button`,
-      'value': t.toLowerCase()
-    }
   })
 
-  var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount}`
-
-  response.attachments.push({
+  // ------------------------------------
+  // tip attachment
+  var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount.toFixed(2)}`
+  var tipAttachment = {
     'title': `Tip: ${tipTitle}`,
     'callback_id': 'food.admin.cart.tip',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'mrkdwn_in': ['text'],
-    'actions': tipButtons
-  })
+    'actions': [`15%`, `20%`, `25%`, `Cash`].map((t) => {
+      var baseTipButton = (foodSession.tipPercent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `￮ ${t}`
+      return {
+        'name': 'food.admin.cart.tip',
+        'text': baseTipButton,
+        'type': `button`,
+        'value': t.toLowerCase()
+      }
+    })
+  }
 
-  // final attachment
-  response.attachments.push({
-    text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
-          `*Taxes:* ${foodSession.order.tax.$}\n` +
-          `*Team Cart Total:* ${foodSession.order.total.$}`,
-    fallback: 'Confirm Choice',
-    callback_id: 'foodConfrimOrder_callbackID',
-    color: '#3AA3E3',
-    attachment_type: 'default',
-    mrkdwn_in: ['text'],
-    actions: [{
-      'name': `food.admin.order.checkout.confirm`,
-      'text': `Checkout ${foodSession.order.total.$}`,
-      'type': `button`,
-      'style': `primary`,
-      'value': `checkout`
-    }]
-  })
+  // ------------------------------------
+  // combine it all
+  var response = {
+    text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
+    attachments: [mainAttachment].concat(itemAttachments).concat([tipAttachment]).concat([finalAttachment])
+  }
 
   if (replace) {
     $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
@@ -322,14 +358,6 @@ handlers['food.member.order.view'] = function * (message) {
 handlers['food.admin.cart.tip'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   foodSession.tipPercent = message.source.actions[0].value
-  yield foodSession.save()
-
-  // set up tip stuff
-  if (foodSession.tipPercent === 'cash') {
-    foodSession.tipAmount = 0.00
-  } else {
-    foodSession.tipAmount = Number((Number(foodSession.tipPercent.slice(0, 2)) * 0.01 * foodSession.order.subtotal).toFixed(2))
-  }
   yield foodSession.save()
   yield handlers['food.admin.order.confirm'](message, true)
 }

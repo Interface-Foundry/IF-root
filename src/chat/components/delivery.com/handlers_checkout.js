@@ -45,38 +45,6 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
     'fallback': 'Unable to get phone',
     'callback_id': 'food.admin.order.checkout.phone_number'
   }
-
-  // can check to see if we already have phone number
-  // if (foodSession.convo_initiater.phone_number) {
-  //   // retrieve users phone number
-  //   response = {
-  //     text: `Should we use a phone number from your previous order? ${foodSession.convo_initiater.phone_number}`,
-  //     fallback: `unable to confirm phone number`,
-  //     callback_id: `food.admin.order.checkout.phone_number`,
-  //     color: `#3AA3E3`,
-  //     attachments: [{
-  //       'title': '',
-  //       'text': ``,
-  //       'fallback': `You are pay for this order`,
-  //       'callback_id': `food.admin.order.checkout.phone_number`,
-  //       'color': `#3AA3E3`,
-  //       'attachment_type': `default`,
-  //       'actions': [{
-  //         'name': `food.admin.order.checkout.phone_number`,
-  //         'text': `Confirm`,
-  //         'style': `primary`,
-  //         'type': `button`,
-  //         'value': `edit`
-  //       }, {
-  //         'name': `food.admin.order.checkout.phone_number`,
-  //         'text': `Edit`,
-  //         'type': `button`,
-  //         'value': `edit`
-  //       }]
-  //     }]
-  //   }
-  // }
-  // get users phone number
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.phone_number', type: message.origin, data: response})
 }
 
@@ -330,7 +298,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'guest_token': foodSession.guest_token,
     'order': {
       'total': foodSession.order.total * 100,
-      'tip': (foodSession.tip === `cash`) ? 0.00 : Number(foodSession.tip.slice(0, 2)) * 0.01,
+      'tip': foodSession.tipAmount,
       'order_type': foodSession.fulfillment_method
     }
   }
@@ -487,3 +455,37 @@ module.exports = function (replyChannel, allHandlers) {
   // merge in our own handlers
   _.merge($allHandlers, handlers)
 }
+
+
+
+  // can check to see if we already have phone number
+  // if (foodSession.convo_initiater.phone_number) {
+  //   // retrieve users phone number
+  //   response = {
+  //     text: `Should we use a phone number from your previous order? ${foodSession.convo_initiater.phone_number}`,
+  //     fallback: `unable to confirm phone number`,
+  //     callback_id: `food.admin.order.checkout.phone_number`,
+  //     color: `#3AA3E3`,
+  //     attachments: [{
+  //       'title': '',
+  //       'text': ``,
+  //       'fallback': `You are pay for this order`,
+  //       'callback_id': `food.admin.order.checkout.phone_number`,
+  //       'color': `#3AA3E3`,
+  //       'attachment_type': `default`,
+  //       'actions': [{
+  //         'name': `food.admin.order.checkout.phone_number`,
+  //         'text': `Confirm`,
+  //         'style': `primary`,
+  //         'type': `button`,
+  //         'value': `edit`
+  //       }, {
+  //         'name': `food.admin.order.checkout.phone_number`,
+  //         'text': `Edit`,
+  //         'type': `button`,
+  //         'value': `edit`
+  //       }]
+  //     }]
+  //   }
+  // }
+  // get users phone number
