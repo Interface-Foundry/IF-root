@@ -23,7 +23,6 @@ function * initializeTeam(team, auth) {
  if (!auth.user_id) {
     return kip.error('Could not find the user who added slackbot ' + team._id)
  }
- kip.debug(' \n\n\n\n\n\n utils:28: res_auth.user_id: ', auth, ' \n\n\n\n\n\n\n')
  team.meta.addedBy = auth.user_id;
  team.meta.office_assistants = [auth.user_id];
  var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel

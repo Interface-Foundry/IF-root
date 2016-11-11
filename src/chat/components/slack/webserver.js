@@ -135,6 +135,9 @@ app.post('/slackaction', next(function * (req, res) {
         var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
         var last_message = history[0];
         var actions = _.get(last_message,'mode') == 'shopping' ? cardTemplate.slack_home : cardTemplate.slack_settings;
+        var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
+        var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
+        if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
         var json = parsedIn.original_message;
         json.attachments[json.attachments.length-1] = {
             fallback: 'Search Results',
@@ -145,7 +148,7 @@ app.post('/slackaction', next(function * (req, res) {
           method: 'POST',
           uri: message.source.response_url,
           body: JSON.stringify(json)
-        })
+        });
         return res.sendStatus(200)
       }
       else if (simple_command == 'cafe_btn') {
@@ -410,9 +413,7 @@ app.get('/newslack', next(function * (req, res) {
   res_auth = JSON.parse(res_auth);
   if (_.get(res_auth,'ok')) {
      var existingTeam = yield db.Slackbots.findOne({'team_id': _.get(res_auth,'team_id'), 'deleted': { $ne:true } }).exec();
-     kip.debug('webserver414:existingTeam:..', existingTeam)
      if ( _.get(existingTeam, 'team_id')) {
-        kip.debug('webserver415:newslack:team already exists..', existingTeam)
         _.merge(existingTeam, res_auth);
         yield existingTeam.save();
         refresh_team(existingTeam.team_id)
