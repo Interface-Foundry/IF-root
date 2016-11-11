@@ -225,13 +225,12 @@ app.post('/process', jsonParser, function (req, res) {
       if (err) {
         console.log(err)
       } else {
-        var customer_id
         // create stripe customer
         stripe.customers.create({
           source: token,
           description: 'Delivery.com & Kip: ' + pay.order.chosen_restaurant.name
         }).then(function (customer) {
-          customer_id = customer.id
+          var customer_id = customer.id
           return stripe.charges.create({
             amount: pay.order.order.total,
             currency: 'usd',
@@ -247,10 +246,10 @@ app.post('/process', jsonParser, function (req, res) {
             })
           }
 
-          if (charge.status == 'succeeded') {
+          if (charge.status === 'succeeded') {
 
             // pay delivery.com
-            pay_delivery_com(pay)
+            payDeliveryDotCom(pay)
 
             // save stripe info to slack team
             Slackbot.findOne({team_id: pay.order.team_id}, function (err, obj) {
@@ -258,7 +257,7 @@ app.post('/process', jsonParser, function (req, res) {
               // update stripe / push cards into array
               if (err) {
                 console.error('error: cant find team to save stripe info')
-              }else {
+              } else {
                 if (!obj.meta.payments) {
                   obj.meta.payments = []
                 }
@@ -283,14 +282,14 @@ app.post('/process', jsonParser, function (req, res) {
                 })
               }
             })
-          }else {
+          } else {
             console.log('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
             console.log('OUTCOME: ', charge.outcome)
           }
         })
       }
     })
-  }else {
+  } else {
     res.status(500).send('charge token missing')
   }
 })
