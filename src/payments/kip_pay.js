@@ -233,7 +233,7 @@ app.post('/process', jsonParser, function (req, res) {
         }).then(function (customer) {
           customer_id = customer.id
           return stripe.charges.create({
-            amount: pay.order.order.total + pay.order.tipAmount * 100, // Amount in cents + tip
+            amount: pay.order.order.total,
             currency: 'usd',
             customer: customer.id
           })
@@ -352,9 +352,9 @@ function * payDeliveryDotCom (pay, callback) {
   var err = null
 
   // payment amounts should match
-  // NOTE: THIS MUST BE THE TOTAL PAYMENT + TOP TO COMPARE TO CHARGE VAL
 
-  if (pay.charge.amount === pay.order.order.total + roundUp(pay.order.tipAmount * 100, 10)) {
+  // total already includes tip
+  if (pay.charge.amount === pay.order.order.total) {
     // add special instructions
     pay.order.chosen_location.special_instructions = _.get(pay, 'order.chosen_location.special_instructions') ? pay.order.chosen_location.special_instructions : ''
     // build guest checkout obj

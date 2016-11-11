@@ -297,7 +297,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'chosen_restaurant': foodSession.chosen_restaurant,
     'guest_token': foodSession.guest_token,
     'order': {
-      'total': foodSession.order.total * 100,
+      'total': (foodSession.order.total * 100) + (foodSession.tipAmount * 100),
       'tip': foodSession.tipAmount * 100,
       'order_type': foodSession.fulfillment_method
     }
@@ -365,7 +365,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
     'chosen_restaurant': foodSession.chosen_restaurant,
     'guest_token': foodSession.guest_token,
     'order': {
-      'total': foodSession.order.total * 100,
+      'total': (foodSession.order.total * 100) + (foodSession.tipAmount * 100),
       'tip': foodSession.tipAmount * 100,
       'order_type': foodSession.fulfillment_method
     },
