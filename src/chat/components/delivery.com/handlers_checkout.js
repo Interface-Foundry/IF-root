@@ -14,15 +14,22 @@ var handlers = {}
 *
 *
 */
-handlers['food.admin.order.checkout.address'] = function * (message) {
+handlers['food.admin.order.checkout.address_2'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var response = {
     'text': `Whats your apartment or floor number at ${foodSession.chosen_location.address_1}\n` +
           `>Type your apartment or floor number below`,
     'fallback': 'Unable to get address',
-    'callback_id': `food.admin.order.checkout.address`
+    'callback_id': `food.admin.order.checkout.address_2`,
+    'attachment_type': `default`,
+    'actions': [{
+      'name': `food.admin.order.checkout.address_2`,
+      'text': `None`,
+      'type': `button`,
+      'value': `none`
+    }]
   }
-  $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address', type: message.origin, data: response})
+  $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address_2', type: message.origin, data: response})
 }
 
 handlers['food.admin.order.checkout.name'] = function * (message) {
@@ -55,9 +62,13 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   console.log('heerrr', prevMessage.reply.textFor)
   var editInfo = {}
 
-  editInfo['admin.order.checkout.address'] = function * (message) {
-    logging.info('saving apartment number: ', message.text)
-    foodSession.chosen_location.address_2 = message.text
+  editInfo['admin.order.checkout.address_2'] = function * (message) {
+    if (_.get(message, 'source.actions[0].value') === 'none') {
+      foodSession.chosen_location.address_2 = ' '
+    } else {
+      logging.info('saving apartment number: ', message.text)
+      foodSession.chosen_location.address_2 = message.text
+    }
     foodSession.markModified('chosen_location')
     yield foodSession.save()
   }
@@ -89,7 +100,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   if (!foodSession.chosen_location.address_2) {
-    return yield handlers['food.admin.order.checkout.address'](message)
+    return yield handlers['food.admin.order.checkout.address_2'](message)
   }
   if (!foodSession.convo_initiater.last_name) {
     return yield handlers['food.admin.order.checkout.name'](message)
@@ -129,14 +140,14 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': [`text`],
         'text': `*Address:*\n` +
-                `${foodSession.chosen_location.address_1}`,
+                `${foodSession.chosen_location.address_1} ${foodSession.chosen_location.city}, ${foodSession.chosen_location.state} ${foodSession.chosen_location.zip_code}`,
         'fallback': `You are unable to change address`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
         'attachment_type': `default`,
         'actions': [
           {
-            'name': `food.admin.order.checkout.address`,
+            'name': `food.admin.order.checkout.address_1`,
             'text': `Edit`,
             'type': `button`,
             'value': `edit`
@@ -150,7 +161,6 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
                 `${foodSession.chosen_location.address_2}`,
         'fallback': `You are unable to confirm this order`,
         'callback_id': `food.admin.order.checkout.confirm`,
-        'color': '#3AA3E3',
         'attachment_type': 'default',
         'actions': [
           {
@@ -186,23 +196,28 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
           _.get(foodSession, 'data.instructions') ? foodSession.data.instructions : ``,
         'fallback': `You are unable to edit instructions`,
         'callback_id': `food.admin.order.checkout.confirm`,
-        'color': `#49d63a`,
         'attachment_type': `default`,
         'actions': [
           {
-            'name': `food.admin.order.pay`,
-            'text': `✓ Confirm Address`,
-            'type': `button`,
-            'style': `primary`,
-            'value': `confirm`
-          },
-          {
             'name': `food.admin.order.checkout.deliver_instructions`,
-            'text': `+ Delivery Instructions`,
+            'text': `+ Add`,
             'type': `button`,
             'value': `edit`
           }
         ]
+      },
+      {
+        'title': ``,
+        'fallback': `You are unable to confirm address`,
+        'callback_id': `food.admin.order.checkout.confirm`,
+        'attachment_type': `default`,
+        'actions': [{
+          'name': `food.admin.order.pay`,
+          'text': `✓ Confirm Address`,
+          'type': `button`,
+          'style': `primary`,
+          'value': `confirm`
+        }]
       }
     ]
   }
@@ -231,7 +246,7 @@ handlers['food.admin.order.pay'] = function * (message) {
         'text': `+ Add new Card`,
         'type': `button`,
         'value': `add`
-      },{
+      }, {
         'name': `food.admin.order.confirm`,
         'text': `< Change Order`,
         'type': `button`,
@@ -297,7 +312,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'chosen_restaurant': foodSession.chosen_restaurant,
     'guest_token': foodSession.guest_token,
     'order': {
-      'total': foodSession.order.total * 100,
+      'total': (foodSession.order.total * 100) + (foodSession.tipAmount * 100),
       'tip': foodSession.tipAmount * 100,
       'order_type': foodSession.fulfillment_method
     }
@@ -368,7 +383,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
     'chosen_restaurant': foodSession.chosen_restaurant,
     'guest_token': foodSession.guest_token,
     'order': {
-      'total': foodSession.order.total * 100,
+      'total': (foodSession.order.total * 100) + (foodSession.tipAmount * 100),
       'tip': foodSession.tipAmount * 100,
       'order_type': foodSession.fulfillment_method
     },

@@ -32,10 +32,9 @@ module.exports.payForItemFromKip = function * (session, guestToken) {
     'body': session
   }
 
-  console.log('SENDING TO DELIVERY NOW ', opts)
-  var response
+  logging.info('SENDING TO DELIVERY NOW ', opts)
   try {
-    response = yield request(opts)
+    var response = yield request(opts)
     return response
   } catch (e) {
     response = null
