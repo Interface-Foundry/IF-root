@@ -419,7 +419,7 @@ app.get('/newslack', next(function * (req, res) {
      } else {
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
-      yield utils.initializeTeam(bot);
+      yield utils.initializeTeam(bot, res_auth);
       refresh_team(bot.team_id)
      }
   }

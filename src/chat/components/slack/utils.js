@@ -19,14 +19,13 @@ var eachSeries = require('async-co/eachSeries');
 * @returns {Object} slackbot object
 *                   
 */
-function * initializeTeam(team) {
- var res_auth = yield request('https://slack.com/api/auth.test?token=' + team.bot.bot_access_token); 
- res_auth = JSON.parse(res_auth);
- if (!res_auth.user_id) {
-    return kip.error('Could not find the user who added slackbot ' + bot._id)
+function * initializeTeam(team, auth) {
+ if (!auth.user_id) {
+    return kip.error('Could not find the user who added slackbot ' + team._id)
  }
- team.meta.addedBy = res_auth.user_id;
- team.meta.office_assistants = [res_auth.user_id];
+ kip.debug(' \n\n\n\n\n\n utils:28: res_auth.user_id: ', auth, ' \n\n\n\n\n\n\n')
+ team.meta.addedBy = auth.user_id;
+ team.meta.office_assistants = [auth.user_id];
  var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
  res_chan = JSON.parse(res_chan);
  var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
