@@ -50,6 +50,37 @@ var slack_home = module.exports.slack_home =[{
      value: "back"
    }];
 
+var slack_team_default = module.exports.slack_team_default = [
+      {
+        "name": "exit",
+        "text": "Exit Members",
+        "style": "primary",
+        "type": "button",
+        "value": "exit"
+      },
+      {
+        "name": "home_btn",
+        "text": "🐧",
+        "style": "default",
+        "type": "button",
+        "value": "home_btn"
+      }
+  ]
+
+var slack_team = module.exports.slack_team =[{
+     name: "cafe_btn",
+     text: "Kip Cafe",
+     style: "default",
+     type: "button",
+     value: "cafe_btn"
+   },
+   {
+     name: "back_btn",
+     text: "< Back",
+     style: "default",
+     type: "button",
+     value: "back"
+   }];
 
 var slack_settings_default = module.exports.slack_settings_default = [{
       name: "exit",
@@ -57,12 +88,6 @@ var slack_settings_default = module.exports.slack_settings_default = [{
       style: "primary",
       type: "button",
       value: "exit"
-    },{
-     name: "help_btn",
-     text: "Help",
-     style: "default",
-     type: "button",
-     value: "help_btn"
     },{
       name: "home_btn",
       text: "🐧",

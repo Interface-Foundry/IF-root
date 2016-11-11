@@ -7,6 +7,7 @@ var co = require('co');
 var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
+var cardTemplate = require('../slack/card_templates');
 var team;
 var teamMembers;
 var admins;
@@ -63,22 +64,7 @@ handlers['start'] = function * (message) {
   attachments.push({text: 'Channels: ', actions: buttons, callback_id: "none"});
     var endpart = {
       "text":"Update cart members? Or type `exit`",
-      "actions": [
-          {
-            "name": "exit",
-            "text": "Exit Members",
-            "style": "primary",
-            "type": "button",
-            "value": "exit"
-          },
-          {
-            "name": "home_btn",
-            "text": "🐧",
-            "style": "default",
-            "type": "button",
-            "value": "home_btn"
-          }
-      ],
+      "actions": cardTemplate.slack_team_default,
       "callback_id": 'none',
       // "mrkdwn_in": ["fields","text"],
       // "color":"#49d63a"

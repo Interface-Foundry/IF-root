@@ -7,11 +7,11 @@ var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
-var team;
-var teamMembers;
-var admins;
-var currentUser;
-var isAdmin;
+// var team;
+// var teamMembers;
+// var admins;
+// var currentUser;
+// var isAdmin;
 var cron = require('cron');
 //maybe can make this persistent later?
 var cronJobs = {};
@@ -36,11 +36,11 @@ handlers['start'] = function * (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  teamMembers = yield yield utils.getTeamMembers(team);
-  admins = yield utils.findAdmins(team);
-  currentUser = yield db.Chatusers.findOne({id: message.source.user});
-  isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var teamMembers = yield utils.getTeamMembers(team);
+  var admins = yield utils.findAdmins(team);
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   var attachments = [];
   //adding settings mode sticker
   attachments.push({
@@ -130,6 +130,8 @@ handlers['start'] = function * (message) {
 }
 
 handlers['status_on'] = function * (message) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   team.meta.weekly_status_enabled = true;
   yield team.save();
   var msg = message;
@@ -143,6 +145,8 @@ handlers['status_on'] = function * (message) {
 }
 
 handlers['status_off'] = function * (message) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   team.meta.weekly_status_enabled = false;
   yield team.save();
   var msg = message;
@@ -155,7 +159,9 @@ handlers['status_off'] = function * (message) {
 }
 
 handlers['change_status'] = function * (message) {
-  kip.debug('\n\n\n\n\n\nHitting home.change_status text: ', message.text,' \n\n\n\n\n\n\n\n\n');
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
   var text = message.text.replace(/^(change|update) weekly (status|update)/, '').trim();
   text = text.replace('days', 'day');
   text = text.replace(/(to|every|\bat\b)/g, '');
@@ -185,13 +191,13 @@ handlers['change_status'] = function * (message) {
   team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-2) + ' ' + am_pm;
   team.meta.weekly_status_timezone = currentUser.tz;
   yield team.save();
-  updateCronJob(team, message);
+  yield updateCronJob(team, message);
   var msg = message;
   msg.mode = 'settings'
   msg.action = 'home'
   msg.text = 'Ok I have updated your settings 😊';
   msg.execute = [ { 
-    "mode": "home",
+    "mode": "settings",
     "action": "home",
     "_id": message._id
   } ]; 
@@ -202,7 +208,11 @@ handlers['change_status'] = function * (message) {
 
 handlers['add_or_remove'] = function * (message) {
  var replies = [];
+ var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var tokens = message.original_text.toLowerCase().trim().split(' ');
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   if (isAdmin && ['add', 'remove'].indexOf(tokens[0]) >= 0) {
     // look for users mentioned with the @ symbol
     var userIds = tokens.filter((t) => {
@@ -281,11 +291,6 @@ handlers['add_or_remove'] = function * (message) {
       msg.mode = 'settings'
       msg.action = 'home'
       msg.text = "We couldn't find that user!";
-      // msg.execute = [ { 
-      //   "mode": "home",
-      //   "action": "home",
-      //   "_id": message._id
-      // } ]; 
       msg.reply = attachments;
       msg.source.team = team.team_id;
       msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
@@ -316,7 +321,7 @@ handlers['add_or_remove'] = function * (message) {
     msg.action = 'home';
     msg.text = 'Ok I have updated your settings 😊';
     msg.execute = [ { 
-      "mode": "home",
+      "mode": "settings",
       "action": "home",
       "_id": message._id
     } ]; 
@@ -328,6 +333,9 @@ handlers['add_or_remove'] = function * (message) {
 }
 
 handlers['last_call_off'] = function * (message) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
   currentUser.settings.last_call_alerts = false;
   yield currentUser.save();
   var msg = message;
@@ -335,7 +343,7 @@ handlers['last_call_off'] = function * (message) {
   message.action = 'home';
   msg.text = 'Ok I turned off last call!';
   msg.execute = [ { 
-    "mode": "home",
+    "mode": "settings",
     "action": "home",
     "_id": message._id
   } ]; 
@@ -345,6 +353,7 @@ handlers['last_call_off'] = function * (message) {
 }
 
 handlers['last_call_on'] = function * (message) {
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
   currentUser.settings.last_call_alerts = true;
   yield currentUser.save();
   var msg = message;
@@ -352,7 +361,7 @@ handlers['last_call_on'] = function * (message) {
   message.action = 'home';
   msg.text = 'Ok I updated last call! 😊';
   msg.execute = [ { 
-    "mode": "home",
+    "mode": "settings",
     "action": "home",
     "_id": message._id
   } ]; 
@@ -362,6 +371,9 @@ handlers['last_call_on'] = function * (message) {
 }
 
 handlers['send_last_call'] = function * (message) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
   var replies = []
   yield team.meta.cart_channels.map( function * (c) {
     var channelMembers = yield utils.getChannelMembers(team, c);
@@ -384,7 +396,7 @@ handlers['send_last_call'] = function * (message) {
         msg.action = 'home';
         // msg.text = 'Ok I updated last call! 😊';
         msg.execute = [ { 
-          "mode": "home",
+          "mode": "settings",
           "action": "home",
           "_id": message._id
         }]; 
@@ -546,7 +558,7 @@ function isSendLastCall(input) {
 
 
 
-function  updateCronJob(team, message) {
+function * updateCronJob(team, message) {
     kip.debug('\n\n\nsetting cron job day: ', team.meta.weekly_status_day, ' time: ', team.meta.weekly_status_time,'\n\n\n')
    var date = Date.parse(team.meta.weekly_status_day + ' ' + team.meta.weekly_status_time);
    var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
@@ -555,6 +567,7 @@ function  updateCronJob(team, message) {
     if (cronJobs[team.team_id]) {
       cronJobs[team.team_id].stop();
     }
+    var teamMembers = yield utils.getTeamMembers(team);
     cronJobs[team.team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function  () {  
        team.meta.office_assistants.map(function  (a) {
        var assistant = teamMembers.find(function(m, i){ return m.id == a });
@@ -617,7 +630,7 @@ function  updateCronJob(team, message) {
         user_id: assistant.id,
         origin: 'slack',
         source: message.source,
-        mode: 'home',
+        mode: 'settings',
         action: 'home',
         user: message.source.user,
         reply: attachments

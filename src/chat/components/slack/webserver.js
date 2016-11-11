@@ -134,10 +134,12 @@ app.post('/slackaction', next(function * (req, res) {
       if (simple_command == 'home_btn') {
         var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
         var last_message = history[0];
-        var actions = _.get(last_message,'mode') == 'shopping' ? cardTemplate.slack_home : cardTemplate.slack_settings;
+        var mode = _.get(last_message,'mode');
+        var actions = mode == 'shopping' ? cardTemplate.slack_home : mode == 'settings' ? cardTemplate.slack_settings :  mode == 'team' ? cardTemplate.slack_team : cardTemplate.slack_home;
         var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
         var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
         if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
+        kip.debug(' \n\n\n\n mode: ', mode, ' actions: ', actions, ' isAdmin:', isAdmin,' \n\n\n\n ' );
         var json = parsedIn.original_message;
         json.attachments[json.attachments.length-1] = {
             fallback: 'Search Results',
@@ -187,16 +189,19 @@ app.post('/slackaction', next(function * (req, res) {
       else if (simple_command == 'channel_btn') {
         var channelId = _.get(parsedIn,'actions[0].value');
         var team_id = message.source.team;
-        team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+        var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
         if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
-          _.remove(team.meta.cart_channels, function(c) { return c == channelId; });
+          kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
+          _.remove(team.meta.cart_channels, function(c) { return c == channelId });
+          kip.debug(' \n\n\n\n\n  channel removed, cart channels:', team.meta.cart_channels ,' \n\n\n\n\n ');
         } else {
           team.meta.cart_channels.push(channelId);
+          kip.debug(' \n\n\n\n\n  added channel:', channelId, 'cart channels: ',team.meta.cart_channels ,' \n\n\n\n\n ');
         }
         yield team.save();
         var channels = yield utils.getChannels(team);
         var buttons = channels.map(channel => {
-        var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
+          var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
           return {
             name: 'channel_btn',
             text: checkbox + channel.name ,

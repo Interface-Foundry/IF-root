@@ -50,13 +50,13 @@ function default_reply (message) {
 
 // get a simple text message
 function text_reply (message, text) {
-  var msg = default_reply(message)
-  msg.text = text
-  msg.execute = msg.execute ? msg.execute : []
+  var msg = default_reply(message);
+  msg.text = text;
+  msg.execute = msg.execute ? msg.execute : [];
   msg.execute.push({
     mode: 'banter',
     action: 'reply'
-  })
+  });
   return msg
 } 
 
@@ -477,7 +477,7 @@ function execute (message) {
       kip.debug('route: ', route, 'exec: ', exec)
 
       //switch between reply_logic and delivery.com.js as necessary
-      var message_promises = exec.mode.match(/^(shopping|settings|team)$/) ? shopping[route](message, exec) : food[route](message);
+      var message_promises = exec.mode.match(/^(shopping|settings|team|exit)$/) ? shopping[route](message, exec) : food[route](message);
       
       if (!message_promises) {
         throw new Error(route + ' handler not implemented')
