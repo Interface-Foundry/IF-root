@@ -210,7 +210,7 @@ app.post('/slackaction', function(req, res) {
     kip.debug('proxy-ing button press to gcp for team', parsedIn.team.id)
     var request = require('request-promise')
     request({
-      uri: 'http://localhost:8000/slackaction',
+      uri: 'https://canary.kipapp.co/slackaction',
       method: 'POST',
       body: req.body,
       json: true
