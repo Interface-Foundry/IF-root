@@ -375,7 +375,7 @@ function * payDeliveryDotCom (pay, callback) {
       ],
       'sms_notify': true,
       'isOptingIn': false,
-      'phone_number': pay.order.convo_initiater.phone_number,
+      'phone_number': '7143309047',
       'merchant_id': pay.order.chosen_restaurant.id,
       'first_name': pay.order.convo_initiater.first_name,
       'last_name': pay.order.convo_initiater.last_name,
