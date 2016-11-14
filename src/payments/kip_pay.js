@@ -17,7 +17,7 @@
        (Giant Clam)            (Cooked Egg)             (Shrimp)
 */
 require('kip')
-
+require('../logging')
 var pay_const = require('./pay_const.js')
 
 // base URL for pay.kipthis.com linking
