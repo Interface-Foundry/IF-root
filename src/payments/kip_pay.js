@@ -356,6 +356,9 @@ function * payDeliveryDotCom (pay, callback) {
     // add special instructions
     pay.order.chosen_location.special_instructions = _.get(pay, 'order.chosen_location.special_instructions') ? pay.order.chosen_location.special_instructions : ''
     // build guest checkout obj
+
+    console.log('CREDIT CARD ',cc)
+
     var guestCheckout = {
       'client_id': pay_const.delivery_com_client_id,
       'order_type': pay.order.order.order_type,
@@ -364,11 +367,11 @@ function * payDeliveryDotCom (pay, callback) {
         {
           'type': 'credit_card',
           'card': {
-            'cc_number': cc.cc_number,
-            'exp_year': cc.exp_year,
-            'exp_mon': cc.cc_month,
-            'cvv': cc.cvv,
-            'billing_zip': cc.billing_zip,
+            'cc_number': cc.kip.cc_number,
+            'exp_year': cc.kip.exp_year,
+            'exp_mon': cc.kip.cc_month,
+            'cvv': cc.kip.cvv,
+            'billing_zip': cc.kip.billing_zip,
             'save': false
           }
         }
