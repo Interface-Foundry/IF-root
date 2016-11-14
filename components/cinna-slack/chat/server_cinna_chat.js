@@ -172,6 +172,16 @@ app.get('/newslack', function(req, res) {
   });
 });
 
+// simple list of teams that have been migrated to gcp from aws
+// need to forward button presses on
+var migratedTeams = []
+db.Slackbots.find({
+  'meta.migrated': 'true'
+}).select('team_id').exec(function(e, slackbots) {
+  if (e) {return console.error(e)}
+  migratedTeams = slackbots.map(function (s) { return s.team_id })
+  debugger;
+})
 
 //
 // incoming slack action
@@ -194,6 +204,20 @@ app.post('/slackaction', function(req, res) {
     kip.error('slack buttons broke, need a response_url and original_message');
     res.sendStatus(500);
     return;
+  }
+
+  if (!migratedTeams.indexOf(parsedIn.team.id) >= 0) {
+    kip.debug('proxy-ing button press to gcp for team', parsedIn.team.id)
+    var request = require('request-promise')
+    request({
+      uri: 'http://localhost:8000/slackaction',
+      method: 'POST',
+      body: req.body,
+      json: true
+    }, function (e, r, b) {
+      res.send(b)
+    })
+    return
   }
 
   var navId = parsedIn.team.id + '_' + parsedIn.channel.id + '_' + parsedIn.user.id;
