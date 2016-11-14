@@ -211,7 +211,9 @@ queue.topic('incoming').subscribe(incoming => {
 
     if (isCancelIntent(message)) {
       message.mode = 'shopping';
+      message.action = 'switch'
       yield message.save();
+      queue.publish('outgoing.' + message.origin, message, message._id + '.reply')
       incoming.ack();
       timer.stop();
       return
@@ -305,7 +307,11 @@ queue.topic('incoming').subscribe(incoming => {
     timer.tic('saving replies')
     yield replies.map(r => {
       if (r.save) {
-        r.save()
+        try {
+          r.save()
+        } catch(err) {
+          kip.debug(' \n\n\n ', err, ' \n\n\n ')
+        }
       } else {
         logging.debug('could not save ' + r)
       }
@@ -477,8 +483,7 @@ function execute (message) {
       kip.debug('route: ', route, 'exec: ', exec)
 
       //switch between reply_logic and delivery.com.js as necessary
-      var message_promises = exec.mode.match(/^(shopping|settings|team|exit)$/) ? shopping[route](message, exec) : food[route](message);
-      
+      var message_promises = exec.mode.match(/^(shopping|settings|team|cart|exit)$/) ? shopping[route](message, exec) : food[route](message);
       if (!message_promises) {
         throw new Error(route + ' handler not implemented')
       }
