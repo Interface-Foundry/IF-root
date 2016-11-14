@@ -187,7 +187,8 @@ var initSlackUsers = function(env){
     } else {
         console.log('retrieving slackbots from mongo database ' + config.mongodb.url);
         Slackbots.find({
-          deleted: {$ne: true}
+          deleted: {$ne: true},
+          'meta.migrated': {$ne: true}
         }).exec(function(err, users) {
             if(err && process.env.NODE_ENV === 'production'){
                 console.log('saved slack bot retrieval error');
