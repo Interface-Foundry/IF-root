@@ -381,11 +381,11 @@ function * simple_response (message) {
       })
       break
      case 'search.home':
-      message.mode = 'home'
-      message.action = 'settings'
+      message.mode = 'settings'
+      message.action = 'home'
       message.execute.push({
-        mode: 'home',
-        action: 'settings'
+        mode: 'settings',
+        action: 'home'
       })
       break
     case 'purchase.remove':

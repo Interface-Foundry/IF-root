@@ -30,6 +30,9 @@ function * initializeTeam(team, auth) {
  var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
  team.meta.cart_channels.push(generalChannel.id);
  team.meta.all_channels = res_chan.channels.map(c => {return c.id});
+ team.markModified('meta.cart_channels');
+ team.markModified('meta.all_channels');
+ team.markModified('meta.office_assistants');
  yield team.save();
  yield getTeamMembers(team);
  return team;
@@ -188,6 +191,7 @@ function * removeCartChannel(message, channel_name) {
       }
     });
   }
+  team.markModified('meta.cart_channels');
   yield team.save();
   return
 }
@@ -209,6 +213,7 @@ function * addCartChannel(message, channel_name) {
       }
     });
   }
+  team.markModified('meta.cart_channels');
   yield team.save();
   return
 }

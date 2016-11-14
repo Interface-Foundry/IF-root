@@ -46,7 +46,7 @@ handlers['start'] = function * (message) {
   var cartChannels = team.meta.cart_channels;
   //adding settings mode sticker
   var attachments = [];
-  attachments.push({
+  attachments.push({ 
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
     text: ''
   });
@@ -97,169 +97,169 @@ handlers['start'] = function * (message) {
 
 }
 
-function viewCartMembers(convo,callback,flag){
+// function viewCartMembers(convo,callback,flag){
 
-  co(function*() {
+//   co(function*() {
 
-    //get slack team
-    var slackbot = yield db.Slackbots.findOne({team_id: convo.slackbot.team_id}).exec();
+//     //get slack team
+//     var slackbot = yield db.Slackbots.findOne({team_id: convo.slackbot.team_id}).exec();
 
-    if (!slackbot.meta.cart_channels){
-      slackbot.meta.cart_channels = [];
-    }
+//     if (!slackbot.meta.cart_channels){
+//       slackbot.meta.cart_channels = [];
+//     }
 
-    var cartChannels = slackbot.meta.cart_channels;
+//     var cartChannels = slackbot.meta.cart_channels;
 
-    //get email users on team
-    var emailUsers = yield Chatuser.find({
-      'team_id': convo.slackbot.team_id,
-      'type': 'email',
-      'settings.emailNotification': true
-    }).exec();
-    //how many rows do we need for attachment?
-    var emails = _.map(emailUsers, _.property('profile.email')); //extract emails
-    //* * * Building column slug to fill unequal columns * * * //
-    //add to cartChannels
-    if(cartChannels.length < emails.length){
-      if(cartChannels.length < 1){
-        var calc = 0;
-      }else {
-        var calc = cartChannels.length;
-      }
-      var addNum = emails.length - calc;
-      var slugArr = new Array(addNum).fill('');
-      cartChannels = cartChannels.concat(slugArr);
-    }
-    //add to emails
-    else if (cartChannels.length > emails.length){
-      if(emails.length < 1){
-        var calc = 0;
-      }else {
-        var calc = emails.length;
-      }
-      var addNum = cartChannels.length - calc;
-      console.log('emails ',emails.length)
-      console.log('channels ',cartChannels.length)
-      console.log('addNum ',addNum)
-      var slugArr = new Array(addNum).fill('');
-      emails = emails.concat(slugArr);
-    }
-    //* * * * * * *//
-    //this merges both arrays and alternates between them
-    var comboArr = _.flatten(_.zip(cartChannels, emails));
-    var comboObj = comboArr.map(function(res) {
-        //not email, add slack channel syntax
-        if(!validator.isEmail(res) && res !== '' && res !== undefined && res !== null){
-          res = "<#"+res+">";
-        }
-        var obj = {
-          "value": res,
-          "short": true
-        }
-        return obj;
-    });
-    var userList = {
-      "color":"#45a5f4",
-      "mrkdwn_in": ["fields"],
-      "fields": comboObj
-    };
-    //ensure column titles
-    if(userList.fields[0]){
-      userList.fields[0].title = 'Slack Channel Members';
-    }else {
-      userList.fields[0] = {
-        "title": "Slack Channels",
-        "short": true,
-        "value":"_No Channels_"
-      }
-    }
-    if(userList.fields[1]){
-      userList.fields[1].title = 'Emails';
-    }else {
-      userList.fields[1] = {
-        "title": "Emails",
-        "short": true,
-        "value":"_No Emails_"
-      }
-    }
-    //- - - - - - //
-    var attachments = [
-      {
-        "image_url":"http://kipthis.com/kip_modes/mode_teamcart_members.png",
-        "text":"",
-        "color":"#45a5f4"
-      }
-    ]
-    attachments.push(userList);
-    var commands = {
-      "text":"",
-      "pretext":"*Options*",
-      "mrkdwn_in": ["fields","pretext"],
-      "color":"#45a5f4",
-      "fields": [
-        {
-          "value": "_Add channel_ `add #channel`",
-          "short": true
-        },
-        {
-          "value": "_Add email_ `add name@email.com`",
-          "short": true
-        },
-        {
-          "value": "_Remove channel_ `rm #channel`",
-          "short": true
-        },
-        {
-          "value": "_Remove email_ `rm name@email.com`",
-          "short": true
-        }
-      ]
-    };
-    attachments.push(commands);
-    if (flag !== 'noPrompt'){
-      var endpart = {
-        "text":"Update group cart members? Or type `exit`",
-        "actions": [
-            {
-              "name": "exit",
-              "text": "Exit Members",
-              "style": "primary",
-              "type": "button",
-              "value": "exit"
-            },              
-            {
-              "name": "help",
-              "text": "Help",
-              "style": "default",
-              "type": "button",
-              "value": "help"
-            },
-            {
-              "name": "home",
-              "text": "🐧",
-              "style": "default",
-              "type": "button",
-              "value": "home"
-            }
-        ],
-        "callback_id": 'none',
-        "mrkdwn_in": ["fields","text"],
-        "color":"#49d63a"
-      };
-      attachments.push(endpart);
-    }
-    var resList = {
-      username: 'Kip',
-      text: "",
-      attachments: attachments,
-      fallback: 'Team Cart Members'
-    };
-    callback(resList);
-   }).catch((e) => {
-    console.log(e);
-    console.log(e.stack);
-  })
-}
+//     //get email users on team
+//     var emailUsers = yield Chatuser.find({
+//       'team_id': convo.slackbot.team_id,
+//       'type': 'email',
+//       'settings.emailNotification': true
+//     }).exec();
+//     //how many rows do we need for attachment?
+//     var emails = _.map(emailUsers, _.property('profile.email')); //extract emails
+//     //* * * Building column slug to fill unequal columns * * * //
+//     //add to cartChannels
+//     if(cartChannels.length < emails.length){
+//       if(cartChannels.length < 1){
+//         var calc = 0;
+//       }else {
+//         var calc = cartChannels.length;
+//       }
+//       var addNum = emails.length - calc;
+//       var slugArr = new Array(addNum).fill('');
+//       cartChannels = cartChannels.concat(slugArr);
+//     }
+//     //add to emails
+//     else if (cartChannels.length > emails.length){
+//       if(emails.length < 1){
+//         var calc = 0;
+//       }else {
+//         var calc = emails.length;
+//       }
+//       var addNum = cartChannels.length - calc;
+//       console.log('emails ',emails.length)
+//       console.log('channels ',cartChannels.length)
+//       console.log('addNum ',addNum)
+//       var slugArr = new Array(addNum).fill('');
+//       emails = emails.concat(slugArr);
+//     }
+//     //* * * * * * *//
+//     //this merges both arrays and alternates between them
+//     var comboArr = _.flatten(_.zip(cartChannels, emails));
+//     var comboObj = comboArr.map(function(res) {
+//         //not email, add slack channel syntax
+//         if(!validator.isEmail(res) && res !== '' && res !== undefined && res !== null){
+//           res = "<#"+res+">";
+//         }
+//         var obj = {
+//           "value": res,
+//           "short": true
+//         }
+//         return obj;
+//     });
+//     var userList = {
+//       "color":"#45a5f4",
+//       "mrkdwn_in": ["fields"],
+//       "fields": comboObj
+//     };
+//     //ensure column titles
+//     if(userList.fields[0]){
+//       userList.fields[0].title = 'Slack Channel Members';
+//     }else {
+//       userList.fields[0] = {
+//         "title": "Slack Channels",
+//         "short": true,
+//         "value":"_No Channels_"
+//       }
+//     }
+//     if(userList.fields[1]){
+//       userList.fields[1].title = 'Emails';
+//     }else {
+//       userList.fields[1] = {
+//         "title": "Emails",
+//         "short": true,
+//         "value":"_No Emails_"
+//       }
+//     }
+//     //- - - - - - //
+//     var attachments = [
+//       {
+//         "image_url":"http://kipthis.com/kip_modes/mode_teamcart_members.png",
+//         "text":"",
+//         "color":"#45a5f4"
+//       }
+//     ]
+//     attachments.push(userList);
+//     var commands = {
+//       "text":"",
+//       "pretext":"*Options*",
+//       "mrkdwn_in": ["fields","pretext"],
+//       "color":"#45a5f4",
+//       "fields": [
+//         {
+//           "value": "_Add channel_ `add #channel`",
+//           "short": true
+//         },
+//         {
+//           "value": "_Add email_ `add name@email.com`",
+//           "short": true
+//         },
+//         {
+//           "value": "_Remove channel_ `rm #channel`",
+//           "short": true
+//         },
+//         {
+//           "value": "_Remove email_ `rm name@email.com`",
+//           "short": true
+//         }
+//       ]
+//     };
+//     attachments.push(commands);
+//     if (flag !== 'noPrompt'){
+//       var endpart = {
+//         "text":"Update group cart members? Or type `exit`",
+//         "actions": [
+//             {
+//               "name": "exit",
+//               "text": "Exit Members",
+//               "style": "primary",
+//               "type": "button",
+//               "value": "exit"
+//             },              
+//             {
+//               "name": "help",
+//               "text": "Help",
+//               "style": "default",
+//               "type": "button",
+//               "value": "help"
+//             },
+//             {
+//               "name": "home",
+//               "text": "🐧",
+//               "style": "default",
+//               "type": "button",
+//               "value": "home"
+//             }
+//         ],
+//         "callback_id": 'none',
+//         "mrkdwn_in": ["fields","text"],
+//         "color":"#49d63a"
+//       };
+//       attachments.push(endpart);
+//     }
+//     var resList = {
+//       username: 'Kip',
+//       text: "",
+//       attachments: attachments,
+//       fallback: 'Team Cart Members'
+//     };
+//     callback(resList);
+//    }).catch((e) => {
+//     console.log(e);
+//     console.log(e.stack);
+//   })
+// }
 
 
 function getAction (text) {

@@ -123,7 +123,6 @@ handlers['start'] = function * (message) {
    msg.text = ''
    msg.source.team = team_id;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-   msg.client_res.push(attachments)
    msg.reply = attachments;
    return [msg];
 
@@ -294,7 +293,6 @@ handlers['add_or_remove'] = function * (message) {
       msg.reply = attachments;
       msg.source.team = team.team_id;
       msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-      kip.debug(' \n\n\n\n\n settings.js line 336 ', msg, ' \n\n\n\n\n')
       return [msg]
     }
     var shouldReturn = false;
@@ -315,6 +313,7 @@ handlers['add_or_remove'] = function * (message) {
     if (shouldReturn) {
       return;
     }
+    team.markModified('meta.office_assistants');
     yield team.save();
     var msg = message;
     msg.mode = 'settings';
@@ -354,6 +353,8 @@ handlers['last_call_off'] = function * (message) {
 
 handlers['last_call_on'] = function * (message) {
   var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   currentUser.settings.last_call_alerts = true;
   yield currentUser.save();
   var msg = message;

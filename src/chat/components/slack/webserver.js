@@ -191,13 +191,14 @@ app.post('/slackaction', next(function * (req, res) {
         var team_id = message.source.team;
         var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
         if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
-          kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
+          // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
           _.remove(team.meta.cart_channels, function(c) { return c == channelId });
           kip.debug(' \n\n\n\n\n  channel removed, cart channels:', team.meta.cart_channels ,' \n\n\n\n\n ');
         } else {
           team.meta.cart_channels.push(channelId);
           kip.debug(' \n\n\n\n\n  added channel:', channelId, 'cart channels: ',team.meta.cart_channels ,' \n\n\n\n\n ');
         }
+        team.markModified('meta.cart_channels');
         yield team.save();
         var channels = yield utils.getChannels(team);
         var buttons = channels.map(channel => {
