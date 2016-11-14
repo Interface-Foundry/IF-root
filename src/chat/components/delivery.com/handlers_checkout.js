@@ -333,12 +333,24 @@ handlers['food.admin.add_new_card'] = function * (message) {
   }
 
   try {
-    foodSession.payment = yield request({
-      uri: `https://pay.kipthis.com/charge`,
-      method: `POST`,
-      json: true,
-      body: postBody
-    })
+
+
+    if (process.env.NODE_ENV == 'development_alyx') {
+      foodSession.payment = yield request({
+        uri: `https://7ad44111.ngrok.io/charge`,
+        method: `POST`,
+        json: true,
+        body: postBody
+      })
+    } else {
+      foodSession.payment = yield request({
+        uri: `https://pay.kipthis.com/charge`,
+        method: `POST`,
+        json: true,
+        body: postBody
+      })
+    }
+
     foodSession.save()
   } catch (e) {
     logging.error('error doing kip pay lol', e)
@@ -352,7 +364,10 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'color': `#3AA3E3`,
     'attachment_type': `default`,
     'attachments': [
-      {'image_url': 'http://tidepools.co/kip/stripe_powered.png'},
+      { 
+        'title':'',
+        'image_url': 'http://tidepools.co/kip/stripe_powered.png'
+      },
       {
         'title': '',
         'mrkdwn_in': ['text'],

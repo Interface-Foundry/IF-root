@@ -22,7 +22,7 @@ var pay_const = require('./pay_const.js')
 
 // base URL for pay.kipthis.com linking
 if (process.env.NODE_ENV == 'development_alyx') {
-  var baseURL = 'https://b75f53de.ngrok.io'
+  var baseURL = 'https://7ad44111.ngrok.io'
   var stripe_id = pay_const.stripe_test_id
 } else {
   var baseURL = 'https://pay.kipthis.com'
@@ -230,12 +230,14 @@ app.post('/process', jsonParser, function (req, res) {
           source: token,
           description: 'Delivery.com & Kip: ' + pay.order.chosen_restaurant.name
         }).then(function (customer) {
+
           var customer_id = customer.id
           return stripe.charges.create({
             amount: pay.order.order.total,
             currency: 'usd',
             customer: customer.id
           })
+
         }).then(function (charge) {
           if (charge) {
             pay.charge = charge
@@ -248,44 +250,40 @@ app.post('/process', jsonParser, function (req, res) {
 
           if (charge.status === 'succeeded') {
 
-            // pay delivery.com
-            payDeliveryDotCom(pay)
+            try {
+              co(function * () {
+                var paymentResponse = yield payDeliveryDotCom(pay)
 
-            // save stripe info to slack team
-            Slackbot.findOne({team_id: pay.order.team_id}, function (err, obj) {
+                storeCard(pay,charge)
 
-              // update stripe / push cards into array
-              if (err) {
-                console.error('error: cant find team to save stripe info')
-              } else {
-                if (!obj.meta.payments) {
-                  obj.meta.payments = []
-                }
-                // save card / stripe acct to slack team
-                obj.meta.payments.push({
-                  vendor: 'stripe',
-                  customer_id: customer_id,
-                  card: {
-                    card_id: charge.source.id,
-                    brand: charge.source.brand, // visa, mastercard, etc
-                    exp_month: charge.source.exp_month,
-                    exp_year: charge.source.exp_year,
-                    last4: charge.source.last4,
-                    address_zip: charge.source.address_zip,
-                    email: charge.source.name // this should work...
-                  }
-                })
-                obj.save(function (err, z) {
-                  if (err) {
-                    console.error('ERROR!')
-                  }
-                })
-              }
-            })
+                // look up user and the last message sent to us in relation to this order
+                var foodSession = yield db.Delivery.findOne({guest_token: pay.order.guest_token}).exec()
+
+                var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `done`, incoming: false}).sort('-ts').limit(1)
+                finalFoodMessage = finalFoodMessage[0]
+
+                // send message to user
+                replyChannel.send(
+                  finalFoodMessage,
+                  'food.payment_info',
+                  {
+                    type: finalFoodMessage.origin,
+                    data: {
+                      orderInfo: paymentResponse,
+                      text: `looks like everything went through on this order`
+                    }
+                  })
+              })
+            } catch (err) {
+              logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
+            }
+
+
           } else {
             console.log('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
             console.log('OUTCOME: ', charge.outcome)
           }
+
         })
       }
     })
@@ -293,6 +291,7 @@ app.post('/process', jsonParser, function (req, res) {
     res.status(500).send('charge token missing')
   }
 })
+
 
 // make a charge
 function chargeById (payment) {
@@ -408,6 +407,9 @@ function * payDeliveryDotCom (pay, callback) {
       guestCheckout.zip_code = pay.order.chosen_location.addr.zip_code
     }
 
+
+    console.log('GUEST CHECKOUT OBJ ',guestCheckout)
+
     // pos to delivery
     co(function * () {
       var response = yield pay_utils.payForItemFromKip(guestCheckout, pay.order.guest_token)
@@ -422,6 +424,41 @@ function * payDeliveryDotCom (pay, callback) {
     err = 'ERROR: Charge amounts dont match D:'
     callback(err)
   }
+}
+
+//save stripe card token to slack team
+function storeCard(pay,charge){
+  // save stripe info to slack team
+  Slackbot.findOne({team_id: pay.order.team_id}, function (err, obj) {
+
+    // update stripe / push cards into array
+    if (err) {
+      console.error('error: cant find team to save stripe info')
+    } else {
+      if (!obj.meta.payments) {
+        obj.meta.payments = []
+      }
+      // save card / stripe acct to slack team
+      obj.meta.payments.push({
+        vendor: 'stripe',
+        customer_id: charge.source.customer,
+        card: {
+          card_id: charge.source.id,
+          brand: charge.source.brand, // visa, mastercard, etc
+          exp_month: charge.source.exp_month,
+          exp_year: charge.source.exp_year,
+          last4: charge.source.last4,
+          address_zip: charge.source.address_zip,
+          email: charge.source.name // this should work...
+        }
+      })
+      obj.save(function (err, z) {
+        if (err) {
+          console.error('ERROR!')
+        }
+      })
+    }
+  })
 }
 
 // precision is 10 for 10ths, 100 for 100ths, etc.
