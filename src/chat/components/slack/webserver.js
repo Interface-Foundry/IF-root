@@ -430,8 +430,7 @@ app.get('/newslack', next(function * (req, res) {
       refresh_team(bot.team_id)
      }
   }
-
-    res.redirect('/thanks.html')
+  res.redirect('/thanks.html')
 }))
 
 // app.get('/*', function(req, res, next) {

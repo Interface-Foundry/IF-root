@@ -42,7 +42,6 @@ handlers['shopping.initial'] = function*(message, exec) {
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
   var results = yield amazon_search.search(exec.params,message.origin);
-  winston.debug('!1',exec)
 
   if (results == null || !results) {
       winston.debug('-1')

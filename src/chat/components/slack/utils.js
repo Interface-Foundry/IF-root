@@ -5,6 +5,7 @@ var _ = require('lodash');
 var kip = require('kip');
 var async = require('async');
 var eachSeries = require('async-co/eachSeries');
+var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client')
 
 /*
 *
@@ -35,6 +36,8 @@ function * initializeTeam(team, auth) {
  team.markModified('meta.office_assistants');
  yield team.save();
  yield getTeamMembers(team);
+ var rtm = new slack.RtmClient(team.bot.bot_access_token || '')
+ rtm.start()
  return team;
 }
 
