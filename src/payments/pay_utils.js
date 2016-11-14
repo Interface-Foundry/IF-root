@@ -40,7 +40,7 @@ module.exports.payForItemFromKip = function * (session, guestToken) {
     return response
   } catch (e) {
     response = null
-    logging.error('couldnt submit payment uh oh ',e)
+    logging.error('couldnt submit payment uh oh ',JSON.stringify(e))
     return null
   }
 }
