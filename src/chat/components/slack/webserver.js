@@ -13,9 +13,9 @@ var cart = require('./cart');
 var kipcart = require('../cart');
 var _ = require('lodash');
 var slackConnections = require('./slack').slackConnections
+var slackModule = require('./slack')
 var cardTemplate = require('./card_templates');
 var utils = require('./utils');
-var next = require('co-next');
 var cookieParser = require('cookie-parser')
 var uuid = require('uuid')
 // var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
@@ -24,6 +24,7 @@ var request = require('request')
 var requestPromise = require('request-promise');
 // var init_team = require("../init_team.js");
 var app = express();
+
 app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
@@ -271,7 +272,7 @@ app.post('/slackaction', next(function * (req, res) {
           fallback: 'Shopping'
         };
         var team = message.source.team;
-        var slackBot = slackConnections[team];
+        var slackBot = slackConnectionz[team];
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
         
       }
@@ -404,8 +405,10 @@ app.get('/authorize', function (req, res) {
   res.redirect('https://slack.com/oauth/authorize?scope=commands+bot+users:read&client_id=' + kip.config.slack.client_id)
 })
 
-app.get('/newslack', next(function * (req, res) {
-  console.log('new slack integration request')
+app.get('/newslack', function (req, res) {
+  console.log('new slack integration request');
+    co(function * () {
+     
   if (!req.query.code) {
     console.error(new Date())
     console.error('no code in the callback url, cannot proceed with new slack integration')
@@ -427,11 +430,24 @@ app.get('/newslack', next(function * (req, res) {
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
       yield utils.initializeTeam(bot, res_auth);
-      refresh_team(bot.team_id)
+      refresh_team(bot.team_id);
+      // var rtm = new slack.RtmClient(bot.bot.bot_access_token || '')
+      // rtm.start()
+      // var web = new slack.WebClient(bot.bot.bot_access_token || '')
+      // slackConnections[bot.team_id] = {
+      //   rtm: rtm,
+      //   web: web,
+      //   slackbot: bot
+      // };
+      kip.debug(' SHANIQUA !!! : ', slackModule);
+      slackModule.start();
      }
   }
-  res.redirect('/thanks.html')
-}))
+    res.redirect('/thanks.html')
+  }).catch(console.log.bind(console))
+})
+
+
 
 // app.get('/*', function(req, res, next) {
 //     res.sendfile(defaultPage)
@@ -452,6 +468,4 @@ app.listen(port, function (e) {
   }
 })
 
-module.exports = {
-  listen: listen
-}
+module.exports.listen = listen;

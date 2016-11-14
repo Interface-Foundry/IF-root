@@ -36,8 +36,7 @@ function * initializeTeam(team, auth) {
  team.markModified('meta.office_assistants');
  yield team.save();
  yield getTeamMembers(team);
- var rtm = new slack.RtmClient(team.bot.bot_access_token || '')
- rtm.start()
+
  return team;
 }
 

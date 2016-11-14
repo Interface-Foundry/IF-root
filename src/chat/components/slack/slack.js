@@ -51,13 +51,16 @@ var search_results = require('./search_results')
 var focus = require('./focus')
 var cart = require('./cart')
 var cardTemplate = require('./card_templates');
-module.exports.slackConnections = slackConnections = {}
+var slackConnections = {}
+// var slackConnections = {};
 var webserver = require('./webserver')
 
 //
 // slackbots
 //
-function * start() {
+function start() {
+ co(function * () {
+
   if (process.env.NODE_ENV === 'test') {
     console.log('starting mock slack server')
     yield slack.run_chat_server()
@@ -151,6 +154,8 @@ function * start() {
       })
     })
   })
+ }).catch(console.log.bind(console))
+
 }
 
 //
@@ -244,9 +249,8 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
   }
 })
 
-module.exports = {
-  start: start
-}
+module.exports.start = start;
+module.exports.slackConnections = slackConnections;
 
 if (!module.parent) {
   co(start).catch((e) => {
