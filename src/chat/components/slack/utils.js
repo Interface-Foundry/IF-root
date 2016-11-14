@@ -6,6 +6,8 @@ var kip = require('kip');
 var async = require('async');
 var eachSeries = require('async-co/eachSeries');
 var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client')
+var jstz = require('jstz');
+
 
 /*
 *

@@ -169,14 +169,14 @@ handlers['change_status'] = function * (message) {
   // but it does understand Tuesday at 2:00
   if (text.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/)) {
     var dayOfWeek = _.get(text.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/),'[0]');
-    if (text.indexOf(':') < 0) {
-      var hour = _.get(text.match(/([\d]+)/), '[0]');
-      var minutes = text.slice(_.indexOf(text, hour)+1, text.length).replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
-      // var minutes = _.get(text.split(hour), '[1]').replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
-      minutes = minutes ? minutes.trim() : '00';
-      hour = parseInt(hour.replace(dayOfWeek,''));
-      kip.debug('hour is :', hour, 'minutes is: ', minutes);
-    }
+    // if (text.indexOf(':') < 0) {
+      var rtext = text.replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '').replace(dayOfWeek,'');
+      var hour = _.get(rtext.match(/([\d]+)/), '[0]');
+      var minutes = rtext.replace(hour, '')
+      minutes = typeof minutes == 'string' ? minutes.trim() : '00';
+      hour = typeof hour == 'string' ? hour.trim() : '8';
+      hour = parseInt(hour);
+    // }
   }
   var am_pm = _.get(text.match(/(am|a.m.|a m|pm|p.m.|p m)/i), '[0]');
   if (hour > 0 && hour < 7 && !am_pm) {
@@ -188,9 +188,15 @@ handlers['change_status'] = function * (message) {
   am_pm = am_pm.toUpperCase().trim();
   team.meta.weekly_status_day = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
   team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-2) + ' ' + am_pm;
-  team.meta.weekly_status_timezone = currentUser.tz;
+  team.meta.weekly_status_timezone = team.meta.weekly_status_timezone;
   yield team.save();
-  yield updateCronJob(team, message);
+  var day = getDayNum(team.meta.weekly_status_day);
+  kip.debug('hour is :', hour, 'minutes is: ', minutes, 'am_pm is: ', am_pm);
+  var rhour = am_pm == 'PM' ? hour + 12 : hour;
+  var dateObj = { day: day, hour: rhour, minutes: minutes};
+  var moment_date = momenttz().day(day).toString().split(':')[0].slice(0, -2);
+  var date = moment_date + ' '  + team.meta.weekly_status_time;
+  yield updateCronJob(team, message, dateObj);
   var msg = message;
   msg.mode = 'settings'
   msg.action = 'home'
@@ -559,17 +565,13 @@ function isSendLastCall(input) {
 
 
 
-function * updateCronJob(team, message) {
-    kip.debug('\n\n\nsetting cron job day: ', team.meta.weekly_status_day, ' time: ', team.meta.weekly_status_time,'\n\n\n')
-   var date = Date.parse(team.meta.weekly_status_day + ' ' + team.meta.weekly_status_time);
-   var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
-   var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'),  'America/New_York'); //team.meta.weekly_status_timezone
-   console.log('setting weekly job for team ' + team.team_id + ' ' + team.team_name + ' at ' + job_time_bot_tz.format('00 mm HH * * d') + ' ' + team.meta.weekly_status_timezone); 
+function * updateCronJob(team, message, date) {
     if (cronJobs[team.team_id]) {
       cronJobs[team.team_id].stop();
     }
+    kip.debug('\n\n\nsetting cron job day: ', '00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day,'\n\n\n')
     var teamMembers = yield utils.getTeamMembers(team);
-    cronJobs[team.team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function  () {  
+    cronJobs[team.team_id] = new cron.CronJob('00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day, function  () {  
        team.meta.office_assistants.map(function  (a) {
        var assistant = teamMembers.find(function(m, i){ return m.id == a });
        var attachments = [
@@ -653,3 +655,29 @@ function * updateCronJob(team, message) {
     true,
     team.meta.weekly_status_timezone);
 };
+
+function getDayNum(string) {
+  switch(string) {
+    case 'Sunday':
+     return 0
+     break; 
+    case 'Monday':
+     return 1
+     break; 
+    case 'Tuesday':
+     return 2
+     break; 
+    case 'Wednesday':
+     return 3
+     break; 
+    case 'Thursday':
+     return 4
+     break; 
+    case 'Friday':
+     return 5
+     break; 
+    case 'Saturday':
+     return 6
+     break; 
+  }
+}

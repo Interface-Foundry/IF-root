@@ -12,7 +12,6 @@ var bodyParser = require('body-parser');
 var cart = require('./cart');
 var kipcart = require('../cart');
 var _ = require('lodash');
-var slackConnections = require('./slack').slackConnections
 var slackModule = require('./slack')
 var cardTemplate = require('./card_templates');
 var utils = require('./utils');
@@ -272,7 +271,7 @@ app.post('/slackaction', next(function * (req, res) {
           fallback: 'Shopping'
         };
         var team = message.source.team;
-        var slackBot = slackConnectionz[team];
+        var slackBot = slackModule.slackConnections[team];
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
         
       }
