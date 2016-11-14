@@ -53,7 +53,7 @@ function * findTeam(name) {
 function * deactivateOldTeam(team) {
   var mongodb = require('mongodb')
   var old_db = yield mongodb.MongoClient.connect('mongodb://jolteon.kipapp.co/foundry')
-  yield old_db.collection('slackbots').update({team_name: team.team_name}, {$set: {'deleted': true}})
+  yield old_db.collection('slackbots').update({team_name: team.team_name}, {$set: {'meta.migrated': true}})
 }
 
 
