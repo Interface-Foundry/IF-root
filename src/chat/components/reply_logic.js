@@ -306,14 +306,14 @@ queue.topic('incoming').subscribe(incoming => {
     timer.tic('done saving message', message)
     timer.tic('saving replies')
     yield replies.map(r => {
-      if (r.save) {
+      if (r) {
         try {
           r.save()
         } catch(err) {
-          kip.debug(' \n\n\n ', err, ' \n\n\n ')
+        logging.debug('could not save ' + r, err)
         }
       } else {
-        logging.debug('could not save ' + r)
+        logging.debug('reply_logic:316:r does not exist ' + r)
       }
     })
     timer.tic('done saving replies')
