@@ -1,5 +1,6 @@
 require('kip')
 var _ = require('lodash')
+var phone = require('phone')
 var request = require('request-promise')
 
 // injected dependencies
@@ -17,16 +18,20 @@ var handlers = {}
 handlers['food.admin.order.checkout.address_2'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var response = {
-    'text': `Whats your apartment or floor number at ${foodSession.chosen_location.address_1}\n` +
-          `>Type your apartment or floor number below`,
+    'title': `Whats your apartment or floor number at ${foodSession.chosen_location.address_1}`,
+    'text': `Type your apartment or floor number below`,
     'fallback': 'Unable to get address',
     'callback_id': `food.admin.order.checkout.address_2`,
-    'attachment_type': `default`,
-    'actions': [{
-      'name': `food.admin.order.checkout.address_2`,
-      'text': `None`,
-      'type': `button`,
-      'value': `none`
+    'attachments': [{
+      'fallback': `You are unable to add address`,
+      'callback_id': `food.admin.order.checkout.address_2`,
+      'attachment_type': `default`,
+      'actions': [{
+        'name': `food.admin.order.checkout.address_2`,
+        'text': `None`,
+        'type': `button`,
+        'value': `none`
+      }]
     }]
   }
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address_2', type: message.origin, data: response})
@@ -89,6 +94,14 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
 
   editInfo['admin.order.checkout.phone_number'] = function * (message) {
     var num = message.text.replace(/<tel:([^|]*)\|.*/, '$1')
+    var phoneParsed = phone(num)
+    if (phoneParsed[0] === undefined) {
+      // not a valid number
+      $replyChannel.send(
+        message,
+        'food.admin.order.checkout.phone_number',
+        {type: message.origin})
+    }
     logging.info('saving phone number: ', num, 'from', message.text)
     foodSession.chosen_location.phone_number = num
     foodSession.markModified('chosen_location')
@@ -109,6 +122,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
     return yield handlers['food.admin.order.checkout.phone_number'](message)
   }
 
+
+  var deliveryInstructionsText = _.get(foodSession, 'data.instructions') ? foodSession.data.instructions : ``
   var response = {
     text: `Great, please confirm your contact and delivery details:`,
     fallback: `Unable to get address`,
@@ -144,15 +159,15 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'fallback': `You are unable to change address`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
-        'attachment_type': `default`,
-        'actions': [
-          {
-            'name': `food.admin.order.checkout.address_1`,
-            'text': `Edit`,
-            'type': `button`,
-            'value': `edit`
-          }
-        ]
+        'attachment_type': `default`
+
+        // doesnt make sense to have this since if we allow the user to edit order it negates a large portion of our system
+        // 'actions': [{
+        //   'name': `food.admin.order.checkout.address_1`,
+        //   'text': `Edit`,
+        //   'type': `button`,
+        //   'value': `edit`
+        // }]
       },
       {
         'title': '',
@@ -192,14 +207,13 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       {
         'title': '',
         'mrkdwn_in': ['text'],
-        'text': `*Delivery Instructions:*\n` +
-          _.get(foodSession, 'data.instructions') ? foodSession.data.instructions : ``,
+        'text': `*Delivery Instructions:*\n` + deliveryInstructionsText,
         'fallback': `You are unable to edit instructions`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'attachment_type': `default`,
         'actions': [
           {
-            'name': `food.admin.order.checkout.deliver_instructions`,
+            'name': `food.admin.order.checkout.delivery_instructions`,
             'text': `+ Add`,
             'type': `button`,
             'value': `edit`
@@ -337,19 +351,17 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'callback_id': `food.admin.add_new_card`,
     'color': `#3AA3E3`,
     'attachment_type': `default`,
-    'attachments': [{
-      'title': '',
-      'image_url': 'http://tidepools.co/kip/stripe_powered.png'
-    },
-    {
-      'title': '',
-      'mrkdwn_in': ['text'],
-      'text': `Great, <${foodSession.payment.url}|➤ Click to pay with Stripe>`,
-      'fallback': `You are unable to follow this link to confirm order`,
-      'callback_id': `food.admin.add_new_card`,
-      'color': `#49d63a`,
-      'attachment_type': `default`
-    }]
+    'attachments': [
+      {'image_url': 'http://tidepools.co/kip/stripe_powered.png'},
+      {
+        'title': '',
+        'mrkdwn_in': ['text'],
+        'text': `Great, <${foodSession.payment.url}|➤ Click to pay with Stripe>`,
+        'fallback': `You are unable to follow this link to confirm order`,
+        'callback_id': `food.admin.add_new_card`,
+        'color': `#49d63a`,
+        'attachment_type': `default`
+      }]
   }
   $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: response})
 }
