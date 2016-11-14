@@ -25,18 +25,18 @@ var prompt = require('prompt-promise')
 // command line usage
 if (!module.parent) {
   co(function * () {
-    var name = 'Mars Vacation Condos'
+    var name = process.argv.slice(2).join(' ')
     var team = yield findTeam(name)
     if (!team) {
       console.log('could not find team "' + name + '"')
       process.exit(1)
     }
 
-    console.log('found team ', team.team_name)
-    // yield prompt('Enter to continue, or ctrl+c to quit')
+    console.log('found team "' + team.team_name + '"')
+    yield prompt('Enter to continue, or ctrl+c to quit')
     var newTeam = yield migrate(team)
     console.log('team is in new database. _id is', newTeam._id.toString())
-    console.log('deactivating old team by setting slackbot.deleted to "true"')
+    console.log('deactivating old team by setting slackbot.meta.migrated to "true"')
     yield deactivateOldTeam(team)
     console.log('to fully deactivate the old team, you need to restart the slack process on chat.kipapp.co')
     process.exit(0)
@@ -53,7 +53,8 @@ function * findTeam(name) {
 function * deactivateOldTeam(team) {
   var mongodb = require('mongodb')
   var old_db = yield mongodb.MongoClient.connect('mongodb://jolteon.kipapp.co/foundry')
-  yield old_db.collection('slackbots').update({team_name: team.team_name}, {$set: {'meta.migrated': true}})
+  var r = yield old_db.collection('slackbots').update({team_name: team.team_name}, {$set: {'meta.migrated': true}})
+  console.log(r.result)
 }
 
 
