@@ -263,6 +263,7 @@ app.post('/slackaction', next(function * (req, res) {
       else if (simple_command == 'exit') {
         message.mode = 'exit';
         message.action = 'exit';
+        message.text = ''
         var attachments = cardTemplate.slack_shopping_mode;
         var reply = {
           username: 'Kip',
@@ -424,21 +425,12 @@ app.get('/newslack', function (req, res) {
      if ( _.get(existingTeam, 'team_id')) {
         _.merge(existingTeam, res_auth);
         yield existingTeam.save();
-        refresh_team(existingTeam.team_id)
+        yield utils.initializeTeam(existingTeam, res_auth);
+        slackModule.start();
      } else {
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
       yield utils.initializeTeam(bot, res_auth);
-      refresh_team(bot.team_id);
-      // var rtm = new slack.RtmClient(bot.bot.bot_access_token || '')
-      // rtm.start()
-      // var web = new slack.WebClient(bot.bot.bot_access_token || '')
-      // slackConnections[bot.team_id] = {
-      //   rtm: rtm,
-      //   web: web,
-      //   slackbot: bot
-      // };
-      kip.debug(' SHANIQUA !!! : ', slackModule);
       slackModule.start();
      }
   }

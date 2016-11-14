@@ -26,19 +26,20 @@ function * initializeTeam(team, auth) {
  if (!auth.user_id) {
     return kip.error('Could not find the user who added slackbot ' + team._id)
  }
- team.meta.addedBy = auth.user_id;
- team.meta.office_assistants = [auth.user_id];
+ team.meta.addedBy = typeof team.meta.addedBy == 'string' ? team.meta.addedBy : auth.user_id;
+ team.meta.office_assistants = (team.meta.office_assistants && team.meta.office_assistants.length > 0) ? team.meta.office_assistants : [auth.user_id];
  var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
  res_chan = JSON.parse(res_chan);
- var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
- team.meta.cart_channels.push(generalChannel.id);
+ if (!(team.meta.cart_channels && team.meta.cart_channels.length > 0)) {
+  var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
+  team.meta.cart_channels.push(generalChannel.id);
+ }
  team.meta.all_channels = res_chan.channels.map(c => {return c.id});
  team.markModified('meta.cart_channels');
  team.markModified('meta.all_channels');
  team.markModified('meta.office_assistants');
  yield team.save();
  yield getTeamMembers(team);
-
  return team;
 }
 
@@ -129,10 +130,18 @@ function * getChannelMembers(team, channelId) {
 *                   
 */
 function * getChannels(team) {
-    var channels = [];
     var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
-    res_chan = JSON.parse(res_chan);
-    return res_chan.channels
+    var channels =JSON.parse(res_chan).channels;
+    channels = _.orderBy(channels, ['num_members'], ['desc']);
+    channels = channels.filter( c => { return !c.is_archived });
+     // channels.sort(function(a, b) { parseFloat(b["num_members"]) - parseFloat(a["num_members"]) })
+    var generalChannel = channels.find( (c) => { return c.name == 'general' });
+    if (generalChannel) {
+      var generalChannelIndex =  _.findIndex(channels, function(c) { return c.name == 'general'});
+      channels.splice(generalChannelIndex, 1);
+      channels.unshift(generalChannel);
+    }
+    return channels
 }
 
 
