@@ -260,11 +260,10 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       foodSession.markModified('order')
 
       if (foodSession.tipPercent === 'cash') {
-        tipAmount = 0.00
-        foodSession.tipAmount = tipAmount
+        foodSession.tipAmount = 0.00
+        tipAmount
       } else {
-        tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) / 100 * totalPrice).toFixed(2)
-        foodSession.tipAmount = tipAmount
+        foodSession.tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) / 100 * totalPrice).toFixed(2)
       }
       yield foodSession.save()
 
