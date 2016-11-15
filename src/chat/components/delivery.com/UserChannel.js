@@ -1,10 +1,9 @@
 var _ = require('lodash')
 var request = require('request-promise')
 
-
 function cleanAttachment (a) {
   // every attachmnet needs a callback id
-  a.callback_id = a.callback_id || 'default'
+  a.callback_id = _.get(a, 'callback_id') || 'default'
 
   // also should json stringify action.value
   _.get(a, 'actions', []).map(action => {
