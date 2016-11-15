@@ -106,7 +106,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       return yield handlers['food.admin.order.checkout.phone_number'](message)
     }
     logging.info('saving phone number: ', num, 'from', message.text)
-    foodSession.chosen_location.phone_number = num
+    foodSession.chosen_location.phone_number = phoneParsed[0]
     foodSession.markModified('chosen_location')
     yield foodSession.save()
   }
