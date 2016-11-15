@@ -574,7 +574,6 @@ function * updateCronJob(team, message, date) {
     cronJobs[team.team_id] = new cron.CronJob('00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day, function  () {  
        team.meta.office_assistants.map(function  (a) {
        var assistant = teamMembers.find(function(m, i){ return m.id == a });
-        kip.debug('\n\n\n Firing Cron Job: assistant: ', assistant,'\n\n\n')
 
        var attachments = [
         {
@@ -640,6 +639,8 @@ function * updateCronJob(team, message, date) {
         user: message.source.user,
         reply: attachments
       })
+      kip.debug('\n\n\n Firing Cron Job: assistant: ', assistant, message, newMessage,'\n\n\n')
+
       newMessage.save()
       queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
           
