@@ -12,10 +12,23 @@ var kipcart = require('../cart');
 // Handlers take something from the message.execute array and turn it into new messages
 //
 var handlers = {}
-module.exports = {}
-module.exports.handlers = handlers
 
 handlers['shopping.initial'] = function*(message, exec) {
+
+  //if switching back to shopping mode from food or some other mode
+  if (message.text == 'shopping') {
+      return new db.Message({
+      incoming: false,
+      thread_id: message.thread_id,
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
+      source: message.source,
+      mode: 'shopping',
+      action: 'switch'
+      })
+  }
+
   // typing(message);
   message._timer.tic('starting amazon_search');
     //NLP classified this query incorrectly - lets remove this after NLP sorts into shopping initial 100%
@@ -29,7 +42,6 @@ handlers['shopping.initial'] = function*(message, exec) {
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
   var results = yield amazon_search.search(exec.params,message.origin);
-  winston.debug('!1',exec)
 
   if (results == null || !results) {
       winston.debug('-1')
@@ -445,8 +457,7 @@ handlers['cart.empty'] = function*(message, exec) {
   return res;
 };
 
-
-
+module.exports.handlers = handlers
 
 //
 // Returns the amazon results as it is stored in the db (json string)

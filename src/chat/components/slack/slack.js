@@ -50,14 +50,17 @@ var image_search = require('../image_search')
 var search_results = require('./search_results')
 var focus = require('./focus')
 var cart = require('./cart')
-// var actions = require('./actions'); --> this runs an extra service not sure what for
+var cardTemplate = require('./card_templates');
 var slackConnections = {}
+// var slackConnections = {};
 var webserver = require('./webserver')
 
 //
 // slackbots
 //
-function * start () {
+function start() {
+ co(function * () {
+
   if (process.env.NODE_ENV === 'test') {
     console.log('starting mock slack server')
     yield slack.run_chat_server()
@@ -81,7 +84,7 @@ function * start () {
       rtm: rtm,
       web: web,
       slackbot: slackbot
-    }
+    };
 
     // TODO figure out how to tell when auth is invalid
     // right now the library just console.log's a message and I can't figure out
@@ -115,16 +118,16 @@ function * start () {
         origin: 'slack',
         source: data
       })
-      // kip.debug('\n\n\n\n\nYOLO : '.)
+
       // don't talk to yourself
       if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-        kip.debug("don't talk to yourself: ")
+        kip.debug("don't talk to yourself: data: ",data);
         return; // drop the message before saving.
       }
 
       // other random things
       if (data.type !== 'message' || (data.hidden === true) || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { // settings.name = kip's slack username
-        kip.debug('will not handle this message')
+        kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
         return
       }
 
@@ -152,6 +155,8 @@ function * start () {
       })
     })
   })
+ }).catch(console.log.bind(console))
+
 }
 
 //
@@ -161,47 +166,44 @@ kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
   try {
-    // console.log(outgoing)
-    var message = outgoing.data
-    debugger
-    var team = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
-    var team = _.get(message, 'source.team')
-    var bot = slackConnections[team]
+    var message = outgoing.data;
+    var team = _.get(message, 'source.team');
+    var thread_id = _.get(message, 'thread_id');
+    var bot = slackConnections[team] ? slackConnections[team] : slackConnections[thread_id];
     if (typeof bot === 'undefined') {
-      logging.error('error with the bot thing, message:', message)
-      kip.debug('\n\nslack.js line 174, message: ', message, '\n\n')
-      throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
+      // logging.error('error with the bot thing, message:', message)
+      // throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
     }
-
     var msgData = {
       icon_url: 'http://kipthis.com/img/kip-icon.png',
       username: 'Kip'
     }
-
     co(function * () {
       if (message.action === 'typing') {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
           outgoing.ack()
         })
       }
-      // console.log('outgoing message', message)
+      kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {
-        // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
-        var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
+        var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : { reply: message.text }
         return bot.web.chat.postMessage(message.source.channel,(reply.label ? reply.label : message.text), reply)
       }
       if (message.mode === 'address') {
-        kip.debug('slack.js line 200 message: ', message)
-        // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
         return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
 
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
-        msgData.attachments = yield search_results(message)
-        kip.debug('\n\nslack.js line 197: message.mode = shopping, message.action = results, msgData: ', msgData, '\n\n')
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+        msgData.attachments = yield search_results(message);
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
+
+      if (message.mode === 'shopping' && message.action === 'switch') {
+        msgData.attachments = cardTemplate.slack_shopping_mode;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
 
       if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
         msgData.attachments = yield focus(message)
@@ -213,17 +215,27 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-      if (message.mode === 'home' && message.action === 'view') {
-        msgData.attachments = message.client_res[0]
-        kip.debug('\n\nslack.js line 212: message.mode = home, message.action = view, msgData: ', message, '\n\n')
+      if (message.mode === 'settings' && message.action === 'home') {
+        msgData.attachments = message.reply;
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-      // bot.rtm.sendMessage(message.text, message.source.channel, () => {
-      //   outgoing.ack()
-      // })
+      if (message.mode === 'team' && message.action === 'home') {
+        msgData.attachments = message.reply
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+      }
 
-      bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data)
+      if (message.mode === 'exit' && message.action === 'exit') {
+        msgData.attachments = message.reply
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+      }
+
+      try {
+        bot.web.chat.postMessage(message.source.channel, message.text, null);
+      } catch (err) {
+        kip.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message,'\n\n\n\n');
+      }
+      
       outgoing.ack()
     }).then(() => {
       outgoing.ack()
@@ -238,9 +250,8 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
   }
 })
 
-module.exports = {
-  start: start
-}
+module.exports.start = start;
+module.exports.slackConnections = slackConnections;
 
 if (!module.parent) {
   co(start).catch((e) => {

@@ -1,10 +1,8 @@
 require('kip')
-require('nodejs-dashboard')
 
 var co = require('co')
 var _ = require('lodash')
 var sleep = require('co-sleep')
-
 var api = require('./api-wrapper')
 var queue = require('../queue-mongo')
 var utils = require('./utils')
@@ -12,13 +10,16 @@ var utils = require('./utils')
 var team_utils = require('./team_utils.js')
 var parseAddress = require('parse-address')
 var mailer_transport = require('../../../mail/IF_mail.js')
-
 var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)
 
 // turn feedback buttons on/off
 var feedbackOn = true
 var feedbackTracker = {}
+
+// injected dependencies
+var $replyChannel
+var $allHandlers // this is how you can access handlers from other methods
 
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
@@ -383,7 +384,7 @@ handlers['address.confirm'] = function * (message) {
         ]
       }
     ]
-  }
+  };
 
   // collect feedback on this feature
   if (feedbackOn && msg_json) {
@@ -718,11 +719,11 @@ handlers['food.restaurants.list'] = function * (message) {
 // Return some restaurants, button value is the index offset
 //
 handlers['food.restaurants.list.recent'] = function * (message) {
-  var index = parseInt(_.get(message, 'data.value')) || 0
+  var index = parseInt(_.get(message, 'data.value')) || 0;
   var msg_json = { text: 'Looking up your order history for this location...' }
   replyChannel.sendReplace(message, 'food.waiting', {type: message.origin, data: msg_json})
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var availableMerchantIds = foodSession.merchants.map(m => m.id)
+  var availableMerchantIds = foodSession.merchants.map(m => m.id);
   var recentDeliveries = yield db.Delivery.aggregate([
     {
       $match: {
@@ -736,7 +737,7 @@ handlers['food.restaurants.list.recent'] = function * (message) {
         count: {$sum: 1}
       }
     }
-  ])
+  ]);
 
   // show 3 restaurants that are in the foodSession available list
   var attachments = yield recentDeliveries
@@ -886,3 +887,13 @@ handlers['test.s8'] = function * (message) {
 
   replyChannel.send(message, 'food.menu.quick_picks', {type: 'slack', data: msg_json})
 }
+
+
+module.exports = function (allHandlers) {
+  $allHandlers = allHandlers
+  // merge in our own handlers
+  _.merge($allHandlers, handlers)
+}
+
+
+

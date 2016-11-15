@@ -9,6 +9,7 @@ var chatuserSchema = mongoose.Schema({
     unique: true,
     index: true
   },
+  platform: String,
   persona: {
     sessions: [String],
     items: [String]
@@ -68,6 +69,7 @@ var chatuserSchema = mongoose.Schema({
   },
   history: {
     orders: [],
+    modes: [], //{ ts: date, mode: 'shopping'/'food' }
     interactions: []
   },
   phone_number: String
