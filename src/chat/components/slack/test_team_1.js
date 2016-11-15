@@ -24,7 +24,8 @@ team.slackbot = {
     'initialized': true,
     'dateAdded': ISODate('2016-06-24T20:29:22.265Z'),
     'addedBy': 'U1JU56UG1',
-    locations: [{address_1: '21 Essex St 10002'}]
+    locations: [{address_1: '21 Essex St 10002'}],
+    mock: true
   },
   'bot': {
     'bot_user_id': 'kip_yolo',

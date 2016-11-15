@@ -66,7 +66,8 @@ function * start () {
   var slackbots = yield db.Slackbots.find({
     'meta.deleted': {
       $ne: true
-    }
+    },
+    'meta.mock': process.env.NODE_ENV === 'test' ? true : {$ne: true}
   }).exec()
 
   kip.log('found', slackbots.length, 'slackbots')

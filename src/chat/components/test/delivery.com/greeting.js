@@ -1,5 +1,6 @@
 var mock = require('../mock_slack_users.js')
 var should = require('should')
+var _ = require('lodash')
 require('co-mocha')
 
 describe('greeting', () => {
@@ -13,11 +14,7 @@ describe('greeting', () => {
     user.chatuser.team_id.should.equal('yolo')
 
     var res = yield user.text('food')
-    res.text.should.equal("yeah let's eat! what address should i use?")
-
-    res = yield user.text('21 Essex St 10002')
-    res.text.should.equal('Select your order method.')
-    res = yield user.tap(res, 0, 0)
-    res.text.should.equal('delivery context updated.')
+    console.log(res)
+    _.get(res, 'attachments[0].image_url').should.equal('http://kipthis.com/kip_modes/mode_cafe.png')
   })
 })
