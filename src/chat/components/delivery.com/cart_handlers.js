@@ -89,7 +89,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
         'name': 'food.cart.personal.confirm',
         'text': '✓ Confirm: ' + totalPrice.$,
         'type': 'button',
-        'value': 'chess',
+        'value': 'food.cart.personal.confirm',
         'style': 'primary'
       },
       {

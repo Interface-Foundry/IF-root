@@ -10,7 +10,6 @@ var $allHandlers
 // exports
 var handlers = {}
 
-
 /* S12B
 *
 *
@@ -338,26 +337,18 @@ handlers['food.admin.add_new_card'] = function * (message) {
   }
 
   try {
-    if (process.env.NODE_ENV === 'development_alyx') {
-      foodSession.payment = yield request({
-        uri: `https://7ad44111.ngrok.io/charge`,
-        method: `POST`,
-        json: true,
-        body: postBody
-      })
-    } else {
-      foodSession.payment = yield request({
-        uri: `https://pay.kipthis.com/charge`,
-        method: `POST`,
-        json: true,
-        body: postBody
-      })
-    }
-
-    foodSession.save()
+    foodSession.payment = yield request({
+      uri: kip.config.kipPayURL + `/charge`,
+      method: `POST`,
+      json: true,
+      body: postBody
+    })
+    yield foodSession.save()
   } catch (e) {
     logging.error('error doing kip pay lol', e)
-    $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'ok couldnt submit to kippay'}})
+    $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'ok couldnt submit to kippay try again'}})
+    yield handlers['food.admin.order.pay'](message)
+    return
   }
 
   var response = {
@@ -368,7 +359,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'attachment_type': `default`,
     'attachments': [
       {
-        'title':'',
+        'title': '',
         'image_url': 'http://tidepools.co/kip/stripe_powered.png'
       },
       {
@@ -391,8 +382,8 @@ handlers['food.admin.order.select_card'] = function * (message) {
     'card': {'card_id': message.source.actions[0].value}
   })
 
-  console.log('FOOD SESSION ',foodSession.data)
-  console.log('FOOD SESSION ',foodSession.chosen_location)
+  logging.info('FOOD SESSION: ', foodSession.data)
+  logging.info('FOOD SESSION: ', foodSession.chosen_location)
 
     // add various shit to the foodSession
   var postBody = {
@@ -429,21 +420,13 @@ handlers['food.admin.order.select_card'] = function * (message) {
   }
 
   try {
-    if (process.env.NODE_ENV === 'development_alyx') {
-      foodSession.payment = yield request({
-        uri: `https://7ad44111.ngrok.io/charge`,
-        method: `POST`,
-        json: true,
-        body: postBody
-      })
-    } else {
-      foodSession.payment = yield request({
-        uri: `https://pay.kipthis.com/charge`,
-        method: `POST`,
-        json: true,
-        body: postBody
-      })
-    }
+    // make post to our own kip pay server
+    foodSession.payment = yield request({
+      uri: kip.config.kipPayURL + `/charge`,
+      method: `POST`,
+      json: true,
+      body: postBody
+    })
 
     foodSession.save()
     var response = {
@@ -462,11 +445,11 @@ handlers['food.admin.order.select_card'] = function * (message) {
         'attachment_type': `default`
       }]
     }
+    $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
   } catch (e) {
-    logging.error('error doing kip pay lol', e)
+    logging.error('error doing kip pay lol idk what to do', e)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kippay'}})
   }
-  $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
 }
 
 handlers['food.admin.order.pay.confirm'] = function * (message) {
@@ -499,7 +482,7 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
       }]
     }]
   }
-  $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: response})
+  $replyChannel.send(message, 'food.done', {type: message.origin, data: response})
 }
 
 handlers['food.done'] = function * (message) {
