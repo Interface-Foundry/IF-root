@@ -277,13 +277,10 @@ app.post('/process', jsonParser, function (req, res) {
             } catch (err) {
               logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
             }
-
-
           } else {
             console.log('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
             console.log('OUTCOME: ', charge.outcome)
           }
-
         })
       }
     })
@@ -409,7 +406,7 @@ function * payDeliveryDotCom (pay, callback) {
     // for physical delivery
     if (pay.order.chosen_location.addr) {
       guestCheckout.street = pay.order.chosen_location.addr.address_1
-      guestCheckout.unit_number = pay.order.chosen_location.addr.address_2
+      guestCheckout.unit_number = pay.order.chosen_location.addr.address_2 || ``
       guestCheckout.city = pay.order.chosen_location.addr.city
       guestCheckout.state = pay.order.chosen_location.addr.state
       guestCheckout.zip_code = pay.order.chosen_location.addr.zip_code

@@ -332,7 +332,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'guest_token': foodSession.guest_token,
     'order': {
       'total': (foodSession.order.total * 100) + (foodSession.tipAmount * 100),
-      'tip': foodSession.tipAmount * 100,
+      'tip': foodSession.tipAmount,
       'order_type': foodSession.fulfillment_method
     }
   }
@@ -418,7 +418,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
     'guest_token': foodSession.guest_token,
     'order': {
       'total': (foodSession.order.total * 100) + (foodSession.tipAmount * 100),
-      'tip': foodSession.tipAmount * 100,
+      'tip': foodSession.tipAmount,
       'order_type': foodSession.fulfillment_method
     },
     'saved_card': {
@@ -429,7 +429,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
   }
 
   try {
-    if (process.env.NODE_ENV == 'development_alyx') {
+    if (process.env.NODE_ENV === 'development_alyx') {
       foodSession.payment = yield request({
         uri: `https://7ad44111.ngrok.io/charge`,
         method: `POST`,
@@ -510,7 +510,6 @@ handlers['food.done'] = function * (message) {
   // retrieve users phone number
 }
 
-
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel
   $allHandlers = allHandlers
@@ -518,37 +517,3 @@ module.exports = function (replyChannel, allHandlers) {
   // merge in our own handlers
   _.merge($allHandlers, handlers)
 }
-
-
-
-  // can check to see if we already have phone number
-  // if (foodSession.convo_initiater.phone_number) {
-  //   // retrieve users phone number
-  //   response = {
-  //     text: `Should we use a phone number from your previous order? ${foodSession.convo_initiater.phone_number}`,
-  //     fallback: `unable to confirm phone number`,
-  //     callback_id: `food.admin.order.checkout.phone_number`,
-  //     color: `#3AA3E3`,
-  //     attachments: [{
-  //       'title': '',
-  //       'text': ``,
-  //       'fallback': `You are pay for this order`,
-  //       'callback_id': `food.admin.order.checkout.phone_number`,
-  //       'color': `#3AA3E3`,
-  //       'attachment_type': `default`,
-  //       'actions': [{
-  //         'name': `food.admin.order.checkout.phone_number`,
-  //         'text': `Confirm`,
-  //         'style': `primary`,
-  //         'type': `button`,
-  //         'value': `edit`
-  //       }, {
-  //         'name': `food.admin.order.checkout.phone_number`,
-  //         'text': `Edit`,
-  //         'type': `button`,
-  //         'value': `edit`
-  //       }]
-  //     }]
-  //   }
-  // }
-  // get users phone number
