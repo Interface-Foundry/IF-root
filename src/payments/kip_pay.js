@@ -402,7 +402,8 @@ function * payDeliveryDotCom (pay, callback) {
 
     // for physical delivery
     if (pay.order.chosen_location.addr) {
-      guestCheckout.street = pay.order.chosen_location.addr.address_1 + ', ' + pay.order.chosen_location.addr.address_2
+      guestCheckout.street = pay.order.chosen_location.addr.address_1
+      guestCheckout.unit_number = pay.order.chosen_location.addr.address_2
       guestCheckout.city = pay.order.chosen_location.addr.city
       guestCheckout.state = pay.order.chosen_location.addr.state
       guestCheckout.zip_code = pay.order.chosen_location.addr.zip_code
