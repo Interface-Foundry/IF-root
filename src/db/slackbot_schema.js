@@ -97,7 +97,8 @@ var slackbotSchema = mongoose.Schema({
         email: String,
         address_zip: String
       }
-    }]
+    }],
+    mock: Boolean
   },
   // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
   conversaitons: {}

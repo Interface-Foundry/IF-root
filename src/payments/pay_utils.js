@@ -12,7 +12,7 @@ var replyChannel = new UserChannel(queue)
 */
 module.exports.sessionSuccesfullyPaid = function * (foodSession) {
   // var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var lastMessageByUser = yield db.Messages.find({user_id: foodSession.convo_initiater.id, incoming: true}).sort({ts: -1}).limit(1).exec()
+  var lastMessageByUser = yield db.Messages.find({user_id: foodSession.order.convo_initiater.id, incoming: true}).sort({ts: -1}).limit(1).exec()
   lastMessageByUser = lastMessageByUser[0]
   foodSession.order['completed_payment'] = true
   foodSession.save()
@@ -32,13 +32,16 @@ module.exports.payForItemFromKip = function * (session, guestToken) {
     'body': session
   }
 
-  logging.info('SENDING TO DELIVERY NOW ', opts)
+  console.log('SENDING TO DELIVERY NOW ', JSON.stringify(opts))
+
+  //return true
   try {
     var response = yield request(opts)
     return response
   } catch (e) {
     response = null
-    logging.error('couldnt submit payment uh oh')
+    logging.error('couldnt submit payment uh oh ',JSON.stringify(e))
+    return null
   }
 }
 

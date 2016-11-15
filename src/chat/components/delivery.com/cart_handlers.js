@@ -301,7 +301,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     textForItem += descriptionString.length > 0 ? `*Options:* ${descriptionString}\n` + `*Added by:* <@${item.user_id}>` : `*Added by:* <@${item.user_id}>`
     return {
       text: textForItem,
-      callback_id: foodInfo.id,
+      callback_id: 'foodInfoItems_wopr',
       color: '#3AA3E3',
       attachment_type: 'default',
       mrkdwn_in: ['text'],
@@ -348,6 +348,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
   // combine it all
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
+    fallback: 'You are unable to confirm.',
+    callback_id: 'address_confirm',
     attachments: [mainAttachment].concat(itemAttachments).concat([tipAttachment]).concat([finalAttachment])
   }
 
