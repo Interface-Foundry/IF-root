@@ -319,6 +319,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
         'zip_code': foodSession.chosen_location.zip_code,
         'coordinates': []
       },
+      'phone_number': foodSession.chosen_location.phone_number,
       'special_instructions': foodSession.data.special_instructions || ''
     },
     'time_started': foodSession.time_started,
@@ -388,6 +389,9 @@ handlers['food.admin.order.select_card'] = function * (message) {
     'card': {'card_id': message.source.actions[0].value}
   })
 
+  console.log('FOOD SESSION ',foodSession.data)
+  console.log('FOOD SESSION ',foodSession.chosen_location)
+
     // add various shit to the foodSession
   var postBody = {
     '_id': foodSession._id,
@@ -403,6 +407,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
         'zip_code': foodSession.chosen_location.zip_code,
         'coordinates': []
       },
+      'phone_number': foodSession.chosen_location.phone_number,
       'special_instructions': foodSession.data.special_instructions || ''
     },
     'time_started': foodSession.time_started,
@@ -422,12 +427,22 @@ handlers['food.admin.order.select_card'] = function * (message) {
   }
 
   try {
-    foodSession.payment = yield request({
-      uri: `https://pay.kipthis.com/charge`,
-      method: `POST`,
-      json: true,
-      body: postBody
-    })
+    if (process.env.NODE_ENV == 'development_alyx') {
+      foodSession.payment = yield request({
+        uri: `https://7ad44111.ngrok.io/charge`,
+        method: `POST`,
+        json: true,
+        body: postBody
+      })
+    } else {
+      foodSession.payment = yield request({
+        uri: `https://pay.kipthis.com/charge`,
+        method: `POST`,
+        json: true,
+        body: postBody
+      })
+    }
+
     foodSession.save()
     var response = {
       'text': ``,

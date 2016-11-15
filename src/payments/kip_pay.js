@@ -233,7 +233,7 @@ app.post('/process', jsonParser, function (req, res) {
 
           var customer_id = customer.id
           return stripe.charges.create({
-            amount: pay.order.order.total,
+            amount: Math.round(payment.order.order.total),
             currency: 'usd',
             customer: customer.id
           })
@@ -295,10 +295,13 @@ app.post('/process', jsonParser, function (req, res) {
 
 // make a charge
 function chargeById (payment) {
+
+  console.log()
+
   // STRIPE CHARGE BY ID
   // When it's time to charge the customer again, retrieve the customer ID!
   stripe.charges.create({
-    amount: payment.order.order.total, // Amount in cents
+    amount: Math.round(payment.order.order.total), // Amount in cents
     currency: 'usd',
     customer: payment.order.saved_card.customer_id, // Previously stored, then retrieved
     card: payment.order.saved_card.card_id
@@ -352,7 +355,7 @@ function * payDeliveryDotCom (pay, callback) {
   // payment amounts should match
 
   // total already includes tip
-  if (pay.charge.amount === pay.order.order.total) {
+  if (pay.charge.amount === Math.round(pay.order.order.total)) {
     // add special instructions
     pay.order.chosen_location.special_instructions = _.get(pay, 'order.chosen_location.special_instructions') ? pay.order.chosen_location.special_instructions : ''
     // build guest checkout obj
@@ -376,7 +379,7 @@ function * payDeliveryDotCom (pay, callback) {
       ],
       'sms_notify': true,
       'isOptingIn': false,
-      'phone_number': '7143309047',
+      'phone_number': pay.order.chosen_location.phone_number,
       'merchant_id': pay.order.chosen_restaurant.id,
       'first_name': pay.order.convo_initiater.first_name,
       'last_name': pay.order.convo_initiater.last_name,
@@ -385,8 +388,11 @@ function * payDeliveryDotCom (pay, callback) {
     }
 
     // convert tips to double if exists
-    if (_.get(pay, 'order.tipAmount')) {
-      guestCheckout.tip = pay.order.order.tipAmount
+    if (_.get(pay, 'order.order.tip')) {
+      guestCheckout.tip = Math.floor(pay.order.order.tip)
+      console.log('CHECKOUT TIP ',guestCheckout.tip)
+      guestCheckout.tip = (guestCheckout.tip/100).toFixed( 2 )
+      console.log('CHECKOUT TIP ',guestCheckout.tip)
     }
 
     // limit special delivery instructions to 100 char
@@ -409,18 +415,19 @@ function * payDeliveryDotCom (pay, callback) {
       guestCheckout.zip_code = pay.order.chosen_location.addr.zip_code
     }
 
-
+    console.log('PAY OBJ ',pay)
     console.log('GUEST CHECKOUT OBJ ',guestCheckout)
 
-    // pos to delivery
-    co(function * () {
-      var response = yield pay_utils.payForItemFromKip(guestCheckout, pay.order.guest_token)
-      if (response !== null) {
-        yield pay_utils.sessionSuccesfullyPaid(pay)
-      }
-    }).catch(function (err) {
-      console.error(err.stack)
-    })
+    // // pos to delivery
+    // co(function * () {
+    //   var response = yield pay_utils.payForItemFromKip(guestCheckout, pay.order.guest_token)
+    //   if (response !== null) {
+    //     yield pay_utils.sessionSuccesfullyPaid(pay)
+    //   }
+    // }).catch(function (err) {
+    //   console.error(err.stack)
+    // })
+
   } else {
     console.error('ERROR: Charge amounts dont match D:')
     err = 'ERROR: Charge amounts dont match D:'

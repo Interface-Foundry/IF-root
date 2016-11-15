@@ -34,15 +34,20 @@ module.exports.payForItemFromKip = function * (session, guestToken) {
 
   console.log('SENDING TO DELIVERY NOW ', JSON.stringify(opts))
 
-  //return true
-  try {
-    var response = yield request(opts)
-    return response
-  } catch (e) {
-    response = null
-    logging.error('couldnt submit payment uh oh ',JSON.stringify(e))
-    return null
+  if (process.env.NODE_ENV == 'development_alyx') {
+    return true
+  }else {
+    
+    try {
+      var response = yield request(opts)
+      return response
+    } catch (e) {
+      response = null
+      logging.error('couldnt submit payment uh oh ',JSON.stringify(e))
+      return null
+    }
   }
+
 }
 
 // queue.topic('cafe.payments').subscribe(payment => {
