@@ -451,7 +451,7 @@ handlers['feedback.save'] = function * (session) {
   //check for entry in feedback tracker
   if (feedbackTracker[session.source.team + session.source.user + session.source.channel]){
     var source = feedbackTracker[session.source.team + session.source.user + session.source.channel].source
-  }else {
+  } else {
     var source = 'undefined'
   }
 
@@ -469,8 +469,8 @@ handlers['feedback.save'] = function * (session) {
     'text': 'Thanks for explaining the issue'
   }
 
-  //switch back to original context
-  if(source.callback_id){
+  // switch back to original context
+  if (_.get(source, 'callback_id')) {
     replyChannel.send(session, source.callback_id.replace(/_/g, '.'), {type: session.origin, data: msg_json})
   }
 }
