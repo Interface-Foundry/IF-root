@@ -100,7 +100,11 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       $replyChannel.send(
         message,
         'food.admin.order.checkout.phone_number',
-        {type: message.origin})
+        {
+          type: message.origin,
+          data: {'text': `hmm there was an error with that number, try again?`}
+        })
+      return yield handlers['food.admin.order.checkout.phone_number'](message)
     }
     logging.info('saving phone number: ', num, 'from', message.text)
     foodSession.chosen_location.phone_number = num
@@ -365,7 +369,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'color': `#3AA3E3`,
     'attachment_type': `default`,
     'attachments': [
-      { 
+      {
         'title':'',
         'image_url': 'http://tidepools.co/kip/stripe_powered.png'
       },
