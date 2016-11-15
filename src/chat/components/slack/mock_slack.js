@@ -18,15 +18,31 @@ function run_chat_server () {
      * Listen for mock taps
      */
     app.post('/tap/:access_token', (req, res) => {
+      var options = req.body.options || { expect: 1 }
+      var messages = []
       // register listeners
       ALL_THE_WEB_CLIENTS[req.params.access_token].on_next((message) => {
-        res.send(message)
+        if (options.expect > 1) {
+          messages.push(message)
+          if (messages.length === options.expect) {
+            res.send(messages)
+          }
+        } else {
+          res.send(message)
+        }
       })
       ALL_THE_RTM_CLIENTS[req.params.access_token].on_next((message) => {
-        res.send(message)
+        if (options.expect > 1) {
+          messages.push(message)
+          if (messages.length === options.expect) {
+            res.send(messages)
+          }
+        } else {
+          res.send(message)
+        }
       })
 
-      var body = {payload: JSON.stringify(req.body) }
+      var body = {payload: JSON.stringify(req.body.payload) }
       // send the mock tap
       request({
         method: 'POST',
@@ -40,16 +56,34 @@ function run_chat_server () {
      * Listen for mock texts
      */
     app.post('/text/:access_token', (req, res) => {
+      var options = req.body.options || { expect: 1 }
+      var messages = []
       // register listeners
       ALL_THE_WEB_CLIENTS[req.params.access_token].on_next((message) => {
-        res.send(message)
+        // console.log('incoming webmessage', message)
+        if (options.expect > 1) {
+          messages.push(message)
+          if (messages.length === options.expect) {
+            res.send(messages)
+          }
+        } else {
+          res.send(message)
+        }
       })
       ALL_THE_RTM_CLIENTS[req.params.access_token].on_next((message) => {
-        res.send(message)
+        // console.log('incoming rtm message', message)
+        if (options.expect > 1) {
+          messages.push(message)
+          if (messages.length === options.expect) {
+            res.send(messages)
+          }
+        } else {
+          res.send(message)
+        }
       })
 
       // send the mock message
-      ALL_THE_RTM_CLIENTS[req.params.access_token].on_message(req.body)
+      ALL_THE_RTM_CLIENTS[req.params.access_token].on_message(req.body.message)
     })
 
     /**

@@ -27,10 +27,16 @@ var User = function (opts) {
 
 /**
  * mocks a text sent to kip from slack
+   options: {
+     expect: Number, // number of messages to expect as a reply (default 1)
+   }
  */
-User.prototype.text = function * (text) {
+User.prototype.text = function * (text, options) {
   var user = this.chatuser
   var slackbot = this.slackbot
+  options = options || {
+    expect: 1
+  }
   return co(function * () {
     var message = {
       type: 'message',
@@ -43,7 +49,10 @@ User.prototype.text = function * (text) {
     return request({
       method: 'POST',
       uri: 'http://localhost:8080/text/' + slackbot.bot.bot_access_token,
-      body: message,
+      body: {
+        message: message,
+        options: options
+      },
       json: true
     })
   })
@@ -52,9 +61,12 @@ User.prototype.text = function * (text) {
 /**
  * mocks the user tapping on a button
  */
-User.prototype.tap = function (message, attachment_index, action_index) {
+User.prototype.tap = function (message, attachment_index, action_index, options) {
   var user = this.chatuser
   var slackbot = this.slackbot
+  options = options || {
+    expect: 1
+  }
   return co(function * () {
     if (!_.get(message, `attachments[${attachment_index}].actions[${action_index}]`)) {
       throw new Error(`No button for attachments[${attachment_index}].actions[${action_index}]`)
@@ -85,7 +97,10 @@ User.prototype.tap = function (message, attachment_index, action_index) {
     return request({
       method: 'POST',
       uri: 'http://localhost:8080/tap/' + slackbot.bot.bot_access_token,
-      body: body,
+      body: {
+        payload: body,
+        options: options
+      },
       json: true
     })
   })

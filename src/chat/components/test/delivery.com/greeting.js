@@ -9,12 +9,13 @@ describe('greeting', () => {
     yield mock.setup()
   })
   it('should respond to "food"', function * () {
+    this.timeout(5000)
     var user = yield mock.ExistingUser()
     user.chatuser.id.should.equal('bamf_yolo')
     user.chatuser.team_id.should.equal('yolo')
 
-    var res = yield user.text('food')
-    console.log(res)
-    _.get(res, 'attachments[0].image_url').should.equal('http://kipthis.com/kip_modes/mode_cafe.png')
+    var res = yield user.text('food', {expect: 2})
+    _.get(res, '[0]attachments[0].image_url').should.equal('http://kipthis.com/kip_modes/mode_cafe.png')
+    _.get(res, '[1]attachments[0].text').should.equal('Great! Which address is this for?')
   })
 })
