@@ -25,6 +25,8 @@ var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 var queue = require('./queue-mongo');
 var onboarding = require('./modes/onboarding');
+var onboard = require('./modes/onboard');
+
 var settings = require('./modes/settings');
 var team = require('./modes/team');
 var shopping = require('./modes/shopping').handlers;
@@ -95,6 +97,9 @@ function switchMode(message) {
     'onboarding': function () {
       return 'onboarding';
     },
+    'onboard': function () {
+      return 'onboard';
+    },
     'shopping': function () {
       return 'shopping';
     },
@@ -126,6 +131,9 @@ function printMode(message) {
       break
     case 'onboarding':
       winston.debug('In', 'ONBOARDING'.green, 'mode 👋')
+      break
+    case 'onboard':
+      winston.debug('In', 'ONBOARD'.cyan, 'mode 👋')
       break
      case 'team':
       winston.debug('In', 'TEAM'.yellow, 'mode 👋')
@@ -221,7 +229,7 @@ queue.topic('incoming').subscribe(incoming => {
 
     if (switchMode(message)) {
       message.mode = switchMode(message);
-      if (message.mode.match(/(settings|team)/)) message.action = 'home';
+      if (message.mode.match(/(settings|team)/) || message.mode == 'onboard') message.action = 'home';
       yield message.save(); 
     }
 
@@ -249,7 +257,6 @@ queue.topic('incoming').subscribe(incoming => {
           if (text == 'Singapore' || text == 'United States') {
             winston.debug('SAVING TO DB')
             replies = ['Saved country!'];
-
             //access onboard template per source origin!!!!
             modes[user.id] = 'shopping';
           } else {
@@ -258,11 +265,20 @@ queue.topic('incoming').subscribe(incoming => {
           }
         }
       break;
+     case 'onboard':
+       if (message.origin === 'slack') {
+          var replies = yield onboard.handle(message)
+        } 
+      break;
      case 'settings':
+      if (message.origin === 'slack') {
         var replies = yield settings.handle(message);
+       }
         break;
      case 'team':
+       if (message.origin === 'slack') {
         var replies = yield team.handle(message);
+       }
         break;
     case 'food':
         return

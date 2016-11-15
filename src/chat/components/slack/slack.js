@@ -217,6 +217,11 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
+       if (message.mode === 'onboard' && message.action === 'home') {
+        msgData.attachments = message.reply;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+      }
+
       if (message.mode === 'team' && message.action === 'home') {
         msgData.attachments = message.reply
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
