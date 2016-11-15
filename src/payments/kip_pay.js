@@ -77,10 +77,11 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
 
     // ALREADY A STRIPE USER
     if (_.get(body, 'saved_card.customer_id')) {
+      logging.info('using saved card')
       // we have card to charge
       if (body.saved_card.card_id) {
         yield chargeById(payment)
-        logging.info('SAVED CHARGE RESULT ', r)
+        logging.info('SAVED CHARGE RESULT ')
 
         var v = {
           newAcct: false,
@@ -204,6 +205,7 @@ function * chargeById (payment) {
   // When it's time to charge the customer again, retrieve the customer ID!
 
   try {
+    logging.info('creating charge by ID')
     var charge = yield stripe.charges.create({
       amount: Math.round(payment.order.order.total), // Amount in cents
       currency: 'usd',
