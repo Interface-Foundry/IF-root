@@ -145,3 +145,29 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
        color:"#49d63a"
    }
 ];
+
+
+
+// ONBOARDING MODE TEMPLATES
+
+var slack_onboard_start = module.exports.slack_onboard_start = [{
+     name: "onboard.start.lunch",
+     text: "Lunch",
+     style: "default",
+     type: "button",
+     value: "lunch"
+   },
+   {
+     name: "onboard.start.supplies",
+     text: "Supplies",
+     style: "default",
+     type: "button",
+     value: "supplies"
+   },
+   {
+     name: "onboard.start.remind",
+     text: "Remind Me Later",
+     style: "default",
+     type: "button",
+     value: "remind"
+   }];
