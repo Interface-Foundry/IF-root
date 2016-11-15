@@ -180,7 +180,7 @@ db.Slackbots.find({
 }).select('team_id').exec(function(e, slackbots) {
   if (e) {return console.error(e)}
   migratedTeams = slackbots.map(function (s) { return s.team_id })
-  debugger;
+  console.log('migrated teams', migratedTeams)
 })
 
 //
@@ -206,7 +206,7 @@ app.post('/slackaction', function(req, res) {
     return;
   }
 
-  if (!migratedTeams.indexOf(parsedIn.team.id) >= 0) {
+  if (migratedTeams.indexOf(parsedIn.team.id) >= 0) {
     kip.debug('proxy-ing button press to gcp for team', parsedIn.team.id)
     var request = require('request-promise')
     request({
