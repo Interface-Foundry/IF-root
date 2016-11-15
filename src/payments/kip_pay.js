@@ -357,8 +357,6 @@ function * payDeliveryDotCom (pay, callback) {
     pay.order.chosen_location.special_instructions = _.get(pay, 'order.chosen_location.special_instructions') ? pay.order.chosen_location.special_instructions : ''
     // build guest checkout obj
 
-    console.log('CREDIT CARD ',cc)
-
     var guestCheckout = {
       'client_id': pay_const.delivery_com_client_id,
       'order_type': pay.order.order.order_type,
