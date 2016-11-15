@@ -58,8 +58,7 @@ var webserver = require('./webserver')
 //
 // slackbots
 //
-function start() {
- co(function * () {
+function * start () {
 
   if (process.env.NODE_ENV === 'test') {
     console.log('starting mock slack server')
@@ -155,8 +154,6 @@ function start() {
       })
     })
   })
- }).catch(console.log.bind(console))
-
 }
 
 //
@@ -235,7 +232,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       } catch (err) {
         kip.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message,'\n\n\n\n');
       }
-      
+
       outgoing.ack()
     }).then(() => {
       outgoing.ack()
