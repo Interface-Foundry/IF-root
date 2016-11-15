@@ -166,6 +166,7 @@ team.reset = function * () {
 
   // remove all the random things
   yield db.collection('messages').remove({'source.team': team.slackbot.team_id})
+  yield db.collection('pubsubs').remove({})
 
   console.log('done resetting test team')
 }

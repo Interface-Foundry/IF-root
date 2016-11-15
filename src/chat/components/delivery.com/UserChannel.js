@@ -67,7 +67,7 @@ class UserChannel {
 
     this.sendReplace = function (session, nextHandlerID, data) {
       if (process.env.NODE_ENV === 'test') {
-        logging.error('sendReplace not working correctly in testing, sending as default message')
+        // logging.error('sendReplace not working correctly in testing, sending as default message')
         this.send(session, nextHandlerID, data, false)
       } else {
         this.send(session, nextHandlerID, data, true)
