@@ -426,12 +426,12 @@ app.get('/newslack', function (req, res) {
         _.merge(existingTeam, res_auth);
         yield existingTeam.save();
         yield utils.initializeTeam(existingTeam, res_auth);
-        slackModule.start();
+      co(slackModule.start);
      } else {
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
       yield utils.initializeTeam(bot, res_auth);
-      slackModule.start();
+      co(slackModule.start);
      }
   }
     res.redirect('/thanks.html')
