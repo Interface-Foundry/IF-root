@@ -338,9 +338,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
   }
 
   try {
-
-
-    if (process.env.NODE_ENV == 'development_alyx') {
+    if (process.env.NODE_ENV === 'development_alyx') {
       foodSession.payment = yield request({
         uri: `https://7ad44111.ngrok.io/charge`,
         method: `POST`,

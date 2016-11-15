@@ -259,7 +259,7 @@ app.post('/process', jsonParser, function (req, res) {
                 // look up user and the last message sent to us in relation to this order
                 var foodSession = yield db.Delivery.findOne({guest_token: pay.order.guest_token}).exec()
 
-                var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `done`, incoming: false}).sort('-ts').limit(1)
+                var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
                 finalFoodMessage = finalFoodMessage[0]
 
                 // send message to user
