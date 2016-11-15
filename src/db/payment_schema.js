@@ -1,11 +1,23 @@
-'use strict'
-
 var mongoose = require('mongoose')
+
+/**
+ * Save payment Info
+ */
 var paymentSchema = mongoose.Schema({
-  session_token: { type: String, index: true }, //gen key inside object
-  ts: { type : Date, default: Date.now },
+  foodSessionId: String,
+  session_token: {
+    // gen key inside object
+    type: String,
+    index: true
+  },
   order: {},
-  charge: {}
+  charge: {},
+  ts: {
+    type: Date,
+    default: Date.now
+  },
+  stripe_response: {},
+  delivery_response: {}
 })
 
 module.exports = mongoose.model('Payment', paymentSchema)

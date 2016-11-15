@@ -1,8 +1,6 @@
 require('kip')
 var request = require('request-promise')
 
-const payURL = `https://pay.kipthis.com/`
-
 var UserChannel = require('../chat/components/delivery.com/UserChannel')
 var queue = require('../chat/components/queue-mongo')
 var replyChannel = new UserChannel(queue)
@@ -34,26 +32,17 @@ module.exports.payForItemFromKip = function * (session, guestToken) {
 
   console.log('SENDING TO DELIVERY NOW ', JSON.stringify(opts))
 
-  if (process.env.NODE_ENV == 'development_alyx') {
+  if (process.env.NODE_ENV !== 'production') {
+    logging.info('not going to pay for actual item outside of production')
     return true
-  }else {
-    
+  } else {
     try {
       var response = yield request(opts)
       return response
     } catch (e) {
       response = null
-      logging.error('couldnt submit payment uh oh ',JSON.stringify(e))
+      logging.error('couldnt submit payment uh oh ', JSON.stringify(e))
       return null
     }
   }
-
 }
-
-// queue.topic('cafe.payments').subscribe(payment => {
-//   logging.info('ack-ing payment', payment.data)
-
-//   // if payment is successful create message for replyChannel or whatever
-//   payment.ack()
-// })
-
