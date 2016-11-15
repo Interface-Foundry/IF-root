@@ -294,7 +294,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
   // ------------------------------------
   // item attachment with items and prices
-  var itemAttachments = foodSession.cart.map((item) => {
+  var itemAttachments = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
     var foodInfo = menu.getItemById(String(item.item.item_id))
     var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
     var textForItem = `*${foodInfo.name} - ${menu.getCartItemPrice(item).$}*\n`

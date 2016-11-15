@@ -30,7 +30,7 @@ module.exports.createCartForSession = function * (session) {
       'client_id': client_id,
       'order_type': `delivery`,
       'instructions': '',
-      'items': _.map(session.cart, 'item').filter(i => i.added_to_cart)
+      'items': session.cart.filter(i => i.added_to_cart).map(i => i.item)
     }
   }
 
