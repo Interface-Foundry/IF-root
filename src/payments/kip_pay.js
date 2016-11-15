@@ -418,15 +418,15 @@ function * payDeliveryDotCom (pay, callback) {
     console.log('PAY OBJ ',pay)
     console.log('GUEST CHECKOUT OBJ ',guestCheckout)
 
-    // // pos to delivery
-    // co(function * () {
-    //   var response = yield pay_utils.payForItemFromKip(guestCheckout, pay.order.guest_token)
-    //   if (response !== null) {
-    //     yield pay_utils.sessionSuccesfullyPaid(pay)
-    //   }
-    // }).catch(function (err) {
-    //   console.error(err.stack)
-    // })
+    // pos to delivery
+    co(function * () {
+      var response = yield pay_utils.payForItemFromKip(guestCheckout, pay.order.guest_token)
+      if (response !== null) {
+        yield pay_utils.sessionSuccesfullyPaid(pay)
+      }
+    }).catch(function (err) {
+      console.error(err.stack)
+    })
 
   } else {
     console.error('ERROR: Charge amounts dont match D:')
