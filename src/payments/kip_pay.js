@@ -384,14 +384,6 @@ function * payDeliveryDotCom (pay, callback) {
       'uhau_id': 'kipthis-dot-com'
     }
 
-    // convert tips to double if exists
-    if (_.get(pay, 'order.order.tip')) {
-      guestCheckout.tip = Math.floor(pay.order.order.tip)
-      console.log('CHECKOUT TIP ',guestCheckout.tip)
-      guestCheckout.tip = (guestCheckout.tip/100).toFixed( 2 )
-      console.log('CHECKOUT TIP ',guestCheckout.tip)
-    }
-
     // limit special delivery instructions to 100 char
     if (pay.order.chosen_location.special_instructions) {
       var si = pay.order.chosen_location.special_instructions
