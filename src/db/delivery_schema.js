@@ -6,7 +6,6 @@ var mongoose = require('mongoose')
 var deliverySchema = mongoose.Schema({
   active: {
     type: Boolean
-
   },
   session_id: mongoose.Schema.ObjectId,
   team_id: String,
