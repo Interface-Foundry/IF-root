@@ -121,7 +121,7 @@ function start() {
 
       // don't talk to yourself
       if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-        kip.debug("don't talk to yourself: ");
+        kip.debug("don't talk to yourself: data: ",data);
         return; // drop the message before saving.
       }
 

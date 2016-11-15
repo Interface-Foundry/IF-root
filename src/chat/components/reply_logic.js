@@ -221,7 +221,8 @@ queue.topic('incoming').subscribe(incoming => {
 
     if (switchMode(message)) {
       message.mode = switchMode(message);
-      yield message.save();
+      if (message.mode.match(/(settings|team)/)) message.action = 'home';
+      yield message.save(); 
     }
 
     if (!message.mode) {

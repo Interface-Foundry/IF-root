@@ -192,7 +192,7 @@ handlers['change_status'] = function * (message) {
   yield team.save();
   var day = getDayNum(team.meta.weekly_status_day);
   kip.debug('hour is :', hour, 'minutes is: ', minutes, 'am_pm is: ', am_pm);
-  var rhour = am_pm == 'PM' ? hour + 12 : hour;
+  var rhour = (am_pm == 'PM' && hour != 12) ? hour + 12 : hour;
   var dateObj = { day: day, hour: rhour, minutes: minutes};
   var moment_date = momenttz().day(day).toString().split(':')[0].slice(0, -2);
   var date = moment_date + ' '  + team.meta.weekly_status_time;
@@ -574,6 +574,8 @@ function * updateCronJob(team, message, date) {
     cronJobs[team.team_id] = new cron.CronJob('00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day, function  () {  
        team.meta.office_assistants.map(function  (a) {
        var assistant = teamMembers.find(function(m, i){ return m.id == a });
+        kip.debug('\n\n\n Firing Cron Job: assistant: ', assistant,'\n\n\n')
+
        var attachments = [
         {
           // "pretext": "Hi, this is your weekly reminder.  Would you like to send out a last call?",
