@@ -369,7 +369,7 @@ function * payDeliveryDotCom (pay, callback) {
           'card': {
             'cc_number': cc.kip.cc_number,
             'exp_year': cc.kip.exp_year,
-            'exp_mon': cc.kip.exp_month,
+            'exp_month': cc.kip.exp_month,
             'cvv': cc.kip.cvv,
             'billing_zip': cc.kip.billing_zip,
             'save': false
