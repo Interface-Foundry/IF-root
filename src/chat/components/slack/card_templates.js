@@ -171,3 +171,41 @@ var slack_onboard_start = module.exports.slack_onboard_start = [{
      type: "button",
      value: "remind"
    }];
+
+
+var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
+     name: "onboard.supplies.snackbox",
+     text: "Snackbox",
+     style: "default",
+     type: "button",
+     value: "bundle"
+   },
+  {
+     name: "onboard.supplies.drinks",
+     text: "Drinks",
+     style: "default",
+     type: "button",
+     value: "bundle"
+   },
+   {
+     name: "onboard.supplies.supplies",
+     text: "Office Supplies",
+     style: "default",
+     type: "button",
+     value: "bundle"
+   }];
+
+var slack_onboard_default = module.exports.slack_onboard_default = [{
+      name: "exit",
+      text: "Exit Onboarding",
+      style: "primary",
+      type: "button",
+      value: "exit"
+    },{
+      name: "home_btn",
+      text: "🐧",
+      style: "default",
+      type: "button",
+      value: "home_btn"
+    }];
+
