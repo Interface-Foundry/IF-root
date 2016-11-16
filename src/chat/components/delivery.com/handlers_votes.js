@@ -308,19 +308,19 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       }
       return counts
     }, {})
-  votes = Object.keys(votes).map(v => `${v}: ${votes[v]}`).join('\n')
+  votes = Object.keys(votes).map(v => `*${v}:* ${votes[v]}`).join('\n')
   var slackers = ''
 
   var dashboard = {
-    text: 'Kip Café poll ‒ What\'s for lunch?',
+    // text: 'Kip Café poll ‒ What\'s for lunch?',
     attachments: [{
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
-      text: `*Votes*\n${votes}`
+      text: `*Votes from the group* 👋\n${votes}`
     },{
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
-      text: `Waiting for votes from: \n${slackers}`,
+      text: `*Waiting for votes from:* \n${slackers}`,
       actions: [{
         name: 'food.admin.restaurant.pick.list',
         text: 'Finish Voting Early',
