@@ -22,7 +22,10 @@ var pay_const = require('./pay_const.js')
 
 const kipPayURL = kip.config.kipPayURL
 // base URL for pay.kipthis.com linking
-if (process.env.NODE_ENV !== 'production') {
+
+if (!process.env.NODE_ENV) {
+  throw new Error('you need to run kip-pay with NODE_ENV')
+} else if (process.env.NODE_ENV !== 'production') {
   var stripe_id = pay_const.stripe_test_id
 } else {
   stripe_id = pay_const.stripe_production_id
