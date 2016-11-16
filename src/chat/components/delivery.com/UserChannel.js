@@ -36,7 +36,7 @@ class UserChannel {
         user_id: 'kip',
         origin: session.origin,
         source: session.source,
-        mode: session.mode,
+        mode: session.mode || 'food',
         action: session.action,
         state: session.state,
         user: session.source.user

@@ -24,97 +24,93 @@ var $allHandlers // this is how you can access handlers from other methods
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
-queue.topic('incoming').subscribe(incoming => {
-  co(function * () {
-    if (incoming.data.text) {
-      console.log('>>>'.yellow, incoming.data.text.yellow)
-    } else {
-      console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
-    }
-
-    // find the last 20 messages in this conversation, including this one
-    var history = yield db.Messages.find({
-      thread_id: incoming.data.thread_id,
-      ts: {
-        $lte: incoming.data.ts
+if (!module.parent || process.env.NODE_ENV === 'test') {
+  queue.topic('incoming').subscribe(incoming => {
+    co(function * () {
+      if (incoming.data.text) {
+        console.log('>>>'.yellow, incoming.data.text.yellow)
+      } else {
+        console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
       }
-    }).sort('-ts').limit(20)
 
-    var session = history[0]
-    if (_.get(session, 'state') && _.get(history[1], 'state')) {
-      session.state = history[1].state
-    }
+      // find the last 20 messages in this conversation, including this one
+      var history = yield db.Messages.find({
+        thread_id: incoming.data.thread_id,
+        ts: {
+          $lte: incoming.data.ts
+        }
+      }).sort('-ts').limit(20)
 
-    // parse the action value objects if they exist
-    try {
-      session.data.value = JSON.parse(session.data.value)
-    } catch (e) {}
+      var message = history[0]
+      message.history = history.slice(1)
 
-    if (!session) {
-      logging.error('No Session!!!')
-      session.state = {}
-    }
-    session.state = session.state || {}
-    session.history = history.slice(1)
-    if (session._id.toString() !== incoming.data._id.toString()) {
-      throw new Error('correct message not retrieved from db')
-    }
-    if (history[1]) {
-      session.mode = history[0].mode
-      session.action = history[0].action
-      session.route = session.mode + '.' + session.action
-      session.prevMode = history[1].mode
-      session.prevAction = history[1].action
-      session.prevRoute = session.prevMode + '.' + session.prevAction
-    }
-    if (!session.mode) {
-      kip.debug('setting mode to prevmode', session.prevMode)
-      session.mode = session.prevMode
-    }
-    if (!session.action) {
-      kip.debug('setting mode to prevaction', session.prevAction)
-      session.action = session.prevAction
-    }
-    var route = yield getRoute(session)
+      if (history[1]) {
+        message.mode = history[0].mode
+        message.action = history[0].action
+        message.route = message.mode + '.' + message.action
+        message.prevMode = history[1].mode
+        message.prevAction = history[1].action
+        message.prevRoute = message.prevMode + '.' + message.prevAction
+      }
+      if (!message.mode) {
+        kip.debug('setting mode to prevmode', message.prevMode)
+        message.mode = message.prevMode
+      }
+      if (!message.action) {
+        kip.debug('setting mode to prevaction', message.prevAction)
+        message.action = message.prevAction
+      }
 
-    if (session.text && session.mode === 'food') {
-      // if user types something allow the text_matching flag which we can use
-      // in some handlers: cuisine picking, restaurant picking, item picking
-      session.allow_text_matching = true
-    }
-
-    kip.debug('mode', session.mode, 'action', session.action)
-    kip.debug('route'.cyan, route.cyan)
-    // session.mode = 'food'
-    // session.action = route.replace(/^food./, '')
-    if (handlers[route]) {
-      yield handlers[route](session)
-    } else {
-      kip.error('No route handler for ' + route)
+      yield handleMessage(message)
       incoming.ack()
-    }
-    session.save()
-    incoming.ack()
-  }).catch(e => {
-    kip.err(e)
-    incoming.ack()
+    }).catch(e => {
+      kip.err(e)
+      incoming.ack()
+    })
   })
-})
+}
+
+function * handleMessage(message) {
+  // parse the action value objects if they exist
+  try {
+    message.data.value = JSON.parse(message.data.value)
+  } catch (e) {}
+
+  var route = yield getRoute(message)
+
+  if (message.text && message.mode === 'food') {
+    // if user types something allow the text_matching flag which we can use
+    // in some handlers: cuisine picking, restaurant picking, item picking
+    message.allow_text_matching = true
+  }
+
+  kip.debug('mode', message.mode, 'action', message.action)
+  kip.debug('route'.cyan, route.cyan)
+  // message.mode = 'food'
+  // message.action = route.replace(/^food./, '')
+  if (handlers[route]) {
+    yield handlers[route](message)
+  } else {
+    kip.error('No route handler for ' + route)
+    incoming.ack()
+  }
+  message.save()
+}
 
 //
 // this is the worst part of building bots: intent recognition
 //
-function getRoute (session) {
-  kip.debug(`prevRoute ${session.prevRoute}`)
+function getRoute (message) {
+  kip.debug(`prevRoute ${message.prevRoute}`)
   return co(function * () {
-    if (session.text === 'food') {
-      kip.debug('### User typed in :' + session.text)
+    if (message.text === 'food') {
+      kip.debug('### User typed in :' + message.text)
       return 'food.begin'
-    } else if (handlers[session.text]) {
+    } else if (handlers[message.text]) {
       // allows jumping to a section, will want to remove this when not testing to not create issues
-      return session.text
+      return message.text
     } else {
-      return (session.mode + '.' + session.action)
+      return (message.mode + '.' + message.action)
     }
     // unreachable
     throw new Error("couldn't figure out the right mode/action to route to")
@@ -131,11 +127,11 @@ require('./handlers_votes')(replyChannel, handlers)
 require('./handlers_checkout')(replyChannel, handlers)
 require('./team_handlers')(replyChannel, handlers)
 
-handlers['food.sys_error'] = function * (session) {
-  kip.debug('chat session halted.')
+handlers['food.sys_error'] = function * (message) {
+  kip.debug('chat message halted.')
 }
 
-handlers['food.null'] = function * (session) {
+handlers['food.null'] = function * (message) {
   // nothing to see here
 }
 
@@ -173,7 +169,7 @@ handlers['food.exit'] = function * (message) {
 
 handlers['food.exit.confirm'] = function * (message) {
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'ok byeee'}})
-  // make sure to remove this user from the food session if they are in it
+  // make sure to remove this user from the food message if they are in it
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
   foodSession.markModified('team_members')
@@ -183,7 +179,7 @@ handlers['food.exit.confirm'] = function * (message) {
 //
 // the user's intent is to initiate a food order
 //
-handlers['food.begin'] = function * (session) {
+handlers['food.begin'] = function * (message) {
   kip.debug('🍕 food order 🌮')
 
   // send the banner first
@@ -196,14 +192,14 @@ handlers['food.begin'] = function * (session) {
       }
     ]
   }
-  replyChannel.send(session, 'food.banner', {type: session.origin, data: msg_json})
+  replyChannel.send(message, 'food.banner', {type: message.origin, data: msg_json})
   yield sleep(1000)
 
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
-  team_utils.getChatUsers(session)
-  session.state = {}
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-  var foodSession = yield utils.initiateDeliverySession(session)
+  team_utils.getChatUsers(message)
+  message.state = {}
+  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  var foodSession = yield utils.initiateDeliverySession(message)
   yield foodSession.save()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
     return {
@@ -235,24 +231,24 @@ handlers['food.begin'] = function * (session) {
   }
 
 
-  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json})
+  replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
 }
 
 //
 // User decides what address they are ordering for. could be that they need to make a new address
 //
-handlers['food.choose_address'] = function * (session) {
-  if (_.get(session, 'source.response_url')) {
+handlers['food.choose_address'] = function * (message) {
+  if (_.get(message, 'source.response_url')) {
     // slack action button tap
     try {
-      var location = JSON.parse(session.text)
+      var location = JSON.parse(message.text)
     } catch (e) {
-      var location = {address_1: session.text}
-      kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
+      var location = {address_1: message.text}
+      kip.debug('Could not understand the address the user wanted to use, message.text: ', message.text)
     // TODO handle the case where they type a new address without clicking the "new" button
     }
 
-    var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
+    var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     foodSession.chosen_location = location
 
     //
@@ -293,7 +289,7 @@ handlers['food.choose_address'] = function * (session) {
         }
       ]
     }
-    replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: msg_json})
+    replyChannel.sendReplace(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
 
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
     var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession, 'data.input')
@@ -313,7 +309,7 @@ handlers['food.choose_address'] = function * (session) {
 //
 handlers['address.new'] = function * (message) {
   kip.debug(' 🌆🏙 enter a new address')
-  // session.state = {}
+  // message.state = {}
   var msg_json = {
     'text': "What's the address for the order?",
     'attachments': [{
@@ -400,10 +396,10 @@ handlers['address.confirm'] = function * (message) {
 }
 
 // Save the address to the db after the user confirms it
-handlers['address.save'] = function * (session) {
-  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-  var location = session.data.value
+handlers['address.save'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  var location = message.data.value
 
   if (location) {
     team.meta.locations.push(location)
@@ -414,20 +410,20 @@ handlers['address.save'] = function * (session) {
   }
   yield [team.save(), foodSession.save()]
 
-  session.text = JSON.stringify(location)
-  return yield handlers['food.choose_address'](session)
+  message.text = JSON.stringify(location)
+  return yield handlers['food.choose_address'](message)
 }
 
-handlers['address.change'] = function * (session) {
-  return yield handlers['food.begin'](session)
+handlers['address.change'] = function * (message) {
+  return yield handlers['food.begin'](message)
 }
 
 
 //send feedback to Kip 😀😐🙁
-handlers['feedback.new'] = function * (session) {
+handlers['feedback.new'] = function * (message) {
 
-   feedbackTracker[session.source.team + session.source.user + session.source.channel] = {
-    source: session.source
+   feedbackTracker[message.source.team + message.source.user + message.source.channel] = {
+    source: message.source
    }
 
   var msg_json = {
@@ -439,19 +435,19 @@ handlers['feedback.new'] = function * (session) {
           'text'
         ],
         'fallback': 'What can we improve?',
-        'callback_id': JSON.stringify(session),
+        'callback_id': JSON.stringify(message),
         'attachment_type': 'default'
       }
     ]
   }
-  replyChannel.send(session, 'feedback.save', {type: session.origin, data: msg_json})
+  replyChannel.send(message, 'feedback.save', {type: message.origin, data: msg_json})
 }
 
-handlers['feedback.save'] = function * (session) {
+handlers['feedback.save'] = function * (message) {
 
   //check for entry in feedback tracker
-  if (feedbackTracker[session.source.team + session.source.user + session.source.channel]){
-    var source = feedbackTracker[session.source.team + session.source.user + session.source.channel].source
+  if (feedbackTracker[message.source.team + message.source.user + message.source.channel]){
+    var source = feedbackTracker[message.source.team + message.source.user + message.source.channel].source
   } else {
     var source = 'undefined'
   }
@@ -460,7 +456,7 @@ handlers['feedback.save'] = function * (session) {
     to: 'Kip Server <hello@kipthis.com>',
     from: 'Kip Café <server@kipthis.com>',
     subject: '['+source.callback_id+'] Kip Café Feedback',
-    text: '- Feedback: '+session.text + ' \r\n - Context:'+JSON.stringify(source)
+    text: '- Feedback: '+message.text + ' \r\n - Context:'+JSON.stringify(source)
   }
   mailer_transport.sendMail(mailOptions, function (err) {
     if (err) console.log(err)
@@ -472,15 +468,15 @@ handlers['feedback.save'] = function * (session) {
 
   // switch back to original context
   if (_.get(source, 'callback_id')) {
-    replyChannel.send(session, source.callback_id.replace(/_/g, '.'), {type: session.origin, data: msg_json})
+    replyChannel.send(message, source.callback_id.replace(/_/g, '.'), {type: message.origin, data: msg_json})
   }
 }
 
 //
 // The user jsut clicked pickup or delivery and is now ready to start ordering
 //
-handlers['food.delivery_or_pickup'] = function * (session) {
-  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
+handlers['food.delivery_or_pickup'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // Sometimes we have to wait a ilttle bit for the merchants to finish populating from an earlier step
   // i ended up just sending the reply back in that earlier step w/o waiting for delivery.com, because
@@ -489,12 +485,12 @@ handlers['food.delivery_or_pickup'] = function * (session) {
   while (_.get(foodSession, 'merchants.length', 0) <= 0 && (+new Date() - time < 3000)) {
     if (!alreadyWaiting) {
       var alreadyWaiting = true
-      replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: {text: 'Searching your area for good food...'}})
+      replyChannel.sendReplace(message, 'food.delivery_or_pickup', {type: message.origin, data: {text: 'Searching your area for good food...'}})
     }
     yield sleep(500)
-    foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   }
-  var fulfillmentMethod = session.data.value
+  var fulfillmentMethod = message.data.value
   foodSession.fulfillment_method = fulfillmentMethod
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
 
@@ -513,14 +509,14 @@ handlers['food.delivery_or_pickup'] = function * (session) {
 
   // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
   var merchantIds = foodSession.merchants.map(m => m.id)
-  var lastOrdered = yield db.Deliveries.find({team_id: session.source.team, chosen_restaurant: {$exists: true}})
+  var lastOrdered = yield db.Deliveries.find({team_id: message.source.team, chosen_restaurant: {$exists: true}})
     .sort({_id: -1})
     .select('chosen_restaurant')
     .exec()
 
-  lastOrdered = lastOrdered.filter(session => merchantIds.includes(session.chosen_restaurant.id))
+  lastOrdered = lastOrdered.filter(message => merchantIds.includes(message.chosen_restaurant.id))
   var mostRecentSession = lastOrdered[0]
-  lastOrdered = _.uniq(lastOrdered.map(session => session.chosen_restaurant.id)) // list of unique restaurants
+  lastOrdered = _.uniq(lastOrdered.map(message => message.chosen_restaurant.id)) // list of unique restaurants
 
   // create attachments, only including most recent merchant if one exists
   var attachments = []
@@ -579,7 +575,7 @@ handlers['food.delivery_or_pickup'] = function * (session) {
     attachments: attachments
   }
 
-  replyChannel.sendReplace(session, 'food.ready_to_poll', {type: session.origin, data: res})
+  replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: res})
   foodSession.save()
 }
 
@@ -888,12 +884,6 @@ handlers['test.s8'] = function * (message) {
   replyChannel.send(message, 'food.menu.quick_picks', {type: 'slack', data: msg_json})
 }
 
-
-module.exports = function (allHandlers) {
-  $allHandlers = allHandlers
-  // merge in our own handlers
-  _.merge($allHandlers, handlers)
+module.exports = {
+  handleMessage: handleMessage
 }
-
-
-
