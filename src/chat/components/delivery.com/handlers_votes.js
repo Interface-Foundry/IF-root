@@ -297,6 +297,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
+  // Build the votes tally
   var votes = foodSession.votes
     .map(v => v.vote) // get just the vote, not username
     .map(v => v.charAt(0).toUpperCase() + v.slice(1).toLowerCase()) // capitalize
@@ -309,7 +310,11 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       return counts
     }, {})
   votes = Object.keys(votes).map(v => `*${v}:* ${votes[v]}`).join('\n')
-  var slackers = ''
+
+  // Show which team members are not in the votes array
+  var slackers = _.difference(foodSession.team_members.map(m => m.id), foodSession.votes.map(v => v.user))
+    .map(id => `<@${id}>`)
+    .join(', ')
 
   var dashboard = {
     // text: 'Kip Café poll ‒ What\'s for lunch?',
@@ -318,7 +323,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`
     },{
-      color: '#3AA3E3',
+      color: '#49d63a',
       mrkdwn_in: ['text'],
       text: `*Waiting for votes from:* \n${slackers}`,
       actions: [{
