@@ -36,10 +36,7 @@ function * payForItemFromKip (session, guestToken) {
 
   logging.info('SENDING TO DELIVERY NOW ', JSON.stringify(opts))
 
-  if ((process.env.NODE_ENV !== 'canary') || (process.env.NODE_ENV !== 'production' )) {
-    logging.info('not going to pay for actual item outside of production')
-    return 'development'
-  } else {
+  if (process.env.NODE_ENV === 'canary') {
     try {
       var response = yield request(opts)
       return response
@@ -48,6 +45,9 @@ function * payForItemFromKip (session, guestToken) {
       logging.error('couldnt submit payment uh oh ', JSON.stringify(e))
       return null
     }
+  } else {
+    logging.info('not going to pay for actual item outside of production')
+    return 'development'
   }
 }
 
