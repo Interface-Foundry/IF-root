@@ -36,7 +36,7 @@ function * payForItemFromKip (session, guestToken) {
 
   logging.info('SENDING TO DELIVERY NOW ', JSON.stringify(opts))
 
-  if (process.env.NODE_ENV !== 'production') {
+  if ((process.env.NODE_ENV !== 'canary') || (process.env.NODE_ENV !== 'production' )) {
     logging.info('not going to pay for actual item outside of production')
     return 'development'
   } else {

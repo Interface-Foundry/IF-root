@@ -65,6 +65,7 @@ var replyChannel = new UserChannel(queue)
 
 app.use('/', express.static(path.join(__dirname, 'web')))
 logging.info('running kip pay from: ', __dirname)
+logging.info('running in NODE_ENV', process.env.NODE_ENV)
 
 // post a new charge for kip user
 app.post('/charge', jsonParser, (req, res) => co(function * () {
