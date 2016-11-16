@@ -87,7 +87,7 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
 
     // ALREADY A STRIPE USER
     if (_.get(body, 'saved_card.customer_id')) {
-      profOak.say(`${payment.order.team_id} decided to pay with saved card`)
+      profOak.say(`paying with saved card for ${payment.order.team_id}`)
       logging.info('using saved card')
       // we have card to charge
       if (body.saved_card.card_id) {
