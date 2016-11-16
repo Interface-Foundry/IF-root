@@ -21,7 +21,7 @@ function * handle(message) {
     var action =options[0];
     options.splice(0,1);
     kip.debug('\n\n\n🤖 action : ',action, options, ' 🤖\n\n\n');
-    return yield handlers[action](message)
+    return yield handlers[action](message, options)
   }
 }
  
