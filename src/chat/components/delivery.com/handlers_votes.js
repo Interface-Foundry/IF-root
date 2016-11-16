@@ -2,6 +2,7 @@
 require('kip')
 var _ = require('lodash')
 
+var sleep = require('co-sleep')
 var googl = require('goo.gl')
 var request = require('request-promise')
 var api = require('./api-wrapper.js')
@@ -216,7 +217,8 @@ handlers['food.user.poll'] = function * (message) {
       user: member.id,
       team: member.team_id
     }
-
+    // sleep for half a second so we dont get no
+    if (foodSession.cuisines.length < 5) sleep(1000)
     var cuisinesAvailForUser = _.map(_.filter(foodSession.cuisines, function (o) { return o.count > 10 }), 'name')
     var cuisineMessage = askUserForCuisineTypes(cuisinesAvailForUser, foodSession.convo_initiater, member.dm)
 

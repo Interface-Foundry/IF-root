@@ -52,9 +52,9 @@ var jsonParser = bodyParser.json()
 // import kip cc
 var pay_utils = require('./pay_utils.js')
 
-//
-// var ProfOak = require('../monitoring/prof_oak.js')
-// var profOak =
+// tracking for food into cafe-tracking
+var Professor = require('../monitoring/prof_oak.js')
+var profOak = new Professor.Professor('C33NU7FRC')
 
 // VARIOUS STUFF TO POST BACK TO USER EASILY
 // --------------------------------------------
@@ -81,11 +81,13 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
       session_token: crypto.randomBytes(256).toString('hex'), // gen key inside object
       order: body
     })
+    profOak.say(`creating new payment for team:${payment.order.team_id}`)
 
     yield payment.save()
 
     // ALREADY A STRIPE USER
     if (_.get(body, 'saved_card.customer_id')) {
+      profOak.say(`${payment.order.team_id} decided to pay with saved card`)
       logging.info('using saved card')
       // we have card to charge
       if (body.saved_card.card_id) {
@@ -110,6 +112,7 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
         res.status(500).send(JSON.stringify(v))
       }
     } else {
+      profOak.say(`using new card for team:${payment.order.team_id}`)
       // NEW STRIPE USER
       // return checkout LINK
       v = {
@@ -150,34 +153,38 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
     // LOOK UP USER BY HASH TOKEN
     var t = req.body.session_token.replace(/[^\w\s]/gi, '') // clean special char
 
-    var pay = yield Payment.findOne({session_token: t})
+    var payment = yield Payment.findOne({session_token: t})
+    profOak.say(`processing new card for team:${payment.order.team_id}`)
 
     // create stripe customer
     try {
       logging.info('creating new customer and charge for, ', token)
       var customer = yield stripe.customers.create({
         source: token,
-        description: 'Delivery.com & Kip: ' + pay.order.chosen_restaurant.name
+        description: 'Delivery.com & Kip: ' + payment.order.chosen_restaurant.name
       })
       var charge = yield stripe.charges.create({
-        amount: Math.round(pay.order.order.total),
+        amount: Math.round(payment.order.order.total),
         currency: 'usd',
         customer: customer.id
       })
+      profOak.say(`succesfully created new card and charge for team:${payment.order.team_id}`)
     } catch (err) {
       logging.error('had an error creating customer and card', err)
     }
 
-    pay.charge = charge
-    pay.save()
+    payment.charge = charge
+    payment.save()
 
     if (charge.status === 'succeeded') {
       try {
-        var paymentResponse = yield pay_utils.payDeliveryDotCom(pay)
-        yield pay_utils.storeCard(pay, charge)
+        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
+        profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
+        yield payment.save()
+        yield pay_utils.storeCard(payment, charge)
 
         // look up user and the last message sent to us in relation to this order
-        var foodSession = yield db.Delivery.findOne({guest_token: pay.order.guest_token}).exec()
+        var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
         foodSession.order['completed_payment'] = true
         yield foodSession.save()
 
@@ -191,10 +198,10 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
           {
             type: finalFoodMessage.origin,
             data: {
-              orderInfo: paymentResponse,
               text: `looks like everything went through on this order`
             }
           })
+        profOak.say(`order completed for team: ${payment.order.team_id}`)
       } catch (err) {
         logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
       }
@@ -214,6 +221,7 @@ function * chargeById (payment) {
   // When it's time to charge the customer again, retrieve the customer ID!
 
   try {
+    profOak.say(`creating stripe charge for ${payment.order.saved_card.saved_card}`)
     logging.info('creating charge by ID')
     var charge = yield stripe.charges.create({
       amount: Math.round(payment.order.order.total), // Amount in cents
@@ -233,7 +241,10 @@ function * chargeById (payment) {
   if (charge.status === 'succeeded') {
     // POST TO MONGO QUEUE SUCCESS PAYMENT
     try {
-      var paymentResponse = yield pay_utils.payDeliveryDotCom(payment)
+      profOak.say(`succesfully paid for stripe for team ${payment.order.team_id}`)
+      profOak.say(`paying for delivery.com order for ${payment.order.team_id}`)
+      payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
+      yield payment.save()
 
       // look up user and the last message sent to us in relation to this order
       var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
@@ -247,7 +258,6 @@ function * chargeById (payment) {
         {
           type: finalFoodMessage.origin,
           data: {
-            orderInfo: paymentResponse,
             text: `looks like everything went through on this order`
           }
         })

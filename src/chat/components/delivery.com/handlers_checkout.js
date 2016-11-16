@@ -308,7 +308,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // add various shit to the foodSession
-  var postBody = {
+  foodSession.payment_post = {
     '_id': foodSession._id,
     'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
     'active': foodSession.active,
@@ -341,11 +341,11 @@ handlers['food.admin.add_new_card'] = function * (message) {
       uri: kip.config.kipPayURL + `/charge`,
       method: `POST`,
       json: true,
-      body: postBody
+      body: foodSession.payment_post
     })
     yield foodSession.save()
-  } catch (e) {
-    logging.error('error doing kip pay lol', e)
+  } catch (err) {
+    logging.error('error doing kip pay lol', err)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'ok couldnt submit to kippay try again'}})
     yield handlers['food.admin.order.pay'](message)
     return
@@ -387,7 +387,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
   logging.info('FOOD SESSION: ', foodSession.chosen_location)
 
     // add various shit to the foodSession
-  var postBody = {
+  foodSession.payment_post = {
     '_id': foodSession._id,
     'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
     'active': foodSession.active,
@@ -426,7 +426,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
       uri: kip.config.kipPayURL + `/charge`,
       method: `POST`,
       json: true,
-      body: postBody
+      body: foodSession.payment_post
     })
 
     foodSession.save()
@@ -502,15 +502,10 @@ handlers['food.done'] = function * (message) {
   // slackbot save info
   logging.info('saving location... ', foodSession.chosen_location)
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  slackbot.meta.locations.push(foodSession.chosen_location)
+  if (!_.find(slackbot.meta.locations, {'address_1': foodSession.chosen_location.address_1})) {
+    slackbot.meta.locations.push(foodSession.chosen_location)
+  }
   yield slackbot.save()
-
-
-
-
-  // var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  // var slackbot = db.Salckbots.findOne({team_id: message.source.team}).exec()
-  // retrieve users phone number
 }
 
 module.exports = function (replyChannel, allHandlers) {
