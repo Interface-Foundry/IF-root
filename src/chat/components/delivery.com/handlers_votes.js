@@ -26,10 +26,14 @@ var handlers = {}
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function askUserForCuisineTypes (cuisines, admin, user) { // move this into the functiopn later
-  // probably should check if user is on slack
-  var cuisineToUse = _.sampleSize(cuisines, 4)
-    // var cuisineToUse = cuisines.slice(0,2) // use this for testing
+function askUserForCuisineTypes (cuisines, admin, user) {
+  // present top 2 local avail and then 2 random sample,
+  // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
+  var orderedCuisines = _.map(_.sortBy(cuisines, ['count']), 'name')
+  var top1 = orderedCuisines.pop()
+  var top2 = orderedCuisines.pop()
+  var randomCuisines = _.sampleSize(orderedCuisines, 2)
+  var cuisineToUse = [top1, top2, randomCuisines[0], randomCuisines[1]]
 
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
     return {
@@ -219,7 +223,7 @@ handlers['food.user.poll'] = function * (message) {
     }
     // sleep for half a second so we dont get no
     if (foodSession.cuisines.length < 5) sleep(1000)
-    var cuisinesAvailForUser = _.map(_.filter(foodSession.cuisines, function (o) { return o.count > 10 }), 'name')
+    var cuisinesAvailForUser = _.filter(foodSession.cuisines, function (o) { return o.count > 10 })
     var cuisineMessage = askUserForCuisineTypes(cuisinesAvailForUser, foodSession.convo_initiater, member.dm)
 
     var response = {
