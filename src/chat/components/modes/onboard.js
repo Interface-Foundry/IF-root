@@ -11,17 +11,22 @@ var cronJobs = {};
 var momenttz = require('moment-timezone');
 var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
+var slackcart = require('../slack/cart');
+var bundles = require('../bundles');
+var sleep = require('co-sleep');
+var eachSeries = require('async-co/eachSeries');
+var processData = require('../process');
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
   if (!last_action || last_action.indexOf('home') == -1) {
     return yield handlers['start'](message)
   } else {
-    var options = _.split(message.data.value, '.')
-    var action =options[0];
-    options.splice(0,1);
-    kip.debug('\n\n\n🤖 action : ',action, options, ' 🤖\n\n\n');
-    return yield handlers[action](message, options)
+    var data = _.split(message.data.value, '.')
+    var action = data[0];
+    data.splice(0,1);
+    kip.debug('\n\n\n🤖 action : ',action, 'data: ', data, ' 🤖\n\n\n');
+    return yield handlers[action](message, data)
   }
 }
  
@@ -52,10 +57,6 @@ handlers['start'] = function * (message) {
     // image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
     text: 'Welcome to Kip!  We\'ll help you get started :)'
   });
-  if (admins && isAdmin) {
-  //
-  // Admin-only settings
-  //
   attachments.push({
       text: ' What are looking for?',
       color: '#49d63a',
@@ -64,7 +65,6 @@ handlers['start'] = function * (message) {
       actions: cardTemplate.slack_onboard_start,
       callback_id: 'none'
     })
-  }
   attachments.push({
       text: '',
       color: '#49d63a',
@@ -129,7 +129,6 @@ handlers['supplies'] = function * (message) {
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
    return [msg];
-
 }
 
 handlers['lunch'] = function * (message) {   
@@ -183,20 +182,120 @@ handlers['lunch'] = function * (message) {
 /**
  * S3
  */
-handlers['bundle'] = function * (message) { 
-  //snacks: pocky 15 B017L0BL5E, gummi bears: B000EVOSE4, Assorted Japanese Dagashi B00URCF2B8
+handlers['bundle'] = function * (message, data) {
+ var choice = data[0];
+ var bundle = bundles.getBundle(choice);
+ var cart_id = message.cart_reference_id || message.source.team; 
 
-
- var res = yield amazon.lookup({ ASIN: 'B00MNG37C2', IdType: 'ASIN'})
-  kip.debug(' \n\n\n\n\n onboard:186:bundle:res: ', res,' \n\n\n\n\n ')
-
-  var cart_id = message.cart_reference_id || message.source.team; 
-    try {
+ yield eachSeries(bundle, function * (asin) {
+   try {
+    var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
     yield kipcart.addToCart(cart_id, message.user_id, res[0], 'team');
-  } catch (e) {
-    kip.err(e);
-    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
-  }
+   } catch (e) {
+    kip.debug(' \n\n\n\n\n\n\n onboard.js:193:eachseries error: ',e, ' \n\n\n\n\n\n\n');
+    // return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊', e)
+   }
+ });
+
+ yield sleep(1000)
+
+ var cart_id = message.source.team
+ var cart = yield kipcart.getCart(cart_id)
+ // all the messages which compose the cart
+ var attachments = [];
+
+  attachments.push({
+    text: 'Awesome! You added your first bundle.',
+    color: '#45a5f4',
+    // image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
+  })
+
+  for (var i = 0; i < cart.aggregate_items.length; i++) {
+    var item = cart.aggregate_items[i];
+
+    // the slack message for just this item in the cart list
+    var item_message = {
+      mrkdwn_in: ['text', 'pretext'],
+      color: '#45a5f4',
+      thumb_url: item.image
+    }
+
+    // multiple people could have added an item to the cart, so construct a string appropriately
+    var userString = item.added_by.map(function(u) {
+      return '<@' + u + '>';
+    }).join(', ');
+    var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
+
+    // make the text for this item's message
+    item_message.text = [
+      `*${i + 1}.* ` + `<${link}|${item.title}>`,
+      `*Price:* ${item.price} each`,
+      `*Added by:* ${userString}`,
+      `*Quantity:* ${item.quantity}`,
+      
+    ].filter(Boolean).join('\n');
+
+    // add the item actions if needed
+      item_message.callback_id = item._id.toString();
+      var buttons = [{
+        "name": "additem",
+        "text": "+",
+        "style": "default",
+        "type": "button",
+        "value": "add"
+      }, {
+        "name": "removeitem",
+        "text": "—",
+        "style": "default",
+        "type": "button",
+        "value": "remove" 
+      }];
+
+      if (item.quantity > 1) {
+        buttons.push({
+          name: "removeall",
+          text: 'Remove All',
+          style: 'default',
+          type: 'button',
+          value: 'removeall'
+        })
+      }
+
+      item_message.actions = buttons;
+    
+
+    attachments.push(item_message)
+   }
+    var summaryText = `*Team Cart Summary*
+    *Total:* ${cart.total}`;
+    attachments.push({
+      text: summaryText,
+      mrkdwn_in: ['text', 'pretext'],
+      color: '#49d63a'
+    })
+
+   // yield sleep(1000)
+
+   attachments.push({
+      text: 'Do you want to let others add stuff to cart?',
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      fallback:'Onboard',
+      actions: cardTemplate.slack_onboard_basic,
+      callback_id: 'none'
+    });
+   attachments.map(function(a) {
+      a.mrkdwn_in =  ['text'];
+      a.color = '#45a5f4';
+    });
+   var msg = message;
+   msg.mode = 'onboard'
+   msg.action = 'home';
+   msg.text = ''
+   msg.source.team = message.source.team;
+   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+   msg.reply = attachments;
+   return [msg];
 
 }
 
@@ -257,4 +356,6 @@ handlers['sorry'] = function * (message) {
 
 
 }
+
+
 

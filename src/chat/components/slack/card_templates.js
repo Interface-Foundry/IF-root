@@ -178,21 +178,21 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
      text: "Snackbox",
      style: "default",
      type: "button",
-     value: "bundle"
+     value: "bundle.snackbox"
    },
   {
      name: "onboard.supplies.drinks",
      text: "Drinks",
      style: "default",
      type: "button",
-     value: "bundle"
+     value: "bundle.drinks"
    },
    {
      name: "onboard.supplies.supplies",
      text: "Office Supplies",
      style: "default",
      type: "button",
-     value: "bundle"
+     value: "bundle.supplies"
    }];
 
 var slack_onboard_default = module.exports.slack_onboard_default = [{
@@ -208,4 +208,20 @@ var slack_onboard_default = module.exports.slack_onboard_default = [{
       type: "button",
       value: "home_btn"
     }];
+
+
+var slack_onboard_basic = module.exports.slack_onboard_basic = [{
+      name: "onboard.bundle.yes",
+      text: "Yes",
+      style: "primary",
+      type: "button",
+      value: "yes"
+    },{
+      name: "onboard.bundle.no",
+      text: "No",
+      style: "default",
+      type: "button",
+      value: "no"
+    }];
+
 
