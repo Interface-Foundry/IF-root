@@ -398,17 +398,15 @@ handlers['address.confirm'] = function * (message) {
 // Save the address to the db after the user confirms it
 handlers['address.save'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var location = message.data.value
 
   if (location) {
-    team.meta.locations.push(location)
     foodSession.chosen_location = location
   } else {
     // todo error
     throw new Error('womp bad address')
   }
-  yield [team.save(), foodSession.save()]
+  yield foodSession.save()
 
   message.text = JSON.stringify(location)
   return yield handlers['food.choose_address'](message)

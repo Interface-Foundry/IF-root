@@ -134,8 +134,8 @@ function * initiateDeliverySession (session) {
     convo_initiater: {
       id: admin.id,
       name: admin.name,
-      first_name: _.get(admin.profile, 'first_name') ? admin.profile.first_name : admin.profile.real_name,
-      last_name: _.get(admin.profile, 'last_name') ? admin.profile.last_name : '',
+      first_name: _.get(admin, 'first_name') ? admin.first_name : admin.profile.real_name,
+      last_name: _.get(admin, 'last_name') ? admin.last_name : '',
       email: admin.profile.email
     },
     data: {
@@ -146,6 +146,9 @@ function * initiateDeliverySession (session) {
       confirmed_orders_msg: null
     }
   })
+  if (_.get(admin, 'phone_number')) {
+    newSession.phone_number = admin.phone_number
+  }
   // check if user has entered phone number before
   if (_.get(admin, 'phone_number')) {
     newSession.convo_initiater.phone_number = admin.phone_number

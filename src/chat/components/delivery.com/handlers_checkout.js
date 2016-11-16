@@ -373,6 +373,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
       }]
   }
   $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: response})
+  yield handlers['food.done'](message)
 }
 
 handlers['food.admin.order.select_card'] = function * (message) {
@@ -483,11 +484,30 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
     }]
   }
   $replyChannel.send(message, 'food.done', {type: message.origin, data: response})
+  yield handlers['food.done'](message)
 }
 
 handlers['food.done'] = function * (message) {
+  logging.error('saving users info to slackbots and peripheral cleanup')
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
   // final area to save and reset stuff
-  logging.error('do cleanup and stuff here in the future')
+  logging.info('saving phone_number... ', foodSession.convo_initiater.phone_number)
+  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
+  user.phone_number = foodSession.convo_initiater.phone_number
+  user.first_name = foodSession.convo_initiater.first_name
+  user.last_name = foodSession.convo_initiater.last_name
+  yield user.save()
+
+  // slackbot save info
+  logging.info('saving location... ', foodSession.chosen_location)
+  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  slackbot.meta.locations.push(foodSession.chosen_location)
+  yield slackbot.save()
+
+
+
+
   // var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   // var slackbot = db.Salckbots.findOne({team_id: message.source.team}).exec()
   // retrieve users phone number
