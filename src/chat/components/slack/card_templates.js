@@ -146,8 +146,6 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
    }
 ];
 
-
-
 // ONBOARDING MODE TEMPLATES
 
 var slack_onboard_start = module.exports.slack_onboard_start = [{
@@ -165,13 +163,12 @@ var slack_onboard_start = module.exports.slack_onboard_start = [{
      value: "supplies"
    },
    {
-     name: "onboard.start.remind",
+     name: "onboard.start.reminder",
      text: "Remind Me Later",
      style: "default",
      type: "button",
      value: "reminder"
    }];
-
 
 var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
      name: "onboard.supplies.snackbox",
@@ -208,7 +205,6 @@ var slack_onboard_default = module.exports.slack_onboard_default = [{
       type: "button",
       value: "home_btn"
     }];
-
 
 var slack_onboard_basic = module.exports.slack_onboard_basic = [{
       name: "onboard.bundle.yes",
@@ -253,4 +249,35 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
       value: "back"
     }];
 
-
+var slack_reminder = module.exports.slack_reminder = [{
+    name: "onboard.start.confirm_reminder",
+    text: "Today",
+    style: "default",
+    type: "button",
+    value: "confirm_reminder.today"
+  }, {
+    name: "onboard.start.confirm_reminder",
+    text: "Tomorrow",
+    style: "default",
+    type: "button",
+    value: "confirm_reminder.tomorrow"
+  }, {
+    name: "onboard.start.confirm_reminder",
+    text: "1 Week",
+    style: "default",
+    type: "button",
+    value: "confirm_reminder.one_week"
+  }, {
+    name: "onboard.start.confirm_reminder",
+    text: "1 Month",
+    style: "default",
+    type: "button",
+    value: "confirm_reminder.one_month"
+  }, {
+    name: "onboard.start.confirm_reminder",
+    text: "Never",
+    style: "default",
+    type: "button",
+    value: "confirm_reminder.never"
+  }
+];
