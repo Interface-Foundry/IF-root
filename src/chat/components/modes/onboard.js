@@ -312,26 +312,118 @@ handlers['team'] = function * (message) {
  * S4A1 
  */
 handlers['reminder'] = function * (message) { 
- kip.debug('\n\n\n\n 😗 😙 😚 😜 😝 😛 🤑 🤓 😎 getting to reminder 😗 😙 😚 😜 😝 😛 🤑 🤓 😎 \n\n\n\n');
-
-
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var teamMembers = yield utils.getTeamMembers(team);
+  var admins = yield utils.findAdmins(team);
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
+  var attachments = [];
+  attachments.push({
+      text: 'Would you like to set a reminder for collecting shopping orders from your team?',
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      fallback:'Onboard',
+      actions: cardTemplate.slack_reminder,
+      callback_id: 'none'
+    });
+  attachments.push({
+      text: '',
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      fallback:'Onboard',
+      actions: cardTemplate.slack_onboard_default,
+      callback_id: 'none'
+    });
+  attachments.map(function(a) {
+      a.mrkdwn_in =  ['text'];
+      a.color = '#45a5f4';
+    });
+   var msg = message;
+   msg.mode = 'onboard'
+   msg.action = 'home'
+   msg.text = 'Awesome! I\'ve let them know.'
+   msg.source.team = team_id;
+   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+   msg.reply = attachments;
+   return [msg];
 }
 
 /**
  * S4A2
  */
-handlers['confirm_reminder'] = function * (message) { 
- 
 
+handlers['confirm_reminder'] = function * (message, data) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  var team = yield db.Slackbots.findOne({
+    'team_id': team_id
+  }).exec();
+
+  const ONE_DAY = 24 * 60 * 60 * 1000; //hours in a day * mins in hour * seconds in min * milliseconds in second
+  var dateDescrip,
+    msInFuture = -1,
+    alertTime = data[0],
+    now = new Date();
+  switch (alertTime) {
+    case 'today':
+      msInFuture = ONE_DAY / 6; //4 hours for now
+      dateDescrip = 'later today';
+      break;
+    case 'tomorrow':
+      msInFuture = ONE_DAY;
+      dateDescrip = 'tomorrow';
+      break;
+    case 'one_week':
+      msInFuture = ONE_DAY * 7;
+      dateDescrip = 'in a week';
+      break;
+    case 'one_month':
+      msInFuture = ONE_DAY * 30;
+      dateDescrip = 'in a month';
+      break;
+    case 'never':
+    default:
+      break;
+  }
+  var messageText = (msInFuture > 0) ?
+    `Awesome! I'll give you a heads up for your order ${dateDescrip}.` :
+    'Ok! I won\'t set any reminders.';
+  messageText += ' Thanks and have a great day. Type `help` if you\'re feeling a bit wobbly :)';
+
+  if (msInFuture > 0) {
+    yield updateCronJob(team, message, new Date(msInFuture + now.getTime()));
+  }
+
+  var msg = message;
+  var attachments = [];
+  attachments.push({
+    text: messageText,
+    color: '#49d63a',
+    mrkdwn_in: ['text'],
+    fallback: 'Onboard',
+    callback_id: 'none'
+  });
+  attachments.push({
+    text: '',
+    color: '#49d63a',
+    mrkdwn_in: ['text'],
+    fallback: 'Onboard',
+    actions: cardTemplate.slack_onboard_default,
+    callback_id: 'none'
+  });
+
+  msg.action = 'home'
+  msg.mode = 'onboard'
+  msg.text = ''
+  msg.source.team = team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.reply = attachments;
+  return [msg];
 }
 
-/**
- * S4A3
- */
-handlers['collect'] = function * (message) { 
- 
-
-}
 
 /**
  * S5
@@ -357,5 +449,70 @@ handlers['sorry'] = function * (message) {
 
 }
 
+function * updateCronJob(team, message, date) {
+  if (cronJobs[team.team_id]) {
+    cronJobs[team.team_id].stop();
+  }
+  kip.debug('\n\n\nsetting cron job day: ', '00 ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n')
+  var teamMembers = yield utils.getTeamMembers(team);
+  var currentUser = yield db.Chatusers.findOne({
+    id: message.source.user
+  });
 
+  cronJobs[team.team_id] = new cron.CronJob('00 ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), function() {
+      team.meta.office_assistants.map(function(a) {
+        var assistant = teamMembers.find(function(m, i) {
+          return m.id == a
+        });
 
+        var attachments = [{
+          // "pretext": "Hi, this is your weekly reminder.  Would you like to send out a last call?",
+          "image_url": "http://kipthis.com/kip_modes/mode_teamcart_collect.png",
+          "text": "",
+          "mrkdwn_in": [
+            "text",
+            "pretext"
+          ],
+          "color": "#45a5f4"
+        }];
+        attachments.push({
+          text: `Hi, <@${currentUser.id}> is collecting Amazon orders`,
+          color: '#49d63a',
+          mrkdwn_in: ['text'],
+          fallback: 'Onboard',
+          callback_id: 'none'
+        });
+        attachments.map(function(a) {
+          a.mrkdwn_in = ['text'];
+          a.color = '#45a5f4';
+        })
+        var newMessage = new db.Message({
+          incoming: false,
+          thread_id: message.thread_id,
+          user_id: assistant.id,
+          origin: 'slack',
+          source: message.source,
+          mode: 'onboard',
+          action: 'home',
+          user: message.source.user,
+          reply: attachments
+        })
+        kip.debug('\n\n\n Firing Cron Job: assistant: ', assistant, message, newMessage, '\n\n\n')
+
+        newMessage.save()
+        queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
+
+        // slackBot.web.chat.postMessage(assistant.dm, '', reply);
+        //   // SHOW CART STICKER
+        //  //* * * * * * * * * * * * * * * * * //
+        //  //CHECKING HERE IF NO EMAILS users or channels. If none, Show User Cart Members, prompt to add people, defaults to <#general>
+        //  //* * * * * * * * * * * * * * * * * //
+        //   //* * * *  SHOW TEAM CART USERS  ** * * * //
+        //   convo.ask('Would you like me to send an last call message to *SHOW TEAM LIST*', lastCall)
+      });
+    }, function() {
+      console.log('just finished the scheduled update thing for team ' + team.team_id + ' ' + team.team_name);
+    },
+    true,
+    team.meta.weekly_status_timezone);
+};
