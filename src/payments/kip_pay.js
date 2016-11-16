@@ -18,30 +18,31 @@
 */
 require('kip')
 require('colors')
-var pay_const = require('./pay_const.js')
+var payConst = require('./pay_const.js')
 
 const kipPayURL = kip.config.kipPayURL
 // base URL for pay.kipthis.com linking
 
 if (!process.env.NODE_ENV) {
   throw new Error('you need to run kip-pay with NODE_ENV')
-} else if (process.env.NODE_ENV !== 'production') {
-  var stripe_id = pay_const.stripe_test_id
+} else if (process.env.NODE_ENV !== 'canary') {
+  var stripeID = payConst.stripe_test_id
+} else if (process.env.NODE_ENV === 'canary') {
+  stripeID = payConst.stripe_production_id
 } else {
-  stripe_id = pay_const.stripe_production_id
+  stripeID = payConst.stripe_production_id
 }
 
 logging.info('using base url: ', (kip.config.kipPayURL).yellow)
 
 // See keys here: https://dashboard.stripe.com/account/apikeys
-var stripe = require('stripe')(stripe_id) // NOTE: change to production key
+var stripe = require('stripe')(stripeID) // NOTE: change to production key
 var path = require('path')
 var _ = require('lodash')
 var crypto = require('crypto')
 var co = require('co')
 
 var Payment = db.Payment
-var Slackbot = db.Slackbot
 
 var bodyParser = require('body-parser')
 var express = require('express')
@@ -50,6 +51,10 @@ var jsonParser = bodyParser.json()
 
 // import kip cc
 var pay_utils = require('./pay_utils.js')
+
+//
+// var ProfOak = require('../monitoring/prof_oak.js')
+// var profOak =
 
 // VARIOUS STUFF TO POST BACK TO USER EASILY
 // --------------------------------------------
@@ -228,6 +233,7 @@ function * chargeById (payment) {
     // POST TO MONGO QUEUE SUCCESS PAYMENT
     try {
       var paymentResponse = yield pay_utils.payDeliveryDotCom(payment)
+
       // look up user and the last message sent to us in relation to this order
       var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
       var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `done`, incoming: false}).sort('-ts').limit(1)
