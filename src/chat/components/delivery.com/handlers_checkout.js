@@ -283,12 +283,12 @@ handlers['food.admin.order.pay'] = function * (message) {
     var cardsAttachment = slackbot.meta.payments.map((c) => {
       return {
         'title': `${c.card.brand}`,
-        'text': `Ending in ${c.card.last_4}, exp ${c.card.exp_date}`,
+        'text': `Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
         'fallback': `You are unable to pick this card`,
         'callback_id': `food.admin.order.select_card`,
         'color': `#3AA3E3`,
         'attachment_type': `default`,
-        'thumb_url': _.get(c, 'card.card_type') ? cardImages[c.card.card_type.toLowerCase()] : '',
+        'thumb_url': _.get(c, 'card.brand') ? cardImages[c.card.brand.toLowerCase()] : '',
         'actions': [{
           'name': `food.admin.order.select_card`,
           'text': `✓ Select Card`,
@@ -465,7 +465,7 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
       'title': `Checkout for ${foodSession.chosen_restaurant.name}`,
       'attachment_type': `default`,
       'mrkdwn_in': ['text'],
-      'text': `${c.card.brand} - Ending in ${c.card.last_4}, exp ${c.card.exp_date}`,
+      'text': `${c.card.brand} - Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
       'fallback': `You are unable to follow this link to confirm order`,
       'callback_id': `food.admin.order.pay.confirm`,
       'color': `#3AA3E3`,
