@@ -42,7 +42,8 @@ var deliverySchema = mongoose.Schema({
     first_name: String,
     last_name: String,
     phone_number: String,
-    email: String
+    email: String,
+    dm: String
   },
 
   fulfillment_method: String,

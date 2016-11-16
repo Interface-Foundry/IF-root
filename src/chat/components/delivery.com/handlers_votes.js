@@ -122,7 +122,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Different ways to compute the score for a merchant. Higher scores show up first.
   //
   var scoreAlgorithms = {
-    [SORT.cuisine] : (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v)).length || 0,
+    [SORT.cuisine] : (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
     [SORT.keyword] : (m) => {
       if (!keyword) {
         throw new Error('Cannot sort based on keyword without a keyword')
@@ -239,52 +239,128 @@ handlers['food.user.choice_confirm'] = function * (message) {
   $replyChannel.send(message, 'food.admin.restaurant.pick', {type: 'slack', data: message.example_res})
 }
 
+
+
 handlers['food.admin.restaurant.pick'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  function addVote(str) {
+    var vote = {
+      user: message.source.user,
+      vote: str
+    }
+
+    foodSession.update({$push: {votes: vote}})
+    foodSession.votes.push(vote)
+  }
 
   if (message.allow_text_matching) {
     // user typed something
     logging.info('using text matching for cuisine choice')
     var res = yield utils.matchText(message.text, foodSession.cuisines, ['name'])
     if (res !== null) {
-      logging.info('using vote', res)
-      foodSession.votes.push(res[0].name)
-      foodSession.markModified('votes')
+      addVote(res[0].name)
+    } else {
+      addVote(message.text)
     }
   } else {
     // user used button click
     // No Lunch For Me
     if (message.data.value === 'user_remove') {
+      foodSession.update({$pull: {team_members: {id: message.user_id}}})
       foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
-      foodSession.markModified('team_members')
+    } else {
+      addVote(message.data.value)
     }
-    foodSession.votes.push(message.data.value)
-    foodSession.markModified('votes')
   }
-  foodSession.save()
-  var numOfResponsesWaitingFor = foodSession.team_members.length - foodSession.votes.length
+  var numOfResponsesWaitingFor = foodSession.team_members.length - _.uniq(foodSession.votes.map(v => v.user)).length
   var votes = foodSession.votes
   kip.debug('numOfResponsesWaitingFor: ', numOfResponsesWaitingFor, ' votes: ', votes)
 
   // replace after votes
   $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})
+
   if (numOfResponsesWaitingFor <= 0) {
-    var admin = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).exec()
-    var resp = {
+    yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
+  } else {
+    logging.error('waiting for more responses have, votes: ', votes.length)
+    logging.error('need', numOfResponsesWaitingFor)
+    yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
+  }
+}
+
+
+
+/*
+* Confirm all users have voted for a cuisine
+*/
+handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
+  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+
+  var votes = foodSession.votes
+    .map(v => v.vote) // get just the vote, not username
+    .map(v => v.charAt(0).toUpperCase() + v.slice(1).toLowerCase()) // capitalize
+    .reduce((counts, v) => { // count
+      if (counts.hasOwnProperty(v)) {
+        counts[v]++
+      } else {
+        counts[v] = 1
+      }
+      return counts
+    }, {})
+  votes = Object.keys(votes).map(v => `${v}: ${votes[v]}`).join('\n')
+  var slackers = ''
+
+  var dashboard = {
+    text: 'Kip Café poll ‒ What\'s for lunch?',
+    attachments: [{
+      color: '#3AA3E3',
+      mrkdwn_in: ['text'],
+      text: `*Votes*\n${votes}`
+    },{
+      color: '#3AA3E3',
+      mrkdwn_in: ['text'],
+      text: `Waiting for votes from: \n${slackers}`,
+      actions: [{
+        name: 'food.admin.restaurant.pick.list',
+        text: 'Finish Voting Early',
+        style: 'default',
+        type: 'button',
+        value: 'food.admin.restaurant.pick.list'
+      }]
+    }]
+  }
+
+  var confirmedUsersString = 'wow'
+  if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
+    // replace admins message
+    var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
+    $replyChannel.sendReplace(msgToReplace, 'food.admin.dashboard.cuisine', {
+      type: msgToReplace.origin,
+      data: dashboard
+    })
+  } else {
+    // admin is confirming, replace their message
+    var admin = foodSession.convo_initiater
+    var message = {
       mode: 'food',
       action: 'admin.restaurant.pick',
       thread_id: admin.dm,
       origin: message.origin,
       source: {
-        team: admin.team_id,
+        team: foodSession.team_id,
         user: admin.id,
         channel: admin.dm
       }
     }
-    yield handlers['food.admin.restaurant.pick.list'](resp, foodSession)
-  } else {
-    logging.error('waiting for more responses have, votes: ', votes.length)
-    logging.error('need', numOfResponsesWaitingFor)
+
+    $replyChannel.send(message, 'food.admin.dashboard.cuisine', {
+      type: message.origin,
+      data: dashboard
+    })
+    foodSession.tracking.confirmed_orders_msg = message._id
+    foodSession.markModified('tracking')
+    yield foodSession.save()
   }
 }
 
