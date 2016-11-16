@@ -2,7 +2,6 @@ var processData = require('../process');
 
 module.exports = function*(message, slackbot, highlight_added_item) {
   var cart = message.data;
-  kip.debug(' \n\n\n\n\n\n cart.js:5:cart:', cart,' \n\n\n\n\n\n ');
   // admins have special rights
   var isAdmin = slackbot.meta.office_assistants.indexOf(message.source.user) >= 0;
   var isP2P = slackbot.meta.office_assistants.length === 0;

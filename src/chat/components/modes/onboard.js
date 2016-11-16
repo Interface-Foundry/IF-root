@@ -20,23 +20,17 @@ var processData = require('../process');
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
   if (!last_action || last_action.indexOf('home') == -1) {
-    return yield handlers['start'](message)
+    return yield handlers['start'](message);
   } else {
-    var data = _.split(message.data.value, '.')
+    var data = _.split(message.data.value, '.');
     var action = data[0];
     data.splice(0,1);
     kip.debug('\n\n\n🤖 action : ',action, 'data: ', data, ' 🤖\n\n\n');
-    return yield handlers[action](message, data)
+    return yield handlers[action](message, data);
   }
 }
  
 module.exports.handle = handle;
-
-// arg1: {
-//   "query": "jacket"
-// }  
-// arg2: slack
-  // var results = yield amazon_search.search(exec.params,message.origin);
 
 /**
  * S1
@@ -192,8 +186,7 @@ handlers['bundle'] = function * (message, data) {
     var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
     yield kipcart.addToCart(cart_id, message.user_id, res[0], 'team');
    } catch (e) {
-    kip.debug(' \n\n\n\n\n\n\n onboard.js:193:eachseries error: ',e, ' \n\n\n\n\n\n\n');
-    // return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊', e)
+    kip.debug(' \n\n\n\n\n\n\n onboard.js:193:error: ',e, ' \n\n\n\n\n\n\n');
    }
  });
 
@@ -212,20 +205,17 @@ handlers['bundle'] = function * (message, data) {
 
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];
-
     // the slack message for just this item in the cart list
     var item_message = {
       mrkdwn_in: ['text', 'pretext'],
       color: '#45a5f4',
       thumb_url: item.image
     }
-
     // multiple people could have added an item to the cart, so construct a string appropriately
     var userString = item.added_by.map(function(u) {
       return '<@' + u + '>';
     }).join(', ');
     var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
-
     // make the text for this item's message
     item_message.text = [
       `*${i + 1}.* ` + `<${link}|${item.title}>`,
@@ -234,37 +224,33 @@ handlers['bundle'] = function * (message, data) {
       `*Quantity:* ${item.quantity}`,
       
     ].filter(Boolean).join('\n');
-
     // add the item actions if needed
-      item_message.callback_id = item._id.toString();
-      var buttons = [{
-        "name": "additem",
-        "text": "+",
-        "style": "default",
-        "type": "button",
-        "value": "add"
-      }, {
-        "name": "removeitem",
-        "text": "—",
-        "style": "default",
-        "type": "button",
-        "value": "remove" 
-      }];
+    item_message.callback_id = item._id.toString();
+    var buttons = [{
+      "name": "additem",
+      "text": "+",
+      "style": "default",
+      "type": "button",
+      "value": "add"
+    }, {
+      "name": "removeitem",
+      "text": "—",
+      "style": "default",
+      "type": "button",
+      "value": "remove" 
+    }];
 
-      if (item.quantity > 1) {
-        buttons.push({
-          name: "removeall",
-          text: 'Remove All',
-          style: 'default',
-          type: 'button',
-          value: 'removeall'
-        })
-      }
-
-      item_message.actions = buttons;
-    
-
-    attachments.push(item_message)
+    if (item.quantity > 1) {
+      buttons.push({
+        name: "removeall",
+        text: 'Remove All',
+        style: 'default',
+        type: 'button',
+        value: 'removeall'
+      })
+    }
+    item_message.actions = buttons;
+    attachments.push(item_message);
    }
     var summaryText = `*Team Cart Summary*
     *Total:* ${cart.total}`;
@@ -273,9 +259,6 @@ handlers['bundle'] = function * (message, data) {
       mrkdwn_in: ['text', 'pretext'],
       color: '#49d63a'
     })
-
-   // yield sleep(1000)
-
    attachments.push({
       text: 'Do you want to let others add stuff to cart?',
       color: '#49d63a',
@@ -304,7 +287,57 @@ handlers['bundle'] = function * (message, data) {
  * S4
  */
 handlers['team'] = function * (message) { 
- 
+  
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var cartChannels = team.meta.cart_channels;
+  var attachments = [];
+  attachments.push({ 
+    text: ''
+  });
+  var channels = yield utils.getChannels(team);
+  var cartChannels = team.meta.cart_channels;
+  var buttons = channels.map(channel => {
+    var checkbox = cartChannels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
+      return {
+        name: 'channel_btn',
+        text: checkbox + channel.name ,
+        type: 'button',
+        value: channel.id
+      }
+  });
+  attachments.push({text: 'Which channels do you want to include? ', actions: buttons, callback_id: "none"});
+  attachments.push({
+      text: '',
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      fallback:'Onboard',
+      actions: cardTemplate.slack_onboard_team,
+      callback_id: 'none'
+    });
+    // var resList = {
+    //   username: 'Kip',
+    //   text: "",
+    //   attachments: attachments,
+    //   fallback: 'Team Cart Members'
+    // };
+    // make all the attachments markdown
+    attachments.map(function(a) {
+      a.mrkdwn_in =  ['text', 'fields'];
+      a.color = '#45a5f4';
+    })
+
+    var msg = message;
+    msg.mode = 'onboard';
+    msg.action = 'home'
+    msg.text = '';
+    msg.source.team = team.team_id;
+    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    msg.reply = attachments;
+    return [msg];
 
 }
 

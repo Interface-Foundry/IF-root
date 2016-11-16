@@ -215,13 +215,42 @@ var slack_onboard_basic = module.exports.slack_onboard_basic = [{
       text: "Yes",
       style: "primary",
       type: "button",
-      value: "yes"
+      value: "team"
     },{
       name: "onboard.bundle.no",
       text: "No",
       style: "default",
       type: "button",
       value: "no"
+    },{
+      name: "onboard.bundle.more",
+      text: "More Info",
+      style: "default",
+      type: "button",
+      value: "no"
+    }];
+
+
+
+
+var slack_onboard_team = module.exports.slack_onboard_team = [{
+      name: "onboard.team.send",
+      text: "Send Onboarding",
+      style: "primary",
+      type: "button",
+      value: "reminder"
+    },{
+      name: "onboard.team.help",
+      text: "Help",
+      style: "default",
+      type: "button",
+      value: "help"
+    },{
+      name: "onboard.team.back",
+      text: "< Back",
+      style: "default",
+      type: "button",
+      value: "back"
     }];
 
 
