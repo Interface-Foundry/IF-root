@@ -478,7 +478,7 @@ function * nlp_response (message) {
   // the nlp api adds the processing data to the message
   try {
     yield nlp.parse(message);
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV.includes('development')) {
       var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute) + '`')
     }
     var messages = yield execute(message)
@@ -486,7 +486,7 @@ function * nlp_response (message) {
   catch(err) {
     kip.err(err)
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV.includes('development')) {
     return [debug_message].concat(messages)
   } else {
     return messages
