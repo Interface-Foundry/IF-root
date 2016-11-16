@@ -40,3 +40,4 @@ picstitch: http://kadabra.kipapp.co:5000
 nlp: http://kadabra.kipapp.co:8083
 doc2vec: http://kadabra.kipapp.co:8084
 picstitchDelivery: http://canary.kipapp.co:5000
+kipPayURL: https://pay.kipthis.com

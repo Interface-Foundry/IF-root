@@ -30,7 +30,7 @@ var onboard = require('./modes/onboard');
 var settings = require('./modes/settings');
 var team = require('./modes/team');
 var shopping = require('./modes/shopping').handlers;
-var food = require('./delivery.com/delivery.com').handlers;
+var food = require('./delivery.com/delivery.com').handleMessage;
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
@@ -60,7 +60,7 @@ function text_reply (message, text) {
     action: 'reply'
   });
   return msg
-} 
+}
 
 // sends a simple text reply
 function send_text_reply (message, text) {
@@ -120,7 +120,7 @@ function switchMode(message) {
     }
   };
   var mode = (modes[input] || modes['default'])();
-  if (!mode) return false 
+  if (!mode) return false
   return mode
 }
 
@@ -159,7 +159,11 @@ function printMode(message) {
 queue.topic('incoming').subscribe(incoming => {
 
   co(function * () {
-    kip.debug('🔥', incoming)
+    if (incoming.data.text) {
+      console.log('>>>'.yellow, incoming.data.text.yellow)
+    } else if (_.get(incoming, 'data.data.value')) {
+      console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
+    }
 
     var timer = new kip.SavedTimer('message.timer', incoming.data)
 
@@ -203,13 +207,27 @@ queue.topic('incoming').subscribe(incoming => {
         $lte: incoming.data.ts
       }
     }).sort('-ts').limit(20)
+
     var message = history[0]
     message.history = history.slice(1)
 
-    // sanitize text input
-    if (message.text) {
-      message.text = message.text.replace(/[^0-9a-zA-Z.]/g, ' ')
+    if (history[1]) {
+      message.mode = history[0].mode
+      message.action = history[0].action
+      message.route = message.mode + '.' + message.action
+      message.prevMode = history[1].mode
+      message.prevAction = history[1].action
+      message.prevRoute = message.prevMode + '.' + message.prevAction
     }
+    if (!message.mode) {
+      kip.debug('setting mode to prevmode', message.prevMode)
+      message.mode = message.prevMode
+    }
+    if (!message.action) {
+      kip.debug('setting mode to prevaction', message.prevAction)
+      message.action = message.prevAction
+    }
+
     timer.tic('got history')
     message._timer = timer
     // fail fast if the message was not in the database
@@ -244,6 +262,7 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     printMode(message)
+    debugger;
 
     //MODE SWITCHER
     switch(message.mode) {
@@ -281,8 +300,8 @@ queue.topic('incoming').subscribe(incoming => {
        }
         break;
     case 'food':
-        return
-        break;
+        yield food(message)
+        return incoming.ack()
      case 'address':
         return
         break;
@@ -297,9 +316,9 @@ queue.topic('incoming').subscribe(incoming => {
         if (!replies || replies.length === 0) {
           timer.tic('getting nlp response')
           logging.info('👽 passing to nlp: ', message.text)
-          if (message.execute && message.execute.length >= 1) {
+          if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
             replies = yield execute(message)
-          }else {
+          } else {
             replies = yield nlp_response(message)
             kip.debug('+++ NLPRESPONSE ' + replies)
           }
@@ -479,7 +498,7 @@ function * nlp_response (message) {
       var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute) + '`')
     }
     var messages = yield execute(message)
-  } 
+  }
   catch(err) {
     kip.err(err)
   }

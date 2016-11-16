@@ -427,6 +427,7 @@ app.get('/newslack', function (req, res) {
         yield existingTeam.save();
         yield utils.initializeTeam(existingTeam, res_auth);
        co(slackModule.start);
+
      } else {
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
