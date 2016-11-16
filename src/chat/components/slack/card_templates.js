@@ -169,7 +169,7 @@ var slack_onboard_start = module.exports.slack_onboard_start = [{
      text: "Remind Me Later",
      style: "default",
      type: "button",
-     value: "remind"
+     value: "reminder"
    }];
 
 

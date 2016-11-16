@@ -9,20 +9,29 @@ var cardTemplate = require('../slack/card_templates');
 var cron = require('cron');
 var cronJobs = {};
 var momenttz = require('moment-timezone');
+var amazon = require('../amazon_search.js');
+var kipcart = require('../cart');
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
   if (!last_action || last_action.indexOf('home') == -1) {
     return yield handlers['start'](message)
   } else {
-    kip.debug('\n\n\n🤖  onboard:handle:17:message: ', message,' 🤖\n\n\n');
-    var action = message.data.value;
-    kip.debug('\n\n\n🤖 action : ',action,' 🤖\n\n\n');
+    var options = _.split(message.data.value, '.')
+    var action =options[0];
+    options.splice(0,1);
+    kip.debug('\n\n\n🤖 action : ',action, options, ' 🤖\n\n\n');
     return yield handlers[action](message)
   }
 }
  
 module.exports.handle = handle;
+
+// arg1: {
+//   "query": "jacket"
+// }  
+// arg2: slack
+  // var results = yield amazon_search.search(exec.params,message.origin);
 
 /**
  * S1
@@ -61,7 +70,7 @@ handlers['start'] = function * (message) {
       color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
-      actions: cardTemplate.slack_settings_default,
+      actions: cardTemplate.slack_onboard_default,
       callback_id: 'none'
     });
   attachments.map(function(a) {
@@ -175,11 +184,24 @@ handlers['lunch'] = function * (message) {
  * S3
  */
 handlers['bundle'] = function * (message) { 
- 
+  //snacks: pocky 15 B017L0BL5E, gummi bears: B000EVOSE4, Assorted Japanese Dagashi B00URCF2B8
+
+
+ var res = yield amazon.lookup({ ASIN: 'B00MNG37C2', IdType: 'ASIN'})
+  kip.debug(' \n\n\n\n\n onboard:186:bundle:res: ', res,' \n\n\n\n\n ')
+
+  var cart_id = message.cart_reference_id || message.source.team; 
+    try {
+    yield kipcart.addToCart(cart_id, message.user_id, res[0], 'team');
+  } catch (e) {
+    kip.err(e);
+    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+  }
 
 }
 
 /**
+
  * S4
  */
 handlers['team'] = function * (message) { 
@@ -191,7 +213,8 @@ handlers['team'] = function * (message) {
  * S4A1 
  */
 handlers['reminder'] = function * (message) { 
- 
+ kip.debug('\n\n\n\n 😗 😙 😚 😜 😝 😛 🤑 🤓 😎 getting to reminder 😗 😙 😚 😜 😝 😛 🤑 🤓 😎 \n\n\n\n');
+
 
 }
 

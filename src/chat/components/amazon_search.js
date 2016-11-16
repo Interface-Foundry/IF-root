@@ -98,7 +98,7 @@ var lookup = function * (params, origin) {
       var results = yield get_client().itemLookup(amazonParams)
       timer.tic('got results from ItemLookup api')
       var enhanced = yield enhance_results(results, origin, timer)
-      timer.tic('done enhancing result')
+      timer.tic('done enhancing result, enhanced: ', enhanced)
       timer.stop()
       return enhanced
     })
