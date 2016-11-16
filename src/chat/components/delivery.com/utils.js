@@ -146,6 +146,9 @@ function * initiateDeliverySession (session) {
       confirmed_orders_msg: null
     }
   })
+  if (_.get(admin, 'phone_number')) {
+    newSession.phone_number = admin.phone_number
+  }
   // check if user has entered phone number before
   if (_.get(admin, 'phone_number')) {
     newSession.convo_initiater.phone_number = admin.phone_number
