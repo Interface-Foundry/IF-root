@@ -9,20 +9,22 @@ var Fuse = require('fuse.js')
 var queue = require('../queue-mongo')
 
 
-
 /*
 * use this to match on terms where key_choices are
 * text is what user entered,
 * allChoices is array of all the options to search thru
 * keyChoices is array like ['name'] or ['title', 'children.name']
 */
-function * matchText (text, allChoices, keyChoices) {
+function * matchText (text, allChoices, keyChoices, options) {
   // might want to use id, but dont for now
-  var fuse = new Fuse(allChoices, {
-    shouldSort: true,
-    threshold: 0.4,
-    keys: keyChoices
-  })
+  if (typeof options === undefined) {
+    options = {
+      shouldSort: true,
+      threshold: 0.4,
+      keys: keyChoices
+    }
+  }
+  var fuse = new Fuse(allChoices, options)
   var res = yield fuse.search(text)
   //
   if (res.length > 0) {

@@ -787,9 +787,7 @@ handlers['food.restaurants.list.recent'] = function * (message) {
   }
 
   replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg})
-
 }
-
 
 handlers['food.poll.confirm_send'] = function * (message) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
@@ -802,8 +800,8 @@ handlers['food.poll.confirm_send'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ],
-        'text': `Send poll for lunch cuisine to the team members at \`${addr}\`?`,
-        'fallback': 'Send poll for lunch cuisine to the team members at ',
+        'text': `Send poll for cuisine to the team members at \`${addr}\`?`,
+        'fallback': 'Send poll for cuisine to the team members at ',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
