@@ -247,23 +247,27 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   if (message.allow_text_matching) {
     // user typed something
     logging.info('using text matching for cuisine choice')
-    var res = yield utils.matchText(message.text, foodSession.cuisines, ['name'])
+    var res = yield utils.matchText(message.text, foodSession.cuisines, ['name'], {
+      shouldSort: true,
+      threshold: 0.8,
+      tokenize: true,
+      matchAllTokens: true,
+      keys: ['name']
+    })
     if (res !== null) {
-      logging.info('using vote', res)
-      foodSession.votes.push(res[0].name)
-      foodSession.markModified('votes')
+      logging.info('using vote', res[0])
+      yield db.Delivery.update({_id: foodSession._id}, {$push: {votes: res[0].name}}).exec()
     }
   } else {
     // user used button click
     // No Lunch For Me
     if (message.data.value === 'user_remove') {
-      foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
-      foodSession.markModified('team_members')
+      yield db.Delivery.update({_id: foodSession._id}, {$pull: {team_members: {id: message.user_id}}}).exec()
     }
-    foodSession.votes.push(message.data.value)
-    foodSession.markModified('votes')
+    yield db.Delivery.update({_id: foodSession._id}, {$push: {votes: message.data.value}}).exec()
   }
-  foodSession.save()
+  // reload foodSession
+  foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var numOfResponsesWaitingFor = foodSession.team_members.length - foodSession.votes.length
   var votes = foodSession.votes
   kip.debug('numOfResponsesWaitingFor: ', numOfResponsesWaitingFor, ' votes: ', votes)
