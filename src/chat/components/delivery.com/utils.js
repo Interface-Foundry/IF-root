@@ -134,8 +134,8 @@ function * initiateDeliverySession (session) {
     convo_initiater: {
       id: admin.id,
       name: admin.name,
-      first_name: _.get(admin.profile, 'first_name') ? admin.profile.first_name : admin.profile.real_name,
-      last_name: _.get(admin.profile, 'last_name') ? admin.profile.last_name : '',
+      first_name: _.get(admin, 'first_name') ? admin.first_name : admin.profile.real_name,
+      last_name: _.get(admin, 'last_name') ? admin.last_name : '',
       email: admin.profile.email
     },
     data: {

@@ -69,16 +69,13 @@ var chatuserSchema = mongoose.Schema({
   },
   history: {
     orders: [],
-    modes: [], //{ ts: date, mode: 'shopping'/'food' }
+    modes: [], // { ts: date, mode: 'shopping'/'food' }
     interactions: []
   },
-  phone_number: String
-// , email_stages: {
-//   stage_1: {
-//     type: Boolean,
-//     default: false
-//   }
-// }
+  phone_number: String,
+  first_name: String,
+  last_name: String
+
 })
 
 module.exports = mongoose.model('Chatuser', chatuserSchema)
