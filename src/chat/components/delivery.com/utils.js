@@ -167,8 +167,7 @@ function * initiateDeliverySession (session) {
     // last_sent_message to replace, and specific id's to
       confirmed_orders_msg: null,
       confirmed_votes_msg: null
-    },
-    error: {}
+    }
   })
   if (_.get(admin, 'phone_number')) {
     newSession.phone_number = admin.phone_number

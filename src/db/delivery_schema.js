@@ -62,7 +62,7 @@ var deliverySchema = mongoose.Schema({
     confirmed_votes_msg: String,
     confirmed_orders_msg: String
   },
-  order_post: {},
+  delivery_post: {},
   order: {}, // info after adding items to cart
   tipPercent: {
     type: String,
@@ -73,7 +73,10 @@ var deliverySchema = mongoose.Schema({
   payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later
   guest_token: String, // related to creating a guest token per session
-  completed_payment: Boolean
+  completed_payment: Boolean,
+
+  // errors
+  delivery_error: String
 })
 
 deliverySchema.virtual('chosen_restaurant_full').get(function () {
