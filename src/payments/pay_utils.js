@@ -95,6 +95,9 @@ module.exports.payDeliveryDotCom = function * (pay) {
     guestCheckout.zip_code = pay.order.chosen_location.addr.zip_code
   }
 
+  // tip
+  guestCheckout.tip = pay.order.order.tip
+
   logging.info('PAY OBJ ', pay)
   logging.info('GUEST CHECKOUT OBJ ', guestCheckout)
 
