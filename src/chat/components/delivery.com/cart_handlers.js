@@ -4,6 +4,7 @@ var _ = require('lodash')
 var Menu = require('./Menu')
 var api = require('./api-wrapper')
 
+var sleep = require('co-sleep')
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other methods
@@ -287,11 +288,15 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     try {
       foodSession.order = yield api.createCartForSession(foodSession)
       foodSession.markModified('order')
+      yield foodSession.save()
+      foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+      logging.info('GOING TO SLEEP FOR 500~~~~~~')
+      sleep(500)
 
       if (foodSession.tipPercent === 'cash') {
         foodSession.tipAmount = 0.00
       } else {
-        foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * totalPrice).toFixed(2)
+        foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
       }
       yield foodSession.save()
 
