@@ -287,6 +287,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     try {
       foodSession.order = yield api.createCartForSession(foodSession)
       foodSession.markModified('order')
+      yield foodSession.save()
+      foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
       if (foodSession.tipPercent === 'cash') {
         foodSession.tipAmount = 0.00

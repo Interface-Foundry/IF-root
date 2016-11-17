@@ -262,7 +262,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       vote: str
     }
 
-    foodSession.update({$push: {votes: vote}})
+    foodSession.update({$push: {votes: vote}}).exec()
     foodSession.votes.push(vote)
   }
 
