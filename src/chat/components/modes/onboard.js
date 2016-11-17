@@ -40,7 +40,6 @@ module.exports.handle = handle;
  * S1
  */
 handlers['start'] = function * (message) { 
-  yield bundles.updateBundles();
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -750,8 +749,7 @@ handlers['sorry'] = function * (message) {
       a.color = '#45a5f4';
     })
    message.reply = attachments;
-     return [message];
-
+   return [message];
 
 }
 

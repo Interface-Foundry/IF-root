@@ -55,13 +55,12 @@ var slackConnections = {}
 // var slackConnections = {};
 var webserver = require('./webserver')
 var bundles = require('../bundles');
-co(bundles.updater);
+bundles.updater(); //caches bundle items to mongo everyday at midnight
 
 //
 // slackbots
 //
 function * start () {
-
   if (process.env.NODE_ENV === 'test') {
     console.log('starting mock slack server')
     yield slack.run_chat_server()
