@@ -385,10 +385,10 @@ handlers['food.settings.address.confirm'] = function * (message) {
   // collect feedback on this feature
   if (feedbackOn && msg_json) {
     msg_json.attachments[0].actions.push({
-      name: 'feedback.new',
+      name: 'food.feedback.new',
       text: '⇲ Send feedback',
       type: 'button',
-      value: 'feedback.new'
+      value: 'food.feedback.new'
     })
   }
 
@@ -422,7 +422,7 @@ handlers['food.settings.address.change'] = function * (message) {
 
 
 //send feedback to Kip 😀😐🙁
-handlers['feedback.new'] = function * (message) {
+handlers['food.feedback.new'] = function * (message) {
 
    feedbackTracker[message.source.team + message.source.user + message.source.channel] = {
     source: message.source
@@ -442,10 +442,10 @@ handlers['feedback.new'] = function * (message) {
       }
     ]
   }
-  replyChannel.send(message, 'feedback.save', {type: message.origin, data: msg_json})
+  replyChannel.send(message, 'food.feedback.save', {type: message.origin, data: msg_json})
 }
 
-handlers['feedback.save'] = function * (message) {
+handlers['food.feedback.save'] = function * (message) {
 
   //check for entry in feedback tracker
   if (feedbackTracker[message.source.team + message.source.user + message.source.channel]){
