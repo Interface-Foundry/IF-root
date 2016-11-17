@@ -33,13 +33,15 @@ module.exports.createCartForSession = function * (session) {
       'items': session.cart.filter(i => i.added_to_cart === true).map(i => i.item)
     }
   }
-
+  session.order_post = opts
+  session.markModified('order_post')
+  yield session.save()
   try {
     var response = yield request(opts)
     logging.info('got cart from delivery.com')
     return response
   } catch (e) {
-    logging.error('error lol', e)
+    logging.error('error lol', JSON.stringify(e))
   }
 }
 

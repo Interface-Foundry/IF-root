@@ -62,6 +62,7 @@ var deliverySchema = mongoose.Schema({
     confirmed_votes_msg: String,
     confirmed_orders_msg: String
   },
+  order_post: {},
   order: {}, // info after adding items to cart
   tipPercent: {
     type: String,
