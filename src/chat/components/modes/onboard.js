@@ -346,9 +346,7 @@ handlers['reminder'] = function * (message) {
   }
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var teamMembers = yield utils.getTeamMembers(team);
-  var admins = yield utils.findAdmins(team);
   var currentUser = yield db.Chatusers.findOne({id: message.source.user});
-  var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   var attachments = [];
   attachments.push({
       text: 'Would you like to set a reminder for collecting shopping orders from your team?',
@@ -397,7 +395,7 @@ handlers['confirm_reminder'] = function * (message, data) {
     now = new Date();
   switch (alertTime) {
     case 'today':
-      msInFuture = ONE_DAY / 6; //4 hours for now
+      msInFuture = 1000*30; //4 hours for now
       dateDescrip = 'later today';
       break;
     case 'tomorrow':
@@ -586,19 +584,24 @@ function * updateCronJob(team, message, date) {
     cronJobs[team.team_id].stop();
   }
   kip.debug('\n\n\nsetting cron job day: ', '00 ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n')
-  var teamMembers = yield utils.getTeamMembers(team);
+  var channels = team.meta.cart_channels;
+  var channelMembers = [];
+  yield channels.map(function * (channel) {
+  var members = yield utils.getChannelMembers(team, channel);
+  if (channelMembers.length == 0) {
+    channelMembers = channelMembers.concat(members);
+  } else {
+    channelMembers = channelMembers.concat(_.differenceWith(channelMembers, members, (a, b) => a.id == b.id));
+  }
+});
+  kip.debug(`\n\n\n channels: \n ${JSON.stringify(channels, null, 2)} \n\n channelMembers: \n ${JSON.stringify(channelMembers, null, 2)} \n\n\n`)
   var currentUser = yield db.Chatusers.findOne({
     id: message.source.user
   });
 
-  cronJobs[team.team_id] = new cron.CronJob('00 ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), function() {
-      team.meta.office_assistants.map(function(a) {
-        var assistant = teamMembers.find(function(m, i) {
-          return m.id == a
-        });
-
+  cronJobs[team.team_id] = new cron.CronJob(date, function() {
+      channelMembers.map(function(a) {
         var attachments = [{
-          // "pretext": "Hi, this is your weekly reminder.  Would you like to send out a last call?",
           "image_url": "http://kipthis.com/kip_modes/mode_teamcart_collect.png",
           "text": "",
           "mrkdwn_in": [
@@ -618,18 +621,26 @@ function * updateCronJob(team, message, date) {
           a.mrkdwn_in = ['text'];
           a.color = '#45a5f4';
         })
-        var newMessage = new db.Message({
-          incoming: false,
-          thread_id: message.thread_id,
-          user_id: assistant.id,
-          origin: 'slack',
-          source: message.source,
-          mode: 'onboard',
-          action: 'home',
-          user: message.source.user,
-          reply: attachments
-        })
-        kip.debug('\n\n\n Firing Cron Job: assistant: ', assistant, message, newMessage, '\n\n\n')
+      var newMessage = new db.Message({
+        incoming: false,
+        thread_id: message.thread_id,
+        user_id: a.id,
+        origin: 'slack',
+        source: {
+          team: team.team_id,
+          channel: a.dm,
+          user: a.id,
+          type: "message",
+          subtype: "bot_message"
+        },
+        mode: 'onboard',
+        action: 'home',
+        user: a,
+        reply: attachments
+      })
+        kip.debug(`\n\n\n member: \n ${JSON.stringify(a, null, 2)}  \n\n\n`)
+        kip.debug(`\n\n\n message: \n ${JSON.stringify(newMessage, null, 2)}  \n\n\n`)
+
 
         newMessage.save()
         queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
