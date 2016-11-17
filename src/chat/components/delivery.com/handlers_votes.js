@@ -262,8 +262,8 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       vote: str
     }
 
-    foodSession.update({$push: {votes: vote}}).exec()
     foodSession.votes.push(vote)
+    return foodSession.save()
   }
 
   if (message.allow_text_matching) {
@@ -277,9 +277,9 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       keys: ['name']
     })
     if (res !== null) {
-      addVote(res[0].name)
+      yield addVote(res[0].name)
     } else {
-      addVote(message.text)
+      yield addVote(message.text)
     }
   } else {
     // user used button click
@@ -288,7 +288,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       yield foodSession.update({$pull: {team_members: {id: message.user_id}}}).exec()
       foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
     } else {
-      addVote(message.data.value)
+      yield addVote(message.data.value)
     }
   }
   var numOfResponsesWaitingFor = foodSession.team_members.length - _.uniq(foodSession.votes.map(v => v.user)).length
