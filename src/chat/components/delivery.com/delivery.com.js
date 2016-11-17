@@ -329,7 +329,6 @@ handlers['food.settings.address.confirm'] = function * (message) {
   replyChannel.sendReplace(message, 'food.settings.address.save', {type: message.origin, data: {text: 'Thanks! We need to process that address real quick.'}})
   try {
     var res = yield api.searchNearby({addr: message.text})
-    logging.data('address broh', _.keys(res))
     var location = {
       address_1: res.search_address.street,
       address_2: res.search_address.unit,
@@ -349,6 +348,8 @@ handlers['food.settings.address.confirm'] = function * (message) {
       type: message.origin,
       data: {text: `Sorry, I can't find that address! Try typing something like: "902 Broadway New York, NY 10010"`}
     })
+    yield sleep(250)
+    yield handlers['food.settings.address.new'](message)
     return
   }
 

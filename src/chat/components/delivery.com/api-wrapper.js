@@ -51,26 +51,36 @@ module.exports.createCartForSession = function * (session) {
 module.exports.searchNearby = function * (params) {
   params = _.merge({}, defaultParams.searchNearby, params)
   logging.info('searching delivery.com for restaurants with params', params)
+
   try {
-    var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
-  } catch(err) {
-    if (_.get(err,'error.code') == 'ENOTFOUND') kip.debug('delivery.com api is down, or returned no results for specified address...')
-    params.addr = yield address_utils.cleanAddress(params.addr);
-    kip.debug('api-wrapper 86: searchNearBy err: ', err,'cleaned string: ', params.addr)
-    try {
-      var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
-    } catch(err) {
-      if (_.get(err,'error.code') == 'ENOTFOUND') kip.debug('delivery.com api is down, or returned no results for specified address...')
-      return false
+    var allNearby = yield request({
+      url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`,
+      json: true
+    })
+  } catch (err) {
+    // possible errors: 'invalid_address',
+    logging.error('error with address search for address')
+    if (_.get(err, 'message[0].code') === 'invalid_address') {
+      // invalid address, have user try again
+      return 'invalid_address'
+    } else {
+      //
+      return 'address_error'
     }
   }
-   if ((allNearby.merchants == undefined)) {
-    params.addr = yield address_utils.cleanAddress(params.addr);
-     try {
-      var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
-    } catch(err) {
-      if (_.get(err,'error.code') == 'ENOTFOUND') kip.debug('delivery.com api is down, or returned no results for specified address...')
-      return false
+
+  if (allNearby.merchants === undefined) {
+    params.addr = yield address_utils.cleanAddress(params.addr)
+    try {
+      allNearby = yield request({
+        url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`,
+        json: true
+      })
+    } catch (err) {
+      if (_.get(err, 'error.code') === 'ENOTFOUND') {
+        logging.error('delivery.com api is down, or returned no results for specified address...')
+        return 'address_error'
+      }
     }
   }
   // make sure we have all the merchants in the db
