@@ -107,7 +107,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
     var mediumImage = _.get(item, 'MediumImage[0].URL[0]')
     var largeImage = _.get(item, 'LargeImage[0].URL[0]')
     var altImage = item.altImage
-    var image
+    var image;
     // http://images-na.ssl-images-amazon.com/images/I/61WRcLLvdpL._SL1100_.jpg
     if (smallImage.indexOf('images-na.ssl-images-amazon.com') > -1 || mediumImage.indexOf('images-na.ssl-images-amazon.com') > -1) {
       image = 'http://kipthis.com/images/kip_head.png'
@@ -518,7 +518,7 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
       })
       timer('cleared')
 
-      yield sleep(8) // prevent amazon throttle
+
 
       timer('rebuilding cart ' + cart.amazon.CartId)
       console.log('rebuilding cart')

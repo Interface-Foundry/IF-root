@@ -217,7 +217,7 @@ var slack_onboard_basic = module.exports.slack_onboard_basic = [{
       text: "No",
       style: "default",
       type: "button",
-      value: "no"
+      value: "checkout"
     },{
       name: "onboard.bundle.more",
       text: "More Info",

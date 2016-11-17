@@ -94,7 +94,7 @@ handlers['start'] = function * (message) {
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
     msg.reply = attachments;
     return [msg];
-
+    
 }
 
 // function viewCartMembers(convo,callback,flag){

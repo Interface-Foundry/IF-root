@@ -100,28 +100,6 @@ function * getChannelMembers(team, channelId) {
     return co(function * (){
       yield eachSeries(channel.members, function * (uId) {
         var bots = res_prof.members.filter( (e) => { return e.is_bot }).map((e) => { return e.id });
-        // if ( teamMemberIds.indexOf(uId) == -1 && uId != 'USLACKBOT' && bots.indexOf(uId) == -1) {
-        //   var userInfo =  res_dm.ims.find( (e) => { return e.user == uId } );
-        //   // if (!userInfo) {
-        //   //   var res_dm2 = yield request('https://slack.com/api/im.open?token=' + team.bot.bot_access_token + '&&user='+uId); // has direct message id
-        //   //   res_dm2 = JSON.parse(res_dm2);
-        //   //   kip.debug(' \n\n\n utils:109: res_dm2', res_dm2, ' \n\n\n ')
-        //   //   if (_.get(res_dm2,'channel.id')) {
-        //   //     userInfo.user = res_dm2.channel.id
-        //   //   }
-        //   // }
-        //   var user = new db.Chatuser();
-        //   user.team_id = team.team_id;
-        //    kip.debug(' \n\n\n utils:115: res_dm', res_dm, ' userInfo: ', userInfo, ' uId: ', uId, ' \n\n\n ')
-        //   user.id = userInfo.user;
-        //   user.platform = 'slack';
-        //   user.dm = u.id;
-        //   user.is_bot = false;
-        //   var profile = res_prof.members.find((e) => { return (e.id == uId) });
-        //   user = _.merge(user, profile);
-        //   yield user.save();
-        //   channelMembers.push(user);
-        // } else 
         if (teamMemberIds.indexOf(uId) > -1 && uId != 'USLACKBOT' && bots.indexOf(uId) == -1) {
           var user = teamMembers.find((e) => { return (e.id == uId) });
           if (user != null) {

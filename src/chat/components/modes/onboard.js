@@ -22,9 +22,13 @@ function * handle(message) {
   if (!last_action || last_action.indexOf('home') == -1) {
     return yield handlers['start'](message);
   } else {
-    var data = _.split(message.data.value, '.');
-    var action = data[0];
-    data.splice(0,1);
+    if (!message.data){
+      var action = 'sorry'
+    } else {
+      var data = _.split(message.data.value, '.');
+      var action = data[0];
+      data.splice(0,1);
+    }
     kip.debug('\n\n\n🤖 action : ',action, 'data: ', data, ' 🤖\n\n\n');
     return yield handlers[action](message, data);
   }
@@ -190,8 +194,6 @@ handlers['bundle'] = function * (message, data) {
    }
  });
 
- yield sleep(1000)
-
  var cart_id = message.source.team
  var cart = yield kipcart.getCart(cart_id)
  // all the messages which compose the cart
@@ -318,26 +320,19 @@ handlers['team'] = function * (message) {
       actions: cardTemplate.slack_onboard_team,
       callback_id: 'none'
     });
-    // var resList = {
-    //   username: 'Kip',
-    //   text: "",
-    //   attachments: attachments,
-    //   fallback: 'Team Cart Members'
-    // };
-    // make all the attachments markdown
-    attachments.map(function(a) {
+  attachments.map(function(a) {
       a.mrkdwn_in =  ['text', 'fields'];
       a.color = '#45a5f4';
-    })
+    });
 
-    var msg = message;
-    msg.mode = 'onboard';
-    msg.action = 'home'
-    msg.text = '';
-    msg.source.team = team.team_id;
-    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-    msg.reply = attachments;
-    return [msg];
+  var msg = message;
+  msg.mode = 'onboard';
+  msg.action = 'home'
+  msg.text = '';
+  msg.source.team = team.team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.reply = attachments;
+  return [msg];
 
 }
 
@@ -462,8 +457,24 @@ handlers['confirm_reminder'] = function * (message, data) {
  * S5
  */
 handlers['member'] = function * (message) {
-
-
+ var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var cartChannels = team.meta.cart_channels;
+  var attachments = [];
+  attachments.push({ 
+    text: ''
+  });
+  var cartMembers = [];
+  yield cartChannels.map(function * (cid) {
+    let channelMembers = yield utils.getChannelMembers(cid);
+    cartMembers = cartMembers.concat(channelMembers);
+  });
+  yield cartMembers.map( function * (m) {
+        //Send onboarding stuff for each individual member
+  });
 }
 
 /**
@@ -471,6 +482,74 @@ handlers['member'] = function * (message) {
  */
 handlers['checkout'] = function * (message) {
 
+ var cart_id = message.source.team
+ var cart = yield kipcart.getCart(cart_id)
+  var attachments = [];
+  attachments.push({
+    text: '',
+    color: '#45a5f4',
+    image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
+  });
+  for (var i = 0; i < cart.aggregate_items.length; i++) {
+    var item = cart.aggregate_items[i];
+    var item_message = {
+      mrkdwn_in: ['text', 'pretext'],
+      color: item.ASIN === '#7bd3b6',
+      thumb_url: item.image
+    }
+    var userString = item.added_by.map(function(u) {
+      return '<@' + u + '>';
+    }).join(', ');
+    var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
+    item_message.text = [
+      `*${i + 1}.* <${link}|${item.title}>`,
+      `*Price:* ${item.price} each`,
+      `*Added by:* ${userString}`,
+      `*Quantity:* ${item.quantity}`
+    ].filter(Boolean).join('\n');
+    item_message.callback_id = item._id.toString();
+    var buttons = [{
+      "name": "additem",
+      "text": "+",
+      "style": "default",
+      "type": "button",
+      "value": "add"
+    }, {
+      "name": "removeitem",
+      "text": "—",
+      "style": "default",
+      "type": "button",
+      "value": "remove" 
+    }];
+    if (item.quantity > 1) {
+      buttons.push({
+        name: "removeall",
+        text: 'Remove All',
+        style: 'default',
+        type: 'button',
+        value: 'removeall'
+      })
+    }
+    item_message.actions = buttons;
+    attachments.push(item_message)
+  }
+  var summaryText = `*Team Cart Summary*
+   *Total:* ${cart.total}`;
+      summaryText += `
+   <${cart.link}|*➤ Click Here to Checkout*>`;
+      attachments.push({
+        text: summaryText,
+        mrkdwn_in: ['text', 'pretext'],
+        color: '#49d63a'
+      })
+   var msg = message;
+   msg.mode = 'onboard'
+   msg.action = 'home';
+   msg.text = ''
+   msg.source.team = message.source.team;
+   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+   msg.reply = attachments;
+   return [msg];
 
 }
 
@@ -478,6 +557,26 @@ handlers['checkout'] = function * (message) {
  * catcher
  */
 handlers['sorry'] = function * (message) {
+
+ // kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
+   message.text = "Sorry, my brain froze!"
+   message.mode = 'onboard';
+   message.action = 'home';
+   var attachments = [];
+   attachments.push({
+      text: 'Don’t have any changes? Type `exit` to quit settings',
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      fallback:'Settings',
+      actions: cardTemplate.slack_onboard_default,
+      callback_id: 'none'
+    });
+    attachments.map(function(a) {
+      a.mrkdwn_in =  ['text'];
+      a.color = '#45a5f4';
+    })
+   message.reply = attachments;
+     return [message];
 
 
 }
