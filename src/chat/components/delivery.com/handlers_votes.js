@@ -336,10 +336,10 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     }]
   }
 
-  var confirmedUsersString = 'wow'
-  if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
+  if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
     // replace admins message
-    var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
+    var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_votes_msg})
+    debugger
     $replyChannel.sendReplace(msgToReplace, 'food.admin.dashboard.cuisine', {
       type: msgToReplace.origin,
       data: dashboard
@@ -363,7 +363,8 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       type: message.origin,
       data: dashboard
     })
-    foodSession.tracking.confirmed_orders_msg = message._id
+    debugger;
+    foodSession.tracking.confirmed_votes_msg = message._id
     foodSession.markModified('tracking')
     yield foodSession.save()
   }

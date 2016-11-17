@@ -41,6 +41,9 @@ class UserChannel {
         state: session.state,
         user: session.source.user
       })
+      if (replace && session.slack_ts) {
+        newSession.replace_ts = session.slack_ts
+      }
       newSession['reply'] = data;
       newSession.mode = nextHandlerID.split('.')[0];
       newSession.action = nextHandlerID.split('.').slice(1).join('.');
@@ -58,6 +61,8 @@ class UserChannel {
             uri: session.source.response_url,
             body: JSON.stringify(data.data)
           })
+        } else if (replace && newSession.replace_ts) {
+          self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
         } else {
           self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
         }
