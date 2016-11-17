@@ -50,31 +50,34 @@ class UserChannel {
       kip.debug('inside channel.send(). Session mode is ' + newSession.mode);
       kip.debug('inside channel.send(). Session action is ' + newSession.action);
       var self = this
-      newSession.save(function (err, saved) {
-        if (err) {
-          kip.debug('mongo save err: ', err)
-          throw Error(err)
-        }
-        if (replace && _.get(session, 'source.response_url')) {
-          request({
-            method: 'POST',
-            uri: session.source.response_url,
-            body: JSON.stringify(data.data)
-          })
-        } else if (replace && newSession.replace_ts) {
-          self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
-        } else {
-          self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
-        }
+      return new Promise((resolve, reject) => {
+        newSession.save(function (err, saved) {
+          if (err) {
+            kip.debug('mongo save err: ', err)
+            throw Error(err)
+          }
+          if (replace && _.get(session, 'source.response_url')) {
+            request({
+              method: 'POST',
+              uri: session.source.response_url,
+              body: JSON.stringify(data.data)
+            })
+          } else if (replace && newSession.replace_ts) {
+            self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+          } else {
+            self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+          }
+          resolve(newSession)
+        })
       })
     }
 
     this.sendReplace = function (session, nextHandlerID, data) {
       if (process.env.NODE_ENV === 'test') {
         // logging.error('sendReplace not working correctly in testing, sending as default message')
-        this.send(session, nextHandlerID, data, false)
+        return this.send(session, nextHandlerID, data, false)
       } else {
-        this.send(session, nextHandlerID, data, true)
+        return this.send(session, nextHandlerID, data, true)
       }
     }
     return this

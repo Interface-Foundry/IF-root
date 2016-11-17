@@ -58,7 +58,10 @@ var deliverySchema = mongoose.Schema({
   mode: String,
   action: String,
   data: {}, // \shrug
-  tracking: {}, // possibly combine w/ data, cant remember what data is in explicitly
+  tracking: {
+    confirmed_votes_msg: String,
+    confirmed_orders_msg: String
+  },
   order: {}, // info after adding items to cart
   tipPercent: {
     type: String,

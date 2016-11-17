@@ -339,11 +339,11 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
     // replace admins message
     var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_votes_msg})
-    debugger
     $replyChannel.sendReplace(msgToReplace, 'food.admin.dashboard.cuisine', {
       type: msgToReplace.origin,
       data: dashboard
     })
+
   } else {
     // admin is confirming, replace their message
     var admin = foodSession.convo_initiater
@@ -359,13 +359,11 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       }
     }
 
-    $replyChannel.send(message, 'food.admin.dashboard.cuisine', {
+    var sentMessage = yield $replyChannel.send(message, 'food.admin.dashboard.cuisine', {
       type: message.origin,
       data: dashboard
     })
-    debugger;
-    foodSession.tracking.confirmed_votes_msg = message._id
-    foodSession.markModified('tracking')
+    foodSession.tracking.confirmed_votes_msg = sentMessage._id
     yield foodSession.save()
   }
 }
@@ -450,7 +448,22 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   responseForAdmin.attachments.push(buttons)
 
-  $replyChannel.sendReplace(message, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
+
+  // admin is confirming, replace their message
+  var admin = foodSession.convo_initiater
+  var message = _.merge({}, message, {
+    mode: 'food',
+    action: 'admin.restaurant.pick.list',
+    thread_id: admin.dm,
+    origin: message.origin,
+    source: {
+      team: foodSession.team_id,
+      user: admin.id,
+      channel: admin.dm
+    }
+  })
+
+  $replyChannel.send(message, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {

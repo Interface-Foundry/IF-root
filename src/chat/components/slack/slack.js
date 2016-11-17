@@ -183,18 +183,17 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
       kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {
-        debugger;
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : { reply: message.text }
         if (message.replace_ts) {
           // replace a specific message
           return bot.web.chat.update(message.replace_ts, message.source.channel, reply.label || message.text, reply, (e, r) => {
             // set the slack_ts from their server so we can update/delete specific messages
-            db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}})
+            db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
           })
         } else {
           return bot.web.chat.postMessage(message.source.channel,(reply.label ? reply.label : message.text), reply, (e, r) => {
             // set the slack_ts from their server so we can update/delete specific messages
-            db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}})
+            db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
           })
         }
       }
