@@ -34,7 +34,6 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
   var menu = this
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
-  console.log(JSON.stringify(item, null, 2))
 
   var basePrice
   var hasPriceGroup = item.children.map(c => c.type).includes('price group')
@@ -236,6 +235,28 @@ function nodeOptions (node, cartItem, validate) {
     })
     return a
   })
+
+  // spread out the buttons to multiple attachments if needed
+  attachments = attachments.reduce((all, a) => {
+    if (_.get(a, 'actions.length', 0) <= 5) {
+      all.push(a)
+      return all
+    } else {
+      var actions = a.actions
+      a.actions = actions.splice(0, 5)
+      all.push(a)
+      while (actions.length > 0) {
+        all.push({
+          color: '#3AA3E3',
+          fallback: 'meal options',
+          callback_id: 'even more actions',
+          attachment_type: 'default',
+          actions: actions.splice(0, 5)
+        })
+      }
+      return all
+    }
+  }, [])
 
   return attachments
 }
