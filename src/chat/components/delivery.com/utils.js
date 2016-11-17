@@ -7,7 +7,8 @@ var request = require('request-promise')
 var Fuse = require('fuse.js')
 
 var queue = require('../queue-mongo')
-
+var UserChannel = require('./UserChannel')
+var replyChannel = new UserChannel(queue)
 
 /*
 * use this to match on terms where key_choices are
@@ -113,8 +114,15 @@ function * initiateDeliverySession (session) {
   if (foodSessions) {
     yield foodSessions.map((session) => {
       logging.info('send message to old admin that their order is being canceled')
-      // var oldMessage = yield db.Message.findOne({incoming: true, mode: 'food', })
-      // replyChannel.sendReplace(oldMessage, 'food.delivery_or_pickup', {type: session.origin, data: {text: 'Searching your area for good food...'}})
+      // var lastMessage = yield db.Messages.find({
+      //   incoming: false,
+      //   mode: 'food',
+      //   source: {
+      //     'user': session.convo_initiater.id}})
+      //   .sort({'ts': -1})
+      //   .limit(1).exec()
+
+      // replyChannel.send(lastMessage[0], 'food.cancel_previous', {type: session.origin, data: {text: 'Hey we are canceling your old order! Someone is starting a new order'}})
       session.active = false
       session.save()
     })

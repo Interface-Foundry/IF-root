@@ -245,6 +245,11 @@ handlers['food.admin.order.pay'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
+  // check tip amount???
+  if (foodSession.tipAmount !== (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)) {
+    logging.error('tipAmount not correct')
+  }
+
   // base response
   var response = {
     text: `Checkout for ${foodSession.chosen_restaurant.name} - ${(foodSession.order.total + foodSession.tipAmount).$}`,

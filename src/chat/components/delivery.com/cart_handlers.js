@@ -274,7 +274,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       foodSession.tipAmount = 0.00
     } else {
       // set up tip stuff since we dont have order submitted
-      foodSession.tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) / 100 * totalPrice).toFixed(2)
+      foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * totalPrice).toFixed(2)
     }
     yield foodSession.save()
       // food order minimum not met, let admin add more items i guess
@@ -291,9 +291,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       if (foodSession.tipPercent === 'cash') {
         foodSession.tipAmount = 0.00
-        tipAmount
       } else {
-        foodSession.tipAmount = (Number(foodSession.tipPercent.slice(0, 2)) / 100 * totalPrice).toFixed(2)
+        foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * totalPrice).toFixed(2)
       }
       yield foodSession.save()
 
@@ -412,7 +411,7 @@ handlers['food.admin.cart.quantity.subtract'] = function * (message) {
   logging.info('attempting to decrease quantity of item')
   var itemObjectID = message.source.actions[0].value
   var item = yield db.Delivery.findOne({team_id: message.source.team, active: true}, {'cart': itemObjectID.toObjectId()}).exec()
-  if (item.cart[0].item.item_qty === 0) {
+  if (item.cart[0].item.item_qty === 1) {
     // delete item
     logging.info('deleting this item')
     yield db.Delivery.update({_id: item._id}, {$pull: {cart: {_id: itemObjectID.toObjectId()}}}).exec()
