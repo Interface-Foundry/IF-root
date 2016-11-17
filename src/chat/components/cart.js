@@ -65,7 +65,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
     // please do not remove changes below. it is required for fb to work.
     if (type == 'personal') {
       cart = yield getCart(slack_id, type)
-    }else {
+    } else {
       var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec()
       if (team_carts.length === 1) {
         var cart = team_carts[0]
@@ -432,7 +432,7 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
         i.purchased = true
         i.purchased_date = cart.purchased_date
         return i.save()
-      })
+      });
 
       kip.debug('creating a new cart for ' + slack_id)
       cart = new db.Cart({
@@ -451,7 +451,7 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
         kip.err('ERR: Amazon item is not eligible to be added to the cart')
         // cart.amazon = amazonCart
 
-        kip.debug('# cart ', cart)
+        kip.debug('# cart ', cart);
         // console.log('# amz ',cart.amazon)
 
         // cart.link =

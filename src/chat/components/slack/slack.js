@@ -54,6 +54,8 @@ var cardTemplate = require('./card_templates');
 var slackConnections = {}
 // var slackConnections = {};
 var webserver = require('./webserver')
+var bundles = require('../bundles');
+co(bundles.updater);
 
 //
 // slackbots

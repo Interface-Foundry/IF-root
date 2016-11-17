@@ -40,6 +40,7 @@ module.exports.handle = handle;
  * S1
  */
 handlers['start'] = function * (message) { 
+  yield bundles.updateBundles();
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -321,19 +322,11 @@ handlers['lunch'] = function * (message) {
  */
 handlers['bundle'] = function * (message, data) {
  var choice = data[0];
- var bundle = bundles.getBundle(choice);
  var cart_id = message.cart_reference_id || message.source.team; 
 
- yield eachSeries(bundle, function * (asin) {
-   try {
-    var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
-    yield kipcart.addToCart(cart_id, message.user_id, res[0], 'team');
-   } catch (e) {
-    kip.debug(' \n\n\n\n\n\n\n onboard.js:193:error: ',e, ' \n\n\n\n\n\n\n');
-   }
- });
+ yield bundles.addBundleToCart(choice, message.user_id,cart_id)
 
- var cart_id = message.source.team
+ // var cart_id = message.source.team
  var cart = yield kipcart.getCart(cart_id)
  // all the messages which compose the cart
  var attachments = [];

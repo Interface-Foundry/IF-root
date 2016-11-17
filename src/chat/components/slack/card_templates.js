@@ -175,7 +175,7 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
      text: "Snackbox",
      style: "default",
      type: "button",
-     value: "bundle.snackbox"
+     value: "bundle.snacks"
    },
   {
      name: "onboard.supplies.drinks",

@@ -35,6 +35,8 @@ var food = require('./delivery.com/delivery.com').handleMessage;
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
 
+
+
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
 // I'm sorry i couldn't understand that
@@ -170,7 +172,6 @@ queue.topic('incoming').subscribe(incoming => {
     // skipping histoy and stuff rn b/c i dont have time to do it
     if (_.get(incoming, 'data.action') == 'item.add') {
       var selected_data = incoming.data.postback.selected_data
-      kip.debug(' \n\n\n\n\n\n reply_logic:173: selected_data: ', selected_data, ' amazon_variety: ', amazon_variety, ' \n\n\n\n\n\n ')
       var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data)
       var results = yield amazon_search.lookup(results, results.origin)
 
