@@ -135,7 +135,7 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message) {
     // don't let them go down to zero
     userItem.deleteMe = true
     foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
-    yield db.Delivery.update({_id: cart.foodSession._id}, {$pull: { cart: {_id: userItem._id }}}).exec()
+    yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}}).exec()
   } else {
     userItem.item.item_qty--
     yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
@@ -254,75 +254,22 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 handlers['food.admin.order.confirm'] = function * (message, replace) {
   // show admin final confirm of ting
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-
-  // check for minimum price
   var menu = Menu(foodSession.menu)
+
   var totalPrice = foodSession.cart.reduce((sum, i) => {
     return sum + menu.getCartItemPrice(i)
   }, 0)
+  // ------------------------------------
+  // main response and attachment
+  var response = {
+    text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
+    fallback: 'You are unable to confirm.',
+    callback_id: 'address_confirm'
+  }
 
   var mainAttachment = {
     'title': '',
     'image_url': `https://storage.googleapis.com/kip-random/kip-team-cafe-cart.png`
-  }
-
-  // ------------------------------------
-  // set up final attachment and tip stuff if total price isnt enough
-  var finalAttachment
-  var tipAmount
-  if (totalPrice < foodSession.chosen_restaurant.minimum) {
-    if (foodSession.tipPercent === 'cash') {
-      foodSession.tipAmount = 0.00
-    } else {
-      // set up tip stuff since we dont have order submitted
-      foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * totalPrice).toFixed(2)
-    }
-    yield foodSession.save()
-      // food order minimum not met, let admin add more items i guess
-    finalAttachment = {
-      text: 'final amount not enough, add more',
-      fallback: 'Confirm Choice',
-      callback_id: 'foodConfrimOrder_callbackID',
-      attachment_type: 'default'
-    }
-  } else {
-    try {
-      foodSession.order = yield api.createCartForSession(foodSession)
-      foodSession.markModified('order')
-      yield foodSession.save()
-      foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-      logging.info('GOING TO SLEEP FOR 500~~~~~~')
-      sleep(500)
-
-      if (foodSession.tipPercent === 'cash') {
-        foodSession.tipAmount = 0.00
-      } else {
-        foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
-      }
-      yield foodSession.save()
-
-      // final attachment with everything
-      finalAttachment = {
-        text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
-              `*Taxes:* ${foodSession.order.tax.$}\n` +
-              `*Tip:* ${foodSession.tipAmount.$}\n` +
-              `*Team Cart Total:* ${foodSession.order.total.$}`,
-        fallback: 'Confirm Choice',
-        callback_id: 'foodConfrimOrder_callbackID',
-        color: '#49d63a',
-        attachment_type: 'default',
-        mrkdwn_in: ['text'],
-        actions: [{
-          'name': `food.admin.order.checkout.confirm`,
-          'text': `Checkout ${(foodSession.order.total + foodSession.tipAmount).$}`,
-          'type': `button`,
-          'style': `primary`,
-          'value': `checkout`
-        }]
-      }
-    } catch (err) {
-      logging.error('error with creating cart payment for some reason', err)
-    }
   }
 
   // ------------------------------------
@@ -357,33 +304,77 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     }
   })
 
-  // ------------------------------------
-  // tip attachment
-  var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount.toFixed(2)}`
-  var tipAttachment = {
-    'title': `Tip: ${tipTitle}`,
-    'callback_id': 'food.admin.cart.tip',
-    'color': '#3AA3E3',
-    'attachment_type': 'default',
-    'mrkdwn_in': ['text'],
-    'actions': [`15%`, `20%`, `25%`, `Cash`].map((t) => {
-      var baseTipButton = (foodSession.tipPercent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `￮ ${t}`
-      return {
-        'name': 'food.admin.cart.tip',
-        'text': baseTipButton,
-        'type': `button`,
-        'value': t.toLowerCase()
-      }
-    })
-  }
+  if (foodSession.tipPercent === 'cash') foodSession.tipAmount = 0.00
 
-  // ------------------------------------
-  // combine it all
-  var response = {
-    text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    fallback: 'You are unable to confirm.',
-    callback_id: 'address_confirm',
-    attachments: [mainAttachment].concat(itemAttachments).concat([tipAttachment]).concat([finalAttachment])
+  try {
+    var order = yield api.createCartForSession(foodSession)
+    if (order !== null) {
+      // order is successful
+      foodSession.order = order
+      foodSession.markModified('order')
+      yield foodSession.save()
+
+      if (foodSession.tipPercent !== 'cash') {
+        foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
+      }
+      var finalAttachment = {
+        text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
+              `*Taxes:* ${foodSession.order.tax.$}\n` +
+              `*Tip:* ${foodSession.tipAmount.$}\n` +
+              `*Team Cart Total:* ${foodSession.order.total.$}`,
+        fallback: 'Confirm Choice',
+        callback_id: 'foodConfrimOrder_callbackID',
+        color: '#49d63a',
+        attachment_type: 'default',
+        mrkdwn_in: ['text']
+      }
+
+      if (totalPrice < foodSession.chosen_restaurant.minimum) {
+        finalAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *_\$${foodSession.chosen_restaurant.minimum}_*`
+      } else {
+        finalAttachment.actions = [{
+          'name': `food.admin.order.checkout.confirm`,
+          'text': `Checkout ${(foodSession.order.total + foodSession.tipAmount).$}`,
+          'type': `button`,
+          'style': `primary`,
+          'value': `checkout`
+        }]
+      }
+      // ------------------------------------
+      // tip attachment
+      var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount.toFixed(2)}`
+      var tipAttachment = {
+        'title': `Tip: ${tipTitle}`,
+        'callback_id': 'food.admin.cart.tip',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'mrkdwn_in': ['text'],
+        'actions': [`15%`, `20%`, `25%`, `Cash`].map((t) => {
+          var baseTipButton = (foodSession.tipPercent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `￮ ${t}`
+          return {
+            'name': 'food.admin.cart.tip',
+            'text': baseTipButton,
+            'type': `button`,
+            'value': t.toLowerCase()
+          }
+        })
+      }
+      response.attachments = [mainAttachment].concat(itemAttachments).concat([tipAttachment]).concat([finalAttachment])
+    } else {
+      // some sort of error
+      foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+      var deliveryError = JSON.parse(foodSession.delivery_error)
+      var errorMsg = `Looks like there are ${deliveryError.length} total errors including: ${deliveryError[0].user_msg}`
+      finalAttachment = {
+        text: errorMsg,
+        fallback: 'Confirm Choice',
+        callback_id: 'foodConfrimOrder_callbackID',
+        attachment_type: 'default'
+      }
+      response.attachments = [mainAttachment].concat(itemAttachments).concat([finalAttachment])
+    }
+  } catch (err) {
+    logging.error('error with creating cart payment for some reason', err)
   }
 
   if (replace) {

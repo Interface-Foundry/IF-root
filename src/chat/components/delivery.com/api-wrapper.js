@@ -33,18 +33,20 @@ module.exports.createCartForSession = function * (session) {
       'items': session.cart.filter(i => i.added_to_cart === true).map(i => i.item)
     }
   }
-  session.order_post = opts
-  session.markModified('order_post')
-  yield session.save()
+  session.delivery_post = opts
+  session.markModified('delivery_post')
+  session.save()
   try {
     var response = yield request(opts)
     logging.info('got cart from delivery.com')
     return response
-  } catch (e) {
-    logging.error('error lol', JSON.stringify(e))
+  } catch (err) {
+    session.delivery_error = JSON.stringify(err.error.message)
+    yield session.save()
+    logging.error('error submitting to delivery.com', err.error)
+    return null
   }
 }
-
 
 module.exports.searchNearby = function * (params) {
   params = _.merge({}, defaultParams.searchNearby, params)
