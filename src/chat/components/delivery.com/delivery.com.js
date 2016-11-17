@@ -214,7 +214,7 @@ handlers['food.begin'] = function * (message) {
     name: 'passthrough',
     text: 'New +',
     type: 'button',
-    value: 'address.new'
+    value: 'food.settings.address.new'
   })
 
   var msg_json = {
@@ -280,10 +280,10 @@ handlers['food.choose_address'] = function * (message) {
               'value': 'pickup'
             },
             {
-              'name': 'address.change',
+              'name': 'food.settings.address.change',
               'text': '< Change Address',
               'type': 'button',
-              'value': 'address.change'
+              'value': 'food.settings.address.change'
             }
           ]
         }
@@ -307,7 +307,7 @@ handlers['food.choose_address'] = function * (message) {
 //
 // the user's intent is to create a new address
 //
-handlers['address.new'] = function * (message) {
+handlers['food.settings.address.new'] = function * (message) {
   kip.debug(' 🌆🏙 enter a new address')
   // message.state = {}
   var msg_json = {
@@ -317,16 +317,16 @@ handlers['address.new'] = function * (message) {
       'mrkdwn_in': ['text']
     }]
   }
-  replyChannel.send(message, 'address.confirm', {type: message.origin, data: msg_json})
+  replyChannel.send(message, 'food.settings.address.confirm', {type: message.origin, data: msg_json})
 }
 
 //
 // the user seeks to confirm their possibly updated/validated address
 //
-handlers['address.confirm'] = function * (message) {
+handlers['food.settings.address.confirm'] = function * (message) {
   // ✐✐✐
   // send response since this is slow
-  replyChannel.sendReplace(message, 'address.save', {type: message.origin, data: {text: 'Thanks! We need to process that address real quick.'}})
+  replyChannel.sendReplace(message, 'food.settings.address.save', {type: message.origin, data: {text: 'Thanks! We need to process that address real quick.'}})
   try {
     var res = yield api.searchNearby({addr: message.text})
     logging.data('address broh', _.keys(res))
@@ -345,7 +345,7 @@ handlers['address.confirm'] = function * (message) {
     }
   } catch (err) {
     logging.error('error searching that address', err)
-    replyChannel.sendReplace(message, 'address.new', {
+    replyChannel.sendReplace(message, 'food.settings.address.new', {
       type: message.origin,
       data: {text: `Sorry, I can't find that address! Try typing something like: "902 Broadway New York, NY 10010"`}
     })
@@ -365,7 +365,7 @@ handlers['address.confirm'] = function * (message) {
         'attachment_type': 'default',
         'actions': [
           {
-            name: 'address.save',
+            name: 'food.settings.address.save',
             text: '✓ Confirm Address',
             type: 'button',
             style: 'primary',
@@ -375,7 +375,7 @@ handlers['address.confirm'] = function * (message) {
             name: 'passthrough',
             text: 'Edit Address',
             type: 'button',
-            value: 'address.new'
+            value: 'food.settings.address.new'
           }
         ]
       }
@@ -392,27 +392,31 @@ handlers['address.confirm'] = function * (message) {
     })
   }
 
-  replyChannel.send(message, 'address.save', {type: message.origin, data: msg_json})
+  replyChannel.send(message, 'food.settings.address.save', {type: message.origin, data: msg_json})
 }
 
 // Save the address to the db after the user confirms it
-handlers['address.save'] = function * (message) {
+handlers['food.settings.address.save'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var location = message.data.value
 
+  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+
   if (location) {
     foodSession.chosen_location = location
+    slackbot.meta.locations.push(location)
   } else {
     // todo error
     throw new Error('womp bad address')
   }
   yield foodSession.save()
+  yield slackbot.save()
 
   message.text = JSON.stringify(location)
   return yield handlers['food.choose_address'](message)
 }
 
-handlers['address.change'] = function * (message) {
+handlers['food.settings.address.change'] = function * (message) {
   return yield handlers['food.begin'](message)
 }
 
