@@ -107,7 +107,18 @@ function * start () {
     rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
       kip.debug('got slack message sent from user', data.user, 'on channel', data.channel)
-      // kip.debug(data)
+
+      // For channels that are not DM's, only respond if kip is called out by name
+      if ('CG'.includes(data.channel[0])) {
+        if (data.text.includes(slackbot.bot.bot_user_id)) {
+          // strip out the bot user id, like "<@U13456> find me socks" -> "find me socks"
+          var regex = new RegExp('<@' + slackbot.bot.bot_user_id + '>[:]*', 'g')
+          data.text = data.text.replace(regex, '').trim()
+        } else {
+          // if not mentioned by name, do nothing
+          return;
+        }
+      }
 
       var message = new db.Message({
         incoming: true,
