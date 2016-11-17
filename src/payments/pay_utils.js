@@ -103,6 +103,8 @@ module.exports.payDeliveryDotCom = function * (pay) {
 
   // pos to delivery
   try {
+    pay.delivery_post = guestCheckout
+    pay.save()
     var response = yield payForItemFromKip(guestCheckout, pay.order.guest_token)
     return response
   } catch (err) {
