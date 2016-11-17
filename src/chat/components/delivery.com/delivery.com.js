@@ -251,6 +251,11 @@ handlers['food.choose_address'] = function * (message) {
     var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     foodSession.chosen_location = location
 
+    // TEMP HACK skip s2, automatically choose delivery for now
+    var msg = _.cloneDeep(message)
+    msg.text = 'delivery'
+    yield handlers['food.delivery_or_pickup'](message)
+
     //
     // START OF S2
     //
@@ -289,7 +294,7 @@ handlers['food.choose_address'] = function * (message) {
         }
       ]
     }
-    replyChannel.sendReplace(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
+    // replyChannel.sendReplace(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
 
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
     var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession, 'data.input')
@@ -488,7 +493,7 @@ handlers['food.delivery_or_pickup'] = function * (message) {
     yield sleep(500)
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   }
-  var fulfillmentMethod = message.data.value
+  var fulfillmentMethod = _.get(message, 'data.value', message.text)
   foodSession.fulfillment_method = fulfillmentMethod
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
 
