@@ -27,7 +27,15 @@ handlers['food.menu.quick_picks'] = function * (message) {
     logging.info('searching for', keyword.cyan)
     var menu = Menu(foodSession.menu)
     var sortedMenu = menu.allItems()
-    var matchingItems = yield utils.matchText(keyword, sortedMenu, ['name'])
+    var matchingItems = yield utils.matchText(keyword, sortedMenu, ['name'], {
+      // seems to work better for matching
+      shouldSort: true,
+      threshold: 0.8,
+      tokenize: true,
+      matchAllTokens: true,
+      keys: ['name']
+    })
+
     if (matchingItems !== null) {
       logging.info('we possibly found a food match, hmm')
     } else {

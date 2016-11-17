@@ -2,6 +2,7 @@
 require('kip')
 var _ = require('lodash')
 
+var sleep = require('co-sleep')
 var googl = require('goo.gl')
 var request = require('request-promise')
 var api = require('./api-wrapper.js')
@@ -25,10 +26,14 @@ var handlers = {}
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function askUserForCuisineTypes (cuisines, admin, user) { // move this into the functiopn later
-  // probably should check if user is on slack
-  var cuisineToUse = _.sampleSize(cuisines, 4)
-    // var cuisineToUse = cuisines.slice(0,2) // use this for testing
+function askUserForCuisineTypes (cuisines, admin, user) {
+  // present top 2 local avail and then 2 random sample,
+  // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
+  var orderedCuisines = _.map(_.sortBy(cuisines, ['count']), 'name')
+  var top1 = orderedCuisines.pop()
+  var top2 = orderedCuisines.pop()
+  var randomCuisines = _.sampleSize(orderedCuisines, 2)
+  var cuisineToUse = [top1, top2, randomCuisines[0], randomCuisines[1]]
 
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
     return {
@@ -143,7 +148,13 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   // next filter out restaurants that don't match the keyword if provided
   if (keyword) {
-    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, ['summary.name'])
+    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, ['summary.name'], {
+      shouldSort: true,
+      threshold: 0.8,
+      tokenize: true,
+      matchAllTokens: true,
+      keys: ['summary.name']
+    })
     matchingRestaurants = matchingRestaurants.map(r => r.id)
     merchants = merchants.filter(m => matchingRestaurants.includes(m.id))
   }
@@ -216,8 +227,9 @@ handlers['food.user.poll'] = function * (message) {
       user: member.id,
       team: member.team_id
     }
-
-    var cuisinesAvailForUser = _.map(_.filter(foodSession.cuisines, function (o) { return o.count > 10 }), 'name')
+    // sleep for half a second so we dont get no
+    if (foodSession.cuisines.length < 5) sleep(1000)
+    var cuisinesAvailForUser = _.filter(foodSession.cuisines, function (o) { return o.count > 10 })
     var cuisineMessage = askUserForCuisineTypes(cuisinesAvailForUser, foodSession.convo_initiater, member.dm)
 
     var response = {
@@ -257,7 +269,13 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   if (message.allow_text_matching) {
     // user typed something
     logging.info('using text matching for cuisine choice')
-    var res = yield utils.matchText(message.text, foodSession.cuisines, ['name'])
+    var res = yield utils.matchText(message.text, foodSession.cuisines, ['name'], {
+      shouldSort: true,
+      threshold: 0.8,
+      tokenize: true,
+      matchAllTokens: true,
+      keys: ['name']
+    })
     if (res !== null) {
       addVote(res[0].name)
     } else {

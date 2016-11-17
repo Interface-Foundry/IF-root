@@ -68,6 +68,7 @@ var deliverySchema = mongoose.Schema({
     default: `15%`
   },
   tipAmount: Number,
+  payment_post: {}, // post body for payment (i.e. select or add new card)
   payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later
   guest_token: String, // related to creating a guest token per session
