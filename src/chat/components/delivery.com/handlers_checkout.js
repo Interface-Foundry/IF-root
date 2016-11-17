@@ -248,6 +248,8 @@ handlers['food.admin.order.pay'] = function * (message) {
   // check tip amount???
   if (foodSession.tipAmount !== (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)) {
     logging.error('tipAmount not correct')
+    logging.error('expected tip:', (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2))
+    logging.error('actual tip:', foodSession.tipAmount)
   }
 
   // base response
