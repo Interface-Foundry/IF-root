@@ -446,7 +446,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
       'attachments': [{
         'title': '',
         'mrkdwn_in': ['text'],
-        'text': `Cool, <${foodSession.payment.url}|➤ Click Here to Checkout>`,
+        'text': `Cool, looks like everything went through`,
         'fallback': `You are unable to follow this link to confirm order`,
         'callback_id': `food.admin.add_new_card`,
         'color': `#3AA3E3`,
