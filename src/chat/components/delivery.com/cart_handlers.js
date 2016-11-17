@@ -292,7 +292,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       if (foodSession.tipPercent === 'cash') {
         foodSession.tipAmount = 0.00
       } else {
-        foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * totalPrice).toFixed(2)
+        foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
       }
       yield foodSession.save()
 
