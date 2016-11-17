@@ -204,7 +204,6 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
         data: {text: `Thanks for your order, these users have submitted orders so far: ${confirmedUsersString}, waiting for the rest`}
       })
       foodSession.tracking.confirmed_orders_msg = message._id
-      foodSession.markModified('tracking')
       yield foodSession.save()
     }
   }

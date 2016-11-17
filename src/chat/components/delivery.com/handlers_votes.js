@@ -148,7 +148,13 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   // next filter out restaurants that don't match the keyword if provided
   if (keyword) {
-    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, ['summary.name'])
+    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, ['summary.name'], {
+      shouldSort: true,
+      threshold: 0.8,
+      tokenize: true,
+      matchAllTokens: true,
+      keys: ['summary.name']
+    })
     matchingRestaurants = matchingRestaurants.map(r => r.id)
     merchants = merchants.filter(m => matchingRestaurants.includes(m.id))
   }
