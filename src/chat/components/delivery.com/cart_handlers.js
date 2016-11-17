@@ -216,7 +216,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       return all + ', ' + _.filter(foodSession.team_members, {id: user})[0].name
     }, ``).slice(2)
 
-    if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
+    if (_.get(foodSession, 'tracking.confirmed_orders_msg')) {
       // user has confirmed and admin has already confirmed as well
 
       // users response
@@ -230,12 +230,11 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       })
     } else {
       // admin is confirming, replace their message
-      $replyChannel.sendReplace(message, '.', {
+      var msg = yield $replyChannel.sendReplace(message, '.', {
         type: message.origin,
         data: dashboard
       })
-      foodSession.tracking.confirmed_orders_msg = message._id
-      foodSession.markModified('tracking')
+      foodSession.tracking.confirmed_orders_msg = msg._id
       yield foodSession.save()
     }
   }
