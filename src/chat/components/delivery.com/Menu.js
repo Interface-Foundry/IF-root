@@ -34,9 +34,25 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
   var menu = this
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
+  console.log(JSON.stringify(item, null, 2))
 
-  return item.price * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
+  var basePrice
+  var hasPriceGroup = item.children.map(c => c.type).includes('price group')
+  if (hasPriceGroup) {
+    debugger;
+    var priceGroup = item.children.filter(c => c.type === 'price group')[0]
+    var priceOption = priceGroup.children.filter(p => !!cartItem.item.option_qty[p.unique_id])[0]
+    basePrice = _.get(priceOption, 'price', item.price)
+  } else {
+    basePrice = item.price
+  }
+
+  return basePrice * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
       if (!cartItem.item.option_qty.hasOwnProperty(optionId)) {
+        return sum
+      }
+
+      if (optionId === _.get(priceOption, 'unique_id', -1).toString()) {
         return sum
       }
 
@@ -139,7 +155,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
 }
 
 function nodeOptions (node, cartItem, validate) {
-  var attachments = node.children.filter(c => c.type === 'option group').map(g => {
+  var attachments = node.children.filter(c => c.type.includes('group')).map(g => {
     var a = {
       fallback: 'Meal option',
       callback_id: g.id,
@@ -192,8 +208,17 @@ function nodeOptions (node, cartItem, validate) {
     }
 
     a.actions = g.children.map(option => {
-      var checkbox
-      var price = option.price ? ' +$' + option.price : ''
+      var checkbox, price
+      if (g.type === 'price group') {
+        // price groups are like 'small, medium or large' and so each one is the base price
+        price = ' $' + option.price
+      } else if (g.type === 'option group' && option.price) {
+        // option groups are add-ons or required choices which can add to the item cost
+        price = ' +$' + option.price
+      } else {
+        price = ''
+      }
+
       if (cartItem.item.option_qty[option.unique_id]) {
         checkbox = allowMultiple ? '✓ ' : '◉ '
       } else {
