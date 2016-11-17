@@ -128,11 +128,22 @@ function * initiateDeliverySession (session) {
     })
   }
 
+  // TEMP HACK for Spark demo
+  var WHITELISTS = {
+    T0299Q668: ['jeff', 'christafogleman', 'donnasokolsky'], // Spark
+    T1JTUM7RN: ['peter', 'elon'], // Mars Vacation Condos
+    // T1P8S8C91: ['peter', 'graham', 'alyx', 'rachel', 'muchimoto', 'chris'] // Kip
+  }
+
   var teamMembers = yield db.Chatusers.find({
     team_id: session.source.team,
     is_bot: {$ne: true},
     deleted: {$ne: true},
     id: {$ne: 'USLACKBOT'}}).exec()
+
+  if (WHITELISTS[session.source.team]) {
+    teamMembers = teamMembers.filter(u => WHITELISTS[session.source.team].includes(u.name))
+  }
 
   var admin = yield db.Chatuser.findOne({id: session.source.user}).exec()
   var newSession = new db.Delivery({
