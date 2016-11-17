@@ -170,9 +170,9 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 */
 handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+  foodSession.update({$push: {confirmed_orders: message.source.user}})
   foodSession.confirmed_orders.push(message.source.user)
-  foodSession.markModified('confirmed_orders')
-  yield foodSession.save()
+  var menu = Menu(foodSession.menu)
 
   if (message.source.user !== foodSession.convo_initiater.id && !_.get(foodSession.tracking, 'confirmed_orders_msg')) {
     // user has confirmed but admin has not
@@ -181,11 +181,42 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   } else {
     // admin has already confirmed or admin is confirming their vote rn
 
+    var allItems = foodSession.cart
+      .filter(i => i.added_to_cart && foodSession.confirmed_orders.includes(i.user_id))
+      .map(i => menu.getItemById(i.item.item_id).name)
+      .join(', ')
+
+    // Show which team members are not in the votes array
+    var slackers = _.difference(foodSession.team_members.map(m => m.id), foodSession.confirmed_orders)
+      .map(id => `<@${id}>`)
+      .join(', ')
+
+    var dashboard = {
+      mrkdwn_in: ['text'],
+      text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
+      attachments: [{
+        color: '#3AA3E3',
+        mrkdwn_in: ['text'],
+        text: `*Collected so far* 👋\n_${allItems}_`
+      },{
+        color: '#49d63a',
+        mrkdwn_in: ['text'],
+        text: `*Waiting for votes from:*\n${slackers}`,
+        actions: [{
+          name: 'food.admin.order.confirm',
+          text: 'Finish Order Early',
+          style: 'default',
+          type: 'button',
+          value: 'food.admin.order.confirm'
+        }]
+      }]
+    }
+
     var confirmedUsersString = _.reduce(foodSession.confirmed_orders, function (all, user) {
       return all + ', ' + _.filter(foodSession.team_members, {id: user})[0].name
     }, ``).slice(2)
 
-    if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
+    if (_.get(foodSession, 'tracking.confirmed_orders_msg')) {
       // user has confirmed and admin has already confirmed as well
 
       // users response
@@ -195,15 +226,15 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
       $replyChannel.sendReplace(msgToReplace, '.', {
         type: msgToReplace.origin,
-        data: {text: `Thanks for your order, these users have submitted orders so far: ${confirmedUsersString}, waiting for the rest`}
+        data: dashboard
       })
     } else {
       // admin is confirming, replace their message
-      $replyChannel.sendReplace(message, '.', {
+      var msg = yield $replyChannel.sendReplace(message, '.', {
         type: message.origin,
-        data: {text: `Thanks for your order, these users have submitted orders so far: ${confirmedUsersString}, waiting for the rest`}
+        data: dashboard
       })
-      foodSession.tracking.confirmed_orders_msg = message._id
+      foodSession.tracking.confirmed_orders_msg = msg._id
       yield foodSession.save()
     }
   }

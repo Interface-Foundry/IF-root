@@ -138,14 +138,16 @@ function * initiateDeliverySession (session) {
       name: admin.name,
       first_name: _.get(admin, 'first_name') ? admin.first_name : admin.profile.real_name,
       last_name: _.get(admin, 'last_name') ? admin.last_name : '',
-      email: admin.profile.email
+      email: admin.profile.email,
+      dm: admin.dm
     },
     data: {
       instructions: ' '
     },
     tracking: {
     // last_sent_message to replace, and specific id's to
-      confirmed_orders_msg: null
+      confirmed_orders_msg: null,
+      confirmed_votes_msg: null
     }
   })
   if (_.get(admin, 'phone_number')) {
