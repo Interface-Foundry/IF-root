@@ -285,7 +285,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     // user used button click
     // No Lunch For Me
     if (message.data.value === 'user_remove') {
-      foodSession.update({$pull: {team_members: {id: message.user_id}}})
+      yield foodSession.update({$pull: {team_members: {id: message.user_id}}}).exec()
       foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
     } else {
       addVote(message.data.value)

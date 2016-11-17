@@ -170,8 +170,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 */
 handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-  foodSession.update({$push: {confirmed_orders: message.source.user}})
-  foodSession.confirmed_orders.push(message.source.user)
+  yield foodSession.update({$push: {confirmed_orders: message.source.user}}).exec()
   var menu = Menu(foodSession.menu)
 
   if (message.source.user !== foodSession.convo_initiater.id && !_.get(foodSession.tracking, 'confirmed_orders_msg')) {
