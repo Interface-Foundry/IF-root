@@ -355,10 +355,18 @@ handlers['food.settings.address.confirm'] = function * (message) {
     return
   }
 
+  console.log(location)
+
+  var addr = [
+    [location.address_1, location.address_2].filter(Boolean).join(' '),
+    location.neighborhood,
+    `${location.city}, ${location.state} ${location.zip_code}`].filter(Boolean).join('\n')
+
   var msg_json = {
-    'text': `Is ${location.address_1} ${location.city}, ${location.state}, ${location.zip_code} your address?`,
+    text: `Is this your address?`,
     'attachments': [
       {
+        text: addr,
         'mrkdwn_in': [
           'text'
         ],
