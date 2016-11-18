@@ -294,6 +294,18 @@ handlers['food.admin.order.pay'] = function * (message) {
           'type': `button`,
           'style': `primary`,
           'value': c.card.card_id
+        }, {
+          name: 'food.admin.order.remove_card',
+          text: 'Remove Card',
+          type: 'button',
+          style: 'default',
+          value: c.card.card_id,
+          confirm: {
+            title: 'Confirm Remove Card',
+            text: `Are you sure you want to remove the card ending in ${c.card.last4} from your list of saved credit cards?`,
+            ok_text: 'Remove Card',
+            dismiss_text: 'Keep Card'
+          }
         }]
       }
     })
@@ -301,6 +313,18 @@ handlers['food.admin.order.pay'] = function * (message) {
     response.attachments = response.attachments.concat(cardsAttachment)
   }
   $replyChannel.sendReplace(message, 'food.admin.order.select_card', {type: message.origin, data: response})
+}
+
+handlers['food.admin.order.remove_card'] = function * (message) {
+  if (!message.data.value) {
+    return logging.error('could not remove card because card_id was undefined')
+  }
+
+  var slackbot = yield db.Slackbots.update({team_id: message.source.team}, {
+    $pull: {'meta.payments': {'card.card_id': message.data.value}}
+  }).exec()
+
+  return yield handlers['food.admin.order.pay'](message)
 }
 
 handlers['food.admin.add_new_card'] = function * (message) {
