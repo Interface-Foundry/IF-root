@@ -854,47 +854,6 @@ handlers['food.poll.confirm_send'] = function * (message) {
   replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
 }
 
-handlers['test.s8'] = function * (message) {
-  var msg_json = {
-    'text': '`Alyx` chose `Choza Taqueria` - Mexican, Southwestern - est. wait time 45-55 min',
-    'attachments': [
-      {
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': 'Want to be in this order?',
-        'fallback': 'n/a',
-        'callback_id': 'food.participate.confirmation',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'food.menu.quick_picks',
-            'text': 'Yes',
-            'type': 'button',
-            'style': 'primary',
-            'value': 'food.menu.quick_picks'
-          },
-          {
-            'name': 'food.exit.confirm',
-            'text': 'No',
-            'type': 'button',
-            'value': 'food.exit.confirm',
-            'confirm': {
-              'title': 'Are you sure?',
-              'text': "Are you sure you don't want to order food?",
-              'ok_text': 'Yes',
-              'dismiss_text': 'No'
-            }
-          }
-        ]
-      }
-    ]
-  }
-
-  replyChannel.send(message, 'food.menu.quick_picks', {type: 'slack', data: msg_json})
-}
-
 module.exports = {
   handleMessage: handleMessage
 }

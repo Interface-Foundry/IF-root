@@ -173,76 +173,94 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 */
 handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-  foodSession.confirmed_orders.push(message.source.user)
-  yield foodSession.save()
-  var menu = Menu(foodSession.menu)
 
-  if (message.source.user !== foodSession.convo_initiater.id && !_.get(foodSession.tracking, 'confirmed_orders_msg')) {
-    // user has confirmed but admin has not
-
-    $replyChannel.sendReplace(message, '.', {type: message.origin, data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
+  //
+  // Reply to the user who either submitted their personal cart or said "no thanks"
+  //
+  if (message.data.value === 'no thanks') {
+    yield foodSession.update({$pull: {team_members: {id: message.user_id}}}).exec()
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   } else {
-    // admin has already confirmed or admin is confirming their vote rn
-
-    var allItems = foodSession.cart
-      .filter(i => i.added_to_cart && foodSession.confirmed_orders.includes(i.user_id))
-      .map(i => menu.getItemById(i.item.item_id).name)
-      .join(', ')
-
-    // Show which team members are not in the votes array
-    var slackers = _.difference(foodSession.team_members.map(m => m.id), foodSession.confirmed_orders)
-      .map(id => `<@${id}>`)
-      .join(', ')
-
-    var dashboard = {
-      mrkdwn_in: ['text'],
-      text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
-      attachments: [{
-        color: '#3AA3E3',
-        mrkdwn_in: ['text'],
-        text: `*Collected so far* 👋\n_${allItems}_`
-      },{
-        color: '#49d63a',
-        mrkdwn_in: ['text'],
-        text: `*Waiting for votes from:*\n${slackers}`,
-        actions: [{
-          name: 'food.admin.order.confirm',
-          text: 'Finish Order Early',
-          style: 'default',
-          type: 'button',
-          value: 'food.admin.order.confirm'
-        }]
-      }]
-    }
-
-    var confirmedUsersString = _.reduce(foodSession.confirmed_orders, function (all, user) {
-      return all + ', ' + _.filter(foodSession.team_members, {id: user})[0].name
-    }, ``).slice(2)
-
-    if (_.get(foodSession, 'tracking.confirmed_orders_msg')) {
-      // user has confirmed and admin has already confirmed as well
-
-      // users response
-      $replyChannel.sendReplace(message, '.', {type: message.origin, data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
-
-      // replace admins message
-      var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
-      $replyChannel.sendReplace(msgToReplace, '.', {
-        type: msgToReplace.origin,
-        data: dashboard
-      })
-    } else {
-      // admin is confirming, replace their message
-      var msg = yield $replyChannel.sendReplace(message, '.', {
-        type: message.origin,
-        data: dashboard
-      })
-      foodSession.tracking.confirmed_orders_msg = msg._id
-      yield foodSession.save()
-    }
+    foodSession.confirmed_orders.push(message.source.user)
+    $replyChannel.sendReplace(message, '.', {type: message.origin, data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
+    yield foodSession.save()
   }
 
-  // yield in case it takes a second for foodSession array takes time
+
+  //
+  // Admin Order Dashboard
+  //
+  var menu = Menu(foodSession.menu)
+  var allItems = foodSession.cart
+    .filter(i => i.added_to_cart && foodSession.confirmed_orders.includes(i.user_id))
+    .map(i => menu.getItemById(i.item.item_id).name)
+    .join(', ')
+
+  // Show which team members are not in the votes array
+  var slackers = _.difference(foodSession.team_members.map(m => m.id), foodSession.confirmed_orders)
+    .map(id => `<@${id}>`)
+    .join(', ')
+
+  var dashboard = {
+    text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
+    attachments: [{
+      color: '#3AA3E3',
+      mrkdwn_in: ['text'],
+      text: `*Collected so far* 👋\n_${allItems}_`
+    }]
+  }
+
+  if (slackers) {
+    dashboard.attachments.push({
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      text: `*Waiting for votes from:*\n${slackers}`,
+      actions: [{
+        name: 'food.admin.order.confirm',
+        text: 'Finish Order Early',
+        style: 'default',
+        type: 'button',
+        value: 'food.admin.order.confirm'
+      }]
+    })
+  }
+
+  if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
+    // replace admins message
+    var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
+    $replyChannel.sendReplace(msgToReplace, 'food.admin.waiting_for_orders', {
+      type: msgToReplace.origin,
+      data: dashboard
+    })
+
+  } else if (foodSession.convo_initiater.id === message.source.user) {
+    // admin is done
+    // create the dashboard for the first time for the admin
+    var admin = foodSession.convo_initiater
+    var msg = {
+      mode: 'food',
+      action: 'food.admin.waiting_for_orders',
+      thread_id: admin.dm,
+      origin: message.origin,
+      source: {
+        team: foodSession.team_id,
+        user: admin.id,
+        channel: admin.dm
+      }
+    }
+
+    var sentMessage = yield $replyChannel.send(msg, 'food.admin.waiting_for_orders', {
+      type: msg.origin,
+      data: dashboard
+    })
+    foodSession.tracking.confirmed_orders_msg = sentMessage._id
+    yield foodSession.save()
+  }
+
+
+  //
+  // Move on to the TEAM CART (omigosh almost there)
+  //
   if (foodSession.confirmed_orders.length >= foodSession.team_members.length) {
     // take admin to order confirm, not sure if i need to look this up again but doing it for assurance
     var adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})

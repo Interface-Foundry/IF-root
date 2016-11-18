@@ -347,7 +347,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   }
 
   if (slackers.length > 0) {
-    dashboard.attachments({
+    dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
       text: `*Waiting for votes from:* \n${slackers}`,
@@ -567,10 +567,10 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
             'value': {}
           },
           {
-            'name': 'food.exit.confirm',
+            'name': 'food.admin.waiting_for_orders',
             'text': 'No',
             'type': 'button',
-            'value': 'food.exit.confirm',
+            'value': 'no thanks',
             'confirm': {
               'title': 'Are you sure?',
               'text': "Are you sure you don't want to order food?",
