@@ -210,7 +210,7 @@ function nodeOptions (node, cartItem, validate) {
       } else {
         a.text += `
  Required - Choose at least ${g.min_selection} and up to ${g.max_selection}.`
-        if (validate && numSelected > g.max_selection) {
+        if (numSelected > g.max_selection) {
           a.text += '\n`Maximum number of options exceeded`'
           a.color = '#fa951b'
         } else if (validate && numSelected < g.min_selection) {
