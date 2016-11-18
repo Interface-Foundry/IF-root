@@ -245,7 +245,12 @@ handlers['food.user.poll'] = function * (message) {
     foodSession.data = { response_history: []}
     foodSession.data.response_history.push({'handler': 'food.user.poll', 'response': response.data})
     foodSession.save()
-    $replyChannel.send(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
+
+    if (member.id === foodSession.convo_initiater.id) {
+      $replyChannel.sendReplace(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
+    } else {
+      $replyChannel.send(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
+    }
   })
 }
 
