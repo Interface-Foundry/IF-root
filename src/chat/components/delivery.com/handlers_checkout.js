@@ -499,7 +499,7 @@ handlers['food.done'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
 
-  logging.info('FOOD SESSION FOOD.DONE: ',foodSession)
+  //logging.info('FOOD SESSION FOOD.DONE: ',foodSession)
 
   //MESSAGE ALL MEMBERS OF ORDER ---> food is on the way! (send kip food gif). at some point let's point a game here
 
