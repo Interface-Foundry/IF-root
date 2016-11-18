@@ -158,7 +158,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
 
     // create stripe customer
     try {
-      logging.info('creating new customer and charge for, ', token)
+      logging.info(`creating new customer and charge for, ${token}`)
       var customer = yield stripe.customers.create({
         source: token,
         description: 'Delivery.com & Kip: ' + payment.order.chosen_restaurant.name
@@ -168,7 +168,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
         currency: 'usd',
         customer: customer.id
       })
-      profOak.say(`succesfully created new card and charge for team:${payment.order.team_id}`)
+      profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(charge.amount / 100.0).toFixed(2).$}`)
     } catch (err) {
       logging.error('had an error creating customer and card', err)
     }
@@ -229,6 +229,9 @@ function * chargeById (payment) {
       customer: payment.order.saved_card.customer_id, // Previously stored, then retrieved
       card: payment.order.saved_card.card_id
     })
+
+    profOak.say(`succesfully created new stripe charge for team:${payment.order.team_id} in amount ${(charge.amount / 100.0).toFixed(2).$}`)
+    logging.info(`succesfully created new stripe charge for team:${payment.order.team_id} in amount ${(charge.amount / 100.0).toFixed(2).$}`)
   } catch (err) {
     logging.error('error creating stripe charge')
   }

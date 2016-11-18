@@ -5,6 +5,10 @@ var _ = require('lodash')
 var payConst = require('./pay_const.js')
 var cc = require('./secrets/kip_cc.js')
 
+// tracking for food into cafe-tracking
+var Professor = require('../monitoring/prof_oak.js')
+var profOak = new Professor.Professor('C33NU7FRC')
+
 /* this would be for kip to pay for an order once the user has successfully paid stripe
 *
 *
@@ -105,6 +109,7 @@ module.exports.payDeliveryDotCom = function * (pay) {
   try {
     pay.delivery_post = guestCheckout
     pay.save()
+    profOak.say(`paying for delivery.com for team:${pay.order.team_id} total amount: ${pay.order.total} with tip ${pay.delivery_post.tip}`)
     var response = yield payForItemFromKip(guestCheckout, pay.order.guest_token)
     return response
   } catch (err) {
