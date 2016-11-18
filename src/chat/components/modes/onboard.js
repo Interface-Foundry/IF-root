@@ -732,7 +732,6 @@ handlers['checkout'] = function * (message) {
  */
 handlers['sorry'] = function * (message) {
 
- // kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
    message.text = "Sorry, my brain froze!"
    message.mode = 'onboard';
    message.action = 'home';
@@ -778,6 +777,8 @@ handlers['home_btn'] = function * (message) {
       uri: message.source.response_url,
       body: JSON.stringify(json)
     });
+
+    return
 }
 
 /**
@@ -786,7 +787,6 @@ handlers['home_btn'] = function * (message) {
 handlers['back_btn'] = function * (message) {
    var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
    var last_message = history[0];
-   var mode = _.get(last_message,'mode');
    var actions = cardTemplate.slack_onboard_default;
    var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
    var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
@@ -795,16 +795,55 @@ handlers['back_btn'] = function * (message) {
     json.attachments[json.attachments.length-1] = {
         fallback: 'onboard',
         callback_id: 'onboard',
-        actions: actions
+        actions: cardTemplate.slack_onboard_default
     }
-   
     request({
       method: 'POST',
       uri: message.source.response_url,
       body: JSON.stringify(json)
     });
+    return 
 }
 
+/**
+ * more info / help handler
+ */
+handlers['more_info'] = function * (message) {
+   var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
+   var last_message = history[0];
+   var lastAction = _.get(last_message,'action');
+   var helpText;
+   var lastMenu = _.get(message, 'source.original_message.attachments') ? _.get(message, 'source.original_message.attachments')[_.get(message, 'source.original_message.attachments').length-1].actions : undefined;
+   switch(lastAction) {
+    case 'bundle.more':
+      helpText = `Selecting 'Yes' will allow you to choose which channels to add to this order.
+  Or simply checkout your items by selecting 'No'`
+      break
+    case 'team.help': 
+      helpText = `Kip will direct message members in each selected channel to help them add items to the cart!`
+      break
+   }
+
+   message.text = "";
+   message.mode = 'onboard';
+   message.action = 'home';
+   var attachments = [];
+   attachments.push({
+      text: helpText,
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      fallback:'Onboard',
+      actions: lastMenu,
+      callback_id: 'none'
+    });
+    attachments.map(function(a) {
+      a.mrkdwn_in =  ['text'];
+      a.color = '#45a5f4';
+    })
+   message.reply = attachments;
+   return [message];
+
+}
 
 function createCronJob(people, msg, team, date) {
   kip.debug('\n\n\nsetting cron job day: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');

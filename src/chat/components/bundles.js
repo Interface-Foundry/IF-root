@@ -109,7 +109,7 @@ var updateBundle = module.exports.updateBundle = function * (bundle) {
 
 var updater  = module.exports.updater =  function () {
   kip.debug('setting cron job for updating bundle items at midnight...');
-  new cron.CronJob('48 18 * * *', function () {
+  new cron.CronJob('00 00 * * *', function () {
  	  co(updateBundles); 
     }, function() {
   kip.debug('\n\n\n updated bundle items! \n\n\n');
