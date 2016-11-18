@@ -148,43 +148,6 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
 
 // ONBOARDING MODE TEMPLATES
 
-var slack_onboard_default = module.exports.slack_onboard_default = [{
-      name: "exit",
-      text: "Exit Onboarding",
-      style: "primary",
-      type: "button",
-      value: "exit"
-    },{
-      name: "onboard.home.menu",
-      text: "🐧",
-      style: "default",
-      type: "button",
-      value: "home_btn"
-    }];
-
-
-var slack_onboard_home = module.exports.slack_onboard_home  = [{
-     name: "cafe_btn",
-     text: "Kip Cafe",
-     style: "default",
-     type: "button",
-     value: "cafe_btn"
-   },
-   {
-     name: "shopping_btn",
-     text: "Kip Shopping",
-     style: "default",
-     type: "button",
-     value: "shopping_btn"
-   },
-   {
-     name: "onboard.home.default",
-     text: "< Back",
-     style: "default",
-     type: "button",
-     value: "back_btn"
-   }];
-
 var slack_onboard_start = module.exports.slack_onboard_start = [{
      name: "onboard.start.lunch",
      text: "Lunch",
@@ -229,6 +192,19 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
      value: "bundle.supplies"
    }];
 
+var slack_onboard_default = module.exports.slack_onboard_default = [{
+      name: "exit",
+      text: "Exit Onboarding",
+      style: "primary",
+      type: "button",
+      value: "exit"
+    },{
+      name: "home_btn",
+      text: "🐧",
+      style: "default",
+      type: "button",
+      value: "home_btn"
+    }];
 
 var slack_onboard_basic = module.exports.slack_onboard_basic = [{
       name: "onboard.bundle.yes",
@@ -255,7 +231,13 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
       text: "Send Onboarding",
       style: "primary",
       type: "button",
-      value: "reminder"
+      value: "member"
+    },{
+      name: "onboard.team.help",
+      text: "Help",
+      style: "default",
+      type: "button",
+      value: "help"
     },{
       name: "onboard.team.help",
       text: "Help",
@@ -330,3 +312,65 @@ var slack_remind = module.exports.slack_remind = [{
     value: "confirm_remind.choose"
   }
 ];
+
+var member_remind = module.exports.slack_member_remind = [{
+    name: "onboard_shopping.member.confirm_reminder",
+    text: "Today",
+    style: "default",
+    type: "button",
+    value: "confirm_reminder.today"
+  }, {
+    name: "onboard_shopping.member.confirm_reminder",
+    text: "Tomorrow",
+    style: "default",
+    type: "button",
+    value: "confirm_reminder.tomorrow"
+  }, {
+    name: "onboard_shopping.member.confirm_reminder",
+    text: "1 Week",
+    style: "default",
+    type: "button",
+    value: "confirm_reminder.one_week"
+  }, {
+    name: "onboard_shopping.member.confirm_reminder",
+    text: "Choose for me",
+    style: "default",
+    type: "button",
+    value: "confirm_reminder.choose"
+  }
+];
+
+
+var slack_onboard_member = module.exports.slack_onboard_member = [{
+      name: "onboard_shopping.member.step_1",
+      text: "Ok!",
+      style: "default",
+      type: "button",
+      value: "step_1"
+    },{
+      name: "onboard_shopping.member.reminder",
+      text: "Remind me later",
+      style: "default",
+      type: "button",
+      value: "reminder"
+    }];
+
+var slack_member_onboard_start = module.exports.slack_member_onboard_start = [{
+  "name": "onboard_shopping.member.step_2",
+  "text": "Headphones",
+  "style": "default",
+  "type": "button",
+  "value": "step_2.headphones"
+}, {
+  "name": "onboard_shopping.member.step_2",
+  "text": "Coding Books",
+  "style": "default",
+  "type": "button",
+  "value": "step_2.books"
+}, {
+  "name": "onboard_shopping.member.step_2",
+  "text": "Healthy Snacks",
+  "style": "default",
+  "type": "button",
+  "value": "step_2.snacks"
+}];

@@ -7,7 +7,6 @@ var dutils = require('../delivery.com/utils');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
 var cron = require('cron');
-var cronJobs = {};
 var momenttz = require('moment-timezone');
 var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
@@ -121,6 +120,7 @@ handlers['start'] = function * (message) {
    msg.reply = attachments;
    return [msg];
  }
+
 handlers['confirm_remind'] = function*(message, data) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   var team = yield db.Slackbots.findOne({
@@ -476,21 +476,14 @@ handlers['reminder'] = function (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  var attachments = [];
-  attachments.push({
-    text: 'Awesome! I\'ve let them know',
-    color: '#49d63a',
-    mrkdwn_in: ['text'],
-    fallback: 'Onboard'
-  })
-  attachments.push({
-    text: 'Would you like to set a reminder for collecting shopping orders from your team?',
+  var attachments = [{
+    text: 'Awesome! I\'ve let them know\nWould you like to set a reminder for collecting shopping orders from your team?',
     color: '#49d63a',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
     actions: cardTemplate.slack_reminder,
     callback_id: 'none'
-  });
+  }];
   attachments.push({
     text: '',
     color: '#49d63a',
@@ -550,24 +543,17 @@ handlers['confirm_reminder'] = function*(message, data) {
       break;
   }
   var messageText = (msInFuture > 0) ?
-    `Awesome! I'll give you a heads up for your order ${dateDescrip}.` :
+    `Awesome! I'll give everyone a heads up for your order ${dateDescrip}.` :
     'Ok! I won\'t set any reminders.';
   messageText += ' Thanks and have a great day. Type `help` if you\'re feeling a bit wobbly :)';
-  var attachments = [];
-  attachments.push({
-    text: messageText,
-    color: '#49d63a',
-    mrkdwn_in: ['text'],
-    fallback: 'Onboard'
-  });
-  attachments.push({
+  var attachments = [{
     text: '',
     color: '#49d63a',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
-  });
+  }];
   attachments.map(function(a) {
     a.mrkdwn_in = ['text'];
     a.color = '#45a5f4';
@@ -575,7 +561,7 @@ handlers['confirm_reminder'] = function*(message, data) {
   var msg = message;
   msg.mode = 'onboard'
   msg.action = 'home'
-  msg.text = ''
+  msg.text = messageText
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
@@ -631,26 +617,70 @@ handlers['confirm_reminder'] = function*(message, data) {
  * S5
  */
 handlers['member'] = function * (message) {
- var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  var cartChannels = team.meta.cart_channels;
-  var attachments = [];
-  attachments.push({ 
-    text: ''
+  var team = yield db.Slackbots.findOne({
+    'team_id': team_id
+  }).exec();
+  var channelMembers = [];
+  var currentUser = yield db.Chatusers.findOne({
+    id: message.source.user
   });
-  var cartMembers = [];
-  yield cartChannels.map(function * (cid) {
-    let channelMembers = yield utils.getChannelMembers(cid);
-    cartMembers = cartMembers.concat(channelMembers);
+  yield team.meta.cart_channels.map(function*(channel) {
+    var members = yield utils.getChannelMembers(team, channel);
+    if (channelMembers.length == 0) {
+      channelMembers = members; // don't check if something's already there if we know there's nothing there
+    } else {
+      channelMembers = channelMembers.concat(_.differenceWith(channelMembers, members, (a, b) => a.id == b.id));
+    }
   });
-  yield cartMembers.map( function * (m) {
-        //Send onboarding stuff for each individual member
-  });
-}
 
+  var attachments = [{
+    text: `Make <@${currentUser.id}>'s life easier! Let me show you how to add items to the team cart`,
+    mrkdwn_in: ['text'],
+    fallback: 'Onboard',
+    callback_id: 'none',
+    actions: cardTemplate.slack_onboard_member,
+  }];
+  attachments.push({
+    text: '',
+    color: '#49d63a',
+    mrkdwn_in: ['text'],
+    fallback: 'Onboard',
+    actions: cardTemplate.slack_onboard_default,
+    callback_id: 'none'
+  });
+  attachments.map(function(a) {
+    a.mrkdwn_in = ['text'];
+    a.color = '#45a5f4';
+  })
+  yield channelMembers.map(function * (a) {
+    if (a.id == currentUser.id) return;
+    var newMessage = new db.Message({
+      text: '',
+      incoming: false,
+      thread_id: a.dm,
+      origin: 'slack',
+      mode: 'onboard',
+      action: 'home',
+      reply: attachments,
+      source: {
+        team: team.team_id,
+        channel: a.dm,
+        user: a.id,
+        type: "message",
+        subtype: "bot_message"
+      },
+      user: a,
+      user_id: a.id
+    });
+    yield newMessage.save()
+    queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
+  });
+  return handlers['reminder'](message);
+}
 /**
  * S6
  */
@@ -724,7 +754,6 @@ handlers['checkout'] = function * (message) {
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
    return [msg];
-
 }
 
 /**
@@ -845,8 +874,8 @@ handlers['more_info'] = function * (message) {
 
 }
 
-function createCronJob(people, msg, team, date) {
-  kip.debug('\n\n\nsetting cron job day: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
+const createCronJob = function(people, msg, team, date) {
+  kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
   new cron.CronJob(date, function() {
       people.map(function(a) {
         msg.user_id = a.id;
@@ -856,10 +885,10 @@ function createCronJob(people, msg, team, date) {
           channel: a.dm,
           user: a.id,
           type: "message",
-          subtype:"bot_message"
+          subtype: "bot_message"
         }
         var newMessage = new db.Message(msg);
-        newMessage.save()
+        newMessage.save();
         queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
       });
     }, function() {
@@ -869,10 +898,10 @@ function createCronJob(people, msg, team, date) {
     true,
     team.meta.weekly_status_timezone);
 };
-
 // based on the current time, determine a later time
 function determineLaterToday(now) {
   var ONE_HOUR = 60*60*1000;
+  return 20 * 1000; //TODO: change back
   if (now.getHours() < 12) return ONE_HOUR;
   else if (now.getHours() < 14) return ONE_HOUR * 2;
   else if (now.getHours() < 17) return (17 - now.getHours()) * ONE_HOUR;
