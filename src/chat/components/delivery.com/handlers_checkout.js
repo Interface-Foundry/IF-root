@@ -163,14 +163,6 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
         'attachment_type': `default`
-
-        // doesnt make sense to have this since if we allow the user to edit order it negates a large portion of our system
-        // 'actions': [{
-        //   'name': `food.admin.order.checkout.address_1`,
-        //   'text': `Edit`,
-        //   'type': `button`,
-        //   'value': `edit`
-        // }]
       },
       {
         'title': '',

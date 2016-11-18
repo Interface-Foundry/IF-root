@@ -316,6 +316,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       if (foodSession.tipPercent !== 'cash') {
         foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
+        foodSession.save()
       }
       var finalAttachment = {
         text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +

@@ -168,7 +168,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
         currency: 'usd',
         customer: customer.id
       })
-      profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(charge.amount / 100.0).toFixed(2).$}`)
+      profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(payment.order.order.total / 100.0).toFixed(2).$}`)
     } catch (err) {
       logging.error('had an error creating customer and card', err)
     }
@@ -230,8 +230,7 @@ function * chargeById (payment) {
       card: payment.order.saved_card.card_id
     })
 
-    profOak.say(`succesfully created new stripe charge for team:${payment.order.team_id} in amount ${(charge.amount / 100.0).toFixed(2).$}`)
-    logging.info(`succesfully created new stripe charge for team:${payment.order.team_id} in amount ${(charge.amount / 100.0).toFixed(2).$}`)
+    profOak.say(`succesfully created new stripe charge for team:${payment.order.team_id} in amount ${(payment.order.order.total / 100.0).toFixed(2).$}`)
   } catch (err) {
     logging.error('error creating stripe charge')
   }
