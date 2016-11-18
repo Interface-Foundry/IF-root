@@ -30,9 +30,11 @@ function askUserForCuisineTypes (cuisines, admin, user) {
   // present top 2 local avail and then 2 random sample,
   // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
   var orderedCuisines = _.map(_.sortBy(cuisines, ['count']), 'name')
-  var top1 = orderedCuisines.pop()
-  var top2 = orderedCuisines.pop()
-  var randomCuisines = _.sampleSize(orderedCuisines, 2)
+  var ignoredTopItems = ['Cafe', 'Kosher', 'Sandwiches', 'Italian', 'Pizza', 'Asian']
+  var cuisinesWithoutTop = _.pullAll(orderedCuisines, ignoredTopItems)
+  var top1 = cuisinesWithoutTop.pop()
+  var top2 = cuisinesWithoutTop.pop()
+  var randomCuisines = _.sampleSize(_.pull(orderedCuisines, top1, top2), 2)
   var cuisineToUse = [top1, top2, randomCuisines[0], randomCuisines[1]]
 
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
