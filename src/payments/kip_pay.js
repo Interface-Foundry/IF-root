@@ -281,7 +281,7 @@ function * chargeById (payment) {
         var itemNames = foodSession.cart
           .filter(i => u.user_id === userId)
           .map(i => menu.getItemById(i.item.item_id).name)
-          .map(n => '*' + name + '*') // be bold
+          .map(name => '*' + name + '*') // be bold
 
         if (itemNames.length > 1) {
           var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
