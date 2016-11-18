@@ -8,6 +8,7 @@ var queue = require('../queue-mongo')
 var utils = require('./utils')
 
 var team_utils = require('./team_utils.js')
+var slackUtils = require('../slack/utils.js')
 var parseAddress = require('parse-address')
 var mailer_transport = require('../../../mail/IF_mail.js')
 var UserChannel = require('./UserChannel')
@@ -193,12 +194,13 @@ handlers['food.begin'] = function * (message) {
     ]
   }
   replyChannel.send(message, 'food.banner', {type: message.origin, data: msg_json})
-  yield sleep(1000)
+
 
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
-  team_utils.getChatUsers(message)
-  message.state = {}
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  yield [sleep(1000), slackUtils.getTeamMembers(team)]
+
+  message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
   yield foodSession.save()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
