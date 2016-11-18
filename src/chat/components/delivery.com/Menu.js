@@ -134,7 +134,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   var options = nodeOptions(item, cartItem, validate)
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
-    'text': 'Special Instructions: _None_',
+    'text': `Special Instructions: ${cartItem.item.instructions || "_None_"}`,
     'fallback': 'You are unable to choose a game',
     'callback_id': 'wopr_game',
     'color': '#49d63a',
@@ -151,10 +151,10 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
         'value': cartItem.item.item_id
       },
       {
-        'name': 'chess',
-        'text': '+ Special Instructions',
+        'name': 'food.item.instructions',
+        'text': '✎ Special Instructions',
         'type': 'button',
-        'value': 'chess'
+        'value': cartItem.item.item_id
       },
       {
         'name': 'food.menu.quick_picks',

@@ -262,6 +262,38 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
+handlers['food.item.instructions'] = function * (message) {
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var itemId = message.data.value
+  var item = cart.menu.getItemById(itemId)
+  var msg = {
+    text: `Add Special Instructions for *${item.name}*`,
+    attachments: [{
+      text: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
+      mrkdwn_in: ['text']
+    }]
+  }
+
+  var response = yield $replyChannel.sendReplace(message, 'food.item.instructions.submit', {type: message.origin, data: msg})
+  db.Messages.update({_id: response._id}, {$set: {'data.item_id': itemId}}).exec()
+}
+
+handlers['food.item.instructions.submit'] = function * (message) {
+  var itemId = message.history.map(m => _.get(m, 'data.item_id')).filter(Boolean)[0]
+
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var userItem = yield cart.getItemInProgress(itemId, message.source.user)
+
+  yield db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.item.instructions': message.text || ''}}).exec()
+  var msg = _.merge({}, message, {
+    text: '',
+    data: {value: itemId}
+  })
+  return yield handlers['food.item.submenu'](msg)
+}
+
 handlers['food.item.add_to_cart'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
