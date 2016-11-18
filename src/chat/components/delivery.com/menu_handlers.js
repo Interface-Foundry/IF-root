@@ -253,8 +253,9 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
   if (userItem.item.item_qty === 1) {
-    // don't let them go down to zero
-    return
+    // if it's zero here, go back to the menu view
+    message.data = {}
+    return yield handlers['food.menu.quick_picks'](message)
   }
   userItem.item.item_qty--
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
