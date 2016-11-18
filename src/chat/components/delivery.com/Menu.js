@@ -261,8 +261,8 @@ function nodeOptions (node, cartItem, validate) {
       all.push(a)
       while (actions.length > 0) {
         all.push({
-          color: '#3AA3E3',
-          fallback: 'meal options',
+          color: a.color,
+          fallback: a.fallback,
           callback_id: 'even more actions',
           attachment_type: 'default',
           actions: actions.splice(0, 5)
