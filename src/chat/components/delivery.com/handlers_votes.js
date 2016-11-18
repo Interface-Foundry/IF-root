@@ -301,6 +301,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})
 
   if (numOfResponsesWaitingFor <= 0) {
+    yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
     logging.error('waiting for more responses have, votes: ', votes.length)
@@ -342,7 +343,11 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`
-    },{
+    }]
+  }
+
+  if (slackers.length > 0) {
+    dashboard.attachments({
       color: '#49d63a',
       mrkdwn_in: ['text'],
       text: `*Waiting for votes from:* \n${slackers}`,
@@ -353,7 +358,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
         type: 'button',
         value: 'food.admin.restaurant.pick.list'
       }]
-    }]
+    })
   }
 
   if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
