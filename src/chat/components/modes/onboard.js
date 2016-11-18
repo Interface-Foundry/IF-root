@@ -16,6 +16,7 @@ var bundles = require('../bundles');
 var sleep = require('co-sleep');
 var eachSeries = require('async-co/eachSeries');
 var processData = require('../process');
+var request = require('request');
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
@@ -56,7 +57,7 @@ handlers['start'] = function * (message) {
     text: 'Welcome to Kip!  We\'ll help you get started :)'
   });
   attachments.push({
-      text: ' What are looking for?',
+      text: 'What are looking for?',
       color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
@@ -752,6 +753,58 @@ handlers['sorry'] = function * (message) {
    return [message];
 
 }
+
+
+/**
+ * send_replace home button
+ */
+handlers['home_btn'] = function * (message) {
+   var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
+   var last_message = history[0];
+   var mode = _.get(last_message,'mode');
+   var actions = cardTemplate.slack_onboard_home;
+   var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
+   var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
+   if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
+    var json = message.source.original_message;
+    json.attachments[json.attachments.length-1] = {
+        fallback: 'onboard',
+        callback_id: 'onboard',
+        actions: actions
+    }
+   
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify(json)
+    });
+}
+
+/**
+ * send_replace back button
+ */
+handlers['back_btn'] = function * (message) {
+   var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
+   var last_message = history[0];
+   var mode = _.get(last_message,'mode');
+   var actions = cardTemplate.slack_onboard_default;
+   var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
+   var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
+   if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
+    var json = message.source.original_message;
+    json.attachments[json.attachments.length-1] = {
+        fallback: 'onboard',
+        callback_id: 'onboard',
+        actions: actions
+    }
+   
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify(json)
+    });
+}
+
 
 function createCronJob(people, msg, team, date) {
   kip.debug('\n\n\nsetting cron job day: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');

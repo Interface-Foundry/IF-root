@@ -57,6 +57,8 @@ function simple_action_handler (action) {
       return 'more'
     case 'cafe_btn':
       return 'cafe_btn';
+    case 'shopping_btn':
+      return 'shopping_btn';
     case 'home_btn':
       return 'home_btn';
     case 'back_btn':
@@ -139,8 +141,9 @@ app.post('/slackaction', next(function * (req, res) {
         var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
         var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
         if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
-        kip.debug(' \n\n\n\n mode: ', mode, ' actions: ', actions, ' isAdmin:', isAdmin,' \n\n\n\n ' );
         var json = parsedIn.original_message;
+                kip.debug(' \n\n\n\n\n\n\n\n webserver:143:json:', JSON.stringify(json),'\n\n\n\n\n\n\n\n ' );
+
         json.attachments[json.attachments.length-1] = {
             fallback: 'Search Results',
             callback_id: 'search_results',
@@ -157,6 +160,14 @@ app.post('/slackaction', next(function * (req, res) {
           message.mode = 'food'
           message.action = 'begin'
           message.text = 'food'
+          message.save().then(() => {
+            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          })
+      }
+      else if (simple_command == 'shopping_btn') {
+          message.mode = 'shopping'
+          message.action = 'initial'
+          message.text = 'exit'
           message.save().then(() => {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
@@ -239,7 +250,7 @@ app.post('/slackaction', next(function * (req, res) {
         message.source.location = location
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-        })
+        });
       }
       else if (simple_command == 'send_last_call_btn') {
         message.mode = 'settings';

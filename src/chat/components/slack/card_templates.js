@@ -148,6 +148,43 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
 
 // ONBOARDING MODE TEMPLATES
 
+var slack_onboard_default = module.exports.slack_onboard_default = [{
+      name: "exit",
+      text: "Exit Onboarding",
+      style: "primary",
+      type: "button",
+      value: "exit"
+    },{
+      name: "onboard.home.menu",
+      text: "🐧",
+      style: "default",
+      type: "button",
+      value: "home_btn"
+    }];
+
+
+var slack_onboard_home = module.exports.slack_onboard_home  = [{
+     name: "cafe_btn",
+     text: "Kip Cafe",
+     style: "default",
+     type: "button",
+     value: "cafe_btn"
+   },
+   {
+     name: "shopping_btn",
+     text: "Kip Shopping",
+     style: "default",
+     type: "button",
+     value: "shopping_btn"
+   },
+   {
+     name: "onboard.home.default",
+     text: "< Back",
+     style: "default",
+     type: "button",
+     value: "back_btn"
+   }];
+
 var slack_onboard_start = module.exports.slack_onboard_start = [{
      name: "onboard.start.lunch",
      text: "Lunch",
@@ -192,19 +229,6 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
      value: "bundle.supplies"
    }];
 
-var slack_onboard_default = module.exports.slack_onboard_default = [{
-      name: "exit",
-      text: "Exit Onboarding",
-      style: "primary",
-      type: "button",
-      value: "exit"
-    },{
-      name: "home_btn",
-      text: "🐧",
-      style: "default",
-      type: "button",
-      value: "home_btn"
-    }];
 
 var slack_onboard_basic = module.exports.slack_onboard_basic = [{
       name: "onboard.bundle.yes",
@@ -226,21 +250,12 @@ var slack_onboard_basic = module.exports.slack_onboard_basic = [{
       value: "no"
     }];
 
-
-
-
 var slack_onboard_team = module.exports.slack_onboard_team = [{
       name: "onboard.team.send",
       text: "Send Onboarding",
       style: "primary",
       type: "button",
       value: "reminder"
-    },{
-      name: "onboard.team.help",
-      text: "Help",
-      style: "default",
-      type: "button",
-      value: "help"
     },{
       name: "onboard.team.back",
       text: "< Back",

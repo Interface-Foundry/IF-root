@@ -45,6 +45,7 @@ var updateBundles = module.exports.updateBundles = function * () {
 	  try {
 	      var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
 	   } catch (e) {
+	   	 skip = true;
 	   }
 	  if (res && !skip) {
 	  	 var item = res[0];
@@ -78,6 +79,7 @@ var updateBundle = module.exports.updateBundle = function * (bundle) {
 	  try {
 	      var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
 	   } catch (e) {
+	   	 skip = true;
 	   }
 	  if (res && !skip) {
 	  	 var item = res[0];
@@ -106,8 +108,8 @@ var updateBundle = module.exports.updateBundle = function * (bundle) {
 
 
 var updater  = module.exports.updater =  function () {
-  kip.debug('\n\n\nsetting cron job for updating bundle items at midnight... \n\n\n');
-  new cron.CronJob('00 00 * * *', function () {
+  kip.debug('setting cron job for updating bundle items at midnight...');
+  new cron.CronJob('48 18 * * *', function () {
  	  co(updateBundles); 
     }, function() {
   kip.debug('\n\n\n updated bundle items! \n\n\n');
