@@ -603,7 +603,7 @@ handlers['confirm_reminder'] = function*(message, data) {
       incoming: false,
       thread_id: message.thread_id,
       origin: 'slack',
-      mode: 'onboard',
+      mode: 'shopping',
       action: 'home',
       reply: cronAttachments
     }
@@ -901,7 +901,6 @@ const createCronJob = function(people, msg, team, date) {
 // based on the current time, determine a later time
 function determineLaterToday(now) {
   var ONE_HOUR = 60*60*1000;
-  return 20 * 1000; //TODO: change back
   if (now.getHours() < 12) return ONE_HOUR;
   else if (now.getHours() < 14) return ONE_HOUR * 2;
   else if (now.getHours() < 17) return (17 - now.getHours()) * ONE_HOUR;
