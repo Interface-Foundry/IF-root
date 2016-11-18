@@ -293,7 +293,7 @@ function * setup () {
 
   yield require('../slack/test_team_1').reset()
   yield require('../slack/slack').start()
-  require('../delivery.com/delivery.com')
+  require('../reply_logic.js')
 
   console.log('Done with setup'.green)
   console.log()

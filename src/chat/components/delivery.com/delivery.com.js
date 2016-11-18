@@ -24,7 +24,7 @@ var $allHandlers // this is how you can access handlers from other methods
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
-if (!module.parent || process.env.NODE_ENV === 'test') {
+if (!module.parent) {
   queue.topic('incoming').subscribe(incoming => {
     co(function * () {
       if (incoming.data.text) {
