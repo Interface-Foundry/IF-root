@@ -200,7 +200,7 @@ function nodeOptions (node, cartItem, validate) {
     } else {
       required = true
       if (g.min_selection === g.max_selection) {
-        allowMultiple = false
+        allowMultiple = g.min_selection !== 1
         a.text += `
  Required - Choose exactly ${g.min_selection}.`
         if (validate && numSelected === 0) {

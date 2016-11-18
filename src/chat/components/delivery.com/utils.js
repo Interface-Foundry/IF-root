@@ -131,7 +131,7 @@ function * initiateDeliverySession (session) {
   // TEMP HACK for Spark demo
   var WHITELISTS = {
     T0299Q668: ['jeff', 'christafogleman', 'donnasokolsky'], // Spark
-    T1JTUM7RN: ['peter', 'elon'], // Mars Vacation Condos
+    // T1JTUM7RN: ['peter', 'elon'], // Mars Vacation Condos
     // T1P8S8C91: ['peter', 'graham', 'alyx', 'rachel', 'muchimoto', 'chris'] // Kip
   }
 
