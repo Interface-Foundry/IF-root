@@ -38,7 +38,6 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
   var basePrice
   var hasPriceGroup = item.children.map(c => c.type).includes('price group')
   if (hasPriceGroup) {
-    debugger;
     var priceGroup = item.children.filter(c => c.type === 'price group')[0]
     var priceOption = priceGroup.children.filter(p => !!cartItem.item.option_qty[p.unique_id])[0]
     basePrice = _.get(priceOption, 'price', item.price)
@@ -69,7 +68,22 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
 // turns the menu into a single object with keys as item ids
 function flattenMenu (data) {
   var out = {}
+  var schedules = data.schedule
+  var now = new Date()
   function flatten (node, out) {
+    if (node.type === 'menu' && _.get(node, 'schedule[0]')) {
+      var isAvailable = false
+      node.schedule.map(id => _.find(schedules, {id: id})).map(t => {
+        if (now > new Date(t.from) && now < new Date(t.to)) {
+          isAvailable = true
+        }
+      })
+
+      if (!isAvailable) {
+        return
+      }
+    }
+
     out[node.unique_id] = node
     _.get(node, 'children', []).map(c => flatten(c, out))
   }
