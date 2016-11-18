@@ -39,9 +39,11 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   var lineItems = myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
+    var instructions = i.item.instructions ? `\n_Special Instrucrtions: ${i.item.instructions}_` : ''
     var quantityAttachment = {
       title: item.name + ' – ' + menu.getCartItemPrice(i).$,
-      text: item.description,
+      text: item.description + instructions,
+      mrkdwn_in: ['text'],
       callback_id: item.unique_id,
       color: '#3AA3E3',
       attachment_type: 'default',
