@@ -60,6 +60,7 @@ var profOak = new Professor.Professor('C33NU7FRC')
 // --------------------------------------------
 var queue = require('../chat/components/queue-mongo')
 var UserChannel = require('../chat/components/delivery.com/UserChannel')
+var Menu = require('../chat/components/delivery.com/Menu')
 var replyChannel = new UserChannel(queue)
 // --------------------------------------------
 
@@ -252,6 +253,7 @@ function * chargeById (payment) {
       var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
       var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `done`, incoming: false}).sort('-ts').limit(1)
       finalFoodMessage = finalFoodMessage[0]
+      var menu = Menu(foodSession.menu)
 
       // send message to user
       replyChannel.send(
@@ -263,6 +265,40 @@ function * chargeById (payment) {
             text: `looks like everything went through on this order`
           }
         })
+
+      // send message to all the ppl that ordered food
+      foodSession.confirmed_orders.map(userId => {
+        var user = _.find(foodSession.team_members, {id: userId}) // find returns the first one
+        var msg = _.merge({}, finalFoodMessage, {
+          thread_id: user.dm,
+          source: {
+            user: user.id,
+            team: foodSession.team_id,
+            channel: user.dm
+          }
+        })
+
+        var itemNames = foodSession.cart
+          .filter(i => u.user_id === userId)
+          .map(i => menu.getItemById(i.item.item_id).name)
+          .map(name => '*' + name + '*') // be bold
+
+        if (itemNames.length > 1) {
+          var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
+        } else {
+          foodString = itemNames[0]
+        }
+
+        replyChannel.send(
+          msg,
+          'food.payment_info',
+          {
+            type: finalFoodMessage.origin,
+            data: {
+              text: `Your order of ${foodString} is on the way 😊`
+            }
+          })
+      })
     } catch (err) {
       logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
     }
@@ -276,4 +312,3 @@ var port = process.env.PORT || 8080
 app.listen(port, function () {
   console.log('Listening on ' + port)
 })
-
