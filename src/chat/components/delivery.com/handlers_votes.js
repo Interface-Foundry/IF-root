@@ -247,7 +247,7 @@ handlers['food.user.poll'] = function * (message) {
     foodSession.save()
 
     if (member.id === foodSession.convo_initiater.id) {
-      $replyChannel.sendReplace(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
+      $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
     } else {
       $replyChannel.send(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
     }
