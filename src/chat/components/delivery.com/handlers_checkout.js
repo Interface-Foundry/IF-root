@@ -456,7 +456,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
   } catch (e) {
     logging.error('error doing kip pay lol idk what to do', e)
-    $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kippay'}})
+    $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kip pay'}})
   }
 }
 
@@ -497,6 +497,13 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
 handlers['food.done'] = function * (message) {
   logging.error('saving users info to slackbots and peripheral cleanup')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+
+  logging.info('FOOD SESSION FOOD.DONE: ',foodSession)
+
+  //MESSAGE ALL MEMBERS OF ORDER ---> food is on the way! (send kip food gif). at some point let's point a game here
+
+  //Email receipt to admin here
 
   // final area to save and reset stuff
   logging.info('saving phone_number... ', foodSession.convo_initiater.phone_number)

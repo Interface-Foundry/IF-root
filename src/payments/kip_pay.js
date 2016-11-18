@@ -198,7 +198,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
           {
             type: finalFoodMessage.origin,
             data: {
-              text: `looks like everything went through on this order`
+              text: `Your order was successful and you should receive an email from Delivery.com soon!`
             }
           })
         profOak.say(`order completed for team: ${payment.order.team_id}`)
