@@ -349,7 +349,7 @@ queue.topic('incoming').subscribe(incoming => {
           replies = [default_reply(message)]
         }
     }
-    kip.debug('num replies', replies.length)
+    if (replies) kip.debug('num replies', replies.length)
     timer.tic('saving message', message)
     yield message.save(); // the incoming message has had some stuff added to it :)
     timer.tic('done saving message', message)

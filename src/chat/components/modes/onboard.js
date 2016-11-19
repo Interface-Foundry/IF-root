@@ -16,6 +16,7 @@ var sleep = require('co-sleep');
 var eachSeries = require('async-co/eachSeries');
 var processData = require('../process');
 var request = require('request');
+var Fuse = require('fuse.js')
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
@@ -23,7 +24,7 @@ function * handle(message) {
     return yield handlers['start'](message);
   } else {
     if (!message.data){
-      var action = 'sorry'
+      var action = 'text'
     } else {
       var data = _.split(message.data.value, '.');
       var action = data[0];
@@ -56,7 +57,7 @@ handlers['start'] = function * (message) {
     text: 'Welcome to Kip!  We\'ll help you get started :)'
   });
   attachments.push({
-      text: 'What are looking for?',
+      text: 'What are you looking for?',
       color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
@@ -167,7 +168,7 @@ handlers['confirm_remind'] = function*(message, data) {
       text: 'Hey, it\'s me again. Ready to get started?'
     });
     cronAttachments.push({
-      text: ' What are looking for?',
+      text: ' What are you looking for?',
       color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback: 'Onboard',
@@ -240,7 +241,7 @@ handlers['supplies'] = function * (message) {
   var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   var attachments = [];
   attachments.push({
-      text: ' What are looking for?',
+      text: ' What are you looking for?',
       color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
@@ -756,6 +757,47 @@ handlers['checkout'] = function * (message) {
    return [msg];
 }
 
+
+/**
+ * Handle user input text
+ */
+handlers['text'] = function * (message) {
+  var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
+  var lastMessage = history[1];
+  var choices = _.flatten(lastMessage.reply.map( m => { return m.actions }).filter(function(n){ return n != undefined }))
+  if (!choices) { return kip.debug('error: lastMessage: ', choices); }
+  var fuse = new Fuse(choices, {
+    shouldSort: true,
+    threshold: 0.4,
+    keys: ["text"]
+  })
+  var matches = yield fuse.search(message.text)
+  var choice;
+  if (matches.length > 0) {
+    choice = matches[0].value;
+    if (choice.indexOf('.') > -1) {
+      var handle = choice.split('.')[0];
+      var data = [choice.split('.')[1]];
+      return yield handlers[handle](message, data);
+    } else {
+      try {
+        if (choice == 'more_info') {
+          kip.debug(' \n\n\n\n\n\n\n\n\n\n ', history[2].action,' \n\n\n\n\n\n\n\n\n\n ')
+          var data = { action: history[0].action, attachments: choice }
+          return yield handlers[choice](message, data);
+        } 
+        return yield handlers[choice](message);
+      } catch(err) {
+        return yield handlers['sorry'](message);
+      }
+    }
+  } else {
+    return yield handlers['sorry'](message);
+  }
+}
+
+
+
 /**
  * catcher
  */
@@ -837,12 +879,12 @@ handlers['back_btn'] = function * (message) {
 /**
  * more info / help handler
  */
-handlers['more_info'] = function * (message) {
+handlers['more_info'] = function * (message, data) {
    var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
    var last_message = history[0];
-   var lastAction = _.get(last_message,'action');
+   var lastAction = _.get(last_message,'action') ?_.get(last_message,'action') : _.get(data,'action');
    var helpText;
-   var lastMenu = _.get(message, 'source.original_message.attachments') ? _.get(message, 'source.original_message.attachments')[_.get(message, 'source.original_message.attachments').length-1].actions : undefined;
+   var lastMenu = _.get(message, 'source.original_message.attachments') ? _.get(message, 'source.original_message.attachments')[_.get(message, 'source.original_message.attachments').length-1].actions : _.get(data,'attachments');
    switch(lastAction) {
     case 'bundle.more':
       helpText = `Selecting 'Yes' will allow you to choose which channels to add to this order.
@@ -852,6 +894,9 @@ handlers['more_info'] = function * (message) {
       helpText = `Kip will direct message members in each selected channel to help them add items to the cart!`
       break
    }
+
+  kip.debug(' \n\n\n\n\n\n onboard:853:more_info:last_message: ', last_message,' lastAction: ', lastAction,' lastMenu: ', lastMenu,' data: ', data,' \n\n\n\n\n\n ')
+
 
    message.text = "";
    message.mode = 'onboard';
