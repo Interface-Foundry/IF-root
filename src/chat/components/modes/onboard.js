@@ -292,7 +292,7 @@ handlers['lunch'] = function * (message) {
     name: 'passthrough',
     text: 'New +',
     type: 'button',
-    value: 'address.new'
+    value: 'food.settings.address.new'
   })
   var msg_json = {
     'attachments': [
