@@ -91,6 +91,8 @@ handlers['food.menu.quick_picks'] = function * (message) {
   }).sort((a, b) => b.sortOrder - a.sortOrder)
 
   var menuItems = sortedMenu.slice(index, index + 3).map(i => {
+
+    var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var attachment = {
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       fallback: 'i.name',
@@ -107,7 +109,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
       ]
     }
 
-    attachment.text = [i.description, i.infoLine].filter(Boolean).join('\n')
+    attachment.text = [i.description, parentDescription, i.infoLine].filter(Boolean).join('\n')
 
     return attachment
   })
