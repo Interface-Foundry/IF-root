@@ -168,7 +168,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
 }
 
 function nodeOptions (node, cartItem, validate) {
-  var attachments = node.children.filter(c => c.type.includes('group')).map(g => {
+  var attachments = node.children.filter(c => c.type.includes('group')).reduce((all, g) => {
     var a = {
       fallback: 'Meal option',
       callback_id: g.id,
@@ -247,8 +247,17 @@ function nodeOptions (node, cartItem, validate) {
         }
       }
     })
-    return a
-  })
+
+    all.push(a)
+
+    // Submenu part
+    if (cartItem.item.option_qty[option.unique_id] && _.get(option, 'children.0')) {
+      var submenuAttachments = nodeOptions(option, cartItem, validate)
+      all = all.concat(submenuAttachments)
+    }
+
+    return all
+  }, [])
 
   // spread out the buttons to multiple attachments if needed
   attachments = attachments.reduce((all, a) => {
