@@ -930,19 +930,28 @@ const createCronJob = function(people, msg, team, date) {
   kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
   new cron.CronJob(date, function() {
     people.map(function(a) {
-      msg.user_id = a.id;
-      msg.user = a;
-      msg.source = {
-        team: team.team_id,
-        channel: a.dm,
+
+       var newMessage= new db.Message({
+        incoming: false,
         thread_id: a.dm,
-        user: a.id,
-        type: 'message',
-        subtype: 'bot_message'
-      }
-      var newMessage = new db.Message(msg);
-      newMessage.save();
-      queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
+        resolved: true,
+        user_id: a.id,
+        origin: 'slack',
+        text: '',
+        source:  {
+          team: team.team_id,
+          channel: a.dm,
+          thread_id: a.dm,
+          user: a.id,
+          type: 'message',
+        },
+        reply: msg.reply,
+        mode: 'shopping',
+        action: 'switch.silent',
+        user: a.id
+      })
+
+      co(publish(newMessage));
     });
   },
   function() {
@@ -958,4 +967,10 @@ const determineLaterToday = function(now) {
   else if (now.getHours() < 14) return ONE_HOUR * 2;
   else if (now.getHours() < 17) return (17 - now.getHours()) * ONE_HOUR;
   else return ONE_HOUR;
+}
+
+function * publish (message) {
+  yield message.save();
+  kip.debug('\n\n\n\n\n\n\n\n\n\n onboard:967:publish: ',message, '\n\n\n\n\n\n\n\n\n\n')
+  queue.publish('outgoing.' + message.origin, message, message._id + '.reply.update');
 }
