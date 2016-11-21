@@ -194,12 +194,17 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         var results = yield search_results(message);
-        msgData.attachments = [...message.reply, ...results];
+        msgData.attachments = [...message.reply || [], ...results || []];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
       if (message.mode === 'shopping' && message.action === 'switch') {
         msgData.attachments = cardTemplate.slack_shopping_mode;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
+      if (message.mode === 'shopping' && message.action === 'switch.silent') {
+        msgData.attachments = message.reply;
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 

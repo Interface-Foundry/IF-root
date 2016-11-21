@@ -144,10 +144,10 @@ function printMode(message) {
     case 'onboard_shopping':
       winston.debug('In', 'ONBOARD_SHOPPING'.cyan, 'mode 👋')
       break
-     case 'team':
+    case 'team':
       winston.debug('In', 'TEAM'.yellow, 'mode 👋')
       break
-     case 'settings':
+    case 'settings':
       winston.debug('In', 'SETTINGS'.red, 'mode 👋')
       break
     case 'food':

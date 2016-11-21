@@ -9,11 +9,12 @@ var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
 
 function* handle(message) {
+  let action;
   if (!message.data) {
-    var action = 'sorry'
+    action = 'sorry'
   } else {
     var data = _.split(message.data.value, '.');
-    var action = data[0];
+    action = data[0];
     data.splice(0, 1);
   }
   kip.debug('\n\n\n🤖 action : ', action, 'data: ', data, ' 🤖\n\n\n');
@@ -61,9 +62,9 @@ handlers['step_1'] = function (message) {
  * Results and adding to cart
  */
 handlers['step_2'] = function*(message, data) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
-  var searchTerm = data[0];
-  var query = '';
+  let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null),
+    searchTerm = data[0],
+    query = '';
   switch (searchTerm) {
     case 'books':
       query = 'coding books'
@@ -72,10 +73,11 @@ handlers['step_2'] = function*(message, data) {
       query = 'healthy snacks'
       break;
     default:
+      query = searchTerm;
       break;
   }
   var results = yield amazon.search({
-    query: searchTerm
+    query: query
   }, message.origin);
 
   if (results == null || !results) {
@@ -266,27 +268,26 @@ handlers['reminder_confirm'] = function*(message, data) {
 /**
  * catcher
  */
-handlers['sorry'] = function * (message) {
-
- // kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
-   message.text = "Sorry, my brain froze!"
-   message.mode = 'onboard_shopping';
-   message.action = 'home';
-   var attachments = [];
-   attachments.push({
-      text: 'Don’t have any changes? Type `exit` to quit settings',
-      color: '#49d63a',
-      mrkdwn_in: ['text'],
-      fallback:'Settings',
-      actions: cardTemplate.slack_onboard_default,
-      callback_id: 'none'
-    });
-    attachments.map(function(a) {
-      a.mrkdwn_in =  ['text'];
-      a.color = '#45a5f4';
-    })
-   message.reply = attachments;
-   return [message];
+handlers['sorry'] = function(message) {
+  // kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
+  message.text = "Sorry, my brain froze!"
+  message.mode = 'onboard_shopping';
+  message.action = 'home';
+  var attachments = [];
+  attachments.push({
+    text: 'Don’t have any changes? Type `exit` to quit settings',
+    color: '#49d63a',
+    mrkdwn_in: ['text'],
+    fallback: 'Settings',
+    actions: cardTemplate.slack_onboard_default,
+    callback_id: 'none'
+  });
+  attachments.map(function(a) {
+    a.mrkdwn_in = ['text'];
+    a.color = '#45a5f4';
+  })
+  message.reply = attachments;
+  return [message];
 
 }
 
@@ -294,21 +295,21 @@ handlers['sorry'] = function * (message) {
 const createCronJob = function(people, msg, team, date) {
   kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
   new cron.CronJob(date, function() {
-      people.map(function(a) {
-        msg.user_id = a.id;
-        msg.user = a;
-        msg.source = {
-          team: team.team_id,
-          channel: a.dm,
-          user: a.id,
-          type: "message",
-          subtype: "bot_message"
-        }
-        var newMessage = new db.Message(msg);
-        newMessage.save();
-        queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
-      });
-    }, function() {
+    people.map(function(a) {
+      msg.user_id = a.id;
+      msg.user = a;
+      msg.source = {
+        team: team.team_id,
+        channel: a.dm,
+        user: a.id,
+        type: 'message',
+        subtype: 'bot_message'
+      }
+      var newMessage = new db.Message(msg);
+      newMessage.save();
+      queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
+    });},
+    function() {
       console.log('just finished the scheduled update thing for team ' + team.team_id + ' ' + team.team_name);
       this.stop();
     },
@@ -317,8 +318,9 @@ const createCronJob = function(people, msg, team, date) {
 };
 // based on the current time, determine a later time
 function determineLaterToday(now) {
-  var ONE_HOUR = 60*60*1000;
-  if (now.getHours() < 12) return ONE_HOUR;
+  var ONE_HOUR = 60 * 60 * 1000;
+  if (process.env.NODE_ENV.includes('development')) return 20 * 1000; //20 seconds for dev
+  else if (now.getHours() < 12) return ONE_HOUR;
   else if (now.getHours() < 14) return ONE_HOUR * 2;
   else if (now.getHours() < 17) return (17 - now.getHours()) * ONE_HOUR;
   else return ONE_HOUR;

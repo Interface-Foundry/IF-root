@@ -16,7 +16,7 @@ var sleep = require('co-sleep');
 var eachSeries = require('async-co/eachSeries');
 var processData = require('../process');
 var request = require('request');
-var Fuse = require('fuse.js')
+var Fuse = require('fuse.js');
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
@@ -34,6 +34,7 @@ function * handle(message) {
     return yield handlers[action](message, data);
   }
 }
+
  
 module.exports.handle = handle;
 
@@ -472,8 +473,8 @@ handlers['team'] = function * (message) {
 /**
  * S4A1 
  */
-handlers['reminder'] = function (message) { 
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+handlers['reminder'] = function(message) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
@@ -494,17 +495,17 @@ handlers['reminder'] = function (message) {
     callback_id: 'none'
   });
   attachments.map(function(a) {
-      a.mrkdwn_in =  ['text'];
-      a.color = '#45a5f4';
-    });
-   var msg = message;
-   msg.mode = 'onboard'
-   msg.action = 'home'
-   msg.text = ''
-   msg.source.team = team_id;
-   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-   msg.reply = attachments;
-   return [msg];
+    a.mrkdwn_in = ['text'];
+    a.color = '#45a5f4';
+  });
+  var msg = message;
+  msg.mode = 'onboard'
+  msg.action = 'home'
+  msg.text = ''
+  msg.source.team = team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.reply = attachments;
+  return [msg];
 }
 
 /**
@@ -581,19 +582,19 @@ handlers['confirm_reminder'] = function*(message, data) {
       id: message.source.user
     });
     var cronAttachments = [{
-      "image_url": "http://kipthis.com/kip_modes/mode_teamcart_collect.png",
-      "text": "",
-      "mrkdwn_in": [
-        "text",
-        "pretext"
+      'image_url': 'http://kipthis.com/kip_modes/mode_teamcart_collect.png',
+      'text': '',
+      'mrkdwn_in': [
+        'text',
+        'pretext'
       ],
-      "color": "#45a5f4"
+      'color': '#45a5f4'
     }];
     cronAttachments.push({
       text: `Hi, <@${currentUser.id}> is collecting Amazon orders`,
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      fallback: 'Onboard',
+      fallback: 'Shopping',
       callback_id: 'none'
     });
     cronAttachments.map(function(a) {
@@ -602,10 +603,11 @@ handlers['confirm_reminder'] = function*(message, data) {
     })
     var cronMsg = {
       incoming: false,
-      thread_id: message.thread_id,
-      origin: 'slack',
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
       mode: 'shopping',
-      action: 'home',
+      action: 'switch.silent',
       reply: cronAttachments
     }
     createCronJob(channelMembers, cronMsg, team, new Date(msInFuture + now.getTime()));
@@ -671,8 +673,8 @@ handlers['member'] = function * (message) {
         team: team.team_id,
         channel: a.dm,
         user: a.id,
-        type: "message",
-        subtype: "bot_message"
+        type: 'message',
+        subtype: 'bot_message'
       },
       user: a,
       user_id: a.id
@@ -682,6 +684,7 @@ handlers['member'] = function * (message) {
   });
   return handlers['reminder'](message);
 }
+
 /**
  * S6
  */
@@ -873,7 +876,7 @@ handlers['back_btn'] = function * (message) {
       uri: message.source.response_url,
       body: JSON.stringify(json)
     });
-    return 
+    return
 }
 
 /**
@@ -922,31 +925,32 @@ handlers['more_info'] = function * (message, data) {
 const createCronJob = function(people, msg, team, date) {
   kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
   new cron.CronJob(date, function() {
-      people.map(function(a) {
-        msg.user_id = a.id;
-        msg.user = a;
-        msg.source = {
-          team: team.team_id,
-          channel: a.dm,
-          user: a.id,
-          type: "message",
-          subtype: "bot_message"
-        }
-        var newMessage = new db.Message(msg);
-        newMessage.save();
-        queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
-      });
-    }, function() {
-      console.log('just finished the scheduled update thing for team ' + team.team_id + ' ' + team.team_name);
-      this.stop();
-    },
-    true,
-    team.meta.weekly_status_timezone);
+    people.map(function(a) {
+      msg.user_id = a.id;
+      msg.user = a;
+      msg.source = {
+        team: team.team_id,
+        channel: a.dm,
+        thread_id: a.dm,
+        user: a.id,
+        type: 'message',
+        subtype: 'bot_message'
+      }
+      var newMessage = new db.Message(msg);
+      newMessage.save();
+      queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
+    });
+  },
+  function() {
+    kip.debug('just finished the scheduled update thing for team ' + team.team_id + ' ' + team.team_name);
+    this.stop();
+  }, true, team.meta.weekly_status_timezone);
 };
 // based on the current time, determine a later time
-function determineLaterToday(now) {
-  var ONE_HOUR = 60*60*1000;
-  if (now.getHours() < 12) return ONE_HOUR;
+const determineLaterToday = function(now) {
+  const ONE_HOUR = 60 * 60 * 1000;
+  if (process.env.NODE_ENV.includes('development')) return 20 * 1000; //20 seconds for dev
+  else if (now.getHours() < 12) return ONE_HOUR;
   else if (now.getHours() < 14) return ONE_HOUR * 2;
   else if (now.getHours() < 17) return (17 - now.getHours()) * ONE_HOUR;
   else return ONE_HOUR;
