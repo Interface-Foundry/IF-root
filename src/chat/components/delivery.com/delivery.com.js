@@ -8,6 +8,7 @@ var queue = require('../queue-mongo')
 var utils = require('./utils')
 
 var team_utils = require('./team_utils.js')
+var slackUtils = require('../slack/utils.js')
 var parseAddress = require('parse-address')
 var mailer_transport = require('../../../mail/IF_mail.js')
 var UserChannel = require('./UserChannel')
@@ -24,7 +25,7 @@ var $allHandlers // this is how you can access handlers from other methods
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
-if (!module.parent || process.env.NODE_ENV === 'test') {
+if (!module.parent) {
   queue.topic('incoming').subscribe(incoming => {
     co(function * () {
       if (incoming.data.text) {
@@ -193,12 +194,13 @@ handlers['food.begin'] = function * (message) {
     ]
   }
   replyChannel.send(message, 'food.banner', {type: message.origin, data: msg_json})
-  yield sleep(1000)
+
 
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
-  team_utils.getChatUsers(message)
-  message.state = {}
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  yield [sleep(1000), slackUtils.getTeamMembers(team)]
+
+  message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
   yield foodSession.save()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
@@ -214,7 +216,7 @@ handlers['food.begin'] = function * (message) {
     name: 'passthrough',
     text: 'New +',
     type: 'button',
-    value: 'address.new'
+    value: 'food.settings.address.new'
   })
 
   var msg_json = {
@@ -280,10 +282,10 @@ handlers['food.choose_address'] = function * (message) {
               'value': 'pickup'
             },
             {
-              'name': 'address.change',
+              'name': 'food.settings.address.change',
               'text': '< Change Address',
               'type': 'button',
-              'value': 'address.change'
+              'value': 'food.settings.address.change'
             }
           ]
         }
@@ -307,7 +309,7 @@ handlers['food.choose_address'] = function * (message) {
 //
 // the user's intent is to create a new address
 //
-handlers['address.new'] = function * (message) {
+handlers['food.settings.address.new'] = function * (message) {
   kip.debug(' 🌆🏙 enter a new address')
   // message.state = {}
   var msg_json = {
@@ -317,19 +319,18 @@ handlers['address.new'] = function * (message) {
       'mrkdwn_in': ['text']
     }]
   }
-  replyChannel.send(message, 'address.confirm', {type: message.origin, data: msg_json})
+  replyChannel.send(message, 'food.settings.address.confirm', {type: message.origin, data: msg_json})
 }
 
 //
 // the user seeks to confirm their possibly updated/validated address
 //
-handlers['address.confirm'] = function * (message) {
+handlers['food.settings.address.confirm'] = function * (message) {
   // ✐✐✐
   // send response since this is slow
-  replyChannel.sendReplace(message, 'address.save', {type: message.origin, data: {text: 'Thanks! We need to process that address real quick.'}})
+  replyChannel.sendReplace(message, 'food.settings.address.save', {type: message.origin, data: {text: 'Thanks! We need to process that address real quick.'}})
   try {
     var res = yield api.searchNearby({addr: message.text})
-    logging.data('address broh', _.keys(res))
     var location = {
       address_1: res.search_address.street,
       address_2: res.search_address.unit,
@@ -345,17 +346,27 @@ handlers['address.confirm'] = function * (message) {
     }
   } catch (err) {
     logging.error('error searching that address', err)
-    replyChannel.sendReplace(message, 'address.new', {
+    replyChannel.sendReplace(message, 'food.settings.address.new', {
       type: message.origin,
       data: {text: `Sorry, I can't find that address! Try typing something like: "902 Broadway New York, NY 10010"`}
     })
+    yield sleep(250)
+    yield handlers['food.settings.address.new'](message)
     return
   }
 
+  console.log(location)
+
+  var addr = [
+    [location.address_1, location.address_2].filter(Boolean).join(' '),
+    location.neighborhood,
+    `${location.city}, ${location.state} ${location.zip_code}`].filter(Boolean).join('\n')
+
   var msg_json = {
-    'text': `Is ${location.address_1} ${location.city}, ${location.state}, ${location.zip_code} your address?`,
+    text: `Is this your address?`,
     'attachments': [
       {
+        text: addr,
         'mrkdwn_in': [
           'text'
         ],
@@ -365,7 +376,7 @@ handlers['address.confirm'] = function * (message) {
         'attachment_type': 'default',
         'actions': [
           {
-            name: 'address.save',
+            name: 'food.settings.address.save',
             text: '✓ Confirm Address',
             type: 'button',
             style: 'primary',
@@ -375,7 +386,7 @@ handlers['address.confirm'] = function * (message) {
             name: 'passthrough',
             text: 'Edit Address',
             type: 'button',
-            value: 'address.new'
+            value: 'food.settings.address.new'
           }
         ]
       }
@@ -385,40 +396,44 @@ handlers['address.confirm'] = function * (message) {
   // collect feedback on this feature
   if (feedbackOn && msg_json) {
     msg_json.attachments[0].actions.push({
-      name: 'feedback.new',
+      name: 'food.feedback.new',
       text: '⇲ Send feedback',
       type: 'button',
-      value: 'feedback.new'
+      value: 'food.feedback.new'
     })
   }
 
-  replyChannel.send(message, 'address.save', {type: message.origin, data: msg_json})
+  replyChannel.send(message, 'food.settings.address.save', {type: message.origin, data: msg_json})
 }
 
 // Save the address to the db after the user confirms it
-handlers['address.save'] = function * (message) {
+handlers['food.settings.address.save'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var location = message.data.value
 
+  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+
   if (location) {
     foodSession.chosen_location = location
+    slackbot.meta.locations.push(location)
   } else {
     // todo error
     throw new Error('womp bad address')
   }
   yield foodSession.save()
+  yield slackbot.save()
 
   message.text = JSON.stringify(location)
   return yield handlers['food.choose_address'](message)
 }
 
-handlers['address.change'] = function * (message) {
+handlers['food.settings.address.change'] = function * (message) {
   return yield handlers['food.begin'](message)
 }
 
 
 //send feedback to Kip 😀😐🙁
-handlers['feedback.new'] = function * (message) {
+handlers['food.feedback.new'] = function * (message) {
 
    feedbackTracker[message.source.team + message.source.user + message.source.channel] = {
     source: message.source
@@ -438,10 +453,10 @@ handlers['feedback.new'] = function * (message) {
       }
     ]
   }
-  replyChannel.send(message, 'feedback.save', {type: message.origin, data: msg_json})
+  replyChannel.send(message, 'food.feedback.save', {type: message.origin, data: msg_json})
 }
 
-handlers['feedback.save'] = function * (message) {
+handlers['food.feedback.save'] = function * (message) {
 
   //check for entry in feedback tracker
   if (feedbackTracker[message.source.team + message.source.user + message.source.channel]){
@@ -787,9 +802,7 @@ handlers['food.restaurants.list.recent'] = function * (message) {
   }
 
   replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg})
-
 }
-
 
 handlers['food.poll.confirm_send'] = function * (message) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
@@ -802,8 +815,8 @@ handlers['food.poll.confirm_send'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ],
-        'text': `Send poll for lunch cuisine to the team members at \`${addr}\`?`,
-        'fallback': 'Send poll for lunch cuisine to the team members at ',
+        'text': `Send poll for cuisine to the team members at \`${addr}\`?`,
+        'fallback': 'Send poll for cuisine to the team members at ',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -839,47 +852,6 @@ handlers['food.poll.confirm_send'] = function * (message) {
   }
 
   replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
-}
-
-handlers['test.s8'] = function * (message) {
-  var msg_json = {
-    'text': '`Alyx` chose `Choza Taqueria` - Mexican, Southwestern - est. wait time 45-55 min',
-    'attachments': [
-      {
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': 'Want to be in this order?',
-        'fallback': 'n/a',
-        'callback_id': 'food.participate.confirmation',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'food.menu.quick_picks',
-            'text': 'Yes',
-            'type': 'button',
-            'style': 'primary',
-            'value': 'food.menu.quick_picks'
-          },
-          {
-            'name': 'food.exit.confirm',
-            'text': 'No',
-            'type': 'button',
-            'value': 'food.exit.confirm',
-            'confirm': {
-              'title': 'Are you sure?',
-              'text': "Are you sure you don't want to order food?",
-              'ok_text': 'Yes',
-              'dismiss_text': 'No'
-            }
-          }
-        ]
-      }
-    ]
-  }
-
-  replyChannel.send(message, 'food.menu.quick_picks', {type: 'slack', data: msg_json})
 }
 
 module.exports = {

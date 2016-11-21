@@ -5,7 +5,7 @@ var _ = require('lodash')
 
 describe('greeting', () => {
   before(function * () {
-    this.timeout(5000)
+    this.timeout(10000)
     yield mock.setup()
   })
   it('should allow an admin to start an order for delivery', function * () {

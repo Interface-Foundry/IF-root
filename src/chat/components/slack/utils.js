@@ -11,7 +11,7 @@ var jstz = require('jstz');
 
 /*
 *
-* Team Member Management 
+* Team Member Management
 *
 */
 
@@ -20,7 +20,7 @@ var jstz = require('jstz');
 * returns sets admin user for a slackbot team, creates chat users
 * @param {Object} slackbot object
 * @returns {Object} slackbot object
-*                   
+*
 */
 function * initializeTeam(team, auth) {
  if (!auth.user_id) {
@@ -51,7 +51,7 @@ function * initializeTeam(team, auth) {
 * returns admins of a team or false if there are none. will appropriately update chatusers based on latest slackbot.meta.office_assistants field
 * @param {Object} slackbot object
 * @returns {array} returns chatuser admin objects
-*                   
+*
 */
 function * findAdmins(team) {
   var admins = [];
@@ -69,11 +69,11 @@ function * findAdmins(team) {
       else if ( adminIds.indexOf(user.id) == -1 && user.is_admin ) {
         user.is_admin = false;
         yield user.save();
-      } 
+      }
     });
   }).then( function() { return members });
   if (admins != null) {
-    return admins  
+    return admins
   } else {
     return false
   }
@@ -83,8 +83,8 @@ function * findAdmins(team) {
 * returns members of a channel given a slackbot(team) and channelId
 * @param {Object} slackbot object
 * @param {string} channel ID
-* @returns {array} returns chatuser objects 
-*                   
+* @returns {array} returns chatuser objects
+*
 */
 function * getChannelMembers(team, channelId) {
     var channelMembers = [];
@@ -112,10 +112,10 @@ function * getChannelMembers(team, channelId) {
 
 
 /*
-* returns all channel objects for a given a slackbot(team) 
+* returns all channel objects for a given a slackbot(team)
 * @param {Object} slackbot object
-* @returns {array} returns channel objects 
-*                   
+* @returns {array} returns channel objects
+*
 */
 function * getChannels(team) {
     var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
@@ -136,8 +136,8 @@ function * getChannels(team) {
 /*
 * returns members of a team given a slackbot object, creates chatuser objects if they do not exist in db
 * @param {Object} slackbot object
-* @returns {array} returns chatuser objects 
-*                   
+* @returns {array} returns chatuser objects
+*
 */
 function * getTeamMembers(team) {
     var members = [];
@@ -196,7 +196,7 @@ function * removeCartChannel(message, channel_name) {
       if (c.name === channel_name && c.is_channel && team.meta.cart_channels.indexOf(c.id) > -1) {
         var index = team.meta.cart_channels.indexOf(c.id);
         team.meta.cart_channels.splice(index, 1);
-      } 
+      }
       else {
         kip.debug('no channel to remove.', c, team.meta.cart_channels);
       }
@@ -215,7 +215,7 @@ function * addCartChannel(message, channel_name) {
     channels.map(c => {
       if (c.name === channel_name && c.is_channel && !c.is_archived && c.num_members > 0 && team.meta.cart_channels.indexOf(c.id) == -1) {
         team.meta.cart_channels.push(c.id);
-      } 
+      }
       else {
         kip.debug('channel already exists.', c,   team.meta.cart_channels);
       }

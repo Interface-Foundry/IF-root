@@ -157,7 +157,7 @@ handlers['confirm_remind'] = function*(message, data) {
   var messageText = (msInFuture > 0) ?
     `Ok, I'll talk to you ${dateDescrip}.` :
     'Ok! I won\'t set any reminders.';
-  messageText += ' Thanks and have a great day. Type `help` if you\'re feeling a bit wobbly :)';
+  messageText += ' Thanks and have a great day :)';
 
   if (msInFuture > 0) {
     var currentUser = yield db.Chatusers.findOne({
@@ -544,7 +544,7 @@ handlers['confirm_reminder'] = function*(message, data) {
   var messageText = (msInFuture > 0) ?
     `Awesome! I'll give everyone a heads up for your order ${dateDescrip}.` :
     'Ok! I won\'t set any reminders.';
-  messageText += ' Thanks and have a great day. Type `help` if you\'re feeling a bit wobbly :)';
+  messageText += ' Thanks and have a great day :)';
   var attachments = [{
     text: '',
     color: '#49d63a',

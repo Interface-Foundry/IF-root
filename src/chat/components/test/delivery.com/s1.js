@@ -5,7 +5,7 @@ var _ = require('lodash')
 
 describe('greeting', () => {
   before(function * () {
-    this.timeout(5000)
+    this.timeout(10000)
     yield mock.setup()
   })
   it('should allow an admin to start an order with a saved address', function * () {
@@ -15,7 +15,7 @@ describe('greeting', () => {
     user.chatuser.team_id.should.equal('yolo')
 
     // Start the food convo with the admin
-    var msg = yield user.text('food.begin', {expect: 2})
+    var msg = yield user.text('food', {expect: 2})
     _.get(msg, '[0].attachments[0].text', '').should.equal("")
     _.get(msg, '[0].attachments[0].image_url', 'default').should.equal("http://kipthis.com/kip_modes/mode_cafe.png")
     _.get(msg, '[1].attachments[0].text', '').should.equal("Great! Which address is this for?")
@@ -37,7 +37,7 @@ describe('greeting', () => {
     user.chatuser.team_id.should.equal('yolo')
 
     // Start the food convo with the admin
-    var msg = yield user.text('food.begin', { expect: 2 })
+    var msg = yield user.text('food', { expect: 2 })
 
     // choose to input a new address
     msg = yield user.tap(msg[1], 0, 1)

@@ -163,14 +163,6 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
         'attachment_type': `default`
-
-        // doesnt make sense to have this since if we allow the user to edit order it negates a large portion of our system
-        // 'actions': [{
-        //   'name': `food.admin.order.checkout.address_1`,
-        //   'text': `Edit`,
-        //   'type': `button`,
-        //   'value': `edit`
-        // }]
       },
       {
         'title': '',
@@ -245,6 +237,13 @@ handlers['food.admin.order.pay'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
+  // check tip amount???
+  if (Number(foodSession.tipAmount).toFixed(2) !== (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)) {
+    logging.error('tipAmount not correct')
+    logging.error(`expected tip: ${(Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)}`)
+    logging.error(`actual tip: ${foodSession.tipAmount}`)
+  }
+
   // base response
   var response = {
     text: `Checkout for ${foodSession.chosen_restaurant.name} - ${(foodSession.order.total + foodSession.tipAmount).$}`,
@@ -283,18 +282,30 @@ handlers['food.admin.order.pay'] = function * (message) {
     var cardsAttachment = slackbot.meta.payments.map((c) => {
       return {
         'title': `${c.card.brand}`,
-        'text': `Ending in ${c.card.last_4}, exp ${c.card.exp_date}`,
+        'text': `Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
         'fallback': `You are unable to pick this card`,
         'callback_id': `food.admin.order.select_card`,
         'color': `#3AA3E3`,
         'attachment_type': `default`,
-        'thumb_url': _.get(c, 'card.card_type') ? cardImages[c.card.card_type.toLowerCase()] : '',
+        'thumb_url': _.get(c, 'card.brand') ? cardImages[c.card.brand.toLowerCase()] : '',
         'actions': [{
           'name': `food.admin.order.select_card`,
           'text': `✓ Select Card`,
           'type': `button`,
           'style': `primary`,
           'value': c.card.card_id
+        }, {
+          name: 'food.admin.order.remove_card',
+          text: 'Remove Card',
+          type: 'button',
+          style: 'default',
+          value: c.card.card_id,
+          confirm: {
+            title: 'Confirm Remove Card',
+            text: `Are you sure you want to remove the card ending in ${c.card.last4} from your list of saved credit cards?`,
+            ok_text: 'Remove Card',
+            dismiss_text: 'Keep Card'
+          }
         }]
       }
     })
@@ -304,11 +315,23 @@ handlers['food.admin.order.pay'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.order.select_card', {type: message.origin, data: response})
 }
 
+handlers['food.admin.order.remove_card'] = function * (message) {
+  if (!message.data.value) {
+    return logging.error('could not remove card because card_id was undefined')
+  }
+
+  var slackbot = yield db.Slackbots.update({team_id: message.source.team}, {
+    $pull: {'meta.payments': {'card.card_id': message.data.value}}
+  }).exec()
+
+  return yield handlers['food.admin.order.pay'](message)
+}
+
 handlers['food.admin.add_new_card'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // add various shit to the foodSession
-  var postBody = {
+  foodSession.payment_post = {
     '_id': foodSession._id,
     'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
     'active': foodSession.active,
@@ -341,11 +364,11 @@ handlers['food.admin.add_new_card'] = function * (message) {
       uri: kip.config.kipPayURL + `/charge`,
       method: `POST`,
       json: true,
-      body: postBody
+      body: foodSession.payment_post
     })
     yield foodSession.save()
-  } catch (e) {
-    logging.error('error doing kip pay lol', e)
+  } catch (err) {
+    logging.error('error doing kip pay lol', err)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'ok couldnt submit to kippay try again'}})
     yield handlers['food.admin.order.pay'](message)
     return
@@ -387,7 +410,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
   logging.info('FOOD SESSION: ', foodSession.chosen_location)
 
     // add various shit to the foodSession
-  var postBody = {
+  foodSession.payment_post = {
     '_id': foodSession._id,
     'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
     'active': foodSession.active,
@@ -426,30 +449,19 @@ handlers['food.admin.order.select_card'] = function * (message) {
       uri: kip.config.kipPayURL + `/charge`,
       method: `POST`,
       json: true,
-      body: postBody
+      body: foodSession.payment_post
     })
 
     foodSession.save()
     var response = {
-      'text': ``,
-      'fallback': `You are unable to complete payment`,
-      'callback_id': `food.admin.select_card`,
-      'color': `#3AA3E3`,
-      'attachment_type': `default`,
-      'attachments': [{
-        'title': '',
-        'mrkdwn_in': ['text'],
-        'text': `Cool, <${foodSession.payment.url}|➤ Click Here to Checkout>`,
-        'fallback': `You are unable to follow this link to confirm order`,
-        'callback_id': `food.admin.add_new_card`,
-        'color': `#3AA3E3`,
-        'attachment_type': `default`
-      }]
+      'text': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
+      'fallback': `Order Success!`,
+      'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
   } catch (e) {
     logging.error('error doing kip pay lol idk what to do', e)
-    $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kippay'}})
+    $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kip pay'}})
   }
 }
 
@@ -465,7 +477,7 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
       'title': `Checkout for ${foodSession.chosen_restaurant.name}`,
       'attachment_type': `default`,
       'mrkdwn_in': ['text'],
-      'text': `${c.card.brand} - Ending in ${c.card.last_4}, exp ${c.card.exp_date}`,
+      'text': `${c.card.brand} - Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
       'fallback': `You are unable to follow this link to confirm order`,
       'callback_id': `food.admin.order.pay.confirm`,
       'color': `#3AA3E3`,
@@ -502,15 +514,10 @@ handlers['food.done'] = function * (message) {
   // slackbot save info
   logging.info('saving location... ', foodSession.chosen_location)
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  slackbot.meta.locations.push(foodSession.chosen_location)
+  if (!_.find(slackbot.meta.locations, {'address_1': foodSession.chosen_location.address_1})) {
+    slackbot.meta.locations.push(foodSession.chosen_location)
+  }
   yield slackbot.save()
-
-
-
-
-  // var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  // var slackbot = db.Salckbots.findOne({team_id: message.source.team}).exec()
-  // retrieve users phone number
 }
 
 module.exports = function (replyChannel, allHandlers) {

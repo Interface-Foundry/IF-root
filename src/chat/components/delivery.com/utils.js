@@ -7,8 +7,8 @@ var request = require('request-promise')
 var Fuse = require('fuse.js')
 
 var queue = require('../queue-mongo')
-
-
+var UserChannel = require('./UserChannel')
+var replyChannel = new UserChannel(queue)
 
 /*
 * use this to match on terms where key_choices are
@@ -16,13 +16,16 @@ var queue = require('../queue-mongo')
 * allChoices is array of all the options to search thru
 * keyChoices is array like ['name'] or ['title', 'children.name']
 */
-function * matchText (text, allChoices, keyChoices) {
+function * matchText (text, allChoices, keyChoices, options) {
   // might want to use id, but dont for now
-  var fuse = new Fuse(allChoices, {
-    shouldSort: true,
-    threshold: 0.4,
-    keys: keyChoices
-  })
+  if (typeof options === undefined) {
+    options = {
+      shouldSort: true,
+      threshold: 0.4,
+      keys: keyChoices
+    }
+  }
+  var fuse = new Fuse(allChoices, options)
   var res = yield fuse.search(text)
   //
   if (res.length > 0) {
@@ -111,11 +114,25 @@ function * initiateDeliverySession (session) {
   if (foodSessions) {
     yield foodSessions.map((session) => {
       logging.info('send message to old admin that their order is being canceled')
-      // var oldMessage = yield db.Message.findOne({incoming: true, mode: 'food', })
-      // replyChannel.sendReplace(oldMessage, 'food.delivery_or_pickup', {type: session.origin, data: {text: 'Searching your area for good food...'}})
+      // var lastMessage = yield db.Messages.find({
+      //   incoming: false,
+      //   mode: 'food',
+      //   source: {
+      //     'user': session.convo_initiater.id}})
+      //   .sort({'ts': -1})
+      //   .limit(1).exec()
+
+      // replyChannel.send(lastMessage[0], 'food.cancel_previous', {type: session.origin, data: {text: 'Hey we are canceling your old order! Someone is starting a new order'}})
       session.active = false
       session.save()
     })
+  }
+
+  // TEMP HACK for Spark demo
+  var WHITELISTS = {
+    T0299Q668: ['jeff', 'christafogleman', 'donnasokolsky'], // Spark
+    // T1JTUM7RN: ['peter', 'elon'], // Mars Vacation Condos
+    // T1P8S8C91: ['peter', 'graham', 'alyx', 'rachel', 'muchimoto', 'chris'] // Kip
   }
 
   var teamMembers = yield db.Chatusers.find({
@@ -123,6 +140,10 @@ function * initiateDeliverySession (session) {
     is_bot: {$ne: true},
     deleted: {$ne: true},
     id: {$ne: 'USLACKBOT'}}).exec()
+
+  if (WHITELISTS[session.source.team]) {
+    teamMembers = teamMembers.filter(u => WHITELISTS[session.source.team].includes(u.name))
+  }
 
   var admin = yield db.Chatuser.findOne({id: session.source.user}).exec()
   var newSession = new db.Delivery({
@@ -136,14 +157,16 @@ function * initiateDeliverySession (session) {
       name: admin.name,
       first_name: _.get(admin, 'first_name') ? admin.first_name : admin.profile.real_name,
       last_name: _.get(admin, 'last_name') ? admin.last_name : '',
-      email: admin.profile.email
+      email: admin.profile.email,
+      dm: admin.dm
     },
     data: {
       instructions: ' '
     },
     tracking: {
     // last_sent_message to replace, and specific id's to
-      confirmed_orders_msg: null
+      confirmed_orders_msg: null,
+      confirmed_votes_msg: null
     }
   })
   if (_.get(admin, 'phone_number')) {

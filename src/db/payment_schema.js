@@ -17,6 +17,7 @@ var paymentSchema = mongoose.Schema({
     default: Date.now
   },
   stripe_response: {},
+  delivery_post: {},
   delivery_response: {}
 })
 

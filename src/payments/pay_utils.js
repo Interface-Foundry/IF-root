@@ -2,24 +2,12 @@ require('kip')
 var request = require('request-promise')
 var _ = require('lodash')
 
-var pay_const = require('./pay_const.js')
+var payConst = require('./pay_const.js')
 var cc = require('./secrets/kip_cc.js')
 
-var UserChannel = require('../chat/components/delivery.com/UserChannel')
-var queue = require('../chat/components/queue-mongo')
-var replyChannel = new UserChannel(queue)
-
-/*
-*
-*/
-function * sessionSuccesfullyPaid (foodSession) {
-  // var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var lastMessageByUser = yield db.Messages.find({user_id: foodSession.order.convo_initiater.id, incoming: true}).sort({ts: -1}).limit(1).exec()
-  lastMessageByUser = lastMessageByUser[0]
-  foodSession.order['completed_payment'] = true
-  foodSession.save()
-  replyChannel.send(lastMessageByUser, 'food.done', {type: 'slack', data: {text: 'thanks, order successfully paid and submitted'}})
-}
+// tracking for food into cafe-tracking
+var Professor = require('../monitoring/prof_oak.js')
+var profOak = new Professor.Professor('C33NU7FRC')
 
 /* this would be for kip to pay for an order once the user has successfully paid stripe
 *
@@ -36,10 +24,7 @@ function * payForItemFromKip (session, guestToken) {
 
   logging.info('SENDING TO DELIVERY NOW ', JSON.stringify(opts))
 
-  if (process.env.NODE_ENV !== 'production') {
-    logging.info('not going to pay for actual item outside of production')
-    return 'development'
-  } else {
+  if (process.env.NODE_ENV === 'canary') {
     try {
       var response = yield request(opts)
       return response
@@ -48,6 +33,9 @@ function * payForItemFromKip (session, guestToken) {
       logging.error('couldnt submit payment uh oh ', JSON.stringify(e))
       return null
     }
+  } else {
+    logging.error('NOT GOING TO PAY FOR ORDER IN CANARY MODE, SWITCH TO NODE_ENV=CANARY')
+    return 'development'
   }
 }
 
@@ -64,7 +52,7 @@ module.exports.payDeliveryDotCom = function * (pay) {
   // build guest checkout obj
 
   var guestCheckout = {
-    'client_id': pay_const.delivery_com_client_id,
+    'client_id': payConst.delivery_com_client_id,
     'order_type': pay.order.order.order_type,
     'order_time': new Date().toISOString(),
     'payments': [
@@ -111,11 +99,17 @@ module.exports.payDeliveryDotCom = function * (pay) {
     guestCheckout.zip_code = pay.order.chosen_location.addr.zip_code
   }
 
+  // tip
+  guestCheckout.tip = pay.order.order.tip
+
   logging.info('PAY OBJ ', pay)
   logging.info('GUEST CHECKOUT OBJ ', guestCheckout)
 
   // pos to delivery
   try {
+    pay.delivery_post = guestCheckout
+    pay.save()
+    profOak.say(`paying for delivery.com for team:${pay.order.team_id} total amount: ${pay.order.total} with tip ${pay.delivery_post.tip}`)
     var response = yield payForItemFromKip(guestCheckout, pay.order.guest_token)
     return response
   } catch (err) {

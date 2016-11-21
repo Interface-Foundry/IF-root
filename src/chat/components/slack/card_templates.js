@@ -198,12 +198,6 @@ var slack_onboard_default = module.exports.slack_onboard_default = [{
       style: "primary",
       type: "button",
       value: "exit"
-    },{
-      name: "home_btn",
-      text: "🐧",
-      style: "default",
-      type: "button",
-      value: "home_btn"
     }];
 
 var slack_onboard_basic = module.exports.slack_onboard_basic = [{

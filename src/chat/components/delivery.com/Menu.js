@@ -35,8 +35,22 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
 
-  return item.price * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
+  var basePrice
+  var hasPriceGroup = item.children.map(c => c.type).includes('price group')
+  if (hasPriceGroup) {
+    var priceGroup = item.children.filter(c => c.type === 'price group')[0]
+    var priceOption = priceGroup.children.filter(p => !!cartItem.item.option_qty[p.unique_id])[0]
+    basePrice = _.get(priceOption, 'price', item.price)
+  } else {
+    basePrice = item.price
+  }
+
+  return basePrice * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
       if (!cartItem.item.option_qty.hasOwnProperty(optionId)) {
+        return sum
+      }
+
+      if (optionId === _.get(priceOption, 'unique_id', -1).toString()) {
         return sum
       }
 
@@ -54,7 +68,22 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
 // turns the menu into a single object with keys as item ids
 function flattenMenu (data) {
   var out = {}
+  var schedules = data.schedule
+  var now = new Date()
   function flatten (node, out) {
+    if (node.type === 'menu' && _.get(node, 'schedule[0]')) {
+      var isAvailable = false
+      node.schedule.map(id => _.find(schedules, {id: id})).map(t => {
+        if (now > new Date(t.from) && now < new Date(t.to)) {
+          isAvailable = true
+        }
+      })
+
+      if (!isAvailable) {
+        return
+      }
+    }
+
     out[node.unique_id] = node
     _.get(node, 'children', []).map(c => flatten(c, out))
   }
@@ -105,7 +134,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   var options = nodeOptions(item, cartItem, validate)
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
-    'text': 'Special Instructions: _None_',
+    'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"}`,
     'fallback': 'You are unable to choose a game',
     'callback_id': 'wopr_game',
     'color': '#49d63a',
@@ -122,10 +151,10 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
         'value': cartItem.item.item_id
       },
       {
-        'name': 'chess',
-        'text': '+ Special Instructions',
+        'name': 'food.item.instructions',
+        'text': '✎ Special Instructions',
         'type': 'button',
-        'value': 'chess'
+        'value': cartItem.item.item_id
       },
       {
         'name': 'food.menu.quick_picks',
@@ -139,7 +168,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
 }
 
 function nodeOptions (node, cartItem, validate) {
-  var attachments = node.children.filter(c => c.type === 'option group').map(g => {
+  var attachments = node.children.filter(c => c.type.includes('group')).reduce((all, g) => {
     var a = {
       fallback: 'Meal option',
       callback_id: g.id,
@@ -171,17 +200,17 @@ function nodeOptions (node, cartItem, validate) {
     } else {
       required = true
       if (g.min_selection === g.max_selection) {
-        allowMultiple = false
+        allowMultiple = g.min_selection !== 1
         a.text += `
  Required - Choose exactly ${g.min_selection}.`
         if (validate && numSelected === 0) {
-          a.text += '\n`Option Requred`'
+          a.text += '\n`Option Required`'
           a.color = '#fa951b'
         }
       } else {
         a.text += `
  Required - Choose at least ${g.min_selection} and up to ${g.max_selection}.`
-        if (validate && numSelected > g.max_selection) {
+        if (numSelected > g.max_selection) {
           a.text += '\n`Maximum number of options exceeded`'
           a.color = '#fa951b'
         } else if (validate && numSelected < g.min_selection) {
@@ -192,8 +221,17 @@ function nodeOptions (node, cartItem, validate) {
     }
 
     a.actions = g.children.map(option => {
-      var checkbox
-      var price = option.price ? ' +$' + option.price : ''
+      var checkbox, price
+      if (g.type === 'price group') {
+        // price groups are like 'small, medium or large' and so each one is the base price
+        price = ' $' + option.price
+      } else if (g.type === 'option group' && option.price) {
+        // option groups are add-ons or required choices which can add to the item cost
+        price = ' +$' + option.price
+      } else {
+        price = ''
+      }
+
       if (cartItem.item.option_qty[option.unique_id]) {
         checkbox = allowMultiple ? '✓ ' : '◉ '
       } else {
@@ -209,8 +247,41 @@ function nodeOptions (node, cartItem, validate) {
         }
       }
     })
-    return a
-  })
+
+    all.push(a)
+
+    // Submenu part
+    g.children.map(option => {
+      if (cartItem.item.option_qty[option.unique_id] && _.get(option, 'children.0')) {
+        var submenuAttachments = nodeOptions(option, cartItem, validate)
+        all = all.concat(submenuAttachments)
+      }
+    })
+
+    return all
+  }, [])
+
+  // spread out the buttons to multiple attachments if needed
+  attachments = attachments.reduce((all, a) => {
+    if (_.get(a, 'actions.length', 0) <= 5) {
+      all.push(a)
+      return all
+    } else {
+      var actions = a.actions
+      a.actions = actions.splice(0, 5)
+      all.push(a)
+      while (actions.length > 0) {
+        all.push({
+          color: a.color,
+          fallback: a.fallback,
+          callback_id: 'even more actions',
+          attachment_type: 'default',
+          actions: actions.splice(0, 5)
+        })
+      }
+      return all
+    }
+  }, [])
 
   return attachments
 }

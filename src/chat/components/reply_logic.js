@@ -82,6 +82,44 @@ function typing (message) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
+function simplehome (message) {
+  // var slackreply = {
+  //   mrkdwn_in: ['text'],
+  //   text: '*Hi! Thanks for using Kip* 😊',
+  // }
+
+  var slackreply = {
+    text: '*Hi! Thanks for using Kip* 😊',
+    attachments: [{
+      text: 'Click a mode to start using Kip',
+      color: '#3AA3E3',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'shopping',
+        text: 'Shopping Mode',
+        type: 'button'
+      }, {
+        name: 'passthrough',
+        value: 'food',
+        text: 'Food Mode',
+        type: 'button'
+      }]
+    }]
+    // mrkdwn_in: ['text']
+  }
+
+  var msg = {
+    action: 'simplehome',
+    mode: 'food',
+    source: message.source,
+    origin: message.origin,
+    reply: {data: slackreply}
+  }
+
+  queue.publish('outgoing.' + message.origin, msg, 'home.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+}
+
 function isCancelIntent(message) {
   var text = message.text ? message.text.toLowerCase() : '';
   var cancelPhrases = [
@@ -89,7 +127,8 @@ function isCancelIntent(message) {
     'exit',
     'cancel',
     'start over',
-    'quit'
+    'quit',
+    'home'
   ];
   return cancelPhrases.indexOf(text) >= 0
 }
@@ -166,6 +205,8 @@ function printMode(message) {
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS <--lel
 //
 queue.topic('incoming').subscribe(incoming => {
+
+  incoming.ack();
 
   co(function * () {
     if (incoming.data.text) {
@@ -246,9 +287,8 @@ queue.topic('incoming').subscribe(incoming => {
     if (isCancelIntent(message)) {
       message.mode = 'shopping';
       message.action = 'switch'
+      return simplehome(message)
       yield message.save();
-      queue.publish('outgoing.' + message.origin, message, message._id + '.reply')
-      incoming.ack();
       timer.stop();
       return
     }

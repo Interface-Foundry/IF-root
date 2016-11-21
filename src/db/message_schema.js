@@ -13,6 +13,8 @@ var messageSchema = mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  slack_ts: String,
+  replace_ts: String,
   resolved: {
     type: Boolean,
     default: false

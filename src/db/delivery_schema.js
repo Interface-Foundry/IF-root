@@ -42,7 +42,8 @@ var deliverySchema = mongoose.Schema({
     first_name: String,
     last_name: String,
     phone_number: String,
-    email: String
+    email: String,
+    dm: String
   },
 
   fulfillment_method: String,
@@ -57,17 +58,25 @@ var deliverySchema = mongoose.Schema({
   mode: String,
   action: String,
   data: {}, // \shrug
-  tracking: {}, // possibly combine w/ data, cant remember what data is in explicitly
+  tracking: {
+    confirmed_votes_msg: String,
+    confirmed_orders_msg: String
+  },
+  delivery_post: {},
   order: {}, // info after adding items to cart
   tipPercent: {
     type: String,
     default: `15%`
   },
   tipAmount: Number,
+  payment_post: {}, // post body for payment (i.e. select or add new card)
   payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later
   guest_token: String, // related to creating a guest token per session
-  completed_payment: Boolean
+  completed_payment: Boolean,
+
+  // errors
+  delivery_error: String
 })
 
 deliverySchema.virtual('chosen_restaurant_full').get(function () {

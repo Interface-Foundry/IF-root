@@ -27,7 +27,15 @@ handlers['food.menu.quick_picks'] = function * (message) {
     logging.info('searching for', keyword.cyan)
     var menu = Menu(foodSession.menu)
     var sortedMenu = menu.allItems()
-    var matchingItems = yield utils.matchText(keyword, sortedMenu, ['name'])
+    var matchingItems = yield utils.matchText(keyword, sortedMenu, ['name'], {
+      // seems to work better for matching
+      shouldSort: true,
+      threshold: 0.8,
+      tokenize: true,
+      matchAllTokens: true,
+      keys: ['name']
+    })
+
     if (matchingItems !== null) {
       logging.info('we possibly found a food match, hmm')
     } else {
@@ -210,6 +218,7 @@ handlers['food.option.click'] = function * (message) {
     optionGroup.children.map(radio => {
       if (userItem.item.option_qty[radio.unique_id]) {
         delete userItem.item.option_qty[radio.unique_id]
+        deleteChildren(optionNode, userItem, cart.foodSession._id)
         db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + radio.unique_id]: ''}}).exec()
       }
     })
@@ -218,14 +227,28 @@ handlers['food.option.click'] = function * (message) {
   // toggle behavior for checkboxes and radio
   if (userItem.item.option_qty[option_id]) {
     delete userItem.item.option_qty[option_id]
+    deleteChildren(optionNode, userItem, cart.foodSession._id)
     db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + option_id]: ''}}).exec()
   } else {
     userItem.item.option_qty[option_id] = 1
     db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {['cart.$.item.option_qty.' + option_id]: 1}}).exec()
   }
 
+  kip.debug('option_qty', userItem.item.option_qty)
+
   var json = cart.menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
+}
+
+function deleteChildren(node, cartItem, deliveryId) {
+  (node.children || []).map(c => {
+    if (_.get(cartItem, 'item.option_qty.' + c.unique_id)) {
+      kip.debug('deleting', c.unique_id)
+      delete cartItem.item.option_qty[c.unique_id]
+      db.Delivery.update({_id: deliveryId, 'cart._id': cartItem._id}, {$unset: {['cart.$.item.option_qty.' + c.unique_id]: ''}}).exec()
+    }
+    deleteChildren(c, cartItem, deliveryId)
+  })
 }
 
 // Handles only the current item the user is editing
@@ -245,13 +268,46 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
   if (userItem.item.item_qty === 1) {
-    // don't let them go down to zero
-    return
+    // if it's zero here, go back to the menu view
+    message.data = {}
+    return yield handlers['food.menu.quick_picks'](message)
   }
   userItem.item.item_qty--
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   var json = cart.menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
+}
+
+handlers['food.item.instructions'] = function * (message) {
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var itemId = message.data.value
+  var item = cart.menu.getItemById(itemId)
+  var msg = {
+    text: `Add Special Instructions for *${item.name}*`,
+    attachments: [{
+      text: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
+      mrkdwn_in: ['text']
+    }]
+  }
+
+  var response = yield $replyChannel.sendReplace(message, 'food.item.instructions.submit', {type: message.origin, data: msg})
+  db.Messages.update({_id: response._id}, {$set: {'data.item_id': itemId}}).exec()
+}
+
+handlers['food.item.instructions.submit'] = function * (message) {
+  var itemId = message.history.map(m => _.get(m, 'data.item_id')).filter(Boolean)[0]
+
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var userItem = yield cart.getItemInProgress(itemId, message.source.user)
+
+  yield db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.item.instructions': message.text || ''}}).exec()
+  var msg = _.merge({}, message, {
+    text: '',
+    data: {value: itemId}
+  })
+  return yield handlers['food.item.submenu'](msg)
 }
 
 handlers['food.item.add_to_cart'] = function * (message) {
