@@ -218,6 +218,7 @@ handlers['food.option.click'] = function * (message) {
     optionGroup.children.map(radio => {
       if (userItem.item.option_qty[radio.unique_id]) {
         delete userItem.item.option_qty[radio.unique_id]
+        deleteChildren(optionNode, userItem, cart.foodSession._id)
         db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + radio.unique_id]: ''}}).exec()
       }
     })
@@ -226,14 +227,28 @@ handlers['food.option.click'] = function * (message) {
   // toggle behavior for checkboxes and radio
   if (userItem.item.option_qty[option_id]) {
     delete userItem.item.option_qty[option_id]
+    deleteChildren(optionNode, userItem, cart.foodSession._id)
     db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + option_id]: ''}}).exec()
   } else {
     userItem.item.option_qty[option_id] = 1
     db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {['cart.$.item.option_qty.' + option_id]: 1}}).exec()
   }
 
+  kip.debug('option_qty', userItem.item.option_qty)
+
   var json = cart.menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
+}
+
+function deleteChildren(node, cartItem, deliveryId) {
+  (node.children || []).map(c => {
+    if (_.get(cartItem, 'item.option_qty.' + c.unique_id)) {
+      kip.debug('deleting', c.unique_id)
+      delete cartItem.item.option_qty[c.unique_id]
+      db.Delivery.update({_id: deliveryId, 'cart._id': cartItem._id}, {$unset: {['cart.$.item.option_qty.' + c.unique_id]: ''}}).exec()
+    }
+    deleteChildren(c, cartItem, deliveryId)
+  })
 }
 
 // Handles only the current item the user is editing
