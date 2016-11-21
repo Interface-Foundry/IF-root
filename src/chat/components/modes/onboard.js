@@ -189,9 +189,6 @@ handlers['confirm_remind'] = function*(message, data) {
       a.color = '#45a5f4';
     });
     var cronMsg = {
-      incoming: false,
-      thread_id: message.thread_id,
-      origin: 'slack',
       mode: 'onboard',
       action: 'home',
       reply: cronAttachments
@@ -602,10 +599,6 @@ handlers['confirm_reminder'] = function*(message, data) {
       a.color = '#45a5f4';
     })
     var cronMsg = {
-      incoming: false,
-      resolved: true,
-      user_id: 'kip',
-      origin: message.origin,
       mode: 'shopping',
       action: 'switch.silent',
       reply: cronAttachments
@@ -641,9 +634,17 @@ handlers['member'] = function * (message) {
   });
 
   var attachments = [{
+    'image_url': 'http://kipthis.com/kip_modes/mode_howtousekip.png',
+    'text': '',
+    'mrkdwn_in': [
+      'text',
+      'pretext'
+    ],
+    'color': '#45a5f4'
+  }, {
     text: `Make <@${currentUser.id}>'s life easier! Let me show you how to add items to the team cart`,
     mrkdwn_in: ['text'],
-    fallback: 'Onboard',
+    fallback: 'Onboard_Shopping',
     callback_id: 'none',
     actions: cardTemplate.slack_onboard_member,
   }];
@@ -651,7 +652,7 @@ handlers['member'] = function * (message) {
     text: '',
     color: '#49d63a',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard',
+    fallback: 'Onboard_Shopping',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
   });
@@ -666,7 +667,7 @@ handlers['member'] = function * (message) {
       incoming: false,
       thread_id: a.dm,
       origin: 'slack',
-      mode: 'onboard',
+      mode: 'onboard_shopping',
       action: 'home',
       reply: attachments,
       source: {
@@ -930,7 +931,6 @@ const createCronJob = function(people, msg, team, date) {
   kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
   new cron.CronJob(date, function() {
     people.map(function(a) {
-
        var newMessage= new db.Message({
         incoming: false,
         thread_id: a.dm,
@@ -946,11 +946,10 @@ const createCronJob = function(people, msg, team, date) {
           type: 'message',
         },
         reply: msg.reply,
-        mode: 'shopping',
-        action: 'switch.silent',
+        mode: msg.mode,
+        action: msg.action,
         user: a.id
       })
-
       co(publish(newMessage));
     });
   },

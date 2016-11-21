@@ -307,42 +307,42 @@ var slack_remind = module.exports.slack_remind = [{
   }
 ];
 
-var member_remind = module.exports.slack_member_remind = [{
-    name: "onboard_shopping.member.confirm_reminder",
+var slack_member_remind = module.exports.slack_member_remind = [{
+    name: "onboard_shopping.start.reminder_confirm",
     text: "Today",
     style: "default",
     type: "button",
-    value: "confirm_reminder.today"
+    value: "reminder_confirm.today"
   }, {
-    name: "onboard_shopping.member.confirm_reminder",
+    name: "onboard_shopping.start.reminder_confirm",
     text: "Tomorrow",
     style: "default",
     type: "button",
-    value: "confirm_reminder.tomorrow"
+    value: "reminder_confirm.tomorrow"
   }, {
-    name: "onboard_shopping.member.confirm_reminder",
+    name: "onboard_shopping.start.reminder_confirm",
     text: "1 Week",
     style: "default",
     type: "button",
-    value: "confirm_reminder.one_week"
+    value: "reminder_confirm.one_week"
   }, {
-    name: "onboard_shopping.member.confirm_reminder",
+    name: "onboard_shopping.start.choose",
     text: "Choose for me",
     style: "default",
     type: "button",
-    value: "confirm_reminder.choose"
+    value: "reminder_confirm.choose"
   }
 ];
 
 
 var slack_onboard_member = module.exports.slack_onboard_member = [{
-      name: "onboard_shopping.member.step_1",
+      name: "onboard_shopping.start.step_1",
       text: "Ok!",
       style: "default",
       type: "button",
       value: "step_1"
     },{
-      name: "onboard_shopping.member.reminder",
+      name: "onboard_shopping.start.reminder",
       text: "Remind me later",
       style: "default",
       type: "button",
@@ -350,19 +350,19 @@ var slack_onboard_member = module.exports.slack_onboard_member = [{
     }];
 
 var slack_member_onboard_start = module.exports.slack_member_onboard_start = [{
-  "name": "onboard_shopping.member.step_2",
+  "name": "onboard_shopping.start.step_2",
   "text": "Headphones",
   "style": "default",
   "type": "button",
   "value": "step_2.headphones"
 }, {
-  "name": "onboard_shopping.member.step_2",
+  "name": "onboard_shopping.start.step_2",
   "text": "Coding Books",
   "style": "default",
   "type": "button",
   "value": "step_2.books"
 }, {
-  "name": "onboard_shopping.member.step_2",
+  "name": "onboard_shopping.start.step_2",
   "text": "Healthy Snacks",
   "style": "default",
   "type": "button",

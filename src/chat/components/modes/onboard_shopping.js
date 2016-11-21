@@ -7,11 +7,12 @@ var co = require('co');
 var cron = require('cron');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
+var Fuse = require('fuse.js');
 
 function* handle(message) {
   let action;
   if (!message.data) {
-    action = 'sorry'
+    action = 'text'
   } else {
     var data = _.split(message.data.value, '.');
     action = data[0];
@@ -27,7 +28,7 @@ module.exports.handle = handle;
  * Step 1:
  * You can search for things you need
  */
-handlers['step_1'] = function (message) {
+handlers['step_1'] = function(message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -129,7 +130,7 @@ handlers['step_2'] = function*(message, data) {
  * Step 3:
  * You can copy/paste etc. text
  */
-handlers['step_3'] = function *(message) {
+handlers['step_3'] = function*(message) {
   // body...
 }
 
@@ -148,7 +149,7 @@ handlers['reminder'] = function(message) {
     text: 'Ok! When would you like to be reminded?',
     color: '#49d63a',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard',
+    fallback: 'Onboard_Shopping',
     actions: cardTemplate.slack_member_remind,
     callback_id: 'none'
   });
@@ -156,7 +157,7 @@ handlers['reminder'] = function(message) {
     text: '',
     color: '#49d63a',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard',
+    fallback: 'Onboard_Shopping',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
   });
@@ -165,7 +166,7 @@ handlers['reminder'] = function(message) {
     a.color = '#45a5f4';
   });
   var msg = message;
-  msg.mode = 'onboard'
+  msg.mode = 'onboard_shopping'
   msg.action = 'home'
   msg.text = ''
   msg.source.team = team_id;
@@ -218,7 +219,7 @@ handlers['reminder_confirm'] = function*(message, data) {
       text: 'Hey, it\'s me again. Ready to get started?',
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      fallback: 'Onboard',
+      fallback: 'Onboard_Shopping',
       actions: cardTemplate.slack_onboard_member,
       callback_id: 'none'
     }];
@@ -230,7 +231,7 @@ handlers['reminder_confirm'] = function*(message, data) {
       incoming: false,
       thread_id: message.thread_id,
       origin: 'slack',
-      mode: 'onboard',
+      mode: 'onboard_shopping',
       action: 'home',
       reply: cronAttachments
     }
@@ -247,7 +248,7 @@ handlers['reminder_confirm'] = function*(message, data) {
     text: '',
     color: '#49d63a',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard',
+    fallback: 'Onboard_Shopping',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
   }];
@@ -256,7 +257,7 @@ handlers['reminder_confirm'] = function*(message, data) {
     a.color = '#45a5f4';
   });
   msg.action = 'home'
-  msg.mode = 'onboard'
+  msg.mode = 'onboard_shopping'
   msg.text = ''
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
@@ -288,34 +289,89 @@ handlers['sorry'] = function(message) {
   })
   message.reply = attachments;
   return [message];
-
 }
 
+
+/**
+ * Handle user input text
+ */
+handlers['text'] = function*(message) {
+  var history = yield db.Messages.find({
+    thread_id: message.source.channel
+  }).sort('-ts').limit(10);
+  var lastMessage = history[1];
+  var choices = _.flatten(lastMessage.reply.map(m => {
+    return m.actions
+  }).filter(function(n) {
+    return n != undefined
+  }))
+  if (!choices) {
+    return kip.debug('error: lastMessage: ', choices);
+  }
+  var fuse = new Fuse(choices, {
+    shouldSort: true,
+    threshold: 0.4,
+    keys: ["text"]
+  })
+  var matches = yield fuse.search(message.text)
+  var choice;
+  if (matches.length > 0) {
+    choice = matches[0].text == 'Help' ? 'help' : matches[0].value;
+    if (choice.indexOf('.') > -1) {
+      var handle = choice.split('.')[0];
+      var data = [choice.split('.')[1]];
+      return yield handlers[handle](message, data);
+    } else {
+      try {
+        return yield handlers[choice](message);
+      } catch (err) {
+        return yield handlers['step_2'](message, [message.text]);
+      }
+    }
+  } else {
+    return yield handlers['step_2'](message,[message.text]);
+  }
+}
 
 const createCronJob = function(people, msg, team, date) {
   kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
   new cron.CronJob(date, function() {
-    people.map(function(a) {
-      msg.user_id = a.id;
-      msg.user = a;
-      msg.source = {
-        team: team.team_id,
-        channel: a.dm,
-        user: a.id,
-        type: 'message',
-        subtype: 'bot_message'
-      }
-      var newMessage = new db.Message(msg);
-      newMessage.save();
-      queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
-    });},
-    function() {
-      console.log('just finished the scheduled update thing for team ' + team.team_id + ' ' + team.team_name);
-      this.stop();
+      people.map(function(a) {
+        var newMessage = new db.Message({
+          incoming: false,
+          thread_id: a.dm,
+          resolved: true,
+          user_id: a.id,
+          origin: 'slack',
+          text: '',
+          source: {
+            team: team.team_id,
+            channel: a.dm,
+            thread_id: a.dm,
+            user: a.id,
+            type: 'message',
+          },
+          reply: msg.reply,
+          mode: msg.mode,
+          action: msg.action,
+          user: a.id
+        })
+        co(publish(newMessage));
+      });
     },
-    true,
-    team.meta.weekly_status_timezone);
+    function() {
+      kip.debug('just finished the scheduled update thing for team ' + team.team_id + ' ' + team.team_name);
+      this.stop();
+    }, true, team.meta.weekly_status_timezone);
 };
+
+function* publish(message) {
+  yield message.save();
+  kip.debug('\n\n\n\n\n\n\n\n\n\n onboard:967:publish: ', message, '\n\n\n\n\n\n\n\n\n\n')
+  queue.publish('outgoing.' + message.origin, message, message._id + '.reply.update');
+}
+
+
 // based on the current time, determine a later time
 function determineLaterToday(now) {
   var ONE_HOUR = 60 * 60 * 1000;
