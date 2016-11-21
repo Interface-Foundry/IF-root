@@ -172,7 +172,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
         currency: 'usd',
         customer: customer.id
       })
-      profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(payment.order.order.total / 100.0).toFixed(2).$}`)
+      profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(payment.order.order.total / 100.0).$}`)
     } catch (err) {
       logging.error('had an error creating customer and card', err)
     }
@@ -249,7 +249,7 @@ function * chargeById (payment) {
       card: payment.order.saved_card.card_id
     })
 
-    profOak.say(`succesfully created new stripe charge for team:${payment.order.team_id} in amount ${(payment.order.order.total / 100.0).toFixed(2).$}`)
+    profOak.say(`succesfully created new stripe charge for team:${payment.order.team_id} in amount ${(payment.order.order.total / 100.0).$}`)
   } catch (err) {
     logging.error('error creating stripe charge')
   }
@@ -262,7 +262,7 @@ function * chargeById (payment) {
   //fired on re-used cards charged ONLY
   if (charge.status === 'succeeded') {
     // POST TO MONGO QUEUE SUCCESS PAYMENT
-    try { 
+    try {
       profOak.say(`succesfully paid for stripe for team ${payment.order.team_id}`)
       profOak.say(`paying for delivery.com order for ${payment.order.team_id}`)
 
@@ -281,7 +281,7 @@ function * chargeById (payment) {
         profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
         yield payment.save()
       }
-    
+
       yield onSuccess(payment)
 
     } catch (err) {
@@ -317,7 +317,7 @@ function * onSuccess (payment) {
     //   })
 
     // send message to all the ppl that ordered food
-    foodSession.confirmed_orders.map(userId => {       
+    foodSession.confirmed_orders.map(userId => {
 
       var user = _.find(foodSession.team_members, {id: userId}) // find returns the first one
 

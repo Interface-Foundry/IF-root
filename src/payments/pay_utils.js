@@ -109,7 +109,7 @@ module.exports.payDeliveryDotCom = function * (pay) {
   try {
     pay.delivery_post = guestCheckout
     pay.save()
-    profOak.say(`paying for delivery.com for team:${pay.order.team_id} total amount: ${pay.order.total} with tip ${pay.delivery_post.tip}`)
+    profOak.say(`paying for delivery.com for team:${pay.order.team_id} total amount: ${pay.order.order.total} with tip ${pay.delivery_post.tip}`)
     var response = yield payForItemFromKip(guestCheckout, pay.order.guest_token)
     return response
   } catch (err) {
