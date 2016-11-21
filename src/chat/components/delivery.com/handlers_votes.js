@@ -389,7 +389,14 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       }
     }
 
-    var sentMessage = yield $replyChannel.send(message, 'food.admin.dashboard.cuisine', {
+    // if the admin has not yet voted, make sure to set the mode.action to the votable route
+    if (foodSession.votes.map(u => u.user).includes(foodSession.convo_initiater.id)) {
+      var route = 'food.admin.dashboard.cuisine'
+    } else {
+      route = 'food.admin.restaurant.pick'
+    }
+
+    var sentMessage = yield $replyChannel.send(message, route, {
       type: message.origin,
       data: dashboard
     })
