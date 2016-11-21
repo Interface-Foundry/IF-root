@@ -217,9 +217,13 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
           {
             type: finalFoodMessage.origin,
             data: {
-              text: `Your order was successful and you should receive an email from Delivery.com soon!`
+              text: 'Your order was successful and you should receive an email from `Delivery.com` soon!'
             }
           })
+
+        //send success messages to order members
+        yield onSuccess(payment)
+
         profOak.say(`order completed for team: ${payment.order.team_id}`)
       } catch (err) {
         logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
@@ -234,11 +238,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
 }))
 
 function * chargeById (payment) {
-  // make a charge
-
-  // STRIPE CHARGE BY ID
-  // When it's time to charge the customer again, retrieve the customer ID!
-
+  // make a charge by saved card ID
   try {
     profOak.say(`creating stripe charge for ${payment.order.saved_card.saved_card}`)
     logging.info('creating charge by ID')
@@ -282,78 +282,7 @@ function * chargeById (payment) {
         yield payment.save()
       }
     
-      // look up user and the last message sent to us in relation to this order
-      var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
-      var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
-      finalFoodMessage = finalFoodMessage[0]
-      var menu = Menu(foodSession.menu)
-
-
-      logging.info('WHAHAHT ',finalFoodMessage.origin)
-
-      //send message to user
-      replyChannel.send(
-        finalFoodMessage,
-        'food.payment_info',
-        {
-          type: finalFoodMessage.origin,
-          data: {
-            'text': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
-            'fallback': `Order Success!`,
-            'callback_id': `food.admin.select_card`
-          }
-        })
-
-      // send message to all the ppl that ordered food
-      foodSession.confirmed_orders.map(userId => {       
-
-        var user = _.find(foodSession.team_members, {id: userId}) // find returns the first one
-
-        var msg = _.merge({}, finalFoodMessage, {
-          thread_id: user.dm,
-          source: {
-            user: user.id,
-            team: foodSession.team_id,
-            channel: user.dm
-          }
-        })
-
-        var itemNames = foodSession.cart
-          .filter(i => i.user_id === userId)
-          .map(i => menu.getItemById(i.item.item_id).name)
-          .map(name => '*' + name + '*') // be bold
-
-        if (itemNames.length > 1) {
-          var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
-        } else {
-          foodString = itemNames[0]
-        }
-
-        replyChannel.send(
-          msg,
-          'food.payment_info',
-          {
-            type: finalFoodMessage.origin,
-            data: {
-              text: `Your order of ${foodString} is on the way 😊`
-            }
-          })
-      })
-
-      // logging.info('CONFIRMED ORDERS: ',foodSession.confirmed_orders)
-      // logging.info('CONVO INIT: ',foodSession.convo_initiater)
-
-    
-      // //send confirmation email to admin
-      // var mailOptions = {
-      //   to: 'Kip Server <hello@kipthis.com>',
-      //   from: 'Kip Café <server@kipthis.com>',
-      //   subject: '['+source.callback_id+'] Kip Café Feedback',
-      //   text: '- Feedback: '+message.text + ' \r\n - Context:'+JSON.stringify(source)
-      // }
-      // mailer_transport.sendMail(mailOptions, function (err) {
-      //   if (err) console.log(err)
-      // })
+      yield onSuccess(payment)
 
     } catch (err) {
       logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
@@ -364,9 +293,81 @@ function * chargeById (payment) {
   }
 }
 
-
+//when everything goes well
 function * onSuccess (payment) {
+  try {
+    // look up user and the last message sent to us in relation to this order
+    var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
+    var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
+    finalFoodMessage = finalFoodMessage[0]
+    var menu = Menu(foodSession.menu)
 
+    //NOTE: already doing this elsewhere, so commenting out. also, this is happening in two diff places based on new / used card. just fyi, code traveler
+    //send message to user
+    // replyChannel.send(
+    //   finalFoodMessage,
+    //   'food.payment_info',
+    //   {
+    //     type: finalFoodMessage.origin,
+    //     data: {
+    //       'text': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
+    //       'fallback': `Order Success!`,
+    //       'callback_id': `food.admin.select_card`
+    //     }
+    //   })
+
+    // send message to all the ppl that ordered food
+    foodSession.confirmed_orders.map(userId => {       
+
+      var user = _.find(foodSession.team_members, {id: userId}) // find returns the first one
+
+      var msg = _.merge({}, finalFoodMessage, {
+        thread_id: user.dm,
+        source: {
+          user: user.id,
+          team: foodSession.team_id,
+          channel: user.dm
+        }
+      })
+
+      var itemNames = foodSession.cart
+        .filter(i => i.user_id === userId)
+        .map(i => menu.getItemById(i.item.item_id).name)
+        .map(name => '*' + name + '*') // be bold
+
+      if (itemNames.length > 1) {
+        var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
+      } else {
+        foodString = itemNames[0]
+      }
+
+      replyChannel.send(
+        msg,
+        'food.payment_info',
+        {
+          type: finalFoodMessage.origin,
+          data: {
+            text: `Your order of ${foodString} is on the way 😊`
+          }
+        })
+    })
+
+    //send confirmation email to admin
+    var mailOptions = {
+      to: ''+foodSession.convo_initiater.name+' <'+foodSession.convo_initiater.email+'>',
+      from: 'Kip Café <hello@kipthis.com>',
+      subject: 'Kip Café Order Receipt for XYZ Restaurant',
+      text: 'Kip Café receipt coming soon! \n\n'
+    }
+
+    logging.info(mailOptions)
+    mailer_transport.sendMail(mailOptions, function (err) {
+      if (err) console.log(err)
+    })
+
+  } catch (err){
+    logging.error('on success messages broke')
+  }
 }
 
 var port = process.env.PORT || 8080
