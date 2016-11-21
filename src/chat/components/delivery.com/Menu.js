@@ -251,10 +251,12 @@ function nodeOptions (node, cartItem, validate) {
     all.push(a)
 
     // Submenu part
-    if (cartItem.item.option_qty[option.unique_id] && _.get(option, 'children.0')) {
-      var submenuAttachments = nodeOptions(option, cartItem, validate)
-      all = all.concat(submenuAttachments)
-    }
+    g.children.map(option => {
+      if (cartItem.item.option_qty[option.unique_id] && _.get(option, 'children.0')) {
+        var submenuAttachments = nodeOptions(option, cartItem, validate)
+        all = all.concat(submenuAttachments)
+      }
+    })
 
     return all
   }, [])
