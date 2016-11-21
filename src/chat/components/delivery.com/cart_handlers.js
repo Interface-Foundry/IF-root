@@ -214,7 +214,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      text: `*Waiting for votes from:*\n${slackers}`,
+      text: `*Waiting for order(s) from:*\n${slackers}`,
       actions: [{
         name: 'food.admin.order.confirm',
         text: 'Finish Order Early',
