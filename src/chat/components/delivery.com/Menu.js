@@ -204,7 +204,7 @@ function nodeOptions (node, cartItem, validate) {
         a.text += `
  Required - Choose exactly ${g.min_selection}.`
         if (validate && numSelected === 0) {
-          a.text += '\n`Option Requred`'
+          a.text += '\n`Option Required`'
           a.color = '#fa951b'
         }
       } else {

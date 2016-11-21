@@ -454,20 +454,9 @@ handlers['food.admin.order.select_card'] = function * (message) {
 
     foodSession.save()
     var response = {
-      'text': ``,
-      'fallback': `You are unable to complete payment`,
-      'callback_id': `food.admin.select_card`,
-      'color': `#3AA3E3`,
-      'attachment_type': `default`,
-      'attachments': [{
-        'title': '',
-        'mrkdwn_in': ['text'],
-        'text': `Cool, looks like everything went through`,
-        'fallback': `You are unable to follow this link to confirm order`,
-        'callback_id': `food.admin.add_new_card`,
-        'color': `#3AA3E3`,
-        'attachment_type': `default`
-      }]
+      'text': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
+      'fallback': `Order Success!`,
+      'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
   } catch (e) {

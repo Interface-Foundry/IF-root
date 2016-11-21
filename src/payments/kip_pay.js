@@ -52,6 +52,9 @@ var jsonParser = bodyParser.json()
 // import kip cc
 var pay_utils = require('./pay_utils.js')
 
+// kip emailer
+var mailer_transport = require('../mail/IF_mail.js')
+
 // tracking for food into cafe-tracking
 var Professor = require('../monitoring/prof_oak.js')
 var profOak = new Professor.Professor('C33NU7FRC')
@@ -177,11 +180,26 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
     payment.charge = charge
     payment.save()
 
+    //fired on new cards charged ONLY
     if (charge.status === 'succeeded') {
       try {
-        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
-        profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
-        yield payment.save()
+
+        //complicated for testing purposes
+        if (!process.env.NODE_ENV) {
+          throw new Error('you need to run kip-pay with NODE_ENV')
+        } else if (process.env.NODE_ENV !== 'canary') {
+          payment.delivery_response = 'test_success'
+          yield payment.save()
+        } else if (process.env.NODE_ENV === 'canary') {
+          payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
+          profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
+          yield payment.save()
+        } else {
+          payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
+          profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
+          yield payment.save()
+        }
+
         yield pay_utils.storeCard(payment, charge)
 
         // look up user and the last message sent to us in relation to this order
@@ -241,34 +259,56 @@ function * chargeById (payment) {
     yield payment.save()
   }
 
+  //fired on re-used cards charged ONLY
   if (charge.status === 'succeeded') {
     // POST TO MONGO QUEUE SUCCESS PAYMENT
-    try {
+    try { 
       profOak.say(`succesfully paid for stripe for team ${payment.order.team_id}`)
       profOak.say(`paying for delivery.com order for ${payment.order.team_id}`)
-      payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
-      yield payment.save()
 
+      //complicated for testing purposes
+      if (!process.env.NODE_ENV) {
+        throw new Error('you need to run kip-pay with NODE_ENV')
+      } else if (process.env.NODE_ENV !== 'canary') {
+        payment.delivery_response = 'test_success'
+        yield payment.save()
+      } else if (process.env.NODE_ENV === 'canary') {
+        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
+        profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
+        yield payment.save()
+      } else {
+        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
+        profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
+        yield payment.save()
+      }
+    
       // look up user and the last message sent to us in relation to this order
       var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
-      var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `done`, incoming: false}).sort('-ts').limit(1)
+      var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
       finalFoodMessage = finalFoodMessage[0]
       var menu = Menu(foodSession.menu)
 
-      // send message to user
+
+      logging.info('WHAHAHT ',finalFoodMessage.origin)
+
+      //send message to user
       replyChannel.send(
         finalFoodMessage,
         'food.payment_info',
         {
           type: finalFoodMessage.origin,
           data: {
-            text: `looks like everything went through on this order`
+            'text': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
+            'fallback': `Order Success!`,
+            'callback_id': `food.admin.select_card`
           }
         })
 
       // send message to all the ppl that ordered food
-      foodSession.confirmed_orders.map(userId => {
+      foodSession.confirmed_orders.map(userId => {       
+
         var user = _.find(foodSession.team_members, {id: userId}) // find returns the first one
+
         var msg = _.merge({}, finalFoodMessage, {
           thread_id: user.dm,
           source: {
@@ -279,7 +319,7 @@ function * chargeById (payment) {
         })
 
         var itemNames = foodSession.cart
-          .filter(i => u.user_id === userId)
+          .filter(i => i.user_id === userId)
           .map(i => menu.getItemById(i.item.item_id).name)
           .map(name => '*' + name + '*') // be bold
 
@@ -299,6 +339,22 @@ function * chargeById (payment) {
             }
           })
       })
+
+      // logging.info('CONFIRMED ORDERS: ',foodSession.confirmed_orders)
+      // logging.info('CONVO INIT: ',foodSession.convo_initiater)
+
+    
+      // //send confirmation email to admin
+      // var mailOptions = {
+      //   to: 'Kip Server <hello@kipthis.com>',
+      //   from: 'Kip Café <server@kipthis.com>',
+      //   subject: '['+source.callback_id+'] Kip Café Feedback',
+      //   text: '- Feedback: '+message.text + ' \r\n - Context:'+JSON.stringify(source)
+      // }
+      // mailer_transport.sendMail(mailOptions, function (err) {
+      //   if (err) console.log(err)
+      // })
+
     } catch (err) {
       logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
     }
@@ -306,6 +362,11 @@ function * chargeById (payment) {
     logging.error('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
     logging.error('OUTCOME: ', charge.outcome)
   }
+}
+
+
+function * onSuccess (payment) {
+
 }
 
 var port = process.env.PORT || 8080
