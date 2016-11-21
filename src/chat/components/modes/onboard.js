@@ -58,6 +58,7 @@ handlers['start'] = function * (message) {
     text: 'Welcome to Kip!  We\'ll help you get started :)'
   });
   attachments.push({
+      image_url: "http://tidepools.co/kip/kip_menu.png",
       text: 'What are you looking for?',
       color: '#49d63a',
       mrkdwn_in: ['text'],

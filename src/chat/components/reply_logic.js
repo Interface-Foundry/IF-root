@@ -91,18 +91,19 @@ function simplehome (message) {
   var slackreply = {
     text: '*Hi! Thanks for using Kip* 😊',
     attachments: [{
+      image_url: "http://tidepools.co/kip/kip_menu.png",
       text: 'Click a mode to start using Kip',
       color: '#3AA3E3',
       callback_id: 'wow such home',
       actions: [{
         name: 'passthrough',
         value: 'shopping',
-        text: 'Shopping Mode',
+        text: 'Kip Store',
         type: 'button'
       }, {
         name: 'passthrough',
         value: 'food',
-        text: 'Food Mode',
+        text: 'Kip Café',
         type: 'button'
       }]
     }]
