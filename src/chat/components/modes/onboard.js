@@ -399,7 +399,7 @@ handlers['bundle'] = function * (message, data) {
       text: 'Do you want to let others add stuff to cart?',
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      fallback:'Onboard',
+      fallback:'Onboard.helper',
       actions: cardTemplate.slack_onboard_basic,
       callback_id: 'none'
     });
@@ -777,16 +777,17 @@ handlers['text'] = function * (message) {
   var matches = yield fuse.search(message.text)
   var choice;
   if (matches.length > 0) {
-    choice = matches[0].value;
+    choice = matches[0].text == 'Help' ? 'help' : matches[0].value;
     if (choice.indexOf('.') > -1) {
       var handle = choice.split('.')[0];
       var data = [choice.split('.')[1]];
       return yield handlers[handle](message, data);
     } else {
       try {
-        if (choice == 'more_info') {
-          kip.debug(' \n\n\n\n\n\n\n\n\n\n ', history[2].action,' \n\n\n\n\n\n\n\n\n\n ')
-          var data = { action: history[0].action, attachments: choice }
+        if (choice == 'more_info' || choice == 'help') {
+          var data = { lastAction: choice == 'more_info' ? 'bundle.more' : 'team.help'};
+          if (data.lastAction == 'team.help') message.text = '';
+          // kip.debug(' \n\n\n\n\ onboard:788:textHandler: sending data: ', data  ,'\n\n\n\n');
           return yield handlers[choice](message, data);
         } 
         return yield handlers[choice](message);
@@ -883,23 +884,26 @@ handlers['back_btn'] = function * (message) {
  * more info / help handler
  */
 handlers['more_info'] = function * (message, data) {
+
+   kip.debug(' \n\n\n\n\n\n onboard:887:more_infoHandler got data: ', data,' \n\n\n\n\n\n ');
+
    var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
    var last_message = history[0];
-   var lastAction = _.get(last_message,'action') ?_.get(last_message,'action') : _.get(data,'action');
+   var lastAction = _.get(data,'lastAction') ? _.get(data,'lastAction') : _.get(last_message,'action') ?  _.get(last_message,'action') : 'team.help';
    var helpText;
+   var helpOptions;
    var lastMenu = _.get(message, 'source.original_message.attachments') ? _.get(message, 'source.original_message.attachments')[_.get(message, 'source.original_message.attachments').length-1].actions : _.get(data,'attachments');
    switch(lastAction) {
     case 'bundle.more':
       helpText = `Selecting 'Yes' will allow you to choose which channels to add to this order.
   Or simply checkout your items by selecting 'No'`
+      helpOptions = cardTemplate.slack_onboard_basic
       break
     case 'team.help': 
       helpText = `Kip will direct message members in each selected channel to help them add items to the cart!`
+      helpOptions = cardTemplate.slack_onboard_team
       break
    }
-
-  kip.debug(' \n\n\n\n\n\n onboard:853:more_info:last_message: ', last_message,' lastAction: ', lastAction,' lastMenu: ', lastMenu,' data: ', data,' \n\n\n\n\n\n ')
-
 
    message.text = "";
    message.mode = 'onboard';
@@ -910,7 +914,7 @@ handlers['more_info'] = function * (message, data) {
       color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
-      actions: lastMenu,
+      actions: helpOptions,
       callback_id: 'none'
     });
     attachments.map(function(a) {

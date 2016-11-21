@@ -235,12 +235,6 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
     },{
       name: "onboard.team.help",
       text: "Help",
-      style: "default",
-      type: "button",
-      value: "help"
-    },{
-      name: "onboard.team.help",
-      text: "Help",
       style: "primary",
       type: "button",
       value: "more_info"

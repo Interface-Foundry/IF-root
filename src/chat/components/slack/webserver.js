@@ -142,7 +142,6 @@ app.post('/slackaction', next(function * (req, res) {
         var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
         if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
         var json = parsedIn.original_message;
-                kip.debug(' \n\n\n\n\n\n\n\n webserver:143:json:', JSON.stringify(json),'\n\n\n\n\n\n\n\n ' );
 
         json.attachments[json.attachments.length-1] = {
             fallback: 'Search Results',
