@@ -129,18 +129,18 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Different ways to compute the score for a merchant. Higher scores show up first.
   //
   var scoreAlgorithms = {
-    [SORT.cuisine] : (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
-    [SORT.keyword] : (m) => {
+    [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
+    [SORT.keyword]: (m) => {
       if (!keyword) {
         throw new Error('Cannot sort based on keyword without a keyword')
       }
-      return (matchingRestaurants.length - matchingRestaurants.indexOf(m.id))/matchingRestaurants.length
+      return (matchingRestaurants.length - matchingRestaurants.indexOf(m.id)) / matchingRestaurants.length
     },
-    [SORT.distance] : (m) => _.get(m, 'location.distance', 10000),
-    [SORT.rating] : (m) => {
+    [SORT.distance]: (m) => _.get(m, 'location.distance', 10000),
+    [SORT.rating]: (m) => {
       return _.get(m, 'summary.overall_rating', 0) },
-    [SORT.price] : (m) => _.get(m, 'summary.price_rating', 10),
-    [SORT.random] : (m) => Math.random()
+    [SORT.price]: (m) => _.get(m, 'summary.price_rating', 10),
+    [SORT.random]: (m) => Math.random()
   }
 
   // First filter out the ones that are not available for delivery or pickup
@@ -258,12 +258,10 @@ handlers['food.user.choice_confirm'] = function * (message) {
   $replyChannel.send(message, 'food.admin.restaurant.pick', {type: 'slack', data: message.example_res})
 }
 
-
-
 handlers['food.admin.restaurant.pick'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
-  function addVote(str) {
+  function addVote (str) {
     var vote = {
       user: message.source.user,
       vote: str
@@ -314,8 +312,6 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
   }
 }
-
-
 
 /*
 * Confirm all users have voted for a cuisine
@@ -373,7 +369,6 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       type: msgToReplace.origin,
       data: dashboard
     })
-
   } else {
     // admin is confirming, replace their message
     var admin = foodSession.convo_initiater
@@ -405,12 +400,22 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   }
 }
 
-
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
+
+  // reset to cuisine sort if tyring to keyword sort w/o a keyword
+  if (sort === SORT.keyword && !keyword) {
+    sort = SORT.cuisine
+  }
+
+  // always sort descending for keyword and cuisine matches (sort by highest relevance)
+  if ([SORT.cuisine, SORT.keyword].includes(sort)) {
+    direction = SORT.descending
+  }
+
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   var viableRestaurants = yield createSearchRanking(foodSession, sort, direction, keyword)
   logging.info('# of restaurants: ', foodSession.merchants.length)
@@ -418,7 +423,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': yield viableRestaurants.slice(index, index+3).map(utils.buildRestaurantAttachment)
+    'attachments': yield viableRestaurants.slice(index, index + 3).map(utils.buildRestaurantAttachment)
   }
 
   var moreButton = {
@@ -442,7 +447,12 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'name': 'food.admin.restaurant.pick.list',
     'text': (sort === SORT.price ? arrow : '') + 'Sort Price',
     'type': 'button',
-    'value': {index: 0, sort: SORT.price, keyword: keyword, direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending }
+    'value': {
+      index: 0,
+      sort: (sort === SORT.price && direction === SORT.descending) ? SORT.keyword : SORT.price,
+      keyword: keyword,
+      direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending
+    }
   }
 
   // default rating sort direction is descending
@@ -450,7 +460,12 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'name': 'food.admin.restaurant.pick.list',
     'text': (sort === SORT.rating ? arrow : '') + 'Sort Rating',
     'type': 'button',
-    'value': {index: 0, sort: SORT.rating, keyword: keyword, direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending }
+    'value': {
+      index: 0,
+      sort: (sort === SORT.rating && direction === SORT.ascending) ? SORT.keyword : SORT.rating,
+      keyword: keyword,
+      direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending
+    }
   }
 
   // default distance sort direction is ascending
@@ -458,7 +473,12 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'name': 'food.admin.restaurant.pick.list',
     'text': (sort === SORT.distance ? arrow : '') + 'Sort Distance',
     'type': 'button',
-    'value': {index: 0, sort: SORT.distance, keyword: keyword, direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending }
+    'value': {
+      index: 0,
+      sort: (sort === SORT.distance && direction === SORT.descending) ? SORT.keyword : SORT.distance,
+      keyword: keyword,
+      direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending
+    }
   }
 
   var buttons = {
@@ -485,7 +505,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   responseForAdmin.attachments.push(buttons)
 
-
   // admin is confirming, replace their message
   var admin = foodSession.convo_initiater
   var message = _.merge({}, message, {
@@ -500,7 +519,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     }
   })
 
-  $replyChannel.send(message, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
+  $replyChannel.sendReplace(message, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
@@ -616,8 +635,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     $replyChannel.send(newMessage, 'food.menu.quick_picks', {type: 'slack', data: msgJson})
   })
 }
-
-
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel
