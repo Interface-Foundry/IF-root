@@ -544,17 +544,17 @@ handlers['food.done'] = function * (message) {
     }]
     // mrkdwn_in: ['text']
   }
- // var msg = {
- //    action: 'simplehome',
- //    mode: 'food',
- //    source: message.source,
- //    origin: message.origin,
- //    reply: {data: slackreply}
- //  }
+ var msg = {
+    action: 'simplehome',
+    mode: 'food',
+    source: message.source,
+    origin: message.origin,
+    reply: {data: slackreply}
+  }
   
- //  sleep(2000);
+  sleep(2000);
 
- //  $replyChannel.send(msg, 'food.done', {type: msg.origin, data: slackreply})
+  $replyChannel.send(msg, 'food.done', {type: msg.origin, data: slackreply})
 }
 
 module.exports = function (replyChannel, allHandlers) {
