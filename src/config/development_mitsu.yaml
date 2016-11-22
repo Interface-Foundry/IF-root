@@ -1,6 +1,6 @@
 env: development_mitsu
-mongodb:
-  url: localhost/foundry
+# mongodb:
+#   url: localhost/foundry
 elasticsearch:
   url: http://localhost:9200
 app:
