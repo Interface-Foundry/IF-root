@@ -73,7 +73,7 @@ logging.info('running in NODE_ENV', process.env.NODE_ENV)
 
 // post a new charge for kip user
 app.post('/charge', jsonParser, (req, res) => co(function * () {
-    // include KEY with new POST req to /charge to verify authentic kip request
+  // include KEY with new POST req to /charge to verify authentic kip request
   var kipSecret = 'mooseLogicalthirteen$*optimumNimble!Cake'
 
     // NEED TO IP RESTRICT TO ONLY OUR ECOSYSTEM
@@ -128,7 +128,7 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
       res.status(200).send(JSON.stringify(v))
     }
   } else {
-    logging.error('kip token didnt match up or body total thing ', req.body)
+    logging.error('kip token didnt match up or body total thing ', req)
     res.status(401).send('😅')
   }
 }))
@@ -180,11 +180,10 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
     payment.charge = charge
     payment.save()
 
-    //fired on new cards charged ONLY
+    // fired on new cards charged ONLY
     if (charge.status === 'succeeded') {
       try {
-
-        //complicated for testing purposes
+        // complicated for testing purposes
         if (!process.env.NODE_ENV) {
           throw new Error('you need to run kip-pay with NODE_ENV')
         } else if (process.env.NODE_ENV !== 'canary') {
@@ -221,7 +220,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
             }
           })
 
-        //send success messages to order members
+        // send success messages to order members
         yield onSuccess(payment)
 
         profOak.say(`order completed for team: ${payment.order.team_id}`)
@@ -352,9 +351,9 @@ function * onSuccess (payment) {
         })
     })
 
-    //send confirmation email to admin
+    // send confirmation email to admin
     var mailOptions = {
-      to: ''+foodSession.convo_initiater.name+' <'+foodSession.convo_initiater.email+'>',
+      to: '' + foodSession.convo_initiater.name + ' <' + foodSession.convo_initiater.email + '>',
       from: 'Kip Café <hello@kipthis.com>',
       subject: 'Kip Café Order Receipt for XYZ Restaurant',
       text: 'Kip Café receipt coming soon! \n\n'
@@ -364,9 +363,8 @@ function * onSuccess (payment) {
     mailer_transport.sendMail(mailOptions, function (err) {
       if (err) console.log(err)
     })
-
-  } catch (err){
-    logging.error('on success messages broke')
+  } catch (err) {
+    logging.error('on success messages broke', err)
   }
 }
 
