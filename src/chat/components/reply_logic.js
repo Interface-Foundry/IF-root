@@ -97,13 +97,13 @@ function simplehome (message) {
       callback_id: 'wow such home',
       actions: [{
         name: 'passthrough',
-        value: 'shopping',
-        text: 'Kip Store',
-        type: 'button'
-      }, {
-        name: 'passthrough',
         value: 'food',
         text: 'Kip Café',
+        type: 'button'
+      },{
+        name: 'passthrough',
+        value: 'shopping',
+        text: 'Kip Store',
         type: 'button'
       }]
     }]
@@ -156,6 +156,9 @@ function switchMode(message) {
       return 'team';
     },
     'food': function () {
+      return 'food';
+    },
+    'cafe': function () {
       return 'food';
     },
     'address': function () {

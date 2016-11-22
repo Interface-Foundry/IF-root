@@ -148,16 +148,17 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
 
 // ONBOARDING MODE TEMPLATES
 
-var slack_onboard_start = module.exports.slack_onboard_start = [{
+var slack_onboard_start = module.exports.slack_onboard_start = [
+  {
      name: "onboard.start.lunch",
-     text: "Lunch",
+     text: "Kip Café",
      style: "default",
      type: "button",
      value: "lunch"
    },
    {
      name: "onboard.start.supplies",
-     text: "Supplies",
+     text: "Kip Store",
      style: "default",
      type: "button",
      value: "supplies"
