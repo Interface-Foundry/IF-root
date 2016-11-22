@@ -507,7 +507,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   // admin is confirming, replace their message
   var admin = foodSession.convo_initiater
-  var message = _.merge({}, message, {
+  var msg = {
     mode: 'food',
     action: 'admin.restaurant.pick.list',
     thread_id: admin.dm,
@@ -517,9 +517,12 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       user: admin.id,
       channel: admin.dm
     }
-  })
+  }
 
-  $replyChannel.sendReplace(message, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
+  kip.debug('sending message to admin', admin)
+  kip.debug(msg)
+
+  $replyChannel.send(msg, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
