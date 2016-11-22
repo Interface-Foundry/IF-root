@@ -88,7 +88,7 @@ function * start () {
     }
 
     co(function * () {
-      yield slackUtils.getAllChannels(slackConnections[slackbot.team_id])
+      yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
     })
     // TODO figure out how to tell when auth is invalid
     // right now the library just console.log's a message and I can't figure out

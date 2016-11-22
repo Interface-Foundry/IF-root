@@ -48,7 +48,7 @@ function * initializeTeam(team, auth) {
 
 
 /*
-* returns admins of a team or false if there are none. will appropriately update chatusers based on latest slackbot.meta.office_assistants field
+* returns admins of a team. will appropriately update chatusers based on latest slackbot.meta.office_assistants field
 * @param {Object} slackbot object
 * @returns {array} returns chatuser admin objects
 *
@@ -71,12 +71,7 @@ function * findAdmins(team) {
         yield user.save();
       }
     });
-  }).then( function() { return members });
-  if (admins != null) {
-    return admins
-  } else {
-    return false
-  }
+  }).then( function() { return admins });
 }
 
 /*
@@ -229,16 +224,13 @@ function * addCartChannel(message, channel_name) {
   return
 }
 
-function * getAllChannels (slackbot) {
+function * refreshAllChannels (slackbot) {
   var botChannelArray = yield slackbot.web.channels.list()
   var botGroupArray = yield slackbot.web.groups.list()
   var botsChannels = botChannelArray.channels.concat(botGroupArray.groups)
   logging.info(`adding ${botsChannels.length} to slackbots.meta`)
   slackbot.slackbot.meta.all_channels = botsChannels.map((channel) => {
-    return {
-      id: channel.id,
-      name: channel.name
-    }
+    return channel.id
   })
   yield slackbot.slackbot.save()
 }
@@ -251,5 +243,5 @@ module.exports = {
   getChannelMembers: getChannelMembers,
   addCartChannel: addCartChannel,
   removeCartChannel: removeCartChannel,
-  getAllChannels: getAllChannels
+  refreshAllChannels: refreshAllChannels
 };

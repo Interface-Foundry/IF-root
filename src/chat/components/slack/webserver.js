@@ -17,6 +17,7 @@ var cardTemplate = require('./card_templates');
 var utils = require('./utils');
 var cookieParser = require('cookie-parser')
 var uuid = require('uuid')
+var sleep = require('co-sleep');
 // var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
 // var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
 var request = require('request')
@@ -431,6 +432,8 @@ app.get('/newslack', function (req, res) {
   var res_auth = yield requestPromise({ url: 'https://' + kip.config.slack.client_id + ':' + kip.config.slack.client_secret + '@slack.com/api/oauth.access',method: 'POST',form: body})
   res_auth = JSON.parse(res_auth);
   if (_.get(res_auth,'ok')) {
+          kip.debug('lel')
+
      var existingTeam = yield db.Slackbots.findOne({'team_id': _.get(res_auth,'team_id'), 'deleted': { $ne:true } }).exec();
      if ( _.get(existingTeam, 'team_id')) {
         _.merge(existingTeam, res_auth);
@@ -439,13 +442,44 @@ app.get('/newslack', function (req, res) {
        co(slackModule.start);
 
      } else {
+
+
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
       yield utils.initializeTeam(bot, res_auth);
       co(slackModule.start);
+      var admins = yield utils.findAdmins(bot);
+      var a = admins[0];
+      var message= new db.Message({
+        incoming: false,
+        thread_id: a.dm,
+        resolved: true,
+        user_id: a.id,
+        origin: 'slack',
+        text: '',
+        source:  {
+          team: bot.team_id,
+          channel: a.dm,
+          thread_id: a.dm,
+          user: a.id,
+          type: 'message',
+        },
+        mode: 'onboard',
+        action: 'home',
+        user: a.id
+      })
+     // queue it up for processing
+      message.save().then(() => {
+        queue.publish('incoming', message, ['slack', a.dm, Date.now()].join('.'))
+      })
+      
      }
-  }
-    res.redirect('/thanks.html')
+  } else {
+    kip.debug(res_auth)
+   }
+
+  res.redirect('/thanks.html')
+  
   }).catch(console.log.bind(console))
 })
 
