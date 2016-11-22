@@ -92,8 +92,8 @@ module.exports.payDeliveryDotCom = function * (pay) {
   // for physical delivery
   if (pay.order.chosen_location.addr) {
     guestCheckout.street = pay.order.chosen_location.addr.address_1
-    guestCheckout.instructions = pay.order.chosen_location.addr.address_2
-    guestCheckout.unit_number = pay.order.chosen_location.addr.address_2 || ``
+    //guestCheckout.instructions = pay.order.chosen_location.addr.address_2
+    guestCheckout.unit = pay.order.chosen_location.addr.address_2 || ``
     guestCheckout.city = pay.order.chosen_location.addr.city
     guestCheckout.state = pay.order.chosen_location.addr.state
     guestCheckout.zip_code = pay.order.chosen_location.addr.zip_code
