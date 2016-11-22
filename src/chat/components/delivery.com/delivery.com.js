@@ -592,6 +592,7 @@ handlers['food.delivery_or_pickup'] = function * (message) {
   foodSession.save()
 }
 
+
 handlers['food.restaurants.list'] = function * (message) {
   // here's some mock stuff for now
   var msg_json = {
@@ -849,6 +850,44 @@ handlers['food.poll.confirm_send'] = function * (message) {
         ]
       }
     ]
+  }
+
+  replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
+}
+
+// allow specific channel to be used
+handlers['food.admin.select_team_members'] = function * (message) {
+  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  var basicIdeologies = [{
+    name: `Everyone`,
+    id: `Everyone`
+  }, {
+    name: `Just Me`,
+    id: `just_me`
+  }]
+
+  var buttons = basicIdeologies.concat(slackbot.meta.all_channels).map((channel) => {
+    return {
+      'text': `${channel.name}`,
+      'value': channel.id,
+      'name': `food.admin.select_channel`,
+      'type': `button`
+    }
+  })
+
+  var groupedButtons = _.chunk(buttons, 5)
+  var msg_json = {
+    title: ``,
+    attachments: groupedButtons.map((buttonGroup) => {
+      return {
+        'text': ``,
+        'fallback': 'Cant select a channel at this time',
+        'callback_id': 'channel_select',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': buttonGroup
+      }
+    })
   }
 
   replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})

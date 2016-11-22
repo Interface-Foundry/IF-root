@@ -251,7 +251,19 @@ function * addCartChannel(message, channel_name) {
   return
 }
 
-
+function * getAllChannels (slackbot) {
+  var botChannelArray = yield slackbot.web.channels.list()
+  var botGroupArray = yield slackbot.web.groups.list()
+  var botsChannels = botChannelArray.channels.concat(botGroupArray.groups)
+  logging.info(`adding ${botsChannels.length} to slackbots.meta`)
+  slackbot.slackbot.meta.all_channels = botsChannels.map((channel) => {
+    return {
+      id: channel.id,
+      name: channel.name
+    }
+  })
+  yield slackbot.slackbot.save()
+}
 
 module.exports = {
   initializeTeam: initializeTeam,
@@ -260,5 +272,6 @@ module.exports = {
   getChannels: getChannels,
   getChannelMembers: getChannelMembers,
   addCartChannel: addCartChannel,
-  removeCartChannel: removeCartChannel
+  removeCartChannel: removeCartChannel,
+  getAllChannels: getAllChannels
 };
