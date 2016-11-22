@@ -517,6 +517,39 @@ handlers['food.done'] = function * (message) {
     slackbot.meta.locations.push(foodSession.chosen_location)
   }
   yield slackbot.save()
+
+   var slackreply = {
+    text: '*Hi! Thanks for using Kip* 😊',
+    attachments: [{
+      image_url: "http://tidepools.co/kip/kip_menu.png",
+      text: 'Click a mode to start using Kip',
+      color: '#3AA3E3',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'shopping',
+        text: 'Kip Store',
+        type: 'button'
+      }, {
+        name: 'passthrough',
+        value: 'food',
+        text: 'Kip Café',
+        type: 'button'
+      }]
+    }]
+    // mrkdwn_in: ['text']
+  }
+
+  var msg = {
+    action: 'simplehome',
+    mode: 'food',
+    source: message.source,
+    origin: message.origin,
+    reply: {data: slackreply}
+  }
+  
+  $replyChannel.send(msg, 'food.done', {type: msg.origin, data: slackreply})
+
 }
 
 module.exports = function (replyChannel, allHandlers) {
