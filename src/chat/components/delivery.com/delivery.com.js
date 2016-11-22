@@ -297,7 +297,7 @@ handlers['food.choose_address'] = function * (message) {
     replyChannel.sendReplace(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
 
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
-    var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession, 'data.input')
+    var addr = [foodSession.chosen_location.address_1, foodSession.chosen_location.zip_code].join(' ')
     var res = yield api.searchNearby({addr: addr})
     foodSession.merchants = _.get(res, 'merchants')
     foodSession.cuisines = _.get(res, 'cuisines')
