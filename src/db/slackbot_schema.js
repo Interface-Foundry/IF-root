@@ -58,7 +58,10 @@ var slackbotSchema = mongoose.Schema({
     city: {
       type: String
     },
-    all_channels: [String],
+    all_channels: [{
+      id: String,
+      name: String
+    }],
     cart_channels: [String],
     deleted: {
       type: Boolean,

@@ -1,4 +1,6 @@
+var configFiles = require('./config')
 var winston = require('winston')
+var MongoDB = require('winston-mongodb').MongoDB
 
 var logging
 
@@ -26,10 +28,19 @@ var config = {
 if (process.env.NODE_ENV !== 'test') {
   logging = new (winston.Logger)({
     transports: [
+      // console logger
       new (winston.transports.Console)({
         level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
         colorize: true,
         prettyPrint: true
+      }),
+      // log errors to mongodb
+      new (winston.transports.MongoDB)({
+        level: 'error',
+        db: configFiles.mongodb.url,
+        collection: 'errors',
+        label: 'winston',
+        decolorize: true
       })],
     colors: config.colors,
     levels: config.levels

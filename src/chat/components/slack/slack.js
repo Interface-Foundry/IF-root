@@ -57,6 +57,7 @@ var webserver = require('./webserver')
 var bundles = require('../bundles');
 bundles.updater(); //caches bundle items to mongo everyday at midnight
 
+var slackUtils = require('./utils.js')
 //
 // slackbots
 //
@@ -84,8 +85,11 @@ function * start () {
       rtm: rtm,
       web: web,
       slackbot: slackbot
-    };
+    }
 
+    co(function * () {
+      yield slackUtils.getAllChannels(slackConnections[slackbot.team_id])
+    })
     // TODO figure out how to tell when auth is invalid
     // right now the library just console.log's a message and I can't figure out
     // how to intercept that event.

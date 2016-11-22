@@ -400,16 +400,15 @@ handlers['food.admin.add_new_card'] = function * (message) {
 }
 
 handlers['food.admin.order.select_card'] = function * (message) {
+  // immediately remove payment options
+  yield $replyChannel.sendReplace(message, 'food.admin.processing_card', {type: message.origin, data: {text: 'processing...'}})
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var card = _.find(slackbot.meta.payments, {
     'card': {'card_id': message.source.actions[0].value}
   })
 
-  logging.info('FOOD SESSION: ', foodSession.data)
-  logging.info('FOOD SESSION: ', foodSession.chosen_location)
-
-    // add various shit to the foodSession
+  // add various shit to the foodSession
   foodSession.payment_post = {
     '_id': foodSession._id,
     'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
@@ -460,7 +459,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
   } catch (e) {
-    logging.error('error doing kip pay lol idk what to do', e)
+    logging.error('error doing kip pay in food.admin.order.select_card', e)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kip pay'}})
   }
 }

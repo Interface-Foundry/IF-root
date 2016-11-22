@@ -85,7 +85,10 @@ function flattenMenu (data) {
     }
 
     out[node.unique_id] = node
-    _.get(node, 'children', []).map(c => flatten(c, out))
+    _.get(node, 'children', []).map(c => {
+      c.parentId = node.unique_id
+      flatten(c, out)
+    })
   }
   data.menu.map(m => flatten(m, out))
   return out
