@@ -162,6 +162,7 @@ function * getChannels(team) {
 *
 */
 function * getTeamMembers(team) {
+    if (process.env.NODE_ENV === 'test') return
     var members = [];
     var teamMembers = yield db.Chatusers.find({team_id: team.team_id, is_bot: false}).exec();
     var res_dm = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token); // has direct message id
