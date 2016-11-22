@@ -32,7 +32,9 @@ var addBundleToCart = module.exports.addBundleToCart = function * (bundle, userI
    } catch (err) {
    	 skip = true;
    }
-   if (!skip) yield kipcart.addToCart(cart_id, userId, item, 'team');
+   if (!skip){ 
+   	 try { yield kipcart.addToCart(cart_id, userId, item, 'team'); } catch(err) {}
+    } 
   })  
 }
 

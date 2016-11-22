@@ -462,7 +462,6 @@ handlers['food.admin.order.select_card'] = function * (message) {
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
     sleep(5000);
 
-
   } catch (e) {
     logging.error('error doing kip pay in food.admin.order.select_card', e)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kip pay'}})
@@ -523,38 +522,6 @@ handlers['food.done'] = function * (message) {
   }
   yield slackbot.save()
 
-   var slackreply = {
-    text: '*Hi! Thanks for using Kip* 😊',
-    attachments: [{
-      image_url: "http://tidepools.co/kip/kip_menu.png",
-      text: 'Click a mode to start using Kip',
-      color: '#3AA3E3',
-      callback_id: 'wow such home',
-      actions: [{
-        name: 'passthrough',
-        value: 'shopping',
-        text: 'Kip Store',
-        type: 'button'
-      }, {
-        name: 'passthrough',
-        value: 'food',
-        text: 'Kip Café',
-        type: 'button'
-      }]
-    }]
-    // mrkdwn_in: ['text']
-  }
- var msg = {
-    action: 'simplehome',
-    mode: 'food',
-    source: message.source,
-    origin: message.origin,
-    reply: {data: slackreply}
-  }
-  
-  sleep(2000);
-
-  $replyChannel.send(msg, 'food.done', {type: msg.origin, data: slackreply})
 }
 
 module.exports = function (replyChannel, allHandlers) {
