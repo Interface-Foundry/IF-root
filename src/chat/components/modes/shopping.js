@@ -13,8 +13,22 @@ var kipcart = require('../cart');
 //
 var handlers = {}
 
-handlers['shopping.initial'] = function*(message, exec) {
+//handle buttons
+handlers['shopping_button'] = function*(message, data) {
+  kip.debug(`button.message: \n ${JSON.stringify(message)} \n button.data: \n ${JSON.stringify(data)} `);
+  let query = data[0].replace('_', ' ');
+  message.text = query;
+  const msg = yield handlers['shopping.initial'](message, {
+    mode: 'shopping',
+    action: 'initial',
+    params: {
+      query: query
+    }
+  })
+  return [msg];
+}
 
+handlers['shopping.initial'] = function*(message, exec) {
   //if switching back to shopping mode from food or some other mode
   if (message.text == 'shopping') {
       return new db.Message({

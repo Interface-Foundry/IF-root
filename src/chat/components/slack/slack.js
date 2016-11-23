@@ -269,26 +269,28 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           color: '#3AA3E3'
         }, {
           text: 'Tap to search for something',
-          mrkdwn_in: ['text'],
+          fallback: 'You are unable to choose a game',
+          callback_id: 'wopr_game',
           color: '#3AA3E3',
+          attachment_type: 'default',
           actions: [{
-            "name": "shopping.initial",
+            "name": "shopping_button.start.search",
             "text": "Headphones",
             "style": "default",
             "type": "button",
-            "value": "headphones"
+            "value": "search.headphones"
           }, {
-            "name": "shopping.initial",
+            "name": "shopping_button.start.search",
             "text": "Coding Books",
             "style": "default",
             "type": "button",
-            "value": "coding books"
+            "value": "search.coding_books"
           }, {
-            "name": "shopping.initial",
+            "name": "shopping_button.start.search",
             "text": "Healthy Snacks",
             "style": "default",
             "type": "button",
-            "value": "healthy snacks"
+            "value": "search.healthy_snacks"
           }]
         }, {
           text: '✎ Or type what you want (Example: _macbook pro power cord_) \n*Tip:* Add items directly from amazon by pasting the URL and sending it to me',
