@@ -332,8 +332,8 @@ var slack_member_remind = module.exports.slack_member_remind = [{
 
 var slack_onboard_member = module.exports.slack_onboard_member = [{
       name: "onboard_shopping.start.step_1",
-      text: "Ok!",
-      style: "default",
+      text: "✓ Ok!",
+      style: "primary",
       type: "button",
       value: "step_1"
     },{
@@ -355,11 +355,11 @@ var slack_member_onboard_start = module.exports.slack_member_onboard_start = [{
   "text": "Coding Books",
   "style": "default",
   "type": "button",
-  "value": "step_2.books"
+  "value": "step_2.coding_books"
 }, {
   "name": "onboard_shopping.start.step_2",
   "text": "Healthy Snacks",
   "style": "default",
   "type": "button",
-  "value": "step_2.snacks"
+  "value": "step_2.healthy_snacks"
 }];

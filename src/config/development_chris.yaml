@@ -1,6 +1,7 @@
 env: development_chris
 mongodb:
-  url: localhost/foundry
+  # url: localhost/foundry
+  url: mongodb://localhost:27017/foundry
 elasticsearch:
   url: http://localhost:9200
 app:

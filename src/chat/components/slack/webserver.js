@@ -84,7 +84,8 @@ function simple_action_handler (action) {
       return 'address_confirm_btn'
     case 'send_last_call_btn':
       return 'send_last_call_btn'
-
+    case 'shopping_search':
+      return 'shopping_search'
     case 'passthrough':
       return action.value
   }
@@ -160,6 +161,14 @@ app.post('/slackaction', next(function * (req, res) {
           message.mode = 'food'
           message.action = 'begin'
           message.text = 'food'
+          message.save().then(() => {
+            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          })
+      }
+      else if (simple_command == 'shopping_search'){
+          message.mode = 'shopping'
+          message.action = 'initial'
+          message.text = 'exit'
           message.save().then(() => {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })

@@ -1,23 +1,29 @@
 var _ = require('lodash');
 
-var buttons = function(num) {
-  return [
+var buttons = function(num, modeIsOnboard) {
+  return modeIsOnboard ? [{
+      "name":  'onboard_shopping.addcart',
+      "text": "Add to Cart",
+      "style": "primary",
+      "type": "button",
+      "value": 'addcart.' + num
+    }] : [
     {
-      "name": "addcart",
+      "name": 'addcart',
       "text": "Add to Cart",
       "style": "primary",
       "type": "button",
       "value": num
     },
     {
-      "name": "cheaper",
+      "name": 'cheaper',
       "text": "Find Cheaper",
       "style": "default",
       "type": "button",
-      "value": num
+      "value": num 
     },
     {
-      "name": "moreinfo",
+      "name": 'moreinfo',
       "text": "More Info",
       "style": "default",
       "type": "button",
@@ -42,7 +48,7 @@ var emojis = {
 //
 // Generate the slack reponse for the search results
 //
-function* results(message) {
+function * results(message, modeIsOnboard = false) {
 
   var amazon = JSON.parse(message.amazon);
 
@@ -55,32 +61,34 @@ function* results(message) {
       title_link: r.shortened_url,
       fallback: 'Search Results',
       callback_id: message._id.toString() + '.' + i,
-      actions: buttons(i+1)
+      actions: buttons(i+1, modeIsOnboard)
     }
   });
   // debugger;
-  results.push({
-    fallback: 'Search Results',
-    callback_id: 'search_results',
-    actions: [{
-      name: "more",
+  let actions = [];
+  if (!modeIsOnboard) {
+    actions.push({
+      name: 'more',
       text: "See More Results",
       style: "default",
       type: "button",
       value: "more"
-    },
-    {
+    });
+
+    actions.push({
       name: "home_btn",
       text: "🐧",
       style: "default",
       type: "button",
       value: "home"
-    }
-    ]
+    });
+  }
+  results.push({
+    fallback: 'Search Results',
+    callback_id: 'search_results',
+    actions: actions
   })
-
   return results;
-
 }
 
 module.exports = results;

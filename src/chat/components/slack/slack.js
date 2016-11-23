@@ -230,7 +230,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       if (message.mode === 'shopping' && message.action === 'switch.silent') {
-        
         msgData.attachments = message.reply;
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
@@ -256,14 +255,51 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-       if (message.mode === 'onboard_shopping' && message.action === 'home') {
+      if (message.mode === 'onboard_shopping' && message.action === 'home') {
         msgData.attachments = message.reply;
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-       if (message.mode === 'onboard_shopping' && message.action === 'results' && message.amazon.length > 0) {
-        var results = yield search_results(message);
-        msgData.attachments = [...message.reply, ...results];
+      if (message.mode === 'shopping' && message.action === 'onboard_cart') {
+        let results = yield cart(message, bot.slackbot, false)
+        msgData.attachments = [...message.reply || [], ...results || [], {
+          'image_url': 'http://kipthis.com/kip_modes/mode_shopping.png',
+          text: '',
+          mrkdwn_in: ['text'],
+          color: '#3AA3E3'
+        }, {
+          text: 'Tap to search for something',
+          mrkdwn_in: ['text'],
+          color: '#3AA3E3',
+          actions: [{
+            "name": "shopping.initial",
+            "text": "Headphones",
+            "style": "default",
+            "type": "button",
+            "value": "headphones"
+          }, {
+            "name": "shopping.initial",
+            "text": "Coding Books",
+            "style": "default",
+            "type": "button",
+            "value": "coding books"
+          }, {
+            "name": "shopping.initial",
+            "text": "Healthy Snacks",
+            "style": "default",
+            "type": "button",
+            "value": "healthy snacks"
+          }]
+        }, {
+          text: '✎ Or type what you want (Example: _macbook pro power cord_) \n*Tip:* Add items directly from amazon by pasting the URL and sending it to me',
+          mrkdwn_in: ['text']
+        }];
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+      
+      if (message.mode === 'onboard_shopping' && message.action === 'results' && message.amazon.length > 0) {
+        let results = yield search_results(message, true);
+        msgData.attachments = [...message.reply || [], ...results || []];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
