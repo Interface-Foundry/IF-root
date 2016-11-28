@@ -296,7 +296,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
             "value": "search.healthy_snacks"
           }]
         }, {
-          text: '✎ Or type what you want (Example: _macbook pro power cord_) \n*Tip:* Add items directly from amazon by pasting the URL and sending it to me',
+          text: '✎ Or type what you want (Example: _macbook pro power cord_) \n*Tip:* Add items directly from Amazon by pasting the URL and sending it to me',
           mrkdwn_in: ['text']
         }];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);

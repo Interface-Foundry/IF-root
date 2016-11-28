@@ -41,8 +41,16 @@ module.exports = function*(message) {
     // make the description text
     var attrs = _.get(r, 'ItemAttributes[0]');
     kip.debug(`FEATURES: ${JSON.stringify(attrs.Feature, null, 2)}`);
+    var review_line = '';
+    if (_.get(r, 'reviews.rating') && _.get(r, 'reviews.reviewCount')) {
+      for (var i = 0; i <= r.reviews.rating|0; i++ ) {
+        review_line = review_line + '⭐️';
+      }
+      review_line += ` ${r.reviews.rating} stars - ${r.reviews.reviewCount} reviews`
+    }
     var description = [
       '*' + r.realPrice + '*',
+      review_line,
       _.get(attrs, 'Size[0]') ? ' ○ Size: ' + _.get(attrs, 'Size[0]') : false,
       _.get(attrs, 'Artist[0]') ? ' ○ Artist: ' + _.get(attrs, 'Artist[0]') : false,
       _.get(attrs, 'Brand[0]') ? ' ○ ' + _.get(attrs, 'Brand[0]') : false,
@@ -50,15 +58,7 @@ module.exports = function*(message) {
       _.get(attrs, 'Feature[0]') ? ' ○ ' + attrs.Feature.join('\n ○ ') : false
     ].filter(Boolean).join('\n');
 
-    if (_.get(r, 'reviews.rating') && _.get(r, 'reviews.reviewCount')) {
-      var review_line = '';
-      for (var i = 0; i <= r.reviews.rating|0; i++ ) {
-        review_line = review_line + '⭐️';
-      }
-
-      review_line += ` ${r.reviews.rating} stars - ${r.reviews.reviewCount} reviews`
-      description = description + '\n' + review_line;
-    }
+    
 
   return [{
     text: emojis[message.focus] + ' ' + `<${r.shortened_url}|*${truncate(_.get(r, 'ItemAttributes[0].Title[0]'))}*>`,

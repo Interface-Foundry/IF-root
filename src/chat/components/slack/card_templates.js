@@ -1,6 +1,6 @@
 var slack_home_default = module.exports.slack_home_default = [{
      name: "more",
-     text: "See More Result",
+     text: "See More Results",
      style: "default",
      type: "button",
      value: "more"
@@ -224,7 +224,7 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
 var slack_onboard_default = module.exports.slack_onboard_default = [{
       name: "exit",
       text: "Exit Onboarding",
-      style: "primary",
+      style: "default",
       type: "button",
       value: "exit"
     }];

@@ -68,7 +68,7 @@ handlers['start'] = function * (message) {
   attachments.push({
       image_url: "http://tidepools.co/kip/kip_menu.png",
       text: 'What are you looking for?',
-      color: '#49d63a',
+      color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
       actions: cardTemplate.slack_onboard_start,
@@ -76,16 +76,12 @@ handlers['start'] = function * (message) {
     })
   attachments.push({
       text: '',
-      color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
       actions: cardTemplate.slack_onboard_default,
       callback_id: 'none'
     });
-  attachments.map(function(a) {
-      a.mrkdwn_in =  ['text'];
-      a.color = '#45a5f4';
-    });
+
    var msg = message;
    msg.mode = 'onboard'
    // msg.action = 'home'
@@ -104,7 +100,7 @@ handlers['start'] = function * (message) {
    var attachments = [];
    attachments.push({
      text: 'Ok! When would you like to be reminded?',
-     color: '#49d63a',
+     color: '#45a5f4',
      mrkdwn_in: ['text'],
      fallback: 'Onboard',
      actions: cardTemplate.slack_remind,
@@ -112,15 +108,11 @@ handlers['start'] = function * (message) {
    });
    attachments.push({
      text: '',
-     color: '#49d63a',
      mrkdwn_in: ['text'],
      fallback: 'Onboard',
      actions: cardTemplate.slack_onboard_default,
      callback_id: 'none'
-   });
-   attachments.map(function(a) {
-     a.mrkdwn_in = ['text'];
-     a.color = '#45a5f4';
+     
    });
    var msg = message;
    msg.mode = 'onboard'
@@ -179,7 +171,7 @@ handlers['confirm_remind'] = function*(message, data) {
     });
     cronAttachments.push({
       text: ' What are you looking for?',
-      color: '#49d63a',
+      color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback: 'Onboard',
       actions: cardTemplate.slack_onboard_start,
@@ -187,15 +179,10 @@ handlers['confirm_remind'] = function*(message, data) {
     })
     cronAttachments.push({
       text: '',
-      color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback: 'Onboard',
       actions: cardTemplate.slack_onboard_default,
       callback_id: 'none'
-    });
-    cronAttachments.map(function(a) {
-      a.mrkdwn_in = ['text'];
-      a.color = '#45a5f4';
     });
     var cronMsg = {
       mode: 'onboard',
@@ -208,22 +195,17 @@ handlers['confirm_remind'] = function*(message, data) {
   var attachments = [];
   attachments.push({
     text: messageText,
-    color: '#49d63a',
+   color: '#45a5f4',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
     callback_id: 'none'
   });
   attachments.push({
     text: '',
-    color: '#49d63a',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
-  });
-  attachments.map(function(a) {
-    a.mrkdwn_in = ['text'];
-    a.color = '#45a5f4';
   });
   msg.action = 'home'
   msg.mode = 'onboard'
@@ -249,7 +231,7 @@ handlers['supplies'] = function * (message) {
   var attachments = [];
   attachments.push({
       text: ' What are you looking for?',
-      color: '#49d63a',
+      color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
       actions: cardTemplate.slack_onboard_bundles,
@@ -257,15 +239,10 @@ handlers['supplies'] = function * (message) {
     })
   attachments.push({
       text: '',
-      color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
       actions: cardTemplate.slack_onboard_default,
       callback_id: 'none'
-    });
-  attachments.map(function(a) {
-      a.mrkdwn_in =  ['text'];
-      a.color = '#45a5f4';
     });
    var msg = message;
    msg.mode = 'onboard'
@@ -399,20 +376,16 @@ handlers['bundle'] = function * (message, data) {
     attachments.push({
       text: summaryText,
       mrkdwn_in: ['text', 'pretext'],
-      color: '#49d63a'
+      color: '#45a5f4'
     })
    attachments.push({
       text: 'Do you want to let others add stuff to cart?',
-      color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Onboard.helper',
       actions: cardTemplate.slack_onboard_basic,
       callback_id: 'none'
     });
-   attachments.map(function(a) {
-      a.mrkdwn_in =  ['text'];
-      a.color = '#45a5f4';
-    });
+
    var msg = message;
    msg.mode = 'onboard'
    msg.action = 'home';
@@ -454,15 +427,11 @@ handlers['team'] = function * (message) {
   attachments.push({text: 'Which channels do you want to include? ', actions: buttons, callback_id: "none"});
   attachments.push({
       text: '',
-      color: '#49d63a',
+      color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
       actions: cardTemplate.slack_onboard_team,
       callback_id: 'none'
-    });
-  attachments.map(function(a) {
-      a.mrkdwn_in =  ['text', 'fields'];
-      a.color = '#45a5f4';
     });
 
   var msg = message;
@@ -486,7 +455,7 @@ handlers['reminder'] = function(message) {
   }
   var attachments = [{
     text: 'Awesome! I\'ve let them know\nWould you like to set a reminder for collecting shopping orders from your team?',
-    color: '#49d63a',
+    color: '#45a5f4',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
     actions: cardTemplate.slack_reminder,
@@ -494,15 +463,10 @@ handlers['reminder'] = function(message) {
   }];
   attachments.push({
     text: '',
-    color: '#49d63a',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
-  });
-  attachments.map(function(a) {
-    a.mrkdwn_in = ['text'];
-    a.color = '#45a5f4';
   });
   var msg = message;
   msg.mode = 'onboard'
@@ -556,16 +520,11 @@ handlers['confirm_reminder'] = function*(message, data) {
   messageText += ' Thanks and have a great day :)';
   var attachments = [{
     text: '',
-    color: '#49d63a',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
   }];
-  attachments.map(function(a) {
-    a.mrkdwn_in = ['text'];
-    a.color = '#45a5f4';
-  });
   var msg = message;
   msg.mode = 'onboard'
   msg.action = 'home'
@@ -594,19 +553,15 @@ handlers['confirm_reminder'] = function*(message, data) {
         'text',
         'pretext'
       ],
-      'color': '#45a5f4'
+      color: '#45a5f4'
     }];
     cronAttachments.push({
       text: `Hi, <@${currentUser.id}> is collecting Amazon orders`,
-      color: '#49d63a',
+      color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback: 'Shopping',
       callback_id: 'none'
     });
-    cronAttachments.map(function(a) {
-      a.mrkdwn_in = ['text'];
-      a.color = '#45a5f4';
-    })
     var cronMsg = {
       mode: 'shopping',
       action: 'switch.silent',
@@ -656,11 +611,9 @@ handlers['member'] = function * (message) {
     fallback: 'Onboard_Shopping',
     callback_id: 'none',
     actions: cardTemplate.slack_onboard_member,
+    color: '#45a5f4'
   }];
-  attachments.map(function(a) {
-    a.mrkdwn_in = ['text'];
-    a.color = '#45a5f4';
-  })
+
   yield channelMembers.map(function * (a) {
     if (a.id == currentUser.id) return;
     var newMessage = new db.Message({
@@ -815,16 +768,12 @@ handlers['sorry'] = function * (message) {
    var attachments = [];
    attachments.push({
       text: 'Don’t have any changes? Type `exit` to quit settings',
-      color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Settings',
       actions: cardTemplate.slack_onboard_default,
-      callback_id: 'none'
+      callback_id: 'none',
+      color: '#45a5f4'
     });
-    attachments.map(function(a) {
-      a.mrkdwn_in =  ['text'];
-      a.color = '#45a5f4';
-    })
    message.reply = attachments;
    return [message];
 
@@ -913,16 +862,12 @@ handlers['more_info'] = function * (message, data) {
    var attachments = [];
    attachments.push({
       text: helpText,
-      color: '#49d63a',
+      color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
       actions: helpOptions,
       callback_id: 'none'
     });
-    attachments.map(function(a) {
-      a.mrkdwn_in =  ['text'];
-      a.color = '#45a5f4';
-    })
    message.reply = attachments;
    return [message];
 

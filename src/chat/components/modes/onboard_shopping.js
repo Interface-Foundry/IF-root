@@ -196,19 +196,16 @@ handlers['reminder'] = function(message) {
     mrkdwn_in: ['text'],
     fallback: 'Onboard_Shopping',
     actions: cardTemplate.slack_member_remind,
-    callback_id: 'none'
+    callback_id: 'none',
+    mrkdwn_in: ['text'],
   });
   attachments.push({
     text: '',
-    color: '#49d63a',
     mrkdwn_in: ['text'],
     fallback: 'Onboard_Shopping',
     actions: cardTemplate.slack_onboard_default,
-    callback_id: 'none'
-  });
-  attachments.map(function(a) {
-    a.mrkdwn_in = ['text'];
-    a.color = '#45a5f4';
+    callback_id: 'none',
+    mrkdwn_in: ['text'],
   });
   var msg = message;
   msg.mode = 'onboard_shopping'
@@ -262,16 +259,13 @@ handlers['reminder_confirm'] = function*(message, data) {
     });
     var cronAttachments = [{
       text: 'Hey, it\'s me again. Ready to get started?',
-      color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback: 'Onboard_Shopping',
       actions: cardTemplate.slack_onboard_member,
-      callback_id: 'none'
+      callback_id: 'none',
+      color: '#45a5f4'
     }];
-    cronAttachments.map(function(a) {
-      a.mrkdwn_in = ['text'];
-      a.color = '#45a5f4';
-    });
+
     var cronMsg = {
       incoming: false,
       thread_id: message.thread_id,
@@ -285,22 +279,18 @@ handlers['reminder_confirm'] = function*(message, data) {
   var msg = message;
   var attachments = [{
     text: messageText,
-    color: '#49d63a',
+    color: '#45a5f4',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
     callback_id: 'none'
   }, {
     text: '',
-    color: '#49d63a',
     mrkdwn_in: ['text'],
     fallback: 'Onboard_Shopping',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
   }];
-  attachments.map(function(a) {
-    a.mrkdwn_in = ['text'];
-    a.color = '#45a5f4';
-  });
+
   msg.action = 'home'
   msg.mode = 'onboard_shopping'
   msg.text = ''
@@ -322,16 +312,12 @@ handlers['sorry'] = function(message) {
   var attachments = [];
   attachments.push({
     text: 'Don’t have any changes? Type `exit` to quit settings',
-    color: '#49d63a',
     mrkdwn_in: ['text'],
     fallback: 'Settings',
     actions: cardTemplate.slack_onboard_default,
-    callback_id: 'none'
+    callback_id: 'none',
+    color: '#45a5f4'
   });
-  attachments.map(function(a) {
-    a.mrkdwn_in = ['text'];
-    a.color = '#45a5f4';
-  })
   message.reply = attachments;
   return [message];
 }
