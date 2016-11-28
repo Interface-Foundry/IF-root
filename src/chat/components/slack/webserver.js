@@ -432,18 +432,13 @@ app.get('/newslack', function (req, res) {
   var res_auth = yield requestPromise({ url: 'https://' + kip.config.slack.client_id + ':' + kip.config.slack.client_secret + '@slack.com/api/oauth.access',method: 'POST',form: body})
   res_auth = JSON.parse(res_auth);
   if (_.get(res_auth,'ok')) {
-          kip.debug('lel')
-
      var existingTeam = yield db.Slackbots.findOne({'team_id': _.get(res_auth,'team_id'), 'deleted': { $ne:true } }).exec();
      if ( _.get(existingTeam, 'team_id')) {
         _.merge(existingTeam, res_auth);
         yield existingTeam.save();
         yield utils.initializeTeam(existingTeam, res_auth);
        co(slackModule.start);
-
      } else {
-
-
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
       yield utils.initializeTeam(bot, res_auth);
@@ -472,7 +467,6 @@ app.get('/newslack', function (req, res) {
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', a.dm, Date.now()].join('.'))
       })
-      
      }
   } else {
     kip.debug(res_auth)

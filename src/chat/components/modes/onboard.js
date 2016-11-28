@@ -23,7 +23,6 @@ function * handle(message) {
   if (!last_action || last_action.indexOf('home') == -1) {
     return yield handlers['start'](message);
   } else {
-    kip.debug(' lelelelel ', message)
     if (!message.data){
       var action = 'text'
     } else {
