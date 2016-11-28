@@ -25,6 +25,13 @@ var feedbackTracker = {}
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other methods
 
+// allow mongoose ._id to be used as button things
+String.prototype.toObjectId = function () {
+  var ObjectId = (require('mongoose').Types.ObjectId)
+  return new ObjectId(this.toString())
+}
+
+
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
@@ -196,9 +203,12 @@ handlers['food.begin'] = function * (message) {
       }
     ]
   }
-  replyChannel.send(message, 'food.banner', {type: message.origin, data: msg_json})
+  replyChannel.send(message, 'food.admin.select_address', {type: message.origin, data: msg_json})
+  yield handlers['food.admin.select_address'](message)
+}
 
 
+handlers['food.admin.select_address'] = function * (message) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   yield [sleep(1000), slackUtils.getTeamMembers(team)]
@@ -206,7 +216,7 @@ handlers['food.begin'] = function * (message) {
   message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
   yield foodSession.save()
-  var address_buttons = _.get(team, 'meta.locations', []).map(a => {
+  var addressButtons = _.get(team, 'meta.locations', []).map(a => {
     return {
       name: 'passthrough',
       text: a.address_1,
@@ -215,28 +225,108 @@ handlers['food.begin'] = function * (message) {
 
     }
   })
-  address_buttons.push({
+  addressButtons.push({
     name: 'passthrough',
     text: 'New +',
     type: 'button',
     value: 'food.settings.address.new'
   })
-
+  addressButtons = _.chunk(addressButtons, 5)
   var msg_json = {
-    'attachments': [
-      {
-        'text': 'Great! Which address is this for?',
+    'attachments':
+    [{
+      'text': 'Great! Which address is this for?',
+      'fallback': 'You are unable to choose an address',
+      'callback_id': 'address',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'actions': addressButtons[0]
+    }]
+  }
+
+  if (addressButtons.length > 1) {
+    addressButtons.slice(1).map(group => {
+      msg_json.attachments.push({
+        'text': '',
         'fallback': 'You are unable to choose an address',
         'callback_id': 'address',
         'color': '#3AA3E3',
         'attachment_type': 'default',
-        'actions': address_buttons
-      }
-    ]
+        'actions': group
+      })
+    })
   }
 
+  // allow removal if more than one meta.locations thing
+  if (_.get(team, 'meta.locations').length > 1) {
+    msg_json.attachments.push({
+      'text': '',
+      'fallback': 'You are unable to remove an address',
+      'callback_id': 'remove_address',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'actions': [{
+        'name': 'passthrough',
+        'text': 'Remove An Address',
+        'type': 'button',
+        'value': 'food.settings.address.remove_select',
+        'style': 'danger'
+      }]
+    })
+  }
 
-  replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
+}
+
+handlers['food.settings.address.remove_select'] = function * (message) {
+  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  _.get(team, 'meta.locations')
+  var addressButtons = _.get(team, 'meta.locations', []).map(a => {
+    return {
+      name: 'passthrough',
+      text: a.address_1,
+      type: 'button',
+      value: JSON.stringify(a)
+
+    }
+  })
+  addressButtons.push({
+    name: 'none',
+    text: 'None, go back',
+    type: 'button',
+    value: 'food.admin.select_address'
+  })
+
+  var msg_json = {
+    title: '',
+    text: 'Which address should we remove?',
+    attachments: _.chunk(addressButtons,5).map(group => {
+      return {
+        'text': '',
+        'fallback': 'You are unable to remove an address',
+        'callback_id': 'remove_address',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': group
+      }
+    })
+  }
+
+  replyChannel.sendReplace(message, 'food.settings.address.remove', {type: message.origin, data: msg_json})
+}
+
+handlers['food.settings.address.remove'] = function * (message) {
+  var addressToRemove = JSON.parse(message.text)
+  logging.debug('removing this address', addressToRemove)
+  yield db.Slackbots.update(
+    {team_id: message.source.team},
+    {$pull: {
+      'meta.locations': {
+        _id: addressToRemove._id
+      }
+    }
+  }).exec()
+  yield handlers['food.admin.select_address'](message)
 }
 
 //
@@ -431,7 +521,7 @@ handlers['food.settings.address.save'] = function * (message) {
 }
 
 handlers['food.settings.address.change'] = function * (message) {
-  return yield handlers['food.begin'](message)
+  return yield handlers['food.admin.select_address'](message)
 }
 
 
@@ -868,15 +958,14 @@ handlers['food.poll.confirm_send'] = function * (message) {
 // allow specific channel to be used
 handlers['food.admin.select_team_members'] = function * (message) {
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  var basicIdeologies = [{
+
+  var buttons1 = [{
     name: `Everyone`,
     id: `everyone`
   }, {
     name: `Just Me`,
     id: `just_me`
-  }]
-
-  var buttons = basicIdeologies.concat(slackbot.meta.all_channels).map((channel) => {
+  }].map((channel) => {
     return {
       'text': `${channel.name}`,
       'value': channel.id,
@@ -885,7 +974,16 @@ handlers['food.admin.select_team_members'] = function * (message) {
     }
   })
 
-  var groupedButtons = _.chunk(buttons, 5)
+  var buttons2 = slackbot.meta.all_channels.map((channel) => {
+    return {
+      'text': `#${channel.name}`,
+      'value': channel.id,
+      'name': `food.admin.select_channel`,
+      'type': `button`
+    }
+  })
+
+  var groupedButtons = _.chunk(buttons1.concat(buttons2), 5)
   var msg_json = {
     title: `Which team members are you ordering food for?`,
     attachments: groupedButtons.map((buttonGroup) => {
