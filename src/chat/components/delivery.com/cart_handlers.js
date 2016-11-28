@@ -39,7 +39,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   var lineItems = myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
-    var instructions = i.item.instructions ? `\n_Special Instrucrtions: ${i.item.instructions}_` : ''
+    var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
     var quantityAttachment = {
       title: item.name + ' – ' + menu.getCartItemPrice(i).$,
       text: item.description + instructions,
@@ -355,7 +355,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       } else {
         finalAttachment.actions = [{
           'name': `food.admin.order.checkout.confirm`,
-          'text': `Checkout ${(foodSession.order.total + foodSession.tipAmount).$}`,
+          'text': `✓ Checkout ${(foodSession.order.total + foodSession.tipAmount).$}`,
           'type': `button`,
           'style': `primary`,
           'value': `checkout`
