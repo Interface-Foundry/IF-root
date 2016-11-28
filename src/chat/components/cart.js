@@ -114,7 +114,6 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
     }else {
       image = item.altImage || _.get(item, 'SmallImage[0].URL[0]')
     }
-
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
@@ -129,11 +128,9 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
       slack_id: slack_id,
       source_json: JSON.stringify(item)
     })).save()
-
     console.log('adding item ' + i._id + ' to cart ' + cart._id)
     cart.items.push(i._id)
     yield cart.save()
-
     console.log('calling getCart again to rebuild amazon cart')
     try {
       yield getCart(slack_id)

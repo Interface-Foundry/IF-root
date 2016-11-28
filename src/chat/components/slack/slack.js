@@ -234,7 +234,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
-
       if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
         msgData.attachments = yield focus(message)
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
@@ -250,7 +249,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-       if (message.mode === 'onboard' && message.action === 'home') {
+      if (message.mode === 'onboard' && message.action === 'home') {
         msgData.attachments = message.reply;
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }

@@ -21,6 +21,7 @@ var addBundleToCart = module.exports.addBundleToCart = function * (bundle, userI
  yield kipcart.emptyCart(cart_id);
  var items = yield db.Item.find({'bundle': bundle, 'available': true},{'source_json':1 });
  if (!items || items.length < 1) {
+ 	kip.debug(' \n\n\n bundle:24:items not cached in mongo, updating bundle \n\n\n');
  	yield updateBundle(bundle);
  	var items = yield db.Item.find({'bundle': bundle, 'available': true},{'source_json':1 });
  }
@@ -79,7 +80,7 @@ var updateBundle = module.exports.updateBundle = function * (bundle) {
 	yield eachSeries(bundles[bundle], function * (asin) {
 	  var skip = false;
 	  try {
-	      var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
+	     var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
 	   } catch (e) {
 	   	 skip = true;
 	   }

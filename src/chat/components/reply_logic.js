@@ -169,7 +169,6 @@ function switchMode(message) {
     }
   };
   var mode = (modes[input] || modes['default'])();
-  if (!mode) return false
   return mode
 }
 
