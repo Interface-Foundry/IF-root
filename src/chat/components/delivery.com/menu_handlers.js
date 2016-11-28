@@ -126,7 +126,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
         ]
       }].concat(menuItems).concat([{
       'text': '',
-      'fallback': 'You are unable to choose a game',
+      'fallback': 'Unable to load menu item',
       'callback_id': 'wopr_game',
       'color': '#3AA3E3',
       'attachment_type': 'default',
