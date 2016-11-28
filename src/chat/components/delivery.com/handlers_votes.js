@@ -486,7 +486,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       'text'
     ],
     'text': '',
-    'fallback': 'You are unable to choose a game',
+    'fallback': 'You are unable to pick a restaurant',
     'callback_id': 'food.admin.restaurant.pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
