@@ -52,6 +52,8 @@ function simple_action_handler (action) {
       } else {
         return 'cheaper'
       }
+    case 'similar':
+      return 'similar ' + action.value
     case 'moreinfo':
       return action.value
     case 'more':

@@ -437,7 +437,7 @@ handlers['team'] = function * (message) {
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var cartChannels = team.meta.cart_channels;
   var attachments = [];
-  attachments.push({ 
+  attachments.push({ 
     text: ''
   });
   var channels = yield utils.getChannels(team);

@@ -40,9 +40,9 @@ function truncate(string) {
 };
 
 var emojis = {
-  1: ':one:',
-  2: ':two:',
-  3: ':three:'
+  1: '*1.*',
+  2: '*2.*',
+  3: '*3.*'
 };
 
 //
@@ -54,11 +54,11 @@ function * results(message, modeIsOnboard = false) {
 
   var results = amazon.map((r, i) => {
     return {
-      title: emojis[i+1] + ' ' + truncate(_.get(r, 'ItemAttributes[0].Title[0]')),
       color: '#45a5f4',
-      text: '',
+      text: emojis[i+1] + ' ' + `<${r.shortened_url}|*${truncate(_.get(r, 'ItemAttributes[0].Title[0]'))}*>`,
       image_url: r.picstitch_url,
       title_link: r.shortened_url,
+      mrkdwn_in: ['text', 'pretext', 'title'],
       fallback: 'Search Results',
       callback_id: message._id.toString() + '.' + i,
       actions: buttons(i+1, modeIsOnboard)

@@ -126,25 +126,53 @@ var slack_settings = module.exports.slack_settings = [{
      value: "back"
    }];
 
+var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
+  // buttons search for whatever follows search in value. e.g. search.healthy_snacks searches for 'healthy snacks'
+  'name': 'shopping_button.start.search',
+  'text': 'Headphones',
+  'style': 'default',
+  'type': 'button',
+  'value': 'search.headphones'
+}, {
+  'name': 'shopping_button.start.search',
+  'text': 'Coding Books',
+  'style': 'default',
+  'type': 'button',
+  'value': 'search.coding_books'
+}, {
+  'name': 'shopping_button.start.search',
+  'text': 'Healthy Snacks',
+  'style': 'default',
+  'type': 'button',
+  'value': 'search.healthy_snacks'
+}];
+
 var slack_shopping_mode = module.exports.slack_shopping_mode = [{
-     pretext: "Going back to Shopping Mode ☺️",
-     image_url:"http://kipthis.com/kip_modes/mode_shopping.png",
-     text:"",
-     mrkdwn_in: [
-         "text",
-         "pretext"
-     ],
-     color:"#45a5f4"
-   },
-   {
-       text: "Tell me what you're looking for, or use `help` for more options",
-       mrkdwn_in: [
-           "text",
-           "pretext"
-       ],
-       color:"#49d63a"
-   }
+    pretext: "Going back to Shopping Mode ☺️",
+    image_url: "http://kipthis.com/kip_modes/mode_shopping.png",
+    text: "",
+    mrkdwn_in: [
+      "text",
+      "pretext"
+    ],
+    color: "#45a5f4"
+  }, {
+    text: "Tell me what you're looking for, or use `help` for more options",
+    mrkdwn_in: [
+      "text",
+      "pretext"
+    ],
+    color: "#49d63a"
+  }, {
+    text: 'Tap to search for something',
+    fallback: 'You are unable to choose a game',
+    callback_id: 'wopr_game',
+    color: '#3AA3E3',
+    attachment_type: 'default',
+    actions: slack_shopping_buttons
+  }
 ];
+
 
 // ONBOARDING MODE TEMPLATES
 
