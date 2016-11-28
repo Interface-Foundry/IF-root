@@ -169,7 +169,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'mrkdwn_in': ['text'],
         'text': `*Apt/Floor#:*\n` +
                 `${foodSession.chosen_location.address_2}`,
-        'fallback': `You are unable to confirm this order`,
+        'fallback': `You are unable to change address`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'attachment_type': 'default',
         'actions': [
@@ -186,7 +186,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'mrkdwn_in': ['text'],
         'text': `*Phone Number:*\n` +
                 `${foodSession.chosen_location.phone_number}`,
-        'fallback': `You are unable to choose a game`,
+        'fallback': `You are unable to change phone number`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
         'attachment_type': `default`,
