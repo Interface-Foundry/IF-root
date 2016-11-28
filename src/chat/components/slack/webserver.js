@@ -84,7 +84,6 @@ function simple_action_handler (action) {
       return 'address_confirm_btn'
     case 'send_last_call_btn':
       return 'send_last_call_btn'
-
     case 'passthrough':
       return action.value
   }

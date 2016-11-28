@@ -649,14 +649,6 @@ handlers['member'] = function * (message) {
     callback_id: 'none',
     actions: cardTemplate.slack_onboard_member,
   }];
-  attachments.push({
-    text: '',
-    color: '#49d63a',
-    mrkdwn_in: ['text'],
-    fallback: 'Onboard_Shopping',
-    actions: cardTemplate.slack_onboard_default,
-    callback_id: 'none'
-  });
   attachments.map(function(a) {
     a.mrkdwn_in = ['text'];
     a.color = '#45a5f4';

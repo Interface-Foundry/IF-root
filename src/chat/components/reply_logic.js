@@ -175,6 +175,7 @@ function switchMode(message) {
 
 function printMode(message) {
   switch (message.mode) {
+    case 'shopping_button':
     case 'shopping':
       winston.debug('In', 'SHOPPING'.rainbow, 'mode 👚👖👗👝👛👜🏬🏪💳🛍')
       break
@@ -345,10 +346,18 @@ queue.topic('incoming').subscribe(incoming => {
         if (message.origin === 'slack') {
           var replies = yield onboardShopping.handle(message)
         }
+      break;
+      case 'shopping_button':
+        if (message.origin === 'slack') {
+          var data = _.split(message.data.value, '.');
+          var action = data[0];
+          data.splice(0, 1);
+          var replies = yield shopping[message.mode](message, data);
+        }
         break;
-     case 'settings':
-      if (message.origin === 'slack') {
-        var replies = yield settings.handle(message);
+      case 'settings':
+        if (message.origin === 'slack') {
+          var replies = yield settings.handle(message);
        }
         break;
      case 'team':
