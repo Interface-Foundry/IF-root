@@ -15,7 +15,6 @@ var handlers = {}
 
 //handle buttons
 handlers['shopping_button'] = function*(message, data) {
-  kip.debug(`button.message: \n ${JSON.stringify(message)} \n button.data: \n ${JSON.stringify(data)} `);
   let query = data[0].replace('_', ' ');
   message.text = query;
   const msg = yield handlers['shopping.initial'](message, {

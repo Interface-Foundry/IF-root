@@ -263,6 +263,10 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       if (message.mode === 'shopping' && message.action === 'onboard_cart') {
         let results = yield cart(message, bot.slackbot, false)
         msgData.attachments = [...message.reply || [], ...results || [], {
+          text: 'That\'s everything! You can always type `help` if you have any problems',
+          mrkdwn_in: ['text'],
+          color: '#A368F0'
+        }, {
           'image_url': 'http://kipthis.com/kip_modes/mode_shopping.png',
           text: '',
           mrkdwn_in: ['text'],
