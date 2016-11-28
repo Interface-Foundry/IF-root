@@ -650,7 +650,7 @@ handlers['food.delivery_or_pickup'] = function * (message) {
       'text'
     ],
     'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
-    'fallback': 'You are unable to choose a game',
+    'fallback': 'You are unable to start a poll.',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
@@ -697,7 +697,7 @@ handlers['food.restaurants.list'] = function * (message) {
         ],
         'text': '',
         'image_url': 'http://i.imgur.com/iqjT5iJ.png',
-        'fallback': 'You are unable to choose a game',
+        'fallback': 'Unable to list the restaurant.',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -724,7 +724,7 @@ handlers['food.restaurants.list'] = function * (message) {
           'text'
         ],
         'text': '',
-        'fallback': 'You are unable to choose a game',
+        'fallback': 'Unable to list the restaurant.',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -751,7 +751,7 @@ handlers['food.restaurants.list'] = function * (message) {
           'text'
         ],
         'text': '',
-        'fallback': 'You are unable to choose a game',
+        'fallback': 'Unable to list the restaurant.',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -776,7 +776,7 @@ handlers['food.restaurants.list'] = function * (message) {
           'text'
         ],
         'text': '',
-        'fallback': 'You are unable to choose a game',
+        'fallback': 'Unable to load change list of restaurants.',
         'callback_id': 'wopr_game',
         'attachment_type': 'default',
         'actions': [
@@ -857,7 +857,7 @@ handlers['food.restaurants.list.recent'] = function * (message) {
       'text'
     ],
     'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
-    'fallback': 'You are unable to choose a game',
+    'fallback': 'You are unable to start a poll.',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
