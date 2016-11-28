@@ -343,7 +343,8 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     attachments: [{
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
-      text: `*Votes from the group* 👋\n${votes}`
+      text: `*Votes from the group* 👋\n${votes}`,
+      fallback: 'Unable to load votes'
     }]
   }
 

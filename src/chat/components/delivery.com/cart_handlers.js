@@ -83,7 +83,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   var bottom = {
     'text': '',
-    'fallback': 'Unable to load bottom',
+    'fallback': 'Unable to load price confirm',
     'callback_id': 'wopr_game',
     'color': '#49d63a',
     'attachment_type': 'default',
@@ -301,6 +301,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     textForItem += descriptionString.length > 0 ? `*Options:* ${descriptionString}\n` + `*Added by:* <@${item.user_id}>` : `*Added by:* <@${item.user_id}>`
     return {
       text: textForItem,
+      fallback: 'Unable to load food item',
       callback_id: 'foodInfoItems_wopr',
       color: '#3AA3E3',
       attachment_type: 'default',
@@ -366,6 +367,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount.toFixed(2)}`
       var tipAttachment = {
         'title': `Tip: ${tipTitle}`,
+        'fallback': 'Unable to load tip',
         'callback_id': 'food.admin.cart.tip',
         'color': '#3AA3E3',
         'attachment_type': 'default',

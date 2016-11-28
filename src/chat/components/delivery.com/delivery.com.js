@@ -911,7 +911,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
           'text'
         ],
         'text': textWithChannelMaybe,
-        'fallback': 'Send poll for cuisine to the team members at ',
+        'fallback': 'Send poll for cuisine to the team members',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
