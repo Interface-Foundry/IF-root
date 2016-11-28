@@ -130,14 +130,12 @@ handlers['food.menu.quick_picks'] = function * (message) {
       'callback_id': 'wopr_game',
       'color': '#3AA3E3',
       'attachment_type': 'default',
-      'actions': [
-        // {
-        //   'name': 'chess',
-        //   'text': 'Category',
-        //   'type': 'button',
-        //   'value': 'chess'
-        // }
-      ]
+      'actions': [{
+        name: 'food.feedback.new',
+        text: '⇲ Send feedback',
+        type: 'button',
+        value: 'food.feedback.new'
+      }]
     }])
   }
 
@@ -292,6 +290,7 @@ handlers['food.item.instructions'] = function * (message) {
     text: `Add Special Instructions for *${item.name}*`,
     attachments: [{
       text: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
+      fallback: 'Unable to add special instructions',
       mrkdwn_in: ['text']
     }]
   }

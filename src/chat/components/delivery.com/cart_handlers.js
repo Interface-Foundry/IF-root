@@ -360,6 +360,11 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           'type': `button`,
           'style': `primary`,
           'value': `checkout`
+        }, {
+        name: 'food.feedback.new',
+        text: '⇲ Send feedback',
+        type: 'button',
+        value: 'food.feedback.new'
         }]
       }
       // ------------------------------------

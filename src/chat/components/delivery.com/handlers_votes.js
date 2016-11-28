@@ -345,7 +345,13 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`,
-      fallback: 'Unable to load votes'
+      fallback: 'Unable to load votes',
+      actions: [{
+        name: 'food.feedback.new',
+        text: '⇲ Send feedback',
+        type: 'button',
+        value: 'food.feedback.new'
+      }]
     }]
   }
 
@@ -363,6 +369,8 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       }]
     })
   }
+
+  
 
   if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
     // replace admins message

@@ -30,6 +30,12 @@ handlers['food.admin.order.checkout.address_2'] = function * (message) {
         'text': `None`,
         'type': `button`,
         'value': `none`
+      }, 
+      {
+        'name': 'food.feedback.new',
+        'text': '⇲ Send feedback',
+        'type': 'button',
+        'value': 'food.feedback.new'
       }]
     }]
   }
@@ -134,7 +140,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
     attachments: [
       {
         'title': '',
-        'mrkdwn_in': ['text']
+        'mrkdwn_in': ['text'],
+        'fallback': ''
       },
       {
         'title': '',
@@ -267,6 +274,11 @@ handlers['food.admin.order.pay'] = function * (message) {
         'text': `< Change Order`,
         'type': `button`,
         'value': `change`
+      }, {
+        'name': 'food.feedback.new',
+        'text': '⇲ Send feedback',
+        'type': 'button',
+        'value': 'food.feedback.new'
       }]
     }]
   }

@@ -164,6 +164,12 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
         'text': '< Back',
         'type': 'button',
         'value': 0
+      },
+      {
+        name: 'food.feedback.new',
+        text: '⇲ Send feedback',
+        type: 'button',
+        value: 'food.feedback.new'
       }
     ]
   })
