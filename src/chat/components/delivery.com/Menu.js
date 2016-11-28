@@ -138,7 +138,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
     'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"}`,
-    'fallback': 'You are unable to choose a game',
+    'fallback': 'Unable to load food options.',
     'callback_id': 'wopr_game',
     'color': '#49d63a',
     'attachment_type': 'default',
