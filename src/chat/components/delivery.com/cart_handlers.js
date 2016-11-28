@@ -83,7 +83,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   var bottom = {
     'text': '',
-    'fallback': 'You are unable to choose a game',
+    'fallback': 'Unable to load bottom',
     'callback_id': 'wopr_game',
     'color': '#49d63a',
     'attachment_type': 'default',
