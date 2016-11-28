@@ -18,10 +18,10 @@ var bundles = { snacks: snacks, drinks: drinks, supplies: supplies }
 
 
 var addBundleToCart = module.exports.addBundleToCart = function * (bundle, userId ,cart_id) {
+ yield kipcart.emptyCart(cart_id);
  var items = yield db.Item.find({'bundle': bundle, 'available': true},{'source_json':1 });
  if (!items || items.length < 1) {
  	yield updateBundle(bundle);
- 	sleep(1000);
  	var items = yield db.Item.find({'bundle': bundle, 'available': true},{'source_json':1 });
  }
  if (!items) return
@@ -33,7 +33,7 @@ var addBundleToCart = module.exports.addBundleToCart = function * (bundle, userI
    	 skip = true;
    }
    if (!skip){ 
-   	 try { yield kipcart.addToCart(cart_id, userId, item, 'team'); } catch(err) {}
+   	 try { yield kipcart.addToCart(cart_id, userId, item, 'team'); } catch(err) { kip.debug('\n\n\n bundles:36:addtoCart err:', err,' \n\n\n') }
     } 
   })  
 }

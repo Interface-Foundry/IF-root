@@ -157,7 +157,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
 module.exports.emptyCart = function (cart_id) {
   return co(function * () {
     var cart = yield db.Carts.findOne({'slack_id': cart_id}).exec()
-    console.log('firing emptyCart: cart_id: ', cart_id, ' cart: ', cart)
+    if (!cart || cart == null) return null
     async.eachSeries(cart.items, function iterator (id, callback) {
       db.Item.findById(id).then(function (err, item) {
         if (item) {
