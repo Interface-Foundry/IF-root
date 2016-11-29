@@ -1,6 +1,12 @@
 env: development_alyx
 mongodb:
-  url: localhost/foundry
+  url: mongodb://localhost:27017/foundry
+  backuphost: localhost
+  options:
+    server:
+      poolSize: 5
+      socketOptions:
+        keepAlive: 1
 elasticsearch:
   url: http://localhost:9200
 app:
