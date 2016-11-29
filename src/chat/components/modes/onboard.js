@@ -378,13 +378,14 @@ handlers['bundle'] = function * (message, data) {
       mrkdwn_in: ['text', 'pretext'],
       color: '#45a5f4'
     })
-   attachments.push({
-      text: 'Do you want to let others add stuff to cart?',
-      mrkdwn_in: ['text'],
-      fallback:'Onboard.helper',
-      actions: cardTemplate.slack_onboard_basic,
-      callback_id: 'none'
-    });
+  attachments.push({
+    text: 'Do you want to let others add stuff to cart?',
+    mrkdwn_in: ['text'],
+    fallback: 'Onboard.helper',
+    actions: cardTemplate.slack_onboard_basic,
+    callback_id: 'none',
+    color: '#49d63a'
+  });
 
    var msg = message;
    msg.mode = 'onboard'
