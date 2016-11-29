@@ -252,17 +252,32 @@ function * addCartChannel(message, channel_name) {
   return
 }
 
+/*
+* get the groups (private channels) and channels and add them to slackbots meta
+* used as init in slack.js but probably should be run periodically (like
+* multiple times a day)
+* @param {Object} slackbot object with web, rtm and mongo objects
+*/
 function * getAllChannels (slackbot) {
   var botChannelArray = yield slackbot.web.channels.list()
-  var botGroupArray = yield slackbot.web.groups.list()
-  var botsChannels = botChannelArray.channels.concat(botGroupArray.groups)
-  logging.info(`adding ${botsChannels.length} to slackbots.meta`)
-  slackbot.slackbot.meta.all_channels = botsChannels.map((channel) => {
+  botChannelArray = botChannelArray.channels.map(channel => {
     return {
       id: channel.id,
       name: channel.name
     }
   })
+
+  var botGroupArray = yield slackbot.web.groups.list()
+  botGroupArray = botGroupArray.groups.map(channel => {
+    return {
+      id: channel.id,
+      name: channel.name,
+      group: true
+    }
+  })
+  var allChannels = botChannelArray.concat(botGroupArray)
+  logging.info(`adding ${allChannels.length} to slackbots.meta`)
+  slackbot.slackbot.meta.all_channels = allChannels
   yield slackbot.slackbot.save()
 }
 
@@ -275,4 +290,4 @@ module.exports = {
   addCartChannel: addCartChannel,
   removeCartChannel: removeCartChannel,
   getAllChannels: getAllChannels
-};
+}

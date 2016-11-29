@@ -43,10 +43,17 @@ var deliverySchema = mongoose.Schema({
     last_name: String,
     phone_number: String,
     email: String,
-    dm: String,
-    chosen_channel_id: String,
-    chosen_channel_name: String
+    dm: String
   },
+
+  chosen_channels: [{
+    channel_name: String,
+    channel_id: String,
+    group: {
+      type: Boolean,
+      default: false
+    }
+  }],
 
   fulfillment_method: String,
   time_started: {
