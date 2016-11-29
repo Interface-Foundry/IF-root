@@ -26,10 +26,10 @@ var handlers = {}
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function askUserForCuisineTypes (cuisines, admin, user) {
+function voteMessage (foodSession) {
   // present top 2 local avail and then 2 random sample,
   // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
-  var orderedCuisines = _.map(_.sortBy(cuisines, ['count']), 'name')
+  var orderedCuisines = _.map(_.sortBy(foodSession.cuisines, ['count']), 'name')
   var ignoredTopItems = ['Cafe', 'Kosher', 'Sandwiches', 'Italian', 'Pizza', 'Asian']
   var cuisinesWithoutTop = _.pullAll(orderedCuisines, ignoredTopItems)
   var top1 = cuisinesWithoutTop.pop()
@@ -53,6 +53,8 @@ function askUserForCuisineTypes (cuisines, admin, user) {
     type: 'button',
     style: 'danger'
   })
+
+  var admin = foodSession.convo_initiater
 
   var res = {
     text: `<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!`,
@@ -229,10 +231,9 @@ handlers['food.user.poll'] = function * (message) {
       user: member.id,
       team: member.team_id
     }
-    // sleep for half a second so we dont get no
-    if (foodSession.cuisines.length < 5) sleep(1000)
-    var cuisinesAvailForUser = _.filter(foodSession.cuisines, function (o) { return o.count > 10 })
-    var cuisineMessage = askUserForCuisineTypes(cuisinesAvailForUser, foodSession.convo_initiater, member.dm)
+
+    // generate some random cuisines to vote from
+    var cuisineMessage = voteMessage(foodSession)
 
     var response = {
       mode: 'food',
