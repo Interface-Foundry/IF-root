@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>RestaurantName Menu</title>
+  <title>Menu</title>
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
@@ -17,7 +17,7 @@
       <div id="logo">
         <div id="logo_text">
           <!-- class="logo_colour", allows you to change the colour of the text -->
-          <h1>Restaurant Name</h1>
+          <h1>{{name}}</h1>
           <h2>Courtesy of Kip</h2>
         </div>
       </div>
@@ -47,9 +47,16 @@
           <h3 class="item_description">{{item.description}}</h3>
           <div ng-repeat="child in item.children">
             <h4>{{child.name}}</h4>
-            <!-- <div ng-if="console.log(child.type); child.type == 'option group'"> -->
-              <h5 ng-repeat="option in child.children">{{option.name}}</h5>
-            <!-- </div> -->
+            <div ng-show="child.max_selection == 1">
+              <label ng-repeat="option in child.children">
+                <input type="radio" ng-model="model[option]" value="option"/>
+                {{option.name}}
+              </label>
+              <!-- <p ng-repeat="option in child.children">{{option.name}}</p> -->
+            </div>
+            <div ng-hide="child.max_selection == 1">
+              <p ng-repeat="option in child.children">{{option.name}}</p>
+            </div>
           </div>
         </div>
         <p>foodings, in some sort of list, with prices and add to cart buttons</p>

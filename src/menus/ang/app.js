@@ -2,24 +2,31 @@ var app = angular.module('app', []);
 
 app.factory('MenuFactory', function ($http) {
   // return result of http call
-  return $http.get('/menu', function (res) {
-    return res.data;
-  }).then(function (m) {
-    console.log(m.data);
-    return m.data;
-  })
-  // .then(function (m) {
-  //   var itemNames = [];
-  //   console.log('in the dot then');
-  //   for (var i = 0; i < m.length; i++) {
-  //     itemNames.push(m[i].name);
-  //   }
-  //   return itemNames;
-  // });
 
-  //return "I am a menu, yes i am!";
+  var mf = {};
+
+  var testId = "583db964d421373ebe0adf11";
+
+  mf.getMenu = function () {
+    return $http.get('/menu/'+ testId, function (res) {
+      return res.data;
+    }).then(function (m) {
+      console.log(m.data);
+      return m.data;
+    })
+  }
+
+  mf.getRestaurantName = function () {
+    return $http.get('/name/' + testId, function (res) {
+      return res.data;
+    });
+  }
+
+  return mf;
 });
 
 app.controller('menuController', function ($scope, MenuFactory) {
-  $scope.menu = MenuFactory;
+  $scope.menu = MenuFactory.getMenu();
+  $scope.name = MenuFactory.getRestaurantName();
+  $scope.model = {};
 });

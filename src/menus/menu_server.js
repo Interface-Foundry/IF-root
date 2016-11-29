@@ -16,17 +16,28 @@ app.use('/ang', express.static('ang'));
 //require('../chat/components/delivery.com/scrape_menus.js');
 
 //DB stuff
-//test id "583db883d388443e97348da6"
 var Menu = require('../chat/components/delivery.com/Menu.js');
+var ObjectId = require('mongoose').Types.ObjectId;
 
 //GET serve up menu
-app.get('/menu', function (req, res) {
-  db.Menu.findOne({}).exec()
+app.get('/menu/:id', function (req, res) {
+  db.Menu.findOne({_id: ObjectId(req.params.id)}).exec()
   .then(function (result) {
     if (result) {
       res.send(Menu(result.raw_menu).allItems());
     }
     else res.send('no menu found')
+  })
+  .catch(function (err) {
+    res.send(err);
+  });
+});
+
+//serve up restaurant name
+app.get('/name/:id', function (req, res) {
+  db.Menu.findOne({_id: ObjectId(req.params.id)}).exec()
+  .then(function (result) {
+    res.send(result.merchant_id);
   })
   .catch(function (err) {
     res.send(err);
