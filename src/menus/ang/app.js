@@ -11,7 +11,6 @@ app.factory('MenuFactory', function ($http) {
     return $http.get('/menu/'+ testId, function (res) {
       return res.data;
     }).then(function (m) {
-      console.log(m.data);
       return m.data;
     })
   }
@@ -19,13 +18,16 @@ app.factory('MenuFactory', function ($http) {
   mf.getRestaurantName = function () {
     return $http.get('/name/' + testId, function (res) {
       return res.data;
-    });
+    }).then(function (n) {
+      return n.data;
+    })
   }
 
   return mf;
 });
 
 app.controller('menuController', function ($scope, MenuFactory) {
+  $scope.name = "Zafra";
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurantName();
   $scope.model = {};

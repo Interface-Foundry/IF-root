@@ -19,12 +19,26 @@ app.use('/ang', express.static('ang'));
 var Menu = require('../chat/components/delivery.com/Menu.js');
 var ObjectId = require('mongoose').Types.ObjectId;
 
+//TODO get id of chosen restaurant in whichever delivery is currently active
+//NOTE: then can probably remove req param from /menu get
+
 //GET serve up menu
 app.get('/menu/:id', function (req, res) {
   db.Menu.findOne({_id: ObjectId(req.params.id)}).exec()
   .then(function (result) {
     if (result) {
-      res.send(Menu(result.raw_menu).allItems());
+      var bigMenu = Menu(result.raw_menu).allItems();
+      var smallMenu = [];
+      for (var i = 0; i < bigMenu.length; i++) {
+        smallMenu.push({
+          children: bigMenu[i].children,
+          price: bigMenu[i].price,
+          description: bigMenu[i].description,
+          name: bigMenu[i].name
+        });
+      }
+      console.log('small', smallMenu);
+      res.send(smallMenu);
     }
     else res.send('no menu found')
   })
@@ -33,13 +47,19 @@ app.get('/menu/:id', function (req, res) {
   });
 });
 
+//TODO: change to take its own (unofficial) ID
 //serve up restaurant name
 app.get('/name/:id', function (req, res) {
   db.Menu.findOne({_id: ObjectId(req.params.id)}).exec()
   .then(function (result) {
-    res.send(result.merchant_id);
+    console.log('merchantId', result);
+    return db.Merchant.findOne({id: result.merchant_id}).exec();
+  })
+  .then(function (result) {
+    res.send(result.data.summary.name);
   })
   .catch(function (err) {
+    console.log(err);
     res.send(err);
   });
 });
