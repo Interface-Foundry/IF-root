@@ -408,6 +408,7 @@ handlers['food.settings.address.new'] = function * (message) {
   var msg_json = {
     'text': "What's the address for the order?",
     'attachments': [{
+      'fallback': 'Unable to enter new address',
       'text': '✎ Type your address below (Example: _902 Broadway 10010_)',
       'mrkdwn_in': ['text']
     }]
@@ -559,8 +560,8 @@ handlers['food.feedback.save'] = function * (message) {
   }
 
   var mailOptions = {
-    to: 'Kip Server <hello@kipthis.com>',
-    from: 'Kip Café <server@kipthis.com>',
+    to: 'Tim Wong <timothy@interfacefoundry.com>',
+    from: 'Tim Wong <timothy@interfacefoundry.com>',
     subject: '['+source.callback_id+'] Kip Café Feedback',
     text: '- Feedback: '+message.text + ' \r\n - Context:'+JSON.stringify(source)
   }

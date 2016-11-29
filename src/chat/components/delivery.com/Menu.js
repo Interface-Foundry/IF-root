@@ -139,7 +139,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   json.attachments.push({
     'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"}`,
     'fallback': 'Unable to load food options.',
-    'callback_id': 'wopr_game',
+    'callback_id': 'load.food.options',
     'color': '#49d63a',
     'attachment_type': 'default',
     'mrkdwn_in': [
@@ -164,12 +164,6 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
         'text': '< Back',
         'type': 'button',
         'value': 0
-      },
-      {
-        name: 'food.feedback.new',
-        text: '⇲ Send feedback',
-        type: 'button',
-        value: 'food.feedback.new'
       }
     ]
   })

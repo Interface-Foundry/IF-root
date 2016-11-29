@@ -345,7 +345,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
               `*Tip:* ${foodSession.tipAmount.$}\n` +
               `*Team Cart Total:* ${foodSession.order.total.$}`,
         fallback: 'Confirm Choice',
-        callback_id: 'foodConfrimOrder_callbackID',
+        callback_id: 'food_confirm',
         color: '#49d63a',
         attachment_type: 'default',
         mrkdwn_in: ['text']
@@ -361,10 +361,10 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           'style': `primary`,
           'value': `checkout`
         }, {
-        name: 'food.feedback.new',
-        text: '⇲ Send feedback',
-        type: 'button',
-        value: 'food.feedback.new'
+          'name': 'food.feedback.new',
+          'text': '⇲ Send feedback',
+          'type': 'button',
+          'value': 'food.feedback.new'
         }]
       }
       // ------------------------------------

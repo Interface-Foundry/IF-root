@@ -113,7 +113,6 @@ handlers['food.menu.quick_picks'] = function * (message) {
     }
 
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
-
     return attachment
   })
 
@@ -127,7 +126,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
       }].concat(menuItems).concat([{
       'text': '',
       'fallback': 'Unable to load menu item',
-      'callback_id': 'wopr_game',
+      'callback_id': 'food.quick_picks',
       'color': '#3AA3E3',
       'attachment_type': 'default',
       'actions': [{
