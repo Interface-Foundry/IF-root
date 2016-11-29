@@ -10,7 +10,8 @@ var path = require('path');
 var volleyball = require('volleyball');
 app.use(volleyball);
 
-app.use('/', express.static(path.join(__dirname, 'web')));
+app.use('/', express.static('template'));
+app.use('/ang', express.static('ang'));
 
 //require('../chat/components/delivery.com/scrape_menus.js');
 
