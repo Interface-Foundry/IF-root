@@ -353,6 +353,12 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       if (totalPrice < foodSession.chosen_restaurant.minimum) {
         finalAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *_\$${foodSession.chosen_restaurant.minimum}_*`
+        finalAttachment.actions = [{
+          'name': 'food.feedback.new',
+          'text': '⇲ Send feedback',
+          'type': 'button',
+          'value': 'food.feedback.new'
+        }]
       } else {
         finalAttachment.actions = [{
           'name': `food.admin.order.checkout.confirm`,

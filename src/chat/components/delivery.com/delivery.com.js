@@ -562,6 +562,8 @@ handlers['food.feedback.save'] = function * (message) {
   var mailOptions = {
     to: 'Tim Wong <timothy@interfacefoundry.com>',
     from: 'Tim Wong <timothy@interfacefoundry.com>',
+    //to: 'Kip Server <hello@kipthis.com>',
+    //from: 'Kip Café <server@kipthis.com>',
     subject: '['+source.callback_id+'] Kip Café Feedback',
     text: '- Feedback: '+message.text + ' \r\n - Context:'+JSON.stringify(source)
   }
