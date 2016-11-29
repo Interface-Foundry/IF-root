@@ -6,6 +6,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
   var isAdmin = slackbot.meta.office_assistants.indexOf(message.source.user) >= 0;
   var isP2P = slackbot.meta.office_assistants.length === 0;
   var show_everything = isAdmin || isP2P;
+  
 
   // get the latest added item if we need to highlight it
   if (highlight_added_item) {
@@ -22,10 +23,12 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     color: '#45a5f4',
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
   })
-
+  kip.debug(`message is: ${JSON.stringify(message, null, 2)}`);
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];
+    var addedByUser = item.added_by.includes(message.source.user);
 
+    kip.debug(`item is: ${JSON.stringify(item, null, 2)}`);
     // the slack message for just this item in the cart list
     var item_message = {
       mrkdwn_in: ['text', 'pretext'],
@@ -39,21 +42,22 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     }).join(', ');
 
     // only allow links for admins/p2p
-    if (show_everything) {
+    if (show_everything || addedByUser) {
       var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
     }
 
     // make the text for this item's message
+
     item_message.text = [
-      `*${i + 1}.* ` + (show_everything ? `<${link}|${item.title}>` : item.title),
-      `*Price:* ${item.price} each`,
-      show_everything ? `*Added by:* ${userString}` : false,
+      `*${i + 1}.* ` + ((show_everything || addedByUser) ? `<${link}|${item.title}>` : item.title),
+      ((show_everything || addedByUser) ? `*Price:* ${item.price} each`: ''),
+      (show_everything || addedByUser) ? `*Added by:* ${userString}` : false,
       `*Quantity:* ${item.quantity}`,
-      
+
     ].filter(Boolean).join('\n');
 
     // add the item actions if needed
-    if (show_everything) {
+    if (show_everything || addedByUser) {
       item_message.callback_id = item._id.toString();
       var buttons = [{
         "name": "additem",
@@ -66,10 +70,10 @@ module.exports = function*(message, slackbot, highlight_added_item) {
         "text": "—",
         "style": "default",
         "type": "button",
-        "value": "remove" 
+        "value": "remove"
       }];
 
-      if (item.quantity > 1) {
+      if (item.quantity > 1 && show_everything) {
         buttons.push({
           name: "removeall",
           text: 'Remove All',
