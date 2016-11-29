@@ -1,4 +1,7 @@
 var _ = require('lodash');
+var cardTemplate = require('./card_templates');
+var slackUtils = require('./utils.js')
+
 
 var buttons = function(num, modeIsOnboard) {
   return modeIsOnboard ? [{
@@ -66,28 +69,23 @@ function * results(message, modeIsOnboard = false) {
   });
   // debugger;
   let actions = [];
-  if (!modeIsOnboard) {
-    actions.push({
-      name: 'more',
-      text: "See More Results",
-      style: "default",
-      type: "button",
-      value: "more"
-    });
 
-    actions.push({
-      name: "home_btn",
-      text: "🐧",
-      style: "default",
-      type: "button",
-      value: "home"
-    });
+  var original = cardTemplate.shopping_home_default(message._id);
+  var expandable = cardTemplate.shopping_home(message._id)
+
+  if (!modeIsOnboard) {
+    actions = actions.concat(original);
   }
+
   results.push({
     fallback: 'Search Results',
     callback_id: 'search_results',
     actions: actions
   })
+
+  
+  yield slackUtils.cacheMenu(message, original, expandable)
+
   return results;
 }
 

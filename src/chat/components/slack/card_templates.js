@@ -1,4 +1,5 @@
-var slack_home_default = module.exports.slack_home_default = [{
+var shopping_home_default = module.exports.shopping_home_default = function(id) {
+  return [{
      name: "more",
      text: "See More Results",
      style: "default",
@@ -6,15 +7,17 @@ var slack_home_default = module.exports.slack_home_default = [{
      value: "more"
    },
    {
-     name: "home_btn",
+     name: "shopping.home.expand",
      text: "🐧",
      style: "default",
      type: "button",
-     value: "home"
+     value: id
    }]
+}
 
 
-var slack_home = module.exports.slack_home =[{
+var shopping_home = module.exports.shopping_home =function(id) { 
+  return [{
      name: "cafe_btn",
      text: "Kip Cafe",
      style: "default",
@@ -43,14 +46,45 @@ var slack_home = module.exports.slack_home =[{
      value: "view_cart_btn"
      }, 
    {
-     name: "back_btn",
+     name: "shopping.home.detract",
      text: "< Back",
      style: "default",
      type: "button",
-     value: "back"
-   }];
+     value: id
+   }]
+}
 
-var slack_team_default = module.exports.slack_team_default = [
+var focus_home_default = module.exports.focus_home_default = function(message) {
+  return [{
+      "name": "addcart",
+      "text": "Add to Cart",
+      "style": "primary",
+      "type": "button",
+      "value": message.focus - 1
+    }, {
+      "name": "cheaper",
+      "text": "Find Cheaper",
+      "style": "default",
+      "type": "button",
+      "value": message.focus - 1
+    }, {
+      "name": "similar",
+      "text": "Find Similar",
+      "style": "default",
+      "type": "button",
+      "value": message.focus - 1
+    }, {
+      "name": "focus.home.expand",
+      "text": "🐧",
+      "style": "default",
+      "type": "button",
+      "value": message._id
+    }]
+}
+
+
+var shopping_team_default = module.exports.shopping_team_default = function(id) {
+  return [
       {
         "name": "exit",
         "text": "Exit Members",
@@ -59,15 +93,17 @@ var slack_team_default = module.exports.slack_team_default = [
         "value": "exit"
       },
       {
-        "name": "home_btn",
+        "name": "shopping.home.expand",
         "text": "🐧",
         "style": "default",
         "type": "button",
-        "value": "home_btn"
+        "value": id
       }
   ]
+}
 
-var slack_team = module.exports.slack_team =[{
+var shopping_team = module.exports.shopping_team = function(id) { 
+  return [{
      name: "cafe_btn",
      text: "Kip Cafe",
      style: "default",
@@ -75,29 +111,36 @@ var slack_team = module.exports.slack_team =[{
      value: "cafe_btn"
    },
    {
-     name: "back_btn",
+     name: "shopping.home.detract",
      text: "< Back",
      style: "default",
      type: "button",
-     value: "back"
-   }];
+     value: id
+   }]
+ }
 
-var slack_settings_default = module.exports.slack_settings_default = [{
+
+var shopping_settings_default = module.exports.shopping_settings_default = function(id) {
+
+  return [{
       name: "exit",
       text: "Exit Settings",
       style: "primary",
       type: "button",
       value: "exit"
     },{
-      name: "home_btn",
+      name: "shopping.home.expand",
       text: "🐧",
       style: "default",
       type: "button",
-      value: "home_btn"
-    }];
+      value: id
+    }]
+
+}
 
 
-var slack_settings = module.exports.slack_settings = [{
+var shopping_settings = module.exports.shopping_settings =  function(id) { 
+  return [{
      name: "cafe_btn",
      text: "Kip Cafe",
      style: "default",
@@ -119,12 +162,13 @@ var slack_settings = module.exports.slack_settings = [{
      value: "view_cart_btn"
      }, 
    {
-     name: "back_btn",
+     name: "shopping.home.detract",
      text: "< Back",
      style: "default",
      type: "button",
-     value: "back"
-   }];
+     value: id
+   }]
+}
 
 var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
   // buttons search for whatever follows search in value. e.g. search.healthy_snacks searches for 'healthy snacks'

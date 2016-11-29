@@ -7,6 +7,9 @@ var amazon_search = require('../amazon_search.js');
 var picstitch = require("../picstitch.js");
 var processData = require("../process.js");
 var kipcart = require('../cart');
+var cardTemplate = require('../slack/card_templates');
+var request = require('request');
+var slackUtils = require('../slack/utils');
 
 //
 // Handlers take something from the message.execute array and turn it into new messages
@@ -58,7 +61,6 @@ handlers['shopping.initial'] = function*(message, exec) {
   var results = yield amazon_search.search(exec.params,message.origin);
 
   if (results == null || !results) {
-      winston.debug('-1')
       return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -109,17 +111,16 @@ handlers['shopping.focus'] = function*(message, exec) {
     action: 'focus',
     focus: exec.params.focus
   })
+
 };
 
 // "more"
 handlers['shopping.more'] = function*(message, exec) {
   exec.params = yield getLatestAmazonQuery(message);
   exec.params.skip = (exec.params.skip || 0) + 3;
-    winston.debug('!2', exec)
 
   var results = yield amazon_search.search(exec.params,message.origin);
    if (results == null || !results) {
-          winston.debug('-2')
 
       return new db.Message({
       incoming: false,
@@ -159,7 +160,6 @@ handlers['shopping.similar'] = function*(message, exec) {
 
   if (!exec.params.asin) {
     var old_results = yield getLatestAmazonResults(message);
-    winston.debug(old_results);
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0];
   }
     winston.debug('!2', exec)
@@ -167,7 +167,6 @@ handlers['shopping.similar'] = function*(message, exec) {
 
   var results = yield amazon_search.similar(exec.params,message.origin);
    if (results == null || !results) {
-          winston.debug('-3')
 
       return new db.Message({
       incoming: false,
@@ -307,7 +306,6 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       }
     }
   }
-      winston.debug('!4', exec)
 
   // modify the params and then do another search.
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
@@ -337,7 +335,6 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   }
 
    if ((results == null || !results) && exec.params.type !== 'price')  {
-                  winston.debug('-5')
 
       return new db.Message({
       incoming: false,
@@ -366,6 +363,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
 
 
   var results = yield amazon_search.search(exec.params,message.origin);
+
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -379,7 +377,17 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     mode: 'shopping',
     action: 'results'
   })
+
 }
+
+handlers['home.expand'] = function*(message, exec) {
+  return yield slackUtils.showMenu(message);
+};
+
+handlers['home.detract'] = function*(message, exec) {
+   return yield slackUtils.hideMenu(message);
+
+};
 
 handlers['cart.save'] = function*(message, exec) {
   if (!exec.params.focus) {

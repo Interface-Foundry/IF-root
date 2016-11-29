@@ -797,13 +797,11 @@ handlers['home_btn'] = function * (message) {
         callback_id: 'onboard',
         actions: actions
     }
-   
     request({
       method: 'POST',
       uri: message.source.response_url,
       body: JSON.stringify(json)
     });
-
     return
 }
 

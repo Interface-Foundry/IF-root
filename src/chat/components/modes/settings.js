@@ -17,7 +17,7 @@ var cron = require('cron');
 var cronJobs = {};
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
-  if (!last_action || last_action.indexOf('home') == -1) {
+  if (!last_action || last_action != 'home') {
     return yield handlers['start'](message)
   } else {
     var action = getAction(message.text);
@@ -102,13 +102,14 @@ handlers['start'] = function * (message) {
       attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'});
     }
   };
-
+  var original = cardTemplate.shopping_settings_default(message._id);
+  var expandable = cardTemplate.shopping_home(message._id)
   attachments.push({
       text: 'Don’t have any changes? Type `exit` to quit settings',
       color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Settings',
-      actions: cardTemplate.slack_settings_default,
+      actions: original,
       callback_id: 'none'
     })
     // console.log('SETTINGS ATTACHMENTS ',attachments);
@@ -117,8 +118,8 @@ handlers['start'] = function * (message) {
       a.mrkdwn_in =  ['text'];
       a.color = '#45a5f4';
     })
-
    var msg = message;
+   yield utils.cacheMenu(msg, original, expandable)
    msg.mode = 'settings'
    msg.text = ''
    msg.source.team = team_id;

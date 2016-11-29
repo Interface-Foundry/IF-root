@@ -83,10 +83,6 @@ function typing (message) {
 }
 
 function simplehome (message) {
-  // var slackreply = {
-  //   mrkdwn_in: ['text'],
-  //   text: '*Hi! Thanks for using Kip* 😊',
-  // }
 
   var slackreply = {
     text: '*Hi! Thanks for using Kip* 😊',
@@ -132,6 +128,11 @@ function isCancelIntent(message) {
     'home'
   ];
   return cancelPhrases.indexOf(text) >= 0
+}
+
+function isMenuChange(message) {
+
+  return _.get(message,'action') && (_.get(message,'action').indexOf('home.expand') > -1 || _.get(message,'action').indexOf('home.detract') > -1)
 }
 
 function switchMode(message) {
@@ -276,9 +277,10 @@ queue.topic('incoming').subscribe(incoming => {
       kip.debug('setting mode to prevmode', message.prevMode)
       message.mode = message.prevMode
     }
-    if (!message.action) {
-      kip.debug('setting mode to prevaction', message.prevAction)
-      message.action = message.prevAction
+    if (!message.action && message.prevAction) {
+      message.action = message.prevAction.match(/(expand|detract)/) ?  'initial' : message.prevAction;
+      kip.debug('setting mode to prevaction', message.action)
+
     }
 
     timer.tic('got history')
@@ -291,10 +293,17 @@ queue.topic('incoming').subscribe(incoming => {
     if (isCancelIntent(message)) {
       message.mode = 'shopping';
       message.action = 'switch'
-      return simplehome(message)
+      simplehome(message)
       yield message.save();
       timer.stop();
       return
+    }
+
+    if (isMenuChange(message)) { 
+      timer.stop();
+      incoming.ack()
+      return yield shopping[_.get(message,'action')](message);
+      
     }
 
     if (switchMode(message)) {
@@ -354,6 +363,9 @@ queue.topic('incoming').subscribe(incoming => {
           var replies = yield shopping[message.mode](message, data);
         }
         break;
+      case 'shopping_home':
+        var replies = yield shopping['shopping.home'](message);
+        break;
       case 'settings':
         if (message.origin === 'slack') {
           var replies = yield settings.handle(message);
@@ -364,7 +376,7 @@ queue.topic('incoming').subscribe(incoming => {
         var replies = yield team.handle(message);
        }
         break;
-    case 'food':
+     case 'food':
         yield food(message)
         return incoming.ack()
      case 'address':
@@ -411,7 +423,7 @@ queue.topic('incoming').subscribe(incoming => {
         try {
           r.save()
         } catch(err) {
-        logging.debug('could not save ' + r, err)
+          logging.debug('could not save ' + r, err)
         }
       } else {
         logging.debug('reply_logic:316:r does not exist ' + r)
@@ -435,13 +447,16 @@ function * simple_response (message) {
 
   // check for canned responses/actions before routing to NLP
   // this adds mode and action to the message
-  var reply = banter.checkForCanned(message)
+  if (message.text) {
+    var reply =  banter.checkForCanned(message)
+  } else {
+    message.text = '';
+    var reply =  banter.checkForCanned(message)
+  }
 
   kip.debug('prefab reply from banter.js', reply)
 
-  if (!reply.flag) {
-    return
-  }
+
 
   switch (reply.flag) {
     case 'basic': // just respond, no actions

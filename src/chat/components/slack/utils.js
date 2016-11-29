@@ -180,9 +180,22 @@ function * getTeamMembers(team) {
 
 /*
 *
-* Cart Channel Management
+* Channel Management
 *
 */
+
+
+function * refreshAllChannels (slackbot) {
+  var botChannelArray = yield slackbot.web.channels.list()
+  var botGroupArray = yield slackbot.web.groups.list()
+  var botsChannels = botChannelArray.channels.concat(botGroupArray.groups)
+  logging.info(`adding ${botsChannels.length} to slackbots.meta`)
+  slackbot.slackbot.meta.all_channels = botsChannels.map((channel) => {
+    return channel.id
+  })
+  yield slackbot.slackbot.save()
+}
+
 function * removeCartChannel(message, channel_name) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
   var channels = yield request({url: 'https://slack.com/api/channels.list?token=' + team.bot.bot_access_token, json: true});
@@ -225,15 +238,61 @@ function * addCartChannel(message, channel_name) {
   return
 }
 
-function * refreshAllChannels (slackbot) {
-  var botChannelArray = yield slackbot.web.channels.list()
-  var botGroupArray = yield slackbot.web.groups.list()
-  var botsChannels = botChannelArray.channels.concat(botGroupArray.groups)
-  logging.info(`adding ${botsChannels.length} to slackbots.meta`)
-  slackbot.slackbot.meta.all_channels = botsChannels.map((channel) => {
-    return channel.id
-  })
-  yield slackbot.slackbot.save()
+
+
+
+
+/*
+*
+* Menu Management
+*
+*/
+
+function * cacheMenu(message, original, expandable, data) {
+   yield db.Messages.update({_id: message._id}, {$set: {menus:{ id: message._id, original: {data: original }, expandable: { data: expandable } }, data: data}}).exec()
+}
+
+function * showMenu(message) {
+   var relevantMessage = yield db.Messages.findOne({"thread_id": message.source.channel, "menus.id": message.data.value})
+   var actions = _.get(relevantMessage, 'menus.expandable[0].data') ? _.get(relevantMessage, 'menus.expandable[0].data') : cardTemplate.shopping_home(message._id);
+   var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
+   var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
+   if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
+    var json = message.source.original_message;
+    if (!json.attachments) return;
+    var text =  _.get(relevantMessage,'data.text') ?  _.get(relevantMessage,'data.text') : ''
+    json.attachments[json.attachments.length-1] = {
+        fallback: message.action,
+        callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
+        text: text,
+        actions: actions
+    }
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify(json)
+    });
+    return 
+}
+
+function * hideMenu(message, original, expandable, data) {
+  if (!_.get(message,'data.value')) return
+    var relevantMessage = yield db.Messages.findOne({"thread_id": message.source.channel, "menus.id": message.data.value})
+    var actions = _.get(relevantMessage, 'menus.original[0].data') ? _.get(relevantMessage, 'menus.original[0].data') : cardTemplate.shopping_home_default(message._id);
+    var json =  message.source.original_message;
+    var text =  _.get(relevantMessage,'data.text') ?  _.get(relevantMessage,'data.text') : ''
+    json.attachments[json.attachments.length-1] = {
+        fallback: message.action,
+        callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
+        text: text,
+        actions: actions
+    };
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify(json)
+    });
+  return
 }
 
 module.exports = {
@@ -242,7 +301,10 @@ module.exports = {
   getTeamMembers: getTeamMembers,
   getChannels: getChannels,
   getChannelMembers: getChannelMembers,
+  refreshAllChannels: refreshAllChannels,
   addCartChannel: addCartChannel,
   removeCartChannel: removeCartChannel,
-  refreshAllChannels: refreshAllChannels
+  cacheMenu: cacheMenu,
+  showMenu: showMenu,
+  hideMenu: hideMenu
 };

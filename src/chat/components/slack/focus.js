@@ -1,4 +1,7 @@
 var _ = require('lodash');
+var cardTemplate = require('./card_templates');
+var slackUtils = require('./utils.js')
+
 
 var actionObj = [
     {
@@ -31,6 +34,8 @@ var emojis = {
 };
 
 module.exports = function*(message) {
+
+
     var amazon = JSON.parse(message.amazon);
     var r = amazon[message.focus - 1];
 
@@ -58,21 +63,7 @@ module.exports = function*(message) {
       _.get(attrs, 'Feature[0]') ? ' ○ ' + attrs.Feature.join('\n ○ ') : false
     ].filter(Boolean).join('\n');
 
-    
-
-  return [{
-    text: emojis[message.focus] + ' ' + `<${r.shortened_url}|*${truncate(_.get(r, 'ItemAttributes[0].Title[0]'))}*>`,
-    color: '#45a5f4',
-    mrkdwn_in: ['text'],
-    image_url: img,
-    fallback: 'More Information'
-  }, {
-    color: '#45a5f4',
-    text: description,
-    mrkdwn_in: ['text', 'pretext'],
-    callback_id: 'none',
-    fallback: 'focus',
-    actions: [{
+  var original = [{
       "name": "addcart",
       "text": "Add to Cart",
       "style": "primary",
@@ -91,11 +82,29 @@ module.exports = function*(message) {
       "type": "button",
       "value": message.focus - 1
     }, {
-      "name": "home_btn",
+      "name": "focus.home.expand",
       "text": "🐧",
       "style": "default",
       "type": "button",
-      "value": "home"
+      "value": message._id
     }]
-  }]
+
+  var reply = [{
+    text: emojis[message.focus] + ' ' + `<${r.shortened_url}|*${truncate(_.get(r, 'ItemAttributes[0].Title[0]'))}*>`,
+    color: '#45a5f4',
+    mrkdwn_in: ['text'],
+    image_url: img,
+    fallback: 'More Information'
+  }, {
+    color: '#45a5f4',
+    text: description,
+    mrkdwn_in: ['text', 'pretext'],
+    callback_id: 'none',
+    fallback: 'focus',
+    actions: original
+  }];
+
+  yield slackUtils.cacheMenu(message, cardTemplate.focus_home_default(message), cardTemplate.shopping_home(message._id), {text: description})
+
+  return reply
 }

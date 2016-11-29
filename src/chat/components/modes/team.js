@@ -61,10 +61,13 @@ handlers['start'] = function * (message) {
         value: channel.id
       }
   });
+  var original = cardTemplate.shopping_team_default(message._id);
+  var expandable = cardTemplate.shopping_team(message._id)
   attachments.push({text: 'Channels: ', actions: buttons, callback_id: "none"});
+  var text = "Update cart members? Or type `exit`"
     var endpart = {
-      "text":"Update cart members? Or type `exit`",
-      "actions": cardTemplate.slack_team_default,
+      "text": text,
+      "actions": original,
       "callback_id": 'none',
       // "mrkdwn_in": ["fields","text"],
       // "color":"#49d63a"
@@ -93,9 +96,13 @@ handlers['start'] = function * (message) {
     msg.source.team = team.team_id;
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
     msg.reply = attachments;
+    yield utils.cacheMenu(msg, original, expandable, {text: text})
+
     return [msg];
-    
 }
+
+
+
 
 // function viewCartMembers(convo,callback,flag){
 

@@ -62,10 +62,8 @@ function simple_action_handler (action) {
       return 'cafe_btn';
     case 'shopping_btn':
       return 'shopping_btn';
-    case 'home_btn':
-      return 'home_btn';
-    case 'back_btn':
-      return 'back_btn';
+    case 'shopping_home':
+      return 'shopping_home';
     case 'help_btn':
       return 'help_btn';
     case 'view_cart_btn':
@@ -135,27 +133,14 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.team = message.source.team.id;
       message.source.user = message.source.user.id;
       message.source.channel = message.source.channel.id;
-      if (simple_command == 'home_btn') {
-        var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
-        var last_message = history[0];
-        var mode = _.get(last_message,'mode');
-        var actions = mode == 'shopping' ? cardTemplate.slack_home : mode == 'settings' ? cardTemplate.slack_settings :  mode == 'team' ? cardTemplate.slack_team : cardTemplate.slack_home;
-        var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
-        var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
-        if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
-        var json = parsedIn.original_message;
 
-        json.attachments[json.attachments.length-1] = {
-            fallback: 'Search Results',
-            callback_id: 'search_results',
-            actions: actions
-        }
-        request({
-          method: 'POST',
-          uri: message.source.response_url,
-          body: JSON.stringify(json)
-        });
-        return res.sendStatus(200)
+      if (simple_command == 'shopping.home') {
+          message.mode = 'shopping_home'
+          message.action = 'home'
+          message.text = ''
+          message.save().then(() => {
+            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          })
       }
       else if (simple_command == 'cafe_btn') {
           message.mode = 'food'
@@ -172,23 +157,6 @@ app.post('/slackaction', next(function * (req, res) {
           message.save().then(() => {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
-      }
-      else if (simple_command == 'back_btn') {
-        var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
-        var last_message = history[0];
-        var actions = _.get(last_message,'mode') == 'shopping' ? cardTemplate.slack_home_default : cardTemplate.slack_settings_default;
-        var json = parsedIn.original_message;
-        json.attachments[json.attachments.length-1] = {
-            fallback: 'Search Results',
-            callback_id: 'search_results',
-            actions: actions
-        };
-        request({
-          method: 'POST',
-          uri: message.source.response_url,
-          body: JSON.stringify(json)
-        })
-        return res.sendStatus(200)
       }
       else if (simple_command == 'help_btn') {
           message.mode = 'banter'
@@ -288,6 +256,7 @@ app.post('/slackaction', next(function * (req, res) {
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
         
       }
+
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       });
@@ -307,6 +276,8 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.team = message.source.team.id
       message.source.user = message.source.user.id
       message.source.channel = message.source.channel.id
+
+
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       })
