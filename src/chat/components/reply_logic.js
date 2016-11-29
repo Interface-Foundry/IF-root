@@ -383,7 +383,8 @@ queue.topic('incoming').subscribe(incoming => {
         logging.info('👽 passing to nlp: ', message.text)
         if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
           replies = yield execute(message)
-        } else if ((!message.execute || message.execute.length <= 1) && message.mode === 'shopping') {
+        } else if ((!message.execute || message.execute.length <= 1)&& !message.action && message.mode === 'shopping' ) {
+          kip.debug(`SKIPPING NLP: \n ${message}`);
           message.mode = 'shopping'
           message.action = 'initial'
           message.execute.push({
