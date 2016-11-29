@@ -39,8 +39,19 @@
       </div>
       <div id="content" ng-controller="menuController">
         <!-- insert the page content here -->
-        <h1>Type of Food</h1>
-        <p>{{menu}}</p>
+        <!-- <h1>Type of Food</h1> -->
+        <div ng-repeat="item in menu" class="menu_item">
+          <h2>
+            <span class="item_name">{{item.name}}</span>
+            <span class="price">{{item.price}}</span> </h2>
+          <h3 class="item_description">{{item.description}}</h3>
+          <div ng-repeat="child in item.children">
+            <h4>{{child.name}}</h4>
+            <!-- <div ng-if="console.log(child.type); child.type == 'option group'"> -->
+              <h5 ng-repeat="option in child.children">{{option.name}}</h5>
+            <!-- </div> -->
+          </div>
+        </div>
         <p>foodings, in some sort of list, with prices and add to cart buttons</p>
       </div>
     </div>
