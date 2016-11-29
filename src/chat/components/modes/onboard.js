@@ -519,19 +519,31 @@ handlers['confirm_reminder'] = function*(message, data) {
     'Ok! I won\'t set any reminders.';
   messageText += ' Thanks and have a great day :)';
   var attachments = [{
-    text: '',
-    mrkdwn_in: ['text'],
-    fallback: 'Onboard',
-    actions: cardTemplate.slack_onboard_default,
-    callback_id: 'none'
+    image_url: "http://tidepools.co/kip/kip_menu.png",
+    text: 'Click a mode to start using Kip',
+    color: '#3AA3E3',
+    callback_id: 'wow such home',
+    actions: [{
+      name: 'passthrough',
+      value: 'food',
+      text: 'Kip Café',
+      type: 'button'
+    }, {
+      name: 'passthrough',
+      value: 'shopping',
+      text: 'Kip Store',
+      type: 'button'
+    }]
   }];
-  var msg = message;
-  msg.mode = 'onboard'
-  msg.action = 'home'
-  msg.text = messageText
-  msg.source.team = team_id;
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  msg.reply = attachments;
+
+  var msg = {
+    text: messageText,
+    action: 'home',
+    mode: 'onboard',
+    source: message.source,
+    origin: message.origin,
+    reply: attachments
+  }
 
   if (msInFuture > 0) {
     var channelMembers = [];
@@ -567,11 +579,100 @@ handlers['confirm_reminder'] = function*(message, data) {
       action: 'switch.silent',
       reply: cronAttachments
     }
-    createCronJob(channelMembers, cronMsg, team, new Date(msInFuture + now.getTime()));
+    var collectMsg = yield createCartMsg(message);
+    createCronJob(
+      channelMembers,
+      cronMsg,
+      team,
+      new Date(msInFuture + now.getTime()),
+      //display the cart to the admin an hour after the reminder
+      (now) => createCronJob([currentUser], collectMsg, team, new Date((ONE_DAY / 24) + now.getTime()))
+    );
   }
   return [msg];
 }
 
+var createCartMsg = function*(message) {
+  var cart_id = message.source.team,
+    cart = yield kipcart.getCart(cart_id),
+    attachments = [{
+      text: 'Ready to check out? Here\'s your team cart!',
+      color: '#A368F0'
+    }];
+  attachments.push({
+    text: '',
+    color: '#45a5f4',
+    image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
+  });
+  for (var i = 0; i < cart.aggregate_items.length; i++) {
+    var item = cart.aggregate_items[i];
+    // the slack message for just this item in the cart list
+    var item_message = {
+        mrkdwn_in: ['text', 'pretext'],
+        color: '#45a5f4',
+        thumb_url: item.image
+      }
+      // multiple people could have added an item to the cart, so construct a string appropriately
+    var userString = item.added_by.map(function(u) {
+      return '<@' + u + '>';
+    }).join(', ');
+    var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
+    // make the text for this item's message
+    item_message.text = [
+      `*${i + 1}.* ` + `<${link}|${item.title}>`,
+      `*Price:* ${item.price} each`,
+      `*Added by:* ${userString}`,
+      `*Quantity:* ${item.quantity}`,
+
+    ].filter(Boolean).join('\n');
+    // add the item actions if needed
+    item_message.callback_id = item._id.toString();
+    var buttons = [{
+      "name": "additem",
+      "text": "+",
+      "style": "default",
+      "type": "button",
+      "value": "add"
+    }, {
+      "name": "removeitem",
+      "text": "—",
+      "style": "default",
+      "type": "button",
+      "value": "remove"
+    }];
+
+    if (item.quantity > 1) {
+      buttons.push({
+        name: "removeall",
+        text: 'Remove All',
+        style: 'default',
+        type: 'button',
+        value: 'removeall'
+      })
+    }
+    item_message.actions = buttons;
+    attachments.push(item_message);
+  }
+
+  var summaryText = `*Team Cart Summary*
+   *Total:* ${cart.total}`;
+  summaryText += `
+   <${cart.link}|*➤ Click Here to Checkout*>`;
+  attachments.push({
+    text: summaryText,
+    mrkdwn_in: ['text', 'pretext'],
+    color: '#49d63a'
+  })
+
+  var msg = message;
+  msg.mode = 'shopping'
+  msg.action = 'switch.silent';
+  msg.text = ''
+  msg.source.team = message.source.team;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.reply = attachments;
+  return msg;
+}
 
 /**
  * S5
@@ -872,19 +973,18 @@ handlers['more_info'] = function * (message, data) {
    return [message];
 
 }
-
-const createCronJob = function(people, msg, team, date) {
+const createCronJob = function(people, msg, team, date, onRun) {
   kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
   new cron.CronJob(date, function() {
     people.map(function(a) {
-       var newMessage= new db.Message({
+      var newMessage = new db.Message({
         incoming: false,
         thread_id: a.dm,
         resolved: true,
         user_id: a.id,
         origin: 'slack',
         text: '',
-        source:  {
+        source: {
           team: team.team_id,
           channel: a.dm,
           thread_id: a.dm,
@@ -898,10 +998,14 @@ const createCronJob = function(people, msg, team, date) {
       })
       co(publish(newMessage));
     });
+    this.stop();
+    if (onRun) { // run another function
+      kip.debug('RUNNING SECOND CRON FUNC')
+      onRun(new Date());
+    }
   },
   function() {
     kip.debug('just finished the scheduled update thing for team ' + team.team_id + ' ' + team.team_name);
-    this.stop();
   }, true, team.meta.weekly_status_timezone);
 };
 // based on the current time, determine a later time
