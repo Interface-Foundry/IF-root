@@ -26,12 +26,11 @@ handlers['food.admin.order.checkout.address_2'] = function * (message) {
       'callback_id': `food.admin.order.checkout.address_2`,
       'attachment_type': `default`,
       'actions': [{
-        'name': `food.admin.order.checkout.address_2`,
+        'name': `food.admin.order.checkout.confirm`,
         'text': `None`,
         'type': `button`,
         'value': `none`
-      }, 
-      {
+      }, {
         'name': 'food.feedback.new',
         'text': '⇲ Send feedback',
         'type': 'button',
