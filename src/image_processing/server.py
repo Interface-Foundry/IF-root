@@ -55,12 +55,26 @@ def get_gcloud():
 
 
 def upload_to_gcloud(image, gcloud_bucket=get_gcloud()):
+    start = time.time()
+
     tmp_img = io.BytesIO()
     image.created_image.save(tmp_img, 'PNG', quality=90)
+    saved = time.time()
+
     object_upload = gcloud_bucket.blob(
         os.path.join(image.origin, image.uniq_fn))
+    blobbed = time.time()
+
     object_upload.upload_from_string(
         tmp_img.getvalue(), content_type='image/png')
+    uploaded = time.time()
+
+    if time.time() - start > 1:
+        logging.info('slow upload. save: %.2fs, blob create: %.2fs, string upload %2fs',
+            saved-start, blobbed-saved, uploaded-blobed)
+
+    # public_url is a property func that appears to just be a string-format
+    # call. Probably no value in instrumenting.
     return object_upload.public_url
 
 
@@ -80,12 +94,9 @@ def main():
                     font_dict=font_dict)
     t2 = time.time()
     gc_url = upload_to_gcloud(pic, gcloud_bucket)
-    logging.info('uploaded to gcloud @ ' + gc_url)
     t3 = time.time()
-    logging.info('time to make img %s, ' +
-                 'time to upload image %s, ' +
-                 'total time: %s',
-                 str(t2 - t1), str(t3 - t2), str(t3 - t1))
+    logging.info('request complete. make: %.2fs, upload: %.2fs, total: %.2fs to %s',
+                 t2 - t1, t3 - t2, t3 - t1, gc_url)
     return gc_url
 
 # load connections to gcloud and aws
