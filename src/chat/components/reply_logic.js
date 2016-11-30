@@ -326,7 +326,7 @@ queue.topic('incoming').subscribe(incoming => {
     debugger;
 
     //MODE SWITCHER
-    switch(message.mode) {
+    switch (message.mode) {
       case 'onboarding':
         if (message.origin === 'slack') {
           var replies = yield onboarding.handle(message)
@@ -344,17 +344,17 @@ queue.topic('incoming').subscribe(incoming => {
             winston.debug('Didnt understand, please choose a country thx')
           }
         }
-      break;
-     case 'onboard':
-       if (message.origin === 'slack') {
+        break;
+      case 'onboard':
+        if (message.origin === 'slack') {
           var replies = yield onboard.handle(message)
-        } 
-      break;
+        }
+        break;
       case 'onboard_shopping':
         if (message.origin === 'slack') {
           var replies = yield onboardShopping.handle(message)
         }
-      break;
+        break;
       case 'shopping_button':
         if (message.origin === 'slack') {
           var data = _.split(message.data.value, '.');
@@ -369,49 +369,59 @@ queue.topic('incoming').subscribe(incoming => {
       case 'settings':
         if (message.origin === 'slack') {
           var replies = yield settings.handle(message);
-       }
+        }
         break;
-     case 'team':
-       if (message.origin === 'slack') {
-        var replies = yield team.handle(message);
-       }
+      case 'team':
+        if (message.origin === 'slack') {
+          var replies = yield team.handle(message);
+        }
         break;
-     case 'food':
+      case 'food':
         yield food(message)
         return incoming.ack()
-     case 'address':
+      case 'address':
         return
         break;
-    default:
+      default:
         logging.debug('DEFAULT SHOPPING MODE')
         // try for simple reply
         timer.tic('getting simple response')
         var replies = yield simple_response(message)
         timer.tic('got simple response')
-        kip.debug('simple replies'.cyan, replies)
+      kip.debug('simple replies'.cyan, replies)
         // not a simple reply, do NLP
-        if (!replies || replies.length === 0) {
-          timer.tic('getting nlp response')
-          logging.info('👽 passing to nlp: ', message.text)
-          if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
-            replies = yield execute(message)
-          } else {
-            replies = yield nlp_response(message)
-            kip.debug('+++ NLPRESPONSE ' + replies)
-          }
-          timer.tic('got nlp response')
-          kip.debug('nlp replies'.cyan,
-            replies.map(function * (r) {
-              return {
-                text: r.text,
-                execute: r.execute
-              }
-            }))
+      if (!replies || replies.length === 0) {
+        timer.tic('getting nlp response')
+        logging.info('👽 passing to nlp: ', message.text)
+        if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
+          replies = yield execute(message)
+        } else if ((!message.execute || message.execute.length <= 1)&& !message.action && message.mode === 'shopping' ) {
+          kip.debug(`SKIPPING NLP: \n ${message}`);
+          message.mode = 'shopping'
+          message.action = 'initial'
+          message.execute.push({
+            mode: 'shopping',
+            action: 'initial'
+          });
+          replies = yield execute(message);
+        } else {
+          kip.debug(`PRENLP message: \n ${JSON.stringify(message, null, 2)}`)
+          replies = yield nlp_response(message)
+          kip.debug('+++ NLPRESPONSE ' + replies)
         }
-        if (!replies || replies.length === 0) {
-          kip.error('Could not understand message ' + message._id)
-          replies = [default_reply(message)]
-        }
+        timer.tic('got nlp response')
+        kip.debug('nlp replies'.cyan,
+          replies.map(function*(r) {
+            return {
+              text: r.text,
+              execute: r.execute
+            }
+          }))
+      }
+      if (!replies || replies.length === 0) {
+        kip.error('Could not understand message ' + message._id)
+        replies = [default_reply(message)]
+      }
     }
     if (replies) kip.debug('num replies', replies.length)
     timer.tic('saving message', message)
@@ -591,7 +601,7 @@ function * nlp_response (message) {
 
 // do the things
 function execute (message) {
-  // kip.debug('exec', message.execute)
+  kip.debug('exec', message.execute)
   return co(function * () {
     message._timer.tic('getting messages')
     var messages = yield message.execute.reduce((messages, exec) => {
