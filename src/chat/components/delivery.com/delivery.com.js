@@ -903,5 +903,3 @@ module.exports = function (replyChannel, allHandlers) {
 module.exports = {
   handleMessage: handleMessage
 }
-
-logging.info('hey!!!', _.keys(handlers))
