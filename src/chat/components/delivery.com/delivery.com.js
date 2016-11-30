@@ -216,12 +216,7 @@ handlers['food.admin.select_address'] = function * (message) {
 
     }
   })
-  addressButtons.push({
-    name: 'passthrough',
-    text: 'New +',
-    type: 'button',
-    value: 'food.settings.address.new'
-  })
+
   addressButtons = _.chunk(addressButtons, 5)
   var msg_json = {
     'attachments':
@@ -254,14 +249,17 @@ handlers['food.admin.select_address'] = function * (message) {
       'text': '',
       'fallback': 'You are unable to remove an address',
       'callback_id': 'remove_address',
-      'color': '#3AA3E3',
       'attachment_type': 'default',
       'actions': [{
         'name': 'passthrough',
-        'text': 'Remove An Address',
+        'text': 'New +',
+        'type': 'button',
+        'value': 'food.settings.address.new'
+      }, {
+        'name': 'passthrough',
+        'text': 'Edit',
         'type': 'button',
         'value': 'food.settings.address.remove_select',
-        'style': 'danger'
       }]
     })
   }
@@ -275,23 +273,17 @@ handlers['food.settings.address.remove_select'] = function * (message) {
   var addressButtons = _.get(team, 'meta.locations', []).map(a => {
     return {
       name: 'passthrough',
-      text: a.address_1,
+      text: `× ${a.address_1}`,
       type: 'button',
       value: JSON.stringify(a)
 
     }
   })
-  addressButtons.push({
-    name: 'none',
-    text: 'None, go back',
-    type: 'button',
-    value: 'food.admin.select_address'
-  })
 
   var msg_json = {
     title: '',
-    text: 'Which address should we remove?',
-    attachments: _.chunk(addressButtons,5).map(group => {
+    text: 'Which address should I remove?',
+    attachments: _.chunk(addressButtons, 5).map(group => {
       return {
         'text': '',
         'fallback': 'You are unable to remove an address',
@@ -303,6 +295,18 @@ handlers['food.settings.address.remove_select'] = function * (message) {
     })
   }
 
+  msg_json.attachments.push({
+    'text': '',
+    'fallback': 'You are unable to go back',
+    'callback_id': 'back_remove_address',
+    'attachment_type': 'default',
+    'actions': [{
+      'name': 'passthrough',
+      'text': 'None, go back',
+      'type': 'button',
+      'value': 'food.admin.select_address'
+    }]
+  })
   replyChannel.sendReplace(message, 'food.settings.address.remove', {type: message.origin, data: msg_json})
 }
 
