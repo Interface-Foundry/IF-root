@@ -1,8 +1,14 @@
-var configFiles = require('./config')
 var winston = require('winston')
 var MongoDB = require('winston-mongodb').MongoDB
 
+var configFiles = require('./config')
+
 var logging
+
+// slight fix for mongodb stuff to work with config files
+if (configFiles.mongodb.url.indexOf('mongodb://') < 0) {
+  configFiles.mongodb.url = `mongodb://` + configFiles.mongodb.url
+}
 
 var config = {
   levels: {
