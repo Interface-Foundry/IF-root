@@ -3,12 +3,10 @@ require('kip')
 var co = require('co')
 var _ = require('lodash')
 var sleep = require('co-sleep')
-var request = require('request-promise')
 
 var api = require('./api-wrapper')
 var queue = require('../queue-mongo')
 var utils = require('./utils')
-
 
 var team_utils = require('./team_utils.js')
 var slackUtils = require('../slack/utils.js')
@@ -24,13 +22,6 @@ var feedbackTracker = {}
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other methods
-
-// allow mongoose ._id to be used as button things
-String.prototype.toObjectId = function () {
-  var ObjectId = (require('mongoose').Types.ObjectId)
-  return new ObjectId(this.toString())
-}
-
 
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
@@ -81,7 +72,7 @@ if (!module.parent) {
   })
 }
 
-function * handleMessage(message) {
+function * handleMessage (message) {
   // parse the action value objects if they exist
   try {
     message.data.value = JSON.parse(message.data.value)
@@ -134,6 +125,7 @@ function getRoute (message) {
 var handlers = {}
 require('./menu_handlers')(replyChannel, handlers)
 require('./cart_handlers')(replyChannel, handlers)
+require('./handlers_user_selection')(replyChannel, handlers)
 require('./handlers_votes')(replyChannel, handlers)
 require('./handlers_checkout')(replyChannel, handlers)
 require('./team_handlers')(replyChannel, handlers)
@@ -206,7 +198,6 @@ handlers['food.begin'] = function * (message) {
   replyChannel.send(message, 'food.admin.select_address', {type: message.origin, data: msg_json})
   yield handlers['food.admin.select_address'](message)
 }
-
 
 handlers['food.admin.select_address'] = function * (message) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
@@ -618,9 +609,10 @@ handlers['food.delivery_or_pickup'] = function * (message) {
 
   // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
   var merchantIds = foodSession.merchants.map(m => m.id)
-  var lastOrdered = yield db.Deliveries.find({team_id: message.source.team, chosen_restaurant: {$exists: true}})
+  var lastOrdered = yield db.Delivery.find({team_id: message.source.team, chosen_restaurant: {$exists: true}})
     .sort({_id: -1})
     .select('chosen_restaurant')
+    .limit(10)
     .exec()
 
   lastOrdered = lastOrdered.filter(message => merchantIds.includes(message.chosen_restaurant.id))
@@ -663,7 +655,7 @@ handlers['food.delivery_or_pickup'] = function * (message) {
         'text': '✓ Start New Poll',
         'style': 'primary',
         'type': 'button',
-        'value': 'food.poll.confirm_send'
+        'value': 'food.poll.confirm_send_initial'
       },
       {
         'name': 'passthrough',
@@ -820,7 +812,6 @@ handlers['food.restaurants.list'] = function * (message) {
   replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
 }
 
-
 //
 // Return some restaurants, button value is the index offset
 //
@@ -901,166 +892,16 @@ handlers['food.restaurants.list.recent'] = function * (message) {
   replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg})
 }
 
-handlers['food.poll.confirm_send'] = function * (message) {
-  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
-  var locationIndex = _.get(team,'meta.locations[0]') && _.get(team,'meta.locations[0]').length > 0 ? _.get(team,'meta.locations[0]').length - 1 : 0;
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
-  var textWithChannelMaybe = _.get(foodSession, 'convo_initiater.chosen_channel_name') ? `Send poll for cuisine to <#${foodSession.convo_initiater.chosen_channel_id}|${foodSession.convo_initiater.chosen_channel_name}> at \`${addr}\`?` : `Send poll for cuisine to the team members at \`${addr}\`?`
-  var msg_json = {
-    'attachments': [
-      {
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': textWithChannelMaybe,
-        'fallback': 'Send poll for cuisine to the team members',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'passthrough',
-            'text': 'Confirm',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'food.user.poll'
-          },
-          {
-            'name': 'food.admin.team.members',
-            'text': 'View Team Members',
-            'type': 'button',
-            'value': 'team.members'
-          },
-          {
-            'name': 'food.admin.select_team_members',
-            'text': 'Use a Channel',
-            'type': 'button',
-            'value': 'select_team_members'
-          },
-          {
-            'name': 'passthrough',
-            'text': '× Cancel',
-            'type': 'button',
-            'value': 'food.exit.confirm',
-            'confirm': {
-              'title': 'Are you sure?',
-              'text': "Are you sure you don't want to order food?",
-              'ok_text': 'Yes',
-              'dismiss_text': 'No'
-            }
-          }
-        ]
-      }
-    ]
-  }
+module.exports = function (replyChannel, allHandlers) {
+  $replyChannel = replyChannel
+  $allHandlers = allHandlers
 
-  replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
-}
-
-// allow specific channel to be used
-handlers['food.admin.select_team_members'] = function * (message) {
-  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-
-  var buttons1 = [{
-    name: `Everyone`,
-    id: `everyone`
-  }, {
-    name: `Just Me`,
-    id: `just_me`
-  }].map((channel) => {
-    return {
-      'text': `${channel.name}`,
-      'value': channel.id,
-      'name': `food.admin.select_channel`,
-      'type': `button`
-    }
-  })
-
-  var buttons2 = slackbot.meta.all_channels.map((channel) => {
-    return {
-      'text': `#${channel.name}`,
-      'value': channel.id,
-      'name': `food.admin.select_channel`,
-      'type': `button`
-    }
-  })
-
-  var groupedButtons = _.chunk(buttons1.concat(buttons2), 5)
-  var msg_json = {
-    title: `Which team members are you ordering food for?`,
-    attachments: groupedButtons.map((buttonGroup) => {
-      return {
-        'text': ``,
-        'fallback': 'Cant select a channel at this time',
-        'callback_id': 'channel_select',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': buttonGroup
-      }
-    })
-  }
-
-  replyChannel.sendReplace(message, 'food.admin.select_channel', {type: message.origin, data: msg_json})
-}
-
-handlers['food.admin.select_channel'] = function * (message) {
-  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  if (message.data.value.toLowerCase() === 'everyone') {
-    foodSession.team_members = yield db.Chatusers.find({
-      team_id: message.source.team,
-      is_bot: {$ne: true},
-      deleted: {$ne: true},
-      id: {$ne: 'USLACKBOT'}}).exec()
-    foodSession.convo_initiater.chosen_channel_id = null
-    foodSession.convo_initiater.chosen_channel_name = null
-  } else if (message.data.value.toLowerCase() === 'just_me') {
-    //
-    foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
-    foodSession.convo_initiater.chosen_channel_id = null
-    foodSession.convo_initiater.chosen_channel_name = null
-  } else {
-    //
-    try {
-      // request from basic channel api endpoint
-      var resp = yield request({
-        uri: `https://slack.com/api/channels.info?token=${slackbot.bot.bot_access_token}&channel=${message.data.value}`,
-        json: true
-      })
-
-      /*
-      slack sends us response but its a group not a channel and we aren't
-      differentiating them in slackbots so hacky way to try group if channel fails
-      */
-      if (_.get(resp, 'error') === 'channel_not_found') {
-        // try request from groups api endpoint
-        logging.info('trying slack api for groups.info')
-        resp = yield request({
-          uri: `https://slack.com/api/groups.info?token=${slackbot.bot.bot_access_token}&channel=${message.data.value}`,
-          json: true
-        })
-        resp = resp.group
-      } else {
-        resp = resp.channel
-      }
-      logging.debug('got resp back for select_channel members', resp)
-      foodSession.team_members = foodSession.team_members.filter(user => {
-        return _.includes(resp.members, user.id)
-      })
-
-      foodSession.convo_initiater.chosen_channel_id = message.data.value
-      foodSession.convo_initiater.chosen_channel_name = resp.name
-      logging.info('filtered down members to these members: ', foodSession.team_members)
-    } catch (err) {
-      replyChannel.send(message, 'food.admin.select_channel', {type: message.origin, data: {text: 'hmm that didn\'t seem to work'}})
-      logging.error('error getting members', err)
-    }
-  }
-  yield foodSession.save()
-  yield handlers['food.poll.confirm_send'](message)
+  // merge in our own handlers
+  _.merge($allHandlers, handlers)
 }
 
 module.exports = {
   handleMessage: handleMessage
 }
+
+logging.info('hey!!!', _.keys(handlers))

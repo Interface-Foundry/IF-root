@@ -263,7 +263,8 @@ function * getAllChannels (slackbot) {
   botChannelArray = botChannelArray.channels.map(channel => {
     return {
       id: channel.id,
-      name: channel.name
+      name: channel.name,
+      is_channel: true
     }
   })
 
@@ -272,7 +273,7 @@ function * getAllChannels (slackbot) {
     return {
       id: channel.id,
       name: channel.name,
-      group: true
+      is_channel: false
     }
   })
   var allChannels = botChannelArray.concat(botGroupArray)
