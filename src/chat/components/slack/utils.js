@@ -267,7 +267,6 @@ function * getAllChannels (slackbot) {
       is_channel: true
     }
   })
-
   var botGroupArray = yield slackbot.web.groups.list()
   botGroupArray = botGroupArray.groups.map(channel => {
     return {
@@ -276,6 +275,8 @@ function * getAllChannels (slackbot) {
       is_channel: false
     }
   })
+  logging.debug('botChannelArray', botChannelArray)
+  logging.debug('botGroupArray', botGroupArray)
   var allChannels = botChannelArray.concat(botGroupArray)
   logging.info(`adding ${allChannels.length} to slackbots.meta`)
   slackbot.slackbot.meta.all_channels = allChannels
