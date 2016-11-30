@@ -73,13 +73,14 @@ function flattenMenu (data) {
   function flatten (node, out) {
     if (node.type === 'menu' && _.get(node, 'schedule[0]')) {
       var isAvailable = false
-      node.schedule.map(id => _.find(schedules, {id: id})).map(t => {
+      node.schedule.map(id => _.find(schedules, {id: id}))[0].times.map(t => {
         if (now > new Date(t.from) && now < new Date(t.to)) {
           isAvailable = true
         }
       })
 
       if (!isAvailable) {
+        logging.debug(node.name.cyan, 'is not available'.red)
         return
       }
     }
