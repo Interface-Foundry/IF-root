@@ -150,6 +150,7 @@ function * initiateDeliverySession (session) {
     active: true,
     team_id: session.source.team,
     team_members: teamMembers,
+    all_members: teamMembers,
     fulfillment_method: 'delivery', // set by default and change to pickup if it changes
     confirmed_orders: [],
     convo_initiater: {

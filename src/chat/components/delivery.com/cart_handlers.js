@@ -96,7 +96,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
         'style': 'primary'
       },
       {
-        'name': 'food.menu.quick_picks',
+        'name': 'food.menu.quickpicks',
         'text': '< Back',
         'type': 'button',
         'value': ''
@@ -343,16 +343,25 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
               `*Taxes:* ${foodSession.order.tax.$}\n` +
               `*Tip:* ${foodSession.tipAmount.$}\n` +
-              `*Team Cart Total:* ${foodSession.order.total.$}`,
+              `*Team Cart:* ${foodSession.order.total.$}\n` +
+              `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
         fallback: 'Confirm Choice',
-        callback_id: 'foodConfrimOrder_callbackID',
+        callback_id: 'admin_order_confirm',
         color: '#49d63a',
         attachment_type: 'default',
-        mrkdwn_in: ['text']
+        mrkdwn_in: ['text'],
+        footer: 'Powered by Delivery.com',
+        footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
       }
 
       if (totalPrice < foodSession.chosen_restaurant.minimum) {
         finalAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *_\$${foodSession.chosen_restaurant.minimum}_*`
+        finalAttachment.actions = [{
+          'name': 'food.feedback.new',
+          'text': '⇲ Send feedback',
+          'type': 'button',
+          'value': 'food.feedback.new'
+        }]
       } else {
         finalAttachment.actions = [{
           'name': `food.admin.order.checkout.confirm`,
@@ -360,6 +369,11 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           'type': `button`,
           'style': `primary`,
           'value': `checkout`
+        }, {
+          'name': 'food.feedback.new',
+          'text': '⇲ Send feedback',
+          'type': 'button',
+          'value': 'food.feedback.new'
         }]
       }
       // ------------------------------------

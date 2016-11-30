@@ -11,7 +11,7 @@ var $allHandlers // this is how you can access handlers from other files
 // exports
 var handlers = {}
 
-handlers['food.menu.quick_picks'] = function * (message) {
+handlers['food.menu.quickpicks'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   var previouslyOrderedItemIds = []
@@ -113,7 +113,6 @@ handlers['food.menu.quick_picks'] = function * (message) {
     }
 
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
-
     return attachment
   })
 
@@ -127,23 +126,21 @@ handlers['food.menu.quick_picks'] = function * (message) {
       }].concat(menuItems).concat([{
       'text': '',
       'fallback': 'Unable to load menu item',
-      'callback_id': 'wopr_game',
+      'callback_id': 'menu_quickpicks',
       'color': '#3AA3E3',
       'attachment_type': 'default',
-      'actions': [
-        // {
-        //   'name': 'chess',
-        //   'text': 'Category',
-        //   'type': 'button',
-        //   'value': 'chess'
-        // }
-      ]
+      'actions': [{
+        name: 'food.feedback.new',
+        text: '⇲ Send feedback',
+        type: 'button',
+        value: 'food.feedback.new'
+      }]
     }])
   }
 
   if (sortedMenu.length >= index + 4) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
-      'name': 'food.menu.quick_picks',
+      'name': 'food.menu.quickpicks',
       'text': keyword ? `More "${keyword}" >` : 'More >',
       'type': 'button',
       'value': {
@@ -156,7 +153,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
   // add the Back button to clear the keyword
   if (keyword) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.push({
-      name: 'food.menu.quick_picks',
+      name: 'food.menu.quickpicks',
       type: 'button',
       text: '× Clear'
     })
@@ -164,7 +161,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
 
   if (index > 0) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
-      name: 'food.menu.quick_picks',
+      name: 'food.menu.quickpicks',
       text: '<',
       type: 'button',
       value: {
@@ -186,7 +183,7 @@ handlers['food.menu.search'] = function * (message) {
     }
   }
 
-  return yield handlers['food.menu.quick_picks'](message)
+  return yield handlers['food.menu.quickpicks'](message)
 }
 
 //
@@ -275,7 +272,7 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   if (userItem.item.item_qty === 1) {
     // if it's zero here, go back to the menu view
     message.data = {}
-    return yield handlers['food.menu.quick_picks'](message)
+    return yield handlers['food.menu.quickpicks'](message)
   }
   userItem.item.item_qty--
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
@@ -292,6 +289,7 @@ handlers['food.item.instructions'] = function * (message) {
     text: `Add Special Instructions for *${item.name}*`,
     attachments: [{
       text: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
+      fallback: 'Unable to add special instructions',
       mrkdwn_in: ['text']
     }]
   }

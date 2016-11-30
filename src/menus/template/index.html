@@ -48,10 +48,12 @@
           <div ng-repeat="child in item.children">
             <h4>{{child.name}}</h4>
             <div ng-show="child.max_selection == 1">
-              <label ng-repeat="option in child.children">
-                <input type="radio" ng-model="model[option]" value="option"/>
-                {{option.name}}
-              </label>
+              <div ng-repeat="option in child.children">
+                <label>
+                  <input name="child" type="radio" ng-model="test[option.id]" value=true/>
+                  {{option.name}} <!-- option.name -->
+                </label>
+              </div>
               <!-- <p ng-repeat="option in child.children">{{option.name}}</p> -->
             </div>
             <div ng-hide="child.max_selection == 1">

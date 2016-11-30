@@ -21,8 +21,8 @@ handlers['food.admin.team.members'] = function * (message) {
   }
 
   if (foodSession.team_members.length === 0) {
-    $replyChannel.sendReplace(message, 'food.begin', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
-    return yield $allHandlers['food.begin'](message)
+    $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
+    return yield $allHandlers['food.admin.select_address'](message)
   }
 
   var attachments = foodSession.team_members.map(user => {
@@ -82,10 +82,18 @@ handlers['food.admin.team.members'] = function * (message) {
   })
 
   buttons.actions.push({
+    name: 'passthrough',
+    value: 'food.poll.confirm_send',
+    text: '< Back',
+    type: 'button'
+  })
+
+  buttons.actions.push({
     name: 'food.exit.confirm',
     text: '× Cancel',
     type: 'button',
-    'confirm': {
+    style: 'danger',
+    confirm: {
       'title': 'Are you sure?',
       'text': "Are you sure you don't want to order food?",
       'ok_text': 'Yes',
@@ -100,8 +108,7 @@ handlers['food.admin.team.members'] = function * (message) {
     attachments: attachments
   }
 
-  $replyChannel.sendReplace(message, 'food.begin', {type: message.origin, data: msg_json})
-
+  $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: msg_json})
 }
 
 

@@ -80,6 +80,22 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
   if ((_.get(req, 'body.kip_token') === kipSecret) && _.get(req, 'body.order.total')) {
     var body = req.body
 
+    //logging.info('BODY INCOMING ',body)
+
+    //COUPONS
+    if (body.team_id == 'T2X0BLHGX'){ //alyx testing team
+      body.order.coupon = 0.5 //in percentage off
+    }
+    else if (body.team_id == 'T02PN3B25'){ //kipsearch team
+      body.order.coupon = 0.99 //in percentage off
+    }
+    else if (body.team_id == 'T02QUPKHW'){ //quibb team
+      body.order.coupon = 0.99 //in percentage off
+    }
+    else if (body.team_id == 'T1198BQV8'){ //message.io team
+      body.order.coupon = 0.99 //in percentage off
+    }
+
     // new payment
     var payment = new Payment({
       session_token: crypto.randomBytes(256).toString('hex'), // gen key inside object
@@ -139,6 +155,12 @@ app.post('/session', jsonParser, (req, res) => co(function * () {
     var t = req.body.session_token.replace(/[^\w\s]/gi, '') // clean special char
     try {
       var pay = yield Payment.findOne({session_token: t})
+
+      //check for coupon
+      if (pay.order && pay.order.order && pay.order.order.coupon){
+        pay.order.order.total = pay_utils.calCoupon(pay.order.order.total, pay.order.order.coupon)
+      }
+
       res.send(JSON.stringify(pay))
     } catch (err) {
       logging.error('catching error in session ', err)
@@ -167,12 +189,21 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
         source: token,
         description: 'Delivery.com & Kip: ' + payment.order.chosen_restaurant.name
       })
+
+      //check for coupon
+      if (payment.order && payment.order.order && payment.order.order.coupon){
+        var total = pay_utils.calCoupon(payment.order.order.total, payment.order.order.coupon)
+        total = Math.round(total)
+      }else {
+        var total = Math.round(payment.order.order.total)
+      }
+
       var charge = yield stripe.charges.create({
-        amount: Math.round(payment.order.order.total),
+        amount: total,
         currency: 'usd',
         customer: customer.id
       })
-      profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(payment.order.order.total / 100.0).$}`)
+      profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(total / 100.0).$}`)
     } catch (err) {
       logging.error('had an error creating customer and card', err)
     }
@@ -188,6 +219,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
           throw new Error('you need to run kip-pay with NODE_ENV')
         } else if (process.env.NODE_ENV !== 'canary') {
           payment.delivery_response = 'test_success'
+          // payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
           yield payment.save()
         } else if (process.env.NODE_ENV === 'canary') {
           payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
@@ -240,15 +272,24 @@ function * chargeById (payment) {
   // make a charge by saved card ID
   try {
     profOak.say(`creating stripe charge for ${payment.order.saved_card.saved_card}`)
-    logging.info('creating charge by ID')
+    logging.info('creating charge by ID ')
+
+    //check for coupon
+    if (payment.order && payment.order.order && payment.order.order.coupon){
+      var total = pay_utils.calCoupon(payment.order.order.total, payment.order.order.coupon)
+      total = Math.round(total)
+    }else {
+      var total = Math.round(payment.order.order.total)
+    }
+
     var charge = yield stripe.charges.create({
-      amount: Math.round(payment.order.order.total), // Amount in cents
+      amount: total, // Amount in cents
       currency: 'usd',
       customer: payment.order.saved_card.customer_id, // Previously stored, then retrieved
       card: payment.order.saved_card.card_id
     })
 
-    profOak.say(`succesfully created new stripe charge for team:${payment.order.team_id} in amount ${(payment.order.order.total / 100.0).$}`)
+    profOak.say(`succesfully created new stripe charge for team: ${payment.order.team_id} in amount ${(total / 100.0).$}`)
   } catch (err) {
     logging.error('error creating stripe charge')
   }
@@ -361,7 +402,7 @@ function * onSuccess (payment) {
 
     logging.info(mailOptions)
     mailer_transport.sendMail(mailOptions, function (err) {
-      if (err) console.log(err)
+      if (err) logging.error(err)
     })
   } catch (err) {
     logging.error('on success messages broke', err)

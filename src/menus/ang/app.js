@@ -33,5 +33,5 @@ app.controller('menuController', function ($scope, MenuFactory) {
   $scope.name = "Zafra";
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
-  $scope.model = {};
+  $scope.test = {};
 });

@@ -73,13 +73,14 @@ function flattenMenu (data) {
   function flatten (node, out) {
     if (node.type === 'menu' && _.get(node, 'schedule[0]')) {
       var isAvailable = false
-      node.schedule.map(id => _.find(schedules, {id: id})).map(t => {
+      node.schedule.map(id => _.find(schedules, {id: id}))[0].times.map(t => {
         if (now > new Date(t.from) && now < new Date(t.to)) {
           isAvailable = true
         }
       })
 
       if (!isAvailable) {
+        logging.debug(node.name.cyan, 'is not available'.red)
         return
       }
     }
@@ -139,7 +140,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   json.attachments.push({
     'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"}`,
     'fallback': 'Unable to load food options.',
-    'callback_id': 'wopr_game',
+    'callback_id': 'menu_quickpicks',
     'color': '#49d63a',
     'attachment_type': 'default',
     'mrkdwn_in': [
@@ -160,7 +161,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
         'value': cartItem.item.item_id
       },
       {
-        'name': 'food.menu.quick_picks',
+        'name': 'food.menu.quickpicks',
         'text': '< Back',
         'type': 'button',
         'value': 0

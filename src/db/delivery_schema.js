@@ -9,6 +9,8 @@ var deliverySchema = mongoose.Schema({
   },
   session_id: mongoose.Schema.ObjectId,
   team_id: String,
+
+  all_members: [], // not sure how whitelist thing works so just stashing all_members instead of looking up team_members
   team_members: [], // who is in the order
   chosen_location: {}, // from slackbot.meta.locations
   chosen_restaurant: {
@@ -43,10 +45,27 @@ var deliverySchema = mongoose.Schema({
     last_name: String,
     phone_number: String,
     email: String,
-    dm: String,
-    chosen_channel_id: String,
-    chosen_channel_name: String
+    dm: String
   },
+
+  // temp hold over until we can send to multiple
+  chosen_channel: {
+    name: String,
+    id: String,
+    is_channel: {
+      type: Boolean,
+      default: true
+    }
+  },
+
+  // chosen_channels: [{
+  //   channel_name: String,
+  //   channel_id: String,
+  //   is_channel: { // if its not a channel its a group
+  //     type: Boolean,
+  //     default: true
+  //   }
+  // }],
 
   fulfillment_method: String,
   time_started: {

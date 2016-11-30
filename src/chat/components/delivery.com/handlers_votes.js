@@ -26,10 +26,10 @@ var handlers = {}
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function askUserForCuisineTypes (cuisines, admin, user) {
+function voteMessage (foodSession) {
   // present top 2 local avail and then 2 random sample,
   // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
-  var orderedCuisines = _.map(_.sortBy(cuisines, ['count']), 'name')
+  var orderedCuisines = _.map(_.sortBy(foodSession.cuisines, ['count']), 'name')
   var ignoredTopItems = ['Cafe', 'Kosher', 'Sandwiches', 'Italian', 'Pizza', 'Asian']
   var cuisinesWithoutTop = _.pullAll(orderedCuisines, ignoredTopItems)
   var top1 = cuisinesWithoutTop.pop()
@@ -49,13 +49,15 @@ function askUserForCuisineTypes (cuisines, admin, user) {
   sampleArray.push({
     name: 'food.admin.restaurant.pick',
     value: 'user_remove',
-    text: '× No Lunch for Me',
+    text: '× No Food for Me',
     type: 'button',
     style: 'danger'
   })
 
+  var admin = foodSession.convo_initiater
+
   var res = {
-    text: `<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!`,
+    text: `<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!`,
     fallback: 'You are unable to vote for lunch preferences',
     callback_id: 'food.user.poll',
     color: '#3AA3E3',
@@ -229,10 +231,9 @@ handlers['food.user.poll'] = function * (message) {
       user: member.id,
       team: member.team_id
     }
-    // sleep for half a second so we dont get no
-    if (foodSession.cuisines.length < 5) sleep(1000)
-    var cuisinesAvailForUser = _.filter(foodSession.cuisines, function (o) { return o.count > 10 })
-    var cuisineMessage = askUserForCuisineTypes(cuisinesAvailForUser, foodSession.convo_initiater, member.dm)
+
+    // generate some random cuisines to vote from
+    var cuisineMessage = voteMessage(foodSession)
 
     var response = {
       mode: 'food',
@@ -344,7 +345,14 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`,
-      fallback: 'Unable to load votes'
+      fallback: 'Unable to load votes',
+      callback_id: 'admin_restaurant_pick',
+      actions: [{
+        name: 'food.feedback.new',
+        text: '⇲ Send feedback',
+        type: 'button',
+        value: 'food.feedback.new'
+      }]
     }]
   }
 
@@ -362,6 +370,8 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       }]
     })
   }
+
+
 
   if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
     // replace admins message
@@ -488,10 +498,12 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     ],
     'text': '',
     'fallback': 'You are unable to pick a restaurant',
-    'callback_id': 'food.admin.restaurant.pick',
+    'callback_id': 'admin_restaurant_pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
-    'actions': []
+    'actions': [],
+    'footer': 'Powered by Delivery.com',
+    'footer_icon': 'http://tidepools.co/kip/dcom_footer.png'
   }
 
   if (index > 0) {
@@ -565,12 +577,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     minimum: merchant.ordering.minimum
   }
 
-  var menu = yield request({
-    url: `https://api.delivery.com/merchant/${merchant.id}/menu?client_id=brewhacks2016`,
-    json: true
-  })
-
-  foodSession.menu = menu
+  foodSession.menu = yield api.getMenu(merchant.id)
 
   foodSession.save()
 
@@ -595,7 +602,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'food.menu.quick_picks',
+            'name': 'food.menu.quickpicks',
             'text': 'Yes',
             'type': 'button',
             'style': 'primary',
@@ -636,7 +643,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       user: m.id
     }
 
-    $replyChannel.send(newMessage, 'food.menu.quick_picks', {type: 'slack', data: msgJson})
+    $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
   })
 }
 
