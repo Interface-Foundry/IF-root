@@ -275,10 +275,8 @@ function * getAllChannels (slackbot) {
       is_channel: false
     }
   })
-  logging.debug('botChannelArray', botChannelArray)
-  logging.debug('botGroupArray', botGroupArray)
-  var allChannels = botChannelArray.concat(botGroupArray)
-  logging.info(`adding ${allChannels.length} to slackbots.meta`)
+  var allChannels = (botGroupArray.length === 0) ? botChannelArray : botChannelArray.concat(botGroupArray)
+  logging.debug(`adding allChannels with ${allChannels.length} to slackbots.meta \n\n allChannels:\n`, allChannels)
   slackbot.slackbot.meta.all_channels = allChannels
   yield slackbot.slackbot.save()
 }
