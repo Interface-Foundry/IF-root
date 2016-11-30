@@ -82,10 +82,18 @@ handlers['food.admin.team.members'] = function * (message) {
   })
 
   buttons.actions.push({
+    name: 'passthrough',
+    value: 'food.poll.confirm_send',
+    text: '< Back',
+    type: 'button'
+  })
+
+  buttons.actions.push({
     name: 'food.exit.confirm',
     text: '× Cancel',
     type: 'button',
-    'confirm': {
+    style: 'danger',
+    confirm: {
       'title': 'Are you sure?',
       'text': "Are you sure you don't want to order food?",
       'ok_text': 'Yes',
