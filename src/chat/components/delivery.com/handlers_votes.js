@@ -371,7 +371,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     })
   }
 
-  
+
 
   if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
     // replace admins message
@@ -575,12 +575,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     minimum: merchant.ordering.minimum
   }
 
-  var menu = yield request({
-    url: `https://api.delivery.com/merchant/${merchant.id}/menu?client_id=brewhacks2016`,
-    json: true
-  })
-
-  foodSession.menu = menu
+  foodSession.menu = yield api.getMenu(merchant.id)
 
   foodSession.save()
 

@@ -123,11 +123,13 @@ function saveMerchants (merchants) {
 // get all the menu items for a merchant
 //
 module.exports.getMenu = function * (merchant_id) {
-  kip.debug('getting menu for merchant id', merchant_id)
+  logging.info('getting menu for merchant id', merchant_id)
   // var data = yield db.Menus.findOne({merchant_id: merchant_id})
-  var data = yield request({url: `https://api.delivery.com/merchant/${merchant_id}/menu?client_id=${client_id}`, json: true})
-  var menu = data.menu; // should i return this or a better data model?
-  return unfuck_menu(menu)
+  var data = yield request({
+    url: `https://api.delivery.com/merchant/${merchant_id}/menu?client_id=${client_id}`,
+    json: true
+  })
+  return data
 }
 
 module.exports.getMerchant = function * (merchant_id) {
