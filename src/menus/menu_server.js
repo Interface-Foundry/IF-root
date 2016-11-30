@@ -9,9 +9,11 @@ var jsonParser = bodyParser.json();
 var path = require('path');
 var volleyball = require('volleyball');
 var crypto = require('crypto');
+var co = require('co');
+var _ = require('lodash');
 
-var Menu = require('../chat/components/delivery.com/Menu.js');
-var menuURL = 'localhost:8001/session'
+var cafeMenu = require('../chat/components/delivery.com/Menu.js');
+var menuURL = 'localhost:8001/session';
 
 app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -20,48 +22,66 @@ app.use(jsonParser);
 app.use('/', express.static('template'));
 app.use('/ang', express.static('ang'));
 
-//require('../chat/components/delivery.com/scrape_menus.js');
+var MenuSession = db.Menu_session;
+var Menu = db.Menu;
+var Merchant = db.Merchant;
+// console.log(Menu);
+// console.log(Merchant);
 
-var menus = {};
-var names = {};
+//require('../chat/components/delivery.com/scrape_menus.js');
+//
+// var menus = {};
+// var names = {};
 
 //handle post request with a binder full of data
-app.post('/cafe', function (req, res) {
+app.post('/cafe', (req, res) => co(function * () {
+
+  var ms = new MenuSession({
+    session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
+  });
 
   var rest_id = req.body.rest_id;
   var team_id = req.body.team_id; //etc, or whatever we need
 
-  //generate key
-  var session_token = crypto.randomBytes(256).toString('hex');
+  var result = yield Menu.findOne({merchant_id: rest_id})
 
-  //should probably query db at this point
-  db.Menu.findOne({merchant_id: rest_id})
-  .then(function (result) {
-    if (result) {
-      menus[session_token] = Menu(result.raw_menu).allItems();
-    }
-  });
+  //console.log('got raw menu data');
 
-  db.Merchant.findOne({id: rest_id})
-  .then(function (result) {
-    names[session_token] = result.data.summary.name;
-    console.log(names[session_token]);
-  })
+  ms.menu.data = cafeMenu(result.raw_menu).allItems();
+
+  ms.merchant.id = rest_id;
+  ms.merchant.data = yield Merchant.findOne({id: rest_id}).select('data.summary.name');
+
+  console.log('ms', ms);
+
+  yield ms.save();
 
   //return a url w a key in a query string
-  res.send(menuURL + '#?k=' + session_token);
-});
+  res.send(menuURL + '#?k=' + ms.session_token);
+}));
 
 //when user hits that url up, post to /session w/key and gets correct pg
 
-app.post('/session/menu', function (req, res) {
-  res.send(menus[req.body.k]);
-});
+app.post('/session', (req, res) => co(function * () {
+  if (req.query && req.query.k) {
+    var t = req.query.k.replace(/[^\w\s]/gi, '') // clean special char
+    try {
+      var ms = yield MenuSession.findOne({session_token: t});
+      res.send(JSON.stringify(ms))
+    } catch (err) {
+      logging.error('catching error in session ', err)
+    }
+  }
+}))
 
-app.post('/session/name', function (req, res) {
-  console.log(names);
-  res.send(names[req.body.k]);
-});
+// app.get('/session', function (req, res) {
+//   res.send(menus[req.body.k]);
+// });
+//
+// app.post('/session/name', function (req, res) {
+//   console.log(names);
+//   res.send(names[req.body.k]);
+// });
 
 //TODO: error handling for promises
 
