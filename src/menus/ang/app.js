@@ -5,20 +5,26 @@ app.factory('MenuFactory', function ($http, $location) {
   var mf = {};
   var key = $location.search().k;
 
-  mf.getMenu = function () {
-    return $http.post('/session/menu', {k: key})
-    .then(function (menu) {
-      return menu.data;
+  var ms = $http.post('/session', {session_token: key})
+    .then(function (response) {
+      return response.data;
     });
-  }
+
+  mf.getMenu = function () {
+    return ms.then(function (ms) {
+      return ms.menu.data;
+    });
+  };
 
   mf.getRestaurant = function () {
-    return $http.post('/session/name', {k: key})
-    .then(function (name) {
-      console.log(name);
-      return name.data;
+    return ms.then(function (ms) {
+      console.log('ms', ms);
+      var name = ms && ms.merchant && ms.merchant.name;
+      if (name) return name
+      else return "No name listed";
+      //else console.log('no merchant information');
     });
-  }
+  };
 
   return mf;
 });
