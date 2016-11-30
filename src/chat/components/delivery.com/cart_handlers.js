@@ -96,7 +96,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
         'style': 'primary'
       },
       {
-        'name': 'food.menu.quick_picks',
+        'name': 'food.menu.quickpicks',
         'text': '< Back',
         'type': 'button',
         'value': ''
@@ -346,7 +346,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
               `*Team Cart:* ${foodSession.order.total.$}\n` +
               `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
         fallback: 'Confirm Choice',
-        callback_id: 'food_confirm',
+        callback_id: 'admin_order_confirm',
         color: '#49d63a',
         attachment_type: 'default',
         mrkdwn_in: ['text'],

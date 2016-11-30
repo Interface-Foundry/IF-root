@@ -346,7 +346,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`,
       fallback: 'Unable to load votes',
-      callback_id: 'food_cuisine',
+      callback_id: 'admin_restaurant_pick',
       actions: [{
         name: 'food.feedback.new',
         text: '⇲ Send feedback',
@@ -498,7 +498,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     ],
     'text': '',
     'fallback': 'You are unable to pick a restaurant',
-    'callback_id': 'food.admin.restaurant.pick',
+    'callback_id': 'admin_restaurant_pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [],
@@ -602,7 +602,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'food.menu.quick_picks',
+            'name': 'food.menu.quickpicks',
             'text': 'Yes',
             'type': 'button',
             'style': 'primary',
@@ -643,7 +643,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       user: m.id
     }
 
-    $replyChannel.send(newMessage, 'food.menu.quick_picks', {type: 'slack', data: msgJson})
+    $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
   })
 }
 

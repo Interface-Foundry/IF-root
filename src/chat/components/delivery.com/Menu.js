@@ -140,7 +140,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   json.attachments.push({
     'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"}`,
     'fallback': 'Unable to load food options.',
-    'callback_id': 'food.options',
+    'callback_id': 'menu_quickpicks',
     'color': '#49d63a',
     'attachment_type': 'default',
     'mrkdwn_in': [
@@ -161,16 +161,10 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
         'value': cartItem.item.item_id
       },
       {
-        'name': 'food.menu.quick_picks',
+        'name': 'food.menu.quickpicks',
         'text': '< Back',
         'type': 'button',
         'value': 0
-      },
-      {
-        name: 'food.feedback.new',
-        text: '⇲ Send feedback',
-        type: 'button',
-        value: 'food.feedback.new'
       }
     ]
   })

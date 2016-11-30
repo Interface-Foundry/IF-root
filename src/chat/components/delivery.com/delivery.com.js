@@ -460,7 +460,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
           'text'
         ],
         'fallback': 'You are unable to confirm.',
-        'callback_id': 'address_confirm',
+        'callback_id': 'settings_address_new',
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'actions': [
@@ -555,8 +555,8 @@ handlers['food.feedback.save'] = function * (message) {
   }
 
   var mailOptions = {
-    // to: 'Tim Wong <timothy@interfacefoundry.com>',
-    // from: 'Tim Wong <timothy@interfacefoundry.com>',
+    //to: 'Tim Wong <timothy@interfacefoundry.com>',
+    //from: 'Tim Wong <timothy@interfacefoundry.com>',
     to: 'Kip Server <hello@kipthis.com>',
     from: 'Kip Café <server@kipthis.com>',
     subject: '['+source.callback_id+'] Kip Café Feedback',
@@ -573,7 +573,9 @@ handlers['food.feedback.save'] = function * (message) {
 
   // switch back to original context
   if (_.get(source, 'callback_id')) {
-    replyChannel.send(message, source.callback_id.replace(/_/g, '.'), {type: message.origin, data: msg_json})
+    replyChannel.send(message, 'food.' + source.callback_id.replace(/_/g, '.'), {type: message.origin, data: msg_json})
+    return yield handlers['food.' + source.callback_id.replace(/_/g, '.')](message)
+
   }
 }
 

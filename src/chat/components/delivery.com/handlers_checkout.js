@@ -14,16 +14,16 @@ var handlers = {}
 *
 *
 */
-handlers['food.admin.order.checkout.address_2'] = function * (message) {
+handlers['food.admin.order.checkout.address2'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var response = {
     'title': `Whats your apartment or floor number at ${foodSession.chosen_location.address_1}`,
     'text': `Type your apartment or floor number below`,
     'fallback': 'Unable to get address',
-    'callback_id': `food.admin.order.checkout.address_2`,
+    'callback_id': `admin_order_checkout_address2`,
     'attachments': [{
       'fallback': `You are unable to add address`,
-      'callback_id': `food.admin.order.checkout.address_2`,
+      'callback_id': `admin_order_checkout_address2`,
       'attachment_type': `default`,
       'actions': [{
         'name': `food.admin.order.checkout.confirm`,
@@ -38,7 +38,7 @@ handlers['food.admin.order.checkout.address_2'] = function * (message) {
       }]
     }]
   }
-  $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address_2', type: message.origin, data: response})
+  $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address2', type: message.origin, data: response})
 }
 
 handlers['food.admin.order.checkout.name'] = function * (message) {
@@ -71,7 +71,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   console.log('heerrr', prevMessage.reply.textFor)
   var editInfo = {}
 
-  editInfo['admin.order.checkout.address_2'] = function * (message) {
+  editInfo['admin.order.checkout.address2'] = function * (message) {
     if (_.get(message, 'source.actions[0].value') === 'none') {
       foodSession.chosen_location.address_2 = ' '
     } else {
@@ -121,7 +121,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   if (!foodSession.chosen_location.address_2) {
-    return yield handlers['food.admin.order.checkout.address_2'](message)
+    return yield handlers['food.admin.order.checkout.address2'](message)
   }
   if (!foodSession.convo_initiater.last_name) {
     return yield handlers['food.admin.order.checkout.name'](message)
@@ -180,7 +180,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'food.admin.order.checkout.address_2',
+            'name': 'food.admin.order.checkout.address2',
             'text': `Edit`,
             'type': `button`,
             'value': `edit`
@@ -254,13 +254,13 @@ handlers['food.admin.order.pay'] = function * (message) {
   var response = {
     text: `Checkout for ${foodSession.chosen_restaurant.name} - ${(foodSession.order.total + foodSession.tipAmount).$}`,
     fallback: `Unable to pay for order`,
-    callback_id: `food.admin.order.pay`,
+    callback_id: `admin_order_pay`,
     attachments: [{
       'title': '',
       'mrkdwn_in': ['text'],
       'text': ``,
       'fallback': `You are unable to add a card`,
-      'callback_id': `food.admin.order.pay`,
+      'callback_id': `admin.order.pay`,
       'color': `#3AA3E3`,
       'attachment_type': `default`,
       'actions': [{
