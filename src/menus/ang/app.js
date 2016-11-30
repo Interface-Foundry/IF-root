@@ -1,26 +1,23 @@
 var app = angular.module('app', []);
 
-app.factory('MenuFactory', function ($http) {
+app.factory('MenuFactory', function ($http, $location) {
   // return result of http call
-
   var mf = {};
-
-  var testId = "583db964d421373ebe0adf11";
+  var key = $location.search().k;
 
   mf.getMenu = function () {
-    return $http.get('/menu/'+ testId, function (res) {
-      return res.data;
-    }).then(function (m) {
-      return m.data;
-    })
+    return $http.post('/session/menu', {k: key})
+    .then(function (menu) {
+      return menu.data;
+    });
   }
 
-  mf.getRestaurantName = function () {
-    return $http.get('/name/' + testId, function (res) {
-      return res.data;
-    }).then(function (n) {
-      return n.data;
-    })
+  mf.getRestaurant = function () {
+    return $http.post('/session/name', {k: key})
+    .then(function (name) {
+      console.log(name);
+      return name.data;
+    });
   }
 
   return mf;
@@ -29,6 +26,6 @@ app.factory('MenuFactory', function ($http) {
 app.controller('menuController', function ($scope, MenuFactory) {
   $scope.name = "Zafra";
   $scope.menu = MenuFactory.getMenu();
-  $scope.name = MenuFactory.getRestaurantName();
+  $scope.name = MenuFactory.getRestaurant();
   $scope.model = {};
 });
