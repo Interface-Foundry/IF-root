@@ -23,12 +23,12 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     color: '#45a5f4',
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
   })
-  kip.debug(`message is: ${JSON.stringify(message, null, 2)}`);
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];
     var addedByUser = item.added_by.includes(message.source.user);
-
-    kip.debug(`item is: ${JSON.stringify(item, null, 2)}`);
+    if(item.quantity<1){
+      return;
+    }
     // the slack message for just this item in the cart list
     var item_message = {
       mrkdwn_in: ['text', 'pretext'],
@@ -83,6 +83,16 @@ module.exports = function*(message, slackbot, highlight_added_item) {
         })
       }
 
+      item_message.actions = buttons;
+    } else if (!addedByUser){
+      item_message.callback_id = item._id.toString();
+      var buttons = [{
+        "name": "additem",
+        "text": "+",
+        "style": "default",
+        "type": "button",
+        "value": "add"
+      }];
       item_message.actions = buttons;
     }
 

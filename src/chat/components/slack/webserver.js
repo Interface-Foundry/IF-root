@@ -283,86 +283,33 @@ app.post('/slackaction', next(function * (req, res) {
       })
     } else {
       //actions that do not require processing in reply_logic, skill all dat
+      let index = -1,
+        cart;
       switch (action.name) {
         case 'additem':
-          // adds the item to the cart the right way, but for speed we return a hacked message right away
-          var updatedMessage = parsedIn.original_message
-          var priceDifference = 0
-          updatedMessage.attachments.map(a => {
-            if (a.callback_id === parsedIn.callback_id) {
-              priceDifference = parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1))
-              a.text = a.text.replace(/\d+$/, replacement => {
-                return parseInt(replacement) + 1
-              })
-            } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-              a.text = a.text.replace(/\$[\d.]+/, function (total) {
-                return '$' + (parseFloat(total.substr(1)) + priceDifference).toFixed(2)
-              })
-            }
-          })
-          co(function * () {
-            var teamCart = yield kipcart.getCart(parsedIn.team.id)
-            var item = yield db.Items.findById(parsedIn.callback_id).exec()
-            yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item)
-          }).catch(console.log.bind(console))
+          let teamCart = yield kipcart.getCart(parsedIn.team.id),
+            item = yield db.Items.findById(parsedIn.callback_id).exec();
+          cart = yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item)
+          parsedIn.original_message.attachments = yield updateCartMsg(cart, parsedIn);
           break
-
         case 'removeitem':
-          // reduces the quantity right way, but for speed we return a hacked message right away
-          var index
-          var priceDifference = 0
-          var updatedMessage = parsedIn.original_message
-          updatedMessage.attachments = updatedMessage.attachments.reduce((all, a, i) => {
-            if (a.callback_id === parsedIn.callback_id) {
-              priceDifference = parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1))
-              var isZero = false
-              index = i
-              a.text = a.text.replace(/\d+$/, replacement => {
-                if (parseInt(replacement) <= 1) {
-                  isZero = true
-                }
-                return parseInt(replacement) - 1
-              })
-              if (!isZero) {
-                all.push(a)
-              }
-            } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-              a.text = a.text.replace(/\$[\d.]+/, function (total) {
-                return '$' + (parseFloat(total.substr(1)) - priceDifference).toFixed(2)
-              })
-              all.push(a)
-            } else {
-              all.push(a)
+          parsedIn.original_message.attachments.forEach((ele, id) => {
+            if (ele.callback_id === parsedIn.callback_id) {
+              index = id;
             }
-            return all
-          }, [])
-          co(function * () {
-            yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index)
-          }).catch(console.log.bind(console))
+          });
+          cart = yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index, 'team');
+          parsedIn.original_message.attachments = yield updateCartMsg(cart, parsedIn);
           break
         case 'removeall':
-          // reduces the quantity right way, but for speed we return a hacked message right away
-          var index;
-          var priceDifference = 0;
-          var updatedMessage = parsedIn.original_message;
-          updatedMessage.attachments = updatedMessage.attachments.reduce((all, a, i) => {
-            if (a.callback_id === parsedIn.callback_id) {;
-              var quantity = parseInt(a.text.match(/\d+$/)[0])
-              priceDifference = quantity * parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1));
-              index = i;
-            } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-              a.text = a.text.replace(/\$[\d.]+/, function (total) {
-                return '$' + (parseFloat(total.substr(1)) - priceDifference).toFixed(2)
-              })
-              all.push(a)
-            } else {
-              all.push(a)
+          parsedIn.original_message.attachments.forEach((ele, id) => {
+            if (ele.callback_id === parsedIn.callback_id) {
+              index = id;
             }
-            return all
-          }, [])
-          co(function * () {
-            yield kipcart.removeAllOfItem(parsedIn.team.id, index)
-          }).catch(console.log.bind(console))
+          });
+
+          cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index);
+          parsedIn.original_message.attachments = yield updateCartMsg(cart, parsedIn);
           break
       }
     }
@@ -381,6 +328,66 @@ app.post('/slackaction', next(function * (req, res) {
     res.sendStatus(200)
   }
 }))
+
+function* updateCartMsg(cart, parsedIn) {
+  kip.debug(`parsedIn is: \n ${JSON.stringify(parsedIn, null, 2)}`);
+  let attachments,
+    updatedItemAmt,
+    showButtons = false,
+    cbIdRegex = new RegExp('^' + parsedIn.callback_id + '$', 'i'),
+    team = yield db.slackbots.findOne({
+      team_id: parsedIn.team.id
+    }),
+    userIsAdmin= team.meta.office_assistants.includes(parsedIn.user.id);
+
+  cart.aggregate_items.forEach((ele) => {
+    if (cbIdRegex.test(ele._id)) { //I have no idea why === isn't working here
+      updatedItemAmt = ele.quantity;
+      showButtons = ele.added_by.includes(parsedIn.user.id) || userIsAdmin;
+    }
+  });
+
+  attachments = parsedIn.original_message.attachments.reduce((all, a) => {
+
+    if (parsedIn.callback_id === a.callback_id) {
+      let isZero = updatedItemAmt < 1 || !updatedItemAmt;
+      a.text = a.text.replace(/\d+$/, updatedItemAmt);
+
+      a.actions = showButtons ? [{
+        'id': '1',
+        'name': 'additem',
+        'text': '+',
+        'style': 'default',
+        'type': 'button',
+        'value': 'add'
+      }, {
+        'id': '2',
+        'name': 'removeitem',
+        'text': '—',
+        'style': 'default',
+        'type': 'button',
+        'value': 'remove'
+      }] : [{
+        'id': '1',
+        'name': 'additem',
+        'text': '+',
+        'style': 'default',
+        'type': 'button',
+        'value': 'add'
+      }];
+      if (!isZero) {
+        all.push(a);
+      }
+    } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
+      a.text = a.text.replace(/\$(\d{1,3},)*(\d{1,3})(\.\d{0,2})?/g, '$' + cart.total);
+      all.push(a);
+    } else {
+      all.push(a);
+    }
+    return all;
+  }, []);
+  return attachments;
+}
 
 
 app.get('/authorize', function (req, res) {

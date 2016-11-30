@@ -245,9 +245,10 @@ module.exports.removeFromCart = function (slack_id, user_id, number, type) {
   return co(function * () {
     var cart = yield getCart(slack_id)
     // please do not remove changes below. it is required for fb to work.
+
     if (type == 'team') {
       var team = yield db.slackbots.findOne({team_id: slack_id})
-      var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0
+      var userIsAdmin = team.meta.office_assistants.includes(user_id)
     }
 
     // need to watch out for items that have multiple quantities
@@ -269,9 +270,9 @@ module.exports.removeFromCart = function (slack_id, user_id, number, type) {
 
     // if no items matching the user_id were found, an admin can still remove any item
     matching_items = cart.items.filter(function (i) {
-      return i.ASIN === ASIN_to_remove
+      return i.ASIN === ASIN_to_remove && userIsAdmin
     })
-
+    
     return module.exports.removeFromCartByItem(matching_items.pop())
   })
 }

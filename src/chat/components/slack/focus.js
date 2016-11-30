@@ -53,13 +53,20 @@ module.exports = function*(message) {
       }
       review_line += ` ${r.reviews.rating} stars - ${r.reviews.reviewCount} reviews`
     }
+  var brandManu = '';
+  var brand = _.get(attrs, 'Brand[0]') ? _.get(attrs, 'Brand[0]') : false;
+  var manufacturer = _.get(attrs, 'Manufacturer[0]') ? _.get(attrs, 'Manufacturer[0]') : false;
+  if (brand && manufacturer && brand.toLowerCase() === manufacturer.toLowerCase()) {
+    brandManu = ' ○ ' + brand;
+  } else if (brand && manufacturer) {
+    brandManu = ' ○ ' + brand + '\n ○ ' + manufacturer;
+  }
     var description = [
       '*' + r.realPrice + '*',
       review_line,
       _.get(attrs, 'Size[0]') ? ' ○ Size: ' + _.get(attrs, 'Size[0]') : false,
       _.get(attrs, 'Artist[0]') ? ' ○ Artist: ' + _.get(attrs, 'Artist[0]') : false,
-      _.get(attrs, 'Brand[0]') ? ' ○ ' + _.get(attrs, 'Brand[0]') : false,
-      _.get(attrs, 'Manufacturer[0]') ? ' ○ ' + _.get(attrs, 'Manufacturer[0]') : false,
+      brandManu,
       _.get(attrs, 'Feature[0]') ? ' ○ ' + attrs.Feature.join('\n ○ ') : false
     ].filter(Boolean).join('\n');
 
@@ -68,19 +75,19 @@ module.exports = function*(message) {
       "text": "Add to Cart",
       "style": "primary",
       "type": "button",
-      "value": message.focus - 1
+      "value": message.focus
     }, {
       "name": "cheaper",
       "text": "Find Cheaper",
       "style": "default",
       "type": "button",
-      "value": message.focus - 1
+      "value": message.focus
     }, {
       "name": "similar",
       "text": "Find Similar",
       "style": "default",
       "type": "button",
-      "value": message.focus - 1
+      "value": message.focus
     }, {
       "name": "focus.home.expand",
       "text": "🐧",
