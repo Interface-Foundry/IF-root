@@ -244,23 +244,26 @@ handlers['food.admin.select_address'] = function * (message) {
   }
 
   // allow removal if more than one meta.locations thing
+  // if (_.get(team, 'meta.locations').length > 1) {
+  msg_json.attachments.push({
+    'text': '',
+    'fallback': 'You are unable to remove an address',
+    'callback_id': 'remove_address',
+    'attachment_type': 'default',
+    'actions': [{
+      'name': 'passthrough',
+      'text': 'New +',
+      'type': 'button',
+      'value': 'food.settings.address.new'
+    }]
+  })
+
   if (_.get(team, 'meta.locations').length > 1) {
-    msg_json.attachments.push({
-      'text': '',
-      'fallback': 'You are unable to remove an address',
-      'callback_id': 'remove_address',
-      'attachment_type': 'default',
-      'actions': [{
-        'name': 'passthrough',
-        'text': 'New +',
-        'type': 'button',
-        'value': 'food.settings.address.new'
-      }, {
-        'name': 'passthrough',
-        'text': 'Edit',
-        'type': 'button',
-        'value': 'food.settings.address.remove_select',
-      }]
+    msg_json.attachments[msg_json.attachments.length - 1].actions.push({
+      'name': 'passthrough',
+      'text': 'Edit',
+      'type': 'button',
+      'value': 'food.settings.address.remove_select'
     })
   }
 
