@@ -238,9 +238,9 @@ handlers['food.admin.display_channels'] = function * (message) {
       'type': 'button',
       'style': 'primary'
     }, {
-      'text': `Edit Members`,
+      'name': 'passthrough',
       'value': 'food.admin.team.members',
-      'name': 'team_members',
+      'text': `Edit Members`,
       'type': 'button'
     }, {
       'text': `< Back`,
