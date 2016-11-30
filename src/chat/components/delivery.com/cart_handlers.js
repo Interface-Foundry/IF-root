@@ -349,8 +349,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         color: '#49d63a',
         attachment_type: 'default',
         mrkdwn_in: ['text'],
-        'footer': 'Powered by Delivery.com',
-        'footer_icon': 'http://tidepools.co/kip/dcom_footer.png'
+        footer: 'Powered by Delivery.com',
+        footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
       }
 
       if (totalPrice < foodSession.chosen_restaurant.minimum) {

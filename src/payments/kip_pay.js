@@ -402,7 +402,7 @@ function * onSuccess (payment) {
 
     logging.info(mailOptions)
     mailer_transport.sendMail(mailOptions, function (err) {
-      if (err) console.log(err)
+      if (err) logging.error(err)
     })
   } catch (err) {
     logging.error('on success messages broke', err)

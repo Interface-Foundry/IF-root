@@ -413,7 +413,7 @@ handlers['food.settings.address.new'] = function * (message) {
 handlers['food.settings.address.confirm'] = function * (message) {
   // ✐✐✐
   // send response since this is slow
-  replyChannel.sendReplace(message, 'food.settings.address.save', {type: message.origin, data: {text: 'Thanks! We need to process that address real quick.'}})
+  replyChannel.sendReplace(message, 'food.settings.address.save', {type: message.origin, data: {text: 'Thanks! Let me process that address real quick'}})
   try {
     var res = yield api.searchNearby({addr: message.text})
     var location = {
@@ -560,20 +560,8 @@ handlers['food.feedback.save'] = function * (message) {
   }
   logging.info(mailOptions)
   mailer_transport.sendMail(mailOptions, function (err) {
-    if (err) console.log(err)
+    if (err) logging.error(err)
   })
-
-  // var mailOptions = {
-  //   to: 'Tim Wong <timothy@kipthis.com>',
-  //   from: 'Kip Café <server@kipthis.com>',
-  //   // to: 'Kip Server <hello@kipthis.com>',
-  //   // from: 'Kip Café <server@kipthis.com>',
-  //   subject: '['+source.callback_id+'] Kip Café Feedback',
-  //   text: '- Feedback: '+message.text + ' \r\n - Context:'+JSON.stringify(source)
-  // }
-  // mailer_transport.sendMail(mailOptions, function (err) {
-  //   if (err) console.log(err)
-  // })
 
   var msg_json = {
     'text': 'Thanks for explaining the issue'

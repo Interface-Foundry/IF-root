@@ -49,7 +49,7 @@ function voteMessage (foodSession) {
   sampleArray.push({
     name: 'food.admin.restaurant.pick',
     value: 'user_remove',
-    text: '× No Lunch for Me',
+    text: '× No Food for Me',
     type: 'button',
     style: 'danger'
   })
@@ -57,7 +57,7 @@ function voteMessage (foodSession) {
   var admin = foodSession.convo_initiater
 
   var res = {
-    text: `<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!`,
+    text: `<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!`,
     fallback: 'You are unable to vote for lunch preferences',
     callback_id: 'food.user.poll',
     color: '#3AA3E3',
@@ -434,9 +434,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': yield viableRestaurants.slice(index, index + 3).map(utils.buildRestaurantAttachment),
-    'footer': 'Powered by Delivery.com',
-    'footer_icon': 'http://tidepools.co/kip/dcom_footer.png'
+    'attachments': yield viableRestaurants.slice(index, index + 3).map(utils.buildRestaurantAttachment)
   }
 
   var moreButton = {
@@ -503,7 +501,9 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'callback_id': 'food.admin.restaurant.pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
-    'actions': []
+    'actions': [],
+    'footer': 'Powered by Delivery.com',
+    'footer_icon': 'http://tidepools.co/kip/dcom_footer.png'
   }
 
   if (index > 0) {
