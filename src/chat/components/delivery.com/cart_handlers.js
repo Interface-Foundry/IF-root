@@ -343,7 +343,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
               `*Taxes:* ${foodSession.order.tax.$}\n` +
               `*Tip:* ${foodSession.tipAmount.$}\n` +
-              `*Team Cart Total:* ${foodSession.order.total.$}`,
+              `*Team Cart:* ${foodSession.order.total.$}\n` +
+              `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
         fallback: 'Confirm Choice',
         callback_id: 'food_confirm',
         color: '#49d63a',
