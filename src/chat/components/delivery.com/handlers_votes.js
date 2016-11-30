@@ -434,7 +434,9 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': yield viableRestaurants.slice(index, index + 3).map(utils.buildRestaurantAttachment)
+    'attachments': yield viableRestaurants.slice(index, index + 3).map(utils.buildRestaurantAttachment),
+    'footer': 'Powered by Delivery.com',
+    'footer_icon': 'http://tidepools.co/kip/dcom_footer.png'
   }
 
   var moreButton = {

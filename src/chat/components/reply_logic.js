@@ -324,6 +324,7 @@ queue.topic('incoming').subscribe(incoming => {
         var replies = yield team.handle(message);
         break;
     case 'food':
+    case 'cafe':
         yield food(message)
         return incoming.ack()
      case 'address':

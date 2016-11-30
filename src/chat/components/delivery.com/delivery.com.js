@@ -80,7 +80,7 @@ function * handleMessage (message) {
 
   var route = yield getRoute(message)
 
-  if (message.text && message.mode === 'food') {
+  if (message.text && message.mode === 'food' || message.mode === 'cafe') {
     // if user types something allow the text_matching flag which we can use
     // in some handlers: cuisine picking, restaurant picking, item picking
     message.allow_text_matching = true
@@ -105,7 +105,7 @@ function * handleMessage (message) {
 function getRoute (message) {
   kip.debug(`prevRoute ${message.prevRoute}`)
   return co(function * () {
-    if (message.text === 'food') {
+    if (message.text === 'food' || message.text === 'cafe') {
       kip.debug('### User typed in :' + message.text)
       return 'food.begin'
     } else if (handlers[message.text]) {
@@ -551,16 +551,29 @@ handlers['food.feedback.save'] = function * (message) {
   }
 
   var mailOptions = {
-    to: 'Tim Wong <timothy@interfacefoundry.com>',
-    from: 'Tim Wong <timothy@interfacefoundry.com>',
-    //to: 'Kip Server <hello@kipthis.com>',
-    //from: 'Kip Café <server@kipthis.com>',
+    // to: 'Tim Wong <timothy@interfacefoundry.com>',
+    // from: 'Tim Wong <timothy@interfacefoundry.com>',
+    to: 'Kip Server <hello@kipthis.com>',
+    from: 'Kip Café <server@kipthis.com>',
     subject: '['+source.callback_id+'] Kip Café Feedback',
     text: '- Feedback: '+message.text + ' \r\n - Context:'+JSON.stringify(source)
   }
+  logging.info(mailOptions)
   mailer_transport.sendMail(mailOptions, function (err) {
     if (err) console.log(err)
   })
+
+  // var mailOptions = {
+  //   to: 'Tim Wong <timothy@kipthis.com>',
+  //   from: 'Kip Café <server@kipthis.com>',
+  //   // to: 'Kip Server <hello@kipthis.com>',
+  //   // from: 'Kip Café <server@kipthis.com>',
+  //   subject: '['+source.callback_id+'] Kip Café Feedback',
+  //   text: '- Feedback: '+message.text + ' \r\n - Context:'+JSON.stringify(source)
+  // }
+  // mailer_transport.sendMail(mailOptions, function (err) {
+  //   if (err) console.log(err)
+  // })
 
   var msg_json = {
     'text': 'Thanks for explaining the issue'
