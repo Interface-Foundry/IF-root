@@ -245,13 +245,9 @@ queue.topic('incoming').subscribe(incoming => {
     var timer = new kip.SavedTimer('message.timer', incoming.data)
     // skipping histoy and stuff rn b/c i dont have time to do it
     if (_.get(incoming, 'data.action') == 'item.add') {
-      kip.debug(' \n\n\n\n\n\n\n\n\n\n 😊 uno ', _.get(incoming, 'data.action'),' \n\n\n\n\n\n\n\n\n\n ');
       var selected_data = incoming.data.postback.selected_data;
-      kip.debug(' \n\n\n\n\n\n\n\n\n\n 😊 dos ',selected_data,' \n\n\n\n\n\n\n\n\n\n ');
       var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data);
-      kip.debug(' \n\n\n\n\n\n\n\n\n\n 😊 tres ',results,' \n\n\n\n\n\n\n\n\n\n ');
       var results = yield amazon_search.lookup(results, results.origin);
-      kip.debug(' \n\n\n\n\n\n\n\n\n\n 😊 quatro ',results,' \n\n\n\n\n\n\n\n\n\n ');
 
       logging.debug('taking first item from results')
       var results = results[0]
