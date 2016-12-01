@@ -33,11 +33,14 @@ app.controller('menuController', function ($scope, MenuFactory) {
   $scope.name = "Zafra";
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
-  $scope.order = {};
+  $scope.cart = {};
+  $scope.total = 0;
   $scope.printOrder = function () {
-    console.log($scope.order);
+    console.log($scope.cart);
   }
-  $scope.addToCart = function () {
-    console.log('addedToCart');
+  $scope.addToCart = function (item) {
+    console.log('addedToCart', item);
+    if ($scope.cart[item.id]) $scope.cart[item.id].quantity++;
+    else $scope.cart[item.id] = {quantity: 1, name:item.name, options:{}};
   }
 });
