@@ -56,11 +56,19 @@ app.controller('menuController', function ($scope, MenuFactory) {
   }
 
   $scope.validateItem = function (item) {
+
+    var validateRadio = function (option) {
+      var radio = $scope.inProgress[item.id].options[option];
+      if (Object.keys(radio).indexOf('radio') >= 0) return true;
+      else return false;
+    }
+
     console.log('item to validate:', item);
     for (var i = 0; i < item.children.length; i++) {
       var opGroup = item.children[i];
-      if (!opGroup.min_selection) return true;
-      // else for (var j = 0; j < opGroup.children.length; )
+      if (opGroup.min_selection) {
+          if (! validateRadio(opGroup.name)) return false;
+      }
     }
     return true;
   }
