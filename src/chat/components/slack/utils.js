@@ -7,6 +7,8 @@ var async = require('async');
 var eachSeries = require('async-co/eachSeries');
 var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client')
 var jstz = require('jstz');
+var amazon = require('../amazon_search.js');
+var kipcart = require('../cart');
 
 
 /*
@@ -300,6 +302,31 @@ function * hideMenu(message, original, expandable, data) {
   return
 }
 
+
+/*
+*
+* Misc.
+*
+*/
+
+function * addViaAsin(asin, message) {
+   var cart_id = message.cart_reference_id || message.source.team; 
+   var skip = false;
+    try {
+       var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
+     } catch (e) {
+       skip = true;
+     }
+    if (res && !skip) {
+      var item = res[0];
+      if (item.reviews && item.reviews.reviewCount) {
+        item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
+      }
+      yield kipcart.addToCart(cart_id, message.user_id, item, 'team');
+    }
+}
+
+
 module.exports = {
   initializeTeam: initializeTeam,
   findAdmins: findAdmins,
@@ -311,5 +338,6 @@ module.exports = {
   removeCartChannel: removeCartChannel,
   cacheMenu: cacheMenu,
   showMenu: showMenu,
-  hideMenu: hideMenu
+  hideMenu: hideMenu,
+  addViaAsin: addViaAsin
 };

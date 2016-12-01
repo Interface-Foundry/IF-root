@@ -35,6 +35,7 @@ var food = require('./delivery.com/delivery.com').handleMessage;
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
+var slackUtils = require('./slack/utils');
 
 
 
@@ -131,8 +132,30 @@ function isCancelIntent(message) {
 }
 
 function isMenuChange(message) {
-
   return _.get(message,'action') && (_.get(message,'action').indexOf('home.expand') > -1 || _.get(message,'action').indexOf('home.detract') > -1)
+}
+
+function * processProductLink(message) {
+  var text = message.text ? message.text.toLowerCase() : '';
+  if (text.indexOf('www.amazon.com') > -1 ) {
+    if (text.indexOf('/dp/') > -1) {
+      var asin = text.substr(text.indexOf('/dp/')+4, 10);
+    } else if (text.indexOf('/gp/') > -1) {
+      var asin = text.substr(text.indexOf('/gp/')+12, 10);
+    }
+  }
+  if (asin) {
+    var fail = false;
+    try {
+      yield slackUtils.addViaAsin(asin, message);
+    } catch (err) {
+      fail = true;
+    }
+    if (!fail) {
+      message.text = 'view cart';
+      yield message.save();
+    }
+  } 
 }
 
 function switchMode(message) {
@@ -219,14 +242,16 @@ queue.topic('incoming').subscribe(incoming => {
     } else if (_.get(incoming, 'data.data.value')) {
       console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
     }
-
     var timer = new kip.SavedTimer('message.timer', incoming.data)
-
     // skipping histoy and stuff rn b/c i dont have time to do it
     if (_.get(incoming, 'data.action') == 'item.add') {
-      var selected_data = incoming.data.postback.selected_data
-      var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data)
-      var results = yield amazon_search.lookup(results, results.origin)
+      kip.debug(' \n\n\n\n\n\n\n\n\n\n 😊 uno ', _.get(incoming, 'data.action'),' \n\n\n\n\n\n\n\n\n\n ');
+      var selected_data = incoming.data.postback.selected_data;
+      kip.debug(' \n\n\n\n\n\n\n\n\n\n 😊 dos ',selected_data,' \n\n\n\n\n\n\n\n\n\n ');
+      var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data);
+      kip.debug(' \n\n\n\n\n\n\n\n\n\n 😊 tres ',results,' \n\n\n\n\n\n\n\n\n\n ');
+      var results = yield amazon_search.lookup(results, results.origin);
+      kip.debug(' \n\n\n\n\n\n\n\n\n\n 😊 quatro ',results,' \n\n\n\n\n\n\n\n\n\n ');
 
       logging.debug('taking first item from results')
       var results = results[0]
@@ -280,7 +305,6 @@ queue.topic('incoming').subscribe(incoming => {
     if (!message.action && message.prevAction) {
       message.action = message.prevAction.match(/(expand|detract)/) ?  'initial' : message.prevAction;
       kip.debug('setting mode to prevaction', message.action)
-
     }
 
     timer.tic('got history')
@@ -303,8 +327,9 @@ queue.topic('incoming').subscribe(incoming => {
       timer.stop();
       incoming.ack()
       return yield shopping[_.get(message,'action')](message);
-      
     }
+
+    yield processProductLink(message);
 
     if (switchMode(message)) {
       message.mode = switchMode(message);

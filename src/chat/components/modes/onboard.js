@@ -928,8 +928,6 @@ handlers['back_btn'] = function * (message) {
  */
 handlers['more_info'] = function * (message, data) {
 
-   kip.debug(' \n\n\n\n\n\n onboard:887:more_infoHandler got data: ', data,' \n\n\n\n\n\n ');
-
    var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
    var last_message = history[0];
    var lastAction = _.get(data,'lastAction') ? _.get(data,'lastAction') : _.get(last_message,'action') ?  _.get(last_message,'action') : 'team.help';
