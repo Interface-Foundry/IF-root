@@ -11,9 +11,9 @@
   <script src="../ang/app.js" defer></script>
 </head>
 
-<body ng-app="app">
+<body ng-app="app" ng-controller="menuController">
   <div id="main">
-    <div id="header" ng-controller="menuController">
+    <div id="header">
       <div id="logo">
         <div id="logo_text">
           <!-- class="logo_colour", allows you to change the colour of the text -->
@@ -30,20 +30,26 @@
           <div class="sidebar_item">
             <!-- insert your sidebar items here -->
             <h3>Cart</h3>
-            <h4>Item</h4>
-            <h5>Description</h5>
-            <p>I need more styling to display number</p>
+            <div ng-repeat="item in cart">
+              <h4>
+                <span class="item_name">{{item.name}}</span>
+                <span class="price">{{item.price}}</span>
+              <h4>
+            </div>
           </div>
           <div class="sidebar_base"></div>
         </div>
       </div>
-      <div id="content" ng-controller="menuController">
+      <div id="content">
         <!-- insert the page content here -->
         <!-- <h1>Type of Food</h1> -->
         <div ng-repeat="item in menu" class="menu_item">
-          <h2 ng-click="itemDetails(item)">
-            <span class="item_name">{{item.name}}</span>
-            <span class="price">{{item.price}}</span>
+          <h2>
+            <span ng-click="itemDetails(item)" class="item_name">{{item.name}}</span>
+            <span class="price" ng-hide="inProgress[item.id] && validateItem(item)">{{item.price}}</span>
+            <span class="price" ng-show="inProgress[item.id] && validateItem(item)">
+              <button ng-click="addToCart(item)">Add to cart for {{item.price}}</button>
+            </span>
           </h2>
           <h3 class="item_description">{{item.description}}</h3>
           <div ng-show="$parent.inProgress[item.id]">
@@ -53,19 +59,18 @@
                 <div ng-repeat="option in child.children">
                   <form name="optionForm">
                     <label>
-                      <input type="radio" name="child.name" ng-model="$parent.inProgress[item.id].options[child.name]" ng-value="option.name"/>
-                      {{option.name}} <!-- option.name -->
+                      <input type="radio" name="child.name" ng-model="$parent.inProgress[item.id].options[child.name].radio" ng-value="option.unique_id"/>
+                      {{option.name}}
                     </label>
                   </form>
                 </div>
-                <!-- <p ng-repeat="option in child.children">{{option.name}}</p> -->
               </div>
               <div ng-show="child.min_selection == 0">
                 <div ng-repeat="option in child.children">
                   <form>
                     <label>
-                      <input type="checkbox" name="order" ng-model="$parent.inProgress[item.id].options[child.name][$parent.inProgress[item.id].options[child.name].length]"/>
-                      {{option.name}} <!-- option.name -->
+                      <input type="checkbox" name="order" ng-model="$parent.inProgress[item.id].options[child.name][option.unique_id].chosen" ng-value="true"/>
+                      {{option.name}}
                     </label>
                   </form>
                 </div>

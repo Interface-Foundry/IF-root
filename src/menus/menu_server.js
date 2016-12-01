@@ -36,11 +36,12 @@ app.post('/cafe', (req, res) => co(function * () {
   });
 
   var rest_id = req.body.rest_id;
-  //var team_id = req.body.team_id; //etc, or whatever we need
 
   var result = yield Menu.findOne({merchant_id: rest_id});
 
   ms.menu.data = cafeMenu(result.raw_menu).allItems();
+
+  ms.deliveryId = req.body.delivery_ObjectId;;
 
   ms.merchant.id = rest_id;
   merchant = yield Merchant.findOne({id: rest_id});
@@ -67,6 +68,12 @@ app.post('/session', (req, res) => co(function * () {
     }
   }
 }))
+
+//updates the correct delivery object in the db
+//with the delivery object id saved on the menu session
+app.post('/order', function (req, res) {
+  //TODO
+});
 
 var port = 8001
 app.listen(port, function () {

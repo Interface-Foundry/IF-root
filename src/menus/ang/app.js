@@ -32,23 +32,42 @@ app.factory('MenuFactory', function ($http, $location) {
 app.controller('menuController', function ($scope, MenuFactory) {
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
-  $scope.cart = {};
+  $scope.cart = [];
   $scope.total = 0;
   $scope.inProgress = {};
 
   $scope.itemDetails = function (item) {
-    var details = {quantity: 1, name: item.name, price: item.price, options: {}};
+    var details = {item_qty: 1, name: item.name, id: item.unique_id, price: item.price, options: {}};
     for (var child in item.children) {
       details.options[item.children[child].name] = {};
       var opt = item.children[child];
-      for (var selection in opt.children) {
-        details.options[item.children[child].name][opt.children[selection].name] = false;
+      for (var s in opt.children) {
+        var selection = opt.children[s];
+        console.log(selection, "selection is what i think it is right?");
+        details.options[item.children[child].name][opt.children[s].unique_id] = {
+          chosen: false,
+          price: selection.price,
+          name: selection.name
+        };
       }
     }
-    
     $scope.inProgress[item.id] = details;
     console.log($scope.inProgress);
-    // if ($scope.cart[item.id]) $scope.cart[item.id].quantity++;
-    // else $scope.cart[item.id] = {quantity: 1, name:item.name, options:{}};
+  }
+
+  $scope.validateItem = function (item) {
+    console.log('item to validate:', item);
+    for (var i = 0; i < item.children.length; i++) {
+      var opGroup = item.children[i];
+      if (!opGroup.min_selection) return true;
+      // else for (var j = 0; j < opGroup.children.length; )
+    }
+    return true;
+  }
+
+  $scope.addToCart = function (item) {
+    $scope.cart.push($scope.inProgress[item.id]);
+    console.log($scope.cart, 'carttt');
+    $scope.inProgress[item.id] = null;
   }
 });
