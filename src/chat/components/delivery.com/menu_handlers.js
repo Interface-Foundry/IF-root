@@ -96,9 +96,11 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
 
-    var attachment = {
+    var attachment = 
+      {
+      image_url: (i.images.length>0 ? i.images[0].url : 'https://kipthis.com/images/kip_head.png'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
-      fallback: 'i.name',
+      fallback: i.name,
       color: '#3AA3E3',
       attachment_type: 'default',
       'actions': [
