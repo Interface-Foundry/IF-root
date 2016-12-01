@@ -19,7 +19,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
 
   //add mode sticker
   cartObj.push({
-    text: '',
+    text: 'Here\'s everything you have in your cart',
     color: '#45a5f4',
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
   })

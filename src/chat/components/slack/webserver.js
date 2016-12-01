@@ -16,7 +16,8 @@ var slackModule = require('./slack')
 var cardTemplate = require('./card_templates');
 var utils = require('./utils');
 var cookieParser = require('cookie-parser')
-var uuid = require('uuid')
+var uuid = require('uuid');
+var processData = require('../process');
 var sleep = require('co-sleep');
 // var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
 // var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
@@ -287,29 +288,49 @@ app.post('/slackaction', next(function * (req, res) {
         cart;
       switch (action.name) {
         case 'additem':
-          let teamCart = yield kipcart.getCart(parsedIn.team.id),
-            item = yield db.Items.findById(parsedIn.callback_id).exec();
-          cart = yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item)
-          parsedIn.original_message.attachments = yield updateCartMsg(cart, parsedIn);
+          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
+          co(function*() {
+            let teamCart = yield kipcart.getCart(parsedIn.team.id);
+            let item = yield db.Items.findById(parsedIn.callback_id).exec();
+            cart = yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item);
+            yield updateCartMsg(cart, parsedIn);
+          }).catch(console.log.bind(console));
           break
         case 'removeitem':
-          parsedIn.original_message.attachments.forEach((ele, id) => {
-            if (ele.callback_id === parsedIn.callback_id) {
-              index = id;
-            }
-          });
-          cart = yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index, 'team');
-          parsedIn.original_message.attachments = yield updateCartMsg(cart, parsedIn);
+          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
+          co(function*() {
+            parsedIn.original_message.attachments.forEach((ele, id) => {
+              if (ele.callback_id === parsedIn.callback_id) {
+                index = id;
+              }
+            });
+            cart = yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index, 'team'); //'team' assumes this is a slack command. need a way to tell
+            yield updateCartMsg(cart, parsedIn);
+          }).catch(console.log.bind(console));
           break
         case 'removeall':
-          parsedIn.original_message.attachments.forEach((ele, id) => {
-            if (ele.callback_id === parsedIn.callback_id) {
-              index = id;
+          // reduces the quantity right way, but for speed we return a hacked message right away
+          var priceDifference = 0;
+          var updatedMessage = parsedIn.original_message;
+          updatedMessage.attachments = updatedMessage.attachments.reduce((all, a, i) => {
+            if (a.callback_id === parsedIn.callback_id) {
+              var quantity = parseInt(a.text.match(/\d+$/)[0])
+              priceDifference = quantity * parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1));
+              index = i;
+            } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
+              a.text = a.text.replace(/\$(\d{1,3},)*(\d{1,3})(\.\d{0,2})?/g, function(total) {
+                return '$' + (parseFloat(total.substr(1)) - priceDifference).toFixed(2)
+              })
+              all.push(a)
+            } else {
+              all.push(a)
             }
-          });
-
-          cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index);
-          parsedIn.original_message.attachments = yield updateCartMsg(cart, parsedIn);
+            return all
+          }, [])
+          co(function*() {
+            cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index)
+            yield updateCartMsg(cart, parsedIn);
+          }).catch(console.log.bind(console))
           break
       }
     }
@@ -329,64 +350,107 @@ app.post('/slackaction', next(function * (req, res) {
   }
 }))
 
+function clearCartMsg(attachments) {
+  //clears all but the updating message of buttons
+  return attachments.reduce((all, a) => {
+    if (a.callback_id && a.text.includes('Quantity:')) {
+      a.actions = null;
+      a.text += '\nLoading...'
+    }
+    all.push(a);
+    return all;
+  }, []);
+}
+
 function* updateCartMsg(cart, parsedIn) {
-  kip.debug(`parsedIn is: \n ${JSON.stringify(parsedIn, null, 2)}`);
-  let attachments,
-    updatedItemAmt,
-    showButtons = false,
-    cbIdRegex = new RegExp('^' + parsedIn.callback_id + '$', 'i'),
+  kip.debug('Updating Cart')
+  let itemNum = 1,
     team = yield db.slackbots.findOne({
       team_id: parsedIn.team.id
     }),
-    userIsAdmin= team.meta.office_assistants.includes(parsedIn.user.id);
+    userIsAdmin = team.meta.office_assistants.includes(parsedIn.user.id);
 
-  cart.aggregate_items.forEach((ele) => {
-    if (cbIdRegex.test(ele._id)) { //I have no idea why === isn't working here
-      updatedItemAmt = ele.quantity;
-      showButtons = ele.added_by.includes(parsedIn.user.id) || userIsAdmin;
+  let itemData = cart.aggregate_items.reduce((all, ele) => {
+    all[ele._id] = {};
+    all[ele._id].quantity = ele.quantity;
+    all[ele._id].showDetail = ele.added_by.includes(parsedIn.user.id);
+    all[ele._id].added_by = ele.added_by;
+    all[ele._id].title = ele.title;
+    all[ele._id].price = ele.price;
+    all[ele._id].link = ele.link
+    return all;
+  }, {});
+
+  cart.aggregate_items.map(function*(ele) {
+    if (itemData[ele._id].showDetail || userIsAdmin) {
+      itemData[ele._id].link = yield processData.getItemLink(itemData[ele._id].link, parsedIn.user.id, ele._id.toString());
     }
-  });
+  })
 
-  attachments = parsedIn.original_message.attachments.reduce((all, a) => {
-
-    if (parsedIn.callback_id === a.callback_id) {
-      let isZero = updatedItemAmt < 1 || !updatedItemAmt;
-      a.text = a.text.replace(/\d+$/, updatedItemAmt);
-
-      a.actions = showButtons ? [{
-        'id': '1',
+  let attachments = parsedIn.original_message.attachments.reduce((all, a, i) => {
+    if (a.callback_id && itemData[a.callback_id]) {
+      let userString;
+      a.actions = (itemData[a.callback_id].showDetail || userIsAdmin) ? [{
         'name': 'additem',
         'text': '+',
         'style': 'default',
         'type': 'button',
         'value': 'add'
       }, {
-        'id': '2',
         'name': 'removeitem',
         'text': '—',
         'style': 'default',
         'type': 'button',
         'value': 'remove'
       }] : [{
-        'id': '1',
         'name': 'additem',
         'text': '+',
         'style': 'default',
         'type': 'button',
         'value': 'add'
       }];
-      if (!isZero) {
+
+      if (userIsAdmin && itemData[a.callback_id].quantity > 1) {
+        a.actions.push({
+          name: "removeall",
+          text: 'Remove All',
+          style: 'default',
+          type: 'button',
+          value: 'removeall'
+        });
+      }
+      userString = itemData[a.callback_id].added_by.map(function(u) {
+        return '<@' + u + '>';
+      }).join(', ');
+
+      a.text = [
+        `*${itemNum}.* ` + ((userIsAdmin || itemData[a.callback_id].showDetail) ? `<${itemData[a.callback_id].link}|${itemData[a.callback_id].title}>` : itemData[a.callback_id].title),
+        ((userIsAdmin || itemData[a.callback_id].showDetail) ? `*Price:* ${itemData[a.callback_id].price} each` : ''),
+        (userIsAdmin || itemData[a.callback_id].showDetail) ? `*Added by:* ${userString}` : false,
+        `*Quantity:* ${itemData[a.callback_id].quantity}`,
+      ].filter(Boolean).join('\n');
+
+      if (itemData[a.callback_id].quantity > 0) {
         all.push(a);
+        itemNum++;
       }
     } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
       a.text = a.text.replace(/\$(\d{1,3},)*(\d{1,3})(\.\d{0,2})?/g, '$' + cart.total);
       all.push(a);
-    } else {
+    } else if (a.text && !a.text.includes('Quantity:')) {
       all.push(a);
     }
     return all;
   }, []);
-  return attachments;
+
+  parsedIn.original_message.attachments = attachments;
+  if (parsedIn.original_message) {
+    request({
+      method: 'POST',
+      uri: parsedIn.response_url,
+      body: JSON.stringify(parsedIn.original_message)
+    });
+  }
 }
 
 
