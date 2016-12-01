@@ -33,5 +33,11 @@ app.controller('menuController', function ($scope, MenuFactory) {
   $scope.name = "Zafra";
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
-  $scope.test = {};
+  $scope.order = {};
+  $scope.printOrder = function () {
+    console.log($scope.order);
+  }
+  $scope.addToCart = function () {
+    console.log('addedToCart');
+  }
 });
