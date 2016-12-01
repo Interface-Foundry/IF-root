@@ -30,17 +30,25 @@ app.factory('MenuFactory', function ($http, $location) {
 });
 
 app.controller('menuController', function ($scope, MenuFactory) {
-  $scope.name = "Zafra";
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
   $scope.cart = {};
   $scope.total = 0;
-  $scope.printOrder = function () {
-    console.log($scope.cart);
-  }
-  $scope.addToCart = function (item) {
-    console.log('addedToCart', item);
-    if ($scope.cart[item.id]) $scope.cart[item.id].quantity++;
-    else $scope.cart[item.id] = {quantity: 1, name:item.name, options:{}};
+  $scope.inProgress = {};
+
+  $scope.itemDetails = function (item) {
+    var details = {quantity: 1, name: item.name, price: item.price, options: {}};
+    for (var child in item.children) {
+      details.options[item.children[child].name] = {};
+      var opt = item.children[child];
+      for (var selection in opt.children) {
+        details.options[item.children[child].name][opt.children[selection].name] = false;
+      }
+    }
+    
+    $scope.inProgress[item.id] = details;
+    console.log($scope.inProgress);
+    // if ($scope.cart[item.id]) $scope.cart[item.id].quantity++;
+    // else $scope.cart[item.id] = {quantity: 1, name:item.name, options:{}};
   }
 });

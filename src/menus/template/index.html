@@ -41,31 +41,34 @@
         <!-- insert the page content here -->
         <!-- <h1>Type of Food</h1> -->
         <div ng-repeat="item in menu" class="menu_item">
-          <h2 ng-click="addToCart(item)">
+          <h2 ng-click="itemDetails(item)">
             <span class="item_name">{{item.name}}</span>
-            <span class="price">{{item.price}}</span> </h2>
+            <span class="price">{{item.price}}</span>
+          </h2>
           <h3 class="item_description">{{item.description}}</h3>
-          <div ng-repeat="child in item.children">
-            <h4>{{child.name}}</h4>
-            <div ng-show="child.min_selection == 1">
-              <div ng-repeat="option in child.children">
-                <form name="optionForm">
-                  <label>
-                    <input name="option" type="radio" ng-model="$parent.cart[item.id].options[child.name]" ng-value="option.name"/>
-                    {{option.name}} <!-- option.name -->
-                  </label>
-                </form>
+          <div ng-show="$parent.inProgress[item.id]">
+            <div ng-repeat="child in item.children">
+              <h4>{{child.name}}</h4>
+              <div ng-show="child.min_selection == 1">
+                <div ng-repeat="option in child.children">
+                  <form name="optionForm">
+                    <label>
+                      <input type="radio" name="child.name" ng-model="$parent.inProgress[item.id].options[child.name]" ng-value="option.name"/>
+                      {{option.name}} <!-- option.name -->
+                    </label>
+                  </form>
+                </div>
+                <!-- <p ng-repeat="option in child.children">{{option.name}}</p> -->
               </div>
-              <!-- <p ng-repeat="option in child.children">{{option.name}}</p> -->
-            </div>
-            <div ng-show="child.min_selection == 0">
-              <div ng-repeat="option in child.children">
-                <form>
-                  <label>
-                    <input type="checkbox" name="order" ng-model="cart[option.id]" value="true" ng-click="printOrder()"/>
-                    {{option.name}} <!-- option.name -->
-                  </label>
-                </form>
+              <div ng-show="child.min_selection == 0">
+                <div ng-repeat="option in child.children">
+                  <form>
+                    <label>
+                      <input type="checkbox" name="order" ng-model="$parent.inProgress[item.id].options[child.name][$parent.inProgress[item.id].options[child.name].length]"/>
+                      {{option.name}} <!-- option.name -->
+                    </label>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
