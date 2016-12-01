@@ -68,6 +68,7 @@ var deliverySchema = mongoose.Schema({
   // }],
 
   fulfillment_method: String,
+  instructions: String,
   time_started: {
     type: Date,
     default: Date.now

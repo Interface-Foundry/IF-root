@@ -2,6 +2,7 @@
 
 var _ = require('lodash')
 var Menu = require('./Menu')
+var Cart = require('./Cart')
 var api = require('./api-wrapper')
 
 var sleep = require('co-sleep')
@@ -340,11 +341,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         foodSession.save()
       }
       var finalAttachment = {
-        text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
-              `*Taxes:* ${foodSession.order.tax.$}\n` +
-              `*Tip:* ${foodSession.tipAmount.$}\n` +
-              `*Team Order:* ${foodSession.order.total.$}\n` +
-              `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
+        text: `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
         fallback: 'Confirm Choice',
         callback_id: 'admin_order_confirm',
         color: '#49d63a',
@@ -354,22 +351,31 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
       }
 
+      var instructionsButton = {
+        name: 'food.order.instructions',
+        text: '✎ Special Instructions',
+        type: 'button',
+        value: ''
+      }
+
       if (totalPrice < foodSession.chosen_restaurant.minimum) {
         finalAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *_\$${foodSession.chosen_restaurant.minimum}_*`
-        finalAttachment.actions = [{
+        finalAttachment.actions = [
+          instructionsButton, {
           'name': 'food.feedback.new',
           'text': '⇲ Send feedback',
           'type': 'button',
           'value': 'food.feedback.new'
         }]
       } else {
-        finalAttachment.actions = [{
+        finalAttachment.actions = [instructionsButton, {
           'name': `food.admin.order.checkout.confirm`,
           'text': `✓ Checkout ${(foodSession.order.total + foodSession.tipAmount).$}`,
           'type': `button`,
           'style': `primary`,
           'value': `checkout`
-        }, {
+        },
+        instructionsButton, {
           'name': 'food.feedback.new',
           'text': '⇲ Send feedback',
           'type': 'button',
@@ -396,7 +402,24 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           }
         })
       }
-      response.attachments = [mainAttachment].concat(itemAttachments).concat([tipAttachment]).concat([finalAttachment])
+
+      var infoAttachment = {
+        fallback: 'Order Information',
+        text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
+              `*Taxes:* ${foodSession.order.tax.$}\n` +
+              `*Tip:* ${foodSession.tipAmount.$}\n` +
+              `*Team Order:* ${foodSession.order.total.$}`,
+        'callback_id': 'food.admin.cart.info',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'mrkdwn_in': ['text']
+      }
+
+      if (foodSession.instructions) {
+        infoAttachment.text = `*Special Instructions*: _${foodSession.instructions}_\n` + infoAttachment.text
+      }
+
+      response.attachments = _.flatten([mainAttachment, itemAttachments, tipAttachment, infoAttachment, finalAttachment]).filter(Boolean)
     } else {
       // some sort of error
       foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -408,7 +431,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         callback_id: 'foodConfrimOrder_callbackID',
         attachment_type: 'default'
       }
-      response.attachments = [mainAttachment].concat(itemAttachments).concat([finalAttachment])
+      response.attachments = _.flatten([mainAttachment, itemAttachments, finalAttachment]).filter(Boolean)
     }
   } catch (err) {
     logging.error('error with creating cart payment for some reason', err)
@@ -420,6 +443,32 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
   }
 }
+
+handlers['food.order.instructions'] = function * (message) {
+  var msg = {
+    text: `Add Special Instructions`,
+    attachments: [{
+      text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
+      fallback: 'Add Special Instructions',
+      mrkdwn_in: ['text']
+    }]
+  }
+
+  var response = yield $replyChannel.sendReplace(message, 'food.order.instructions.submit', {type: message.origin, data: msg})
+}
+
+handlers['food.order.instructions.submit'] = function * (message) {
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+
+  yield db.Delivery.update({_id: cart.foodSession._id}, {$set: {'instructions': message.text || ''}}).exec()
+  var msg = _.merge({}, message, {
+    text: ''
+  })
+  return yield handlers['food.admin.order.confirm'](msg)
+}
+
+
 
 handlers['food.member.order.view'] = function * (message) {
   // would be S12 stuff for just member here
