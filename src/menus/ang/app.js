@@ -1,58 +1,38 @@
 var app = angular.module('app', []);
 
-app.factory('MenuFactory', function ($http, $location) {
-  // return result of http call
-  var mf = {};
-  var key = $location.search().k;
-
-  var ms = $http.post('/session', {session_token: key})
-    .then(function (response) {
-      return response.data;
-    });
-
-  mf.getMenu = function () {
-    return ms.then(function (ms) {
-      return ms.menu.data;
-    });
-  };
-
-  mf.getRestaurant = function () {
-    return ms.then(function (ms) {
-      console.log('ms', ms);
-      var name = ms && ms.merchant && ms.merchant.name;
-      if (name) return name
-      else return "No name listed";
-      //else console.log('no merchant information');
-    });
-  };
-
-  return mf;
-});
-
 app.controller('menuController', function ($scope, MenuFactory) {
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
-  $scope.cart = [];
   $scope.total = 0;
+  $scope.cart = [];
   $scope.inProgress = {};
 
   $scope.itemDetails = function (item) {
-    var details = {item_qty: 1, name: item.name, id: item.unique_id, price: item.price, options: {}};
-    for (var child in item.children) {
-      details.options[item.children[child].name] = {};
-      var opt = item.children[child];
-      for (var s in opt.children) {
-        var selection = opt.children[s];
-        console.log(selection, "selection is what i think it is right?");
-        details.options[item.children[child].name][opt.children[s].unique_id] = {
-          chosen: false,
-          price: selection.price,
-          name: selection.name
-        };
-      }
+    if ($scope.inProgress[item.id]) {
+      $scope.inProgress[item.id] = null;
     }
-    $scope.inProgress[item.id] = details;
-    console.log($scope.inProgress);
+    else {
+      var details = {item_qty: 1, name: item.name, id: item.unique_id, price: item.price, options: {}};
+      for (var child in item.children) {
+        details.options[item.children[child].name] = {};
+        var opt = item.children[child];
+        for (var s in opt.children) {
+          var selection = opt.children[s];
+          //console.log(selection, "selection is what i think it is right?");
+          details.options[item.children[child].name][opt.children[s].unique_id] = {
+            chosen: false,
+            price: selection.price,
+            name: selection.name
+          };
+        }
+      }
+      $scope.inProgress[item.id] = details;
+    }
+  }
+
+  $scope.formatPrice = function (price) {
+    //console.log('price', price)
+    return (price != 0 ? " + " + price : "");
   }
 
   $scope.validateItem = function (item) {
@@ -63,7 +43,7 @@ app.controller('menuController', function ($scope, MenuFactory) {
       else return false;
     }
 
-    console.log('item to validate:', item);
+    //console.log('item to validate:', item);
     for (var i = 0; i < item.children.length; i++) {
       var opGroup = item.children[i];
       if (opGroup.min_selection) {
@@ -73,9 +53,43 @@ app.controller('menuController', function ($scope, MenuFactory) {
     return true;
   }
 
+  //should just take an item lol
+  $scope.calculateTotal = function (item) {
+    var cost = item.price;
+    // console.log(item, 'item');
+    for (var opt in item.options) {
+      // console.log('in second for loop');
+      var optGroup = item.options[opt];
+      // console.log('optGroup', optGroup)
+      for (var optId in optGroup) {
+        console.log('does this say radio?', optId)
+        var option = optGroup[optId];
+        // console.log('option', option);
+        if (option.chosen) cost += option.price;
+      }
+      // console.log('OPTGROUP', optGroup)
+    }
+    $scope.total += cost;
+    console.log('cart total is now', $scope.total);
+  }
+
   $scope.addToCart = function (item) {
-    $scope.cart.push($scope.inProgress[item.id]);
+    var foodItem = $scope.inProgress[item.id]
+    for (var k in foodItem.options) {
+      opGroup = foodItem.options[k];
+      if (Object.keys(opGroup).indexOf('radio') > -1) {
+        var selectionId = opGroup.radio;
+        opGroup[selectionId].chosen = true;
+        _.remove(opGroup, function (k) {k=='radio'});
+      }
+    }
     console.log($scope.cart, 'carttt');
+    $scope.cart.push($scope.inProgress[item.id]);
+    $scope.total = $scope.calculateTotal($scope.inProgress[item.id]);
     $scope.inProgress[item.id] = null;
+  }
+
+  $scope.checkout = function () {
+    MenuFactory.submitOrder(MenuFactory.formatCart($scope.cart));
   }
 });

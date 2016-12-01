@@ -9,6 +9,7 @@
   <link rel="stylesheet" type="text/css" href="style/style.css" />
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
   <script src="../ang/app.js" defer></script>
+  <script src="../ang/menu.factory.js" defer></script>
 </head>
 
 <body ng-app="app" ng-controller="menuController">
@@ -36,6 +37,9 @@
                 <span class="price">{{item.price}}</span>
               <h4>
             </div>
+            <button ng-click=checkout()>
+              Check out for {{total}}
+            </button>
           </div>
           <div class="sidebar_base"></div>
         </div>
@@ -60,7 +64,7 @@
                   <form name="optionForm">
                     <label>
                       <input type="radio" name="child.name" ng-model="$parent.inProgress[item.id].options[child.name].radio" ng-value="option.unique_id"/>
-                      {{option.name}}
+                      {{option.name}} {{formatPrice(option.price)}}
                     </label>
                   </form>
                 </div>
