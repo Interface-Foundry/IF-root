@@ -265,7 +265,7 @@ handlers['food.admin.order.pay'] = function * (message) {
       'attachment_type': `default`,
       'actions': [{
         'name': `food.admin.add_new_card`,
-        'text': `+ Add new Card`,
+        'text': `+ Add New Card`,
         'type': `button`,
         'value': `add`
       }, {

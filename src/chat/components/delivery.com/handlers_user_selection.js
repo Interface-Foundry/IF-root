@@ -63,7 +63,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     }
     yield foodSession.save()
   } else {
-    textWithPrevChannel = `Send poll for cuisine to the team mebers at \`${addr}\`?`
+    textWithPrevChannel = `Send poll for cuisine to the team members at \`${addr}\`?`
   }
   var msg_json = {
     'attachments': [
