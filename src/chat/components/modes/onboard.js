@@ -21,16 +21,8 @@ var Fuse = require('fuse.js');
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
   if ((!last_action || last_action.indexOf('home') == -1) && (_.get(message,'action') != 'start.supplies')) {
-
-    kip.debug(' \n\n\n\n\n\n\n\n\n ROBO', message,'\n\n\n\n\n\n\n\n\n')
-
     return yield handlers['start'](message);
-
   } else {
-
-    kip.debug(' \n\n\n\n\n\n\n\n\n MOTO \n\n\n\n\n\n\n\n\n')
-
-
     if (!message.data){
       var action = 'text'
     } else {

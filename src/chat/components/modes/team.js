@@ -80,10 +80,11 @@ handlers['start'] = function * (message) {
       attachments: attachments,
       fallback: 'Team Cart Members'
     };
+    var color = '#45a5f4';
     // make all the attachments markdown
     attachments.map(function(a) {
       a.mrkdwn_in =  ['text', 'fields'];
-      a.color = '#45a5f4';
+      a.color = color;
     })
     var msg = message;
     msg.mode = 'team';
@@ -96,7 +97,7 @@ handlers['start'] = function * (message) {
     msg.source.team = team.team_id;
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
     msg.reply = attachments;
-    yield utils.cacheMenu(msg, original, expandable, {text: text})
+    yield utils.cacheMenu(msg, original, expandable, {text: text, color: color})
 
     return [msg];
 }

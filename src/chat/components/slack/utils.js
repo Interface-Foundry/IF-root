@@ -261,10 +261,12 @@ function * showMenu(message) {
     var json = message.source.original_message;
     if (!json.attachments) return;
     var text =  _.get(relevantMessage,'data.text') ?  _.get(relevantMessage,'data.text') : ''
+    var color =  _.get(relevantMessage,'data.color') ?  _.get(relevantMessage,'data.color') : ''
     json.attachments[json.attachments.length-1] = {
         fallback: message.action,
         callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
         text: text,
+        color: color,
         actions: actions
     }
     request({
@@ -281,10 +283,13 @@ function * hideMenu(message, original, expandable, data) {
     var actions = _.get(relevantMessage, 'menus.original[0].data') ? _.get(relevantMessage, 'menus.original[0].data') : cardTemplate.shopping_home_default(message._id);
     var json =  message.source.original_message;
     var text =  _.get(relevantMessage,'data.text') ?  _.get(relevantMessage,'data.text') : ''
+    var color =  _.get(relevantMessage,'data.color') ?  _.get(relevantMessage,'data.color') : ''
+
     json.attachments[json.attachments.length-1] = {
         fallback: message.action,
         callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
         text: text,
+        color: color,
         actions: actions
     };
     request({

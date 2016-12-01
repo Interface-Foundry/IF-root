@@ -104,10 +104,11 @@ handlers['start'] = function * (message) {
   };
   var original = cardTemplate.shopping_settings_default(message._id);
   var expandable = cardTemplate.shopping_home(message._id)
-  var text = 'Don’t have any changes? Type `exit` to quit settings'
+  var text = 'Don’t have any changes? Type `exit` to quit settings';
+  var color = '#45a5f4';
   attachments.push({
       text: text,
-      color: '#49d63a',
+      color: color,
       mrkdwn_in: ['text'],
       fallback:'Settings',
       actions: original,
@@ -120,7 +121,7 @@ handlers['start'] = function * (message) {
       a.color = '#45a5f4';
     })
    var msg = message;
-   yield utils.cacheMenu(msg, original, expandable,  {text: text})
+   yield utils.cacheMenu(msg, original, expandable,  {text: text, color: color})
    msg.mode = 'settings'
    msg.text = ''
    msg.source.team = team_id;
