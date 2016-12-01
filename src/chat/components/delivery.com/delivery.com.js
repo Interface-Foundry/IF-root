@@ -184,22 +184,10 @@ handlers['food.exit.confirm'] = function * (message) {
 //
 handlers['food.begin'] = function * (message) {
   kip.debug('🍕 food order 🌮')
-
-  // send the banner first
-  var msg_json = {
-    attachments: [
-      {
-        'fallback': 'Kip Cafe',
-        'title': '',
-        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
-      }
-    ]
-  }
-  replyChannel.send(message, 'food.admin.select_address', {type: message.origin, data: msg_json})
-  yield handlers['food.admin.select_address'](message)
+  return yield handlers['food.admin.select_address'](message, true)
 }
 
-handlers['food.admin.select_address'] = function * (message) {
+handlers['food.admin.select_address'] = function * (message, banner) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   yield [sleep(1000), slackUtils.getTeamMembers(team)]
@@ -228,6 +216,16 @@ handlers['food.admin.select_address'] = function * (message) {
       'attachment_type': 'default',
       'actions': addressButtons[0]
     }]
+  }
+
+  if (banner) {
+    msg_json.attachments.splice(0, 0,
+      {
+        'fallback': 'Kip Cafe',
+        'title': '',
+        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png',
+        'color': '#3AA3E3',
+      })
   }
 
   if (addressButtons.length > 1) {
@@ -266,8 +264,11 @@ handlers['food.admin.select_address'] = function * (message) {
       'value': 'food.settings.address.remove_select'
     })
   }
-
-  replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  if (!banner) {
+    replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  } else {
+    return replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  }
 }
 
 handlers['food.settings.address.remove_select'] = function * (message) {
@@ -344,6 +345,20 @@ handlers['food.choose_address'] = function * (message) {
     var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     foodSession.chosen_location = location
 
+    // keep the banner
+    var msg_json = {
+      fallback: 'Kip Cafe',
+      attachments: [
+        {
+          'fallback': 'Kip Cafe',
+          'title': '',
+          'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png',
+          'color': '#3AA3E3',
+        }
+      ]
+    }
+    replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
+
     //
     // START OF S2
     //
@@ -382,7 +397,7 @@ handlers['food.choose_address'] = function * (message) {
         }
       ]
     }
-    replyChannel.sendReplace(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
+    replyChannel.send(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
 
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
     var addr = [foodSession.chosen_location.address_1, foodSession.chosen_location.zip_code].join(' ')
