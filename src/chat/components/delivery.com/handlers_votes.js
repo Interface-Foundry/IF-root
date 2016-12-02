@@ -152,7 +152,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   // next filter out restaurants that don't match the keyword if provided
   if (keyword) {
-    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, ['summary.name'], {
+    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, {
       shouldSort: true,
       threshold: 0.8,
       tokenize: true,
@@ -275,7 +275,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   if (message.allow_text_matching) {
     // user typed something
     logging.info('using text matching for cuisine choice')
-    var res = yield utils.matchText(message.text, foodSession.cuisines, ['name'], {
+    var res = yield utils.matchText(message.text, foodSession.cuisines, {
       shouldSort: true,
       threshold: 0.8,
       tokenize: true,

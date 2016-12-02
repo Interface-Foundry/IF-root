@@ -12,20 +12,27 @@ var replyChannel = new UserChannel(queue)
 
 /*
 * use this to match on terms where key_choices are
-* text is what user entered,
-* allChoices is array of all the options to search thru
-* keyChoices is array like ['name'] or ['title', 'children.name']
+* @param {String} text is what user entered,
+* @param {Array} allChoices is array of all the options to search thru
+* @param {Object options is object with everything such as
+  @returns {Array} results from fuse match
+* options = {
+*   threshold: 0.8,
+*   tokenize: true,
+*   matchAllTokens: true,
+*   keys: ['name']
+* }
 */
 function * matchText (text, allChoices, keyChoices, options) {
   // might want to use id, but dont for now
-  if (typeof options === undefined) {
-    options = {
-      shouldSort: true,
-      threshold: 0.4,
-      keys: keyChoices
-    }
+  var baseOptions = {
+    shouldSort: true,
+    threshold: 0.8,
+    tokenize: true,
+    matchAllTokens: true
   }
-  var fuse = new Fuse(allChoices, options)
+  _.merge(baseOptions, options)
+  var fuse = new Fuse(allChoices, baseOptions)
   var res = yield fuse.search(text)
   //
   if (res.length > 0) {
