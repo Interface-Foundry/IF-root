@@ -53,24 +53,8 @@ app.controller('menuController', function ($scope, MenuFactory) {
     return true;
   }
 
-  //TODO should process entire cart, because of deletion and quantities
   $scope.calculateTotal = function (item) {
-    var cost = item.price;
-    // console.log(item, 'item');
-    for (var opt in item.options) {
-      // console.log('in second for loop');
-      var optGroup = item.options[opt];
-      // console.log('optGroup', optGroup)
-      for (var optId in optGroup) {
-        //console.log('does this say radio?', optId)
-        var option = optGroup[optId];
-        // console.log('option', option);
-        if (option != 'radio' && option.chosen) cost += option.price;
-      }
-      // console.log('OPTGROUP', optGroup)
-    }
-    $scope.total += cost;
-    console.log('cart total is now', $scope.total);
+    //TODO should process entire cart, because of deletion and quantities
   }
 
   $scope.addToCart = function (item) {

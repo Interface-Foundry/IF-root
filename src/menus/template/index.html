@@ -27,21 +27,25 @@
     <div id="site_content">
       <div id="sidebar_container">
         <div class="sidebar">
-          <div class="sidebar_top"></div>
-          <div class="sidebar_item">
+          <!-- <div class="sidebar_top"></div> -->
+          <!-- <div class="sidebar_item"> -->
             <!-- insert your sidebar items here -->
             <h3>Cart</h3>
             <div ng-repeat="item in cart">
-              <h4>
-                <span class="item_name">{{item.name}}</span>
-                <span class="price">{{item.price}}</span>
-              <h4>
+              <div class="sidebar_top"></div>
+              <div class="sidebar_item">
+                <h4>
+                  <span class="item_name">{{item.name}}</span>
+                  <span class="price">{{item.price}}</span>
+                <h4>
+              </div>
+              <div class="sidebar_base"></div>
             </div>
             <button ng-click=checkout()>
               Check out for {{total}}
             </button>
-          </div>
-          <div class="sidebar_base"></div>
+          <!-- </div> -->
+          <!-- <div class="sidebar_base"></div> -->
         </div>
       </div>
       <div id="content">

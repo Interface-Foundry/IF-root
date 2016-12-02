@@ -202,10 +202,12 @@ ul#menu li a:hover
   padding: 0;
   margin: 0 0 16px 0;}
 
-.sidebar_item
-{ background: url(side_back.png) repeat-y;
+.sidebar_item {
+  background: url(side_back.png) repeat-y;
   padding: 0 15px;
-  width: 192px;}
+  display: flex; 
+  width: 192px;
+}
 
 .sidebar li a.selected
 { color: #444;}
@@ -335,6 +337,13 @@ table tr td
 .item_description {
   padding-top: .5em;
   padding-right: 2em;
+}
+.menu_item {
+  width: 46%;
+  padding-left: 1.5%;
+  padding-right: 1.5%;
+  margin: .5%;
+  float: left;
 }
 
 h4 {

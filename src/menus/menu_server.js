@@ -82,9 +82,6 @@ app.post('/order', function (req, res) {
       var order = req.body.order;
       var user_id = req.body.user_id;
       var deliv_id = req.body.deliv_id;
-      console.log('order, userid and deliveryid: ', order, user_id, deliv_id);
-      //Hanging here
-      console.log('that, called on deliv_id', new ObjectId(deliv_id));
       var deliv = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
 
       console.log('found the current delivery in the db');
