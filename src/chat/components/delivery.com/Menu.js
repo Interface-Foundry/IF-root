@@ -107,6 +107,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
     text: `*${item.name}*
  ${item.description}`,
     attachments: [{
+      thumb_url: (item.images.length>0 ? item.images[0].url : 'https://kipthis.com/images/kip_head.png'),
       fallback: 'Quantity: ' + cartItem.item.item_qty,
       callback_id: 'quantity',
       color: 'grey',
@@ -133,7 +134,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
       ]
     }]
   }
-
+  
   // options, like radios and checkboxes
   var options = nodeOptions(item, cartItem, validate)
   json.attachments = json.attachments.concat(options)
