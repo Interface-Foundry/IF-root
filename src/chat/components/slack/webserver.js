@@ -159,6 +159,11 @@ app.post('/slackaction', next(function * (req, res) {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
       }
+      else if (simple_command == 'loading_btn') {
+        kip.debug('🛒 LOADING THAT CART 🛒')
+        res.send();
+        return;
+      }
       else if (simple_command == 'help_btn') {
           message.mode = 'banter'
           message.action = 'reply'
@@ -367,8 +372,13 @@ function clearCartMsg(attachments) {
   //clears all but the updating message of buttons
   return attachments.reduce((all, a) => {
     if (a.callback_id && a.text.includes('Quantity:')) {
-      a.actions = null;
-      a.text += '\nLoading...'
+      a.actions = [{
+        'name': 'passthrough',
+        'text': 'Loading...',
+        'style': 'default',
+        'type': 'button',
+        'value': 'loading_btn'
+      }];
     }
     all.push(a);
     return all;
@@ -417,7 +427,7 @@ function* updateCartMsg(cart, parsedIn) {
         'value': 'remove'
       }] : [{
         'name': 'additem',
-        'text': '+',
+        'text': '+ Add',
         'style': 'default',
         'type': 'button',
         'value': 'add'
@@ -438,8 +448,8 @@ function* updateCartMsg(cart, parsedIn) {
 
       a.text = [
         `*${itemNum}.* ` + ((userIsAdmin || itemData[a.callback_id].showDetail) ? `<${itemData[a.callback_id].link}|${itemData[a.callback_id].title}>` : itemData[a.callback_id].title),
-        ((userIsAdmin || itemData[a.callback_id].showDetail) ? `*Price:* ${itemData[a.callback_id].price} each` : ''),
-        (userIsAdmin || itemData[a.callback_id].showDetail) ? `*Added by:* ${userString}` : false,
+        ((userIsAdmin) ? `*Price:* ${itemData[a.callback_id].price} each` : ''),
+        `*Added by:* ${userString}`,
         `*Quantity:* ${itemData[a.callback_id].quantity}`,
       ].filter(Boolean).join('\n');
 

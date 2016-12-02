@@ -50,8 +50,8 @@ module.exports = function*(message, slackbot, highlight_added_item) {
 
     item_message.text = [
       `*${i + 1}.* ` + ((show_everything || addedByUser) ? `<${link}|${item.title}>` : item.title),
-      ((show_everything || addedByUser) ? `*Price:* ${item.price} each`: ''),
-      (show_everything || addedByUser) ? `*Added by:* ${userString}` : false,
+      ((show_everything) ? `*Price:* ${item.price} each`: ''),
+      `*Added by:* ${userString}`,
       `*Quantity:* ${item.quantity}`,
 
     ].filter(Boolean).join('\n');
@@ -82,13 +82,12 @@ module.exports = function*(message, slackbot, highlight_added_item) {
           value: 'removeall'
         })
       }
-
       item_message.actions = buttons;
     } else if (!addedByUser){
       item_message.callback_id = item._id.toString();
       var buttons = [{
         "name": "additem",
-        "text": "+",
+        "text": "+ Add",
         "style": "default",
         "type": "button",
         "value": "add"

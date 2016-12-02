@@ -111,7 +111,6 @@ handlers['shopping.focus'] = function*(message, exec) {
     action: 'focus',
     focus: exec.params.focus
   })
-
 };
 
 // "more"
@@ -388,6 +387,10 @@ handlers['home.detract'] = function*(message, exec) {
    return yield slackUtils.hideMenu(message);
 
 };
+
+handlers['cart.loading'] = function (message) {
+  // nothing to see here
+}
 
 handlers['cart.save'] = function*(message, exec) {
   if (!exec.params.focus) {
