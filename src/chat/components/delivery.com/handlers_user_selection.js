@@ -216,7 +216,7 @@ handlers['food.admin.display_channels'] = function * (message) {
     attachments: groupedButtons.map((buttonGroup) => {
       return {
         'text': ``,
-        'fallback': 'Cant select a channel at this time',
+        'fallback': 'Which team members are you ordering food for?',
         'callback_id': 'channel_select',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -228,7 +228,7 @@ handlers['food.admin.display_channels'] = function * (message) {
   // final attachment with send, edit members, < back
   msg_json.attachments.push({
     'text': ``,
-    'fallback': 'Cant do thing',
+    'fallback': '✓ Send to Members',
     'callback_id': 'channel_select',
     'attachment_type': 'default',
     'actions': [{

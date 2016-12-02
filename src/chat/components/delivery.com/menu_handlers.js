@@ -100,7 +100,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
       {
       thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + (i.parentId%20 + 1) + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.jpg'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
-      fallback: i.name,
+      fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       color: '#3AA3E3',
       attachment_type: 'default',
       'actions': [
@@ -127,7 +127,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
         ]
       }].concat(menuItems).concat([{
       'text': '',
-      'fallback': 'Unable to load menu item',
+      'fallback': 'Food option',
       'callback_id': 'menu_quickpicks',
       'color': '#3AA3E3',
       'attachment_type': 'default',
@@ -291,7 +291,7 @@ handlers['food.item.instructions'] = function * (message) {
     text: `Add Special Instructions for *${item.name}*`,
     attachments: [{
       text: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
-      fallback: 'Unable to add special instructions',
+      fallback: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
       mrkdwn_in: ['text']
     }]
   }

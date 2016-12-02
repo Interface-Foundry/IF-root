@@ -230,7 +230,7 @@ function initiateFoodOrdering (admin) {
     var locationMessage = {}
     locationMessage['text'] = 'Great! Which address is this for?'
     locationMessage['attachments'] = {
-      fallback: 'You are unable to choose a location',
+      fallback: 'Great! Which address is this for?',
       callback_id: 'adminLocationPicker',
       color: '#3AA3E3',
       attachment_type: 'default',
@@ -403,7 +403,7 @@ function * buildRestaurantAttachment (restaurant) {
     'image_url': realImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
-    'fallback': 'You are unable to choose a restaurant',
+    'fallback': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*> - <${shortenedRestaurantUrl}|View Menu>`,
     'attachment_type': 'default',
     'mrkdwn_in': ['text'],
     'actions': [

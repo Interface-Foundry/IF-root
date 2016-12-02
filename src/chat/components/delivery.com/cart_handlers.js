@@ -84,7 +84,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   var bottom = {
     'text': '',
-    'fallback': 'Unable to load price confirm',
+    'fallback': 'Confirm personal cart',
     'callback_id': 'wopr_game',
     'color': '#49d63a',
     'attachment_type': 'default',
@@ -284,7 +284,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
   // main response and attachment
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    fallback: 'You are unable to confirm.',
+    fallback: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     callback_id: 'address_confirm'
   }
 
@@ -302,7 +302,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     textForItem += descriptionString.length > 0 ? `*Options:* ${descriptionString}\n` + `*Added by:* <@${item.user_id}>` : `*Added by:* <@${item.user_id}>`
     return {
       text: textForItem,
-      fallback: 'Unable to load food item',
+      fallback: textForItem,
       callback_id: 'foodInfoItems_wopr',
       color: '#3AA3E3',
       attachment_type: 'default',
@@ -342,7 +342,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }
       var finalAttachment = {
         text: `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
-        fallback: 'Confirm Choice',
+        fallback: `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
         callback_id: 'admin_order_confirm',
         color: '#49d63a',
         attachment_type: 'default',
@@ -387,7 +387,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount.toFixed(2)}`
       var tipAttachment = {
         'title': `Tip: ${tipTitle}`,
-        'fallback': 'Unable to load tip',
+        'fallback': `Tip: ${tipTitle}`,
         'callback_id': 'food.admin.cart.tip',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -404,7 +404,10 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }
 
       var infoAttachment = {
-        fallback: 'Order Information',
+        fallback: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
+              `*Taxes:* ${foodSession.order.tax.$}\n` +
+              `*Tip:* ${foodSession.tipAmount.$}\n` +
+              `*Team Order:* ${foodSession.order.total.$}`,
         text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
               `*Taxes:* ${foodSession.order.tax.$}\n` +
               `*Tip:* ${foodSession.tipAmount.$}\n` +
@@ -427,7 +430,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       var errorMsg = `Looks like there are ${deliveryError.length} total errors including: ${deliveryError[0].user_msg}`
       finalAttachment = {
         text: errorMsg,
-        fallback: 'Confirm Choice',
+        fallback: errorMsg,
         callback_id: 'foodConfrimOrder_callbackID',
         attachment_type: 'default'
       }
@@ -449,7 +452,7 @@ handlers['food.order.instructions'] = function * (message) {
     text: `Add Special Instructions`,
     attachments: [{
       text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
-      fallback: 'Add Special Instructions',
+      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
       mrkdwn_in: ['text']
     }]
   }

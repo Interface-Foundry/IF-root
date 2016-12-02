@@ -61,7 +61,7 @@ handlers['food.admin.team.members'] = function * (message) {
   }
 
   var buttons = {
-    fallback: 'You are unable to navigate the admin option menu',
+    fallback: 'Button',
     'color': '#3AA3E3',
     actions: []
   }

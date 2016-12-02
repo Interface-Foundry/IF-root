@@ -108,7 +108,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
  ${item.description}`,
     attachments: [{
       image_url: (item.images.length>0 ? 'https://res.cloudinary.com/delivery-com/image/fetch/w_300,h_240,c_fit/' + encodeURIComponent(item.images[0].url) : ''),
-      fallback: 'Quantity: ' + cartItem.item.item_qty,
+      fallback: item.name + ' - ' + item.description,
       callback_id: 'quantity',
       color: 'grey',
       attachment_type: 'default',
@@ -140,7 +140,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
     'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"}`,
-    'fallback': 'Unable to load food options.',
+    'fallback': `*Special Instructions:* ${cartItem.item.instructions || "_None_"}`,
     'callback_id': 'menu_quickpicks',
     'color': '#49d63a',
     'attachment_type': 'default',

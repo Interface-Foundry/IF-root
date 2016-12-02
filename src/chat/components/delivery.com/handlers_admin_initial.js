@@ -41,7 +41,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     'attachments':
     [{
       'text': 'Great! Which address is this for?',
-      'fallback': 'You are unable to choose an address',
+      'fallback': 'Great! Which address is this for?',
       'callback_id': 'address',
       'color': '#3AA3E3',
       'attachment_type': 'default',
@@ -63,7 +63,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     addressButtons.slice(1).map(group => {
       msg_json.attachments.push({
         'text': '',
-        'fallback': 'You are unable to choose an address',
+        'fallback': 'Select address',
         'callback_id': 'address',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -76,7 +76,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   // if (_.get(team, 'meta.locations').length > 1) {
   msg_json.attachments.push({
     'text': '',
-    'fallback': 'You are unable to remove an address',
+    'fallback': 'Remove an address',
     'callback_id': 'remove_address',
     'attachment_type': 'default',
     'actions': [{
@@ -121,7 +121,7 @@ handlers['food.settings.address.remove_select'] = function * (message) {
     attachments: _.chunk(addressButtons, 5).map(group => {
       return {
         'text': '',
-        'fallback': 'You are unable to remove an address',
+        'fallback': 'Which address should I remove?',
         'callback_id': 'remove_address',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -132,7 +132,7 @@ handlers['food.settings.address.remove_select'] = function * (message) {
 
   msg_json.attachments.push({
     'text': '',
-    'fallback': 'You are unable to go back',
+    'fallback': 'None, go back',
     'callback_id': 'back_remove_address',
     'attachment_type': 'default',
     'actions': [{
@@ -201,7 +201,7 @@ handlers['food.choose_address'] = function * (message) {
             'text'
           ],
           'text': text,
-          'fallback': 'You did not choose a fulfillment method :/',
+          'fallback': text,
           'callback_id': 'wopr_game',
           'color': '#3AA3E3',
           'attachment_type': 'default',
@@ -252,7 +252,7 @@ handlers['food.settings.address.new'] = function * (message) {
   var msg_json = {
     'text': "What's the address for the order?",
     'attachments': [{
-      'fallback': 'Unable to enter new address',
+      'fallback': "What's the address for the order?",
       'text': '✎ Type your address below (Example: _902 Broadway 10010_)',
       'mrkdwn_in': ['text']
     }]
@@ -308,7 +308,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ],
-        'fallback': 'You are unable to confirm.',
+        'fallback': text,
         'callback_id': 'settings_address_new',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -385,7 +385,7 @@ handlers['food.feedback.new'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ],
-        'fallback': 'What can we improve?',
+        'fallback': text,
         'callback_id': JSON.stringify(message),
         'attachment_type': 'default'
       }
@@ -522,7 +522,7 @@ handlers['food.admin_polling_options'] = function * (message) {
       'text'
     ],
     'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
-    'fallback': 'You are unable to start a poll.',
+    'fallback': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
@@ -587,7 +587,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     'text': '',
     'attachments': [{
       'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
-      'fallback': 'Unable to confirm selection of previous restaurant',
+      'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
       'callback_id': 'reordering_confirmation',
       'color': '#3AA3E3',
       'attachment_type': 'default',
@@ -630,7 +630,7 @@ handlers['food.restaurants.list'] = function * (message) {
         ],
         'text': '',
         'image_url': 'http://i.imgur.com/iqjT5iJ.png',
-        'fallback': 'Unable to list the restaurant.',
+        'fallback': 'Restaurant 1',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -657,7 +657,7 @@ handlers['food.restaurants.list'] = function * (message) {
           'text'
         ],
         'text': '',
-        'fallback': 'Unable to list the restaurant.',
+        'fallback': 'Restaurant 2',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -684,7 +684,7 @@ handlers['food.restaurants.list'] = function * (message) {
           'text'
         ],
         'text': '',
-        'fallback': 'Unable to list the restaurant.',
+        'fallback': 'Restaurant 3',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -709,7 +709,7 @@ handlers['food.restaurants.list'] = function * (message) {
           'text'
         ],
         'text': '',
-        'fallback': 'Unable to load change list of restaurants.',
+        'fallback': 'Other options',
         'callback_id': 'wopr_game',
         'attachment_type': 'default',
         'actions': [
@@ -789,7 +789,7 @@ handlers['food.restaurants.list.recent'] = function * (message) {
       'text'
     ],
     'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
-    'fallback': 'You are unable to start a poll.',
+    'fallback': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',

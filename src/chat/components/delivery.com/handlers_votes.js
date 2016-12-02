@@ -58,13 +58,13 @@ function voteMessage (foodSession) {
 
   var res = {
     text: `<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!`,
-    fallback: 'You are unable to vote for lunch preferences',
+    fallback: '<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!',
     callback_id: 'food.user.poll',
     color: '#3AA3E3',
     attachment_type: 'default',
     attachments: [{
       'text': 'Type what you want or tap a button',
-      'fallback': 'You are unable to tap a button',
+      'fallback': 'Type what you want or tap a button',
       'callback_id': 'food.user.poll',
       'color': '#3AA3E3',
       'attachment_type': 'default',
@@ -76,7 +76,7 @@ function voteMessage (foodSession) {
 
 var userFoodPreferencesPlaceHolder = {
   text: 'Here we would ask user for preferences if they didnt have it',
-  fallback: 'You are unable to confirm preferences',
+  fallback: 'Any preferences?',
   callback_id: 'confirm.user.preferences',
   color: 'grey',
   attachment_type: 'default',
@@ -345,7 +345,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`,
-      fallback: 'Unable to load votes',
+      fallback: `*Votes from the group* 👋\n${votes}`,
       callback_id: 'admin_restaurant_pick',
       actions: [{
         name: 'food.feedback.new',
@@ -497,7 +497,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       'text'
     ],
     'text': '',
-    'fallback': 'You are unable to pick a restaurant',
+    'fallback': 'Restaurant',
     'callback_id': 'admin_restaurant_pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
@@ -603,7 +603,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
           'text'
         ],
         'text': 'Want to be in this order?',
-        'fallback': 'n/a',
+        'fallback': 'Want to be in this order?',
         'callback_id': 'food.participate.confirmation',
         'color': '#3AA3E3',
         'attachment_type': 'default',
