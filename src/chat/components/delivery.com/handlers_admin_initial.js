@@ -179,65 +179,70 @@ handlers['food.choose_address'] = function * (message) {
     // keep the banner
     var msg_json = {
       fallback: 'Kip Cafe',
+      text: 'Searching your area for good food...',
       attachments: [
         {
           'fallback': 'Kip Cafe',
           'title': '',
           'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png',
-          'color': '#3AA3E3',
+          'color': '#3AA3E3'
         }
       ]
     }
     $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
 
+    foodSession.fulfillment_method = 'delivery'
     //
-    // START OF S2
+    // Commented out until pickup is reimplemented ----------------------------
     //
-    var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
-    var msg_json = {
-      'attachments': [
-        {
-          'mrkdwn_in': [
-            'text'
-          ],
-          'text': text,
-          'fallback': text,
-          'callback_id': 'wopr_game',
-          'color': '#3AA3E3',
-          'attachment_type': 'default',
-          'actions': [
-            {
-              'name': 'food.delivery_or_pickup',
-              'text': 'Delivery',
-              'type': 'button',
-              'value': 'delivery'
-            },
-            {
-              'name': 'food.delivery_or_pickup',
-              'text': 'Pickup',
-              'type': 'button',
-              'value': 'pickup'
-            },
-            {
-              'name': 'food.settings.address.change',
-              'text': '< Change Address',
-              'type': 'button',
-              'value': 'food.settings.address.change'
-            }
-          ]
-        }
-      ]
-    }
-    $replyChannel.send(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
+    // var text = `Cool! You selected \`${location.address_1}\`. We are only doing delivery (no pickup) right now, is that okay?`
+    // var msg_json = {
+    //   'attachments': [
+    //     {
+    //       'mrkdwn_in': [
+    //         'text'
+    //       ],
+    //       'text': text,
+    //       'fallback': text,
+    //       'callback_id': 'wopr_game',
+    //       'color': '#3AA3E3',
+    //       'attachment_type': 'default',
+    //       'actions': [
+    //         {
+    //           'name': 'food.delivery_or_pickup',
+    //           'text': 'Yep!',
+    //           'type': 'button',
+    //           'value': 'delivery'
+    //         },
+    //         // REMOVING THIS UNTIL WE RE ADD PICKUP
+    //         // {
+    //         //   'name': 'food.delivery_or_pickup',
+    //         //   'text': 'Pickup',
+    //         //   'type': 'button',
+    //         //   'value': 'pickup'
+    //         // },
+    //         {
+    //           'name': 'food.settings.address.change',
+    //           'text': '< Change Address',
+    //           'type': 'button',
+    //           'value': 'food.settings.address.change'
+    //         }
+    //       ]
+    //     }
+    //   ]
+    // }
+    // $replyChannel.send(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
+    // ------------------------------------------------------------------------
 
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
     var addr = [foodSession.chosen_location.address_1, foodSession.chosen_location.zip_code].join(' ')
-    var res = yield api.searchNearby({addr: addr})
+    var res = yield api.searchNearby({addr: addr, pickup: false})
     foodSession.merchants = _.get(res, 'merchants')
     foodSession.cuisines = _.get(res, 'cuisines')
     foodSession.markModified('merchants')
     foodSession.markModified('cuisines')
     yield foodSession.save()
+    yield handlers['food.admin_polling_options'](message)
   } else {
     throw new Error('this route does not handle text input')
   }
