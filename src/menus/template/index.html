@@ -49,9 +49,7 @@
                 <span class="fewer_btn">
                   <button ng-click="changeQuantity(item.id, -1)">-</button>
                 </span>
-                <span>
-                  <input placeholder="1" ng-model="item.item_qty"></input>
-                </span>
+                <span>{{item.item_qty}}</span>
                 <span class="more_btn">
                   <button ng-click="changeQuantity(item.id, 1)">+</button>
                 </span>

@@ -1,6 +1,6 @@
 var app = angular.module('app', []);
 
-app.controller('menuController', function ($scope, MenuFactory) {
+app.controller('menuController', function ($scope, $window, MenuFactory) {
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
   $scope.total = 0;
@@ -12,14 +12,14 @@ app.controller('menuController', function ($scope, MenuFactory) {
   $scope.toggleCategory = function (cat) {
     if ($scope.categories[cat]) $scope.categories[cat] = false;
     else $scope.categories[cat] = true;
-  }
+  };
 
   $scope.itemDetails = function (item) {
     if ($scope.inProgress[item.id]) {
       $scope.inProgress[item.id] = null;
     }
     else {
-      var details = {item_qty: 1, name: item.name, id: item.unique_id, price: item.price, options: {}};
+      var details = {item_qty: 1, max_qty: item.max_qty, name: item.name, id: item.unique_id, price: item.price, options: {}};
       for (var child in item.children) {
         details.options[item.children[child].name] = {};
         var opt = item.children[child];
@@ -35,12 +35,12 @@ app.controller('menuController', function ($scope, MenuFactory) {
       }
       $scope.inProgress[item.id] = details;
     }
-  }
+  };
 
   $scope.formatPrice = function (price) {
     //console.log('price', price)
-    return (price != 0 ? " + " + price : "");
-  }
+    return (price !== 0 ? " + " + price : "");
+  };
 
   $scope.validateItem = function (item) {
 
@@ -48,7 +48,7 @@ app.controller('menuController', function ($scope, MenuFactory) {
       var radio = $scope.inProgress[item.id].options[option];
       if (Object.keys(radio).indexOf('radio') >= 0) return true;
       else return false;
-    }
+    };
 
     //console.log('item to validate:', item);
     for (var i = 0; i < item.children.length; i++) {
@@ -58,30 +58,24 @@ app.controller('menuController', function ($scope, MenuFactory) {
       }
     }
     return true;
-  }
+  };
 
   $scope.addItemPrice = function (item) {
     var cost = item.price;
-    // console.log(item, 'item');
     for (var opt in item.options) {
-      // console.log('in second for loop');
       var optGroup = item.options[opt];
-      // console.log('optGroup', optGroup)
       for (var optId in optGroup) {
-        //console.log('does this say radio?', optId)
         var option = optGroup[optId];
-        //  console.log('option', option);
         if (option != 'radio' && option.chosen) cost += option.price;
       }
-      // console.log('OPTGROUP', optGroup)
     }
     $scope.total += cost;
-    console.log('cart total is now', $scope.total);
-  }
+  };
 
   $scope.addToCart = function (item) {
     console.log('ITEM', item);
-    var foodItem = $scope.inProgress[item.id]
+    var foodItem = $scope.inProgress[item.id];
+    if (foodItem.item_qty > item.max_qty) foodItem.item_qty = item.max_qty;
     for (var k in foodItem.options) {
       opGroup = foodItem.options[k];
       // console.log('opGroup!!', opGroup)
@@ -89,14 +83,13 @@ app.controller('menuController', function ($scope, MenuFactory) {
         var selectionId = opGroup.radio;
         opGroup[selectionId].chosen = true;
       }
-      for (var k in opGroup) {
-        if (opGroup[k].chosen) {
-          if ($scope.options[item.unique_id]) $scope.options[item.unique_id].push([opGroup[k].name, opGroup[k].price])
-          else $scope.options[item.unique_id] = [[opGroup[k].name, opGroup[k].price]];
+      for (var key in opGroup) {
+        if (opGroup[key].chosen) {
+          if ($scope.options[item.unique_id]) $scope.options[item.unique_id].push([opGroup[key].name, opGroup[key].price]);
+          else $scope.options[item.unique_id] = [[opGroup[key].name, opGroup[key].price]];
         }
       }
     }
-    console.log($scope.options, 'options');
     console.log($scope.cart, 'cart');
 
     $scope.inProgress[item.id].instructions = window.prompt("Do you have any special instructions?");
@@ -104,7 +97,7 @@ app.controller('menuController', function ($scope, MenuFactory) {
     $scope.cart.push($scope.inProgress[item.id]);
     $scope.addItemPrice($scope.inProgress[item.id]);
     $scope.inProgress[item.id] = null;
-  }
+  };
 
   $scope.changeQuantity = function (item_id, diff) {
     for (var i = 0; i < $scope.cart.length; i++) {
@@ -114,21 +107,20 @@ app.controller('menuController', function ($scope, MenuFactory) {
           if (! window.confirm("Are you sure you want to delete this item from your cart?")) {
             return null;
           }
-          //delete item from cart
           $scope.cart.splice(i, 1);
           console.log($scope.cart);
         }
+        else if ($scope.cart[i].item_qty + diff > $scope.cart[i].max_qty) {
+          return;
+        }
         else {
-          //just change quantity
-          console.log('speakerboxxx')
           $scope.cart[i].item_qty += diff;
         }
       }
     }
-  }
+  };
 
   $scope.checkout = function () {
     MenuFactory.submitOrder(MenuFactory.formatCart($scope.cart));
-    window.close();
-  }
+  };
 });
