@@ -191,8 +191,21 @@ app.post('/slackaction', next(function * (req, res) {
             value: channel.id
           }
         });
+        var buttonRow;
         var json = parsedIn.original_message;
-        json.attachments[json.attachments.length-2] = {text: 'Channels: ', actions: buttons, callback_id: "none"}
+        for (var i = 0; i < buttons.length; i++) {
+          if (buttons[i].value === channelId) {
+            buttonRow = Math.floor(i/5);
+          }
+        }
+        var chunkedButtons = _.chunk(buttons, 5);
+        var newRow = {
+          text: buttonRow == 0 ? 'Which channels do you want to include? ' : '',
+          actions: chunkedButtons[buttonRow],
+          callback_id: 'none',
+        }
+        json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
+                                                           // maybe I just don't understand slack yet
         request({
           method: 'POST',
           uri: message.source.response_url,

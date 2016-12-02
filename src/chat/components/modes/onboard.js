@@ -383,6 +383,7 @@ handlers['bundle'] = function * (message, data) {
    msg.mode = 'onboard'
    msg.action = 'home';
    msg.text = ''
+   msg.fallback = 'Awesome! You added your first bundle.'
    msg.source.team = message.source.team;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
@@ -412,12 +413,18 @@ handlers['team'] = function * (message) {
     var checkbox = cartChannels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
       return {
         name: 'channel_btn',
-        text: checkbox + channel.name ,
+        text: checkbox + channel.name,
         type: 'button',
         value: channel.id
       }
   });
-  attachments.push({text: 'Which channels do you want to include? ', actions: buttons, callback_id: "none"});
+  var chunkedButtons = _.chunk(buttons, 5);
+  attachments.push({text: 'Which channels do you want to include? ', actions: chunkedButtons[0], callback_id: "none"});
+  chunkedButtons.forEach((ele, i) => {
+    if (i != 0) {
+      attachments.push({text:'', actions: ele, callback_id: 'none'});
+    }
+  })
   attachments.push({
       text: '',
       color: '#45a5f4',
