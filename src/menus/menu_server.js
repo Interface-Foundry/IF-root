@@ -25,6 +25,9 @@ app.use('/ang', express.static('ang'));
 var MenuSession = db.Menu_session;
 var Menu = db.Menu;
 var Merchant = db.Merchant;
+var Delivery = db.Delivery;
+
+var ObjectId = require('mongodb').ObjectID;
 
 //require('../chat/components/delivery.com/scrape_menus.js');
 
@@ -36,13 +39,11 @@ app.post('/cafe', (req, res) => co(function * () {
   });
 
   var rest_id = req.body.rest_id;
-
   var result = yield Menu.findOne({merchant_id: rest_id});
 
   ms.menu.data = cafeMenu(result.raw_menu).allItems();
-
-  ms.deliveryId = req.body.delivery_ObjectId;;
-
+  ms.foodSessionId = req.body.delivery_ObjectId;
+  ms.userId = req.body.user_id;
   ms.merchant.id = rest_id;
   merchant = yield Merchant.findOne({id: rest_id});
   ms.merchant.name = merchant.data.summary.name;
@@ -71,8 +72,41 @@ app.post('/session', (req, res) => co(function * () {
 
 //updates the correct delivery object in the db
 //with the delivery object id saved on the menu session
+
+//TODO: post to /order is hanging
+
 app.post('/order', function (req, res) {
-  //TODO
+  co(function * () {
+    console.log('post to /order');
+    if (_.get(req, 'body')) {
+      var order = req.body.order;
+      var user_id = req.body.user_id;
+      var deliv_id = req.body.deliv_id;
+      console.log('order, userid and deliveryid: ', order, user_id, deliv_id);
+      //Hanging here
+      console.log('that, called on deliv_id', new ObjectId(deliv_id));
+      var deliv = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
+
+      console.log('found the current delivery in the db');
+      var cart = deliv.cart;
+
+      console.log('the delivery has a cart: ', deliv.cart);
+
+      for (var i = 0; i < order.length; i++) {
+        cart.push({
+          added_to_cart: true,
+          item: order[i],
+          user_id: user_id
+        });
+      }
+
+      console.log('updated the cart locally')
+
+      yield db.delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart}});
+
+      console.log('db should be updated with the order!');
+    }
+  });
 });
 
 var port = 8001

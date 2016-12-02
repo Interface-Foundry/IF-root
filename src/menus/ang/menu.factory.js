@@ -5,8 +5,22 @@ app.factory('MenuFactory', function ($http, $location) {
 
   var ms = $http.post('/session', {session_token: key})
     .then(function (response) {
+      console.log('this is the ms!!', response.data);
       return response.data;
-    });
+    })
+
+  mf.getUserId = function () {
+    return ms.then(function (ms) {
+      console.log('this should have a userId on it', ms);
+      return ms.userId;
+    })
+  };
+
+  mf.getFoodSessionId = function () {
+    return ms.then(function (ms) {
+      return ms.foodSessionId;
+    })
+  }
 
   mf.getMenu = function () {
     return ms.then(function (ms) {
@@ -20,12 +34,10 @@ app.factory('MenuFactory', function ($http, $location) {
       var name = ms && ms.merchant && ms.merchant.name;
       if (name) return name
       else return "No name listed";
-      //else console.log('no merchant information');
     });
   };
 
   mf.formatCart = function (oldCart) {
-    //TODO
     console.log("I am formating the cart")
     console.log('CART', oldCart);
     var cart = [];
@@ -48,12 +60,20 @@ app.factory('MenuFactory', function ($http, $location) {
 
     console.log('new cart::', cart);
     return cart;
-  }
+  };
 
   mf.submitOrder = function (cart) {
-    //TODO
-    console.log("submitting the order");
-  }
+    ms.then(function (ms) {
+      return $http.post('/order', {
+        order: cart,
+        user_id: ms.userId,
+        deliv_id: ms.foodSessionId
+      })
+      .then(function (result) {
+        console.log('order submission successful');
+      });
+    });
+  };
 
   return mf;
 });
