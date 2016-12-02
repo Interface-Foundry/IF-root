@@ -31,6 +31,7 @@ app.factory('MenuFactory', function ($http, $location) {
       var item = {};
       item.item_id = oldCart[i].id;
       item.item_qty = oldCart[i].item_qty;
+      item.instructions = oldCart[i].instructions;
       item.options = {};
       for (var group in oldCart[i].options) {
         var opGroup = oldCart[i].options[group];

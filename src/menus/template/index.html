@@ -37,9 +37,25 @@
                 <h4>
                   <span class="item_name">{{item.name}}</span>
                   <span class="price">{{item.price}}</span>
-                <h4>
+                </h4>
+                <div ng-repeat="selected in options[item.id]">
+                  <h5>
+                    {{selected[0]}} (+ {{selected[1]}})
+                  </h5>
+                </div>
               </div>
               <div class="sidebar_base"></div>
+              <div class="qty_area">
+                <span class="fewer_btn">
+                  <button ng-click="changeQuantity(item.id, -1)">-</button>
+                </span>
+                <span>
+                  <input placeholder="1" ng-model="item.item_qty"></input>
+                </span>
+                <span class="more_btn">
+                  <button ng-click="changeQuantity(item.id, 1)">+</button>
+                </span>
+              </div>
             </div>
             <button class="checkout_btn" ng-click=checkout()>
               Check out for {{total}}
@@ -86,6 +102,12 @@
                       </label>
                     </form>
                   </div>
+                </div>
+              </div>
+              <div>
+                <h5>How many would you like?</h5>
+                <div>
+                  <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
                 </div>
               </div>
             </div>

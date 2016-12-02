@@ -7,11 +7,11 @@ app.controller('menuController', function ($scope, MenuFactory) {
   $scope.cart = [];
   $scope.inProgress = {};
   $scope.categories = {};
+  $scope.options = {};
 
   $scope.toggleCategory = function (cat) {
     if ($scope.categories[cat]) $scope.categories[cat] = false;
     else $scope.categories[cat] = true;
-    console.log(cat);
   }
 
   $scope.itemDetails = function (item) {
@@ -75,28 +75,60 @@ app.controller('menuController', function ($scope, MenuFactory) {
       }
       // console.log('OPTGROUP', optGroup)
     }
-    console.log('these should both be numbers:', $scope.total, cost);
     $scope.total += cost;
     console.log('cart total is now', $scope.total);
   }
 
   $scope.addToCart = function (item) {
+    console.log('ITEM', item);
     var foodItem = $scope.inProgress[item.id]
     for (var k in foodItem.options) {
       opGroup = foodItem.options[k];
+      // console.log('opGroup!!', opGroup)
       if (Object.keys(opGroup).indexOf('radio') > -1) {
         var selectionId = opGroup.radio;
         opGroup[selectionId].chosen = true;
-        //_.remove(opGroup, function (k) {k=='radio'});
+      }
+      for (var k in opGroup) {
+        if (opGroup[k].chosen) {
+          if ($scope.options[item.unique_id]) $scope.options[item.unique_id].push([opGroup[k].name, opGroup[k].price])
+          else $scope.options[item.unique_id] = [[opGroup[k].name, opGroup[k].price]];
+        }
       }
     }
+    console.log($scope.options, 'options');
     console.log($scope.cart, 'cart');
+
+    $scope.inProgress[item.id].instructions = window.prompt("Do you have any special instructions?");
+
     $scope.cart.push($scope.inProgress[item.id]);
     $scope.addItemPrice($scope.inProgress[item.id]);
     $scope.inProgress[item.id] = null;
   }
 
+  $scope.changeQuantity = function (item_id, diff) {
+    for (var i = 0; i < $scope.cart.length; i++) {
+      if ($scope.cart[i].id == item_id) {
+        $scope.cart[i].item_qty = Number($scope.cart[i].item_qty);
+        if (diff + $scope.cart[i].item_qty <= 0) {
+          if (! window.confirm("Are you sure you want to delete this item from your cart?")) {
+            return null;
+          }
+          //delete item from cart
+          $scope.cart.splice(i, 1);
+          console.log($scope.cart);
+        }
+        else {
+          //just change quantity
+          console.log('speakerboxxx')
+          $scope.cart[i].item_qty += diff;
+        }
+      }
+    }
+  }
+
   $scope.checkout = function () {
     MenuFactory.submitOrder(MenuFactory.formatCart($scope.cart));
+    window.close();
   }
 });
