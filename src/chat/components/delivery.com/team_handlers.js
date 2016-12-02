@@ -76,7 +76,7 @@ handlers['food.admin.team.members'] = function * (message) {
 
   buttons.actions.push({
     name: 'food.user.poll',
-    text: 'Send Poll',
+    text: '✓ Send Poll',
     type: 'button',
     style: 'primary'
   })

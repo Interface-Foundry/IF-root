@@ -221,7 +221,13 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
         text: 'Finish Order Early',
         style: 'default',
         type: 'button',
-        value: 'food.admin.order.confirm'
+        value: 'food.admin.order.confirm',
+        confirm: {
+            "title": "Finish Order Early?",
+            "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
+            "ok_text": "Yes",
+            "dismiss_text": "No"
+        }
       }]
     })
   }
