@@ -584,6 +584,13 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
 }
 
+handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.menu = yield api.getMenu(foodSession.chosen_restaurant.id)
+  yield foodSession.save()
+  yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
+}
+
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
