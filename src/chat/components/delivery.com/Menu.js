@@ -102,7 +102,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
 
   // Price for the Add To Cart button
   var fullPrice = menu.getCartItemPrice(cartItem)
-  
+
   var json = {
     text: `*${item.name}*
  ${item.description}`,
@@ -134,7 +134,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
       ]
     }]
   }
-  
+
   // options, like radios and checkboxes
   var options = nodeOptions(item, cartItem, validate)
   json.attachments = json.attachments.concat(options)
@@ -192,12 +192,12 @@ function nodeOptions (node, cartItem, validate) {
     var allowMultiple = true
     var numSelected = g.children.filter(option => Object.keys(cartItem.item.option_qty).includes(option.unique_id.toString())).length
     if (g.min_selection === 0) {
-      if (g.max_selection > 4) {
+      if (g.max_selection >= g.children.length) {
         a.text += '\n Optional - Choose as many as you like.'
       } else {
         a.text += `
  Optional - Choose up to ${g.max_selection}.`
-        if (validate && numSelected > g.max_selection) {
+        if (numSelected > g.max_selection) {
           a.text += '\n`Maximum number of options exceeded`'
           a.color = '#fa951b'
         }
@@ -208,8 +208,11 @@ function nodeOptions (node, cartItem, validate) {
         allowMultiple = g.min_selection !== 1
         a.text += `
  Required - Choose exactly ${g.min_selection}.`
-        if (validate && numSelected === 0) {
-          a.text += '\n`Option Required`'
+        if (numSelected > g.min_selection) {
+          a.text += `\n\`Too many options selected\``
+          a.color = '#fa951b'
+        } else if (validate && numSelected < g.min_selection) {
+          a.text += `\n\`${g.min_selection - numSelected} more selection(s) required\``
           a.color = '#fa951b'
         }
       } else {
