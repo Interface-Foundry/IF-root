@@ -5,25 +5,12 @@ app.factory('MenuFactory', function ($http, $location) {
 
   var ms = $http.post('/session', {session_token: key})
     .then(function (response) {
-      console.log('this is the ms!!', response.data);
       return response.data;
     })
 
-  mf.getUserId = function () {
-    return ms.then(function (ms) {
-      console.log('this should have a userId on it', ms);
-      return ms.userId;
-    })
-  };
-
-  mf.getFoodSessionId = function () {
-    return ms.then(function (ms) {
-      return ms.foodSessionId;
-    })
-  }
-
   mf.getMenu = function () {
     return ms.then(function (ms) {
+      console.log('MENU', ms.menu.data)
       return ms.menu.data;
     });
   };
@@ -38,8 +25,6 @@ app.factory('MenuFactory', function ($http, $location) {
   };
 
   mf.formatCart = function (oldCart) {
-    console.log("I am formating the cart")
-    console.log('CART', oldCart);
     var cart = [];
 
     for (var i in oldCart) {

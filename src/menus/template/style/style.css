@@ -205,7 +205,7 @@ ul#menu li a:hover
 .sidebar_item {
   background: url(side_back.png) repeat-y;
   padding: 0 15px;
-  display: flex; 
+  display: flex;
   width: 192px;
 }
 
@@ -344,6 +344,21 @@ table tr td
   padding-right: 1.5%;
   margin: .5%;
   float: left;
+}
+.checkout_btn {
+  padding: .2em .6em .2em .6em;
+  margin-top: 1em;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+.category_name {
+  width: 100%;
+  border-style: dashed;
+  border-width: thin;
+  border-color: orange;
+  display: block;
+  clear: both;
 }
 
 h4 {

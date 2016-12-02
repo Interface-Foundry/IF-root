@@ -41,7 +41,8 @@ app.post('/cafe', (req, res) => co(function * () {
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
-  ms.menu.data = cafeMenu(result.raw_menu).allItems();
+  ms.menu.data = result.raw_menu.menu;
+  //ms.menu.data = cafeMenu(result.raw_menu);
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.userId = req.body.user_id;
   ms.merchant.id = rest_id;
@@ -72,8 +73,6 @@ app.post('/session', (req, res) => co(function * () {
 
 //updates the correct delivery object in the db
 //with the delivery object id saved on the menu session
-
-//TODO: post to /order is hanging
 
 app.post('/order', function (req, res) {
   co(function * () {
