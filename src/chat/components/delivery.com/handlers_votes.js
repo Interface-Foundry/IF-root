@@ -352,14 +352,14 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       callback_id: 'admin_restaurant_pick',
     }]
   }
-  if (feedbackOn && dashboard) {
-    dashboard.attachments[0].actions.push({
-      name: 'food.feedback.new',
-      text: '⇲ Send feedback',
-      type: 'button',
-      value: 'food.feedback.new'
-    })
-  }
+  // if (feedbackOn && dashboard) {
+  //   dashboard.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
 
   if (slackers.length > 0) {
     dashboard.attachments.push({

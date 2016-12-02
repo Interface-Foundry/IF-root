@@ -373,14 +373,14 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         instructionsButton
         ]
       }
-      if (feedbackOn && finalAttachment) {
-        finalAttachment.actions.push({
-          name: 'food.feedback.new',
-          text: '⇲ Send feedback',
-          type: 'button',
-          value: 'food.feedback.new'
-        })
-      }
+      // if (feedbackOn && finalAttachment) {
+      //   finalAttachment.actions.push({
+      //     name: 'food.feedback.new',
+      //     text: '⇲ Send feedback',
+      //     type: 'button',
+      //     value: 'food.feedback.new'
+      //   })
+      // }
       // ------------------------------------
       // tip attachment
       var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount.toFixed(2)}`

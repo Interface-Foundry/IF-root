@@ -10,7 +10,7 @@ var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)
 
 // turn feedback buttons on/off
-var feedbackOn = true
+var feedbackOn = false
 var feedbackTracker = {}
 
 // injected dependencies

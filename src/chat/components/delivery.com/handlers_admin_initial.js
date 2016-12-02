@@ -8,7 +8,7 @@ var slackUtils = require('../slack/utils.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
 
 // turn feedback buttons on/off
-var feedbackOn = true
+var feedbackOn = false
 var feedbackTracker = {}
 
 // injected dependencies
@@ -337,14 +337,14 @@ handlers['food.settings.address.confirm'] = function * (message) {
   }
 
   // collect feedback on this feature
-  if (feedbackOn && msg_json) {
-    msg_json.attachments[0].actions.push({
-      name: 'food.feedback.new',
-      text: '⇲ Send feedback',
-      type: 'button',
-      value: 'food.feedback.new'
-    })
-  }
+  // if (feedbackOn && msg_json) {
+  //   msg_json.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
 
   $replyChannel.send(message, 'food.settings.address.save', {type: message.origin, data: msg_json})
 }

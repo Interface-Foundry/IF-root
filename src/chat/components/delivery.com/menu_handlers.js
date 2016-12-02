@@ -96,9 +96,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
 
-
-    var attachment = 
-      {
+    var attachment = {
       thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
@@ -135,14 +133,14 @@ handlers['food.menu.quickpicks'] = function * (message) {
       'attachment_type': 'default',
     }])
   }
-  if (feedbackOn && msg_json) {
-    msg_json.attachments[0].actions.push({
-      name: 'food.feedback.new',
-      text: '⇲ Send feedback',
-      type: 'button',
-      value: 'food.feedback.new'
-    })
-  }
+  // if (feedbackOn && msg_json) {
+  //   msg_json.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
 
   if (sortedMenu.length >= index + 4) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {

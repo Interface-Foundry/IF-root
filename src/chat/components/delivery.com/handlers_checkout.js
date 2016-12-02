@@ -33,14 +33,14 @@ handlers['food.admin.order.checkout.address2'] = function * (message) {
       }]
     }]
   }
-  if (feedbackOn && response) {
-    response.attachments[0].actions.push({
-      name: 'food.feedback.new',
-      text: '⇲ Send feedback',
-      type: 'button',
-      value: 'food.feedback.new'
-    })
-  }
+  // if (feedbackOn && response) {
+  //   response.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address2', type: message.origin, data: response})
 }
 
@@ -284,14 +284,14 @@ handlers['food.admin.order.pay'] = function * (message) {
       }]
     }]
   }
-  if (feedbackOn && response) {
-    response.attachments[0].actions.push({
-      name: 'food.feedback.new',
-      text: '⇲ Send feedback',
-      type: 'button',
-      value: 'food.feedback.new'
-    })
-  }
+  // if (feedbackOn && response) {
+  //   response.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
   
 
   if (_.get(slackbot.meta, 'payments')) {
