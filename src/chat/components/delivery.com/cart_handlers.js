@@ -44,6 +44,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     var quantityAttachment = {
       title: item.name + ' – ' + menu.getCartItemPrice(i).$,
       text: item.description + instructions,
+      fallback: item.description + instructions
       mrkdwn_in: ['text'],
       callback_id: item.unique_id,
       color: '#3AA3E3',
@@ -207,7 +208,8 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     attachments: [{
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
-      text: `*Collected so far* 👋\n_${allItems}_`
+      text: `*Collected so far* 👋\n_${allItems}_`,
+      'fallback': `*Collected so far* 👋\n_${allItems}_`
     }]
   }
 
