@@ -44,7 +44,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     var quantityAttachment = {
       title: item.name + ' – ' + menu.getCartItemPrice(i).$,
       text: item.description + instructions,
-      fallback: item.description + instructions
+      fallback: item.description + instructions,
       mrkdwn_in: ['text'],
       callback_id: item.unique_id,
       color: '#3AA3E3',
