@@ -350,13 +350,15 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       text: `*Votes from the group* 👋\n${votes}`,
       fallback: `*Votes from the group* 👋\n${votes}`,
       callback_id: 'admin_restaurant_pick',
-      actions: [{
-        name: 'food.feedback.new',
-        text: '⇲ Send feedback',
-        type: 'button',
-        value: 'food.feedback.new'
-      }]
     }]
+  }
+  if (feedbackOn && dashboard) {
+    dashboard.attachments[0].actions.push({
+      name: 'food.feedback.new',
+      text: '⇲ Send feedback',
+      type: 'button',
+      value: 'food.feedback.new'
+    })
   }
 
   if (slackers.length > 0) {

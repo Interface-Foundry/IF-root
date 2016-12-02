@@ -96,9 +96,10 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
 
-    var attachment =
+
+    var attachment = 
       {
-      thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + (i.parentId%20 + 1) + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.jpg'),
+      thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       color: '#3AA3E3',
@@ -113,7 +114,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
         }
       ]
     }
-
+    desc = (desc.split(' ').length > 10 ? desc.split(' ').slice(0,10).join(' ')+"…" : desc)
+    parentDescription = (parentDescription.split(' ').length > 10 ? parentDescription.split(' ').slice(0,10).join(' ')+"…" : parentDescription)
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
   })
@@ -131,13 +133,15 @@ handlers['food.menu.quickpicks'] = function * (message) {
       'callback_id': 'menu_quickpicks',
       'color': '#3AA3E3',
       'attachment_type': 'default',
-      'actions': [{
-        name: 'food.feedback.new',
-        text: '⇲ Send feedback',
-        type: 'button',
-        value: 'food.feedback.new'
-      }]
     }])
+  }
+  if (feedbackOn && msg_json) {
+    msg_json.attachments[0].actions.push({
+      name: 'food.feedback.new',
+      text: '⇲ Send feedback',
+      type: 'button',
+      value: 'food.feedback.new'
+    })
   }
 
   if (sortedMenu.length >= index + 4) {

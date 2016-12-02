@@ -362,13 +362,6 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       if (totalPrice < foodSession.chosen_restaurant.minimum) {
         finalAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *_\$${foodSession.chosen_restaurant.minimum}_*`
-        finalAttachment.actions = [
-          instructionsButton, {
-          'name': 'food.feedback.new',
-          'text': '⇲ Send feedback',
-          'type': 'button',
-          'value': 'food.feedback.new'
-        }]
       } else {
         finalAttachment.actions = [instructionsButton, {
           'name': `food.admin.order.checkout.confirm`,
@@ -377,12 +370,16 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           'style': `primary`,
           'value': `checkout`
         },
-        instructionsButton, {
-          'name': 'food.feedback.new',
-          'text': '⇲ Send feedback',
-          'type': 'button',
-          'value': 'food.feedback.new'
-        }]
+        instructionsButton
+        ]
+      }
+      if (feedbackOn && finalAttachment) {
+        finalAttachment.actions.push({
+          name: 'food.feedback.new',
+          text: '⇲ Send feedback',
+          type: 'button',
+          value: 'food.feedback.new'
+        })
       }
       // ------------------------------------
       // tip attachment

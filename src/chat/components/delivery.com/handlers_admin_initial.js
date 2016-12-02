@@ -390,7 +390,7 @@ handlers['food.feedback.new'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ],
-        'fallback': text,
+        'fallback': 'Can you share a bit of info about this? I\'ll pass it on so that we can do better next time',
         'callback_id': JSON.stringify(message),
         'attachment_type': 'default'
       }
