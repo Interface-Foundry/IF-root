@@ -462,6 +462,18 @@ handlers['food.delivery_or_pickup'] = function * (message) {
 //
 handlers['food.admin_polling_options'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  // check to make sure restaurants are even open
+  if (foodSession.merchants.length === 0) {
+    var msg_json = {
+      text: `Looks like there are no open restaurants taking orders for ${foodSession.fulfillment_method} near ${foodSession.chosen_location.address_1} right now. Please try again later.`
+    }
+
+    $replyChannel.sendReplace(message, 'food.begin', {type: message.origin, data: msg_json})
+    return
+  }
+
+
   // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
   var merchantIds = foodSession.merchants.map(m => m.id)
   var lastOrdered = yield db.Delivery.find({team_id: message.source.team, chosen_restaurant: {$exists: true}})
