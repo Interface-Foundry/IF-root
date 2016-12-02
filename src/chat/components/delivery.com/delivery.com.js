@@ -597,9 +597,6 @@ handlers['food.feedback.save'] = function * (message) {
   }
 }
 
-//
-// The user jsut clicked pickup or delivery and is now ready to start ordering
-//
 handlers['food.delivery_or_pickup'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
@@ -620,27 +617,30 @@ handlers['food.delivery_or_pickup'] = function * (message) {
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
 
   if (fulfillmentMethod === 'pickup') {
-    var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession,'data.input')
+    var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession, 'data.input')
     var res = yield api.searchNearby({addr: addr, pickup: true})
     foodSession.merchants = _.get(res, 'merchants')
     foodSession.cuisines = _.get(res, 'cuisines')
     foodSession.markModified('merchants')
     foodSession.markModified('cuisines')
   }
-
-  //
-  // START OF S2B
-  //
-
+  yield foodSession.save()
+  yield handlers['food.admin_polling_options'](message)
+}
+//
+// The user jsut clicked pickup or delivery and is now ready to start ordering
+//
+handlers['food.admin_polling_options'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
   var merchantIds = foodSession.merchants.map(m => m.id)
   var lastOrdered = yield db.Delivery.find({team_id: message.source.team, chosen_restaurant: {$exists: true}})
     .sort({_id: -1})
     .select('chosen_restaurant')
-    .limit(10)
+    .limit(15)
     .exec()
 
-  lastOrdered = lastOrdered.filter(message => merchantIds.includes(message.chosen_restaurant.id))
+  lastOrdered = yield lastOrdered.filter(message => merchantIds.includes(message.chosen_restaurant.id))
   var mostRecentSession = lastOrdered[0]
   lastOrdered = _.uniq(lastOrdered.map(message => message.chosen_restaurant.id)) // list of unique restaurants
 
@@ -653,6 +653,16 @@ handlers['food.delivery_or_pickup'] = function * (message) {
     var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id)[0] // get the full merchant
     var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
     listing.text = `You ordered \`Delivery\` from ${listing.text} recently, order again?`
+
+    // allow confirmation
+    listing.actions = [{
+      'name': 'food.admin.restaurant.reordering_confirmation',
+      'text': '✓ Reorder From Here',
+      'type': 'button',
+      'style': 'primary',
+      'value': mostRecentMerchant.id
+    }]
+
     listing.mrkdwn_in = ['text']
     if (lastOrdered.length > 1) {
       listing.actions.push({
@@ -705,6 +715,74 @@ handlers['food.delivery_or_pickup'] = function * (message) {
   foodSession.save()
 }
 
+handlers['food.admin.restaurant.reordering_confirmation'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var mostRecentMerchant = message.data.value
+  // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
+  var lastOrdered = yield db.Delivery.find({team_id: message.source.team, 'chosen_restaurant.id': mostRecentMerchant, active: false})
+    .sort({_id: -1})
+    .limit(1)
+    .exec()
+
+  // copy all the last ordered stuff to this order
+  lastOrdered = lastOrdered[0]
+  foodSession.chosen_channel = lastOrdered.chosen_channel
+  foodSession.chosen_restaurant = lastOrdered.chosen_restaurant
+  foodSession.team_members = lastOrdered.team_members
+  foodSession.markModified('team_members')
+  yield foodSession.save()
+
+  // create attachments, only including most recent merchant if one exists
+
+  if (foodSession.chosen_channel.name === 'just_me') {
+    var textWording = 'just you'
+  } else if (foodSession.chosen_channel.name === 'everyone') {
+    textWording = 'everyone'
+  } else {
+    textWording = `<#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}>`
+  }
+  var msg_json = {
+    'text': '',
+    'attachments': [{
+      'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
+      'fallback': 'Unable to confirm selection of previous restaurant',
+      'callback_id': 'reordering_confirmation',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'actions': [{
+        'name': 'passthrough',
+        'text': 'Confirm',
+        'style': 'primary',
+        'type': 'button',
+        'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
+      }, {
+        'name': 'passthrough',
+        'text': '< Back',
+        'type': 'button',
+        'value': 'food.admin_polling_options'
+      }, {
+        'name': 'passthrough',
+        'text': '× Cancel',
+        'type': 'button',
+        'value': 'food.exit.confirm',
+        'confirm': {
+          'title': 'Are you sure?',
+          'text': "Are you sure you don't want to order food?",
+          'ok_text': 'Yes',
+          'dismiss_text': 'No'
+        }
+      }]
+    }]
+  }
+  replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
+}
+
+handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.menu = yield api.getMenu(foodSession.chosen_restaurant.id)
+  yield foodSession.save()
+  return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
+}
 
 handlers['food.restaurants.list'] = function * (message) {
   // here's some mock stuff for now
