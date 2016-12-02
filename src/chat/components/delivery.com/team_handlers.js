@@ -88,23 +88,10 @@ handlers['food.admin.team.members'] = function * (message) {
     type: 'button'
   })
 
-  buttons.actions.push({
-    name: 'food.exit.confirm',
-    text: '× Cancel',
-    type: 'button',
-    style: 'danger',
-    confirm: {
-      'title': 'Are you sure?',
-      'text': "Are you sure you don't want to order food?",
-      'ok_text': 'Yes',
-      'dismiss_text': 'No'
-    }
-  })
-
   attachments.push(buttons)
 
   var msg_json = {
-    text: 'Users in the order:',
+    text: 'Team members in the order:',
     attachments: attachments
   }
 

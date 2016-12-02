@@ -63,12 +63,17 @@ function voteMessage (foodSession) {
     color: '#3AA3E3',
     attachment_type: 'default',
     attachments: [{
-      'text': 'Type what you want or tap a button',
-      'fallback': 'You are unable to tap a button',
+      'text': 'Tap a button to choose a cuisine',
+      'fallback': 'Tap a button to choose a cuisine',
       'callback_id': 'food.user.poll',
       'color': '#3AA3E3',
       'attachment_type': 'default',
       'actions': sampleArray
+    },
+    {
+    'fallback': 'Search for a restaurant',
+    'text': '✎ Or type what you want below (Example: _japanese_)',
+    'mrkdwn_in': ['text']
     }]
   }
   return res
@@ -518,6 +523,13 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   responseForAdmin.attachments.push(buttons)
 
+  //adding writing prompt
+  responseForAdmin.attachments.push({
+    'fallback': 'Search for a restaurant',
+    'text': '✎ Type below to search for a restaurant (Example: _sushi_)',
+    'mrkdwn_in': ['text']
+  })
+
   // admin is confirming, replace their message
   var admin = foodSession.convo_initiater
   var msg = {
@@ -603,7 +615,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         'actions': [
           {
             'name': 'food.menu.quickpicks',
-            'text': 'Yes',
+            'text': '✓ Yes',
             'type': 'button',
             'style': 'primary',
             'value': {}

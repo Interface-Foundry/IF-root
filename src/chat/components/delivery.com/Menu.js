@@ -138,7 +138,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   var options = nodeOptions(item, cartItem, validate)
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
-    'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"}`,
+    'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"} \n *Total:* `+fullPrice.$,
     'fallback': 'Unable to load food options.',
     'callback_id': 'menu_quickpicks',
     'color': '#49d63a',
@@ -149,7 +149,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
     'actions': [
       {
         'name': 'food.item.add_to_cart',
-        'text': '✓ Add to Cart: ' + fullPrice.$,
+        'text': '✓ Add to Order',
         'type': 'button',
         'style': 'primary',
         'value': cartItem.item.item_id

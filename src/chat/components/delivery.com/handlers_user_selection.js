@@ -98,7 +98,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           },
           {
             'name': 'passthrough',
-            'text': '× Cancel',
+            'text': '× Exit Café',
             'type': 'button',
             'value': 'food.exit.confirm',
             'confirm': {
@@ -159,7 +159,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
           },
           {
             'name': 'passthrough',
-            'text': '× Cancel',
+            'text': '× Exit Café',
             'type': 'button',
             'value': 'food.exit.confirm',
             'confirm': {

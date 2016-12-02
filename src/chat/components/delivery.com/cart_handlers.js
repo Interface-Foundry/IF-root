@@ -82,7 +82,8 @@ handlers['food.cart.personal'] = function * (message, replace) {
   })
 
   var bottom = {
-    'text': '',
+    'text': '*My Order Total:* '+totalPrice.$,
+    'mrkdwn_in': ['text'],
     'fallback': 'Unable to load price confirm',
     'callback_id': 'wopr_game',
     'color': '#49d63a',
@@ -90,7 +91,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     'actions': [
       {
         'name': 'food.cart.personal.confirm',
-        'text': '✓ Confirm: ' + totalPrice.$,
+        'text': '✓ Finish My Order',
         'type': 'button',
         'value': 'food.cart.personal.confirm',
         'style': 'primary'
