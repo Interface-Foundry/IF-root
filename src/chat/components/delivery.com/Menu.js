@@ -102,12 +102,12 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
 
   // Price for the Add To Cart button
   var fullPrice = menu.getCartItemPrice(cartItem)
-
+  
   var json = {
     text: `*${item.name}*
  ${item.description}`,
     attachments: [{
-      thumb_url: (item.images.length>0 ? item.images[0].url : 'https://kipthis.com/images/kip_head.png'),
+      image_url: (item.images.length>0 ? 'https://res.cloudinary.com/delivery-com/image/fetch/w_300,h_240,c_fit/' + encodeURIComponent(item.images[0].url) : ''),
       fallback: 'Quantity: ' + cartItem.item.item_qty,
       callback_id: 'quantity',
       color: 'grey',

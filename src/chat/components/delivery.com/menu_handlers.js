@@ -95,12 +95,10 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
-    //var parentMenuImages = _.get(menu, `flattenedMenu.${i.parentId}.images`)
 
     var attachment = 
       {
-      //thumb_url: (i.images.length>0 ? i.images[0].url : (parentMenuImages.length>0 ? parentMenuImages.url : 'https://kipthis.com/images/kip_head.png') ),
-      thumb_url: (i.images.length>0 ? i.images[0].url : 'https://kipthis.com/images/kip_head.png'),
+      thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + (i.parentId%20 + 1) + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.jpg'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       fallback: i.name,
       color: '#3AA3E3',
