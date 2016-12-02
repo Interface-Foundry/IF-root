@@ -8,5 +8,5 @@ slack:
   client_id: "40262605191.99843739429"
   client_secret: 00a0a312ef83e675243ca4102080aae1
   verification_token: twZRwtgqPxHdOMNVru9MqD6p
-  redirect_uri: https://7ead8886.ngrok.io/newslack
-kipPayURL: https://cb1ba7c7.ngrok.io
+  redirect_uri: https://besiktasslack.localtunnel.me/newslack
+kipPayURL: https://besiktaskippay.localtunnel.me
