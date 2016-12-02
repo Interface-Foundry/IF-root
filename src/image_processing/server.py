@@ -71,7 +71,7 @@ def upload_to_gcloud(image, gcloud_bucket=get_gcloud()):
 
     if time.time() - start > 1:
         logging.info('slow upload. save: %.2fs, blob create: %.2fs, string upload %2fs',
-            saved-start, blobbed-saved, uploaded-blobed)
+            saved-start, blobbed-saved, uploaded-blobbed)
 
     # public_url is a property func that appears to just be a string-format
     # call. Probably no value in instrumenting.
