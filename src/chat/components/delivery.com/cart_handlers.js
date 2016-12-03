@@ -182,6 +182,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   if (message.data.value === 'no thanks') {
     yield foodSession.update({$pull: {team_members: {id: message.user_id}}}).exec()
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+    $replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: `Ok, maybe next time :blush:`}})
   } else {
     foodSession.confirmed_orders.push(message.source.user)
     $replyChannel.sendReplace(message, '.', {type: message.origin, data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
