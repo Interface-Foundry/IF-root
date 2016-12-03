@@ -355,7 +355,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       var instructionsButton = {
         name: 'food.order.instructions',
-        text: '✎ Special Instructions',
+        text: '✎ Delivery Instructions',
         type: 'button',
         value: ''
       }
@@ -363,7 +363,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       if (totalPrice < foodSession.chosen_restaurant.minimum) {
         finalAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *_\$${foodSession.chosen_restaurant.minimum}_*`
       } else {
-        finalAttachment.actions = [instructionsButton, {
+        finalAttachment.actions = [{
           'name': `food.admin.order.checkout.confirm`,
           'text': `✓ Checkout ${(foodSession.order.total + foodSession.tipAmount).$}`,
           'type': `button`,
