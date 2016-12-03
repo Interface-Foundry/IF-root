@@ -131,6 +131,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
       'callback_id': 'menu_quickpicks',
       'color': '#3AA3E3',
       'attachment_type': 'default',
+      'actions': []
     }])
   }
   // if (feedbackOn && msg_json) {
