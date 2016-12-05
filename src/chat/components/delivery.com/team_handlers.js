@@ -21,8 +21,8 @@ handlers['food.admin.team.members'] = function * (message) {
   }
 
   if (foodSession.team_members.length === 0) {
-    $replyChannel.sendReplace(message, 'food.begin', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
-    return yield $allHandlers['food.begin'](message)
+    $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
+    return yield $allHandlers['food.admin.select_address'](message)
   }
 
   var attachments = foodSession.team_members.map(user => {
@@ -61,7 +61,7 @@ handlers['food.admin.team.members'] = function * (message) {
   }
 
   var buttons = {
-    fallback: 'You are unable to navigate the admin option menu',
+    fallback: 'Button',
     'color': '#3AA3E3',
     actions: []
   }
@@ -76,32 +76,33 @@ handlers['food.admin.team.members'] = function * (message) {
 
   buttons.actions.push({
     name: 'food.user.poll',
-    text: 'Send Poll',
+    text: '✓ Send Poll',
     type: 'button',
     style: 'primary'
   })
 
+  buttons.actions.push({   
+    'name': 'food.admin.display_channels',
+    'text': 'Use a #channel',
+    'type': 'button',
+    'value': 'select_team_members'    
+  })
+
   buttons.actions.push({
-    name: 'food.exit.confirm',
-    text: '× Cancel',
-    type: 'button',
-    'confirm': {
-      'title': 'Are you sure?',
-      'text': "Are you sure you don't want to order food?",
-      'ok_text': 'Yes',
-      'dismiss_text': 'No'
-    }
+    name: 'passthrough',
+    value: 'food.poll.confirm_send',
+    text: '< Back',
+    type: 'button'
   })
 
   attachments.push(buttons)
 
   var msg_json = {
-    text: 'Users in the order:',
+    text: 'Team members in the order:',
     attachments: attachments
   }
 
-  $replyChannel.sendReplace(message, 'food.begin', {type: message.origin, data: msg_json})
-
+  $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: msg_json})
 }
 
 

@@ -43,7 +43,19 @@ function * payForItemFromKip (session, guestToken) {
 module.exports.payDeliveryDotCom = function * (pay) {
   // payment amounts should match
   // total already includes tip
-  if (pay.charge.amount !== Math.round(pay.order.order.total)) {
+
+  logging.info('PAY TOTAL: ',pay.order.order.total)
+  logging.info('PAY CHARGED: ',pay.charge.amount)
+
+  //check for coupon
+  if (pay.order && pay.order.order && pay.order.order.coupon){
+    var total = calCoupon(pay.order.order.total, pay.order.order.coupon)
+    total = Math.round(total)
+  }else {
+    var total = Math.round(pay.order.order.total)
+  }
+
+  if (pay.charge.amount !== total) {
     logging.error('ERROR: Charge amounts dont match D:')
     return
   }
@@ -148,3 +160,14 @@ module.exports.storeCard = function * (pay, charge) {
   })
   yield slackbot.save()
 }
+
+function calCoupon(total,coupon){
+  var s = total * coupon
+  var t = total - s
+  if(t < 50){ //to reach minimum stripe charge of $0.50 
+    t = 50
+  }
+  return t
+}
+
+module.exports.calCoupon = calCoupon

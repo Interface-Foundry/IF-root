@@ -16,26 +16,34 @@ var handlers = {}
 *
 *
 */
-handlers['food.admin.order.checkout.address_2'] = function * (message) {
+handlers['food.admin.order.checkout.address2'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var response = {
     'title': `Whats your apartment or floor number at ${foodSession.chosen_location.address_1}`,
     'text': `Type your apartment or floor number below`,
-    'fallback': 'Unable to get address',
-    'callback_id': `food.admin.order.checkout.address_2`,
+    'fallback': 'Type your apartment or floor number below',
+    'callback_id': `admin_order_checkout_address2`,
     'attachments': [{
-      'fallback': `You are unable to add address`,
-      'callback_id': `food.admin.order.checkout.address_2`,
+      'fallback': `Type your apartment or floor number below`,
+      'callback_id': `admin_order_checkout_address2`,
       'attachment_type': `default`,
       'actions': [{
-        'name': `food.admin.order.checkout.address_2`,
+        'name': `food.admin.order.checkout.confirm`,
         'text': `None`,
         'type': `button`,
         'value': `none`
       }]
     }]
   }
-  $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address_2', type: message.origin, data: response})
+  // if (feedbackOn && response) {
+  //   response.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
+  $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address2', type: message.origin, data: response})
 }
 
 handlers['food.admin.order.checkout.name'] = function * (message) {
@@ -43,7 +51,8 @@ handlers['food.admin.order.checkout.name'] = function * (message) {
   var response = {
     'text': `Hey ${foodSession.convo_initiater.name} what's the full name of the person who will be receiving this order\n` +
             `>Type their name below`,
-    'fallback': 'Unable to get name',
+    'fallback': `Hey ${foodSession.convo_initiater.name} what's the full name of the person who will be receiving this order\n` +
+            `>Type their name below`,
     'callback_id': 'food.admin.order.checkout.name'
   }
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.name', type: message.origin, data: response})
@@ -55,7 +64,7 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
   var response = {
     'text': `Whats your phone number ${foodSession.convo_initiater.name}\n` +
             `>Type your phone number below:`,
-    'fallback': 'Unable to get phone',
+    'fallback': 'Type your phone number below',
     'callback_id': 'food.admin.order.checkout.phone_number'
   }
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.phone_number', type: message.origin, data: response})
@@ -68,7 +77,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   console.log('heerrr', prevMessage.reply.textFor)
   var editInfo = {}
 
-  editInfo['admin.order.checkout.address_2'] = function * (message) {
+  editInfo['admin.order.checkout.address2'] = function * (message) {
     if (_.get(message, 'source.actions[0].value') === 'none') {
       foodSession.chosen_location.address_2 = ' '
     } else {
@@ -118,7 +127,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   if (!foodSession.chosen_location.address_2) {
-    return yield handlers['food.admin.order.checkout.address_2'](message)
+    return yield handlers['food.admin.order.checkout.address2'](message)
   }
   if (!foodSession.convo_initiater.last_name) {
     return yield handlers['food.admin.order.checkout.name'](message)
@@ -131,19 +140,21 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   var deliveryInstructionsText = _.get(foodSession, 'data.instructions') ? foodSession.data.instructions : ``
   var response = {
     text: `Great, please confirm your contact and delivery details:`,
-    fallback: `Unable to get address`,
+    fallback: `Great, please confirm your contact and delivery details`,
     callback_id: `food.admin.order.checkout.confirm`,
     attachments: [
       {
         'title': '',
-        'mrkdwn_in': ['text']
+        'mrkdwn_in': ['text'],
+        'fallback': ''
       },
       {
         'title': '',
         'mrkdwn_in': ['text'],
         'text': `*Name:*\n` +
                 `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name}`,
-        'fallback': `You are unable to change name`,
+        'fallback': `*Name:*\n` +
+                `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name}`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
         'attachment_type': `default`,
@@ -161,7 +172,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'mrkdwn_in': [`text`],
         'text': `*Address:*\n` +
                 `${foodSession.chosen_location.address_1} ${foodSession.chosen_location.city}, ${foodSession.chosen_location.state} ${foodSession.chosen_location.zip_code}`,
-        'fallback': `You are unable to change address`,
+        'fallback': `*Address:*\n` +
+                `${foodSession.chosen_location.address_1} ${foodSession.chosen_location.city}, ${foodSession.chosen_location.state} ${foodSession.chosen_location.zip_code}`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
         'attachment_type': `default`
@@ -171,12 +183,13 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'mrkdwn_in': ['text'],
         'text': `*Apt/Floor#:*\n` +
                 `${foodSession.chosen_location.address_2}`,
-        'fallback': `You are unable to confirm this order`,
+        'fallback': `*Apt/Floor#:*\n` +
+                `${foodSession.chosen_location.address_2}`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'food.admin.order.checkout.address_2',
+            'name': 'food.admin.order.checkout.address2',
             'text': `Edit`,
             'type': `button`,
             'value': `edit`
@@ -188,7 +201,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'mrkdwn_in': ['text'],
         'text': `*Phone Number:*\n` +
                 `${foodSession.chosen_location.phone_number}`,
-        'fallback': `You are unable to choose a game`,
+        'fallback': `*Phone Number:*\n` +
+                `${foodSession.chosen_location.phone_number}`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
         'attachment_type': `default`,
@@ -205,7 +219,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': ['text'],
         'text': `*Delivery Instructions:*\n` + deliveryInstructionsText,
-        'fallback': `You are unable to edit instructions`,
+        'fallback': `*Delivery Instructions:*\n` + deliveryInstructionsText,
         'callback_id': `food.admin.order.checkout.confirm`,
         'attachment_type': `default`,
         'actions': [
@@ -219,7 +233,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       },
       {
         'title': ``,
-        'fallback': `You are unable to confirm address`,
+        'fallback': `✓ Confirm Address`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'attachment_type': `default`,
         'actions': [{
@@ -249,19 +263,19 @@ handlers['food.admin.order.pay'] = function * (message) {
   // base response
   var response = {
     text: `Checkout for ${foodSession.chosen_restaurant.name} - ${(foodSession.order.total + foodSession.tipAmount).$}`,
-    fallback: `Unable to pay for order`,
-    callback_id: `food.admin.order.pay`,
+    fallback: `Checkout for ${foodSession.chosen_restaurant.name} - ${(foodSession.order.total + foodSession.tipAmount).$}`,
+    callback_id: `admin_order_pay`,
     attachments: [{
       'title': '',
       'mrkdwn_in': ['text'],
       'text': ``,
-      'fallback': `You are unable to add a card`,
-      'callback_id': `food.admin.order.pay`,
+      'fallback': `+ Add New Card or < Change Order`,
+      'callback_id': `admin.order.pay`,
       'color': `#3AA3E3`,
       'attachment_type': `default`,
       'actions': [{
         'name': `food.admin.add_new_card`,
-        'text': `+ Add new Card`,
+        'text': `+ Add New Card`,
         'type': `button`,
         'value': `add`
       }, {
@@ -272,6 +286,15 @@ handlers['food.admin.order.pay'] = function * (message) {
       }]
     }]
   }
+  // if (feedbackOn && response) {
+  //   response.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
+  
 
   if (_.get(slackbot.meta, 'payments')) {
     // we already have a card source, present cards
@@ -285,7 +308,7 @@ handlers['food.admin.order.pay'] = function * (message) {
       return {
         'title': `${c.card.brand}`,
         'text': `Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
-        'fallback': `You are unable to pick this card`,
+        'fallback': `Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
         'callback_id': `food.admin.order.select_card`,
         'color': `#3AA3E3`,
         'attachment_type': `default`,
@@ -378,7 +401,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
 
   var response = {
     'text': `You're all set to add a new card and check-out!`,
-    'fallback': `You are unable to complete payment`,
+    'fallback': `You're all set to add a new card and check-out!`,
     'callback_id': `food.admin.add_new_card`,
     'color': `#3AA3E3`,
     'attachment_type': `default`,
@@ -391,7 +414,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
         'title': '',
         'mrkdwn_in': ['text'],
         'text': `Great, <${foodSession.payment.url}|➤ Click to pay with Stripe>`,
-        'fallback': `You are unable to follow this link to confirm order`,
+        'fallback': `Great, <${foodSession.payment.url}|➤ Click to pay with Stripe>`,
         'callback_id': `food.admin.add_new_card`,
         'color': `#49d63a`,
         'attachment_type': `default`
@@ -456,7 +479,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
     foodSession.save()
     var response = {
       'text': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
-      'fallback': `Order Success!`,
+      'fallback': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
       'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
@@ -474,14 +497,14 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
   var c = _.find(slackbot.meta.payments, {'card': {'card_id': message.source.actions[0].value}})
   var response = {
     text: ``,
-    fallback: `You are unable to complete payment`,
+    fallback: `Confirm pay`,
     callback_id: `food.admin.order.pay.confirm`,
     attachments: [{
       'title': `Checkout for ${foodSession.chosen_restaurant.name}`,
       'attachment_type': `default`,
       'mrkdwn_in': ['text'],
       'text': `${c.card.brand} - Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
-      'fallback': `You are unable to follow this link to confirm order`,
+      'fallback': `${c.card.brand} - Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
       'callback_id': `food.admin.order.pay.confirm`,
       'color': `#3AA3E3`,
       'actions': [{
