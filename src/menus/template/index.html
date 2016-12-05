@@ -82,15 +82,23 @@
             <div ng-show="$parent.inProgress[item.id]">
 
               <div ng-hide="false" ng-repeat="child in (item.children)">
-                <!-- show this div if they're really children  -->
-                <!-- define child in item.children as a ternary? -->
-                <!-- if the thing above -->
+
                 <h4>{{child.name}}</h4>
-              <!-- ////// options -->
+                
                 <item ng-hide="item.type=='menu'"></item>
                 <div ng-show="item.type=='menu'" ng-repeat="food in child.children">
-                  <h3>{{food.name}}</h3>
-                  Speakerbox
+                  <h2>
+                    <span ng-click="itemDetails(food)" class="item_name">{{food.name}}</span>
+                    <span class="price">
+                      <button ng-click="addToCart(food)">Add to cart for {{food.price}}</button>
+                    </span>
+                  </h2>
+                  <div>
+                    <h5>How many would you like?</h5>
+                    <div>
+                      <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div>
