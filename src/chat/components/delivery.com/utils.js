@@ -416,7 +416,7 @@ function * buildRestaurantAttachment (restaurant) {
     'actions': [
       {
         'name': 'food.admin.restaurant.confirm',
-        'text': '✓ Choose',
+        'text': '✓ Order Here',
         'type': 'button',
         'style': 'primary',
         'value': restaurant.id

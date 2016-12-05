@@ -9,6 +9,7 @@ var deliverySchema = mongoose.Schema({
   },
   session_id: mongoose.Schema.ObjectId,
   team_id: String,
+  onboarding: Boolean, //show onboarding walkthrough tips to user
 
   all_members: [], // not sure how whitelist thing works so just stashing all_members instead of looking up team_members
   team_members: [], // who is in the order

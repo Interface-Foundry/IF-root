@@ -79,7 +79,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': 'Confirm',
+            'text': '✓ Send Poll',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
@@ -92,13 +92,13 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           },
           {
             'name': 'food.admin.display_channels',
-            'text': 'Use a Channel',
+            'text': 'Use a #channel',
             'type': 'button',
             'value': 'select_team_members'
           },
           {
             'name': 'passthrough',
-            'text': '× Cancel',
+            'text': '× Exit Café',
             'type': 'button',
             'value': 'food.exit.confirm',
             'confirm': {
@@ -140,7 +140,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': 'Confirm',
+            'text': '✓ Send Poll',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
@@ -153,13 +153,13 @@ handlers['food.poll.confirm_send'] = function * (message) {
           },
           {
             'name': 'food.admin.display_channels',
-            'text': 'Use a Channel',
+            'text': 'Use a #channel',
             'type': 'button',
             'value': 'select_team_members'
           },
           {
             'name': 'passthrough',
-            'text': '× Cancel',
+            'text': '× Exit Café',
             'type': 'button',
             'value': 'food.exit.confirm',
             'confirm': {
