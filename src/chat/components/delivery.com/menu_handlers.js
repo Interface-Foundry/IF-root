@@ -74,11 +74,9 @@ handlers['food.menu.quickpicks'] = function * (message) {
   not really any good way to order items atm so just going to throw
   everything in last til have some actual way to order things w/ sortOrder
   */
-  var lastItems = ['beverage', 'beverages', 'desserts', 'dessert', 'cold appetizer', 'hot appetizer', 'appetizers', 'appetizers from the kitchen', 'soup', 'drinks', 'salads', 'side salads', 'side menu', 'bagged snacks', 'snacks']
+  var lastItems = ['beverage', 'beverages', 'desserts', 'dessert', 'cold appetizer', 'hot appetizer', 'appetizers', 'appetizers from the kitchen', 'soup', 'soups', 'drinks', 'salads', 'side salads', 'side menu', 'bagged snacks', 'snacks']
 
-  logging.debug('recIds', JSON.stringify(recommendedItemIds))
   var menu = Menu(foodSession.menu)
-  logging.info('MENU KEYs' , _.keys(menu))
   var sortedMenu = menu.allItems().map(i => {
     // inject the sort order stuff
     if (previouslyOrderedItemIds.includes(Number(i.unique_id))) {
@@ -88,7 +86,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
       i.sortOrder = sortOrder.recommended
       i.infoLine = 'Popular Item'
     } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
-      logging.debug('item in lastItems', menu.flattenedMenu[String(i.parentId)].name.toLowerCase())
       i.sortOrder = sortOrder.last
     } else {
       i.sortOrder = sortOrder.none
