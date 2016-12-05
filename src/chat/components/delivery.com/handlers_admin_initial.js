@@ -551,17 +551,17 @@ handlers['food.admin_polling_options'] = function * (message) {
     foodSession.onboarding = true
   }
 
-  //onboarding stuff
-  if(foodSession.onboarding){
-    attachments.push({
-      'text': '',
-      'fallback': 'Team voting',
-      'callback_id': 'wopr_game',
-      'color': '',
-      'attachment_type': 'default',
-      'image_url': 'http://tidepools.co/kip/onboarding_2.png'
-    })
-  }
+  // //onboarding stuff
+  // if(foodSession.onboarding){
+  //   attachments.push({
+  //     'text': '',
+  //     'fallback': 'Team voting',
+  //     'callback_id': 'wopr_game',
+  //     'color': '',
+  //     'attachment_type': 'default',
+  //     'image_url': 'http://tidepools.co/kip/onboarding_2.png'
+  //   })
+  // }
 
   attachments.push({
     'mrkdwn_in': [
