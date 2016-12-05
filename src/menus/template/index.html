@@ -79,7 +79,6 @@
               <span class="price" ng-show="inProgress[item.id] && validateItem(item) && item.type=='item'">
                 <button ng-click="addToCart(item)">Add to cart for {{item.price}}</button>
               </span>
-              <!-- <p ng-show="item.type">MICHIGAN {{item.type}}<p> -->
             </h2>
             <h3 class="item_description">{{item.description}}</h3>
             <div ng-show="$parent.inProgress[item.id]">
@@ -128,14 +127,22 @@
                 <!-- here -->
                 <!-- <div ng-show="item.type=='menu'" ng-repeat="food in child.children"> -->
                 <div ng-repeat="child in item.children">
-                  {{child.type}}
-                    <h2>
+                  <!-- child is of type item, for now -->
+                  <h2>
+                    <span ng-click="itemDetails(child)" class="item_name">{{child.name}}</span>
+                    <span class="price" ng-hide="inProgress[child.id] && validateItem(child) && child.type=='item'">{{child.price}}</span>
+                    <span class="price" ng-show="inProgress[child.id] && validateItem(child) && child.type=='item'">
+                      <button ng-click="addToCart(child)">Add to cart for {{child.price}}</button>
+                    </span>
+                  </h2>
+                    <!-- <h2 ng-click="itemDetails(child)">
                       <span class="item_name">{{child.name}}</span>
                       <span class="price">
-                        <button ng-click="itemDetails(child);addToCart(child);">Add to cart for {{child.price * inProgress[child.id].item_qty}}</button>
+                         need the button set of of above
+                       <button ng-click="itemDetails(child);addToCart(child);">Add to cart for {{child.price * inProgress[child.id].item_qty}}</button>
                       </span>
-                    </h2>
-                    <div ng-repeat="og in child.children" ng-show="og.type=='option group'">
+                    </h2> -->
+                    <div ng-show="inProgress[child.id]" ng-repeat="og in child.children" ng-show="og.type=='option group'">
                       <h3>{{og.name}}</h3>
                       <div ng-show="og.min_selection == 1">
                         <div ng-repeat="option in og.children">
@@ -163,13 +170,13 @@
 
 
                     <!-- </div> -->
-                    <div>
+                    <div ng-show="inProgress[child.id]">
                       <h5>How many would you like?</h5>
                       <div>
                         <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
                       </div>
                     </div>
-                    
+
                   </div>
                 </div>
 
