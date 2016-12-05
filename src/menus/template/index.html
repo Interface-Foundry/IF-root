@@ -84,13 +84,40 @@
               <div ng-hide="false" ng-repeat="child in (item.children)">
 
                 <h4>{{child.name}}</h4>
-                
-                <item ng-hide="item.type=='menu'"></item>
+
+                <div ng-hide="item.type=='menu'">
+                  <div ng-show="child.min_selection == 1">
+                    <div ng-repeat="option in child.children">
+                      <form name="optionForm">
+                        <label>
+                          <input type="radio" name="child.name" ng-model="inProgress[item.id].options[child.name].radio" ng-value="option.unique_id"/>
+                          {{option.name}} {{formatPrice(option.price)}}
+                        </label>
+                      </form>
+                    </div>
+                  </div>
+                  <div ng-show="child.min_selection == 0">
+                    <div ng-repeat="option in child.children">
+                      <form>
+                        <label>
+                          <input type="checkbox" name="order" ng-model="inProgress[item.id].options[child.name][option.unique_id].chosen" ng-value="true"/>
+                          {{option.name}} {{formatPrice(option.price)}}
+                        </label>
+                      </form>
+                    </div>
+                  </div>
+                  <div>
+                    <h5>How many would you like?</h5>
+                    <div>
+                      <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
+                    </div>
+                  </div>
+                </div>
                 <div ng-show="item.type=='menu'" ng-repeat="food in child.children">
                   <h2>
-                    <span ng-click="itemDetails(food)" class="item_name">{{food.name}}</span>
+                    <span class="item_name">{{food.name}}</span>
                     <span class="price">
-                      <button ng-click="addToCart(food)">Add to cart for {{food.price}}</button>
+                      <button ng-click="itemDetails(food);addToCart(food);">Add to cart for {{food.price}}</button>
                     </span>
                   </h2>
                   <div>
@@ -99,12 +126,6 @@
                       <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div>
-                <h5>How many would you like?</h5>
-                <div>
-                  <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
                 </div>
               </div>
             </div>
