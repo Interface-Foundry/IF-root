@@ -37,6 +37,7 @@ var food = require('./delivery.com/delivery.com').handleMessage;
 var winston = require('winston');
 var slackUtils = require('./slack/utils');
 var amazon_variety = require('./amazon_variety');
+var card_templates = require('./slack/card_templates.js');
 
 
 
@@ -84,7 +85,7 @@ function typing (message) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
-function simplehome (message) {
+function * simplehome (message) {
 
   var slackreply = {
     text: '*Hi! Thanks for using Kip* 😊',
@@ -108,9 +109,17 @@ function simplehome (message) {
     // mrkdwn_in: ['text']
   }
 
+
+  let team = yield db.Slackbots.findOne({
+    'team_id': message.source.team
+  }).exec();
+  let admins = yield slackUtils.findAdmins(team)
+
+  slackreply.attachments = admins.includes(message.source.user) ? slackreply.attachments: card_templates.slack_shopping_mode;
+
   var msg = {
-    action: 'simplehome',
-    mode: 'food',
+    action: admins.includes(message.source.user) ? 'simplehome' : 'switch',
+    mode: admins.includes(message.source.user) ? 'food' : 'shopping',
     source: message.source,
     origin: message.origin,
     reply: {data: slackreply}
@@ -338,7 +347,7 @@ queue.topic('incoming').subscribe(incoming => {
     if (isCancelIntent(message)) {
       message.mode = 'shopping';
       message.action = 'switch'
-      simplehome(message)
+      yield simplehome(message)
       yield message.save();
       timer.stop();
       return
