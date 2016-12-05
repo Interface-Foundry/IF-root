@@ -12,7 +12,6 @@ var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
 var slackcart = require('../slack/cart');
 var bundles = require('../bundles');
-var sleep = require('co-sleep');
 var eachSeries = require('async-co/eachSeries');
 var processData = require('../process');
 var request = require('request');
@@ -187,7 +186,7 @@ handlers['confirm_remind'] = function*(message, data) {
   var attachments = [];
   attachments.push({
     text: messageText,
-   color: '#45a5f4',
+    color: '#45a5f4',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
     callback_id: 'none'
@@ -348,7 +347,7 @@ handlers['bundle'] = function * (message, data) {
       "text": "—",
       "style": "default",
       "type": "button",
-      "value": "remove" 
+      "value": "remove"
     }];
 
     if (item.quantity > 1) {
