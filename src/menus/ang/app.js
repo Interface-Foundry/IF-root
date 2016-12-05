@@ -4,7 +4,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
   $scope.minimum = MenuFactory.getMinimum();
-  console.log(MenuFactory.getMinimum(), '####');
   $scope.total = 0;
   $scope.cart = [];
   $scope.inProgress = {};
@@ -80,7 +79,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
   $scope.addToCart = function (item) {
     console.log('ITEM', item);
     var foodItem = $scope.inProgress[item.id];
-    console.log('fooditem', foodItem)
     if (foodItem.item_qty > item.max_qty) foodItem.item_qty = item.max_qty;
     for (var k in foodItem.options) {
       opGroup = foodItem.options[k];
