@@ -415,6 +415,7 @@ queue.topic('incoming').subscribe(incoming => {
         }
         break;
       case 'food':
+      case 'cafe':
         yield food(message)
         return incoming.ack()
       case 'address':
@@ -433,9 +434,8 @@ queue.topic('incoming').subscribe(incoming => {
         logging.info('👽 passing to nlp: ', message.text)
         if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
           replies = yield execute(message)
-        } else if ((!message.execute || message.execute.length <= 1) 
-            && (!message.action && message.mode === 'shopping')
-            && (!message.text || message.text === 'shopping')) {
+        } else if (message.text === 'shopping' || (message.execute && message.execute.length >= 1) || 
+          (message.action === 'switch' && (message.text === 'shopping' || !message.text))) {
           kip.debug(`SKIPPING NLP: \n ${message}`);
           message.mode = 'shopping'
           message.action = 'initial'

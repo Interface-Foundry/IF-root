@@ -240,10 +240,6 @@ function * addCartChannel(message, channel_name) {
   return
 }
 
-
-
-
-
 /*
 *
 * Menu Management
@@ -301,6 +297,34 @@ function * hideMenu(message, original, expandable, data) {
     });
   return
 }
+/*
+* get the groups (private channels) and channels and add them to slackbots meta
+* used as init in slack.js but probably should be run periodically (like
+* multiple times a day)
+* @param {Object} slackbot object with web, rtm and mongo objects
+*/
+function * getAllChannels (slackbot) {
+  var botChannelArray = yield slackbot.web.channels.list()
+  botChannelArray = botChannelArray.channels.map(channel => {
+    return {
+      id: channel.id,
+      name: channel.name,
+      is_channel: true
+    }
+  })
+  var botGroupArray = yield slackbot.web.groups.list()
+  botGroupArray = botGroupArray.groups.map(channel => {
+    return {
+      id: channel.id,
+      name: channel.name,
+      is_channel: false
+    }
+  })
+  var allChannels = (botGroupArray.length === 0) ? botChannelArray : botChannelArray.concat(botGroupArray)
+  logging.debug(`adding allChannels with ${allChannels.length} to slackbots.meta \n\n allChannels:\n`, allChannels)
+  slackbot.slackbot.meta.all_channels = allChannels
+  yield slackbot.slackbot.save()
+}
 
 
 /*
@@ -339,5 +363,6 @@ module.exports = {
   cacheMenu: cacheMenu,
   showMenu: showMenu,
   hideMenu: hideMenu,
-  addViaAsin: addViaAsin
-};
+  addViaAsin: addViaAsin,
+  getAllChannels: getAllChannels
+}

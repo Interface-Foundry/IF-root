@@ -12,20 +12,27 @@ var replyChannel = new UserChannel(queue)
 
 /*
 * use this to match on terms where key_choices are
-* text is what user entered,
-* allChoices is array of all the options to search thru
-* keyChoices is array like ['name'] or ['title', 'children.name']
+* @param {String} text is what user entered,
+* @param {Array} allChoices is array of all the options to search thru
+* @param {Object options is object with everything such as
+  @returns {Array} results from fuse match
+* options = {
+*   threshold: 0.8,
+*   tokenize: true,
+*   matchAllTokens: true,
+*   keys: ['name']
+* }
 */
 function * matchText (text, allChoices, keyChoices, options) {
   // might want to use id, but dont for now
-  if (typeof options === undefined) {
-    options = {
-      shouldSort: true,
-      threshold: 0.4,
-      keys: keyChoices
-    }
+  var baseOptions = {
+    shouldSort: true,
+    threshold: 0.8,
+    tokenize: true,
+    matchAllTokens: true
   }
-  var fuse = new Fuse(allChoices, options)
+  _.merge(baseOptions, options)
+  var fuse = new Fuse(allChoices, baseOptions)
   var res = yield fuse.search(text)
   //
   if (res.length > 0) {
@@ -150,6 +157,7 @@ function * initiateDeliverySession (session) {
     active: true,
     team_id: session.source.team,
     team_members: teamMembers,
+    all_members: teamMembers,
     fulfillment_method: 'delivery', // set by default and change to pickup if it changes
     confirmed_orders: [],
     convo_initiater: {
@@ -229,7 +237,7 @@ function initiateFoodOrdering (admin) {
     var locationMessage = {}
     locationMessage['text'] = 'Great! Which address is this for?'
     locationMessage['attachments'] = {
-      fallback: 'You are unable to choose a location',
+      fallback: 'Great! Which address is this for?',
       callback_id: 'adminLocationPicker',
       color: '#3AA3E3',
       attachment_type: 'default',
@@ -402,13 +410,13 @@ function * buildRestaurantAttachment (restaurant) {
     'image_url': realImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
-    'fallback': 'You are unable to choose a restaurant',
+    'fallback': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*> - <${shortenedRestaurantUrl}|View Menu>`,
     'attachment_type': 'default',
     'mrkdwn_in': ['text'],
     'actions': [
       {
         'name': 'food.admin.restaurant.confirm',
-        'text': '✓ Choose',
+        'text': '✓ Order Here',
         'type': 'button',
         'style': 'primary',
         'value': restaurant.id

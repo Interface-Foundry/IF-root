@@ -10,7 +10,6 @@ MarkupSafe==0.23
 numpy==1.11.2
 oauth2client==4.0.0
 Pillow==3.4.1
-pkg-resources==0.0.0
 protobuf==3.1.0.post1
 pyasn1==0.1.9
 pyasn1-modules==0.0.8

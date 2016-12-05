@@ -11,7 +11,7 @@ var $allHandlers // this is how you can access handlers from other files
 // exports
 var handlers = {}
 
-handlers['food.menu.quick_picks'] = function * (message) {
+handlers['food.menu.quickpicks'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   var previouslyOrderedItemIds = []
@@ -27,7 +27,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
     logging.info('searching for', keyword.cyan)
     var menu = Menu(foodSession.menu)
     var sortedMenu = menu.allItems()
-    var matchingItems = yield utils.matchText(keyword, sortedMenu, ['name'], {
+    var matchingItems = yield utils.matchText(keyword, sortedMenu, {
       // seems to work better for matching
       shouldSort: true,
       threshold: 0.8,
@@ -97,28 +97,29 @@ handlers['food.menu.quick_picks'] = function * (message) {
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
 
     var attachment = {
+      thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
-      fallback: 'i.name',
+      fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       color: '#3AA3E3',
       attachment_type: 'default',
       'actions': [
         {
           'name': 'food.item.submenu',
-          'text': 'Add to Cart',
+          'text': 'Add to Order',
           'type': 'button',
           'style': 'primary',
           'value': i.unique_id
         }
       ]
     }
-
+    desc = (desc.split(' ').length > 10 ? desc.split(' ').slice(0,10).join(' ')+"…" : desc)
+    parentDescription = (parentDescription.split(' ').length > 10 ? parentDescription.split(' ').slice(0,10).join(' ')+"…" : parentDescription)
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
-
     return attachment
   })
 
   var msg_json = {
-    'text': `<${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> - <${foodSession.chosen_restaurant.url}|View Full Menu>`,
+    'text': `${foodSession.chosen_restaurant.name} - <${foodSession.chosen_restaurant.url}|View Full Menu>`,
     'attachments': [
       {
         'mrkdwn_in': [
@@ -126,24 +127,25 @@ handlers['food.menu.quick_picks'] = function * (message) {
         ]
       }].concat(menuItems).concat([{
       'text': '',
-      'fallback': 'You are unable to choose a game',
-      'callback_id': 'wopr_game',
+      'fallback': 'Food option',
+      'callback_id': 'menu_quickpicks',
       'color': '#3AA3E3',
       'attachment_type': 'default',
-      'actions': [
-        // {
-        //   'name': 'chess',
-        //   'text': 'Category',
-        //   'type': 'button',
-        //   'value': 'chess'
-        // }
-      ]
+      'actions': []
     }])
   }
+  // if (feedbackOn && msg_json) {
+  //   msg_json.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
 
   if (sortedMenu.length >= index + 4) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
-      'name': 'food.menu.quick_picks',
+      'name': 'food.menu.quickpicks',
       'text': keyword ? `More "${keyword}" >` : 'More >',
       'type': 'button',
       'value': {
@@ -156,7 +158,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
   // add the Back button to clear the keyword
   if (keyword) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.push({
-      name: 'food.menu.quick_picks',
+      name: 'food.menu.quickpicks',
       type: 'button',
       text: '× Clear'
     })
@@ -164,7 +166,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
 
   if (index > 0) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
-      name: 'food.menu.quick_picks',
+      name: 'food.menu.quickpicks',
       text: '<',
       type: 'button',
       value: {
@@ -173,6 +175,13 @@ handlers['food.menu.quick_picks'] = function * (message) {
       }
     })
   }
+
+  //adding writing prompt
+  msg_json.attachments.push({
+    'fallback': 'Search the menu',
+    'text': '✎ Type below to search for menu items (Example: _lunch special_)',
+    'mrkdwn_in': ['text']
+  })
 
   $replyChannel.sendReplace(message, 'food.menu.search', {type: 'slack', data: msg_json})
 }
@@ -186,7 +195,7 @@ handlers['food.menu.search'] = function * (message) {
     }
   }
 
-  return yield handlers['food.menu.quick_picks'](message)
+  return yield handlers['food.menu.quickpicks'](message)
 }
 
 //
@@ -275,7 +284,7 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   if (userItem.item.item_qty === 1) {
     // if it's zero here, go back to the menu view
     message.data = {}
-    return yield handlers['food.menu.quick_picks'](message)
+    return yield handlers['food.menu.quickpicks'](message)
   }
   userItem.item.item_qty--
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
@@ -291,7 +300,8 @@ handlers['food.item.instructions'] = function * (message) {
   var msg = {
     text: `Add Special Instructions for *${item.name}*`,
     attachments: [{
-      text: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
+      text: '✎ Type your instructions below (Example: _Extra chili on side_)',
+      fallback: '✎ Type your instructions below',
       mrkdwn_in: ['text']
     }]
   }
