@@ -9,8 +9,6 @@ var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require(
 var jstz = require('jstz');
 var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
-var queue = require('../queue-mongo');
-
 
 
 /*
@@ -76,6 +74,16 @@ function * findAdmins(team) {
       }
     });
   }).then( function() { return admins });
+}
+
+function * isAdmin(userId, team) {
+  let adminList = yield findAdmins(team);
+  for (var i = 0; i < adminList.length; i++) {
+    if(adminList[i].id === userId){
+      return true;
+    }
+  }
+  return false;
 }
 
 /*
@@ -284,6 +292,7 @@ function * hideMenu(message, original, expandable, data) {
     var json =  message.source.original_message;
     var text =  _.get(relevantMessage,'data.text') ?  _.get(relevantMessage,'data.text') : ''
     var color =  _.get(relevantMessage,'data.color') ?  _.get(relevantMessage,'data.color') : ''
+
     json.attachments[json.attachments.length-1] = {
         fallback: message.action,
         callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
@@ -351,36 +360,6 @@ function * addViaAsin(asin, message) {
     }
 }
 
-function * showLoading(message) {
-  var message = new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    text: 'Searching...',
-    data: { loading: true}
-  });
-  yield message.save();
-  yield queue.publish('outgoing.' + message.origin, message, message._id + '.loading.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
-  // return message;
-}
-
-function * replaceLoading(message, response) {
-  var relevantMessage = yield db.Messages.findOne({"thread_id": message.source.channel, "data.loading": true}).sort('_id').exec();
-  kip.debug(' \n\n\n\n\n\n\n\n\n\n  👳/slack/utils.js:372:replaceLoading', relevantMessage, response,'  \n\n\n\n\n\n\n\n\n\n');
-  request({
-      method: 'POST',
-      uri: relevantMessage.source.response_url,
-      body: JSON.stringify(response)
-    });
-}
-
-
-function * updateResponseUrl(message) {
-  yield db.Messages.update({_id: message._id}, {$set: {source:{ response_url: message.source.response_url}}}).exec();
-}
 
 module.exports = {
   initializeTeam: initializeTeam,
@@ -395,8 +374,6 @@ module.exports = {
   showMenu: showMenu,
   hideMenu: hideMenu,
   addViaAsin: addViaAsin,
-  showLoading: showLoading,
-  updateResponseUrl: updateResponseUrl,
-  replaceLoading: replaceLoading,
-  getAllChannels: getAllChannels
+  getAllChannels: getAllChannels,
+  isAdmin: isAdmin
 }

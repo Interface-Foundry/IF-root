@@ -113,13 +113,13 @@ function * simplehome (message) {
   let team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
-  let admins = yield slackUtils.findAdmins(team)
+  let isAdmin = yield slackUtils.isAdmin(message.source.user, team)
 
-  slackreply.attachments = admins.includes(message.source.user) ? slackreply.attachments: card_templates.slack_shopping_mode;
+  slackreply.attachments = isAdmin ? slackreply.attachments: card_templates.slack_shopping_mode;
 
   var msg = {
-    action: admins.includes(message.source.user) ? 'simplehome' : 'switch',
-    mode: admins.includes(message.source.user) ? 'food' : 'shopping',
+    action: isAdmin ? 'simplehome' : 'switch',
+    mode: isAdmin ? 'food' : 'shopping',
     source: message.source,
     origin: message.origin,
     reply: {data: slackreply}
@@ -374,8 +374,9 @@ queue.topic('incoming').subscribe(incoming => {
         let team = yield db.Slackbots.findOne({
           'team_id': message.source.team
         }).exec();
-        let admins = yield slackUtils.findAdmins(team)
-        if (!admins.includes(message.source.user)) {
+        let isAdmin = yield slackUtils.isAdmin(message.source.user, team)
+        kip.debug(`🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 ${JSON.stringify(isAdmin, null, 2)}`);
+        if (!isAdmin) {
           message.mode = 'shopping'
         }
       }
@@ -694,6 +695,7 @@ function execute (message) {
     return replies
   })
 }
+
 
 ;`
 LIFE OF  NEKO
