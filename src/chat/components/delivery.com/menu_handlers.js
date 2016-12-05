@@ -32,7 +32,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
       shouldSort: true,
       threshold: 0.8,
       tokenize: true,
-      matchAllTokens: true,
       keys: ['name']
     })
 
@@ -46,7 +45,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
     matchingItems = []
   }
   matchingItems = matchingItems.map(i => i.unique_id)
-
 
   var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
     .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
