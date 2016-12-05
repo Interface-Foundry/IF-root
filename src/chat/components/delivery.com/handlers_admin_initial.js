@@ -32,9 +32,16 @@ handlers['food.admin.select_address'] = function * (message, banner) {
       text: a.address_1,
       type: 'button',
       value: JSON.stringify(a)
-
     }
   })
+
+  //no addresses yet, show onboarding
+  if(addressButtons.length < 1){
+    foodSession.onboarding = true
+    yield foodSession.save()
+  }else {
+    foodSession.onboarding = false
+  }
 
   addressButtons = _.chunk(addressButtons, 5)
   var msg_json = {
@@ -47,6 +54,13 @@ handlers['food.admin.select_address'] = function * (message, banner) {
       'attachment_type': 'default',
       'actions': addressButtons[0]
     }]
+  }
+
+  //modify message for onboarding
+  if (foodSession.onboarding) {
+    msg_json.text = 'Hi there, I\'m going to walk you through your first order!'
+    msg_json.attachments[0].text = 'First, add an address for delivery by tapping the `New +` button'
+    msg_json.attachments[0].mrkdwn_in = ["text"]
   }
 
   if (banner) {
@@ -72,6 +86,24 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     })
   }
 
+  //toggle floor buttons for onboarding
+  var floorButtons = [{
+    'name': 'passthrough',
+    'text': 'New +',
+    'type': 'button',
+    'value': 'food.settings.address.new'
+  }]
+  if (foodSession.onboarding){
+    //add an exit button
+    floorButtons[0].style = 'primary'
+    floorButtons.push({
+        'name': 'passthrough',
+        'text': '× Exit Café',
+        'type': 'button',
+        'value': 'food.exit.confirm'
+    })
+  }
+
   // allow removal if more than one meta.locations thing
   // if (_.get(team, 'meta.locations').length > 1) {
   msg_json.attachments.push({
@@ -79,15 +111,10 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     'fallback': 'Remove an address',
     'callback_id': 'remove_address',
     'attachment_type': 'default',
-    'actions': [{
-      'name': 'passthrough',
-      'text': 'New +',
-      'type': 'button',
-      'value': 'food.settings.address.new'
-    }]
+    'actions': floorButtons
   })
 
-  if (_.get(team, 'meta.locations').length > 1) {
+  if (_.get(team, 'meta.locations').length >= 1) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.push({
       'name': 'passthrough',
       'text': 'Edit',
@@ -313,7 +340,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ],
-        'fallback': addr,
+        'fallback': `Is this your address?`,
         'callback_id': 'settings_address_new',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -514,13 +541,27 @@ handlers['food.admin_polling_options'] = function * (message) {
     if (lastOrdered.length > 1) {
       listing.actions.push({
         'name': 'food.restaurants.list.recent',
-        'text': 'See More',
+        'text': 'More Past Orders',
         'type': 'button',
         'value': 0
       })
     }
     attachments.push(listing)
+  }else {
+    foodSession.onboarding = true
   }
+
+  // //onboarding stuff
+  // if(foodSession.onboarding){
+  //   attachments.push({
+  //     'text': '',
+  //     'fallback': 'Team voting',
+  //     'callback_id': 'wopr_game',
+  //     'color': '',
+  //     'attachment_type': 'default',
+  //     'image_url': 'http://tidepools.co/kip/onboarding_2.png'
+  //   })
+  // }
 
   attachments.push({
     'mrkdwn_in': [
@@ -541,7 +582,7 @@ handlers['food.admin_polling_options'] = function * (message) {
       },
       {
         'name': 'passthrough',
-        'text': '× Cancel',
+        'text': '× Exit Café',
         'type': 'button',
         'value': 'food.exit.confirm',
         confirm: {
@@ -598,7 +639,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       'attachment_type': 'default',
       'actions': [{
         'name': 'passthrough',
-        'text': 'Confirm',
+        'text': '✓ Collect Orders',
         'style': 'primary',
         'type': 'button',
         'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
@@ -609,7 +650,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
         'value': 'food.admin_polling_options'
       }, {
         'name': 'passthrough',
-        'text': '× Cancel',
+        'text': '× Exit Café',
         'type': 'button',
         'value': 'food.exit.confirm',
         'confirm': {
@@ -741,13 +782,13 @@ handlers['food.restaurants.list'] = function * (message) {
             'text': 'Sort Rating',
             'type': 'button',
             'value': 'maze'
-          },
-          {
-            'name': 'maze',
-            'text': 'Sort Distance',
-            'type': 'button',
-            'value': 'maze'
           }
+          // {
+          //   'name': 'maze',
+          //   'text': 'Sort Distance',
+          //   'type': 'button',
+          //   'value': 'maze'
+          // }
         ]
       }
     ]
@@ -808,14 +849,14 @@ handlers['food.restaurants.list.recent'] = function * (message) {
       },
       {
         'name': 'food.restaurants.list.recent',
-        'text': 'See More',
+        'text': 'More Past Orders',
         'type': 'button',
         'value': index + 3
       },
 
       {
         'name': 'passthrough',
-        'text': '× Cancel',
+        'text': '× Exit Café',
         'type': 'button',
         'value': 'food.exit.confirm',
         confirm: {

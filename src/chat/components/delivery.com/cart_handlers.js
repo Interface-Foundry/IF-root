@@ -84,7 +84,8 @@ handlers['food.cart.personal'] = function * (message, replace) {
   })
 
   var bottom = {
-    'text': '',
+    'text': '*My Order Total:* '+totalPrice.$,
+    'mrkdwn_in': ['text'],
     'fallback': 'Confirm personal cart',
     'callback_id': 'wopr_game',
     'color': '#49d63a',
@@ -92,7 +93,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     'actions': [
       {
         'name': 'food.cart.personal.confirm',
-        'text': '✓ Confirm: ' + totalPrice.$,
+        'text': '✓ Finish My Order',
         'type': 'button',
         'value': 'food.cart.personal.confirm',
         'style': 'primary'
@@ -224,7 +225,13 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
         text: 'Finish Order Early',
         style: 'default',
         type: 'button',
-        value: 'food.admin.order.confirm'
+        value: 'food.admin.order.confirm',
+        confirm: {
+            "title": "Finish Order Early?",
+            "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
+            "ok_text": "Yes",
+            "dismiss_text": "No"
+        }
       }]
     })
   }

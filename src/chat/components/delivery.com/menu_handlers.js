@@ -105,7 +105,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
       'actions': [
         {
           'name': 'food.item.submenu',
-          'text': 'Add to Cart',
+          'text': 'Add to Order',
           'type': 'button',
           'style': 'primary',
           'value': i.unique_id
@@ -119,7 +119,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   })
 
   var msg_json = {
-    'text': `<${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> - <${foodSession.chosen_restaurant.url}|View Full Menu>`,
+    'text': `${foodSession.chosen_restaurant.name} - <${foodSession.chosen_restaurant.url}|View Full Menu>`,
     'attachments': [
       {
         'mrkdwn_in': [
@@ -175,6 +175,13 @@ handlers['food.menu.quickpicks'] = function * (message) {
       }
     })
   }
+
+  //adding writing prompt
+  msg_json.attachments.push({
+    'fallback': 'Search the menu',
+    'text': '✎ Type below to search for menu items (Example: _lunch special_)',
+    'mrkdwn_in': ['text']
+  })
 
   $replyChannel.sendReplace(message, 'food.menu.search', {type: 'slack', data: msg_json})
 }
@@ -293,8 +300,8 @@ handlers['food.item.instructions'] = function * (message) {
   var msg = {
     text: `Add Special Instructions for *${item.name}*`,
     attachments: [{
-      text: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
-      fallback: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
+      text: '✎ Type your instructions below (Example: _Extra chili on side_)',
+      fallback: '✎ Type your instructions below',
       mrkdwn_in: ['text']
     }]
   }
