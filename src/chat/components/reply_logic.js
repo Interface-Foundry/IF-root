@@ -135,6 +135,10 @@ function isMenuChange(message) {
   return _.get(message,'action') && (_.get(message,'action').indexOf('home.expand') > -1 || _.get(message,'action').indexOf('home.detract') > -1)
 }
 
+function isLoading(message) {
+  return (_.get(message,'action') && (_.get(message,'action').indexOf('home.loading') > -1))
+}
+
 //NOT WORKING
 
 //https://www.amazon.com/gp/product/B01E7QPPWK/ref=br_asw_pdt-3?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=AP76KCMKGEN673ZV8SPX&pf_rd_t=36701&pf_rd_p=3a087c6c-220d-4990-9d91-10b580e4cb73&pf_rd_i=desktop
@@ -342,6 +346,12 @@ queue.topic('incoming').subscribe(incoming => {
       return yield shopping[_.get(message,'action')](message);
     }
 
+     if (isLoading(message)) { 
+      timer.stop();
+      incoming.ack()
+      return yield shopping['home.loading'](message);
+    }
+
     yield processProductLink(message);
 
     if (switchMode(message)) {
@@ -392,17 +402,6 @@ queue.topic('incoming').subscribe(incoming => {
         if (message.origin === 'slack') {
           var replies = yield onboardShopping.handle(message)
         }
-        break;
-      case 'shopping_button':
-        if (message.origin === 'slack') {
-          var data = _.split(message.data.value, '.');
-          var action = data[0];
-          data.splice(0, 1);
-          var replies = yield shopping[message.mode](message, data);
-        }
-        break;
-      case 'shopping_home':
-        var replies = yield shopping['shopping.home'](message);
         break;
       case 'settings':
         if (message.origin === 'slack') {

@@ -253,16 +253,15 @@ handlers['lunch'] = function * (message) {
   msg.action = 'begin'
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  msg.state = {}
+  msg.state = {};
   var foodSession = yield dutils.initiateDeliverySession(msg)
-  yield foodSession.save()
+  yield foodSession.save();
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
     return {
       name: 'passthrough',
       text: a.address_1,
       type: 'button',
       value: JSON.stringify(a)
-
     }
   })
   address_buttons.push({
@@ -270,7 +269,7 @@ handlers['lunch'] = function * (message) {
     text: 'New +',
     type: 'button',
     value: 'food.settings.address.new'
-  })
+  });
   var msg_json = {
     'attachments': [
     {
@@ -299,6 +298,9 @@ handlers['lunch'] = function * (message) {
 handlers['bundle'] = function * (message, data) {
  var choice = data[0];
  var cart_id = message.cart_reference_id || message.source.team; 
+
+ yield utils.showLoading(message);
+
 
  yield bundles.addBundleToCart(choice, message.user_id,cart_id)
 
@@ -386,6 +388,15 @@ handlers['bundle'] = function * (message, data) {
    msg.source.team = message.source.team;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
+   var response = {
+      icon_url: 'http://kipthis.com/img/kip-icon.png',
+      username: 'Kip',
+      subtype: "bot_message",
+      type: "message",
+      attachments: attachments
+    }
+   // yield utils.replaceLoading(message, response);
+
    return [msg];
 
 }

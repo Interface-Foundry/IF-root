@@ -63,8 +63,6 @@ function simple_action_handler (action) {
       return 'cafe_btn';
     case 'shopping_btn':
       return 'shopping_btn';
-    case 'shopping_home':
-      return 'shopping_home';
     case 'help_btn':
       return 'help_btn';
     case 'view_cart_btn':
@@ -135,15 +133,7 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.user = message.source.user.id;
       message.source.channel = message.source.channel.id;
 
-      if (simple_command == 'shopping.home') {
-          message.mode = 'shopping_home'
-          message.action = 'home'
-          message.text = ''
-          message.save().then(() => {
-            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-          })
-      }
-      else if (simple_command == 'cafe_btn') {
+    if (simple_command == 'cafe_btn') {
           message.mode = 'food'
           message.action = 'begin'
           message.text = 'food'

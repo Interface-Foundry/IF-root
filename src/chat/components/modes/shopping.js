@@ -10,6 +10,7 @@ var kipcart = require('../cart');
 var cardTemplate = require('../slack/card_templates');
 var request = require('request');
 var slackUtils = require('../slack/utils');
+var queue = require('../queue-mongo');
 
 //
 // Handlers take something from the message.execute array and turn it into new messages
@@ -386,6 +387,35 @@ handlers['home.expand'] = function*(message, exec) {
 handlers['home.detract'] = function*(message, exec) {
    return yield slackUtils.hideMenu(message);
 
+};
+
+handlers['home.loading'] = function*(message) {
+
+  kip.debug(' \n\n\n\n\n\n\n\n\n\n  👳shopping.js:393:home.loading', message,'  \n\n\n\n\n\n\n\n\n\n')
+
+  var message = new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    text: 'Searching...',
+  })
+
+  yield queue.publish('outgoing.' + message.origin, message, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+  
+
+   // return new db.Message({
+   //    incoming: false,
+   //    thread_id: message.thread_id,
+   //    mode: 'shopping',
+   //    resolved: true,
+   //    user_id: 'kip',
+   //    origin: message.origin,
+   //    source: message.source,
+   //    text: 'Searching...'
+   //  })
 };
 
 handlers['cart.loading'] = function (message) {

@@ -176,7 +176,7 @@ function * start () {
 //
 kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
-
+  
   try {
     var message = outgoing.data;
     var team = _.get(message, 'source.team');
@@ -195,6 +195,9 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
           outgoing.ack()
         })
+      }
+      if( _.get(message,'data.loading') &&  _.get(message,'text') == 'Searching...') {
+        yield slackUtils.updateResponseUrl(message);
       }
       kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {

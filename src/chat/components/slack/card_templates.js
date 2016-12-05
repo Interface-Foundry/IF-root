@@ -250,7 +250,7 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
      type: "button",
      value: "bundle.snacks"
    },
-  {
+   {
      name: "onboard.supplies.drinks",
      text: "Drinks",
      style: "default",
@@ -264,6 +264,7 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
      type: "button",
      value: "bundle.supplies"
    }];
+  
 
 var slack_onboard_default = module.exports.slack_onboard_default = [{
       name: "exit",
