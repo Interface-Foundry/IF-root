@@ -30,26 +30,32 @@ var Delivery = db.Delivery;
 
 var ObjectId = require('mongodb').ObjectID;
 
-//require('../chat/components/delivery.com/scrape_menus.js');
+// require('../chat/components/delivery.com/scrape_menus.js');
 
 //handle post request with a binder full of data
 app.post('/cafe', (req, res) => co(function * () {
+  console.log('post to cafe')
 
   var ms = new MenuSession({
     session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
   });
 
+  console.log('new menusession created')
+
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
+  // console.log('menu found') // last printed
+
+  // console.log('result:', result)
   ms.menu.data = result.raw_menu.menu;
-  //ms.menu.data = cafeMenu(result.raw_menu);
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.userId = req.body.user_id;
   ms.merchant.id = rest_id;
   merchant = yield Merchant.findOne({id: rest_id});
+  console.log('merchant', merchant)
   ms.merchant.name = merchant.data.summary.name;
-
+  ms.merchant.minimum = merchant.data.ordering.minimum + "";
   console.log('ms', ms);
 
   yield ms.save();

@@ -15,6 +15,16 @@ app.factory('MenuFactory', function ($http, $location) {
     });
   };
 
+  mf.getMinimum = function () {
+    return ms.then(function (ms) {
+      console.log('does this merchant have a min', ms.merchant.minimum)
+      return ms.merchant.minimum;
+    })
+    ms.catch(function (err) {
+      console.log('error', err)
+    });
+  }
+
   mf.getRestaurant = function () {
     return ms.then(function (ms) {
       console.log('ms', ms);

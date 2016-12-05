@@ -56,9 +56,12 @@
                 </span>
               </div>
             </div>
-            <button class="checkout_btn" ng-click=checkout()>
+            <button ng-hide="minimum > total" class="checkout_btn" ng-click=checkout()>
               Check out for {{total}}
             </button>
+            <h5 ng-show="minimum > total">
+              Add {{minimum-total}} to your order to check out!
+            </h5>
           <!-- </div> -->
           <!-- <div class="sidebar_base"></div> -->
         </div>

@@ -3,11 +3,16 @@ var app = angular.module('app', []);
 app.controller('menuController', function ($scope, $window, MenuFactory) {
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
+  $scope.minimum = MenuFactory.getMinimum();
+  console.log(MenuFactory.getMinimum(), '####');
   $scope.total = 0;
   $scope.cart = [];
   $scope.inProgress = {};
   $scope.categories = {};
   $scope.options = {};
+
+  // console.log(MenuFactory.getMinimum(), 'get min called');
+  // console.log(MenuFactory.getRestaurant(), 'get name called')
 
   $scope.toggleCategory = function (cat) {
     if ($scope.categories[cat]) $scope.categories[cat] = false;
