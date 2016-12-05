@@ -329,7 +329,7 @@ queue.topic('incoming').subscribe(incoming => {
 
     if (switchMode(message)) {
       message.mode = switchMode(message);
-      if (message.mode.match(/(settings|team)/) || message.mode == 'onboard') message.action = 'home';
+      if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
       yield message.save(); 
     }
 

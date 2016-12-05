@@ -52,7 +52,6 @@ var focus = require('./focus')
 var cart = require('./cart')
 var cardTemplate = require('./card_templates');
 var slackConnections = {}
-// var slackConnections = {};
 var webserver = require('./webserver')
 var bundles = require('../bundles');
 bundles.updater(); //caches bundle items to mongo everyday at midnight
@@ -149,7 +148,7 @@ function * start () {
       //
       // 🖼 image search
       //
-      if (data.subtype === 'file_share' && ['png', 'jpg', 'gif', 'jpeg', 'sgv'].indexOf(data.file.filetype.toLowerCase()) >= 0) {
+      if (data.subtype === 'file_share' && ['png', 'jpg', 'gif', 'jpeg', 'svg'].indexOf(data.file.filetype.toLowerCase()) >= 0) {
         return image_search(data.file.url_private, slackbot.bot.bot_access_token, function (res) {
           message.text = res
           message.save().then(() => {
@@ -252,6 +251,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       if (message.mode === 'onboard' && message.action === 'home') {
         msgData.attachments = message.reply;
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+
+        // return bot.web.chat.postMessage(message.source.channel, message.text, msgData, (e, r) => {
+        //   // set the slack_ts from their server so we can update/delete specific messages
+        //   //db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
+        //   kip.debug('🐢',r.response_url)
+        // })
       }
 
       if (message.mode === 'onboard_shopping' && message.action === 'home') {
