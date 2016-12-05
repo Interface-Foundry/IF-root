@@ -10,6 +10,7 @@
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
   <script src="../ang/app.js" defer></script>
   <script src="../ang/menu.factory.js" defer></script>
+  <script src="../ang/item.directive.js" defer></script>
 </head>
 
 <body ng-app="app" ng-controller="menuController">
@@ -79,27 +80,17 @@
             </h2>
             <h3 class="item_description">{{item.description}}</h3>
             <div ng-show="$parent.inProgress[item.id]">
-              <div ng-repeat="child in item.children">
+
+              <div ng-hide="false" ng-repeat="child in (item.children)">
+                <!-- show this div if they're really children  -->
+                <!-- define child in item.children as a ternary? -->
+                <!-- if the thing above -->
                 <h4>{{child.name}}</h4>
-                <div ng-show="child.min_selection == 1">
-                  <div ng-repeat="option in child.children">
-                    <form name="optionForm">
-                      <label>
-                        <input type="radio" name="child.name" ng-model="$parent.inProgress[item.id].options[child.name].radio" ng-value="option.unique_id"/>
-                        {{option.name}} {{formatPrice(option.price)}}
-                      </label>
-                    </form>
-                  </div>
-                </div>
-                <div ng-show="child.min_selection == 0">
-                  <div ng-repeat="option in child.children">
-                    <form>
-                      <label>
-                        <input type="checkbox" name="order" ng-model="$parent.inProgress[item.id].options[child.name][option.unique_id].chosen" ng-value="true"/>
-                        {{option.name}} {{formatPrice(option.price)}}
-                      </label>
-                    </form>
-                  </div>
+              <!-- ////// options -->
+                <item ng-hide="item.type=='menu'"></item>
+                <div ng-show="item.type=='menu'" ng-repeat="food in child.children">
+                  <h3>{{food.name}}</h3>
+                  Speakerbox
                 </div>
               </div>
               <div>

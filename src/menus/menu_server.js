@@ -20,6 +20,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 
 app.use('/', express.static('template'));
+app.use('/test', express.static('test'));
 app.use('/ang', express.static('ang'));
 
 var MenuSession = db.Menu_session;

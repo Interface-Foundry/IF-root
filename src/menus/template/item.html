@@ -1,0 +1,22 @@
+
+    <div ng-show="child.min_selection == 1">
+      <div ng-repeat="option in child.children">
+        <form name="optionForm">
+          <label>
+            <input type="radio" name="child.name" ng-model="inProgress[item.id].options[child.name].radio" ng-value="option.unique_id"/>
+            {{option.name}} {{formatPrice(option.price)}}
+          </label>
+        </form>
+      </div>
+    </div>
+    <div ng-show="child.min_selection == 0">
+      <div ng-repeat="option in child.children">
+        <form>
+          <label>
+            <input type="checkbox" name="order" ng-model="inProgress[item.id].options[child.name][option.unique_id].chosen" ng-value="true"/>
+            {{option.name}} {{formatPrice(option.price)}}
+          </label>
+        </form>
+      </div>
+    </div>
+    

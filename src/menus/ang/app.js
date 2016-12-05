@@ -122,5 +122,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
 
   $scope.checkout = function () {
     MenuFactory.submitOrder(MenuFactory.formatCart($scope.cart));
+    window.close();
   };
 });
