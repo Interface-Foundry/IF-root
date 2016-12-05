@@ -112,8 +112,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
         }
       ]
     }
-    desc = (desc.split(' ').length > 10 ? desc.split(' ').slice(0,10).join(' ')+"…" : desc)
-    parentDescription = (parentDescription.split(' ').length > 10 ? parentDescription.split(' ').slice(0,10).join(' ')+"…" : parentDescription)
+    desc = (desc.split(' ').length > 26 ? desc.split(' ').slice(0,26).join(' ')+"…" : desc)
+    parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
   })

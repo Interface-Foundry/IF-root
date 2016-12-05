@@ -102,10 +102,14 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
 
   // Price for the Add To Cart button
   var fullPrice = menu.getCartItemPrice(cartItem)
+  var parentName = _.get(menu, `flattenedMenu.${item.parentId}.name`)
+  var parentDescription = _.get(menu, `flattenedMenu.${item.parentId}.description`)
 
   var json = {
-    text: `*${item.name}*
- ${item.description}`,
+    text: `*${parentName}*  
+${parentDescription}
+      *_${item.name}_*
+      _${item.description || 'No description provided'}_`,
     attachments: [{
       image_url: (item.images.length>0 ? 'https://res.cloudinary.com/delivery-com/image/fetch/w_300,h_240,c_fit/' + encodeURIComponent(item.images[0].url) : ''),
       fallback: item.name + ' - ' + item.description,

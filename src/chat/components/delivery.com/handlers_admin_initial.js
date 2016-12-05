@@ -313,7 +313,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ],
-        'fallback': text,
+        'fallback': addr,
         'callback_id': 'settings_address_new',
         'color': '#3AA3E3',
         'attachment_type': 'default',
