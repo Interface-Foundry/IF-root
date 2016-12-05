@@ -135,6 +135,18 @@ function isMenuChange(message) {
   return _.get(message,'action') && (_.get(message,'action').indexOf('home.expand') > -1 || _.get(message,'action').indexOf('home.detract') > -1)
 }
 
+//NOT WORKING
+
+//https://www.amazon.com/gp/product/B01E7QPPWK/ref=br_asw_pdt-3?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=AP76KCMKGEN673ZV8SPX&pf_rd_t=36701&pf_rd_p=3a087c6c-220d-4990-9d91-10b580e4cb73&pf_rd_i=desktop
+//B01E7QPPWK
+
+//WORKING
+
+//https://www.amazon.com/gp/product/B01E8O2K0Q/ref=br_asw_pdt-3?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=AP76KCMKGEN673ZV8SPX&pf_rd_t=36701&pf_rd_p=3a087c6c-220d-4990-9d91-10b580e4cb73&pf_rd_i=desktop&th=1&psc=1
+// B01E8O2K0Q
+
+
+
 function * processProductLink(message) {
   var text = message.text ? message.text.toLowerCase() : '';
   if (text.indexOf('www.amazon.com') > -1 ) {
@@ -145,17 +157,22 @@ function * processProductLink(message) {
     }
   }
   if (asin) {
+    kip.debug('\n\n\n\n\n\n\n\n\n\n  Got ASIN: ', asin,'  \n\n\n\n\n\n\n\n\n\n')
     var fail = false;
     try {
       yield slackUtils.addViaAsin(asin, message);
     } catch (err) {
+      kip.debug('\n\n\n\n\n\n\n\n\n\n  Failed to add via ASIN: ', err,'  \n\n\n\n\n\n\n\n\n\n')
       fail = true;
     }
     if (!fail) {
       message.text = 'view cart';
       yield message.save();
     }
-  } 
+  } else {
+     kip.debug('\n\n\n\n\n\n\n\n\n\n  Did NOT get ASIN \n\n\n\n\n\n\n\n\n\n')
+
+  }
 }
 
 function switchMode(message) {
