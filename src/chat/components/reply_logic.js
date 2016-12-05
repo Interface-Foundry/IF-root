@@ -36,6 +36,7 @@ var food = require('./delivery.com/delivery.com').handleMessage;
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
 var slackUtils = require('./slack/utils');
+var amazon_variety = require('./amazon_variety');
 
 
 
@@ -166,7 +167,8 @@ function * processProductLink(message) {
     try {
       yield slackUtils.addViaAsin(asin, message);
     } catch (err) {
-      kip.debug('\n\n\n\n\n\n\n\n\n\n  Failed to add via ASIN: ', err,'  \n\n\n\n\n\n\n\n\n\n')
+      kip.debug('hmm, that didn\'t work. Let\'s try doing that with amazon_variety lookup')
+      yield amazon_variety.getVariations(asin, message);
       fail = true;
     }
     if (!fail) {
@@ -359,7 +361,16 @@ queue.topic('incoming').subscribe(incoming => {
     if (switchMode(message)) {
       message.mode = switchMode(message);
       if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
-      yield message.save(); 
+      if (message.mode.match(/(onboard|food)/)) {
+        let team = yield db.Slackbots.findOne({
+          'team_id': message.source.team
+        }).exec();
+        let admins = yield slackUtils.findAdmins(team)
+        if (!admins.includes(message.source.user)) {
+          message.mode = 'shopping'
+        }
+      }
+      yield message.save();
     }
 
     if (!message.mode) {

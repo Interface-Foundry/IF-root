@@ -381,7 +381,7 @@ function* updateCartMsg(cart, parsedIn) {
     team = yield db.slackbots.findOne({
       team_id: parsedIn.team.id
     }),
-    userIsAdmin = team.meta.office_assistants.includes(parsedIn.user.id);
+    showEverything = team.meta.office_assistants.includes(parsedIn.user.id) || slackbot.meta.office_assistants.length === 0;
 
   let itemData = cart.aggregate_items.reduce((all, ele) => {
     all[ele._id] = {};
@@ -395,7 +395,7 @@ function* updateCartMsg(cart, parsedIn) {
   }, {});
 
   cart.aggregate_items.map(function*(ele) {
-    if (itemData[ele._id].showDetail || userIsAdmin) {
+    if (itemData[ele._id].showDetail || showEverything) {
       itemData[ele._id].link = yield processData.getItemLink(itemData[ele._id].link, parsedIn.user.id, ele._id.toString());
     }
   })
@@ -403,7 +403,7 @@ function* updateCartMsg(cart, parsedIn) {
   let attachments = parsedIn.original_message.attachments.reduce((all, a, i) => {
     if (a.callback_id && itemData[a.callback_id]) {
       let userString;
-      a.actions = (itemData[a.callback_id].showDetail || userIsAdmin) ? [{
+      a.actions = (itemData[a.callback_id].showDetail || showEverything) ? [{
         'name': 'additem',
         'text': '+',
         'style': 'default',
@@ -423,7 +423,7 @@ function* updateCartMsg(cart, parsedIn) {
         'value': 'add'
       }];
 
-      if (userIsAdmin && itemData[a.callback_id].quantity > 1) {
+      if (showEverything && itemData[a.callback_id].quantity > 1) {
         a.actions.push({
           name: "removeall",
           text: 'Remove All',
@@ -437,8 +437,8 @@ function* updateCartMsg(cart, parsedIn) {
       }).join(', ');
 
       a.text = [
-        `*${itemNum}.* ` + ((userIsAdmin || itemData[a.callback_id].showDetail) ? `<${itemData[a.callback_id].link}|${itemData[a.callback_id].title}>` : itemData[a.callback_id].title),
-        ((userIsAdmin) ? `*Price:* ${itemData[a.callback_id].price} each` : ''),
+        `*${itemNum}.* ` + ((showEverything || itemData[a.callback_id].showDetail) ? `<${itemData[a.callback_id].link}|${itemData[a.callback_id].title}>` : itemData[a.callback_id].title),
+        ((showEverything) ? `*Price:* ${itemData[a.callback_id].price} each` : ''),
         `*Added by:* ${userString}`,
         `*Quantity:* ${itemData[a.callback_id].quantity}`,
       ].filter(Boolean).join('\n');

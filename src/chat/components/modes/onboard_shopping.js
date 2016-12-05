@@ -55,7 +55,7 @@ handlers['step_1'] = function(message) {
     attachment_type: 'default',
     actions: cardTemplate.slack_member_onboard_start
   }, {
-    text: '✎ Or type what you want (Example: _macbook pro power cord_)',
+    'text': '✎ Hint: You can also what you want below (Example: _MacBook Pro Power Cord_)\n✂︎ Or you can just paste an Amazon item address',
     mrkdwn_in: ['text']
   }];
   return [msg];
