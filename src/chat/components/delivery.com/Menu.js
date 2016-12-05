@@ -107,7 +107,8 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
     text: `*${item.name}*
  ${item.description}`,
     attachments: [{
-      fallback: 'Quantity: ' + cartItem.item.item_qty,
+      image_url: (item.images.length>0 ? 'https://res.cloudinary.com/delivery-com/image/fetch/w_300,h_240,c_fit/' + encodeURIComponent(item.images[0].url) : ''),
+      fallback: item.name + ' - ' + item.description,
       callback_id: 'quantity',
       color: 'grey',
       attachment_type: 'default',
@@ -139,7 +140,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
     'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"} \n *Total:* `+fullPrice.$,
-    'fallback': 'Unable to load food options.',
+    'fallback': 'Special Instructions: ${cartItem.item.instructions || "_None_"}',
     'callback_id': 'menu_quickpicks',
     'color': '#49d63a',
     'attachment_type': 'default',
@@ -191,12 +192,12 @@ function nodeOptions (node, cartItem, validate) {
     var allowMultiple = true
     var numSelected = g.children.filter(option => Object.keys(cartItem.item.option_qty).includes(option.unique_id.toString())).length
     if (g.min_selection === 0) {
-      if (g.max_selection > 4) {
+      if (g.max_selection >= g.children.length) {
         a.text += '\n Optional - Choose as many as you like.'
       } else {
         a.text += `
  Optional - Choose up to ${g.max_selection}.`
-        if (validate && numSelected > g.max_selection) {
+        if (numSelected > g.max_selection) {
           a.text += '\n`Maximum number of options exceeded`'
           a.color = '#fa951b'
         }
@@ -207,8 +208,11 @@ function nodeOptions (node, cartItem, validate) {
         allowMultiple = g.min_selection !== 1
         a.text += `
  Required - Choose exactly ${g.min_selection}.`
-        if (validate && numSelected === 0) {
-          a.text += '\n`Option Required`'
+        if (numSelected > g.min_selection) {
+          a.text += `\n\`Too many options selected\``
+          a.color = '#fa951b'
+        } else if (validate && numSelected < g.min_selection) {
+          a.text += `\n\`${g.min_selection - numSelected} more selection(s) required\``
           a.color = '#fa951b'
         }
       } else {

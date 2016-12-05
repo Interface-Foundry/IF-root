@@ -27,7 +27,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
     logging.info('searching for', keyword.cyan)
     var menu = Menu(foodSession.menu)
     var sortedMenu = menu.allItems()
-    var matchingItems = yield utils.matchText(keyword, sortedMenu, ['name'], {
+    var matchingItems = yield utils.matchText(keyword, sortedMenu, {
       // seems to work better for matching
       shouldSort: true,
       threshold: 0.8,
@@ -97,8 +97,9 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
 
     var attachment = {
+      thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
-      fallback: 'i.name',
+      fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       color: '#3AA3E3',
       attachment_type: 'default',
       'actions': [
@@ -111,7 +112,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
         }
       ]
     }
-
+    desc = (desc.split(' ').length > 10 ? desc.split(' ').slice(0,10).join(' ')+"…" : desc)
+    parentDescription = (parentDescription.split(' ').length > 10 ? parentDescription.split(' ').slice(0,10).join(' ')+"…" : parentDescription)
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
   })
@@ -125,18 +127,21 @@ handlers['food.menu.quickpicks'] = function * (message) {
         ]
       }].concat(menuItems).concat([{
       'text': '',
-      'fallback': 'Unable to load menu item',
+      'fallback': 'Food option',
       'callback_id': 'menu_quickpicks',
       'color': '#3AA3E3',
       'attachment_type': 'default',
-      'actions': [{
-        name: 'food.feedback.new',
-        text: '⇲ Send feedback',
-        type: 'button',
-        value: 'food.feedback.new'
-      }]
+      'actions': []
     }])
   }
+  // if (feedbackOn && msg_json) {
+  //   msg_json.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
 
   if (sortedMenu.length >= index + 4) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
@@ -296,7 +301,7 @@ handlers['food.item.instructions'] = function * (message) {
     text: `Add Special Instructions for *${item.name}*`,
     attachments: [{
       text: '✎ Type your instructions below (Example: _Extra chili on side_)',
-      fallback: 'Unable to add special instructions',
+      fallback: '✎ Type your instructions below',
       mrkdwn_in: ['text']
     }]
   }

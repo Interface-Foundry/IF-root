@@ -58,7 +58,7 @@ function voteMessage (foodSession) {
 
   var res = {
     text: `<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!`,
-    fallback: 'You are unable to vote for lunch preferences',
+    fallback: '<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!',
     callback_id: 'food.user.poll',
     color: '#3AA3E3',
     attachment_type: 'default',
@@ -81,7 +81,7 @@ function voteMessage (foodSession) {
 
 var userFoodPreferencesPlaceHolder = {
   text: 'Here we would ask user for preferences if they didnt have it',
-  fallback: 'You are unable to confirm preferences',
+  fallback: 'Any preferences?',
   callback_id: 'confirm.user.preferences',
   color: 'grey',
   attachment_type: 'default',
@@ -157,7 +157,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   // next filter out restaurants that don't match the keyword if provided
   if (keyword) {
-    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, ['summary.name'], {
+    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, {
       shouldSort: true,
       threshold: 0.8,
       tokenize: true,
@@ -280,7 +280,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   if (message.allow_text_matching) {
     // user typed something
     logging.info('using text matching for cuisine choice')
-    var res = yield utils.matchText(message.text, foodSession.cuisines, ['name'], {
+    var res = yield utils.matchText(message.text, foodSession.cuisines, {
       shouldSort: true,
       threshold: 0.8,
       tokenize: true,
@@ -325,6 +325,9 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
+  if (message.allow_text_matching) {
+    return yield handlers['food.admin.restaurant.pick'](message)
+  }
   // Build the votes tally
   var votes = foodSession.votes
     .map(v => v.vote) // get just the vote, not username
@@ -350,16 +353,18 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`,
-      fallback: 'Unable to load votes',
+      fallback: `*Votes from the group* 👋\n${votes}`,
       callback_id: 'admin_restaurant_pick',
-      actions: [{
-        name: 'food.feedback.new',
-        text: '⇲ Send feedback',
-        type: 'button',
-        value: 'food.feedback.new'
-      }]
     }]
   }
+  // if (feedbackOn && dashboard) {
+  //   dashboard.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
 
   if (slackers.length > 0) {
     dashboard.attachments.push({
@@ -502,7 +507,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       'text'
     ],
     'text': '',
-    'fallback': 'You are unable to pick a restaurant',
+    'fallback': 'Restaurant',
     'callback_id': 'admin_restaurant_pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
@@ -596,6 +601,13 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
 }
 
+handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.menu = yield api.getMenu(foodSession.chosen_restaurant.id)
+  yield foodSession.save()
+  yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
+}
+
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
@@ -608,7 +620,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
           'text'
         ],
         'text': 'Want to be in this order?',
-        'fallback': 'n/a',
+        'fallback': 'Want to be in this order?',
         'callback_id': 'food.participate.confirmation',
         'color': '#3AA3E3',
         'attachment_type': 'default',

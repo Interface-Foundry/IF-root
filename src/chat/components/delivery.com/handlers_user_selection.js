@@ -79,7 +79,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': 'Confirm',
+            'text': '✓ Send Poll',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
@@ -92,7 +92,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           },
           {
             'name': 'food.admin.display_channels',
-            'text': 'Use a Channel',
+            'text': 'Use a #channel',
             'type': 'button',
             'value': 'select_team_members'
           },
@@ -140,7 +140,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': 'Confirm',
+            'text': '✓ Send Poll',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
@@ -153,7 +153,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
           },
           {
             'name': 'food.admin.display_channels',
-            'text': 'Use a Channel',
+            'text': 'Use a #channel',
             'type': 'button',
             'value': 'select_team_members'
           },
@@ -216,7 +216,7 @@ handlers['food.admin.display_channels'] = function * (message) {
     attachments: groupedButtons.map((buttonGroup) => {
       return {
         'text': ``,
-        'fallback': 'Cant select a channel at this time',
+        'fallback': 'Which team members are you ordering food for?',
         'callback_id': 'channel_select',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -228,7 +228,7 @@ handlers['food.admin.display_channels'] = function * (message) {
   // final attachment with send, edit members, < back
   msg_json.attachments.push({
     'text': ``,
-    'fallback': 'Cant do thing',
+    'fallback': '✓ Send to Members',
     'callback_id': 'channel_select',
     'attachment_type': 'default',
     'actions': [{
