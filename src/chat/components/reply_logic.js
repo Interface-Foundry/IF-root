@@ -153,6 +153,8 @@ function * processProductLink(message) {
     }
     if (!fail) {
       message.text = 'view cart';
+      message.mode = 'shopping';
+      message.action = 'initial';
       yield message.save();
     }
   } 
