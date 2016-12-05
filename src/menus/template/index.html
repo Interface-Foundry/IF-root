@@ -84,7 +84,10 @@
             <h3 class="item_description">{{item.description}}</h3>
             <div ng-show="$parent.inProgress[item.id]">
 
-              <div ng-hide="false" ng-repeat="child in (item.children)">
+              <!-- One layer deep -->
+            <div ng-show="item.type=='item'">
+              <div ng-repeat="child in item.children">
+                <!-- ie option groups -->
 
                 <h4>{{child.name}}</h4>
 
@@ -110,53 +113,70 @@
                       </form>
                     </div>
                   </div>
-                  <div>
-                    <h5>How many would you like?</h5>
-                    <div>
-                      <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
-                    </div>
-                  </div>
                 </div>
+              </div>
+
+              <div>
+                <h5>How many would you like?</h5>
+                <div>
+                  <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
+                </div>
+              </div>
+            </div>
+              <!-- Two layers deep -->
+            <div ng-show="item.type='menu'">
                 <!-- here -->
-                <div ng-show="item.type=='menu'" ng-repeat="food in child.children">
-                  <h2>
-                    <span class="item_name">{{food.name}}</span>
-                    <span class="price">
-                      <button ng-click="itemDetails(food);addToCart(food);">Add to cart for {{food.price}}</button>
-                    </span>
-                  </h2>
-                  <!-- <div ng-show="food.type=='item'"> -->
-                    <div ng-show="food.type=='option group'">
-                      <div ng-show="food.min_selection == 1">
-                        <div ng-repeat="option in food.children">
+                <!-- <div ng-show="item.type=='menu'" ng-repeat="food in child.children"> -->
+                <div ng-repeat="child in item.children">
+                  {{child.type}}
+                    <h2>
+                      <span class="item_name">{{child.name}}</span>
+                      <span class="price">
+                        <button ng-click="itemDetails(child);addToCart(child);">Add to cart for {{child.price * inProgress[child.id].item_qty}}</button>
+                      </span>
+                    </h2>
+                    <div ng-repeat="og in child.children" ng-show="og.type=='option group'">
+                      <h3>{{og.name}}</h3>
+                      <div ng-show="og.min_selection == 1">
+                        <div ng-repeat="option in og.children">
                           <form name="optionForm">
                             <label>
-                              <input type="radio" name="food.name" ng-model="inProgress[item.id].options[child.name].radio" ng-value="option.unique_id"/>
+                              <input type="radio" name="og.name" ng-model="inProgress[child.id].options[og.name].radio" ng-value="option.unique_id"/>
                               {{option.name}} {{formatPrice(option.price)}}
                             </label>
                           </form>
                         </div>
                       </div>
                       <div ng-show="food.min_selection == 0">
-                        <div ng-repeat="option in food.children">
+                        <div ng-repeat="option in og.children">
                           <form>
                             <label>
-                              <input type="checkbox" name="order" ng-model="inProgress[item.id].options[child.name][option.unique_id].chosen" ng-value="true"/>
+                              <input type="checkbox" name="order" ng-model="inProgress[child.id].options[og.name][option.unique_id].chosen" ng-value="true"/>
                               {{option.name}} {{formatPrice(option.price)}}
                             </label>
                           </form>
                         </div>
                       </div>
                     </div>
-                  <!-- here before -->
-                </div>
-                <div>
-                  <h5>How many would you like?</h5>
-                  <div>
-                    <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
+
+                    <!-- <div ng-show="food.type=='option group'"> -->
+
+
+                    <!-- </div> -->
+                    <div>
+                      <h5>How many would you like?</h5>
+                      <div>
+                        <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
+                      </div>
+                    </div>
+                    
                   </div>
                 </div>
+
+                <!-- end, for some reason? -->
+
               </div>
+
             </div>
           </div>
         </div>

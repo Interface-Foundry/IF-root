@@ -13,7 +13,8 @@ var menuSessionSchema = mongoose.Schema({
   },
   merchant: {
     id: String,
-    name: String
+    name: String,
+    minimum: String
   },
   cart: {},
   ts: {
