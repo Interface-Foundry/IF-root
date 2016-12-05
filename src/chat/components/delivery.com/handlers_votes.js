@@ -325,7 +325,8 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
-  if (message.allow_text_matching) {
+  var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
+  if (message.allow_text_matching && !adminHasVoted) {
     return yield handlers['food.admin.restaurant.pick'](message)
   }
   // Build the votes tally
