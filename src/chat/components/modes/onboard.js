@@ -871,25 +871,27 @@ handlers['text'] = function * (message) {
 /**
  * catcher
  */
-handlers['sorry'] = function * (message) {
+handlers['sorry'] = function*(message) {
+  if(message.text.includes('amazon.com')){
+    return; //ignore times people paste stuff in
+  }
+  message.text = "Sorry, my brain froze!"
+  message.mode = 'onboard';
+  message.action = 'home';
+  var attachments = [];
+  attachments.push({
+    text: 'Don’t have any changes? Type `exit` to quit settings',
+    mrkdwn_in: ['text'],
+    fallback: 'Settings',
+    actions: cardTemplate.slack_onboard_default,
+    callback_id: 'none',
+    color: '#45a5f4'
+  });
+  message.reply = attachments;
 
-   message.text = "Sorry, my brain froze!"
-   message.mode = 'onboard';
-   message.action = 'home';
-   var attachments = [];
-   attachments.push({
-      text: 'Don’t have any changes? Type `exit` to quit settings',
-      mrkdwn_in: ['text'],
-      fallback:'Settings',
-      actions: cardTemplate.slack_onboard_default,
-      callback_id: 'none',
-      color: '#45a5f4'
-    });
-   message.reply = attachments;
-   return [message];
+  return [message];
 
 }
-
 
 /**
  * send_replace home button

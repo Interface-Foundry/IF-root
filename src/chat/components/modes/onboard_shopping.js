@@ -306,6 +306,9 @@ handlers['reminder_confirm'] = function*(message, data) {
  */
 handlers['sorry'] = function(message) {
   // kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
+  if(message.text.includes('amazon.com')){
+  	return; //ignore times people paste stuff in
+  }
   message.text = "Sorry, my brain froze!"
   message.mode = 'onboard_shopping';
   message.action = 'home';
