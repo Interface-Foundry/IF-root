@@ -44,7 +44,7 @@ SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client')
 var co = require('co')
 var _ = require('lodash')
-var kip = require('kip')
+var kip = require('../../../kip')
 var queue = require('../queue-mongo')
 var image_search = require('../image_search')
 var search_results = require('./search_results')
