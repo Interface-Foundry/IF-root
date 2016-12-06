@@ -285,8 +285,6 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.team = message.source.team.id
       message.source.user = message.source.user.id
       message.source.channel = message.source.channel.id
-
-
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       })
@@ -498,30 +496,31 @@ app.get('/newslack', function (req, res) {
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
       yield utils.initializeTeam(bot, res_auth);
+      var user = yield db.Chatuser.findOne({ id: _.get(res_auth,'user_id')}).exec()
       co(slackModule.start);
-      var admins = yield utils.findAdmins(bot);
-      var a = admins[0];
+      // var admins = yield utils.findAdmins(bot);
+      // var a = admins[0];
       var message= new db.Message({
         incoming: false,
-        thread_id: a.dm,
+        thread_id: user.dm,
         resolved: true,
-        user_id: a.id,
+        user_id: user.id,
         origin: 'slack',
         text: '',
         source:  {
           team: bot.team_id,
-          channel: a.dm,
-          thread_id: a.dm,
-          user: a.id,
+          channel: user.dm,
+          thread_id: user.dm,
+          user: user.id,
           type: 'message',
         },
-        mode: 'onboard',
+        mode: 'onboarding',
         action: 'home',
-        user: a.id
+        user: user.id
       })
      // queue it up for processing
       message.save().then(() => {
-        queue.publish('incoming', message, ['slack', a.dm, Date.now()].join('.'))
+        queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
       })
      }
   } else {

@@ -161,12 +161,10 @@ function * processProductLink(message) {
     }
   }
   if (asin) {
-    kip.debug('\n\n\n\n\n\n\n\n\n\n  Got ASIN: ', asin,'  \n\n\n\n\n\n\n\n\n\n')
     var fail = false;
     try {
       yield slackUtils.addViaAsin(asin, message);
     } catch (err) {
-      kip.debug('\n\n\n\n\n\n\n\n\n\n  Failed to add via ASIN: ', err,'  \n\n\n\n\n\n\n\n\n\n')
       fail = true;
     }
     if (!fail) {
@@ -175,9 +173,6 @@ function * processProductLink(message) {
       message.action = 'initial';
       yield message.save();
     }
-  } else {
-     kip.debug('\n\n\n\n\n\n\n\n\n\n  Did NOT get ASIN \n\n\n\n\n\n\n\n\n\n')
-
   }
 }
 
@@ -379,7 +374,7 @@ queue.topic('incoming').subscribe(incoming => {
     switch (message.mode) {
       case 'onboarding':
         if (message.origin === 'slack') {
-          var replies = yield onboarding.handle(message)
+          var replies = yield onboarding.handle(message);
         } else {
           // facebook
           //check for valid country

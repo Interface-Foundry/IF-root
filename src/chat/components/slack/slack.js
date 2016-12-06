@@ -136,7 +136,7 @@ function * start () {
       // don't talk to yourself
       if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
         kip.debug("don't talk to yourself: data: ",data);
-        return; // drop the message before saving.
+        return; // drop the message before sa ving.
       }
 
       // other random things
@@ -260,6 +260,11 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         //   //db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
         //   kip.debug('🐢',r.response_url)
         // })
+      }
+
+       if (message.mode === 'onboarding') {
+        msgData.attachments = message.reply;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
       if (message.mode === 'onboard_shopping' && message.action === 'home') {

@@ -42,12 +42,12 @@ function * initializeTeam(team, auth) {
  team.markModified('meta.cart_channels');
  team.markModified('meta.all_channels');
  team.markModified('meta.office_assistants');
- yield team.save();
  yield getTeamMembers(team);
+ //ill fix this later
+ team.meta.office_assistants = [];
+ yield team.save();
  return team;
 }
-
-
 
 
 
@@ -360,6 +360,7 @@ function * showLoading(message) {
     origin: message.origin,
     source: message.source,
     text: 'Searching...',
+
     data: { loading: true}
   });
   yield message.save();

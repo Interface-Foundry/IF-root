@@ -2,6 +2,8 @@ var _ = require('lodash')
 var message_tools = require('../message_tools')
 module.exports = {}
 var handlers = module.exports.handlers = {}
+var onboard = require('./onboard');
+var queue = require('../queue-mongo');
 
 /**
  * Main handler which decides what part of the onbaording process the user is at 
@@ -14,7 +16,9 @@ function * handle(message) {
     return yield handlers['start'](message)
   } else if (last_action === 'get-admins.ask') {
     return yield handlers['get-admins.response'](message)
-  }
+  } else if(last_action === 'get-admins.response') {
+    return yield handlers['reroute'](message)
+  } 
 }
 
 module.exports.handle = handle;
@@ -26,11 +30,23 @@ module.exports.handle = handle;
  */
 handlers['start'] = function * (message) {
   kip.debug('starting onboarding conversation')
-  var welcome = 'Well done! *Kip* has been enabled for your team 😊'
-  var welcome_message = message_tools.text_reply(message, welcome)
-  var next_message = yield handlers['get-admins.ask'](message);
-  kip.debug('\n\nwelcome_message and next_mesage: ',welcome_message, next_message,'\n\n');
-  return [welcome_message, next_message]
+  var attachments = [];
+  var welcome = 'Kudos! *Kip* is now officially a member of your team :blush: '
+  attachments.push({
+    image_url: 'https://kipthis.com/kip_modes/mode_success.png',
+    color: '#3AA3E3',
+    mrkdwn_in: ['text'],
+    fallback:'Onboarding',
+    callback_id: 'none'
+  })
+  attachments.push({text: welcome, color: '#3AA3E3'})
+  attachments.push({text:  'Who manages the office purchases? Type something like `me` or `me and @jane`', color: '#3AA3E3'})
+  var welcome_message = message_tools.text_reply(message,'');
+  welcome_message.reply = attachments;
+  welcome_message.action = 'get-admins.ask';
+  // kip.debug('\n\nwelcome_message and next_mesage: ',welcome_message, next_message,'\n\n');
+  // var next_message = yield handlers['get-admins.ask'](message);
+  return [welcome_message];
 }
 
 /**
@@ -41,7 +57,6 @@ handlers['start'] = function * (message) {
  */
 handlers['get-admins.ask'] = function * (message) {
   var reply = 'Who manages the office purchases? Type something like `me` or `me and @jane`'
-  
   // if not slack, move on to the next part of the onboarding convo
   if (message.origin !== 'slack') {
     kip.err('not slack showing up in slack-only onboarding')
@@ -59,14 +74,15 @@ handlers['get-admins.ask'] = function * (message) {
  * @param message the latest message from the user
  */
 handlers['get-admins.response'] = function * (message) {
-  var reply_success = 'Great! I\'ll keep $ADMINS up-to-date on what your team members are adding to the office shopping cart 😊'
+  var reply_success = `Great! I\'ll keep $ADMINS up-to-date on what your team members are adding to the office shopping cart 😊
+  Do you want me to take you on a short tour of Kip?`
   var reply_failure = "I'm sorry, I couldn't quite understand that, can you clarify for me who manages office purchases? If you want to skip this part, just type 'skip' and we can move on."
   var special_admin_message = message_tools.text_reply(message, 'special instructions for admins') // TODO
   var admins = []
   var user_is_admin = false
   var team = yield db.Slackbots.findOne({
     'source.team_id': message.source.team_id
-  }).exec()
+  }).exec();
 
   // check for mentioned users
   // for a typed message like "that would be @dan"
@@ -84,8 +100,7 @@ handlers['get-admins.response'] = function * (message) {
       team.save();
       return g.replace(/(\<\@|\>)/g, '')
     }
-  })
-
+  });
 
   // also look for users mentioned by name without the @ symbol
   var users = yield db.Chatusers.find({
@@ -107,108 +122,11 @@ handlers['get-admins.response'] = function * (message) {
   reply_success = reply_success.replace('$ADMINS', office_admins.map(g => {
     return '<@' + g + '>'
   }).join(', ').replace(/,([^,]*)$/, ' and $1'));
-
-  // TODO send special message to admins
-
-/*
-              var attachments = [
-                  {
-                    // "pretext": "Ok thanks! Done with cart members 😊",
-                    "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
-                    "text":"",
-                    "color":"#45a5f4",
-                    "fallback":"Welcome"
-                  },
-                  {
-                      "text": "Hi I'm *Kip*, your shopping helper bot! <@$user> made you an admin, so I'll keep you updated on what other members are adding to your Team Shopping Cart 😊".replace('$user', user_id),
-                      "mrkdwn_in": [
-                          "text",
-                          "pretext"
-                      ],
-                      "color":"#45a5f4",
-                      "image_url":"http://kipthis.com/kip_modes/mode_howtousekip.png",
-                      "fallback":"Welcome"
-                  },
-                  {
-                      "text": "• Type `settings` to add other admins, edit standing orders and reminders",
-                      "mrkdwn_in": [
-                          "text",
-                          "pretext"
-                      ],
-                      "color":"#49d63a",
-                      "fallback":"Welcome"
-                  },
-                  {
-                      "text": "• Type `cart` to view Team Cart",
-                      "mrkdwn_in": [
-                          "text",
-                          "pretext"
-                      ],
-                      "color":"#49d63a",
-                      "fallback":"Welcome"
-                  },
-                  {
-                      "text": "• Type `members` to add Slack channels and emails for Team Cart. Kip will ping team members via email to collect orders if they are not on Slack",
-                      "mrkdwn_in": [
-                          "text",
-                          "pretext"
-                      ],
-                      "color":"#49d63a",
-                      "fallback":"Welcome"
-                  },
-                  {
-                      "text": "• If you want to make sure everyone gets the memo, feel free to post this message in a channel where everyone will see it:",
-                      "mrkdwn_in": [
-                          "text"
-                      ],
-                      "color":"#49d63a",
-                      "fallback":"Welcome"
-                  },
-                  {
-                    "mrkdwn_in": [
-                        "fields"
-                    ],
-                    "fields": [
-                        {
-                            "value": "_Hey <@channel>, I just enabled <@"+convo.slackbot.bot.bot_user_id+"> for our team, so you can search for things we need and save to Team Cart_ \n\n\n _Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:_\n\n _See more results with `more`. Type `save 1` to add item :one: to Team Cart_ \n\n _Type `help` to <@"+convo.slackbot.bot.bot_user_id+"> for more info_",
-                            "short": false
-                        }
-                    ],
-                    "fallback":"Welcome"
-                  }
-              ];
-              */
-
-  // if (message.origin !== 'slack') {
-  //   kip.err(`cannot parse admins for any platform besides slack, got message.source: ${message.origin}, message._id: ${message._id.toString()}`)
-  //   admins = [message.user_id]
-  //   var reply_message = message_tools.text_reply(message, reply_success)
-  // } else {
-
-
-  //   // check for something like "nobody"
-  //   else if (message.text.toLowerCase().match(/^(no one|nobody|noone)/)) {
-  //     team.meta.office_assistants = [message.user];
-  //     user_is_admin = true;
-  //     specialAdminMessage();
-  //   }
-
-  //   //add slack members only, no "me"
-  //   else if (message.text.indexOf('<@') > -1) {
-  //     fireGremlins();
-  //   }
-  //   //send error
-  //   else {
-  //     var ask = yield handlers['get-admins.ask'](message)
-  //     return [message_tools.default_reply(message), ask]
-  //   }
-  // }
-
-  var reply_message = message_tools.text_reply(message, reply_success)
-  var next_message = yield handlers['finished'](message)
-  return [reply_message, next_message]
+  var reply_message = message_tools.text_reply(message, reply_success);
+  reply_message.mode = 'onboarding'
+  reply_message.action = 'get-admins.response';
+  return [reply_message]
 }
-
 
 
 /**
@@ -217,9 +135,16 @@ handlers['get-admins.response'] = function * (message) {
  *  
  * @param message the latest message from the user
  */
-handlers['finished'] = function * (message) {
-  var finished = "Thanks for the info! Why don't you try searching for something? Type something like 'headphones' to search"
-  var finished_message = message_tools.text_reply(message, finished)
-  finished_message.mode = 'shopping'
-  return finished_message
+handlers['reroute'] = function * (message) {
+  var next_mode = message.original_text.match(/(yes|ok|sure|yeah|yea)/) && message.original_text.match(/(yes|ok|sure|yeah|yea)/).length > 0 ? 'onboard' : 'shopping';
+  if (next_mode == 'shopping') {
+    var finished = "Thanks for the info! Why don't you try searching for something? Type something like 'headphones' to search"
+    var finished_message = message_tools.text_reply(message, finished)
+    return [finished_message];
+  } else {
+    var next_message = message
+    next_message.mode = 'onboard';
+    next_message.action = 'home';
+    return yield onboard.handle(next_message);
+  }
 }
