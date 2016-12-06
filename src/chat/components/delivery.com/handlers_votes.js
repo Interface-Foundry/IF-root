@@ -282,9 +282,9 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     logging.info('using text matching for cuisine choice')
     var res = yield utils.matchText(message.text, foodSession.cuisines, {
       shouldSort: true,
-      threshold: 0.8,
+      threshold: 0.4,
+      distance: 5,
       tokenize: true,
-      matchAllTokens: true,
       keys: ['name']
     })
     if (res !== null) {
