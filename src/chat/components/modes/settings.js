@@ -7,11 +7,7 @@ var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
-// var team;
-// var teamMembers;
-// var admins;
-// var currentUser;
-// var isAdmin;
+
 var cron = require('cron');
 //maybe can make this persistent later?
 var cronJobs = {};
@@ -28,7 +24,7 @@ function * handle(message) {
  
 module.exports.handle = handle;
 
-/**
+/*
  * Show the user all the settings they have access to
  */
 handlers['start'] = function * (message) { 
@@ -261,14 +257,7 @@ handlers['add_or_remove'] = function * (message) {
                 "style": "primary",
                 "type": "button",
                 "value": "exit"
-              },              
-              // {
-              //   "name": "help",
-              //   "text": "Help",
-              //   "style": "default",
-              //   "type": "button",
-              //   "value": "help"
-              // },              
+              },                           
               {
                 "name": "team",
                 "text": "Team Members",
@@ -282,14 +271,7 @@ handlers['add_or_remove'] = function * (message) {
                 "style": "default",
                 "type": "button",
                 "value": "viewcart"
-              },
-              // {
-              //   "name": "home",
-              //   "text": "🐧",
-              //   "style": "default",
-              //   "type": "button",
-              //   "value": "home"
-              // }
+              }
           ],
           callback_id: 'none'
         });
@@ -308,6 +290,11 @@ handlers['add_or_remove'] = function * (message) {
     }
     var shouldReturn = false;
     if (tokens[0] === 'add') {
+      if(team.meta.p2p) {
+         team.meta.p2p = false;
+         kip.debug('P2P mode OFF');
+         team.meta.office_assistants = [];
+      }
       userIds.map((id) => {
         if (team.meta.office_assistants.indexOf(id) < 0) {
           team.meta.office_assistants.push(id);

@@ -49,8 +49,7 @@ handlers['start'] = function * (message) {
   var welcome_message = message_tools.text_reply(message,'');
   welcome_message.reply = attachments;
   welcome_message.action = 'get-admins.ask';
-  // kip.debug('\n\nwelcome_message and next_mesage: ',welcome_message, next_message,'\n\n');
-  // var next_message = yield handlers['get-admins.ask'](message);
+
   return [welcome_message];
 }
 
@@ -95,7 +94,6 @@ handlers['get-admins.response'] = function * (message) {
   // for a typed message like "that would be @dan"
   // the response.text would be like  "that would be <@U0R6H9BKN>"
   var office_admins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
-  
   // replace "me" with the user's id, and <@U12345> with just U12345
   office_admins = office_admins.map(g => {
     if (g === 'me') {
@@ -108,40 +106,42 @@ handlers['get-admins.response'] = function * (message) {
       return g.replace(/(\<\@|\>)/g, '')
     }
   });
-
   // also look for users mentioned by name without the @ symbol
   var users = yield db.Chatusers.find({
     team_id: team.team_id,
     is_bot: {$ne: true},
     deleted: {$ne: true}
   }).select('id name');
-
   users.map((u) => {
     var re = new RegExp('\\b' + u.name + '\\b', 'i')
     if (message.original_text.match(re)) {
       office_admins.push(u.id);
     }
   });
-
   office_admins = _.uniq(office_admins);
-
   // add the admin strings into the reply message
   reply_success = reply_success.replace('$ADMINS', office_admins.map(g => {
     return '<@' + g + '>'
   }).join(', ').replace(/,([^,]*)$/, ' and $1'));
-
-  kip.debug(' \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n  GOLDEN LIGHT', message,'  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
   var isAdmin = yield slackUtils.isAdmin(message.source.user, team);
-  message.mode = 'onboarding'
+  message.mode = 'onboarding';
   message.action = 'get-admins.response';
+  if (team.meta.office_assistants.length == 0) {
+    team.meta.p2p = true;
+    kip.debug('P2P mode ON');
+    var members = yield slackUtils.getTeamMembers(team);
+    team.meta.office_assistants = members.map( (m) => {
+      return m.id
+    })
+    yield team.save();
+  } 
   if (isAdmin) {
     reply_success = reply_success.concat('\n' + reply_admin);
   } else {
     reply_success = reply_success.concat('\n' + reply_user);
-    message.mode = 'shopping'
+    message.mode = 'shopping';
     message.action = '';
   }
- 
   var reply_message = message_tools.text_reply(message, reply_success);
   return [reply_message]
 }
