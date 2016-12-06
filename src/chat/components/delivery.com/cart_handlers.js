@@ -468,10 +468,9 @@ handlers['food.order.instructions'] = function * (message) {
 }
 
 handlers['food.order.instructions.submit'] = function * (message) {
-  var cart = Cart(message.source.team)
-  yield cart.pullFromDB()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
-  yield db.Delivery.update({_id: cart.foodSession._id}, {$set: {'instructions': message.text || ''}}).exec()
+  yield db.Delivery.update({_id: foodSession._id}, {$set: {'instructions': message.text || ''}}).exec()
   var msg = _.merge({}, message, {
     text: ''
   })

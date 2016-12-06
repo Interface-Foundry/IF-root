@@ -32,7 +32,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
       shouldSort: true,
       threshold: 0.8,
       tokenize: true,
-      matchAllTokens: true,
       keys: ['name']
     })
 
@@ -47,7 +46,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
   }
   matchingItems = matchingItems.map(i => i.unique_id)
 
-
   var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
     .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
     .reduce((allIds, order) => {
@@ -55,8 +53,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
       return allIds
     }, [])
 
-  var recommendedItemIds = Object.keys(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {}))
-
+  recommendedItemIds = _.keys(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {}))
+  recommendedItemIds = recommendedItemIds.map(i => Number(i))
   //
   // adding the thing where you show 3 at a time
   // nned to show a few different kinds of itesm.
@@ -65,20 +63,30 @@ handlers['food.menu.quickpicks'] = function * (message) {
   // THen the rest of the menu in any order i think
   //
   var sortOrder = {
-    orderedBefore: 3,
-    recommended: 2,
-    none: 1
+    orderedBefore: 5,
+    recommended: 4,
+    none: 3,
+    indifferent: 2,
+    last: 1
   }
+
+  /*
+  not really any good way to order items atm so just going to throw
+  everything in last til have some actual way to order things w/ sortOrder
+  */
+  var lastItems = ['beverage', 'beverages', 'desserts', 'dessert', 'cold appetizer', 'hot appetizer', 'appetizers', 'appetizers from the kitchen', 'soup', 'soups', 'drinks', 'salads', 'side salads', 'side menu', 'bagged snacks', 'snacks']
 
   var menu = Menu(foodSession.menu)
   var sortedMenu = menu.allItems().map(i => {
     // inject the sort order stuff
-    if (previouslyOrderedItemIds.includes(i.unique_id)) {
+    if (previouslyOrderedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.orderedBefore
-      i.infoLine = "You ordered this before"
-    } else if (recommendedItemIds.includes(i.unique_id)) {
+      i.infoLine = 'You ordered this before'
+    } else if (recommendedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.recommended
-      i.infoLine = "Popular Item"
+      i.infoLine = 'Popular Item'
+    } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
+      i.sortOrder = sortOrder.last
     } else {
       i.sortOrder = sortOrder.none
     }
@@ -112,8 +120,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
         }
       ]
     }
-    desc = (desc.split(' ').length > 10 ? desc.split(' ').slice(0,10).join(' ')+"…" : desc)
-    parentDescription = (parentDescription.split(' ').length > 10 ? parentDescription.split(' ').slice(0,10).join(' ')+"…" : parentDescription)
+    desc = (desc.split(' ').length > 26 ? desc.split(' ').slice(0,26).join(' ')+"…" : desc)
+    parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
   })

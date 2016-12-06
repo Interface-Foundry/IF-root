@@ -1,4 +1,4 @@
-require('kip')
+require('../../../kip')
 
 var co = require('co')
 var _ = require('lodash')

@@ -63,7 +63,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     }
     yield foodSession.save()
   } else {
-    textWithPrevChannel = `Send poll for cuisine to the team members at \`${addr}\`?`
+    textWithPrevChannel = `Send poll for cuisine to team members at \`${addr}\`?`
   }
   var msg_json = {
     'attachments': [
@@ -98,15 +98,9 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           },
           {
             'name': 'passthrough',
-            'text': '× Exit Café',
+            'text': '< Back',
             'type': 'button',
-            'value': 'food.exit.confirm',
-            'confirm': {
-              'title': 'Are you sure?',
-              'text': "Are you sure you don't want to order food?",
-              'ok_text': 'Yes',
-              'dismiss_text': 'No'
-            }
+            'value': 'food.admin.select_address'
           }
         ]
       }
@@ -159,15 +153,9 @@ handlers['food.poll.confirm_send'] = function * (message) {
           },
           {
             'name': 'passthrough',
-            'text': '× Exit Café',
+            'text': '< Back',
             'type': 'button',
-            'value': 'food.exit.confirm',
-            'confirm': {
-              'title': 'Are you sure?',
-              'text': "Are you sure you don't want to order food?",
-              'ok_text': 'Yes',
-              'dismiss_text': 'No'
-            }
+            'value': 'food.admin.select_address'
           }
         ]
       }

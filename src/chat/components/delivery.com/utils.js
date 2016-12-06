@@ -23,13 +23,12 @@ var replyChannel = new UserChannel(queue)
 *   keys: ['name']
 * }
 */
-function * matchText (text, allChoices, keyChoices, options) {
+function * matchText (text, allChoices, options) {
   // might want to use id, but dont for now
   var baseOptions = {
     shouldSort: true,
     threshold: 0.8,
-    tokenize: true,
-    matchAllTokens: true
+    tokenize: true
   }
   _.merge(baseOptions, options)
   var fuse = new Fuse(allChoices, baseOptions)
