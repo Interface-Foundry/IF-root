@@ -105,11 +105,22 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   var parentName = _.get(menu, `flattenedMenu.${item.parentId}.name`)
   var parentDescription = _.get(menu, `flattenedMenu.${item.parentId}.description`)
 
+  //lol
+  if (item.description){
+    var des = `- _${item.description}_`
+  }else {
+    var des = ''
+  }
+  //lol
+  if(parentDescription){
+    var h = '-'
+  }else {
+    var h = ''
+  }
+
   var json = {
-    text: `*${parentName}*  
-${parentDescription}
-      *_${item.name}_*
-      _${item.description || 'No description provided'}_`,
+    text: `${parentName} `+h+` ${parentDescription}
+      *${item.name}* ${des}`,
     attachments: [{
       image_url: (item.images.length>0 ? 'https://res.cloudinary.com/delivery-com/image/fetch/w_300,h_240,c_fit/' + encodeURIComponent(item.images[0].url) : ''),
       fallback: item.name + ' - ' + item.description,
