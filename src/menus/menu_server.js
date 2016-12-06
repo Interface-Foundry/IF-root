@@ -12,6 +12,13 @@ var crypto = require('crypto');
 var co = require('co');
 var _ = require('lodash');
 
+// VARIOUS STUFF TO POST BACK TO USER EASILY
+// --------------------------------------------
+var queue = require('../chat/components/queue-mongo')
+var UserChannel = require('../chat/components/delivery.com/UserChannel')
+var replyChannel = new UserChannel(queue)
+// --------------------------------------------
+
 var cafeMenu = require('../chat/components/delivery.com/Menu.js');
 var menuURL = 'localhost:8001';
 
@@ -79,12 +86,7 @@ app.post('/session', (req, res) => co(function * () {
   }
 }))
 
-// VARIOUS STUFF TO POST BACK TO USER EASILY
-// --------------------------------------------
-var queue = require('../chat/components/queue-mongo')
-var UserChannel = require('../chat/components/delivery.com/UserChannel')
-var replyChannel = new UserChannel(queue)
-// --------------------------------------------
+
 
 //updates the correct delivery object in the db
 //with the delivery object id saved on the menu session
@@ -107,24 +109,35 @@ app.post('/order', function (req, res) {
           user_id: user_id
         });
       }
-      //hangs here
+      //hangs here, but not reliably
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart}});
 
       //----------Message Queue-----------//
 
-      console.log('looking for source message');
+      console.log('updated delivery; looking for source message');
+
+      console.log('deliv convo inititator', deliv.convo_initiater.id )
 
       var foodMessage = yield Messages.find({
-        'source.user': user.id,
+        'source.user': deliv.convo_initiater.id,
         mode: 'food',
         incoming: false
-      });
+      }).sort('-ts').limit(1);
 
-      console.log('food message~~~', foodMessage);
+      console.log('food message~~~ found', foodMessage[0]);
 
-      //look up last message about this order
-      //identify correct handler from cart_handlers
-      //send message back
+      replyChannel.send(
+        foodMessage[0],
+        'food.cart.personal',
+        {
+          type: foodMessage.origin,
+          data: {
+            text: 'Your order has been submitted!'
+          }
+        }
+      );
+
+      console.log('ostensibly sent');
 
       //----------Message Queue-----------//
 
