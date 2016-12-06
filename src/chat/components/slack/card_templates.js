@@ -16,43 +16,43 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
 }
 
 
-var shopping_home = module.exports.shopping_home =function(id) { 
-  return [{
-     name: "cafe_btn",
-     text: "Kip Cafe",
-     style: "default",
-     type: "button",
-     value: "cafe_btn"
-   },
-   {
-     name: "settings",
-     text: "Settings",
-     style: "default",
-     type: "button",
-     value: "home",
-   },
-   {
-     name: "team",
-     text: "Team Members",
-     style: "default",
-     type: "button",
-     value: "home",
-   }, 
-   {
-     name: "view_cart_btn",
-     text: "View Cart",
-     style: "default",
-     type: "button",
-     value: "view_cart_btn"
-     }, 
-   {
-     name: "shopping.home.detract",
-     text: "< Back",
-     style: "default",
-     type: "button",
-     value: id
-   }]
-}
+// var shopping_home = module.exports.shopping_home =function(id) { 
+//   return [{
+//      name: "cafe_btn",
+//      text: "Kip Cafe",
+//      style: "default",
+//      type: "button",
+//      value: "cafe_btn"
+//    },
+//    {
+//      name: "settings",
+//      text: "Settings",
+//      style: "default",
+//      type: "button",
+//      value: "home",
+//    },
+//    {
+//      name: "team",
+//      text: "Team Members",
+//      style: "default",
+//      type: "button",
+//      value: "home",
+//    }, 
+//    {
+//      name: "view_cart_btn",
+//      text: "View Cart",
+//      style: "default",
+//      type: "button",
+//      value: "view_cart_btn"
+//      }, 
+//    {
+//      name: "shopping.home.detract",
+//      text: "< Back",
+//      style: "default",
+//      type: "button",
+//      value: id
+//    }]
+// }
 
 var focus_home_default = module.exports.focus_home_default = function(message) {
   return [{
@@ -102,22 +102,22 @@ var shopping_team_default = module.exports.shopping_team_default = function(id) 
   ]
 }
 
-var shopping_team = module.exports.shopping_team = function(id) { 
-  return [{
-     name: "cafe_btn",
-     text: "Kip Cafe",
-     style: "default",
-     type: "button",
-     value: "cafe_btn"
-   },
-   {
-     name: "shopping.home.detract",
-     text: "< Back",
-     style: "default",
-     type: "button",
-     value: id
-   }]
- }
+// var shopping_team = module.exports.shopping_team = function(id) { 
+//   return [{
+//      name: "cafe_btn",
+//      text: "Kip Cafe",
+//      style: "default",
+//      type: "button",
+//      value: "cafe_btn"
+//    },
+//    {
+//      name: "shopping.home.detract",
+//      text: "< Back",
+//      style: "default",
+//      type: "button",
+//      value: id
+//    }]
+//  }
 
 
 var shopping_settings_default = module.exports.shopping_settings_default = function(id) {
@@ -139,36 +139,36 @@ var shopping_settings_default = module.exports.shopping_settings_default = funct
 }
 
 
-var shopping_settings = module.exports.shopping_settings =  function(id) { 
-  return [{
-     name: "cafe_btn",
-     text: "Kip Cafe",
-     style: "default",
-     type: "button",
-     value: "cafe_btn"
-   },
-   {
-     name: "team",
-     text: "Team Members",
-     style: "default",
-     type: "button",
-     value: "home",
-   }, 
-   {
-     name: "view_cart_btn",
-     text: "View Cart",
-     style: "default",
-     type: "button",
-     value: "view_cart_btn"
-     }, 
-   {
-     name: "shopping.home.detract",
-     text: "< Back",
-     style: "default",
-     type: "button",
-     value: id
-   }]
-}
+// var shopping_settings = module.exports.shopping_settings =  function(id) { 
+//   return [{
+//      name: "cafe_btn",
+//      text: "Kip Cafe",
+//      style: "default",
+//      type: "button",
+//      value: "cafe_btn"
+//    },
+//    {
+//      name: "team",
+//      text: "Team Members",
+//      style: "default",
+//      type: "button",
+//      value: "home",
+//    }, 
+//    {
+//      name: "view_cart_btn",
+//      text: "View Cart",
+//      style: "default",
+//      type: "button",
+//      value: "view_cart_btn"
+//      }, 
+//    {
+//      name: "shopping.home.detract",
+//      text: "< Back",
+//      style: "default",
+//      type: "button",
+//      value: id
+//    }]
+// }
 
 var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
   // buttons search for whatever follows search in value. e.g. search.healthy_snacks searches for 'healthy snacks'

@@ -113,16 +113,19 @@ function * simplehome (message) {
   let team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
-  let isAdmin = yield slackUtils.isAdmin(message.source.user, team)
+  let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+  let allow = isAdmin || team.meta.office_assistants == 0;
 
-  slackreply.attachments = isAdmin ? slackreply.attachments: card_templates.slack_shopping_mode;
+  slackreply.attachments = allow ? slackreply.attachments : card_templates.slack_shopping_mode;
 
   var msg = {
-    action: isAdmin ? 'simplehome' : 'switch',
-    mode: isAdmin ? 'food' : 'shopping',
+    action: allow ? 'simplehome' : 'switch',
+    mode: allow ? 'food' : 'shopping',
     source: message.source,
     origin: message.origin,
-    reply: {data: slackreply}
+    reply: {
+      data: slackreply
+    }
   }
 
   queue.publish('outgoing.' + message.origin, msg, 'home.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
@@ -365,13 +368,13 @@ queue.topic('incoming').subscribe(incoming => {
     if (switchMode(message)) {
       message.mode = switchMode(message);
       if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
-      if (message.mode.match(/(onboard|food)/)) {
+      if (message.mode.match(/(onboard|food|team)/)) {
         let team = yield db.Slackbots.findOne({
           'team_id': message.source.team
         }).exec();
-        let isAdmin = yield slackUtils.isAdmin(message.source.user, team)
-        kip.debug(`🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 ${JSON.stringify(isAdmin, null, 2)}`);
-        if (!isAdmin) {
+        let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+        let allow = isAdmin || team.meta.office_assistants == 0;
+        if (!allow) {
           message.mode = 'shopping'
         }
       }
@@ -424,6 +427,7 @@ queue.topic('incoming').subscribe(incoming => {
       case 'settings':
         if (message.origin === 'slack') {
           var replies = yield settings.handle(message);
+          kip.debug(`Searching for back button REPLY_LOGIC ${JSON.stringify(replies, null, 2)}`)
         }
         break;
       case 'team':

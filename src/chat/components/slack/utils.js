@@ -125,7 +125,7 @@ function * getChannels(team) {
     var channels =JSON.parse(res_chan).channels;
     channels = _.orderBy(channels, ['num_members'], ['desc']);
     channels = channels.filter( c => { return !c.is_archived });
-     // channels.sort(function(a, b) { parseFloat(b["num_members"]) - parseFloat(a["num_members"]) })
+     // channels.sort(function(a, b) { parseFloat(b['num_members']) - parseFloat(a['num_members']) })
     var generalChannel = channels.find( (c) => { return c.name == 'general' });
     if (generalChannel) {
       var generalChannelIndex =  _.findIndex(channels, function(c) { return c.name == 'general'});
@@ -184,7 +184,6 @@ function * getTeamMembers(team) {
       });
     }).then( function() { return members });
 }
-
 
 /*
 *
@@ -257,11 +256,11 @@ function * cacheMenu(message, original, expandable, data) {
 }
 
 function * showMenu(message) {
-   var relevantMessage = yield db.Messages.findOne({"thread_id": message.source.channel, "menus.id": message.data.value})
-   var actions = _.get(relevantMessage, 'menus.expandable[0].data') ? _.get(relevantMessage, 'menus.expandable[0].data') : cardTemplate.shopping_home(message._id);
-   var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
-   var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
-   if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
+   var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel, 'menus.id': message.data.value})
+   var actions = _.get(relevantMessage, 'menus.expandable[0].data') ? _.get(relevantMessage, 'menus.expandable[0].data') : yield generateMenuButtons(message);
+   // var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
+   // var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
+   // if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
     var json = message.source.original_message;
     if (!json.attachments) return;
     var text =  _.get(relevantMessage,'data.text') ?  _.get(relevantMessage,'data.text') : ''
@@ -283,7 +282,7 @@ function * showMenu(message) {
 
 function * hideMenu(message, original, expandable, data) {
   if (!_.get(message,'data.value')) return
-    var relevantMessage = yield db.Messages.findOne({"thread_id": message.source.channel, "menus.id": message.data.value})
+    var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel, 'menus.id': message.data.value})
     var actions = _.get(relevantMessage, 'menus.original[0].data') ? _.get(relevantMessage, 'menus.original[0].data') : cardTemplate.shopping_home_default(message._id);
     var json =  message.source.original_message;
     var text =  _.get(relevantMessage,'data.text') ?  _.get(relevantMessage,'data.text') : ''
@@ -303,6 +302,133 @@ function * hideMenu(message, original, expandable, data) {
     });
   return
 }
+
+function* generateMenuButtons(message) {
+  kip.debug(`🔲 🔲 🔲 🔲 🔲 🔲 🔲 🔲 🔲 🔲 \n ${JSON.stringify(message, null, 2)}`)
+  let team = yield db.Slackbots.findOne({
+    'team_id': message.source.team
+  }).exec();
+
+  let isAdmin = yield this.isAdmin(message.source.user, team),
+    buttons = [];
+  let showEverything = isAdmin || team.meta.office_assistants == 0
+  switch (message.mode) {
+    case 'settings':
+      buttons.push({
+        name: 'shopping',
+        text: 'Shopping',
+        type: 'button',
+        value: 'shopping_btn'
+      });
+      if (showEverything) {
+        buttons = [...buttons, {
+          name: 'cafe_btn',
+          text: 'Kip Café',
+          style: 'default',
+          type: 'button',
+          value: 'cafe_btn'
+        }, {
+          name: 'team',
+          text: 'Team Members',
+          style: 'default',
+          type: 'button',
+          value: 'home',
+        }];
+      }
+      break;
+
+    case 'food':
+      buttons = [{
+        name: 'shopping',
+        text: 'Shopping',
+        type: 'button',
+        value: 'shopping_btn'
+      }, {
+        name: 'settings',
+        text: 'Settings',
+        style: 'default',
+        type: 'button',
+        value: 'home'
+      }];
+      if (showEverything) {
+        buttons.push({
+          name: 'team',
+          text: 'Team Members',
+          style: 'default',
+          type: 'button',
+          value: 'home',
+        });
+      }
+      break;
+
+    case 'shopping':
+      buttons.push({
+        name: 'settings',
+        text: 'Settings',
+        style: 'default',
+        type: 'button',
+        value: 'home'
+      });
+      if (showEverything) {
+        buttons = [...buttons, {
+          name: 'cafe_btn',
+          text: 'Kip Café',
+          style: 'default',
+          type: 'button',
+          value: 'cafe_btn'
+        }, {
+          name: 'team',
+          text: 'Team Members',
+          style: 'default',
+          type: 'button',
+          value: 'home',
+        }];
+      }
+      break;
+
+    case 'team':
+      buttons = [{
+        name: 'shopping',
+        text: 'Shopping',
+        type: 'button',
+        value: 'shopping_btn'
+      }, {
+        name: 'settings',
+        text: 'Settings',
+        style: 'default',
+        type: 'button',
+        value: 'home'
+      }];
+      if (showEverything) {
+        buttons.push({
+          name: 'cafe_btn',
+          text: 'Kip Café',
+          style: 'default',
+          type: 'button',
+          value: 'cafe_btn'
+        });
+      }
+  }
+
+  var newBtns = [...buttons, {
+    name: 'view_cart_btn',
+    text: 'View Cart',
+    style: 'default',
+    type: 'button',
+    value: 'view_cart_btn'
+  }, {
+    name: 'shopping.home.detract',
+    text: '< Back',
+    style: 'default',
+    type: 'button',
+    value: message._id
+  }]
+  kip.debug(`🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  \n ${JSON.stringify(newBtns, null, 2)}`)
+  return newBtns;
+}
+
+
+
 /*
 * get the groups (private channels) and channels and add them to slackbots meta
 * used as init in slack.js but probably should be run periodically (like
@@ -374,7 +500,7 @@ function * showLoading(message) {
 }
 
 function * replaceLoading(message, response) {
-  var relevantMessage = yield db.Messages.findOne({"thread_id": message.source.channel, "data.loading": true}).sort('_id').exec();
+  var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel, 'data.loading': true}).sort('_id').exec();
   kip.debug(' \n\n\n\n\n\n\n\n\n\n  👳/slack/utils.js:372:replaceLoading', relevantMessage, response,'  \n\n\n\n\n\n\n\n\n\n');
   request({
       method: 'POST',
@@ -403,5 +529,6 @@ module.exports = {
   hideMenu: hideMenu,
   addViaAsin: addViaAsin,
   getAllChannels: getAllChannels,
-  isAdmin: isAdmin
+  isAdmin: isAdmin,
+  generateMenuButtons: generateMenuButtons
 }

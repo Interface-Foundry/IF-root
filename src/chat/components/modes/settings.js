@@ -103,7 +103,7 @@ handlers['start'] = function * (message) {
     }
   };
   var original = cardTemplate.shopping_settings_default(message._id);
-  var expandable = cardTemplate.shopping_home(message._id)
+  var expandable = yield utils.generateMenuButtons(message)
   var text = 'Don’t have any changes? Type `exit` to quit settings';
   var color = '#45a5f4';
   attachments.push({
@@ -121,7 +121,9 @@ handlers['start'] = function * (message) {
       a.color = '#45a5f4';
     })
    var msg = message;
+   kip.debug(`Searching for back button SETTINGS:BEFORE_CACHE ${JSON.stringify(expandable, null, 2)}`)
    yield utils.cacheMenu(msg, original, expandable,  {text: text, color: color})
+   kip.debug(`Searching for back button SETTINGS:AFTER CACHE ${JSON.stringify(expandable, null, 2)}`)
    msg.mode = 'settings'
    msg.text = ''
    msg.source.team = team_id;

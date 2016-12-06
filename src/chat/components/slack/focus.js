@@ -110,8 +110,8 @@ module.exports = function*(message) {
     fallback: 'focus',
     actions: original
   }];
-
-  yield slackUtils.cacheMenu(message, cardTemplate.focus_home_default(message), cardTemplate.shopping_home(message._id), {text: description})
+  let menuButtons = yield slackUtils.generateMenuButtons(message);
+  yield slackUtils.cacheMenu(message, cardTemplate.focus_home_default(message), menuButtons, {text: description})
 
   return reply
 }

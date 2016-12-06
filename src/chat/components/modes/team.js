@@ -62,7 +62,7 @@ handlers['start'] = function * (message) {
       }
   });
   var original = cardTemplate.shopping_team_default(message._id);
-  var expandable = cardTemplate.shopping_team(message._id)
+  var expandable = yield utils.generateMenuButtons(message)
   attachments.push({text: 'Channels: ', actions: buttons, callback_id: "none"});
   var text = "Update cart members? Or type `exit`"
     var endpart = {
