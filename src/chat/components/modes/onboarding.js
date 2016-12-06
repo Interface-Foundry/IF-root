@@ -4,6 +4,7 @@ module.exports = {}
 var handlers = module.exports.handlers = {}
 var onboard = require('./onboard');
 var queue = require('../queue-mongo');
+var slackUtils = require('../slack/utils');
 
 /**
  * Main handler which decides what part of the onbaording process the user is at 
@@ -40,7 +41,11 @@ handlers['start'] = function * (message) {
     callback_id: 'none'
   })
   attachments.push({text: welcome, color: '#3AA3E3'})
-  attachments.push({text:  'Who manages the office purchases? Type something like `me` or `me and @jane`', color: '#3AA3E3'})
+  attachments.push({text:  'Who manages the office purchases? Type something like `me` or `me and @jane`', color: '#3AA3E3',
+    mrkdwn_in: [
+        'text',
+        'pretext'
+      ]})
   var welcome_message = message_tools.text_reply(message,'');
   welcome_message.reply = attachments;
   welcome_message.action = 'get-admins.ask';
@@ -74,8 +79,10 @@ handlers['get-admins.ask'] = function * (message) {
  * @param message the latest message from the user
  */
 handlers['get-admins.response'] = function * (message) {
-  var reply_success = `Great! I\'ll keep $ADMINS up-to-date on what your team members are adding to the office shopping cart 😊
-  Do you want me to take you on a short tour of Kip?`
+  var reply_success = `Great! I\'ll keep $ADMINS up-to-date on what your team members are adding to the office shopping cart 😊`;
+  var reply_admin = `Do you want me to take you on a short tour of Kip?`;
+  var reply_user = `Why don't you try searching for something? Type something like 'headphones' to search`;
+
   var reply_failure = "I'm sorry, I couldn't quite understand that, can you clarify for me who manages office purchases? If you want to skip this part, just type 'skip' and we can move on."
   var special_admin_message = message_tools.text_reply(message, 'special instructions for admins') // TODO
   var admins = []
@@ -122,9 +129,20 @@ handlers['get-admins.response'] = function * (message) {
   reply_success = reply_success.replace('$ADMINS', office_admins.map(g => {
     return '<@' + g + '>'
   }).join(', ').replace(/,([^,]*)$/, ' and $1'));
+
+  kip.debug(' \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n  GOLDEN LIGHT', message,'  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+  var isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+  message.mode = 'onboarding'
+  message.action = 'get-admins.response';
+  if (isAdmin) {
+    reply_success = reply_success.concat('\n' + reply_admin);
+  } else {
+    reply_success = reply_success.concat('\n' + reply_user);
+    message.mode = 'shopping'
+    message.action = '';
+  }
+ 
   var reply_message = message_tools.text_reply(message, reply_success);
-  reply_message.mode = 'onboarding'
-  reply_message.action = 'get-admins.response';
   return [reply_message]
 }
 
