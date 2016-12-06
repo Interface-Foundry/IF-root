@@ -139,7 +139,9 @@ handlers['reroute'] = function * (message) {
   var next_mode = message.original_text.match(/(yes|ok|sure|yeah|yea)/) && message.original_text.match(/(yes|ok|sure|yeah|yea)/).length > 0 ? 'onboard' : 'shopping';
   if (next_mode == 'shopping') {
     var finished = "Thanks for the info! Why don't you try searching for something? Type something like 'headphones' to search"
-    var finished_message = message_tools.text_reply(message, finished)
+    var finished_message = message_tools.text_reply(message, finished);
+    finished_message.mode = 'shopping';
+    finished_message.action = '';
     return [finished_message];
   } else {
     var next_message = message

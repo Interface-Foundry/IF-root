@@ -9,8 +9,6 @@ var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require(
 var jstz = require('jstz');
 var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
-var queue = require('../queue-mongo');
-
 
 
 /*
@@ -72,6 +70,16 @@ function * findAdmins(team) {
       }
     });
   }).then( function() { return admins });
+}
+
+function * isAdmin(userId, team) {
+  let adminList = yield findAdmins(team);
+  for (var i = 0; i < adminList.length; i++) {
+    if(adminList[i].id === userId){
+      return true;
+    }
+  }
+  return false;
 }
 
 /*
@@ -280,6 +288,7 @@ function * hideMenu(message, original, expandable, data) {
     var json =  message.source.original_message;
     var text =  _.get(relevantMessage,'data.text') ?  _.get(relevantMessage,'data.text') : ''
     var color =  _.get(relevantMessage,'data.color') ?  _.get(relevantMessage,'data.color') : ''
+
     json.attachments[json.attachments.length-1] = {
         fallback: message.action,
         callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
@@ -379,6 +388,7 @@ function * updateResponseUrl(message) {
   yield db.Messages.update({_id: message._id}, {$set: {source:{ response_url: message.source.response_url}}}).exec();
 }
 
+
 module.exports = {
   initializeTeam: initializeTeam,
   findAdmins: findAdmins,
@@ -392,8 +402,6 @@ module.exports = {
   showMenu: showMenu,
   hideMenu: hideMenu,
   addViaAsin: addViaAsin,
-  showLoading: showLoading,
-  updateResponseUrl: updateResponseUrl,
-  replaceLoading: replaceLoading,
-  getAllChannels: getAllChannels
+  getAllChannels: getAllChannels,
+  isAdmin: isAdmin
 }

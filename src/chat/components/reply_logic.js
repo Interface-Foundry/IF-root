@@ -36,6 +36,8 @@ var food = require('./delivery.com/delivery.com').handleMessage;
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
 var slackUtils = require('./slack/utils');
+var amazon_variety = require('./amazon_variety');
+var card_templates = require('./slack/card_templates.js');
 
 
 
@@ -83,7 +85,7 @@ function typing (message) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
-function simplehome (message) {
+function * simplehome (message) {
 
   var slackreply = {
     text: '*Hi! Thanks for using Kip* 😊',
@@ -107,9 +109,17 @@ function simplehome (message) {
     // mrkdwn_in: ['text']
   }
 
+
+  let team = yield db.Slackbots.findOne({
+    'team_id': message.source.team
+  }).exec();
+  let isAdmin = yield slackUtils.isAdmin(message.source.user, team)
+
+  slackreply.attachments = isAdmin ? slackreply.attachments: card_templates.slack_shopping_mode;
+
   var msg = {
-    action: 'simplehome',
-    mode: 'food',
+    action: isAdmin ? 'simplehome' : 'switch',
+    mode: isAdmin ? 'food' : 'shopping',
     source: message.source,
     origin: message.origin,
     reply: {data: slackreply}
@@ -165,6 +175,7 @@ function * processProductLink(message) {
     try {
       yield slackUtils.addViaAsin(asin, message);
     } catch (err) {
+      yield amazon_variety.getVariations(asin, message);
       fail = true;
     }
     if (!fail) {
@@ -331,7 +342,7 @@ queue.topic('incoming').subscribe(incoming => {
     if (isCancelIntent(message)) {
       message.mode = 'shopping';
       message.action = 'switch'
-      simplehome(message)
+      yield simplehome(message)
       yield message.save();
       timer.stop();
       return
@@ -354,7 +365,17 @@ queue.topic('incoming').subscribe(incoming => {
     if (switchMode(message)) {
       message.mode = switchMode(message);
       if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
-      yield message.save(); 
+      if (message.mode.match(/(onboard|food)/)) {
+        let team = yield db.Slackbots.findOne({
+          'team_id': message.source.team
+        }).exec();
+        let isAdmin = yield slackUtils.isAdmin(message.source.user, team)
+        kip.debug(`🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 🙃 ${JSON.stringify(isAdmin, null, 2)}`);
+        if (!isAdmin) {
+          message.mode = 'shopping'
+        }
+      }
+      yield message.save();
     }
 
     if (!message.mode) {
@@ -669,6 +690,7 @@ function execute (message) {
     return replies
   })
 }
+
 
 ;`
 LIFE OF  NEKO
