@@ -97,7 +97,7 @@ app.post('/order', function (req, res) {
       var user_id = req.body.user_id;
       var deliv_id = req.body.deliv_id;
       var deliv = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
-
+      console.log('found the delivery object');
       var cart = deliv.cart;
 
       for (var i = 0; i < order.length; i++) {
@@ -107,10 +107,12 @@ app.post('/order', function (req, res) {
           user_id: user_id
         });
       }
-
-      yield db.delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart}});
+      //hangs here
+      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart}});
 
       //----------Message Queue-----------//
+
+      console.log('looking for source message');
 
       var foodMessage = yield Messages.find({
         'source.user': user.id,

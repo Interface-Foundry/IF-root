@@ -73,6 +73,7 @@
             <h1 style="text-align:center;">{{category.name}}</h1>
           </div>
           <div ng-show="categories[category.id]" ng-repeat="item in category.children" class="menu_item">
+
             <h2>
               <span ng-click="itemDetails(item)" class="item_name">{{item.name}}</span>
               <span class="price" ng-hide="inProgress[item.id] && validateItem(item) && item.type=='item'">{{item.price}}</span>
@@ -84,14 +85,14 @@
             <div ng-show="$parent.inProgress[item.id]">
 
               <!-- One layer deep -->
-            <div ng-show="item.type=='item'">
-              <div ng-repeat="child in item.children">
+            <!-- //<div ng-show="item.type=='item'"> -->
+              <div ng-show="item.type=='item'" ng-repeat="child in item.children">
                 <!-- ie option groups -->
 
                 <h4>{{child.name}}</h4>
 
                 <!-- here -->
-                <div ng-show="item.type=='item'">
+                <div>
                   <div ng-show="child.min_selection == 1">
                     <div ng-repeat="option in child.children">
                       <form name="optionForm">
@@ -115,7 +116,8 @@
                 </div>
               </div>
 
-              <div>
+              <div ng-show="child">
+                SPEAKERBOX
                 <h5>How many would you like?</h5>
                 <div>
                   <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
@@ -123,11 +125,14 @@
               </div>
             </div>
               <!-- Two layers deep -->
-            <div ng-show="item.type='menu'">
+
+            <div ng-show="item.type=='menu'">
                 <!-- here -->
                 <!-- <div ng-show="item.type=='menu'" ng-repeat="food in child.children"> -->
-                <div ng-repeat="child in item.children">
+                <div ng-show="inProgress[item.id]" ng-repeat="child in item.children">
+                  <!-- <h1>{{child.name}} ***** {{child.type}} //// {{item.type}}</h1> -->
                   <!-- child is of type item, for now -->
+                  <!-- <h2 ng-show="child.type=='item'"> -->
                   <h2>
                     <span ng-click="itemDetails(child)" class="item_name">{{child.name}}</span>
                     <span class="price" ng-hide="inProgress[child.id] && validateItem(child) && child.type=='item'">{{child.price}}</span>
@@ -142,9 +147,9 @@
                        <button ng-click="itemDetails(child);addToCart(child);">Add to cart for {{child.price * inProgress[child.id].item_qty}}</button>
                       </span>
                     </h2> -->
-                    <div ng-show="inProgress[child.id]" ng-repeat="og in child.children" ng-show="og.type=='option group'">
-                      <h3>{{og.name}}</h3>
-                      <div ng-show="og.min_selection == 1">
+                    <div ng-show="child.type=='item' && inProgress[child.id]" ng-repeat="og in child.children">
+                      <div ng-show="og.min_selection == 1 && (og.type=='option group' || og.type=='price group')">
+                        <h3>{{og.name}}</h3>
                         <div ng-repeat="option in og.children">
                           <form name="optionForm">
                             <label>
@@ -154,7 +159,7 @@
                           </form>
                         </div>
                       </div>
-                      <div ng-show="og.min_selection == 0">
+                      <div ng-show="og.min_selection == 0 && (og.type=='option group' || og.type=='price group')">
                         <div ng-repeat="option in og.children">
                           <form>
                             <label>
@@ -171,6 +176,7 @@
 
                     <!-- </div> -->
                     <div ng-show="inProgress[child.id]">
+                      <!-- {{child.name}} -->
                       <h5>How many would you like?</h5>
                       <div>
                         <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>
