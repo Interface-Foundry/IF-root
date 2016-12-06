@@ -6,7 +6,7 @@ var config = require('../config')
 var natural = require('natural')
 var nounInflector = new natural.NounInflector()
 var fs = require('fs')
-require('logging')
+require('../logging')
 
 if (mongoose.connection.readyState == 0) {
   mongoose.connect(config.mongodb.url)
