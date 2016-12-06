@@ -178,8 +178,8 @@ function * processProductLink(message) {
     try {
       yield slackUtils.addViaAsin(asin, message);
     } catch (err) {
+    	fail = true;
       yield amazon_variety.getVariations(asin, message);
-      fail = true;
     }
     if (!fail) {
       message.text = 'view cart';
