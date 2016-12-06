@@ -109,6 +109,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     for (var i = 0; i < $scope.cart.length; i++) {
       if ($scope.cart[i].id == item_id) {
         $scope.cart[i].item_qty = Number($scope.cart[i].item_qty);
+        //you're deleting the order
         if (diff + $scope.cart[i].item_qty <= 0) {
           if (! window.confirm("Are you sure you want to delete this item from your cart?")) {
             return null;
@@ -118,11 +119,13 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
 
           console.log($scope.cart);
         }
+        //you've surpassed the order maximum
         else if ($scope.cart[i].item_qty + diff > $scope.cart[i].max_qty) {
           return;
         }
         else {
           $scope.cart[i].item_qty += diff;
+          $scope.total += diff * $scope.cart[i].price;
         }
       }
     }

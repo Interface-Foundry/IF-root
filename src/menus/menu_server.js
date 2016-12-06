@@ -27,6 +27,7 @@ var MenuSession = db.Menu_session;
 var Menu = db.Menu;
 var Merchant = db.Merchant;
 var Delivery = db.Delivery;
+var Messages = db.Messages;
 
 var ObjectId = require('mongodb').ObjectID;
 
@@ -78,6 +79,13 @@ app.post('/session', (req, res) => co(function * () {
   }
 }))
 
+// VARIOUS STUFF TO POST BACK TO USER EASILY
+// --------------------------------------------
+var queue = require('../chat/components/queue-mongo')
+var UserChannel = require('../chat/components/delivery.com/UserChannel')
+var replyChannel = new UserChannel(queue)
+// --------------------------------------------
+
 //updates the correct delivery object in the db
 //with the delivery object id saved on the menu session
 
@@ -90,10 +98,7 @@ app.post('/order', function (req, res) {
       var deliv_id = req.body.deliv_id;
       var deliv = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
 
-      console.log('found the current delivery in the db');
       var cart = deliv.cart;
-
-      console.log('the delivery has a cart: ', deliv.cart);
 
       for (var i = 0; i < order.length; i++) {
         cart.push({
@@ -103,11 +108,24 @@ app.post('/order', function (req, res) {
         });
       }
 
-      console.log('updated the cart locally')
-
       yield db.delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart}});
 
-      console.log('db should be updated with the order!');
+      //----------Message Queue-----------//
+
+      var foodMessage = yield Messages.find({
+        'source.user': user.id,
+        mode: 'food',
+        incoming: false
+      });
+
+      console.log('food message~~~', foodMessage);
+
+      //look up last message about this order
+      //identify correct handler from cart_handlers
+      //send message back
+
+      //----------Message Queue-----------//
+
     }
   });
 });
