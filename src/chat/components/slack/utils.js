@@ -21,7 +21,7 @@ var queue = require('../queue-mongo');
 
 
 /*
-* returns sets admin user for a slackbot team, creates chat users
+* returns creates chat users for a team
 * @param {Object} slackbot object
 * @returns {Object} slackbot object
 *
@@ -31,7 +31,6 @@ function * initializeTeam(team, auth) {
     return kip.error('Could not find the user who added slackbot ' + team._id)
  }
  team.meta.addedBy = typeof team.meta.addedBy == 'string' ? team.meta.addedBy : auth.user_id;
- team.meta.office_assistants = (team.meta.office_assistants && team.meta.office_assistants.length > 0) ? team.meta.office_assistants : [auth.user_id];
  var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
  res_chan = JSON.parse(res_chan);
  if (!(team.meta.cart_channels && team.meta.cart_channels.length > 0)) {
@@ -41,10 +40,7 @@ function * initializeTeam(team, auth) {
  team.meta.all_channels = res_chan.channels.map(c => {return c.id});
  team.markModified('meta.cart_channels');
  team.markModified('meta.all_channels');
- team.markModified('meta.office_assistants');
  yield getTeamMembers(team);
- //ill fix this later
- team.meta.office_assistants = [];
  yield team.save();
  return team;
 }
