@@ -464,44 +464,44 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var arrow = direction === SORT.descending ? '▾ ' : '▴ '
 
-  // default price sort direction is ascending
-  var sortPriceButton = {
-    'name': 'food.admin.restaurant.pick.list',
-    'text': (sort === SORT.price ? arrow : '') + 'Sort Price',
-    'type': 'button',
-    'value': {
-      index: 0,
-      sort: (sort === SORT.price && direction === SORT.descending) ? SORT.keyword : SORT.price,
-      keyword: keyword,
-      direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending
-    }
-  }
+  // // default price sort direction is ascending
+  // var sortPriceButton = {
+  //   'name': 'food.admin.restaurant.pick.list',
+  //   'text': (sort === SORT.price ? arrow : '') + 'Sort Price',
+  //   'type': 'button',
+  //   'value': {
+  //     index: 0,
+  //     sort: (sort === SORT.price && direction === SORT.descending) ? SORT.keyword : SORT.price,
+  //     keyword: keyword,
+  //     direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending
+  //   }
+  // }
 
-  // default rating sort direction is descending
-  var sortRatingButton = {
-    'name': 'food.admin.restaurant.pick.list',
-    'text': (sort === SORT.rating ? arrow : '') + 'Sort Rating',
-    'type': 'button',
-    'value': {
-      index: 0,
-      sort: (sort === SORT.rating && direction === SORT.ascending) ? SORT.keyword : SORT.rating,
-      keyword: keyword,
-      direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending
-    }
-  }
+  // // default rating sort direction is descending
+  // var sortRatingButton = {
+  //   'name': 'food.admin.restaurant.pick.list',
+  //   'text': (sort === SORT.rating ? arrow : '') + 'Sort Rating',
+  //   'type': 'button',
+  //   'value': {
+  //     index: 0,
+  //     sort: (sort === SORT.rating && direction === SORT.ascending) ? SORT.keyword : SORT.rating,
+  //     keyword: keyword,
+  //     direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending
+  //   }
+  // }
 
-  // default distance sort direction is ascending
-  var sortDistanceButton = {
-    'name': 'food.admin.restaurant.pick.list',
-    'text': (sort === SORT.distance ? arrow : '') + 'Sort Distance',
-    'type': 'button',
-    'value': {
-      index: 0,
-      sort: (sort === SORT.distance && direction === SORT.descending) ? SORT.keyword : SORT.distance,
-      keyword: keyword,
-      direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending
-    }
-  }
+  // // default distance sort direction is ascending
+  // var sortDistanceButton = {
+  //   'name': 'food.admin.restaurant.pick.list',
+  //   'text': (sort === SORT.distance ? arrow : '') + 'Sort Distance',
+  //   'type': 'button',
+  //   'value': {
+  //     index: 0,
+  //     sort: (sort === SORT.distance && direction === SORT.descending) ? SORT.keyword : SORT.distance,
+  //     keyword: keyword,
+  //     direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending
+  //   }
+  // }
 
   var buttons = {
     'mrkdwn_in': [
@@ -525,14 +525,14 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     buttons.actions.push(moreButton)
   }
 
-  buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
+  //buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
 
   responseForAdmin.attachments.push(buttons)
 
   //adding writing prompt
   responseForAdmin.attachments.push({
     'fallback': 'Search for a restaurant',
-    'text': '✎ Type below to search for a restaurant (Example: _sushi_)',
+    'text': '✎ Type below to search for a restaurant by name (Example: _Azuki Sushi_)',
     'mrkdwn_in': ['text']
   })
 

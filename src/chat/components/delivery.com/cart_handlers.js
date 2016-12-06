@@ -100,7 +100,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
       },
       {
         'name': 'food.menu.quickpicks',
-        'text': '< Back',
+        'text': '< Order More',
         'type': 'button',
         'value': ''
       }
@@ -363,7 +363,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       var instructionsButton = {
         name: 'food.order.instructions',
-        text: '✎ Delivery Instructions',
+        text: '✎ Add Instructions',
         type: 'button',
         value: ''
       }
@@ -411,14 +411,10 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }
 
       var infoAttachment = {
-        fallback: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
-              `*Taxes:* ${foodSession.order.tax.$}\n` +
-              `*Tip:* ${foodSession.tipAmount.$}\n` +
-              `*Team Order:* ${foodSession.order.total.$}`,
+        fallback: 'Checkout Total',
         text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
               `*Taxes:* ${foodSession.order.tax.$}\n` +
-              `*Tip:* ${foodSession.tipAmount.$}\n` +
-              `*Team Order:* ${foodSession.order.total.$}`,
+              `*Tip:* ${foodSession.tipAmount.$}\n`,
         'callback_id': 'food.admin.cart.info',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -426,7 +422,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }
 
       if (foodSession.instructions) {
-        infoAttachment.text = `*Special Instructions*: _${foodSession.instructions}_\n` + infoAttachment.text
+        infoAttachment.text = `*Delivery Instructions*: _${foodSession.instructions}_\n` + infoAttachment.text
       }
 
       response.attachments = _.flatten([mainAttachment, itemAttachments, tipAttachment, infoAttachment, finalAttachment]).filter(Boolean)
@@ -458,8 +454,8 @@ handlers['food.order.instructions'] = function * (message) {
   var msg = {
     text: `Add Special Instructions`,
     attachments: [{
-      text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
-      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
+      text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
+      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
       mrkdwn_in: ['text']
     }]
   }
