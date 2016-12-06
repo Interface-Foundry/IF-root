@@ -93,6 +93,10 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
       body.order.coupon = 0.5 // in percentage off
     } else if (body.team_id === 'T3AHPU2N9') { // eden tester
       body.order.coupon = 0.99 // in percentage off
+    }else if (body.team_id === 'T3BCG4CP4') { // woodside friends 
+      body.order.coupon = 0.99 // in percentage off
+    }else if (body.team_id === 'T3AM3RZSL') { // vegan house
+      body.order.coupon = 0.99 // in percentage off
     }
 
 
