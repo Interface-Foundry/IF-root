@@ -46,12 +46,11 @@ handlers['start'] = function * (message) {
   var cartChannels = team.meta.cart_channels;
   //adding settings mode sticker
   var attachments = [];
-  attachments.push({ 
+  attachments.push({
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
     text: ''
   });
   var channels = yield utils.getChannels(team);
-  var cartChannels = team.meta.cart_channels;
   var buttons = channels.map(channel => {
     var checkbox = cartChannels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
       return {
@@ -61,12 +60,19 @@ handlers['start'] = function * (message) {
         value: channel.id
       }
   });
+  var color = '#45a5f4';
+  var chunkedButtons = _.chunk(buttons, 5);
+  attachments.push({text: 'Update cart members? Or type `exit`', actions: chunkedButtons[0], callback_id: "none"});
+  chunkedButtons.forEach((ele, i) => {
+    if (i != 0) {
+      attachments.push({text:'', actions: ele, callback_id: 'none', color: color});
+    }
+  })
+
   var original = cardTemplate.shopping_team_default(message._id);
   var expandable = yield utils.generateMenuButtons(message)
-  attachments.push({text: 'Channels: ', actions: buttons, callback_id: "none"});
-  var text = "Update cart members? Or type `exit`"
     var endpart = {
-      "text": text,
+      "text": '',
       "actions": original,
       "callback_id": 'none',
       // "mrkdwn_in": ["fields","text"],
@@ -80,7 +86,7 @@ handlers['start'] = function * (message) {
       attachments: attachments,
       fallback: 'Team Cart Members'
     };
-    var color = '#45a5f4';
+    
     // make all the attachments markdown
     attachments.map(function(a) {
       a.mrkdwn_in =  ['text', 'fields'];
@@ -97,7 +103,7 @@ handlers['start'] = function * (message) {
     msg.source.team = team.team_id;
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
     msg.reply = attachments;
-    yield utils.cacheMenu(msg, original, expandable, {text: text, color: color})
+    yield utils.cacheMenu(msg, original, expandable, {text: '', color: color})
 
     return [msg];
 }

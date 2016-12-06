@@ -198,6 +198,7 @@ app.post('/slackaction', next(function * (req, res) {
           text: buttonRow == 0 ? 'Which channels do you want to include? ' : '',
           actions: chunkedButtons[buttonRow],
           callback_id: 'none',
+          color: parsedIn.original_message.attachments[buttonRow+1].color || null
         }
         json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
                                                            // maybe I just don't understand slack yet
