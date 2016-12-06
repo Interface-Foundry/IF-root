@@ -51,6 +51,7 @@ var search_results = require('./search_results')
 // var variation_view = require('./variation_view')
 var focus = require('./focus')
 var cart = require('./cart')
+var kipCart = require('../cart')
 var cardTemplate = require('./card_templates');
 var slackConnections = {}
 var webserver = require('./webserver')
@@ -222,9 +223,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
       if(message.mode === 'item.add'){
       	//its a variation message
-      	kip.debug(`👗 👔 👘 👗 👔 👘 👗 👔 👘 👗 👔 👘 👗 👔 👘 \n ${JSON.stringify(message, null, 2)}`)
-      	msgData.attachments = yield variation_view(message);
-      	return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+        
+        var asin = message.reply[0].id; //just grab the first one for now
+        yield slackUtils.addViaAsin(asin, message);
+        message.data = yield kipCart.getCart(message.source.team)
+        message.mode = 'cart';
+        message.action = 'view';
       }
 
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
