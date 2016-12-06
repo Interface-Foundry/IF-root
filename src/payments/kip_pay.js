@@ -91,7 +91,10 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
       body.order.coupon = 0.99 // in percentage off
     } else if (body.team_id === 'T1198BQV8') { // message.io team
       body.order.coupon = 0.5 // in percentage off
+    } else if (body.team_id === 'T3AHPU2N9') { // eden tester
+      body.order.coupon = 0.99 // in percentage off
     }
+
 
     // new payment
     var payment = new Payment({

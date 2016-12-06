@@ -35,13 +35,20 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     }
   })
 
-  //no addresses yet, show onboarding
-  if(addressButtons.length < 1){
-    foodSession.onboarding = true
-    yield foodSession.save()
-  }else {
-    foodSession.onboarding = false
-  }
+  // //no addresses yet, show onboarding
+  // if(addressButtons.length < 1){
+  //   foodSession.onboarding = true
+  //   yield foodSession.save()
+  // }
+  // //if user taps < back button back to this view
+  // else if(foodSession.onboarding){ 
+  //   foodSession.onboarding = true
+  // }
+  // //dont use onboarding for this session
+  // else {
+  //   foodSession.onboarding = false
+  // }
+  foodSession.onboarding = false
 
   addressButtons = _.chunk(addressButtons, 5)
   var msg_json = {
@@ -58,9 +65,16 @@ handlers['food.admin.select_address'] = function * (message, banner) {
 
   //modify message for onboarding
   if (foodSession.onboarding) {
-    msg_json.text = 'Hi there, I\'m going to walk you through your first order!'
-    msg_json.attachments[0].text = 'First, add an address for delivery by tapping the `New +` button'
+    msg_json.attachments[0].text = '*Step 1* Add an address for delivery by tapping the `New Location +` button'
     msg_json.attachments[0].mrkdwn_in = ["text"]
+    msg_json.attachments[0].color = '#A368F0'
+
+    //add onboard sticker #1
+    msg_json.attachments.unshift({
+      'text':'Hi there, I\'m going to walk you through your first order!',
+      'image_url':'http://tidepools.co/kip/onboarding_2.png',
+      'color': '#3AA3E3'
+    })
   }
 
   if (banner) {
@@ -89,19 +103,14 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   //toggle floor buttons for onboarding
   var floorButtons = [{
     'name': 'passthrough',
-    'text': 'New +',
+    'text': 'New Location +',
     'type': 'button',
     'value': 'food.settings.address.new'
   }]
+
   if (foodSession.onboarding){
-    //add an exit button
     floorButtons[0].style = 'primary'
-    floorButtons.push({
-        'name': 'passthrough',
-        'text': '× Exit Café',
-        'type': 'button',
-        'value': 'food.exit.confirm'
-    })
+    floorButtons.color = '#2ab27b'
   }
 
   // allow removal if more than one meta.locations thing
@@ -114,14 +123,28 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     'actions': floorButtons
   })
 
+  if (foodSession.onboarding){
+    //green New Location attachment
+    msg_json.attachments[msg_json.attachments.length - 1].color = '#2ab27b' 
+  }
+
   if (_.get(team, 'meta.locations').length >= 1) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.push({
       'name': 'passthrough',
-      'text': 'Edit',
+      'text': 'Edit Locations',
       'type': 'button',
       'value': 'food.settings.address.remove_select'
     })
   }
+
+  //add kip menu (should show options like Home screen view)
+  msg_json.attachments[msg_json.attachments.length - 1].actions.push({
+    'name': 'passthrough',
+    'text': 'Home',
+    'type': 'button',
+    'value': 'food.exit.confirm'
+  })
+
   if (!banner) {
     $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
   } else {
@@ -526,7 +549,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     // but them modify it with some text to indicate you've ordered here before
     var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id)[0] // get the full merchant
     var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
-    listing.text = `You ordered \`Delivery\` from ${listing.text} recently, order again?`
+    listing.text = `You recently ordered delivery from ${listing.text} \n Order again?`
 
     // allow confirmation
     listing.actions = [{
@@ -551,24 +574,24 @@ handlers['food.admin_polling_options'] = function * (message) {
     foodSession.onboarding = true
   }
 
-  // //onboarding stuff
-  // if(foodSession.onboarding){
-  //   attachments.push({
-  //     'text': '',
-  //     'fallback': 'Team voting',
-  //     'callback_id': 'wopr_game',
-  //     'color': '',
-  //     'attachment_type': 'default',
-  //     'image_url': 'http://tidepools.co/kip/onboarding_2.png'
-  //   })
-  // }
+  //onboarding stuff
+  if(foodSession.onboarding){
+    attachments.push({
+      'text': '',
+      'fallback': 'Team voting',
+      'callback_id': 'wopr_game',
+      'color': '',
+      'attachment_type': 'default',
+      'image_url': 'http://tidepools.co/kip/onboarding_2.png'
+    })
+  }
 
   attachments.push({
     'mrkdwn_in': [
       'text'
     ],
-    'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
-    'fallback': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
+    'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want',
+    'fallback': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
@@ -582,15 +605,9 @@ handlers['food.admin_polling_options'] = function * (message) {
       },
       {
         'name': 'passthrough',
-        'text': '× Exit Café',
+        'text': '< Back',
         'type': 'button',
-        'value': 'food.exit.confirm',
-        confirm: {
-          title: 'Leave Order',
-          text: 'Are you sure you want to stop ordering food?',
-          ok_text: "Don't order food",
-          dismiss_text: 'Keep ordering food'
-        }
+        'value': 'food.admin.select_address'
       }
     ]
   })
@@ -654,18 +671,20 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
         'text': '< Back',
         'type': 'button',
         'value': 'food.admin_polling_options'
-      }, {
+      },
+      {
         'name': 'passthrough',
-        'text': '× Exit Café',
+        'text': 'Home',
         'type': 'button',
         'value': 'food.exit.confirm',
         'confirm': {
           'title': 'Are you sure?',
-          'text': "Are you sure you don't want to order food?",
+          'text': "Are you sure want to end this order?",
           'ok_text': 'Yes',
           'dismiss_text': 'No'
         }
-      }]
+      }
+      ]
     }]
   }
   $replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
@@ -859,18 +878,11 @@ handlers['food.restaurants.list.recent'] = function * (message) {
         'type': 'button',
         'value': index + 3
       },
-
       {
         'name': 'passthrough',
-        'text': '× Exit Café',
+        'text': '< Back',
         'type': 'button',
-        'value': 'food.exit.confirm',
-        confirm: {
-          title: 'Leave Order',
-          text: 'Are you sure you want to stop ordering food?',
-          ok_text: "Don't order food",
-          dismiss_text: 'Keep ordering food'
-        }
+        'value': 'food.admin.select_address' 
       }
     ]
   })
