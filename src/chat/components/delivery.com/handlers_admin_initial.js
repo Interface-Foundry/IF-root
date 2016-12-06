@@ -341,7 +341,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
     logging.error('error searching that address', err)
     $replyChannel.sendReplace(message, 'food.settings.address.new', {
       type: message.origin,
-      data: {text: `Sorry, I can't find that address! Try typing something like: "902 Broadway New York, NY 10010"`}
+      data: {text: `Sorry, I can't find that address! Try typing a valid US address like: "902 Broadway New York, NY 10010"`}
     })
     yield sleep(250)
     yield handlers['food.settings.address.new'](message)
@@ -459,8 +459,6 @@ handlers['food.feedback.save'] = function * (message) {
   }
 
   var mailOptions = {
-    //to: 'Tim Wong <timothy@interfacefoundry.com>',
-    //from: 'Tim Wong <timothy@interfacefoundry.com>',
     to: 'Kip Server <hello@kipthis.com>',
     from: 'Kip Café <server@kipthis.com>',
     subject: '['+source.callback_id+'] Kip Café Feedback',

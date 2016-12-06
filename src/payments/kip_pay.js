@@ -360,7 +360,7 @@ function * onSuccess (payment) {
       })
 
       var itemNames = foodSession.cart
-        .filter(i => i.user_id === userId)
+        .filter(i => i.user_id === userId && i.added_to_cart)
         .map(i => menu.getItemById(i.item.item_id).name)
         .map(name => '*' + name + '*') // be bold
 
@@ -380,14 +380,12 @@ function * onSuccess (payment) {
           }
         })
     })
-
+    var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
-      var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
-      htmlForItem += '<tr><td>'+foodInfo.name+'</td><td>'+descriptionString+'</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+'</td><td>'+user[0].real_name+'</td></tr>'
-      return htmlForItem
+      htmlForItem += '<tr><td>'+foodInfo.name+'</td><td>'+descriptionString+'</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+'</td><td>'+user[0].real_name+'</td></tr>'    
     })
 
     // send confirmation email to admin
@@ -395,7 +393,7 @@ function * onSuccess (payment) {
       to: '' + foodSession.convo_initiater.name + ' <' + foodSession.convo_initiater.email + '>',
       from: 'Kip Café <hello@kipthis.com>',
       subject: 'Kip Café Order Receipt for XYZ Restaurant',
-      html: orders+'</thead></table>'
+      html: htmlForItem+'</thead></table>'
     }
 
     logging.info(mailOptions)
