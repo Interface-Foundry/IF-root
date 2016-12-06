@@ -48,6 +48,7 @@ var kip = require('kip')
 var queue = require('../queue-mongo')
 var image_search = require('../image_search')
 var search_results = require('./search_results')
+// var variation_view = require('./variation_view')
 var focus = require('./focus')
 var cart = require('./cart')
 var cardTemplate = require('./card_templates');
@@ -219,6 +220,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
         return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
+      if(message.mode === 'item.add'){
+      	//its a variation message
+      	kip.debug(`👗 👔 👘 👗 👔 👘 👗 👔 👘 👗 👔 👘 👗 👔 👘 \n ${JSON.stringify(message, null, 2)}`)
+      	msgData.attachments = yield variation_view(message);
+      	return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+      }
 
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         var results = yield search_results(message);
@@ -248,6 +255,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       if (message.mode === 'settings' && message.action === 'home') {
         msgData.attachments = message.reply;
+           kip.debug(`Searching for back button SLACK_JS ${JSON.stringify(msgData, null, 2)}`)
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 

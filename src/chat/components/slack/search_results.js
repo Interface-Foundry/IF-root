@@ -71,7 +71,7 @@ function * results(message, modeIsOnboard = false) {
   let actions = [];
 
   var original = cardTemplate.shopping_home_default(message._id);
-  var expandable = cardTemplate.shopping_home(message._id)
+  var expandable = yield slackUtils.generateMenuButtons(message)
 
   if (!modeIsOnboard) {
     actions = actions.concat(original);
