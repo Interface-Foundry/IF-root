@@ -707,6 +707,7 @@ handlers['member'] = function * (message) {
       channelMembers = channelMembers.concat(_.differenceWith(channelMembers, members, (a, b) => a.id == b.id));
     }
   });
+  channelMembers = _.uniq(channelMembers);
 
   var attachments = [{
     'image_url': 'http://kipthis.com/kip_modes/mode_howtousekip.png',
