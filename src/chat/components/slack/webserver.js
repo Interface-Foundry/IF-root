@@ -380,7 +380,7 @@ function* updateCartMsg(cart, parsedIn) {
     team = yield db.slackbots.findOne({
       team_id: parsedIn.team.id
     }),
-    showEverything = team.meta.office_assistants.includes(parsedIn.user.id) || slackbot.meta.office_assistants.length === 0;
+    showEverything = team.meta.office_assistants.includes(parsedIn.user.id) || team.meta.office_assistants.length === 0;
 
   let itemData = cart.aggregate_items.reduce((all, ele) => {
     all[ele._id] = {};
