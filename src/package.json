@@ -16,8 +16,7 @@
   },
   "scripts": {
     "test": "find . -name '*.test.js' | xargs env NODE_ENV=test mocha --bail --reporter spec",
-    "start": "node chat/server_cinna_chat.js",
-    "install": "ln -sf ../kip.js node_modules/kip.js && ln -sf ../db node_modules/db && ln -sf ../logging.js node_modules/logging.js"
+    "start": "node chat/server_cinna_chat.js"
   },
   "keywords": [
     "chat"
