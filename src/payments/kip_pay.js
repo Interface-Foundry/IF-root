@@ -378,12 +378,21 @@ function * onSuccess (payment) {
         })
     })
 
+    var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
+      var foodInfo = menu.getItemById(String(item.item.item_id))
+      var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
+      var textForItem = foodInfo.name + ' - $' + menu.getCartItemPrice(item).toFixed(2) + ' '
+      var user = foodSession.team_members.filter(j => j.id === item.user_id)
+      textForItem += descriptionString.length > 0 ? descriptionString + ' for ' + user[0].real_name + '\n\n': ' for ' + user[0].real_name + '\n\n'
+      //textForItem = user.real
+      return textForItem
+    })
     // send confirmation email to admin
     var mailOptions = {
       to: '' + foodSession.convo_initiater.name + ' <' + foodSession.convo_initiater.email + '>',
       from: 'Kip Café <hello@kipthis.com>',
       subject: 'Kip Café Order Receipt for XYZ Restaurant',
-      text: 'Kip Café receipt coming soon! \n\n'
+      text: orders + '\n'
     }
 
     logging.info(mailOptions)
