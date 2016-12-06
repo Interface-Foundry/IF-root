@@ -116,8 +116,7 @@
                 </div>
               </div>
 
-              <div ng-show="child">
-                SPEAKERBOX
+              <div ng-show="item.type=='item'">
                 <h5>How many would you like?</h5>
                 <div>
                   <input placeholder="1" ng-model="$parent.inProgress[item.id].item_qty"></input>

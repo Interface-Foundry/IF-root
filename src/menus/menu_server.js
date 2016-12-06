@@ -135,9 +135,10 @@ app.post('/order', function (req, res) {
             text: 'Your order has been submitted!'
           }
         }
-      );
+      )
 
-      console.log('ostensibly sent');
+      console.log('ostensibly done');
+      res.send();
 
       //----------Message Queue-----------//
 
