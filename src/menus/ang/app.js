@@ -37,6 +37,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
           };
         }
       }
+      console.log('in progress:', details)
       $scope.inProgress[item.id] = details;
     }
   };
@@ -73,6 +74,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
         if (option != 'radio' && option.chosen) cost += option.price;
       }
     }
+    item.price = cost;
     $scope.total += cost;
   };
 
@@ -111,7 +113,9 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
           if (! window.confirm("Are you sure you want to delete this item from your cart?")) {
             return null;
           }
+          $scope.total -= $scope.cart[i].price;
           $scope.cart.splice(i, 1);
+
           console.log($scope.cart);
         }
         else if ($scope.cart[i].item_qty + diff > $scope.cart[i].max_qty) {

@@ -37,7 +37,7 @@
               <div class="sidebar_item">
                 <h4>
                   <span class="item_name">{{item.name}}</span>
-                  <span class="price">{{item.price}}</span>
+                  <span class="price">{{item.price * item.item_qty}}</span>
                 </h4>
                 <div ng-repeat="selected in options[item.id]">
                   <h5>
@@ -154,7 +154,7 @@
                           </form>
                         </div>
                       </div>
-                      <div ng-show="food.min_selection == 0">
+                      <div ng-show="og.min_selection == 0">
                         <div ng-repeat="option in og.children">
                           <form>
                             <label>
