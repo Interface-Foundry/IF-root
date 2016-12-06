@@ -135,7 +135,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
 
-  var deliveryInstructionsText = _.get(foodSession, 'data.instructions') ? foodSession.data.instructions : ``
+  var deliveryInstructionsText = foodSession.instructions || ''
   var response = {
     text: `Great, please confirm your contact and delivery details:`,
     fallback: `Great, please confirm your contact and delivery details`,
@@ -223,7 +223,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'actions': [
           {
             'name': `food.admin.order.checkout.delivery_instructions`,
-            'text': `+ Add`,
+            'text': `✎ Edit`,
             'type': `button`,
             'value': `edit`
           }
@@ -246,6 +246,30 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
   $replyChannel.send(message, 'food.admin.order.pay', {type: message.origin, data: response})
 }
+
+handlers['food.admin.order.checkout.delivery_instructions'] = function * (message) {
+  var msg = {
+    text: `Add Special Instructions`,
+    attachments: [{
+      text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
+      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
+      mrkdwn_in: ['text']
+    }]
+  }
+
+  var response = yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.delivery_instructions.submit', {type: message.origin, data: msg})
+}
+
+handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  yield db.Delivery.update({_id: foodSession._id}, {$set: {'instructions': message.text || ''}}).exec()
+  var msg = _.merge({}, message, {
+    text: ''
+  })
+  return yield handlers['food.admin.order.checkout.confirm'](msg)
+}
+
 
 handlers['food.admin.order.pay'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -292,7 +316,7 @@ handlers['food.admin.order.pay'] = function * (message) {
   //     value: 'food.feedback.new'
   //   })
   // }
-  
+
 
   if (_.get(slackbot.meta, 'payments')) {
     // we already have a card source, present cards
@@ -369,7 +393,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
         'coordinates': []
       },
       'phone_number': foodSession.chosen_location.phone_number,
-      'special_instructions': foodSession.data.special_instructions || ''
+      'special_instructions': foodSession.instructions || ''
     },
     'time_started': foodSession.time_started,
     'convo_initiater': foodSession.convo_initiater,
@@ -447,7 +471,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
         'coordinates': []
       },
       'phone_number': foodSession.chosen_location.phone_number,
-      'special_instructions': foodSession.data.special_instructions || ''
+      'special_instructions': foodSession.instructions || ''
     },
     'time_started': foodSession.time_started,
     'convo_initiater': foodSession.convo_initiater,
