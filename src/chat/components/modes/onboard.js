@@ -257,7 +257,7 @@ handlers['lunch'] = function * (message) {
   msg.state = {};
   var foodSession = yield dutils.initiateDeliverySession(msg)
   yield foodSession.save();
-  var address_buttons = _.get(team, 'meta.locations', []).map(a => {
+  var addressButtons = _.get(team, 'meta.locations', []).map(a => {
     return {
       name: 'passthrough',
       text: a.address_1,
@@ -265,29 +265,116 @@ handlers['lunch'] = function * (message) {
       value: JSON.stringify(a)
     }
   })
-  address_buttons.push({
-    name: 'passthrough',
-    text: 'New +',
-    type: 'button',
-    value: 'food.settings.address.new'
-  });
+ //no addresses yet, show onboarding
+  if(addressButtons.length < 1){
+    foodSession.onboarding = true
+    banner = false
+    yield foodSession.save()
+  }
+  //if user taps < back button back to this view
+  else if(foodSession.onboarding){ 
+    foodSession.onboarding = true
+    banner = false
+  }
+  //dont use onboarding for this session
+  else {
+    foodSession.onboarding = false
+  }
+
+  addressButtons = _.chunk(addressButtons, 5)
   var msg_json = {
-    'attachments': [
-    {
+    'attachments':
+    [{
+      'text': 'Great! Which address is this for?',
+      'fallback': 'Great! Which address is this for?',
+      'callback_id': 'address',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'actions': addressButtons[0]
+    }]
+  }
+
+  //modify message for onboarding
+  if (foodSession.onboarding) {
+    msg_json.attachments[0].text = '*Step 1.* Add an address for delivery by tapping the `New Location +` button'
+    msg_json.attachments[0].mrkdwn_in = ["text"]
+    msg_json.attachments[0].color = '#A368F0'
+
+    //add onboard sticker #1
+    msg_json.attachments.unshift({
+      'text':'Hi there, I\'m going to walk you through your first Kip Café order!',
+      'image_url':'http://tidepools.co/kip/welcome_cafe.png',
+      'color': '#A368F0'
+    })
+  }
+
+  if (banner) {
+    msg_json.attachments.splice(0, 0,
+      {
         'fallback': 'Kip Cafe',
         'title': '',
         'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
-      },
-      {
-        'text': 'Great! Which address is this for?',
-        'fallback': 'You are unable to choose an address',
+      })
+  }
+
+  if (addressButtons.length > 1) {
+    addressButtons.slice(1).map(group => {
+      msg_json.attachments.push({
+        'text': '',
+        'fallback': 'Select address',
         'callback_id': 'address',
         'color': '#3AA3E3',
         'attachment_type': 'default',
-        'actions': address_buttons
-      }
-    ]
+        'actions': group
+      })
+    })
   }
+
+  //toggle floor buttons for onboarding
+  var floorButtons = [{
+    'name': 'passthrough',
+    'text': 'New Location +',
+    'type': 'button',
+    'value': 'food.settings.address.new'
+  }]
+
+  if (foodSession.onboarding){
+    floorButtons[0].style = 'primary'
+    floorButtons.color = '#2ab27b'
+  }
+
+  // allow removal if more than one meta.locations thing
+  // if (_.get(team, 'meta.locations').length > 1) {
+  msg_json.attachments.push({
+    'text': '',
+    'fallback': 'Remove an address',
+    'callback_id': 'remove_address',
+    'attachment_type': 'default',
+    'actions': floorButtons
+  })
+
+  if (foodSession.onboarding){
+    //green New Location attachment
+    msg_json.attachments[msg_json.attachments.length - 1].color = '#2ab27b' 
+  }
+
+  if (_.get(team, 'meta.locations').length >= 1) {
+    msg_json.attachments[msg_json.attachments.length - 1].actions.push({
+      'name': 'passthrough',
+      'text': 'Edit Locations',
+      'type': 'button',
+      'value': 'food.settings.address.remove_select'
+    })
+  }
+
+  //add kip menu (should show options like Home screen view)
+  msg_json.attachments[msg_json.attachments.length - 1].actions.push({
+    'name': 'passthrough',
+    'text': 'Home',
+    'type': 'button',
+    'value': 'food.exit.confirm'
+  })
+
   msg.reply = msg_json;  
   return [msg];
 
