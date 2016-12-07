@@ -136,7 +136,6 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
     return yield handlers['food.admin.order.checkout.phone_number'](message)
   }
 
-
   var deliveryInstructionsText = foodSession.instructions || ''
   var response = {
     text: `Great, please confirm your contact and delivery details:`,
@@ -253,8 +252,8 @@ handlers['food.admin.order.checkout.delivery_instructions'] = function * (messag
   var msg = {
     text: `Add Special Instructions`,
     attachments: [{
-      text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
-      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
+      text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
+      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
       mrkdwn_in: ['text']
     }]
   }

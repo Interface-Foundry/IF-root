@@ -116,7 +116,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
     {
-      'text':'*Step 3.* Choose who you want to be part of your food order',
+      'text':'*Step 5.* Choose who you want to be part of your food order',
       'color':'#A368F0',
       'mrkdwn_in': ['text']
     })
