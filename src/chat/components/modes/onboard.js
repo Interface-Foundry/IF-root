@@ -127,7 +127,7 @@ handlers['confirm_admin_reminder'] = function*(message, data) {
     now = new Date();
   switch (alertTime) {
     case 'today':
-      msInFuture = determineLaterToday(now);
+      msInFuture = determineLaterToday();
       dateDescrip = 'in a bit';
       break;
     case 'tomorrow':
@@ -589,7 +589,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
     now = new Date();
   switch (alertTime) {
     case 'today':
-      msInFuture = determineLaterToday(now); //4 hours for now
+      msInFuture = determineLaterToday(); //4 hours for now
       dateDescrip = 'later today';
       break;
     case 'tomorrow':
@@ -1088,12 +1088,9 @@ const createCronJob = function(people, msg, team, date, onRun) {
   }, true, team.meta.weekly_status_timezone);
 };
 // based on the current time, determine a later time
-const determineLaterToday = function(now) {
+const determineLaterToday = function() {
   const ONE_HOUR = 60 * 60 * 1000;
   if (process.env.NODE_ENV.includes('development')) return 20 * 1000; //20 seconds for dev
-  else if (now.getHours() < 12) return ONE_HOUR;
-  else if (now.getHours() < 14) return ONE_HOUR * 2;
-  else if (now.getHours() < 17) return (17 - now.getHours()) * ONE_HOUR;
   else return ONE_HOUR;
 }
 

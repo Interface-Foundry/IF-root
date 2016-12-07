@@ -6,6 +6,7 @@ var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
+var request = require('request');
 
 var cron = require('cron');
 //maybe can make this persistent later?
@@ -97,8 +98,7 @@ handlers['start'] = function * (message) {
       attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'});
     }
   };
-  var original = cardTemplate.shopping_settings_default(message._id);
-  var expandable = yield utils.generateMenuButtons(message)
+  var original = cardTemplate.settings_buttons;
   var text = 'Don’t have any changes? Type `exit` to quit settings';
   var color = '#45a5f4';
   attachments.push({
@@ -115,17 +115,12 @@ handlers['start'] = function * (message) {
       a.mrkdwn_in =  ['text'];
       a.color = '#45a5f4';
     })
-   var msg = message;
-   kip.debug(`Searching for back button SETTINGS:BEFORE_CACHE ${JSON.stringify(expandable, null, 2)}`)
-   yield utils.cacheMenu(msg, original, expandable,  {text: text, color: color})
-   kip.debug(`Searching for back button SETTINGS:AFTER CACHE ${JSON.stringify(expandable, null, 2)}`)
-   msg.mode = 'settings'
-   msg.text = ''
-   msg.source.team = team_id;
-   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-   msg.reply = attachments;
-   return [msg];
 
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify({text: '', attachments: attachments})
+  })
 }
 
 handlers['status_on'] = function * (message) {

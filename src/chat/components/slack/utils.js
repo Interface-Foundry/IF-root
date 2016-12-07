@@ -305,7 +305,6 @@ function * hideMenu(message, original, expandable, data) {
 }
 
 function* generateMenuButtons(message) {
-  kip.debug(`🔲 🔲 🔲 🔲 🔲 🔲 🔲 🔲 🔲 🔲 \n ${JSON.stringify(message, null, 2)}`)
   let team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
@@ -424,7 +423,6 @@ function* generateMenuButtons(message) {
     type: 'button',
     value: message._id
   }]
-  kip.debug(`🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  🎒  \n ${JSON.stringify(newBtns, null, 2)}`)
   return newBtns;
 }
 

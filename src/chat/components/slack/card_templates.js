@@ -14,6 +14,33 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
   }]
 }
 
+var settings_buttons = module.exports.settings_buttons =
+  [{
+    "name": "settings.back",
+    "text": "< Back",
+    "style": "default",
+    "type": "button"
+  }, {
+    name: 'team',
+    text: 'Team Members',
+    style: 'default',
+    type: 'button',
+    value: 'home',
+  }];
+
+  var team_buttons = module.exports.team_buttons =
+    [{
+      name: 'settings',
+      text: '< Back',
+      style: 'default',
+      type: 'button'
+    }, {
+      "name": "settings.back",
+      "text": "⌂ Home",
+      "style": "default",
+      "type": "button"
+    }];
+
 var focus_home_default = module.exports.focus_home_default = function(message) {
   return [{
     "name": "addcart",

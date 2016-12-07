@@ -225,7 +225,7 @@ handlers['reminder_confirm'] = function*(message, data) {
     now = new Date();
   switch (alertTime) {
     case 'today':
-      msInFuture = determineLaterToday(now);
+      msInFuture = determineLaterToday();
       dateDescrip = 'in a bit';
       break;
     case 'tomorrow':
@@ -400,12 +400,9 @@ function* publish(message) {
 
 
 // based on the current time, determine a later time
-function determineLaterToday(now) {
-  var ONE_HOUR = 60 * 60 * 1000;
+const determineLaterToday = function(now) {
+  const ONE_HOUR = 60 * 60 * 1000;
   if (process.env.NODE_ENV.includes('development')) return 20 * 1000; //20 seconds for dev
-  else if (now.getHours() < 12) return ONE_HOUR;
-  else if (now.getHours() < 14) return ONE_HOUR * 2;
-  else if (now.getHours() < 17) return (17 - now.getHours()) * ONE_HOUR;
   else return ONE_HOUR;
 }
 

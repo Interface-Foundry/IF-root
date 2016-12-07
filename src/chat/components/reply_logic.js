@@ -102,6 +102,12 @@ function * simplehome (message) {
         value: 'shopping',
         text: 'Kip Store',
         type: 'button'
+      },{
+        name: 'settings',
+        text: 'Settings',
+        style: 'default',
+        type: 'button',
+        value: 'home'
       }]
     }]
     // mrkdwn_in: ['text']
@@ -494,23 +500,27 @@ queue.topic('incoming').subscribe(incoming => {
     yield message.save(); // the incoming message has had some stuff added to it :)
     timer.tic('done saving message', message)
     timer.tic('saving replies')
-    yield replies.map(r => {
-      if (r) {
-        try {
-          r.save()
-        } catch(err) {
-          logging.debug('could not save ' + r, err)
+    if (replies) {
+      yield replies.map(r => {
+        if (r) {
+          try {
+            r.save()
+          } catch (err) {
+            logging.debug('could not save ' + r, err)
+          }
+        } else {
+          logging.debug('reply_logic:316:r does not exist ' + r)
         }
-      } else {
-        logging.debug('reply_logic:316:r does not exist ' + r)
-      }
-    })
+      })
+    }
     timer.tic('done saving replies')
     timer.tic('sending replies')
-    yield replies.map((r, i) => {
-      kip.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
-      queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
-    })
+    if (replies) {
+      yield replies.map((r, i) => {
+        kip.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
+        queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
+      })
+    }
     incoming.ack()
     timer.stop()
   }).catch(kip.err)

@@ -7,6 +7,7 @@ var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
+var request = require('request');
 var team;
 var teamMembers;
 var admins;
@@ -68,43 +69,28 @@ handlers['start'] = function * (message) {
     }
   })
 
-  var original = cardTemplate.shopping_team_default(message._id);
-  var expandable = yield utils.generateMenuButtons(message)
-    var endpart = {
-      "text": '',
-      "actions": original,
-      "callback_id": 'none',
-      // "mrkdwn_in": ["fields","text"],
-      // "color":"#49d63a"
-    };
-    attachments.push(endpart);
-    // }
-    var resList = {
-      username: 'Kip',
-      text: "",
-      attachments: attachments,
-      fallback: 'Team Cart Members'
-    };
+  var endpart = {
+    "text": '',
+    "actions": cardTemplate.team_buttons,
+    "callback_id": 'none',
+  };
+  // make all the attachments markdown
+  attachments.map(function(a) {
+    a.mrkdwn_in = ['text', 'fields'];
+    a.color = color;
+  })
+  attachments.push(endpart);
 
-    // make all the attachments markdown
-    attachments.map(function(a) {
-      a.mrkdwn_in =  ['text', 'fields'];
-      a.color = color;
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify({
+      text: '',
+      attachments: attachments
     })
-    var msg = message;
-    msg.mode = 'team';
-    msg.text = '';
-    msg.execute = [ { 
-      "mode": "team",
-      "action": "home",
-      "_id": message._id
-    } ];
-    msg.source.team = team.team_id;
-    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-    msg.reply = attachments;
-    yield utils.cacheMenu(msg, original, expandable, {text: '', color: color})
+  })
 
-    return [msg];
+  return;
 }
 
 
