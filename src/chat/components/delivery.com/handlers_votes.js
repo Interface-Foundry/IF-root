@@ -281,7 +281,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   if (_.includes(_.map(foodSession.votes, 'user'), message.source.user)) {
     if (message.text === 'food') {
       var exitEarlyMessage = {
-        'text': 'you typed food, but we are choosing a cuisine so thats ambiguous',
+        'text': 'You typed food, but we are choosing a cuisine so thats ambiguous.  Would you like to restart or just continue',
         'fallback': 'Any preferences?',
         'callback_id': 'confirm.confirm.exit',
         'attachment_type': 'default',
@@ -298,7 +298,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
             'type': 'button'
           }, {
             'name': 'passthrough',
-            'value': 'food.null.remove',
+            'value': 'food.null.continue',
             'text': '× Cancel',
             'type': 'button'
           }]

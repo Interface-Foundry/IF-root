@@ -134,6 +134,14 @@ handlers['food.null'] = function * (message) {
   // nothing to see here
 }
 
+handlers['food.null.continue'] = function * (message) {
+  var msg_json = {
+    'text': 'Okay we are just going to continue for the time being',
+    'fallback': 'Okay we are just going to continue for the time being'
+  }
+  replyChannel.sendReplace(message, `${message.mode}.${message.action}`, {type: message.origin, data: msg_json})
+}
+
 handlers['food.exit'] = function * (message) {
   var msg_json = {
     'text': "Are you sure you don't want to order food?",
@@ -165,6 +173,8 @@ handlers['food.exit'] = function * (message) {
   }
   replyChannel.send(message, 'food.exit.confirm', {type: message.origin, data: msg_json})
 }
+
+
 
 handlers['food.exit.confirm'] = function * (message) {
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'ok byeee'}})
