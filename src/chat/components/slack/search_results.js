@@ -5,7 +5,7 @@ var slackUtils = require('./utils.js')
 
 var buttons = function(num, modeIsOnboard) {
   return modeIsOnboard ? [{
-      "name":  'onboard_shopping.addcart',
+      "name":  'member_onboard.addcart',
       "text": "Add to Cart",
       "style": "primary",
       "type": "button",

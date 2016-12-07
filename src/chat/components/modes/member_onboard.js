@@ -38,7 +38,7 @@ handlers['step_1'] = function(message) {
   }
   kip.debug(`\n\n\n\n\n\n\n\n message is: \n ${message} \n\n\n\n\n\n\n\n`);
   var msg = message;
-  msg.mode = 'onboard_shopping';
+  msg.mode = 'member_onboard';
   msg.action = 'home';
   msg.text = '';
   msg.source.team = team_id;
@@ -102,10 +102,10 @@ handlers['step_2'] = function*(message, data) {
   var msg = message;
   msg.resolved = true;
   msg.incoming = false;
-  msg.mode = 'onboard_shopping'
+  msg.mode = 'member_onboard'
   msg.action = 'results'
   msg.exec = {
-    mode: 'onboard_shopping',
+    mode: 'member_onboard',
     action: 'step_2',
     params: {
       query: searchTerm
@@ -151,7 +151,7 @@ handlers['addcart'] = function*(message, data) {
 
 //modified version of modes/shopping.js
 handlers['cart'] = function*(message) {
-  kip.debug('onboard_shopping.viewcart');
+  kip.debug('member_onboard.viewcart');
   let attachments = [{
     text: '*Step 3:* Well done!\n Here\'s what your team\'s cart looks like:',
     mrkdwn_in: ['text'],
@@ -194,21 +194,21 @@ handlers['reminder'] = function(message) {
     text: 'Ok! When would you like to be reminded?',
     color: '#49d63a',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard_Shopping',
-    actions: cardTemplate.slack_member_remind,
+    fallback: 'member_onboard',
+    actions: cardTemplate.member_reminder,
     callback_id: 'none',
     mrkdwn_in: ['text'],
   });
   attachments.push({
     text: '',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard_Shopping',
+    fallback: 'member_onboard',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none',
     mrkdwn_in: ['text'],
   });
   var msg = message;
-  msg.mode = 'onboard_shopping'
+  msg.mode = 'member_onboard'
   msg.action = 'home'
   msg.text = ''
   msg.source.team = team_id;
@@ -260,7 +260,7 @@ handlers['reminder_confirm'] = function*(message, data) {
     var cronAttachments = [{
       text: 'Hey, it\'s me again. Ready to get started?',
       mrkdwn_in: ['text'],
-      fallback: 'Onboard_Shopping',
+      fallback: 'member_onboard',
       actions: cardTemplate.slack_onboard_member,
       callback_id: 'none',
       color: '#45a5f4'
@@ -270,7 +270,7 @@ handlers['reminder_confirm'] = function*(message, data) {
       incoming: false,
       thread_id: message.thread_id,
       origin: 'slack',
-      mode: 'onboard_shopping',
+      mode: 'member_onboard',
       action: 'home',
       reply: cronAttachments
     }
@@ -286,13 +286,13 @@ handlers['reminder_confirm'] = function*(message, data) {
   }, {
     text: '',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard_Shopping',
+    fallback: 'member_onboard',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
   }];
 
   msg.action = 'home'
-  msg.mode = 'onboard_shopping'
+  msg.mode = 'member_onboard'
   msg.text = ''
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
@@ -310,7 +310,7 @@ handlers['sorry'] = function(message) {
   	return; //ignore times people paste stuff in
   }
   message.text = "Sorry, my brain froze!"
-  message.mode = 'onboard_shopping';
+  message.mode = 'member_onboard';
   message.action = 'home';
   var attachments = [];
   attachments.push({

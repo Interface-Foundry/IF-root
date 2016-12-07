@@ -26,7 +26,7 @@ var email = require('./email');
 var queue = require('./queue-mongo');
 var onboarding = require('./modes/onboarding');
 var onboard = require('./modes/onboard');
-var onboardShopping = require('./modes/onboard_shopping');
+var member_onboard = require('./modes/member_onboard');
 
 var settings = require('./modes/settings');
 var team = require('./modes/team');
@@ -197,8 +197,8 @@ function switchMode(message) {
     'onboard': function () {
       return 'onboard';
     },
-    'onboard_shopping': function () {
-      return 'onboard_shopping'
+    'member_onboard': function () {
+      return 'member_onboard'
     },
     'shopping': function () {
       return 'shopping';
@@ -238,8 +238,8 @@ function printMode(message) {
     case 'onboard':
       winston.debug('In', 'ONBOARD'.cyan, 'mode 👋')
       break
-    case 'onboard_shopping':
-      winston.debug('In', 'ONBOARD_SHOPPING'.cyan, 'mode 👋')
+    case 'member_onboard':
+      winston.debug('In', 'MEMBER_ONBOARD'.cyan, 'mode 👋')
       break
     case 'team':
       winston.debug('In', 'TEAM'.yellow, 'mode 👋')
@@ -417,9 +417,9 @@ queue.topic('incoming').subscribe(incoming => {
           var replies = yield onboard.handle(message)
         }
         break;
-      case 'onboard_shopping':
+      case 'member_onboard':
         if (message.origin === 'slack') {
-          var replies = yield onboardShopping.handle(message)
+          var replies = yield member_onboard.handle(message)
         }
         break;
       case 'settings':

@@ -216,84 +216,84 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   value: "exit"
 }];
 
-var slack_reminder = module.exports.slack_reminder = [{
-  name: "onboard.start.confirm_reminder",
+var cart_reminder = module.exports.cart_reminder = [{
+  name: "onboard.start.confirm_cart_reminder",
   text: "Today",
   style: "default",
   type: "button",
-  value: "confirm_reminder.today"
+  value: "confirm_cart_reminder.today"
 }, {
-  name: "onboard.start.confirm_reminder",
+  name: "onboard.start.confirm_cart_reminder",
   text: "Tomorrow",
   style: "default",
   type: "button",
-  value: "confirm_reminder.tomorrow"
+  value: "confirm_cart_reminder.tomorrow"
 }, {
-  name: "onboard.start.confirm_reminder",
+  name: "onboard.start.confirm_cart_reminder",
   text: "1 Week",
   style: "default",
   type: "button",
-  value: "confirm_reminder.one_week"
+  value: "confirm_cart_reminder.one_week"
 }, {
-  name: "onboard.start.confirm_reminder",
+  name: "onboard.start.confirm_cart_reminder",
   text: "1 Month",
   style: "default",
   type: "button",
-  value: "confirm_reminder.one_month"
+  value: "confirm_cart_reminder.one_month"
 }, {
-  name: "onboard.start.confirm_reminder",
+  name: "onboard.start.confirm_cart_reminder",
   text: "Never",
   style: "default",
   type: "button",
-  value: "confirm_reminder.never"
+  value: "confirm_cart_reminder.never"
 }];
 
-var slack_remind = module.exports.slack_remind = [{
-  name: "onboard.start.confirm_remind",
+var admin_reminder = module.exports.admin_reminder = [{
+  name: "onboard.start.confirm_admin_reminder",
   text: "Today",
   style: "default",
   type: "button",
-  value: "confirm_remind.today"
+  value: "confirm_admin_reminder.today"
 }, {
-  name: "onboard.start.confirm_remind",
+  name: "onboard.start.confirm_admin_reminder",
   text: "Tomorrow",
   style: "default",
   type: "button",
-  value: "confirm_remind.tomorrow"
+  value: "confirm_admin_reminder.tomorrow"
 }, {
-  name: "onboard.start.confirm_remind",
+  name: "onboard.start.confirm_admin_reminder",
   text: "1 Week",
   style: "default",
   type: "button",
-  value: "confirm_remind.one_week"
+  value: "confirm_admin_reminder.one_week"
 }, {
   name: "onboard.start.choose",
   text: "Choose for me",
   style: "default",
   type: "button",
-  value: "confirm_remind.choose"
+  value: "confirm_admin_reminder.choose"
 }];
 
-var slack_member_remind = module.exports.slack_member_remind = [{
-  name: "onboard_shopping.start.reminder_confirm",
+var member_reminder = module.exports.member_reminder = [{
+  name: "member_onboard.start.reminder_confirm",
   text: "Today",
   style: "default",
   type: "button",
   value: "reminder_confirm.today"
 }, {
-  name: "onboard_shopping.start.reminder_confirm",
+  name: "member_onboard.start.reminder_confirm",
   text: "Tomorrow",
   style: "default",
   type: "button",
   value: "reminder_confirm.tomorrow"
 }, {
-  name: "onboard_shopping.start.reminder_confirm",
+  name: "member_onboard.start.reminder_confirm",
   text: "1 Week",
   style: "default",
   type: "button",
   value: "reminder_confirm.one_week"
 }, {
-  name: "onboard_shopping.start.choose",
+  name: "member_onboard.start.choose",
   text: "Choose for me",
   style: "default",
   type: "button",
@@ -302,13 +302,13 @@ var slack_member_remind = module.exports.slack_member_remind = [{
 
 
 var slack_onboard_member = module.exports.slack_onboard_member = [{
-  name: "onboard_shopping.start.step_1",
+  name: "member_onboard.start.step_1",
   text: "✓ Ok!",
   style: "primary",
   type: "button",
   value: "step_1"
 }, {
-  name: "onboard_shopping.start.reminder",
+  name: "member_onboard.start.reminder",
   text: "Remind me later",
   style: "default",
   type: "button",
@@ -316,19 +316,19 @@ var slack_onboard_member = module.exports.slack_onboard_member = [{
 }];
 
 var slack_member_onboard_start = module.exports.slack_member_onboard_start = [{
-  "name": "onboard_shopping.start.step_2",
+  "name": "member_onboard.start.step_2",
   "text": "Headphones",
   "style": "default",
   "type": "button",
   "value": "step_2.headphones"
 }, {
-  "name": "onboard_shopping.start.step_2",
+  "name": "member_onboard.start.step_2",
   "text": "Coding Books",
   "style": "default",
   "type": "button",
   "value": "step_2.coding_books"
 }, {
-  "name": "onboard_shopping.start.step_2",
+  "name": "member_onboard.start.step_2",
   "text": "Healthy Snacks",
   "style": "default",
   "type": "button",

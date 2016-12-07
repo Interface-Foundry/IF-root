@@ -94,7 +94,7 @@ handlers['start'] = function * (message) {
      color: '#45a5f4',
      mrkdwn_in: ['text'],
      fallback: 'Onboard',
-     actions: cardTemplate.slack_remind,
+     actions: cardTemplate.admin_reminder,
      callback_id: 'none'
    });
    attachments.push({
@@ -115,7 +115,7 @@ handlers['start'] = function * (message) {
    return [msg];
  }
 
-handlers['confirm_remind'] = function*(message, data) {
+handlers['confirm_admin_reminder'] = function*(message, data) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   var team = yield db.Slackbots.findOne({
     'team_id': team_id
@@ -152,13 +152,17 @@ handlers['confirm_remind'] = function*(message, data) {
   messageText += ' Thanks and have a great day :)';
 
   if (msInFuture > 0) {
+    var currentUser = yield db.Chatusers.findOne({
+      id: message.source.user
+    });
     var cronAttachments = [];
     cronAttachments.push({
       // image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
       text: 'Hey, it\'s me again. Ready to get started?'
     });
     cronAttachments.push({
-      text: ' What are you looking for?',
+      image_url: "http://tidepools.co/kip/kip_menu.png",
+      text: 'What are you looking for?',
       color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback: 'Onboard',
@@ -177,7 +181,7 @@ handlers['confirm_remind'] = function*(message, data) {
       action: 'home',
       reply: cronAttachments
     }
-    createCronJob([message.source.user], cronMsg, team, new Date(msInFuture + now.getTime()));
+    createCronJob([currentUser], cronMsg, team, new Date(msInFuture + now.getTime()));
   }
   var msg = message;
   var attachments = [];
@@ -465,7 +469,7 @@ handlers['reminder'] = function(message) {
     color: '#45a5f4',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
-    actions: cardTemplate.slack_reminder,
+    actions: cardTemplate.cart_reminder,
     callback_id: 'none'
   }];
   attachments.push({
@@ -489,7 +493,7 @@ handlers['reminder'] = function(message) {
  * S4A2
  */
 
-handlers['confirm_reminder'] = function*(message, data) {
+handlers['confirm_cart_reminder'] = function*(message, data) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   var team = yield db.Slackbots.findOne({
     'team_id': team_id
@@ -679,7 +683,7 @@ var createCartMsg = function*(message) {
 /**
  * S5
  */
-handlers['member'] = function * (message) {
+handlers['member'] = function*(message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -705,7 +709,7 @@ handlers['member'] = function * (message) {
   }, {
     text: `Make <@${message.source.user}>'s life easier! Let me show you how to add items to the team cart`,
     mrkdwn_in: ['text'],
-    fallback: 'Onboard_Shopping',
+    fallback: 'Welcome to Kip!',
     callback_id: 'none',
     actions: cardTemplate.slack_onboard_member,
     color: '#45a5f4'
@@ -718,7 +722,7 @@ handlers['member'] = function * (message) {
       incoming: false,
       thread_id: a.dm,
       origin: 'slack',
-      mode: 'onboard_shopping',
+      mode: 'member_onboard',
       action: 'home',
       reply: attachments,
       source: {
@@ -741,7 +745,6 @@ handlers['member'] = function * (message) {
  * S6
  */
 handlers['checkout'] = function * (message) {
-
  var cart_id = message.source.team
  var cart = yield kipcart.getCart(cart_id)
   var attachments = [];
