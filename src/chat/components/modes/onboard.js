@@ -152,9 +152,6 @@ handlers['confirm_remind'] = function*(message, data) {
   messageText += ' Thanks and have a great day :)';
 
   if (msInFuture > 0) {
-    var currentUser = yield db.Chatusers.findOne({
-      id: message.source.user
-    });
     var cronAttachments = [];
     cronAttachments.push({
       // image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
@@ -180,7 +177,7 @@ handlers['confirm_remind'] = function*(message, data) {
       action: 'home',
       reply: cronAttachments
     }
-    createCronJob([currentUser], cronMsg, team, new Date(msInFuture + now.getTime()));
+    createCronJob([message.source.user], cronMsg, team, new Date(msInFuture + now.getTime()));
   }
   var msg = message;
   var attachments = [];
@@ -562,9 +559,7 @@ handlers['confirm_reminder'] = function*(message, data) {
       channelMembers = channelMembers.concat(members);
     });
     channelMembers = _.uniqBy(channelMembers, a => a.id);
-    var currentUser = yield db.Chatusers.findOne({
-      id: message.source.user
-    });
+
     var cronAttachments = [{
       'image_url': 'http://kipthis.com/kip_modes/mode_teamcart_collect.png',
       'text': '',
@@ -575,7 +570,7 @@ handlers['confirm_reminder'] = function*(message, data) {
       color: '#45a5f4'
     }];
     cronAttachments.push({
-      text: `Hi, <@${currentUser.id}> is collecting Amazon orders`,
+      text: `Hi, <@${message.source.user}> is collecting Amazon orders`,
       color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback: 'Shopping',
@@ -693,9 +688,6 @@ handlers['member'] = function * (message) {
     'team_id': team_id
   }).exec();
   var channelMembers = [];
-  var currentUser = yield db.Chatusers.findOne({
-    id: message.source.user
-  });
   yield team.meta.cart_channels.map(function*(channel) {
     var members = yield utils.getChannelMembers(team, channel);
     channelMembers = channelMembers.concat(members);
@@ -711,7 +703,7 @@ handlers['member'] = function * (message) {
     ],
     'color': '#45a5f4'
   }, {
-    text: `Make <@${currentUser.id}>'s life easier! Let me show you how to add items to the team cart`,
+    text: `Make <@${message.source.user}>'s life easier! Let me show you how to add items to the team cart`,
     mrkdwn_in: ['text'],
     fallback: 'Onboard_Shopping',
     callback_id: 'none',
@@ -720,7 +712,7 @@ handlers['member'] = function * (message) {
   }];
 
   yield channelMembers.map(function * (a) {
-    if (a.id == currentUser.id) return;
+    if (a.id == message.source.user) return;
     var newMessage = new db.Message({
       text: '',
       incoming: false,
@@ -1002,7 +994,6 @@ const createCronJob = function(people, msg, team, date, onRun) {
     });
     this.stop();
     if (onRun) { // run another function
-      kip.debug('RUNNING SECOND CRON FUNC')
       onRun(new Date());
     }
   },
