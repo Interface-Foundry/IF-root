@@ -225,7 +225,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
       logging.info(`creating new customer and charge for, ${token}`)
       var customer = yield stripe.customers.create({
         source: token,
-        description: 'Delivery.com & Kip: ' + payment.order.chosen_restaurant.name
+        description: 'Delivery.com & Kip: ' + payment.order.team_id
       })
 
       // check for coupon
