@@ -559,12 +559,9 @@ handlers['confirm_reminder'] = function*(message, data) {
     var channelMembers = [];
     yield team.meta.cart_channels.map(function*(channel) {
       var members = yield utils.getChannelMembers(team, channel);
-      if (channelMembers.length == 0) {
-        channelMembers = members;
-      } else {
-        channelMembers = channelMembers.concat(_.differenceWith(channelMembers, members, (a, b) => a.id == b.id));
-      }
+      channelMembers = channelMembers.concat(members);
     });
+    channelMembers = _.uniqBy(channelMembers, a => a.id);
     var currentUser = yield db.Chatusers.findOne({
       id: message.source.user
     });
@@ -701,13 +698,9 @@ handlers['member'] = function * (message) {
   });
   yield team.meta.cart_channels.map(function*(channel) {
     var members = yield utils.getChannelMembers(team, channel);
-    if (channelMembers.length == 0) {
-      channelMembers = members; // don't check if something's already there if we know there's nothing there
-    } else {
-      channelMembers = channelMembers.concat(_.differenceWith(channelMembers, members, (a, b) => a.id == b.id));
-    }
+    channelMembers = channelMembers.concat(members);
   });
-  channelMembers = _.uniq(channelMembers);
+  channelMembers = _.uniqBy(channelMembers, a => a.id);
 
   var attachments = [{
     'image_url': 'http://kipthis.com/kip_modes/mode_howtousekip.png',
