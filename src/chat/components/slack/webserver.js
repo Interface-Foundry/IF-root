@@ -169,10 +169,8 @@ app.post('/slackaction', next(function * (req, res) {
         if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
           // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
           _.remove(team.meta.cart_channels, function(c) { return c == channelId });
-          kip.debug(' \n\n\n\n\n  channel removed, cart channels:', team.meta.cart_channels ,' \n\n\n\n\n ');
         } else {
           team.meta.cart_channels.push(channelId);
-          kip.debug(' \n\n\n\n\n  added channel:', channelId, 'cart channels: ',team.meta.cart_channels ,' \n\n\n\n\n ');
         }
         team.markModified('meta.cart_channels');
         yield team.save();
@@ -499,8 +497,6 @@ app.get('/newslack', function (req, res) {
       yield utils.initializeTeam(bot, res_auth);
       var user = yield db.Chatuser.findOne({ id: _.get(res_auth,'user_id')}).exec()
       co(slackModule.start);
-      // var admins = yield utils.findAdmins(bot);
-      // var a = admins[0];
       var message= new db.Message({
         incoming: false,
         thread_id: user.dm,

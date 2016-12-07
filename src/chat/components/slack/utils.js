@@ -35,9 +35,11 @@ function * initializeTeam(team, auth) {
   var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
   team.meta.cart_channels.push(generalChannel.id);
  }
+ team.meta.office_assistants = _.uniq(team.meta.office_assistants);
  team.meta.all_channels = res_chan.channels.map(c => {return c.id});
  team.markModified('meta.cart_channels');
  team.markModified('meta.all_channels');
+ team.markModified('meta.office_assistants');
  yield getTeamMembers(team);
  yield team.save();
  return team;

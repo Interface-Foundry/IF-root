@@ -1022,6 +1022,5 @@ const determineLaterToday = function(now) {
 
 function * publish (message) {
   yield message.save();
-  kip.debug('\n\n\n\n\n\n\n\n\n\n onboard:967:publish: ',message, '\n\n\n\n\n\n\n\n\n\n')
   queue.publish('outgoing.' + message.origin, message, message._id + '.reply.update');
 }

@@ -81,7 +81,6 @@ handlers['get-admins.response'] = function * (message) {
   var reply_success = `Great! I\'ll keep $ADMINS up-to-date on what your team members are adding to the office shopping cart 😊`;
   var reply_admin = `Do you want me to take you on a short tour of Kip?`;
   var reply_user = `Why don't you try searching for something? Type something like 'headphones' to search`;
-
   var reply_failure = "I'm sorry, I couldn't quite understand that, can you clarify for me who manages office purchases? If you want to skip this part, just type 'skip' and we can move on."
   var special_admin_message = message_tools.text_reply(message, 'special instructions for admins') // TODO
   var admins = []
@@ -98,14 +97,15 @@ handlers['get-admins.response'] = function * (message) {
   office_admins = office_admins.map(g => {
     if (g === 'me') {
       team.meta.office_assistants.push(message.user_id);
-      team.save();
       return message.user_id
     } else {
       team.meta.office_assistants.push(g.replace(/(\<\@|\>)/g, ''));
-      team.save();
       return g.replace(/(\<\@|\>)/g, '')
     }
   });
+  team.meta.office_assistants = _.uniq(team.meta.office_assistants);
+  yield team.save();
+
   // also look for users mentioned by name without the @ symbol
   var users = yield db.Chatusers.find({
     team_id: team.team_id,
