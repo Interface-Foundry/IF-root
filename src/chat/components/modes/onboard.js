@@ -387,10 +387,10 @@ handlers['bundle'] = function * (message, data) {
  var choice = data[0];
  var cart_id = message.cart_reference_id || message.source.team; 
  yield utils.showLoading(message);
- yield bundles.addBundleToCart(choice, message.user_id,cart_id)
+ yield bundles.addBundleToCart(choice, message.user_id,cart_id);
 
  // var cart_id = message.source.team
- var cart = yield kipcart.getCart(cart_id)
+ var cart = yield kipcart.getCart(cart_id);
  // all the messages which compose the cart
  var attachments = [];
 
@@ -398,7 +398,7 @@ handlers['bundle'] = function * (message, data) {
     text: 'Awesome! You added your first bundle.',
     color: '#45a5f4',
     // image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
-  })
+  });
 
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];

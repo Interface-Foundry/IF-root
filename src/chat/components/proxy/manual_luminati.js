@@ -5,11 +5,11 @@ var exec = require('child_process').exec;
 var child;
 // executes `pwd`
 child = exec("luminati --customer lum-customer-kipthis-zone-gen --password e49d4ega1696 --port 24000 --proxy_count 3 --max_requests 20 --country us", function (error, stdout, stderr) {
-  console.log('stdout: ' + stdout);
-  console.log('stderr: ' + stderr);
-  if (error !== null) {
-    console.log('exec error: ' + error);
-  }
+  // console.log('stdout: ' + stdout);
+  // console.log('stderr: ' + stderr);
+  // if (error !== null) {
+  //   console.log('exec error: ' + error);
+  // }
 });
 
 
