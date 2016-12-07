@@ -259,7 +259,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       if (message.mode === 'settings' && message.action === 'home') {
         msgData.attachments = message.reply;
-           kip.debug(`Searching for back button SLACK_JS ${JSON.stringify(msgData, null, 2)}`)
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 

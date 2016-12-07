@@ -96,7 +96,6 @@ var lookup = function * (params, origin) {
     return co(function * () {
       logging.debug('looking up asin', amazonParams)
       var results = yield get_client().itemLookup(amazonParams)
-      kip.debug('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n YOLO got results from ItemLookup api', results,' \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
       var enhanced = yield enhance_results(results, origin, timer)
       timer.tic('done enhancing result, enhanced: ', enhanced)
       timer.stop()

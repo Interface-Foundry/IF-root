@@ -186,6 +186,8 @@ handlers['change_status'] = function * (message) {
     hour = hour - 12;
     am_pm = 'PM';
   }
+  if (hour.toString().indexOf(':') > -1) hour = parseInt(hour.replace(':',''));
+  if (minutes.toString().indexOf(':') > -1) minutes = parseInt(minutes.replace(':',''));
   am_pm = am_pm.toUpperCase().trim();
   team.meta.weekly_status_day = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
   team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-2) + ' ' + am_pm;

@@ -231,7 +231,8 @@ app.post('/slackaction', next(function * (req, res) {
       }
       else if (simple_command == 'send_last_call_btn') {
         message.mode = 'settings';
-        message.action = 'send_last_call';
+        message.action = 'home';
+        message.text = 'send last call btn';
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         })
