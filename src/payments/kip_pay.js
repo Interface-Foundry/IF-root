@@ -16,8 +16,9 @@
           Mirugai                Tamago                   Ebi
        (Giant Clam)            (Cooked Egg)             (Shrimp)
 */
-require('kip')
 require('colors')
+require('../kip')
+require('../logging')
 var payConst = require('./pay_const.js')
 
 const kipPayURL = kip.config.kipPayURL
@@ -85,21 +86,21 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
     // COUPONS
     if (body.team_id === 'T2X0BLHGX') { // alyx testing team
       body.order.coupon = 0.99 // in percentage off
-    } 
+    }
     else if (body.team_id === 'T02PN3B25') { // kipsearch team
-      
+
       body.order.coupon = 0.99 // in percentage off
-    } 
+    }
     else if (body.team_id === 'T02QUPKHW') { // quibb team
       body.order.coupon = 0.99 // in percentage off
-    } 
+    }
     else if (body.team_id === 'T1198BQV8') { // message.io team
       body.order.coupon = 0.99 // in percentage off
-    } 
+    }
     else if (body.team_id === 'T3AHPU2N9') { // eden tester
       body.order.coupon = 0.99 // in percentage off
     }
-    else if (body.team_id === 'T3BCG4CP4') { // woodside friends 
+    else if (body.team_id === 'T3BCG4CP4') { // woodside friends
       body.order.coupon = 0.99 // in percentage off
     }
     else if (body.team_id === 'T3AM3RZSL') { // vegan house
@@ -441,7 +442,7 @@ function * onSuccess (payment) {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
-      htmlForItem += '<tr><td>'+foodInfo.name+'</td><td>'+descriptionString+'</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+'</td><td>'+user[0].real_name+'</td></tr>'    
+      htmlForItem += '<tr><td>'+foodInfo.name+'</td><td>'+descriptionString+'</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+'</td><td>'+user[0].real_name+'</td></tr>'
     })
 
     // send confirmation email to admin

@@ -1,4 +1,4 @@
-require('kip')
+require('../logging')
 var request = require('request-promise')
 var _ = require('lodash')
 
@@ -165,7 +165,7 @@ module.exports.storeCard = function * (pay, charge) {
 function calCoupon(total,coupon){
   var s = total * coupon
   var t = total - s
-  if(t < 50){ //to reach minimum stripe charge of $0.50 
+  if(t < 50){ //to reach minimum stripe charge of $0.50
     t = 50
   }
   return t
