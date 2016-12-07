@@ -1,6 +1,5 @@
 var message_tools = require('../message_tools')
 var handlers = module.exports = {};
-var db = require('db');
 var _ = require('lodash');
 var co = require('co');
 var utils = require('../slack/utils');
@@ -21,13 +20,13 @@ function * handle(message) {
     return yield handlers[action](message)
   }
 }
- 
+
 module.exports.handle = handle;
 
 /*
  * Show the user all the settings they have access to
  */
-handlers['start'] = function * (message) { 
+handlers['start'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -93,7 +92,7 @@ handlers['start'] = function * (message) {
       console.log('job time in user timzone', job_time_user_tz.format());
       attachments.push({text: 'You are receiving weekly cart status updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + '\nYou can turn this off by saying `no weekly status`'
         + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'});
-    } 
+    }
     else {
       attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'});
     }
@@ -208,7 +207,7 @@ handlers['change_status'] = function * (message) {
     "mode": "settings",
     "action": "home",
     "_id": message._id
-  } ]; 
+  } ];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -259,7 +258,7 @@ handlers['add_or_remove'] = function * (message) {
                 "style": "primary",
                 "type": "button",
                 "value": "exit"
-              },                           
+              },
               {
                 "name": "team",
                 "text": "Team Members",
@@ -323,10 +322,10 @@ handlers['add_or_remove'] = function * (message) {
       "mode": "settings",
       "action": "home",
       "_id": message._id
-    } ]; 
+    } ];
     msg.source.team = team.team_id;
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-    replies.push(msg)      
+    replies.push(msg)
   }
  return replies;
 }
@@ -345,7 +344,7 @@ handlers['last_call_off'] = function * (message) {
     "mode": "settings",
     "action": "home",
     "_id": message._id
-  } ]; 
+  } ];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -365,7 +364,7 @@ handlers['last_call_on'] = function * (message) {
     "mode": "settings",
     "action": "home",
     "_id": message._id
-  } ]; 
+  } ];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -378,13 +377,13 @@ handlers['send_last_call'] = function * (message) {
   var replies = []
   yield team.meta.cart_channels.map( function * (c) {
     var channelMembers = yield utils.getChannelMembers(team, c);
-    yield channelMembers.map( (m) => {      
+    yield channelMembers.map( (m) => {
       var attachment = [{
             "fallback": "Last Call",
             "text":'',
             "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
             "color": "#45a5f4",
-            "mrkdwn_in": ["text"]        
+            "mrkdwn_in": ["text"]
         },{
             "fallback": "Last Call",
             "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.\n So if you’ve got some last minute shopping to do, it’s now or never! You have *60* minutes left',
@@ -400,7 +399,7 @@ handlers['send_last_call'] = function * (message) {
           "mode": "settings",
           "action": "home",
           "_id": message._id
-        }]; 
+        }];
         msg.reply = attachment;
         msg.source.team = team.team_id;
         msg.source.channel = m.dm; //not sure if this will work
@@ -429,7 +428,7 @@ handlers['sorry'] = function * (message) {
             "style": "primary",
             "type": "button",
             "value": "exit"
-          },              
+          },
           {
             "name": "help",
             "text": "Help",
@@ -438,7 +437,7 @@ handlers['sorry'] = function * (message) {
 
 
             "value": "help"
-          },              
+          },
           {
             "name": "team",
             "text": "Team Members",
@@ -565,7 +564,7 @@ function * updateCronJob(team, message, date) {
     }
     kip.debug('\n\n\nsetting cron job day: ', '00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day,'\n\n\n')
     var teamMembers = yield utils.getTeamMembers(team);
-    cronJobs[team.team_id] = new cron.CronJob('00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day, function  () {  
+    cronJobs[team.team_id] = new cron.CronJob('00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day, function  () {
        team.meta.office_assistants.map(function  (a) {
        var assistant = teamMembers.find(function(m, i){ return m.id == a });
 
@@ -593,21 +592,21 @@ function * updateCronJob(team, message, date) {
               "style": "primary",
               "type": "button",
               "value": "exit"
-            },              
+            },
             {
               "name": "send_last_call_btn",
               "text": "Yes",
               "style": "default",
               "type": "button",
               "value": "send_last_call_btn"
-            }, 
+            },
             {
               "name": "no",
               "text": "No",
               "style": "default",
               "type": "button",
               "value": "no"
-            },             
+            },
             {
               "name": "team",
               "text": "Team Members",
@@ -637,7 +636,7 @@ function * updateCronJob(team, message, date) {
 
       newMessage.save()
       queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
-          
+
           // slackBot.web.chat.postMessage(assistant.dm, '', reply);
           //   // SHOW CART STICKER
           //  //* * * * * * * * * * * * * * * * * //
@@ -657,24 +656,24 @@ function getDayNum(string) {
   switch(string) {
     case 'Sunday':
      return 0
-     break; 
+     break;
     case 'Monday':
      return 1
-     break; 
+     break;
     case 'Tuesday':
      return 2
-     break; 
+     break;
     case 'Wednesday':
      return 3
-     break; 
+     break;
     case 'Thursday':
      return 4
-     break; 
+     break;
     case 'Friday':
      return 5
-     break; 
+     break;
     case 'Saturday':
      return 6
-     break; 
+     break;
   }
 }

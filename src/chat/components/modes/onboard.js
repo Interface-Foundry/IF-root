@@ -1,5 +1,4 @@
 var handlers = module.exports = {};
-var db = require('db');
 var _ = require('lodash');
 var co = require('co');
 var utils = require('../slack/utils');
@@ -34,13 +33,13 @@ function * handle(message) {
   }
 }
 
- 
+
 module.exports.handle = handle;
 
 /**
  * S1
  */
-handlers['start'] = function * (message) { 
+handlers['start'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -103,7 +102,7 @@ handlers['start'] = function * (message) {
      fallback: 'Onboard',
      actions: cardTemplate.slack_onboard_default,
      callback_id: 'none'
-     
+
    });
    var msg = message;
    msg.mode = 'onboard'
@@ -210,7 +209,7 @@ handlers['confirm_admin_reminder'] = function*(message, data) {
 /**
  * S2
  */
-handlers['supplies'] = function * (message) { 
+handlers['supplies'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -246,7 +245,7 @@ handlers['supplies'] = function * (message) {
    return [msg];
 }
 
-handlers['lunch'] = function * (message) {   
+handlers['lunch'] = function * (message) {
   var msg = message;
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
@@ -272,7 +271,7 @@ handlers['lunch'] = function * (message) {
     yield foodSession.save()
   }
   //if user taps < back button back to this view
-  else if(foodSession.onboarding){ 
+  else if(foodSession.onboarding){
     foodSession.onboarding = true
     banner = false
   }
@@ -355,7 +354,7 @@ handlers['lunch'] = function * (message) {
 
   if (foodSession.onboarding){
     //green New Location attachment
-    msg_json.attachments[msg_json.attachments.length - 1].color = '#2ab27b' 
+    msg_json.attachments[msg_json.attachments.length - 1].color = '#2ab27b'
   }
 
   if (_.get(team, 'meta.locations').length >= 1) {
@@ -375,7 +374,7 @@ handlers['lunch'] = function * (message) {
     'value': 'food.exit.confirm'
   })
 
-  msg.reply = msg_json;  
+  msg.reply = msg_json;
   return [msg];
 
 }
@@ -385,7 +384,7 @@ handlers['lunch'] = function * (message) {
  */
 handlers['bundle'] = function * (message, data) {
  var choice = data[0];
- var cart_id = message.cart_reference_id || message.source.team; 
+ var cart_id = message.cart_reference_id || message.source.team;
  yield utils.showLoading(message);
  yield bundles.addBundleToCart(choice, message.user_id,cart_id)
 
@@ -419,7 +418,7 @@ handlers['bundle'] = function * (message, data) {
       `*Price:* ${item.price} each`,
       `*Added by:* ${userString}`,
       `*Quantity:* ${item.quantity}`,
-      
+
     ].filter(Boolean).join('\n');
     // add the item actions if needed
     item_message.callback_id = item._id.toString();
@@ -490,8 +489,8 @@ handlers['bundle'] = function * (message, data) {
 
  * S4
  */
-handlers['team'] = function * (message) { 
-  
+handlers['team'] = function * (message) {
+
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -499,7 +498,7 @@ handlers['team'] = function * (message) {
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var cartChannels = team.meta.cart_channels;
   var attachments = [];
-  attachments.push({ 
+  attachments.push({
     text: ''
   });
   var channels = yield utils.getChannels(team);
@@ -541,7 +540,7 @@ handlers['team'] = function * (message) {
 }
 
 /**
- * S4A1 
+ * S4A1
  */
 handlers['reminder'] = function(message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
@@ -866,7 +865,7 @@ handlers['checkout'] = function * (message) {
       "text": "—",
       "style": "default",
       "type": "button",
-      "value": "remove" 
+      "value": "remove"
     }];
     if (item.quantity > 1) {
       buttons.push({
@@ -928,7 +927,7 @@ handlers['text'] = function * (message) {
           if (data.lastAction == 'team.help') message.text = '';
           // kip.debug(' \n\n\n\n\ onboard:788:textHandler: sending data: ', data  ,'\n\n\n\n');
           return yield handlers[choice](message, data);
-        } 
+        }
         return yield handlers[choice](message);
       } catch(err) {
         return yield handlers['sorry'](message);
@@ -1032,7 +1031,7 @@ handlers['more_info'] = function * (message, data) {
   Or simply checkout your items by selecting 'No'`
       helpOptions = cardTemplate.slack_onboard_basic
       break
-    case 'team.help': 
+    case 'team.help':
       helpText = `Kip will direct message members in each selected channel to help them add items to the cart!`
       helpOptions = cardTemplate.slack_onboard_team
       break
