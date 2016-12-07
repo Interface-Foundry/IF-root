@@ -39,8 +39,6 @@ var slackUtils = require('./slack/utils');
 var amazon_variety = require('./amazon_variety');
 var card_templates = require('./slack/card_templates.js');
 
-
-
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
 // I'm sorry i couldn't understand that
