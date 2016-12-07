@@ -10,9 +10,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
   $scope.categories = {};
   $scope.options = {};
 
-  // console.log(MenuFactory.getMinimum(), 'get min called');
-  // console.log(MenuFactory.getRestaurant(), 'get name called')
-
   $scope.toggleCategory = function (cat) {
     if ($scope.categories[cat]) $scope.categories[cat] = false;
     else $scope.categories[cat] = true;

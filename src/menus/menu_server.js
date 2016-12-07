@@ -109,14 +109,12 @@ app.post('/order', function (req, res) {
           user_id: user_id
         });
       }
-      //hangs here, but not reliably
+
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart}});
 
       //----------Message Queue-----------//
 
       console.log('updated delivery; looking for source message');
-
-      console.log('deliv convo inititator', deliv.convo_initiater.id )
 
       var foodMessage = yield Messages.find({
         'source.user': deliv.convo_initiater.id,
@@ -124,18 +122,42 @@ app.post('/order', function (req, res) {
         incoming: false
       }).sort('-ts').limit(1);
 
-      console.log('food message~~~ found', foodMessage[0]);
+      foodMessage = foodMessage[0];
 
-      replyChannel.send(
-        foodMessage[0],
-        'food.cart.personal',
-        {
-          type: foodMessage.origin,
-          data: {
-            text: 'Your order has been submitted!'
-          }
+      console.log('food message~~~ found', foodMessage);
+
+      var mess = new Messages({
+        incoming: true,
+        thread_id: foodMessage.thread_id,
+        action: 'cart.personal',
+        user_id: foodMessage.source.user,
+        mode: 'food',
+        origin: 'slack',
+        source: {
+          team: foodMessage.source.team,
+          channel: foodMessage.source.channel,
+          user: foodMessage.source.user
         }
-      )
+      })
+
+      yield mess.save();
+
+      yield queue.publish('incoming', mess, ['slack', foodMessage.source.channel, foodMessage.ts, new Date().getSeconds()].join('.'), true)
+
+      // //queue.publish('incoming', mess, ['slack', ].join('.'));
+      //['slack', foodMessage.source.channel, 'cart.personal'].join('.')
+      //
+      // replyChannel.send(
+      //   foodMessage,
+      //   'food.cart.personal',
+      //   {
+      //     type: foodMessage.origin,
+      //     incoming: true,
+      //     data: {
+      //       text: 'Your order has been submitted!'
+      //     }
+      //   }
+      // )
 
       console.log('ostensibly done');
       res.send();
