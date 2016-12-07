@@ -452,7 +452,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
 handlers['food.order.instructions'] = function * (message) {
   var msg = {
-    text: `Add Special Instructions`,
+    text: `*Add Special Instructions*`,
     attachments: [{
       text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
       fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
