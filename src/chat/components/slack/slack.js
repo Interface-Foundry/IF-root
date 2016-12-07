@@ -279,8 +279,13 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       if (message.mode === 'shopping' && message.action === 'onboard_cart') {
         let results = yield cart(message, bot.slackbot, false)
+        
+        results = results.reduce((fin, item) => {
+          if (item.text.includes(message.source.user)) fin.push(item);
+          return fin;
+        }, [])
         msgData.attachments = [...message.reply || [], ...results || [], {
-          text: 'That\'s everything! You can always type `help` if you have any problems',
+          text: '*Success!* You can always type `help` if you have any problems',
           mrkdwn_in: ['text'],
           color: '#A368F0'
         }, {
@@ -296,7 +301,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           attachment_type: 'default',
           actions: cardTemplate.slack_shopping_buttons
         }, {
-          'text': '✎ Hint: You can also what you want below (Example: _Macbook Pro Power Cord_)\n✂︎ Or you can just paste an Amazon item address\n*Tip:* Add items directly from Amazon by pasting the URL and sending it to me',
+          'text': '✂︎ Add items directly from Amazon by pasting the URL and sending it to me',
           mrkdwn_in: ['text']
         }];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);

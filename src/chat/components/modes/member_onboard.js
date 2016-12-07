@@ -53,7 +53,7 @@ handlers['step_1'] = function(message) {
     attachment_type: 'default',
     actions: cardTemplate.slack_member_onboard_start
   }, {
-    'text': '✎ Hint: You can also what you want below (Example: _MacBook Pro Power Cord_)\n✂︎ Or you can just paste an Amazon item address',
+    'text': '✎ Hint: You can also what you want below (Example: _MacBook Pro Power Cord_)',
     mrkdwn_in: ['text']
   }];
   return [msg];
@@ -150,7 +150,7 @@ handlers['addcart'] = function*(message, data) {
 //modified version of modes/shopping.js
 handlers['cart'] = function*(message) {
   let attachments = [{
-    text: '*Step 3:* Well done!\n Here\'s what your team\'s cart looks like:',
+    text: '*Step 3:* Well done!\n I\'ve added your item to the team cart',
     mrkdwn_in: ['text'],
     color: '#A368F0'
   }];
@@ -166,7 +166,6 @@ handlers['cart'] = function*(message) {
     reply: attachments
   })
   var cart_reference_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO
-  winston.debug('reply-473: cart_reference_id: ', cart_reference_id)
   res.data = yield kipcart.getCart(cart_reference_id);
   res.data = res.data.toObject();
   if (res.data.items.length < 1) {
