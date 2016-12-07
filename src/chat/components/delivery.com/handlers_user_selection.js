@@ -106,6 +106,21 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     ]
   }
 
+  if(foodSession.onboarding){
+    msg_json.attachments.unshift(
+    // {
+    //   'text': '',
+    //   'fallback': 'Team voting',
+    //   'color': '#A368F0',
+    //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
+    // },
+    {
+      'text':'*Step 5.* Choose who you want to be part of your food order',
+      'color':'#A368F0',
+      'mrkdwn_in': ['text']
+    })
+  }
+
   $replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
 }
 

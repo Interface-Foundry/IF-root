@@ -88,7 +88,6 @@ function * handleMessage (message) {
     yield handlers[route](message)
   } else {
     kip.error('No route handler for ' + route)
-    incoming.ack()
   }
   message.save()
 }
@@ -99,7 +98,8 @@ function * handleMessage (message) {
 function getRoute (message) {
   kip.debug(`prevRoute ${message.prevRoute}`)
   return co(function * () {
-    if (message.text === 'food' || message.text === 'cafe') {
+    // allow people to type food in cuisine selection and it not ruin the order
+    if ((message.text === 'food' || message.text === 'cafe') && (message.action !== 'admin.restaurant.pick')) {
       kip.debug('### User typed in :' + message.text)
       return 'food.begin'
     } else if (handlers[message.text]) {
@@ -133,6 +133,14 @@ handlers['food.null'] = function * (message) {
   // nothing to see here
 }
 
+handlers['food.null.continue'] = function * (message) {
+  var msg_json = {
+    'text': 'Okay we are just going to continue for the time being',
+    'fallback': 'Okay we are just going to continue for the time being'
+  }
+  replyChannel.sendReplace(message, `${message.mode}.${message.action}`, {type: message.origin, data: msg_json})
+}
+
 handlers['food.exit'] = function * (message) {
   var msg_json = {
     'text': "Are you sure you don't want to order food?",
@@ -164,6 +172,8 @@ handlers['food.exit'] = function * (message) {
   }
   replyChannel.send(message, 'food.exit.confirm', {type: message.origin, data: msg_json})
 }
+
+
 
 handlers['food.exit.confirm'] = function * (message) {
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'ok byeee'}})

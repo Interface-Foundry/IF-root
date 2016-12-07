@@ -37,7 +37,6 @@ var slackbotSchema = mongoose.Schema({
       default: false
     },
     office_assistants: [String], // user ids of the office assistants, like U0R6H9BKN
-
     weekly_status_enabled: {
       type: Boolean,
       default: true
@@ -58,14 +57,7 @@ var slackbotSchema = mongoose.Schema({
     city: {
       type: String
     },
-    all_channels: [{
-      id: String,
-      name: String,
-      is_channel: { // if a group its different from a channel
-        type: Boolean,
-        default: true
-      }
-    }],
+    all_channels: [String],
     cart_channels: [String],
     deleted: {
       type: Boolean,
@@ -105,7 +97,8 @@ var slackbotSchema = mongoose.Schema({
         address_zip: String
       }
     }],
-    mock: Boolean
+    mock: Boolean,
+    p2p: Boolean
   },
   // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
   conversaitons: {}

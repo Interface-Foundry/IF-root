@@ -16,12 +16,21 @@ const constants = require('./constants')
 * create pubsub with
 *
 */
-function pubsubVariation (item) {
+function pubsubVariation(item, message, origin = 'facebook') { //default to facebook bc thats all this was used for before
   logging.debug('\n\n\ncreating variation for: ', item.ASIN)
-  queue.publish(
-    'outgoing.facebook',
-    item,
-    item._id + '.variation.' + uuid.v4())
+  if (origin === 'slack') {
+    message.mode = 'item.add'
+    message.reply = item.asins; // we need to keep the rest of the message info so we'll
+    queue.publish(
+      `outgoing.${origin}`,
+      message,
+      message._id + '.variation.' + uuid.v4())
+  } else {
+    queue.publish(
+      `outgoing.${origin}`,
+      item,
+      item._id + '.variation.' + uuid.v4())
+  }
 }
 
 /*
@@ -103,7 +112,7 @@ function * getVariations (asin, message) {
           if (err) throw err
         })
 
-        pubsubVariation(item)
+        pubsubVariation(item,message, message.origin)
         // logging.debug('getting asin stuff for ASIN: ', )
         logging.debug('getting asin stuff for source: ', item.source.source.channel)
       }

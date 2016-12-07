@@ -84,17 +84,55 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
 
     // COUPONS
     if (body.team_id === 'T2X0BLHGX') { // alyx testing team
-      body.order.coupon = 0.5 // in percentage off
-    } else if (body.team_id === 'T02PN3B25') { // kipsearch team
       body.order.coupon = 0.99 // in percentage off
-    } else if (body.team_id === 'T02QUPKHW') { // quibb team
+    } 
+    else if (body.team_id === 'T02PN3B25') { // kipsearch team
+      
       body.order.coupon = 0.99 // in percentage off
-    } else if (body.team_id === 'T1198BQV8') { // message.io team
-      body.order.coupon = 0.5 // in percentage off
-    } else if (body.team_id === 'T3AHPU2N9') { // eden tester
+    } 
+    else if (body.team_id === 'T02QUPKHW') { // quibb team
+      body.order.coupon = 0.99 // in percentage off
+    } 
+    else if (body.team_id === 'T1198BQV8') { // message.io team
+      body.order.coupon = 0.99 // in percentage off
+    } 
+    else if (body.team_id === 'T3AHPU2N9') { // eden tester
+      body.order.coupon = 0.99 // in percentage off
+    }
+    else if (body.team_id === 'T3BCG4CP4') { // woodside friends 
+      body.order.coupon = 0.99 // in percentage off
+    }
+    else if (body.team_id === 'T3AM3RZSL') { // vegan house
       body.order.coupon = 0.99 // in percentage off
     }
 
+    //phase 2
+    else if (body.team_id === 'T3AN3CDJ5') { // Berkshire Inc.
+      body.order.coupon = 0.99 // in percentage off
+    }
+    else if (body.team_id === 'T024F5PNW') { // Betaworks
+      body.order.coupon = 0.99 // in percentage off
+    }
+    else if (body.team_id === 'T2U751DHD') { // Marketing605
+      body.order.coupon = 0.99 // in percentage off
+    }
+    else if (body.team_id === 'T3BCWK9MG') { // Tawa
+      body.order.coupon = 0.99 // in percentage off
+    }
+
+    //check for order over $510 (pre coupon)
+    if (body.order.coupon == 0.99){
+      //not processing over $510 (pre coupon)
+      if (body.order.total > 51000){
+        var v = {
+          msg: 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions',
+          newAcct: false,
+          processing: false
+        }
+        res.status(500).send(v)
+        return
+      }
+    }
 
     // new payment
     var payment = new Payment({
@@ -187,7 +225,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
       logging.info(`creating new customer and charge for, ${token}`)
       var customer = yield stripe.customers.create({
         source: token,
-        description: 'Delivery.com & Kip: ' + payment.order.chosen_restaurant.name
+        description: 'Delivery.com & Kip: ' + payment.order.team_id
       })
 
       // check for coupon
@@ -376,9 +414,27 @@ function * onSuccess (payment) {
         {
           type: finalFoodMessage.origin,
           data: {
-            text: `Your order of ${foodString} is on the way 😊`
+            text: `Your order of ${foodString} is on the way 😊`,
+             attachments: [{
+              image_url: "http://tidepools.co/kip/kip_menu.png",
+              text: 'Click a mode to start using Kip',
+              color: '#3AA3E3',
+              callback_id: 'wow such home',
+              actions: [{
+                name: 'passthrough',
+                value: 'food',
+                text: 'Kip Café',
+                type: 'button'
+              },{
+                name: 'passthrough',
+                value: 'shopping',
+                text: 'Kip Store',
+                type: 'button'
+              }]
+            }]
           }
         })
+
     })
     var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
