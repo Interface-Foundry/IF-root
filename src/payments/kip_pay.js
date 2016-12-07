@@ -120,10 +120,10 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
       body.order.coupon = 0.99 // in percentage off
     }
 
-    //check for order over $600
+    //check for order over $1k (pre coupon)
     if (body.order.coupon == 0.99){
-      //not processing over $600!!
-      if (body.order.total > 60000){
+      //not processing over $1k (pre coupon)
+      if (body.order.total > 100000){
         var v = {
           msg: 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions',
           newAcct: false,
