@@ -1,4 +1,3 @@
-require('kip')
 var co = require('co')
 var _ = require('lodash')
 var parse_address = require('parse-address');

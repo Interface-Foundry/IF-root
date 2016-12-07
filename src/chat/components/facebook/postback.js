@@ -1,7 +1,5 @@
 var co = require('co')
-var kip = require('kip')
 var queue = require('../queue-mongo')
-var db = require('../../../db')
 var _ = require('lodash')
 var request = require('request')
 var async = require('async')

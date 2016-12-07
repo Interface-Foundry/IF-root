@@ -1,4 +1,3 @@
-require('kip')
 var _ = require('lodash')
 var co = require('co')
 var fs = require('fs')

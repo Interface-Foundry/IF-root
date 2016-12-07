@@ -1,5 +1,4 @@
 /*eslint-env es6*/
-require('kip')
 
 var promisify = require('promisify-node')
 var co = require('co')
