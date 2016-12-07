@@ -277,9 +277,51 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     return foodSession.save()
   }
 
+  // user is typing food or another category but fuck voter fraud
+  if (_.includes(_.map(foodSession.votes, 'user'), message.source.user)) {
+    if (message.text === 'food') {
+      var exitEarlyMessage = {
+        'text': 'you typed food, but we are choosing a cuisine so thats ambiguous',
+        'fallback': 'Any preferences?',
+        'callback_id': 'confirm.confirm.exit',
+        'attachment_type': 'default',
+        'attachments': [{
+          'text': '',
+          'fallback': 'Want to exit the kip Cafe?',
+          'callback_id': 'food.admin.restaurant.pick',
+          'attachment_type': 'default',
+          'actions': [{
+            'name': 'passthrough',
+            'value': 'food.begin',
+            'text': 'Restart Order',
+            'style': 'danger',
+            'type': 'button'
+          }, {
+            'name': 'passthrough',
+            'value': 'food.null.remove',
+            'text': '× Cancel',
+            'type': 'button'
+          }]
+        }]
+      }
+      return yield $replyChannel.send(message, 'food.begin', {
+        type: message.origin,
+        data: exitEarlyMessage
+      })
+    } else {
+      return yield $replyChannel.send(message, 'food.admin.restaurant.pick', {
+        type: message.origin,
+        data: { text: 'One user one vote, chill the hell out' }
+      })
+    }
+  }
+
   if (message.allow_text_matching) {
     // user typed something
     logging.info('using text matching for cuisine choice')
+
+    // if user has already voted and types something again
+
     var res = yield utils.matchText(message.text, foodSession.cuisines, {
       shouldSort: true,
       threshold: 0.4,
