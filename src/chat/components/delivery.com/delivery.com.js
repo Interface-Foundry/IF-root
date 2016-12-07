@@ -88,7 +88,6 @@ function * handleMessage (message) {
     yield handlers[route](message)
   } else {
     kip.error('No route handler for ' + route)
-    incoming.ack()
   }
   message.save()
 }

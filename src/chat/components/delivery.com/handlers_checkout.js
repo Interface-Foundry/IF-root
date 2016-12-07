@@ -548,6 +548,10 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
   yield handlers['food.done'](message)
 }
 
+handlers['food.payment_info'] = function * (message) {
+  logging.info('recevied message from pay server')
+}
+
 handlers['food.done'] = function * (message) {
   logging.error('saving users info to slackbots and peripheral cleanup')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
