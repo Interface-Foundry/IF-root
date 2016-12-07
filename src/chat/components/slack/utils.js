@@ -285,7 +285,7 @@ function * showMenu(message) {
 function * hideMenu(message, original, expandable, data) {
   if (!_.get(message,'data.value')) return
     var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel, 'menus.id': message.data.value})
-    var actions = _.get(relevantMessage, 'menus.original[0].data') ? _.get(relevantMessage, 'menus.original[0].data') : cardTemplate.shopping_home_default(message._id);
+    var actions = _.get(relevantMessage, 'menus.original[0].data') ? _.get(relevantMessage, 'menus.original[0].data') : yield generateMenuButtons(message);
     var json =  message.source.original_message;
     var text =  _.get(relevantMessage,'data.text') ?  _.get(relevantMessage,'data.text') : ''
     var color =  _.get(relevantMessage,'data.color') ?  _.get(relevantMessage,'data.color') : ''
@@ -501,7 +501,7 @@ function * showLoading(message) {
   // return message;
 }
 
-function * replaceLoading(message, response) {
+function * hideLoading(message, response) {
   var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel, 'data.loading': true}).sort('_id').exec();
   kip.debug(' \n\n\n\n\n\n\n\n\n\n  👳/slack/utils.js:372:replaceLoading', relevantMessage, response,'  \n\n\n\n\n\n\n\n\n\n');
   request({
@@ -532,5 +532,7 @@ module.exports = {
   addViaAsin: addViaAsin,
   getAllChannels: getAllChannels,
   isAdmin: isAdmin,
-  generateMenuButtons: generateMenuButtons
+  generateMenuButtons: generateMenuButtons,
+  showLoading: showLoading,
+  hideLoading: hideLoading
 }
