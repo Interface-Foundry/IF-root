@@ -16,5 +16,5 @@ slack:
    # "17713782326.83486971505"
   client_secret: 6b0a6fb9215c0c28991648ac2232983c
   verification_token: rF1BCPsHSBpLyw80aQ7FCGhN
-  redirect_uri: https://ade2f2eb.ngrok.io/newslack
+  redirect_uri: https://a6432a94.ngrok.io/newslack
   

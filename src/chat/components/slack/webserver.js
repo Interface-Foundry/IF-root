@@ -43,7 +43,6 @@ app.use(bodyParser.json());
 
  */
 function simple_action_handler (action) {
-  // kip.debug('\nwebserver.js line 28 simple_action_handler action: ', action, '\n\n\n')
   switch (action.name) {
     case 'addcart':
       return 'save ' + action.value
@@ -150,7 +149,7 @@ app.post('/slackaction', next(function * (req, res) {
           })
       }
       else if (simple_command == 'loading_btn') {
-        kip.debug('🛒 LOADING THAT CART 🛒')
+      	// responding with nothing means the button does nothing!
         res.send();
         return;
       }

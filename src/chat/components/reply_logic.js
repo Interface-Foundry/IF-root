@@ -463,7 +463,6 @@ queue.topic('incoming').subscribe(incoming => {
           replies = yield execute(message)
         } else if (message.text === 'shopping' || (message.execute && message.execute.length >= 1) || 
           (message.action === 'switch' && (message.text === 'shopping' || !message.text))) {
-          kip.debug(`SKIPPING NLP: \n ${message}`);
           message.mode = 'shopping'
           message.action = 'initial'
           message.execute.push({

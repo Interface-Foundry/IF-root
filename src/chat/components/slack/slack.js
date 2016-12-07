@@ -265,12 +265,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       if (message.mode === 'onboard' && message.action === 'home') {
         msgData.attachments = message.reply;
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
-
-        // return bot.web.chat.postMessage(message.source.channel, message.text, msgData, (e, r) => {
-        //   // set the slack_ts from their server so we can update/delete specific messages
-        //   //db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
-        //   kip.debug('🐢',r.response_url)
-        // })
       }
 
        if (message.mode === 'onboarding') {

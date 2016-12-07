@@ -36,7 +36,6 @@ handlers['step_1'] = function(message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  kip.debug(`\n\n\n\n\n\n\n\n message is: \n ${message} \n\n\n\n\n\n\n\n`);
   var msg = message;
   msg.mode = 'member_onboard';
   msg.action = 'home';
@@ -151,7 +150,6 @@ handlers['addcart'] = function*(message, data) {
 
 //modified version of modes/shopping.js
 handlers['cart'] = function*(message) {
-  kip.debug('member_onboard.viewcart');
   let attachments = [{
     text: '*Step 3:* Well done!\n Here\'s what your team\'s cart looks like:',
     mrkdwn_in: ['text'],
@@ -175,7 +173,6 @@ handlers['cart'] = function*(message) {
   if (res.data.items.length < 1) {
     return text_reply(message, 'It looks like your cart is empty');
   }
-  kip.debug('view cart message', res);
   return [res];
 }
 
@@ -305,7 +302,6 @@ handlers['reminder_confirm'] = function*(message, data) {
  * catcher
  */
 handlers['sorry'] = function(message) {
-  // kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
   if(message.text.includes('amazon.com')){
   	return; //ignore times people paste stuff in
   }
@@ -401,7 +397,6 @@ const createCronJob = function(people, msg, team, date) {
 
 function* publish(message) {
   yield message.save();
-  kip.debug('\n\n\n\n\n\n\n\n\n\n onboard:967:publish: ', message, '\n\n\n\n\n\n\n\n\n\n')
   queue.publish('outgoing.' + message.origin, message, message._id + '.reply.update');
 }
 
