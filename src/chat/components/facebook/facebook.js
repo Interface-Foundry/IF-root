@@ -56,11 +56,10 @@
 // █████┼┼┼┼┼┼████┼┼┼┼┼┼┼
 // ██┼┼┼┼┼┼┼┼┼┼┼██┼┼┼┼┼┼┼
 
-require('kip')
+require('../../../kip')
 
 var co = require('co')
 var queue = require('../queue-mongo')
-var db = require('../../../db')
 var _ = require('lodash')
 var http = require('http')
 var request = require('request')

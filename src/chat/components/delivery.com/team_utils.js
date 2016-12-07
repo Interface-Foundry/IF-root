@@ -1,7 +1,5 @@
-var db = require('db');
 var request = require('request-promise');
 var co = require('co');
-var kip = require('kip');
 var async = require('async');
 
 function * removeCartChannel(message, channel_name) {

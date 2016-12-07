@@ -1,5 +1,4 @@
 'use strict'
-require('kip')
 var _ = require('lodash')
 
 var sleep = require('co-sleep')

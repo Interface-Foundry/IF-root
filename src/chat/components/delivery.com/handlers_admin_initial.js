@@ -1,4 +1,3 @@
-require('kip')
 var sleep = require('co-sleep')
 var _ = require('lodash')
 

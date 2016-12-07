@@ -1,4 +1,3 @@
-require('kip')
 
 // I'm sorry i couldn't understand that
 function default_reply (message) {

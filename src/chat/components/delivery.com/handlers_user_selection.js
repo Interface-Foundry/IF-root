@@ -1,4 +1,3 @@
-require('kip')
 var request = require('request-promise')
 var _ = require('lodash')
 

@@ -1,8 +1,6 @@
-var db = require('db');
 var request = require('request-promise');
 var co = require('co');
 var _ = require('lodash');
-var kip = require('kip');
 var async = require('async');
 var eachSeries = require('async-co/eachSeries');
 var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client')

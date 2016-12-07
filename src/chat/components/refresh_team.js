@@ -1,4 +1,3 @@
-require('kip')
 var co = require('co');
 var request = require('request-promise');
 require('promisify-global');

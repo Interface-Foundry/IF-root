@@ -1,4 +1,3 @@
-require('kip')
 var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
