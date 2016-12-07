@@ -7,17 +7,13 @@ var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
-// var team;
-// var teamMembers;
-// var admins;
-// var currentUser;
-// var isAdmin;
+
 var cron = require('cron');
 //maybe can make this persistent later?
 var cronJobs = {};
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
-  if (!last_action || last_action.indexOf('home') == -1) {
+  if (!last_action || last_action != 'home') {
     return yield handlers['start'](message)
   } else {
     var action = getAction(message.text);
@@ -28,7 +24,7 @@ function * handle(message) {
  
 module.exports.handle = handle;
 
-/**
+/*
  * Show the user all the settings they have access to
  */
 handlers['start'] = function * (message) { 
@@ -102,13 +98,16 @@ handlers['start'] = function * (message) {
       attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'});
     }
   };
-
+  var original = cardTemplate.shopping_settings_default(message._id);
+  var expandable = yield utils.generateMenuButtons(message)
+  var text = 'Don’t have any changes? Type `exit` to quit settings';
+  var color = '#45a5f4';
   attachments.push({
-      text: 'Don’t have any changes? Type `exit` to quit settings',
-      color: '#49d63a',
+      text: text,
+      color: color,
       mrkdwn_in: ['text'],
       fallback:'Settings',
-      actions: cardTemplate.slack_settings_default,
+      actions: original,
       callback_id: 'none'
     })
     // console.log('SETTINGS ATTACHMENTS ',attachments);
@@ -117,8 +116,10 @@ handlers['start'] = function * (message) {
       a.mrkdwn_in =  ['text'];
       a.color = '#45a5f4';
     })
-
    var msg = message;
+   kip.debug(`Searching for back button SETTINGS:BEFORE_CACHE ${JSON.stringify(expandable, null, 2)}`)
+   yield utils.cacheMenu(msg, original, expandable,  {text: text, color: color})
+   kip.debug(`Searching for back button SETTINGS:AFTER CACHE ${JSON.stringify(expandable, null, 2)}`)
    msg.mode = 'settings'
    msg.text = ''
    msg.source.team = team_id;
@@ -185,6 +186,8 @@ handlers['change_status'] = function * (message) {
     hour = hour - 12;
     am_pm = 'PM';
   }
+  if (hour.toString().indexOf(':') > -1) hour = parseInt(hour.replace(':',''));
+  if (minutes.toString().indexOf(':') > -1) minutes = parseInt(minutes.replace(':',''));
   am_pm = am_pm.toUpperCase().trim();
   team.meta.weekly_status_day = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
   team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-2) + ' ' + am_pm;
@@ -256,14 +259,7 @@ handlers['add_or_remove'] = function * (message) {
                 "style": "primary",
                 "type": "button",
                 "value": "exit"
-              },              
-              // {
-              //   "name": "help",
-              //   "text": "Help",
-              //   "style": "default",
-              //   "type": "button",
-              //   "value": "help"
-              // },              
+              },                           
               {
                 "name": "team",
                 "text": "Team Members",
@@ -277,14 +273,7 @@ handlers['add_or_remove'] = function * (message) {
                 "style": "default",
                 "type": "button",
                 "value": "viewcart"
-              },
-              // {
-              //   "name": "home",
-              //   "text": "🐧",
-              //   "style": "default",
-              //   "type": "button",
-              //   "value": "home"
-              // }
+              }
           ],
           callback_id: 'none'
         });
@@ -303,6 +292,11 @@ handlers['add_or_remove'] = function * (message) {
     }
     var shouldReturn = false;
     if (tokens[0] === 'add') {
+      if(team.meta.p2p) {
+         team.meta.p2p = false;
+         kip.debug('P2P mode OFF');
+         team.meta.office_assistants = [];
+      }
       userIds.map((id) => {
         if (team.meta.office_assistants.indexOf(id) < 0) {
           team.meta.office_assistants.push(id);

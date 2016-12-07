@@ -65,7 +65,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
     // please do not remove changes below. it is required for fb to work.
     if (type == 'personal') {
       cart = yield getCart(slack_id, type)
-    }else {
+    } else {
       var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec()
       if (team_carts.length === 1) {
         var cart = team_carts[0]
@@ -107,14 +107,13 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
     var mediumImage = _.get(item, 'MediumImage[0].URL[0]')
     var largeImage = _.get(item, 'LargeImage[0].URL[0]')
     var altImage = item.altImage
-    var image
+    var image;
     // http://images-na.ssl-images-amazon.com/images/I/61WRcLLvdpL._SL1100_.jpg
     if (smallImage.indexOf('images-na.ssl-images-amazon.com') > -1 || mediumImage.indexOf('images-na.ssl-images-amazon.com') > -1) {
       image = 'http://kipthis.com/images/kip_head.png'
     }else {
       image = item.altImage || _.get(item, 'SmallImage[0].URL[0]')
     }
-
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
@@ -129,11 +128,9 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
       slack_id: slack_id,
       source_json: JSON.stringify(item)
     })).save()
-
     console.log('adding item ' + i._id + ' to cart ' + cart._id)
     cart.items.push(i._id)
     yield cart.save()
-
     console.log('calling getCart again to rebuild amazon cart')
     try {
       yield getCart(slack_id)
@@ -157,7 +154,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
 module.exports.emptyCart = function (cart_id) {
   return co(function * () {
     var cart = yield db.Carts.findOne({'slack_id': cart_id}).exec()
-    console.log('firing emptyCart: cart_id: ', cart_id, ' cart: ', cart)
+    if (!cart || cart == null) return null
     async.eachSeries(cart.items, function iterator (id, callback) {
       db.Item.findById(id).then(function (err, item) {
         if (item) {
@@ -248,9 +245,10 @@ module.exports.removeFromCart = function (slack_id, user_id, number, type) {
   return co(function * () {
     var cart = yield getCart(slack_id)
     // please do not remove changes below. it is required for fb to work.
+
     if (type == 'team') {
       var team = yield db.slackbots.findOne({team_id: slack_id})
-      var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0
+      var userIsAdmin = team.meta.office_assistants.includes(user_id)
     }
 
     // need to watch out for items that have multiple quantities
@@ -272,9 +270,9 @@ module.exports.removeFromCart = function (slack_id, user_id, number, type) {
 
     // if no items matching the user_id were found, an admin can still remove any item
     matching_items = cart.items.filter(function (i) {
-      return i.ASIN === ASIN_to_remove
+      return i.ASIN === ASIN_to_remove && userIsAdmin
     })
-
+    
     return module.exports.removeFromCartByItem(matching_items.pop())
   })
 }
@@ -432,7 +430,7 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
         i.purchased = true
         i.purchased_date = cart.purchased_date
         return i.save()
-      })
+      });
 
       kip.debug('creating a new cart for ' + slack_id)
       cart = new db.Cart({
@@ -451,7 +449,7 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
         kip.err('ERR: Amazon item is not eligible to be added to the cart')
         // cart.amazon = amazonCart
 
-        kip.debug('# cart ', cart)
+        kip.debug('# cart ', cart);
         // console.log('# amz ',cart.amazon)
 
         // cart.link =
@@ -518,7 +516,7 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
       })
       timer('cleared')
 
-      yield sleep(8) // prevent amazon throttle
+
 
       timer('rebuilding cart ' + cart.amazon.CartId)
       console.log('rebuilding cart')

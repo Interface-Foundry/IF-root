@@ -25,6 +25,9 @@ var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 var queue = require('./queue-mongo');
 var onboarding = require('./modes/onboarding');
+var onboard = require('./modes/onboard');
+var member_onboard = require('./modes/member_onboard');
+
 var settings = require('./modes/settings');
 var team = require('./modes/team');
 var shopping = require('./modes/shopping').handlers;
@@ -32,6 +35,9 @@ var food = require('./delivery.com/delivery.com').handleMessage;
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
+var slackUtils = require('./slack/utils');
+var amazon_variety = require('./amazon_variety');
+var card_templates = require('./slack/card_templates.js');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
@@ -77,39 +83,47 @@ function typing (message) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
-function simplehome (message) {
-  // var slackreply = {
-  //   mrkdwn_in: ['text'],
-  //   text: '*Hi! Thanks for using Kip* 😊',
-  // }
+function * simplehome (message) {
 
   var slackreply = {
     text: '*Hi! Thanks for using Kip* 😊',
     attachments: [{
+      image_url: "http://tidepools.co/kip/kip_menu.png",
       text: 'Click a mode to start using Kip',
       color: '#3AA3E3',
       callback_id: 'wow such home',
       actions: [{
         name: 'passthrough',
-        value: 'shopping',
-        text: 'Shopping Mode',
-        type: 'button'
-      }, {
-        name: 'passthrough',
         value: 'food',
-        text: 'Food Mode',
+        text: 'Kip Café',
+        type: 'button'
+      },{
+        name: 'passthrough',
+        value: 'shopping',
+        text: 'Kip Store',
         type: 'button'
       }]
     }]
     // mrkdwn_in: ['text']
   }
 
+
+  let team = yield db.Slackbots.findOne({
+    'team_id': message.source.team
+  }).exec();
+  let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+  let allow = isAdmin || team.meta.office_assistants == 0;
+
+  slackreply.attachments = allow ? slackreply.attachments : card_templates.slack_shopping_mode;
+
   var msg = {
-    action: 'simplehome',
-    mode: 'food',
+    action: allow ? 'simplehome' : 'switch',
+    mode: allow ? 'food' : 'shopping',
     source: message.source,
     origin: message.origin,
-    reply: {data: slackreply}
+    reply: {
+      data: slackreply
+    }
   }
 
   queue.publish('outgoing.' + message.origin, msg, 'home.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
@@ -128,11 +142,63 @@ function isCancelIntent(message) {
   return cancelPhrases.indexOf(text) >= 0
 }
 
+function isMenuChange(message) {
+  return _.get(message,'action') && (_.get(message,'action').indexOf('home.expand') > -1 || _.get(message,'action').indexOf('home.detract') > -1)
+}
+
+function isLoading(message) {
+  return (_.get(message,'action') && (_.get(message,'action').indexOf('home.loading') > -1))
+}
+
+//NOT WORKING
+
+//https://www.amazon.com/gp/product/B01E7QPPWK/ref=br_asw_pdt-3?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=AP76KCMKGEN673ZV8SPX&pf_rd_t=36701&pf_rd_p=3a087c6c-220d-4990-9d91-10b580e4cb73&pf_rd_i=desktop
+//B01E7QPPWK
+
+//WORKING
+
+//https://www.amazon.com/gp/product/B01E8O2K0Q/ref=br_asw_pdt-3?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=AP76KCMKGEN673ZV8SPX&pf_rd_t=36701&pf_rd_p=3a087c6c-220d-4990-9d91-10b580e4cb73&pf_rd_i=desktop&th=1&psc=1
+// B01E8O2K0Q
+
+
+
+function * processProductLink(message) {
+  var text = message.text ? message.text.toLowerCase() : '';
+  if (text.indexOf('www.amazon.com') > -1 ) {
+    if (text.indexOf('/dp/') > -1) {
+      var asin = text.substr(text.indexOf('/dp/')+4, 10);
+    } else if (text.indexOf('/gp/') > -1) {
+      var asin = text.substr(text.indexOf('/gp/')+12, 10);
+    }
+  }
+  if (asin) {
+    var fail = false;
+    try {
+      yield slackUtils.addViaAsin(asin, message);
+    } catch (err) {
+        fail = true;
+      yield amazon_variety.getVariations(asin, message);
+    }
+    if (!fail) {
+      message.text = 'view cart';
+      message.mode = 'shopping';
+      message.action = 'initial';
+      yield message.save();
+    }
+  }
+}
+
 function switchMode(message) {
   var input = message.text ? message.text.toLowerCase().trim() : '';
   var modes = {
     'onboarding': function () {
       return 'onboarding';
+    },
+    'onboard': function () {
+      return 'onboard';
+    },
+    'member_onboard': function () {
+      return 'member_onboard'
     },
     'shopping': function () {
       return 'shopping';
@@ -146,6 +212,9 @@ function switchMode(message) {
     'food': function () {
       return 'food';
     },
+    'cafe': function () {
+      return 'food';
+    },
     'address': function () {
       return 'address';
     },
@@ -154,22 +223,28 @@ function switchMode(message) {
     }
   };
   var mode = (modes[input] || modes['default'])();
-  if (!mode) return false
   return mode
 }
 
 function printMode(message) {
   switch (message.mode) {
+    case 'shopping_button':
     case 'shopping':
       winston.debug('In', 'SHOPPING'.rainbow, 'mode 👚👖👗👝👛👜🏬🏪💳🛍')
       break
     case 'onboarding':
       winston.debug('In', 'ONBOARDING'.green, 'mode 👋')
       break
-     case 'team':
+    case 'onboard':
+      winston.debug('In', 'ONBOARD'.cyan, 'mode 👋')
+      break
+    case 'member_onboard':
+      winston.debug('In', 'MEMBER_ONBOARD'.cyan, 'mode 👋')
+      break
+    case 'team':
       winston.debug('In', 'TEAM'.yellow, 'mode 👋')
       break
-     case 'settings':
+    case 'settings':
       winston.debug('In', 'SETTINGS'.red, 'mode 👋')
       break
     case 'food':
@@ -197,15 +272,12 @@ queue.topic('incoming').subscribe(incoming => {
     } else if (_.get(incoming, 'data.data.value')) {
       console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
     }
-
     var timer = new kip.SavedTimer('message.timer', incoming.data)
-
     // skipping histoy and stuff rn b/c i dont have time to do it
     if (_.get(incoming, 'data.action') == 'item.add') {
-      var selected_data = incoming.data.postback.selected_data
-
-      var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data)
-      var results = yield amazon_search.lookup(results, results.origin)
+      var selected_data = incoming.data.postback.selected_data;
+      var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data);
+      var results = yield amazon_search.lookup(results, results.origin);
 
       logging.debug('taking first item from results')
       var results = results[0]
@@ -256,9 +328,9 @@ queue.topic('incoming').subscribe(incoming => {
       kip.debug('setting mode to prevmode', message.prevMode)
       message.mode = message.prevMode
     }
-    if (!message.action) {
-      kip.debug('setting mode to prevaction', message.prevAction)
-      message.action = message.prevAction
+    if (!message.action && message.prevAction) {
+      message.action = message.prevAction.match(/(expand|detract)/) ?  'initial' : message.prevAction;
+      kip.debug('setting mode to prevaction', message.action)
     }
 
     timer.tic('got history')
@@ -271,15 +343,39 @@ queue.topic('incoming').subscribe(incoming => {
     if (isCancelIntent(message)) {
       message.mode = 'shopping';
       message.action = 'switch'
-      return simplehome(message)
+      yield simplehome(message)
       yield message.save();
       timer.stop();
       return
     }
 
+    if (isMenuChange(message)) { 
+      timer.stop();
+      incoming.ack()
+      return yield shopping[_.get(message,'action')](message);
+    }
+
+     if (isLoading(message)) { 
+      timer.stop();
+      incoming.ack()
+      return yield shopping['home.loading'](message);
+    }
+
+    yield processProductLink(message);
+
     if (switchMode(message)) {
       message.mode = switchMode(message);
-      if (message.mode.match(/(settings|team)/)) message.action = 'home';
+      if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
+      if (message.mode.match(/(onboard|food|team)/)) {
+        let team = yield db.Slackbots.findOne({
+          'team_id': message.source.team
+        }).exec();
+        let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+        let allow = isAdmin || team.meta.office_assistants == 0;
+        if (!allow) {
+          message.mode = 'shopping'
+        }
+      }
       yield message.save();
     }
 
@@ -297,10 +393,10 @@ queue.topic('incoming').subscribe(incoming => {
     debugger;
 
     //MODE SWITCHER
-    switch(message.mode) {
+    switch (message.mode) {
       case 'onboarding':
         if (message.origin === 'slack') {
-          var replies = yield onboarding.handle(message)
+          var replies = yield onboarding.handle(message);
         } else {
           // facebook
           //check for valid country
@@ -308,7 +404,6 @@ queue.topic('incoming').subscribe(incoming => {
           if (text == 'Singapore' || text == 'United States') {
             winston.debug('SAVING TO DB')
             replies = ['Saved country!'];
-
             //access onboard template per source origin!!!!
             modes[user.id] = 'shopping';
           } else {
@@ -316,52 +411,85 @@ queue.topic('incoming').subscribe(incoming => {
             winston.debug('Didnt understand, please choose a country thx')
           }
         }
-      break;
-     case 'settings':
-        var replies = yield settings.handle(message);
         break;
-     case 'team':
-        var replies = yield team.handle(message);
+      case 'onboard':
+        if (message.origin === 'slack') {
+          var replies = yield onboard.handle(message)
+        }
         break;
-    case 'food':
-    case 'cafe':
+      case 'member_onboard':
+        if (message.origin === 'slack') {
+          var replies = yield member_onboard.handle(message)
+        }
+        break;
+      case 'settings':
+        if (message.origin === 'slack') {
+          var replies = yield settings.handle(message);
+          kip.debug(`Searching for back button REPLY_LOGIC ${JSON.stringify(replies, null, 2)}`)
+        }
+        break;
+      case 'search_btn':
+        if (message.origin === 'slack') {
+          var data = _.split(message.data.value, '.');
+          var action = data[0];
+          data.splice(0, 1);
+          var replies = yield shopping[message.mode](message, data);
+        }
+        break;
+      case 'team':
+        if (message.origin === 'slack') {
+          var replies = yield team.handle(message);
+        }
+        break;
+      case 'food':
+      case 'cafe':
         yield food(message)
         return incoming.ack()
-     case 'address':
+      case 'address':
         return
         break;
-    default:
+      default:
         logging.debug('DEFAULT SHOPPING MODE')
         // try for simple reply
         timer.tic('getting simple response')
         var replies = yield simple_response(message)
         timer.tic('got simple response')
-        kip.debug('simple replies'.cyan, replies)
+      kip.debug('simple replies'.cyan, replies)
         // not a simple reply, do NLP
-        if (!replies || replies.length === 0) {
-          timer.tic('getting nlp response')
-          logging.info('👽 passing to nlp: ', message.text)
-          if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
-            replies = yield execute(message)
-          } else {
-            replies = yield nlp_response(message)
-            kip.debug('+++ NLPRESPONSE ' + replies)
-          }
-          timer.tic('got nlp response')
-          kip.debug('nlp replies'.cyan,
-            replies.map(function * (r) {
-              return {
-                text: r.text,
-                execute: r.execute
-              }
-            }))
+      if (!replies || replies.length === 0) {
+        timer.tic('getting nlp response')
+        logging.info('👽 passing to nlp: ', message.text)
+        if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
+          replies = yield execute(message)
+        } else if (message.text === 'shopping' || (message.execute && message.execute.length >= 1) || 
+          (message.action === 'switch' && (message.text === 'shopping' || !message.text))) {
+          message.mode = 'shopping'
+          message.action = 'initial'
+          message.execute.push({
+            mode: 'shopping',
+            action: 'initial'
+          });
+          replies = yield execute(message);
+        } else {
+          kip.debug(`PRENLP message: \n ${JSON.stringify(message, null, 2)}`)
+          replies = yield nlp_response(message)
+          kip.debug('+++ NLPRESPONSE ' + replies)
         }
-        if (!replies || replies.length === 0) {
-          kip.error('Could not understand message ' + message._id)
-          replies = [default_reply(message)]
-        }
+        timer.tic('got nlp response')
+        kip.debug('nlp replies'.cyan,
+          replies.map(function*(r) {
+            return {
+              text: r.text,
+              execute: r.execute
+            }
+          }))
+      }
+      if (!replies || replies.length === 0) {
+        kip.error('Could not understand message ' + message._id)
+        replies = [default_reply(message)]
+      }
     }
-    kip.debug('num replies', replies.length)
+    if (replies) kip.debug('num replies', replies.length)
     timer.tic('saving message', message)
     yield message.save(); // the incoming message has had some stuff added to it :)
     timer.tic('done saving message', message)
@@ -371,7 +499,7 @@ queue.topic('incoming').subscribe(incoming => {
         try {
           r.save()
         } catch(err) {
-        logging.debug('could not save ' + r, err)
+          logging.debug('could not save ' + r, err)
         }
       } else {
         logging.debug('reply_logic:316:r does not exist ' + r)
@@ -395,13 +523,16 @@ function * simple_response (message) {
 
   // check for canned responses/actions before routing to NLP
   // this adds mode and action to the message
-  var reply = banter.checkForCanned(message)
+  if (message.text) {
+    var reply =  banter.checkForCanned(message)
+  } else {
+    message.text = '';
+    var reply =  banter.checkForCanned(message)
+  }
 
   kip.debug('prefab reply from banter.js', reply)
 
-  if (!reply.flag) {
-    return
-  }
+
 
   switch (reply.flag) {
     case 'basic': // just respond, no actions
@@ -536,7 +667,7 @@ function * nlp_response (message) {
 
 // do the things
 function execute (message) {
-  // kip.debug('exec', message.execute)
+  kip.debug('exec', message.execute)
   return co(function * () {
     message._timer.tic('getting messages')
     var messages = yield message.execute.reduce((messages, exec) => {
@@ -568,6 +699,7 @@ function execute (message) {
     return replies
   })
 }
+
 
 ;`
 LIFE OF  NEKO

@@ -2,6 +2,8 @@ require('kip')
 var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
+var sleep = require('co-sleep');
+
 
 // injected dependencies
 var $replyChannel
@@ -504,6 +506,8 @@ handlers['food.admin.order.select_card'] = function * (message) {
       'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
+    sleep(5000);
+
   } catch (e) {
     logging.error('error doing kip pay in food.admin.order.select_card', e)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kip pay'}})
@@ -563,6 +567,7 @@ handlers['food.done'] = function * (message) {
     slackbot.meta.locations.push(foodSession.chosen_location)
   }
   yield slackbot.save()
+
 }
 
 module.exports = function (replyChannel, allHandlers) {

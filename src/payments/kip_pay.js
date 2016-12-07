@@ -414,9 +414,27 @@ function * onSuccess (payment) {
         {
           type: finalFoodMessage.origin,
           data: {
-            text: `Your order of ${foodString} is on the way 😊`
+            text: `Your order of ${foodString} is on the way 😊`,
+             attachments: [{
+              image_url: "http://tidepools.co/kip/kip_menu.png",
+              text: 'Click a mode to start using Kip',
+              color: '#3AA3E3',
+              callback_id: 'wow such home',
+              actions: [{
+                name: 'passthrough',
+                value: 'food',
+                text: 'Kip Café',
+                type: 'button'
+              },{
+                name: 'passthrough',
+                value: 'shopping',
+                text: 'Kip Store',
+                type: 'button'
+              }]
+            }]
           }
         })
+
     })
     var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
