@@ -216,65 +216,65 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   value: "exit"
 }];
 
-var slack_reminder = module.exports.slack_reminder = [{
-  name: "onboard.start.confirm_reminder",
+var cart_reminder = module.exports.cart_reminder = [{
+  name: "onboard.start.confirm_cart_reminder",
   text: "Today",
   style: "default",
   type: "button",
-  value: "confirm_reminder.today"
+  value: "confirm_cart_reminder.today"
 }, {
-  name: "onboard.start.confirm_reminder",
+  name: "onboard.start.confirm_cart_reminder",
   text: "Tomorrow",
   style: "default",
   type: "button",
-  value: "confirm_reminder.tomorrow"
+  value: "confirm_cart_reminder.tomorrow"
 }, {
-  name: "onboard.start.confirm_reminder",
+  name: "onboard.start.confirm_cart_reminder",
   text: "1 Week",
   style: "default",
   type: "button",
-  value: "confirm_reminder.one_week"
+  value: "confirm_cart_reminder.one_week"
 }, {
-  name: "onboard.start.confirm_reminder",
+  name: "onboard.start.confirm_cart_reminder",
   text: "1 Month",
   style: "default",
   type: "button",
-  value: "confirm_reminder.one_month"
+  value: "confirm_cart_reminder.one_month"
 }, {
-  name: "onboard.start.confirm_reminder",
+  name: "onboard.start.confirm_cart_reminder",
   text: "Never",
   style: "default",
   type: "button",
-  value: "confirm_reminder.never"
+  value: "confirm_cart_reminder.never"
 }];
 
-var slack_remind = module.exports.slack_remind = [{
-  name: "onboard.start.confirm_remind",
+var admin_reminder = module.exports.admin_reminder = [{
+  name: "onboard.start.confirm_admin_reminder",
   text: "Today",
   style: "default",
   type: "button",
-  value: "confirm_remind.today"
+  value: "confirm_admin_reminder.today"
 }, {
-  name: "onboard.start.confirm_remind",
+  name: "onboard.start.confirm_admin_reminder",
   text: "Tomorrow",
   style: "default",
   type: "button",
-  value: "confirm_remind.tomorrow"
+  value: "confirm_admin_reminder.tomorrow"
 }, {
-  name: "onboard.start.confirm_remind",
+  name: "onboard.start.confirm_admin_reminder",
   text: "1 Week",
   style: "default",
   type: "button",
-  value: "confirm_remind.one_week"
+  value: "confirm_admin_reminder.one_week"
 }, {
   name: "onboard.start.choose",
   text: "Choose for me",
   style: "default",
   type: "button",
-  value: "confirm_remind.choose"
+  value: "confirm_admin_reminder.choose"
 }];
 
-var slack_member_remind = module.exports.slack_member_remind = [{
+var member_reminder = module.exports.member_reminder = [{
   name: "onboard_shopping.start.reminder_confirm",
   text: "Today",
   style: "default",

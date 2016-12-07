@@ -94,7 +94,7 @@ handlers['start'] = function * (message) {
      color: '#45a5f4',
      mrkdwn_in: ['text'],
      fallback: 'Onboard',
-     actions: cardTemplate.slack_remind,
+     actions: cardTemplate.admin_reminder,
      callback_id: 'none'
    });
    attachments.push({
@@ -115,7 +115,7 @@ handlers['start'] = function * (message) {
    return [msg];
  }
 
-handlers['confirm_remind'] = function*(message, data) {
+handlers['confirm_admin_reminder'] = function*(message, data) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   var team = yield db.Slackbots.findOne({
     'team_id': team_id
@@ -465,7 +465,7 @@ handlers['reminder'] = function(message) {
     color: '#45a5f4',
     mrkdwn_in: ['text'],
     fallback: 'Onboard',
-    actions: cardTemplate.slack_reminder,
+    actions: cardTemplate.collect_reminder,
     callback_id: 'none'
   }];
   attachments.push({
@@ -489,7 +489,7 @@ handlers['reminder'] = function(message) {
  * S4A2
  */
 
-handlers['confirm_reminder'] = function*(message, data) {
+handlers['confirm_cart_reminder'] = function*(message, data) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   var team = yield db.Slackbots.findOne({
     'team_id': team_id

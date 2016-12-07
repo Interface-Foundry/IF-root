@@ -195,7 +195,7 @@ handlers['reminder'] = function(message) {
     color: '#49d63a',
     mrkdwn_in: ['text'],
     fallback: 'Onboard_Shopping',
-    actions: cardTemplate.slack_member_remind,
+    actions: cardTemplate.member_reminder,
     callback_id: 'none',
     mrkdwn_in: ['text'],
   });
