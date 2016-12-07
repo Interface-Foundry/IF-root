@@ -1,4 +1,3 @@
-require('kip')
 var winston = require('winston');
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 var _ = require('lodash')

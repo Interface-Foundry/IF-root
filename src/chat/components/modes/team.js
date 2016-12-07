@@ -2,7 +2,6 @@ var message_tools = require('../message_tools');
 var handlers = module.exports = {};
 var _ = require('lodash');
 var validator = require('validator');
-var db = require('db');
 var co = require('co');
 var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
@@ -86,7 +85,7 @@ handlers['start'] = function * (message) {
       attachments: attachments,
       fallback: 'Team Cart Members'
     };
-    
+
     // make all the attachments markdown
     attachments.map(function(a) {
       a.mrkdwn_in =  ['text', 'fields'];
@@ -99,7 +98,7 @@ handlers['start'] = function * (message) {
       "mode": "team",
       "action": "home",
       "_id": message._id
-    } ]; 
+    } ];
     msg.source.team = team.team_id;
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
     msg.reply = attachments;
@@ -240,7 +239,7 @@ handlers['start'] = function * (message) {
 //               "style": "primary",
 //               "type": "button",
 //               "value": "exit"
-//             },              
+//             },
 //             {
 //               "name": "help",
 //               "text": "Help",
@@ -297,4 +296,3 @@ function getAction (text) {
     }
     return action;
 }
-

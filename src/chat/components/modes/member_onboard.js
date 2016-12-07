@@ -1,7 +1,6 @@
 // Introduces non-admins to the process of adding items to the cart
 var handlers = module.exports = {};
 var amazon = require('../amazon_search.js');
-var db = require('db');
 var _ = require('lodash');
 var co = require('co');
 var cron = require('cron');
@@ -412,7 +411,7 @@ function determineLaterToday(now) {
 }
 
 // stolen from modes/shopping.js
-// 
+//
 // Returns the amazon results as it is stored in the db (json string)
 // Recalls more history from the db if it needs to, and the history is just appended
 // to the existing history so you don't need to worry about stuff getting too messed up.

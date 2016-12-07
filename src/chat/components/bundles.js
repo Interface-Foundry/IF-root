@@ -1,5 +1,4 @@
 var amazon = require('./amazon_search.js');
-var db = require('db');
 var co = require('co');
 var _ = require('lodash');
 var eachSeries = require('async-co/eachSeries');
@@ -33,10 +32,10 @@ var addBundleToCart = module.exports.addBundleToCart = function * (bundle, userI
    } catch (err) {
    	 skip = true;
    }
-   if (!skip){ 
+   if (!skip){
    	 try { yield kipcart.addToCart(cart_id, userId, item, 'team'); } catch(err) { kip.debug('\n\n\n bundles:36:addtoCart err:', err,' \n\n\n') }
-    } 
-  })  
+    }
+  })
 }
 
 
@@ -46,7 +45,7 @@ var updateBundles = module.exports.updateBundles = function * () {
 	yield eachSeries(bundles[key], function * (asin) {
 	  var skip = false;
 	  try {
-	      var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
+	      var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'});
 	   } catch (e) {
 	   	 skip = true;
 	   }
@@ -57,7 +56,7 @@ var updateBundles = module.exports.updateBundles = function * () {
 			  var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
 			  if (total_offers === 0) {
 			  	existingItem.available = false;
-			  	yield existingItem.save();	    
+			  	yield existingItem.save();
 			  }
 		  } else {
 		  	 if (item.reviews && item.reviews.reviewCount) {
@@ -73,14 +72,14 @@ var updateBundles = module.exports.updateBundles = function * () {
 		  }
 	    }
 	 })
-  }) 	 
+  })
 };
 
 var updateBundle = module.exports.updateBundle = function * (bundle) {
 	yield eachSeries(bundles[bundle], function * (asin) {
 	  var skip = false;
 	  try {
-	     var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
+	     var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'});
 	   } catch (e) {
 	   	 skip = true;
 	   }
@@ -91,7 +90,7 @@ var updateBundle = module.exports.updateBundle = function * (bundle) {
 			  var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
 			  if (total_offers === 0) {
 			  	existingItem.available = false;
-			  	yield existingItem.save();	    
+			  	yield existingItem.save();
 			  }
 		  } else {
 		  	 if (item.reviews && item.reviews.reviewCount) {
@@ -113,11 +112,10 @@ var updateBundle = module.exports.updateBundle = function * (bundle) {
 var updater  = module.exports.updater =  function () {
   kip.debug('setting cron job for updating bundle items at midnight...');
   new cron.CronJob('00 00 * * *', function () {
- 	  co(updateBundles); 
+ 	  co(updateBundles);
     }, function() {
   kip.debug('\n\n\n updated bundle items! \n\n\n');
     },
     true,
     'America/New_York');
 }
-
