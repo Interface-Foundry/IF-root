@@ -28,10 +28,11 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var menu = Menu(foodSession.menu)
     var sortedMenu = menu.allItems()
     var matchingItems = yield utils.matchText(keyword, sortedMenu, {
-      // seems to work better for matching
       shouldSort: true,
-      threshold: 0.8,
-      tokenize: true,
+      location: 0,
+      distance: 10,
+      threshold: 0.6,
+      tokenize: false,
       keys: ['name']
     })
 
@@ -63,6 +64,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   // THen the rest of the menu in any order i think
   //
   var sortOrder = {
+    searched: 6,
     orderedBefore: 5,
     recommended: 4,
     none: 3,
@@ -79,7 +81,9 @@ handlers['food.menu.quickpicks'] = function * (message) {
   var menu = Menu(foodSession.menu)
   var sortedMenu = menu.allItems().map(i => {
     // inject the sort order stuff
-    if (previouslyOrderedItemIds.includes(Number(i.unique_id))) {
+    if (matchingItems.includes(i.unique_id)) {
+      i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.unique_id })
+    } else if (previouslyOrderedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.orderedBefore
       i.infoLine = 'You ordered this before'
     } else if (recommendedItemIds.includes(Number(i.unique_id))) {
@@ -89,10 +93,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
       i.sortOrder = sortOrder.last
     } else {
       i.sortOrder = sortOrder.none
-    }
-
-    if (matchingItems.includes(i.unique_id)) {
-      i.sortOrder += 10 + (matchingItems.length - matchingItems.indexOf(i.unique_id))/matchingItems.length
     }
 
     return i

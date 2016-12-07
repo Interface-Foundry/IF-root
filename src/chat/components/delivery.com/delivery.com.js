@@ -99,7 +99,8 @@ function * handleMessage (message) {
 function getRoute (message) {
   kip.debug(`prevRoute ${message.prevRoute}`)
   return co(function * () {
-    if (message.text === 'food' || message.text === 'cafe') {
+    // allow people to type food in cuisine selection and it not ruin the order
+    if ((message.text === 'food' || message.text === 'cafe') && (message.action !== 'admin.restaurant.pick')) {
       kip.debug('### User typed in :' + message.text)
       return 'food.begin'
     } else if (handlers[message.text]) {

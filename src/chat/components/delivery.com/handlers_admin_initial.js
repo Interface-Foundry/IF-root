@@ -35,20 +35,21 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     }
   })
 
-  // //no addresses yet, show onboarding
-  // if(addressButtons.length < 1){
-  //   foodSession.onboarding = true
-  //   yield foodSession.save()
-  // }
-  // //if user taps < back button back to this view
-  // else if(foodSession.onboarding){ 
-  //   foodSession.onboarding = true
-  // }
-  // //dont use onboarding for this session
-  // else {
-  //   foodSession.onboarding = false
-  // }
-  foodSession.onboarding = false
+  //no addresses yet, show onboarding
+  if(addressButtons.length < 1){
+    foodSession.onboarding = true
+    banner = false
+    yield foodSession.save()
+  }
+  //if user taps < back button back to this view
+  else if(foodSession.onboarding){ 
+    foodSession.onboarding = true
+    banner = false
+  }
+  //dont use onboarding for this session
+  else {
+    foodSession.onboarding = false
+  }
 
   addressButtons = _.chunk(addressButtons, 5)
   var msg_json = {
@@ -65,15 +66,15 @@ handlers['food.admin.select_address'] = function * (message, banner) {
 
   //modify message for onboarding
   if (foodSession.onboarding) {
-    msg_json.attachments[0].text = '*Step 1* Add an address for delivery by tapping the `New Location +` button'
+    msg_json.attachments[0].text = '*Step 1.* Add an address for delivery by tapping the `New Location +` button'
     msg_json.attachments[0].mrkdwn_in = ["text"]
     msg_json.attachments[0].color = '#A368F0'
 
     //add onboard sticker #1
     msg_json.attachments.unshift({
-      'text':'Hi there, I\'m going to walk you through your first order!',
-      'image_url':'http://tidepools.co/kip/onboarding_2.png',
-      'color': '#3AA3E3'
+      'text':'Hi there, I\'m going to walk you through your first Kip Café order!',
+      'image_url':'http://tidepools.co/kip/welcome_cafe.png',
+      'color': '#A368F0'
     })
   }
 
@@ -82,8 +83,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
       {
         'fallback': 'Kip Cafe',
         'title': '',
-        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png',
-        'color': '#3AA3E3',
+        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
       })
   }
 
@@ -382,6 +382,12 @@ handlers['food.settings.address.confirm'] = function * (message) {
             value: 'food.settings.address.new'
           }
         ]
+      },
+      {
+        text: `*Tip:* _If you added a floor, suite or apt # it hasn't gone away, Kip kept it for later_`,
+        'mrkdwn_in': [
+          'text'
+        ]
       }
     ]
   }
@@ -574,13 +580,22 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   //onboarding stuff
   if(foodSession.onboarding){
-    attachments.push({
-      'text': '',
+    attachments.push(
+    // {
+    //   'text': '',
+    //   'fallback': 'Team voting',
+    //   'callback_id': 'wopr_game',
+    //   'color': '#A368F0',
+    //   'attachment_type': 'default',
+    //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
+    // },
+    {
+      'text': '*Step 2.* Kip polls your team on what type of food they want to eat \n Tap `✓ Start New Poll` to select which team members to poll',
       'fallback': 'Team voting',
       'callback_id': 'wopr_game',
-      'color': '',
+      'color': '#A368F0',
       'attachment_type': 'default',
-      'image_url': 'http://tidepools.co/kip/onboarding_2.png'
+      'mrkdwn_in': ['text']
     })
   }
 
@@ -609,6 +624,11 @@ handlers['food.admin_polling_options'] = function * (message) {
       }
     ]
   })
+
+  if(foodSession.onboarding){
+    attachments[attachments.length - 1].color = '#2ab27b' //green
+    attachments[attachments.length - 1].text = '' //green
+  }
 
   var res = {
     attachments: attachments
@@ -793,19 +813,19 @@ handlers['food.restaurants.list'] = function * (message) {
             'text': 'More Choices >',
             'type': 'button',
             'value': 'chess'
-          },
-          {
-            'name': 'maze',
-            'text': 'Sort Price',
-            'type': 'button',
-            'value': 'maze'
-          },
-          {
-            'name': 'maze',
-            'text': 'Sort Rating',
-            'type': 'button',
-            'value': 'maze'
           }
+          // {
+          //   'name': 'maze',
+          //   'text': 'Sort Price',
+          //   'type': 'button',
+          //   'value': 'maze'
+          // },
+          // {
+          //   'name': 'maze',
+          //   'text': 'Sort Rating',
+          //   'type': 'button',
+          //   'value': 'maze'
+          // }
           // {
           //   'name': 'maze',
           //   'text': 'Sort Distance',
