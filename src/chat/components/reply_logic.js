@@ -178,7 +178,7 @@ function * processProductLink(message) {
     try {
       yield slackUtils.addViaAsin(asin, message);
     } catch (err) {
-    	fail = true;
+        fail = true;
       yield amazon_variety.getVariations(asin, message);
     }
     if (!fail) {
@@ -428,6 +428,14 @@ queue.topic('incoming').subscribe(incoming => {
         if (message.origin === 'slack') {
           var replies = yield settings.handle(message);
           kip.debug(`Searching for back button REPLY_LOGIC ${JSON.stringify(replies, null, 2)}`)
+        }
+        break;
+      case 'search_btn':
+        if (message.origin === 'slack') {
+          var data = _.split(message.data.value, '.');
+          var action = data[0];
+          data.splice(0, 1);
+          var replies = yield shopping[message.mode](message, data);
         }
         break;
       case 'team':

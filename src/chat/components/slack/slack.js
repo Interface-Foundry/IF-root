@@ -222,7 +222,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
       if(message.mode === 'item.add'){
-      	//its a variation message
+        //its a variation message
         
         var asin = message.reply[0].id; //just grab the first one for now
         yield slackUtils.addViaAsin(asin, message);
@@ -296,29 +296,11 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           color: '#3AA3E3'
         }, {
           text: 'Tap to search for something',
-          fallback: 'You are unable to choose a game',
-          callback_id: 'wopr_game',
+          fallback: 'Search for what you want',
+          callback_id: 'idk',
           color: '#3AA3E3',
           attachment_type: 'default',
-          actions: [{
-            "name": "shopping_button.start.search",
-            "text": "Headphones",
-            "style": "default",
-            "type": "button",
-            "value": "search.headphones"
-          }, {
-            "name": "shopping_button.start.search",
-            "text": "Coding Books",
-            "style": "default",
-            "type": "button",
-            "value": "search.coding_books"
-          }, {
-            "name": "shopping_button.start.search",
-            "text": "Healthy Snacks",
-            "style": "default",
-            "type": "button",
-            "value": "search.healthy_snacks"
-          }]
+          actions: cardTemplate.slack_shopping_buttons
         }, {
           'text': '✎ Hint: You can also what you want below (Example: _Macbook Pro Power Cord_)\n✂︎ Or you can just paste an Amazon item address\n*Tip:* Add items directly from Amazon by pasting the URL and sending it to me',
           mrkdwn_in: ['text']
