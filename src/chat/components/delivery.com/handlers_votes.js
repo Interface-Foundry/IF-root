@@ -7,6 +7,8 @@ var request = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
 
+var yelp = require('./yelp');
+
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
 } else {
@@ -174,6 +176,12 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
       return m
     })
     .sort((a, b) => directionMultiplier * (a.score - b.score))
+
+  //~~~~~~~~~~Yelp Reviews~~~~~~~~~~//
+
+  yelp(merchants[0]);
+
+  //~~~~~~~~~~Yelp Reviews~~~~~~~~~~//
 
   return merchants
 }
