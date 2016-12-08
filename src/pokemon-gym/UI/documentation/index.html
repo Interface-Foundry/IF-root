@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<!--if lt 8html.no-js.lt-ie8
+-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+  <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <!-- if IEmeta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+    -->
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- if lt IE 9
+    script(src="http://html5shim.googlecode.com/svn/trunk/html5.js")
+    
+    -->
+    <!-- stylesheets-->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/docs.css" rel="stylesheet">
+    <link href="assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
+  </head>
+  <body data-spy="scroll" data-target=".bs-docs-sidebar">
+    <header role="banner" class="top-header navbar navbar-inverse navbar-fixed-top bs-docs-nav">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" data-toggle="collapse" data-target=".bs-navbar-collapse" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a href="http://iarouse.com/" target="_blank" class="navbar-brand">iArouse</a>
+        </div>
+        <nav role="navigation" class="collapse navbar-collapse bs-navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Getting Started</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <div id="content" class="bs-header">
+      <div class="container">
+        <h1>Documentation</h1>
+        <p>An overview of the admin template</p>
+      </div>
+    </div>
+    <div class="container bs-docs-container">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="bs-sidebar hidden-print">
+            <ul class="nav bs-sidenav">
+              <li><a href="#thanks">Thanks</a></li>
+              <li><a href="#intro">Introduction</a></li>
+              <li><a href="#file-structure">File Structure</a></li>
+              <li><a href="#bower">Dependencies Management with Bower</a></li>
+              <li><a href="#gulp">Automation with Gulp</a></li>
+              <li><a href="#run">How to Run It?</a></li>
+              <li><a href="#use_sass">How to Use It? (Default Sass Version)</a></li>
+              <li><a href="#basic_html">Basic Template Structure</a></li>
+              <li><a href="#layouts">Layouts    </a></li>
+            </ul>
+          </div>
+        </div>
+        <div role="main" class="col-md-9"><a href="http://themeforest.net/user/arousing" target="_blank"><img style="z-index: 1100; position: fixed; top: 0; right: 0; border: 0;" src="assets/img/contact_me.png" alt="contact me"></a>
+          <section id="thanks">
+            <div class="page-header">
+              <h1>Thank you</h1>
+            </div>
+            <p class="lead">Thank you for purchasing. Feel free to <a href="http://themeforest.net/user/arousing" target="_blank">contact me</a> if you have any questions.</p>
+            <P class="lead">Also, <a href="http://themeforest.net/user/arousing" target="_blank">email me</a> if you have any feature request or advice, I'll be glad to know.</P>
+          </section>
+          <section id="intro">
+            <div class="page-header">
+              <h1>Introduction</h1>
+            </div>
+            <p class="lead">Material is a fully responsive admin web App built with Bootstrap & AngularJS. It uses Sass CSS which makes it easy to modify.</p>
+          </section>
+          <section id="file-structure">
+            <div class="page-header">
+              <h1>File Structure</h1>
+            </div>
+            <p class="lead">Within the download you'll find the following file structure and contents</p>
+            <p>Once downloaded, unzip the compressed folder  and you'll see something like this:</p>
+            <pre class="prettyprint">Material/
+├── Material/                       ───> Contains the develop version of Material Admin Template.
+│   ├── client/                           └──> All front end files are in this folder.
+│   │     ├── app/                            └──> All the custom JS scripts and HTML markup
+│   │     ├── fonts/                          └──> Contains icon fonts.
+│   │     ├── i18n/                           └──> Data files for i18n (Internationalization)
+│   │     ├── images/                         
+│   │     ├── styles/                         └──> All the custom stylesheets (Scss files)
+│   │     ├── favicon.ico
+│   │     └── index.html
+│   ├── .bowerrc
+│   ├── .editorconfig
+│   ├── .gitattributes
+│   ├── .jshintrc
+│   ├── .travis.yml
+│   ├── bower.json
+│   ├── CHANGELOG.md              ───> The change log
+│   ├── gulp.config.js
+│   ├── gulpfile.js
+│   └── package.json
+├── dist/                         ───> The distribution (production) version of Material Admin
+└── documentation/                ───> Where the help documentation is.</pre>
+            <p class="lead">Introduction to some important files:</p>
+            <dl class="dl-horizontal">
+              <dt>".bowerrc"</dt>
+              <dd>file is hidden, and is used for configure <a href="http://bower.io/">Twitter Bower</a></dd>
+              <dt>"bower.json"</dt>
+              <dd> is the JSON file of <a href="http://bower.io/">Twitter Bower</a> (You can click the link to know more).</dd>
+              <dt>"gulp.config.js"</dt>
+              <dd> contains the global configuration variables of <a href="http://gulpjs.com/">Gulp</a> tasks</dd>
+              <dt>"gulpfile.js"</dt>
+              <dd> is the configure file of <a href="http://gulpjs.com/">Gulp</a> (You can click the link to know more).
+                 It is used to configure or define tasks and load Gulp plugins.
+              </dd>
+              <dt>"package.json"</dt>
+              <dd> is the JSON file of <a href="http://npmjs.com/">NPM</a> (You can click the link to know more).
+                 This file is used by npm to store metadata for projects published as <a href="https://npmjs.org/">npm</a> modules.
+              </dd>
+            </dl>
+          </section>
+          <section id="bower">
+            <div class="page-header">
+              <h1> Dependencies Management with Bower</h1>
+            </div>
+            <p class="lead"> <a href="http://bower.io/">Bower</a> is a front-end package manager for the web by Twitter.</p>
+            <p>Material use <a href="http://bower.io/">Bower </a> to manage all the front end dependencies, make things clean, tidy and simple. However if you are not familiar with command line tool, it may be a bit scary for you, but don't worry, it's simple.</p>
+            <p>If you haven't try Bower before, then give it a shot,<strong> it makes life easier</strong>, you'll fall in love with it.</p>
+            <p>Inside the <strong>bower.json</strong> file of Bower, you'll see the list dependencies (package name and version):</p>
+            <p>If you want to know more about the packages, you can <a href="http://bower.io/search/">click here.</a> Search the package and click the link to know more.</p>
+            <pre> 
+ "dependencies": {
+    "jquery": "~2.1.4",
+    "angular": "~1.4.0",
+    "angular-route": "~1.4.0",
+    "angular-animate": "~1.4.0",
+    "angular-aria": "~1.4.0",
+    "angular-messages": "~1.4.0",
+    "angular-material": "~1.0.0-rc2",
+    "angular-ui-router": "~0.2.14",
+    "angular-bootstrap": "~0.14.0",
+    "angular-translate": "~2.8.0",
+    "angular-translate-loader-static-files": "~2.8.0",
+    "material-design-iconic-font": "~2.1.0",
+    "font-awesome": "~4.4.0",
+    "textAngular": "~1.4.0",
+    "toastr": "~2.1.0",
+    "jquery.easy-pie-chart": "~2.1.6",
+    "jquery.slimscroll": "~1.3.3",
+    "jquery-steps": "~1.1.0",
+    "angular-ui-tree": "~2.10.0",
+    "ngmap": "~1.13.0",
+    "flot": "~0.8.3",
+    "flot.tooltip": "~0.8.5",
+    "jvectormap": "~2.0.0",
+    "flot.curvedlines": "~0.6.4",
+    "angular-scroll": "~0.7.0",
+    "Chart.js": "~1.0.1",
+    "angular-chart.js": "~0.8.0",
+    "angular-validation-match": "~1.6.0"
+ }</pre>
+          </section>
+          <section id="gulp">
+            <div class="page-header"> 
+              <h1>Automation with Gulp</h1>
+            </div>
+            <p class="lead"><a href="http://gulpjs.com/">Gulp</a> is a JavaScript task runner (Automation), save yourself from repetitive tasks.</p>
+            <p>It's probably a bit complex to you if it's your first time using Gulp. However, <strong>you'll fail in love with it</strong> once you get up and running, it saves you from repetitive tasks. Project like jQuery, Bootstrap and many more use and love task automation tools.</p>
+            <p>By the way, be sure to check out this <a href="https://github.com/gulpjs/gulp/blob/master/docs/getting-started.md" target="_blank">Getting Started guide</a>, it will help you get up and running.</p>
+            <dl class="dl-horizontal">
+              <dt>"gulp.config.js"</dt>
+              <dd> contains the global configuration variables of <a href="http://gulpjs.com/">Gulp</a> tasks</dd>
+              <dt>"gulpfile.js"</dt>
+              <dd> is the configure file of <a href="http://gulpjs.com/">Gulp</a> (You can click the link to know more).
+                 It is used to configure or define tasks and load Gulp plugins.
+              </dd>
+              <dt>"package.json"</dt>
+              <dd> is the JSON file of <a href="http://npmjs.com/">NPM</a> (You can click the link to know more).
+                 This file is used by npm to store metadata for projects published as <a href="https://npmjs.org/">npm</a> modules.
+              </dd>
+            </dl>
+            <p>Inside <strong>package.json</strong> file, you'll see all the Gulp plugins
+               that help to automate the tasks.
+            </p>
+            <p>And all the plugins are configured in <strong>gulpfile.js</strong> file.</p>
+            <p>If you want to know more about the plugins, you can <a href="http://gulpjs.com/plugins/">click here.</a></p>
+            <pre> "devDependencies": {
+    "browser-sync": "~2.9.0",
+    "del": "~2.0.0",
+    "gulp": "~3.9.0",
+    "gulp-angular-filesort": "~1.1.1",
+    "gulp-angular-templatecache": "~1.8.0",
+    "gulp-autoprefixer": "~3.1.0",
+    "gulp-csso": "~1.0.0",
+    "gulp-filter": "~3.0.0",
+    "gulp-if": "~2.0.0",
+    "gulp-imagemin": "~2.4.0",
+    "gulp-inject": "~3.0.0",
+    "gulp-jade": "~1.1.0",
+    "gulp-jscs": "~3.0.0",
+    "gulp-jshint": "~1.12.0",
+    "gulp-less": "~3.0.3",
+    "gulp-load-plugins": "~1.0.0",
+    "gulp-ng-annotate": "~1.1.0",
+    "gulp-open": "~1.0.0",
+    "gulp-plumber": "~1.0.0",
+    "gulp-print": "~2.0.0",
+    "gulp-rev": "~6.0.0",
+    "gulp-rev-replace": "~0.4.0",
+    "gulp-ruby-sass": "~2.0.0",
+    "gulp-sass": "~2.1.0",
+    "gulp-sourcemaps": "~1.6.0",
+    "gulp-task-listing": "~1.0.0",
+    "gulp-uglify": "~1.4.0",
+    "gulp-useref": "~1.3.0",
+    "gulp-util": "~3.0.4",
+    "jshint-stylish": "~2.0.0",
+    "wiredep": "~2.2.0",
+    "yargs": "~3.29.0"
+ }</pre>
+          </section>
+          <section id="run">
+            <div class="page-header">
+              <h1>How to Run it?</h1>
+            </div>
+            <p class="lead">You'll need to put the files on a server to run it. </p>
+            <p>So you can upload the <strong>"dist"</strong> folder to your server to run it. Or you can build a server locally.</p>
+            <p class="lead">Then how to build a server locally?</p>
+            <p><em>You can build a locally server using WAMP or MAMP (if you uses PHP). Also it's pretty easy to build one with Python or Ruby (if you prefer Python or Ruby). And here we'll build a local server with NodeJS</em></p>
+            <p> <strong>Preparation:</strong></p>
+            <P>You'll need to install <a href="http://nodejs.org/">Node.js</a> (NPM comes along with it) and <a href="https://github.com/cloudhead/node-static">node-static</a> (an NPM package)</P>
+            <p><strong>Steps:</strong></p>
+            <p>It's easy if you are familiar with Node. Download <a href="http://nodejs.org/download/">Node.js here</a>  then install it, and install <a href="https://github.com/cloudhead/node-static">node-static</a> with one command line</p>
+            <pre>$ npm install -g node-static</pre>
+            <p>The usage of node-static is simple. Just enter the "dist" directory with command line</p>
+            <pre>$ cd dist/</pre>
+            <p>and type:</p>
+            <pre>$ static</pre>
+            <p>It'll return something like this: </p>
+            <pre>serving "." at http://127.0.0.1:8080</pre>
+            <p>Then you can view the template on http://127.0.0.1:8080 with your browser</p>
+          </section>
+          <section id="use_sass">
+            <div class="page-header">
+              <h1>How to Use It? (Sass Version, The Default)</h1>
+            </div>
+            <p class="lead">In order to do development with it, first you'll need have the following tools installed:</p>
+            <li> <a href="http://nodejs.org/">Node.js</a> (NPM comes along with it), just download and install it, that's it, don't be afraid.</li>
+            <li> <a href="http://yeoman.io/">Yeoman </a>, <a href="http://bower.io/">Bower</a>, <a href="http://gulpjs.com/">Gulp</a> for modern workflow.</li>
+            <li><a href="https://www.ruby-lang.org/en/">Ruby </a>(if you are using a Mac, you already have it)
+              , <a href="http://sass-lang.com/">Sass </a>, <a href="http://compass-style.org/">Compass</a> for Sass CSS.
+            </li><br>
+            <p>And you'll need to know how some basis about them, click the links to learn more if you not familiar with these yet. <strong>If it's your first time using these tools</strong>, it's probably too complex or even overwhelming for you. You'd better find someone to help you.</p>
+            <p>By the way, just a tip here, after you installed NodeJS (NPM comes along with it), you can use one command line to install Yeoman, Bower and Gulp instead of installing them one by one</p>
+            <pre>$ npm install -g yo bower gulp</pre>
+            <p class="lead">If you already know how to use them, then just do a few things to start developing:</p>
+            <p>1. Enter "Material" folder with your command line tool.</p>
+            <p>2. Install all the NPM packages (for development) with NPM: </p>
+            <pre>$ npm install</pre>
+            <p>3. Install all the front end packages with Twitter Bower:</p>
+            <pre>$ bower install</pre>
+            <p>4. Then type<strong> gulp serve</strong> and you are ready to go.</p>
+            <pre>$ gulp serve</pre>
+            <p>By the way, if you want to build a distribution (production) version, simply run</p>
+            <pre>$ gulp serve-dist</pre><br>
+            <p>All the files for development are under <strong>./Material/client/</strong> folder.</p>
+          </section>
+          <section id="basic_html">
+            <div class="page-header">
+              <h1>Basic Template Structure</h1>
+            </div>
+            <p class="lead">The basic structure of template (index.html) is quiet simple. It contains 3 parts: <strong>The header</strong>, which load all the stylesheets. <strong>The body</strong>, which contains the content of App.  <strong>The footer</strong>, which load all the scripts. </p>
+            <p class="lead">The Header</p>
+            <pre class="prettyprint linenums">&lt;!doctype html&gt;
+&lt;!--[if lt IE 8]&gt;         &lt;html class="no-js lt-ie8"&gt; &lt;![endif]--&gt;
+&lt;!--[if gt IE 8]&gt;&lt;!--&gt; &lt;html class="no-js"&gt; &lt;!--&lt;![endif]--&gt;
+    &lt;head&gt;
+        &lt;meta charset="utf-8"&gt;
+        &lt;meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'&gt;
+        &lt;title&gt;Web Application&lt;/title&gt;
+        &lt;meta name="description" content="Responsive Admin Web App with Bootstrap and AngularJS"&gt;
+        &lt;meta name="keywords" content="angularjs admin, admin templates, admin themes, bootstrap admin"&gt;
+        &lt;meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"&gt;
+ 
+        &lt;!-- Needs images, font... therefore can not be part of main.css --&gt;
+        &lt;link href='http://fonts.googleapis.com/css?family=Roboto:400,100,500,300,300italic,500italic|Roboto+Condensed:400,300' rel='stylesheet' type='text/css'&gt;
+        &lt;link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css"&gt;
+        &lt;link rel="stylesheet" href="bower_components/weather-icons/css/weather-icons.min.css"&gt;
+        &lt;!-- end Needs images --&gt;
+ 
+            
+            &lt;!-- build:css({.tmp,client}) styles/main.css --&gt;
+            &lt;link rel="stylesheet" href="styles/bootstrap.css"&gt;
+            &lt;link rel="stylesheet" href="styles/ui.css"&gt;
+            &lt;link rel="stylesheet" href="styles/main.css"&gt;
+            &lt;!-- endbuild --&gt;
+ 
+    &lt;/head&gt;</pre>
+            <p class="lead">The Body</p>
+            <pre class="prettyprint linenums">    &lt;body data-ng-app="app"
+          id="app"
+          class="app"
+          data-custom-page 
+          data-off-canvas-nav
+          data-ng-controller="AppCtrl"
+          data-ng-class=" { 'layout-boxed': admin.layout === 'boxed', 
+                            'nav-collapsed-min': admin.menu === 'collapsed'
+          } "&gt;
+        &lt;!--[if lt IE 9]&gt;
+            &lt;div class="lt-ie9-bg"&gt;
+                &lt;p class="browsehappy"&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser.&lt;/p&gt;
+                &lt;p&gt;Please &lt;a href="http://browsehappy.com/"&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;![endif]--&gt;
+ 
+        &lt;header data-ng-include=" 'views/header.html' "
+                 id="header"
+                 class="header-container "
+                 data-ng-class="{ 'header-fixed': admin.fixedHeader,
+                                  'bg-white': ['11','12','13','14','15','16','21'].indexOf(admin.skin) &gt;= 0,
+                                  'bg-dark': admin.skin === '31',
+                                  'bg-primary': ['22','32'].indexOf(admin.skin) &gt;= 0,
+                                  'bg-success': ['23','33'].indexOf(admin.skin) &gt;= 0,
+                                  'bg-info-alt': ['24','34'].indexOf(admin.skin) &gt;= 0,
+                                  'bg-warning': ['25','35'].indexOf(admin.skin) &gt;= 0,
+                                  'bg-danger': ['26','36'].indexOf(admin.skin) &gt;= 0
+                 }"&gt;&lt;/header&gt;
+ 
+        &lt;div class="main-container"
+             data-ng-class="{ 'app-nav-horizontal': admin.menu === 'horizontal' }"&gt;
+            &lt;aside data-ng-include=" 'views/sidebar.html' "
+                   id="nav-container"
+                   class="nav-container"  
+                   data-ng-class="{ 'nav-fixed': admin.fixedSidebar,
+                                    'nav-horizontal': admin.menu === 'horizontal',
+                                    'nav-vertical': admin.menu === 'vertical',
+                                    'bg-white': ['31','32','33','34','35','36'].indexOf(admin.skin) &gt;= 0,
+                                    'bg-dark': ['31','32','33','34','35','36'].indexOf(admin.skin) &lt; 0
+                   }"&gt;
+            &lt;/aside&gt;
+ 
+            &lt;div id="content" class="content-container"&gt;
+                &lt;section data-ui-view
+                         class="view-container {{admin.pageTransition.class}}"&gt;&lt;/section&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;</pre>
+            <p class="lead">The Footer</p>
+            <pre class="prettyprint linenums">        &lt;script src="http://maps.google.com/maps/api/js?sensor=false"&gt;&lt;/script&gt;
+        &lt;!-- build:js scripts/vendor.js --&gt;
+        &lt;script src="bower_components/jquery/dist/jquery.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/angular/angular.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/angular-animate/angular-animate.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"&gt;&lt;/script&gt;
+        &lt;!-- endbuild --&gt;
+ 
+ 
+        &lt;!-- build:js scripts/ui.js --&gt;
+        &lt;script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/jquery-steps/build/jquery.steps.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/toastr/toastr.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/bootstrap-file-input/bootstrap.file-input.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/jquery.slimscroll/jquery.slimscroll.min.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/vendors/jquery.sparkline.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/flot/jquery.flot.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/flot/jquery.flot.resize.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/flot/jquery.flot.pie.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/vendors/jquery.flot.orderBars.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/flot/jquery.flot.stack.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/flot.curvedlines/curvedLines.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/flot.tooltip/js/jquery.flot.tooltip.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/flot/jquery.flot.time.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/jquery.easy-pie-chart/dist/angular.easypiechart.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/angular-ui-tree/dist/angular-ui-tree.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/ngmap/build/scripts/ng-map.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/ng-tags-input/ng-tags-input.min.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/vendors/jquery-jvectormap-1.2.2.min.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/vendors/jquery-jvectormap-world-mill-en.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/angular-loading-bar/build/loading-bar.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/angular-scroll/angular-scroll.min.js"&gt;&lt;/script&gt;
+ 
+        &lt;script src="bower_components/textAngular/dist/textAngular-rangy.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/textAngular/dist/textAngular.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/textAngular/dist/textAngular-sanitize.min.js"&gt;&lt;/script&gt;
+ 
+        &lt;script src="bower_components/angular-translate/angular-translate.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"&gt;&lt;/script&gt;
+ 
+        &lt;script src="bower_components/Chart.js/Chart.min.js"&gt;&lt;/script&gt;
+        &lt;script src="bower_components/angular-chart.js/dist/angular-chart.min.js"&gt;&lt;/script&gt;
+        &lt;!-- endbuild --&gt;
+ 
+ 
+        &lt;!-- build:js scripts/app.js --&gt;
+        &lt;script src="scripts/app.module.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/core/config.route.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/core/app.controller.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/core/i18n.js"&gt;&lt;/script&gt;
+ 
+        &lt;script src="scripts/chart/chart.module.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/chart/chart.controller.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/chart/chart.directive.js"&gt;&lt;/script&gt;
+ 
+        &lt;script src="scripts/form/form.module.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/form/form.controller.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/form/form.directive.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/form/formValidation.module.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/form/formValidation.controller.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/form/formValidation.directive.js"&gt;&lt;/script&gt;
+ 
+        &lt;script src="scripts/layout/nav.module.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/layout/nav.directive.js"&gt;&lt;/script&gt;
+ 
+        &lt;script src="scripts/page/page.module.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/page/page.controller.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/page/page.directive.js"&gt;&lt;/script&gt;
+ 
+        &lt;script src="scripts/table/table.module.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/table/table.controller.js"&gt;&lt;/script&gt;
+ 
+        &lt;script src="scripts/ui/ui.module.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/ui/ui.controller.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/ui/ui.directive.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/ui/ui.service.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/ui/map.module.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/ui/map.controller.js"&gt;&lt;/script&gt;
+        &lt;script src="scripts/ui/map.directive.js"&gt;&lt;/script&gt;
+        &lt;!-- endbuild --&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</pre>
+          </section>
+          <section id="layouts">
+            <div class="page-header">
+              <h1>Layouts</h1>
+            </div>
+            <p class="lead">
+              There's two ways to change the default layout. 
+              (1) Change "index.html" file. 
+              (2) Change "app.config.js" file inside "./client/app/core" folder.
+            </p>
+            <p><strong>Both ways are easy. </strong> Here we'll talk about the second way since it's easier. Open "app.config.js" file, you'll find following code. You can change the value to update default layout.</p>
+            <pre class="prettyprint linenums">$scope.main = {
+    brand: 'Material',
+    name: 'Lisa',
+    year: year,
+    layout: 'wide',                                 // 'boxed', 'wide'
+    menu: 'vertical',                               // 'horizontal', 'vertical', 'collapsed'
+    fixedHeader: true,                              // true, false
+    fixedSidebar: true,                             // true, false
+    pageTransition: pageTransitionOpts[0],          // unlimited
+    skin: '12'                                      // 11,12,13,14,15,16; 21,22,23,24,25,26; 31,32,33,34,35,36
+};                                   </pre>
+            <p>For example you want to set "boxed layout" as default, then you can update code like so:</p>
+            <pre class="prettyprint linenums">$scope.admin = {
+    brand: 'Material',
+    name: 'Lisa',
+    year: year,
+    layout: 'boxed',                                // 'boxed', 'wide'
+    menu: 'vertical',                               // 'horizontal', 'vertical', 'collapsed'
+    fixedHeader: true,                              // true, false
+    fixedSidebar: true,                             // true, false
+    pageTransition: pageTransitionOpts[0],          // unlimited
+    skin: '12'                                      // 11,12,13,14,15,16; 21,22,23,24,25,26; 31,32,33,34,35,36
+};                                       </pre>
+            <p>Done and enjoy :)</p>
+          </section>
+        </div>
+      </div>
+    </div>
+    <!-- Footer-->
+    <footer class="bs-footer">
+      <div class="container text-center">
+        <p>Copyright <span id="copyright"></span> <a href="http://iarouse.com/">iArouse.com</a></p>
+      </div>
+    </footer>
+    <!-- Scripts-->
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/holder.js"></script>
+    <script src="assets/js/google-code-prettify/prettify.js"></script>
+    <script src="assets/js/jquery.smooth-scroll.js"></script>
+    <script src="assets/js/application.js"></script>
+    <script>
+      $('.bs-sidenav a').smoothScroll();
+      window.prettyPrint && prettyPrint();
+    </script>
+  </body>
+</html>

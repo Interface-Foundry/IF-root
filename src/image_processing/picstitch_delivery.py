@@ -251,9 +251,9 @@ class PicStitch:
                 font=self.config['font3'],
                 fill="#3b9ef1")
         else:
-            draw.text((x, last_y),
+            draw.text((x, last_y+4),
                 self.img_req['cuisines'][0],
-                font=self.config['font3'],
+                font=self.config['font1'],
                 fill="#3b9ef1")
 
         # add prime logo
@@ -293,7 +293,7 @@ class PicStitch:
             selectRating = str(selectRating)
 
             img.paste(self.review_stars_images[selectRating],
-                      (x - 3, last_y - 2),
+                      (x - 3, last_y),
                       mask=self.review_stars_images[selectRating])
 
             # make number count in blue to right of stars
@@ -331,28 +331,28 @@ class PicStitch:
             last_y = last_y + 25
 
         if 'minimum' in self.img_req['ordering']:
-            draw.text((x, last_y +4), 
+            draw.text((x, last_y +4),
                        '$ ' + str(self.img_req['ordering']['minimum']),
                        font=self.config['font4'],
                        fill='#909497')
-            draw.text((x, last_y + 20), 
+            draw.text((x, last_y + 20),
                        'Minimum',
                        font=self.config['font2'],
                        fill='#909497')
 
         if 'delivery_charge' in self.img_req['ordering']:
             delivery_charge = self.img_req['ordering']['delivery_charge']
-            if delivery_charge == 0: 
-                draw.text((x + 90, last_y + 4), 
+            if delivery_charge == 0:
+                draw.text((x + 90, last_y + 4),
                            'Free',
                            font=self.config['font4'],
                            fill='#37a936')
-                draw.text((x + 89, last_y + 20), 
+                draw.text((x + 89, last_y + 20),
                            'Delivery',
                            font=self.config['font2'],
                            fill='#37a936')
-            else:         
-                draw.text((x + 89, last_y + 4), 
+            else:
+                draw.text((x + 89, last_y + 4),
                            '$' + str(delivery_charge),
                            font=self.config['font2'],
                            fill='#37a936')
