@@ -57,8 +57,9 @@ handlers['shopping.initial'] = function*(message, exec) {
    }
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
-
+  // yield slackUtils.showLoading(message);
   var results = yield amazon_search.search(exec.params,message.origin);
+  // yield slackUtils.hideLoading(message);
 
   if (results == null || !results) {
       return new db.Message({
@@ -87,7 +88,8 @@ handlers['shopping.initial'] = function*(message, exec) {
     mode: 'shopping',
     action: 'results',
     original_query: results.original_query
-  })
+  });
+
 }
 
 handlers['shopping.focus'] = function*(message, exec) {
