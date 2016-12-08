@@ -1,4 +1,3 @@
-var kip = require('kip')
 var co = require('co')
 var rx = require('rx')
 

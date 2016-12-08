@@ -90,7 +90,12 @@ var messageSchema = mongoose.Schema({
     callback_id: String
   },
   original_query: String,
-  reply: mongoose.Schema.Types.Mixed
+  reply: mongoose.Schema.Types.Mixed,
+  menus: {
+    id: String,
+    original: [{data: [], weight: Number}],
+    expandable: [{data: [], weight: Number}]
+  }
 })
 
 module.exports = mongoose.model('Message', messageSchema)

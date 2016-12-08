@@ -1,5 +1,4 @@
 /*eslint-env es6*/
-require('kip')
 
 var async = require('async')
 var request = require('request')

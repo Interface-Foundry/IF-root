@@ -18,6 +18,7 @@ var paymentSchema = mongoose.Schema({
   },
   stripe_response: {},
   delivery_post: {},
+  delivery_raw_response: {}, //this is the full json response from delivery.com (inc order id and points)
   delivery_response: {}
 })
 

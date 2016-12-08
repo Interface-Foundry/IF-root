@@ -2,8 +2,6 @@
 // "Actions" are what slack calls buttons
 //
 var queue = require('../queue-mongo');
-var db = require('db');
-require('kip');
 var refresh_team = require('../refresh_team');
 var express = require('express');
 var co = require('co');
@@ -16,7 +14,9 @@ var slackModule = require('./slack')
 var cardTemplate = require('./card_templates');
 var utils = require('./utils');
 var cookieParser = require('cookie-parser')
-var uuid = require('uuid')
+var uuid = require('uuid');
+var processData = require('../process');
+var sleep = require('co-sleep');
 // var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
 // var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
 var request = require('request')
@@ -25,7 +25,7 @@ var requestPromise = require('request-promise');
 var app = express();
 
 app.use(express.static(__dirname + '/public'))
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 // app.listen(3000, function(e) {
@@ -41,7 +41,6 @@ app.use(bodyParser.json());
 
  */
 function simple_action_handler (action) {
-  // kip.debug('\nwebserver.js line 28 simple_action_handler action: ', action, '\n\n\n')
   switch (action.name) {
     case 'addcart':
       return 'save ' + action.value
@@ -51,16 +50,16 @@ function simple_action_handler (action) {
       } else {
         return 'cheaper'
       }
+    case 'similar':
+      return 'similar ' + action.value
     case 'moreinfo':
       return action.value
     case 'more':
       return 'more'
     case 'cafe_btn':
       return 'cafe_btn';
-    case 'home_btn':
-      return 'home_btn';
-    case 'back_btn':
-      return 'back_btn';
+    case 'shopping_btn':
+      return 'shopping_btn';
     case 'help_btn':
       return 'help_btn';
     case 'view_cart_btn':
@@ -81,7 +80,6 @@ function simple_action_handler (action) {
       return 'address_confirm_btn'
     case 'send_last_call_btn':
       return 'send_last_call_btn'
-
     case 'passthrough':
       return action.value
   }
@@ -131,29 +129,8 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.team = message.source.team.id;
       message.source.user = message.source.user.id;
       message.source.channel = message.source.channel.id;
-      if (simple_command == 'home_btn') {
-        var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
-        var last_message = history[0];
-        var mode = _.get(last_message,'mode');
-        var actions = mode == 'shopping' ? cardTemplate.slack_home : mode == 'settings' ? cardTemplate.slack_settings :  mode == 'team' ? cardTemplate.slack_team : cardTemplate.slack_home;
-        var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
-        var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
-        if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
-        kip.debug(' \n\n\n\n mode: ', mode, ' actions: ', actions, ' isAdmin:', isAdmin,' \n\n\n\n ' );
-        var json = parsedIn.original_message;
-        json.attachments[json.attachments.length-1] = {
-            fallback: 'Search Results',
-            callback_id: 'search_results',
-            actions: actions
-        }
-        request({
-          method: 'POST',
-          uri: message.source.response_url,
-          body: JSON.stringify(json)
-        });
-        return res.sendStatus(200)
-      }
-      else if (simple_command == 'cafe_btn') {
+
+    if (simple_command == 'cafe_btn') {
           message.mode = 'food'
           message.action = 'begin'
           message.text = 'food'
@@ -161,22 +138,18 @@ app.post('/slackaction', next(function * (req, res) {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
       }
-      else if (simple_command == 'back_btn') {
-        var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
-        var last_message = history[0];
-        var actions = _.get(last_message,'mode') == 'shopping' ? cardTemplate.slack_home_default : cardTemplate.slack_settings_default;
-        var json = parsedIn.original_message;
-        json.attachments[json.attachments.length-1] = {
-            fallback: 'Search Results',
-            callback_id: 'search_results',
-            actions: actions
-        };
-        request({
-          method: 'POST',
-          uri: message.source.response_url,
-          body: JSON.stringify(json)
-        })
-        return res.sendStatus(200)
+      else if (simple_command == 'shopping_btn') {
+          message.mode = 'shopping'
+          message.action = 'initial'
+          message.text = 'exit'
+          message.save().then(() => {
+            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          })
+      }
+      else if (simple_command == 'loading_btn') {
+      	// responding with nothing means the button does nothing!
+        res.send();
+        return;
       }
       else if (simple_command == 'help_btn') {
           message.mode = 'banter'
@@ -193,10 +166,8 @@ app.post('/slackaction', next(function * (req, res) {
         if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
           // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
           _.remove(team.meta.cart_channels, function(c) { return c == channelId });
-          kip.debug(' \n\n\n\n\n  channel removed, cart channels:', team.meta.cart_channels ,' \n\n\n\n\n ');
         } else {
           team.meta.cart_channels.push(channelId);
-          kip.debug(' \n\n\n\n\n  added channel:', channelId, 'cart channels: ',team.meta.cart_channels ,' \n\n\n\n\n ');
         }
         team.markModified('meta.cart_channels');
         yield team.save();
@@ -210,8 +181,22 @@ app.post('/slackaction', next(function * (req, res) {
             value: channel.id
           }
         });
+        var buttonRow;
         var json = parsedIn.original_message;
-        json.attachments[json.attachments.length-2] = {text: 'Channels: ', actions: buttons, callback_id: "none"}
+        for (var i = 0; i < buttons.length; i++) {
+          if (buttons[i].value === channelId) {
+            buttonRow = Math.floor(i/5);
+          }
+        }
+        var chunkedButtons = _.chunk(buttons, 5);
+        var newRow = {
+          text: buttonRow == 0 ? 'Which channels do you want to include? ' : '',
+          actions: chunkedButtons[buttonRow],
+          callback_id: 'none',
+          color: parsedIn.original_message.attachments[buttonRow+1].color || null
+        }
+        json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
+                                                           // maybe I just don't understand slack yet
         request({
           method: 'POST',
           uri: message.source.response_url,
@@ -239,11 +224,12 @@ app.post('/slackaction', next(function * (req, res) {
         message.source.location = location
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-        })
+        });
       }
       else if (simple_command == 'send_last_call_btn') {
         message.mode = 'settings';
-        message.action = 'send_last_call';
+        message.action = 'home';
+        message.text = 'send last call btn';
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         })
@@ -276,6 +262,7 @@ app.post('/slackaction', next(function * (req, res) {
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
         
       }
+
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       });
@@ -300,75 +287,41 @@ app.post('/slackaction', next(function * (req, res) {
       })
     } else {
       //actions that do not require processing in reply_logic, skill all dat
+      let index = -1,
+        cart;
       switch (action.name) {
         case 'additem':
-          // adds the item to the cart the right way, but for speed we return a hacked message right away
-          var updatedMessage = parsedIn.original_message
-          var priceDifference = 0
-          updatedMessage.attachments.map(a => {
-            if (a.callback_id === parsedIn.callback_id) {
-              priceDifference = parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1))
-              a.text = a.text.replace(/\d+$/, replacement => {
-                return parseInt(replacement) + 1
-              })
-            } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-              a.text = a.text.replace(/\$[\d.]+/, function (total) {
-                return '$' + (parseFloat(total.substr(1)) + priceDifference).toFixed(2)
-              })
-            }
-          })
-          co(function * () {
-            var teamCart = yield kipcart.getCart(parsedIn.team.id)
-            var item = yield db.Items.findById(parsedIn.callback_id).exec()
-            yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item)
-          }).catch(console.log.bind(console))
+          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
+          co(function*() {
+            let teamCart = yield kipcart.getCart(parsedIn.team.id);
+            let item = yield db.Items.findById(parsedIn.callback_id).exec();
+            cart = yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item);
+            yield updateCartMsg(cart, parsedIn);
+          }).catch(console.log.bind(console));
           break
-
         case 'removeitem':
-          // reduces the quantity right way, but for speed we return a hacked message right away
-          var index
-          var priceDifference = 0
-          var updatedMessage = parsedIn.original_message
-          updatedMessage.attachments = updatedMessage.attachments.reduce((all, a, i) => {
-            if (a.callback_id === parsedIn.callback_id) {
-              priceDifference = parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1))
-              var isZero = false
-              index = i
-              a.text = a.text.replace(/\d+$/, replacement => {
-                if (parseInt(replacement) <= 1) {
-                  isZero = true
-                }
-                return parseInt(replacement) - 1
-              })
-              if (!isZero) {
-                all.push(a)
+          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
+          co(function*() {
+            parsedIn.original_message.attachments.forEach((ele, id) => {
+              if (ele.callback_id === parsedIn.callback_id) {
+                index = id;
               }
-            } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-              a.text = a.text.replace(/\$[\d.]+/, function (total) {
-                return '$' + (parseFloat(total.substr(1)) - priceDifference).toFixed(2)
-              })
-              all.push(a)
-            } else {
-              all.push(a)
-            }
-            return all
-          }, [])
-          co(function * () {
-            yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index)
-          }).catch(console.log.bind(console))
+            });
+            cart = yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index, 'team'); //'team' assumes this is a slack command. need a way to tell
+            yield updateCartMsg(cart, parsedIn);
+          }).catch(console.log.bind(console));
           break
         case 'removeall':
           // reduces the quantity right way, but for speed we return a hacked message right away
-          var index;
           var priceDifference = 0;
           var updatedMessage = parsedIn.original_message;
           updatedMessage.attachments = updatedMessage.attachments.reduce((all, a, i) => {
-            if (a.callback_id === parsedIn.callback_id) {;
+            if (a.callback_id === parsedIn.callback_id) {
               var quantity = parseInt(a.text.match(/\d+$/)[0])
               priceDifference = quantity * parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1));
               index = i;
             } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-              a.text = a.text.replace(/\$[\d.]+/, function (total) {
+              a.text = a.text.replace(/\$(\d{1,3},)*(\d{1,3})(\.\d{0,2})?/g, function(total) {
                 return '$' + (parseFloat(total.substr(1)) - priceDifference).toFixed(2)
               })
               all.push(a)
@@ -377,8 +330,9 @@ app.post('/slackaction', next(function * (req, res) {
             }
             return all
           }, [])
-          co(function * () {
-            yield kipcart.removeAllOfItem(parsedIn.team.id, index)
+          co(function*() {
+            cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index)
+            yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console))
           break
       }
@@ -398,6 +352,114 @@ app.post('/slackaction', next(function * (req, res) {
     res.sendStatus(200)
   }
 }))
+
+function clearCartMsg(attachments) {
+  //clears all but the updating message of buttons
+  return attachments.reduce((all, a) => {
+    if (a.callback_id && a.text.includes('Quantity:')) {
+      a.actions = [{
+        'name': 'passthrough',
+        'text': 'Loading...',
+        'style': 'default',
+        'type': 'button',
+        'value': 'loading_btn'
+      }];
+    }
+    all.push(a);
+    return all;
+  }, []);
+}
+
+function* updateCartMsg(cart, parsedIn) {
+  kip.debug('Updating Cart')
+  let itemNum = 1,
+    team = yield db.slackbots.findOne({
+      team_id: parsedIn.team.id
+    }),
+    showEverything = team.meta.office_assistants.includes(parsedIn.user.id) || team.meta.office_assistants.length === 0;
+
+  let itemData = cart.aggregate_items.reduce((all, ele) => {
+    all[ele._id] = {};
+    all[ele._id].quantity = ele.quantity;
+    all[ele._id].showDetail = ele.added_by.includes(parsedIn.user.id);
+    all[ele._id].added_by = ele.added_by;
+    all[ele._id].title = ele.title;
+    all[ele._id].price = ele.price;
+    all[ele._id].link = ele.link
+    return all;
+  }, {});
+
+  cart.aggregate_items.map(function*(ele) {
+    if (itemData[ele._id].showDetail || showEverything) {
+      itemData[ele._id].link = yield processData.getItemLink(itemData[ele._id].link, parsedIn.user.id, ele._id.toString());
+    }
+  })
+
+  let attachments = parsedIn.original_message.attachments.reduce((all, a, i) => {
+    if (a.callback_id && itemData[a.callback_id]) {
+      let userString;
+      a.actions = (itemData[a.callback_id].showDetail || showEverything) ? [{
+        'name': 'additem',
+        'text': '+',
+        'style': 'default',
+        'type': 'button',
+        'value': 'add'
+      }, {
+        'name': 'removeitem',
+        'text': '—',
+        'style': 'default',
+        'type': 'button',
+        'value': 'remove'
+      }] : [{
+        'name': 'additem',
+        'text': '+ Add',
+        'style': 'default',
+        'type': 'button',
+        'value': 'add'
+      }];
+
+      if (showEverything && itemData[a.callback_id].quantity > 1) {
+        a.actions.push({
+          name: "removeall",
+          text: 'Remove All',
+          style: 'default',
+          type: 'button',
+          value: 'removeall'
+        });
+      }
+      userString = itemData[a.callback_id].added_by.map(function(u) {
+        return '<@' + u + '>';
+      }).join(', ');
+
+      a.text = [
+        `*${itemNum}.* ` + ((showEverything || itemData[a.callback_id].showDetail) ? `<${itemData[a.callback_id].link}|${itemData[a.callback_id].title}>` : itemData[a.callback_id].title),
+        ((showEverything) ? `*Price:* ${itemData[a.callback_id].price} each` : ''),
+        `*Added by:* ${userString}`,
+        `*Quantity:* ${itemData[a.callback_id].quantity}`,
+      ].filter(Boolean).join('\n');
+
+      if (itemData[a.callback_id].quantity > 0) {
+        all.push(a);
+        itemNum++;
+      }
+    } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
+      a.text = a.text.replace(/\$(\d{1,3},)*(\d{1,3})(\.\d{0,2})?/g, '$' + cart.total);
+      all.push(a);
+    } else if (a.text && !a.text.includes('Quantity:')) {
+      all.push(a);
+    }
+    return all;
+  }, []);
+
+  parsedIn.original_message.attachments = attachments;
+  if (parsedIn.original_message) {
+    request({
+      method: 'POST',
+      uri: parsedIn.response_url,
+      body: JSON.stringify(parsedIn.original_message)
+    });
+  }
+}
 
 
 app.get('/authorize', function (req, res) {
@@ -426,15 +488,42 @@ app.get('/newslack', function (req, res) {
         _.merge(existingTeam, res_auth);
         yield existingTeam.save();
         yield utils.initializeTeam(existingTeam, res_auth);
-      co(slackModule.start);
+       co(slackModule.start);
      } else {
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
       yield utils.initializeTeam(bot, res_auth);
+      var user = yield db.Chatuser.findOne({ id: _.get(res_auth,'user_id')}).exec()
       co(slackModule.start);
+      var message= new db.Message({
+        incoming: false,
+        thread_id: user.dm,
+        resolved: true,
+        user_id: user.id,
+        origin: 'slack',
+        text: '',
+        source:  {
+          team: bot.team_id,
+          channel: user.dm,
+          thread_id: user.dm,
+          user: user.id,
+          type: 'message',
+        },
+        mode: 'onboarding',
+        action: 'home',
+        user: user.id
+      })
+     // queue it up for processing
+      message.save().then(() => {
+        queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
+      })
      }
-  }
-    res.redirect('/thanks.html')
+  } else {
+    kip.debug(res_auth)
+   }
+
+  res.redirect('/thanks.html')
+  
   }).catch(console.log.bind(console))
 })
 

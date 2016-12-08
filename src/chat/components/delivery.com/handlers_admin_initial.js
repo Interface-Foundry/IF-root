@@ -1,4 +1,3 @@
-require('kip')
 var sleep = require('co-sleep')
 var _ = require('lodash')
 
@@ -303,7 +302,7 @@ handlers['food.choose_address'] = function * (message) {
 //
 handlers['food.settings.address.new'] = function * (message) {
   kip.debug(' 🌆🏙 enter a new address')
-  // message.state = {}
+
   var msg_json = {
     'text': "What's the address for the order?",
     'attachments': [{
@@ -312,6 +311,18 @@ handlers['food.settings.address.new'] = function * (message) {
       'mrkdwn_in': ['text']
     }]
   }
+
+  //onboarding view
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  if(foodSession.onboarding){
+    msg_json.text = ''
+    msg_json.attachments.unshift({
+      'text':'*Step 2.* What\'s the address for the order?',
+      'color':'#A368F0',
+      'mrkdwn_in': ['text']
+    })
+  }
+
   $replyChannel.send(message, 'food.settings.address.confirm', {type: message.origin, data: msg_json})
 }
 
@@ -392,6 +403,18 @@ handlers['food.settings.address.confirm'] = function * (message) {
     ]
   }
 
+  //onboarding view
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  if(foodSession.onboarding){
+    msg_json.text = ''
+    msg_json.attachments.unshift({
+      'text':'*Step 3.* Is this your address?',
+      'color':'#A368F0',
+      'mrkdwn_in': ['text']
+    })
+  }
+
+
   // collect feedback on this feature
   // if (feedbackOn && msg_json) {
   //   msg_json.attachments[0].actions.push({
@@ -402,7 +425,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
   //   })
   // }
 
-  $replyChannel.send(message, 'food.settings.address.save', {type: message.origin, data: msg_json})
+  return $replyChannel.send(message, 'food.settings.address.save', {type: message.origin, data: msg_json})
 }
 
 // Save the address to the db after the user confirms it
@@ -597,7 +620,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
     {
-      'text': '*Step 2.* Kip polls your team on what type of food they want to eat \n Tap `✓ Start New Poll` to select which team members to poll',
+      'text': '*Step 4.* Kip polls your team on what type of food they want to eat \n Tap `✓ Start New Poll` to select which team members to poll',
       'fallback': 'Team voting',
       'callback_id': 'wopr_game',
       'color': '#A368F0',
@@ -641,7 +664,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     attachments: attachments
   }
 
-  $replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: res})
+  $replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: res})
   foodSession.save()
 }
 

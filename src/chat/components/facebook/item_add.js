@@ -1,5 +1,3 @@
-require('kip')
-
 var co = require('co')
 var _ = require('lodash')
 var http = require('http')

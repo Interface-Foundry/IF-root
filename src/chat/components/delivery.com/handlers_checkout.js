@@ -1,7 +1,8 @@
-require('kip')
 var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
+var sleep = require('co-sleep');
+
 
 // injected dependencies
 var $replyChannel
@@ -134,7 +135,6 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
     return yield handlers['food.admin.order.checkout.phone_number'](message)
   }
 
-
   var deliveryInstructionsText = foodSession.instructions || ''
   var response = {
     text: `Great, please confirm your contact and delivery details:`,
@@ -251,8 +251,8 @@ handlers['food.admin.order.checkout.delivery_instructions'] = function * (messag
   var msg = {
     text: `Add Special Instructions`,
     attachments: [{
-      text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
-      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A. An intern named Benjamin will be waiting._)',
+      text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
+      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
       mrkdwn_in: ['text']
     }]
   }
@@ -505,6 +505,8 @@ handlers['food.admin.order.select_card'] = function * (message) {
       'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
+    sleep(5000);
+
   } catch (e) {
     logging.error('error doing kip pay in food.admin.order.select_card', e)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kip pay'}})
@@ -545,6 +547,10 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
   yield handlers['food.done'](message)
 }
 
+handlers['food.payment_info'] = function * (message) {
+  logging.info('recevied message from pay server')
+}
+
 handlers['food.done'] = function * (message) {
   logging.error('saving users info to slackbots and peripheral cleanup')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -564,6 +570,7 @@ handlers['food.done'] = function * (message) {
     slackbot.meta.locations.push(foodSession.chosen_location)
   }
   yield slackbot.save()
+
 }
 
 module.exports = function (replyChannel, allHandlers) {

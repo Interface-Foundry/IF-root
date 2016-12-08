@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: replylogic
+  name: replylogic
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: replylogic
+  template:
+    metadata:
+      labels:
+        run: replylogic
+    spec:
+      containers:
+      - image: gcr.io/kip-styles/reply_logic:6e22796
+        imagePullPolicy: Always
+        name: replylogic
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

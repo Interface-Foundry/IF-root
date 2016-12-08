@@ -1,5 +1,3 @@
-require('kip')
-
 stitch = require('../../image_processing/api.js')
 var async = require('async')
 

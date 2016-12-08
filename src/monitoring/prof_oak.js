@@ -1,5 +1,5 @@
 'use strict'
-require('logging')
+require('../logging')
 require('colors')
 var slack = require('@slack/client')
 var token = 'xoxb-50573012182-9gJAJ1IBPDRjM3xrfcIFdTO1'

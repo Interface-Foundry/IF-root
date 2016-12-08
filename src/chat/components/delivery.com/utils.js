@@ -1,5 +1,3 @@
-require('kip')
-
 var co = require('co')
 var _ = require('lodash')
 var googl = require('goo.gl')
