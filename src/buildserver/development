@@ -1,0 +1,9 @@
+COMMIT='HEAD'
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOTDIR="$DIR"/../../
+
+cd $ROOTDIR
+git fetch origin
+#git reset --hard origin/$COMMIT
+echo 'not resetting --hard origin/$COMMIT in dev mode because that would destroy all that i have worked for all these years'

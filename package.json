@@ -30,6 +30,7 @@
     "everyconfig": "^1.0.2",
     "express": "^4.13.4",
     "fuse.js": "^2.5.0",
+    "github-webhook-handler": "^0.6.0",
     "goo.gl": "^0.1.4",
     "google-cloud": "^0.44.2",
     "hutil": "^0.1.6",

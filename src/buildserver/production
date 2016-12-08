@@ -1,0 +1,10 @@
+COMMIT='HEAD'
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOTDIR="$DIR"/../../
+
+cd $ROOTDIR
+git fetch origin
+git reset --hard origin/$COMMIT
+yarn install --ignore-engine
+pm2 restart all
