@@ -451,8 +451,7 @@ queue.topic('incoming').subscribe(incoming => {
         logging.info('👽 passing to nlp: ', message.text)
         if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
           replies = yield execute(message)
-        } else if (message.text === 'shopping' || (message.execute && message.execute.length >= 1) || 
-          (message.action === 'switch' && (message.text === 'shopping' || !message.text))) {
+        } else if ((message.text.includes('shop') && !message.execute) || (message.action === 'switch' && (message.text === 'shopping' || !message.text))) {
           message.mode = 'shopping'
           message.action = 'initial'
           message.execute.push({
