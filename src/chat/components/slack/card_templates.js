@@ -14,6 +14,24 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
   }]
 }
 
+var simple_home = module.exports.simple_home = [{
+  name: 'passthrough',
+  value: 'food',
+  text: 'Kip Café',
+  type: 'button'
+}, {
+  name: 'passthrough',
+  value: 'shopping',
+  text: 'Kip Store',
+  type: 'button'
+}, {
+  name: 'settings',
+  text: 'Settings',
+  style: 'default',
+  type: 'button',
+  value: 'start'
+}]
+
 var settings_buttons = module.exports.settings_buttons =
   [{
     "name": "settings.back",
@@ -25,21 +43,22 @@ var settings_buttons = module.exports.settings_buttons =
     text: 'Team Members',
     style: 'default',
     type: 'button',
-    value: 'home',
+    value: 'start',
   }];
 
-  var team_buttons = module.exports.team_buttons =
-    [{
-      name: 'settings',
-      text: '< Back',
-      style: 'default',
-      type: 'button'
-    }, {
-      "name": "settings.back",
-      "text": "⌂ Home",
-      "style": "default",
-      "type": "button"
-    }];
+var team_buttons = module.exports.team_buttons =
+  [{
+    name: 'settings',
+    text: '< Back',
+    style: 'default',
+    type: 'button',
+    value: 'start'
+  }, {
+    "name": "settings.back",
+    "text": "⌂ Home",
+    "style": "default",
+    "type": "button"
+  }];
 
 var focus_home_default = module.exports.focus_home_default = function(message) {
   return [{

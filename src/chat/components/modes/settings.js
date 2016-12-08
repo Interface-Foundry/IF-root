@@ -11,15 +11,19 @@ var request = require('request');
 var cron = require('cron');
 //maybe can make this persistent later?
 var cronJobs = {};
-function * handle(message) {
+function* handle(message) {
   var last_action = _.get(message, 'history[0].action');
+  let action;
   if (!last_action || last_action != 'home') {
-    return yield handlers['start'](message)
-  } else {
-    var action = getAction(message.text);
-    kip.debug('\n\n\n🤖 action : ',action,' 🤖\n\n\n');
-    return yield handlers[action](message)
+    action = 'start';
+  } else if (message.text) {
+    action = getAction(message.text);
+    kip.debug('\n\n\n🤖 action : ', action, ' 🤖\n\n\n');
+  } else if (action === undefined) {
+    action = message.action;
   }
+
+  return yield handlers[action](message)
 }
 
 module.exports.handle = handle;
@@ -115,13 +119,43 @@ handlers['start'] = function * (message) {
       a.mrkdwn_in =  ['text'];
       a.color = '#45a5f4';
     })
+  if (message.source.response_url) {
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify({
+        text: '',
+        attachments: attachments
+      })
+    })
+  }
+  else { 
+    // for case when settings is typed
+    var msg = message;
+    msg.mode = 'settings'
+    msg.text = ''
+    msg.source.team = team_id;
+    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    msg.reply = attachments;
+    return [msg];
+  }
+}
 
+handlers['back'] = function * (message) {
+  var attachments = [{
+    image_url: "http://tidepools.co/kip/kip_menu.png",
+    text: 'Click a mode to start using Kip',
+    color: '#3AA3E3',
+    callback_id: 'wow such home',
+    actions: cardTemplate.simple_home
+  }];
   request({
     method: 'POST',
     uri: message.source.response_url,
     body: JSON.stringify({text: '', attachments: attachments})
   })
 }
+
 
 handlers['status_on'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
@@ -466,26 +500,30 @@ handlers['sorry'] = function * (message) {
 
 }
 
-function getAction (text) {
+function getAction(text) {
   var action;
+  kip.debug(`\n🥝  ${text}\n`)
   if (isStatusOff(text)) {
-      action = 'status_off';
-    } else if (isStatusOn(text)){
-      action = 'status_on';
-    } else if (isStatusChange(text)){
-      action = 'change_status';
-    } else if (isAddOrRemove(text)) {
-      action = 'add_or_remove';
-    } else if (isLastCallOff(text)){
-      action = 'last_call_off';
-    } else if (isLastCallOn(text)){
-      action = 'last_call_on';
-    } else if (isSendLastCall(text)){
-      action = 'send_last_call';
-    } else {
-      action = 'sorry'
-    }
-    return action;
+    action = 'status_off';
+  } else if (isStatusOn(text)) {
+    action = 'status_on';
+  } else if (isStatusChange(text)) {
+    action = 'change_status';
+  } else if (isAddOrRemove(text)) {
+    action = 'add_or_remove';
+  } else if (isLastCallOff(text)) {
+    action = 'last_call_off';
+  } else if (isLastCallOn(text)) {
+    action = 'last_call_on';
+  } else if (isSendLastCall(text)) {
+    action = 'send_last_call';
+  } else if (text.includes('settings')) {
+    kip.debug(`\n🥝  ${text}\n`)
+    action = 'start'
+  } else {
+    action = 'sorry'
+  }
+  return action;
 }
 
 function isStatusChange(input) {

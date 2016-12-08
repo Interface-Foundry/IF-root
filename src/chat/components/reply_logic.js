@@ -92,23 +92,7 @@ function * simplehome (message) {
       text: 'Click a mode to start using Kip',
       color: '#3AA3E3',
       callback_id: 'wow such home',
-      actions: [{
-        name: 'passthrough',
-        value: 'food',
-        text: 'Kip Café',
-        type: 'button'
-      },{
-        name: 'passthrough',
-        value: 'shopping',
-        text: 'Kip Store',
-        type: 'button'
-      },{
-        name: 'settings',
-        text: 'Settings',
-        style: 'default',
-        type: 'button',
-        value: 'home'
-      }]
+      actions: card_templates.simple_home
     }]
     // mrkdwn_in: ['text']
   }

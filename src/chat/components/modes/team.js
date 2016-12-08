@@ -81,16 +81,31 @@ handlers['start'] = function * (message) {
   })
   attachments.push(endpart);
 
-  request({
-    method: 'POST',
-    uri: message.source.response_url,
-    body: JSON.stringify({
-      text: '',
-      attachments: attachments
+  if (message.source.response_url) {
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify({
+        text: '',
+        attachments: attachments
+      })
     })
-  })
+  } else { // in case someone types team
+    var msg = message;
+    msg.mode = 'team';
+    msg.text = '';
+    msg.execute = [{
+      "mode": "team",
+      "action": "home",
+      "_id": message._id
+    }];
+    msg.source.team = team.team_id;
+    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    msg.reply = attachments;
 
-  return;
+    return [msg];
+  }
+
 }
 
 
