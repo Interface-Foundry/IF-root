@@ -6,6 +6,7 @@ var _ = require('lodash')
 
 
 var PORT = process.env.NODE_ENV === 'production' ? 7777 : 8000
+if (process.env.NODE_ENV === 'canary') PORT = 7777
 var branch = process.env.NODE_ENV === 'production' ? 'refs/heads/master' : 'refs/heads/dev'
 var channel = process.env.NODE_ENV === 'production' ? 'G06BTTZGW' : 'D1GGV0CMU'
 var Professor = require('../monitoring/prof_oak').Professor
