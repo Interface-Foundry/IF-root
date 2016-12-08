@@ -1,4 +1,4 @@
 apps:
-  - script: ../src/chat/components/slack/slack.js
-  - script: ../src/chat/components/delivery.com/delivery.com.js
-  - script: ../src/payments/kip_pay.js
+  - script: src/chat/components/slack/slack.js
+  - script: src/chat/components/delivery.com/delivery.com.js
+  - script: src/payments/kip_pay.js
