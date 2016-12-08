@@ -30,9 +30,9 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var matchingItems = yield utils.matchText(keyword, sortedMenu, {
       shouldSort: true,
       location: 0,
-      distance: 10,
-      threshold: 0.6,
-      tokenize: false,
+      distance: 0,
+      threshold: 0.3,
+      tokenize: true,
       keys: ['name']
     })
 
@@ -83,6 +83,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
     // inject the sort order stuff
     if (matchingItems.includes(i.unique_id)) {
       i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.unique_id })
+      // i.infoLine = 'Returned from search term'
     } else if (previouslyOrderedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.orderedBefore
       i.infoLine = 'You ordered this before'
