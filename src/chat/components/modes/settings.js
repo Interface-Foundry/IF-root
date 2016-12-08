@@ -102,7 +102,10 @@ handlers['start'] = function * (message) {
       attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'});
     }
   };
-  var original = cardTemplate.settings_buttons;
+  var buttons = cardTemplate.settings_buttons;
+  if(!isAdmin && admins.length > 0){
+  	buttons = cardTemplate.settings_buttons.slice(0, 1);
+  }
   var text = 'Don’t have any changes? Type `exit` to quit settings';
   var color = '#45a5f4';
   attachments.push({
@@ -110,7 +113,7 @@ handlers['start'] = function * (message) {
       color: color,
       mrkdwn_in: ['text'],
       fallback:'Settings',
-      actions: original,
+      actions: buttons,
       callback_id: 'none'
     })
     // console.log('SETTINGS ATTACHMENTS ',attachments);
