@@ -1,5 +1,4 @@
 /*eslint-env es6*/
-require('kip')
 
 var promisify = require('promisify-node')
 var co = require('co')
@@ -96,9 +95,8 @@ var lookup = function * (params, origin) {
     return co(function * () {
       logging.debug('looking up asin', amazonParams)
       var results = yield get_client().itemLookup(amazonParams)
-      timer.tic('got results from ItemLookup api')
       var enhanced = yield enhance_results(results, origin, timer)
-      timer.tic('done enhancing result')
+      timer.tic('done enhancing result, enhanced: ', enhanced)
       timer.stop()
       return enhanced
     })
@@ -401,7 +399,6 @@ function * enhance_results (results, origin, timer) {
     if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {
       r.mustSelectSize = true
     }
-
     return co(function * () {
       var data = yield getPricesPromise(r)
       r.realPrice = data.price

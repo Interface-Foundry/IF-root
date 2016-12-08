@@ -6,13 +6,20 @@ var mongoose = require('mongoose')
 var deliverySchema = mongoose.Schema({
   active: {
     type: Boolean
-
   },
   session_id: mongoose.Schema.ObjectId,
   team_id: String,
+  onboarding: Boolean, //show onboarding walkthrough tips to user
+
+  all_members: [], // not sure how whitelist thing works so just stashing all_members instead of looking up team_members
   team_members: [], // who is in the order
   chosen_location: {}, // from slackbot.meta.locations
-  chosen_restaurant: {},
+  chosen_restaurant: {
+    id: String,
+    name: String,
+    url: String,
+    minimum: Number
+  },
   menu: {}, // the actual menu for the chosen merchant
   merchants: [], // all possible merchants (based on location)
   cuisines: [], // don't confuse this with votes below
@@ -23,7 +30,7 @@ var deliverySchema = mongoose.Schema({
     user_id: String,
     added_to_cart: {type: Boolean, default: false},
     item: {
-      item_id: String, // the item.unique_id
+      item_id: Number, // the item.unique_id
       item_qty: Number,
       option_qty: {}, // hash of {unique_id, quantity} pairs
       item_label: {type: String, default: ''}, // leave blank? idk what this is
@@ -34,10 +41,35 @@ var deliverySchema = mongoose.Schema({
   // admin or whomever to use for picking restaurant and various other
   convo_initiater: {
     id: String,
-    name: String
+    name: String,
+    first_name: String,
+    last_name: String,
+    phone_number: String,
+    email: String,
+    dm: String
   },
 
+  // temp hold over until we can send to multiple
+  chosen_channel: {
+    name: String,
+    id: String,
+    is_channel: {
+      type: Boolean,
+      default: true
+    }
+  },
+
+  // chosen_channels: [{
+  //   channel_name: String,
+  //   channel_id: String,
+  //   is_channel: { // if its not a channel its a group
+  //     type: Boolean,
+  //     default: true
+  //   }
+  // }],
+
   fulfillment_method: String,
+  instructions: String,
   time_started: {
     type: Date,
     default: Date.now
@@ -49,6 +81,25 @@ var deliverySchema = mongoose.Schema({
   mode: String,
   action: String,
   data: {}, // \shrug
+  tracking: {
+    confirmed_votes_msg: String,
+    confirmed_orders_msg: String
+  },
+  delivery_post: {},
+  order: {}, // info after adding items to cart
+  tipPercent: {
+    type: String,
+    default: `15%`
+  },
+  tipAmount: Number,
+  payment_post: {}, // post body for payment (i.e. select or add new card)
+  payment: {}, // object with payment details
+  confirmed_orders: [], // possibly add time counter thing later
+  guest_token: String, // related to creating a guest token per session
+  completed_payment: Boolean,
+
+  // errors
+  delivery_error: String
 })
 
 deliverySchema.virtual('chosen_restaurant_full').get(function () {

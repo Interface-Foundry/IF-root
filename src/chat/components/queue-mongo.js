@@ -1,4 +1,3 @@
-var kip = require('kip')
 var co = require('co')
 var rx = require('rx')
 
@@ -13,7 +12,8 @@ var topics = {
   'outgoing.web': 8,
   'outgoing.skype': 9,
   'variation.facebook': 10,
-  'variation.slack': 11
+  'variation.slack': 11,
+  // 'cafe.payment': 12
 }
 
 //
@@ -21,7 +21,6 @@ var topics = {
 //
 function publish (topic, data, key) {
   logging.info('topic: ', topic, 'data: ', data, 'key: ', key)
-  kip.debug('publishing to topic', topic)
   if (typeof topic !== 'string') {
     throw new Error('pub/sub topic must be a string, ex queue.publish("messages", {})')
   }

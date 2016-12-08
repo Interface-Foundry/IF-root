@@ -1,6 +1,6 @@
 env: development_mitsu
-mongodb:
-  url: localhost/foundry
+# mongodb:
+#   url: localhost/foundry
 elasticsearch:
   url: http://localhost:9200
 app:
@@ -15,43 +15,5 @@ slack:
    # "17713782326.83486971505"
   client_secret: 74d42c3d72d9e86476734d859569a9b1
   verification_token: rF1BCPsHSBpLyw80aQ7FCGhN
-  redirect_uri: https://0ab69e54.ngrok.io/newslack
-
-globals:
-        port:                   5050
-        debug:                  True
-        service_module:         kip_services
-        log_transports:
-                  - type:         winston.transports.File
-                    filename:     kip.log
-                    level:        debug
-                    json:         false
-                  
-                  - type:         winston.transports.Console
-                    level:        info
-                    json:         false
-
-
-service_objects:
-        MongoDBClient:          
-                init_params:
-                        - username:     person
-                          password:     mypass
-                          host:         localhost
-                          port:         27050
-
-
-        DSXClient:
-                init_params:
-                          host:         64639cb4.ngrok.io
-                          port:         80
-
-
-
-#-----  experimental section, under development --
-segments:
-        snapclient:
-                port:   5050
-#-------------------------------------------------
-
-
+  redirect_uri: https://380bd1b4.ngrok.io/newslack
+kipPayURL: https://447ade6e.ngrok.io 

@@ -2,7 +2,6 @@ var express = require('express');
 var app = express();
 var builder = require('botbuilder');
 var co = require('co');
-var kip = require('kip');
 var queue = require('../queue-mongo');
 var _ = require('lodash');
 var http = require('http');

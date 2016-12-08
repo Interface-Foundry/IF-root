@@ -1,4 +1,3 @@
-require('kip')
 var winston = require('winston');
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 var _ = require('lodash')
@@ -7,15 +6,45 @@ var amazon_search = require('../amazon_search.js');
 var picstitch = require("../picstitch.js");
 var processData = require("../process.js");
 var kipcart = require('../cart');
+var cardTemplate = require('../slack/card_templates');
+var request = require('request');
+var slackUtils = require('../slack/utils');
+var queue = require('../queue-mongo');
 
 //
 // Handlers take something from the message.execute array and turn it into new messages
 //
 var handlers = {}
-module.exports = {}
-module.exports.handlers = handlers
+
+//handle buttons
+handlers['search_btn'] = function*(message, data) {
+  let query = data[0].replace('_', ' ');
+  message.text = query;
+  const msg = yield handlers['shopping.initial'](message, {
+    mode: 'shopping',
+    action: 'initial',
+    params: {
+      query: query
+    }
+  })
+  return [msg];
+}
 
 handlers['shopping.initial'] = function*(message, exec) {
+  //if switching back to shopping mode from food or some other mode
+  if (message.text == 'shopping') {
+      return new db.Message({
+      incoming: false,
+      thread_id: message.thread_id,
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
+      source: message.source,
+      mode: 'shopping',
+      action: 'switch'
+      })
+  }
+
   // typing(message);
   message._timer.tic('starting amazon_search');
     //NLP classified this query incorrectly - lets remove this after NLP sorts into shopping initial 100%
@@ -28,11 +57,10 @@ handlers['shopping.initial'] = function*(message, exec) {
    }
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
+
   var results = yield amazon_search.search(exec.params,message.origin);
-  winston.debug('!1',exec)
 
   if (results == null || !results) {
-      winston.debug('-1')
       return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -89,11 +117,9 @@ handlers['shopping.focus'] = function*(message, exec) {
 handlers['shopping.more'] = function*(message, exec) {
   exec.params = yield getLatestAmazonQuery(message);
   exec.params.skip = (exec.params.skip || 0) + 3;
-    winston.debug('!2', exec)
 
   var results = yield amazon_search.search(exec.params,message.origin);
    if (results == null || !results) {
-          winston.debug('-2')
 
       return new db.Message({
       incoming: false,
@@ -133,7 +159,6 @@ handlers['shopping.similar'] = function*(message, exec) {
 
   if (!exec.params.asin) {
     var old_results = yield getLatestAmazonResults(message);
-    winston.debug(old_results);
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0];
   }
     winston.debug('!2', exec)
@@ -141,7 +166,6 @@ handlers['shopping.similar'] = function*(message, exec) {
 
   var results = yield amazon_search.similar(exec.params,message.origin);
    if (results == null || !results) {
-          winston.debug('-3')
 
       return new db.Message({
       incoming: false,
@@ -281,7 +305,6 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       }
     }
   }
-      winston.debug('!4', exec)
 
   // modify the params and then do another search.
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
@@ -311,7 +334,6 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   }
 
    if ((results == null || !results) && exec.params.type !== 'price')  {
-                  winston.debug('-5')
 
       return new db.Message({
       incoming: false,
@@ -340,6 +362,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
 
 
   var results = yield amazon_search.search(exec.params,message.origin);
+
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -353,14 +376,55 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     mode: 'shopping',
     action: 'results'
   })
+
+}
+
+handlers['home.expand'] = function*(message, exec) {
+  return yield slackUtils.showMenu(message);
+};
+
+handlers['home.detract'] = function*(message, exec) {
+   return yield slackUtils.hideMenu(message);
+
+};
+
+handlers['home.loading'] = function*(message) {
+
+  kip.debug(' \n\n\n\n\n\n\n\n\n\n  👳shopping.js:393:home.loading', message,'  \n\n\n\n\n\n\n\n\n\n')
+
+  var message = new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    text: 'Searching...',
+  })
+
+  yield queue.publish('outgoing.' + message.origin, message, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+  
+
+   // return new db.Message({
+   //    incoming: false,
+   //    thread_id: message.thread_id,
+   //    mode: 'shopping',
+   //    resolved: true,
+   //    user_id: 'kip',
+   //    origin: message.origin,
+   //    source: message.source,
+   //    text: 'Searching...'
+   //  })
+};
+
+handlers['cart.loading'] = function (message) {
+  // nothing to see here
 }
 
 handlers['cart.save'] = function*(message, exec) {
   if (!exec.params.focus) {
     throw new Error('no focus for saving to cart');
   }
-
-
 
  var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message);
   winston.debug('raw_results: ', typeof raw_results, raw_results);
@@ -369,8 +433,8 @@ handlers['cart.save'] = function*(message, exec) {
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
   //Diverting team vs. personal cart based on source origin for now
   var cart_type= message.source.origin == 'slack' ? 'team' : 'personal';
-  winston.debug('INSIDE REPLY_LOGIC SAVEE   :   ', exec.params.focus - 1 )
-;  try {
+  winston.debug('INSIDE REPLY_LOGIC SAVEE   :   ', exec.params.focus - 1 );  
+  try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
     kip.err(e);
@@ -445,8 +509,7 @@ handlers['cart.empty'] = function*(message, exec) {
   return res;
 };
 
-
-
+module.exports.handlers = handlers
 
 //
 // Returns the amazon results as it is stored in the db (json string)

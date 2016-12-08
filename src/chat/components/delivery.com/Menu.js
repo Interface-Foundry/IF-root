@@ -35,8 +35,22 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
 
-  return item.price * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
+  var basePrice
+  var hasPriceGroup = item.children.map(c => c.type).includes('price group')
+  if (hasPriceGroup) {
+    var priceGroup = item.children.filter(c => c.type === 'price group')[0]
+    var priceOption = priceGroup.children.filter(p => !!cartItem.item.option_qty[p.unique_id])[0]
+    basePrice = _.get(priceOption, 'price', item.price)
+  } else {
+    basePrice = item.price
+  }
+
+  return basePrice * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
       if (!cartItem.item.option_qty.hasOwnProperty(optionId)) {
+        return sum
+      }
+
+      if (optionId === _.get(priceOption, 'unique_id', -1).toString()) {
         return sum
       }
 
@@ -54,27 +68,62 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
 // turns the menu into a single object with keys as item ids
 function flattenMenu (data) {
   var out = {}
+  var schedules = data.schedule
+  var now = new Date()
   function flatten (node, out) {
+    if (node.type === 'menu' && _.get(node, 'schedule[0]')) {
+      var isAvailable = false
+      node.schedule.map(id => _.find(schedules, {id: id}))[0].times.map(t => {
+        if (now > new Date(t.from) && now < new Date(t.to)) {
+          isAvailable = true
+        }
+      })
+
+      if (!isAvailable) {
+        logging.debug(node.name.cyan, 'is not available'.red)
+        return
+      }
+    }
+
     out[node.unique_id] = node
-    _.get(node, 'children', []).map(c => flatten(c, out))
+    _.get(node, 'children', []).map(c => {
+      c.parentId = node.unique_id
+      flatten(c, out)
+    })
   }
   data.menu.map(m => flatten(m, out))
   return out
 }
 
-Menu.prototype.generateJsonForItem = function (cartItem) {
+Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   var menu = this
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
 
   // Price for the Add To Cart button
   var fullPrice = menu.getCartItemPrice(cartItem)
+  var parentName = _.get(menu, `flattenedMenu.${item.parentId}.name`)
+  var parentDescription = _.get(menu, `flattenedMenu.${item.parentId}.description`)
+
+  //lol
+  if (item.description){
+    var des = `- _${item.description}_`
+  }else {
+    var des = ''
+  }
+  //lol
+  if(parentDescription){
+    var h = '-'
+  }else {
+    var h = ''
+  }
 
   var json = {
-    text: `*${item.name}*
- ${item.description}`,
+    text: `${parentName} `+h+` ${parentDescription}
+      *${item.name}* ${des}`,
     attachments: [{
-      fallback: 'Quantity: ' + cartItem.item.item_qty,
+      image_url: (item.images.length>0 ? 'https://res.cloudinary.com/delivery-com/image/fetch/w_300,h_240,c_fit/' + encodeURIComponent(item.images[0].url) : ''),
+      fallback: item.name + ' - ' + item.description,
       callback_id: 'quantity',
       color: 'grey',
       attachment_type: 'default',
@@ -102,12 +151,12 @@ Menu.prototype.generateJsonForItem = function (cartItem) {
   }
 
   // options, like radios and checkboxes
-  var options = nodeOptions(item, cartItem)
+  var options = nodeOptions(item, cartItem, validate)
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
-    'text': 'Special Instructions: _None_',
-    'fallback': 'You are unable to choose a game',
-    'callback_id': 'wopr_game',
+    'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"} \n *Total:* `+fullPrice.$,
+    'fallback': 'Special Instructions: ${cartItem.item.instructions || "_None_"}',
+    'callback_id': 'menu_quickpicks',
     'color': '#49d63a',
     'attachment_type': 'default',
     'mrkdwn_in': [
@@ -116,30 +165,30 @@ Menu.prototype.generateJsonForItem = function (cartItem) {
     'actions': [
       {
         'name': 'food.item.add_to_cart',
-        'text': '✓ Add to Cart: $' + fullPrice.toFixed(2),
+        'text': '✓ Add to Order',
         'type': 'button',
         'style': 'primary',
         'value': cartItem.item.item_id
       },
       {
-        'name': 'chess',
-        'text': '+ Special Instructions',
+        'name': 'food.item.instructions',
+        'text': '✎ Special Instructions',
         'type': 'button',
-        'value': 'chess'
+        'value': cartItem.item.item_id
       },
       {
-        'name': 'chess',
+        'name': 'food.menu.quickpicks',
         'text': '< Back',
         'type': 'button',
-        'value': 'chess'
+        'value': 0
       }
     ]
   })
   return json
 }
 
-function nodeOptions (node, cartItem) {
-  var attachments = node.children.filter(c => c.type === 'option group').map(g => {
+function nodeOptions (node, cartItem, validate) {
+  var attachments = node.children.filter(c => c.type.includes('group')).reduce((all, g) => {
     var a = {
       fallback: 'Meal option',
       callback_id: g.id,
@@ -156,28 +205,56 @@ function nodeOptions (node, cartItem) {
 
     var required = false
     var allowMultiple = true
+    var numSelected = g.children.filter(option => Object.keys(cartItem.item.option_qty).includes(option.unique_id.toString())).length
     if (g.min_selection === 0) {
-      if (g.max_selection > 4) {
+      if (g.max_selection >= g.children.length) {
         a.text += '\n Optional - Choose as many as you like.'
       } else {
         a.text += `
  Optional - Choose up to ${g.max_selection}.`
+        if (numSelected > g.max_selection) {
+          a.text += '\n`Maximum number of options exceeded`'
+          a.color = '#fa951b'
+        }
       }
     } else {
       required = true
       if (g.min_selection === g.max_selection) {
-        allowMultiple = false
+        allowMultiple = g.min_selection !== 1
         a.text += `
  Required - Choose exactly ${g.min_selection}.`
+        if (numSelected > g.min_selection) {
+          a.text += `\n\`Too many options selected\``
+          a.color = '#fa951b'
+        } else if (validate && numSelected < g.min_selection) {
+          a.text += `\n\`${g.min_selection - numSelected} more selection(s) required\``
+          a.color = '#fa951b'
+        }
       } else {
         a.text += `
  Required - Choose at least ${g.min_selection} and up to ${g.max_selection}.`
+        if (numSelected > g.max_selection) {
+          a.text += '\n`Maximum number of options exceeded`'
+          a.color = '#fa951b'
+        } else if (validate && numSelected < g.min_selection) {
+          a.text += '\n`Minimum number of options not met`'
+          a.color = '#fa951b'
+        }
       }
     }
 
     a.actions = g.children.map(option => {
-      var checkbox
-      var price = option.price ? ' +$' + option.price : ''
+      var checkbox, price
+      if (g.type === 'price group') {
+        // price groups are like 'small, medium or large' and so each one is the base price
+        price = ' $' + option.price
+      } else if (g.type === 'option group' && option.price) {
+        // option groups are add-ons or required choices which can add to the item cost
+        price = ' +$' + option.price
+      } else {
+        price = ''
+      }
+
       if (cartItem.item.option_qty[option.unique_id]) {
         checkbox = allowMultiple ? '✓ ' : '◉ '
       } else {
@@ -187,13 +264,62 @@ function nodeOptions (node, cartItem) {
         name: 'food.option.click',
         text: checkbox + option.name + price,
         type: 'button',
-        value: option.unique_id
+        value: {
+          item_id: cartItem.item.item_id,
+          option_id: option.unique_id
+        }
       }
     })
-    return a
-  })
+
+    all.push(a)
+
+    // Submenu part
+    g.children.map(option => {
+      if (cartItem.item.option_qty[option.unique_id] && _.get(option, 'children.0')) {
+        var submenuAttachments = nodeOptions(option, cartItem, validate)
+        all = all.concat(submenuAttachments)
+      }
+    })
+
+    return all
+  }, [])
+
+  // spread out the buttons to multiple attachments if needed
+  attachments = attachments.reduce((all, a) => {
+    if (_.get(a, 'actions.length', 0) <= 5) {
+      all.push(a)
+      return all
+    } else {
+      var actions = a.actions
+      a.actions = actions.splice(0, 5)
+      all.push(a)
+      while (actions.length > 0) {
+        all.push({
+          color: a.color,
+          fallback: a.fallback,
+          callback_id: 'even more actions',
+          attachment_type: 'default',
+          actions: actions.splice(0, 5)
+        })
+      }
+      return all
+    }
+  }, [])
 
   return attachments
+}
+
+// Check a cartItem for errors
+// (a cartItem is one thing from the foodSession.cart array)
+Menu.prototype.errors = function (cartItem) {
+  // the way we'll do this is to build the options with the validation flag
+  // and then check the outputted json for errors.
+  var submenu = this.generateJsonForItem(cartItem, true)
+  var ok = !JSON.stringify(submenu).includes('fa951b')
+
+  if (!ok) {
+    return submenu
+  }
 }
 
 module.exports = Menu

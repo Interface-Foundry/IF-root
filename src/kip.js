@@ -165,6 +165,19 @@ SavedTimer.prototype.tic = function (label) {
   })
 }
 
+//
+// let's you do total.$ to get "$2.99"
+// example
+//    var a = 2.5
+//    console.log(a.$)
+//    > "$2.50"
+//
+Object.defineProperty(Number.prototype, '$', {
+  get: function() {
+    return '$' + this.toFixed(2)
+  }
+})
+
 module.exports = global.kip = {
   SavedTimer: SavedTimer,
   debug: debug,

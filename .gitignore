@@ -16,6 +16,10 @@ node_modules/
 
 node-v*/
 
+# python #
+__pycache__/
+*.pyc
+
 # Compiled source #
 ###################
 *.class
@@ -71,3 +75,6 @@ app/phonegap/platforms/ios/Bubbl.li.xcodeproj/project.xcworkspace/xcuserdata/jrb
 
 TrainingCorpus
 components/cinna-slack/node_modules/*
+src/db/db
+
+yarn.lock

@@ -40,7 +40,7 @@ async.whilst(
           status.latency=(end-begin)/10000;
           status.data_retrieved = false;
           status.age = (Date.now() - status.last_ping)/10000;
-          console.log('\nstatus: ',status,'\n');
+          // console.log('\nstatus: ',status,'\n');
           db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: url, delay_ms: status.latency, success: false, error: err, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config } }); 
           setTimeout(function () {
             callback()
@@ -53,7 +53,7 @@ async.whilst(
           status.latency=(end-begin)/10000;
           status.data_retrieved = reviews ? true : false;
           status.age = (Date.now() - status.last_ping)/10000;
-          console.log('\nstatus: ',status,'\n');
+          // console.log('\nstatus: ',status,'\n');
           db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: url, delay_ms: status.latency, success: true, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}});
           setTimeout(function () {
             callback()
@@ -63,7 +63,7 @@ async.whilst(
           status.latency=(end-begin)/10000;
           status.data_retrieved = false;
           status.age = (Date.now() - status.last_ping)/10000;
-          console.log('\nstatus: ',status,'\n');
+          // console.log('\nstatus: ',status,'\n');
           db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: url, delay_ms: status.latency, success: false, error: err, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}}); 
           setTimeout(function () {
             callback()

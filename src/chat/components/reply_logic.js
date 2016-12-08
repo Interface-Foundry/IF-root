@@ -1,44 +1,43 @@
 /*eslint-env es6*/
+require('../../kip');
 var async = require('async');
 var request = require('request');
 var co = require('co');
 var _ = require('lodash');
 var fs = require('fs');
-
 var banter = require("./banter.js");
-// var history = require("./history.js");
-// var search = require("./search.js");
 var amazon_search = require('./amazon_search.js');
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
-// var init_team = require("./init_team.js");
-// var conversation_botkit = require('./conversation_botkit');
-// var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
 var nlp = require('../../nlp2/api');
 //set env vars
 var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
-
 //load mongoose models
 var mongoose = require('mongoose');
-require('kip');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
 var Slackbots = db.Slackbots;
-
-// var supervisor = require('./supervisor');
 var upload = require('./upload.js');
 var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 var queue = require('./queue-mongo');
-var onboarding = require('./modes/onboarding')
-var settings = require('./modes/settings')
-var shopping = require('./modes/shopping')
+var onboarding = require('./modes/onboarding');
+var onboard = require('./modes/onboard');
+var member_onboard = require('./modes/member_onboard');
+
+var settings = require('./modes/settings');
+var team = require('./modes/team');
+var shopping = require('./modes/shopping').handlers;
+var food = require('./delivery.com/delivery.com').handleMessage;
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
+var slackUtils = require('./slack/utils');
+var amazon_variety = require('./amazon_variety');
+var card_templates = require('./slack/card_templates.js');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
@@ -57,13 +56,13 @@ function default_reply (message) {
 
 // get a simple text message
 function text_reply (message, text) {
-  var msg = default_reply(message)
-  msg.text = text
-  msg.execute = msg.execute ? msg.execute : []
+  var msg = default_reply(message);
+  msg.text = text;
+  msg.execute = msg.execute ? msg.execute : [];
   msg.execute.push({
     mode: 'banter',
     action: 'reply'
-  })
+  });
   return msg
 }
 
@@ -84,27 +83,165 @@ function typing (message) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
+function * simplehome (message) {
+
+  var slackreply = {
+    text: '*Hi! Thanks for using Kip* 😊',
+    attachments: [{
+      image_url: "http://tidepools.co/kip/kip_menu.png",
+      text: 'Click a mode to start using Kip',
+      color: '#3AA3E3',
+      callback_id: 'wow such home',
+      actions: card_templates.simple_home
+    }]
+    // mrkdwn_in: ['text']
+  }
+
+
+  let team = yield db.Slackbots.findOne({
+    'team_id': message.source.team
+  }).exec();
+  let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+  let allow = isAdmin || team.meta.office_assistants == 0;
+
+  slackreply.attachments = allow ? slackreply.attachments : card_templates.slack_shopping_mode;
+
+  var msg = {
+    action: allow ? 'simplehome' : 'switch',
+    mode: allow ? 'food' : 'shopping',
+    source: message.source,
+    origin: message.origin,
+    reply: {
+      data: slackreply
+    }
+  }
+
+  queue.publish('outgoing.' + message.origin, msg, 'home.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+}
+
 function isCancelIntent(message) {
-  var text = message.text.toLowerCase().replace(/^[a-z]/g, '')
+  var text = message.text ? message.text.toLowerCase() : '';
   var cancelPhrases = [
     'stop',
     'exit',
     'cancel',
     'start over',
-    'quit'
-  ]
-
+    'quit',
+    'home'
+  ];
   return cancelPhrases.indexOf(text) >= 0
+}
 
+function isMenuChange(message) {
+  return _.get(message,'action') && (_.get(message,'action').indexOf('home.expand') > -1 || _.get(message,'action').indexOf('home.detract') > -1)
+}
+
+function isLoading(message) {
+  return (_.get(message,'action') && (_.get(message,'action').indexOf('home.loading') > -1))
+}
+
+//NOT WORKING
+
+//https://www.amazon.com/gp/product/B01E7QPPWK/ref=br_asw_pdt-3?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=AP76KCMKGEN673ZV8SPX&pf_rd_t=36701&pf_rd_p=3a087c6c-220d-4990-9d91-10b580e4cb73&pf_rd_i=desktop
+//B01E7QPPWK
+
+//WORKING
+
+//https://www.amazon.com/gp/product/B01E8O2K0Q/ref=br_asw_pdt-3?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=AP76KCMKGEN673ZV8SPX&pf_rd_t=36701&pf_rd_p=3a087c6c-220d-4990-9d91-10b580e4cb73&pf_rd_i=desktop&th=1&psc=1
+// B01E8O2K0Q
+
+
+
+function * processProductLink(message) {
+  var text = message.text ? message.text.toLowerCase() : '';
+  if (text.indexOf('www.amazon.com') > -1 ) {
+    if (text.indexOf('/dp/') > -1) {
+      var asin = text.substr(text.indexOf('/dp/')+4, 10);
+    } else if (text.indexOf('/gp/') > -1) {
+      var asin = text.substr(text.indexOf('/gp/')+12, 10);
+    }
+  }
+  if (asin) {
+    var fail = false;
+    try {
+      yield slackUtils.addViaAsin(asin, message);
+    } catch (err) {
+        fail = true;
+      yield amazon_variety.getVariations(asin, message);
+    }
+    if (!fail) {
+      message.text = 'view cart';
+      message.mode = 'shopping';
+      message.action = 'initial';
+      yield message.save();
+    }
+  }
+}
+
+function switchMode(message) {
+  var input = message.text ? message.text.toLowerCase().trim() : '';
+  var modes = {
+    'onboarding': function () {
+      return 'onboarding';
+    },
+    'onboard': function () {
+      return 'onboard';
+    },
+    'member_onboard': function () {
+      return 'member_onboard'
+    },
+    'shopping': function () {
+      return 'shopping';
+    },
+    'settings': function () {
+      return 'settings';
+    },
+    'team': function () {
+      return 'team';
+    },
+    'food': function () {
+      return 'food';
+    },
+    'cafe': function () {
+      return 'food';
+    },
+    'address': function () {
+      return 'address';
+    },
+    'default': function () {
+      return false;
+    }
+  };
+  var mode = (modes[input] || modes['default'])();
+  return mode
 }
 
 function printMode(message) {
   switch (message.mode) {
+    case 'shopping_button':
     case 'shopping':
       winston.debug('In', 'SHOPPING'.rainbow, 'mode 👚👖👗👝👛👜🏬🏪💳🛍')
       break
     case 'onboarding':
       winston.debug('In', 'ONBOARDING'.green, 'mode 👋')
+      break
+    case 'onboard':
+      winston.debug('In', 'ONBOARD'.cyan, 'mode 👋')
+      break
+    case 'member_onboard':
+      winston.debug('In', 'MEMBER_ONBOARD'.cyan, 'mode 👋')
+      break
+    case 'team':
+      winston.debug('In', 'TEAM'.yellow, 'mode 👋')
+      break
+    case 'settings':
+      winston.debug('In', 'SETTINGS'.red, 'mode 👋')
+      break
+    case 'food':
+      winston.debug('In', 'FOOD'.blue, 'mode 👋')
+      break
+    case 'address':
+      winston.debug('In', 'ADDRESS'.purple, 'mode 👋')
       break
     default:
       winston.debug('no mode known such mystery 🕵 ')
@@ -112,32 +249,33 @@ function printMode(message) {
   }
 }
 
-
-
 //
-// Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
+// Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS <--lel
 //
 queue.topic('incoming').subscribe(incoming => {
 
+  incoming.ack();
+
   co(function * () {
-    kip.debug('🔥', incoming)
-
+    if (incoming.data.text) {
+      console.log('>>>'.yellow, incoming.data.text.yellow)
+    } else if (_.get(incoming, 'data.data.value')) {
+      console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
+    }
     var timer = new kip.SavedTimer('message.timer', incoming.data)
-
     // skipping histoy and stuff rn b/c i dont have time to do it
     if (_.get(incoming, 'data.action') == 'item.add') {
-      var selected_data = incoming.data.postback.selected_data
-
-      var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data)
-      var results = yield amazon_search.lookup(results, results.origin)
+      var selected_data = incoming.data.postback.selected_data;
+      var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data);
+      var results = yield amazon_search.lookup(results, results.origin);
 
       logging.debug('taking first item from results')
       var results = results[0]
       logging.debug('raw_results: ', results)
 
-      var history = yield db.Messages.find({thread_id: incoming.data.postback.dataId}).sort('-ts').limit(20)
-      var message = history[0]
-      message.history = history.slice(1)
+      var history = yield db.Messages.find({thread_id: incoming.data.postback.dataId}).sort('-ts').limit(20);
+      var message = history[0];
+      message.history = history.slice(1);
 
       var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team
       var cart_type = 'personal'
@@ -164,13 +302,27 @@ queue.topic('incoming').subscribe(incoming => {
         $lte: incoming.data.ts
       }
     }).sort('-ts').limit(20)
+
     var message = history[0]
     message.history = history.slice(1)
 
-    // sanitize text input
-    if (message.text) {
-      message.text = message.text.replace(/[^0-9a-zA-Z.]/g, ' ')
+    if (history[1]) {
+      message.mode = history[0].mode
+      message.action = history[0].action
+      message.route = message.mode + '.' + message.action
+      message.prevMode = history[1].mode
+      message.prevAction = history[1].action
+      message.prevRoute = message.prevMode + '.' + message.prevAction
     }
+    if (!message.mode) {
+      kip.debug('setting mode to prevmode', message.prevMode)
+      message.mode = message.prevMode
+    }
+    if (!message.action && message.prevAction) {
+      message.action = message.prevAction.match(/(expand|detract)/) ?  'initial' : message.prevAction;
+      kip.debug('setting mode to prevaction', message.action)
+    }
+
     timer.tic('got history')
     message._timer = timer
     // fail fast if the message was not in the database
@@ -178,19 +330,44 @@ queue.topic('incoming').subscribe(incoming => {
       throw new Error('correct message not retrieved from db')
     }
 
-    // mode guessing
     if (isCancelIntent(message)) {
-      kip.debug('cancel intent triggered')
-      message.mode = 'shopping'
+      message.mode = 'shopping';
+      message.action = 'switch'
+      yield simplehome(message)
+      yield message.save();
+      timer.stop();
+      return
     }
 
-    if (message.text.indexOf('onboard') >= 0) {
-      message.mode = 'onboarding'
+    if (isMenuChange(message)) { 
+      timer.stop();
+      incoming.ack()
+      return yield shopping[_.get(message,'action')](message);
     }
 
-    // if (message.text.indexOf('home') >= 0) {
-    //   message.mode = 'home'
-    // }
+     if (isLoading(message)) { 
+      timer.stop();
+      incoming.ack()
+      return yield shopping['home.loading'](message);
+    }
+
+    yield processProductLink(message);
+
+    if (switchMode(message)) {
+      message.mode = switchMode(message);
+      if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
+      if (message.mode.match(/(onboard|food|team)/)) {
+        let team = yield db.Slackbots.findOne({
+          'team_id': message.source.team
+        }).exec();
+        let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+        let allow = isAdmin || team.meta.office_assistants == 0;
+        if (!allow) {
+          message.mode = 'shopping'
+        }
+      }
+      yield message.save();
+    }
 
     if (!message.mode) {
       if (_.get(message, 'history[0].mode')) {
@@ -203,12 +380,13 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     printMode(message)
+    debugger;
 
     //MODE SWITCHER
-    switch(message.mode) {
+    switch (message.mode) {
       case 'onboarding':
         if (message.origin === 'slack') {
-          var replies = yield onboarding.handle(message)
+          var replies = yield onboarding.handle(message);
         } else {
           // facebook
           //check for valid country
@@ -216,7 +394,6 @@ queue.topic('incoming').subscribe(incoming => {
           if (text == 'Singapore' || text == 'United States') {
             winston.debug('SAVING TO DB')
             replies = ['Saved country!'];
-
             //access onboard template per source origin!!!!
             modes[user.id] = 'shopping';
           } else {
@@ -224,73 +401,109 @@ queue.topic('incoming').subscribe(incoming => {
             winston.debug('Didnt understand, please choose a country thx')
           }
         }
-      break;
-     case 'home':
-        // modes[user.id] = 'home';
-        var replies = yield settings.handle(message);
-        kip.debug('\n\nreply_logic 231: switch case "home"', replies,'\n\n');
         break;
-     case 'team':
-        var replies = yield settings.handle(message);
-        kip.debug('\n\nreply_logic 231: switch case "home"', replies,'\n\n');
+      case 'onboard':
+        if (message.origin === 'slack') {
+          var replies = yield onboard.handle(message)
+        }
         break;
-      //default Kip Mode shopping
+      case 'member_onboard':
+        if (message.origin === 'slack') {
+          var replies = yield member_onboard.handle(message)
+        }
+        break;
+      case 'settings':
+        if (message.origin === 'slack') {
+          var replies = yield settings.handle(message);
+          kip.debug(`Searching for back button REPLY_LOGIC ${JSON.stringify(replies, null, 2)}`)
+        }
+        break;
+      case 'search_btn':
+        if (message.origin === 'slack') {
+          var data = _.split(message.data.value, '.');
+          var action = data[0];
+          data.splice(0, 1);
+          var replies = yield shopping[message.mode](message, data);
+        }
+        break;
+      case 'team':
+        if (message.origin === 'slack') {
+          var replies = yield team.handle(message);
+        }
+        break;
+      case 'food':
+      case 'cafe':
+        yield food(message)
+        return incoming.ack()
+      case 'address':
+        return
+        break;
       default:
         logging.debug('DEFAULT SHOPPING MODE')
         // try for simple reply
         timer.tic('getting simple response')
         var replies = yield simple_response(message)
         timer.tic('got simple response')
-        kip.debug('simple replies'.cyan, replies)
-
+      kip.debug('simple replies'.cyan, replies)
         // not a simple reply, do NLP
-        if (!replies || replies.length === 0) {
-          timer.tic('getting nlp response')
-
-
-          logging.info('👽 passing to nlp: ', message.text)
-
-          if (message.execute && message.execute.length >= 1) {
-            replies = yield execute(message)
-          }else {
-            replies = yield nlp_response(message)
-            kip.debug('+++ NLPRESPONSE ' + replies)
-          }
-
-          timer.tic('got nlp response')
-          kip.debug('nlp replies'.cyan,
-            replies.map(function * (r) {
-              return {
-                text: r.text,
-                execute: r.execute
-              }
-            }))
+      if (!replies || replies.length === 0) {
+        timer.tic('getting nlp response')
+        logging.info('👽 passing to nlp: ', message.text)
+        if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
+          replies = yield execute(message)
+        } else if ((message.text.includes('shop') && !message.execute) || (message.action === 'switch' && (message.text === 'shopping' || !message.text))) {
+          message.mode = 'shopping'
+          message.action = 'initial'
+          message.execute.push({
+            mode: 'shopping',
+            action: 'initial'
+          });
+          replies = yield execute(message);
+        } else {
+          kip.debug(`PRENLP message: \n ${JSON.stringify(message, null, 2)}`)
+          replies = yield nlp_response(message)
+          kip.debug('+++ NLPRESPONSE ' + replies)
         }
-
-        if (!replies || replies.length === 0) {
-          kip.error('Could not understand message ' + message._id)
-          replies = [default_reply(message)]
-        }
+        timer.tic('got nlp response')
+        kip.debug('nlp replies'.cyan,
+          replies.map(function*(r) {
+            return {
+              text: r.text,
+              execute: r.execute
+            }
+          }))
+      }
+      if (!replies || replies.length === 0) {
+        kip.error('Could not understand message ' + message._id)
+        replies = [default_reply(message)]
+      }
     }
-
-    kip.debug('num replies', replies.length)
+    if (replies) kip.debug('num replies', replies.length)
     timer.tic('saving message', message)
     yield message.save(); // the incoming message has had some stuff added to it :)
     timer.tic('done saving message', message)
     timer.tic('saving replies')
-    yield replies.map(r => {
-      if (r.save) {
-        r.save()
-      } else {
-        logging.debug('could not save ' + r)
-      }
-    })
+    if (replies) {
+      yield replies.map(r => {
+        if (r) {
+          try {
+            r.save()
+          } catch (err) {
+            logging.debug('could not save ' + r, err)
+          }
+        } else {
+          logging.debug('reply_logic:316:r does not exist ' + r)
+        }
+      })
+    }
     timer.tic('done saving replies')
     timer.tic('sending replies')
-    yield replies.map((r, i) => {
-      kip.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
-      queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
-    })
+    if (replies) {
+      yield replies.map((r, i) => {
+        kip.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
+        queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
+      })
+    }
     incoming.ack()
     timer.stop()
   }).catch(kip.err)
@@ -303,13 +516,16 @@ function * simple_response (message) {
 
   // check for canned responses/actions before routing to NLP
   // this adds mode and action to the message
-  var reply = banter.checkForCanned(message)
+  if (message.text) {
+    var reply =  banter.checkForCanned(message)
+  } else {
+    message.text = '';
+    var reply =  banter.checkForCanned(message)
+  }
 
   kip.debug('prefab reply from banter.js', reply)
 
-  if (!reply.flag) {
-    return
-  }
+
 
   switch (reply.flag) {
     case 'basic': // just respond, no actions
@@ -356,11 +572,11 @@ function * simple_response (message) {
       })
       break
      case 'search.home':
-      message.mode = 'home'
-      message.action = 'settings'
+      message.mode = 'settings'
+      message.action = 'home'
       message.execute.push({
-        mode: 'home',
-        action: 'settings'
+        mode: 'settings',
+        action: 'home'
       })
       break
     case 'purchase.remove':
@@ -372,7 +588,6 @@ function * simple_response (message) {
         action: 'remove',
         params: {
           focus: reply.query
-        // ? reply.query : (message.searchSelect[0] ? message.searchSelect[0] : undefined)
         }
       })
       break
@@ -424,26 +639,24 @@ function * simple_response (message) {
 
 // use nlp to deterine the intent of the user
 function * nlp_response (message) {
-  kip.debug('nlp_response begin'.cyan)
+  kip.debug('nlp_response begin'.cyan);
   // the nlp api adds the processing data to the message
-
   try {
-    yield nlp.parse(message)
-    if (process.env.NODE_ENV !== 'production') {
+    yield nlp.parse(message);
+    if (process.env.NODE_ENV.includes('development')) {
       var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute) + '`')
     }
     var messages = yield execute(message)
-  } catch(err) {
+  }
+  catch(err) {
     kip.err(err)
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV.includes('development')) {
     return [debug_message].concat(messages)
   } else {
     return messages
   }
 }
-
-var handlers = shopping.handlers;
 
 // do the things
 function execute (message) {
@@ -452,13 +665,13 @@ function execute (message) {
     message._timer.tic('getting messages')
     var messages = yield message.execute.reduce((messages, exec) => {
       var route = exec.mode + '.' + exec.action
-      kip.debug('route', route, 'exec', exec)
-      if (!handlers[route]) {
+      kip.debug('route: ', route, 'exec: ', exec)
+
+      //switch between reply_logic and delivery.com.js as necessary
+      var message_promises = exec.mode.match(/^(shopping|settings|team|cart|exit)$/) ? shopping[route](message, exec) : food[route](message);
+      if (!message_promises) {
         throw new Error(route + ' handler not implemented')
       }
-
-      var message_promises = handlers[route](message, exec)
-
       if (message_promises instanceof Array) {
         messages = messages.concat(message_promises)
       } else {
@@ -480,6 +693,7 @@ function execute (message) {
   })
 }
 
+
 ;`
 LIFE OF  NEKO
 LIFE OF  NEKO
@@ -492,514 +706,3 @@ LIFE OF  NEKO
 　|￣＼∩・ω・)＼
 　|　 ｜￣￣∪￣｜ ﾁﾗｯ
 `
-
-//
-// Handlers take something from the message.execute array and turn it into new messages
-//
-var handlers = {}
-
-handlers['item.picked'] = function * (message, item) {
-  typing(message)
-  message._timer.tic('starting amazon_lookup')
-  // var results = yield amazon_variety.pickItem
-
-// return
-}
-
-handlers['shopping.initial'] = function * (message, exec) {
-  typing(message)
-  message._timer.tic('starting amazon_search');
-  // NLP classified this query incorrectly - lets remove this after NLP sorts into shopping initial 100%
-  if (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) {
-    var fake_exec = {
-      mode: 'shopping',
-      action: 'initial',
-      params: { query: message.text.split(' but ')[1]}
-    }
-  }
-  var exec = fake_exec ? fake_exec : exec;
-  // end of patch
-
-  var results = yield amazon_search.search(exec.params, message.origin);
-  kip.debug('!1', exec);
-
-  if (results == null || !results) {
-    return new db.Message({
-      incoming: false,
-      thread_id: message.thread_id,
-      resolved: true,
-      user_id: 'kip',
-      origin: message.origin,
-      source: message.source,
-      text: 'Oops! Sorry my brain froze!'
-    })
-  }
-
-  message._timer.tic('done with amazon_search')
-
-  return new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    execute: [exec],
-    text: 'Hi, here are some options you might like. Tap `Add to Cart` to save to your Cart 😊',
-    amazon: JSON.stringify(results),
-    mode: 'shopping',
-    action: 'results',
-    original_query: results.original_query
-  })
-}
-
-handlers['shopping.focus'] = function * (message, exec) {
-  if (!exec.params.focus) {
-    kip.err('no focus supplied')
-    return default_reply(message)
-  }
-
-  // find the search results this focus query is referencing
-  var results = yield getLatestAmazonResults(message)
-
-  return new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    amazon: JSON.stringify(results),
-    mode: 'shopping',
-    action: 'focus',
-    focus: exec.params.focus
-  })
-}
-
-// "more"
-handlers['shopping.more'] = function * (message, exec) {
-  exec.params = yield getLatestAmazonQuery(message)
-  exec.params.skip = (exec.params.skip || 0) + 3
-  kip.debug('!2', exec)
-
-  var results = yield amazon_search.search(exec.params, message.origin)
-  if (results == null || !results) {
-    logging.debug('-2')
-
-    return new db.Message({
-      incoming: false,
-      thread_id: message.thread_id,
-      resolved: true,
-      user_id: 'kip',
-      origin: message.origin,
-      source: message.source,
-      text: 'Oops! Sorry my brain froze!'
-    })
-  }
-
-  return new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    execute: [exec],
-    text: 'Hi, here are some more options. Type `more` to see more options or tap `Add to Cart` to save to your Cart 😊',
-    amazon: JSON.stringify(results),
-    mode: 'shopping',
-    action: 'results',
-    original_query: results.original_query
-  })
-}
-
-// "more like 2"
-handlers['shopping.similar'] = function * (message, exec) {
-  if (!exec.params.focus) {
-    kip.err('no focus supplied')
-    return default_reply(message)
-  }
-
-  exec.params.skip = 0; // (exec.params.skip || 0) + 3
-
-  if (!exec.params.asin) {
-    var old_results = yield getLatestAmazonResults(message)
-    kip.debug(old_results)
-    exec.params.asin = old_results[exec.params.focus - 1].ASIN[0]
-  }
-  logging.debug('!2', exec)
-
-  var results = yield amazon_search.similar(exec.params, message.origin)
-  if (results == null || !results) {
-    logging.debug('-3')
-
-    return new db.Message({
-      incoming: false,
-      thread_id: message.thread_id,
-      resolved: true,
-      user_id: 'kip',
-      origin: message.origin,
-      source: message.source,
-      text: 'Oops! Sorry my brain froze!'
-    })
-  }
-
-  return new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    execute: [exec],
-    text: 'I found some similar options, would you like to see more product info? Tap `More Info`',
-    amazon: JSON.stringify(results),
-    mode: 'shopping',
-    action: 'results',
-    original_query: results.original_query
-  })
-}
-
-// "cheaper" and "denim"
-handlers['shopping.modify.all'] = function * (message, exec) {
-  var old_params = yield getLatestAmazonQuery(message)
-  var old_results = yield getLatestAmazonResults(message)
-  kip.debug('old params', old_params)
-  kip.debug('new params', exec.params)
-
-  if (exec.params && exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1) {
-    var all_modifiers = message.text.split(' but ')[1].split(' ')
-    if (all_modifiers.length >= 2) {
-      for (var i = 1; i < all_modifiers.length; i++) {
-        if (all_modifiers[i] && all_modifiers[i] !== '') {
-          exec.params.val.push(all_modifiers[i].replace('_', ' ').trim())
-        }
-      }
-    }
-  }
-
-  // for "cheaper" modify the params and then do another search.
-  if (exec.params.type === 'price') {
-    _.merge(exec.params, old_params)
-    var max_price = Math.max.apply(null, old_results.map(r => parseFloat(r.realPrice.slice(1))))
-    if (exec.params.param === 'less') {
-      exec.params.max_price = max_price * 0.8
-    } else if (exec.params.param === 'more') {
-      kip.log('wow someone wanted something more expensive')
-      exec.params.min_price = max_price * 1.1
-    }
-  }
-  else if (exec.params.type === 'color') {
-    var results = yield getLatestAmazonResults(message)
-    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0]
-    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode
-    exec.params.color = exec.params.val[0]
-  }else {
-    var results = yield getLatestAmazonResults(message)
-    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0]
-    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode
-  }
-  exec.params.query = old_params.query
-  if (!exec.params.query) {
-
-    return new db.Message({
-      incoming: false,
-      thread_id: message.thread_id,
-      resolved: true,
-      user_id: 'kip',
-      origin: message.origin,
-      source: message.source,
-      text: 'Oops! Sorry my brain froze!'
-    })
-  }
-
-  var results = yield amazon_search.search(exec.params, message.origin)
-  if (results == null || !results) {
-
-    return new db.Message({
-      incoming: false,
-      thread_id: message.thread_id,
-      resolved: true,
-      user_id: 'kip',
-      origin: message.origin,
-      source: message.source,
-      text: 'Oops! Sorry my brain froze!'
-    })
-  }
-
-  return new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    execute: [exec],
-    text: 'Hi, here are some different options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
-    amazon: JSON.stringify(results),
-    mode: 'shopping',
-    action: 'results'
-  })
-}
-
-// "like 1 but cheaper", "like 2 but blue"
-handlers['shopping.modify.one'] = function * (message, exec) {
-  if (!exec.params.focus) {
-    kip.err('no focus supplied')
-    return default_reply(message)
-  }
-  var old_params = yield getLatestAmazonQuery(message)
-  var old_results = yield getLatestAmazonResults(message)
-  kip.debug('old params', old_params)
-  kip.debug('new params', exec.params)
-  if (exec.params && exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1) {
-    var all_modifiers = message.text.split(' but ')[1].split(' ')
-    if (all_modifiers.length >= 2) {
-      for (var i = 1; i < all_modifiers.length; i++) {
-        if (all_modifiers[i] && all_modifiers[i] !== '') {
-          exec.params.val.push(all_modifiers[i].replace('_', ' ').trim())
-        }
-      }
-    }
-  }
-  // modify the params and then do another search.
-  // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
-  if (exec.params.type === 'price') {
-    var max_price = parseFloat(old_results[exec.params.focus - 1].realPrice.slice(1))
-    if (exec.params.param === 'less') {
-      exec.params.max_price = max_price * 0.8
-    } else if (exec.params.param === 'more') {
-      exec.params.min_price = max_price * 1.1
-    }
-  }
-  else if (exec.params.type === 'color') {
-    var results = yield getLatestAmazonResults(message)
-    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0]
-    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode
-    exec.params.color = exec.params.val[0]
-  // logging.debug('exec for color search: ', JSON.stringify(exec))
-  }else {
-    var results = yield getLatestAmazonResults(message)
-    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0]
-    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode
-  // exec.params.color = exec.params.val.name
-  // throw new Error('this type of modification not handled yet: ' + exec.params.type)
-  }
-  if ((results == null || !results) && exec.params.type !== 'price') {
-
-    return new db.Message({
-      incoming: false,
-      thread_id: message.thread_id,
-      resolved: true,
-      user_id: 'kip',
-      origin: message.origin,
-      source: message.source,
-      text: 'Oops! Sorry my brain froze!'
-    })
-  }
-
-  exec.params.query = old_params.query
-
-  if (!exec.params.query) {
-    return new db.Message({
-      incoming: false,
-      thread_id: message.thread_id,
-      resolved: true,
-      user_id: 'kip',
-      origin: message.origin,
-      source: message.source,
-      text: 'Oops! Sorry my brain froze!'
-    })
-  }
-
-  var results = yield amazon_search.search(exec.params, message.origin)
-  return new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    execute: [exec],
-    text: 'Hi, here are some different options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
-    amazon: JSON.stringify(results),
-    mode: 'shopping',
-    action: 'results'
-  })
-}
-
-handlers['cart.save'] = function * (message, exec) {
-  if (!exec.params.focus) {
-    throw new Error('no focus for saving to cart')
-  }
-
-  var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message)
-  logging.debug('raw_results: ', typeof raw_results, raw_results)
-  var results = (typeof raw_results == 'array' || typeof raw_results == 'object') ? raw_results : JSON.parse(raw_results)
-
-  var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team // TODO make this available for other platforms
-  // Diverting team vs. personal cart based on source origin for now
-  var cart_type = message.source.origin == 'slack' ? 'team' : 'personal'
-  logging.debug('INSIDE REPLY_LOGIC SAVE   :   ', exec.params.focus - 1)
-  try {
-    yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
-
-    // view the cart
-    return yield handlers['cart.view'](message, exec)
-  } catch (e) {
-    // this is the start of how you can manually select item
-    if (_.get(message, 'origin') === 'facebook') {
-      typing(message)
-      yield amazon_variety.getVariations(results[exec.params.focus - 1].ASIN, message)
-      return text_reply(message, 'One moment, we need to select some specifics :)')
-    } else {
-      kip.err(e)
-      return text_reply(message, "Sorry, it's my fault – I can't add this item to cart. Please click on item link above to add to cart, thanks! 😊")
-    }
-  }
-}
-
-handlers['cart.remove'] = function * (message, exec) {
-  if (!exec.params.focus) {
-    throw new Error('no focus for removing from cart', message)
-  }
-
-  var cart_id = (message.source.origin === 'facebook') ? message.source.org : message.cart_reference_id || message.source.team
-
-  // Diverting team vs. personal cart based on source origin for now
-  var cart_type = message.source.origin == 'slack' ? 'team' : 'personal'
-
-  yield kipcart.removeFromCart(cart_id, message.user_id, exec.params.focus, cart_type)
-  var confirmation = text_reply(message, `Item ${exec.params.focus} removed from your cart`)
-  var viewcart = yield handlers['cart.view'](message)
-  return [confirmation, viewcart]
-}
-
-handlers['cart.view'] = function * (message, exec) {
-  kip.debug('cart.view')
-  var res = new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    mode: 'cart',
-    action: 'view',
-    focus: exec && _.get(exec, 'params.focus')
-  })
-  var cart_reference_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team // TODO
-  logging.debug('reply-473: cart_reference_id: ', cart_reference_id)
-  res.data = yield kipcart.getCart(cart_reference_id)
-  res.data = res.data.toObject()
-  if (res.data.items.length < 1) {
-    return text_reply(message, 'It looks like your cart is empty')
-  }
-  kip.debug('view cart message', res)
-  return res
-}
-
-handlers['cart.empty'] = function * (message, exec) {
-  kip.debug('cart.empty')
-  var res = new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    mode: 'cart',
-    action: 'empty'
-  })
-  var cart_reference_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team // TODO
-  logging.debug('reply_logic cart.empty handler: cart_reference_id: ', cart_reference_id, ' message: ', message.source)
-  res.data = yield kipcart.emptyCart(cart_reference_id)
-  res.data = res.data.toObject()
-  if (res.data.items.length < 1) {
-    return text_reply(message, 'Your cart is now empty')
-  }
-  kip.debug('empty cart message', res)
-  return res
-}
-
-;`
-                         __
-           ---_ ...... _/_ -
-          /  .      ./ .'*           : '         /__-'   .
-         /                      )
-       _/                  >   .'
-     /   .   .       _.-" /  .'
-                __/"     /.'/|
-        '--  .-" /     //' ||
-        |   | /     //_ _ |/|
-          .  :     //|_ _ _||
-         | /.    //  | _ _ |/| ASH
-          _ | / /     _ _               __/       _ _ |`
-
-//
-// Returns the amazon results as it is stored in the db (json string)
-// Recalls more history from the db if it needs to, and the history is just appended
-// to the existing history so you don't need to worry about stuff getting too messed up.
-//
-function * getLatestAmazonResults (message) {
-  var results, i = 0
-  while (!results) {
-    if (!message.history[i]) {
-      var more_history = yield db.Messages.find({
-        thread_id: message.thread_id,
-        ts: {
-          $lte: message.ts
-        }
-      }).sort('-ts').skip(i).limit(20)
-
-      if (more_history.length === 0) {
-        logging.debug(message)
-        throw new Error('Could not find amazon results in message history for message ' + message._id)
-      }
-
-      message.history = message.history.concat(more_history)
-    }
-
-    try {
-      results = JSON.parse(message.history[i].amazon)
-      results[0].ASIN[0] // check to make sure there is an actual result
-    } catch (e) {
-      results = false
-    // welp no results here.
-    }
-
-    i++
-  }
-  return results
-}
-
-//
-// Gets the most recent set of params used to search amazon
-//
-function * getLatestAmazonQuery (message) {
-  var params, i = 0
-  while (!params) {
-    if (!message.history[i]) {
-      var more_history = yield db.Messages.find({
-        thread_id: message.thread_id,
-        ts: {
-          $lte: message.ts
-        }
-      }).sort('-ts').skip(i).limit(20)
-
-      if (more_history.length === 0) {
-        throw new Error('Could not find amazon results in message history for message ' + message._id)
-      }
-
-      message.history = message.history.concat(more_history)
-    }
-
-    var m = message.history[i]
-    if (m.mode === 'shopping' && m.action === 'results' && m.execute[0].params.query) {
-      params = m.execute[0].params
-    }
-
-    i++
-  }
-  return params
-}

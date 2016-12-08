@@ -1,6 +1,14 @@
 var winston = require('winston')
+var MongoDB = require('winston-mongodb').MongoDB
+
+var configFiles = require('./config')
 
 var logging
+
+// slight fix for mongodb stuff to work with config files
+if (configFiles.mongodb.url.indexOf('mongodb://') < 0) {
+  configFiles.mongodb.url = `mongodb://` + configFiles.mongodb.url
+}
 
 var config = {
   levels: {
@@ -26,10 +34,20 @@ var config = {
 if (process.env.NODE_ENV !== 'test') {
   logging = new (winston.Logger)({
     transports: [
+      // console logger
       new (winston.transports.Console)({
         level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
         colorize: true,
         prettyPrint: true
+      }),
+      // log errors to mongodb
+      new MongoDB({
+        level: 'error',
+        db: configFiles.mongodb.url,
+        options: configFiles.mongodb.options,
+        collection: 'errors',
+        label: 'winston',
+        decolorize: true
       })],
     colors: config.colors,
     levels: config.levels

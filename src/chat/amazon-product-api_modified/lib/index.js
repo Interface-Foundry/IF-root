@@ -60,13 +60,19 @@ var runQuery = function (credentials, method) {
       request(url, function (err, response, body) {
 
         if (err) {
-          console.log('!!!!!!err norm ',err);
+          console.log('!!!!!!err norm ', err);
           reject(err);
         } else if (!response) {
           reject("No response (check internet connection)");
+        } else if (response.statusCode == 503) { //let's try to handle rate limits I guess
+          kip.debug('Oh no! AWS is rate limiting me. Let\'s wait a bit')
+          setTimeout(() => {
+            kip.debug('Ok let\'s go');
+            resolve(runQuery(credentials, method)(query,cb)); //should probably find a way to handle infinite recursion
+          }, 1500)
         } else if (response.statusCode !== 200) {
-          parseXML(body, function (err, resp) {
-            console.log('AMAZON QUERY ERROR! in /amazon-product-api_modified/lib/index.js ',JSON.stringify(resp));
+          parseXML(body, function(err, resp) {
+            console.log('AMAZON QUERY ERROR! in /amazon-product-api_modified/lib/index.js ', JSON.stringify(resp));
             if (err) {
               reject(err);
             } else {
@@ -98,7 +104,6 @@ var runQuery = function (credentials, method) {
               else {
                 console.log('error: amazon request callback not handled');
               }
-
             }
           });
         }
@@ -118,7 +123,6 @@ var createClient = function (credentials) {
     similarityLookup: runQuery(credentials, 'SimilarityLookup'),
     itemSearch: runQuery(credentials, 'ItemSearch'),
     itemLookup: runQuery(credentials, 'ItemLookup'),
-    createCart: runQuery(credentials, 'CartCreate'),
     browseNodeLookup: runQuery(credentials, 'BrowseNodeLookup')
   };
 };

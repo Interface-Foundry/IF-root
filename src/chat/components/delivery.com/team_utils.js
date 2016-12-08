@@ -1,7 +1,5 @@
-var db = require('db');
 var request = require('request-promise');
 var co = require('co');
-var kip = require('kip');
 var async = require('async');
 
 function * removeCartChannel(message, channel_name) {
@@ -45,34 +43,38 @@ function * addCartChannel(message, channel_name) {
 }
 
 var getChatUsers = co.wrap(function *(message) {
-        var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
-        var teamMembers = yield db.Chatusers.find({team_id: message.source.team, is_bot: false}).exec();
-        var bots = yield db.Chatusers.find({team_id: message.source.team, is_bot: true}).exec();
-        var result = [];
-        var res = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token);
-        res = JSON.parse(res);
-        kip.debug('res: ',res)
-        var team_members_id_array = teamMembers.map(function(m){
-            return m.dm;
-        })
-          async.eachSeries(res.ims, function iterator(u, cb){
-                    kip.debug('creating new chatusers.. ')
-                    var new_user = new db.Chatuser();
-                    new_user.team_id = team.team_id;
-                    new_user.id = u.user;
-                    new_user.dm = u.id;
-                    new_user.is_bot = false;
-                    if (u.user == message.source.user) {
-                      new_user.is_admin = true;
-                    }
-                    new_user.save(function(err, saved) {
-                      result.push(new_user)
-                      cb();
-                    });
-          }, function done(err) {
-            return Promise.resolve(result)
-          })
-    
+  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
+  var teamMembers = yield db.Chatusers.find({team_id: message.source.team, is_bot: false}).exec();
+  var bots = yield db.Chatusers.find({team_id: message.source.team, is_bot: true}).exec();
+  var result = [];
+  var res = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token);
+  res = JSON.parse(res);
+  kip.debug('res: ',res)
+  var team_members_id_array = teamMembers.map(function(m){
+      return m.dm;
+  })
+  async.eachSeries(res.ims, function iterator(u, cb){
+    if (team_members_id_array.indexOf(u.id == -1)){
+      kip.debug('creating new chatusers.. ')
+      var new_user = new db.Chatuser();
+      new_user.team_id = team.team_id;
+      new_user.id = u.user;
+      new_user.dm = u.id;
+      new_user.is_bot = false;
+      new_user.history.interactions = []
+      if (u.user == message.source.user) {
+        new_user.is_admin = true;
+      }
+      new_user.save(function(err, saved) {
+        result.push(new_user)
+        cb();
+      });
+    } else {
+      cb();
+    }
+  }, function done(err) {
+    return Promise.resolve(result)
+  });
 })
 
 

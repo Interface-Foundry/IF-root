@@ -108,7 +108,7 @@
             "actions": [
                 {
                     "name": "chess",
-                    "text": "✓ Confirm Address",
+                    "text": "✓ Confirm Contact",
                     "type": "button",
 					"style": "primary",
                     "value": "chess"

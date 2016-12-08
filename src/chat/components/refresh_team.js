@@ -1,4 +1,3 @@
-var db = require('../../db');
 var co = require('co');
 var request = require('request-promise');
 require('promisify-global');

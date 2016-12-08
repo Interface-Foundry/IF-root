@@ -37,7 +37,7 @@ module.exports = function (bot, cb) {
 }
 
 // callback is a team, the list of chatusers for this bot
-var scrape_team_info = function (bot, callback) {
+var scrape_team_info = function (bot) {
   // console.log('scraping team for bot ' + bot._id)
   request('https://slack.com/api/auth.test?token=' + bot.access_token, function (e, r, b) {
     if (kip.error(e)) return
@@ -84,7 +84,7 @@ var scrape_team_info = function (bot, callback) {
           userhash[u.user].save()
         })
 
-        callback(null, users)
+        // callback(null, users)
       })
     })
   })

@@ -13,6 +13,8 @@ var messageSchema = mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  slack_ts: String,
+  replace_ts: String,
   resolved: {
     type: Boolean,
     default: false
@@ -28,6 +30,8 @@ var messageSchema = mongoose.Schema({
   // Kip processing stuff
   //
   text: String, // incoming message (if applicable), pre-processed
+  allow_text_matching: Boolean, // allow text to match for fuzzy matching
+  text_matching: {}, // if we use allow_text_matching, store matched in here
   tokens: [String], // broken up incoming message (if applicable)
   execute: [{
     mode: String,
@@ -86,7 +90,12 @@ var messageSchema = mongoose.Schema({
     callback_id: String
   },
   original_query: String,
-  reply: mongoose.Schema.Types.Mixed
+  reply: mongoose.Schema.Types.Mixed,
+  menus: {
+    id: String,
+    original: [{data: [], weight: Number}],
+    expandable: [{data: [], weight: Number}]
+  }
 })
 
 module.exports = mongoose.model('Message', messageSchema)

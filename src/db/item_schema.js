@@ -45,7 +45,11 @@ var item = mongoose.Schema({
   added_date: {
     type: Date,
     default: Date.now
-  }
+  },
+
+  bundle: String,
+
+  available: Boolean
 
 })
 

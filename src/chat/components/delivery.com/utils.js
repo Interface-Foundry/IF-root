@@ -1,39 +1,186 @@
-require('kip')
-
 var co = require('co')
-var fs = require('fs')
 var _ = require('lodash')
-var sm = require('slack-message-builder')
-var async = require('async')
+var googl = require('goo.gl')
+var request = require('request-promise')
+var Fuse = require('fuse.js')
 
-var weekly_updates = require('../weekly_updates.js')
-var api = require('./api-wrapper.js')
+var queue = require('../queue-mongo')
+var UserChannel = require('./UserChannel')
+var replyChannel = new UserChannel(queue)
+
+/*
+* use this to match on terms where key_choices are
+* @param {String} text is what user entered,
+* @param {Array} allChoices is array of all the options to search thru
+* @param {Object options is object with everything such as
+  @returns {Array} results from fuse match
+* options = {
+*   threshold: 0.8,
+*   tokenize: true,
+*   matchAllTokens: true,
+*   keys: ['name']
+* }
+*/
+function * matchText (text, allChoices, options) {
+  // might want to use id, but dont for now
+  var baseOptions = {
+    shouldSort: true,
+    threshold: 0.8,
+    tokenize: true
+  }
+  _.merge(baseOptions, options)
+  var fuse = new Fuse(allChoices, baseOptions)
+  var res = yield fuse.search(text)
+  //
+  if (res.length > 0) {
+    return res
+  } else {
+    // no matches
+    return null
+  }
+}
+
+function * matchTextToButton (message) {
+  // find previous buttons displayed to user
+
+  // need to grab last message we sent to user that contained attachments
+  var prevMessage = yield db.Message.findOne({id: message.source.id, incoming: false}).exec()
+  // combine all the previous attachments actions
+  var prevButtons = _.map(_.flatten(prevMessage.reply.data.attachments), 'actions')
+  var fuse = new Fuse(prevButtons, {
+    shouldSort: true,
+    threshold: 0.4,
+    keys: ['text']
+  })
+  var res = yield fuse.search(message.data.text)
+
+  if (res.length > 0) {
+    return res
+  } else {
+    // no matches
+    return null
+  }
+}
+
+function defaultReply (message) {
+  return new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    text: "I'm sorry I couldn't quite understand that",
+    source: message.source,
+    mode: message.mode,
+    action: message.action,
+    state: message.state
+  })
+}
+
+function textReply (message, text) {
+  var msg = defaultReply(message)
+  msg.text = text
+  return msg
+}
+
+function sendTextReply (message, text) {
+  var msg = textReply(message, text)
+  msg.save()
+  logging.info('<<<'.yellow, text.yellow)
+  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+}
+
+/**
+ * helper to determine an affirmative or negative response
+ *
+ * 10-4 good buddy is not supported
+ *
+ * @param {any} text
+ * @returns {Boolean} yes
+ */
+function * yesOrNo (text) {
+  text = (text || '').toLowerCase().trim()
+  if (text === 'yes') {
+    return true
+  } else {
+    return false
+  }
+}
 
 /*
 *
 *
 *
 */
-function * initiateDeliverySession (session, teamMembers, location) {
+function * initiateDeliverySession (session) {
   var foodSessions = yield db.Delivery.find({team_id: session.source.team, active: true}).exec()
+
   if (foodSessions) {
-    yield foodSessions.map(session => {
+    yield foodSessions.map((session) => {
+      logging.info('send message to old admin that their order is being canceled')
+      // var lastMessage = yield db.Messages.find({
+      //   incoming: false,
+      //   mode: 'food',
+      //   source: {
+      //     'user': session.convo_initiater.id}})
+      //   .sort({'ts': -1})
+      //   .limit(1).exec()
+
+      // replyChannel.send(lastMessage[0], 'food.cancel_previous', {type: session.origin, data: {text: 'Hey we are canceling your old order! Someone is starting a new order'}})
       session.active = false
       session.save()
     })
   }
+
+  // TEMP HACK for Spark demo
+  var WHITELISTS = {
+    T0299Q668: ['jeff', 'christafogleman', 'donnasokolsky'], // Spark
+    // T1JTUM7RN: ['peter', 'elon'], // Mars Vacation Condos
+    // T1P8S8C91: ['peter', 'graham', 'alyx', 'rachel', 'muchimoto', 'chris'] // Kip
+  }
+
+  var teamMembers = yield db.Chatusers.find({
+    team_id: session.source.team,
+    is_bot: {$ne: true},
+    deleted: {$ne: true},
+    id: {$ne: 'USLACKBOT'}}).exec()
+
+  if (WHITELISTS[session.source.team]) {
+    teamMembers = teamMembers.filter(u => WHITELISTS[session.source.team].includes(u.name))
+  }
+
   var admin = yield db.Chatuser.findOne({id: session.source.user}).exec()
   var newSession = new db.Delivery({
     active: true,
     team_id: session.source.team,
-    // probably will want team_members to come from weekly_updates getTeam later
     team_members: teamMembers,
-    chosen_location: {addr: location},
+    all_members: teamMembers,
+    fulfillment_method: 'delivery', // set by default and change to pickup if it changes
+    confirmed_orders: [],
     convo_initiater: {
       id: admin.id,
-      name: admin.name
+      name: admin.name,
+      first_name: _.get(admin, 'first_name') ? admin.first_name : admin.profile.real_name,
+      last_name: _.get(admin, 'last_name') ? admin.last_name : '',
+      email: admin.profile.email,
+      dm: admin.dm
+    },
+    data: {
+      instructions: ' '
+    },
+    tracking: {
+    // last_sent_message to replace, and specific id's to
+      confirmed_orders_msg: null,
+      confirmed_votes_msg: null
     }
   })
+  if (_.get(admin, 'phone_number')) {
+    newSession.phone_number = admin.phone_number
+  }
+  // check if user has entered phone number before
+  if (_.get(admin, 'phone_number')) {
+    newSession.convo_initiater.phone_number = admin.phone_number
+  }
   return newSession
 }
 
@@ -87,7 +234,7 @@ function initiateFoodOrdering (admin) {
     var locationMessage = {}
     locationMessage['text'] = 'Great! Which address is this for?'
     locationMessage['attachments'] = {
-      fallback: 'You are unable to choose a location',
+      fallback: 'Great! Which address is this for?',
       callback_id: 'adminLocationPicker',
       color: '#3AA3E3',
       attachment_type: 'default',
@@ -179,7 +326,7 @@ function createCuisineOptionForUser (user, cuisines) {
   var randomsToUse = 1
   var users_top = _.countBy(user.history)
 
-  historySorted = Object.keys(users_top).sort(function (a, b) {
+  var historySorted = Object.keys(users_top).sort(function (a, b) {
     return users_top[b] - users_top[a]
   })
 
@@ -205,10 +352,6 @@ function getMerchatsWithCuisine (merchants, cuisineType) {
   })
 }
 
-function askUserForPreferences (user) {
-  var buttons = createPreferencesAttachments()
-}
-
 function createPreferencesAttachments () {
   // create button attachments
   var buttonGroup1 = ['Vegetarian', 'Vegan', 'Paleo', 'Pescetarian', 'None']
@@ -224,26 +367,6 @@ function createPreferencesAttachments () {
 }
 
 /*
-* S5
-* creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
-*
-*/
-function askUserForCuisineTypes (cuisines, user, admin) {
-  // probably should check if user is on slack
-  var s = _.sampleSize(cuisines, 4)
-  var res = sm().text(`<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!`)
-  var a = res.attachment()
-    .color('#3AA3E3')
-    .ts(Date.now())
-    .callbackId('food.preferences')
-  _.forEach(s, function (cuisineName) {
-    a.button().name('food.admin.restaurant.pick').value(cuisineName).text(cuisineName).end()
-  })
-  a.button().name('food.admin.restaurant.pick').value('remove_from_users').text('× No Lunch for Me').style('danger').end()
-  return res.json()
-}
-
-/*
 * general use for when you need to remove a user from a session for delivery session
 *
 *
@@ -255,67 +378,60 @@ function * removeUserFromSession (team, user) {
   foodSession.save()
 }
 
-function confirmRestaurant (restaurant) {
-  var res = {
-    text: `Okay I'll collect orders for <${restaurant.url}|${restaurant.name}>`,
-    attachments: [{
-      fallback: 'You are unable to confirm',
-      callback_id: 'confirmRestaurant',
-      color: '#3AA3E3',
-      actions: [
-        {
-          name: 'food.admin.restaurant.collect_orders',
-          text: 'Confirm',
-          style: 'primary',
-          type: 'button',
-          value: 'confirm'
-        },
-        {
-          name: 'food.admin.view_team_members',
-          text: 'View Team Members',
-          type: 'button',
-          value: 'view_team_members'
-        },
-        {
-          name: 'food.admin.change_restaurant',
-          text: '< Change Restaurant',
-          type: 'button',
-          value: 'change_restaurant'
-        }
-      ]
-    }
+function * buildRestaurantAttachment (restaurant) {
+  // will need to use picstitch for placeholder image in future
+  // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+
+  try {
+    var realImage = yield request({
+      uri: kip.config.picstitchDelivery,
+      json: true,
+      body: {
+        origin: 'slack',
+        cuisines: restaurant.summary.cuisines,
+        location: restaurant.location,
+        ordering: restaurant.ordering,
+        summary: restaurant.summary,
+        url: restaurant.summary.merchant_logo
+      }
+    })
+  } catch (e) {
+    kip.err(e)
+    realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+  }
+
+  var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
+
+  var obj = {
+    'text': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*> - <${shortenedRestaurantUrl}|View Menu>`,
+    'image_url': realImage,
+    'color': '#3AA3E3',
+    'callback_id': restaurant.id,
+    'fallback': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*> - <${shortenedRestaurantUrl}|View Menu>`,
+    'attachment_type': 'default',
+    'mrkdwn_in': ['text'],
+    'actions': [
+      {
+        'name': 'food.admin.restaurant.confirm',
+        'text': '✓ Order Here',
+        'type': 'button',
+        'style': 'primary',
+        'value': restaurant.id
+      }
     ]
   }
-  return res
-}
-
-var userFoodPreferencesPlaceHolder = {
-  text: 'Here we would ask user for preferences if they didnt have it',
-  fallback: 'You are unable to confirm preferences',
-  callback_id: 'confirm.user.preferences',
-  color: 'grey',
-  attachment_type: 'default',
-  attachments: [{
-    actions: [{
-      'name': 'food.user.poll',
-      'value': 'food.user.poll',
-      'text': 'Confirm',
-      'type': 'button'
-    },
-      {
-        'name': 'food.user.preference.cancel',
-        'value': 'food.user.preference.cancel',
-        'text': '× Cancel',
-        'type': 'button'
-      }]
-  }]
-
+  return obj
 }
 
 module.exports = {
-  askUserForCuisineTypes,
-  initiateFoodMessage,
-  confirmRestaurant,
-  initiateDeliverySession,
-  removeUserFromSession,
+  initiateFoodMessage: initiateFoodMessage,
+  initiateDeliverySession: initiateDeliverySession,
+  removeUserFromSession: removeUserFromSession,
+  buildRestaurantAttachment: buildRestaurantAttachment,
+  default_reply: defaultReply,
+  text_reply: textReply,
+  send_text_reply: sendTextReply,
+  yesOrNo: yesOrNo,
+  matchText: matchText,
+  matchTextToButton: matchTextToButton
 }
