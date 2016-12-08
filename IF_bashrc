@@ -26,7 +26,6 @@ alias ndoe='node'
 alias l='ls'
 
 
-export TESTDB='localhost:37017'
 
 
 
