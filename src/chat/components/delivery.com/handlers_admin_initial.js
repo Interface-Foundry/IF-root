@@ -544,36 +544,43 @@ handlers['food.admin_polling_options'] = function * (message) {
   lastOrdered = yield lastOrdered.filter(message => merchantIds.includes(message.chosen_restaurant.id))
   var mostRecentSession = lastOrdered[0]
   lastOrdered = _.uniq(lastOrdered.map(message => message.chosen_restaurant.id)) // list of unique restaurants
-
   // create attachments, only including most recent merchant if one exists
   var attachments = []
-
+  
   if (mostRecentSession) {
-    // build the regular listing as if it were a choice presented to the admin in the later steps,
+// build the regular listing as if it were a choice presented to the admin in the later steps,
     // but them modify it with some text to indicate you've ordered here before
-    var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id)[0] // get the full merchant
-    var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
-    listing.text = `You recently ordered delivery from ${listing.text} \n Order again?`
-
-    // allow confirmation
-    listing.actions = [{
-      'name': 'food.admin.restaurant.reordering_confirmation',
-      'text': '✓ Reorder From Here',
-      'type': 'button',
-      'style': 'primary',
-      'value': mostRecentMerchant.id
-    }]
-
-    listing.mrkdwn_in = ['text']
-    if (lastOrdered.length > 1) {
-      listing.actions.push({
-        'name': 'food.restaurants.list.recent',
-        'text': 'More Past Orders',
-        'type': 'button',
-        'value': 0
-      })
+    if (foodSession.fulfillment_method == 'delivery') {
+      var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id && m.ordering.availability.delivery == true)[0]
+    } else if (foodSession.fulfillment_method == 'pickup') {
+      var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id && m.ordering.availability.pickup == true)[0]
     }
-    attachments.push(listing)
+    if(mostRecentMerchant != null){
+      var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
+      listing.text = `You recently ordered delivery from ${listing.text} \n Order again?`
+  
+      // allow confirmation
+      listing.actions = [{
+        'name': 'food.admin.restaurant.reordering_confirmation',
+        'text': '✓ Reorder From Here',
+        'type': 'button',
+        'style': 'primary',
+        'value': mostRecentMerchant.id
+      }]
+
+      listing.mrkdwn_in = ['text']
+      if (lastOrdered.length > 1) {
+        listing.actions.push({
+          'name': 'food.restaurants.list.recent',
+          'text': 'More Past Orders',
+          'type': 'button',
+          'value': 0
+        })
+      }
+      attachments.push(listing)
+    }else {
+      attachments.push({'text': 'Seems like your most recent restaurants are not available at this time.'})
+    }
   }else {
     foodSession.onboarding = true
   }
