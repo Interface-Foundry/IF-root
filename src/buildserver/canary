@@ -5,6 +5,6 @@ ROOTDIR="$DIR"/../../
 
 cd $ROOTDIR
 git fetch origin
-git reset --hard origin/$COMMIT
+git reset --hard origin/dev
 yarn install --ignore-engine
 pm2 restart 5 7

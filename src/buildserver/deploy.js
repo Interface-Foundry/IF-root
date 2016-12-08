@@ -14,8 +14,9 @@ module.exports = deploy
 if (!module.parent) {
   var commit = process.argv[2]
   if (!commit) {
-    console.log('error, no commit supplied.\n\nusage:\n  node build.js HEAD\n  node build.js a6c25e5\n  node build.js a6c25e55c19432a06f498ddf651952ae9bcb2775')
-    process.exit(1)
+    commit = 'HEAD'
+    // console.log('error, no commit supplied.\n\nusage:\n  node deploy.js HEAD\n  node deploy.js a6c25e5\n  node deploy.js a6c25e55c19432a06f498ddf651952ae9bcb2775')
+    // process.exit(1)
   }
   require('../kip')
   deploy(commit).then(() => {

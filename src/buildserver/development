@@ -5,5 +5,5 @@ ROOTDIR="$DIR"/../../
 
 cd $ROOTDIR
 git fetch origin
-#git reset --hard origin/$COMMIT
-echo 'not resetting --hard origin/$COMMIT in dev mode because that would destroy all that i have worked for all these years'
+#git reset --hard origin/dev
+echo 'not resetting --hard origin/dev in dev mode because that would destroy all that i have worked for all these years'
