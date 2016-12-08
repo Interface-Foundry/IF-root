@@ -146,7 +146,6 @@ var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
 }];
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = [{
-  pretext: "Going back to Shopping Mode ☺️",
   image_url: "http://kipthis.com/kip_modes/mode_shopping.png",
   text: "",
   mrkdwn_in: [
@@ -215,12 +214,11 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
 
 
 var slack_onboard_default = module.exports.slack_onboard_default = [{
-  name: "exit",
-  text: "Exit Onboarding",
-  style: "default",
-  type: "button",
-  value: "exit"
-}];
+    "name": "settings.back",
+    "text": "⌂ Home",
+    "style": "default",
+    "type": "button"
+  }];
 
 var slack_onboard_basic = module.exports.slack_onboard_basic = [{
   name: "onboard.bundle.yes",
@@ -234,17 +232,19 @@ var slack_onboard_basic = module.exports.slack_onboard_basic = [{
   style: "default",
   type: "button",
   value: "checkout"
-}, {
-  name: "onboard.bundle.more",
-  text: "More Info",
-  style: "default",
-  type: "button",
-  value: "more_info"
-}];
+}, 
+// {
+//   name: "onboard.bundle.more",
+//   text: "More Info",
+//   style: "default",
+//   type: "button",
+//   value: "more_info"
+// }
+];
 
 var slack_onboard_team = module.exports.slack_onboard_team = [{
   name: "onboard.team.send",
-  text: "Send Onboarding",
+  text: "Notify Channels",
   style: "primary",
   type: "button",
   value: "member"
@@ -255,11 +255,10 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   type: "button",
   value: "more_info"
 }, {
-  name: "exit",
-  text: "Exit Onboarding",
-  style: "primary",
-  type: "button",
-  value: "exit"
+    "name": "settings.back",
+    "text": "⌂ Home",
+    "style": "default",
+    "type": "button"
 }];
 
 var cart_reminder = module.exports.cart_reminder = [{

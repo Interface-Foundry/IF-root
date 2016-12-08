@@ -57,7 +57,7 @@ handlers['start'] = function * (message) {
   });
   attachments.push({
       image_url: "http://tidepools.co/kip/kip_menu.png",
-      text: 'What are you looking for?',
+      text: 'We you like a short tour?',
       color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
@@ -221,9 +221,9 @@ handlers['supplies'] = function * (message) {
   var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   var attachments = [];
   attachments.push({
-      text: ' What are you looking for?',
-      color: '#45a5f4',
+      text: '*Step 1:* Choose a bundle:',
       mrkdwn_in: ['text'],
+      color: '#A368F0',
       fallback:'Onboard',
       actions: cardTemplate.slack_onboard_bundles,
       callback_id: 'none'
@@ -456,12 +456,12 @@ handlers['bundle'] = function * (message, data) {
       color: '#45a5f4'
     })
   attachments.push({
-    text: 'Do you want to let others add stuff to cart?',
+    text: '*Step 2:* Get your team to add items to the cart:',
     mrkdwn_in: ['text'],
+    color: '#A368F0',
     fallback: 'Onboard.helper',
     actions: cardTemplate.slack_onboard_basic,
-    callback_id: 'none',
-    color: '#49d63a'
+    callback_id: 'none'
   });
 
    var msg = message;
@@ -513,7 +513,9 @@ handlers['team'] = function * (message) {
       }
   });
   var chunkedButtons = _.chunk(buttons, 5);
-  attachments.push({text: 'Which channels do you want to include? ', actions: chunkedButtons[0], callback_id: "none"});
+    
+  attachments.push({text: '*Step 3:* Choose the channels you want to include: ', mrkdwn_in: ['text'],
+    color: '#A368F0', actions: chunkedButtons[0], callback_id: "none"});
   chunkedButtons.forEach((ele, i) => {
     if (i != 0) {
       attachments.push({text:'', actions: ele, callback_id: 'none'});
@@ -609,7 +611,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
       break;
   }
   var messageText = (msInFuture > 0) ?
-    `Awesome! I'll give everyone a heads up for your order ${dateDescrip}.` :
+    `I'll give everyone a heads up for your order ${dateDescrip}.` :
     'Ok! I won\'t set any reminders.';
   messageText += ' Thanks and have a great day :)';
   var attachments = [{
