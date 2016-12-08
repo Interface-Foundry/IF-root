@@ -57,7 +57,7 @@ handlers['start'] = function * (message) {
   });
   attachments.push({
       image_url: "http://tidepools.co/kip/kip_menu.png",
-      text: 'We you like a short tour?',
+      text: 'Would you like a short tour?',
       color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback:'Onboard',
