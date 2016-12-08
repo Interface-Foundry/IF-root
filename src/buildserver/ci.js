@@ -35,15 +35,15 @@ handler.on('push', function (event) {
     return logging.info(`not a push to ${branch}, will not do anything`)
   }
 
-  var author = _.get(event, 'payload.head_commit.author.name') || _.get(event, 'payload.head_commit.committer.name', 'Anonymous')
+  // var author = _.get(event, 'payload.head_commit.author.name') || _.get(event, 'payload.head_commit.committer.name', 'Anonymous')
   var message = _.get(event, 'payload.head_commit.message', '[no commit message]')
-  var timestamp = _.get(event, 'payload.head_commit.timestamp', '[no commit timestamp]')
+  // var timestamp = _.get(event, 'payload.head_commit.timestamp', '[no commit timestamp]')
 
   deploy('HEAD').then(() => {
-    var successChat = `Deployed to ${process.env.NODE_ENV}\n${author} - ${message} _${timestamp}_`
+    var successChat = `Deployed to ${process.env.NODE_ENV} - "${message}"`
     prof.say(successChat)
   }).catch((e) => {
-    var errorChat = `Error deploying to ${process.env.NODE_ENV}\n${author} - ${message} _${timestamp}_\n${e}`
+    var errorChat = `Error deploying to ${process.env.NODE_ENV}- "${message}"\n${e}`
     prof.say(errorChat)
   })
 
