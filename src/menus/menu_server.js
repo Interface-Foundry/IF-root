@@ -123,9 +123,7 @@ app.post('/order', function (req, res) {
       }).sort('-ts').limit(1);
 
       foodMessage = foodMessage[0];
-
-      console.log('food message~~~ found', foodMessage);
-
+      
       var mess = new Messages({
         incoming: true,
         thread_id: foodMessage.thread_id,
@@ -139,21 +137,6 @@ app.post('/order', function (req, res) {
       yield mess.save();
 
       yield queue.publish('incoming', mess, ['slack', foodMessage.source.channel, foodMessage.ts, new Date().getSeconds()].join('.'), true)
-
-      // //queue.publish('incoming', mess, ['slack', ].join('.'));
-      //['slack', foodMessage.source.channel, 'cart.personal'].join('.')
-      //
-      // replyChannel.send(
-      //   foodMessage,
-      //   'food.cart.personal',
-      //   {
-      //     type: foodMessage.origin,
-      //     incoming: true,
-      //     data: {
-      //       text: 'Your order has been submitted!'
-      //     }
-      //   }
-      // )
 
       console.log('ostensibly done');
       res.send();
