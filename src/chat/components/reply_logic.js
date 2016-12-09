@@ -83,7 +83,7 @@ function typing (message) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
-function * simplehome (message) {
+function simplehome (message) {
 
   var slackreply = {
     text: '*Hi! Thanks for using Kip* 😊',
@@ -94,21 +94,10 @@ function * simplehome (message) {
       callback_id: 'wow such home',
       actions: card_templates.simple_home
     }]
-    // mrkdwn_in: ['text']
   }
-
-
-  let team = yield db.Slackbots.findOne({
-    'team_id': message.source.team
-  }).exec();
-  let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
-  let allow = isAdmin || team.meta.office_assistants == 0;
-
-  slackreply.attachments = allow ? slackreply.attachments : card_templates.slack_shopping_mode;
-
   var msg = {
-    action: allow ? 'simplehome' : 'switch',
-    mode: allow ? 'food' : 'shopping',
+    action:'simplehome',
+    mode: 'food',
     source: message.source,
     origin: message.origin,
     reply: {
@@ -333,7 +322,7 @@ queue.topic('incoming').subscribe(incoming => {
     if (isCancelIntent(message)) {
       message.mode = 'shopping';
       message.action = 'switch'
-      yield simplehome(message)
+      simplehome(message)
       yield message.save();
       timer.stop();
       return
@@ -356,16 +345,6 @@ queue.topic('incoming').subscribe(incoming => {
     if (switchMode(message)) {
       message.mode = switchMode(message);
       if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
-      if (message.mode.match(/(onboard|food|team)/)) {
-        let team = yield db.Slackbots.findOne({
-          'team_id': message.source.team
-        }).exec();
-        let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
-        let allow = isAdmin || team.meta.office_assistants == 0;
-        if (!allow) {
-          message.mode = 'shopping'
-        }
-      }
       yield message.save();
     }
 
@@ -451,7 +430,7 @@ queue.topic('incoming').subscribe(incoming => {
         logging.info('👽 passing to nlp: ', message.text)
         if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
           replies = yield execute(message)
-        } else if ((message.text.includes('shop') && !message.execute) || (message.action === 'switch' && (message.text === 'shopping' || !message.text))) {
+        } else if ((message.text.includes('shop') && !message.execute) || ((message.action === 'switch'||message.action==='initial') && (message.text === 'shopping' || !message.text))) {
           message.mode = 'shopping'
           message.action = 'initial'
           message.execute.push({

@@ -136,35 +136,39 @@ handlers['get-admins.response'] = function * (message) {
     yield team.save();
   } 
   if (isAdmin) {
-    reply_success = reply_success.concat('\n' + reply_admin);
-  } else {
-    reply_success = reply_success.concat('\n' + reply_user);
-    message.mode = 'shopping';
-    message.action = '';
-  }
-  var reply_message = message_tools.text_reply(message, reply_success);
-  return [reply_message]
-}
-
-
-/**
- * Finishes the onboarding convo with the quick tutorial blurb
- * changes the mode to shopping
- *  
- * @param message the latest message from the user
- */
-handlers['reroute'] = function * (message) {
-  var next_mode = message.original_text.match(/(yes|ok|okay|sure|yeah|yea|y|k|ya)/) != null && message.original_text.match(/(yes|ok|okay|sure|yeah|yea|y|k|ya)/).length > 0 ? 'onboard' : 'shopping';
-  if (next_mode == 'shopping') {
-    var finished = "Thanks for the info! Why don't you try searching for something? Type something like 'headphones' to search"
-    var finished_message = message_tools.text_reply(message, finished);
-    finished_message.mode = 'shopping';
-    finished_message.action = '';
-    return [finished_message];
-  } else {
+    message.mode = 'onboard';
+    message.action = 'home';
     var next_message = message
     next_message.mode = 'onboard';
     next_message.action = 'home';
     return yield onboard.handle(next_message);
+  } else {
+    var reply_message = message_tools.text_reply(message, reply_success);
+    reply_message.mode = 'shopping';
+    reply_message.action = 'switch'; 
+    return [reply_message]
   }
 }
+
+
+// /**
+//  * Finishes the onboarding convo with the quick tutorial blurb
+//  * changes the mode to shopping
+//  *  
+//  * @param message the latest message from the user
+//  */
+// handlers['reroute'] = function * (message) {
+//   var next_mode = message.original_text.match(/(yes|ok|okay|sure|yeah|yea|y|k|ya)/) != null && message.original_text.match(/(yes|ok|okay|sure|yeah|yea|y|k|ya)/).length > 0 ? 'onboard' : 'shopping';
+//   if (next_mode == 'shopping') {
+//     var finished = "Thanks for the info! Why don't you try searching for something? Type something like 'headphones' to search"
+//     var finished_message = message_tools.text_reply(message, finished);
+//     finished_message.mode = 'shopping';
+//     finished_message.action = '';
+//     return [finished_message];
+//   } else {
+//     var next_message = message
+//     next_message.mode = 'onboard';
+//     next_message.action = 'home';
+//     return yield onboard.handle(next_message);
+//   }
+// }

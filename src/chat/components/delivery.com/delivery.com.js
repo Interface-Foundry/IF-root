@@ -13,6 +13,8 @@ var replyChannel = new UserChannel(queue)
 var feedbackOn = false
 var feedbackTracker = {}
 
+var card_templates = require('../slack/card_templates');
+
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other methods
@@ -176,7 +178,17 @@ handlers['food.exit'] = function * (message) {
 
 
 handlers['food.exit.confirm'] = function * (message) {
-  replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'ok byeee'}})
+  var slackreply = {
+    text: '*Hi! Thanks for using Kip* 😊',
+    attachments: [{
+      image_url: "http://tidepools.co/kip/kip_menu.png",
+      text: 'Click a mode to start using Kip',
+      color: '#3AA3E3',
+      callback_id: 'wow such home',
+      actions: card_templates.simple_home
+    }]
+  }
+  replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: slackreply})
   // make sure to remove this user from the food message if they are in it
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)

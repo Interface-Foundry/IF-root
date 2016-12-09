@@ -82,8 +82,6 @@ function * results(message, modeIsOnboard = false) {
     callback_id: 'search_results',
     actions: actions
   })
-
-  
   yield slackUtils.cacheMenu(message, original, expandable)
 
   return results;
