@@ -447,12 +447,16 @@ function * onSuccess (payment) {
         })
 
     })
-    var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
+    var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table style="margin-top:1em;" border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
-      htmlForItem += '<tr><td>'+foodInfo.name+'</td><td>'+descriptionString+'</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+'</td><td>'+user[0].real_name+'</td></tr>'
+      logging.info('USER', user);
+      htmlForItem += '<tr><td>'+foodInfo.name+
+      '</td><td>'+descriptionString+
+      '</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+
+      '</td><td><p>'+user[0].real_name+'</p><p>@' + user[0].name + '</p></td></tr>'
     })
 
     // send confirmation email to admin
