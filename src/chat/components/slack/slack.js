@@ -198,9 +198,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           outgoing.ack()
         })
       }
-      if( _.get(message,'data.loading') &&  _.get(message,'text') == 'Searching...') {
-        yield slackUtils.updateResponseUrl(message);
-      }
       kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : { reply: message.text }
@@ -323,11 +320,22 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
+      if (message.mode === 'loading') {
+         kip.debug(' \n\n\n\n\n\n\n\n\n LOADING MODE:', message,' \n\n\n\n\n\n\n\n\n ')
+
+        if (message.action === 'hide') {
+          msgData.attachments = message.reply;
+          return bot.web.chat.update( message.data.hide_ts, message.source.channel,'', null);
+        } else {
+          msgData.attachments = message.reply;
+          return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+        }
+      }
+
       try {
-        // var data = message.reply ? message.reply : null;
-        bot.web.chat.postMessage(message.source.channel, message.text, null);
-      } catch (err) {
-        kip.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message,'\n\n\n\n');
+          bot.web.chat.postMessage(message.source.channel, message.text, null);
+       } catch (err) {
+        kip.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message.reply,'\n\n\n\n');
       }
 
       outgoing.ack()

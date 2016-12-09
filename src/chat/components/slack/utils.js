@@ -486,19 +486,15 @@ function * showLoading(message) {
   var json = message.source.original_message;
     if (!json) {
      var msg = new db.Message(message);
-     msg.mode = 'banter';
-     msg.action = 'reply';
+     msg.mode = 'loading';
+     msg.action = 'show'
      msg.text = '';
-     msg.reply = {
-      icon_url: 'http://kipthis.com/img/kip-icon.png',
-      username: 'Kip',
-      attachments: [{
+     msg.reply = [{
         text: 'Searching...',
         color: '#45a5f4'
-      }]
-     };
+      }];
      yield msg.save()
-     return yield queue.publish('outgoing.slack', msg, msg._id + '.reply.results')
+     return yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.results');
     }
     json.attachments.push({
         fallback: message.action,
@@ -518,6 +514,15 @@ function * hideLoading(message) {
     var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
     var relevantMessage = history[0];
     var json =  message.reply;
+    if (!message.source.original_message) {
+     var msg = new db.Message(message);
+     msg.mode = 'loading';
+     msg.action = 'hide';
+     msg.text = '';
+     msg.data =  {hide_ts: relevantMessage.ts};
+     yield msg.save()
+     return yield queue.publish('outgoing.' + msg.origin, msg, msg._id + '.reply.results')
+    }
     message.source.original_message.attachments.splice(-1,1);
      request({
       method: 'POST',

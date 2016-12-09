@@ -106,10 +106,9 @@ handlers['start'] = function * (message) {
   if(!isAdmin && admins.length > 0){
   	buttons = cardTemplate.settings_buttons.slice(0, 1);
   }
-  var text = 'Don’t have any changes? Type `exit` to quit settings';
   var color = '#45a5f4';
   attachments.push({
-      text: text,
+      text: '',
       color: color,
       mrkdwn_in: ['text'],
       fallback:'Settings',

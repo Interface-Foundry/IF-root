@@ -55,7 +55,7 @@ var team_buttons = module.exports.team_buttons =
     value: 'start'
   }, {
     "name": "settings.back",
-    "text": "⌂ Home",
+    "text": "Home",
     "style": "default",
     "type": "button"
   }];
@@ -215,7 +215,7 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
 
 var slack_onboard_default = module.exports.slack_onboard_default = [{
     "name": "settings.back",
-    "text": "⌂ Home",
+    "text": "Home",
     "style": "default",
     "type": "button"
   }];
@@ -256,7 +256,7 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   value: "more_info"
 }, {
     "name": "settings.back",
-    "text": "⌂ Home",
+    "text": "Home",
     "style": "default",
     "type": "button"
 }];
