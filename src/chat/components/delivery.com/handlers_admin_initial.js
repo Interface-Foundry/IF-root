@@ -41,7 +41,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     yield foodSession.save()
   }
   //if user taps < back button back to this view
-  else if(foodSession.onboarding){ 
+  else if(foodSession.onboarding){
     foodSession.onboarding = true
     banner = false
   }
@@ -124,7 +124,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
 
   if (foodSession.onboarding){
     //green New Location attachment
-    msg_json.attachments[msg_json.attachments.length - 1].color = '#2ab27b' 
+    msg_json.attachments[msg_json.attachments.length - 1].color = '#2ab27b'
   }
 
   if (_.get(team, 'meta.locations').length >= 1) {
@@ -143,6 +143,17 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     'type': 'button',
     'value': 'food.exit.confirm'
   })
+
+  // if user sent in public channel, switch to DMing them
+  if (_.includes(team.meta.all_channels, message.source.channel)) {
+    logging.debug('sent in public channel, use that persons DM')
+    yield $replyChannel.send(message, 'food.admin.select_address', {
+      type: message.origin,
+      data: {'text': `Great I've started the lunch order, check your DM! 🤗`}
+    })
+    message.thread_id = message.source.channel = foodSession.convo_initiater.dm
+    message.markModified('source')
+  }
 
   if (!banner) {
     $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
@@ -567,36 +578,43 @@ handlers['food.admin_polling_options'] = function * (message) {
   lastOrdered = yield lastOrdered.filter(message => merchantIds.includes(message.chosen_restaurant.id))
   var mostRecentSession = lastOrdered[0]
   lastOrdered = _.uniq(lastOrdered.map(message => message.chosen_restaurant.id)) // list of unique restaurants
-
   // create attachments, only including most recent merchant if one exists
   var attachments = []
 
   if (mostRecentSession) {
-    // build the regular listing as if it were a choice presented to the admin in the later steps,
+// build the regular listing as if it were a choice presented to the admin in the later steps,
     // but them modify it with some text to indicate you've ordered here before
-    var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id)[0] // get the full merchant
-    var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
-    listing.text = `You recently ordered delivery from ${listing.text} \n Order again?`
-
-    // allow confirmation
-    listing.actions = [{
-      'name': 'food.admin.restaurant.reordering_confirmation',
-      'text': '✓ Reorder From Here',
-      'type': 'button',
-      'style': 'primary',
-      'value': mostRecentMerchant.id
-    }]
-
-    listing.mrkdwn_in = ['text']
-    if (lastOrdered.length > 1) {
-      listing.actions.push({
-        'name': 'food.restaurants.list.recent',
-        'text': 'More Past Orders',
-        'type': 'button',
-        'value': 0
-      })
+    if (foodSession.fulfillment_method == 'delivery') {
+      var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id && m.ordering.availability.delivery == true)[0]
+    } else if (foodSession.fulfillment_method == 'pickup') {
+      var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id && m.ordering.availability.pickup == true)[0]
     }
-    attachments.push(listing)
+    if(mostRecentMerchant != null){
+      var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
+      listing.text = `You recently ordered delivery from ${listing.text} \n Order again?`
+
+      // allow confirmation
+      listing.actions = [{
+        'name': 'food.admin.restaurant.reordering_confirmation',
+        'text': '✓ Reorder From Here',
+        'type': 'button',
+        'style': 'primary',
+        'value': mostRecentMerchant.id
+      }]
+
+      listing.mrkdwn_in = ['text']
+      if (lastOrdered.length > 1) {
+        listing.actions.push({
+          'name': 'food.restaurants.list.recent',
+          'text': 'More Past Orders',
+          'type': 'button',
+          'value': 0
+        })
+      }
+      attachments.push(listing)
+    }else {
+      attachments.push({'text': 'Seems like your most recent restaurants are not available at this time.'})
+    }
   }else {
     foodSession.onboarding = true
   }
@@ -923,7 +941,7 @@ handlers['food.restaurants.list.recent'] = function * (message) {
         'name': 'passthrough',
         'text': '< Back',
         'type': 'button',
-        'value': 'food.admin.select_address' 
+        'value': 'food.admin.select_address'
       }
     ]
   })

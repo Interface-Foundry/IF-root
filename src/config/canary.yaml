@@ -3,11 +3,6 @@ isProduction: true
 mongodb:
   url: mongodb://10.142.0.18/foundry
   backuphost: jolteon.internal.kipapp.co
-  options:
-    replset:
-      rs_name: rs0
-      socketOptions:
-        keepAlive: 1
 elasticsearch:
   url: http://elasticsearch-cerulean.internal.kipapp.co:9200
 elasticsearchElk:

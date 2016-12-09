@@ -59,7 +59,7 @@ function * deactivateOldTeam(team) {
 
 
 function * migrate(team) {
-  var kip = require('kip')
+  var kip = require('../../kip')
   var doc = _.merge({}, team, {
 
   })

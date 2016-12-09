@@ -482,35 +482,49 @@ function * addViaAsin(asin, message) {
 }
 
 function * showLoading(message) {
-  var message = new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    text: 'Searching...',
-
-    data: { loading: true}
-  });
-  yield message.save();
-  yield queue.publish('outgoing.' + message.origin, message, message._id + '.loading.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
-  // return message;
+  var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel})
+  var json = message.source.original_message;
+    if (!json) {
+     var msg = new db.Message(message);
+     msg.mode = 'banter';
+     msg.action = 'reply';
+     msg.text = '';
+     msg.reply = {
+      icon_url: 'http://kipthis.com/img/kip-icon.png',
+      username: 'Kip',
+      attachments: [{
+        text: 'Searching...',
+        color: '#45a5f4'
+      }]
+     };
+     yield msg.save()
+     return yield queue.publish('outgoing.slack', msg, msg._id + '.reply.results')
+    }
+    json.attachments.push({
+        fallback: message.action,
+        callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
+        text: 'Searching...',
+        color: '#45a5f4'
+    })
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify(json)
+    });
+    return 
 }
 
-function * hideLoading(message, response) {
-  var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel, 'data.loading': true}).sort('_id').exec();
-  kip.debug(' \n\n\n\n\n\n\n\n\n\n  👳/slack/utils.js:372:replaceLoading', relevantMessage, response,'  \n\n\n\n\n\n\n\n\n\n');
-  request({
+function * hideLoading(message) {
+    var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
+    var relevantMessage = history[0];
+    var json =  message.reply;
+    message.source.original_message.attachments.splice(-1,1);
+     request({
       method: 'POST',
       uri: relevantMessage.source.response_url,
-      body: JSON.stringify(response)
+      body: JSON.stringify(message.source.original_message)
     });
-}
-
-
-function * updateResponseUrl(message) {
-  yield db.Messages.update({_id: message._id}, {$set: {source:{ response_url: message.source.response_url}}}).exec();
+    return
 }
 
 

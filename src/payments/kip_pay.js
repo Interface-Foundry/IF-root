@@ -120,6 +120,16 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
     else if (body.team_id === 'T3BCWK9MG') { // Tawa
       body.order.coupon = 0.99 // in percentage off
     }
+    else if (body.team_id === 'T3BBJ9Y2F') { // Reel Memoriez Photography
+      body.order.coupon = 0.99 // in percentage off
+    }
+    else if (body.team_id === 'T22RW4CUR') { // New School Anime Club
+      body.order.coupon = 0.99 // in percentage off
+    }
+    else if (body.team_id === 'T1A2KS6KH') { // TOPBOTS
+      body.order.coupon = 0.99 // in percentage off
+    }
+
 
     //check for order over $510 (pre coupon)
     if (body.order.coupon == 0.99){

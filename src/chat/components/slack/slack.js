@@ -324,6 +324,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       try {
+        // var data = message.reply ? message.reply : null;
         bot.web.chat.postMessage(message.source.channel, message.text, null);
       } catch (err) {
         kip.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message,'\n\n\n\n');
