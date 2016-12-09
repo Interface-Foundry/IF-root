@@ -30,12 +30,14 @@ function * initializeTeam(team, auth) {
  team.meta.addedBy = typeof team.meta.addedBy == 'string' ? team.meta.addedBy : auth.user_id;
  var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
  res_chan = JSON.parse(res_chan);
+ debugger;
  if (!(team.meta.cart_channels && team.meta.cart_channels.length > 0)) {
   var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
   team.meta.cart_channels.push(generalChannel.id);
  }
  team.meta.office_assistants = _.uniq(team.meta.office_assistants);
- team.meta.all_channels = res_chan.channels.map(c => {return c.id});
+ debugger;
+ team.meta.all_channels = res_chan.channels.map(c => _.pick(c, 'id', 'name', 'is_channel'));
  team.markModified('meta.cart_channels');
  team.markModified('meta.all_channels');
  team.markModified('meta.office_assistants');
@@ -198,8 +200,8 @@ function * refreshAllChannels (slackbot) {
   var botGroupArray = yield slackbot.web.groups.list()
   var botsChannels = botChannelArray.channels.concat(botGroupArray.groups)
   logging.info(`adding ${botsChannels.length} to slackbots.meta`)
-  slackbot.slackbot.meta.all_channels = botsChannels.map((channel) => {
-    return channel.id
+  slackbot.slackbot.meta.all_channels = botsChannels.filter(c => !c.is_archived).map((channel) => {
+    return _.pick(channel, 'id', 'name', 'is_channel')
   })
   yield slackbot.slackbot.save()
 }
@@ -278,7 +280,7 @@ function * showMenu(message) {
       uri: message.source.response_url,
       body: JSON.stringify(json)
     });
-    return 
+    return
 }
 
 function * hideMenu(message, original, expandable, data) {
@@ -465,10 +467,10 @@ function * getAllChannels (slackbot) {
 */
 
 function * addViaAsin(asin, message) {
-   var cart_id = message.cart_reference_id || message.source.team; 
+   var cart_id = message.cart_reference_id || message.source.team;
    var skip = false;
     try {
-       var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'}); 
+       var res = yield amazon.lookup({ ASIN: asin, IdType: 'ASIN'});
      } catch (e) {
        skip = true;
      }
@@ -507,7 +509,7 @@ function * showLoading(message) {
       uri: message.source.response_url,
       body: JSON.stringify(json)
     });
-    return 
+    return
 }
 
 function * hideLoading(message) {
