@@ -39,7 +39,7 @@ app.factory('MenuFactory', function ($http, $location) {
 
     for (var i in oldCart) {
       var item = {};
-      item.item_id = oldCart[i].id;
+      item.item_id = String(oldCart[i].id);
       item.item_qty = oldCart[i].item_qty;
       item.instructions = oldCart[i].instructions;
       item.options = {};

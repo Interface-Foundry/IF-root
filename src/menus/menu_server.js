@@ -1,4 +1,4 @@
-require('kip');
+require('../kip');
 require('colors');
 
 //loads basic server structure
@@ -32,7 +32,7 @@ app.use('/ang', express.static('ang'));
 
 var MenuSession = db.Menu_session;
 var Menu = db.Menu;
-var Merchant = db.Merchant;
+var Merchants = db.Merchants;
 var Delivery = db.Delivery;
 var Messages = db.Messages;
 
@@ -53,15 +53,16 @@ app.post('/cafe', (req, res) => co(function * () {
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
-  // console.log('menu found') // last printed
+  console.log('menu found')
+  // console.log(rest_id)
 
   // console.log('result:', result)
   ms.menu.data = result.raw_menu.menu;
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.userId = req.body.user_id;
   ms.merchant.id = rest_id;
-  merchant = yield Merchant.findOne({id: rest_id});
-  console.log('merchant', merchant)
+  var merchant = yield Merchants.findOne({id: rest_id});
+  // console.log('merchant', merchant)
   ms.merchant.name = merchant.data.summary.name;
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
   console.log('ms', ms);
@@ -86,8 +87,6 @@ app.post('/session', (req, res) => co(function * () {
   }
 }))
 
-
-
 //updates the correct delivery object in the db
 //with the delivery object id saved on the menu session
 
@@ -103,6 +102,7 @@ app.post('/order', function (req, res) {
       var cart = deliv.cart;
 
       for (var i = 0; i < order.length; i++) {
+        console.log(order[i]);
         cart.push({
           added_to_cart: true,
           item: order[i],
@@ -133,11 +133,7 @@ app.post('/order', function (req, res) {
         user_id: foodMessage.source.user,
         mode: 'food',
         origin: 'slack',
-        source: {
-          team: foodMessage.source.team,
-          channel: foodMessage.source.channel,
-          user: foodMessage.source.user
-        }
+        source: foodMessage.source,
       })
 
       yield mess.save();
