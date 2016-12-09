@@ -76,7 +76,7 @@ function * handleMessage (message) {
 
   var route = yield getRoute(message)
 
-  if (message.text && message.mode === 'food' || message.mode === 'cafe') {
+  if (message.text && message.mode.toLowerCase().trim() === 'food' || message.mode === 'cafe') {
     // if user types something allow the text_matching flag which we can use
     // in some handlers: cuisine picking, restaurant picking, item picking
     message.allow_text_matching = true
@@ -100,8 +100,9 @@ function * handleMessage (message) {
 function getRoute (message) {
   kip.debug(`prevRoute ${message.prevRoute}`)
   return co(function * () {
+    var text = (message.text || '').toLowerCase().trim()
     // allow people to type food in cuisine selection and it not ruin the order
-    if ((message.text === 'food' || message.text === 'cafe') && (message.action !== 'admin.restaurant.pick')) {
+    if ((text === 'food' || text === 'cafe') && (message.action !== 'admin.restaurant.pick')) {
       kip.debug('### User typed in :' + message.text)
       return 'food.begin'
     } else if (handlers[message.text]) {
