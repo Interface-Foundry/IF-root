@@ -1,0 +1,20 @@
+env: development_chris
+mongodb:
+  # url: localhost/foundry
+  url: mongodb://localhost:27017/foundry
+elasticsearch:
+  url: http://localhost:9200
+app:
+  publicAPI: http://localhost:2997/api
+picstitch: http://104.196.30.108:5000
+# nlp: http://localhost:8083
+# doc2vec: http://localhost:8084
+nlp: http://104.196.51.184:8083
+nlp_rnn: http://104.196.1.204:8085
+slack:
+  client_id: "105555369782.105569439367"
+   # "17713782326.83486971505"
+  client_secret: 6b0a6fb9215c0c28991648ac2232983c
+  verification_token: rF1BCPsHSBpLyw80aQ7FCGhN
+  redirect_uri: https://a6432a94.ngrok.io/newslack
+  

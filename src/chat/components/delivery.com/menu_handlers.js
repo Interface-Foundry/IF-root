@@ -27,12 +27,12 @@ handlers['food.menu.quickpicks'] = function * (message) {
     logging.info('searching for', keyword.cyan)
     var menu = Menu(foodSession.menu)
     var sortedMenu = menu.allItems()
-    var matchingItems = yield utils.matchText(keyword, sortedMenu, ['name'], {
-      // seems to work better for matching
+    var matchingItems = yield utils.matchText(keyword, sortedMenu, {
       shouldSort: true,
-      threshold: 0.8,
+      location: 0,
+      distance: 0,
+      threshold: 0.3,
       tokenize: true,
-      matchAllTokens: true,
       keys: ['name']
     })
 
@@ -47,7 +47,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
   }
   matchingItems = matchingItems.map(i => i.unique_id)
 
-
   var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
     .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
     .reduce((allIds, order) => {
@@ -55,8 +54,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
       return allIds
     }, [])
 
-  var recommendedItemIds = Object.keys(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {}))
-
+  recommendedItemIds = _.keys(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {}))
+  recommendedItemIds = recommendedItemIds.map(i => Number(i))
   //
   // adding the thing where you show 3 at a time
   // nned to show a few different kinds of itesm.
@@ -65,26 +64,36 @@ handlers['food.menu.quickpicks'] = function * (message) {
   // THen the rest of the menu in any order i think
   //
   var sortOrder = {
-    orderedBefore: 3,
-    recommended: 2,
-    none: 1
+    searched: 6,
+    orderedBefore: 5,
+    recommended: 4,
+    none: 3,
+    indifferent: 2,
+    last: 1
   }
+
+  /*
+  not really any good way to order items atm so just going to throw
+  everything in last til have some actual way to order things w/ sortOrder
+  */
+  var lastItems = ['beverage', 'beverages', 'desserts', 'dessert', 'cold appetizer', 'hot appetizer', 'appetizers', 'appetizers from the kitchen', 'soup', 'soups', 'drinks', 'salads', 'side salads', 'side menu', 'bagged snacks', 'snacks']
 
   var menu = Menu(foodSession.menu)
   var sortedMenu = menu.allItems().map(i => {
     // inject the sort order stuff
-    if (previouslyOrderedItemIds.includes(i.unique_id)) {
+    if (matchingItems.includes(i.unique_id)) {
+      i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.unique_id })
+      // i.infoLine = 'Returned from search term'
+    } else if (previouslyOrderedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.orderedBefore
-      i.infoLine = "You ordered this before"
-    } else if (recommendedItemIds.includes(i.unique_id)) {
+      i.infoLine = 'You ordered this before'
+    } else if (recommendedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.recommended
-      i.infoLine = "Popular Item"
+      i.infoLine = 'Popular Item'
+    } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
+      i.sortOrder = sortOrder.last
     } else {
       i.sortOrder = sortOrder.none
-    }
-
-    if (matchingItems.includes(i.unique_id)) {
-      i.sortOrder += 10 + (matchingItems.length - matchingItems.indexOf(i.unique_id))/matchingItems.length
     }
 
     return i
@@ -97,27 +106,29 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
 
     var attachment = {
+      thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
-      fallback: 'i.name',
+      fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       color: '#3AA3E3',
       attachment_type: 'default',
       'actions': [
         {
           'name': 'food.item.submenu',
-          'text': 'Add to Cart',
+          'text': 'Add to Order',
           'type': 'button',
           'style': 'primary',
           'value': i.unique_id
         }
       ]
     }
-
+    desc = (desc.split(' ').length > 26 ? desc.split(' ').slice(0,26).join(' ')+"…" : desc)
+    parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
   })
 
   var msg_json = {
-    'text': `<${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> - <${foodSession.chosen_restaurant.url}|View Full Menu>`,
+    'text': `${foodSession.chosen_restaurant.name} - <${foodSession.chosen_restaurant.url}|View Full Menu>`,
     'attachments': [
       {
         'mrkdwn_in': [
@@ -125,18 +136,21 @@ handlers['food.menu.quickpicks'] = function * (message) {
         ]
       }].concat(menuItems).concat([{
       'text': '',
-      'fallback': 'Unable to load menu item',
+      'fallback': 'Food option',
       'callback_id': 'menu_quickpicks',
       'color': '#3AA3E3',
       'attachment_type': 'default',
-      'actions': [{
-        name: 'food.feedback.new',
-        text: '⇲ Send feedback',
-        type: 'button',
-        value: 'food.feedback.new'
-      }]
+      'actions': []
     }])
   }
+  // if (feedbackOn && msg_json) {
+  //   msg_json.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
 
   if (sortedMenu.length >= index + 4) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
@@ -170,6 +184,13 @@ handlers['food.menu.quickpicks'] = function * (message) {
       }
     })
   }
+
+  //adding writing prompt
+  msg_json.attachments.push({
+    'fallback': 'Search the menu',
+    'text': '✎ Type below to search for menu items (Example: _lunch special_)',
+    'mrkdwn_in': ['text']
+  })
 
   $replyChannel.sendReplace(message, 'food.menu.search', {type: 'slack', data: msg_json})
 }
@@ -288,8 +309,8 @@ handlers['food.item.instructions'] = function * (message) {
   var msg = {
     text: `Add Special Instructions for *${item.name}*`,
     attachments: [{
-      text: '✎ Type your instructions below (Example: _Hold the egg, no gluten or other farm based products. I eat shadows only. Extra Ranch Dressing!!_)',
-      fallback: 'Unable to add special instructions',
+      text: '✎ Type your instructions below (Example: _Extra chili on side_)',
+      fallback: '✎ Type your instructions below',
       mrkdwn_in: ['text']
     }]
   }

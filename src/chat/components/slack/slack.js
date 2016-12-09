@@ -48,19 +48,21 @@ var kip = require('../../../kip')
 var queue = require('../queue-mongo')
 var image_search = require('../image_search')
 var search_results = require('./search_results')
+// var variation_view = require('./variation_view')
 var focus = require('./focus')
 var cart = require('./cart')
+var kipCart = require('../cart')
 var cardTemplate = require('./card_templates');
 var slackConnections = {}
-// var slackConnections = {};
 var webserver = require('./webserver')
+var bundles = require('../bundles');
+bundles.updater(); //caches bundle items to mongo everyday at midnight
 
 var slackUtils = require('./utils.js')
 //
 // slackbots
 //
 function * start () {
-
   if (process.env.NODE_ENV === 'test') {
     console.log('starting mock slack server')
     yield slack.run_chat_server()
@@ -87,7 +89,7 @@ function * start () {
     }
 
     co(function * () {
-      yield slackUtils.getAllChannels(slackConnections[slackbot.team_id])
+      yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
     })
     // TODO figure out how to tell when auth is invalid
     // right now the library just console.log's a message and I can't figure out
@@ -136,7 +138,7 @@ function * start () {
       // don't talk to yourself
       if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
         kip.debug("don't talk to yourself: data: ",data);
-        return; // drop the message before saving.
+        return; // drop the message before sa ving.
       }
 
       // other random things
@@ -148,7 +150,7 @@ function * start () {
       //
       // 🖼 image search
       //
-      if (data.subtype === 'file_share' && ['png', 'jpg', 'gif', 'jpeg', 'sgv'].indexOf(data.file.filetype.toLowerCase()) >= 0) {
+      if (data.subtype === 'file_share' && ['png', 'jpg', 'gif', 'jpeg', 'svg'].indexOf(data.file.filetype.toLowerCase()) >= 0) {
         return image_search(data.file.url_private, slackbot.bot.bot_access_token, function (res) {
           message.text = res
           message.save().then(() => {
@@ -176,7 +178,7 @@ function * start () {
 //
 kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
-
+  
   try {
     var message = outgoing.data;
     var team = _.get(message, 'source.team');
@@ -195,6 +197,9 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
           outgoing.ack()
         })
+      }
+      if( _.get(message,'data.loading') &&  _.get(message,'text') == 'Searching...') {
+        yield slackUtils.updateResponseUrl(message);
       }
       kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {
@@ -216,9 +221,19 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
         return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
+      if(message.mode === 'item.add'){
+        //its a variation message
+        
+        var asin = message.reply[0].id; //just grab the first one for now
+        yield slackUtils.addViaAsin(asin, message);
+        message.data = yield kipCart.getCart(message.source.team)
+        message.mode = 'cart';
+        message.action = 'view';
+      }
 
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
-        msgData.attachments = yield search_results(message);
+        var results = yield search_results(message);
+        msgData.attachments = [...message.reply || [], ...results || []];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
@@ -227,6 +242,10 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
+      if (message.mode === 'shopping' && message.action === 'switch.silent') {
+        msgData.attachments = message.reply;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
 
       if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
         msgData.attachments = yield focus(message)
@@ -243,6 +262,57 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
+      if (message.mode === 'onboard' && message.action === 'home') {
+        msgData.attachments = message.reply;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+      }
+
+       if (message.mode === 'onboarding') {
+        msgData.attachments = message.reply;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+      }
+
+      if (message.mode === 'member_onboard' && message.action === 'home') {
+        msgData.attachments = message.reply;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+      }
+
+      if (message.mode === 'shopping' && message.action === 'onboard_cart') {
+        let results = yield cart(message, bot.slackbot, false)
+        
+        results = results.reduce((fin, item) => {
+          if (item.text.includes(message.source.user)) fin.push(item);
+          return fin;
+        }, [])
+        msgData.attachments = [...message.reply || [], ...results || [], {
+          text: '*Success!* You can always type `help` if you have any problems',
+          mrkdwn_in: ['text'],
+          color: '#A368F0'
+        }, {
+          'image_url': 'http://kipthis.com/kip_modes/mode_shopping.png',
+          text: '',
+          mrkdwn_in: ['text'],
+          color: '#3AA3E3'
+        }, {
+          text: 'Tap to search for something',
+          fallback: 'Search for what you want',
+          callback_id: 'idk',
+          color: '#3AA3E3',
+          attachment_type: 'default',
+          actions: cardTemplate.slack_shopping_buttons
+        }, {
+          'text': '✂︎ Add items directly from Amazon by pasting the URL and sending it to me',
+          mrkdwn_in: ['text']
+        }];
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+      
+      if (message.mode === 'member_onboard' && message.action === 'results' && message.amazon.length > 0) {
+        let results = yield search_results(message, true);
+        msgData.attachments = [...message.reply || [], ...results || []];
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
       if (message.mode === 'team' && message.action === 'home') {
         msgData.attachments = message.reply
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
@@ -254,6 +324,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       try {
+        // var data = message.reply ? message.reply : null;
         bot.web.chat.postMessage(message.source.channel, message.text, null);
       } catch (err) {
         kip.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message,'\n\n\n\n');

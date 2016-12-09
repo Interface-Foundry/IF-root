@@ -1,5 +1,4 @@
 'use strict'
-require('kip')
 var _ = require('lodash')
 
 var sleep = require('co-sleep')
@@ -7,6 +6,8 @@ var googl = require('goo.gl')
 var request = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
+
+var yelp = require('./yelp');
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -58,17 +59,22 @@ function voteMessage (foodSession) {
 
   var res = {
     text: `<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!`,
-    fallback: 'You are unable to vote for lunch preferences',
+    fallback: '<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!',
     callback_id: 'food.user.poll',
     color: '#3AA3E3',
     attachment_type: 'default',
     attachments: [{
-      'text': 'Type what you want or tap a button',
-      'fallback': 'You are unable to tap a button',
+      'text': 'Tap a button to choose a cuisine',
+      'fallback': 'Tap a button to choose a cuisine',
       'callback_id': 'food.user.poll',
       'color': '#3AA3E3',
       'attachment_type': 'default',
       'actions': sampleArray
+    },
+    {
+    'fallback': 'Search for a restaurant',
+    'text': '✎ Or type what you want below (Example: _japanese_)',
+    'mrkdwn_in': ['text']
     }]
   }
   return res
@@ -76,7 +82,7 @@ function voteMessage (foodSession) {
 
 var userFoodPreferencesPlaceHolder = {
   text: 'Here we would ask user for preferences if they didnt have it',
-  fallback: 'You are unable to confirm preferences',
+  fallback: 'Any preferences?',
   callback_id: 'confirm.user.preferences',
   color: 'grey',
   attachment_type: 'default',
@@ -152,7 +158,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   // next filter out restaurants that don't match the keyword if provided
   if (keyword) {
-    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, ['summary.name'], {
+    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, {
       shouldSort: true,
       threshold: 0.8,
       tokenize: true,
@@ -164,12 +170,39 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   }
 
   // now order the restaurants in terms of descending score
+
+  //keep track of the highest yelp review score in this particular batch of restaurants
+  var maxStars = 0;
+
   merchants = merchants
     .map(m => {
       m.score = scoreAlgorithms[sortOrder](m)
-      return m
+      if (sortOrder == SORT.cuisine) {
+
+        //score based on yelp reviews
+        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
+
+        if (m.stars > maxStars) maxStars = m.stars
+      }
+      return m;
     })
-    .sort((a, b) => directionMultiplier * (a.score - b.score))
+
+  //if we are sorting by cuisine type and want to incorporate yelp reviews into the order
+  if (sortOrder == SORT.cuisine) {
+    merchants = merchants
+      .map(m => {
+
+        //normalize yelp score to be in [0, 1]
+        m.stars = m.stars / maxStars;
+
+        //restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
+        m.score = m.score + m.stars;
+
+        return m;
+      })
+  }
+
+  merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
 
   return merchants
 }
@@ -272,14 +305,56 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     return foodSession.save()
   }
 
+  // user is typing food or another category but fuck voter fraud
+  if (_.includes(_.map(foodSession.votes, 'user'), message.source.user)) {
+    if (message.text === 'food') {
+      var exitEarlyMessage = {
+        'text': 'You typed food, but we are choosing a cuisine so thats ambiguous.  Would you like to restart or just continue',
+        'fallback': 'Any preferences?',
+        'callback_id': 'confirm.confirm.exit',
+        'attachment_type': 'default',
+        'attachments': [{
+          'text': '',
+          'fallback': 'Want to exit the kip Cafe?',
+          'callback_id': 'food.admin.restaurant.pick',
+          'attachment_type': 'default',
+          'actions': [{
+            'name': 'passthrough',
+            'value': 'food.begin',
+            'text': 'Restart Order',
+            'style': 'danger',
+            'type': 'button'
+          }, {
+            'name': 'passthrough',
+            'value': 'food.null.continue',
+            'text': '× Cancel',
+            'type': 'button'
+          }]
+        }]
+      }
+      return yield $replyChannel.send(message, 'food.begin', {
+        type: message.origin,
+        data: exitEarlyMessage
+      })
+    } else {
+      return yield $replyChannel.send(message, 'food.admin.restaurant.pick', {
+        type: message.origin,
+        data: { text: 'One user one vote, chill the hell out' }
+      })
+    }
+  }
+
   if (message.allow_text_matching) {
     // user typed something
     logging.info('using text matching for cuisine choice')
-    var res = yield utils.matchText(message.text, foodSession.cuisines, ['name'], {
+
+    // if user has already voted and types something again
+
+    var res = yield utils.matchText(message.text, foodSession.cuisines, {
       shouldSort: true,
-      threshold: 0.8,
+      threshold: 0.4,
+      distance: 5,
       tokenize: true,
-      matchAllTokens: true,
       keys: ['name']
     })
     if (res !== null) {
@@ -320,6 +395,10 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
+  var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
+  if (message.allow_text_matching && !adminHasVoted) {
+    return yield handlers['food.admin.restaurant.pick'](message)
+  }
   // Build the votes tally
   var votes = foodSession.votes
     .map(v => v.vote) // get just the vote, not username
@@ -345,16 +424,18 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`,
-      fallback: 'Unable to load votes',
+      fallback: `*Votes from the group* 👋\n${votes}`,
       callback_id: 'admin_restaurant_pick',
-      actions: [{
-        name: 'food.feedback.new',
-        text: '⇲ Send feedback',
-        type: 'button',
-        value: 'food.feedback.new'
-      }]
     }]
   }
+  // if (feedbackOn && dashboard) {
+  //   dashboard.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
 
   if (slackers.length > 0) {
     dashboard.attachments.push({
@@ -453,51 +534,51 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var arrow = direction === SORT.descending ? '▾ ' : '▴ '
 
-  // default price sort direction is ascending
-  var sortPriceButton = {
-    'name': 'food.admin.restaurant.pick.list',
-    'text': (sort === SORT.price ? arrow : '') + 'Sort Price',
-    'type': 'button',
-    'value': {
-      index: 0,
-      sort: (sort === SORT.price && direction === SORT.descending) ? SORT.keyword : SORT.price,
-      keyword: keyword,
-      direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending
-    }
-  }
+  // // default price sort direction is ascending
+  // var sortPriceButton = {
+  //   'name': 'food.admin.restaurant.pick.list',
+  //   'text': (sort === SORT.price ? arrow : '') + 'Sort Price',
+  //   'type': 'button',
+  //   'value': {
+  //     index: 0,
+  //     sort: (sort === SORT.price && direction === SORT.descending) ? SORT.keyword : SORT.price,
+  //     keyword: keyword,
+  //     direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending
+  //   }
+  // }
 
-  // default rating sort direction is descending
-  var sortRatingButton = {
-    'name': 'food.admin.restaurant.pick.list',
-    'text': (sort === SORT.rating ? arrow : '') + 'Sort Rating',
-    'type': 'button',
-    'value': {
-      index: 0,
-      sort: (sort === SORT.rating && direction === SORT.ascending) ? SORT.keyword : SORT.rating,
-      keyword: keyword,
-      direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending
-    }
-  }
+  // // default rating sort direction is descending
+  // var sortRatingButton = {
+  //   'name': 'food.admin.restaurant.pick.list',
+  //   'text': (sort === SORT.rating ? arrow : '') + 'Sort Rating',
+  //   'type': 'button',
+  //   'value': {
+  //     index: 0,
+  //     sort: (sort === SORT.rating && direction === SORT.ascending) ? SORT.keyword : SORT.rating,
+  //     keyword: keyword,
+  //     direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending
+  //   }
+  // }
 
-  // default distance sort direction is ascending
-  var sortDistanceButton = {
-    'name': 'food.admin.restaurant.pick.list',
-    'text': (sort === SORT.distance ? arrow : '') + 'Sort Distance',
-    'type': 'button',
-    'value': {
-      index: 0,
-      sort: (sort === SORT.distance && direction === SORT.descending) ? SORT.keyword : SORT.distance,
-      keyword: keyword,
-      direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending
-    }
-  }
+  // // default distance sort direction is ascending
+  // var sortDistanceButton = {
+  //   'name': 'food.admin.restaurant.pick.list',
+  //   'text': (sort === SORT.distance ? arrow : '') + 'Sort Distance',
+  //   'type': 'button',
+  //   'value': {
+  //     index: 0,
+  //     sort: (sort === SORT.distance && direction === SORT.descending) ? SORT.keyword : SORT.distance,
+  //     keyword: keyword,
+  //     direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending
+  //   }
+  // }
 
   var buttons = {
     'mrkdwn_in': [
       'text'
     ],
     'text': '',
-    'fallback': 'You are unable to pick a restaurant',
+    'fallback': 'Restaurant',
     'callback_id': 'admin_restaurant_pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
@@ -514,9 +595,16 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     buttons.actions.push(moreButton)
   }
 
-  buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
+  //buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
 
   responseForAdmin.attachments.push(buttons)
+
+  //adding writing prompt
+  responseForAdmin.attachments.push({
+    'fallback': 'Search for a restaurant',
+    'text': '✎ Type below to search for a restaurant by name (Example: _Azuki Sushi_)',
+    'mrkdwn_in': ['text']
+  })
 
   // admin is confirming, replace their message
   var admin = foodSession.convo_initiater
@@ -584,6 +672,13 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
 }
 
+handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.menu = yield api.getMenu(foodSession.chosen_restaurant.id)
+  yield foodSession.save()
+  yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
+}
+
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
@@ -596,14 +691,14 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
           'text'
         ],
         'text': 'Want to be in this order?',
-        'fallback': 'n/a',
+        'fallback': 'Want to be in this order?',
         'callback_id': 'food.participate.confirmation',
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'actions': [
           {
             'name': 'food.menu.quickpicks',
-            'text': 'Yes',
+            'text': '✓ Yes',
             'type': 'button',
             'style': 'primary',
             'value': {}

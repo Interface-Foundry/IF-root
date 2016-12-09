@@ -23,3 +23,4 @@ slack:
   verification_token: mtqOe7U3SUlxdTcmRThY84sX
   redirect_uri: https://ea670b5c.ngrok.io/newslack
 kipPayURL: https://7ad44111.ngrok.io
+picstitchDelivery: http://localhost:5000

@@ -1,5 +1,5 @@
 var kip = require('../../kip');
-var gcloud = require('gcloud');
+var gcloud = require('google-cloud');
 var rx = require('rx');
 
 var pubsub = gcloud.pubsub({

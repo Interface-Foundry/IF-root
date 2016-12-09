@@ -1,7 +1,7 @@
 var EventEmitter = require('events')
 var co = require('co')
 var request = require('request-promise')
-require('logging')
+require('../../../logging')
 require('colors')
 
 var team = require('./test_team_1')

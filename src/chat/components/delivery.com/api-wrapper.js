@@ -1,4 +1,3 @@
-require('kip')
 var _ = require('lodash')
 var co = require('co')
 var fs = require('fs')
@@ -29,7 +28,7 @@ module.exports.createCartForSession = function * (session) {
     'body': {
       'client_id': client_id,
       'order_type': `delivery`,
-      'instructions': '',
+      'instructions': session.instructions || '',
       'items': session.cart.filter(i => i.added_to_cart === true).map(i => i.item)
     }
   }

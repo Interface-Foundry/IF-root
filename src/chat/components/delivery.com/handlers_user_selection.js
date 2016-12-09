@@ -1,4 +1,3 @@
-require('kip')
 var request = require('request-promise')
 var _ = require('lodash')
 
@@ -63,7 +62,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     }
     yield foodSession.save()
   } else {
-    textWithPrevChannel = `Send poll for cuisine to the team mebers at \`${addr}\`?`
+    textWithPrevChannel = `Send poll for cuisine to team members at \`${addr}\`?`
   }
   var msg_json = {
     'attachments': [
@@ -79,7 +78,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': 'Confirm',
+            'text': '✓ Send Poll',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
@@ -92,25 +91,34 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           },
           {
             'name': 'food.admin.display_channels',
-            'text': 'Use a Channel',
+            'text': 'Use a #channel',
             'type': 'button',
             'value': 'select_team_members'
           },
           {
             'name': 'passthrough',
-            'text': '× Cancel',
+            'text': '< Back',
             'type': 'button',
-            'value': 'food.exit.confirm',
-            'confirm': {
-              'title': 'Are you sure?',
-              'text': "Are you sure you don't want to order food?",
-              'ok_text': 'Yes',
-              'dismiss_text': 'No'
-            }
+            'value': 'food.admin.select_address'
           }
         ]
       }
     ]
+  }
+
+  if(foodSession.onboarding){
+    msg_json.attachments.unshift(
+    // {
+    //   'text': '',
+    //   'fallback': 'Team voting',
+    //   'color': '#A368F0',
+    //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
+    // },
+    {
+      'text':'*Step 5.* Choose who you want to be part of your food order',
+      'color':'#A368F0',
+      'mrkdwn_in': ['text']
+    })
   }
 
   $replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
@@ -140,7 +148,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': 'Confirm',
+            'text': '✓ Send Poll',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
@@ -153,21 +161,15 @@ handlers['food.poll.confirm_send'] = function * (message) {
           },
           {
             'name': 'food.admin.display_channels',
-            'text': 'Use a Channel',
+            'text': 'Use a #channel',
             'type': 'button',
             'value': 'select_team_members'
           },
           {
             'name': 'passthrough',
-            'text': '× Cancel',
+            'text': '< Back',
             'type': 'button',
-            'value': 'food.exit.confirm',
-            'confirm': {
-              'title': 'Are you sure?',
-              'text': "Are you sure you don't want to order food?",
-              'ok_text': 'Yes',
-              'dismiss_text': 'No'
-            }
+            'value': 'food.admin.select_address'
           }
         ]
       }
@@ -216,7 +218,7 @@ handlers['food.admin.display_channels'] = function * (message) {
     attachments: groupedButtons.map((buttonGroup) => {
       return {
         'text': ``,
-        'fallback': 'Cant select a channel at this time',
+        'fallback': 'Which team members are you ordering food for?',
         'callback_id': 'channel_select',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -228,7 +230,7 @@ handlers['food.admin.display_channels'] = function * (message) {
   // final attachment with send, edit members, < back
   msg_json.attachments.push({
     'text': ``,
-    'fallback': 'Cant do thing',
+    'fallback': '✓ Send to Members',
     'callback_id': 'channel_select',
     'attachment_type': 'default',
     'actions': [{

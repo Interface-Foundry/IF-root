@@ -41,9 +41,10 @@ if (process.env.NODE_ENV !== 'test') {
         prettyPrint: true
       }),
       // log errors to mongodb
-      new (winston.transports.MongoDB)({
+      new MongoDB({
         level: 'error',
         db: configFiles.mongodb.url,
+        options: configFiles.mongodb.options,
         collection: 'errors',
         label: 'winston',
         decolorize: true

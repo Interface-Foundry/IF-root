@@ -2,6 +2,7 @@
 
 var _ = require('lodash')
 var Menu = require('./Menu')
+var Cart = require('./Cart')
 var api = require('./api-wrapper')
 
 var sleep = require('co-sleep')
@@ -43,6 +44,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     var quantityAttachment = {
       title: item.name + ' – ' + menu.getCartItemPrice(i).$,
       text: item.description + instructions,
+      fallback: item.description + instructions,
       mrkdwn_in: ['text'],
       callback_id: item.unique_id,
       color: '#3AA3E3',
@@ -82,22 +84,23 @@ handlers['food.cart.personal'] = function * (message, replace) {
   })
 
   var bottom = {
-    'text': '',
-    'fallback': 'Unable to load price confirm',
+    'text': '*My Order Total:* '+totalPrice.$,
+    'mrkdwn_in': ['text'],
+    'fallback': 'Confirm personal cart',
     'callback_id': 'wopr_game',
     'color': '#49d63a',
     'attachment_type': 'default',
     'actions': [
       {
         'name': 'food.cart.personal.confirm',
-        'text': '✓ Confirm: ' + totalPrice.$,
+        'text': '✓ Finish My Order',
         'type': 'button',
         'value': 'food.cart.personal.confirm',
         'style': 'primary'
       },
       {
         'name': 'food.menu.quickpicks',
-        'text': '< Back',
+        'text': '< Order More',
         'type': 'button',
         'value': ''
       }
@@ -180,6 +183,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   if (message.data.value === 'no thanks') {
     yield foodSession.update({$pull: {team_members: {id: message.user_id}}}).exec()
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+    $replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: `Ok, maybe next time :blush:`}})
   } else {
     foodSession.confirmed_orders.push(message.source.user)
     $replyChannel.sendReplace(message, '.', {type: message.origin, data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
@@ -206,7 +210,8 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     attachments: [{
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
-      text: `*Collected so far* 👋\n_${allItems}_`
+      text: `*Collected so far* 👋\n_${allItems}_`,
+      'fallback': `*Collected so far* 👋\n_${allItems}_`
     }]
   }
 
@@ -220,7 +225,13 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
         text: 'Finish Order Early',
         style: 'default',
         type: 'button',
-        value: 'food.admin.order.confirm'
+        value: 'food.admin.order.confirm',
+        confirm: {
+            "title": "Finish Order Early?",
+            "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
+            "ok_text": "Yes",
+            "dismiss_text": "No"
+        }
       }]
     })
   }
@@ -283,7 +294,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
   // main response and attachment
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    fallback: 'You are unable to confirm.',
+    fallback: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     callback_id: 'address_confirm'
   }
 
@@ -301,7 +312,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     textForItem += descriptionString.length > 0 ? `*Options:* ${descriptionString}\n` + `*Added by:* <@${item.user_id}>` : `*Added by:* <@${item.user_id}>`
     return {
       text: textForItem,
-      fallback: 'Unable to load food item',
+      fallback: textForItem,
       callback_id: 'foodInfoItems_wopr',
       color: '#3AA3E3',
       attachment_type: 'default',
@@ -340,18 +351,21 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         foodSession.save()
       }
       var finalAttachment = {
-        text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
-              `*Taxes:* ${foodSession.order.tax.$}\n` +
-              `*Tip:* ${foodSession.tipAmount.$}\n` +
-              `*Team Cart:* ${foodSession.order.total.$}\n` +
-              `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
-        fallback: 'Confirm Choice',
+        text: `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
+        fallback: `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
         callback_id: 'admin_order_confirm',
         color: '#49d63a',
         attachment_type: 'default',
         mrkdwn_in: ['text'],
         footer: 'Powered by Delivery.com',
         footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
+      }
+
+      var instructionsButton = {
+        name: 'food.order.instructions',
+        text: '✎ Add Instructions',
+        type: 'button',
+        value: ''
       }
 
       if (totalPrice < foodSession.chosen_restaurant.minimum) {
@@ -369,19 +383,24 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           'type': `button`,
           'style': `primary`,
           'value': `checkout`
-        }, {
-          'name': 'food.feedback.new',
-          'text': '⇲ Send feedback',
-          'type': 'button',
-          'value': 'food.feedback.new'
-        }]
+        },
+        instructionsButton
+        ]
       }
+      // if (feedbackOn && finalAttachment) {
+      //   finalAttachment.actions.push({
+      //     name: 'food.feedback.new',
+      //     text: '⇲ Send feedback',
+      //     type: 'button',
+      //     value: 'food.feedback.new'
+      //   })
+      // }
       // ------------------------------------
       // tip attachment
       var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount.toFixed(2)}`
       var tipAttachment = {
         'title': `Tip: ${tipTitle}`,
-        'fallback': 'Unable to load tip',
+        'fallback': `Tip: ${tipTitle}`,
         'callback_id': 'food.admin.cart.tip',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -396,7 +415,23 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           }
         })
       }
-      response.attachments = [mainAttachment].concat(itemAttachments).concat([tipAttachment]).concat([finalAttachment])
+
+      var infoAttachment = {
+        fallback: 'Checkout Total',
+        text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
+              `*Taxes:* ${foodSession.order.tax.$}\n` +
+              `*Tip:* ${foodSession.tipAmount.$}\n`,
+        'callback_id': 'food.admin.cart.info',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'mrkdwn_in': ['text']
+      }
+
+      if (foodSession.instructions) {
+        infoAttachment.text = `*Delivery Instructions*: _${foodSession.instructions}_\n` + infoAttachment.text
+      }
+
+      response.attachments = _.flatten([mainAttachment, itemAttachments, tipAttachment, infoAttachment, finalAttachment]).filter(Boolean)
     } else {
       // some sort of error
       foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -404,11 +439,11 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       var errorMsg = `Looks like there are ${deliveryError.length} total errors including: ${deliveryError[0].user_msg}`
       finalAttachment = {
         text: errorMsg,
-        fallback: 'Confirm Choice',
+        fallback: errorMsg,
         callback_id: 'foodConfrimOrder_callbackID',
         attachment_type: 'default'
       }
-      response.attachments = [mainAttachment].concat(itemAttachments).concat([finalAttachment])
+      response.attachments = _.flatten([mainAttachment, itemAttachments, finalAttachment]).filter(Boolean)
     }
   } catch (err) {
     logging.error('error with creating cart payment for some reason', err)
@@ -420,6 +455,31 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
   }
 }
+
+handlers['food.order.instructions'] = function * (message) {
+  var msg = {
+    text: `*Add Special Instructions*`,
+    attachments: [{
+      text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
+      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
+      mrkdwn_in: ['text']
+    }]
+  }
+
+  var response = yield $replyChannel.sendReplace(message, 'food.order.instructions.submit', {type: message.origin, data: msg})
+}
+
+handlers['food.order.instructions.submit'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  yield db.Delivery.update({_id: foodSession._id}, {$set: {'instructions': message.text || ''}}).exec()
+  var msg = _.merge({}, message, {
+    text: ''
+  })
+  return yield handlers['food.admin.order.confirm'](msg)
+}
+
+
 
 handlers['food.member.order.view'] = function * (message) {
   // would be S12 stuff for just member here

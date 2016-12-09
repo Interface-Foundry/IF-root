@@ -1,37 +1,37 @@
 var message_tools = require('../message_tools')
 var handlers = module.exports = {};
-var db = require('db');
 var _ = require('lodash');
 var co = require('co');
 var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
-// var team;
-// var teamMembers;
-// var admins;
-// var currentUser;
-// var isAdmin;
+var request = require('request');
+
 var cron = require('cron');
 //maybe can make this persistent later?
 var cronJobs = {};
-function * handle(message) {
+function* handle(message) {
   var last_action = _.get(message, 'history[0].action');
-  if (!last_action || last_action.indexOf('home') == -1) {
-    return yield handlers['start'](message)
-  } else {
-    var action = getAction(message.text);
-    kip.debug('\n\n\n🤖 action : ',action,' 🤖\n\n\n');
-    return yield handlers[action](message)
+  let action;
+  if (!last_action || last_action != 'home') {
+    action = 'start';
+  } else if (message.text) {
+    action = getAction(message.text);
+    kip.debug('\n\n\n🤖 action : ', action, ' 🤖\n\n\n');
+  } else if (action === undefined) {
+    action = message.action;
   }
+
+  return yield handlers[action](message)
 }
- 
+
 module.exports.handle = handle;
 
-/**
+/*
  * Show the user all the settings they have access to
  */
-handlers['start'] = function * (message) { 
+handlers['start'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -97,18 +97,23 @@ handlers['start'] = function * (message) {
       console.log('job time in user timzone', job_time_user_tz.format());
       attachments.push({text: 'You are receiving weekly cart status updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + '\nYou can turn this off by saying `no weekly status`'
         + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'});
-    } 
+    }
     else {
       attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'});
     }
   };
-
+  var buttons = cardTemplate.settings_buttons;
+  if(!isAdmin && admins.length > 0){
+  	buttons = cardTemplate.settings_buttons.slice(0, 1);
+  }
+  var text = 'Don’t have any changes? Type `exit` to quit settings';
+  var color = '#45a5f4';
   attachments.push({
-      text: 'Don’t have any changes? Type `exit` to quit settings',
-      color: '#49d63a',
+      text: text,
+      color: color,
       mrkdwn_in: ['text'],
       fallback:'Settings',
-      actions: cardTemplate.slack_settings_default,
+      actions: buttons,
       callback_id: 'none'
     })
     // console.log('SETTINGS ATTACHMENTS ',attachments);
@@ -117,16 +122,43 @@ handlers['start'] = function * (message) {
       a.mrkdwn_in =  ['text'];
       a.color = '#45a5f4';
     })
-
-   var msg = message;
-   msg.mode = 'settings'
-   msg.text = ''
-   msg.source.team = team_id;
-   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-   msg.reply = attachments;
-   return [msg];
-
+  if (message.source.response_url) {
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify({
+        text: '',
+        attachments: attachments
+      })
+    })
+  }
+  else { 
+    // for case when settings is typed
+    var msg = message;
+    msg.mode = 'settings'
+    msg.text = ''
+    msg.source.team = team_id;
+    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    msg.reply = attachments;
+    return [msg];
+  }
 }
+
+handlers['back'] = function * (message) {
+  var attachments = [{
+    image_url: "http://tidepools.co/kip/kip_menu.png",
+    text: 'Click a mode to start using Kip',
+    color: '#3AA3E3',
+    callback_id: 'wow such home',
+    actions: cardTemplate.simple_home
+  }];
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify({text: '', attachments: attachments})
+  })
+}
+
 
 handlers['status_on'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
@@ -185,6 +217,8 @@ handlers['change_status'] = function * (message) {
     hour = hour - 12;
     am_pm = 'PM';
   }
+  if (hour.toString().indexOf(':') > -1) hour = parseInt(hour.replace(':',''));
+  if (minutes.toString().indexOf(':') > -1) minutes = parseInt(minutes.replace(':',''));
   am_pm = am_pm.toUpperCase().trim();
   team.meta.weekly_status_day = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
   team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-2) + ' ' + am_pm;
@@ -205,7 +239,7 @@ handlers['change_status'] = function * (message) {
     "mode": "settings",
     "action": "home",
     "_id": message._id
-  } ]; 
+  } ];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -256,14 +290,7 @@ handlers['add_or_remove'] = function * (message) {
                 "style": "primary",
                 "type": "button",
                 "value": "exit"
-              },              
-              // {
-              //   "name": "help",
-              //   "text": "Help",
-              //   "style": "default",
-              //   "type": "button",
-              //   "value": "help"
-              // },              
+              },
               {
                 "name": "team",
                 "text": "Team Members",
@@ -277,14 +304,7 @@ handlers['add_or_remove'] = function * (message) {
                 "style": "default",
                 "type": "button",
                 "value": "viewcart"
-              },
-              // {
-              //   "name": "home",
-              //   "text": "🐧",
-              //   "style": "default",
-              //   "type": "button",
-              //   "value": "home"
-              // }
+              }
           ],
           callback_id: 'none'
         });
@@ -303,6 +323,11 @@ handlers['add_or_remove'] = function * (message) {
     }
     var shouldReturn = false;
     if (tokens[0] === 'add') {
+      if(team.meta.p2p) {
+         team.meta.p2p = false;
+         kip.debug('P2P mode OFF');
+         team.meta.office_assistants = [];
+      }
       userIds.map((id) => {
         if (team.meta.office_assistants.indexOf(id) < 0) {
           team.meta.office_assistants.push(id);
@@ -329,10 +354,10 @@ handlers['add_or_remove'] = function * (message) {
       "mode": "settings",
       "action": "home",
       "_id": message._id
-    } ]; 
+    } ];
     msg.source.team = team.team_id;
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-    replies.push(msg)      
+    replies.push(msg)
   }
  return replies;
 }
@@ -351,7 +376,7 @@ handlers['last_call_off'] = function * (message) {
     "mode": "settings",
     "action": "home",
     "_id": message._id
-  } ]; 
+  } ];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -371,7 +396,7 @@ handlers['last_call_on'] = function * (message) {
     "mode": "settings",
     "action": "home",
     "_id": message._id
-  } ]; 
+  } ];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -384,13 +409,13 @@ handlers['send_last_call'] = function * (message) {
   var replies = []
   yield team.meta.cart_channels.map( function * (c) {
     var channelMembers = yield utils.getChannelMembers(team, c);
-    yield channelMembers.map( (m) => {      
+    yield channelMembers.map( (m) => {
       var attachment = [{
             "fallback": "Last Call",
             "text":'',
             "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
             "color": "#45a5f4",
-            "mrkdwn_in": ["text"]        
+            "mrkdwn_in": ["text"]
         },{
             "fallback": "Last Call",
             "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.\n So if you’ve got some last minute shopping to do, it’s now or never! You have *60* minutes left',
@@ -406,7 +431,7 @@ handlers['send_last_call'] = function * (message) {
           "mode": "settings",
           "action": "home",
           "_id": message._id
-        }]; 
+        }];
         msg.reply = attachment;
         msg.source.team = team.team_id;
         msg.source.channel = m.dm; //not sure if this will work
@@ -435,7 +460,7 @@ handlers['sorry'] = function * (message) {
             "style": "primary",
             "type": "button",
             "value": "exit"
-          },              
+          },
           {
             "name": "help",
             "text": "Help",
@@ -444,7 +469,7 @@ handlers['sorry'] = function * (message) {
 
 
             "value": "help"
-          },              
+          },
           {
             "name": "team",
             "text": "Team Members",
@@ -478,26 +503,30 @@ handlers['sorry'] = function * (message) {
 
 }
 
-function getAction (text) {
+function getAction(text) {
   var action;
+  kip.debug(`\n🥝  ${text}\n`)
   if (isStatusOff(text)) {
-      action = 'status_off';
-    } else if (isStatusOn(text)){
-      action = 'status_on';
-    } else if (isStatusChange(text)){
-      action = 'change_status';
-    } else if (isAddOrRemove(text)) {
-      action = 'add_or_remove';
-    } else if (isLastCallOff(text)){
-      action = 'last_call_off';
-    } else if (isLastCallOn(text)){
-      action = 'last_call_on';
-    } else if (isSendLastCall(text)){
-      action = 'send_last_call';
-    } else {
-      action = 'sorry'
-    }
-    return action;
+    action = 'status_off';
+  } else if (isStatusOn(text)) {
+    action = 'status_on';
+  } else if (isStatusChange(text)) {
+    action = 'change_status';
+  } else if (isAddOrRemove(text)) {
+    action = 'add_or_remove';
+  } else if (isLastCallOff(text)) {
+    action = 'last_call_off';
+  } else if (isLastCallOn(text)) {
+    action = 'last_call_on';
+  } else if (isSendLastCall(text)) {
+    action = 'send_last_call';
+  } else if (text.includes('settings')) {
+    kip.debug(`\n🥝  ${text}\n`)
+    action = 'start'
+  } else {
+    action = 'sorry'
+  }
+  return action;
 }
 
 function isStatusChange(input) {
@@ -571,7 +600,7 @@ function * updateCronJob(team, message, date) {
     }
     kip.debug('\n\n\nsetting cron job day: ', '00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day,'\n\n\n')
     var teamMembers = yield utils.getTeamMembers(team);
-    cronJobs[team.team_id] = new cron.CronJob('00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day, function  () {  
+    cronJobs[team.team_id] = new cron.CronJob('00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day, function  () {
        team.meta.office_assistants.map(function  (a) {
        var assistant = teamMembers.find(function(m, i){ return m.id == a });
 
@@ -599,21 +628,21 @@ function * updateCronJob(team, message, date) {
               "style": "primary",
               "type": "button",
               "value": "exit"
-            },              
+            },
             {
               "name": "send_last_call_btn",
               "text": "Yes",
               "style": "default",
               "type": "button",
               "value": "send_last_call_btn"
-            }, 
+            },
             {
               "name": "no",
               "text": "No",
               "style": "default",
               "type": "button",
               "value": "no"
-            },             
+            },
             {
               "name": "team",
               "text": "Team Members",
@@ -643,7 +672,7 @@ function * updateCronJob(team, message, date) {
 
       newMessage.save()
       queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
-          
+
           // slackBot.web.chat.postMessage(assistant.dm, '', reply);
           //   // SHOW CART STICKER
           //  //* * * * * * * * * * * * * * * * * //
@@ -663,24 +692,24 @@ function getDayNum(string) {
   switch(string) {
     case 'Sunday':
      return 0
-     break; 
+     break;
     case 'Monday':
      return 1
-     break; 
+     break;
     case 'Tuesday':
      return 2
-     break; 
+     break;
     case 'Wednesday':
      return 3
-     break; 
+     break;
     case 'Thursday':
      return 4
-     break; 
+     break;
     case 'Friday':
      return 5
-     break; 
+     break;
     case 'Saturday':
      return 6
-     break; 
+     break;
   }
 }

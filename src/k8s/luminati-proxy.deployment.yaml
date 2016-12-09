@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: luminati-proxy
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: luminati-proxy
+    spec:
+      containers:
+      - env:
+        - name: CUSTOMER
+          value: kipthis
+        # TODO: set up secrets for sensitive storage
+        - name: PASSWORD
+          value: e49d4ega1696
+        - name: PROXY_COUNT
+          value: "3"
+        - name: COUNTRY
+          value: us
+        - name: MAX_REQUESTS
+          value: "20"
+        - name: PORT
+          value: "22225"
+        - name: LOG
+          value: error
+        image: gcr.io/kip-styles/luminati-proxy:20161207
+        imagePullPolicy: Always
+        name: luminati-proxy
+        ports:
+        - containerPort: 22225
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

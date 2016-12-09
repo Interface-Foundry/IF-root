@@ -1,7 +1,6 @@
 var _ = require('lodash')
 var co = require('co')
 
-require('kip')
 var api = require('./api-wrapper')
 
 var defaultParams = {}

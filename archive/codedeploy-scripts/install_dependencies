@@ -1,2 +1,0 @@
-#!/bin/bash
-cd /opt/kip/App; npm install mmmagic

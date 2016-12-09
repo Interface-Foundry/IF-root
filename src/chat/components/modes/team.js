@@ -2,12 +2,12 @@ var message_tools = require('../message_tools');
 var handlers = module.exports = {};
 var _ = require('lodash');
 var validator = require('validator');
-var db = require('db');
 var co = require('co');
 var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
+var request = require('request');
 var team;
 var teamMembers;
 var admins;
@@ -46,12 +46,11 @@ handlers['start'] = function * (message) {
   var cartChannels = team.meta.cart_channels;
   //adding settings mode sticker
   var attachments = [];
-  attachments.push({ 
+  attachments.push({
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
     text: ''
   });
   var channels = yield utils.getChannels(team);
-  var cartChannels = team.meta.cart_channels;
   var buttons = channels.map(channel => {
     var checkbox = cartChannels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
       return {
@@ -61,41 +60,56 @@ handlers['start'] = function * (message) {
         value: channel.id
       }
   });
-  attachments.push({text: 'Channels: ', actions: buttons, callback_id: "none"});
-    var endpart = {
-      "text":"Update cart members? Or type `exit`",
-      "actions": cardTemplate.slack_team_default,
-      "callback_id": 'none',
-      // "mrkdwn_in": ["fields","text"],
-      // "color":"#49d63a"
-    };
-    attachments.push(endpart);
-    // }
-    var resList = {
-      username: 'Kip',
-      text: "",
-      attachments: attachments,
-      fallback: 'Team Cart Members'
-    };
-    // make all the attachments markdown
-    attachments.map(function(a) {
-      a.mrkdwn_in =  ['text', 'fields'];
-      a.color = '#45a5f4';
+  var color = '#45a5f4';
+  var chunkedButtons = _.chunk(buttons, 5);
+  attachments.push({text: 'Which channels do you want to include?', actions: chunkedButtons[0], callback_id: "none"});
+  chunkedButtons.forEach((ele, i) => {
+    if (i != 0) {
+      attachments.push({text:'', actions: ele, callback_id: 'none', color: color});
+    }
+  })
+
+  var endpart = {
+    "text": '',
+    "actions": cardTemplate.team_buttons,
+    "callback_id": 'none',
+  };
+  // make all the attachments markdown
+  attachments.map(function(a) {
+    a.mrkdwn_in = ['text', 'fields'];
+    a.color = color;
+  })
+  attachments.push(endpart);
+
+  if (message.source.response_url) {
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify({
+        text: '',
+        attachments: attachments
+      })
     })
+  } else { // in case someone types team
     var msg = message;
     msg.mode = 'team';
     msg.text = '';
-    msg.execute = [ { 
+    msg.execute = [{
       "mode": "team",
       "action": "home",
       "_id": message._id
-    } ]; 
+    }];
     msg.source.team = team.team_id;
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
     msg.reply = attachments;
+
     return [msg];
+  }
 
 }
+
+
+
 
 // function viewCartMembers(convo,callback,flag){
 
@@ -226,7 +240,7 @@ handlers['start'] = function * (message) {
 //               "style": "primary",
 //               "type": "button",
 //               "value": "exit"
-//             },              
+//             },
 //             {
 //               "name": "help",
 //               "text": "Help",
@@ -283,4 +297,3 @@ function getAction (text) {
     }
     return action;
 }
-
