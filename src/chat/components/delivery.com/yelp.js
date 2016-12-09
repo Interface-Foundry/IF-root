@@ -15,9 +15,7 @@ function tokenize (str) {
 }
 
 function matchLocation (restaurants, location) {
-  //iterate through, etc
-  console.log('matchLocation called on ' + location);
-  //console.log(restaurants[0]);
+
   var closest = -1;
   var smallest = 40000
   for (var i = 0; i < restaurants.length; i++) {
@@ -31,24 +29,26 @@ function matchLocation (restaurants, location) {
     }
   }
 
-  console.log(location.latitude, location.longitude, '//', restaurants[closest].location.coordinate.latitude, restaurants[closest].location.coordinate.longitude)
-  console.log(restaurants[closest].name)
+  //console.log(location.latitude, location.longitude, '//', restaurants[closest].location.coordinate.latitude, restaurants[closest].location.coordinate.longitude);
+  //console.log(restaurants[closest].name);
+  return restaurants[closest];
+}
+
+function yelpRestaurant (merch) {
+
+  //check database or whatever
+
+  return findRestaurant(merch);
 }
 
 function findRestaurant (merch) {
 
-  //checkDB for thing
-  //else search by name
-  //and then search by location
-  //and update the database
-
-  yelp.search({
+  return yelp.search({
     term: tokenize(merch.summary.name),
     radius_filter: 40000,
     location: merch.location.city
   })
   .then(function (data) {
-    //console.log('data?', data)
     var correctMerchant = matchLocation (
       data.businesses,
       {
@@ -56,10 +56,17 @@ function findRestaurant (merch) {
         longitude: merch.location.longitude
       }
     );
+
+    //update database or whatever
+
+    console.log('rating:', correctMerchant.rating);
+
+    // or return anything
+    return correctMerchant.rating;
   })
   .catch(function (err) {
     console.log('ERROR:', err);
   })
 }
 
-module.exports = findRestaurant;
+module.exports = yelpRestaurant;

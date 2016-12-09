@@ -170,18 +170,31 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   }
 
   // now order the restaurants in terms of descending score
+
+  var maxStars = 0;
+
   merchants = merchants
     .map(m => {
       m.score = scoreAlgorithms[sortOrder](m)
-      return m
+      if (sortOrder == SORT.cuisine) {
+        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
+        if (m.stars > maxStars) maxStars = m.stars
+      }
+      return m;
     })
-    .sort((a, b) => directionMultiplier * (a.score - b.score))
 
-  //~~~~~~~~~~Yelp Reviews~~~~~~~~~~//
+  merchants = merchants
+    .map(m => {
+      m.stars = m.stars / maxStars;
+      m.score = m.score + m.stars;
+      return m;
+    })
 
-  yelp(merchants[0]);
+  merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
 
-  //~~~~~~~~~~Yelp Reviews~~~~~~~~~~//
+  // merchants.map(m => {
+  //   console.log('m.score:', m.score, 'm.stars:', m.stars);
+  // })
 
   return merchants
 }
