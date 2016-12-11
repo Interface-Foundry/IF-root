@@ -12,7 +12,7 @@ node {
             checkout scm
         }
 
-        stage('git info')
+        stage('git info') {
             def env = build.getEnvironment()
             def gitCommit = env.GIT_COMMIT
             def shortGitCommit = gitCommit[0..6]
