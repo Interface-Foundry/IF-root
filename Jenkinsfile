@@ -11,7 +11,7 @@ node {
 
         stage('checkout') {
             checkout scm
-            sh('echo using git hash  ${GIT_REVISION,length=6}')
+            // sh('echo using git hash: ${GIT_REVISION}')
         }
 
         stage('npm install') {
