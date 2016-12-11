@@ -46,7 +46,6 @@
     "memoize": "^0.1.1",
     "memory-cache": "^0.1.5",
     "minimist": "^1.2.0",
-    "mmmagic": "^0.3.15",
     "moment": "~2.7.0",
     "moment-timezone": "^0.5.3",
     "mongo-sanitize": "^1.0.0",
