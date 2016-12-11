@@ -1,6 +1,7 @@
 node {
     def nodeHome = tool name: 'node7.2.1', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
     env.PATH = "${nodeHome}/bin:${env.PATH}"
+    def GIT_REVISION = env.GIT_REVISION
 
     try {
         stage('check environment') {
@@ -10,13 +11,7 @@ node {
 
         stage('checkout') {
             checkout scm
-        }
-
-        stage('git info') {
-            def env = build.getEnvironment()
-            def gitCommit = env.GIT_COMMIT
-            def shortGitCommit = gitCommit[0..6]
-            sh('echo using git hash  ${shortGitCommit}')
+            sh('echo using git hash  ${GIT_REVISION,length=6}')
         }
 
         stage('npm install') {
