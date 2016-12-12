@@ -8,6 +8,7 @@ var jstz = require('jstz');
 var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
 var queue = require('../queue-mongo');
+var cron = require('cron');
 
 
 /*
@@ -459,6 +460,14 @@ function * getAllChannels (slackbot) {
   yield slackbot.slackbot.save()
 }
 
+/*
+*
+* CRON Jobs
+*
+*/
+
+
+
 
 /*
 *
@@ -535,6 +544,73 @@ function * hideLoading(message) {
 }
 
 
+function * sendLastCalls(message) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  var replies = [];
+  yield team.meta.cart_channels.map( function * (c) {
+    var channelMembers = yield getChannelMembers(team, c);
+    yield channelMembers.map( function * (m) {
+      var attachment = [{
+            "fallback": "Last Call",
+            "text":'',
+            "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
+            "color": "#45a5f4",
+            "mrkdwn_in": ["text"]
+        },{
+            "fallback": "Last Call",
+            "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.\n So if you’ve got some last minute shopping to do, it’s now or never! You have *60* minutes left',
+            "color": "#45a5f4",
+            "mrkdwn_in": ["text"]
+        }];
+        var msg = message;
+        msg.mode = 'settings';
+        msg.text = '';
+        msg.action = 'home';
+        msg.execute = [ { 
+          "mode": "settings",
+          "action": "home",
+          "_id": message._id
+        }];
+        msg.reply = attachment;
+        msg.source.team = team.team_id;
+        msg.source.channel = m.dm; 
+        yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.lastcall'); 
+    })
+  });
+};
+
+function * sendCartToAdmin(message) {
+ 
+};
+
+
+function * updateCron(message, jobs, when) {
+   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+   var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+   var date;
+    if (jobs[team.team_id]) {
+      jobs[team.team_id].stop();
+    }
+    if (when.minutes) {
+      date = '00 ' + when.minutes + ' ' + when.hour + ' * * ' + when.day;
+    } else {
+      date = when;
+      kip.debug(' \n\n\n\n\n\n\n\n\n PASSED A DATE OBJECT TO UPDATECRON!: ', date, ' \n\n\n\n\n\n\n\n\n  ')
+    }
+    kip.debug('\n\n\nsetting cron job day: ', '00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day,'\n\n\n')
+    jobs[team.team_id] = new cron.CronJob( date, function  () {
+       co(sendLastCalls(message));
+    }, function() {
+      console.log('just finished the weekly update thing for team ' + team.team_id + ' ' + team.team_name);
+    },
+    true,
+    team.meta.weekly_status_timezone);
+};
+
+
 module.exports = {
   initializeTeam: initializeTeam,
   findAdmins: findAdmins,
@@ -552,5 +628,7 @@ module.exports = {
   isAdmin: isAdmin,
   generateMenuButtons: generateMenuButtons,
   showLoading: showLoading,
-  hideLoading: hideLoading
+  hideLoading: hideLoading,
+  updateCron: updateCron,
+  sendLastCalls: sendLastCalls
 }

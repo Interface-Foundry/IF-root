@@ -7,22 +7,36 @@ var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
 var request = require('request');
-
+var requestP = require('request-promise');
+var date_lib = require('date-fns');
 var cron = require('cron');
 //maybe can make this persistent later?
 var cronJobs = {};
 function* handle(message) {
+  kip.debug('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n🤖 SHIGECHI: ',message,' 🤖\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n');
   var last_action = _.get(message, 'history[0].action');
   let action;
-  if (!last_action || last_action != 'home') {
+  if ((_.get(message,'action') && (_.get(message,'action').indexOf('set_day') > -1 || _.get(message,'action').indexOf('set_week') > -1 || _.get(message,'action').indexOf('weekly') > -1 || _.get(message,'action').indexOf('monthly') > -1) )) {
+       var data = _.split(message.action, '.');
+      action = data[0].trim();
+      var choice = data[1]; 
+      var datum = _.get(message,'data.value');
+      kip.debug('\n\n\n🤖🤖🤖 action : ', action, ' choice: ', choice, 'datum: ', datum,' 🤖\n\n\n');
+      return yield handlers[action](message, choice, datum);
+  } else if (!last_action || last_action != 'home') {
     action = 'start';
   } else if (message.text) {
     action = getAction(message.text);
-    kip.debug('\n\n\n🤖 action : ', action, ' 🤖\n\n\n');
-  } else if (action === undefined) {
-    action = message.action;
+  } else {
+      var data = _.split(message.data.action, '.');
+      action = data[0];
+      var choice = _.get(message,'data.value');
+      kip.debug('\n\n\n🤖 message.data: ',message.data,' action : ', action, ' choice: ', choice,' 🤖\n\n\n');
+      return yield handlers[action](message, choice);
   }
-
+  // else if (action === undefined) {
+  //   action = message.action;
+  // }
   return yield handlers[action](message)
 }
 
@@ -47,14 +61,7 @@ handlers['start'] = function * (message) {
     image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
     text: ''
   });
-  //
-  // Last call alerts personal settings
-  //
-  if (currentUser && currentUser.settings.last_call_alerts) {
-    attachments.push({text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
-  } else {
-    attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
-  }
+
   //
   // Admins
   //
@@ -81,30 +88,40 @@ handlers['start'] = function * (message) {
   attachments.push({text: adminText});
 
   //
+  // Last call alerts personal settings
+  //
+  if (currentUser && currentUser.settings.last_call_alerts) {
+    attachments.push({text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
+  } else {
+    attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
+  }
+
+  //
   // Admin-only settings
   //
   if (admins && isAdmin) {
     if (team.meta.weekly_status_enabled) {
-      // TODO convert time to the correct timezone for this user.
-      // 1. Date.parse() returns something in eastern, not the job's timezone
-      // 2. momenttz.tz('2016-04-01 HH:mm', meta.weekly_status_timezone) is the correct date for the job
-      // 3. .tz(chatuser.tz) will convert the above to the user's timezone. whew
-      var date = Date.parse(team.meta.weekly_status_day + ' ' + team.meta.weekly_status_time);
-      var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
-      var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), team.meta.weekly_status_timezone);
-      var job_time_user_tz = job_time_bot_tz.tz(currentUser.tz);
-      console.log('job time in bot timezone', job_time_bot_tz.format());
-      console.log('job time in user timzone', job_time_user_tz.format());
-      attachments.push({text: 'You are receiving weekly cart status updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + '\nYou can turn this off by saying `no weekly status`'
-        + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'});
+      if (team.meta.status_interval != 'never') {
+         attachments.push({text: 'Your team is set to receive last calls at *' + (team.meta.status_interval != 'daily' ? team.meta.weekly_status_day : '') + ' ' + team.meta.weekly_status_time + '*  on a ' + team.meta.status_interval + ' basis.'
+          + '\nYou can specify the time by saying something like: `8:00 am`'});
+      }         
+      attachments.push({
+        text: 'Click below to change when last calls go out:',
+        color: color,
+        mrkdwn_in: ['text'],
+        fallback:'Settings',
+        actions: cardTemplate.settings_intervals,
+        callback_id: 'none'
+      })
     }
     else {
       attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'});
     }
   };
-  var buttons = cardTemplate.settings_buttons;
+  
+  var buttons = cardTemplate.settings_menu;
   if(!isAdmin && admins.length > 0){
-  	buttons = cardTemplate.settings_buttons.slice(0, 1);
+  	buttons = cardTemplate.settings_menu.slice(0, 1);
   }
   var color = '#45a5f4';
   attachments.push({
@@ -188,27 +205,26 @@ handlers['status_off'] = function * (message) {
   return [msg];
 }
 
-handlers['change_status'] = function * (message) {
+handlers['change_time'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var currentUser = yield db.Chatusers.findOne({id: message.source.user});
-  var text = message.text.replace(/^(change|update) weekly (status|update)/, '').trim();
-  text = text.replace('days', 'day');
-  text = text.replace(/(to|every|\bat\b)/g, '');
-  text = text.toLowerCase().trim();
+  // var text = message.text.replace(/^(change|update) last call (status|update)/, '').trim();
+  // text = text.replace(/(to|every|\bat\b)/g, '');
+  var text = message.text.toLowerCase().trim();
   // this date library cannot understand Tuesday at 2
   // but it does understand Tuesday at 2:00
-  if (text.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/)) {
-    var dayOfWeek = _.get(text.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/),'[0]');
+  // if (text.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/)) {
+  //   var dayOfWeek = _.get(text.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/),'[0]');
     // if (text.indexOf(':') < 0) {
-      var rtext = text.replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '').replace(dayOfWeek,'');
-      var hour = _.get(rtext.match(/([\d]+)/), '[0]');
-      var minutes = rtext.replace(hour, '')
-      minutes = typeof minutes == 'string' ? minutes.trim() : '00';
-      hour = typeof hour == 'string' ? hour.trim() : '8';
-      hour = parseInt(hour);
+  var rtext = text.replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
+  var hour = _.get(rtext.match(/([\d]+)/), '[0]');
+  var minutes = rtext.replace(hour, '')
+  minutes = typeof minutes == 'string' ? minutes.trim() : '00';
+  hour = typeof hour == 'string' ? hour.trim() : '8';
+  hour = parseInt(hour);
     // }
-  }
+  // }
   var am_pm = _.get(text.match(/(am|a.m.|a m|pm|p.m.|p m)/i), '[0]');
   if (hour > 0 && hour < 7 && !am_pm) {
     am_pm = 'PM'
@@ -219,21 +235,21 @@ handlers['change_status'] = function * (message) {
   if (hour.toString().indexOf(':') > -1) hour = parseInt(hour.replace(':',''));
   if (minutes.toString().indexOf(':') > -1) minutes = parseInt(minutes.replace(':',''));
   am_pm = am_pm.toUpperCase().trim();
-  team.meta.weekly_status_day = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+  // team.meta.weekly_status_day = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
   team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-2) + ' ' + am_pm;
   team.meta.weekly_status_timezone = team.meta.weekly_status_timezone;
   yield team.save();
-  var day = getDayNum(team.meta.weekly_status_day);
-  kip.debug('hour is :', hour, 'minutes is: ', minutes, 'am_pm is: ', am_pm);
+  var day = team.meta.weekly_status_day ? getDayNum(team.meta.weekly_status_day) :  date_lib.getDay(new Date());
   var rhour = (am_pm == 'PM' && hour != 12) ? hour + 12 : hour;
   var dateObj = { day: day, hour: rhour, minutes: minutes};
+  kip.debug('dateObj is: is : ', dateObj, ' day is : ',day,'hour is :', hour, 'minutes is: ', minutes, 'am_pm is: ', am_pm);
   var moment_date = momenttz().day(day).toString().split(':')[0].slice(0, -2);
   var date = moment_date + ' '  + team.meta.weekly_status_time;
-  yield updateCronJob(team, message, dateObj);
+  yield utils.updateCron(message, cronJobs, dateObj);
   var msg = message;
   msg.mode = 'settings'
   msg.action = 'home'
-  msg.text = 'Ok I have updated your settings 😊';
+  msg.text = 'Ok, I have updated your settings!';
   msg.execute = [ { 
     "mode": "settings",
     "action": "home",
@@ -242,6 +258,227 @@ handlers['change_status'] = function * (message) {
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
+}
+
+
+handlers['cron'] = function * (message, interval) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var rhour = date_lib.getHours(new Date());
+  var rminutes = date_lib.getMinutes(new Date());
+  var day = date_lib.getDay(new Date());
+  var never = false;
+  team.meta.status_interval = interval;
+  yield team.save();
+  switch(interval) {
+    case 'daily':
+      var dateObj = { day: '*', hour: rhour, minutes: rminutes};
+      break;
+    case 'weekly':
+      var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
+      var relevantMessage = history[0];
+      var json = message.source.original_message;
+      if (!json) {
+        kip.debug(' \n\n\n\n\n\n DAFUQ is JSON1111: ', relevantMessage, ' \n\n\n\n\n\n ')
+      }
+      var options = {
+        text: 'Which day of the week?',
+        color: '#49d63a',
+        mrkdwn_in: ['text'],
+        fallback:'Settings',
+        actions: cardTemplate.settings_days(relevantMessage),
+        callback_id: 'none'
+      }
+      json.attachments.splice(json.attachments.length-1, 0, options)
+      request({
+        method: 'POST',
+        uri: message.source.response_url,
+        body: JSON.stringify(json)
+      });
+      return
+      break;
+    case 'monthly':
+     var msg = message;
+      msg.mode = 'settings';
+      msg.action = 'home';
+      msg.text = '';
+      msg.execute = [ { 
+        "mode": "settings",
+        "action": "home",
+        "_id": message._id
+      } ];
+      msg.reply = [{
+        text: 'Which week of the month?',
+        color: '#49d63a',
+        mrkdwn_in: ['text'],
+        fallback:'Settings',
+        actions: cardTemplate.settings_weeks(message),
+        callback_id: 'none'
+      }];
+      msg.source.team = team.team_id;
+      msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+      return [msg];
+      // var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
+      // var relevantMessage = history[0];
+      // var json = message.source.original_message;
+      // if (!json) {
+      //   kip.debug(' \n\n\n\n\n\n DAFUQ is JSON: ', relevantMessage, ' \n\n\n\n\n\n ')
+      // }
+      // var prompt = {
+      //   text: 'Which week of the month? ',
+      //   color: '#49d63a',
+      //   mrkdwn_in: ['text'],
+      //   fallback:'Settings',
+      //   actions: cardTemplate.settings_weeks,
+      //   callback_id: 'none'
+      // };
+      // json.attachments.splice(json.attachments.length-1, 0, prompt)
+      // request({
+      //   method: 'POST',
+      //   uri: message.source.response_url,
+      //   body: JSON.stringify(json)
+      // });
+      // return
+      break;
+    case 'never':
+      never = true;
+      break;
+    default:
+      var dateObj = { day: '*', hour: rhour, minutes: rminutes};
+      break;
+  }
+
+  // yield utils.updateCron(message, cronJobs, dateObj);
+  var msg = message;
+  msg.mode = 'settings'
+  msg.action = 'home'
+  msg.text = 'Ok, I have updated your settings!';
+  msg.execute = [ { 
+    "mode": "settings",
+    "action": "home",
+    "_id": message._id
+  } ];
+  msg.source.team = team.team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  return [msg];
+}
+
+handlers['set_day'] = function * (message, day, week) {
+  var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
+  var relevantMessage = history[0];
+  var dayString =day.charAt(0).toUpperCase() + day.slice(1);
+  var day = getDayNum(day);
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  team.meta.weekly_status_day = dayString;
+  yield team.save();
+  if (team.meta.weekly_status_time){
+    var am_pm = _.get(team.meta.weekly_status_time.match(/(am|a.m.|a m|pm|p.m.|p m)/i), '[0]');
+    var hour = team.meta.weekly_status_time.split(':')[0];
+    var rhour = (am_pm == 'PM' && hour != 12) ? hour + 12 : hour;
+  } else {
+    var rhour = date_lib.getHours(new Date());
+  }
+  var rminutes = team.meta.weekly_status_time ?  team.meta.weekly_status_time.split(':')[1].replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '') : date_lib.getMinutes(new Date());
+  var dateObj = { day: day, hour: rhour, minutes: rminutes};
+    kip.debug(' \n\n\n\n\n\n HITTING SET_DAY: dateObj:', dateObj,' \n\n\n\n\n\n ');
+
+  if (week == 'weekly') {
+    yield utils.updateCron(message, cronJobs, dateObj);
+    var msg = message;
+    msg.mode = 'settings'
+    msg.action = 'home'
+    msg.text = 'Ok, I have updated your settings!';
+    msg.execute = [ { 
+      "mode": "settings",
+      "action": "home",
+      "_id": message._id
+    } ];
+    msg.source.team = team.team_id;
+    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    return [msg];
+  } else {
+    kip.debug('  \n\n\n\n\n\n\n\n\n INSIDE SET_DAY week IS : ', week, '\n\n\n\n\n\n\n');
+    var startOfWeek;
+    // switch(week) {
+    //   case '1':
+    //     startOfWeek = 1;
+    //     break;
+    //   case '2':
+    //     startOfWeek = 8;
+    //     break;
+    //   case '3':
+    //     startOfWeek = 16;
+    //     break;
+    //   case '4':
+    //     startOfWeek = 23;
+    //     break;
+    // }
+
+
+
+
+
+  }
+  
+}
+
+handlers['set_week'] = function * (message, week) {
+  // var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  // var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  // team.meta.status_interval = 'monthly';
+  // yield team.save();
+  // if (team.meta.weekly_status_time){
+  //   var am_pm = _.get(team.meta.weekly_status_time.match(/(am|a.m.|a m|pm|p.m.|p m)/i), '[0]');
+  //   var hour = team.meta.weekly_status_time.split(':')[0];
+  //   var rhour = (am_pm == 'PM' && hour != 12) ? hour + 12 : hour;
+  // } else {
+  //   var rhour = date_lib.getHours(new Date());
+  // }
+  // var rminutes = team.meta.weekly_status_time ?  team.meta.weekly_status_time.split(':')[1].replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '') : date_lib.getMinutes(new Date());
+  // var dateObj = { day: day, hour: rhour, minutes: rminutes};
+
+  kip.debug(' \n\n\n\n\n\n HITTING SET_WEEK: message:', message, week,' \n\n\n\n\n\n ');
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
+  var relevantMessage = history[0];
+
+
+   var msg = relevantMessage;
+   msg.mode = 'settings';
+   msg.action = 'home';
+   msg.text = '';
+   msg.execute = [ { 
+      "mode": "settings",
+      "action": "home",
+      "_id": message._id
+    } ];
+    msg.reply = [{
+    text: 'Which day of the week?',
+    color: '#49d63a',
+    mrkdwn_in: ['text'],
+    fallback:'Settings',
+    actions: cardTemplate.settings_days(message, week),
+    callback_id: 'none'
+  }];
+   msg.source.team = team.team_id;
+   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  return [msg];
+
+  // yield utils.updateCron(message, cronJobs, dateObj);
+  // var msg = message;
+  // msg.mode = 'settings'
+  // msg.action = 'home'
+  // msg.text = 'Ok, I have updated your settings!';
+  // msg.execute = [ { 
+  //   "mode": "settings",
+  //   "action": "home",
+  //   "_id": message._id
+  // } ];
+  // msg.source.team = team.team_id;
+  // msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  // return [msg];
 }
 
 handlers['add_or_remove'] = function * (message) {
@@ -348,7 +585,7 @@ handlers['add_or_remove'] = function * (message) {
     var msg = message;
     msg.mode = 'settings';
     msg.action = 'home';
-    msg.text = 'Ok I have updated your settings 😊';
+    msg.text = 'Ok, I have updated your settings!';
     msg.execute = [ { 
       "mode": "settings",
       "action": "home",
@@ -502,6 +739,8 @@ handlers['sorry'] = function * (message) {
 
 }
 
+
+
 function getAction(text) {
   var action;
   kip.debug(`\n🥝  ${text}\n`)
@@ -509,8 +748,8 @@ function getAction(text) {
     action = 'status_off';
   } else if (isStatusOn(text)) {
     action = 'status_on';
-  } else if (isStatusChange(text)) {
-    action = 'change_status';
+  } else if (isTimeChange(text)) {
+    action = 'change_time';
   } else if (isAddOrRemove(text)) {
     action = 'add_or_remove';
   } else if (isLastCallOff(text)) {
@@ -519,6 +758,8 @@ function getAction(text) {
     action = 'last_call_on';
   } else if (isSendLastCall(text)) {
     action = 'send_last_call';
+  } else if (isCronChange(text)) {
+    action = isCronChange(text)[0]
   } else if (text.includes('settings')) {
     kip.debug(`\n🥝  ${text}\n`)
     action = 'start'
@@ -528,9 +769,9 @@ function getAction(text) {
   return action;
 }
 
-function isStatusChange(input) {
-    var regex = /^(change|update) weekly (status|update)/;
-    if (input.toLowerCase().trim().match(regex)) {
+function isTimeChange(input) {
+    var regex = /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]/;
+    if (input.match(regex) && input.match(regex).length > 0) {
       return true;
     } else {
       return false;
@@ -591,123 +832,37 @@ function isSendLastCall(input) {
     }
 }
 
-
-
-function * updateCronJob(team, message, date) {
-    if (cronJobs[team.team_id]) {
-      cronJobs[team.team_id].stop();
+function isCronChange(input) {
+   var regex = /^(weekly|monthly)/;
+    if (input.toLowerCase().trim().match(regex)) {
+      return input.split('.');
+    } else {
+      return false;
     }
-    kip.debug('\n\n\nsetting cron job day: ', '00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day,'\n\n\n')
-    var teamMembers = yield utils.getTeamMembers(team);
-    cronJobs[team.team_id] = new cron.CronJob('00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day, function  () {
-       team.meta.office_assistants.map(function  (a) {
-       var assistant = teamMembers.find(function(m, i){ return m.id == a });
+}
 
-       var attachments = [
-        {
-          // "pretext": "Hi, this is your weekly reminder.  Would you like to send out a last call?",
-          "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
-          "text":"",
-          "mrkdwn_in": [
-              "text",
-              "pretext"
-          ],
-          "color":"#45a5f4"
-        }
-       ];
-      attachments.push({
-        text: 'Hi, this is your weekly reminder.  Would you like to send out a last call?',
-        color: '#49d63a',
-        mrkdwn_in: ['text'],
-        fallback:'Settings',
-        actions: [
-            {
-              "name": "exit",
-              "text": "Exit Settings",
-              "style": "primary",
-              "type": "button",
-              "value": "exit"
-            },
-            {
-              "name": "send_last_call_btn",
-              "text": "Yes",
-              "style": "default",
-              "type": "button",
-              "value": "send_last_call_btn"
-            },
-            {
-              "name": "no",
-              "text": "No",
-              "style": "default",
-              "type": "button",
-              "value": "no"
-            },
-            {
-              "name": "team",
-              "text": "Team Members",
-              "style": "default",
-              "type": "button",
-              "value": "team"
-            }
-        ],
-        callback_id: 'none'
-      });
-    attachments.map(function(a) {
-      a.mrkdwn_in =  ['text'];
-      a.color = '#45a5f4';
-    })
-     var newMessage = new db.Message({
-        incoming: false,
-        thread_id: message.thread_id,
-        user_id: assistant.id,
-        origin: 'slack',
-        source: message.source,
-        mode: 'settings',
-        action: 'home',
-        user: message.source.user,
-        reply: attachments
-      })
-      kip.debug('\n\n\n Firing Cron Job: assistant: ', assistant, message, newMessage,'\n\n\n')
-
-      newMessage.save()
-      queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
-
-          // slackBot.web.chat.postMessage(assistant.dm, '', reply);
-          //   // SHOW CART STICKER
-          //  //* * * * * * * * * * * * * * * * * //
-          //  //CHECKING HERE IF NO EMAILS users or channels. If none, Show User Cart Members, prompt to add people, defaults to <#general>
-          //  //* * * * * * * * * * * * * * * * * //
-          //   //* * * *  SHOW TEAM CART USERS  ** * * * //
-          //   convo.ask('Would you like me to send an last call message to *SHOW TEAM LIST*', lastCall)
-        });
-    }, function() {
-      console.log('just finished the weekly update thing for team ' + team.team_id + ' ' + team.team_name);
-    },
-    true,
-    team.meta.weekly_status_timezone);
-};
 
 function getDayNum(string) {
-  switch(string) {
-    case 'Sunday':
+  switch(string.toLowerCase()) {
+    case 'sunday':
      return 0
      break;
-    case 'Monday':
+    case 'monday':
      return 1
      break;
-    case 'Tuesday':
+    case 'tuesday':
      return 2
      break;
-    case 'Wednesday':
+    case 'wednesday':
      return 3
      break;
-    case 'Thursday':
+    case 'thursday':
      return 4
      break;
-    case 'Friday':
+    case 'friday':
      return 5
      break;
-    case 'Saturday':
+    case 'saturday':
      return 6
      break;
   }

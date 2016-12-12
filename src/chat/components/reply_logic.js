@@ -126,9 +126,6 @@ function isMenuChange(message) {
 	return _.get(message, 'action') && (_.get(message, 'action').indexOf('home.expand') > -1 || _.get(message, 'action').indexOf('home.detract') > -1)
 }
 
-function isLoading(message) {
-	return (_.get(message, 'action') && (_.get(message, 'action').indexOf('home.loading') > -1))
-}
 
 //NOT WORKING
 
@@ -248,254 +245,245 @@ function printMode(message) {
 //
 queue.topic('incoming').subscribe(incoming => {
 
-	incoming.ack();
+  incoming.ack();
 
-	co(function*() {
-		if (incoming.data.text) {
-			console.log('>>>'.yellow, incoming.data.text.yellow)
-		} else if (_.get(incoming, 'data.data.value')) {
-			console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
-		}
-		var timer = new kip.SavedTimer('message.timer', incoming.data)
-			// skipping histoy and stuff rn b/c i dont have time to do it
-		if (_.get(incoming, 'data.action') == 'item.add') {
-			var selected_data = incoming.data.postback.selected_data;
-			var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data);
-			var results = yield amazon_search.lookup(results, results.origin);
+  co(function * () {
+    if (incoming.data.text) {
+      console.log('>>>'.yellow, incoming.data.text.yellow)
+    } else if (_.get(incoming, 'data.data.value')) {
+      console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
+    }
+    var timer = new kip.SavedTimer('message.timer', incoming.data)
+    // skipping histoy and stuff rn b/c i dont have time to do it
+    if (_.get(incoming, 'data.action') == 'item.add') {
+      var selected_data = incoming.data.postback.selected_data;
+      var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data);
+      var results = yield amazon_search.lookup(results, results.origin);
 
-			logging.debug('taking first item from results')
-			var results = results[0]
-			logging.debug('raw_results: ', results)
+      logging.debug('taking first item from results')
+      var results = results[0]
+      logging.debug('raw_results: ', results)
 
-			var history = yield db.Messages.find({
-				thread_id: incoming.data.postback.dataId
-			}).sort('-ts').limit(20);
-			var message = history[0];
-			message.history = history.slice(1);
+      var history = yield db.Messages.find({thread_id: incoming.data.postback.dataId}).sort('-ts').limit(20);
+      var message = history[0];
+      message.history = history.slice(1);
 
-			var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team
-			var cart_type = 'personal'
-			try {
-				yield kipcart.addToCart(cart_id, cart_id, results, cart_type);
-				logging.debug('added to cart')
-				send_text_reply(message, 'Okay :) added that item to cart');
-				incoming.ack()
-				timer.stop()
-				return
-			} catch (e) {
-				yield send_text_reply(message, 'oops error, you might need to add that manually');
-				timer.stop()
-				incoming.ack()
-				return
-			}
-		}
+      var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team
+      var cart_type = 'personal'
+      try {
+        yield kipcart.addToCart(cart_id, cart_id, results, cart_type);
+        logging.debug('added to cart')
+        send_text_reply(message, 'Okay :) added that item to cart');
+        incoming.ack()
+        timer.stop()
+        return
+      } catch (e) {
+        yield send_text_reply(message, 'oops error, you might need to add that manually');
+        timer.stop()
+        incoming.ack()
+        return
+      }
+    }
 
-		timer.tic('getting history');
-		// find the last 20 messages in this conversation, including this one
-		var history = yield db.Messages.find({
-			thread_id: incoming.data.thread_id,
-			ts: {
-				$lte: incoming.data.ts
-			}
-		}).sort('-ts').limit(20)
+    timer.tic('getting history');
+    // find the last 20 messages in this conversation, including this one
+    var history = yield db.Messages.find({
+      thread_id: incoming.data.thread_id,
+      ts: {
+        $lte: incoming.data.ts
+      }
+    }).sort('-ts').limit(20)
 
-		var message = history[0]
-		message.history = history.slice(1)
+    var message = history[0]
+    message.history = history.slice(1)
 
-		if (history[1]) {
-			message.mode = history[0].mode
-			message.action = history[0].action
-			message.route = message.mode + '.' + message.action
-			message.prevMode = history[1].mode
-			message.prevAction = history[1].action
-			message.prevRoute = message.prevMode + '.' + message.prevAction
-		}
-		if (!message.mode) {
-			kip.debug('setting mode to prevmode', message.prevMode)
-			message.mode = message.prevMode
-		}
-		if (!message.action && message.prevAction) {
-			message.action = message.prevAction.match(/(expand|detract)/) ? 'initial' : message.prevAction;
-			kip.debug('setting mode to prevaction', message.action)
-		}
+    if (history[1]) {
+      message.mode = history[0].mode
+      message.action = history[0].action
+      message.route = message.mode + '.' + message.action
+      message.prevMode = history[1].mode
+      message.prevAction = history[1].action
+      message.prevRoute = message.prevMode + '.' + message.prevAction
+    }
+    if (!message.mode) {
+      kip.debug('setting mode to prevmode', message.prevMode)
+      message.mode = message.prevMode
+    }
+    if (!message.action && message.prevAction) {
+      message.action = message.prevAction.match(/(expand|detract)/) ?  'initial' : message.prevAction;
+      kip.debug('setting mode to prevaction', message.action)
+    }
 
-		timer.tic('got history')
-		message._timer = timer
-			// fail fast if the message was not in the database
-		if (message._id.toString() !== incoming.data._id.toString()) {
-			throw new Error('correct message not retrieved from db')
-		}
+    timer.tic('got history')
+    message._timer = timer
+    // fail fast if the message was not in the database
+    if (message._id.toString() !== incoming.data._id.toString()) {
+      throw new Error('correct message not retrieved from db')
+    }
 
-		if (isCancelIntent(message)) {
-			message.mode = 'shopping';
-			message.action = 'switch'
-			simplehome(message)
-			yield message.save();
-			timer.stop();
-			return
-		}
+    if (isCancelIntent(message)) {
+      message.mode = 'shopping';
+      message.action = 'switch'
+      simplehome(message)
+      yield message.save();
+      timer.stop();
+      return
+    }
 
-		if (isMenuChange(message)) {
-			timer.stop();
-			incoming.ack()
-			return yield shopping[_.get(message, 'action')](message);
-		}
+    if (isMenuChange(message)) { 
+      timer.stop();
+      incoming.ack()
+      return yield shopping[_.get(message,'action')](message);
+    }
 
-		if (isLoading(message)) {
-			timer.stop();
-			incoming.ack()
-			return yield shopping['home.loading'](message);
-		}
+    yield processProductLink(message);
 
-		yield processProductLink(message);
+    if (switchMode(message)) {
+      message.mode = switchMode(message);
+      if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
+      yield message.save();
+    }
 
-		if (switchMode(message)) {
-			message.mode = switchMode(message);
-			if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
-			yield message.save();
-		}
+    if (!message.mode) {
+      if (_.get(message, 'history[0].mode')) {
+        message.mode = _.get(message, 'history[0].mode')
+      } else if (_.get(message, 'history[1].mode')) {
+        message.mode = _.get(message, 'history[1].mode')
+      } else {
+        message.mode = 'shopping'
+      }
+    }
 
-		if (!message.mode) {
-			if (_.get(message, 'history[0].mode')) {
-				message.mode = _.get(message, 'history[0].mode')
-			} else if (_.get(message, 'history[1].mode')) {
-				message.mode = _.get(message, 'history[1].mode')
-			} else {
-				message.mode = 'shopping'
-			}
-		}
+    printMode(message)
+    debugger;
 
-		printMode(message)
-		debugger;
-
-		//MODE SWITCHER
-		switch (message.mode) {
-			case 'onboarding':
-				if (message.origin === 'slack') {
-					var replies = yield onboarding.handle(message);
-				} else {
-					// facebook
-					//check for valid country
-					//turn this into a function
-					if (text == 'Singapore' || text == 'United States') {
-						winston.debug('SAVING TO DB')
-						replies = ['Saved country!'];
-						//access onboard template per source origin!!!!
-						modes[user.id] = 'shopping';
-					} else {
-						replies = ['Didnt understand, please choose a country thx'];
-						winston.debug('Didnt understand, please choose a country thx')
-					}
-				}
-				break;
-			case 'onboard':
-				if (message.origin === 'slack') {
-					var replies = yield onboard.handle(message)
-				}
-				break;
-			case 'member_onboard':
-				if (message.origin === 'slack') {
-					var replies = yield member_onboard.handle(message)
-				}
-				break;
-			case 'settings':
-				if (message.origin === 'slack') {
-					var replies = yield settings.handle(message);
-					kip.debug(`Searching for back button REPLY_LOGIC ${JSON.stringify(replies, null, 2)}`)
-				}
-				break;
-			case 'search_btn':
-				if (message.origin === 'slack') {
-					var data = _.split(message.data.value, '.');
-					var action = data[0];
-					data.splice(0, 1);
-					var replies = yield shopping[message.mode](message, data);
-				}
-				break;
-			case 'team':
-				if (message.origin === 'slack') {
-					var replies = yield team.handle(message);
-				}
-				break;
-			case 'food':
-			case 'cafe':
-				yield food(message)
-				return incoming.ack()
-			case 'address':
-				return
-				break;
-			default:
-				logging.debug('DEFAULT SHOPPING MODE')
-					// try for simple reply
-				timer.tic('getting simple response')
-				if(message.mode === 'variation'){
-					message = yield variation(message);
-				}
-				var replies = yield simple_response(message)
-				timer.tic('got simple response')
-				kip.debug('simple replies'.cyan, replies)
-					// not a simple reply, do NLP
-				if (!replies || replies.length === 0) {
-					timer.tic('getting nlp response')
-					logging.info('👽 passing to nlp: ', message.text)
-					if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
-						replies = yield execute(message)
-					} else if ((message.text.includes('shop') && !message.execute) || ((message.action === 'switch' || message.action === 'initial') && (message.text === 'shopping' || !message.text))) {
-						message.mode = 'shopping'
-						message.action = 'initial'
-						message.execute.push({
-							mode: 'shopping',
-							action: 'initial'
-						});
-						replies = yield execute(message);
-					} else {
-						kip.debug(`PRENLP message: \n ${JSON.stringify(message, null, 2)}`)
-						replies = yield nlp_response(message)
-						kip.debug('+++ NLPRESPONSE ' + replies)
-					}
-					timer.tic('got nlp response')
-					kip.debug('nlp replies'.cyan,
-						replies.map(function*(r) {
-							return {
-								text: r.text,
-								execute: r.execute
-							}
-						}))
-				}
-				if (!replies || replies.length === 0) {
-					kip.error('Could not understand message ' + message._id)
-					replies = [default_reply(message)]
-				}
-		}
-		if (replies) kip.debug('num replies', replies.length)
-		timer.tic('saving message', message)
-		yield message.save(); // the incoming message has had some stuff added to it :)
-		timer.tic('done saving message', message)
-		timer.tic('saving replies')
-		if (replies) {
-			yield replies.map(r => {
-				if (r) {
-					try {
-						r.save()
-					} catch (err) {
-						logging.debug('could not save ' + r, err)
-					}
-				} else {
-					logging.debug('reply_logic:316:r does not exist ' + r)
-				}
-			})
-		}
-		timer.tic('done saving replies')
-		timer.tic('sending replies')
-		if (replies) {
-			yield replies.map((r, i) => {
-				kip.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
-				queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
-			})
-		}
-		incoming.ack()
-		timer.stop()
-	}).catch(kip.err)
+    //MODE SWITCHER
+    switch (message.mode) {
+      case 'onboarding':
+        if (message.origin === 'slack') {
+          var replies = yield onboarding.handle(message);
+        } else {
+          // facebook
+          //check for valid country
+          //turn this into a function
+          if (text == 'Singapore' || text == 'United States') {
+            winston.debug('SAVING TO DB')
+            replies = ['Saved country!'];
+            //access onboard template per source origin!!!!
+            modes[user.id] = 'shopping';
+          } else {
+            replies = ['Didnt understand, please choose a country thx'];
+            winston.debug('Didnt understand, please choose a country thx')
+          }
+        }
+        break;
+      case 'onboard':
+        if (message.origin === 'slack') {
+          var replies = yield onboard.handle(message)
+        }
+        break;
+      case 'member_onboard':
+        if (message.origin === 'slack') {
+          var replies = yield member_onboard.handle(message)
+        }
+        break;
+      case 'settings':
+        if (message.origin === 'slack') {
+          var replies = yield settings.handle(message);
+        }
+        if (!(replies && replies.length > 0)) {
+          return
+        }
+        break;
+      case 'search_btn':
+        if (message.origin === 'slack') {
+          var data = _.split(message.data.value, '.');
+          var action = data[0];
+          data.splice(0, 1);
+          var replies = yield shopping[message.mode](message, data);
+        }
+        break;
+      case 'team':
+        if (message.origin === 'slack') {
+          var replies = yield team.handle(message);
+        }
+        break;
+      case 'food':
+      case 'cafe':
+        yield food(message)
+        return incoming.ack()
+      case 'address':
+        return
+        break;
+      default:
+        logging.debug('DEFAULT SHOPPING MODE')
+        // try for simple reply
+        timer.tic('getting simple response')
+        var replies = yield simple_response(message)
+        timer.tic('got simple response')
+      kip.debug('simple replies'.cyan, replies)
+        // not a simple reply, do NLP
+      if (!replies || replies.length === 0) {
+        timer.tic('getting nlp response')
+        logging.info('👽 passing to nlp: ', message.text)
+        if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
+          replies = yield execute(message)
+        } else if ((message.text.includes('shop') && !message.execute) || ((message.action === 'switch'||message.action==='initial') && (message.text === 'shopping' || !message.text))) {
+          message.mode = 'shopping'
+          message.action = 'initial'
+          message.execute.push({
+            mode: 'shopping',
+            action: 'initial'
+          });
+          replies = yield execute(message);
+        } else {
+          kip.debug(`PRENLP message: \n ${JSON.stringify(message, null, 2)}`)
+          replies = yield nlp_response(message)
+          kip.debug('+++ NLPRESPONSE ' + replies)
+        }
+        timer.tic('got nlp response')
+        kip.debug('nlp replies'.cyan,
+          replies.map(function*(r) {
+            return {
+              text: r.text,
+              execute: r.execute
+            }
+          }))
+      }
+      if (!replies || replies.length === 0) {
+        kip.error('Could not understand message ' + message._id)
+        replies = [default_reply(message)]
+      }
+    }
+    if (replies) kip.debug('num replies', replies.length)
+    timer.tic('saving message', message)
+    yield message.save(); // the incoming message has had some stuff added to it :)
+    timer.tic('done saving message', message)
+    timer.tic('saving replies')
+    if (replies) {
+      yield replies.map(r => {
+        if (r) {
+          try {
+            r.save()
+          } catch (err) {
+            logging.debug('could not save ' + r, err)
+          }
+        } else {
+          logging.debug('reply_logic:316:r does not exist ' + r)
+        }
+      })
+    }
+    timer.tic('done saving replies')
+    timer.tic('sending replies')
+    if (replies) {
+      yield replies.map((r, i) => {
+        kip.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
+        queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
+      })
+    }
+    incoming.ack()
+    timer.stop()
+  }).catch(kip.err)
 })
 
 // pre process incoming messages for canned responses

@@ -321,8 +321,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       if (message.mode === 'loading') {
-         kip.debug(' \n\n\n\n\n\n\n\n\n LOADING MODE:', message,' \n\n\n\n\n\n\n\n\n ')
-
         if (message.action === 'hide') {
           msgData.attachments = message.reply;
           return bot.web.chat.update( message.data.hide_ts, message.source.channel,'', null);

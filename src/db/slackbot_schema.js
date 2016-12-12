@@ -37,6 +37,12 @@ var slackbotSchema = mongoose.Schema({
       default: false
     },
     office_assistants: [String], // user ids of the office assistants, like U0R6H9BKN
+    status_interval: {
+      type: String,
+      enum: ['daily', 'weekly', 'monthly', 'never'],
+      default: 'weekly'
+    },
+    //no longer weekly per se but keeping it for now
     weekly_status_enabled: {
       type: Boolean,
       default: true
