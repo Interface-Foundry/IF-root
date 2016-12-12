@@ -26,7 +26,7 @@ node {
         }
 
         stage('slackInfo') {
-           slackSend (channel: '#ci', color: 'good', message: 'hey we did stuff', teamDomain: 'kipsearch', token: '${slackToken}')
+           slackSend (channel: '#ci', color: 'good', message: 'hey we did stuff', teamDomain: 'kipsearch', token: slackToken)
         }
     }
 
