@@ -76,6 +76,11 @@ function * handleMessage (message) {
 
   var route = yield getRoute(message)
 
+  if (!message.mode) {
+    message.mode = 'food';
+    message.action = 'exit.confirm';
+  }
+
   if (message.text && message.mode.toLowerCase().trim() === 'food' || message.mode === 'cafe') {
     // if user types something allow the text_matching flag which we can use
     // in some handlers: cuisine picking, restaurant picking, item picking
@@ -90,6 +95,17 @@ function * handleMessage (message) {
     yield handlers[route](message)
   } else {
     kip.error('No route handler for ' + route)
+    if (route === 'food.results') {
+      // ppl are getting stuck here for some reasonf
+      var newMessage = new db.Message({
+        source: message.source,
+        text: 'exit',
+        mode: 'food',
+        action: 'exit.confirm'
+      })
+      yield newMessage.save()
+      queue.publish('incoming', message, ['slack', 'delivery.com.exit', Math.random().toString(32).slice(2)].join('.'))
+    }
   }
   message.save()
 }
