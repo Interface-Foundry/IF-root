@@ -281,7 +281,11 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
         }
 
         yield pay_utils.storeCard(payment, charge)
+      } catch (err) {
+        logging.error('error trying to storeCard', err)
+      }
 
+      try {
         // look up user and the last message sent to us in relation to this order
         var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
         foodSession.order['completed_payment'] = true
@@ -300,13 +304,17 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
               text: 'Your order was successful and you should receive an email from `Delivery.com` soon!'
             }
           })
+      } catch (err) {
+        logging.error('error trying to send message to user', err)
+      }
 
+      try {
         // send success messages to order members
         yield onSuccess(payment)
 
         profOak.say(`order completed for team: ${payment.order.team_id}`)
       } catch (err) {
-        logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
+        logging.error('error onSuccess of payment', err)
       }
     } else {
       logging.error('DIDNT PROCESS STRIPE CHARGE: ', charge.status)

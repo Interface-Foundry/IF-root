@@ -154,7 +154,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   var options = nodeOptions(item, cartItem, validate)
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
-'text':  '*Options:* _' + _.keys(cartItem.item.option_qty).map((opt) => this.getItemById(String(opt)).price > 0 ? this.getItemById(String(opt)).name + ' - $' + this.getItemById(String(opt)).price : this.getItemById(String(opt)).name).join(', ') + '_',
+'text':  '*Options:* _' + _.keys(cartItem.item.option_qty).map((opt) => this.getItemById(String(opt)).price > 0 ? this.getItemById(String(opt)).name + ' - $' + this.getItemById(String(opt)).price.toFixed(2) : this.getItemById(String(opt)).name).join(', ') + '_',
     'attachment_type': 'default',
     'mrkdwn_in': [
       'text'

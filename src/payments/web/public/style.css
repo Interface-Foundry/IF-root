@@ -43,7 +43,7 @@
 }*/
 /*239,242,245
 */
-#stripeButton {
+.sButton {
   width: 100%;
   height: 35px;
   float: left;
@@ -154,6 +154,70 @@
 #kipHead{
   padding-left: 10px;
   padding-top: 5px;
+}
+
+#payment-form{
+  text-align: center;
+}
+
+#poweredStripe {
+  max-width: 255px;
+  margin-top: -46px;
+}
+
+.full{
+  width: 94%;
+  height: 30px;
+  margin-left: 3px;
+  border: 1px #cecece solid;
+}
+.half {
+  width: 50%;
+  height: 30px;
+  border: 1px #cecece solid;
+}
+.quart{
+  width: 25%;
+  height: 30px;
+  border: 1px #cecece solid;
+}
+
+#stripeJSButton {
+  margin-top: 107px;
+  height: 45px;
+  cursor: pointer;
+}
+
+#stripeProcessing {
+  margin-top: 107px;
+  height: 45px;
+  opacity: 0.6;
+  padding-top: 10px;
+}
+
+#stripeSuccess {
+  margin-top: 107px;
+  height: 45px;
+  background: green;
+  padding-top: 10px;
+}
+
+.form-row {
+  line-height: 1.7;
+}
+
+
+#terms {   
+  color:#fff; 
+  opacity:0.6; 
+  font-size:14px; 
+  text-align:center;
+
+   position:fixed;
+   left:0px;
+   bottom:0px;
+   height:30px;
+   width:100%;
 }
 
 

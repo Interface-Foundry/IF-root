@@ -1,14 +1,12 @@
-var request = require('request')
 var cheerio = require('cheerio')
 var _ = require('lodash')
-
 var uuid = require('uuid')
 var co = require('co')
-var promisify = require('promisify-node')
-
+var proxy_lib = require('./proxy/proxy_request');
 var queue = require('./queue-mongo')
-var amazon_search = require('./amazon_search.js')
-
+// var amazon_search = require('./amazon_search.js')
+// var promisify = require('promisify-node')
+// var request = require('request')
 var ItemVariation = db.itemvariation
 
 const constants = require('./constants')
@@ -16,11 +14,18 @@ const constants = require('./constants')
 * create pubsub with
 *
 */
-function pubsubVariation(item, message, origin = 'facebook') { //default to facebook bc thats all this was used for before
+function pubsubVariation(item, asin, message, origin = 'facebook') { //default to facebook bc thats all this was used for before
   logging.debug('\n\n\ncreating variation for: ', item.ASIN)
   if (origin === 'slack') {
-    message.mode = 'item.add'
-    message.reply = item.asins; // we need to keep the rest of the message info so we'll
+    kip.debug(`🥗  ${JSON.stringify(message, null, 2)}`)
+    message.mode = 'variations'
+    message.action = 'reply'
+    // message.source.text = message.amazon;
+    message.amazon = JSON.stringify({
+      asins: item.asins,
+      asin: asin,
+      variations: item.variationValues
+    }); // we need to keep the rest of the message info so we'll
     queue.publish(
       `outgoing.${origin}`,
       message,
@@ -76,50 +81,50 @@ function createItemArray (variationValues, asinVariationValues) {
 * @param {string} product with no offer codes.
 * @returns {Object}  variations and respective asins
 */
-function * getVariations (asin, message) {
+function* getVariations(asin, message) {
   var variation = {
     base_asin: asin,
     url: 'https://www.amazon.com/dp/' + asin,
     asins: []
   }
+
   logging.debug('getting variation in amazon_vareity')
+  kip.debug(`🐹  ${message}`)
+  proxy_lib.ensured_request(variation.url)
+    .then((body) => {
+      var $ = cheerio.load(body);
+      $('html').find('style').remove()
+      $('#twisterJsInitializer_feature_div > script').each(function(i, element) {
+        var data = element.children[0].data
+        var lines = data.split('\n')
+        lines = lines.slice(2, lines.length - 3)
+        data = lines.join('\n')
+        eval(data) // returns value that contains dataToReturn var
+        variation.variationValues = dataToReturn.variationValues
+        variation.asinVariationValues = dataToReturn.asinVariationValues
+        variation.asins = createItemArray(variation.variationValues, variation.asinVariationValues)
+      })
 
-  request(variation.url, function (error, response, html) {
-    co(function * () {
-      if (!error && response.statusCode == 200) {
-        var $ = cheerio.load(html)
-        $('#twisterJsInitializer_feature_div > script').each(function (i, element) {
-          var data = element.children[0].data
-          var lines = data.split('\n')
-          lines = lines.slice(2, lines.length - 3)
-          var data = lines.join('\n')
-          eval(data) // returns value that contains dataToReturn var
-          variation.variationValues = dataToReturn.variationValues
-          variation.asinVariationValues = dataToReturn.asinVariationValues
-          variation.asins = createItemArray(variation.variationValues, variation.asinVariationValues)
-        })
+      var item = new ItemVariation({
+        mode: constants.ITEM_ADD,
+        topic: constants.BY_ATTRIBUTE,
+        ASIN: variation.base_asin,
+        // remaining: Object.keys(variation.variationValues),
+        variationValues: variation.variationValues,
+        asins: variation.asins,
+        source: message
+      })
+      item.save(function(err) {
+        if (err) throw err
+      })
 
-        var item = new ItemVariation({
-          mode: constants.ITEM_ADD,
-          topic: constants.BY_ATTRIBUTE,
-          ASIN: variation.base_asin,
-          // remaining: Object.keys(variation.variationValues),
-          variationValues: variation.variationValues,
-          asins: variation.asins,
-          source: message
-        })
-        item.save(function (err) {
-          if (err) throw err
-        })
-
-        pubsubVariation(item,message, message.origin)
+      pubsubVariation(item, asin, message, message.origin)
         // logging.debug('getting asin stuff for ASIN: ', )
-        logging.debug('getting asin stuff for source: ', item.source.source.channel)
-      }
-    })
-  })
-}
+      logging.debug('getting asin stuff for source: ', item.source.source.channel)
 
+    })
+    .catch(err => kip.debug('Proxy errored out.. ', err));
+}
 /*
 * createItemReqs should present user in facebook or slack or whatever with
 * buttons to click for each object in variationValues and return what items

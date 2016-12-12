@@ -249,6 +249,7 @@ handlers['lunch'] = function * (message) {
   var msg = message;
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var banner
   msg.mode = 'food'
   msg.action = 'begin'
   msg.source.team = team_id;
@@ -513,7 +514,7 @@ handlers['team'] = function * (message) {
       }
   });
   var chunkedButtons = _.chunk(buttons, 5);
-    
+
   attachments.push({text: '*Step 3* Choose the channels you want to include: ', mrkdwn_in: ['text'],
     color: '#A368F0', actions: chunkedButtons[0], callback_id: "none"});
   chunkedButtons.forEach((ele, i) => {
