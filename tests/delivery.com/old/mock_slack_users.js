@@ -1,4 +1,4 @@
-require('db')
+require('../../../src/db')
 var co = require('co')
 var _ = require('lodash')
 var request = require('request-promise')
@@ -236,7 +236,7 @@ User.prototype.goto = function (step) {
           session.save()
         })
       }
-      var foodSession = require('../slack/test_team_1_delivery.js')
+      var foodSession = require('../../../src/chat/components/slack/test_team_1_delivery.js')
       var newSession = new db.Delivery({
         active: foodSession.active,
         team_id: foodSession.team_id,
@@ -291,9 +291,9 @@ function * setup () {
     throw new Error('must run as NODE_ENV=test')
   }
 
-  yield require('../slack/test_team_1').reset()
-  yield require('../slack/slack').start()
-  require('../reply_logic.js')
+  yield require('../../../src/chat/components/slack/test_team_1').reset()
+  yield require('../../../src/chat/components/slack/slack').start()
+  require('../../../src/chat/components/reply_logic.js')
 
   console.log('Done with setup'.green)
   console.log()
