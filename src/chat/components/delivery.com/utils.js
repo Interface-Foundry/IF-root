@@ -392,7 +392,8 @@ function * buildRestaurantAttachment (restaurant) {
         location: restaurant.location,
         ordering: restaurant.ordering,
         summary: restaurant.summary,
-        url: restaurant.summary.merchant_logo
+        url: restaurant.summary.merchant_logo,
+        yelp_rating: _.get(restaurant, 'yelp_info.rating', '')
       }
     })
   } catch (e) {

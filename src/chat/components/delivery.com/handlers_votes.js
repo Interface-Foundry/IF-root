@@ -602,7 +602,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   //adding writing prompt
   responseForAdmin.attachments.push({
     'fallback': 'Search for a restaurant',
-    'text': '✎ Type below to search for a restaurant by name (Example: _Azuki Sushi_)',
+    'text': '✎ Type below to search for a restaurant by name (Example: _Azuki Japanese Restaurant_)',
     'mrkdwn_in': ['text']
   })
 

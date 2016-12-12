@@ -266,9 +266,43 @@ class PicStitch:
         if self.origin in ['skype', 'facebook']:
             last_y = last_y + 10
 
+
+
+        if not 'num_ratings' in self.img_req['summary']:
+            self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+
+
+
+        #yelp vs. delivery.com ratings
+        #we should probably show whatever one has better rating
+
+        if 'yelp_rating' in self.img_req and 'review_count' in self.img_req['yelp_rating'] and 'rating' in self.img_req['yelp_rating']:
+            #use yelp rating
+            print('USING YELP')
+
+            #if no reviews, set to zero
+            if not 'num_ratings' in self.img_req['summary']:
+                self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+
+            review_count = self.img_req['yelp_rating']['review_count']
+            rating = self.img_req['yelp_rating']['rating']
+
+        if 'summary' in self.img_req and 'star_ratings' in self.img_req['summary'] and 'num_ratings' in self.img_req['summary']:
+            #use delivery.com rating
+            print('USING DELIVERY.COM')
+
+            #if no reviews, set to zero
+            if not 'num_ratings' in self.img_req['summary']:
+                self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+
+            review_count = self.img_req['summary']['num_ratings']
+            rating = self.img_req['summary']['star_ratings']            
+
+
         # draw - (Review Number)
-        if 'summary' in self.img_req and 'star_ratings' in self.img_req['summary']:
-            image_revs_rating = self.img_req['summary']['star_ratings']
+        if review_count > 0:
+      
+            image_revs_rating = rating
             if image_revs_rating <= 0.5:  # ignoring if 0.0 < rating
                 selectRating = 0.5
             elif image_revs_rating <= 1.0:
@@ -297,11 +331,10 @@ class PicStitch:
                       mask=self.review_stars_images[selectRating])
 
             # make number count in blue to right of stars
-            if 'num_ratings' in self.img_req['summary']:
-                draw.text((x + 80, last_y - 2),
-                          ' - ' + str(self.img_req['summary']['num_ratings']),
-                          font=self.config['review_count_font'],
-                          fill="#2d70c1")
+            draw.text((x + 80, last_y - 2),
+                      ' - ' + str(review_count),
+                      font=self.config['review_count_font'],
+                      fill="#2d70c1")
             last_y = last_y + 18
 
         # #fake reviews for skype!! lmao <--- uhhh
