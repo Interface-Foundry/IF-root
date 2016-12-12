@@ -42,6 +42,7 @@ var slackbotSchema = mongoose.Schema({
       enum: ['daily', 'weekly', 'monthly', 'never'],
       default: 'weekly'
     },
+    cron_jobs: {},
     //no longer weekly per se but keeping it for now
     weekly_status_enabled: {
       type: Boolean,
@@ -51,6 +52,9 @@ var slackbotSchema = mongoose.Schema({
       type: String,
       enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
       default: 'Friday'
+    },
+    weekly_status_date: {
+      type: Number,
     },
     weekly_status_time: {
       type: String,

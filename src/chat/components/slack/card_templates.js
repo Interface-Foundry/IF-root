@@ -74,59 +74,58 @@ var settings_intervals = module.exports.settings_intervals = [
     "value": "never"
   }]
 
-var settings_days= module.exports.settings_days = function(message, week) {
-  return [
+var settings_days= module.exports.settings_days = [
     {
       "name": "settings.set_day.monday",
       "text": "Mon",
       "style": "default",
       "type": "button",
-      "value": (_.get(message,'action') == 'cron.weekly' ? 'weekly' : week)
+      "value": '1'
     },
     {
       "name": "settings.set_day.tuesday",
       "text": "Tues",
       "style": "default",
       "type": "button",
-      "value": (_.get(message,'action') == 'cron.weekly' ? 'weekly' : week)
+      "value": '2'
     },
      {
       "name": "settings.set_day.wednesday",
       "text": "Wed",
       "style": "default",
       "type": "button",
-      "value": (_.get(message,'action') == 'cron.weekly' ? 'weekly' : week)
+      "value": '3'
     },
     {
       "name": "settings.set_day.thursday",
       "text": "Thurs",
       "style": "default",
       "type": "button",
-      "value": (_.get(message,'action') == 'cron.weekly' ? 'weekly' : week)
+      "value": '4'
     },
     {
       "name": "settings.set_day.friday",
       "text": "Fri",
       "style": "default",
       "type": "button",
-      "value": (_.get(message,'action') == 'cron.weekly' ? 'weekly' : week)
+      "value": '5'
     },
     {
       "name": "settings.set_day.saturday",
       "text": "Sat",
       "style": "default",
       "type": "button",
-      "value": (_.get(message,'action') == 'cron.weekly' ? 'weekly' : week)
+      "value": '6'
     },
     {
       "name": "settings.set_day.sunday",
       "text": "Sun",
       "style": "default",
       "type": "button",
-      "value": (_.get(message,'action') == 'cron.weekly' ? 'weekly' : week)
+      "value": '0'
     }
   ]
-} 
+
 
 var settings_weeks= module.exports.settings_weeks = function(message) {
   return [

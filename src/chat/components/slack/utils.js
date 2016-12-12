@@ -560,7 +560,7 @@ function * sendLastCalls(message) {
             "mrkdwn_in": ["text"]
         },{
             "fallback": "Last Call",
-            "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.\n So if you’ve got some last minute shopping to do, it’s now or never! You have *60* minutes left',
+            "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.\n So if you’ve got some last minute shopping to do, it’s now or never!',
             "color": "#45a5f4",
             "mrkdwn_in": ["text"]
         }];
@@ -586,29 +586,70 @@ function * sendCartToAdmin(message) {
 };
 
 
-function * updateCron(message, jobs, when) {
+function * updateCron(message, jobs, when, type) {
    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
    var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
    var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+   var interval = _.get(team, 'meta.status_interval');
    var date;
     if (jobs[team.team_id]) {
       jobs[team.team_id].stop();
     }
-    if (when.minutes) {
-      date = '00 ' + when.minutes + ' ' + when.hour + ' * * ' + when.day;
+    if (type == 'never') {
+      delete jobs[team.team_id];
+      return
+    } else if (type == 'time' && interval != 'daily') {
+      var date = (interval == 'weekly' || interval == 'daily') ? '*' : _.get(team, 'meta.weekly_status_date');
+      var weekday = (interval == 'monthly' || interval == 'daily') ? '*' : getDayNum(_.get(team, 'meta.weekly_status_day')).toString();
+      date = '00 ' + when.minutes + ' ' + when.hour + ' ' + date +  ' * ' + weekday;
+    } else if (type == 'time' && interval == 'daily') {
+      date = '00 ' + when.minutes + ' ' + when.hour  + ' * * *';
+    } else if (type == 'day') {
+      date = '00 ' + when.minutes + ' ' + when.hour  + ' * * ' + when.day;
+    } else if (type == 'date') {
+      date = '00 ' + when.minutes + ' ' + when.hour  + ' ' + when.date + ' * *';
     } else {
       date = when;
-      kip.debug(' \n\n\n\n\n\n\n\n\n PASSED A DATE OBJECT TO UPDATECRON!: ', date, ' \n\n\n\n\n\n\n\n\n  ')
     }
-    kip.debug('\n\n\nsetting cron job day: ', '00 ' + date.minutes + ' ' + date.hour + ' * * ' + date.day,'\n\n\n')
+    kip.debug('\n\n\n\n\n\n setting cron job : ', type, date,'\n\n\n\n\n\n')
+
     jobs[team.team_id] = new cron.CronJob( date, function  () {
        co(sendLastCalls(message));
     }, function() {
-      console.log('just finished the weekly update thing for team ' + team.team_id + ' ' + team.team_name);
+      kip.debug('\n\n\n\n ran cron job for team: ' + team.team_id + ' ' + team.team_name + date + '\n\n\n\n');
     },
     true,
     team.meta.weekly_status_timezone);
 };
+
+
+
+function getDayNum(string) {
+  switch(string.toLowerCase()) {
+    case 'sunday':
+     return 0
+     break;
+    case 'monday':
+     return 1
+     break;
+    case 'tuesday':
+     return 2
+     break;
+    case 'wednesday':
+     return 3
+     break;
+    case 'thursday':
+     return 4
+     break;
+    case 'friday':
+     return 5
+     break;
+    case 'saturday':
+     return 6
+     break;
+  }
+}
+
 
 
 module.exports = {
@@ -630,5 +671,6 @@ module.exports = {
   showLoading: showLoading,
   hideLoading: hideLoading,
   updateCron: updateCron,
-  sendLastCalls: sendLastCalls
+  sendLastCalls: sendLastCalls,
+  getDayNum: getDayNum
 }
