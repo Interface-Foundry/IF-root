@@ -447,7 +447,7 @@ function * onSuccess (payment) {
         })
 
     })
-    var htmlForItem = '<img width="500" height="256" src="http://74e09ba2.ngrok.io/img/kip_cafe_banner.png"><br></br>'
+    var htmlForItem = '<div align="center"><img width="250" height="128" src="http://74e09ba2.ngrok.io/img/kip_cafe_banner.png"></div><br></br>'
     htmlForItem += '<br><hr color="#ffffff"></br>Thank you for your order. Here is the list of items.<br><hr color="#ffffff"></br><p></p><table style="border-style:solid;" width="500px" border="0" bgcolor="#6c53d5"><thead><tr><th bgcolor="#ffffff">Menu Item</th><th bgcolor="#ffffff">Item Options</th><th bgcolor="#ffffff">Price</th><th bgcolor="#ffffff">Recipient</th></tr></thead>'
     var total = 0;
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
@@ -467,11 +467,11 @@ function * onSuccess (payment) {
     var delivery = parseFloat(foodSession.order.delivery_fee)
 
     htmlForItem += '</thead></table><br><hr color="#ffffff"></br>'+
-    '<table align="left" border=0 width="300px"><tr><td width="50px"></td><td>Subtotal:</td><td>$' + total.toFixed(2) + '</td></tr>' +
-    '<tr><td width="25px"></td><td>Tax:</td><td>$' + tax.toFixed(2) + '</td></tr>' +
-    '<tr><td width="25px"></td><td>Tip:</td><td>$' + tip.toFixed(2) + '</td></tr>' +
-    '<tr><td width="25px"></td><td>Delivery:</td><td>$' + delivery.toFixed(2) + '</td></tr>' + '<tr></tr>' +
-    '<tr><td width="25px"></td><td>Total:</td><td style="font-weight:bold;">$' + (delivery + total + tip + tax).toFixed(2) + '</td></tr></table><br></br>'
+    '<table align="left" border=0><tr width="250px"><td></td><td>Subtotal:</td><td>$' + total.toFixed(2) + '</td></tr>' +
+    '<tr width="250px"><td></td><td>Tax:</td><td>$' + tax.toFixed(2) + '</td></tr>' +
+    '<tr width="250px"><td></td><td>Tip:</td><td>$' + tip.toFixed(2) + '</td></tr>' +
+    '<tr width="250px"><td></td><td>Delivery:</td><td>$' + delivery.toFixed(2) + '</td></tr>' + '<tr></tr>' +
+    '<tr width="250px"><td></td><td>Total:</td><td style="font-weight:bold;">$' + (delivery + total + tip + tax).toFixed(2) + '</td></tr></table><br>&nbsp;&nbsp;<br>'
 
     // send confirmation email to admin
     var mailOptions = {
