@@ -447,20 +447,38 @@ function * onSuccess (payment) {
         })
 
     })
-    var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
+    var htmlForItem = '<img width="500" height="256" src="http://74e09ba2.ngrok.io/img/kip_cafe_banner.png"><br></br>'
+    htmlForItem += '<br><hr color="#ffffff"></br>Thank you for your order. Here is the list of items.<br><hr color="#ffffff"></br><p></p><table style="border-style:solid;" width="500px" border="0" bgcolor="#6c53d5"><thead><tr><th bgcolor="#ffffff">Menu Item</th><th bgcolor="#ffffff">Item Options</th><th bgcolor="#ffffff">Price</th><th bgcolor="#ffffff">Recipient</th></tr></thead>'
+    var total = 0;
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
+      var itemPrice = menu.getCartItemPrice(item).toFixed(2)
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
-      htmlForItem += '<tr><td>'+foodInfo.name+'</td><td>'+descriptionString+'</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+'</td><td>'+user[0].real_name+'</td></tr>'
+      htmlForItem += '<tr><td bgcolor="#ffffff">'+foodInfo.name+
+      '</td><td bgcolor="#ffffff">'+descriptionString+
+      '</td><td bgcolor="#ffffff">$'+ itemPrice +
+      '</td><td bgcolor="#ffffff"><p>'+user[0].real_name+'</p><p style="font-size:x-small;">@' + user[0].name + '</p></td></tr>'
+      total += parseFloat(itemPrice);
     })
+
+    var tax = parseFloat(foodSession.order.tax)
+    var tip = parseFloat(foodSession.tipAmount)
+    var delivery = parseFloat(foodSession.order.delivery_fee)
+
+    htmlForItem += '</thead></table><br><hr color="#ffffff"></br>'+
+    '<table align="left" border=0 width="300px"><tr><td width="50px"></td><td>Subtotal:</td><td>$' + total.toFixed(2) + '</td></tr>' +
+    '<tr><td width="25px"></td><td>Tax:</td><td>$' + tax.toFixed(2) + '</td></tr>' +
+    '<tr><td width="25px"></td><td>Tip:</td><td>$' + tip.toFixed(2) + '</td></tr>' +
+    '<tr><td width="25px"></td><td>Delivery:</td><td>$' + delivery.toFixed(2) + '</td></tr>' + '<tr></tr>' +
+    '<tr><td width="25px"></td><td>Total:</td><td style="font-weight:bold;">$' + (delivery + total + tip + tax).toFixed(2) + '</td></tr></table><br></br>'
 
     // send confirmation email to admin
     var mailOptions = {
       to: '' + foodSession.convo_initiater.name + ' <' + foodSession.convo_initiater.email + '>',
       from: 'Kip Café <hello@kipthis.com>',
       subject: 'Kip Café Order Receipt for ' + foodSession.chosen_restaurant.name,
-      html: htmlForItem+'</thead></table>'
+      html: htmlForItem
     }
 
     logging.info(mailOptions)
