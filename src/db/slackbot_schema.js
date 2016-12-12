@@ -104,10 +104,10 @@ var slackbotSchema = mongoose.Schema({
     payments: [{
       vendor: String,
       customer_id: String,
-      card:{
+      card: {
         card_id: String,
-        brand: String, //visa, mastercard, etc
-        exp_month: String, //expiration date
+        brand: String, // visa, mastercard, etc
+        exp_month: String, // expiration date
         exp_year: String,
         last4: String,
         email: String,
@@ -115,7 +115,8 @@ var slackbotSchema = mongoose.Schema({
       }
     }],
     mock: Boolean,
-    p2p: Boolean
+    p2p: Boolean,
+    used_coupons: Number
   },
   // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
   conversaitons: {}

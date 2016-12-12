@@ -9,6 +9,18 @@ var cc = require('./secrets/kip_cc.js')
 var Professor = require('../monitoring/prof_oak.js')
 var profOak = new Professor.Professor('C33NU7FRC')
 
+// various utils
+// kip emailer
+var mailer_transport = require('../mail/IF_mail.js')
+var Menu = require('../chat/components/delivery.com/Menu')
+
+// VARIOUS STUFF TO POST BACK TO USER EASILY
+// --------------------------------------------
+var queue = require('../chat/components/queue-mongo')
+var UserChannel = require('../chat/components/delivery.com/UserChannel')
+var replyChannel = new UserChannel(queue)
+// --------------------------------------------
+
 /* this would be for kip to pay for an order once the user has successfully paid stripe
 *
 *
@@ -40,7 +52,7 @@ function * payForItemFromKip (session, guestToken) {
 }
 
 // pay delivery.com
-module.exports.payDeliveryDotCom = function * (pay) {
+function * payDeliveryDotCom (pay) {
   // payment amounts should match
   // total already includes tip
 
@@ -132,7 +144,7 @@ module.exports.payDeliveryDotCom = function * (pay) {
   }
 }
 
-module.exports.storeCard = function * (pay, charge) {
+function * storeCard (pay, charge) {
   // save stripe card token and info to slack team
   try {
     var slackbot = yield db.Slackbot.findOne({team_id: pay.order.team_id})
@@ -164,13 +176,179 @@ module.exports.storeCard = function * (pay, charge) {
   yield slackbot.save()
 }
 
-function calCoupon(total,coupon){
+
+
+function * chargeById (payment) {
+  // make a charge by saved card ID
+  try {
+    profOak.say(`creating stripe charge for ${payment.order.saved_card.saved_card}`)
+    logging.info('creating charge by ID ')
+
+    // check for coupon
+    if (payment.order && payment.order.order && payment.order.order.coupon) {
+      var total = pay_utils.calCoupon(payment.order.order.total, payment.order.order.coupon)
+      total = Math.round(total)
+    } else {
+      total = Math.round(payment.order.order.total)
+    }
+
+    var charge = yield stripe.charges.create({
+      amount: total, // Amount in cents
+      currency: 'usd',
+      customer: payment.order.saved_card.customer_id, // Previously stored, then retrieved
+      card: payment.order.saved_card.card_id
+    })
+
+    profOak.say(`succesfully created new stripe charge for team: ${payment.order.team_id} in amount ${(total / 100.0).$}`)
+  } catch (err) {
+    logging.error('error in chargeById', err)
+  }
+
+  if (charge) {
+    payment.charge = charge
+    yield payment.save()
+  }
+
+  // fired on re-used cards charged ONLY
+  if (charge.status === 'succeeded') {
+    // POST TO MONGO QUEUE SUCCESS PAYMENT
+    try {
+      profOak.say(`succesfully paid for stripe for team ${payment.order.team_id}`)
+      profOak.say(`paying for delivery.com order for ${payment.order.team_id}`)
+
+      // complicated for testing purposes
+      if (!process.env.NODE_ENV) {
+        throw new Error('you need to run kip-pay with NODE_ENV')
+      } else if (process.env.NODE_ENV !== 'canary') {
+        profOak.say(`not on \`canary\`, so doing a fake charge.  test_success.`)
+        payment.delivery_response = 'test_success'
+        yield payment.save()
+      } else if (process.env.NODE_ENV === 'canary') {
+        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
+        profOak.say(`paid for delivery.com on \`canary\` for team:${payment.order.team_id}`)
+        yield payment.save()
+      } else {
+        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
+        profOak.say(`paid for delivery.com and not sure why since not on canary or not on not canary for team:${payment.order.team_id}`)
+        logging.error('paid for delivery but not on canary or not canary', payment)
+        yield payment.save()
+      }
+
+      yield onSuccess(payment)
+    } catch (err) {
+      logging.error('error after charging stripe but attempting to charge delivery.com', err)
+    }
+  } else {
+    logging.error('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
+    logging.error('OUTCOME: ', charge.outcome)
+  }
+}
+
+/*
+* communicate to user and tie up all things
+* @param {Object} payment object
+*/
+function * onSuccess (payment) {
+  try {
+    // look up user and the last message sent to us in relation to this order
+    var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
+    var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
+    finalFoodMessage = finalFoodMessage[0]
+    var menu = Menu(foodSession.menu)
+    // send message to all the ppl that ordered food
+    foodSession.confirmed_orders.map(userId => {
+      var user = _.find(foodSession.team_members, {id: userId}) // find returns the first one
+
+      var msg = _.merge({}, finalFoodMessage, {
+        thread_id: user.dm,
+        source: {
+          user: user.id,
+          team: foodSession.team_id,
+          channel: user.dm
+        }
+      })
+
+      var itemNames = foodSession.cart
+        .filter(i => i.user_id === userId && i.added_to_cart)
+        .map(i => menu.getItemById(i.item.item_id).name)
+        .map(name => '*' + name + '*') // be bold
+
+      if (itemNames.length > 1) {
+        var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
+      } else {
+        foodString = itemNames[0]
+      }
+
+      replyChannel.send(
+        msg,
+        'food.payment_info',
+        {
+          type: finalFoodMessage.origin,
+          data: {
+            text: `Your order of ${foodString} is on the way 😊`,
+            attachments: [{
+              image_url: "http://tidepools.co/kip/kip_menu.png",
+              text: 'Click a mode to start using Kip',
+              color: '#3AA3E3',
+              callback_id: 'wow such home',
+              actions: [{
+                name: 'passthrough',
+                value: 'food',
+                text: 'Kip Café',
+                type: 'button'
+              },{
+                name: 'passthrough',
+                value: 'shopping',
+                text: 'Kip Store',
+                type: 'button'
+              }]
+            }]
+          }
+        })
+    })
+    var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
+    var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
+      var foodInfo = menu.getItemById(String(item.item.item_id))
+      var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
+      var user = foodSession.team_members.filter(j => j.id === item.user_id)
+      htmlForItem += '<tr><td>'+foodInfo.name+'</td><td>'+descriptionString+'</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+'</td><td>'+user[0].real_name+'</td></tr>'
+    })
+
+    // send confirmation email to admin
+    var mailOptions = {
+      to: `${foodSession.convo_initiater.name} <${foodSession.convo_initiater.email}`,
+      from: `Kip Café <hello@kipthis.com>`,
+      subject: `Kip Café Order Receipt for ${foodSession.chosen_restaurant.name}`,
+      html: `${htmlForItem}</thead></table>`
+    }
+
+    logging.info('mailOptions', mailOptions)
+    mailer_transport.sendMail(mailOptions, function (err) {
+      if (err) console.log(err)
+    })
+  } catch (err) {
+    logging.error('on success messages broke', err)
+  }
+}
+
+/* calculate the amount that coupon results in
+* @param (Number) total
+* @param (Number) coupon percintage as decimal
+* @returns (Number) new total amount
+*/
+function calCoupon (total, coupon) {
   var s = total * coupon
   var t = total - s
-  if(t < 50){ //to reach minimum stripe charge of $0.50
-    t = 50
-  }
+  // to reach minimum stripe charge of $0.50
+  if (t < 50) t = 50
+
   return t
 }
 
-module.exports.calCoupon = calCoupon
+module.exports = {
+  onSuccess: onSuccess,
+  chargeById: chargeById,
+  payDeliveryDotCom: payDeliveryDotCom,
+  storeCard: storeCard,
+  calCoupon: calCoupon
+}
