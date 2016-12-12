@@ -48,7 +48,7 @@ var kip = require('../../../kip')
 var queue = require('../queue-mongo')
 var image_search = require('../image_search')
 var search_results = require('./search_results')
-// var variation_view = require('./variation_view')
+var variation_view = require('./variation_view')
 var focus = require('./focus')
 var cart = require('./cart')
 var kipCart = require('../cart')
@@ -208,7 +208,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
             db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
           })
         } else {
-          return bot.web.chat.postMessage(message.source.channel,(reply.label ? reply.label : message.text), reply, (e, r) => {
+          return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply, (e, r) => {
             // set the slack_ts from their server so we can update/delete specific messages
             db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
           })
@@ -218,16 +218,17 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
         return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
-      if(message.mode === 'item.add'){
-        //its a variation message
+      if(message.mode === 'variations' && message.action === 'reply'){
+        msgData.attachments = yield variation_view(message);
+        msgData.text = '';
+        return bot.web.chat.postMessage(message.source.channel, '', msgData);
         
-        var asin = message.reply[0].id; //just grab the first one for now
-        yield slackUtils.addViaAsin(asin, message);
-        message.data = yield kipCart.getCart(message.source.team)
-        message.mode = 'cart';
-        message.action = 'view';
+        // var asin = message.reply[0].id; //just grab the first one for now
+        // yield slackUtils.addViaAsin(asin, message);
+        // message.data = yield kipCart.getCart(message.source.team)
+        // message.mode = 'cart';
+        // message.action = 'view';
       }
-
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         var results = yield search_results(message);
         msgData.attachments = [...message.reply || [], ...results || []];
@@ -276,10 +277,9 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       if (message.mode === 'shopping' && message.action === 'onboard_cart') {
         let results = yield cart(message, bot.slackbot, false)
-        
-        results = results.reduce((fin, item) => {
-          if (item.text.includes(message.source.user)) fin.push(item);
-          return fin;
+        results = results.reduce((cart, item) => { //hide items that the user hasn't added for onboarding
+          if (item.text.includes(message.source.user)) cart.push(item);
+          return cart;
         }, [])
         msgData.attachments = [...message.reply || [], ...results || [], {
           text: '*Success!* You can always type `help` if you have any problems',
