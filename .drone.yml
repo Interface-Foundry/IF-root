@@ -1,0 +1,6 @@
+build:
+  image: node:6
+  commands:
+    - npm install
+    - npm install -g mocha
+    - NODE_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/parser/parser.test.js
