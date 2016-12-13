@@ -576,26 +576,15 @@ function* sendLastCalls(message) {
       "color": "#45a5f4",
       "mrkdwn_in": ["text"]
     }];
-    kip.debug(`🐊`)
     var msg = new db.Message(message);
-    kip.debug(`🐠`)
-
     msg.mode = 'shopping';
     msg.action = 'switch';
     msg.text = '';
-    kip.debug(`🦍`)
     msg.source.team = team.team_id;
-    kip.debug(`🐑`)
     msg.source.channel = m.dm;
-    kip.debug(`🐡`)
     msg.user_id = m.id;
-    kip.debug(`🕸`)
     msg.thread_id = m.dm;
-    // msg.source.user = m.id;
-    kip.debug(`🐬`)
-
     msg.reply = attachment;
-    kip.debug(`🦀  ${JSON.stringify(msg, null, 2)}`)
     yield msg.save();
     yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.lastcall');
 

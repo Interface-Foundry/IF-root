@@ -707,7 +707,6 @@ function getAction(text) {
   } else if (isCronChange(text)) {
     action = isCronChange(text)[0]
   } else if (text.includes('settings')) {
-    kip.debug(`\n🥝  ${text}\n`)
     action = 'start'
   } else {
     action = 'sorry'

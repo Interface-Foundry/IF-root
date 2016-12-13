@@ -442,11 +442,8 @@ handlers['cart.save'] = function*(message, exec) {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
   	// send them to the variants mode
-  	kip.debug(`🦊  🦊  🦊  🦊  🦊  🦊  🦊  ${JSON.stringify(results, null, 2)}`)
   	yield amazon_variety.getVariations(results[exec.params.focus-1].ASIN, message);
   	return;
-    // kip.err(e);
-    // return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
   }
 
   // view the cart
