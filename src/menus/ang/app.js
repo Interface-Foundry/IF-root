@@ -25,9 +25,13 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
       for (var child in item.children) {
         details.options[item.children[child].name] = {};
         var opt = item.children[child];
+        console.log('OPT TYPE', opt.type)
+        if (opt.type == "price group") {
+          item.price = 0;
+          details.price = 0;
+        }
         for (var s in opt.children) {
           var selection = opt.children[s];
-          //console.log(selection, "selection is what i think it is right?");
           details.options[item.children[child].name][opt.children[s].unique_id] = {
             chosen: false,
             price: selection.price,
@@ -63,6 +67,8 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     return true;
   };
 
+//there is no reason there are two partially overlapping price systems
+//used for adding to cart
   $scope.addItemPrice = function (item) {
     var cost = item.price;
     for (var opt in item.options) {
@@ -76,6 +82,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     $scope.total += cost;
   };
 
+//used for displaying price
   $scope.addRadioPrice = function (og, price, item) {
     if (!item.current_price) item.current_price = 0;
     if (!item[`${og.name}_price`]) item[`${og.name}_price`] = 0;
@@ -86,6 +93,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     item.current_price += price;
   }
 
+//used for displaying price
   $scope.addOptionPrice = function (flag, price, item) {
     // console.log('we are okay', flag, price, item)
     // console.log(item.price);
