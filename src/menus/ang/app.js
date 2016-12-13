@@ -67,43 +67,39 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     return true;
   };
 
-//there is no reason there are two partially overlapping price systems
-//used for adding to cart
-  $scope.addItemPrice = function (item) {
-    var cost = item.price;
-    for (var opt in item.options) {
-      var optGroup = item.options[opt];
-      for (var optId in optGroup) {
-        var option = optGroup[optId];
-        if (option != 'radio' && option.chosen) cost += option.price;
-      }
-    }
-    item.price = cost;
-    $scope.total += cost;
-  };
-
 //used for displaying price
   $scope.addRadioPrice = function (og, price, item) {
     if (!item.current_price) item.current_price = 0;
     if (!item[`${og.name}_price`]) item[`${og.name}_price`] = 0;
     var prevOgPrice = item[`${og.name}_price`];
     item[`${og.name}_price`] = price;
-    console.log(item);
+    console.log(prevOgPrice, 'prevOgPrice', '////', 'price', price);
     item.current_price -= prevOgPrice;
     item.current_price += price;
   }
 
 //used for displaying price
   $scope.addOptionPrice = function (flag, price, item) {
-    // console.log('we are okay', flag, price, item)
-    // console.log(item.price);
     if (flag) {
       item.current_price = (item.current_price ? item.current_price : 0) + price;
     }
     else item.current_price -= price;
-    //else item.current_price = (item.current_price ? item.current_price : 0) - price;
-    // console.log(item.current_price);
   }
+
+  //there is no reason there are two partially overlapping price systems
+  //used for adding to cart
+    // $scope.addItemPrice = function (item) {
+    //   var cost = item.price;
+    //   for (var opt in item.options) {
+    //     var optGroup = item.options[opt];
+    //     for (var optId in optGroup) {
+    //       var option = optGroup[optId];
+    //       if (option != 'radio' && option.chosen) cost += option.price;
+    //     }
+    //   }
+    //   item.price = cost;
+    //   $scope.total += cost;
+    // };
 
   $scope.addToCart = function (item) {
     console.log('ITEM', item);
@@ -111,7 +107,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     if (foodItem.item_qty > item.max_qty) foodItem.item_qty = item.max_qty;
     for (var k in foodItem.options) {
       opGroup = foodItem.options[k];
-      // console.log('opGroup!!', opGroup)
       if (Object.keys(opGroup).indexOf('radio') > -1) {
         var selectionId = opGroup.radio;
         opGroup[selectionId].chosen = true;
@@ -126,9 +121,9 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     console.log($scope.cart, 'cart');
 
     $scope.inProgress[item.id].instructions = window.prompt("Do you have any special instructions?");
-
+    $scope.inProgress[item.id].price += (item.current_price ? item.current_price : 0)
     $scope.cart.push($scope.inProgress[item.id]);
-    $scope.addItemPrice($scope.inProgress[item.id]);
+    $scope.total += $scope.inProgress[item.id].price;
     $scope.inProgress[item.id] = null;
   };
 
