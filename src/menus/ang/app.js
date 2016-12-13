@@ -25,7 +25,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
       for (var child in item.children) {
         details.options[item.children[child].name] = {};
         var opt = item.children[child];
-        console.log('OPT TYPE', opt.type)
+        // console.log('OPT TYPE', opt.type)
         if (opt.type == "price group") {
           item.price = 0;
           details.price = 0;

@@ -76,7 +76,7 @@
 
             <h2>
               <span ng-click="itemDetails(item)" class="item_name">{{item.name}}</span>
-              <span class="price" ng-hide="inProgress[item.id] && validateItem(item) && item.type=='item'">{{item.price + (item.current_price || 0)}}</span>
+              <span class="price" ng-hide="(inProgress[item.id] && validateItem(item)) || item.type!='item'">{{item.type}}{{item.price + (item.current_price || 0)}}</span>
               <span class="price" ng-show="inProgress[item.id] && validateItem(item) && item.type=='item'">
                 <button ng-click="addToCart(item)">Add to cart for {{item.price + (item.current_price || 0)}}</button>
               </span>
