@@ -56,6 +56,7 @@ var luminati_request = function (url, luminati_client, status) {
         if (proxyLog.success) resolve(res.body);
         else reject(err);
       });
+
     });
 };
 
