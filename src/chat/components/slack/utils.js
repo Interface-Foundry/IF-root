@@ -10,7 +10,7 @@ var kipcart = require('../cart');
 var queue = require('../queue-mongo');
 var cron = require('cron');
 var sleep = require('co-sleep');
-
+var cardTemplate = require('./card_templates');
 
 /*
 *
@@ -545,51 +545,51 @@ function * hideLoading(message) {
 }
 
 
-function * sendLastCalls(message) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
-  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
-  var replies = [];
-  yield team.meta.cart_channels.map( function * (c) {
-    var channelMembers = yield getChannelMembers(team, c);
-    yield channelMembers.map( function * (m) {
-      var attachment = [{
-            "fallback": "Last Call",
-            "text":'',
-            "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
-            "color": "#45a5f4",
-            "mrkdwn_in": ["text"]
-        },{
-            "fallback": "Last Call",
-            "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.',
-            "color": "#45a5f4",
-            "mrkdwn_in": ["text"]
-        }];
-        var msg = new db.Message(message);
-        msg.mode = 'settings';
-        msg.text = '';
-        msg.action = 'home';
-        msg.execute = [ { 
-          "mode": "shopping",
-          "action": "switch",
-          "_id": message._id
-        }];
-        msg.reply = attachment;
-        msg.source.team = team.team_id;
-        msg.source.channel = m.dm; 
-        yield msg.save();
-        yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.lastcall'); 
-        // yield sleep(500);
-        var msg2 = new db.Message(message);
-        msg2.mode = 'shopping';
-        msg2.action = 'switch';
-        msg2.text = ''
-        yield msg2.save();
-        yield queue.publish('outgoing.' + message.origin, msg2, msg2._id + '.reply.lastcall'); 
-
-    })
+function* sendLastCalls(message) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  var team = yield db.Slackbots.findOne({
+    'team_id': team_id
+  }).exec();
+  var currentUser = yield db.Chatusers.findOne({
+    id: message.source.user
   });
-};
+  var channelMembers = [];
+  yield team.meta.cart_channels.map(function*(channel) {
+    var members = yield getChannelMembers(team, channel);
+    channelMembers = channelMembers.concat(members);
+  });
+  channelMembers = _.uniqBy(channelMembers, a => a.id);
+  var admins = yield findAdmins(team)
+  channelMembers = _.differenceBy(channelMembers, admins, 'id') //should take out all admins
+  kip.debug(JSON.stringify(channelMembers, null, 2))
+  yield channelMembers.map(function*(m) {
+    kip.debug(JSON.stringify(currentUser, null, 2))
+    var attachment = [{
+      "fallback": "Last Call",
+      "text": '',
+      "image_url": "http://kipthis.com/kip_modes/mode_teamcart_collect.png",
+      "color": "#45a5f4",
+      "mrkdwn_in": ["text"]
+    }, {
+      "fallback": "Last Call",
+      "text": 'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.',
+      "color": "#45a5f4",
+      "mrkdwn_in": ["text"]
+    }];
+    var msg = new db.Message(message);
+    msg.mode = 'shopping';
+    msg.action = 'switch';
+    msg.text = '';
+    msg.source.team = team.team_id;
+    msg.source.channel = m.dm;
+    msg.user_id = m.id;
+    msg.thread_id = m.dm;
+    msg.reply = attachment;
+    yield msg.save();
+    yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.lastcall');
+
+  })
+}
 
 function * sendCartToAdmin(message) {
  

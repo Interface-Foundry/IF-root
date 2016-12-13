@@ -107,7 +107,6 @@ handlers['reply'] = function*(message) {
 }
 
 handlers['addcart'] = function*(message, data) {
-  kip.debug(`🌴 \n ${JSON.stringify(message, null, 2)}`)
   let origAttachments = message.source.original_message.attachments;
   let item = yield db.items.findOne({
     '_id': data[0]

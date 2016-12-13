@@ -17,7 +17,6 @@ const constants = require('./constants')
 function pubsubVariation(item, asin, message, origin = 'facebook') { //default to facebook bc thats all this was used for before
   logging.debug('\n\n\ncreating variation for: ', item.ASIN)
   if (origin === 'slack') {
-    kip.debug(`🥗  ${JSON.stringify(message, null, 2)}`)
     message.mode = 'variations'
     message.action = 'reply'
     // message.source.text = message.amazon;
@@ -89,7 +88,6 @@ function* getVariations(asin, message) {
   }
 
   logging.debug('getting variation in amazon_vareity')
-  kip.debug(`🐹  ${message}`)
   proxy_lib.ensured_request(variation.url)
     .then((body) => {
       var $ = cheerio.load(body);

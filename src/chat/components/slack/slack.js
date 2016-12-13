@@ -236,7 +236,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       if (message.mode === 'shopping' && message.action === 'switch') {
-        msgData.attachments = cardTemplate.slack_shopping_mode;
+        msgData.attachments = [...message.reply || [], ...cardTemplate.slack_shopping_mode];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 

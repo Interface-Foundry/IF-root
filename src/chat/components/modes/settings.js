@@ -290,6 +290,12 @@ handlers['cron'] = function * (message, interval) {
       msg.action = 'set_date';
       msg.text = 'Which day of the month? Say a number from 1 - 31: ';
       msg.source.team = team.team_id;
+      msg.reply = [{
+        color: '#49d63a',
+        mrkdwn_in: ['text'],
+        fallback:'Settings',
+        callback_id: 'none'
+      }];
       msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
       yield msg.save();
       return [msg];
@@ -353,32 +359,49 @@ handlers['set_day'] = function * (message, day) {
 }
 
 handlers['set_date'] = function * (message) {
-  var num;
-  try {
-    num = parseInt(message.text.trim());
-    if (0 > num > 31) throw new Error('date incorrect')
-  } catch(err) {
-    var msg = message;
-    msg.mode = 'settings'
-    msg.action = 'home'
-    msg.text = 'The number you entered is incorrect!';
-    msg.execute = [ { 
-      "mode": "settings",
-      "action": "home",
-      "_id": message._id
-    } ];
-    delete msg.reply;
-    msg.source.team = team.team_id;
-    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-    return [msg];
- 
-  };
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var num = parseInt(message.text.trim())
+
+   if (!(/^\d+$/.test(message.text)) ||  0 > num > 31) { 
+      // var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
+      // var relevantMessage = history[1];
+      // var json = relevantMessage.source.original_message;
+      // var warning = {
+      //   text: 'The date you entered is incorrect!',
+      //   color: '#ff0000',
+      //   mrkdwn_in: ['text'],
+      //   fallback:'Settings',
+      //   callback_id: 'none'
+      // }
+      // json.attachments.push(warning)
+      // request({
+      //   method: 'POST',
+      //   uri: relevantMessage.source.response_url,
+      //   body: JSON.stringify(json)
+      // }); 
+      // return
+      var msg = message;
+      msg.mode = 'settings';
+      msg.action = 'set_date';
+      msg.text = 'Which day of the month? Say a number from 1 - 31: ';
+      msg.source.team = team.team_id;
+      msg.reply = [{
+        color: '#49d63a',
+        mrkdwn_in: ['text'],
+        fallback:'Settings',
+        callback_id: 'none'
+      }];
+      msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+      yield msg.save();
+      return [msg];
+   }
+
   //TODO: Fix this allow crons to run correctly if date is > 28 in feb
   if (num > 28) {
     num = 28;
   };
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
-  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+ 
   team.meta.weekly_status_date = num;
   team.meta.status_interval = 'monthly';
   yield team.save();
@@ -667,7 +690,6 @@ handlers['sorry'] = function * (message) {
 
 function getAction(text) {
   var action;
-  kip.debug(`\n🥝  ${text}\n`)
   if (isStatusOff(text)) {
     action = 'status_off';
   } else if (isStatusOn(text)) {
@@ -685,7 +707,6 @@ function getAction(text) {
   } else if (isCronChange(text)) {
     action = isCronChange(text)[0]
   } else if (text.includes('settings')) {
-    kip.debug(`\n🥝  ${text}\n`)
     action = 'start'
   } else {
     action = 'sorry'

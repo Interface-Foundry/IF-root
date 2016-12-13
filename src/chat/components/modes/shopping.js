@@ -10,7 +10,7 @@ var cardTemplate = require('../slack/card_templates');
 var request = require('request');
 var slackUtils = require('../slack/utils');
 var queue = require('../queue-mongo');
-
+var amazon_variety = require('../amazon_variety')
 //
 // Handlers take something from the message.execute array and turn it into new messages
 //
@@ -61,7 +61,7 @@ handlers['shopping.initial'] = function*(message, exec) {
   // kip.debug('  \n\n\n\n\n\n\n\n\n DIS DAT GOOD SHIT: ', relevantMessage, ' \n\n\n\n\n\n\n\n\n  ')
   yield slackUtils.showLoading(message);
   var results = yield amazon_search.search(exec.params,message.origin);
-  yield slackUtils.hideLoading(message);
+  // yield slackUtils.hideLoading(message);
 
   if (results == null || !results) {
       return new db.Message({
@@ -441,8 +441,9 @@ handlers['cart.save'] = function*(message, exec) {
   try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
-    kip.err(e);
-    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+  	// send them to the variants mode
+  	yield amazon_variety.getVariations(results[exec.params.focus-1].ASIN, message);
+  	return;
   }
 
   // view the cart
