@@ -9,6 +9,7 @@ var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
 var queue = require('../queue-mongo');
 var cron = require('cron');
+var sleep = require('co-sleep');
 
 
 /*
@@ -560,23 +561,32 @@ function * sendLastCalls(message) {
             "mrkdwn_in": ["text"]
         },{
             "fallback": "Last Call",
-            "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.\n So if you’ve got some last minute shopping to do, it’s now or never!',
+            "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.',
             "color": "#45a5f4",
             "mrkdwn_in": ["text"]
         }];
-        var msg = message;
+        var msg = new db.Message(message);
         msg.mode = 'settings';
         msg.text = '';
         msg.action = 'home';
         msg.execute = [ { 
-          "mode": "settings",
-          "action": "home",
+          "mode": "shopping",
+          "action": "switch",
           "_id": message._id
         }];
         msg.reply = attachment;
         msg.source.team = team.team_id;
         msg.source.channel = m.dm; 
+        yield msg.save();
         yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.lastcall'); 
+        // yield sleep(500);
+        var msg2 = new db.Message(message);
+        msg2.mode = 'shopping';
+        msg2.action = 'switch';
+        msg2.text = ''
+        yield msg2.save();
+        yield queue.publish('outgoing.' + message.origin, msg2, msg2._id + '.reply.lastcall'); 
+
     })
   });
 };
