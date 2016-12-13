@@ -76,14 +76,25 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     $scope.total += cost;
   };
 
+  $scope.addRadioPrice = function (og, price, item) {
+    if (!item.current_price) item.current_price = 0;
+    if (!item[`${og.name}_price`]) item[`${og.name}_price`] = 0;
+    var prevOgPrice = item[`${og.name}_price`];
+    item[`${og.name}_price`] = price;
+    console.log(item);
+    item.current_price -= prevOgPrice;
+    item.current_price += price;
+  }
+
   $scope.addOptionPrice = function (flag, price, item) {
-    console.log('we are okay', flag, price, item)
-    console.log(item.price);
+    // console.log('we are okay', flag, price, item)
+    // console.log(item.price);
     if (flag) {
-      item.current_price = (item.current_price ? item.current_price : item.price) + price;
+      item.current_price = (item.current_price ? item.current_price : 0) + price;
     }
-    else item.current_price = (item.current_price ? item.current_price : item.price) - price;
-    console.log(item.current_price);
+    else item.current_price -= price;
+    //else item.current_price = (item.current_price ? item.current_price : 0) - price;
+    // console.log(item.current_price);
   }
 
   $scope.addToCart = function (item) {
