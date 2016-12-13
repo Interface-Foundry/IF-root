@@ -306,6 +306,7 @@ function nodeOptions (node, cartItem, validate, message) {
       return all
     } else {
       var actions = a.actions
+      var numActionRows = Math.ceil(actions.length/3)
       a.actions = actions.splice(0, 3)
       rowCount++
       all.push(a)
@@ -330,6 +331,7 @@ function nodeOptions (node, cartItem, validate, message) {
           })
           rowCount++
         }
+        if(numActionRows > optionIndex){
           all.push({
             'name': 'More Options',
             'fallback': 'More Options',
@@ -344,6 +346,7 @@ function nodeOptions (node, cartItem, validate, message) {
               }
             }]
           })
+        }
       }
       return all
     }
