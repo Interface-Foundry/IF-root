@@ -690,7 +690,6 @@ handlers['sorry'] = function * (message) {
 
 function getAction(text) {
   var action;
-  kip.debug(`\n🥝  ${text}\n`)
   if (isStatusOff(text)) {
     action = 'status_off';
   } else if (isStatusOn(text)) {
