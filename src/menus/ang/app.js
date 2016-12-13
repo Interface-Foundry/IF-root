@@ -123,7 +123,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     $scope.inProgress[item.id].instructions = window.prompt("Do you have any special instructions?");
     $scope.inProgress[item.id].price += (item.current_price ? item.current_price : 0)
     $scope.cart.push($scope.inProgress[item.id]);
-    $scope.total += $scope.inProgress[item.id].price;
+    $scope.total += ($scope.inProgress[item.id].price * $scope.inProgress[item.id].item_qty);
     $scope.inProgress[item.id] = null;
   };
 
