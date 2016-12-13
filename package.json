@@ -25,6 +25,7 @@
     "connect-busboy": "0.0.2",
     "cookie-parser": "^1.4.3",
     "cron": "^1.1.0",
+    "date-fns": "^1.18.0",
     "debug": "^2.2.0",
     "emoji-text": "^0.2.6",
     "everyconfig": "^1.0.2",
