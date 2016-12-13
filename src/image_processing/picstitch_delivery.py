@@ -219,7 +219,7 @@ class PicStitch:
                    self.config['PIC_COORDS']['y']))
 
         # post text
-        last_y = 5
+        last_y = 0
         # change from: 5
 
         print (self.config['TEXTBOX_COORDS'])
@@ -272,7 +272,6 @@ class PicStitch:
             self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
 
 
-
         #yelp vs. delivery.com ratings
         #we should probably show whatever one has better rating
 
@@ -280,20 +279,20 @@ class PicStitch:
             #use yelp rating
             print('USING YELP')
 
-            #if no reviews, set to zero
-            if not 'num_ratings' in self.img_req['summary']:
-                self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+            # #if no reviews, set to zero
+            # if not 'num_ratings' in self.img_req['summary']:
+            #     self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
 
             review_count = self.img_req['yelp_rating']['review_count']
             rating = self.img_req['yelp_rating']['rating']
 
-        if 'summary' in self.img_req and 'star_ratings' in self.img_req['summary'] and 'num_ratings' in self.img_req['summary']:
+        elif 'summary' in self.img_req and 'star_ratings' in self.img_req['summary'] and 'num_ratings' in self.img_req['summary']:
             #use delivery.com rating
             print('USING DELIVERY.COM')
 
             #if no reviews, set to zero
-            if not 'num_ratings' in self.img_req['summary']:
-                self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+            # if not 'num_ratings' in self.img_req['summary']:
+            #     self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
 
             review_count = self.img_req['summary']['num_ratings']
             rating = self.img_req['summary']['star_ratings']            
@@ -385,8 +384,12 @@ class PicStitch:
                            font=self.config['font2'],
                            fill='#37a936')
             else:
-                draw.text((x + 89, last_y + 4),
-                           '$' + str(delivery_charge),
+                draw.text((x + 90, last_y + 4),
+                           '$' + str("{0:.2f}".format(delivery_charge)),
+                           font=self.config['font2'],
+                           fill='#37a936')
+                draw.text((x + 89, last_y + 20),
+                           'Delivery Fee',
                            font=self.config['font2'],
                            fill='#37a936')
         ## if 'Size' in self.img_req['name']:
@@ -418,9 +421,9 @@ class PicStitch:
     def make_image_configs(self):
         logging.debug('using self._make_image_configs')
         config = {}
-        config['CHAT_WIDTH'] = 345
-        config['CHAT_HEIGHT'] = 120
-        config['PADDING'] = 5
+        config['CHAT_WIDTH'] = 324
+        config['CHAT_HEIGHT'] = 110
+        config['PADDING'] = 0
         config['BGCOLOR'] = 'white'
         config['length'] = 3
         config['biggest_width'] = 0
@@ -433,7 +436,7 @@ class PicStitch:
         #                       {'x': 24, 'y': 174},
         #                       {'x': 24, 'y': 336}]
         # where to draw choice numbers
-        config['TEXTBOX_COORDS'] = {'x': 150, 'y': 7}
+        config['TEXTBOX_COORDS'] = {'x': 150, 'y': 0}
         #                           {'x': 190, 'y': 174},
         #                           {'x': 190, 'y': 336}]
 
