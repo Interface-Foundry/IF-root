@@ -76,9 +76,9 @@
 
             <h2>
               <span ng-click="itemDetails(item)" class="item_name">{{item.name}}</span>
-              <span class="price" ng-hide="inProgress[item.id] && validateItem(item) && item.type=='item'">{{item.price}}</span>
+              <span class="price" ng-hide="inProgress[item.id] && validateItem(item) && item.type=='item'">{{item.current_price || item.price}}</span>
               <span class="price" ng-show="inProgress[item.id] && validateItem(item) && item.type=='item'">
-                <button ng-click="addToCart(item)">Add to cart for {{item.price}}</button>
+                <button ng-click="addToCart(item)">Add to cart for {{item.current_price || item.price}}</button>
               </span>
             </h2>
             <h3 class="item_description">{{item.description}}</h3>
@@ -95,22 +95,26 @@
                 <div>
                   <div ng-show="child.min_selection == 1">
                     <div ng-repeat="option in child.children">
-                      <form name="optionForm">
-                        <label>
-                          <input type="radio" name="child.name" ng-model="inProgress[item.id].options[child.name].radio" ng-value="option.unique_id"/>
-                          {{option.name}} {{formatPrice(option.price)}}
-                        </label>
-                      </form>
+                      <div ng-click="addOptionPrice(inProgress[item.id].options[child.name][option.unique_id].chosen, option.price, item)">
+                        <form name="optionForm">
+                          <label>
+                            <input type="radio" name="child.name" ng-model="inProgress[item.id].options[child.name].radio" ng-value="option.unique_id"/>
+                            {{option.name}} {{formatPrice(option.price)}}
+                          </label>
+                        </form>
+                      </div>
                     </div>
                   </div>
                   <div ng-show="child.min_selection == 0">
                     <div ng-repeat="option in child.children">
-                      <form>
-                        <label>
-                          <input type="checkbox" name="order" ng-model="inProgress[item.id].options[child.name][option.unique_id].chosen" ng-value="true"/>
-                          {{option.name}} {{formatPrice(option.price)}}
-                        </label>
-                      </form>
+                      <div ng-click="addOptionPrice(inProgress[item.id].options[child.name][option.unique_id].chosen, option.price, item)">
+                        <form>
+                          <label>
+                            <input type="checkbox" name="order" ng-model="inProgress[item.id].options[child.name][option.unique_id].chosen" ng-value="true"/>
+                            {{option.name}} {{formatPrice(option.price)}}
+                          </label>
+                        </form>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -134,9 +138,9 @@
                   <!-- <h2 ng-show="child.type=='item'"> -->
                   <h2>
                     <span ng-click="itemDetails(child)" class="item_name">{{child.name}}</span>
-                    <span class="price" ng-hide="inProgress[child.id] && validateItem(child) && child.type=='item'">{{child.price}}</span>
+                    <span class="price" ng-hide="inProgress[child.id] && validateItem(child) && child.type=='item'">{{child.current_price || child.price}}</span>
                     <span class="price" ng-show="inProgress[child.id] && validateItem(child) && child.type=='item'">
-                      <button ng-click="addToCart(child)">Add to cart for {{child.price}}</button>
+                      <button ng-click="addToCart(child)">Add to cart for {{child.current_price || child.price}}</button>
                     </span>
                   </h2>
                     <!-- <h2 ng-click="itemDetails(child)">
@@ -151,10 +155,12 @@
                         <h3>{{og.name}}</h3>
                         <div ng-repeat="option in og.children">
                           <form name="optionForm">
-                            <label>
-                              <input type="radio" name="og.name" ng-model="inProgress[child.id].options[og.name].radio" ng-value="option.unique_id"/>
-                              {{option.name}} {{formatPrice(option.price)}}
-                            </label>
+                            <div ng-click="addOptionPrice(inProgress[child.id].options[og.name][option.unique_id].chosen, option.price, child)">
+                              <label>
+                                <input type="radio" name="og.name" ng-model="inProgress[child.id].options[og.name].radio" ng-value="option.unique_id"/>
+                                {{option.name}} {{formatPrice(option.price)}}
+                              </label>
+                            </div>
                           </form>
                         </div>
                       </div>
@@ -162,10 +168,12 @@
                         <h3>{{og.name}}</h3>
                         <div ng-repeat="option in og.children">
                           <form>
-                            <label>
-                              <input type="checkbox" name="order" ng-model="inProgress[child.id].options[og.name][option.unique_id].chosen" ng-value="true"/>
-                              {{option.name}} {{formatPrice(option.price)}}
-                            </label>
+                            <div ng-click="addOptionPrice(inProgress[child.id].options[og.name][option.unique_id].chosen, option.price, child)">
+                              <label>
+                                <input type="checkbox" name="order" ng-model="inProgress[child.id].options[og.name][option.unique_id].chosen" ng-value="true"/>
+                                {{option.name}} {{formatPrice(option.price)}}
+                              </label>
+                            </div>
                           </form>
                         </div>
                       </div>

@@ -17,6 +17,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
 
   $scope.itemDetails = function (item) {
     if ($scope.inProgress[item.id]) {
+      item.current_price = null;
       $scope.inProgress[item.id] = null;
     }
     else {
@@ -74,6 +75,16 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     item.price = cost;
     $scope.total += cost;
   };
+
+  $scope.addOptionPrice = function (flag, price, item) {
+    console.log('we are okay', flag, price, item)
+    console.log(item.price);
+    if (flag) {
+      item.current_price = (item.current_price ? item.current_price : item.price) + price;
+    }
+    else item.current_price = (item.current_price ? item.current_price : item.price) - price;
+    console.log(item.current_price);
+  }
 
   $scope.addToCart = function (item) {
     console.log('ITEM', item);

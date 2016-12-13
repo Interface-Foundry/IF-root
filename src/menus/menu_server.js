@@ -38,7 +38,7 @@ var Messages = db.Messages;
 
 var ObjectId = require('mongodb').ObjectID;
 
-require('../chat/components/delivery.com/scrape_menus.js');
+// require('../chat/components/delivery.com/scrape_menus.js');
 
 //handle post request with a binder full of data
 app.post('/cafe', (req, res) => co(function * () {

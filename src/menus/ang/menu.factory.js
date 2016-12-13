@@ -54,7 +54,7 @@ app.factory('MenuFactory', function ($http, $location) {
       cart.push(item);
     }
 
-    console.log('new cart::', cart);
+    //console.log('new cart::', cart);
     return cart;
   };
 
