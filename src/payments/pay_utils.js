@@ -56,19 +56,13 @@ function * payDeliveryDotCom (pay) {
   // payment amounts should match
   // total already includes tip
 
-  logging.info('PAY TOTAL: ',pay.order.order.total)
-  logging.info('PAY CHARGED: ',pay.charge.amount)
+  logging.info(`PAY TOTAL: ${pay.order.order.total}, PAY CHARGED ${pay.charge.amount}`)
 
-  //check for coupon
-  if (pay.order && pay.order.order && pay.order.order.coupon){
-    var total = calCoupon(pay.order.order.total, pay.order.order.coupon)
-    total = Math.round(total)
-  }else {
-    var total = Math.round(pay.order.order.total)
-  }
+  // check for coupon
+  var total = Math.round(pay.order.order.total)
 
   if (pay.charge.amount !== total) {
-    logging.error('ERROR: Charge amounts dont match D:')
+    logging.error('ERROR: Charge amounts dont match D:', pay, total)
     return
   }
   // add special instructions
@@ -99,7 +93,8 @@ function * payDeliveryDotCom (pay) {
     'first_name': pay.order.convo_initiater.first_name,
     'last_name': pay.order.convo_initiater.last_name,
     'email': pay.order.convo_initiater.email,
-    'uhau_id': 'kipthis-dot-com'
+    'uhau_id': 'kipthis-dot-com',
+    'tip': pay.order.order.tip
   }
 
   // limit special delivery instructions to 100 char
@@ -116,18 +111,11 @@ function * payDeliveryDotCom (pay) {
   // for physical delivery
   if (pay.order.chosen_location.addr) {
     guestCheckout.street = pay.order.chosen_location.addr.address_1
-    //guestCheckout.instructions = pay.order.chosen_location.addr.address_2
     guestCheckout.unit = pay.order.chosen_location.addr.address_2 || ``
     guestCheckout.city = pay.order.chosen_location.addr.city
     guestCheckout.state = pay.order.chosen_location.addr.state
     guestCheckout.zip_code = pay.order.chosen_location.addr.zip_code
   }
-
-  // tip
-  guestCheckout.tip = pay.order.order.tip
-
-  logging.info('PAY OBJ ', pay)
-  logging.info('GUEST CHECKOUT OBJ ', guestCheckout)
 
   // pos to delivery
   try {
@@ -135,7 +123,7 @@ function * payDeliveryDotCom (pay) {
     pay.save()
     profOak.say(`paying for delivery.com for team:${pay.order.team_id} total amount: ${pay.order.order.total} with tip ${pay.delivery_post.tip}`)
     var response = yield payForItemFromKip(guestCheckout, pay.order.guest_token)
-    logging.info('Delivery.com Guest Checkout Res: ',response)
+    logging.info('Delivery.com Guest Checkout Res: ', response)
     pay.delivery_raw_response = response
     pay.save()
     return response
@@ -174,74 +162,6 @@ function * storeCard (pay, charge) {
     }
   })
   yield slackbot.save()
-}
-
-
-
-function * chargeById (payment) {
-  // make a charge by saved card ID
-  try {
-    profOak.say(`creating stripe charge for ${payment.order.saved_card.saved_card}`)
-    logging.info('creating charge by ID ')
-
-    // check for coupon
-    if (payment.order && payment.order.order && payment.order.order.coupon) {
-      var total = pay_utils.calCoupon(payment.order.order.total, payment.order.order.coupon)
-      total = Math.round(total)
-    } else {
-      total = Math.round(payment.order.order.total)
-    }
-
-    var charge = yield stripe.charges.create({
-      amount: total, // Amount in cents
-      currency: 'usd',
-      customer: payment.order.saved_card.customer_id, // Previously stored, then retrieved
-      card: payment.order.saved_card.card_id
-    })
-
-    profOak.say(`succesfully created new stripe charge for team: ${payment.order.team_id} in amount ${(total / 100.0).$}`)
-  } catch (err) {
-    logging.error('error in chargeById', err)
-  }
-
-  if (charge) {
-    payment.charge = charge
-    yield payment.save()
-  }
-
-  // fired on re-used cards charged ONLY
-  if (charge.status === 'succeeded') {
-    // POST TO MONGO QUEUE SUCCESS PAYMENT
-    try {
-      profOak.say(`succesfully paid for stripe for team ${payment.order.team_id}`)
-      profOak.say(`paying for delivery.com order for ${payment.order.team_id}`)
-
-      // complicated for testing purposes
-      if (!process.env.NODE_ENV) {
-        throw new Error('you need to run kip-pay with NODE_ENV')
-      } else if (process.env.NODE_ENV !== 'canary') {
-        profOak.say(`not on \`canary\`, so doing a fake charge.  test_success.`)
-        payment.delivery_response = 'test_success'
-        yield payment.save()
-      } else if (process.env.NODE_ENV === 'canary') {
-        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
-        profOak.say(`paid for delivery.com on \`canary\` for team:${payment.order.team_id}`)
-        yield payment.save()
-      } else {
-        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
-        profOak.say(`paid for delivery.com and not sure why since not on canary or not on not canary for team:${payment.order.team_id}`)
-        logging.error('paid for delivery but not on canary or not canary', payment)
-        yield payment.save()
-      }
-
-      yield onSuccess(payment)
-    } catch (err) {
-      logging.error('error after charging stripe but attempting to charge delivery.com', err)
-    }
-  } else {
-    logging.error('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
-    logging.error('OUTCOME: ', charge.outcome)
-  }
 }
 
 /*
@@ -287,7 +207,7 @@ function * onSuccess (payment) {
           data: {
             text: `Your order of ${foodString} is on the way 😊`,
             attachments: [{
-              image_url: "http://tidepools.co/kip/kip_menu.png",
+              image_url: 'http://tidepools.co/kip/kip_menu.png',
               text: 'Click a mode to start using Kip',
               color: '#3AA3E3',
               callback_id: 'wow such home',
@@ -296,7 +216,7 @@ function * onSuccess (payment) {
                 value: 'food',
                 text: 'Kip Café',
                 type: 'button'
-              },{
+              }, {
                 name: 'passthrough',
                 value: 'shopping',
                 text: 'Kip Store',
@@ -306,12 +226,13 @@ function * onSuccess (payment) {
           }
         })
     })
-    var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
+    var htmlForItem = `Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
+
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
-      htmlForItem += '<tr><td>'+foodInfo.name+'</td><td>'+descriptionString+'</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+'</td><td>'+user[0].real_name+'</td></tr>'
+      htmlForItem += `<tr><td>${foodInfo.name}</td><td>${descriptionString}</td><td>${menu.getCartItemPrice(item).toFixed(2)}</td><td>${user[0].real_name}+</td></tr>`
     })
 
     // send confirmation email to admin
@@ -331,24 +252,8 @@ function * onSuccess (payment) {
   }
 }
 
-/* calculate the amount that coupon results in
-* @param (Number) total
-* @param (Number) coupon percintage as decimal
-* @returns (Number) new total amount
-*/
-function calCoupon (total, coupon) {
-  var s = total * coupon
-  var t = total - s
-  // to reach minimum stripe charge of $0.50
-  if (t < 50) t = 50
-
-  return t
-}
-
 module.exports = {
   onSuccess: onSuccess,
-  chargeById: chargeById,
   payDeliveryDotCom: payDeliveryDotCom,
-  storeCard: storeCard,
-  calCoupon: calCoupon
+  storeCard: storeCard
 }

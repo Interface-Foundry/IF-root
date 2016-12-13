@@ -330,7 +330,7 @@ queue.topic('incoming').subscribe(incoming => {
       return
     }
 
-    if (isMenuChange(message)) { 
+    if (isMenuChange(message)) {
       timer.stop();
       incoming.ack()
       return yield shopping[_.get(message,'action')](message);

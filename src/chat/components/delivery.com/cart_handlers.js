@@ -1,11 +1,10 @@
 'use strict'
 
 var _ = require('lodash')
+var coupon = require('./payments.coupon.js')
 var Menu = require('./Menu')
-var Cart = require('./Cart')
 var api = require('./api-wrapper')
 
-var sleep = require('co-sleep')
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other methods
@@ -190,7 +189,6 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     yield foodSession.save()
   }
 
-
   //
   // Admin Order Dashboard
   //
@@ -268,7 +266,6 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     yield foodSession.save()
   }
 
-
   //
   // Move on to the TEAM CART (omigosh almost there)
   //
@@ -336,7 +333,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     }
   })
 
-  if (foodSession.tipPercent === 'cash') foodSession.tipAmount = 0.00
+  if (foodSession.tip.percent === 'cash') foodSession.tip_amount = 0.00
 
   try {
     var order = yield api.createCartForSession(foodSession)
@@ -346,13 +343,75 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       foodSession.markModified('order')
       yield foodSession.save()
 
-      if (foodSession.tipPercent !== 'cash') {
-        foodSession.tipAmount = (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
+      if (foodSession.tip.percent !== 'cash') {
+        foodSession.tip.amount = (Number(foodSession.tip.percent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
         foodSession.save()
       }
+
+      /*
+      --------- create/explain values here -----------------------
+      notes:
+      - service_fee = $.99 for kip
+      - subtotal = the subtotal from delivery.com for the items
+      - delivery_fee = delivery_fee from delivery.com
+      - convenience_fee = possible value from delivery.com
+      - order.discount_percent = discount from delivery.com, include as note on total/subtotal maybe
+      - taxes = taxes from order.taxes
+      - total = the total from delivery.com (subtotal + taxes - discount)
+      - tip = {
+          amount: fixed dollar amount with cents (calculated on the order.subtotal tho)
+          percent: string with value to use on order.total
+      }
+
+      - main_amount = (order.total + service_fee + taxes + tip + delivery_fee + convenience_fee)
+      - discount_amount = (main_amount) * tip.percent
+      - calculated_amount (total we are charging user) = main_amount - discount_amount
+
+      - calculated_amount will be the value passed to payments that is a value in cents
+      - tip.amount will be passed to payments as well for delivery.com payment.  its already included in calculated_amount so just leave it
+
+      -----
+      other:
+      dont let orders over 510 go through w/ 99% discount
+      order.subtotal will be incorrect if delivery.com is using built in discount (i.e. 10% off for 30$ or more)
+      possibly remove service fee from coupon stuff but do
+      */
+
+      // check if team has any hardcoded coupons
+      var discountAvail = _.find(coupon.couponTeams, function (discounts) {
+        return _.includes(discounts.teams, foodSession.team_id)
+      })
+
+      foodSession.main_amount = order.total + foodSession.service_fee + order.tax + order.delivery_fee + order.convenience_fee
+      if (discountAvail) {
+        // this is literally needed to prevent rounding errors
+        if (foodSession.coupon.used === false) {
+          foodSession.coupon.used = true
+          foodSession.coupon.percent = discountAvail.couponDiscount
+        }
+
+        foodSession.discount_amount = Number((Math.round(((discountAvail.couponDiscount * (foodSession.main_amount)) * 1000) / 10) / 100).toFixed(2))
+      } else {
+        foodSession.discount_amount = 0.00
+      }
+      foodSession.calculated_amount = Number((Math.round(((foodSession.main_amount - foodSession.discount_amount) * 1000) / 10) / 100).toFixed(2))
+
+      // check for order over $510 (pre coupon) not processing over $510 (pre coupon)
+      if (discountAvail.couponDiscount === 0.99 && foodSession.order.total > 510.00) {
+        $replyChannel.send(message, 'food.exit', {
+          type: message.origin,
+          data: {
+            'text': 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions'
+          }
+        })
+        return
+      }
+      yield foodSession.save()
+
+      // ----- done with the calculations of values
       var finalAttachment = {
-        text: `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
-        fallback: `*Total:* ${(foodSession.order.total + foodSession.tipAmount).$}`,
+        text: `*Order Total:* ${foodSession.calculated_amount.$}`,
+        fallback: `*Order Total:* ${foodSession.calculated_amount.$}`,
         callback_id: 'admin_order_confirm',
         color: '#49d63a',
         attachment_type: 'default',
@@ -373,7 +432,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       } else {
         finalAttachment.actions = [{
           'name': `food.admin.order.checkout.confirm`,
-          'text': `✓ Checkout ${(foodSession.order.total + foodSession.tipAmount).$}`,
+          'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
           'type': `button`,
           'style': `primary`,
           'value': `checkout`
@@ -391,7 +450,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       // }
       // ------------------------------------
       // tip attachment
-      var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount.toFixed(2)}`
+      var tipTitle = (foodSession.tip.percent === 'cash') ? `Will tip in cash` : `$${foodSession.tip.amount.toFixed(2)}`
       var tipAttachment = {
         'title': `Tip: ${tipTitle}`,
         'fallback': `Tip: ${tipTitle}`,
@@ -400,7 +459,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         'attachment_type': 'default',
         'mrkdwn_in': ['text'],
         'actions': [`15%`, `20%`, `25%`, `Cash`].map((t) => {
-          var baseTipButton = (foodSession.tipPercent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `￮ ${t}`
+          var baseTipButton = (foodSession.tip.percent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `￮ ${t}`
           return {
             'name': 'food.admin.cart.tip',
             'text': baseTipButton,
@@ -410,15 +469,24 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         })
       }
 
+      var deliveryDiscount = (_.get(foodSession, 'order.discount_percent') > 0.00) ? ` _Included ${foodSession.order.discount_percent * 100}% discount from delivery.com_` : ``
+      var convenienceFee = (_.get(foodSession, 'order.convenience_fee') > 0.00) ? ` _This restaurant also has a convience fee of ${foodSession.order.convenience_fee}_` : ``
+
       var infoAttachment = {
         fallback: 'Checkout Total',
-        text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
+        text: `*Cart Subtotal:* ${foodSession.order.subtotal.$}${deliveryDiscount}\n` +
               `*Taxes:* ${foodSession.order.tax.$}\n` +
-              `*Tip:* ${foodSession.tipAmount.$}\n`,
+              `*Delivery Fee:* ${foodSession.order.delivery_fee.$}${convenienceFee}\n` +
+              `*Service Fee:* ${foodSession.service_fee.$}\n` +
+              `*Tip:* ${foodSession.tip.amount.$}\n`,
         'callback_id': 'food.admin.cart.info',
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'mrkdwn_in': ['text']
+      }
+
+      if (discountAvail) {
+        infoAttachment.text += `\n*Coupon:* -${foodSession.discount_amount.$}`
       }
 
       if (foodSession.instructions) {
@@ -473,15 +541,13 @@ handlers['food.order.instructions.submit'] = function * (message) {
   return yield handlers['food.admin.order.confirm'](msg)
 }
 
-
-
 handlers['food.member.order.view'] = function * (message) {
   // would be S12 stuff for just member here
 }
 
 handlers['food.admin.cart.tip'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  foodSession.tipPercent = message.source.actions[0].value
+  foodSession.tip.percent = message.source.actions[0].value
   yield foodSession.save()
   yield handlers['food.admin.order.confirm'](message, true)
 }

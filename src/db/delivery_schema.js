@@ -87,11 +87,32 @@ var deliverySchema = mongoose.Schema({
   },
   delivery_post: {},
   order: {}, // info after adding items to cart
-  tipPercent: {
-    type: String,
-    default: `15%`
+  tip: {
+    amount: {
+      type: Number
+    },
+    percent: {
+      type: String,
+      default: `15%`
+    }
   },
-  tipAmount: Number,
+  service_fee: {
+    type: Number,
+    default: 0.99
+  },
+
+  coupon: {
+    percent: {
+      type: Number
+    },
+    used: {
+      default: false,
+      type: Boolean
+    }
+  },
+  main_amount: Number,
+  calculated_amount: Number,
+  discount_amount: Number,
   payment_post: {}, // post body for payment (i.e. select or add new card)
   payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later
