@@ -38,7 +38,7 @@ var Messages = db.Messages;
 
 var ObjectId = require('mongodb').ObjectID;
 
-// require('../chat/components/delivery.com/scrape_menus.js');
+require('../chat/components/delivery.com/scrape_menus.js');
 
 //handle post request with a binder full of data
 app.post('/cafe', (req, res) => co(function * () {
@@ -54,15 +54,12 @@ app.post('/cafe', (req, res) => co(function * () {
   var result = yield Menu.findOne({merchant_id: rest_id});
 
   console.log('menu found')
-  // console.log(rest_id)
 
-  // console.log('result:', result)
   ms.menu.data = result.raw_menu.menu;
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.userId = req.body.user_id;
   ms.merchant.id = rest_id;
   var merchant = yield Merchants.findOne({id: rest_id});
-  // console.log('merchant', merchant)
   ms.merchant.name = merchant.data.summary.name;
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
   console.log('ms', ms);
@@ -123,7 +120,7 @@ app.post('/order', function (req, res) {
       }).sort('-ts').limit(1);
 
       foodMessage = foodMessage[0];
-      
+
       var mess = new Messages({
         incoming: true,
         thread_id: foodMessage.thread_id,
