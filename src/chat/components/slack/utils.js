@@ -10,7 +10,7 @@ var kipcart = require('../cart');
 var queue = require('../queue-mongo');
 var cron = require('cron');
 var sleep = require('co-sleep');
-
+var cardTemplate = require('./card_templates');
 
 /*
 *
@@ -565,27 +565,26 @@ function * sendLastCalls(message) {
             "color": "#45a5f4",
             "mrkdwn_in": ["text"]
         }];
+        // attachment.concat(cardTemplate.slack_shopping_mode);
         var msg = new db.Message(message);
         msg.mode = 'settings';
-        msg.text = '';
         msg.action = 'home';
-        msg.execute = [ { 
-          "mode": "shopping",
-          "action": "switch",
-          "_id": message._id
-        }];
-        msg.reply = attachment;
+        msg.text = '';
         msg.source.team = team.team_id;
         msg.source.channel = m.dm; 
+        msg.user_id = m.id;
+        msg.thread_id = m.dm;
+        // msg.source.user = m.id;
+        msg.reply = attachment;
         yield msg.save();
         yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.lastcall'); 
-        // yield sleep(500);
-        var msg2 = new db.Message(message);
+        yield sleep(1000)
+        var msg2 = msg;
         msg2.mode = 'shopping';
         msg2.action = 'switch';
-        msg2.text = ''
-        yield msg2.save();
-        yield queue.publish('outgoing.' + message.origin, msg2, msg2._id + '.reply.lastcall'); 
+        yield msg2.save()
+        kip.debug(' \n\n\n\n\n\n\n\n  LEGALIZE RANCH: ', msg, msg2, ' \n\n\n\n\n\n\n\n ')
+        yield queue.publish('outgoing.' + message.origin, msg2, msg2._id + '.reply.shopping.switch'); 
 
     })
   });
