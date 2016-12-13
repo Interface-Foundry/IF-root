@@ -731,7 +731,7 @@ function * updateCron(message, jobs, when, type) {
     team.meta.weekly_status_timezone);
 
     //Set cron job for admin cart status updates -- currently one hour after
-    jobs[currentUser.user_id] = new cron.CronJob( date2, function  () {
+    jobs[currentUser.user_id] = new cron.CronJob( date, function  () {
        co(sendCartToAdmins(message,team));
     }, function() {
       kip.debug('\n\n\n\n ran cron job for admin: ' + team.team_id + ' ' + team.team_name + date + '\n\n\n\n');

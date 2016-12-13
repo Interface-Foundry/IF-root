@@ -2,8 +2,6 @@ var processData = require('../process');
 
 module.exports = function*(message, slackbot, highlight_added_item) {
   var cart = message.data;
-     kip.debug(' \n\n\n\n\n\n YOLOcart: ', cart, ' \n\n\n\n\n\n ');
-
   // admins have special rights
   var isAdmin = slackbot.meta.office_assistants.indexOf(message.source.user) >= 0;
   var isP2P = slackbot.meta.office_assistants.length === 0;
@@ -18,10 +16,6 @@ module.exports = function*(message, slackbot, highlight_added_item) {
 
   // all the messages which compose the cart
   var cartObj = [];
-
-  if (!(cart.aggregate_items && cart.aggregate_items.length > 0)) {
-    cart.aggregate_items = cart.items;
-  }
 
   //add mode sticker
   cartObj.push({
