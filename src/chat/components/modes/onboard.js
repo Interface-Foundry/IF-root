@@ -249,6 +249,7 @@ handlers['lunch'] = function * (message) {
   var msg = message;
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var banner
   msg.mode = 'food'
   msg.action = 'begin'
   msg.source.team = team_id;
@@ -513,8 +514,8 @@ handlers['team'] = function * (message) {
       }
   });
   var chunkedButtons = _.chunk(buttons, 5);
-    
-  attachments.push({text: '*Step 3:* Choose the channels you want to include: ', mrkdwn_in: ['text'],
+
+  attachments.push({text: '*Step 3* Choose the channels you want to include: ', mrkdwn_in: ['text'],
     color: '#A368F0', actions: chunkedButtons[0], callback_id: "none"});
   chunkedButtons.forEach((ele, i) => {
     if (i != 0) {
@@ -550,13 +551,18 @@ handlers['reminder'] = function(message) {
     return kip.debug('incorrect team id : ', message);
   }
   var attachments = [{
-    text: 'Awesome! I\'ve let them know\nWould you like to set a reminder for collecting shopping orders from your team?',
+    text: 'Awesome! I\'ve let them know. ',
     color: '#45a5f4',
+    mrkdwn_in: ['text']
+  }];
+  attachments.push({
+    text: '*Step 4:* Set a reminder for collecting shopping orders from your team:',
     mrkdwn_in: ['text'],
+    color: '#A368F0',
     fallback: 'Onboard',
     actions: cardTemplate.cart_reminder,
     callback_id: 'none'
-  }];
+  });
   attachments.push({
     text: '',
     mrkdwn_in: ['text'],

@@ -219,7 +219,7 @@ class PicStitch:
                    self.config['PIC_COORDS']['y']))
 
         # post text
-        last_y = 5
+        last_y = 0
         # change from: 5
 
         print (self.config['TEXTBOX_COORDS'])
@@ -266,9 +266,42 @@ class PicStitch:
         if self.origin in ['skype', 'facebook']:
             last_y = last_y + 10
 
+
+
+        if not 'num_ratings' in self.img_req['summary']:
+            self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+
+
+        #yelp vs. delivery.com ratings
+        #we should probably show whatever one has better rating
+
+        if 'yelp_rating' in self.img_req and 'review_count' in self.img_req['yelp_rating'] and 'rating' in self.img_req['yelp_rating']:
+            #use yelp rating
+            print('USING YELP')
+
+            # #if no reviews, set to zero
+            # if not 'num_ratings' in self.img_req['summary']:
+            #     self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+
+            review_count = self.img_req['yelp_rating']['review_count']
+            rating = self.img_req['yelp_rating']['rating']
+
+        elif 'summary' in self.img_req and 'star_ratings' in self.img_req['summary'] and 'num_ratings' in self.img_req['summary']:
+            #use delivery.com rating
+            print('USING DELIVERY.COM')
+
+            #if no reviews, set to zero
+            # if not 'num_ratings' in self.img_req['summary']:
+            #     self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+
+            review_count = self.img_req['summary']['num_ratings']
+            rating = self.img_req['summary']['star_ratings']            
+
+
         # draw - (Review Number)
-        if 'summary' in self.img_req and 'star_ratings' in self.img_req['summary']:
-            image_revs_rating = self.img_req['summary']['star_ratings']
+        if review_count > 0:
+      
+            image_revs_rating = rating
             if image_revs_rating <= 0.5:  # ignoring if 0.0 < rating
                 selectRating = 0.5
             elif image_revs_rating <= 1.0:
@@ -297,11 +330,10 @@ class PicStitch:
                       mask=self.review_stars_images[selectRating])
 
             # make number count in blue to right of stars
-            if 'num_ratings' in self.img_req['summary']:
-                draw.text((x + 80, last_y - 2),
-                          ' - ' + str(self.img_req['summary']['num_ratings']),
-                          font=self.config['review_count_font'],
-                          fill="#2d70c1")
+            draw.text((x + 80, last_y - 2),
+                      ' - ' + str(review_count),
+                      font=self.config['review_count_font'],
+                      fill="#2d70c1")
             last_y = last_y + 18
 
         # #fake reviews for skype!! lmao <--- uhhh
@@ -352,8 +384,12 @@ class PicStitch:
                            font=self.config['font2'],
                            fill='#37a936')
             else:
-                draw.text((x + 89, last_y + 4),
-                           '$' + str(delivery_charge),
+                draw.text((x + 90, last_y + 4),
+                           '$' + str("{0:.2f}".format(delivery_charge)),
+                           font=self.config['font2'],
+                           fill='#37a936')
+                draw.text((x + 89, last_y + 20),
+                           'Delivery Fee',
                            font=self.config['font2'],
                            fill='#37a936')
         ## if 'Size' in self.img_req['name']:
@@ -385,9 +421,9 @@ class PicStitch:
     def make_image_configs(self):
         logging.debug('using self._make_image_configs')
         config = {}
-        config['CHAT_WIDTH'] = 345
-        config['CHAT_HEIGHT'] = 120
-        config['PADDING'] = 5
+        config['CHAT_WIDTH'] = 324
+        config['CHAT_HEIGHT'] = 110
+        config['PADDING'] = 0
         config['BGCOLOR'] = 'white'
         config['length'] = 3
         config['biggest_width'] = 0
@@ -400,7 +436,7 @@ class PicStitch:
         #                       {'x': 24, 'y': 174},
         #                       {'x': 24, 'y': 336}]
         # where to draw choice numbers
-        config['TEXTBOX_COORDS'] = {'x': 150, 'y': 7}
+        config['TEXTBOX_COORDS'] = {'x': 150, 'y': 0}
         #                           {'x': 190, 'y': 174},
         #                           {'x': 190, 'y': 336}]
 

@@ -6,6 +6,8 @@ var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
 
+var popoutUrl = 'http://localhost:8001/cafe';
+
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other files
@@ -132,7 +134,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   //creates a url for the pop-out menu
   function getUrl (rest_id, team_id, delivery_ObjectId, user_id) {
     return rp({
-      url: 'http://localhost:8001/cafe',
+      url: popoutUrl,
       method: 'POST',
       json: {
         rest_id: rest_id,

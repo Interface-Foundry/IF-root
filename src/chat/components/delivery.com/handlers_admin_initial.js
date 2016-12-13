@@ -145,7 +145,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   })
 
   // if user sent in public channel, switch to DMing them
-  if (_.includes(team.meta.all_channels, message.source.channel)) {
+  if (team.meta.all_channels.filter(c => c.id === message.source.channel).length >= 1) {
     logging.debug('sent in public channel, use that persons DM')
     yield $replyChannel.send(message, 'food.admin.select_address', {
       type: message.origin,

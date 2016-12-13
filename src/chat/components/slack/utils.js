@@ -8,6 +8,8 @@ var jstz = require('jstz');
 var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
 var queue = require('../queue-mongo');
+var cron = require('cron');
+var sleep = require('co-sleep');
 
 
 /*
@@ -30,12 +32,14 @@ function * initializeTeam(team, auth) {
  team.meta.addedBy = typeof team.meta.addedBy == 'string' ? team.meta.addedBy : auth.user_id;
  var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
  res_chan = JSON.parse(res_chan);
+ debugger;
  if (!(team.meta.cart_channels && team.meta.cart_channels.length > 0)) {
   var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
   team.meta.cart_channels.push(generalChannel.id);
  }
  team.meta.office_assistants = _.uniq(team.meta.office_assistants);
- team.meta.all_channels = res_chan.channels.map(c => {return c.id});
+ debugger;
+ team.meta.all_channels = res_chan.channels.map(c => _.pick(c, 'id', 'name', 'is_channel'));
  team.markModified('meta.cart_channels');
  team.markModified('meta.all_channels');
  team.markModified('meta.office_assistants');
@@ -198,8 +202,8 @@ function * refreshAllChannels (slackbot) {
   var botGroupArray = yield slackbot.web.groups.list()
   var botsChannels = botChannelArray.channels.concat(botGroupArray.groups)
   logging.info(`adding ${botsChannels.length} to slackbots.meta`)
-  slackbot.slackbot.meta.all_channels = botsChannels.map((channel) => {
-    return channel.id
+  slackbot.slackbot.meta.all_channels = botsChannels.filter(c => !c.is_archived).map((channel) => {
+    return _.pick(channel, 'id', 'name', 'is_channel')
   })
   yield slackbot.slackbot.save()
 }
@@ -457,6 +461,14 @@ function * getAllChannels (slackbot) {
   yield slackbot.slackbot.save()
 }
 
+/*
+*
+* CRON Jobs
+*
+*/
+
+
+
 
 /*
 *
@@ -486,19 +498,15 @@ function * showLoading(message) {
   var json = message.source.original_message;
     if (!json) {
      var msg = new db.Message(message);
-     msg.mode = 'banter';
-     msg.action = 'reply';
+     msg.mode = 'loading';
+     msg.action = 'show'
      msg.text = '';
-     msg.reply = {
-      icon_url: 'http://kipthis.com/img/kip-icon.png',
-      username: 'Kip',
-      attachments: [{
+     msg.reply = [{
         text: 'Searching...',
         color: '#45a5f4'
-      }]
-     };
+      }];
      yield msg.save()
-     return yield queue.publish('outgoing.slack', msg, msg._id + '.reply.results')
+     return yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.results');
     }
     json.attachments.push({
         fallback: message.action,
@@ -518,6 +526,15 @@ function * hideLoading(message) {
     var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
     var relevantMessage = history[0];
     var json =  message.reply;
+    if (!message.source.original_message) {
+     var msg = new db.Message(message);
+     msg.mode = 'loading';
+     msg.action = 'hide';
+     msg.text = '';
+     msg.data =  {hide_ts: relevantMessage.ts};
+     yield msg.save()
+     return yield queue.publish('outgoing.' + msg.origin, msg, msg._id + '.reply.results')
+    }
     message.source.original_message.attachments.splice(-1,1);
      request({
       method: 'POST',
@@ -526,6 +543,123 @@ function * hideLoading(message) {
     });
     return
 }
+
+
+function * sendLastCalls(message) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  var replies = [];
+  yield team.meta.cart_channels.map( function * (c) {
+    var channelMembers = yield getChannelMembers(team, c);
+    yield channelMembers.map( function * (m) {
+      var attachment = [{
+            "fallback": "Last Call",
+            "text":'',
+            "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
+            "color": "#45a5f4",
+            "mrkdwn_in": ["text"]
+        },{
+            "fallback": "Last Call",
+            "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.',
+            "color": "#45a5f4",
+            "mrkdwn_in": ["text"]
+        }];
+        var msg = new db.Message(message);
+        msg.mode = 'settings';
+        msg.text = '';
+        msg.action = 'home';
+        msg.execute = [ { 
+          "mode": "shopping",
+          "action": "switch",
+          "_id": message._id
+        }];
+        msg.reply = attachment;
+        msg.source.team = team.team_id;
+        msg.source.channel = m.dm; 
+        yield msg.save();
+        yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.lastcall'); 
+        // yield sleep(500);
+        var msg2 = new db.Message(message);
+        msg2.mode = 'shopping';
+        msg2.action = 'switch';
+        msg2.text = ''
+        yield msg2.save();
+        yield queue.publish('outgoing.' + message.origin, msg2, msg2._id + '.reply.lastcall'); 
+
+    })
+  });
+};
+
+function * sendCartToAdmin(message) {
+ 
+};
+
+
+function * updateCron(message, jobs, when, type) {
+   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+   var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+   var interval = _.get(team, 'meta.status_interval');
+   var date;
+    if (jobs[team.team_id]) {
+      jobs[team.team_id].stop();
+    }
+    if (type == 'never') {
+      delete jobs[team.team_id];
+      return
+    } else if (type == 'time' && interval != 'daily') {
+      var date = (interval == 'weekly' || interval == 'daily') ? '*' : _.get(team, 'meta.weekly_status_date');
+      var weekday = (interval == 'monthly' || interval == 'daily') ? '*' : getDayNum(_.get(team, 'meta.weekly_status_day')).toString();
+      date = '00 ' + when.minutes + ' ' + when.hour + ' ' + date +  ' * ' + weekday;
+    } else if (type == 'time' && interval == 'daily') {
+      date = '00 ' + when.minutes + ' ' + when.hour  + ' * * *';
+    } else if (type == 'day') {
+      date = '00 ' + when.minutes + ' ' + when.hour  + ' * * ' + when.day;
+    } else if (type == 'date') {
+      date = '00 ' + when.minutes + ' ' + when.hour  + ' ' + when.date + ' * *';
+    } else {
+      date = when;
+    }
+    kip.debug('\n\n\n\n\n\n setting cron job : ', type, date,'\n\n\n\n\n\n')
+
+    jobs[team.team_id] = new cron.CronJob( date, function  () {
+       co(sendLastCalls(message));
+    }, function() {
+      kip.debug('\n\n\n\n ran cron job for team: ' + team.team_id + ' ' + team.team_name + date + '\n\n\n\n');
+    },
+    true,
+    team.meta.weekly_status_timezone);
+};
+
+
+
+function getDayNum(string) {
+  switch(string.toLowerCase()) {
+    case 'sunday':
+     return 0
+     break;
+    case 'monday':
+     return 1
+     break;
+    case 'tuesday':
+     return 2
+     break;
+    case 'wednesday':
+     return 3
+     break;
+    case 'thursday':
+     return 4
+     break;
+    case 'friday':
+     return 5
+     break;
+    case 'saturday':
+     return 6
+     break;
+  }
+}
+
 
 
 module.exports = {
@@ -545,5 +679,8 @@ module.exports = {
   isAdmin: isAdmin,
   generateMenuButtons: generateMenuButtons,
   showLoading: showLoading,
-  hideLoading: hideLoading
+  hideLoading: hideLoading,
+  updateCron: updateCron,
+  sendLastCalls: sendLastCalls,
+  getDayNum: getDayNum
 }

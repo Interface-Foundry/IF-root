@@ -268,6 +268,7 @@ app.post('/slackaction', next(function * (req, res) {
       });
     }
     else if (buttonData) {
+        kip.debug(' \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n  BUTTODATA:', buttonData,'  \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n')
       var message = new db.Message({
         incoming: true,
         thread_id: parsedIn.channel.id,

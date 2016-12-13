@@ -76,7 +76,12 @@ function * handleMessage (message) {
 
   var route = yield getRoute(message)
 
-  if (message.text && message.mode === 'food' || message.mode === 'cafe') {
+  if (!message.mode) {
+    message.mode = 'food';
+    message.action = 'exit.confirm';
+  }
+
+  if (message.text && message.mode.toLowerCase().trim() === 'food' || message.mode === 'cafe') {
     // if user types something allow the text_matching flag which we can use
     // in some handlers: cuisine picking, restaurant picking, item picking
     message.allow_text_matching = true
@@ -90,6 +95,17 @@ function * handleMessage (message) {
     yield handlers[route](message)
   } else {
     kip.error('No route handler for ' + route)
+    if (route === 'food.results') {
+      // ppl are getting stuck here for some reasonf
+      var newMessage = new db.Message({
+        source: message.source,
+        text: 'exit',
+        mode: 'food',
+        action: 'exit.confirm'
+      })
+      yield newMessage.save()
+      queue.publish('incoming', message, ['slack', 'delivery.com.exit', Math.random().toString(32).slice(2)].join('.'))
+    }
   }
   message.save()
 }
@@ -100,8 +116,9 @@ function * handleMessage (message) {
 function getRoute (message) {
   kip.debug(`prevRoute ${message.prevRoute}`)
   return co(function * () {
+    var text = (message.text || '').toLowerCase().trim()
     // allow people to type food in cuisine selection and it not ruin the order
-    if ((message.text === 'food' || message.text === 'cafe') && (message.action !== 'admin.restaurant.pick')) {
+    if ((text === 'food' || text === 'cafe') && (message.action !== 'admin.restaurant.pick')) {
       kip.debug('### User typed in :' + message.text)
       return 'food.begin'
     } else if (handlers[message.text]) {

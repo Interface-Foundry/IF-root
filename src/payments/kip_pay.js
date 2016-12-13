@@ -21,8 +21,8 @@ require('../kip')
 require('../logging')
 var payConst = require('./pay_const.js')
 
-const kipPayURL = kip.config.kipPayURL
 // base URL for pay.kipthis.com linking
+const kipPayURL = kip.config.kipPayURL
 
 if (!process.env.NODE_ENV) {
   throw new Error('you need to run kip-pay with NODE_ENV')
@@ -51,10 +51,8 @@ var app = express()
 var jsonParser = bodyParser.json()
 
 // import kip cc
-var pay_utils = require('./pay_utils.js')
-
-// kip emailer
-var mailer_transport = require('../mail/IF_mail.js')
+var payUtils = require('./pay_utils.js')
+var coupon = require('./coupon.js')
 
 // tracking for food into cafe-tracking
 var Professor = require('../monitoring/prof_oak.js')
@@ -64,7 +62,6 @@ var profOak = new Professor.Professor('C33NU7FRC')
 // --------------------------------------------
 var queue = require('../chat/components/queue-mongo')
 var UserChannel = require('../chat/components/delivery.com/UserChannel')
-var Menu = require('../chat/components/delivery.com/Menu')
 var replyChannel = new UserChannel(queue)
 // --------------------------------------------
 
@@ -81,68 +78,18 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
   if ((_.get(req, 'body.kip_token') === kipSecret) && _.get(req, 'body.order.total')) {
     var body = req.body
 
-    // logging.info('BODY INCOMING ',body)
+    // get coupon %
+    body = yield coupon.getCoupon(body)
 
-    // COUPONS
-    if (body.team_id === 'T2X0BLHGX') { // alyx testing team
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T02PN3B25') { // kipsearch team
-
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T02QUPKHW') { // quibb team
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T1198BQV8') { // message.io team
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T3AHPU2N9') { // eden tester
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T3BCG4CP4') { // woodside friends
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T3AM3RZSL') { // vegan house
-      body.order.coupon = 0.99 // in percentage off
-    }
-
-    //phase 2
-    else if (body.team_id === 'T3AN3CDJ5') { // Berkshire Inc.
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T024F5PNW') { // Betaworks
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T2U751DHD') { // Marketing605
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T3BCWK9MG') { // Tawa
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T3BBJ9Y2F') { // Reel Memoriez Photography
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T22RW4CUR') { // New School Anime Club
-      body.order.coupon = 0.99 // in percentage off
-    }
-    else if (body.team_id === 'T1A2KS6KH') { // TOPBOTS
-      body.order.coupon = 0.99 // in percentage off
-    }
-
-
-    //check for order over $510 (pre coupon)
-    if (body.order.coupon == 0.99){
-      //not processing over $510 (pre coupon)
-      if (body.order.total > 51000){
-        var v = {
-          msg: 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions',
-          newAcct: false,
-          processing: false
-        }
-        res.status(500).send(v)
-        return
+    // check for order over $510 (pre coupon) not processing over $510 (pre coupon)
+    if (body.order.coupon === 0.99 && body.order.total > 51000) {
+      var v = {
+        msg: 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions',
+        newAcct: false,
+        processing: false
       }
+      res.status(500).send(v)
+      return
     }
 
     // new payment
@@ -160,7 +107,7 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
       logging.info('using saved card')
       // we have card to charge
       if (body.saved_card.card_id) {
-        yield chargeById(payment)
+        yield payUtils.chargeById(payment)
         logging.info('SAVED CHARGE RESULT ')
 
         var v = {
@@ -207,7 +154,7 @@ app.post('/session', jsonParser, (req, res) => co(function * () {
 
       // check for coupon
       if (pay.order && pay.order.order && pay.order.order.coupon) {
-        pay.order.order.total = pay_utils.calCoupon(pay.order.order.total, pay.order.order.coupon)
+        pay.order.order.total = payUtils.calCoupon(pay.order.order.total, pay.order.order.coupon)
       }
 
       res.send(JSON.stringify(pay))
@@ -238,15 +185,19 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
         source: token,
         description: 'Delivery.com & Kip: ' + payment.order.team_id
       })
+    } catch (err) {
+      logging.error('error creating stripe.customers.create', err)
+    }
 
-      // check for coupon
-      if (payment.order && payment.order.order && payment.order.order.coupon) {
-        var total = pay_utils.calCoupon(payment.order.order.total, payment.order.order.coupon)
-        total = Math.round(total)
-      } else {
-        total = Math.round(payment.order.order.total)
-      }
+    // check for coupon
+    if (payment.order && payment.order.order && payment.order.order.coupon) {
+      var total = payUtils.calCoupon(payment.order.order.total, payment.order.order.coupon)
+      total = Math.round(total)
+    } else {
+      total = Math.round(payment.order.order.total)
+    }
 
+    try {
       var charge = yield stripe.charges.create({
         amount: total,
         currency: 'usd',
@@ -254,7 +205,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
       })
       profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(total / 100.0).$}`)
     } catch (err) {
-      logging.error('had an error creating customer and card', err)
+      logging.error('error creating charge in stripe.charges.create', err)
     }
 
     payment.charge = charge
@@ -266,23 +217,29 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
         // complicated for testing purposes
         if (!process.env.NODE_ENV) {
           throw new Error('you need to run kip-pay with NODE_ENV')
-        } else if (process.env.NODE_ENV !== 'canary') {
-          payment.delivery_response = 'test_success'
-          // payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
-          yield payment.save()
         } else if (process.env.NODE_ENV === 'canary') {
-          payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
+          // if canary we actually submit
           profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
-          yield payment.save()
-        } else {
-          payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
-          profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
-          yield payment.save()
+          payment.delivery_response = yield payUtils.payDeliveryDotCom(payment)
+        } else if (process.env.NODE_ENV !== 'canary') {
+          // if its not canary we are running locally or on another system to test
+          profOak.say(`we are doing a test order im assuming for team:${payment.order.team_id}`)
+          payment.delivery_response = 'test_success'
         }
+        yield payment.save()
+      } catch (err) {
+        logging.error('error trying to storeCard', err)
+      }
 
-        yield pay_utils.storeCard(payment, charge)
+      // store card since its presumably new
+      try {
+        yield payUtils.storeCard(payment, charge)
+      } catch (err) {
+        logging.error('error trying to storeCard', err)
+      }
 
-        // look up user and the last message sent to us in relation to this order
+      // look up user and the last message sent to us in relation to this order
+      try {
         var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
         foodSession.order['completed_payment'] = true
         yield foodSession.save()
@@ -300,15 +257,19 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
               text: 'Your order was successful and you should receive an email from `Delivery.com` soon!'
             }
           })
+      } catch (err) {
+        logging.error('error trying to send message to user', err)
+      }
 
+      try {
         // send success messages to order members
-        yield onSuccess(payment)
-
+        yield payUtils.onSuccess(payment)
         profOak.say(`order completed for team: ${payment.order.team_id}`)
       } catch (err) {
-        logging.error('woah shit we just charged money but had an issue paying delivery.com', err)
+        logging.error('error onSuccess of payment', err)
       }
     } else {
+      profOak.say('if statement for status===succeeded failed, might want to check logs @graham')
       logging.error('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
       logging.error('OUTCOME: ', charge.outcome)
       logging.error('total error related to ', charge)
@@ -317,164 +278,6 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
     res.status(500).send('charge token missing')
   }
 }))
-
-function * chargeById (payment) {
-  // make a charge by saved card ID
-  try {
-    profOak.say(`creating stripe charge for ${payment.order.saved_card.saved_card}`)
-    logging.info('creating charge by ID ')
-
-    // check for coupon
-    if (payment.order && payment.order.order && payment.order.order.coupon) {
-      var total = pay_utils.calCoupon(payment.order.order.total, payment.order.order.coupon)
-      total = Math.round(total)
-    } else {
-      total = Math.round(payment.order.order.total)
-    }
-
-    var charge = yield stripe.charges.create({
-      amount: total, // Amount in cents
-      currency: 'usd',
-      customer: payment.order.saved_card.customer_id, // Previously stored, then retrieved
-      card: payment.order.saved_card.card_id
-    })
-
-    profOak.say(`succesfully created new stripe charge for team: ${payment.order.team_id} in amount ${(total / 100.0).$}`)
-  } catch (err) {
-    logging.error('error in chargeById', err)
-  }
-
-  if (charge) {
-    payment.charge = charge
-    yield payment.save()
-  }
-
-  // fired on re-used cards charged ONLY
-  if (charge.status === 'succeeded') {
-    // POST TO MONGO QUEUE SUCCESS PAYMENT
-    try {
-      profOak.say(`succesfully paid for stripe for team ${payment.order.team_id}`)
-      profOak.say(`paying for delivery.com order for ${payment.order.team_id}`)
-
-      // complicated for testing purposes
-      if (!process.env.NODE_ENV) {
-        throw new Error('you need to run kip-pay with NODE_ENV')
-      } else if (process.env.NODE_ENV !== 'canary') {
-        profOak.say(`not on \`canary\`, so doing a fake charge.  test_success.`)
-        payment.delivery_response = 'test_success'
-        yield payment.save()
-      } else if (process.env.NODE_ENV === 'canary') {
-        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
-        profOak.say(`paid for delivery.com on \`canary\` for team:${payment.order.team_id}`)
-        yield payment.save()
-      } else {
-        payment.delivery_response = yield pay_utils.payDeliveryDotCom(payment)
-        profOak.say(`paid for delivery.com and not sure why since not on canary or not on not canary for team:${payment.order.team_id}`)
-        logging.error('paid for delivery but not on canary or not canary', payment)
-        yield payment.save()
-      }
-
-      yield onSuccess(payment)
-    } catch (err) {
-      logging.error('error after charging stripe but attempting to charge delivery.com', err)
-    }
-  } else {
-    logging.error('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
-    logging.error('OUTCOME: ', charge.outcome)
-  }
-}
-
-/*
-* communicate to user and tie up all things
-* @param {Object} payment object
-*/
-function * onSuccess (payment) {
-  try {
-    // look up user and the last message sent to us in relation to this order
-    var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
-    var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
-    finalFoodMessage = finalFoodMessage[0]
-    var menu = Menu(foodSession.menu)
-    // send message to all the ppl that ordered food
-    foodSession.confirmed_orders.map(userId => {
-      var user = _.find(foodSession.team_members, {id: userId}) // find returns the first one
-
-      var msg = _.merge({}, finalFoodMessage, {
-        thread_id: user.dm,
-        source: {
-          user: user.id,
-          team: foodSession.team_id,
-          channel: user.dm
-        }
-      })
-
-      var itemNames = foodSession.cart
-        .filter(i => i.user_id === userId && i.added_to_cart)
-        .map(i => menu.getItemById(i.item.item_id).name)
-        .map(name => '*' + name + '*') // be bold
-
-      if (itemNames.length > 1) {
-        var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
-      } else {
-        foodString = itemNames[0]
-      }
-
-      replyChannel.send(
-        msg,
-        'food.payment_info',
-        {
-          type: finalFoodMessage.origin,
-          data: {
-            text: `Your order of ${foodString} is on the way 😊`,
-             attachments: [{
-              image_url: "http://tidepools.co/kip/kip_menu.png",
-              text: 'Click a mode to start using Kip',
-              color: '#3AA3E3',
-              callback_id: 'wow such home',
-              actions: [{
-                name: 'passthrough',
-                value: 'food',
-                text: 'Kip Café',
-                type: 'button'
-              },{
-                name: 'passthrough',
-                value: 'shopping',
-                text: 'Kip Store',
-                type: 'button'
-              }]
-            }]
-          }
-        })
-
-    })
-    var htmlForItem = 'Thank you for your order. Here is the list of items.\n<table style="margin-top:1em;" border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>'
-    var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
-      var foodInfo = menu.getItemById(String(item.item.item_id))
-      var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
-      var user = foodSession.team_members.filter(j => j.id === item.user_id)
-      logging.info('USER', user);
-      htmlForItem += '<tr><td>'+foodInfo.name+
-      '</td><td>'+descriptionString+
-      '</td><td>$'+menu.getCartItemPrice(item).toFixed(2)+
-      '</td><td><p>'+user[0].real_name+'</p><p>@' + user[0].name + '</p></td></tr>'
-    })
-
-    // send confirmation email to admin
-    var mailOptions = {
-      to: '' + foodSession.convo_initiater.name + ' <' + foodSession.convo_initiater.email + '>',
-      from: 'Kip Café <hello@kipthis.com>',
-      subject: 'Kip Café Order Receipt for ' + foodSession.chosen_restaurant.name,
-      html: htmlForItem+'</thead></table>'
-    }
-
-    logging.info(mailOptions)
-    mailer_transport.sendMail(mailOptions, function (err) {
-      if (err) logging.error(err)
-    })
-  } catch (err) {
-    logging.error('on success messages broke', err)
-  }
-}
 
 var port = process.env.PORT || 8080
 app.listen(port, function () {

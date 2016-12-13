@@ -49,7 +49,11 @@ var item = mongoose.Schema({
 
   bundle: String,
 
-  available: Boolean
+  available: Boolean,
+
+  asins: String, // stringified list of asins and their respective options
+  
+  config: String // strigified list of options on an amazon item
 
 })
 

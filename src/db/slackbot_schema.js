@@ -37,6 +37,13 @@ var slackbotSchema = mongoose.Schema({
       default: false
     },
     office_assistants: [String], // user ids of the office assistants, like U0R6H9BKN
+    status_interval: {
+      type: String,
+      enum: ['daily', 'weekly', 'monthly', 'never'],
+      default: 'weekly'
+    },
+    cron_jobs: {},
+    //no longer weekly per se but keeping it for now
     weekly_status_enabled: {
       type: Boolean,
       default: true
@@ -45,6 +52,9 @@ var slackbotSchema = mongoose.Schema({
       type: String,
       enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
       default: 'Friday'
+    },
+    weekly_status_date: {
+      type: Number,
     },
     weekly_status_time: {
       type: String,
@@ -57,7 +67,14 @@ var slackbotSchema = mongoose.Schema({
     city: {
       type: String
     },
-    all_channels: [String],
+    all_channels: [{
+      id: String,
+      name: String,
+      is_channel: { // if a group its different from a channel
+        type: Boolean,
+        default: true
+      }
+    }],
     cart_channels: [String],
     deleted: {
       type: Boolean,
@@ -87,10 +104,10 @@ var slackbotSchema = mongoose.Schema({
     payments: [{
       vendor: String,
       customer_id: String,
-      card:{
+      card: {
         card_id: String,
-        brand: String, //visa, mastercard, etc
-        exp_month: String, //expiration date
+        brand: String, // visa, mastercard, etc
+        exp_month: String, // expiration date
         exp_year: String,
         last4: String,
         email: String,
@@ -98,7 +115,8 @@ var slackbotSchema = mongoose.Schema({
       }
     }],
     mock: Boolean,
-    p2p: Boolean
+    p2p: Boolean,
+    used_coupons: Number
   },
   // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
   conversaitons: {}

@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 var shopping_home_default = module.exports.shopping_home_default = function(id) {
   return [{
     name: "more",
@@ -32,13 +34,140 @@ var simple_home = module.exports.simple_home = [{
   value: 'start'
 }]
 
-var settings_buttons = module.exports.settings_buttons =
-  [{
+
+// {
+//   name: "onboard.start.confirm_cart_reminder",
+//   text: "Today",
+//   style: "default",
+//   type: "button",
+//   value: "confirm_cart_reminder.today"
+// }
+
+
+var settings_intervals = module.exports.settings_intervals = [
+{
+    "name": "settings.cron.daily",
+    "text": "Daily",
+    "style": "default",
+    "type": "button",
+    "value": "daily"
+  },
+  {
+    "name": "settings.cron.weekly",
+    "text": "Weekly",
+    "style": "default",
+    "type": "button",    
+    "value": "weekly"
+  },
+  {
+    "name": "settings.cron.monthly",
+    "text": "Monthly",
+    "style": "default",
+    "type": "button",
+    "value": "monthly"
+  },
+   {
+    "name": "settings.cron.never",
+    "text": "Never",
+    "style": "default",
+    "type": "button",
+    "value": "never"
+  }]
+
+var settings_days= module.exports.settings_days = [
+    {
+      "name": "settings.set_day.monday",
+      "text": "Mon",
+      "style": "default",
+      "type": "button",
+      "value": '1'
+    },
+    {
+      "name": "settings.set_day.tuesday",
+      "text": "Tues",
+      "style": "default",
+      "type": "button",
+      "value": '2'
+    },
+     {
+      "name": "settings.set_day.wednesday",
+      "text": "Wed",
+      "style": "default",
+      "type": "button",
+      "value": '3'
+    },
+    {
+      "name": "settings.set_day.thursday",
+      "text": "Thurs",
+      "style": "default",
+      "type": "button",
+      "value": '4'
+    },
+    {
+      "name": "settings.set_day.friday",
+      "text": "Fri",
+      "style": "default",
+      "type": "button",
+      "value": '5'
+    },
+    {
+      "name": "settings.set_day.saturday",
+      "text": "Sat",
+      "style": "default",
+      "type": "button",
+      "value": '6'
+    },
+    {
+      "name": "settings.set_day.sunday",
+      "text": "Sun",
+      "style": "default",
+      "type": "button",
+      "value": '0'
+    }
+  ]
+
+
+var settings_weeks= module.exports.settings_weeks = function(message) {
+  return [
+    {
+      "name": "settings.set_week.1",
+      "text": "1",
+      "style": "default",
+      "type": "button",
+      "value": '1'
+    },
+    {
+      "name": "settings.set_week.2",
+      "text": "2",
+      "style": "default",
+      "type": "button",
+      "value": '2'
+    },
+     {
+      "name": "settings.set_week.3",
+      "text": "3",
+      "style": "default",
+      "type": "button",
+      "value": '3'
+    },
+    {
+      "name": "settings.set_week.4",
+      "text": "4",
+      "style": "default",
+      "type": "button",
+      "value": '4'
+    }
+  ]
+} 
+
+
+var settings_menu = module.exports.settings_menu = [{
     "name": "settings.back",
     "text": "< Back",
     "style": "default",
     "type": "button"
-  }, {
+  },
+  {
     name: 'team',
     text: 'Team Members',
     style: 'default',
@@ -55,7 +184,7 @@ var team_buttons = module.exports.team_buttons =
     value: 'start'
   }, {
     "name": "settings.back",
-    "text": "⌂ Home",
+    "text": "Home",
     "style": "default",
     "type": "button"
   }];
@@ -215,7 +344,7 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
 
 var slack_onboard_default = module.exports.slack_onboard_default = [{
     "name": "settings.back",
-    "text": "⌂ Home",
+    "text": "Home",
     "style": "default",
     "type": "button"
   }];
@@ -256,7 +385,7 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   value: "more_info"
 }, {
     "name": "settings.back",
-    "text": "⌂ Home",
+    "text": "Home",
     "style": "default",
     "type": "button"
 }];

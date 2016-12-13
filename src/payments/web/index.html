@@ -50,14 +50,7 @@
   <meta name="author" content="Kip">
 </head>
 
-
-
-
 <body>
-<script src="https://checkout.stripe.com/checkout.js"></script>
-<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-
-
 
 <div id="wrap">
 <div id="payWrap">
@@ -71,15 +64,74 @@
         <span id="bodyText"></span>
     </div>
     <div id="innerButton">
-      <button id="stripeButton">Click to Pay with Stripe</button>
+
+      <!-- STRIPE.js -->  
+      <form id="payment-form" style="display:none;">
+        <img id="poweredStripe" src="https://storage.googleapis.com/if-kip-chat-images/slack/stripe_powered.png">
+        
+        <p style="line-height:0.5;" id="cafeInfo"></p>
+        <div class="form-row">
+          <label>
+            <span data-stripe="number"></span>
+            <p id="stripeEmail" style="opacity:0.5; line-height:0.5;"></p>
+          </label>
+        </div>
+
+        <hr style="opacity:0.3;">
+
+        <span class="payment-errors"></span>
+
+        <div class="form-row">
+          <label>
+            <span><b>Credit Card Number</b></span>
+            <input id="s" class="full" type="text" size="19" maxlength="19" data-stripe="number" autocomplete="cc-number" autocorrect="no" autocapitalize="no" inputmode="numeric" placeholder="Card number" spellcheck="no">
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>
+            <span><b>Expiration (MM/YY)</b></span>
+            <br>
+            <input class="quart" type="text" size="2" maxlength="2" data-stripe="exp_month" autocomplete="cc-exp-month" autocorrect="no" autocapitalize="no" inputmode="numeric" placeholder="MM" spellcheck="no">
+          </label>
+          <span> / </span>
+          <input class="quart" type="text" size="2" maxlength="2" data-stripe="exp_year" autocomplete="cc-exp-year" autocorrect="no" autocapitalize="no" inputmode="numeric" placeholder="YY" spellcheck="no">
+        </div>
+
+        <div class="form-row">
+          <label>
+            <span><b>CVC</b></span>
+            <br>
+            <input class="half" type="text" size="4" maxlength="4" data-stripe="cvc" autocomplete="cc-number" autocorrect="no" autocapitalize="no" inputmode="numeric" placeholder="CVC" spellcheck="no">
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>
+            <span><b>Billing ZIP Code</b></span>
+            <br>
+            <input class="half" type="text" size="6" maxlength="6" placeholder="Zip code" data-zip-code="true" data-stripe="address_zip" id="postal-code" name="postal-code" autocomplete="shipping postal-code"  autocorrect="no" autocapitalize="no" inputmode="numeric" spellcheck="no">
+          </label>
+        </div>
+
+        <button type="submit" id="stripeJSButton" class="sButton submit" style="display:none;"></button>
+        <div id="stripeProcessing" class="sButton" style="display:none;">Processing...</div>
+        <div id="stripeSuccess" class="sButton" style="display:none;">✓ Success</div>
+      </form>
+
+      <!--/ / / / / / / / -->
+
+      <button id="stripeButton" class="sButton">Click to Pay with Stripe</button>
     </div>
   </div>
 </div>
-<div>
+  <p id="terms">By using Kip you agree to our <a href="https://kipthis.com/legal.html" target="_blank" style="color:#fff;">Terms & Service</a></p>
+</div>
 
 
-
-
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
 <script src="public/script.js"></script>
 
 </body>

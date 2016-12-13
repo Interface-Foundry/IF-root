@@ -57,9 +57,11 @@ handlers['shopping.initial'] = function*(message, exec) {
    }
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
-  // yield slackUtils.showLoading(message);
+  var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel})
+  // kip.debug('  \n\n\n\n\n\n\n\n\n DIS DAT GOOD SHIT: ', relevantMessage, ' \n\n\n\n\n\n\n\n\n  ')
+  yield slackUtils.showLoading(message);
   var results = yield amazon_search.search(exec.params,message.origin);
-  // yield slackUtils.hideLoading(message);
+  yield slackUtils.hideLoading(message);
 
   if (results == null || !results) {
       return new db.Message({
