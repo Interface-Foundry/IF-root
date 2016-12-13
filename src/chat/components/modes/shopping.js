@@ -10,7 +10,7 @@ var cardTemplate = require('../slack/card_templates');
 var request = require('request');
 var slackUtils = require('../slack/utils');
 var queue = require('../queue-mongo');
-
+var amazon_variety = require('../amazon_variety')
 //
 // Handlers take something from the message.execute array and turn it into new messages
 //
@@ -441,8 +441,12 @@ handlers['cart.save'] = function*(message, exec) {
   try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
-    kip.err(e);
-    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+  	// send them to the variants mode
+  	kip.debug(`🦊  🦊  🦊  🦊  🦊  🦊  🦊  ${JSON.stringify(results, null, 2)}`)
+  	yield amazon_variety.getVariations(results[exec.params.focus-1].ASIN, message);
+  	return;
+    // kip.err(e);
+    // return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
   }
 
   // view the cart

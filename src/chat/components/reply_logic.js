@@ -419,6 +419,9 @@ queue.topic('incoming').subscribe(incoming => {
         logging.debug('DEFAULT SHOPPING MODE')
         // try for simple reply
         timer.tic('getting simple response')
+      if (message.mode === 'variation') {
+        message = yield variation(message);
+      }
         var replies = yield simple_response(message)
         timer.tic('got simple response')
       kip.debug('simple replies'.cyan, replies)
