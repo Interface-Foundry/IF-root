@@ -104,7 +104,7 @@ handlers['start'] = function * (message) {
        attachments.push({text: 'Your team is set to receive last calls on day *' + team.meta.weekly_status_date + '* of every month at *' + team.meta.weekly_status_time + '*  '
         + '\nYou can specify the time by saying something like: `8:00 am`'});
     } else if (team.meta.status_interval == 'never')    {
-       attachments.push({text: 'Your team is currently not receive last call notifications.'});
+       attachments.push({text: 'Your team is currently not receiving last call notifications.'});
     }
     attachments.push({
       text: 'When do you want last calls to go out?',

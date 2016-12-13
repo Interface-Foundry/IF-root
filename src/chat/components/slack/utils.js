@@ -11,6 +11,7 @@ var queue = require('../queue-mongo');
 var cron = require('cron');
 var sleep = require('co-sleep');
 var cardTemplate = require('./card_templates');
+var kipcart = require('../cart');
 
 /*
 *
@@ -592,7 +593,18 @@ function* sendLastCalls(message) {
 }
 
 function * sendCartToAdmin(message) {
- 
+   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+    var msg = new db.Message(message);
+      msg.mode = 'cart';
+      msg.action = 'view';
+      msg.source.team = team.team_id;
+
+      // msg.text = 'view cart';  
+      msg.data = yield kipCart.getCart(message.source.team)
+      // msg.incoming = false;    
+      yield msg.save();
+      yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.lastcall'); 
 };
 
 
@@ -621,7 +633,7 @@ function * updateCron(message, jobs, when, type) {
     } else {
       date = when;
     }
-    kip.debug('\n\n\n\n\n\n setting cron job : ', type, date,'\n\n\n\n\n\n')
+    kip.debug('\n\n\n\n\n\n setting cron job to send last calls : ', date,'\n\n\n\n\n\n')
 
     jobs[team.team_id] = new cron.CronJob( date, function  () {
        co(sendLastCalls(message));
@@ -630,6 +642,16 @@ function * updateCron(message, jobs, when, type) {
     },
     true,
     team.meta.weekly_status_timezone);
+
+    jobs[currentUser.user_id] = new cron.CronJob( date, function  () {
+       co(sendCartToAdmin(message));
+    }, function() {
+      kip.debug('\n\n\n\n ran cron job for admin: ' + team.team_id + ' ' + team.team_name + date + '\n\n\n\n');
+    },
+    true,
+    team.meta.weekly_status_timezone);
+
+
 };
 
 
