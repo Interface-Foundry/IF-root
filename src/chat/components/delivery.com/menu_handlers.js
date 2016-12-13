@@ -216,8 +216,21 @@ handlers['food.item.submenu'] = function * (message) {
 
   // user clicked button
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
-  var json = cart.menu.generateJsonForItem(userItem)
+  var json = cart.menu.generateJsonForItem(userItem, true, message)
   $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
+}
+
+handlers['food.item.loadmore'] = function * (message){
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var userItem = yield cart.getItemInProgress(message.data.value.item_id, message.source.user)
+  var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') :  {}
+  var groupId = parseInt(_.get(message, 'data.value.group_id'))
+  var optionIndex = optionIndices[groupId] ? optionIndices[groupId] : 1
+  optionIndices[groupId] = optionIndices[groupId]? optionIndices[groupId]+1 : 2
+
+  var json = cart.menu.generateJsonForItem(userItem, true, message)
+  $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
 //
@@ -231,10 +244,10 @@ handlers['food.option.click'] = function * (message) {
   var userItem = yield cart.getItemInProgress(item_id, message.source.user)
   var optionNode = cart.menu.getItemById(option_id)
   userItem.item.option_qty = userItem.item.option_qty || {}
-
+  //if(optionNode){
   var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
   var optionGroup = cart.menu.getItemById(optionGroupId)
-
+  //}
   // Radio buttons, can only toggle one at a time
   // so delete any other selected radio before the next step will select it
   if (optionGroup.min_selection === optionGroup.max_selection && optionGroup.min_selection === 1) {
@@ -259,7 +272,7 @@ handlers['food.option.click'] = function * (message) {
 
   kip.debug('option_qty', userItem.item.option_qty)
 
-  var json = cart.menu.generateJsonForItem(userItem)
+  var json = cart.menu.generateJsonForItem(userItem, true, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
@@ -281,7 +294,7 @@ handlers['food.item.quantity.add'] = function * (message) {
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
   userItem.item.item_qty++
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
-  var json = cart.menu.generateJsonForItem(userItem)
+  var json = cart.menu.generateJsonForItem(userItem, true, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
@@ -297,7 +310,7 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   }
   userItem.item.item_qty--
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
-  var json = cart.menu.generateJsonForItem(userItem)
+  var json = cart.menu.generateJsonForItem(userItem, true, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 

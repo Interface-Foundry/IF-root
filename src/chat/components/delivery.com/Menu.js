@@ -95,11 +95,10 @@ function flattenMenu (data) {
   return out
 }
 
-Menu.prototype.generateJsonForItem = function (cartItem, validate) {
+Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
   var menu = this
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
-
   // Price for the Add To Cart button
   var fullPrice = menu.getCartItemPrice(cartItem)
   var parentName = _.get(menu, `flattenedMenu.${item.parentId}.name`)
@@ -151,10 +150,11 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   }
 
   // options, like radios and checkboxes
-  var options = nodeOptions(item, cartItem, validate)
+  var options = nodeOptions(item, cartItem, validate, message)
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
-'text':  '*Options:* _' + _.keys(cartItem.item.option_qty).map((opt) => this.getItemById(String(opt)).price > 0 ? this.getItemById(String(opt)).name + ' - $' + this.getItemById(String(opt)).price.toFixed(2) : this.getItemById(String(opt)).name).join(', ') + '_',
+    'text':  '*Options:* _' + _.keys(cartItem.item.option_qty).map((opt) => this.getItemById(String(opt)).price > 0 ? this.getItemById(String(opt)).name + ' - $' + this.getItemById(String(opt)).price.toFixed(2) : this.getItemById(String(opt)).name).join(', ') + '_',
+    'fallback': '*Options:* _' + _.keys(cartItem.item.option_qty).map((opt) => this.getItemById(String(opt)).price > 0 ? this.getItemById(String(opt)).name + ' - $' + this.getItemById(String(opt)).price.toFixed(2) : this.getItemById(String(opt)).name).join(', ') + '_',
     'attachment_type': 'default',
     'mrkdwn_in': [
       'text'
@@ -194,7 +194,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   return json
 }
 
-function nodeOptions (node, cartItem, validate) {
+function nodeOptions (node, cartItem, validate, message) {
   var attachments = node.children.filter(c => c.type.includes('group')).reduce((all, g) => {
     var a = {
       fallback: 'Meal option',
@@ -210,6 +210,7 @@ function nodeOptions (node, cartItem, validate) {
     } else {
       a.text = `*${g.name}*`
     } 
+    var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') : {}
     var required = false
     var allowMultiple = true
     var numSelected = g.children.filter(option => Object.keys(cartItem.item.option_qty).includes(option.unique_id.toString())).length
@@ -273,7 +274,8 @@ function nodeOptions (node, cartItem, validate) {
         type: 'button',
         value: {
           item_id: cartItem.item.item_id,
-          option_id: option.unique_id
+          option_id: option.unique_id,
+          optionIndices: optionIndices
         }
       }
     })
@@ -283,7 +285,7 @@ function nodeOptions (node, cartItem, validate) {
     // Submenu part
     g.children.map(option => {
       if (cartItem.item.option_qty[option.unique_id] && _.get(option, 'children.0')) {
-        var submenuAttachments = nodeOptions(option, cartItem, validate)
+        var submenuAttachments = nodeOptions(option, cartItem, validate, message)
         all = all.concat(submenuAttachments)
       }
     })
@@ -291,11 +293,12 @@ function nodeOptions (node, cartItem, validate) {
     return all
   }, [])
 
-//var optionIndex = parseInt(_.get(message, 'data.value.optionIndex')) || 1
-var optionIndex = 1
-
   // spread out the buttons to multiple attachments if needed
   attachments = attachments.reduce((all, a) => {
+    
+    var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') : {}
+    var groupId = Number(a.callback_id.split('-').slice(-1)[0])
+    var optionIndex = optionIndices[groupId] ? optionIndices[groupId] : 1
     var isRequired = a.text ? a.text.indexOf('Required') !== -1 : false
     var rowCount = 0
     if (_.get(a, 'actions.length', 0) <= 3) {
@@ -306,7 +309,7 @@ var optionIndex = 1
       a.actions = actions.splice(0, 3)
       rowCount++
       all.push(a)
-//      if(isRequired) {
+      if(isRequired) { //if option is required, show all
         while (actions.length > 0) {
           all.push({
             color: a.color,
@@ -316,35 +319,35 @@ var optionIndex = 1
             actions: actions.splice(0, 3)
           })
         }
-//      } else {
-//        while (rowCount < optionIndex) {
-//          all.push({
-//            color: a.color,
-//            fallback: a.fallback,
-//            callback_id: 'even more actions',
-//            attachment_type: 'default',
-//            actions: actions.splice(0, 3)
-//          })
-//          rowCount++
-//        }
-//        all.push({
-//          'name': 'food.item.submenu',
-//          'fallback': 'More Options',
-//          'actions': [{
-//            'name': 'food.item.submenu',
-//            'text': 'More Options',
-//            'type': 'button',
-//            'value': {
-//              optionIndex: optionIndex + 1,
-//            }
-//          }]
-//        })
-//      }
+      } else { //if option is optional, display 3 at a time.
+        while (rowCount < optionIndex) {
+          all.push({
+            color: a.color,
+            fallback: a.fallback,
+            callback_id: 'even more actions',
+            attachment_type: 'default',
+            actions: actions.splice(0, 3)
+          })
+          rowCount++
+        }
+          all.push({
+            'name': 'More Options',
+            'fallback': 'More Options',
+            'actions': [{
+              'name': 'food.item.loadmore',
+              'text': 'More Options',
+              'type': 'button',
+              'value': {
+                'item_id': cartItem.item.item_id,
+                'group_id': groupId ,
+                'optionIndices': optionIndices
+              }
+            }]
+          })
+      }
       return all
     }
   }, [])
-  //attachments = attachments.slice(0,optionIndex)
-  //viewableAttachments = attachments.slice(0,optionIndex*3)
 
   return attachments
 }
