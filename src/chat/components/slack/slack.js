@@ -87,7 +87,7 @@ function * loadTeam(slackbot) {
   // })
 
   rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
-    kip.log('loaded slack team', slackbot.team_id, slackbot.team_name)
+    // kip.log('loaded slack team', slackbot.team_id, slackbot.team_name)
   })
 
   rtm.on(slack.CLIENT_EVENTS.DISCONNECT, (reason) => {
@@ -190,7 +190,7 @@ function * start () {
 kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
-  logging.info('outgoing slack message', _.get(outgoing, 'data.text', '[no text]')
+  logging.info('outgoing slack message', _.get(outgoing, 'data.text', '[no text]'))
   outgoing.ack();
   try {
     var message = outgoing.data;
