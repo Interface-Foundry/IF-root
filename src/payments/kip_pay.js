@@ -146,112 +146,132 @@ app.post('/session', jsonParser, (req, res) => co(function * () {
 
 // this is the call back from the new credit card to do the charge
 app.post('/process', jsonParser, (req, res) => co(function * () {
-  if (_.get(req, 'body.token') && _.get(req, 'body.session_token')) {
-    logging.info('processing new card')
-    logging.data('__NEW CARD__', req.body)
-    res.sendStatus(200)
+  // error checking fisrt
+  if (!_.has(req, 'body.token')) {
+    logging.error('req.body missing token', req.body)
+    return res.sendStatus(500)
+  }
 
-    // this is a stripe token for the user inputted credit card details
-    var token = req.body.token.replace(/[^\w\s]/gi, '') // clean special char
-    // LOOK UP USER BY HASH TOKEN
-    var t = req.body.session_token.replace(/[^\w\s]/gi, '') // clean special char
+  if (!_.has(req, 'body.session_token')) {
+    logging.error('req.body missing session_token', req.body)
+    return res.sendStatus(500)
+  }
 
-    var payment = yield Payment.findOne({session_token: t})
-    profOak.say(`processing new card for team:${payment.order.team_id}`)
+  logging.info('processing new card')
+  logging.data('__NEW CARD__', req.body)
+  res.sendStatus(200)
 
-    // create stripe customer
-    try {
-      logging.info(`creating new customer and charge for, ${token}`)
-      var customer = yield stripe.customers.create({
-        source: token,
-        description: 'Delivery.com & Kip: ' + payment.order.team_id
-      })
-    } catch (err) {
-      logging.error('error creating stripe.customers.create', err)
+  // this is a stripe token for the user inputted credit card details
+  var token = req.body.token.replace(/[^\w\s]/gi, '') // clean special char
+  // LOOK UP USER BY HASH TOKEN
+  var t = req.body.session_token.replace(/[^\w\s]/gi, '') // clean special char
+
+  var payment = yield Payment.findOne({session_token: t})
+
+  if (!_.has(payment, 'order.team_id')) {
+    return logging.error('payment has no order.team_id', payment)
+  }
+
+  if (!_.has(payment, 'order.order.total')) {
+    return logging.error('payment has no order.order.total', payment)
+  }
+
+  profOak.say(`processing new card for team:${payment.order.team_id}`)
+
+  // create stripe customer
+  try {
+    logging.info(`creating new customer and charge for, ${token}`)
+    var customer = yield stripe.customers.create({
+      source: token,
+      description: 'Delivery.com & Kip: ' + payment.order.team_id
+    })
+  } catch (err) {
+    logging.error('error creating stripe.customers.create', err)
+  }
+
+  // already have coupon
+  var total = Math.round(payment.order.order.total)
+
+  try {
+    var charge = yield stripe.charges.create({
+      amount: total,
+      currency: 'usd',
+      customer: customer.id
+    })
+    profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(total / 100.0).$}`)
+  } catch (err) {
+    logging.error('error creating charge in stripe.charges.create', err)
+  }
+
+  payment.charge = charge
+  payment.save()
+
+  // fired on new cards charged ONLY
+  if (charge.status !== 'succeeded') {
+    profOak.say('if statement for status===succeeded failed, might want to check logs @graham')
+    logging.error('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
+    logging.error('OUTCOME: ', charge.outcome)
+    logging.error('total error related to ', charge)
+    return
+  }
+
+  try {
+    // complicated for testing purposes
+    if (!process.env.NODE_ENV) {
+      throw new Error('you need to run kip-pay with NODE_ENV')
+    } else if (process.env.NODE_ENV === 'production') {
+      // if production we actually submit to
+      profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
+      payment.delivery_response = yield payUtils.payDeliveryDotCom(payment)
+    } else if (process.env.NODE_ENV !== 'production') {
+      // if its not production we are running locally or on another system to test
+      profOak.say(`we are doing a test order im assuming for team:${payment.order.team_id}`)
+      payment.delivery_response = 'test_success'
     }
+    yield payment.save()
+  } catch (err) {
+    logging.error('error trying to storeCard', err)
+    return
+  }
 
-    // already have coupon
-    var total = Math.round(payment.order.order.total)
+  // store card since its presumably new
+  try {
+    yield payUtils.storeCard(payment, charge)
+  } catch (err) {
+    logging.error('error trying to storeCard', err)
+    return
+  }
 
-    try {
-      var charge = yield stripe.charges.create({
-        amount: total,
-        currency: 'usd',
-        customer: customer.id
-      })
-      profOak.say(`succesfully created new stripe card and charge for team:${payment.order.team_id} in amount ${(total / 100.0).$}`)
-    } catch (err) {
-      logging.error('error creating charge in stripe.charges.create', err)
-    }
+  // look up user and the last message sent to us in relation to this order
+  try {
+    var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
+    foodSession.order['completed_payment'] = true
+    yield foodSession.save()
 
-    payment.charge = charge
-    payment.save()
+    var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
+    finalFoodMessage = finalFoodMessage[0]
 
-    // fired on new cards charged ONLY
-    if (charge.status === 'succeeded') {
-      try {
-        // complicated for testing purposes
-        if (!process.env.NODE_ENV) {
-          throw new Error('you need to run kip-pay with NODE_ENV')
-        } else if (process.env.NODE_ENV === 'production') {
-          // if production we actually submit to
-          profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
-          payment.delivery_response = yield payUtils.payDeliveryDotCom(payment)
-        } else if (process.env.NODE_ENV !== 'production') {
-          // if its not production we are running locally or on another system to test
-          profOak.say(`we are doing a test order im assuming for team:${payment.order.team_id}`)
-          payment.delivery_response = 'test_success'
+    // send message to user
+    replyChannel.send(
+      finalFoodMessage,
+      'food.payment_info',
+      {
+        type: finalFoodMessage.origin,
+        data: {
+          text: 'Your order was successful and you should receive an email from `Delivery.com` soon!'
         }
-        yield payment.save()
-      } catch (err) {
-        logging.error('error trying to storeCard', err)
-      }
+      })
+  } catch (err) {
+    logging.error('error trying to send message to user', err)
+    return
+  }
 
-      // store card since its presumably new
-      try {
-        yield payUtils.storeCard(payment, charge)
-      } catch (err) {
-        logging.error('error trying to storeCard', err)
-      }
-
-      // look up user and the last message sent to us in relation to this order
-      try {
-        var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
-        foodSession.order['completed_payment'] = true
-        yield foodSession.save()
-
-        var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
-        finalFoodMessage = finalFoodMessage[0]
-
-        // send message to user
-        replyChannel.send(
-          finalFoodMessage,
-          'food.payment_info',
-          {
-            type: finalFoodMessage.origin,
-            data: {
-              text: 'Your order was successful and you should receive an email from `Delivery.com` soon!'
-            }
-          })
-      } catch (err) {
-        logging.error('error trying to send message to user', err)
-      }
-
-      try {
-        // send success messages to order members
-        yield payUtils.onSuccess(payment)
-        profOak.say(`order completed for team: ${payment.order.team_id}`)
-      } catch (err) {
-        logging.error('error onSuccess of payment', err)
-      }
-    } else {
-      profOak.say('if statement for status===succeeded failed, might want to check logs @graham')
-      logging.error('DIDNT PROCESS STRIPE CHARGE: ', charge.status)
-      logging.error('OUTCOME: ', charge.outcome)
-      logging.error('total error related to ', charge)
-    }
-  } else {
-    res.status(500).send('charge token missing')
+  try {
+    // send success messages to order members
+    yield payUtils.onSuccess(payment)
+    profOak.say(`order completed for team: ${payment.order.team_id}`)
+  } catch (err) {
+    logging.error('error onSuccess of payment', err)
   }
 }))
 
