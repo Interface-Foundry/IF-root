@@ -143,6 +143,7 @@ require('./handlers_user_selection')(replyChannel, handlers)
 require('./handlers_votes')(replyChannel, handlers)
 require('./handlers_checkout')(replyChannel, handlers)
 require('./team_handlers')(replyChannel, handlers)
+require('./handlers_budget')(replyChannel, handlers)
 
 handlers['food.sys_error'] = function * (message) {
   kip.debug('chat message halted.')
@@ -191,8 +192,6 @@ handlers['food.exit'] = function * (message) {
   }
   replyChannel.send(message, 'food.exit.confirm', {type: message.origin, data: msg_json})
 }
-
-
 
 handlers['food.exit.confirm'] = function * (message) {
   var slackreply = {
