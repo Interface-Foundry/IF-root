@@ -1,0 +1,26 @@
+env: development_alyx
+mongodb:
+  url: mongodb://localhost:27017/foundry
+  backuphost: localhost
+  options:
+    server:
+      poolSize: 5
+      socketOptions:
+        keepAlive: 1
+elasticsearch:
+  url: http://localhost:9200
+app:
+  publicAPI: http://localhost:2997/api
+picstitch: http://localhost:5000
+# nlp: http://localhost:8083
+# doc2vec: http://localhost:8084
+nlp: http://104.196.51.184:8083
+nlp_rnn: http://104.196.1.204:8085
+slack:
+  client_id: "99011697575.99013885607"
+   # "17713782326.83486971505"
+  client_secret: 9b2165732056891b7e357b56103571fe
+  verification_token: mtqOe7U3SUlxdTcmRThY84sX
+  redirect_uri: https://82256a84.ngrok.io/newslack
+kipPayURL: https://29f46589.ngrok.io
+picstitchDelivery: http://localhost:5000
