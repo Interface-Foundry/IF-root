@@ -44,35 +44,33 @@ var simple_home = module.exports.simple_home = [{
 // }
 
 
-var settings_intervals = module.exports.settings_intervals = [
-{
+var settings_intervals = module.exports.settings_intervals = function(interval) {
+  return [{
     "name": "settings.cron.daily",
-    "text": "Daily",
+    "text": ((interval === 'daily') ? '◉' : '◎') + ' Daily',
     "style": "default",
     "type": "button",
     "value": "daily"
-  },
-  {
+  }, {
     "name": "settings.cron.weekly",
-    "text": "Weekly",
+    "text": ((interval === 'weekly') ? '◉' : '◎') + ' Weekly',
     "style": "default",
-    "type": "button",    
+    "type": "button",
     "value": "weekly"
-  },
-  {
+  }, {
     "name": "settings.cron.monthly",
-    "text": "Monthly",
+    "text": ((interval === 'monthly') ? '◉' : '◎') + ' Monthly',
     "style": "default",
     "type": "button",
     "value": "monthly"
-  },
-   {
+  }, {
     "name": "settings.cron.never",
-    "text": "Never",
+    "text": ((interval === 'never') ? '◉' : '◎') + ' Never',
     "style": "default",
     "type": "button",
     "value": "never"
-  }]
+  }];
+}
 
 var settings_days= module.exports.settings_days = [
     {
