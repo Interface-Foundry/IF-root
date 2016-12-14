@@ -190,6 +190,8 @@ function * start () {
 kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
+  logging.info('outgoing slack message', _.get(outgoing, 'data.text', '[no text]')
+  outgoing.ack();
   try {
     var message = outgoing.data;
     var team = _.get(message, 'source.team');
@@ -243,6 +245,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         var results = yield search_results(message);
         msgData.attachments = [...message.reply || [], ...results || []];
+        logging.log('sending search results')
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
