@@ -26,9 +26,9 @@ const kipPayURL = kip.config.kipPayURL
 
 if (!process.env.NODE_ENV) {
   throw new Error('you need to run kip-pay with NODE_ENV')
-} else if (process.env.NODE_ENV === 'canary') {
+} else if (process.env.NODE_ENV === 'production') {
   var stripeID = payConst.stripe_production_id
-} else if (process.env.NODE_ENV !== 'canary') {
+} else if (process.env.NODE_ENV !== 'production') {
   stripeID = payConst.stripe_test_id
 }
 
@@ -193,12 +193,12 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
         // complicated for testing purposes
         if (!process.env.NODE_ENV) {
           throw new Error('you need to run kip-pay with NODE_ENV')
-        } else if (process.env.NODE_ENV === 'canary') {
-          // if canary we actually submit to
+        } else if (process.env.NODE_ENV === 'production') {
+          // if production we actually submit to
           profOak.say(`paid for delivery.com for team:${payment.order.team_id}`)
           payment.delivery_response = yield payUtils.payDeliveryDotCom(payment)
-        } else if (process.env.NODE_ENV !== 'canary') {
-          // if its not canary we are running locally or on another system to test
+        } else if (process.env.NODE_ENV !== 'production') {
+          // if its not production we are running locally or on another system to test
           profOak.say(`we are doing a test order im assuming for team:${payment.order.team_id}`)
           payment.delivery_response = 'test_success'
         }
@@ -290,12 +290,12 @@ function * chargeById (payment) {
       // complicated for testing purposes
       if (!process.env.NODE_ENV) {
         throw new Error('you need to run kip-pay with NODE_ENV')
-      } else if (process.env.NODE_ENV === 'canary') {
+      } else if (process.env.NODE_ENV === 'production') {
         payment.delivery_response = yield payUtils.payDeliveryDotCom(payment)
-        profOak.say(`paid for delivery.com on \`canary\` for team:${payment.order.team_id}`)
+        profOak.say(`paid for delivery.com on \`production\` for team:${payment.order.team_id}`)
       } else {
         payment.delivery_response = 'test_success'
-        profOak.say(`not on \`canary\`, so doing a fake charge.  test_success.`)
+        profOak.say(`not on \`production\`, so doing a fake charge.  test_success.`)
       }
 
       yield payment.save()

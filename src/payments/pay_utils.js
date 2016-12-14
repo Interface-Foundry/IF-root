@@ -36,7 +36,7 @@ function * payForItemFromKip (session, guestToken) {
 
   logging.info('SENDING TO DELIVERY NOW ', JSON.stringify(opts))
 
-  if (process.env.NODE_ENV === 'canary') {
+  if (process.env.NODE_ENV === 'production') {
     try {
       var response = yield request(opts)
       return response
@@ -46,7 +46,7 @@ function * payForItemFromKip (session, guestToken) {
       return null
     }
   } else {
-    logging.error('NOT GOING TO PAY FOR ORDER IN CANARY MODE, SWITCH TO NODE_ENV=CANARY')
+    logging.error('NOT GOING TO PAY FOR ORDER IN DEV OR TEST MODE, SWITCH TO NODE_ENV=production')
     return 'development'
   }
 }
