@@ -89,7 +89,7 @@ handlers['get-admins.response'] = function * (message) {
   var team = yield db.Slackbots.findOne({
     'source.team_id': message.source.team_id
   }).exec();
-  var office_admins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
+  var office_admins = message.original_text.toLowerCase().match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
   office_admins = office_admins.map(g => {
     if (g === 'me') {
       team.meta.office_assistants.push(message.user_id);
