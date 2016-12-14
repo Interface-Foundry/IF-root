@@ -470,12 +470,11 @@ handlers['add_or_remove'] = function * (message) {
           mrkdwn_in: ['text'],
           fallback:'Settings',
           actions: [
-              {
-                "name": "exit",
-                "text": "Exit Settings",
-                "style": "primary",
-                "type": "button",
-                "value": "exit"
+              {   
+                "name": "settings.back",
+                "text": "Home",
+                "style": "default",
+                "type": "button"
               },
               {
                 "name": "team",
@@ -545,7 +544,7 @@ handlers['add_or_remove'] = function * (message) {
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
     replies.push(msg)
   }
- return replies;
+ return yield handlers['start'](msg) //actually showing results instead of just saying you updated settings...should be both eventually
 }
 
 handlers['last_call_off'] = function * (message) {
@@ -638,20 +637,10 @@ handlers['sorry'] = function * (message) {
       fallback:'Settings',
       actions: [
           {
-            "name": "exit",
-            "text": "Exit Settings",
-            "style": "primary",
-            "type": "button",
-            "value": "exit"
-          },
-          {
-            "name": "help",
-            "text": "Help",
-            "style": "default",
-            "type": "button",
-
-
-            "value": "help"
+            "style": "primary",    
+            "name": "settings.back",
+            "text": "Home",
+            "type": "button"
           },
           {
             "name": "team",
@@ -666,13 +655,6 @@ handlers['sorry'] = function * (message) {
             "style": "default",
             "type": "button",
             "value": "team"
-          },
-          {
-            "name": "home",
-            "text": "🐧",
-            "style": "default",
-            "type": "button",
-            "value": "home"
           }
       ],
       callback_id: 'none'
