@@ -81,11 +81,11 @@ handlers['food.admin.team.members'] = function * (message) {
     style: 'primary'
   })
 
-  buttons.actions.push({   
+  buttons.actions.push({
     'name': 'food.admin.display_channels',
     'text': 'Use a #channel',
     'type': 'button',
-    'value': 'select_team_members'    
+    'value': 'select_team_members'
   })
 
   buttons.actions.push({
@@ -104,7 +104,6 @@ handlers['food.admin.team.members'] = function * (message) {
 
   $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: msg_json})
 }
-
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel

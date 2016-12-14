@@ -84,6 +84,12 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
             'value': 'food.user.poll'
           },
           {
+            'name': 'food.admin.team_budget',
+            'type': 'button',
+            'text': 'Set a budget',
+            'value': 'food.admin.team_budget'
+          },
+          {
             'name': 'passthrough',
             'value': 'food.admin.team.members',
             'text': 'View Team Members',
