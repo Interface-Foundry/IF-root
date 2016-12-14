@@ -4,49 +4,58 @@ var db = require('../../../db');
 var options = require('./status').options;
 var async = require('async');
 
-var luminati_request = function (url, proxy, status) {
+var luminati_request = function (url, luminati_client, status) {
     return new Promise((resolve, reject)=>{
       var luminatiConfig = config.proxy.luminati;
 
+      var options = {
+        url: url,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
+          'Accept': 'text/html,application/xhtml+xml',
+          'Accept-Language':'en-US,en;q=0.8',
+          'Cache-Control':'max-age=0',
+          'Connection':'keep-alive'
+        }
+      };
+
+      var requestFn;
+      if (luminati_client === undefined) {
+        // when the specified luminati_client (for the locally running luminati
+        // instance) isn't defined, we just send a normal request with a proxy
+        // address specified.
+        requestFn = request;
+        options.proxy = luminatiConfig.addr;
+      } else {
+        requestFn = luminati_client.request;
+      }
+
       var begin= Date.now();
-      proxy.request({
-          url: url,
-          headers: {
-             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
-             'Accept': 'text/html,application/xhtml+xml',
-             'Accept-Language':'en-US,en;q=0.8',
-             'Cache-Control':'max-age=0',
-             'Connection':'keep-alive'
-          },
-        },
-        function(err, res){
-          // NOTE: Date.now() is already in millis. This time unit appears to
-          // be measuring 10ths of seconds? I'm leaving here in case this is
-          // desired or relied upon.
-          var timeSpent=(Date.now()-begin)/10000;
+      requestFn(options, function(err, res){
+        var timeSpent=(Date.now()-begin)/10000;
 
-          var proxyLog = {
-            proxy: 'luminati',
-            check: false,
-            request_url: url,
-            delay_ms: msElapsed,
-            options: options,
-            status: status,
-          };
+        var proxyLog = {
+          proxy: 'luminati',
+          check: false,
+          request_url: url,
+          delay_ms: timeSpent,
+          options: options,
+          status: status,
+        };
 
-          proxyLog.success = (res.body.length > 0 && res.statusCode == 200);
-          if (!proxyLog.success) {
-            if (err) proxyLog.error = err;
-            else {
-              proxyLog.error = res.statusCode;
-              proxyLog.body = res.body;
-            }
+        proxyLog.success = (res.body.length > 0 && res.statusCode == 200);
+        if (!proxyLog.success) {
+          if (err) proxyLog.error = err;
+          else {
+            proxyLog.error = res.statusCode;
+            proxyLog.body = res.body;
           }
+        }
 
-          db.Metrics.log('proxy', proxyLog);
-          if (proxyLog.success) resolve(res.body);
-          else reject(err);
-        });
+        db.Metrics.log('proxy', proxyLog);
+        if (proxyLog.success) resolve(res.body);
+        else reject(err);
+      });
     });
 };
 

@@ -11,7 +11,7 @@ module.exports = mesh_request = function (url, status) {
 
       // choose a host at random
       var host = meshConfig.hosts[Math.floor(Math.random()*meshConfig.hosts.length)];
-      var mesh_proxy = "http://" + meshConfig.user + ":" + meshConfig.password + "@" + meshConfig.host + ":" + meshConfig.port;
+      var mesh_proxy = "http://" + meshConfig.user + ":" + meshConfig.password + "@" + host + ":" + meshConfig.port;
       request({
         url: url,
         proxy: mesh_proxy,
