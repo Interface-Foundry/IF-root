@@ -34,7 +34,11 @@ module.exports.createCartForSession = function * (session) {
   }
   session.delivery_post = opts
   session.markModified('delivery_post')
-  session.save()
+  try {
+    yield session.save()
+  } catch (err) {
+    logging.error('error while trying to save session or something for admin cart', err, session.delivery_post)
+  }
   try {
     var response = yield request(opts)
     logging.info('got cart from delivery.com')
