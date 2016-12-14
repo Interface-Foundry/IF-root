@@ -1,4 +1,5 @@
 var co = require('co')
+var sleep = require('co-sleep')
 var rx = require('rx')
 var hostname = require('os').hostname()
 
@@ -70,17 +71,18 @@ function topic (topic) {
   }
 
   return rx.Observable.create(observer => {
-    // Main polling interval goes through all unread messages
-    setInterval(() => {
-      co(function * () {
-        while (true) {
-          var message = yield getNextMessage(topic)
-          if (!message) { return }
+    // Main polling loop goes through all unread messages
+    co(function * () {
+      while (true) {
+        var message = yield getNextMessage(topic)
+        if (!message) {
+          yield sleep(500)
+        } else {
           kip.debug('handling message', message._id)
           observer.onNext(message)
         }
-      }).catch(kip.err)
-    }, 100)
+      }
+    }).catch(kip.err)
 
     // Retry interval, retry if dispatched but not done and 10 seconds old.
     // setInterval(() => {
