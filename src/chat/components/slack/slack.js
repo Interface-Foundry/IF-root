@@ -190,7 +190,7 @@ function * start () {
 kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
-  logging.info('outgoing slack message', _.get(outgoing, 'data.text', '[no text]'))
+  logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
   outgoing.ack();
   try {
     var message = outgoing.data;
