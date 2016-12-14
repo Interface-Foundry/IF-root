@@ -179,6 +179,10 @@ p {
   margin: 20px 0;
 }
 
+#stripeJSButton:disabled {
+ background: #c8c8c8;
+}
+
 #stripeProcessing {
   margin-top: 107px;
   height: 45px;
@@ -187,10 +191,22 @@ p {
 }
 
 #stripeSuccess {
-  margin-top: 107px;
-  height: 45px;
-  background: green;
-  padding-top: 10px;
+  background: rgba(156, 204, 101, 0.89);
+  position: absolute;
+  top:0;
+  left:0;
+  bottom:0;
+  right:0;
+  color: white;
+  text-align: center;
+}
+
+#stripeSuccess p {
+    font-size: 50px;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
 }
 
 .form-row {
@@ -239,7 +255,7 @@ p {
   box-shadow: inset 0px 1px 2px #d2d2d2;
   border: 1px solid #d2d2d2;
   border-radius: 4px;
-  padding: 2px;
+  padding: 8px 2px 2px 2px;
   background-color: white;
   display: flex;
   flex-direction: column;
@@ -273,6 +289,7 @@ p {
 
 .form-input-set input {
   padding-left: 10px;
+  border-radius: 0;
 }
 
 .form-input-set .border-right {
