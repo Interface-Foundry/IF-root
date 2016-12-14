@@ -55,7 +55,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     //correctly returning true and false
     var validateRadio = function (option) {
       var radio = $scope.inProgress[item.id].options[option];
-      console.log('validate radio -->', Object.keys(radio).indexOf('radio') >= 0)
       if (Object.keys(radio).indexOf('radio') >= 0) return true;
       else return false;
     };
@@ -76,20 +75,17 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
 
     var valid = true;
 
-    //console.log('item to validate:', item);
     for (var i = 0; i < item.children.length; i++) {
-      //console.log('ITEM', item);
       var opGroup = item.children[i];
       if (opGroup.min_selection == 1 && opGroup.max_selection == 1) {
-          console.log('this is radio');
           valid &= validateRadio(opGroup.name);
       }
       else {
         valid &= validateCheck(opGroup.min_selection, opGroup.max_selection, opGroup);
       }
-      console.log('valid:', valid)
+      // console.log('valid:', valid)
     }
-    
+
     return valid;
   };
 
@@ -106,10 +102,13 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
 
 //used for displaying price
   $scope.addOptionPrice = function (flag, price, item) {
+    if (!item.current_price) item.current_price = 0;
+  //  var prev = item.current_price;
     if (flag) {
-      item.current_price = (item.current_price ? item.current_price : 0) + price;
+      item.current_price += price;
     }
     else item.current_price -= price;
+    //console.log(prev, 'prev', '///', 'cp', item.current_price)
   }
 
   $scope.addToCart = function (item) {

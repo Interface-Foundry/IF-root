@@ -61,8 +61,6 @@
             <h5 ng-show="minimum > total">
               Add {{minimum-total}} to your order to check out!
             </h5>
-          <!-- </div> -->
-          <!-- <div class="sidebar_base"></div> -->
         </div>
       </div>
       <div id="content">
@@ -89,8 +87,6 @@
                 <!-- ie option groups -->
 
                 <h4>{{child.name}}</h4>
-
-                <!-- here -->
                 <div>
                   <div ng-show="child.min_selection == 1">
                     <div ng-repeat="option in child.children">
@@ -126,11 +122,10 @@
                 </div>
               </div>
             </div>
+
               <!-- Two layers deep -->
 
             <div ng-show="item.type=='menu'">
-                <!-- here -->
-                <!-- <div ng-show="item.type=='menu'" ng-repeat="food in child.children"> -->
                 <div ng-show="inProgress[item.id]" ng-repeat="child in item.children">
                   <!-- <h1>{{child.name}} ***** {{child.type}} //// {{item.type}}</h1> -->
                   <!-- child is of type item, for now -->
@@ -142,13 +137,6 @@
                       <button ng-click="addToCart(child)">Add to cart for {{child.price + (child.current_price || 0)}}</button>
                     </span>
                   </h2>
-                    <!-- <h2 ng-click="itemDetails(child)">
-                      <span class="item_name">{{child.name}}</span>
-                      <span class="price">
-                         need the button set of of above
-                       <button ng-click="itemDetails(child);addToCart(child);">Add to cart for {{child.price * inProgress[child.id].item_qty}}</button>
-                      </span>
-                    </h2> -->
                     <div ng-show="child.type=='item' && inProgress[child.id]" ng-repeat="og in child.children">
                       <div ng-show="og.min_selection == 1 && (og.type=='option group' || og.type=='price group')">
                         <h3>{{og.name}}</h3>
@@ -163,7 +151,6 @@
                           </form>
                         </div>
                       </div>
-                      og.min_selection: {{og.min_selection}}, og.max_selection: {{og.max_selection}}
                       <div ng-show="og.min_selection == 0 && (og.type=='option group' || og.type=='price group')">
                         <h3>{{og.name}}</h3>
                         <div ng-repeat="option in og.children">
@@ -179,10 +166,6 @@
                       </div>
                     </div>
 
-                    <!-- <div ng-show="food.type=='option group'"> -->
-
-
-                    <!-- </div> -->
                     <div ng-show="inProgress[child.id]">
                       <!-- {{child.name}} -->
                       <h5>How many would you like?</h5>
@@ -190,14 +173,9 @@
                         <input placeholder="1" ng-model="$parent.inProgress[child.id].item_qty"></input>
                       </div>
                     </div>
-
                   </div>
                 </div>
-
-                <!-- end, for some reason? -->
-
               </div>
-
             </div>
           </div>
         </div>
