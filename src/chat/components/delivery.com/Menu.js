@@ -347,7 +347,8 @@ function nodeOptions (node, cartItem, validate, message) {
               'value': {
                 'item_id': cartItem.item.item_id,
                 'group_id': groupId ,
-                'optionIndices': optionIndices
+                'optionIndices': optionIndices,
+                'row_count': numActionRows
               }
             }]
           })

@@ -226,8 +226,8 @@ handlers['food.item.loadmore'] = function * (message){
   var userItem = yield cart.getItemInProgress(message.data.value.item_id, message.source.user)
   var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') :  {}
   var groupId = parseInt(_.get(message, 'data.value.group_id'))
-  var optionIndex = optionIndices[groupId] ? optionIndices[groupId] : 1
-  optionIndices[groupId] = optionIndices[groupId]? optionIndices[groupId]+1 : 2
+  var rowCount = parseInt(_.get(message, 'data.value.row_count'))
+  optionIndices[groupId] = rowCount
 
   var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
