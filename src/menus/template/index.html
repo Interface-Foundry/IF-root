@@ -163,6 +163,7 @@
                           </form>
                         </div>
                       </div>
+                      og.min_selection: {{og.min_selection}}, og.max_selection: {{og.max_selection}}
                       <div ng-show="og.min_selection == 0 && (og.type=='option group' || og.type=='price group')">
                         <h3>{{og.name}}</h3>
                         <div ng-repeat="option in og.children">

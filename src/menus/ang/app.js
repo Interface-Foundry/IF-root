@@ -50,21 +50,47 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
   };
 
   $scope.validateItem = function (item) {
+    //not actually counting the number of selected options
 
+    //correctly returning true and false
     var validateRadio = function (option) {
       var radio = $scope.inProgress[item.id].options[option];
+      console.log('validate radio -->', Object.keys(radio).indexOf('radio') >= 0)
       if (Object.keys(radio).indexOf('radio') >= 0) return true;
       else return false;
     };
 
+    var validateCheck = function (min, max, opGroup) {
+      var ipOpGroup = $scope.inProgress[item.id].options[opGroup.name];
+      var count = 0;
+      for (var k in ipOpGroup) {
+        var op = ipOpGroup[k];
+        //console.log('should have a chosen property', op)
+        if (op.chosen) count++;
+      }
+      //console.log(min, count, max)
+      //console.log('validate check -->', (!count < min || count > max) )
+      if (count < min || count > max) return false;
+      else return true;
+    }
+
+    var valid = true;
+
     //console.log('item to validate:', item);
     for (var i = 0; i < item.children.length; i++) {
+      //console.log('ITEM', item);
       var opGroup = item.children[i];
-      if (opGroup.min_selection) {
-          if (! validateRadio(opGroup.name)) return false;
+      if (opGroup.min_selection == 1 && opGroup.max_selection == 1) {
+          console.log('this is radio');
+          valid &= validateRadio(opGroup.name);
       }
+      else {
+        valid &= validateCheck(opGroup.min_selection, opGroup.max_selection, opGroup);
+      }
+      console.log('valid:', valid)
     }
-    return true;
+    
+    return valid;
   };
 
 //used for displaying price
@@ -73,7 +99,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     if (!item[`${og.name}_price`]) item[`${og.name}_price`] = 0;
     var prevOgPrice = item[`${og.name}_price`];
     item[`${og.name}_price`] = price;
-    console.log(prevOgPrice, 'prevOgPrice', '////', 'price', price);
+    //console.log(prevOgPrice, 'prevOgPrice', '////', 'price', price);
     item.current_price -= prevOgPrice;
     item.current_price += price;
   }
@@ -85,21 +111,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     }
     else item.current_price -= price;
   }
-
-  //there is no reason there are two partially overlapping price systems
-  //used for adding to cart
-    // $scope.addItemPrice = function (item) {
-    //   var cost = item.price;
-    //   for (var opt in item.options) {
-    //     var optGroup = item.options[opt];
-    //     for (var optId in optGroup) {
-    //       var option = optGroup[optId];
-    //       if (option != 'radio' && option.chosen) cost += option.price;
-    //     }
-    //   }
-    //   item.price = cost;
-    //   $scope.total += cost;
-    // };
 
   $scope.addToCart = function (item) {
     console.log('ITEM', item);
