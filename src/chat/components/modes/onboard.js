@@ -6,12 +6,8 @@ var dutils = require('../delivery.com/utils');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
 var cron = require('cron');
-var momenttz = require('moment-timezone');
-var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
-var slackcart = require('../slack/cart');
 var bundles = require('../bundles');
-var eachSeries = require('async-co/eachSeries');
 var processData = require('../process');
 var request = require('request');
 var Fuse = require('fuse.js');
@@ -45,41 +41,36 @@ handlers['start'] = function * (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  var teamMembers = yield utils.getTeamMembers(team);
-  var admins = yield utils.findAdmins(team);
-  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
-  var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   var attachments = [];
   //adding onboard sticker
   attachments.push({
     // image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
-    text: 'Welcome to Kip!  We\'ll help you get started :)'
+    text: 'Welcome to Kip!  We\'ll help you get started :)',
+    fallback: 'Would you like a short tour?',
   });
   attachments.push({
       image_url: "http://tidepools.co/kip/kip_menu.png",
       text: 'Would you like a short tour?',
+      fallback: 'Would you like a short tour?',
       color: '#45a5f4',
       mrkdwn_in: ['text'],
-      fallback:'Onboard',
       actions: cardTemplate.slack_onboard_start,
       callback_id: 'none'
     })
   attachments.push({
       text: '',
       mrkdwn_in: ['text'],
-      fallback:'Onboard',
       actions: cardTemplate.slack_onboard_default,
       callback_id: 'none'
     });
 
    var msg = message;
    msg.mode = 'onboard'
-   // msg.action = 'home'
    msg.text = ''
    msg.source.team = team_id;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
+   msg.fallback = 'Let\'s get started!';
    return [msg];
  }
 
@@ -93,14 +84,14 @@ handlers['start'] = function * (message) {
      text: 'Ok! When would you like to be reminded?',
      color: '#45a5f4',
      mrkdwn_in: ['text'],
-     fallback: 'Onboard',
+     fallback: 'Ok! When would you like to be reminded?',
      actions: cardTemplate.admin_reminder,
      callback_id: 'none'
    });
    attachments.push({
      text: '',
      mrkdwn_in: ['text'],
-     fallback: 'Onboard',
+     fallback: 'Ok! When would you like to be reminded?',
      actions: cardTemplate.slack_onboard_default,
      callback_id: 'none'
 
@@ -112,6 +103,7 @@ handlers['start'] = function * (message) {
    msg.source.team = team_id;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
+   msg.fallback = 'Ok! When would you like to be reminded?';
    return [msg];
  }
 
@@ -158,28 +150,30 @@ handlers['confirm_admin_reminder'] = function*(message, data) {
     var cronAttachments = [];
     cronAttachments.push({
       // image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
-      text: 'Hey, it\'s me again. Ready to get started?'
+      text: 'Hey, it\'s me again. Ready to get started?',
+      fallback: 'Hey, it\'s me again. Ready to get started?'
     });
     cronAttachments.push({
       image_url: "http://tidepools.co/kip/kip_menu.png",
       text: 'What are you looking for?',
       color: '#45a5f4',
       mrkdwn_in: ['text'],
-      fallback: 'Onboard',
+      fallback: 'What are you looking for?',
       actions: cardTemplate.slack_onboard_start,
       callback_id: 'none'
     })
     cronAttachments.push({
       text: '',
       mrkdwn_in: ['text'],
-      fallback: 'Onboard',
+      fallback: 'What are you looking for?',
       actions: cardTemplate.slack_onboard_default,
       callback_id: 'none'
     });
     var cronMsg = {
       mode: 'onboard',
       action: 'home',
-      reply: cronAttachments
+      reply: cronAttachments,
+      fallback: 'Hey, it\'s me again. Ready to get started?'
     }
     createCronJob([currentUser], cronMsg, team, new Date(msInFuture + now.getTime()));
   }
@@ -189,13 +183,12 @@ handlers['confirm_admin_reminder'] = function*(message, data) {
     text: messageText,
     color: '#45a5f4',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard',
+    fallback: messageText,
     callback_id: 'none'
   });
   attachments.push({
     text: '',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
   });
@@ -205,6 +198,7 @@ handlers['confirm_admin_reminder'] = function*(message, data) {
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
+  msg.fallback = messageText;
   return [msg];
 }
 /**
@@ -215,24 +209,18 @@ handlers['supplies'] = function * (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  var teamMembers = yield utils.getTeamMembers(team);
-  var admins = yield utils.findAdmins(team);
-  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
-  var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   var attachments = [];
   attachments.push({
       text: '*Step 1:* Choose a bundle:',
       mrkdwn_in: ['text'],
       color: '#A368F0',
-      fallback:'Onboard',
+      fallback:'Step 1: Choose a bundle',
       actions: cardTemplate.slack_onboard_bundles,
       callback_id: 'none'
     })
   attachments.push({
       text: '',
       mrkdwn_in: ['text'],
-      fallback:'Onboard',
       actions: cardTemplate.slack_onboard_default,
       callback_id: 'none'
     });
@@ -243,6 +231,7 @@ handlers['supplies'] = function * (message) {
    msg.source.team = team_id;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
+   msg.fallback = 'Step 1: Choose a bundle'
    return [msg];
 }
 
@@ -254,6 +243,7 @@ handlers['lunch'] = function * (message) {
   msg.mode = 'food'
   msg.action = 'begin'
   msg.source.team = team_id;
+  msg.fallback = 'Add an address by tapping the \'New Location +\' button'
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.state = {};
   var foodSession = yield dutils.initiateDeliverySession(msg)
@@ -298,12 +288,14 @@ handlers['lunch'] = function * (message) {
   //modify message for onboarding
   if (foodSession.onboarding) {
     msg_json.attachments[0].text = '*Step 1.* Add an address for delivery by tapping the `New Location +` button'
+    msg_json.attachments[0].fallback = 'Step 1: Add an address for delivery by tapping the `New Location +` button'
     msg_json.attachments[0].mrkdwn_in = ["text"]
     msg_json.attachments[0].color = '#A368F0'
 
     //add onboard sticker #1
     msg_json.attachments.unshift({
       'text':'Hi there, I\'m going to walk you through your first Kip Café order!',
+      'fallback':'Hi there, I\'m going to walk you through your first Kip Café order!',
       'image_url':'http://tidepools.co/kip/welcome_cafe.png',
       'color': '#A368F0'
     })
@@ -397,6 +389,7 @@ handlers['bundle'] = function * (message, data) {
 
   attachments.push({
     text: 'Awesome! You added your first bundle.',
+    fallback: 'Awesome! You added your first bundle.',
     color: '#45a5f4',
     // image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
   });
@@ -469,22 +462,12 @@ handlers['bundle'] = function * (message, data) {
    var msg = message;
    msg.mode = 'onboard'
    msg.action = 'home';
-   msg.text = ''
-   msg.fallback = 'Awesome! You added your first bundle.'
+   msg.text = '';
    msg.source.team = message.source.team;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
-   var response = {
-      icon_url: 'http://kipthis.com/img/kip-icon.png',
-      username: 'Kip',
-      subtype: "bot_message",
-      type: "message",
-      attachments: attachments
-    }
   yield utils.hideLoading(message);
-
-   return [msg];
-
+  return [msg];
 }
 
 /**
@@ -492,7 +475,6 @@ handlers['bundle'] = function * (message, data) {
  * S4
  */
 handlers['team'] = function * (message) {
-
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -504,7 +486,6 @@ handlers['team'] = function * (message) {
     text: ''
   });
   var channels = yield utils.getChannels(team);
-  var cartChannels = team.meta.cart_channels;
   var buttons = channels.map(channel => {
     var checkbox = cartChannels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
       return {
@@ -516,8 +497,8 @@ handlers['team'] = function * (message) {
   });
   var chunkedButtons = _.chunk(buttons, 5);
 
-  attachments.push({text: '*Step 3* Choose the channels you want to include: ', mrkdwn_in: ['text'],
-    color: '#A368F0', actions: chunkedButtons[0], callback_id: "none"});
+  attachments.push({text: '*Step 3:* Choose the channels you want to include: ', mrkdwn_in: ['text'],
+    color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3: Choose the channels you want to include' , callback_id: "none"});
   chunkedButtons.forEach((ele, i) => {
     if (i != 0) {
       attachments.push({text:'', actions: ele, callback_id: 'none'});
@@ -527,7 +508,7 @@ handlers['team'] = function * (message) {
       text: '',
       color: '#45a5f4',
       mrkdwn_in: ['text'],
-      fallback:'Onboard',
+      fallback:'Step 3: Choose the channels you want to include',
       actions: cardTemplate.slack_onboard_team,
       callback_id: 'none'
     });
@@ -537,6 +518,7 @@ handlers['team'] = function * (message) {
   msg.action = 'home'
   msg.text = '';
   msg.source.team = team.team_id;
+  msg.fallback = 'Step 3: Choose the channels you want to include'
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
   return [msg];
@@ -554,20 +536,19 @@ handlers['reminder'] = function(message) {
   var attachments = [{
     text: 'Awesome! I\'ve let them know. ',
     color: '#45a5f4',
-    mrkdwn_in: ['text']
+    mrkdwn_in: ['text'],
+    fallback: 'Step 4: Remind team members about shopping order collections'
   }];
   attachments.push({
     text: '*Step 4:* Remind team members about shopping order collections:',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Onboard',
     actions: cardTemplate.cart_reminder,
     callback_id: 'none'
   });
   attachments.push({
     text: '',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none'
   });
@@ -578,6 +559,7 @@ handlers['reminder'] = function(message) {
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
+  msg.fallback = 'Step 4: Remind team members about shopping order collections'
   return [msg];
 }
 
@@ -667,7 +649,8 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
     mode: 'onboard',
     source: message.source,
     origin: message.origin,
-    reply: attachments
+    reply: attachments,
+    fallback: messageText.replace('*', '')
   }
   return [msg];
 }
@@ -796,6 +779,7 @@ handlers['member'] = function*(message) {
       thread_id: a.dm,
       origin: 'slack',
       mode: 'member_onboard',
+      fallback: `Make <@${message.source.user}>'s life easier! Let me show you how to add items to the team cart`,
       action: 'home',
       reply: attachments,
       source: {
@@ -882,6 +866,7 @@ handlers['checkout'] = function * (message) {
    msg.mode = 'onboard'
    msg.action = 'home';
    msg.text = ''
+   msg.fallback = 'Here\'s your cart' 
    msg.source.team = message.source.team;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
@@ -944,7 +929,7 @@ handlers['sorry'] = function*(message) {
   attachments.push({
     text: 'Don’t have any changes? Type `exit` to quit settings',
     mrkdwn_in: ['text'],
-    fallback: 'Settings',
+    fallback: 'Sorry!',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none',
     color: '#45a5f4'
@@ -959,9 +944,6 @@ handlers['sorry'] = function*(message) {
  * send_replace home button
  */
 handlers['home_btn'] = function * (message) {
-   var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
-   var last_message = history[0];
-   var mode = _.get(last_message,'mode');
    var actions = cardTemplate.slack_onboard_home;
    var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
    var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
@@ -984,15 +966,12 @@ handlers['home_btn'] = function * (message) {
  * send_replace back button
  */
 handlers['back_btn'] = function * (message) {
-   var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
-   var last_message = history[0];
    var actions = cardTemplate.slack_onboard_default;
    var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
    var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
    if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
     var json = message.source.original_message;
     json.attachments[json.attachments.length-1] = {
-        fallback: 'onboard',
         callback_id: 'onboard',
         actions: cardTemplate.slack_onboard_default
     }
@@ -1008,13 +987,11 @@ handlers['back_btn'] = function * (message) {
  * more info / help handler
  */
 handlers['more_info'] = function * (message, data) {
-
    var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
    var last_message = history[0];
    var lastAction = _.get(data,'lastAction') ? _.get(data,'lastAction') : _.get(last_message,'action') ?  _.get(last_message,'action') : 'team.help';
    var helpText;
    var helpOptions;
-   var lastMenu = _.get(message, 'source.original_message.attachments') ? _.get(message, 'source.original_message.attachments')[_.get(message, 'source.original_message.attachments').length-1].actions : _.get(data,'attachments');
    switch(lastAction) {
     case 'bundle.more':
       helpText = `Selecting 'Yes' will allow you to choose which channels to add to this order.
@@ -1028,6 +1005,7 @@ handlers['more_info'] = function * (message, data) {
    }
 
    message.text = "";
+   message.fallback = 'More Info'
    message.mode = 'onboard';
    message.action = 'home';
    var attachments = [];
@@ -1035,7 +1013,7 @@ handlers['more_info'] = function * (message, data) {
       text: helpText,
       color: '#45a5f4',
       mrkdwn_in: ['text'],
-      fallback:'Onboard',
+      fallback: helpText,
       actions: helpOptions,
       callback_id: 'none'
     });
