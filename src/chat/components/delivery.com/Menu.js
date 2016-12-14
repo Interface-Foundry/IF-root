@@ -32,10 +32,8 @@ Menu.prototype.getItemById = function (id) {
 // gets the price for a cartItem, which is one of the objects in the delivery_schema cart array
 Menu.prototype.getCartItemPrice = function (cartItem) {
   var menu = this
-//console.log('GETCARTITEM', cartItem)
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
-//console.log('GETCARTITEMPRICE_ITEM', item)
   var basePrice
   var hasPriceGroup = item.children.map(c => c.type).includes('price group')
   if (hasPriceGroup) {
@@ -98,7 +96,6 @@ function flattenMenu (data) {
 
 Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
   var menu = this
-//console.log('GENERATEJSONFORITEM_CARTITEM', cartItem)
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
 

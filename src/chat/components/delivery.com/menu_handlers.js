@@ -214,9 +214,7 @@ handlers['food.item.submenu'] = function * (message) {
   yield cart.pullFromDB()
 
   // user clicked button
-  //console.log('FOODITEMSUBMENU_MESSAGE', message)
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
-  //console.log('FOODITEMSUBMENU_USERITEM', userItem)
   var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
@@ -245,20 +243,13 @@ handlers['food.option.click'] = function * (message) {
   var userItem = yield cart.getItemInProgress(item_id, message.source.user)
   var optionNode = cart.menu.getItemById(option_id)
   userItem.item.option_qty = userItem.item.option_qty || {}
-console.log('OPTION_ID', option_id)
-console.log('ITEM_ID', item_id)
-console.log('USER_ITEM', userItem)
-console.log('OPTION_NODE', optionNode)
   //var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
   var optionGroupId = optionNode.parentId
   var optionGroup = cart.menu.getItemById(optionGroupId)
-console.log('OPTION GROUP ID', optionGroupId)
-console.log('OPTION GROUP', optionGroup)
   // Radio buttons, can only toggle one at a time
   // so delete any other selected radio before the next step will select it
   if (optionGroup.min_selection === optionGroup.max_selection && optionGroup.min_selection === 1) {
     optionGroup.children.map(radio => {
-    //console.log('RADIOOOOOOOO', radio)
       if (userItem.item.option_qty[radio.id]) {
         delete userItem.item.option_qty[radio.id]
         deleteChildren(optionNode, userItem, cart.foodSession._id)
