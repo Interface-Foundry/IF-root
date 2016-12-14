@@ -436,7 +436,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       } else {
         finalAttachment.actions = [{
           'name': `food.admin.order.checkout.confirm`,
-          'text': `✓x Checkout ${foodSession.calculated_amount.$}`,
+          'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
           'type': `button`,
           'style': `primary`,
           'value': `checkout`
