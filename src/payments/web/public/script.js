@@ -75,8 +75,8 @@ function stripeResponseHandler(status, response) {
     $( "#stripeJSButton" ).show();
     $( "#stripeProcessing" ).hide();
     $( "#stripeSuccess" ).hide();
-
-    $form.find('.payment-errors').text(response.error.message);
+    alert(response.error.message);
+    //$form.find('.payment-errors').text(response.error.message);
     $form.find('.submit').prop('disabled', false); // Re-enable submission
 
   } else { // Token was created!
@@ -100,7 +100,6 @@ function stripeResponseHandler(status, response) {
           console.log('SUCCESS')
 
           $( "#stripeJSButton" ).hide();
-          $( "#stripeProcessing" ).hide();
           $( "#stripeSuccess" ).show();
           $(".form-row input").empty();
 
@@ -152,7 +151,6 @@ function process(data){
 
     //only for desktops
     if(!mobileDetect()){
-      
       $("#bodyTitle").html('<a href="'+data.order.chosen_restaurant.url+'">'+data.order.chosen_restaurant.name+'</a>');
       $("#bodyText").html(data.order.order.order_type+'</br>'+(data.order.order.total/100).toFixed(2));
 
@@ -201,12 +199,6 @@ function process(data){
 
     //mobile ios
     else {
-      $( "#stripeJSButton" ).click(function() {
-        $( "#stripeJSButton" ).hide();
-        $( "#stripeProcessing" ).show();
-      });
-      $('#innerButton').css('width', '100%');
-      $('#kipPay').css('width', '100%');
       $("#stripeJSButton").text("Pay $"+(data.order.order.total/100).toFixed(2));
       $("#stripeEmail").text(data.order.convo_initiater.email);
       $('#stripeEmail').attr('data-email', data.order.convo_initiater.email);

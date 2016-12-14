@@ -48,7 +48,7 @@ co(function*() {
 var updateJob = module.exports.updateJob = function(team_id) {
   return co(function*() {
 
-    console.log('updating weekly job for team ' + team_id);
+    // console.log('updating weekly job for team ' + team_id);
     var slackbot = yield db.Slackbots.findOne({
       team_id: team_id
     }).exec();
@@ -57,7 +57,7 @@ var updateJob = module.exports.updateJob = function(team_id) {
     var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
     var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), slackbot.meta.weekly_status_timezone);
 
-    console.log('setting weekly job for team ' + team_id + ' ' + slackbot.team_name + ' at ' + job_time_bot_tz.format('00 mm HH * * d') + ' ' + slackbot.meta.weekly_status_timezone);
+    // console.log('setting weekly job for team ' + team_id + ' ' + slackbot.team_name + ' at ' + job_time_bot_tz.format('00 mm HH * * d') + ' ' + slackbot.meta.weekly_status_timezone);
 
     //
     // Stop the old jerb if it exists
@@ -254,7 +254,7 @@ function lastCall(response, convo) {
               "text":'',
               "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
               "color": "#45a5f4",
-              "mrkdwn_in": ["text"]        
+              "mrkdwn_in": ["text"]
           },{
               "fallback": "Last Call",
               "text":'Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late! \n The clock\'s ticking! You have *60* minutes',
@@ -274,7 +274,7 @@ function lastCall(response, convo) {
               client_res: attachment
           };
           //bye bye botkit ugh
-          ioKip.sendResponse(obj); 
+          ioKip.sendResponse(obj);
 
           resolve();
         })
