@@ -73,7 +73,10 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(1)
   prevMessage = prevMessage[0]
-  console.log('heerrr', prevMessage.reply.textFor)
+  if (_.get(prevMessage, 'reply')) {
+    logging.info('heerrr', prevMessage.reply)
+  }
+
   var editInfo = {}
 
   editInfo['admin.order.checkout.address2'] = function * (message) {
@@ -88,6 +91,10 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   editInfo['admin.order.checkout.name'] = function * (message) {
+    if (!_.get(message, 'text')) {
+      logging.error('message was undefined but we got a handler', message, prevMessage)
+      return yield handlers['food.admin.order.checkout.name'](message)
+    }
     logging.info('saving name of person receiving order: ', message.text)
     if (message.text.split(' ').length > 1) {
       foodSession.convo_initiater.first_name = message.text.split(' ')[0]
