@@ -216,7 +216,7 @@ handlers['food.item.submenu'] = function * (message) {
 
   // user clicked button
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
-  var json = cart.menu.generateJsonForItem(userItem, true, message)
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
@@ -229,7 +229,7 @@ handlers['food.item.loadmore'] = function * (message){
   var optionIndex = optionIndices[groupId] ? optionIndices[groupId] : 1
   optionIndices[groupId] = optionIndices[groupId]? optionIndices[groupId]+1 : 2
 
-  var json = cart.menu.generateJsonForItem(userItem, true, message)
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
@@ -272,7 +272,7 @@ handlers['food.option.click'] = function * (message) {
 
   kip.debug('option_qty', userItem.item.option_qty)
 
-  var json = cart.menu.generateJsonForItem(userItem, true, message)
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
@@ -294,7 +294,7 @@ handlers['food.item.quantity.add'] = function * (message) {
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
   userItem.item.item_qty++
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
-  var json = cart.menu.generateJsonForItem(userItem, true, message)
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
@@ -310,7 +310,7 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   }
   userItem.item.item_qty--
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
-  var json = cart.menu.generateJsonForItem(userItem, true, message)
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
