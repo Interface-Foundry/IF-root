@@ -148,7 +148,7 @@ app.post('/session', jsonParser, (req, res) => co(function * () {
 app.post('/process', jsonParser, (req, res) => co(function * () {
   if (_.get(req, 'body.token') && _.get(req, 'body.session_token')) {
     logging.info('processing new card')
-    logging.data('__NEW CARD__', req.body.order.order)
+    logging.data('__NEW CARD__', req.body)
     res.sendStatus(200)
 
     // this is a stripe token for the user inputted credit card details
