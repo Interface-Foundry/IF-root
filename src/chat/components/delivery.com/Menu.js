@@ -152,44 +152,49 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
   // options, like radios and checkboxes
   var options = nodeOptions(item, cartItem, validate, message)
   json.attachments = json.attachments.concat(options)
+
+  if (_.keys(cartItem.item.option_qty).length > 0) {
+    var optionsText = _.keys(cartItem.item.option_qty).map((opt) => {
+      if (this.getItemById(String(opt)).price > 0) {
+        var specificItem = `${this.getItemById(String(opt)).name} - \$${this.getItemById(String(opt)).price.toFixed(2)}`
+      } else {
+        specificItem = this.getItemById(String(opt)).name
+      }
+      return specificItem
+    })
+    optionsText = `*Options:* _${optionsText.join(', ')}_`
+    json.attachments.push({
+      'text': optionsText,
+      'fallback': optionsText,
+      'attachment_type': 'default',
+      'mrkdwn_in': ['text']
+    })
+  }
+
   json.attachments.push({
-    'text':  '*Options:* _' + _.keys(cartItem.item.option_qty).map((opt) => this.getItemById(String(opt)).price > 0 ? this.getItemById(String(opt)).name + ' - $' + this.getItemById(String(opt)).price.toFixed(2) : this.getItemById(String(opt)).name).join(', ') + '_',
-    'fallback': '*Options:* _' + _.keys(cartItem.item.option_qty).map((opt) => this.getItemById(String(opt)).price > 0 ? this.getItemById(String(opt)).name + ' - $' + this.getItemById(String(opt)).price.toFixed(2) : this.getItemById(String(opt)).name).join(', ') + '_',
-    'attachment_type': 'default',
-    'mrkdwn_in': [
-      'text'
-    ],
-    },     
-    {
     'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"} \n *Total:* `+fullPrice.$,
     'fallback': 'Special Instructions: ${cartItem.item.instructions || "_None_"}',
     'callback_id': 'menu_quickpicks',
     'color': '#49d63a',
     'attachment_type': 'default',
-    'mrkdwn_in': [
-      'text'
-    ],
-    'actions': [
-      {
+    'mrkdwn_in': ['text'],
+    'actions': [{
         'name': 'food.item.add_to_cart',
         'text': '✓ Add to Order',
         'type': 'button',
         'style': 'primary',
         'value': cartItem.item.item_id
-      },
-      {
+      }, {
         'name': 'food.item.instructions',
         'text': '✎ Special Instructions',
         'type': 'button',
         'value': cartItem.item.item_id
-      },
-      {
+      }, {
         'name': 'food.menu.quickpicks',
         'text': '< Back',
         'type': 'button',
         'value': 0
-      }
-    ]
+      }]
   })
   return json
 }
@@ -209,7 +214,7 @@ function nodeOptions (node, cartItem, validate, message) {
       a.color = 'grey'
     } else {
       a.text = `*${g.name}*`
-    } 
+    }
     var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') : {}
     var required = false
     var allowMultiple = true
@@ -295,7 +300,7 @@ function nodeOptions (node, cartItem, validate, message) {
 
   // spread out the buttons to multiple attachments if needed
   attachments = attachments.reduce((all, a) => {
-    
+
     var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') : {}
     var groupId = Number(a.callback_id.split('-').slice(-1)[0])
     var optionIndex = optionIndices[groupId] ? optionIndices[groupId] : 1
