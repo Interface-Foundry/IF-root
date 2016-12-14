@@ -396,6 +396,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }
       foodSession.calculated_amount = Number((Math.round(((foodSession.main_amount - foodSession.discount_amount) * 1000) / 10) / 100).toFixed(2))
 
+      if (foodSession.calculated_amount < 0.50) foodSession.calculated_amount = 0.50 // stripe thing
+
       // check for order over $510 (pre coupon) not processing over $510 (pre coupon)
       if (_.get(discountAvail, 'couponDiscount', 0) === 0.99 && foodSession.order.total > 510.00) {
         $replyChannel.send(message, 'food.exit', {
