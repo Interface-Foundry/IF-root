@@ -151,7 +151,6 @@ function process(data){
 
     //only for desktops
     if(!mobileDetect()){
-      /* ryan - remove bodyTitle and bodyText? */
       $("#bodyTitle").html('<a href="'+data.order.chosen_restaurant.url+'">'+data.order.chosen_restaurant.name+'</a>');
       $("#bodyText").html(data.order.order.order_type+'</br>'+(data.order.order.total/100).toFixed(2));
 
