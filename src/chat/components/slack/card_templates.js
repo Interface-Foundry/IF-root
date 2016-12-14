@@ -392,28 +392,22 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
 
 var cart_reminder = module.exports.cart_reminder = [{
   name: "onboard.start.confirm_cart_reminder",
-  text: "Today",
+  text: "Daily",
   style: "default",
   type: "button",
-  value: "confirm_cart_reminder.today"
+  value: "confirm_cart_reminder.daily"
 }, {
   name: "onboard.start.confirm_cart_reminder",
-  text: "Tomorrow",
+  text: "Weekly",
   style: "default",
   type: "button",
-  value: "confirm_cart_reminder.tomorrow"
+  value: "confirm_cart_reminder.weekly"
 }, {
   name: "onboard.start.confirm_cart_reminder",
-  text: "1 Week",
+  text: "Monthly",
   style: "default",
   type: "button",
-  value: "confirm_cart_reminder.one_week"
-}, {
-  name: "onboard.start.confirm_cart_reminder",
-  text: "1 Month",
-  style: "default",
-  type: "button",
-  value: "confirm_cart_reminder.one_month"
+  value: "confirm_cart_reminder.monthly"
 }, {
   name: "onboard.start.confirm_cart_reminder",
   text: "Never",

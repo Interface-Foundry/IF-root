@@ -12,9 +12,8 @@ picstitch: http://104.196.30.108:5000
 nlp: http://104.196.51.184:8083
 nlp_rnn: http://104.196.1.204:8085
 slack:
-  client_id: "105555369782.105569439367"
-   # "17713782326.83486971505"
-  client_secret: 6b0a6fb9215c0c28991648ac2232983c
-  verification_token: rF1BCPsHSBpLyw80aQ7FCGhN
-  redirect_uri: https://5c48d698.ngrok.io/newslack
+  client_id: "105555369782.117559561207"
+  client_secret: 0ccce527e8ab02cfdbe3ef63a4e16bac
+  verification_token: SeSOXUklO1kRQLu5sNHXilMn
+  redirect_uri: https://54806743.ngrok.io/newslack
   

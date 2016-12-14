@@ -15,6 +15,7 @@ var eachSeries = require('async-co/eachSeries');
 var processData = require('../process');
 var request = require('request');
 var Fuse = require('fuse.js');
+var tz = require('moment-timezone')
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
@@ -457,7 +458,7 @@ handlers['bundle'] = function * (message, data) {
       color: '#45a5f4'
     })
   attachments.push({
-    text: '*Step 2:* Get your team to add items to the cart:',
+    text: '*Step 2:* Let your team add items to the cart?',
     mrkdwn_in: ['text'],
     color: '#A368F0',
     fallback: 'Onboard.helper',
@@ -556,7 +557,7 @@ handlers['reminder'] = function(message) {
     mrkdwn_in: ['text']
   }];
   attachments.push({
-    text: '*Step 4:* Set a reminder for collecting shopping orders from your team:',
+    text: '*Step 4:* Remind team members about shopping order collections:',
     mrkdwn_in: ['text'],
     color: '#A368F0',
     fallback: 'Onboard',
@@ -585,41 +586,63 @@ handlers['reminder'] = function(message) {
  */
 
 handlers['confirm_cart_reminder'] = function*(message, data) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
-  var team = yield db.Slackbots.findOne({
+  let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  let team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
 
-  const ONE_DAY = 24 * 60 * 60 * 1000; //hours in a day * mins in hour * seconds in min * milliseconds in second
-  var dateDescrip,
-    msInFuture = -1,
+  let dateDescrip,
+    cronTime = {},
     alertTime = data[0],
     now = new Date();
+
   switch (alertTime) {
-    case 'today':
-      msInFuture = determineLaterToday(); //4 hours for now
-      dateDescrip = 'later today';
+    case 'daily':
+      cronTime = {
+        day: '1-5',
+        date: '*',
+        hour: now.getHours(),
+        minutes: now.getMinutes()
+      }
+      dateDescrip = `at *${now.getHours() < 12 ? now.getHours() : now.getHours() - 12}:${now.getMinutes()<10?'0'+now.getMinutes(): now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}* every day`;
       break;
-    case 'tomorrow':
-      msInFuture = ONE_DAY;
-      dateDescrip = 'tomorrow';
+    case 'weekly':
+      cronTime = {
+        day: now.getDay(),
+        hour: now.getHours(),
+        minutes: now.getMinutes(),
+        date: '*'
+      }
+      team.meta.weekly_status_day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
+      dateDescrip = `every *${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()]}* at *${now.getHours() < 12 ? now.getHours() : now.getHours() - 12}:${now.getMinutes()<10?'0'+now.getMinutes(): now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}*`;
       break;
-    case 'one_week':
-      msInFuture = ONE_DAY * 7;
-      dateDescrip = 'in a week';
-      break;
-    case 'one_month':
-      msInFuture = ONE_DAY * 30;
-      dateDescrip = 'in a month';
+    case 'monthly':
+      cronTime = {
+        day: '*',
+        date: now.getDate(),
+        hour: now.getHours(),
+        minutes: now.getMinutes()
+      }
+      team.meta.weekly_status_date = now.getDate();
+      dateDescrip = `on day *${now.getDate()}* of every month at *${now.getHours() < 12 ? now.getHours() : now.getHours() - 12}:${now.getMinutes()<10?'0'+now.getMinutes(): now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}*`;
       break;
     case 'never':
     default:
       break;
   }
-  var messageText = (msInFuture > 0) ?
-    `I'll give everyone a heads up for your order ${dateDescrip}.` :
-    'Ok! I won\'t set any reminders.';
-  messageText += ' Thanks and have a great day :)';
+
+  team.meta.status_interval = alertTime;
+  team.meta.weekly_status_timezone = tz.tz.guess();
+  team.meta.weekly_status_enabled = (dateDescrip) ? true : false;
+  team.meta.weekly_status_time = `${now.getHours() < 12 ? now.getHours() : now.getHours() - 12}:${now.getMinutes()<10?'0'+now.getMinutes(): now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}`
+  yield team.save();
+  if (dateDescrip) {
+    yield utils.setCron(message, {}, cronTime)
+  }
+  var messageText = (dateDescrip) ?
+    `Ok, your team will get reminders ${dateDescrip}. Admins can always edit reminders in Settings` :
+    'Ok! I won\'t set any reminders. If you ever want them, you can turn them on in Settings';
+  messageText += '\n Thanks and have a great day :)';
   var attachments = [{
     image_url: "http://tidepools.co/kip/kip_menu.png",
     text: 'Click a mode to start using Kip',
@@ -645,46 +668,6 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
     source: message.source,
     origin: message.origin,
     reply: attachments
-  }
-
-  if (msInFuture > 0) {
-    var channelMembers = [];
-    yield team.meta.cart_channels.map(function*(channel) {
-      var members = yield utils.getChannelMembers(team, channel);
-      channelMembers = channelMembers.concat(members);
-    });
-    channelMembers = _.uniqBy(channelMembers, a => a.id);
-
-    var cronAttachments = [{
-      'image_url': 'http://kipthis.com/kip_modes/mode_teamcart_collect.png',
-      'text': '',
-      'mrkdwn_in': [
-        'text',
-        'pretext'
-      ],
-      color: '#45a5f4'
-    }];
-    cronAttachments.push({
-      text: `Hi, <@${message.source.user}> is collecting Amazon orders`,
-      color: '#45a5f4',
-      mrkdwn_in: ['text'],
-      fallback: 'Shopping',
-      callback_id: 'none'
-    });
-    var cronMsg = {
-      mode: 'shopping',
-      action: 'switch.silent',
-      reply: cronAttachments
-    }
-    var collectMsg = yield createCartMsg(message);
-    createCronJob(
-      channelMembers,
-      cronMsg,
-      team,
-      new Date(msInFuture + now.getTime()),
-      //display the cart to the admin an hour after the reminder
-      (now) => createCronJob([currentUser], collectMsg, team, new Date((ONE_DAY / 24) + now.getTime()))
-    );
   }
   return [msg];
 }
@@ -720,7 +703,6 @@ var createCartMsg = function*(message) {
       `*Price:* ${item.price} each`,
       `*Added by:* ${userString}`,
       `*Quantity:* ${item.quantity}`,
-
     ].filter(Boolean).join('\n');
     // add the item actions if needed
     item_message.callback_id = item._id.toString();

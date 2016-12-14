@@ -66,9 +66,9 @@ function * findAdmins(team) {
     yield eachSeries(members, function * (user) {
       if ( adminIds.indexOf(user.id) > -1) {
         admins.push(user);
-        if (!user.is_admin ) {
-           user.is_admin = true;
-           yield user.save();
+        if (!user.is_admin) {
+          user.is_admin = true;
+          yield user.save();
         }
       }
       else if ( adminIds.indexOf(user.id) == -1 && user.is_admin ) {
@@ -738,9 +738,47 @@ function * updateCron(message, jobs, when, type) {
     },
     true,
     team.meta.weekly_status_timezone);
-
-
 };
+
+/**
+ * Sets all parameters for a given chron
+ * @param {Message} message - the message received
+ * @param {Array} jobs - a list of all cron jobs
+ * @param {Object} when - a date object in the form of {day:String, hour:String, minutes:String, date:String}
+ * @return {Null} no return
+ */
+function* setCron(message, jobs, when) {
+  let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  let team = yield db.Slackbots.findOne({
+    'team_id': team_id
+  }).exec();
+  let currentUser = yield db.Chatusers.findOne({
+    id: message.source.user
+  });
+
+  let teamDate = `00 ${when.minutes} ${when.hour} ${when.date} * ${when.day}`;
+  let adminDate = `00 ${when.minutes} ${(parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')} ${when.date} * ${when.day}`;
+
+  kip.debug('\n\n\n\n\n\n setting cron job to send last calls : ', teamDate, adminDate, '\n\n\n\n\n\n')
+
+  //Set cron job for cart member last calls
+  jobs[team.team_id] = new cron.CronJob(teamDate, function() {
+      co(sendLastCalls(message));
+    }, function() {
+      kip.debug('\n\n\n\n ran cron job for team: ' + team.team_id + ' ' + team.team_name + teamDate + '\n\n\n\n');
+    },
+    true,
+    team.meta.weekly_status_timezone);
+
+  //Set cron job for admin cart status updates -- currently one hour after
+  jobs[currentUser.user_id] = new cron.CronJob(adminDate, function() {
+      co(sendCartToAdmins(message, team));
+    }, function() {
+      kip.debug('\n\n\n\n ran cron job for admin: ' + team.team_id + ' ' + team.team_name + adminDate + '\n\n\n\n');
+    },
+    true,
+    team.meta.weekly_status_timezone);
+}
 
 
 
@@ -793,5 +831,6 @@ module.exports = {
   updateCron: updateCron,
   sendLastCalls: sendLastCalls,
   getDayNum: getDayNum,
-  constructCart: constructCart
+  constructCart: constructCart,
+  setCron: setCron
 }
