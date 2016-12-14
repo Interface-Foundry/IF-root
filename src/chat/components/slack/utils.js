@@ -600,9 +600,9 @@ function * constructCart(message, text) {
  var attachments = [];
 
   attachments.push({
+    image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png',
     text: text,
-    color: '#45a5f4',
-    image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
+    color: '#45a5f4'
   });
 
   for (var i = 0; i < cart.aggregate_items.length; i++) {

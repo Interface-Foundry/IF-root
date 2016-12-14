@@ -364,23 +364,6 @@ handlers['set_date'] = function * (message) {
   var num = parseInt(message.text.trim())
 
    if (!(/^\d+$/.test(message.text)) ||  0 > num > 31) { 
-      // var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
-      // var relevantMessage = history[1];
-      // var json = relevantMessage.source.original_message;
-      // var warning = {
-      //   text: 'The date you entered is incorrect!',
-      //   color: '#ff0000',
-      //   mrkdwn_in: ['text'],
-      //   fallback:'Settings',
-      //   callback_id: 'none'
-      // }
-      // json.attachments.push(warning)
-      // request({
-      //   method: 'POST',
-      //   uri: relevantMessage.source.response_url,
-      //   body: JSON.stringify(json)
-      // }); 
-      // return
       var msg = message;
       msg.mode = 'settings';
       msg.action = 'set_date';
