@@ -260,7 +260,7 @@ app.post('/slackaction', next(function * (req, res) {
         var team = message.source.team;
         var slackBot = slackModule.slackConnections[team];
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
-        
+
       }
 
       message.save().then(() => {
@@ -471,7 +471,7 @@ app.get('/authorize', function (req, res) {
 app.get('/newslack', function (req, res) {
   console.log('new slack integration request');
     co(function * () {
-     
+
   if (!req.query.code) {
     console.error(new Date())
     console.error('no code in the callback url, cannot proceed with new slack integration')
@@ -489,13 +489,13 @@ app.get('/newslack', function (req, res) {
         _.merge(existingTeam, res_auth);
         yield existingTeam.save();
         yield utils.initializeTeam(existingTeam, res_auth);
-       co(slackModule.start);
+        yield slackModule.loadTeam(bot)
      } else {
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
       yield utils.initializeTeam(bot, res_auth);
+      yield slackModule.loadTeam(bot)
       var user = yield db.Chatuser.findOne({ id: _.get(res_auth,'user_id')}).exec()
-      co(slackModule.start);
       var message= new db.Message({
         incoming: false,
         thread_id: user.dm,
@@ -524,7 +524,7 @@ app.get('/newslack', function (req, res) {
    }
 
   res.redirect('/thanks.html')
-  
+
   }).catch(console.log.bind(console))
 })
 
