@@ -4,7 +4,6 @@ var exec = require('child_process').exec;
 var kip = require('../../../kip');
 var config = require('../../../config');
 var async = require('async');
-var request = require('request');
 var db = require('../../../db');
 var mesh_request = require('./mesh');
 var luminati_request = require('./lib_luminati').luminati_request;
@@ -42,13 +41,8 @@ if (config.proxy.luminati.runLocal) {
     proxy.stop();
   });
 } else {
-  console.log('using remote proxy: ' + config.proxy.luminati.addr);
-  proxy = {
-    request: function(options, callback) {
-      options.proxy = config.proxy.luminati.addr;
-      request(options, callback);
-    }
-  };
+  console.log('using remote luminati proxy: ' + config.proxy.luminati.addr);
+  proxy = undefined;
 }
 
 var request = function(url) {
