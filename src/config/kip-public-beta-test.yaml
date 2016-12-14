@@ -25,8 +25,8 @@ nlp: http://104.196.51.184:8083
 nlp_rnn: http://104.196.1.204:8085
 doc2vec: http://localhost:8084
 slack:
-  client_id: "52946721872.116445815877"
-  client_secret: b1fae26b72f29541b4c76f4aa194ead5
-  verification_token: b2hLV2HnBtWBmU5NFgDBG8dL
+  client_id: "2804113073.14708197459"
+  client_secret: d4c324bf9caa887a66870abacb3d7cb5
+  verification_token: P30EDlNgjsl9i15ZQBOElJls
   redirect_uri: https://slack.kipapp.co/newslack
 picstitchDelivery: http://localhost:5000
