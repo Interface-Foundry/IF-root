@@ -169,6 +169,7 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
   var payment = yield Payment.findOne({session_token: t})
 
   if (!_.get(payment, 'order.team_id')) {
+    logging.data('payment.order keys', _.keys(payment.order))
     return logging.error('payment has no order.team_id', payment)
   }
 
