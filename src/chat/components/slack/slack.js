@@ -104,7 +104,7 @@ function * loadTeam(slackbot) {
 
     // For channels that are not DM's, only respond if kip is called out by name
     if ('CG'.includes(data.channel[0])) {
-      if (data.text.includes(slackbot.bot.bot_user_id)) {
+      if (data.text && data.text.includes(slackbot.bot.bot_user_id)) {
         // strip out the bot user id, like "<@U13456> find me socks" -> "find me socks"
         var regex = new RegExp('<@' + slackbot.bot.bot_user_id + '>[:]*', 'g')
         data.text = data.text.replace(regex, '').trim()
@@ -361,7 +361,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
   }
 })
 
-module.exports.start = start;
 module.exports.slackConnections = slackConnections;
 module.exports.loadTeam = loadTeam
 
