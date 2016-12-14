@@ -81,22 +81,22 @@ function topic (topic) {
     }, 100)
 
     // Retry interval, retry if dispatched but not done and 10 seconds old.
-    setInterval(() => {
-      db.Pubsub.update({
-        dispatched: true,
-        done: { $ne: true },
-        dispatch_time: { $lt: new Date() - 10000 },
-        $or: [
-          {retries: {$exists: false}},
-          {retries: {$lt: 3}}
-        ]
-      }, {
-        $set: { dispatched: false },
-        $inc: { retries: 1 }
-      }, {
-        multi: true
-      }).exec()
-    }, 10000)
+    // setInterval(() => {
+    //   db.Pubsub.update({
+    //     dispatched: true,
+    //     done: { $ne: true },
+    //     dispatch_time: { $lt: new Date() - 10000 },
+    //     $or: [
+    //       {retries: {$exists: false}},
+    //       {retries: {$lt: 3}}
+    //     ]
+    //   }, {
+    //     $set: { dispatched: false },
+    //     $inc: { retries: 1 }
+    //   }, {
+    //     multi: true
+    //   }).exec()
+    // }, 10000)
   })
 }
 
