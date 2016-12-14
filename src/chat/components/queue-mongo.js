@@ -1,5 +1,6 @@
 var co = require('co')
 var rx = require('rx')
+var hostname = require('os').hostname()
 
 var topics = {
   'incoming': 1,
@@ -41,7 +42,8 @@ function publish (topic, data, key) {
       }, {
         _id: key,
         topic: topic,
-        data: data
+        data: data,
+        publisher: hostname
       }, {
         upsert: true
       }).exec()
@@ -104,11 +106,7 @@ function* getNextMessage(topic) {
   var message = yield db.Pubsub.findOne({
     topic: topic,
     dispatched: { $ne: true },
-    done: { $ne: true },
-    $or: [
-      {retries: {$exists: false}},
-      {retries: {$lt: 3}}
-    ]
+    done: { $ne: true }
   }).exec()
 
   if (!message) { return }
@@ -119,7 +117,8 @@ function* getNextMessage(topic) {
   }, {
     $set: {
       dispatched: true,
-      dispatch_time: new Date()
+      dispatch_time: new Date(),
+      consumer: hostname
     }
   }).exec()
 
