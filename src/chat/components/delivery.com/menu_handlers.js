@@ -45,7 +45,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   } else {
     matchingItems = []
   }
-  matchingItems = matchingItems.map(i => i.unique_id)
+  matchingItems = matchingItems.map(i => i.id)
 
   var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
     .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
@@ -100,7 +100,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
   }).sort((a, b) => b.sortOrder - a.sortOrder)
 
   var menuItems = sortedMenu.slice(index, index + 3).map(i => {
-
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
@@ -117,7 +116,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
           'text': 'Add to Order',
           'type': 'button',
           'style': 'primary',
-          'value': i.unique_id
+          'value': i.id
         }
       ]
     }
@@ -215,7 +214,9 @@ handlers['food.item.submenu'] = function * (message) {
   yield cart.pullFromDB()
 
   // user clicked button
+  //console.log('FOODITEMSUBMENU_MESSAGE', message)
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+  //console.log('FOODITEMSUBMENU_USERITEM', userItem)
   var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
@@ -244,18 +245,24 @@ handlers['food.option.click'] = function * (message) {
   var userItem = yield cart.getItemInProgress(item_id, message.source.user)
   var optionNode = cart.menu.getItemById(option_id)
   userItem.item.option_qty = userItem.item.option_qty || {}
-  //if(optionNode){
-  var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
+console.log('OPTION_ID', option_id)
+console.log('ITEM_ID', item_id)
+console.log('USER_ITEM', userItem)
+console.log('OPTION_NODE', optionNode)
+  //var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
+  var optionGroupId = optionNode.parentId
   var optionGroup = cart.menu.getItemById(optionGroupId)
-  //}
+console.log('OPTION GROUP ID', optionGroupId)
+console.log('OPTION GROUP', optionGroup)
   // Radio buttons, can only toggle one at a time
   // so delete any other selected radio before the next step will select it
   if (optionGroup.min_selection === optionGroup.max_selection && optionGroup.min_selection === 1) {
     optionGroup.children.map(radio => {
-      if (userItem.item.option_qty[radio.unique_id]) {
-        delete userItem.item.option_qty[radio.unique_id]
+    //console.log('RADIOOOOOOOO', radio)
+      if (userItem.item.option_qty[radio.id]) {
+        delete userItem.item.option_qty[radio.id]
         deleteChildren(optionNode, userItem, cart.foodSession._id)
-        db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + radio.unique_id]: ''}}).exec()
+        db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + radio.id]: ''}}).exec()
       }
     })
   }
@@ -278,10 +285,10 @@ handlers['food.option.click'] = function * (message) {
 
 function deleteChildren(node, cartItem, deliveryId) {
   (node.children || []).map(c => {
-    if (_.get(cartItem, 'item.option_qty.' + c.unique_id)) {
-      kip.debug('deleting', c.unique_id)
-      delete cartItem.item.option_qty[c.unique_id]
-      db.Delivery.update({_id: deliveryId, 'cart._id': cartItem._id}, {$unset: {['cart.$.item.option_qty.' + c.unique_id]: ''}}).exec()
+    if (_.get(cartItem, 'item.option_qty.' + c.id)) {
+      kip.debug('deleting', c.id)
+      delete cartItem.item.option_qty[c.id]
+      db.Delivery.update({_id: deliveryId, 'cart._id': cartItem._id}, {$unset: {['cart.$.item.option_qty.' + c.id]: ''}}).exec()
     }
     deleteChildren(c, cartItem, deliveryId)
   })

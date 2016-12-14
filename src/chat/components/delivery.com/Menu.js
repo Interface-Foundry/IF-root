@@ -32,14 +32,15 @@ Menu.prototype.getItemById = function (id) {
 // gets the price for a cartItem, which is one of the objects in the delivery_schema cart array
 Menu.prototype.getCartItemPrice = function (cartItem) {
   var menu = this
+//console.log('GETCARTITEM', cartItem)
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
-
+//console.log('GETCARTITEMPRICE_ITEM', item)
   var basePrice
   var hasPriceGroup = item.children.map(c => c.type).includes('price group')
   if (hasPriceGroup) {
     var priceGroup = item.children.filter(c => c.type === 'price group')[0]
-    var priceOption = priceGroup.children.filter(p => !!cartItem.item.option_qty[p.unique_id])[0]
+    var priceOption = priceGroup.children.filter(p => !!cartItem.item.option_qty[p.id])[0]
     basePrice = _.get(priceOption, 'price', item.price)
   } else {
     basePrice = item.price
@@ -50,7 +51,7 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
         return sum
       }
 
-      if (optionId === _.get(priceOption, 'unique_id', -1).toString()) {
+      if (optionId === _.get(priceOption, 'id', -1).toString()) {
         return sum
       }
 
@@ -85,9 +86,9 @@ function flattenMenu (data) {
       }
     }
 
-    out[node.unique_id] = node
+    out[node.id] = node
     _.get(node, 'children', []).map(c => {
-      c.parentId = node.unique_id
+      c.parentId = node.id
       flatten(c, out)
     })
   }
@@ -97,8 +98,10 @@ function flattenMenu (data) {
 
 Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
   var menu = this
+//console.log('GENERATEJSONFORITEM_CARTITEM', cartItem)
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
+
   // Price for the Add To Cart button
   var fullPrice = menu.getCartItemPrice(cartItem)
   var parentName = _.get(menu, `flattenedMenu.${item.parentId}.name`)
@@ -218,7 +221,7 @@ function nodeOptions (node, cartItem, validate, message) {
     var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') : {}
     var required = false
     var allowMultiple = true
-    var numSelected = g.children.filter(option => Object.keys(cartItem.item.option_qty).includes(option.unique_id.toString())).length
+    var numSelected = g.children.filter(option => Object.keys(cartItem.item.option_qty).includes(option.id)).length
     if (g.min_selection === 0) {
       if (g.max_selection >= g.children.length) {
         a.text += '\n Optional - Choose as many as you like.'
@@ -268,7 +271,7 @@ function nodeOptions (node, cartItem, validate, message) {
         price = ''
       }
 
-      if (cartItem.item.option_qty[option.unique_id]) {
+      if (cartItem.item.option_qty[option.id]) {
         checkbox = allowMultiple ? '✓ ' : '◉ '
       } else {
         checkbox = allowMultiple ? '☐ ' : '￮ '
@@ -279,7 +282,7 @@ function nodeOptions (node, cartItem, validate, message) {
         type: 'button',
         value: {
           item_id: cartItem.item.item_id,
-          option_id: option.unique_id,
+          option_id: option.id,
           optionIndices: optionIndices
         }
       }
@@ -289,7 +292,7 @@ function nodeOptions (node, cartItem, validate, message) {
 
     // Submenu part
     g.children.map(option => {
-      if (cartItem.item.option_qty[option.unique_id] && _.get(option, 'children.0')) {
+      if (cartItem.item.option_qty[option.id] && _.get(option, 'children.0')) {
         var submenuAttachments = nodeOptions(option, cartItem, validate, message)
         all = all.concat(submenuAttachments)
       }
