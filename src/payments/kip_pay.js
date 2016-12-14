@@ -173,7 +173,8 @@ app.post('/process', jsonParser, (req, res) => co(function * () {
     return logging.error('payment has no order.team_id', payment)
   }
 
-  if (!_.has(payment, 'order.order.total')) {
+  if (!_.get(payment, 'order.order.total')) {
+    logging.data('payment.order.order keys', _.keys(payment.order.order))
     return logging.error('payment has no order.order.total', payment)
   }
 
