@@ -50,7 +50,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
     .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
     .reduce((allIds, order) => {
-      allIds.push(order.deliveryItem.unique_id)
+      allIds.push(order.deliveryItem.id)
       return allIds
     }, [])
 
@@ -81,10 +81,10 @@ handlers['food.menu.quickpicks'] = function * (message) {
   var menu = Menu(foodSession.menu)
   var sortedMenu = menu.allItems().map(i => {
     // inject the sort order stuff
-    if (matchingItems.includes(i.unique_id)) {
-      i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.unique_id })
+    if (matchingItems.includes(i.id)) {
+      i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.id })
       // i.infoLine = 'Returned from search term'
-    } else if (previouslyOrderedItemIds.includes(Number(i.unique_id))) {
+    } else if (previouslyOrderedItemIds.includes(i.id)) {
       i.sortOrder = sortOrder.orderedBefore
       i.infoLine = 'You ordered this before'
     } else if (recommendedItemIds.includes(Number(i.unique_id))) {
