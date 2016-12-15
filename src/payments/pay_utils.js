@@ -34,15 +34,14 @@ function * payForItemFromKip (session, guestToken) {
     'body': session
   }
 
-  logging.info('SENDING TO DELIVERY NOW ', JSON.stringify(opts))
+  logging.info('SENDING TO DELIVERY NOW ', opts)
 
   if (process.env.NODE_ENV === 'production') {
     try {
       var response = yield request(opts)
       return response
-    } catch (e) {
-      response = null
-      logging.error('couldnt submit payment uh oh ', JSON.stringify(e))
+    } catch (err) {
+      logging.error('couldnt submit payment to delivery.com', err)
       return null
     }
   } else {
@@ -232,7 +231,7 @@ function * onSuccess (payment) {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
-      htmlForItem += `<tr><td>${foodInfo.name}</td><td>${descriptionString}</td><td>${menu.getCartItemPrice(item).toFixed(2)}</td><td>${user[0].real_name}+</td></tr>`
+      htmlForItem += `<tr><td>${foodInfo.name}</td><td>${descriptionString}</td><td>${menu.getCartItemPrice(item).toFixed(2)}</td><td>${user[0].real_name}</td></tr>`
     })
 
     // send confirmation email to admin

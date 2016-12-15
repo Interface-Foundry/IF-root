@@ -17,7 +17,6 @@ Cart.prototype.getItemInProgress = function * (unique_id, user_id) {
   var userItem = this.foodSession.cart.filter(i => {
     return i.user_id === user_id && !i.added_to_cart && i.item.item_id === unique_id
   })[0]
-
   if (!userItem) {
     userItem = {
       user_id: user_id,
@@ -28,9 +27,7 @@ Cart.prototype.getItemInProgress = function * (unique_id, user_id) {
         option_qty: {}
       }
     }
-
     var q = yield this.foodSession.update({$push: {cart: userItem}}).exec()
-
     // now need to refresh foodSession and get the item again
     this.foodSession = yield db.Delivery.findOne({team_id: this.team_id, active: true}).exec()
     userItem = yield this.getItemInProgress(unique_id, user_id)

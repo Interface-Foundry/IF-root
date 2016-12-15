@@ -4,7 +4,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
   var cart = message.data;
   // admins have special rights
   var isAdmin = slackbot.meta.office_assistants.indexOf(message.source.user) >= 0;
-  var isP2P = slackbot.meta.office_assistants.length === 0;
+  var isP2P = slackbot.meta.p2p;
   var show_everything = isAdmin || isP2P;
   
 

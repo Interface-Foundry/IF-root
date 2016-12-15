@@ -668,6 +668,15 @@ function * constructCart(message, text) {
 
 
 function * sendCartToAdmins(message,team) {
+   var cutoff = new Date("2016-12-14T23:07:00.417Z"); 
+   var added = new Date(team.meta.dateAdded)
+   var copy;
+   // kip.debug('EUREKA ',added, cutoff, (added < cutoff))
+   if (added < cutoff) {
+    copy =  'Hi, we added a new feature to get cart status updates from what your team is adding to the cart';
+   } else {
+    copy = 'Hi! Here\'s what your team has added into the cart so far. If it looks good click the checkout link below :)';
+   }
    var admins = yield findAdmins(team);
    yield admins.map(function*(a) {
       var msg = new db.Message();
@@ -679,7 +688,7 @@ function * sendCartToAdmins(message,team) {
       msg.source.user = a.id;
       msg.user_id = a.id;
       msg.thread_id = a.dm;
-      msg.reply = yield constructCart(msg,'Hi! Here\'s what your team has added into the cart so far. If it looks good click the checkout link below :)');
+      msg.reply = yield constructCart(msg, copy);
       yield msg.save();
       yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.viewcart'); 
    })
