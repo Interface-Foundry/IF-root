@@ -483,7 +483,8 @@ handlers['team'] = function * (message) {
   var cartChannels = team.meta.cart_channels;
   var attachments = [];
   attachments.push({
-    text: ''
+    text: '',
+    fallback:'Step 3: Choose the channels you want to include'
   });
   var channels = yield utils.getChannels(team);
   var buttons = channels.map(channel => {

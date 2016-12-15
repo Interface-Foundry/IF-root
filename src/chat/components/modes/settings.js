@@ -47,10 +47,17 @@ handlers['start'] = function * (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var find = yield db.Slackbots.find({'team_id': team_id}).exec();
+  if (!find || find && find.length == 0) {
+    return kip.debug('could not find team : ', team_id, find);
+  } else {
+    var team = find[0];
+  }
+
   var teamMembers = yield utils.getTeamMembers(team);
   var admins = yield utils.findAdmins(team);
-  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user}).exec();
+
   var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   var attachments = [];
   //adding settings mode sticker
@@ -86,7 +93,7 @@ handlers['start'] = function * (message) {
     //
     // Last call alerts personal settings
     //
-    if (currentUser && currentUser.settings.last_call_alerts) {
+    if (currentUser && _.get(currentUser,'settings.last_call_alerts')) {
       attachments.push({text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
     } else {
       attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})

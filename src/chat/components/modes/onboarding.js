@@ -87,8 +87,16 @@ handlers['get-admins.response'] = function * (message) {
   var admins = []
   var user_is_admin = false
   var team = yield db.Slackbots.findOne({
-    'source.team_id': message.source.team_id
+    'team_id': message.source.team
   }).exec();
+
+  var find = yield db.Slackbots.find({'team_id': message.source.team}).exec();
+  if (!find || find && find.length == 0) {
+    return kip.debug('could not find team : ', message, find);
+  } else {
+    var team = find[0];
+  }
+
   var office_admins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
   var isAdmin;
   office_admins = office_admins.map(g => {
@@ -121,6 +129,7 @@ handlers['get-admins.response'] = function * (message) {
   }).join(', ').replace(/,([^,]*)$/, ' and $1'));
   message.mode = 'onboarding';
   message.action = 'get-admins.response';
+
   if (isAdmin) {
     var next_message = message
     next_message.mode = 'onboard';
@@ -164,7 +173,7 @@ handlers['get-admins.response'] = function * (message) {
  */
 handlers['get-admins.confirm'] = function * (message) {
   var team = yield db.Slackbots.findOne({
-    'source.team_id': message.source.team_id
+    'team_id': message.source.team
   }).exec();
   var admins = yield slackUtils.findAdmins(team);
   var reply = '';
@@ -219,7 +228,7 @@ handlers['get-admins.confirm'] = function * (message) {
  */
 handlers['get-admins.addme'] = function * (message) {
   var team = yield db.Slackbots.findOne({
-    'source.team_id': message.source.team_id
+    'team_id': message.source.team
   }).exec();
     team.meta.office_assistants.push(message.source.user);
     yield team.save()

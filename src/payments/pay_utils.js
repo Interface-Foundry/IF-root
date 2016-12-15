@@ -34,15 +34,14 @@ function * payForItemFromKip (session, guestToken) {
     'body': session
   }
 
-  logging.info('SENDING TO DELIVERY NOW ', JSON.stringify(opts))
+  logging.info('SENDING TO DELIVERY NOW ', opts)
 
   if (process.env.NODE_ENV === 'production') {
     try {
       var response = yield request(opts)
       return response
-    } catch (e) {
-      response = null
-      logging.error('couldnt submit payment uh oh ', JSON.stringify(e))
+    } catch (err) {
+      logging.error('couldnt submit payment to delivery.com', err)
       return null
     }
   } else {
