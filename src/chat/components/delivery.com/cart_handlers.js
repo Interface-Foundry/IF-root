@@ -111,7 +111,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     attachments: [banner].concat(lineItems).concat([bottom])
   }
 
-  if (foodSession.budget && foodSession.user_budgets[message.user_id] >= 1) {
+  if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
     json.attachments.push({
       'text': `You have $${foodSession.user_budgets[message.user_id]} left to spend`,
       'mrkdwn_in': ['text']
