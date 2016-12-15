@@ -4,10 +4,12 @@ var chai = require('chai')
 var expect = require('chai').expect
 var chaiHttp = require('chai-http');
 
+require('../../src/db/')
+
 var app
 
 describe('testing for kip pay', () => {
-  before('set up kip pay and payments', function () {
+  before('set up kip pay and payments', () => {
     chai.should()
     chai.use(chaiHttp)
     // actual app
@@ -15,10 +17,10 @@ describe('testing for kip pay', () => {
     // create fake card and team
   })
 
-  after('remove payments and etc', function * () {
-    require('../../src/db/')
+  after('remove payments and etc', () => {
+
     // delete all the fake payments
-    yield db.Payment.remove({'order.team_id': 'TEST_ING'})
+    db.Payment.remove({'order.team_id': 'TEST_ING'})
   })
 
   it('hit /charge with new card', function * () {
