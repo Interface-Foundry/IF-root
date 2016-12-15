@@ -237,11 +237,11 @@ handlers['change_time'] = function * (message) {
   msg.mode = 'settings'
   msg.action = 'home'
   msg.text = 'Ok, I have updated your settings!';
-  msg.execute = [ { 
+  msg.execute = [{
     "mode": "settings",
     "action": "home",
     "_id": message._id
-  } ];
+  }];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];

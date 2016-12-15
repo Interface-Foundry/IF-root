@@ -9,6 +9,7 @@ var cardTemplate = require('../slack/card_templates');
 var kipcart = require('../cart');
 var winston = require('winston');
 var Fuse = require('fuse.js');
+var request = require('request')
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
@@ -82,6 +83,16 @@ handlers['step_2'] = function*(message, data) {
       query = searchTerm;
       break;
   }
+  let json = message.source.original_message;
+  json.attachments = [...json.attachments, {
+    'text': 'Searching...',
+    mrkdwn_in: ['text']
+  }]
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(json)
+  });
   var results = yield amazon.search({
     query: query
   }, message.origin);
@@ -124,6 +135,11 @@ handlers['step_2'] = function*(message, data) {
     color: '#A368F0',
     fallback: 'Step 2: Try adding an item to your basket'
   }];
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(message.source.original_message)
+  });
   return [msg];
 }
 
