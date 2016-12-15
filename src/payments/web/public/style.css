@@ -30,6 +30,7 @@ p {
 #kipPay {
   display:none;
   width:90%;
+  max-width: 550px;
   height:auto;
   background-color:rgb(239,242,245);
   border-radius: 5px;
