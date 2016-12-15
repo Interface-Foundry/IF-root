@@ -371,13 +371,15 @@ handlers['food.item.add_to_cart'] = function * (message) {
     var itemPrice = menu.getCartItemPrice(userItem);
 
     if (itemPrice > (budgets[userItem.user_id]) * 1.25) {
-      kip.debug('user has exceeded the budget');
       yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
-      return $replyChannel.sendReplace(message, 'food.menu.submenu',
-        {type: 'slack', data: {
+      return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
+        type: 'slack',
+        data: {
           text: '`Please choose something cheaper`',
           mrkdwn_in: ['text']
-        }})
+        }
+      })
+      //TODO go back to the menu view instead of displaying this here!
     }
 
     budgets[userItem.user_id] -= itemPrice;
