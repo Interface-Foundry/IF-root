@@ -45,8 +45,8 @@ function * initializeTeam(team, auth) {
  team.markModified('meta.cart_channels');
  team.markModified('meta.all_channels');
  team.markModified('meta.office_assistants');
- yield getTeamMembers(team);
  yield team.save();
+ yield getTeamMembers(team);
  return team;
 }
 
@@ -182,11 +182,10 @@ function * getTeamMembers(team) {
             members.push(user);
           } else if (teamIds.indexOf(u.id) > -1) {
             var user = yield db.Chatusers.findOne({ id: u.id}).exec();
-            if (user != null) {
+            if (user != null && user != undefined) {
               members.push(user)
             }
           }
-
       }
     });
   }).then( function() { return members });

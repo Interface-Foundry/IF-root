@@ -237,7 +237,7 @@ function * onSuccess (payment) {
 
     // send confirmation email to admin
     var mailOptions = {
-      to: `${foodSession.convo_initiater.name} <${foodSession.convo_initiater.email}`,
+      to: `${foodSession.convo_initiater.name} <${foodSession.convo_initiater.email}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `Kip Café Order Receipt for ${foodSession.chosen_restaurant.name}`,
       html: `${htmlForItem}</thead></table>`
