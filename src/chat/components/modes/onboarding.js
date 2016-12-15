@@ -89,9 +89,11 @@ handlers['get-admins.response'] = function * (message) {
   var team = yield db.Slackbots.findOne({
     'source.team_id': message.source.team_id
   }).exec();
-  var office_admins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b|\bME\b)/ig) || [];
+  var office_admins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
+  var isAdmin;
   office_admins = office_admins.map(g => {
     if (g === 'me' || g === 'ME') {
+       isAdmin = true;
       team.meta.office_assistants.push(message.user_id);
       return message.user_id
     } else {
@@ -117,7 +119,6 @@ handlers['get-admins.response'] = function * (message) {
   reply_success = reply_success.replace('$ADMINS', office_admins.map(g => {
     return '<@' + g + '>'
   }).join(', ').replace(/,([^,]*)$/, ' and $1'));
-  var isAdmin = yield slackUtils.isAdmin(message.source.user, team);
   message.mode = 'onboarding';
   message.action = 'get-admins.response';
   if (isAdmin) {
