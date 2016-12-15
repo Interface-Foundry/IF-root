@@ -45,7 +45,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
       text: item.description + instructions,
       fallback: item.description + instructions,
       mrkdwn_in: ['text'],
-      callback_id: item.unique_id,
+      callback_id: item.id,
       color: '#3AA3E3',
       attachment_type: 'default',
       actions: [
@@ -59,7 +59,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
           name: 'food.null',
           text: i.item.item_qty,
           type: 'button',
-          value: item.unique_id
+          value: item.id
         },
         {
           name: 'food.cart.personal.quantity.add',
