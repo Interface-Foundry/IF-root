@@ -87,7 +87,7 @@ function * loadTeam(slackbot) {
   // })
 
   rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
-    kip.log('loaded slack team', slackbot.team_id, slackbot.team_name)
+    // kip.log('loaded slack team', slackbot.team_id, slackbot.team_name)
   })
 
   rtm.on(slack.CLIENT_EVENTS.DISCONNECT, (reason) => {
@@ -190,13 +190,15 @@ function * start () {
 kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
+  logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
+  outgoing.ack();
   try {
     var message = outgoing.data;
     var team = _.get(message, 'source.team');
     var thread_id = _.get(message, 'thread_id');
     var bot = slackConnections[team] ? slackConnections[team] : slackConnections[thread_id];
     if (typeof bot === 'undefined') {
-      // logging.error('error with the bot thing, message:', message)
+      logging.error('error with the bot thing, message:', message)
       // throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
     }
     var msgData = {
@@ -243,6 +245,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         var results = yield search_results(message);
         msgData.attachments = [...message.reply || [], ...results || []];
+        logging.log('sending search results')
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 

@@ -111,10 +111,10 @@ handlers['start'] = function * (message) {
       color: color,
       mrkdwn_in: ['text'],
       fallback:'Settings',
-      actions: cardTemplate.settings_intervals,
+      actions: cardTemplate.settings_intervals(team.meta.status_interval),
       callback_id: 'none'
     })
-  };
+  }
   
   var buttons = cardTemplate.settings_menu;
   if(!isAdmin && admins.length > 0){
@@ -237,11 +237,11 @@ handlers['change_time'] = function * (message) {
   msg.mode = 'settings'
   msg.action = 'home'
   msg.text = 'Ok, I have updated your settings!';
-  msg.execute = [ { 
+  msg.execute = [{
     "mode": "settings",
     "action": "home",
     "_id": message._id
-  } ];
+  }];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -254,7 +254,22 @@ handlers['cron'] = function * (message, interval) {
   var rhour = date_lib.getHours(new Date());
   var rminutes = date_lib.getMinutes(new Date());
   var day = date_lib.getDay(new Date());
-  var never = false;
+  var oldAttachments = message.source.original_message.attachments;
+  var buttons = cardTemplate.settings_intervals(interval);
+  oldAttachments[oldAttachments.length - 2].actions = buttons;
+  oldAttachments[oldAttachments.length - 1].actions =
+    oldAttachments[oldAttachments.length - 1].actions.map(button => {
+      button.text = button.text.replace('&lt;', '<')
+      return button;
+    });
+	request({
+		method: 'POST',
+		uri: message.source.response_url,
+		body: JSON.stringify({
+			text: '',
+			attachments: oldAttachments
+		})
+	})
   team.meta.status_interval = interval;
   yield team.save();
   switch(interval) {
@@ -364,23 +379,6 @@ handlers['set_date'] = function * (message) {
   var num = parseInt(message.text.trim())
 
    if (!(/^\d+$/.test(message.text)) ||  0 > num > 31) { 
-      // var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
-      // var relevantMessage = history[1];
-      // var json = relevantMessage.source.original_message;
-      // var warning = {
-      //   text: 'The date you entered is incorrect!',
-      //   color: '#ff0000',
-      //   mrkdwn_in: ['text'],
-      //   fallback:'Settings',
-      //   callback_id: 'none'
-      // }
-      // json.attachments.push(warning)
-      // request({
-      //   method: 'POST',
-      //   uri: relevantMessage.source.response_url,
-      //   body: JSON.stringify(json)
-      // }); 
-      // return
       var msg = message;
       msg.mode = 'settings';
       msg.action = 'set_date';

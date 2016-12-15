@@ -44,35 +44,33 @@ var simple_home = module.exports.simple_home = [{
 // }
 
 
-var settings_intervals = module.exports.settings_intervals = [
-{
+var settings_intervals = module.exports.settings_intervals = function(interval) {
+  return [{
     "name": "settings.cron.daily",
-    "text": "Daily",
+    "text": ((interval === 'daily') ? '◉' : '◎') + ' Daily',
     "style": "default",
     "type": "button",
     "value": "daily"
-  },
-  {
+  }, {
     "name": "settings.cron.weekly",
-    "text": "Weekly",
+    "text": ((interval === 'weekly') ? '◉' : '◎') + ' Weekly',
     "style": "default",
-    "type": "button",    
+    "type": "button",
     "value": "weekly"
-  },
-  {
+  }, {
     "name": "settings.cron.monthly",
-    "text": "Monthly",
+    "text": ((interval === 'monthly') ? '◉' : '◎') + ' Monthly',
     "style": "default",
     "type": "button",
     "value": "monthly"
-  },
-   {
+  }, {
     "name": "settings.cron.never",
-    "text": "Never",
+    "text": ((interval === 'never') ? '◉' : '◎') + ' Never',
     "style": "default",
     "type": "button",
     "value": "never"
-  }]
+  }];
+}
 
 var settings_days= module.exports.settings_days = [
     {
@@ -392,28 +390,22 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
 
 var cart_reminder = module.exports.cart_reminder = [{
   name: "onboard.start.confirm_cart_reminder",
-  text: "Today",
+  text: "Daily",
   style: "default",
   type: "button",
-  value: "confirm_cart_reminder.today"
+  value: "confirm_cart_reminder.daily"
 }, {
   name: "onboard.start.confirm_cart_reminder",
-  text: "Tomorrow",
+  text: "Weekly",
   style: "default",
   type: "button",
-  value: "confirm_cart_reminder.tomorrow"
+  value: "confirm_cart_reminder.weekly"
 }, {
   name: "onboard.start.confirm_cart_reminder",
-  text: "1 Week",
+  text: "Monthly",
   style: "default",
   type: "button",
-  value: "confirm_cart_reminder.one_week"
-}, {
-  name: "onboard.start.confirm_cart_reminder",
-  text: "1 Month",
-  style: "default",
-  type: "button",
-  value: "confirm_cart_reminder.one_month"
+  value: "confirm_cart_reminder.monthly"
 }, {
   name: "onboard.start.confirm_cart_reminder",
   text: "Never",
