@@ -156,6 +156,14 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
 
+  // filter out restaurants whose delivery minimum is significantly above the team's total budget
+
+  if (foodSession.budget) {
+    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
+    merchants = merchants.filter(m => m.ordering.minimum <= max);
+    // console.log(merchants[1]);
+  }
+
   // next filter out restaurants that don't match the keyword if provided
   if (keyword) {
     var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, {

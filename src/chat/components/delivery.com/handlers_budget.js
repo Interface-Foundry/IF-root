@@ -22,7 +22,6 @@ handlers['food.admin.team_budget'] = function * (message) {
   }
 
   if (message.text) {
-    // if (! isNaN(Number(message.text)))
     var num = parseNumber(message.text)
     if (num) {
       if (num <=0) {
