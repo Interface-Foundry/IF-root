@@ -39,7 +39,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
     if (matchingItems !== null) {
       logging.info('we possibly found a food match, hmm')
     } else {
-      logging.info('todo send "couldnot find anything matching text" message to user')
+      logging.info('todo send "could not find anything matching text" message to user')
       matchingItems = []
     }
   } else {
@@ -183,6 +183,14 @@ handlers['food.menu.quickpicks'] = function * (message) {
         keyword: keyword
       }
     })
+  }
+
+  console.log('message.user_id', message.user_id);
+  if (foodSession.budget) {
+    msg_json.attachments.push({
+      'text': `You have $${foodSession.user_budgets[message.user_id]} left in your budget!`,
+      'mrkdwn_in': ['text']
+    });
   }
 
   //adding writing prompt
@@ -348,9 +356,39 @@ handlers['food.item.instructions.submit'] = function * (message) {
 }
 
 handlers['food.item.add_to_cart'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+
+  //~~~budget~~~//
+
+  if (foodSession.user_budgets) {
+    var budgets = foodSession.user_budgets;
+    var menu = Menu(foodSession.menu);
+    console.log('menu.getCartItemPrice', menu.getCartItemPrice(userItem))
+    console.log('userItem qty', userItem.item.item_qty);
+    var itemPrice = menu.getCartItemPrice(userItem);
+
+    if (itemPrice > budgets[userItem.user_id]) {
+      //TODO handle this somehow
+      kip.debug('user has exceeded the budget');
+      yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
+      return $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: {text: 'Please choose something cheaper'}})
+    }
+
+    budgets[userItem.user_id] -= itemPrice;
+
+    yield db.Delivery.update(
+      {team_id: message.source.team, active: true},
+      {$set: {
+        user_budgets: budgets
+      }}
+    );
+  }
+
+  //~~~budget~~~//
+
   var errJson = cart.menu.errors(userItem)
   if (errJson) {
     kip.debug('validation errors, user must fix some things')

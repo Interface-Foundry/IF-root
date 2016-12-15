@@ -111,6 +111,15 @@ handlers['food.cart.personal'] = function * (message, replace) {
     attachments: [banner].concat(lineItems).concat([bottom])
   }
 
+  // this should actually probably check to see whether the remaining budget is less than the cheapest item on the menu
+  // and not display if that's the case
+  if (foodSession.budget) {
+    json.attachments.push({
+      'text': `You have $${foodSession.user_budgets[message.user_id]} left to spend`,
+      'mrkdwn_in': ['text']
+    });
+  }
+
   if (replace) {
     $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
   } else {

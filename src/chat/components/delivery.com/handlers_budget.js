@@ -70,8 +70,17 @@ handlers['food.admin.team_budget'] = function * (message) {
 handlers['food.admin.confirm_budget'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  var user_budgets = {};
+  for (var i = 0; i < foodSession.team_members.length; i++) {
+    user_budgets[foodSession.team_members[i].id] = foodSession.temp_budget;
+  }
+
   yield db.Delivery.update({team_id: message.source.team, active: true}, {
-    $set: {budget: foodSession.temp_budget},
+    $set: {
+      budget: foodSession.temp_budget,
+      user_budgets: user_budgets
+    },
     $unset: {temp_budget: ""}
   });
 
