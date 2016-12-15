@@ -15,15 +15,23 @@ handlers['food.admin.team_budget'] = function * (message) {
   // var next_mode = 'food.admin.team_budget';
   var confirm = false;
 
+  var parseNumber = function (str) {
+    var num = str.match(/([\d]+(?:\.\d\d)?)/);
+    console.log('Regex returns:', num[1]);
+    return num[1];
+  }
+
   if (message.text) {
-    if (! isNaN(Number(message.text))) {
-      if (message.text <=0) {
+    // if (! isNaN(Number(message.text)))
+    var num = parseNumber(message.text)
+    if (num) {
+      if (num <=0) {
          msg_text = "That's not a valid number"
       }
       else {
-        yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: Number(message.text)}})
+        yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: Number(num)}})
         console.log('yielded, updated, etc')
-        msg_text = `To confirm, you want each team member to spend around $${message.text}?`;
+        msg_text = `To confirm, you want each team member to spend around $${num}?`;
         confirm = true;
       }
     }
@@ -67,8 +75,6 @@ handlers['food.admin.confirm_budget'] = function * (message) {
     $set: {budget: foodSession.temp_budget},
     $unset: {temp_budget: ""}
   });
-
-  console.log('B.O.B. PLAY THE GUITAR');
 
   yield $allHandlers['food.poll.confirm_send'](message)
 }

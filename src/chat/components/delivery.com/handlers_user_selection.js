@@ -133,11 +133,12 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
 handlers['food.poll.confirm_send'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
+  var budget = foodSession.budget;
 
   if (_.get(foodSession, 'chosen_channel.id')) {
     var textWithChannelMaybe = `Send poll for cuisine to <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\`?`
   } else {
-    textWithChannelMaybe = `Send poll for cuisine to the team members at \`${addr}\`?`
+    textWithChannelMaybe = `Send poll for cuisine to the team members at \`${addr}\`, with a budget of $${budget} per person?`
   }
 
   var msg_json = {
