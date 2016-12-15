@@ -46,7 +46,7 @@ var Payment = db.Payment
 var bodyParser = require('body-parser')
 var express = require('express')
 var app = express()
-var jsonParser = bodyParser.json()
+
 
 // import kip cc
 var payUtils = require('./pay_utils.js')
@@ -62,12 +62,25 @@ var UserChannel = require('../chat/components/delivery.com/UserChannel')
 var replyChannel = new UserChannel(queue)
 // --------------------------------------------
 
+app.use(bodyParser.json())
 app.use('/', express.static(path.join(__dirname, 'web')))
 logging.info('running kip pay from: ', __dirname)
 logging.info('running in NODE_ENV', process.env.NODE_ENV)
 
+
+app.get('/test', (req, res) => co(function * () {
+  res.status(200).send({'test': 'passed'})
+}))
+
+app.post('/test2', function(req, res) {
+  if (_.get(req, 'body.geo')) {
+    return res.status(200).send({'asdf': req.body.geo})
+  }
+  return res.status(200).send({'asdf': 'failed'})
+})
+
 // post a new charge for kip user
-app.post('/charge', jsonParser, (req, res) => co(function * () {
+app.post('/charge', (req, res) => co(function * () {
   // include KEY with new POST req to /charge to verify authentic kip request
   var kipSecret = 'mooseLogicalthirteen$*optimumNimble!Cake'
 
@@ -102,7 +115,7 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
           msg: 'Processing charge...'
         }
 
-        res.status(200).send(JSON.stringify(respMessage))
+        res.status(200).send(respMessage)
       } else {
         // NEED A CARD ID!
         logging.info('NEED CARD ID!')
@@ -111,7 +124,7 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
           processing: false,
           msg: 'Error: Card ID Missing!'
         }
-        res.status(500).send(JSON.stringify(respMessage))
+        res.status(500).send(respMessage)
       }
     } else {
       profOak.say(`using new card for team:${payment.order.team_id}`)
@@ -120,10 +133,11 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
       respMessage = {
         newAcct: true,
         processing: false,
+        token: payment.session_token,
         url: kipPayURL + '?k=' + payment.session_token
       }
 
-      res.status(200).send(JSON.stringify(respMessage))
+      res.status(200).send(respMessage)
     }
   } else {
     logging.error('catching error in /charge', req)
@@ -132,12 +146,12 @@ app.post('/charge', jsonParser, (req, res) => co(function * () {
 }))
 
 // get session by token
-app.post('/session', jsonParser, (req, res) => co(function * () {
+app.post('/session', (req, res) => co(function * () {
   if (_.get(req, 'body') && _.get(req, 'body.session_token')) {
     var token = req.body.session_token.replace(/[^\w\s]/gi, '') // clean special char
     try {
       var pay = yield Payment.findOne({session_token: token})
-      res.send(JSON.stringify(pay))
+      res.send(pay)
     } catch (err) {
       logging.error('catching error in /session', err)
     }
@@ -145,7 +159,7 @@ app.post('/session', jsonParser, (req, res) => co(function * () {
 }))
 
 // this is the call back from the new credit card to do the charge
-app.post('/process', jsonParser, (req, res) => co(function * () {
+app.post('/process', (req, res) => co(function * () {
   // error checking fisrt
   if (!_.has(req, 'body.token')) {
     logging.error('req.body missing token', req.body)
@@ -334,3 +348,6 @@ var port = process.env.PORT || 8080
 app.listen(port, function () {
   logging.info('Listening on ' + port)
 })
+
+// to allow for testing
+module.exports.kipPay = app
