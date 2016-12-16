@@ -725,7 +725,6 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
   lastOrdered = lastOrdered[0]
   foodSession.chosen_channel = lastOrdered.chosen_channel
   foodSession.chosen_restaurant = lastOrdered.chosen_restaurant
-  console.log('LAST ORDERED TEAM MEMBERS', lastOrdered.team_members)
   if (lastOrdered.chosen_channel === 'just_me') {
     // possible last ordered just me is another admin
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
