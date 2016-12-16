@@ -10,7 +10,7 @@ var handlers = {}
 handlers['food.admin.team_budget'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
-  var msg_text = 'How much would you like each of your team members to spend on food?';
+  var msg_text = 'How much would you like your team to spend on food?';
 
   // var next_mode = 'food.admin.team_budget';
   var confirm = false;
@@ -31,9 +31,10 @@ handlers['food.admin.team_budget'] = function * (message) {
          msg_text = "That's not a valid number"
       }
       else {
-        yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: Number(num)}})
+        individual_num = Math.round(num/foodSession.team_members.length)
+        yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: individual_num}})
         console.log('yielded, updated, etc')
-        msg_text = `To confirm, you want each team member to spend around $${num}?`;
+        msg_text = `To confirm, you want your team to spend around $${num}, which works out to around $${individual_num} per person.`;
         confirm = true;
       }
     }
