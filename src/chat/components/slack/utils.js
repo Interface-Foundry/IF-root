@@ -757,7 +757,6 @@ function * updateCron(message, jobs, when, type) {
  * @return {Null} no return
  */
 function* setCron(message, jobs, when) {
-  return;
   let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   let team = yield db.Slackbots.findOne({
     'team_id': team_id
