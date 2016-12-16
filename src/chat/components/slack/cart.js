@@ -3,10 +3,7 @@ var processData = require('../process');
 module.exports = function*(message, slackbot, highlight_added_item) {
   var cart = message.data;
   // admins have special rights
-  var isAdmin = slackbot.meta.office_assistants.indexOf(message.source.user) >= 0;
-  var isP2P = slackbot.meta.p2p;
-  var show_everything = isAdmin || isP2P;
-  
+  var isAdmin = slackbot.meta.office_assistants.includes(message.source.user) >= 0; 
 
   // get the latest added item if we need to highlight it
   if (highlight_added_item) {
@@ -42,24 +39,25 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     }).join(', ');
 
     // only allow links for admins/p2p
-    if (show_everything || addedByUser) {
+    if (isAdmin) {
       var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
     }
 
     // make the text for this item's message
 
     item_message.text = [
-      `*${i + 1}.* ` + ((show_everything || addedByUser) ? `<${link}|${item.title}>` : item.title),
-      ((show_everything) ? `*Price:* ${item.price} each`: ''),
+      `*${i + 1}.* ` + ((isAdmin || addedByUser) ? `<${link}|${item.title}>` : item.title),
+      ((isAdmin) ? `*Price:* ${item.price} each`: ''),
       `*Added by:* ${userString}`,
       `*Quantity:* ${item.quantity}`,
 
     ].filter(Boolean).join('\n');
 
     // add the item actions if needed
-    if (show_everything || addedByUser) {
+    let buttons = [];
+    if (isAdmin || addedByUser) {
       item_message.callback_id = item._id.toString();
-      var buttons = [{
+      buttons = [{
         "name": "additem",
         "text": "+",
         "style": "default",
@@ -73,7 +71,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
         "value": "remove"
       }];
 
-      if (item.quantity > 1 && show_everything) {
+      if (item.quantity > 1 && isAdmin) {
         buttons.push({
           name: "removeall",
           text: 'Remove All',
@@ -85,7 +83,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
       item_message.actions = buttons;
     } else if (!addedByUser){
       item_message.callback_id = item._id.toString();
-      var buttons = [{
+      buttons = [{
         "name": "additem",
         "text": "+ Add",
         "style": "default",
@@ -99,7 +97,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
   }
 
   // Only show the purchase link in the summary for office admins.
-  if (show_everything) {
+  if (isAdmin) {
     var summaryText = `*Team Cart Summary*
  *Total:* ${cart.total}`;
     summaryText += `
@@ -111,11 +109,11 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     })
   } else {
     //var officeAdmins = slackbot.meta.office_assistants.join(' ')
-
+    let officeAdmins;
     if (slackbot.meta.office_assistants && slackbot.meta.office_assistants[0]) {
-      var officeAdmins = '<@' + slackbot.meta.office_assistants[0] + '>';
+      officeAdmins = '<@' + slackbot.meta.office_assistants[0] + '>';
     } else {
-      var officeAdmins = '';
+      officeAdmins = '';
     }
 
     cartObj.push({
@@ -124,6 +122,17 @@ module.exports = function*(message, slackbot, highlight_added_item) {
       color: '#49d63a'
     })
   }
+  cartObj.push({
+    text: '',
+    callback_id: 'shrug',
+    attachment_type: 'default',
+    actions: [{
+      'name': 'passthrough',
+      'text': 'Home',
+      'type': 'button',
+      'value': 'home'
+    }]
+  })
   console.log(cartObj)
   return cartObj;
 }
