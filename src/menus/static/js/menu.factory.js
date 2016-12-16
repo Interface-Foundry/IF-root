@@ -2,16 +2,16 @@ app.factory('MenuFactory', function ($http, $location) {
   // return result of http call
   var mf = {};
   var key = $location.search().k;
-
   var ms = $http.post('/session', {session_token: key})
     .then(function (response) {
+      console.log('made an http response')
       return response.data;
     })
 
   mf.getMenu = function () {
     return ms.then(function (ms) {
-      console.log('MENU', ms.menu.data)
-      return ms.menu.data;
+      console.log('MENU', ms.menu.data[0].children)
+      return ms.menu.data[0].children;
     });
   };
 
