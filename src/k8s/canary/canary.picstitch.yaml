@@ -16,7 +16,7 @@ spec:
         run: picstitch
     spec:
       containers:
-      - image: gcr.io/kip-styles/picstitch:be74fb2
+      - image: gcr.io/kip-styles/picstitch:IMAGE_TAG
         imagePullPolicy: Always
         name: picstitch
         ports:
