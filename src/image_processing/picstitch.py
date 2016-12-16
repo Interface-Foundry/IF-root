@@ -285,7 +285,7 @@ class PicStitch:
         #                       {'x': 24, 'y': 174},
         #                       {'x': 24, 'y': 336}]
         # where to draw choice numbers
-        config['TEXTBOX_COORDS'] = {'x': 190, 'y': 10}
+        config['TEXTBOX_COORDS'] = [{'x': 190, 'y': 10}]
         #                           {'x': 190, 'y': 174},
         #                           {'x': 190, 'y': 336}]
 
