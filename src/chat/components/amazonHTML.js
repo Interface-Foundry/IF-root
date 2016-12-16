@@ -9,6 +9,7 @@ const hutil = require('hutil')
 var co = require('co')
 var promisify = require('promisify-node')
 var proxy_lib = require('./proxy/proxy_request')
+var requestPromise = require('request-promise')
 
 const CACHE_TTL = 24 * 60 * 60 * 1000
 var cache = {
@@ -40,7 +41,8 @@ module.exports.basic = function (url, callback) {
       callback(null, product)
       return
     }
-    var response = proxy_lib.request(url)
+    var req = process.env.NODE_ENV.includes('development') ? requestPromise : proxy_lib.request
+    var response = req(url)
       .then(function (response) {
         process_data(response, product, url, callback)
       }, function (err) {
