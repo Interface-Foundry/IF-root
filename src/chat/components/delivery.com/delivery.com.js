@@ -189,10 +189,16 @@ handlers['food.exit'] = function * (message) {
       }
     ]
   }
+  
   replyChannel.send(message, 'food.exit.confirm', {type: message.origin, data: msg_json})
 }
 
-
+handlers['food.exit.confirm_end_order'] = function * (message) {
+    var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+    foodSession.active = false
+    yield foodSession.save()
+    yield handlers['food.exit.confirm'](message)
+}
 
 handlers['food.exit.confirm'] = function * (message) {
   var slackreply = {
@@ -208,9 +214,15 @@ handlers['food.exit.confirm'] = function * (message) {
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: slackreply})
   // make sure to remove this user from the food message if they are in it
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
-  foodSession.markModified('team_members')
-  foodSession.save()
+  
+  if(foodSession){
+    foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
+    foodSession.markModified('team_members')
+    if (foodSession.team_members.length <= 0){
+      foodSession.active = false
+    }
+    foodSession.save()
+  }
 }
 
 //
@@ -218,7 +230,14 @@ handlers['food.exit.confirm'] = function * (message) {
 //
 handlers['food.begin'] = function * (message) {
   kip.debug('🍕 food order 🌮')
-  return yield handlers['food.admin.select_address'](message, true)
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  if(foodSession){ // If foodSession exists, let initiator know that one is already in progress.
+    return yield handlers['food.admin.confirm_new_session'](message)
+  } else {//Else carry on like normal
+    return yield handlers['food.admin.select_address'](message, true)
+  }
+
 }
 
 module.exports = function (replyChannel, allHandlers) {

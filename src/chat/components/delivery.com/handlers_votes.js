@@ -719,7 +719,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       }
     ]
   }
-
   foodSession.team_members.map(m => {
     console.log(m)
     var newMessage = {
@@ -737,7 +736,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       state: {},
       user: m.id
     }
-
     $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
   })
 }
