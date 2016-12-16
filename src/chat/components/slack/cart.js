@@ -3,7 +3,7 @@ var processData = require('../process');
 module.exports = function*(message, slackbot, highlight_added_item) {
   var cart = message.data;
   // admins have special rights
-  var isAdmin = slackbot.meta.office_assistants.includes(message.source.user); 
+  var isAdmin = slackbot.meta.office_assistants.includes(message.source.user) || slackbot.meta.office_assistants.length === 0;
 
   // get the latest added item if we need to highlight it
   if (highlight_added_item) {
@@ -23,7 +23,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];
     var addedByUser = item.added_by.includes(message.source.user);
-    if(item.quantity<1){
+    if (item.quantity < 1) {
       return;
     }
     // the slack message for just this item in the cart list
@@ -38,7 +38,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
       return '<@' + u + '>';
     }).join(', ');
 
-    // only allow links for admins/p2p
+    // only allow links for admins
     if (isAdmin) {
       var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
     }
