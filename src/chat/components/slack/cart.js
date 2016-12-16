@@ -3,7 +3,7 @@ var processData = require('../process');
 module.exports = function*(message, slackbot, highlight_added_item) {
   var cart = message.data;
   // admins have special rights
-  var isAdmin = slackbot.meta.office_assistants.includes(message.source.user) >= 0; 
+  var isAdmin = slackbot.meta.office_assistants.includes(message.source.user); 
 
   // get the latest added item if we need to highlight it
   if (highlight_added_item) {
