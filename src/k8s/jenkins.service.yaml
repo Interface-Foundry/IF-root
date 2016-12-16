@@ -1,9 +1,6 @@
-# [START jenkins_service_ui]
----
   kind: Service
   apiVersion: v1
   metadata:
-    name: jenkins-ui
     namespace: jenkins
   spec:
     type: NodePort
@@ -14,20 +11,7 @@
         port: 8080
         targetPort: 8080
         name: ui
-# [END jenkins_service_ui]
-# [START jenkins_service_discovery]
----
-  kind: Service
-  apiVersion: v1
-  metadata:
-    name: jenkins-discovery
-    namespace: jenkins
-  spec:
-    selector:
-      app: master
-    ports:
       - protocol: TCP
         port: 50000
         targetPort: 50000
         name: slaves
-# [END jenkins_service_discovery]

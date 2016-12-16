@@ -417,7 +417,7 @@ function* generateMenuButtons(message) {
 
   var newBtns = [...buttons, {
     name: 'view_cart_btn',
-    text: 'View Cart',
+    text: '⁂ View Cart',
     style: 'default',
     type: 'button',
     value: 'view_cart_btn'
@@ -668,7 +668,7 @@ function * constructCart(message, text) {
 
 
 function * sendCartToAdmins(message,team) {
-   var cutoff = new Date("2016-12-14T23:07:00.417Z"); 
+   var cutoff = new Date("2016-12-14T23:07:00.417Z");
    var added = new Date(team.meta.dateAdded)
    var copy;
    // kip.debug('EUREKA ',added, cutoff, (added < cutoff))
@@ -690,13 +690,14 @@ function * sendCartToAdmins(message,team) {
       msg.thread_id = a.dm;
       msg.reply = yield constructCart(msg, copy);
       yield msg.save();
-      yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.viewcart'); 
+      yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.viewcart');
    })
 };
 
 
 
 function * updateCron(message, jobs, when, type) {
+  return;
    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
    var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
    var currentUser = yield db.Chatusers.findOne({id: message.source.user});
@@ -719,14 +720,14 @@ function * updateCron(message, jobs, when, type) {
       date2 = '00 ' + when.minutes + ' ' + (parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')   + ' * * *';
     } else if (type == 'day') {
       date = '00 ' + when.minutes + ' ' + when.hour  + ' * * ' + when.day;
-      date2 = '00 ' + when.minutes + ' ' + (parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')  + ' * * ' + when.day; 
+      date2 = '00 ' + when.minutes + ' ' + (parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')  + ' * * ' + when.day;
     } else if (type == 'date') {
       date = '00 ' + when.minutes + ' ' + when.hour  + ' ' + when.date + ' * *';
       date2 = '00 ' + when.minutes + ' ' + (parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')   + ' ' + when.date + ' * *';
     } else {
       date = when;
     }
-    kip.debug('\n\n\n\n\n\n setting cron job to send last calls : ', date, date2,'\n\n\n\n\n\n')
+    kip.debug('\n\n\n\n\n\n setting cron job to send last calls : ', date,'\n\n\n\n\n\n')
 
 
     //Set cron job for cart member last calls
@@ -750,6 +751,7 @@ function * updateCron(message, jobs, when, type) {
 
 /**
  * Sets all parameters for a given chron
+ * Only used during onboarding
  * @param {Message} message - the message received
  * @param {Array} jobs - a list of all cron jobs
  * @param {Object} when - a date object in the form of {day:String, hour:String, minutes:String, date:String}

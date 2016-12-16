@@ -299,22 +299,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           text: '*Success!* You can always type `help` if you have any problems',
           mrkdwn_in: ['text'],
           color: '#A368F0'
-        }, {
-          'image_url': 'http://kipthis.com/kip_modes/mode_shopping.png',
-          text: '',
-          mrkdwn_in: ['text'],
-          color: '#3AA3E3'
-        }, {
-          text: 'Tap to search for something',
-          fallback: 'Search for what you want',
-          callback_id: 'idk',
-          color: '#3AA3E3',
-          attachment_type: 'default',
-          actions: cardTemplate.slack_shopping_buttons
-        }, {
-          'text': '✂︎ Add items directly from Amazon by pasting the URL and sending it to me',
-          mrkdwn_in: ['text']
-        }];
+        }, ...cardTemplate.slack_shopping_mode];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 

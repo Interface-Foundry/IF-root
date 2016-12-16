@@ -60,7 +60,7 @@ proxy:
     zone: gen
   mesh:
     user: alyx
-    password: change_me
+    password: 9fSvNH@aB4Hs2s>qcatsoupkanyecandle
     hosts:
     - us-dc.proxymesh.com
     - us-fl.proxymesh.com

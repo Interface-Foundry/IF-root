@@ -44,14 +44,13 @@ handlers['start'] = function * (message) {
   var attachments = [];
   //adding onboard sticker
   attachments.push({
-    // image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
     text: 'Welcome to Kip!  We\'ll help you get started :)',
-    fallback: 'Would you like a short tour?',
+    fallback: 'Onboard',
   });
   attachments.push({
       image_url: "http://tidepools.co/kip/kip_menu.png",
-      text: 'Would you like a short tour?',
-      fallback: 'Would you like a short tour?',
+      text: 'Choose a Kip mode below to start a tour',
+      fallback: 'Onboard',
       color: '#45a5f4',
       mrkdwn_in: ['text'],
       actions: cardTemplate.slack_onboard_start,
@@ -629,7 +628,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
   var attachments = [{
     image_url: "http://tidepools.co/kip/kip_menu.png",
     text: 'Click a mode to start using Kip',
-    color: '#3AA3E3',
+    color: '#45a5f4',
     callback_id: 'wow such home',
     actions: [{
       name: 'passthrough',

@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: luminati-proxy
-  name: luminati-proxy
+    run: picstitch
+  name: picstitch
 spec:
   ports:
-  - port: 22225
+  - port: 5000
     protocol: TCP
-    targetPort: 22225
+    targetPort: 5000
   selector:
-    run: luminati-proxy
+    run: picstitch
   type: ClusterIP
