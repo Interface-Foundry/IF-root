@@ -354,6 +354,20 @@ app.post('/slackaction', next(function * (req, res) {
           }).catch(console.log.bind(console))
           break
       }
+      var stringOrig = JSON.stringify(parsedIn.original_message)
+      var map = {
+        amp: '&',
+        lt: '<',
+        gt: '>',
+        quot: '"',
+        '#039': "'"
+      }
+      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+      request({
+        method: 'POST',
+        uri: parsedIn.response_url,
+        body: stringOrig
+      });
     }
 }))
 
