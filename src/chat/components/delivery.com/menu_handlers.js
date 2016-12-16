@@ -201,12 +201,9 @@ handlers['food.menu.quickpicks'] = function * (message) {
   }
 
   //budget reminder
-  //TODO okay so this isn't printing at all and this is actually printing from somewhere else
-  console.log('message.user_id', message.user_id);
   if (foodSession.budget && Number(foodSession.budget) >= 1) {
-    console.log('why is this printing?', foodSession.budget, Number(foodSession.budget) >= 1)
     msg_json.attachments.push({
-      'text': `Aim to spend around $${foodSession.user_budgets[message.user_id]}!`,
+      'text': `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`,
       'mrkdwn_in': ['text']
     });
   }
