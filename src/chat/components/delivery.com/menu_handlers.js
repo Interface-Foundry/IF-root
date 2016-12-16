@@ -1,5 +1,6 @@
 'use strict'
 var _ = require('lodash')
+var stable = require('stable')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
@@ -99,6 +100,21 @@ handlers['food.menu.quickpicks'] = function * (message) {
     return i
   }).sort((a, b) => b.sortOrder - a.sortOrder)
 
+  //~~~~~
+  //move items that do not meet the user's current budget to after those that do
+  //using a stable sort, to preserve the order of the previous sort within those two categories
+  if (foodSession.budget) {
+    var current_ub = foodSession.user_budgets[message.user_id] * 1.25;
+    stable.inplace(sortedMenu, function (a, b) { //sorts b before a if true
+      //if b is under-budget and a is not, sort b before a
+      console.log('this is a thing being sorted', a);
+      if (a.price > current_ub && b.price < current_ub) return true;
+      else return false;
+      //but otherwise maintain already-sorted order
+    });
+  }
+  //~~~~~
+
   var menuItems = sortedMenu.slice(index, index + 3).map(i => {
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
@@ -190,7 +206,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   if (foodSession.budget && Number(foodSession.budget) >= 1) {
     console.log('why is this printing?', foodSession.budget, Number(foodSession.budget) >= 1)
     msg_json.attachments.push({
-      'text': `You have $${foodSession.user_budgets[message.user_id]} left in your budget!`,
+      'text': `Aim to spend around $${foodSession.user_budgets[message.user_id]}!`,
       'mrkdwn_in': ['text']
     });
   }

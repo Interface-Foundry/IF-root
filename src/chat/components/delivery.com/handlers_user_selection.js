@@ -57,13 +57,6 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
       textWithPrevChannel += '?';
     }
     foodSession.team_members = prevFoodSession.team_members
-    // if (prevFoodSession.budget) {
-    //   foodSession.budget = prevFoodSession.budget;
-    //   foodSession.user_budgets = {};
-    //   for (var i = 0; i < foodSession.team_members.length; i++) {
-    //     foodSession.user_budgets[foodSession.team_members[i].id] = foodSession.budget;
-    //   }
-    // }
     foodSession.chosen_channel = {
       'id': prevFoodSession.chosen_channel.id,
       'name': prevFoodSession.chosen_channel.name,
