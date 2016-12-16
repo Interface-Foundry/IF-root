@@ -727,7 +727,7 @@ function * updateCron(message, jobs, when, type) {
     } else {
       date = when;
     }
-    kip.debug('\n\n\n\n\n\n setting cron job to send last calls : ', date, date2,'\n\n\n\n\n\n')
+    kip.debug('\n\n\n\n\n\n setting cron job to send last calls : ', date,'\n\n\n\n\n\n')
 
 
     //Set cron job for cart member last calls
