@@ -1,16 +1,16 @@
-var winston = require('winston')
-var MongoDB = require('winston-mongodb').MongoDB
+var winston = require('winston');
+var MongoDB = require('winston-mongodb').MongoDB;
 
-var configFiles = require('./config')
+var config = require('./config');
 
-var logging
+var logging;
 
 // slight fix for mongodb stuff to work with config files
-if (configFiles.mongodb.url.indexOf('mongodb://') < 0) {
-  configFiles.mongodb.url = `mongodb://` + configFiles.mongodb.url
+if (config.mongodb.url.indexOf('mongodb://') < 0) {
+  config.mongodb.url = 'mongodb://' + config.mongodb.url;
 }
 
-var config = {
+var localConfig = {
   levels: {
     error: 0,
     warn: 1,
@@ -29,40 +29,33 @@ var config = {
     debug: 'blue',
     silly: 'magenta'
   }
+};
+
+console.log(config.logging.console.level);
+
+var transports = [
+  new (winston.transports.Console)({
+    level: config.logging.console.level,
+    colorize: config.logging.console.colorize,
+    prettyPrint: config.logging.console.prettyPrint,
+  })
+];
+
+if (config.logging.mongo.enabled) {
+  transports.push(new MongoDB({
+    level: 'error',
+    db: config.mongodb.url,
+    options: config.mongodb.options,
+    collection: 'errors',
+    label: 'winston',
+    decolorize: true,
+  }));
 }
 
-if (process.env.NODE_ENV !== 'test') {
-  logging = new (winston.Logger)({
-    transports: [
-      // console logger
-      new (winston.transports.Console)({
-        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-        colorize: true,
-        prettyPrint: true
-      }),
-      // log errors to mongodb
-      new MongoDB({
-        level: 'error',
-        db: configFiles.mongodb.url,
-        options: configFiles.mongodb.options,
-        collection: 'errors',
-        label: 'winston',
-        decolorize: true
-      })],
-    colors: config.colors,
-    levels: config.levels
-  })
-} else {
-  logging = new (winston.Logger)({
-    transports: [
-      new (winston.transports.Console)({
-        level: 'verbose',
-        colorize: true,
-        prettyPrint: true
-      })],
-    colors: config.colors,
-    levels: config.levels
-  })
-}
+logging = new(winston.Logger)({
+    transports: transports,
+    colors: localConfig.colors,
+    levels: localConfig.levels
+  });
 
-module.exports = global.logging = logging
+module.exports = global.logging = logging;

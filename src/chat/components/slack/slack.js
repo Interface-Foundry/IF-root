@@ -366,6 +366,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
 module.exports.slackConnections = slackConnections;
 module.exports.loadTeam = loadTeam
+module.exports.startMockSlack = start
 
 if (!module.parent) {
   co(start).catch((e) => {

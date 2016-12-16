@@ -13,7 +13,25 @@ var deliverySchema = mongoose.Schema({
 
   all_members: [], // not sure how whitelist thing works so just stashing all_members instead of looking up team_members
   team_members: [], // who is in the order
-  chosen_location: {}, // from slackbot.meta.locations
+  chosen_location: {  // from slackbot.meta.locations
+      label: String,
+      coordinates: [Number],
+      address_1: String,
+      address_2: String,
+      street: String,
+      unit_type: String,
+      unit_number: String,
+      city: String,
+      state: String,
+      zip_code: String,
+      phone_number: String,
+      region: String,
+      timezone: String,
+      neighborhood: String,
+      sublocality: String,
+      special_instructions: String,
+      input: String
+  },
   chosen_restaurant: {
     id: String,
     name: String,
