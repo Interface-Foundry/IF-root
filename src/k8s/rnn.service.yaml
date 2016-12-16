@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: luminati-proxy
-  name: luminati-proxy
+    run: rnn
+  name: rnn
 spec:
   ports:
-  - port: 22225
+  - port: 8085
     protocol: TCP
-    targetPort: 22225
+    targetPort: 8085
   selector:
-    run: luminati-proxy
+    run: rnn
   type: ClusterIP

@@ -2,22 +2,26 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    run: replylogic
-  name: replylogic
+    run: facebook
+  name: facebook
+  namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: replylogic
+      run: facebook
   template:
     metadata:
       labels:
-        run: replylogic
+        run: facebook
     spec:
       containers:
-      - image: gcr.io/kip-styles/reply_logic:6e22796
+      - image: gcr.io/kip-styles/facebook:08134aa
         imagePullPolicy: Always
-        name: replylogic
+        name: facebook
+        ports:
+        - containerPort: 4343
+          protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
       dnsPolicy: ClusterFirst
