@@ -19,6 +19,7 @@ node {
         }
 
         stage('push to gcloud') {
+            sh('gcloud auth activate-service-account --key-file=Dockerfiles/gcloud.json')
             sh('gcloud docker push gcr.io/kip-styles/facebook:666')
         }
 
