@@ -2,7 +2,6 @@ var async = require('async');
 var request = require('request');
 var status = {};
 var cheerio = require('cheerio');
-var config = require('../../../config');
 var sets = require('./settings').sets;
 var proxy_opt = {
       customer: 'kipthis', 
@@ -15,27 +14,25 @@ var proxy_opt = {
       // log: 'NONE'
   };
 module.exports = { check: check, options: proxy_opt, current_index: 0};
-var ping_interval = config.proxy.luminati.intervalMillis;
+var argv = require('minimist')(process.argv.slice(2));
+var test_mode = argv.proxy ? argv.proxy : false;
+var ping_interval = (argv.proxy && argv.interval) ? argv.interval : 300000;
 
 async.whilst(
     function () { 
       return true; 
     },
     function (callback) {
-      var proxy_url = config.proxy.luminati.addr;
-      if (proxy_url.indexOf('http') < 0) proxy_url = 'http://' + proxy_url;
-
-      var amazon_url = 'https://www.amazon.com/gp/product/B01AW25FPU/';
+      var amazon_url = 'https://www.amazon.com/gp/product/B01AW25FPU/'
       var macys_url = 'http://www1.macys.com/shop/mens-clothing/mens-shoes?id=65&edge=hybrid&cm_sp=c2_1111US_catsplash_men-_-row4-_-icon_shoes'
-      var test_url = 'http://kipthis.com/DONTTOUCH.txt';
+      var test_url = 'http://kipthis.com/DONTTOUCH.txt'
       var url = amazon_url;
       var options = {
-        url: url,
-        proxy: proxy_url,
+        url: url, 
+        proxy: 'http://127.0.0.1:24000',
         timeout: 3000
       };
-
-      var begin = Date.now();
+      var begin= Date.now();
       status.last_ping= Date.now();
       request(options,function(err, res, body){ 
         if (err) {
@@ -46,7 +43,7 @@ async.whilst(
           // console.log('\nstatus: ',status,'\n');
           db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: url, delay_ms: status.latency, success: false, error: err, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config } }); 
           setTimeout(function () {
-            callback();
+            callback()
           }, ping_interval);
         } 
         else if (res && res.statusCode == 200 && body.length > 0) {
@@ -57,7 +54,7 @@ async.whilst(
           status.data_retrieved = reviews ? true : false;
           status.age = (Date.now() - status.last_ping)/10000;
           // console.log('\nstatus: ',status,'\n');
-          db.Metrics.log('proxy', { proxy: 'luminati', check: true, request_url: url, delay_ms: status.latency, success: true, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}});
+          db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: url, delay_ms: status.latency, success: true, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}});
           setTimeout(function () {
             callback()
           }, ping_interval);
