@@ -6,6 +6,7 @@ var onboard = require('./onboard');
 var queue = require('../queue-mongo');
 var slackUtils = require('../slack/utils');
 var cardTemplate = require('../slack/card_templates');
+
 /**
  * Main handler which decides what part of the onbaording process the user is at 
  * 
@@ -42,7 +43,7 @@ handlers['start'] = function * (message) {
     fallback:'Onboarding',
     callback_id: 'none'
   })
-  attachments.push({text: welcome, color: '#3AA3E3'})
+  attachments.push({text: welcome, mrkdwn_in: ['text'],color: '#3AA3E3'})
   attachments.push({text:  'Who manages the office purchases? Type something like `me` or `me and @jane`', color: '#3AA3E3',
     mrkdwn_in: [
         'text',

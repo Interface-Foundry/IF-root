@@ -527,7 +527,10 @@ handlers['add_or_remove'] = function * (message) {
       userIds.map((id) => {
         if (team.meta.office_assistants.indexOf(id) >= 0) {
           var index = team.meta.office_assistants.indexOf(id);
-          team.meta.office_assistants.splice(index, 1);
+          //check to see if there is only one admin left, if so you cant remove the last remaining admin
+          if (team.meta.office_assistants.length != 1) {
+            team.meta.office_assistants.splice(index, 1);
+          }
         }
       })
     }
