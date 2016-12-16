@@ -1,0 +1,63 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: parser
+  name: parser
+  namespace: canary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: parser
+  template:
+    metadata:
+      labels:
+        run: parser
+    spec:
+      containers:
+      - image: gcr.io/kip-styles/parser:099f5f7
+        imagePullPolicy: Always
+        name: parser
+        ports:
+        - containerPort: 8083
+          protocol: TCP
+        resources: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: parser
+  namespace: canary
+  labels:
+    run: parser
+spec:
+  type: LoadBalancer
+  ports:
+  - nodePort: 30011
+    port: 80
+    protocol: TCP
+    targetPort: 8083
+  selector:
+    run: parser
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: parser-ingress
+  namespace: canary
+spec:
+  backend:
+    serviceName: parser
+    servicePort: 8083
+  rules:
+  - host: dev-parser.kipthis.com
+    http:
+      paths:
+      - backend:
+          serviceName: parser
+          servicePort: 8083

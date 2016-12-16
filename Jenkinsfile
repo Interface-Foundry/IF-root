@@ -14,6 +14,14 @@ node {
             checkout scm
             // sh('echo using git hash: ${GIT_REVISION}')
         }
+        // stage('build docker images') {
+        //     sh('docker build -t gcr.io/kip-styles/facebook:666 -f Dockerfiles/facebook.Dockerfile .')
+        // }
+
+        // stage('push to gcloud') {
+        //     sh('gcloud auth activate-service-account --key-file=Dockerfiles/gcloud.json')
+        //     sh('gcloud docker push gcr.io/kip-styles/facebook:666')
+        // }
 
         stage('npm install') {
             sh('npm install')
@@ -25,8 +33,9 @@ node {
             sh('NODE_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/parser/parser.test.js')
         }
 
+
         stage('slackInfo') {
-           slackSend (channel: '#ci', color: 'good', message: 'hey we did stuff', teamDomain: 'kipsearch', token: slackToken)
+           slackSend (channel: '#ci', color: 'good', message: 'hey we pushed a docker image', teamDomain: 'kipsearch', token: slackToken)
         }
     }
 
