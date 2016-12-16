@@ -46,18 +46,19 @@
     <div class="right-panel">
       <div class="cart">
         <h3>Cart</h3>
+        <p v-if="cartTotal">{{cartTotal}}</p>
         <ul>
-          <li v-for="cartItem in cartItems">({{cartItem.quantity}}){{cartItem.name}}</li>
+          <li v-for="cartItem in cartItems">({{cartItem.quantity}}){{cartItem.name}} - {{cartItem.totalPrice}}</li>
         </ul>
       </div>
     </div>
-    <selected-item v-on:increaseqty="increaseQty" v-on:decreaseqty="decreaseQty" v-on:add="addItemToCart" v-if="selectedItem" @close="selectedItem = null" :item=selectedItem></selected-item>
+    <selected-item v-on:add="addItemToCart" v-if="selectedItem" @close="selectedItem = null" :item=selectedItem></selected-item>
   </div>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="https://unpkg.com/vue/dist/vue.js"></script>
   <script type="text/x-template" id="category-item">
     <li v-on:click="selectItem(item)">
-      <div class="item-title"><p class="item-name">{{item.name}}</p><span class="item-price">{{item.price}}</span></div>
+      <div class="item-title"><p class="item-name">{{item.name}}</p><span class="item-price">${{item.price.toFixed(2)}}</span></div>
       <small class="item-description" v-if="item.description">{{item.description}}</small>
     </li>
   </script>
@@ -69,14 +70,14 @@
           <div class="modal-header">
             <div class="modal-item-info">
               <h3>{{item.name}}</h3>
-              <h3>${{item.price}}</h3>
+              <h3>${{item.price.toFixed(2)}}</h3>
             </div>
             <div class="modal-close-button" @click="$emit('close')"></div>
           </div>
           <div class="item-quantity-selector">
-            <button v-on:click="decreaseQty">-</button>
-            <span>{{item.quantity}}</span>
-            <button v-on:click="increaseQty">+</button>
+            <button @click="decreaseQty">-</button>
+            <span>{{quantity}}</span>
+            <button @click="increaseQty">+</button>
           </div>
           <div class="modal-body">
             <div v-if="isMealAddition(option)" class="option-set" v-for="option in item.children">
@@ -91,7 +92,7 @@
             <textarea></textarea>
           </div>
           <div class="modal-footer">
-            <button v-on:click="addItemToCart" class="base-btn"> Add to Order {{item.price}} </button>
+            <button v-on:click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice}} </button>
           </div>
         </div>
       </div>
