@@ -4,7 +4,6 @@ metadata:
   labels:
     run: facebook
   name: facebook
-  namespace: default
 spec:
   replicas: 1
   selector:
