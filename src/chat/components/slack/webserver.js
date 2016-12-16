@@ -97,9 +97,28 @@ function buttonCommand (action) {
 
 // incoming slack action
 app.post('/slackaction', next(function * (req, res) {
-  if (req.body && req.body.payload) {
-    var message;
-    var parsedIn = JSON.parse(req.body.payload);
+  if (!req.body || !req.body.payload) {
+    // probably a health check message from slack
+    res.sendStatus(200)
+  }
+
+  var message;
+  var parsedIn = JSON.parse(req.body.payload);
+
+  // First reply to slack, then process the request
+  if (parsedIn.original_message) {
+    // var stringOrig = JSON.stringify(parsedIn.original_message)
+    // var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
+    // stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+    // console.log("actually sending message back for real")
+    res.status(200)
+    res.end()
+  } else {
+    console.error('slack buttons broke, need a response_url')
+    res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
+    return
+  }
+
     var action = parsedIn.actions[0];
     kip.debug('incoming action', action);
     kip.debug(action.name.cyan, action.value.yellow);
@@ -148,7 +167,6 @@ app.post('/slackaction', next(function * (req, res) {
       }
       else if (simple_command == 'loading_btn') {
       	// responding with nothing means the button does nothing!
-        res.send();
         return;
       }
       else if (simple_command == 'help_btn') {
@@ -202,7 +220,6 @@ app.post('/slackaction', next(function * (req, res) {
           uri: message.source.response_url,
           body: JSON.stringify(json)
         })
-        return res.sendStatus(200)
       }
       else if (simple_command == 'view_cart_btn') {
           message.mode = 'shopping'
@@ -338,20 +355,6 @@ app.post('/slackaction', next(function * (req, res) {
           break
       }
     }
-    // sends back original chat
-    if (parsedIn.original_message) {
-      var stringOrig = JSON.stringify(parsedIn.original_message)
-      var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
-      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
-      res.send(JSON.parse(stringOrig))
-    } else {
-      console.error('slack buttons broke, need a response_url')
-      res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
-      return
-    }
-  } else {
-    res.sendStatus(200)
-  }
 }))
 
 function clearCartMsg(attachments) {
