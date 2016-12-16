@@ -2,22 +2,25 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    run: replylogic
-  name: replylogic
+    run: rnn
+  name: rnn
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: replylogic
+      run: rnn
   template:
     metadata:
       labels:
-        run: replylogic
+        run: rnn
     spec:
       containers:
-      - image: gcr.io/kip-styles/reply_logic:6e22796
-        imagePullPolicy: Always
-        name: replylogic
+      - image: gcr.io/kip-styles/rnn:911b5e3
+        imagePullPolicy: IfNotPresent
+        name: rnn
+        ports:
+        - containerPort: 8085
+          protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
       dnsPolicy: ClusterFirst

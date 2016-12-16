@@ -2,22 +2,25 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    run: replylogic
-  name: replylogic
+    run: botbuilder
+  name: botbuilder
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: replylogic
+      run: botbuilder
   template:
     metadata:
       labels:
-        run: replylogic
+        run: botbuilder
     spec:
       containers:
-      - image: gcr.io/kip-styles/reply_logic:6e22796
-        imagePullPolicy: Always
-        name: replylogic
+      - image: gcr.io/kip-styles/botbuilder:aa5729c
+        imagePullPolicy: IfNotPresent
+        name: botbuilder
+        ports:
+        - containerPort: 4343
+          protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
       dnsPolicy: ClusterFirst

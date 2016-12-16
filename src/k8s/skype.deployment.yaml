@@ -2,22 +2,25 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    run: replylogic
-  name: replylogic
+    run: skype
+  name: skype
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: replylogic
+      run: skype
   template:
     metadata:
       labels:
-        run: replylogic
+        run: skype
     spec:
       containers:
-      - image: gcr.io/kip-styles/reply_logic:6e22796
+      - image: gcr.io/kip-styles/skype:df4130e
         imagePullPolicy: Always
-        name: replylogic
+        name: skype
+        ports:
+        - containerPort: 8000
+          protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
       dnsPolicy: ClusterFirst

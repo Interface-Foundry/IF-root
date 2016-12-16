@@ -2,22 +2,25 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    run: replylogic
-  name: replylogic
+    run: parser
+  name: parser
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: replylogic
+      run: parser
   template:
     metadata:
       labels:
-        run: replylogic
+        run: parser
     spec:
       containers:
-      - image: gcr.io/kip-styles/reply_logic:6e22796
+      - image: gcr.io/kip-styles/parser:099f5f7
         imagePullPolicy: Always
-        name: replylogic
+        name: parser
+        ports:
+        - containerPort: 8083
+          protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
       dnsPolicy: ClusterFirst
