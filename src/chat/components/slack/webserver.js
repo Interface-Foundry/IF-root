@@ -357,7 +357,7 @@ app.post('/slackaction', next(function * (req, res) {
 function clearCartMsg(attachments) {
   //clears all but the updating message of buttons
   return attachments.reduce((all, a) => {
-    if (a.callback_id && a.text.includes('Quantity:')) {
+    if (a.callback_id && a.text && a.text.includes('Quantity:')) {
       a.actions = [{
         'name': 'passthrough',
         'text': 'Loading...',
