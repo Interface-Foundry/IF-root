@@ -39,12 +39,11 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     }).join(', ');
 
     // only allow links for admins
-    if (isAdmin) {
-      var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
+    let link;
+    if (isAdmin || addedByUser) {
+      link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
     }
-
     // make the text for this item's message
-
     item_message.text = [
       `*${i + 1}.* ` + ((isAdmin || addedByUser) ? `<${link}|${item.title}>` : item.title),
       ((isAdmin) ? `*Price:* ${item.price} each`: ''),

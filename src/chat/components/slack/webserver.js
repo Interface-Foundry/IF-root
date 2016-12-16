@@ -399,7 +399,7 @@ function* updateCartMsg(cart, parsedIn) {
     }
   })
 
-  let attachments = parsedIn.original_message.attachments.reduce((all, a, i) => {
+  let attachments = parsedIn.original_message.attachments.reduce((all, a) => {
     if (a.callback_id && itemData[a.callback_id]) {
       let userString;
       a.actions = (itemData[a.callback_id].showDetail || showEverything) ? [{
@@ -455,6 +455,17 @@ function* updateCartMsg(cart, parsedIn) {
     return all;
   }, []);
 
+  attachments.push({
+    text: '',
+    callback_id: 'shrug',
+    attachment_type: 'default',
+    actions: [{
+      'name': 'passthrough',
+      'text': 'Home',
+      'type': 'button',
+      'value': 'home'
+    }]
+  })
   parsedIn.original_message.attachments = attachments;
   if (parsedIn.original_message) {
     request({
