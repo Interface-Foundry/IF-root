@@ -17,9 +17,12 @@ handlers['food.admin.team_budget'] = function * (message) {
 
   var parseNumber = function (str) {
     var num = str.match(/([\d]+(?:\.\d\d)?)/);
-    console.log('Regex returns:', num[1]);
-    return num[1];
+    // console.log('Regex returns:', num[1]);
+    if (num) return num[1];
+    else return null;
   }
+
+  console.log('message.text', message.text)
 
   if (message.text) {
     var num = parseNumber(message.text)
@@ -58,8 +61,21 @@ handlers['food.admin.team_budget'] = function * (message) {
             'style': 'primary',
             'type': 'button',
             'value': 'food.admin.confirm_budget'
-          } //food.user.poll
-
+          }, //food.user.poll
+          {
+            'name': 'food.admin.team_budget',
+            'text': 'No, that\'s not right',
+            'style': 'default',
+            'type': 'button',
+            'value': 'food.admin.team_budget'
+          },
+          {
+            'name': 'passthrough',
+            'text': '< Back',
+            'style': 'default',
+            'type': 'button',
+            'value': 'food.poll.confirm_send_initial'
+          }
         ] : [])
       }
     ]
