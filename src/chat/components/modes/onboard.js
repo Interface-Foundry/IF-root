@@ -628,7 +628,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
   var attachments = [{
     image_url: "http://tidepools.co/kip/kip_menu.png",
     text: 'Click a mode to start using Kip',
-    color: '#3AA3E3',
+    color: '#45a5f4',
     callback_id: 'wow such home',
     actions: [{
       name: 'passthrough',

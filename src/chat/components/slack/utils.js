@@ -417,7 +417,7 @@ function* generateMenuButtons(message) {
 
   var newBtns = [...buttons, {
     name: 'view_cart_btn',
-    text: 'View Cart',
+    text: '⁂ View Cart',
     style: 'default',
     type: 'button',
     value: 'view_cart_btn'
@@ -751,6 +751,7 @@ function * updateCron(message, jobs, when, type) {
 
 /**
  * Sets all parameters for a given chron
+ * Only used during onboarding
  * @param {Message} message - the message received
  * @param {Array} jobs - a list of all cron jobs
  * @param {Object} when - a date object in the form of {day:String, hour:String, minutes:String, date:String}

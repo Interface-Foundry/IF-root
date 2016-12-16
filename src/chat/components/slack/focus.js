@@ -88,12 +88,6 @@ module.exports = function*(message) {
       "style": "default",
       "type": "button",
       "value": message.focus
-    }, {
-      "name": "focus.home.expand",
-      "text": "🐧",
-      "style": "default",
-      "type": "button",
-      "value": message._id
     }]
 
   var reply = [{
@@ -108,10 +102,14 @@ module.exports = function*(message) {
     mrkdwn_in: ['text', 'pretext'],
     callback_id: 'none',
     fallback: 'focus',
-    actions: original
+    actions: cardTemplate.focus_default(message)
+  }, {
+    text: '',
+    callback_id: 'meh',
+    fallback: 'buttons',
+    actions: cardTemplate.focus_home
   }];
-  let menuButtons = yield slackUtils.generateMenuButtons(message);
-  yield slackUtils.cacheMenu(message, cardTemplate.focus_home_default(message), menuButtons, {text: description})
+
 
   return reply
 }
