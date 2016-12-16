@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html
+<head>
+  <title>Menu</title>
+  <link rel="stylesheet" type="text/css" href="css/styles.css" />
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <script src="main.js"></script>
+</head>
+<body ng-app="app" ng-controller="menuController">
+  <header>
+    <nav>
+      <div class="logo image-container">
+        <img src="images/kip-logo.png">
+      </div>
+      <div class="cart-icon image-container">
+        <img src="images/cart-icon.png">
+      </div>
+    </nav>
+  </header>
+  <div class="main-menu">
+    <div class="menu-header">
+      <img src="images/kip-head.png">
+      <h1 class="restaurant-name">{{name}}</h1>
+      <div class="category-nav">
+        <a href="#{{category.name}}" ng-repeat="category in menu">{{category.name}}</a>
+      </div>
+    </div>
+    <div class="menu-content">
+      <div ng-repeat="category in menu">
+        <h2>{{category.name}}</h2>
+        <ul ng-repeat="item in category.children">
+          <li> 
+            {{item.name}} - {{item.price}}
+            <small ng-show="item.description">{{item.description}}</small>
+            <button ng-click="addToCart(item)">Add to cart for {{item.price}}</button>
+           </li> 
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="cart">
+    <h3>Cart</h3>
+    <div ng-repeat="item in cart">
+      <span class="item_name">{{item.name}}</span>
+      <span class="price">{{item.price * item.item_qty}}</span>
+      <div ng-repeat="selected in options[item.id]">
+        <h5>
+          {{selected[0]}} (+ {{selected[1]}})
+        </h5>
+      </div>
+      <button ng-click="changeQuantity(item.id, -1)">-</button>
+      <span>{{item.item_qty}}</span>
+      <button ng-click="changeQuantity(item.id, 1)">+</button>
+    </div>
+    <button ng-hide="minimum > total" class="checkout_btn" ng-click=checkout()>Check out for {{total}}</button>
+    <h5 ng-show="minimum > total">
+      Add {{minimum-total}} to your order to check out!
+    </h5>
+  </div>
+</body>
+</html>
+      
+      
+
+
+
