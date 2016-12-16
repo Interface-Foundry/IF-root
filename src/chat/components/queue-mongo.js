@@ -1,5 +1,7 @@
 var co = require('co')
+var sleep = require('co-sleep')
 var rx = require('rx')
+var hostname = require('os').hostname()
 
 var topics = {
   'incoming': 1,
@@ -41,7 +43,8 @@ function publish (topic, data, key) {
       }, {
         _id: key,
         topic: topic,
-        data: data
+        data: data,
+        publisher: hostname
       }, {
         upsert: true
       }).exec()
@@ -68,35 +71,36 @@ function topic (topic) {
   }
 
   return rx.Observable.create(observer => {
-    // Main polling interval goes through all unread messages
-    setInterval(() => {
-      co(function * () {
-        while (true) {
-          var message = yield getNextMessage(topic)
-          if (!message) { return }
+    // Main polling loop goes through all unread messages
+    co(function * () {
+      while (true) {
+        var message = yield getNextMessage(topic)
+        if (!message) {
+          yield sleep(500)
+        } else {
           kip.debug('handling message', message._id)
           observer.onNext(message)
         }
-      }).catch(kip.err)
-    }, 100)
+      }
+    }).catch(kip.err)
 
     // Retry interval, retry if dispatched but not done and 10 seconds old.
-    setInterval(() => {
-      db.Pubsub.update({
-        dispatched: true,
-        done: { $ne: true },
-        dispatch_time: { $lt: new Date() - 10000 },
-        $or: [
-          {retries: {$exists: false}},
-          {retries: {$lt: 3}}
-        ]
-      }, {
-        $set: { dispatched: false },
-        $inc: { retries: 1 }
-      }, {
-        multi: true
-      }).exec()
-    }, 10000)
+    // setInterval(() => {
+    //   db.Pubsub.update({
+    //     dispatched: true,
+    //     done: { $ne: true },
+    //     dispatch_time: { $lt: new Date() - 10000 },
+    //     $or: [
+    //       {retries: {$exists: false}},
+    //       {retries: {$lt: 3}}
+    //     ]
+    //   }, {
+    //     $set: { dispatched: false },
+    //     $inc: { retries: 1 }
+    //   }, {
+    //     multi: true
+    //   }).exec()
+    // }, 10000)
   })
 }
 
@@ -104,11 +108,7 @@ function* getNextMessage(topic) {
   var message = yield db.Pubsub.findOne({
     topic: topic,
     dispatched: { $ne: true },
-    done: { $ne: true },
-    $or: [
-      {retries: {$exists: false}},
-      {retries: {$lt: 3}}
-    ]
+    done: { $ne: true }
   }).exec()
 
   if (!message) { return }
@@ -119,7 +119,8 @@ function* getNextMessage(topic) {
   }, {
     $set: {
       dispatched: true,
-      dispatch_time: new Date()
+      dispatch_time: new Date(),
+      consumer: hostname
     }
   }).exec()
 

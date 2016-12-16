@@ -5,6 +5,7 @@ var handlers = module.exports.handlers = {}
 var onboard = require('./onboard');
 var queue = require('../queue-mongo');
 var slackUtils = require('../slack/utils');
+var cardTemplate = require('../slack/card_templates');
 
 /**
  * Main handler which decides what part of the onbaording process the user is at 
@@ -17,8 +18,10 @@ function * handle(message) {
     return yield handlers['start'](message)
   } else if (last_action === 'get-admins.ask') {
     return yield handlers['get-admins.response'](message)
-  } else if(last_action === 'get-admins.response') {
-    return yield handlers['reroute'](message)
+  } else if(_.get(message,'action') === 'get-admins.confirm') {
+    return yield handlers['get-admins.confirm'](message)
+  } else if(_.get(message,'action') === 'get-admins.addme') {
+    return yield handlers['get-admins.addme'](message)
   } 
 }
 
@@ -40,7 +43,7 @@ handlers['start'] = function * (message) {
     fallback:'Onboarding',
     callback_id: 'none'
   })
-  attachments.push({text: welcome, color: '#3AA3E3'})
+  attachments.push({text: welcome, mrkdwn_in: ['text'],color: '#3AA3E3'})
   attachments.push({text:  'Who manages the office purchases? Type something like `me` or `me and @jane`', color: '#3AA3E3',
     mrkdwn_in: [
         'text',
@@ -82,20 +85,24 @@ handlers['get-admins.response'] = function * (message) {
   var reply_admin = `Do you want me to take you on a short tour of Kip?`;
   var reply_user = `Why don't you try searching for something? Type something like 'headphones' to search`;
   var reply_failure = "I'm sorry, I couldn't quite understand that, can you clarify for me who manages office purchases? If you want to skip this part, just type 'skip' and we can move on."
-  var special_admin_message = message_tools.text_reply(message, 'special instructions for admins') // TODO
   var admins = []
   var user_is_admin = false
   var team = yield db.Slackbots.findOne({
-    'source.team_id': message.source.team_id
+    'team_id': message.source.team
   }).exec();
 
-  // check for mentioned users
-  // for a typed message like "that would be @dan"
-  // the response.text would be like  "that would be <@U0R6H9BKN>"
+  var find = yield db.Slackbots.find({'team_id': message.source.team}).exec();
+  if (!find || find && find.length == 0) {
+    return kip.debug('could not find team : ', message, find);
+  } else {
+    var team = find[0];
+  }
+
   var office_admins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
-  // replace "me" with the user's id, and <@U12345> with just U12345
+  var isAdmin;
   office_admins = office_admins.map(g => {
-    if (g === 'me') {
+    if (g === 'me' || g === 'ME') {
+       isAdmin = true;
       team.meta.office_assistants.push(message.user_id);
       return message.user_id
     } else {
@@ -105,8 +112,6 @@ handlers['get-admins.response'] = function * (message) {
   });
   team.meta.office_assistants = _.uniq(team.meta.office_assistants);
   yield team.save();
-
-  // also look for users mentioned by name without the @ symbol
   var users = yield db.Chatusers.find({
     team_id: team.team_id,
     is_bot: {$ne: true},
@@ -123,10 +128,58 @@ handlers['get-admins.response'] = function * (message) {
   reply_success = reply_success.replace('$ADMINS', office_admins.map(g => {
     return '<@' + g + '>'
   }).join(', ').replace(/,([^,]*)$/, ' and $1'));
-  var isAdmin = yield slackUtils.isAdmin(message.source.user, team);
   message.mode = 'onboarding';
   message.action = 'get-admins.response';
+
+  if (isAdmin) {
+    var next_message = message
+    next_message.mode = 'onboard';
+    next_message.action = 'home';
+    return yield onboard.handle(next_message);
+  } else {
+    message.mode = 'onboarding';
+    message.text = '';
+    var attachments = [];
+    attachments.push({
+      text: 'Are you sure you don\'t want to be an admin for team *' + team.team_name + '*?',
+      fallback: 'You are unable to choose a game',
+      callback_id: 'wopr_game',
+      color: '#3AA3E3',
+      mrkdwn_in: ['text', 'pretext'],
+      attachment_type: 'default',
+      actions: [{
+        name: "onboarding.get-admins.confirm",
+        text: "Confirm",
+        style: "primary",
+        type: "button",
+        value: "onboarding.get-admins.confirm"
+      }, {
+        name: "onboarding.get-admins.addme",
+        text: "Add me as an Admin!",
+        style: "default",
+        type: "button",
+        value: "onboarding.get-admins.addme"
+      }]
+    });
+    message.reply = attachments;
+    yield message.save()
+    return [message]
+  }
+}
+
+/**
+ * Ask one more time is user is sure he/she does not want to be admin.
+ * 
+ * @param message the latest message from the user
+ */
+handlers['get-admins.confirm'] = function * (message) {
+  var team = yield db.Slackbots.findOne({
+    'team_id': message.source.team
+  }).exec();
+  var admins = yield slackUtils.findAdmins(team);
+  var reply = '';
   if (team.meta.office_assistants.length == 0) {
+    reply = 'You didn\'t choose an admin for your team, I will allow anybody in the team to manage for now :-)'
     team.meta.p2p = true;
     kip.debug('P2P mode ON');
     var members = yield slackUtils.getTeamMembers(team);
@@ -134,41 +187,57 @@ handlers['get-admins.response'] = function * (message) {
       return m.id
     })
     yield team.save();
-  } 
-  if (isAdmin) {
-    message.mode = 'onboard';
-    message.action = 'home';
-    var next_message = message
+    var next_message = message;
+    next_message.text = reply;
+    delete next_message.reply;
     next_message.mode = 'onboard';
     next_message.action = 'home';
     return yield onboard.handle(next_message);
   } else {
-    var reply_message = message_tools.text_reply(message, reply_success);
-    reply_message.mode = 'shopping';
-    reply_message.action = 'switch'; 
-    return [reply_message]
+    reply = `Great! I\'ll keep $ADMINS up-to-date on what your team members are adding to the office shopping cart 😊`;
+    reply = reply.replace('$ADMINS', admins.map(g => {
+    return '<@' + g.id + '>'
+    }).join(', ').replace(/,([^,]*)$/, ' and $1'));
+    var slackreply = {
+      text: reply,
+      attachments: [{
+        image_url: "http://tidepools.co/kip/kip_menu.png",
+        text: 'Click a mode to start using Kip',
+        color: '#3AA3E3',
+        callback_id: 'wow such home',
+        actions: cardTemplate.simple_home
+      }]
+    }
+    var msg = {
+      action: 'simplehome',
+      mode: 'food',
+      source: message.source,
+      origin: message.origin,
+      reply: {
+        data: slackreply
+      }
+    }
+    yield queue.publish('outgoing.' + message.origin, msg, 'home.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
   }
 }
 
 
-// /**
-//  * Finishes the onboarding convo with the quick tutorial blurb
-//  * changes the mode to shopping
-//  *  
-//  * @param message the latest message from the user
-//  */
-// handlers['reroute'] = function * (message) {
-//   var next_mode = message.original_text.match(/(yes|ok|okay|sure|yeah|yea|y|k|ya)/) != null && message.original_text.match(/(yes|ok|okay|sure|yeah|yea|y|k|ya)/).length > 0 ? 'onboard' : 'shopping';
-//   if (next_mode == 'shopping') {
-//     var finished = "Thanks for the info! Why don't you try searching for something? Type something like 'headphones' to search"
-//     var finished_message = message_tools.text_reply(message, finished);
-//     finished_message.mode = 'shopping';
-//     finished_message.action = '';
-//     return [finished_message];
-//   } else {
-//     var next_message = message
-//     next_message.mode = 'onboard';
-//     next_message.action = 'home';
-//     return yield onboard.handle(next_message);
-//   }
-// }
+/**
+ * User changed mind and wants be an admin
+ * 
+ * @param message the latest message from the user
+ */
+handlers['get-admins.addme'] = function * (message) {
+  var team = yield db.Slackbots.findOne({
+    'team_id': message.source.team
+  }).exec();
+    team.meta.office_assistants.push(message.source.user);
+    yield team.save()
+    var next_message = message;
+    next_message.text = '';
+    delete next_message.reply;
+    next_message.mode = 'onboard';
+    next_message.action = 'home';
+   return yield onboard.handle(next_message);
+}
+

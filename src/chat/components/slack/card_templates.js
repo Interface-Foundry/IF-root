@@ -8,11 +8,16 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
     type: "button",
     value: "more"
   }, {
-    name: "shopping.home.expand",
-    text: "🐧",
-    style: "default",
-    type: "button",
-    value: id
+    name: 'view_cart_btn',
+    text: '⁂ View Cart',
+    style: 'default',
+    type: 'button',
+    value: 'view_cart_btn'
+  },  {
+    'name': 'passthrough',
+    'text': 'Home',
+    'type': 'button',
+    'value': 'home'
   }]
 }
 
@@ -44,35 +49,33 @@ var simple_home = module.exports.simple_home = [{
 // }
 
 
-var settings_intervals = module.exports.settings_intervals = [
-{
+var settings_intervals = module.exports.settings_intervals = function(interval) {
+  return [{
     "name": "settings.cron.daily",
-    "text": "Daily",
+    "text": ((interval === 'daily') ? '◉' : '◎') + ' Daily',
     "style": "default",
     "type": "button",
     "value": "daily"
-  },
-  {
+  }, {
     "name": "settings.cron.weekly",
-    "text": "Weekly",
+    "text": ((interval === 'weekly') ? '◉' : '◎') + ' Weekly',
     "style": "default",
-    "type": "button",    
+    "type": "button",
     "value": "weekly"
-  },
-  {
+  }, {
     "name": "settings.cron.monthly",
-    "text": "Monthly",
+    "text": ((interval === 'monthly') ? '◉' : '◎') + ' Monthly',
     "style": "default",
     "type": "button",
     "value": "monthly"
-  },
-   {
+  }, {
     "name": "settings.cron.never",
-    "text": "Never",
+    "text": ((interval === 'never') ? '◉' : '◎') + ' Never',
     "style": "default",
     "type": "button",
     "value": "never"
-  }]
+  }];
+}
 
 var settings_days= module.exports.settings_days = [
     {
@@ -189,7 +192,7 @@ var team_buttons = module.exports.team_buttons =
     "type": "button"
   }];
 
-var focus_home_default = module.exports.focus_home_default = function(message) {
+var focus_default = module.exports.focus_default = function(message) {
   return [{
     "name": "addcart",
     "text": "Add to Cart",
@@ -208,14 +211,21 @@ var focus_home_default = module.exports.focus_home_default = function(message) {
     "style": "default",
     "type": "button",
     "value": message.focus - 1
-  }, {
-    "name": "focus.home.expand",
-    "text": "🐧",
-    "style": "default",
-    "type": "button",
-    "value": message._id
   }]
 }
+
+var focus_home = module.exports.focus_home = [{
+  'name': 'passthrough',
+  'text': 'Home',
+  'type': 'button',
+  'value': 'home'
+}, {
+  name: 'view_cart_btn',
+  text: '⁂ View Cart',
+  style: 'default',
+  type: 'button',
+  value: 'view_cart_btn'
+}];
 
 
 var shopping_team_default = module.exports.shopping_team_default = function(id) {
@@ -272,10 +282,18 @@ var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
   'style': 'default',
   'type': 'button',
   'value': 'search.healthy_snacks'
+}, {
+  name: 'view_cart_btn',
+  text: '⁂ View Cart',
+  style: 'default',
+  type: 'button',
+  value: 'view_cart_btn'
 }];
+
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = [{
   image_url: "http://kipthis.com/kip_modes/mode_shopping.png",
+  fallback: 'Welcome to Kip Store',
   text: "",
   mrkdwn_in: [
     "text",
@@ -293,11 +311,13 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
   text: 'Tap to search for something',
   fallback: 'You are unable to choose a game',
   callback_id: 'wopr_game',
-  color: '#3AA3E3',
+  color: "#45a5f4",
   attachment_type: 'default',
   actions: slack_shopping_buttons
+},{
+  'text': '✂︎ Add items directly from Amazon by pasting the URL and sending it to me',
+  mrkdwn_in: ['text']
 }];
-
 
 // ONBOARDING MODE TEMPLATES
 
@@ -392,28 +412,22 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
 
 var cart_reminder = module.exports.cart_reminder = [{
   name: "onboard.start.confirm_cart_reminder",
-  text: "Today",
+  text: "Daily",
   style: "default",
   type: "button",
-  value: "confirm_cart_reminder.today"
+  value: "confirm_cart_reminder.daily"
 }, {
   name: "onboard.start.confirm_cart_reminder",
-  text: "Tomorrow",
+  text: "Weekly",
   style: "default",
   type: "button",
-  value: "confirm_cart_reminder.tomorrow"
+  value: "confirm_cart_reminder.weekly"
 }, {
   name: "onboard.start.confirm_cart_reminder",
-  text: "1 Week",
+  text: "Monthly",
   style: "default",
   type: "button",
-  value: "confirm_cart_reminder.one_week"
-}, {
-  name: "onboard.start.confirm_cart_reminder",
-  text: "1 Month",
-  style: "default",
-  type: "button",
-  value: "confirm_cart_reminder.one_month"
+  value: "confirm_cart_reminder.monthly"
 }, {
   name: "onboard.start.confirm_cart_reminder",
   text: "Never",

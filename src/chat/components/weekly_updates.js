@@ -46,33 +46,35 @@ co(function*() {
 // Function to set up a job (jerb?) for a particular team_id using whatever is in the DB right now
 //
 var updateJob = module.exports.updateJob = function(team_id) {
-  return co(function*() {
+  return Promise.resolve()
 
-    console.log('updating weekly job for team ' + team_id);
-    var slackbot = yield db.Slackbots.findOne({
-      team_id: team_id
-    }).exec();
-
-    var date = Date.parse(slackbot.meta.weekly_status_day + ' ' + slackbot.meta.weekly_status_time);
-    var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
-    var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), slackbot.meta.weekly_status_timezone);
-
-    console.log('setting weekly job for team ' + team_id + ' ' + slackbot.team_name + ' at ' + job_time_bot_tz.format('00 mm HH * * d') + ' ' + slackbot.meta.weekly_status_timezone);
-
-    //
-    // Stop the old jerb if it exists
-    //
-    if (jerbs[team_id]) {
-      jerbs[team_id].stop();
-    }
-
-    //
-    // Start the new jerb!
-    //
-    jerbs[team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function() {
-      console.log('starting weekly update for team ' + team_id + ' ' + slackbot.team_name);
-
-      //
+  // co(function*() {
+  //
+  //   // console.log('updating weekly job for team ' + team_id);
+  //   var slackbot = yield db.Slackbots.findOne({
+  //     team_id: team_id
+  //   }).exec();
+  //
+  //   var date = Date.parse(slackbot.meta.weekly_status_day + ' ' + slackbot.meta.weekly_status_time);
+  //   var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
+  //   var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), slackbot.meta.weekly_status_timezone);
+  //
+  //   // console.log('setting weekly job for team ' + team_id + ' ' + slackbot.team_name + ' at ' + job_time_bot_tz.format('00 mm HH * * d') + ' ' + slackbot.meta.weekly_status_timezone);
+  //
+  //   //
+  //   // Stop the old jerb if it exists
+  //   //
+  //   if (jerbs[team_id]) {
+  //     jerbs[team_id].stop();
+  //   }
+  //
+  //   //
+  //   // Start the new jerb!
+  //   //
+  //   jerbs[team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function() {
+  //     console.log('starting weekly update for team ' + team_id + ' ' + slackbot.team_name);
+  //
+  //     //
       // Set up the bot
       //
 
@@ -110,17 +112,17 @@ var updateJob = module.exports.updateJob = function(team_id) {
       //   });
       // });
 
-    }, function() {
-      console.log('just finished the weekly update thing for team ' + team_id + ' ' + slackbot.team_name);
-    },
-    true,
-    slackbot.meta.weekly_status_timezone);
-
-
-  }).catch(function(e) {
-    console.log('error settings up job for team ' + team_id);
-    console.log(e);
-  })
+  //   }, function() {
+  //     console.log('just finished the weekly update thing for team ' + team_id + ' ' + slackbot.team_name);
+  //   },
+  //   true,
+  //   slackbot.meta.weekly_status_timezone);
+  //
+  //
+  // }).catch(function(e) {
+  //   console.log('error settings up job for team ' + team_id);
+  //   console.log(e);
+  // })
 }
 
 module.exports.collect = function(team_id, person_id, callback) {
@@ -254,7 +256,7 @@ function lastCall(response, convo) {
               "text":'',
               "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
               "color": "#45a5f4",
-              "mrkdwn_in": ["text"]        
+              "mrkdwn_in": ["text"]
           },{
               "fallback": "Last Call",
               "text":'Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late! \n The clock\'s ticking! You have *60* minutes',
@@ -274,7 +276,7 @@ function lastCall(response, convo) {
               client_res: attachment
           };
           //bye bye botkit ugh
-          ioKip.sendResponse(obj); 
+          ioKip.sendResponse(obj);
 
           resolve();
         })

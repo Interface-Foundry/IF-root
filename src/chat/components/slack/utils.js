@@ -11,6 +11,8 @@ var queue = require('../queue-mongo');
 var cron = require('cron');
 var sleep = require('co-sleep');
 var cardTemplate = require('./card_templates');
+var kipCart = require('../cart');
+var processData = require('../process');
 
 /*
 *
@@ -43,8 +45,8 @@ function * initializeTeam(team, auth) {
  team.markModified('meta.cart_channels');
  team.markModified('meta.all_channels');
  team.markModified('meta.office_assistants');
- yield getTeamMembers(team);
  yield team.save();
+ yield getTeamMembers(team);
  return team;
 }
 
@@ -64,9 +66,9 @@ function * findAdmins(team) {
     yield eachSeries(members, function * (user) {
       if ( adminIds.indexOf(user.id) > -1) {
         admins.push(user);
-        if (!user.is_admin ) {
-           user.is_admin = true;
-           yield user.save();
+        if (!user.is_admin) {
+          user.is_admin = true;
+          yield user.save();
         }
       }
       else if ( adminIds.indexOf(user.id) == -1 && user.is_admin ) {
@@ -180,11 +182,10 @@ function * getTeamMembers(team) {
             members.push(user);
           } else if (teamIds.indexOf(u.id) > -1) {
             var user = yield db.Chatusers.findOne({ id: u.id}).exec();
-            if (user != null) {
+            if (user != null && user != undefined) {
               members.push(user)
             }
           }
-
       }
     });
   }).then( function() { return members });
@@ -416,7 +417,7 @@ function* generateMenuButtons(message) {
 
   var newBtns = [...buttons, {
     name: 'view_cart_btn',
-    text: 'View Cart',
+    text: '⁂ View Cart',
     style: 'default',
     type: 'button',
     value: 'view_cart_btn'
@@ -591,17 +592,118 @@ function* sendLastCalls(message) {
   })
 }
 
-function * sendCartToAdmin(message) {
- 
+function * constructCart(message, text) {
+ var cart_id = message.cart_reference_id || message.source.team;
+ var cart = yield kipcart.getCart(cart_id);
+ // all the messages which compose the cart
+ var attachments = [];
+
+  attachments.push({
+    image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png',
+    text: text,
+    color: '#45a5f4'
+  });
+
+  for (var i = 0; i < cart.aggregate_items.length; i++) {
+    var item = cart.aggregate_items[i];
+    // the slack message for just this item in the cart list
+    var item_message = {
+      mrkdwn_in: ['text', 'pretext'],
+      color: '#45a5f4',
+      thumb_url: item.image
+    }
+    // multiple people could have added an item to the cart, so construct a string appropriately
+    var userString = item.added_by.map(function(u) {
+      return '<@' + u + '>';
+    }).join(', ');
+    var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
+    // make the text for this item's message
+    item_message.text = [
+      `*${i + 1}.* ` + `<${link}|${item.title}>`,
+      `*Price:* ${item.price} each`,
+      `*Added by:* ${userString}`,
+      `*Quantity:* ${item.quantity}`,
+
+    ].filter(Boolean).join('\n');
+    // add the item actions if needed
+    item_message.callback_id = item._id.toString();
+    var buttons = [{
+      "name": "additem",
+      "text": "+",
+      "style": "default",
+      "type": "button",
+      "value": "add"
+    }, {
+      "name": "removeitem",
+      "text": "—",
+      "style": "default",
+      "type": "button",
+      "value": "remove"
+    }];
+
+    if (item.quantity > 1) {
+      buttons.push({
+        name: "removeall",
+        text: 'Remove All',
+        style: 'default',
+        type: 'button',
+        value: 'removeall'
+      })
+    }
+    item_message.actions = buttons;
+    attachments.push(item_message);
+   }
+    var summaryText = `*Team Cart Summary*
+    *Total:* ${cart.total}`;
+    summaryText += `
+    <${cart.link}|*➤ Click Here to Checkout*>`;
+    attachments.push({
+      text: summaryText,
+      mrkdwn_in: ['text', 'pretext'],
+      color: '#49d63a'
+    })
+
+  return attachments
+}
+
+
+function * sendCartToAdmins(message,team) {
+   var cutoff = new Date("2016-12-14T23:07:00.417Z");
+   var added = new Date(team.meta.dateAdded)
+   var copy;
+   // kip.debug('EUREKA ',added, cutoff, (added < cutoff))
+   if (added < cutoff) {
+    copy =  'Hi, we added a new feature to get cart status updates from what your team is adding to the cart';
+   } else {
+    copy = 'Hi! Here\'s what your team has added into the cart so far. If it looks good click the checkout link below :)';
+   }
+   var admins = yield findAdmins(team);
+   yield admins.map(function*(a) {
+      var msg = new db.Message();
+      msg.source = {};
+      msg.mode = 'settings';
+      msg.action = 'home';
+      msg.source.team = team.team_id;
+      msg.source.channel = a.dm;
+      msg.source.user = a.id;
+      msg.user_id = a.id;
+      msg.thread_id = a.dm;
+      msg.reply = yield constructCart(msg, copy);
+      yield msg.save();
+      yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.viewcart');
+   })
 };
 
 
+
 function * updateCron(message, jobs, when, type) {
+  return;
    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
    var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
    var currentUser = yield db.Chatusers.findOne({id: message.source.user});
    var interval = _.get(team, 'meta.status_interval');
    var date;
+   var date2;
     if (jobs[team.team_id]) {
       jobs[team.team_id].stop();
     }
@@ -609,20 +711,26 @@ function * updateCron(message, jobs, when, type) {
       delete jobs[team.team_id];
       return
     } else if (type == 'time' && interval != 'daily') {
-      var date = (interval == 'weekly' || interval == 'daily') ? '*' : _.get(team, 'meta.weekly_status_date');
+      var dayOfMonth = (interval == 'weekly' || interval == 'daily') ? '*' : _.get(team, 'meta.weekly_status_date');
       var weekday = (interval == 'monthly' || interval == 'daily') ? '*' : getDayNum(_.get(team, 'meta.weekly_status_day')).toString();
-      date = '00 ' + when.minutes + ' ' + when.hour + ' ' + date +  ' * ' + weekday;
+      date = '00 ' + when.minutes + ' ' + when.hour + ' ' + dayOfMonth +  ' * ' + weekday;
+      date2 = '00 ' + when.minutes + ' ' + (parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00') + ' ' + dayOfMonth +  ' * ' + weekday;
     } else if (type == 'time' && interval == 'daily') {
       date = '00 ' + when.minutes + ' ' + when.hour  + ' * * *';
+      date2 = '00 ' + when.minutes + ' ' + (parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')   + ' * * *';
     } else if (type == 'day') {
       date = '00 ' + when.minutes + ' ' + when.hour  + ' * * ' + when.day;
+      date2 = '00 ' + when.minutes + ' ' + (parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')  + ' * * ' + when.day;
     } else if (type == 'date') {
       date = '00 ' + when.minutes + ' ' + when.hour  + ' ' + when.date + ' * *';
+      date2 = '00 ' + when.minutes + ' ' + (parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')   + ' ' + when.date + ' * *';
     } else {
       date = when;
     }
-    kip.debug('\n\n\n\n\n\n setting cron job : ', type, date,'\n\n\n\n\n\n')
+    kip.debug('\n\n\n\n\n\n setting cron job to send last calls : ', date,'\n\n\n\n\n\n')
 
+
+    //Set cron job for cart member last calls
     jobs[team.team_id] = new cron.CronJob( date, function  () {
        co(sendLastCalls(message));
     }, function() {
@@ -630,7 +738,57 @@ function * updateCron(message, jobs, when, type) {
     },
     true,
     team.meta.weekly_status_timezone);
+
+    //Set cron job for admin cart status updates -- currently one hour after
+    jobs[currentUser.user_id] = new cron.CronJob( date2, function  () {
+       co(sendCartToAdmins(message,team));
+    }, function() {
+      kip.debug('\n\n\n\n ran cron job for admin: ' + team.team_id + ' ' + team.team_name + date + '\n\n\n\n');
+    },
+    true,
+    team.meta.weekly_status_timezone);
 };
+
+/**
+ * Sets all parameters for a given chron
+ * Only used during onboarding
+ * @param {Message} message - the message received
+ * @param {Array} jobs - a list of all cron jobs
+ * @param {Object} when - a date object in the form of {day:String, hour:String, minutes:String, date:String}
+ * @return {Null} no return
+ */
+function* setCron(message, jobs, when) {
+  let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  let team = yield db.Slackbots.findOne({
+    'team_id': team_id
+  }).exec();
+  let currentUser = yield db.Chatusers.findOne({
+    id: message.source.user
+  });
+
+  let teamDate = `00 ${when.minutes} ${when.hour} ${when.date} * ${when.day}`;
+  let adminDate = `00 ${when.minutes} ${(parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')} ${when.date} * ${when.day}`;
+
+  kip.debug('\n\n\n\n\n\n setting cron job to send last calls : ', teamDate, adminDate, '\n\n\n\n\n\n')
+
+  //Set cron job for cart member last calls
+  jobs[team.team_id] = new cron.CronJob(teamDate, function() {
+      co(sendLastCalls(message));
+    }, function() {
+      kip.debug('\n\n\n\n ran cron job for team: ' + team.team_id + ' ' + team.team_name + teamDate + '\n\n\n\n');
+    },
+    true,
+    team.meta.weekly_status_timezone);
+
+  //Set cron job for admin cart status updates -- currently one hour after
+  jobs[currentUser.user_id] = new cron.CronJob(adminDate, function() {
+      co(sendCartToAdmins(message, team));
+    }, function() {
+      kip.debug('\n\n\n\n ran cron job for admin: ' + team.team_id + ' ' + team.team_name + adminDate + '\n\n\n\n');
+    },
+    true,
+    team.meta.weekly_status_timezone);
+}
 
 
 
@@ -682,5 +840,7 @@ module.exports = {
   hideLoading: hideLoading,
   updateCron: updateCron,
   sendLastCalls: sendLastCalls,
-  getDayNum: getDayNum
+  getDayNum: getDayNum,
+  constructCart: constructCart,
+  setCron: setCron
 }

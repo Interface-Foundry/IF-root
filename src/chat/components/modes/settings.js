@@ -47,10 +47,17 @@ handlers['start'] = function * (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var find = yield db.Slackbots.find({'team_id': team_id}).exec();
+  if (!find || find && find.length == 0) {
+    return kip.debug('could not find team : ', team_id, find);
+  } else {
+    var team = find[0];
+  }
+
   var teamMembers = yield utils.getTeamMembers(team);
   var admins = yield utils.findAdmins(team);
-  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user}).exec();
+
   var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   var attachments = [];
   //adding settings mode sticker
@@ -86,7 +93,7 @@ handlers['start'] = function * (message) {
     //
     // Last call alerts personal settings
     //
-    if (currentUser && currentUser.settings.last_call_alerts) {
+    if (currentUser && _.get(currentUser,'settings.last_call_alerts')) {
       attachments.push({text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
     } else {
       attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
@@ -104,17 +111,17 @@ handlers['start'] = function * (message) {
        attachments.push({text: 'Your team is set to receive last calls on day *' + team.meta.weekly_status_date + '* of every month at *' + team.meta.weekly_status_time + '*  '
         + '\nYou can specify the time by saying something like: `8:00 am`'});
     } else if (team.meta.status_interval == 'never')    {
-       attachments.push({text: 'Your team is currently not receive last call notifications.'});
+       attachments.push({text: 'Your team is currently not receiving last call notifications.'});
     }
     attachments.push({
       text: 'When do you want last calls to go out?',
       color: color,
       mrkdwn_in: ['text'],
       fallback:'Settings',
-      actions: cardTemplate.settings_intervals,
+      actions: cardTemplate.settings_intervals(team.meta.status_interval),
       callback_id: 'none'
     })
-  };
+  }
   
   var buttons = cardTemplate.settings_menu;
   if(!isAdmin && admins.length > 0){
@@ -237,11 +244,11 @@ handlers['change_time'] = function * (message) {
   msg.mode = 'settings'
   msg.action = 'home'
   msg.text = 'Ok, I have updated your settings!';
-  msg.execute = [ { 
+  msg.execute = [{
     "mode": "settings",
     "action": "home",
     "_id": message._id
-  } ];
+  }];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -254,7 +261,22 @@ handlers['cron'] = function * (message, interval) {
   var rhour = date_lib.getHours(new Date());
   var rminutes = date_lib.getMinutes(new Date());
   var day = date_lib.getDay(new Date());
-  var never = false;
+  var oldAttachments = message.source.original_message.attachments;
+  var buttons = cardTemplate.settings_intervals(interval);
+  oldAttachments[oldAttachments.length - 2].actions = buttons;
+  oldAttachments[oldAttachments.length - 1].actions =
+    oldAttachments[oldAttachments.length - 1].actions.map(button => {
+      button.text = button.text.replace('&lt;', '<')
+      return button;
+    });
+	request({
+		method: 'POST',
+		uri: message.source.response_url,
+		body: JSON.stringify({
+			text: '',
+			attachments: oldAttachments
+		})
+	})
   team.meta.status_interval = interval;
   yield team.save();
   switch(interval) {
@@ -364,23 +386,6 @@ handlers['set_date'] = function * (message) {
   var num = parseInt(message.text.trim())
 
    if (!(/^\d+$/.test(message.text)) ||  0 > num > 31) { 
-      // var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
-      // var relevantMessage = history[1];
-      // var json = relevantMessage.source.original_message;
-      // var warning = {
-      //   text: 'The date you entered is incorrect!',
-      //   color: '#ff0000',
-      //   mrkdwn_in: ['text'],
-      //   fallback:'Settings',
-      //   callback_id: 'none'
-      // }
-      // json.attachments.push(warning)
-      // request({
-      //   method: 'POST',
-      //   uri: relevantMessage.source.response_url,
-      //   body: JSON.stringify(json)
-      // }); 
-      // return
       var msg = message;
       msg.mode = 'settings';
       msg.action = 'set_date';
@@ -470,12 +475,11 @@ handlers['add_or_remove'] = function * (message) {
           mrkdwn_in: ['text'],
           fallback:'Settings',
           actions: [
-              {
-                "name": "exit",
-                "text": "Exit Settings",
-                "style": "primary",
-                "type": "button",
-                "value": "exit"
+              {   
+                "name": "settings.back",
+                "text": "Home",
+                "style": "default",
+                "type": "button"
               },
               {
                 "name": "team",
@@ -523,7 +527,10 @@ handlers['add_or_remove'] = function * (message) {
       userIds.map((id) => {
         if (team.meta.office_assistants.indexOf(id) >= 0) {
           var index = team.meta.office_assistants.indexOf(id);
-          team.meta.office_assistants.splice(index, 1);
+          //check to see if there is only one admin left, if so you cant remove the last remaining admin
+          if (team.meta.office_assistants.length != 1) {
+            team.meta.office_assistants.splice(index, 1);
+          }
         }
       })
     }
@@ -545,7 +552,7 @@ handlers['add_or_remove'] = function * (message) {
     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
     replies.push(msg)
   }
- return replies;
+ return yield handlers['start'](msg) //actually showing results instead of just saying you updated settings...should be both eventually
 }
 
 handlers['last_call_off'] = function * (message) {
@@ -638,20 +645,10 @@ handlers['sorry'] = function * (message) {
       fallback:'Settings',
       actions: [
           {
-            "name": "exit",
-            "text": "Exit Settings",
-            "style": "primary",
-            "type": "button",
-            "value": "exit"
-          },
-          {
-            "name": "help",
-            "text": "Help",
-            "style": "default",
-            "type": "button",
-
-
-            "value": "help"
+            "style": "primary",    
+            "name": "settings.back",
+            "text": "Home",
+            "type": "button"
           },
           {
             "name": "team",
@@ -666,13 +663,6 @@ handlers['sorry'] = function * (message) {
             "style": "default",
             "type": "button",
             "value": "team"
-          },
-          {
-            "name": "home",
-            "text": "🐧",
-            "style": "default",
-            "type": "button",
-            "value": "home"
           }
       ],
       callback_id: 'none'

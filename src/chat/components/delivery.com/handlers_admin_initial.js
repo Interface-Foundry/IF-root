@@ -71,9 +71,10 @@ handlers['food.admin.select_address'] = function * (message, banner) {
 
     //add onboard sticker #1
     msg_json.attachments.unshift({
-      'text':'Hi there, I\'m going to walk you through your first Kip Café order!',
+      'text':'Hi there, I\'m going to walk you through your first Kip Café order! \n _By using Kip you agree to our <https://kipthis.com/legal.html|Terms of Use>_',
       'image_url':'http://tidepools.co/kip/welcome_cafe.png',
-      'color': '#A368F0'
+      'color': '#A368F0',
+      'mrkdwn_in': ['text']
     })
   }
 
@@ -612,7 +613,7 @@ handlers['food.admin_polling_options'] = function * (message) {
         })
       }
       attachments.push(listing)
-    }else {
+    }else if (!foodSession.onboarding) {
       attachments.push({'text': 'Seems like your most recent restaurants are not available at this time.'})
     }
   }else {

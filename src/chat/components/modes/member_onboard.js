@@ -8,8 +8,11 @@ var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
 var kipcart = require('../cart');
 var winston = require('winston');
-winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 var Fuse = require('fuse.js');
+var request = require('request')
+
+winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+
 
 function* handle(message) {
   let action;
@@ -39,12 +42,14 @@ handlers['step_1'] = function(message) {
   msg.mode = 'member_onboard';
   msg.action = 'home';
   msg.text = '';
+  msg.fallback = 'Step 1: Find items to add to team cart'
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = [{
     text: '*Step 1:* Find items to add to team cart',
     mrkdwn_in: ['text'],
-    color: '#A368F0'
+    color: '#A368F0',
+    fallback: 'Step 1: Find items to add to team cart'
   }, {
     text: 'Tap to search for something',
     fallback: 'You are unable to choose a game',
@@ -78,6 +83,16 @@ handlers['step_2'] = function*(message, data) {
       query = searchTerm;
       break;
   }
+  let json = message.source.original_message;
+  json.attachments = [...json.attachments, {
+    'text': 'Searching...',
+    mrkdwn_in: ['text']
+  }]
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(json)
+  });
   var results = yield amazon.search({
     query: query
   }, message.origin);
@@ -117,8 +132,14 @@ handlers['step_2'] = function*(message, data) {
   msg.reply = [{
     text: '*Step 2:* Try adding an item to your basket',
     mrkdwn_in: ['text'],
-    color: '#A368F0'
+    color: '#A368F0',
+    fallback: 'Step 2: Try adding an item to your basket'
   }];
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(message.source.original_message)
+  });
   return [msg];
 }
 
@@ -152,7 +173,8 @@ handlers['cart'] = function*(message) {
   let attachments = [{
     text: '*Step 3:* Well done!\n I\'ve added your item to the team cart',
     mrkdwn_in: ['text'],
-    color: '#A368F0'
+    color: '#A368F0',
+    fallback: 'Step 3: Well done!\n I\'ve added your item to the team cart'
   }];
   let res = new db.Message({
     incoming: false,
@@ -189,10 +211,9 @@ handlers['reminder'] = function(message) {
     text: 'Ok! When would you like to be reminded?',
     color: '#49d63a',
     mrkdwn_in: ['text'],
-    fallback: 'member_onboard',
     actions: cardTemplate.member_reminder,
     callback_id: 'none',
-    mrkdwn_in: ['text'],
+    fallback: 'Ok! When would you like to be reminded?'
   });
   attachments.push({
     text: '',
@@ -200,7 +221,6 @@ handlers['reminder'] = function(message) {
     fallback: 'member_onboard',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none',
-    mrkdwn_in: ['text'],
   });
   var msg = message;
   msg.mode = 'member_onboard'
@@ -276,7 +296,7 @@ handlers['reminder_confirm'] = function*(message, data) {
     text: messageText,
     color: '#45a5f4',
     mrkdwn_in: ['text'],
-    fallback: 'Onboard',
+    fallback: messageText.replace('*', ''),
     callback_id: 'none'
   }, {
     text: '',
@@ -310,7 +330,7 @@ handlers['sorry'] = function(message) {
   attachments.push({
     text: 'Don’t have any changes? Type `exit` to quit settings',
     mrkdwn_in: ['text'],
-    fallback: 'Settings',
+    fallback: 'Sorry!',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none',
     color: '#45a5f4'

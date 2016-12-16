@@ -2,11 +2,11 @@ FROM gcr.io/kip-styles/parser:base
 
 MAINTAINER grahama <graham.annett@gmail.com>
 
-ADD nlp_parser/src_parser/requirements.txt  .
+ADD src/nlp_parser/src_parser/requirements.txt  .
 
 RUN apt update && apt install -y python3-pip  && pip3 install -qr requirements.txt
 
-ADD nlp_parser/src_parser /root/
+ADD src/nlp_parser/src_parser /root/
 
 RUN chmod +x /root/parser.sh
 

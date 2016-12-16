@@ -1,0 +1,32 @@
+env: production
+isProduction: true
+mongodb:
+  url: mongodb://mongodb-1-server-1,mongodb-1-server-2/foundry
+  backuphost: mongodb-1-server-1
+  options:
+    replset:
+      rs_name: rs0
+      socketOptions:
+        keepAlive: 1
+elasticsearch:
+  url: http://elasticsearch-cerulean.internal.kipapp.co:9200
+elasticsearchElk:
+  url: http://elasticsearch-cerulean.internal.kipapp.co:9200
+redis:
+  port: 6379
+  url: redis-thunder.internal.kipapp.co
+geoipURL: http://localhost:8080/json/
+neighborhoodServer:
+  url: http://localhost:9998
+app:
+  publicAPI: https://kipapp.co/styles/api
+picstitch: http://dev-picstitch.kipthis.com
+nlp: http://dev-parser.kipthis.com
+nlp_rnn: http://dev-rnn.kipthis.com
+doc2vec: http://localhost:8084
+slack:
+  client_id: "2804113073.14708197459"
+  client_secret: d4c324bf9caa887a66870abacb3d7cb5
+  verification_token: P30EDlNgjsl9i15ZQBOElJls
+  redirect_uri: https://slack.kipapp.co/newslack
+picstitchDelivery: http://localhost:5000

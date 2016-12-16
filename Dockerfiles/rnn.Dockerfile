@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
     python3-h5py \
     wget
 
-ADD nlp_rnn/src_rnn/requirements.txt /app/requirements.txt
+ADD src/nlp_rnn/src_rnn/requirements.txt /app/requirements.txt
 
 RUN pip3 install $TF_DOWNLOAD && pip3 install -r /app/requirements.txt
 
@@ -38,7 +38,7 @@ RUN wget -P /app/models/ https://storage.googleapis.com/saved-models-bucket/late
 
 WORKDIR /app/
 
-COPY nlp_rnn/src_rnn /app
+COPY src/nlp_rnn/src_rnn /app
 
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/nlp_creds.json
 

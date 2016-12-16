@@ -339,7 +339,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     } else {
       return yield $replyChannel.send(message, 'food.admin.restaurant.pick', {
         type: message.origin,
-        data: { text: 'One user one vote, chill the hell out' }
+        data: { text: 'Waiting for others to submit their votes. Hang on a sec :smile:' }
       })
     }
   }

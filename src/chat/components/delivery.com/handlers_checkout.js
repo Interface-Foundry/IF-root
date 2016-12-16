@@ -1,7 +1,7 @@
 var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
-var sleep = require('co-sleep');
+var sleep = require('co-sleep')
 
 
 // injected dependencies
@@ -80,7 +80,10 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(1)
   prevMessage = prevMessage[0]
-  console.log('heerrr', prevMessage.reply.textFor)
+  if (_.get(prevMessage, 'reply')) {
+    logging.info('heerrr', prevMessage.reply)
+  }
+
   var editInfo = {}
 
   editInfo['admin.order.checkout.address2'] = function * (message) {
@@ -95,6 +98,10 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   editInfo['admin.order.checkout.name'] = function * (message) {
+    if (!_.get(message, 'text')) {
+      logging.error('message was undefined but we got a handler', message, prevMessage)
+      return yield handlers['food.admin.order.checkout.name'](message)
+    }
     logging.info('saving name of person receiving order: ', message.text)
     if (message.text.split(' ').length > 1) {
       foodSession.convo_initiater.first_name = message.text.split(' ')[0]
@@ -277,22 +284,14 @@ handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * 
   return yield handlers['food.admin.order.checkout.confirm'](msg)
 }
 
-
 handlers['food.admin.order.pay'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
-  // check tip amount???
-  if (Number(foodSession.tipAmount).toFixed(2) !== (Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)) {
-    logging.error('tipAmount not correct')
-    logging.error(`expected tip: ${(Number(foodSession.tipPercent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)}`)
-    logging.error(`actual tip: ${foodSession.tipAmount}`)
-  }
-
   // base response
   var response = {
-    text: `Checkout for ${foodSession.chosen_restaurant.name} - ${(foodSession.order.total + foodSession.tipAmount).$}`,
-    fallback: `Checkout for ${foodSession.chosen_restaurant.name} - ${(foodSession.order.total + foodSession.tipAmount).$}`,
+    text: `Checkout for ${foodSession.chosen_restaurant.name} - ${foodSession.calculated_amount.$}`,
+    fallback: `Checkout for ${foodSession.chosen_restaurant.name} - ${foodSession.calculated_amount.$}`,
     callback_id: `admin_order_pay`,
     attachments: [{
       'title': '',
@@ -328,7 +327,6 @@ handlers['food.admin.order.pay'] = function * (message) {
   //     value: 'food.feedback.new'
   //   })
   // }
-
 
   if (_.get(slackbot.meta, 'payments')) {
     // we already have a card source, present cards
@@ -412,8 +410,8 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'chosen_restaurant': foodSession.chosen_restaurant,
     'guest_token': foodSession.guest_token,
     'order': {
-      'total': (foodSession.order.total * 100) + (foodSession.tipAmount * 100),
-      'tip': foodSession.tipAmount,
+      'total': foodSession.calculated_amount * 100,
+      'tip': foodSession.tip.amount,
       'order_type': foodSession.fulfillment_method
     }
   }
@@ -490,8 +488,8 @@ handlers['food.admin.order.select_card'] = function * (message) {
     'chosen_restaurant': foodSession.chosen_restaurant,
     'guest_token': foodSession.guest_token,
     'order': {
-      'total': (foodSession.order.total * 100) + (foodSession.tipAmount * 100),
-      'tip': foodSession.tipAmount,
+      'total': foodSession.calculated_amount * 100,
+      'tip': foodSession.tip.amount,
       'order_type': foodSession.fulfillment_method
     },
     'saved_card': {
@@ -517,8 +515,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
       'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
-    sleep(5000);
-
+    sleep(5000)
   } catch (e) {
     logging.error('error doing kip pay in food.admin.order.select_card', e)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kip pay'}})
@@ -543,7 +540,7 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
       'color': `#3AA3E3`,
       'actions': [{
         'name': `food.admin.order.select_card`,
-        'text': `✓ Order - $${foodSession.order.total}`,
+        'text': `✓ Order - \$${foodSession.calculated_amount}`,
         'type': `button`,
         'style': `primary`,
         'value': c.card.card_id
@@ -582,7 +579,6 @@ handlers['food.done'] = function * (message) {
     slackbot.meta.locations.push(foodSession.chosen_location)
   }
   yield slackbot.save()
-
 }
 
 module.exports = function (replyChannel, allHandlers) {

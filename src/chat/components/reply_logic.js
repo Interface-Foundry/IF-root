@@ -87,7 +87,7 @@ function typing(message) {
 function simplehome(message) {
 
 	var slackreply = {
-		text: '*Hi! Thanks for using Kip* 😊',
+		text: 'Hi! Thanks for using Kip 😊',
 		attachments: [{
 			image_url: "http://tidepools.co/kip/kip_menu.png",
 			text: 'Click a mode to start using Kip',

@@ -59,6 +59,107 @@ var bundles = require('../bundles');
 bundles.updater(); //caches bundle items to mongo everyday at midnight
 
 var slackUtils = require('./utils.js')
+
+
+
+function * loadTeam(slackbot) {
+  if (slackConnections[slackbot.team_id]) {
+    logging.info('already loaded team', slackbot.team_name)
+    return
+  }
+  var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '')
+  rtm.start()
+  var web = new slack.WebClient(slackbot.bot.bot_access_token || '')
+  slackConnections[slackbot.team_id] = {
+    rtm: rtm,
+    web: web,
+    slackbot: slackbot
+  }
+
+  co(function * () {
+    yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
+  })
+  // TODO figure out how to tell when auth is invalid
+  // right now the library just console.log's a message and I can't figure out
+  // how to intercept that event.
+  // rtm.on(slack.CLIENT_EVENTS.RTM.INVALID_AUTH, (err) => {
+  //   kip.log('invalid auth', slackbot.team_id, slackbot.team_name)
+  // })
+
+  rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
+    // kip.log('loaded slack team', slackbot.team_id, slackbot.team_name)
+  })
+
+  rtm.on(slack.CLIENT_EVENTS.DISCONNECT, (reason) => {
+    kip.log('slack client disconnected', slackbot.team_id)
+    kip.log(reason); // is this even a thing?
+  })
+
+  //
+  // Handle incoming slack messages.  Slack-specific pre-processing
+  //
+  rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
+
+    kip.debug('got slack message sent from user', data.user, 'on channel', data.channel)
+
+    // For channels that are not DM's, only respond if kip is called out by name
+    if ('CG'.includes(data.channel[0])) {
+      if (data.text && data.text.includes(slackbot.bot.bot_user_id)) {
+        // strip out the bot user id, like "<@U13456> find me socks" -> "find me socks"
+        var regex = new RegExp('<@' + slackbot.bot.bot_user_id + '>[:]*', 'g')
+        data.text = data.text.replace(regex, '').trim()
+      } else {
+        // if not mentioned by name, do nothing
+        return;
+      }
+    }
+
+    var message = new db.Message({
+      incoming: true,
+      thread_id: data.channel,
+      original_text: data.text,
+      user_id: data.user,
+      origin: 'slack',
+      source: data
+    })
+
+    // don't talk to yourself
+    if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
+      kip.debug("don't talk to yourself: data: ",data);
+      return; // drop the message before sa ving.
+    }
+
+    // other random things
+    if (data.type !== 'message' || (data.hidden === true) || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { // settings.name = kip's slack username
+      kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      return
+    }
+
+    //
+    // 🖼 image search
+    //
+    if (data.subtype === 'file_share' && ['png', 'jpg', 'gif', 'jpeg', 'svg'].indexOf(data.file.filetype.toLowerCase()) >= 0) {
+      return image_search(data.file.url_private, slackbot.bot.bot_access_token, function (res) {
+        message.text = res
+        message.save().then(() => {
+          queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
+        })
+      })
+    }
+    // clean up the text
+    message.text = data.text // .replace(/(<([^>]+)>)/ig, ''); // remove <user.id> tag
+    // if (message.text.charAt(0) == ':') {
+    //   message.text = message.text.substr(1); // remove : from beginning of string
+    // }
+    message.text = message.text.trim() // remove extra spaces on edges of string
+
+    // queue it up for processing
+    message.save().then(() => {
+      queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
+    })
+  })
+}
+
 //
 // slackbots
 //
@@ -78,98 +179,8 @@ function * start () {
   kip.log('found', slackbots.length, 'slackbots')
 
   // Just need the RTM client to listen for messages
-  slackbots.map((slackbot) => {
-    var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '')
-    rtm.start()
-    var web = new slack.WebClient(slackbot.bot.bot_access_token || '')
-    slackConnections[slackbot.team_id] = {
-      rtm: rtm,
-      web: web,
-      slackbot: slackbot
-    }
-
-    co(function * () {
-      yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
-    })
-    // TODO figure out how to tell when auth is invalid
-    // right now the library just console.log's a message and I can't figure out
-    // how to intercept that event.
-    // rtm.on(slack.CLIENT_EVENTS.RTM.INVALID_AUTH, (err) => {
-    //   kip.log('invalid auth', slackbot.team_id, slackbot.team_name)
-    // })
-
-    rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
-      kip.log('loaded slack team', slackbot.team_id, slackbot.team_name)
-    })
-
-    rtm.on(slack.CLIENT_EVENTS.DISCONNECT, (reason) => {
-      kip.log('slack client disconnected', slackbot.team_id)
-      kip.log(reason); // is this even a thing?
-    })
-
-    //
-    // Handle incoming slack messages.  Slack-specific pre-processing
-    //
-    rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
-
-      kip.debug('got slack message sent from user', data.user, 'on channel', data.channel)
-
-      // For channels that are not DM's, only respond if kip is called out by name
-      if ('CG'.includes(data.channel[0])) {
-        if (data.text.includes(slackbot.bot.bot_user_id)) {
-          // strip out the bot user id, like "<@U13456> find me socks" -> "find me socks"
-          var regex = new RegExp('<@' + slackbot.bot.bot_user_id + '>[:]*', 'g')
-          data.text = data.text.replace(regex, '').trim()
-        } else {
-          // if not mentioned by name, do nothing
-          return;
-        }
-      }
-
-      var message = new db.Message({
-        incoming: true,
-        thread_id: data.channel,
-        original_text: data.text,
-        user_id: data.user,
-        origin: 'slack',
-        source: data
-      })
-
-      // don't talk to yourself
-      if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-        kip.debug("don't talk to yourself: data: ",data);
-        return; // drop the message before sa ving.
-      }
-
-      // other random things
-      if (data.type !== 'message' || (data.hidden === true) || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { // settings.name = kip's slack username
-        kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
-        return
-      }
-
-      //
-      // 🖼 image search
-      //
-      if (data.subtype === 'file_share' && ['png', 'jpg', 'gif', 'jpeg', 'svg'].indexOf(data.file.filetype.toLowerCase()) >= 0) {
-        return image_search(data.file.url_private, slackbot.bot.bot_access_token, function (res) {
-          message.text = res
-          message.save().then(() => {
-            queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
-          })
-        })
-      }
-      // clean up the text
-      message.text = data.text // .replace(/(<([^>]+)>)/ig, ''); // remove <user.id> tag
-      // if (message.text.charAt(0) == ':') {
-      //   message.text = message.text.substr(1); // remove : from beginning of string
-      // }
-      message.text = message.text.trim() // remove extra spaces on edges of string
-
-      // queue it up for processing
-      message.save().then(() => {
-        queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
-      })
-    })
+  yield slackbots.map(slackbot => {
+    return loadTeam(slackbot)
   })
 }
 
@@ -178,14 +189,16 @@ function * start () {
 //
 kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
-  
+
+  logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
+  outgoing.ack();
   try {
     var message = outgoing.data;
     var team = _.get(message, 'source.team');
     var thread_id = _.get(message, 'thread_id');
     var bot = slackConnections[team] ? slackConnections[team] : slackConnections[thread_id];
     if (typeof bot === 'undefined') {
-      // logging.error('error with the bot thing, message:', message)
+      logging.error('error with the bot thing, message:', message)
       // throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
     }
     var msgData = {
@@ -222,7 +235,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         msgData.attachments = yield variation_view(message);
         msgData.text = '';
         return bot.web.chat.postMessage(message.source.channel, '', msgData);
-        
+
         // var asin = message.reply[0].id; //just grab the first one for now
         // yield slackUtils.addViaAsin(asin, message);
         // message.data = yield kipCart.getCart(message.source.team)
@@ -232,6 +245,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         var results = yield search_results(message);
         msgData.attachments = [...message.reply || [], ...results || []];
+        logging.log('sending search results')
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
@@ -285,25 +299,10 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           text: '*Success!* You can always type `help` if you have any problems',
           mrkdwn_in: ['text'],
           color: '#A368F0'
-        }, {
-          'image_url': 'http://kipthis.com/kip_modes/mode_shopping.png',
-          text: '',
-          mrkdwn_in: ['text'],
-          color: '#3AA3E3'
-        }, {
-          text: 'Tap to search for something',
-          fallback: 'Search for what you want',
-          callback_id: 'idk',
-          color: '#3AA3E3',
-          attachment_type: 'default',
-          actions: cardTemplate.slack_shopping_buttons
-        }, {
-          'text': '✂︎ Add items directly from Amazon by pasting the URL and sending it to me',
-          mrkdwn_in: ['text']
-        }];
+        }, ...cardTemplate.slack_shopping_mode];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
-      
+
       if (message.mode === 'member_onboard' && message.action === 'results' && message.amazon.length > 0) {
         let results = yield search_results(message, true);
         msgData.attachments = [...message.reply || [], ...results || []];
@@ -350,8 +349,9 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
   }
 })
 
-module.exports.start = start;
 module.exports.slackConnections = slackConnections;
+module.exports.loadTeam = loadTeam
+module.exports.startMockSlack = start
 
 if (!module.parent) {
   co(start).catch((e) => {

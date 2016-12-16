@@ -97,9 +97,28 @@ function buttonCommand (action) {
 
 // incoming slack action
 app.post('/slackaction', next(function * (req, res) {
-  if (req.body && req.body.payload) {
-    var message;
-    var parsedIn = JSON.parse(req.body.payload);
+  if (!req.body || !req.body.payload) {
+    // probably a health check message from slack
+    res.sendStatus(200)
+  }
+
+  var message;
+  var parsedIn = JSON.parse(req.body.payload);
+
+  // First reply to slack, then process the request
+  if (parsedIn.original_message) {
+    // var stringOrig = JSON.stringify(parsedIn.original_message)
+    // var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
+    // stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+    // console.log("actually sending message back for real")
+    res.status(200)
+    res.end()
+  } else {
+    console.error('slack buttons broke, need a response_url')
+    res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
+    return
+  }
+
     var action = parsedIn.actions[0];
     kip.debug('incoming action', action);
     kip.debug(action.name.cyan, action.value.yellow);
@@ -148,7 +167,6 @@ app.post('/slackaction', next(function * (req, res) {
       }
       else if (simple_command == 'loading_btn') {
       	// responding with nothing means the button does nothing!
-        res.send();
         return;
       }
       else if (simple_command == 'help_btn') {
@@ -202,7 +220,6 @@ app.post('/slackaction', next(function * (req, res) {
           uri: message.source.response_url,
           body: JSON.stringify(json)
         })
-        return res.sendStatus(200)
       }
       else if (simple_command == 'view_cart_btn') {
           message.mode = 'shopping'
@@ -260,7 +277,7 @@ app.post('/slackaction', next(function * (req, res) {
         var team = message.source.team;
         var slackBot = slackModule.slackConnections[team];
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
-        
+
       }
 
       message.save().then(() => {
@@ -338,26 +355,12 @@ app.post('/slackaction', next(function * (req, res) {
           break
       }
     }
-    // sends back original chat
-    if (parsedIn.original_message) {
-      var stringOrig = JSON.stringify(parsedIn.original_message)
-      var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
-      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
-      res.send(JSON.parse(stringOrig))
-    } else {
-      console.error('slack buttons broke, need a response_url')
-      res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
-      return
-    }
-  } else {
-    res.sendStatus(200)
-  }
 }))
 
 function clearCartMsg(attachments) {
   //clears all but the updating message of buttons
   return attachments.reduce((all, a) => {
-    if (a.callback_id && a.text.includes('Quantity:')) {
+    if (a.callback_id && a.text && a.text.includes('Quantity:')) {
       a.actions = [{
         'name': 'passthrough',
         'text': 'Loading...',
@@ -471,7 +474,7 @@ app.get('/authorize', function (req, res) {
 app.get('/newslack', function (req, res) {
   console.log('new slack integration request');
     co(function * () {
-     
+
   if (!req.query.code) {
     console.error(new Date())
     console.error('no code in the callback url, cannot proceed with new slack integration')
@@ -489,13 +492,13 @@ app.get('/newslack', function (req, res) {
         _.merge(existingTeam, res_auth);
         yield existingTeam.save();
         yield utils.initializeTeam(existingTeam, res_auth);
-       co(slackModule.start);
+        yield slackModule.loadTeam(existingTeam)
      } else {
       var bot = new db.Slackbot(res_auth);
       yield bot.save();
       yield utils.initializeTeam(bot, res_auth);
+      yield slackModule.loadTeam(bot)
       var user = yield db.Chatuser.findOne({ id: _.get(res_auth,'user_id')}).exec()
-      co(slackModule.start);
       var message= new db.Message({
         incoming: false,
         thread_id: user.dm,
@@ -524,7 +527,7 @@ app.get('/newslack', function (req, res) {
    }
 
   res.redirect('/thanks.html')
-  
+
   }).catch(console.log.bind(console))
 })
 

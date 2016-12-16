@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: picstitch
+  name: picstitch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: picstitch
+  template:
+    metadata:
+      labels:
+        run: picstitch
+    spec:
+      containers:
+      - image: gcr.io/kip-styles/picstitch:8a3447f
+        imagePullPolicy: Always
+        name: picstitch
+        ports:
+        - containerPort: 5000
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

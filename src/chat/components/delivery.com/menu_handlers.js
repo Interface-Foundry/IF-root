@@ -49,12 +49,12 @@ handlers['food.menu.quickpicks'] = function * (message) {
   } else {
     matchingItems = []
   }
-  matchingItems = matchingItems.map(i => i.unique_id)
+  matchingItems = matchingItems.map(i => i.id)
 
   var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
     .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
     .reduce((allIds, order) => {
-      allIds.push(order.deliveryItem.unique_id)
+      allIds.push(order.deliveryItem.id)
       return allIds
     }, [])
 
@@ -85,10 +85,10 @@ handlers['food.menu.quickpicks'] = function * (message) {
   var menu = Menu(foodSession.menu)
   var sortedMenu = menu.allItems().map(i => {
     // inject the sort order stuff
-    if (matchingItems.includes(i.unique_id)) {
-      i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.unique_id })
+    if (matchingItems.includes(i.id)) {
+      i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.id })
       // i.infoLine = 'Returned from search term'
-    } else if (previouslyOrderedItemIds.includes(Number(i.unique_id))) {
+    } else if (previouslyOrderedItemIds.includes(i.id)) {
       i.sortOrder = sortOrder.orderedBefore
       i.infoLine = 'You ordered this before'
     } else if (recommendedItemIds.includes(Number(i.unique_id))) {
@@ -104,7 +104,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
   }).sort((a, b) => b.sortOrder - a.sortOrder)
 
   var menuItems = sortedMenu.slice(index, index + 3).map(i => {
-
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
@@ -121,7 +120,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
           'text': 'Add to Order',
           'type': 'button',
           'style': 'primary',
-          'value': i.unique_id
+          'value': i.id
         }
       ]
     }
@@ -243,8 +242,21 @@ handlers['food.item.submenu'] = function * (message) {
 
   // user clicked button
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
-  var json = cart.menu.generateJsonForItem(userItem)
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
+}
+
+handlers['food.item.loadmore'] = function * (message){
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var userItem = yield cart.getItemInProgress(message.data.value.item_id, message.source.user)
+  var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') :  {}
+  var groupId = parseInt(_.get(message, 'data.value.group_id'))
+  var rowCount = parseInt(_.get(message, 'data.value.row_count'))
+  optionIndices[groupId] = rowCount
+
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
+  $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
 //
@@ -258,18 +270,17 @@ handlers['food.option.click'] = function * (message) {
   var userItem = yield cart.getItemInProgress(item_id, message.source.user)
   var optionNode = cart.menu.getItemById(option_id)
   userItem.item.option_qty = userItem.item.option_qty || {}
-
-  var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
+  //var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
+  var optionGroupId = optionNode.parentId
   var optionGroup = cart.menu.getItemById(optionGroupId)
-
   // Radio buttons, can only toggle one at a time
   // so delete any other selected radio before the next step will select it
   if (optionGroup.min_selection === optionGroup.max_selection && optionGroup.min_selection === 1) {
     optionGroup.children.map(radio => {
-      if (userItem.item.option_qty[radio.unique_id]) {
-        delete userItem.item.option_qty[radio.unique_id]
+      if (userItem.item.option_qty[radio.id]) {
+        delete userItem.item.option_qty[radio.id]
         deleteChildren(optionNode, userItem, cart.foodSession._id)
-        db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + radio.unique_id]: ''}}).exec()
+        db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + radio.id]: ''}}).exec()
       }
     })
   }
@@ -286,16 +297,16 @@ handlers['food.option.click'] = function * (message) {
 
   kip.debug('option_qty', userItem.item.option_qty)
 
-  var json = cart.menu.generateJsonForItem(userItem)
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
 function deleteChildren(node, cartItem, deliveryId) {
   (node.children || []).map(c => {
-    if (_.get(cartItem, 'item.option_qty.' + c.unique_id)) {
-      kip.debug('deleting', c.unique_id)
-      delete cartItem.item.option_qty[c.unique_id]
-      db.Delivery.update({_id: deliveryId, 'cart._id': cartItem._id}, {$unset: {['cart.$.item.option_qty.' + c.unique_id]: ''}}).exec()
+    if (_.get(cartItem, 'item.option_qty.' + c.id)) {
+      kip.debug('deleting', c.id)
+      delete cartItem.item.option_qty[c.id]
+      db.Delivery.update({_id: deliveryId, 'cart._id': cartItem._id}, {$unset: {['cart.$.item.option_qty.' + c.id]: ''}}).exec()
     }
     deleteChildren(c, cartItem, deliveryId)
   })
@@ -308,7 +319,7 @@ handlers['food.item.quantity.add'] = function * (message) {
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
   userItem.item.item_qty++
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
-  var json = cart.menu.generateJsonForItem(userItem)
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
@@ -324,7 +335,7 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   }
   userItem.item.item_qty--
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
-  var json = cart.menu.generateJsonForItem(userItem)
+  var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 

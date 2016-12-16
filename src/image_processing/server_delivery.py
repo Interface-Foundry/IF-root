@@ -10,7 +10,7 @@ import io
 import time
 import os
 
-#gcloud 
+#gcloud
 # from oauth2client.client import GoogleCredentials
 # credentials = GoogleCredentials.get_application_default()
 # from googleapiclient.discovery import build
@@ -105,4 +105,4 @@ if __name__ == '__main__':
     # run app
     logging.info('__not_threaded__')
     logging.info('running app on port ' + str(port_num))
-    application.run(host='0.0.0.0', port=port_num, debug=True)
+    application.run(host='0.0.0.0', port=port_num, debug=False)

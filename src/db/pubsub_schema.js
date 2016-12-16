@@ -37,6 +37,12 @@ var pubSubSchema = mongoose.Schema({
   // Meta data
   //
 
+  // what server published this message
+  publisher: String,
+
+  // what server consumed this message
+  consumer: String,
+
   // has the message been dispatched for processing?
   dispatched: {
     type: Boolean,

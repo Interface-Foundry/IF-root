@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name:
+  namespace: canary
+spec:
+  rules:
+  - host: pay.kipthis.com
+    http:
+      paths:
+      - backend:
+          serviceName: payments
+          servicePort: 80
+        path: /

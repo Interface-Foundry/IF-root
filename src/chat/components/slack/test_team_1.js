@@ -24,7 +24,17 @@ team.slackbot = {
     'initialized': true,
     'dateAdded': ISODate('2016-06-24T20:29:22.265Z'),
     'addedBy': 'U1JU56UG1',
-    locations: [{address_1: '21 Essex St 10002'}],
+    locations: [{
+      "address_1" : "122 W 27th St",
+      "address_2" : "",
+      "zip_code" : "10001",
+      "state" : "NY",
+      "city" : "New York",
+      "sublocality" : "Manhattan",
+      "neighborhood" : "Midtown",
+      "_id" : ObjectId("583f3ab6c93a65817dbb5432"),
+      "coordinates" : []
+  }],
     mock: true
   },
   'bot': {

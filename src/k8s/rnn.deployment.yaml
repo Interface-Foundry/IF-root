@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: rnn
+  name: rnn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: rnn
+  template:
+    metadata:
+      labels:
+        run: rnn
+    spec:
+      containers:
+      - image: gcr.io/kip-styles/rnn:911b5e3
+        imagePullPolicy: IfNotPresent
+        name: rnn
+        ports:
+        - containerPort: 8085
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
