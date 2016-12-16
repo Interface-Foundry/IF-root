@@ -12,6 +12,11 @@ Vue.component('category-item', {
 Vue.component('selected-item', {
   template: '#item-detail',
   props: ['item'],
+  data: function() {
+    return {
+      quantity: this.item.min_qty ? this.item.min_qty : 1
+    }
+  },
   methods: {
     isMealAddition: function(option) {
       return !(option.name === "Meal Additions") 
@@ -21,10 +26,24 @@ Vue.component('selected-item', {
       this.$emit('close')
     },
     increaseQty: function() {
-      this.$emit('increaseqty')
+      if(this.quantity > 0 && this.quantity < this.item.max_qty) {
+        this.quantity += 1 
+        this.$set(this.item, 'quantity', this.quantity) 
+      }
+      
     },
     decreaseQty: function() {
-      this.$emit('decreaseqty')
+      if(this.quantity > this.item.min_qty) {
+        this.quantity -= 1
+        this.$set(this.item, 'quantity', this.quantity)         
+      }          
+    },
+  },
+  computed: {
+    totalPrice: function() {
+      var totalPrice = (this.item.price * this.quantity).toFixed(2) 
+      this.$set(this.item, 'totalPrice', parseFloat(totalPrice))
+      return totalPrice
     }
   }
 })
@@ -37,41 +56,35 @@ var app = new Vue({
     navCategories: null,
     moreCategories: null,
     selectedItem: null,
-    cartItems: []
+    cartItems: [],
   },
   methods: {
     setSelectedItem: function(item) {
       this.selectedItem = item
-      let quantity = this.selectedItem.min_qty ? this.selectedItem.min_qty : 1; 
-      this.$set(this.selectedItem, 'quantity', quantity)
     },
     addItemToCart: function() {
-      console.log('adding')
-      console.log(this.selectedItem.quantity)
-      console.log(this.cartItems)
+      console.log(this.selectedItem)
       this.cartItems.push(this.selectedItem)
     },
-    increaseQty: function() {
-      if(this.selectedItem.quantity > 0 && this.selectedItem.quantity < this.selectedItem.max_qty) {
-        this.selectedItem.quantity += 1 
+  },
+  computed: {
+    cartTotal: function() {
+      var total = 0;
+      for (var i = 0; i < this.cartItems.length; i++) {
+        total += this.cartItems[i].totalPrice
       }
-    },
-    decreaseQty: function() {
-      if(this.selectedItem.quantity > this.selectedItem.min_qty) {
-        this.selectedItem.quantity -= 1 
-      }    
-    }    
+      return total;
+    }
   },
   watch: {
     menu: function() {
       this.navCategories = this.menu.children.slice(0,5)
       this.moreCategories = this.menu.children.slice(5, -1)
-    }
-  
+    } 
   },
   created: function() {
-    let key = window.location.search.split("=")[1]
-    let ms = axios.post('/session', {session_token: key})
+    var key = window.location.search.split("=")[1]
+    var ms = axios.post('/session', {session_token: key})
     .then((response) => {
       this.menu = response.data.menu.data[0];
       this.merchant = response.data.merchant;
