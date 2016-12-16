@@ -653,10 +653,16 @@ function * constructCart(message, text) {
     item_message.actions = buttons;
     attachments.push(item_message);
    }
+
     var summaryText = `*Team Cart Summary*
     *Total:* ${cart.total}`;
     summaryText += `
     <${cart.link}|*➤ Click Here to Checkout*>`;
+
+	if (cart.aggregate_items.length === 0) {
+		summaryText = 'It looks like your cart is empty!'
+	}
+	
     attachments.push({
       text: summaryText,
       mrkdwn_in: ['text', 'pretext'],
