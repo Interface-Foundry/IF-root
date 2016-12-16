@@ -1,0 +1,337 @@
+/*
+/*
+/* Color List
+  light-gray: #F5F5F5
+  dark-gray: #B9B9B9
+  red: #EE3A4A
+  purple: #6F52D8
+  dark-purple: #3a2b71;
+  light-blue: #EFF7FE;
+  transparent-purple: rgba(111,82,216,0.12)
+  white: #fff;
+
+*/
+
+
+/*
+/*
+/* show root vue instance once Vue is loaded */
+[v-cloak] { display:none; }
+
+/*
+/*
+/* global styling */
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: helvetica;
+  font-weight: 200;
+  min-height: 100%;
+}
+
+ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+button.base-btn {
+  background-color: #6F52D8;
+  color: #fff;
+  border-radius: 4px;
+  padding: 15px;
+  border: none;
+}
+
+button.base-btn:hover {
+  background-color: #3a2b71; 
+}
+
+.container {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.image-container {
+  display: inline-block;
+}
+
+.left-panel {
+  float: left;
+  width: 75%;
+}
+
+.right-panel {
+  float: right;
+  width: 25%;
+}
+
+
+/*
+/*
+/* header & nav */
+header{
+  display: inline-block;
+  width: 100%;
+  background-color: #EE3A4A;
+}
+
+nav {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+nav .logo {
+  float: left;
+}
+
+nav .logo img {
+  width: 100px;
+}
+
+nav .cart-icon {
+  float:right
+}
+
+nav .cart-icon img {
+  width: 25px;
+}
+
+
+
+/*
+/*
+/* Restaurant header */
+.restaurant-name {
+  display: inline;
+}
+
+.category-nav {
+  background-color: #F5F5F5;
+  padding: 15px 0;
+}
+
+.category-nav ul {
+  display:flex;
+  display: -webkit-flex;
+}
+
+.category-nav li {
+  display: flex;
+  display: -webkit-flex;
+  flex: 1;
+  -webkit-flex: 1;
+  text-align: center;
+}
+
+.category-nav li a {
+  display: inline-block;
+  width: 100%;
+}
+
+
+/*
+/*
+/* menu container */
+
+.menu-content {
+  display: flex;
+  display: -webkit-flex; 
+  flex-wrap: wrap;
+  -webkit-flex-wrap: wrap;
+}
+
+/*
+/*
+/* menu category */
+
+.category-set {
+  flex: 0 0 100%;
+}
+
+.category-set h2 {
+    padding: 5px 10px;
+    border: 2px dashed #F5F5F5;
+}
+
+.category-set ul {
+  list-style: none;
+  display: inline-block;
+  width: 100%;
+}
+
+
+/*
+/*
+/* category item */
+
+.category-set ul li {
+  border-bottom: 1px solid #F5F5F5;
+  padding: 10px;
+  height: 95px;
+  overflow: hidden;
+  display: inline-block;
+  width: 45%;
+  box-sizing: border-box;
+}
+
+.category-set ul li:hover {
+  background: rgba(111,82,216,0.12);
+  border-bottom: 2px solid #6F52D8;
+  cursor: pointer;
+}
+
+.category-set ul li:nth-child(even) {
+  float: right;
+}
+
+.category-set ul li:nth-child(odd) {
+  float: left;
+}
+
+.item-name {
+  display: inline-block;
+  max-width: 70%;
+  margin: 0;
+}
+
+.item-price {
+  float: right;
+  display: inline-block;
+}
+
+.item-description {
+  color: #B9B9B9;
+}
+
+/*
+/*
+/* modal styling */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+  display: flex;
+  display: -webkit-flex;
+  transition: opacity .3s ease;
+}
+
+.modal-wrapper {
+  z-index: 9998; 
+  width:90%;
+  margin: auto;
+}
+
+.modal-container {
+  width: 60%;
+  max-width: 600px;
+  margin: 0px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+  transition: all .3s ease;
+  min-height: 400px;
+}
+
+.modal-item-info {
+  width: 90%;
+  display: inline-block;
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.modal-body {
+  min-height: 250px;
+  max-height: 300px;
+  overflow: scroll;
+}
+
+.modal-close-button {
+  float: right;
+  background: url(../images/close-icon.svg);
+  height: 30px;
+  width: 30px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.modal-close-button:hover {
+  cursor: pointer;
+}
+
+.option-body {
+  background-color: #EFF7FE;
+  display: flex;
+  display: -webkit-flex;
+  -webkit-flex-wrap: wrap;
+  padding: 10px;
+}
+
+.option-list {
+  display: inline;
+  margin: 0 20px 20px 0;
+}
+
+.item-quantity-selector {
+  padding: 20px 0;
+}
+
+.item-quantity-selector button {
+  background-color: white;
+  border-radius: 4px;
+  color: #6F52D8;
+  border: 2px solid #6F52D8;
+  line-height: 19px;
+  font-size: 24px;
+  font-weight: 300;
+  width: 30px;
+  height: 30px;
+}
+
+.item-quantity-selector span {
+  width: 40px;
+  display: inline-block;
+  border: 1px solid #F5F5F5;
+  box-sizing: content-box;
+  height: 30px;
+  line-height: 30px;
+  vertical-align: top;
+  text-align: center;
+  border-radius: 4px;
+}
+
+/*
+ * The following styles are auto-applied to elements with
+ * transition="modal" when their visibility is toggled
+ * by Vue.js.
+ *
+ * You can easily play with the modal transition by editing
+ * these styles.
+ */
+
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-leave-active {
+  opacity: 0;
+}
+
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+}

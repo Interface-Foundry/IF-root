@@ -1,6 +1,6 @@
 var app = angular.module('app', []);
 
-app.controller('menuController', function ($scope, $window, MenuFactory) {
+app.controller('menuController', ['$scope', 'MenuFactory', function ($scope, MenuFactory) {
   $scope.menu = MenuFactory.getMenu();
   $scope.name = MenuFactory.getRestaurant();
   $scope.minimum = MenuFactory.getMinimum();
@@ -9,7 +9,7 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
   $scope.inProgress = {};
   $scope.categories = {};
   $scope.options = {};
-
+  
   $scope.toggleCategory = function (cat) {
     if ($scope.categories[cat]) $scope.categories[cat] = false;
     else $scope.categories[cat] = true;
@@ -25,7 +25,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
       for (var child in item.children) {
         details.options[item.children[child].name] = {};
         var opt = item.children[child];
-        // console.log('OPT TYPE', opt.type)
         if (opt.type == "price group") {
           item.price = 0;
           details.price = 0;
@@ -45,7 +44,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
   };
 
   $scope.formatPrice = function (price) {
-    //console.log('price', price)
     return (price !== 0 ? " + " + price : "");
   };
 
@@ -64,11 +62,8 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
       var count = 0;
       for (var k in ipOpGroup) {
         var op = ipOpGroup[k];
-        //console.log('should have a chosen property', op)
         if (op.chosen) count++;
       }
-      //console.log(min, count, max)
-      //console.log('validate check -->', (!count < min || count > max) )
       if (count < min || count > max) return false;
       else return true;
     }
@@ -83,7 +78,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
       else {
         valid &= validateCheck(opGroup.min_selection, opGroup.max_selection, opGroup);
       }
-      // console.log('valid:', valid)
     }
 
     return valid;
@@ -95,7 +89,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     if (!item[`${og.name}_price`]) item[`${og.name}_price`] = 0;
     var prevOgPrice = item[`${og.name}_price`];
     item[`${og.name}_price`] = price;
-    //console.log(prevOgPrice, 'prevOgPrice', '////', 'price', price);
     item.current_price -= prevOgPrice;
     item.current_price += price;
   }
@@ -108,7 +101,6 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
       item.current_price += price;
     }
     else item.current_price -= price;
-    //console.log(prev, 'prev', '///', 'cp', item.current_price)
   }
 
   $scope.addToCart = function (item) {
@@ -167,4 +159,4 @@ app.controller('menuController', function ($scope, $window, MenuFactory) {
     MenuFactory.submitOrder(MenuFactory.formatCart($scope.cart));
     window.close();
   };
-});
+}]);

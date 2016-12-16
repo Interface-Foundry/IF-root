@@ -30,7 +30,7 @@ app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 
-app.use('/', express.static('template'));
+app.use('/', express.static('static'));
 app.use('/test', express.static('test'));
 app.use('/ang', express.static('ang'));
 
@@ -47,7 +47,6 @@ var ObjectId = require('mongodb').ObjectID;
 //handle post request with a binder full of data
 app.post('/cafe', (req, res) => co(function * () {
   console.log('post to cafe')
-
   var ms = new MenuSession({
     session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
   });
@@ -59,7 +58,6 @@ app.post('/cafe', (req, res) => co(function * () {
   var result = yield Menu.findOne({merchant_id: rest_id});
 
   console.log('menu found')
-
   ms.menu.data = result.raw_menu.menu;
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.userId = req.body.user_id;
