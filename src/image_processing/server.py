@@ -45,10 +45,17 @@ def get_gcloud():
         'key': 'KipStyles-8da42a8a7423.json',
         'bucket': 'if-kip-chat-images'
     }
-    gcloud_client = storage.Client(project=gcloud_config[
-        'proj_name']).from_service_account_json(
-        'gcloud_key/' + gcloud_config['key'])
-    # 'gcloud_key/' + gcloud_config['key'])
+
+
+    gcloud_key_file = os.path.join(
+        os.path.dirname(__file__),
+        'gcloud_key',
+        gcloud_config['key']
+    )
+
+
+    gcloud_client = storage.Client(project=gcloud_config['proj_name'])
+    gcloud_client = gcloud_client.from_service_account_json(gcloud_key_file)
     gcloud_bucket = gcloud_client.get_bucket(gcloud_config['bucket'])
     # gcloud_bucket.make_public(future=True)
     return gcloud_bucket

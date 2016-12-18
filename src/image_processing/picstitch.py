@@ -18,6 +18,7 @@ logging.basicConfig(level=logging.INFO,
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
 
+
 def load_number_images():
     '''
     '''
@@ -32,12 +33,10 @@ def load_number_images():
 
 def load_fonts():
     try:
-        fonts_file = os.path.join(
-            os.getcwd(), 'fonts', 'HelveticaNeue-Regular.ttf')
+        fonts_file = os.path.join(THIS_FOLDER, 'fonts', 'HelveticaNeue-Regular.ttf')
         logging.debug('fonts loaded correctly')
     except:
-        fonts_file = os.path.join(
-            '/picstitch', 'fonts', 'HelveticaNeue-Regular.ttf')
+        fonts_file = os.path.join('/picstitch', 'fonts', 'HelveticaNeue-Regular.ttf')
         logging.debug('error loading fonts')
     font = {}
     font_size = [x for x in range(12, 30)]
@@ -52,13 +51,13 @@ def load_review_stars():
     star_images = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
     rs_dict = {}
     for i in star_images:
-        f = THIS_FOLDER + '/review_stars/' + str(i) + '.png'
+        f = os.path.join(THIS_FOLDER, 'review_stars', str(i) + '.png')
         rs_dict[str(i)] = Image.open(f)
     return rs_dict
 
 
 def load_amazon_prime():
-    amzn_prime_logo = Image.open(THIS_FOLDER + '/amazon/prime.png')
+    amzn_prime_logo = Image.open(os.path.join(THIS_FOLDER, 'amazon', 'prime.png'))
     return amzn_prime_logo
 
 
