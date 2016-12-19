@@ -581,8 +581,6 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
     cronTime = {},
     alertTime = data[0],
     now = new Date(Date.now().toLocaleString('en-US', { timeZone: tz }));
-
-
   switch (alertTime) {
     case 'daily':
       cronTime = {

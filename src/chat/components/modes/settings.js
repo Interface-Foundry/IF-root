@@ -210,15 +210,15 @@ handlers['status_off'] = function * (message) {
 }
 
 handlers['change_time'] = function * (message) {
-  let userInfo = yield requestP(`https://slack.com/api/users.info?token=${team.bot.bot_access_token}&user=${message.source.user}`);
-  userInfo = JSON.parse(userInfo);
-  let tz = _.get(userInfo, 'user.tz', 'America/New_York'); //default to NY if we can't find one
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var text = message.text.toLowerCase().trim();
   var rtext = text.replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
   var hour = _.get(rtext.match(/([\d]+)/), '[0]');
   var minutes = rtext.replace(hour, '')
+  let userInfo = yield requestP(`https://slack.com/api/users.info?token=${team.bot.bot_access_token}&user=${message.source.user}`);
+  userInfo = JSON.parse(userInfo);
+  let tz = _.get(userInfo, 'user.tz', 'America/New_York'); //default to NY if we can't find one
   minutes = typeof minutes == 'string' ? minutes.trim() : '00';
   hour = typeof hour == 'string' ? hour.trim() : '8';
   hour = parseInt(hour);
@@ -232,15 +232,19 @@ handlers['change_time'] = function * (message) {
   if (hour.toString().indexOf(':') > -1) hour = parseInt(hour.replace(':',''));
   if (minutes.toString().indexOf(':') > -1) minutes = parseInt(minutes.replace(':',''));
   am_pm = am_pm.toUpperCase().trim();
-  team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-2) + ' ' + am_pm;
+  let now = new Date(Date.now().toLocaleString('en-US', { timeZone: tz }));
+  (am_pm == 'PM' && hour != 12) ? now.setHours(hour + 12, minutes): (am_pm == 'AM' && hour == 12) ? now.setHours(0, minutes) : now.setHours(hour, minutes);
+  team.meta.weekly_status_time = now.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short'
+  });
   team.meta.weekly_status_timezone = tz;
   yield team.save();
+  kip.debug(`🤤  ${JSON.stringify(team, null, 2)}`)
   var day = team.meta.weekly_status_day ? utils.getDayNum(team.meta.weekly_status_day) :  date_lib.getDay(new Date());
   var rhour = (am_pm == 'PM' && hour != 12) ? hour + 12 : hour;
   var dateObj = { day: day, hour: rhour, minutes: minutes};
-  // kip.debug('dateObj is: is : ', dateObj, ' day is : ',day,'hour is :', hour, 'minutes is: ', minutes, 'am_pm is: ', am_pm);
-  var moment_date = momenttz().day(day).toString().split(':')[0].slice(0, -2);
-  var date = moment_date + ' '  + team.meta.weekly_status_time;
   yield utils.updateCron(message, cronJobs, dateObj, 'time');
   var msg = message;
   msg.mode = 'settings'
