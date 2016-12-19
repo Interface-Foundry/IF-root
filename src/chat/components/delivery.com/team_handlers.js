@@ -9,7 +9,6 @@ var $allHandlers // this is how you can access handlers from other files
 var handlers = {}
 
 handlers['food.admin.team.members'] = function * (message) {
-  console.log(message.data)
   var index = _.get(message, 'data.value.index', 0)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var userToRemove = _.get(message, 'data.value.user_id')
@@ -136,7 +135,7 @@ handlers['food.admin.team.add_email'] = function * (message) {
       confirm = true;
       console.log('email up here:', email)
       msg_text = `Is ${email} the email you want to add?`;
-      yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_email: email}}, {strict: false})
+      yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {data: {temp_email: email}}}, {strict: false})
     }
     else {
       msg_text = "That wasn't a valid email; please try again!";
@@ -177,7 +176,7 @@ handlers['food.admin.team.confirm_email'] = function * (message) {
   //there is an email field, which is equal to null :(
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var email = foodSession.temp_email;
+  var email = foodSession.data.temp_email;
   console.log('@@@@FOODSESSION@@@@', foodSession)
   // console.log('this is email:', email)
   var tm = foodSession.team_members;
@@ -185,14 +184,9 @@ handlers['food.admin.team.confirm_email'] = function * (message) {
 
   yield db.Delivery.update({team_id: message.source.team, active: true}, {
     $set: {
-      team_members: tm
-    },
-    $unset: {
-      temp_email: ""
-    }},
-  {
-    strict: false
-  });
+      team_members: tm,
+      data: {}
+    }});
 
   yield handlers['food.admin.team.members'](message)
 }
