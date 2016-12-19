@@ -255,7 +255,7 @@ handlers['change_time'] = function * (message) {
     "_id": message._id
   }];
   msg.reply = [{
-    text: 'Ok, I have updated your settings!',
+    text: `Ok, I have updated your settings! Your time has been changed to ${team.meta.weekly_status_time}`,
     color: '#A368F0',
     fallback: 'Ok, I have updated your settings!'
   },
@@ -263,7 +263,6 @@ handlers['change_time'] = function * (message) {
     text: 'We got your timezone from your current slack settings',
     mrkdwn_in: ['text']
   }]
-  msg
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
