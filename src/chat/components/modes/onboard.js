@@ -581,7 +581,6 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
     cronTime = {},
     alertTime = data[0],
     now = new Date(Date.now().toLocaleString('en-US', { timeZone: tz }));
-
   switch (alertTime) {
     case 'daily':
       cronTime = {
@@ -590,7 +589,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
         hour: now.getHours(),
         minutes: now.getMinutes()
       }
-      dateDescrip = `at *${now.getHours() < 13 ? now.getHours() : now.getHours() - 12}:${now.getMinutes() < 10? '0' + now.getMinutes(): now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}* every day`;
+      dateDescrip = `at *${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}* every day`;
       break;
     case 'weekly':
       cronTime = {
@@ -600,7 +599,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
         date: '*'
       }
       team.meta.weekly_status_day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
-      dateDescrip = `every *${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()]}* at *${now.getHours() < 13 ? now.getHours() : now.getHours() - 12}:${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}*`;
+      dateDescrip = `every *${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()]}* at *${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}*`;
       break;
     case 'monthly':
       cronTime = {
@@ -610,7 +609,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
         minutes: now.getMinutes()
       }
       team.meta.weekly_status_date = now.getDate();
-      dateDescrip = `on day *${now.getDate()}* of every month at *${now.getHours() < 13 ? now.getHours() : now.getHours() - 12}:${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}*`;
+      dateDescrip = `on day *${now.getDate()}* of every month at *${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}*`;
       break;
     case 'never':
     default:
@@ -620,16 +619,30 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
   team.meta.status_interval = alertTime;
   team.meta.weekly_status_timezone = tz;
   team.meta.weekly_status_enabled = (dateDescrip) ? true : false;
-  team.meta.weekly_status_time = `${now.getHours() < 13 ? now.getHours() : now.getHours() - 12}:${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}`
+  team.meta.weekly_status_time = `${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}`
   yield team.save();
   if (dateDescrip) {
     yield utils.setCron(message, {}, cronTime)
   }
-  var messageText = (dateDescrip) ?
+
+  let messageText = (dateDescrip) ?
     `Ok, your team will get reminders ${dateDescrip}.\nAdmins can always edit reminders in Settings` :
     'Ok! I won\'t set any reminders. If you ever want them, you can turn them on in Settings';
   messageText += '\n Thanks and have a great day :)';
-  var attachments = [{
+
+  let attachments = [{
+    text: messageText,
+    color: '#A368F0',
+    fallback: messageText,
+    mrkdwn_in: ['text']
+  }];
+  if(dateDescrip) {
+  	attachments.push({
+  		text: 'We got your timezone from your current slack settings',
+  		mrkdwn_in:['text']
+  	})
+  }
+  attachments.push({
     image_url: "http://tidepools.co/kip/kip_menu.png",
     text: 'Click a mode to start using Kip',
     color: '#45a5f4',
@@ -645,10 +658,9 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
       text: 'Kip Store',
       type: 'button'
     }]
-  }];
-
-  var msg = {
-    text: messageText,
+  });
+  let msg = {
+    text: '',
     action: 'home',
     mode: 'onboard',
     source: message.source,
