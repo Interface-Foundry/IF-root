@@ -241,7 +241,6 @@ handlers['change_time'] = function * (message) {
   });
   team.meta.weekly_status_timezone = tz;
   yield team.save();
-  kip.debug(`🤤  ${JSON.stringify(team, null, 2)}`)
   var day = team.meta.weekly_status_day ? utils.getDayNum(team.meta.weekly_status_day) :  date_lib.getDay(new Date());
   var rhour = (am_pm == 'PM' && hour != 12) ? hour + 12 : hour;
   var dateObj = { day: day, hour: rhour, minutes: minutes};
@@ -249,12 +248,22 @@ handlers['change_time'] = function * (message) {
   var msg = message;
   msg.mode = 'settings'
   msg.action = 'home'
-  msg.text = 'Ok, I have updated your settings!';
+  msg.text = ''
   msg.execute = [{
     "mode": "settings",
     "action": "home",
     "_id": message._id
   }];
+  msg.reply = [{
+    text: 'Ok, I have updated your settings!',
+    color: '#A368F0',
+    fallback: 'Ok, I have updated your settings!'
+  },
+  {
+    text: 'We got your timezone from your current slack settings',
+    mrkdwn_in: ['text']
+  }]
+  msg
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
