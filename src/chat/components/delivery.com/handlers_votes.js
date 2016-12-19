@@ -256,6 +256,11 @@ handlers['food.user.poll'] = function * (message) {
     teamMembers = [teamMembers[0]]
   }
 
+  if (teamMembers.length === 0) {
+    $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
+    return yield $allHandlers['food.admin.select_address'](message)
+  }
+
   // error with mock slack not being able to get all messages
   teamMembers.map(function (member) {
     var source = {
@@ -754,7 +759,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       state: {},
       user: m.id
     }
-
     $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
   })
 }

@@ -333,6 +333,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     }
   })
 
+
+
   if (foodSession.tip.percent === 'cash') foodSession.tip_amount = 0.00
 
   try {
@@ -516,6 +518,24 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         attachment_type: 'default'
       }
       response.attachments = _.flatten([mainAttachment, itemAttachments, finalAttachment]).filter(Boolean)
+      response.attachments.push({
+        'text': 'Do you want to restart the order or end the order?',
+        'fallback': 'Do you want to restart the order or end the order?',
+        'attachment_type': 'default',
+        'mrkdwn_in': ['text'],
+        'actions': [{
+          'name': 'food.admin.select_address',
+          'text': 'Restart Order',
+          'type': 'button',
+          'style': 'primary',
+          'value': 'food.admin.select_address'
+        }, {
+          'name': 'food.exit.confirm_end_order',
+          'text': 'End Order',
+          'type': 'button',
+          'value': 'food.exit.confirm_end_order'
+        }]
+       })
     }
   } catch (err) {
     logging.error('error with creating cart payment for some reason', err)
