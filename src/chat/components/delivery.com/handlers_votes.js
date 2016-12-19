@@ -6,7 +6,7 @@ var googl = require('goo.gl')
 var request = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
-
+var mailer_transport = require('../../../mail/IF_mail.js')
 var yelp = require('./yelp');
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
@@ -718,6 +718,23 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         ]
       }
     ]
+  }
+
+  for (var i = 0; i < foodSession.team_members.length; i++) {
+    var m = foodSession.team_members[i];
+    if (m.email_user) {
+      var mailOptions = {
+        to: `<${m.email}>`,
+        from: `Kip Café <hello@kipthis.com>`,
+        subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
+        html: "<body><p>This is the life and the life will not end</p></body>"
+      };
+
+      logging.info('mailOptions', mailOptions);
+      mailer_transport.sendMail(mailOptions, function (err) {
+        if (err) console.log(err);
+      });
+    }
   }
 
   foodSession.team_members.map(m => {
