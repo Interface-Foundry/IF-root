@@ -210,9 +210,11 @@ handlers['status_off'] = function * (message) {
 }
 
 handlers['change_time'] = function * (message) {
+  let userInfo = yield requestP(`https://slack.com/api/users.info?token=${team.bot.bot_access_token}&user=${message.source.user}`);
+  userInfo = JSON.parse(userInfo);
+  let tz = _.get(userInfo, 'user.tz', 'America/New_York'); //default to NY if we can't find one
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
   var text = message.text.toLowerCase().trim();
   var rtext = text.replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
   var hour = _.get(rtext.match(/([\d]+)/), '[0]');
@@ -231,7 +233,7 @@ handlers['change_time'] = function * (message) {
   if (minutes.toString().indexOf(':') > -1) minutes = parseInt(minutes.replace(':',''));
   am_pm = am_pm.toUpperCase().trim();
   team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-2) + ' ' + am_pm;
-  team.meta.weekly_status_timezone = team.meta.weekly_status_timezone;
+  team.meta.weekly_status_timezone = tz;
   yield team.save();
   var day = team.meta.weekly_status_day ? utils.getDayNum(team.meta.weekly_status_day) :  date_lib.getDay(new Date());
   var rhour = (am_pm == 'PM' && hour != 12) ? hour + 12 : hour;
