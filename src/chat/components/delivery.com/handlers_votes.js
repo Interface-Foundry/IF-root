@@ -256,7 +256,7 @@ handlers['food.user.poll'] = function * (message) {
     teamMembers = [teamMembers[0]]
   }
 
-  if (team_members.length === 0) {
+  if (teamMembers.length === 0) {
     $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
     return yield $allHandlers['food.admin.select_address'](message)
   }
