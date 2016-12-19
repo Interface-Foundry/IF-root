@@ -295,12 +295,12 @@ class PicStitch:
             #     self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
 
             review_count = self.img_req['summary']['num_ratings']
-            rating = self.img_req['summary']['star_ratings']            
+            rating = self.img_req['summary']['star_ratings']
 
 
         # draw - (Review Number)
         if review_count > 0:
-      
+
             image_revs_rating = rating
             if image_revs_rating <= 0.5:  # ignoring if 0.0 < rating
                 selectRating = 0.5
@@ -353,13 +353,22 @@ class PicStitch:
 
         #last_y = last_y + 5
 
-        if 'distance' in self.img_req['location'] and 'delivery_estimate' in self.img_req['ordering']['availability']:
-            dist = round(self.img_req['location']['distance'], 2)
+        if 'price_rating' in self.img_req['summary']:
+            rating = self.img_req['summary']['price_rating']
+            boldDollars = '$$$$$'[0 : rating]
             del_est = self.img_req['ordering']['availability']['delivery_estimate']
+
+            # We will draw light gray $$$$$ first
+            # and then over top of that draw bold $$$ for the price rating
             draw.text((x, last_y),
-                       str(dist) + ' miles' + '   •   ' + str(del_est) + ' mins',
-                       font=self.config['font2'],
-                       fill="#909497")
+                '$$$$$' + '   •   ' + str(del_est) + ' mins',
+                font=self.config['font2'],
+                fill="#909497")
+
+            draw.text((x, last_y),
+                boldDollars,
+                font=self.config['font2'],
+                fill="#404447")
             last_y = last_y + 25
 
         if 'minimum' in self.img_req['ordering']:
