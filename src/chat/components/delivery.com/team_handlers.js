@@ -25,11 +25,13 @@ handlers['food.admin.team.members'] = function * (message) {
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
+  console.log('team!!!!!!!!!!!!', foodSession.team_members[2])
+
   var attachments = foodSession.team_members.map(user => {
     return {
       mrkdwn_in: ['text'],
       callback_id: user.id,
-      text: `*${user.real_name || user.name}* - <@${user.id}|${user.name}>`,
+      text: (user.email_user ? `*${user.email}*` : `*${user.real_name || user.name}* - <@${user.id}|${user.name}>`),
       actions: [{
         name: 'food.admin.team.members',
         text: '× Remove',
@@ -121,10 +123,6 @@ handlers['food.admin.team.add_email'] = function * (message) {
   var confirm = false;
 
   function validateEmail (str) {
-    //TODO -- real validation
-    //Part one: a-z, A-Z, 0-9, !#$%&'*+-/=?^ --> . may not be first, or last, or next to itself consecutively
-    //Part two: a-z, -, 0-9 (case insensitive)
-    //Should probably split by . and @, etc, whatever
 
     var email = str.match(/(\b[A-Za-z0-9!#\$%&'\*\+\/=\?^-][A-Za-z0-9!\.#\$%&'\*\+\/=\?^-]*[A-Za-z0-9!#\$%&'\*\+\/=\?^-]@[a-z0-9-]+\.[a-z0-9-]+\b)/);
 
@@ -137,6 +135,7 @@ handlers['food.admin.team.add_email'] = function * (message) {
     var email = validateEmail(message.text);
     if (email) {
       msg_text = `Is ${email} the email you want to add?`;
+      yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_email: email}})
     }
     else {
       msg_text = "That wasn't a valid email; please try again!";
@@ -161,7 +160,7 @@ handlers['food.admin.team.add_email'] = function * (message) {
            'text': 'Yes, that\'s right',
            'style': 'primary',
            'type': 'button',
-           'value': 'food.admin.select_address'
+           'value': 'food.admin.team.confirm_email'
          }
 
        ] : [])
@@ -170,6 +169,27 @@ handlers['food.admin.team.add_email'] = function * (message) {
  }
 
   $replyChannel.sendReplace(message, 'food.admin.team.add_email', {type: message.origin, data: msg_json})
+}
+
+handlers['food.admin.team.confirm_email'] = function * (message) {
+
+  //there is an email field, which is equal to null :(
+
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var email = foodSession.temp_email;
+  var tm = foodSession.team_members;
+  tm.push({email: email, email_user: true});
+
+  yield db.Delivery.update({team_id: message.source.team, active: true}, {
+    $set: {
+      team_members: tm
+    },
+    $unset: {
+      temp_email: ""
+    }
+  });
+
+  yield handlers['food.admin.team.members'](message)
 }
 
 //~~~~~~~~~~//
