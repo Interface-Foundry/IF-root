@@ -581,8 +581,6 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
     cronTime = {},
     alertTime = data[0],
     now = new Date(Date.now().toLocaleString('en-US', { timeZone: tz }));
-
-
   switch (alertTime) {
     case 'daily':
       cronTime = {
@@ -626,11 +624,25 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
   if (dateDescrip) {
     yield utils.setCron(message, {}, cronTime)
   }
-  var messageText = (dateDescrip) ?
+
+  let messageText = (dateDescrip) ?
     `Ok, your team will get reminders ${dateDescrip}.\nAdmins can always edit reminders in Settings` :
     'Ok! I won\'t set any reminders. If you ever want them, you can turn them on in Settings';
   messageText += '\n Thanks and have a great day :)';
-  var attachments = [{
+
+  let attachments = [{
+    text: messageText,
+    color: '#A368F0',
+    fallback: messageText,
+    mrkdwn_in: ['text']
+  }];
+  if(dateDescrip) {
+  	attachments.push({
+  		text: 'We got your timezone from your current slack settings',
+  		mrkdwn_in:['text']
+  	})
+  }
+  attachments.push({
     image_url: "http://tidepools.co/kip/kip_menu.png",
     text: 'Click a mode to start using Kip',
     color: '#45a5f4',
@@ -646,13 +658,9 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
       text: 'Kip Store',
       type: 'button'
     }]
-  }];
-  if(dateDescrip) {
-  	attachments.push({text: 'We got your timezone from your current slack settings'})
-  }
-
-  var msg = {
-    text: messageText,
+  });
+  let msg = {
+    text: '',
     action: 'home',
     mode: 'onboard',
     source: message.source,
