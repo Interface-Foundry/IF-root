@@ -25,7 +25,7 @@ handlers['food.admin.team.members'] = function * (message) {
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
-  console.log('team!!!!!!!!!!!!', foodSession.team_members[2])
+  console.log('team!!!!!!!!!!!!', foodSession.team_members)
 
   var attachments = foodSession.team_members.map(user => {
     return {
@@ -131,11 +131,12 @@ handlers['food.admin.team.add_email'] = function * (message) {
   }
 
   if (message.text && message.text != "food.admin.team.add_email") {
-    confirm = true;
     var email = validateEmail(message.text);
     if (email) {
+      confirm = true;
+      console.log('email up here:', email)
       msg_text = `Is ${email} the email you want to add?`;
-      yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_email: email}})
+      yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_email: email}}, {strict: false})
     }
     else {
       msg_text = "That wasn't a valid email; please try again!";
@@ -177,6 +178,8 @@ handlers['food.admin.team.confirm_email'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var email = foodSession.temp_email;
+  console.log('@@@@FOODSESSION@@@@', foodSession)
+  // console.log('this is email:', email)
   var tm = foodSession.team_members;
   tm.push({email: email, email_user: true});
 
@@ -186,7 +189,9 @@ handlers['food.admin.team.confirm_email'] = function * (message) {
     },
     $unset: {
       temp_email: ""
-    }
+    }},
+  {
+    strict: false
   });
 
   yield handlers['food.admin.team.members'](message)
