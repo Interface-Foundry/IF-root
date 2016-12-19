@@ -215,10 +215,19 @@ app.post('/slackaction', next(function * (req, res) {
         }
         json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
                                                            // maybe I just don't understand slack yet
+        let stringOrig = JSON.stringify(json);
+        var map = {
+          amp: '&',
+          lt: '<',
+          gt: '>',
+          quot: '"',
+          '#039': "'"
+        }
+        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
         request({
           method: 'POST',
           uri: message.source.response_url,
-          body: JSON.stringify(json)
+          body: stringOrig
         })
       }
       else if (simple_command == 'view_cart_btn') {
