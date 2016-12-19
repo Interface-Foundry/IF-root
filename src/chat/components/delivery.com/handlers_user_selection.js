@@ -54,7 +54,11 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     } else {
       textWithPrevChannel = `Send poll for cuisine to <#${prevFoodSession.chosen_channel.id}|${prevFoodSession.chosen_channel.name}> at \`${addr}\`?`
     }
-    foodSession.team_members = prevFoodSession.team_members
+    if(prevFoodSession.team_members.length < 1){
+      foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
+    } else {
+      foodSession.team_members = prevFoodSession.team_members
+    }
     foodSession.chosen_channel = {
       'id': prevFoodSession.chosen_channel.id,
       'name': prevFoodSession.chosen_channel.name,
