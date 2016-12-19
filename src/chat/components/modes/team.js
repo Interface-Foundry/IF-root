@@ -82,13 +82,22 @@ handlers['start'] = function * (message) {
   attachments.push(endpart);
 
   if (message.source.response_url) {
+    let stringOrig = JSON.stringify({
+      text: '',
+      attachments: attachments
+    });
+    var map = {
+      amp: '&',
+      lt: '<',
+      gt: '>',
+      quot: '"',
+      '#039': "'"
+    }
+    stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
     request({
       method: 'POST',
       uri: message.source.response_url,
-      body: JSON.stringify({
-        text: '',
-        attachments: attachments
-      })
+      body: stringOrig
     })
   } else { // in case someone types team
     var msg = message;

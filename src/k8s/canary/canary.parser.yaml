@@ -16,7 +16,7 @@ spec:
         run: parser
     spec:
       containers:
-      - image: gcr.io/kip-styles/parser:099f5f7
+      - image: gcr.io/kip-styles/parser:IMAGE_TAG
         imagePullPolicy: Always
         name: parser
         ports:
