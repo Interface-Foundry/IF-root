@@ -1,12 +1,13 @@
 env: development_nlp
 mongodb:
   url: mongodb://localhost:27017/foundry
-picstitch: http://localhost:5000
-nlp: http://localhost:8083
-nlp_rnn: http://localhost:8085
+picstitch: http://dev-picstitch.kipthis.com
+nlp: http://dev-parser.kipthis.com
+nlp_rnn: http://dev-rnn.kipthis.com
 slack:
   client_id: "40262605191.99843739429"
   client_secret: 00a0a312ef83e675243ca4102080aae1
   verification_token: twZRwtgqPxHdOMNVru9MqD6p
-  redirect_uri: https://65f25c68.ngrok.io/newslack
+  redirect_uri: https://170558f8.ngrok.io/newslack
 kipPayURL: https://fe922461.ngrok.io
+picstitchDelivery: http://delivery-picstitch.kipthis.com

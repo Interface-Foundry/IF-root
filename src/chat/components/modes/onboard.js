@@ -10,6 +10,7 @@ var kipcart = require('../cart');
 var bundles = require('../bundles');
 var processData = require('../process');
 var request = require('request');
+var rp = require('request-promise');
 var Fuse = require('fuse.js');
 var tz = require('moment-timezone')
 
@@ -572,11 +573,14 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
   let team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
-
+  //lets ask slack what the user's time zone is!
+  let userInfo = yield rp(`https://slack.com/api/users.info?token=${team.bot.bot_access_token}&user=${message.source.user}`);
+  userInfo = JSON.parse(userInfo);
+  let tz = _.get(userInfo, 'user.tz', 'America/New_York'); //default to NY if we can't find one
   let dateDescrip,
     cronTime = {},
     alertTime = data[0],
-    now = new Date(Date.now().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    now = new Date(Date.now().toLocaleString('en-US', { timeZone: tz }));
 
   switch (alertTime) {
     case 'daily':
@@ -614,7 +618,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
   }
 
   team.meta.status_interval = alertTime;
-  team.meta.weekly_status_timezone = 'America/New_York';
+  team.meta.weekly_status_timezone = tz;
   team.meta.weekly_status_enabled = (dateDescrip) ? true : false;
   team.meta.weekly_status_time = `${now.getHours() < 13 ? now.getHours() : now.getHours() - 12}:${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}`
   yield team.save();

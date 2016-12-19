@@ -653,10 +653,16 @@ function * constructCart(message, text) {
     item_message.actions = buttons;
     attachments.push(item_message);
    }
+
     var summaryText = `*Team Cart Summary*
     *Total:* ${cart.total}`;
     summaryText += `
     <${cart.link}|*➤ Click Here to Checkout*>`;
+
+	if (cart.aggregate_items.length === 0) {
+		summaryText = 'It looks like your cart is empty!'
+	}
+
     attachments.push({
       text: summaryText,
       mrkdwn_in: ['text', 'pretext'],
@@ -700,7 +706,6 @@ function * updateCron(message, jobs, when, type) {
   return;
    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
    var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-   var currentUser = yield db.Chatusers.findOne({id: message.source.user});
    var interval = _.get(team, 'meta.status_interval');
    var date;
    var date2;
@@ -740,7 +745,7 @@ function * updateCron(message, jobs, when, type) {
     team.meta.weekly_status_timezone);
 
     //Set cron job for admin cart status updates -- currently one hour after
-    jobs[currentUser.user_id] = new cron.CronJob( date2, function  () {
+    jobs[message.source.user] = new cron.CronJob( date2, function  () {
        co(sendCartToAdmins(message,team));
     }, function() {
       kip.debug('\n\n\n\n ran cron job for admin: ' + team.team_id + ' ' + team.team_name + date + '\n\n\n\n');
@@ -762,9 +767,6 @@ function* setCron(message, jobs, when) {
   let team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
-  let currentUser = yield db.Chatusers.findOne({
-    id: message.source.user
-  });
 
   let teamDate = `00 ${when.minutes} ${when.hour} ${when.date} * ${when.day}`;
   let adminDate = `00 ${when.minutes} ${(parseInt(when.hour) < 23 ? (parseInt(when.hour) + 1).toString() : '00')} ${when.date} * ${when.day}`;
@@ -781,7 +783,7 @@ function* setCron(message, jobs, when) {
     team.meta.weekly_status_timezone);
 
   //Set cron job for admin cart status updates -- currently one hour after
-  jobs[currentUser.user_id] = new cron.CronJob(adminDate, function() {
+  jobs[message.source.user] = new cron.CronJob(adminDate, function() {
       co(sendCartToAdmins(message, team));
     }, function() {
       kip.debug('\n\n\n\n ran cron job for admin: ' + team.team_id + ' ' + team.team_name + adminDate + '\n\n\n\n');
