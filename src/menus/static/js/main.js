@@ -1,8 +1,59 @@
+Vue.component('choice', {
+  template: '#choice',
+  props: ['choice', 'type', 'option'],
+  data: function() {
+    return {
+      maxSelection : this.option.max_selection,
+      selected: false
+    }
+  },
+  methods: {
+    selectChoice: function() {
+      var options = this.$parent.$parent.options;
+      var option = this.option;
+      var newOptions = options || {};      
+      if (!options.hasOwnProperty(option.id) || this.maxSelection === 1) {
+        newOptions[option.id] = {}
+        newOptions[option.id].option = option
+        newOptions[option.id].choices = []
+        newOptions[option.id].choices.push(this.choice)
+      } else if (options[option.id].choices.length > 1 && options[option.id].choices.length === this.maxSelection){
+        console.log('you have over' + this.maxSelection + 'selected')
+        return
+      } else {
+        newOptions[option.id] = options[option.id]
+        newOptions[option.id].option = option
+        newOptions[option.id].choices.push(this.choice)
+      }
+      this.$set(this.$parent.$parent, 'options', newOptions)
+    }
+  }
+})
+
+Vue.component('option-set', {
+  props: ['option', 'item'],  
+  template: '#option-set',  
+  data: function() {
+    return {
+      isMealAddition: this.option.name === "Meal Additions",
+      inputType: this.option.max_selection === 1 ? "radio" : "checkbox",
+    }
+  }
+})
+
+
+Vue.component('cart-item', {
+  props: ['item'],  
+  template: '#cart-item',
+})
+
+
+
 Vue.component('category-item', {
   props: ['item'],  
   template: '#category-item',
   methods: {
-    selectItem: function(item) {
+    selectItem: function() {
       this.$emit('show')
     }
   },
@@ -14,14 +65,14 @@ Vue.component('selected-item', {
   props: ['item'],
   data: function() {
     return {
-      quantity: this.item.min_qty ? this.item.min_qty : 1
+      quantity: this.item.min_qty ? this.item.min_qty : 1,
+      options: {},
+      instructions: ""
     }
   },
   methods: {
-    isMealAddition: function(option) {
-      return !(option.name === "Meal Additions") 
-    },
     addItemToCart: function() {
+      this.$set(this.item, 'options', this.options)
       this.$emit('add')
       this.$emit('close')
     },
@@ -29,24 +80,30 @@ Vue.component('selected-item', {
       if(this.quantity > 0 && this.quantity < this.item.max_qty) {
         this.quantity += 1 
         this.$set(this.item, 'quantity', this.quantity) 
-      }
-      
+      }  
     },
     decreaseQty: function() {
       if(this.quantity > this.item.min_qty) {
-        this.quantity -= 1
+        this.quantity -= 1;
         this.$set(this.item, 'quantity', this.quantity)         
       }          
     },
+    updateInstructions: function() {
+      this.$set(this.item, 'instructions', this.instructions);     
+    }
   },
   computed: {
     totalPrice: function() {
-      var totalPrice = (this.item.price * this.quantity).toFixed(2) 
-      this.$set(this.item, 'totalPrice', parseFloat(totalPrice))
+      var totalPrice = parseFloat((this.item.price * this.quantity)).toFixed(2)
+      this.$set(this.item, 'totalPrice', totalPrice)
       return totalPrice
-    }
+    },
+  },
+  created: function() {
+    this.$set(this.item, 'quantity', this.item.min_qty ? this.item.min_qty : 1);
   }
 })
+
 
 var app = new Vue({
   el: "#app",
@@ -63,22 +120,30 @@ var app = new Vue({
       this.selectedItem = item
     },
     addItemToCart: function() {
-      console.log(this.selectedItem)
       this.cartItems.push(this.selectedItem)
     },
   },
   computed: {
-    cartTotal: function() {
+    cartItemsTotal: function() {
       var total = 0;
       for (var i = 0; i < this.cartItems.length; i++) {
         total += this.cartItems[i].totalPrice
       }
-      return total;
+      return parseFloat(total).toFixed(2);
+    },
+    taxAmount: function() {
+      return parseFloat((this.cartItemsTotal * .075)).toFixed(2)
+    },
+    totalCartAmount: function() {
+      return parseFloat((this.cartItemsTotal + this.taxAmount)).toFixed(2)
+    },
+    showCart: function() {
+     return this.cartItems.length ? true : false
     }
   },
   watch: {
     menu: function() {
-      this.navCategories = this.menu.children.slice(0,5)
+      this.navCategories = this.menu.children.slice(0, 5)
       this.moreCategories = this.menu.children.slice(5, -1)
     } 
   },
@@ -88,6 +153,8 @@ var app = new Vue({
     .then((response) => {
       this.menu = response.data.menu.data[0];
       this.merchant = response.data.merchant;
+    })
+    .catch((err) => {
     });
   }
 })

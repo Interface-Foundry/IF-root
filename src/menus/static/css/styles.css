@@ -33,6 +33,10 @@ body {
   min-height: 100%;
 }
 
+#app {
+  height: 100%;
+}
+
 ul {
   padding-left: 0;
   list-style: none;
@@ -65,12 +69,19 @@ button.base-btn:hover {
 
 .left-panel {
   float: left;
-  width: 75%;
+  width: 70%;
 }
 
 .right-panel {
-  float: right;
-  width: 25%;
+  position: fixed;
+  right: 0;
+  width: 30%;
+  height: 100%;
+  top: 0;
+  padding-top: 50px;
+  width: 30%;
+  box-shadow: -3px 0px 6px #b9b9b9;
+  z-index: 10;
 }
 
 
@@ -78,9 +89,10 @@ button.base-btn:hover {
 /*
 /* header & nav */
 header{
-  display: inline-block;
-  width: 100%;
   background-color: #EE3A4A;
+  position: fixed;
+  width: 100%;
+  z-index: 300;
 }
 
 nav {
@@ -211,6 +223,32 @@ nav .cart-icon img {
   color: #B9B9B9;
 }
 
+.option-choice {
+  width: 100%;
+}
+
+
+/*
+/*
+/* cart */
+
+.cart {
+  padding: 10px;
+}
+
+.cart-header {
+  border-bottom: 1px solid #F5F5F5;
+}
+
+.cart-totals .total-item {
+  margin-bottom: 10px;
+}
+
+.cart-totals .item-price {
+  margin: 0;
+}
+
+
 /*
 /*
 /* modal styling */
@@ -224,6 +262,7 @@ nav .cart-icon img {
   display: flex;
   display: -webkit-flex;
   transition: opacity .3s ease;
+  z-index: 100;
 }
 
 .modal-wrapper {
