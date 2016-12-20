@@ -24,8 +24,6 @@ handlers['food.admin.team.members'] = function * (message) {
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
-  console.log('team!!!!!!!!!!!!', foodSession.team_members)
-
   var attachments = foodSession.team_members.map(user => {
     return {
       mrkdwn_in: ['text'],
@@ -171,14 +169,22 @@ handlers['food.admin.team.add_email'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.team.add_email', {type: message.origin, data: msg_json})
 }
 
-handlers['food.admin.team.confirm_email'] = function * (message) {
+//~~~~~~~~~~//
 
-  //there is an email field, which is equal to null :(
+handlers['food.admin.team.confirm_email'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var email = foodSession.data.temp_email;
-  console.log('@@@@FOODSESSION@@@@', foodSession)
-  // console.log('this is email:', email)
+
+  var et = yield db.Email_team.findOne({team_id: message.source.team}); // null if not there
+
+  if (! et) {
+    et = new db.Email_team({team_id: 'hapax', emails: []});
+  }
+  
+  et.emails.push(email);
+  yield et.save();
+
   var tm = foodSession.team_members;
   tm.push({email: email, email_user: true});
 
