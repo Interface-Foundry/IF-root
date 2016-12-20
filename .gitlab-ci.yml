@@ -1,0 +1,21 @@
+image: google/cloud-sdk
+
+services:
+  - docker:dind
+
+stages:
+  - test
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  - gcloud auth activate-service-account --key-file=src/k8s/other/gcloud.json
+  - npm install
+  - npm install --only=dev
+
+test:
+  stage: test
+  script:
+    - NODE_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/parser/parser.test.js

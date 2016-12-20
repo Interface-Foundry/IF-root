@@ -81,6 +81,7 @@ function * findAdmins(team) {
 
 function * isAdmin(userId, team) {
   let adminList = yield findAdmins(team);
+  kip.debug(`👨‍❤️‍👨  ${userId}, ${JSON.stringify(adminList, null, 2)}`)
   for (var i = 0; i < adminList.length; i++) {
     if(adminList[i].id === userId){
       return true;
