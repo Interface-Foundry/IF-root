@@ -216,7 +216,7 @@ app.post('/slackaction', next(function * (req, res) {
         json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
                                                            // maybe I just don't understand slack yet
         let stringOrig = JSON.stringify(json);
-        var map = {
+        let map = {
           amp: '&',
           lt: '<',
           gt: '>',
@@ -338,33 +338,42 @@ app.post('/slackaction', next(function * (req, res) {
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
           break
+        case 'removewarn':
+          parsedIn.original_message.attachments.forEach((ele, id) => {
+            if (ele.callback_id === parsedIn.callback_id) {
+              index = id;
+            }
+          });
+          parsedIn.original_message.attachments[index] = {
+            text: `Are you sure you want to remove the last *${parsedIn.original_message.attachments[index].text.match(/([a-z]+\s+)+/gi)[0]}*?`,
+            actions: cardTemplate.cart_check(index),
+            mrkdwn_in: ['text'],
+            callback_id: parsedIn.original_message.attachments[index].callback_id
+          };
+          break;
+        case 'cancelremove':
+          co(function*() {
+            cart = yield kipcart.getCart(parsedIn.team.id); //'team' assumes this is a slack command. need a way to tell
+            yield updateCartMsg(cart, parsedIn);
+          }).catch(console.log.bind(console));
+          break;
         case 'removeall':
           // reduces the quantity right way, but for speed we return a hacked message right away
-          var priceDifference = 0;
-          var updatedMessage = parsedIn.original_message;
-          updatedMessage.attachments = updatedMessage.attachments.reduce((all, a, i) => {
-            if (a.callback_id === parsedIn.callback_id) {
-              var quantity = parseInt(a.text.match(/\d+$/)[0])
-              priceDifference = quantity * parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1));
-              index = i;
-            } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-              a.text = a.text.replace(/\$(\d{1,3},)*(\d{1,3})(\.\d{0,2})?/g, function(total) {
-                return '$' + (parseFloat(total.substr(1)) - priceDifference).toFixed(2)
-              })
-              all.push(a)
-            } else {
-              all.push(a)
-            }
-            return all
-          }, [])
+          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
           co(function*() {
-            cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index)
+            parsedIn.original_message.attachments.forEach((ele, id) => {
+              if (ele.callback_id === parsedIn.callback_id) {
+                index = id;
+              }
+            });
+
+            cart = yield kipcart.removeAllOfItem(parsedIn.team.id, action.value)
             yield updateCartMsg(cart, parsedIn);
-          }).catch(console.log.bind(console))
+          }).catch(console.log.bind(console));
           break
       }
       var stringOrig = JSON.stringify(parsedIn.original_message)
-      var map = {
+      let map = {
         amp: '&',
         lt: '<',
         gt: '>',
@@ -392,7 +401,9 @@ function clearCartMsg(attachments) {
         'value': 'loading_btn'
       }];
     }
-    all.push(a);
+    if(!(a.text && a.text.includes('Are you sure you want to remove the last'))){
+      all.push(a);
+    }
     return all;
   }, []);
 }
@@ -423,16 +434,17 @@ function* updateCartMsg(cart, parsedIn) {
   })
 
   let attachments = parsedIn.original_message.attachments.reduce((all, a) => {
-    if (a.callback_id && itemData[a.callback_id]) {
+  	let item = itemData[a.callback_id];
+    if (a.callback_id && item) {
       let userString;
-      a.actions = (itemData[a.callback_id].showDetail || showEverything) ? [{
+      a.actions = (item.showDetail || showEverything) ? [{
         'name': 'additem',
         'text': '+',
         'style': 'default',
         'type': 'button',
         'value': 'add'
       }, {
-        'name': 'removeitem',
+        'name': item.quantity > 1 ? "removeitem" : 'removewarn',
         'text': '—',
         'style': 'default',
         'type': 'button',
@@ -445,7 +457,7 @@ function* updateCartMsg(cart, parsedIn) {
         'value': 'add'
       }];
 
-      if (showEverything && itemData[a.callback_id].quantity > 1) {
+      if (showEverything && item.quantity > 1) {
         a.actions.push({
           name: "removeall",
           text: 'Remove All',
@@ -454,23 +466,23 @@ function* updateCartMsg(cart, parsedIn) {
           value: 'removeall'
         });
       }
-      userString = itemData[a.callback_id].added_by.map(function(u) {
+      userString = item.added_by.map(function(u) {
         return '<@' + u + '>';
       }).join(', ');
 
       a.text = [
-        `*${itemNum}.* ` + ((showEverything || itemData[a.callback_id].showDetail) ? `<${itemData[a.callback_id].link}|${itemData[a.callback_id].title}>` : itemData[a.callback_id].title),
-        ((showEverything) ? `*Price:* ${itemData[a.callback_id].price} each` : ''),
+        `*${itemNum}.* ` + ((showEverything || item.showDetail) ? `<${item.link}|${item.title}>` : item.title),
+        ((showEverything) ? `*Price:* ${item.price} each` : ''),
         `*Added by:* ${userString}`,
-        `*Quantity:* ${itemData[a.callback_id].quantity}`,
+        `*Quantity:* ${item.quantity}`,
       ].filter(Boolean).join('\n');
 
-      if (itemData[a.callback_id].quantity > 0) {
+      if (item.quantity > 0) {
         all.push(a);
         itemNum++;
       }
     } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-      a.text = a.text.replace(/\$(\d{1,3},)*(\d{1,3})(\.\d{0,2})?/g, '$' + cart.total);
+      a.text = `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`;
       all.push(a);
     } else if (a.text && !a.text.includes('Quantity:')) {
       all.push(a);
