@@ -221,7 +221,7 @@ handlers['food.admin.display_channels'] = function * (message) {
     title: `Which team members are you ordering food for?`,
     attachments: groupedButtons.map((buttonGroup) => {
       return {
-        'text': `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`,
+        'text': '',
         'fallback': 'Which team members are you ordering food for?',
         'callback_id': 'channel_select',
         'color': '#3AA3E3',
@@ -231,6 +231,8 @@ handlers['food.admin.display_channels'] = function * (message) {
       }
     })
   }
+
+  msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
 
   // final attachment with send, edit members, < back
   msg_json.attachments.push({
