@@ -52,8 +52,6 @@
           <ul>
             <cart-item v-for="item in cartItems" :item=item></cart-item>
           </ul>        
-        </div>
-        <div class="cart-footer">
           <div class="cart-totals">
             <div class="total-item">
               <p class="item-name">Items Subtotal:</p><p class="item-price">${{cartItemsTotal}}</p>
@@ -64,7 +62,10 @@
             <div class="total-item">
               <p class="item-name">Total:</p><p class="item-price">${{totalCartAmount}}</p>
             </div>
-          </div>
+          </div>        
+        </div>
+        <div class="cart-footer">
+          <button class="base-btn">Complete Order ${{totalCartAmount}} </button>
         </div>
       </div>
       <div v-else><img src="images/pineapple.png">Your cart is empty</div>
@@ -73,8 +74,15 @@
   </div>    
   <script type="text/x-template" id="cart-item">
     <li class="cart-item">
-      <div class="item-summary"><img src="images/edit-icon.svg"><span class="item-name">({{item.quantity}})-{{item.name}}</span><span class="item-price">${{item.price.toFixed(2)}}</span></div>
-      <ul class="item-options"></ul> 
+      <div class="item-summary"><img src="images/edit-icon.svg"><span class="item-name">({{item.quantity}}) {{item.name}}</span><span class="item-price">${{item.price.toFixed(2)}}</span></div>
+      <ul class="item-options">
+        <li class="item-option-set" v-for="opt in item.options">
+          <p class="item-option-name">{{opt.option.name}}</p>          
+          <ul class="item-option-list"> 
+            <li class="item-choice" v-for="choice in opt.choices">{{choice.name}}</li>
+          </ul>
+        </li>
+      </ul> 
     </li>
   </script>   
   <script type="text/x-template" id="category-item">
