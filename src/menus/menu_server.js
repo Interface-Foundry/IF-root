@@ -71,7 +71,7 @@ app.post('/cafe', (req, res) => co(function * () {
   yield ms.save();
 
   //return a url w a key in a query string
-  res.send(menuURL + '#?k=' + ms.session_token);
+  res.send(menuURL + '?k=' + ms.session_token);
 }));
 
 //when user hits that url up, post to /session w/key and gets correct pg
