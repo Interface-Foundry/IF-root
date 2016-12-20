@@ -191,7 +191,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
     'mrkdwn_in': ['text']
   })
 
-  $replyChannel.sendReplace(message, 'food.menu.search', {type: 'slack', data: msg_json})
+  $replyChannel.send(message, 'food.menu.search', {type: 'slack', data: msg_json})
 }
 
 // just like pressing a category button
