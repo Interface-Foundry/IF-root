@@ -178,6 +178,22 @@ var settings_menu = module.exports.settings_menu = [{
     value: 'start',
   }];
 
+var cart_check = module.exports.cart_check = function(id) {
+	return [{
+		name: "removeall",
+		text: 'Remove All',
+		style: 'danger',
+		type: 'button',
+		value: id
+	}, {
+		"name": "cancelremove",
+		"text": "Nevermind",
+		"style": "default",
+		"type": "button",
+		value: 'cancelremove'
+	}]
+}
+
 var team_buttons = module.exports.team_buttons =
   [{
     name: 'settings',
