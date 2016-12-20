@@ -10,4 +10,5 @@ EXPOSE 5000
 ENV AWS_ACCESS_KEY_ID=AKIAJEYXGEUG37OMIQKA
 ENV AWS_SECRET_ACCESS_KEY=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
 ENV GOOGLE_APPLICATION_CREDENTIALS=/picstitch/gcloud_key/KipStyles-8da42a8a7423.json
+ADD tests/picstitch/ /tests/
 CMD gunicorn -w 6 --bind 0.0.0.0:5000 main:application
