@@ -38,68 +38,98 @@
         <div class="category-set" v-for="category in menu.children">
           <h2> {{category.name}}</h2>
           <ul>
-            <category-item v-on:show="setSelectedItem(item)" v-for="item in category.children" :item=item></category-item> 
+            <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
           </ul>
         </div>
       </div>
     </div>
     <div class="right-panel">
-      <div class="cart">
-        <h3>Cart</h3>
-        <p v-if="cartTotal">{{cartTotal}}</p>
-        <ul>
-          <li v-for="cartItem in cartItems">({{cartItem.quantity}}){{cartItem.name}} - {{cartItem.totalPrice}}</li>
-        </ul>
-      </div>
-    </div>
-    <selected-item v-on:add="addItemToCart" v-if="selectedItem" @close="selectedItem = null" :item=selectedItem></selected-item> 
-  </div>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="https://unpkg.com/vue/dist/vue.js"></script>
-  <script type="text/x-template" id="category-item">
-    <li v-on:click="selectItem(item)">
-      <div class="item-title"><p class="item-name">{{item.name}}</p><span class="item-price">${{item.price.toFixed(2)}}</span></div>
-      <small class="item-description" v-if="item.description">{{item.description}}</small> 
-    </li>
-  </script> 
-  <script type="text/x-template" id="item-detail">
-  <transition name="modal">
-    <div class="modal-mask">
-      <div class="modal-wrapper">
-        <div class="modal-container">
-          <div class="modal-header">
-            <div class="modal-item-info">
-              <h3>{{item.name}}</h3>
-              <h3>${{item.price.toFixed(2)}}</h3>
+      <div v-if="showCart"  class="cart">
+        <div class="cart-header">
+          <h3> Your Kip Cafe order</h3>
+        </div>
+        <div class="cart-body">
+          <ul>
+            <cart-item v-for="item in cartItems" :item=item></cart-item>
+          </ul>        
+        </div>
+        <div class="cart-footer">
+          <div class="cart-totals">
+            <div class="total-item">
+              <p class="item-name">Items Subtotal:</p><p class="item-price">${{cartItemsTotal}}</p>
             </div>
-            <div class="modal-close-button" @click="$emit('close')"></div> 
-          </div>
-          <div class="item-quantity-selector">
-            <button @click="decreaseQty">-</button>
-            <span>{{quantity}}</span>
-            <button @click="increaseQty">+</button>
-          </div>
-          <div class="modal-body">
-            <div v-if="isMealAddition(option)" class="option-set" v-for="option in item.children">
-              <p> {{option.name}} </p>              
-              <div class="option-body">
-                <ul class="option-list">
-                  <li v-for="subOption in option.children"><input type="radio"/><label>{{subOption.name}}</label></li>
-                </ul>
-              </div>
+            <div class="total-item">
+              <p class="item-name">Sales Tax:</p><p class="item-price">${{taxAmount}}</p>
             </div>
-            <p>Special Instructions</p>
-            <textarea></textarea>            
-          </div>
-          <div class="modal-footer">
-            <button v-on:click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice}} </button>
+            <div class="total-item">
+              <p class="item-name">Total:</p><p class="item-price">${{totalCartAmount}}</p>
+            </div>
           </div>
         </div>
       </div>
+      <div v-else><img src="images/pineapple.png">Your cart is empty</div>
     </div>
-  </transition>
-</script>
-  <script src="js/main.js"></script>      
+    <selected-item v-on:add="addItemToCart" v-if="selectedItem" @close="selectedItem = null" :item=selectedItem></selected-item>    
+  </div>    
+  <script type="text/x-template" id="cart-item">
+    <li class="cart-item">
+      <div class="item-summary"><img src="images/edit-icon.svg"><span class="item-name">({{item.quantity}})-{{item.name}}</span><span class="item-price">${{item.price.toFixed(2)}}</span></div>
+      <ul class="item-options"></ul> 
+    </li>
+  </script>   
+  <script type="text/x-template" id="category-item">
+    <li v-on:click="selectItem">
+      <div class="item-title"><p class="item-name">{{item.name}}</p><span class="item-price">${{item.price.toFixed(2)}}</span></div>
+      <small class="item-description" v-if="item.description">{{item.description}}</small> 
+    </li>
+  </script>
+  <script type="text/x-template" id="option-set">
+    <div v-if="!isMealAddition">
+      <p> {{option.name}} </p>              
+      <div class="option-body">
+        <choice v-for="choice in option.children" :option=option :choice=choice :type="inputType">
+      </div>
+    </div>
+  </script>
+  <script type="text/x-template" id="choice">
+   <div class="option-choice"> <input  v-on:change="selectChoice" :id="choice.unique_id" v-bind:value="choice.name" :type="type" :name="option.name"> <label :for="choice.unique_id">{{choice.name}} <span v-if="choice.price > 0" class="option-price"> + ${{choice.price.toFixed(2)}}</span></label></div>
+  </script>  
+  <script type="text/x-template" id="item-detail">
+    <transition name="modal">
+      <div class="modal-mask">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+            <div class="modal-header">
+              <div class="modal-item-info">
+                <h3>{{item.name}}</h3>
+                <h3>${{item.price.toFixed(2)}}</h3>
+              </div>
+              <div class="modal-close-button" @click="$emit('close')"></div> 
+            </div>
+            <div class="item-quantity-selector">
+              <button @click="decreaseQty">-</button>
+              <span>{{quantity}}</span>
+              <button @click="increaseQty">+</button>
+            </div>
+            <div class="modal-body">
+              <div class="option-set" v-for="option in item.children">
+                <option-set :item=item :option=option></option-set>
+              </div>
+              <p>Special Instructions</p>
+              <textarea v-model="instructions" v-on:change="updateInstructions"></textarea>            
+            </div>
+            <div class="modal-footer">
+              <button v-on:click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice}} </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </script>
+  <script src="https://cdn.jsdelivr.net/lodash/4.17.2/lodash.min.js"></script>
+  <script src="js/vue.js"></script>
+  <script src="js/axios.min.js"></script>      
+  <script src="js/main.js"></script>                  
 </body>
 </html>
       
