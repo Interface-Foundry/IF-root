@@ -96,8 +96,8 @@ header{
 }
 
 nav {
-  padding-top: 5px;
-  padding-bottom: 5px;
+  display: flex;
+  padding: 5px 0;
 }
 
 nav .logo {
@@ -109,14 +109,28 @@ nav .logo img {
 }
 
 nav .cart-icon {
-  float:right
+  margin-left: auto;
+  padding-top: 10px;
 }
 
 nav .cart-icon img {
   width: 25px;
 }
 
-
+.nav-cart-quantity {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  border-radius: 100px;
+  background-color: purple;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  line-height: 26px;
+  top: 5px;
+  right: 2px;
+  position: absolute;
+}
 
 /*
 /*
@@ -128,6 +142,7 @@ nav .cart-icon img {
 .category-nav {
   background-color: #F5F5F5;
   padding: 15px 0;
+  position: relative;
 }
 
 .category-nav ul {
@@ -148,6 +163,10 @@ nav .cart-icon img {
   width: 100%;
 }
 
+.restaurant-header img {
+    position: relative;
+    top: 55px;
+}
 
 /*
 /*
