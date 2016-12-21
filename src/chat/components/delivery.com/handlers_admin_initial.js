@@ -761,6 +761,11 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
         'type': 'button',
         'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
       }, {
+        'name': 'food.admin.team.members.reorder',
+        'value': mostRecentMerchant, //Finish this
+        'text': `Edit Members`,
+        'type': 'button'
+      }, {
         'name': 'passthrough',
         'text': '< Back',
         'type': 'button',
