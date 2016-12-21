@@ -20,6 +20,8 @@ kipPayURL: https://pay.kipthis.com
 logging:
   console:
     level: verbose
+    json: false
+    stringify: false
     colorize: true
     prettyPrint: true
   mongo:

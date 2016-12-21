@@ -36,6 +36,8 @@ console.log(config.logging.console.level);
 var transports = [
   new (winston.transports.Console)({
     level: config.logging.console.level,
+    json: config.logging.console.json,
+    stringify: config.logging.console.stringify,
     colorize: config.logging.console.colorize,
     prettyPrint: config.logging.console.prettyPrint,
   })

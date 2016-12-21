@@ -18,8 +18,12 @@ spec:
       - env:
         - name: LOGGING_CONSOLE_COLORIZE
           value: "false"
+        - name: LOGGING_CONSOLE_JSON
+          value: "true"
         - name: LOGGING_CONSOLE_PRETTYPRINT
           value: "false"
+        - name: LOGGING_CONSOLE_STRINGIFY
+          value: "true"
         - name: PROXY_LUMINATI_ADDR
           value: http://luminati-proxy.default.svc.cluster.local:22225
         image: gcr.io/kip-styles/reply_logic:58dd3bd
