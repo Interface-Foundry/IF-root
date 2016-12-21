@@ -7,7 +7,8 @@ var request = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
 var mailer_transport = require('../../../mail/IF_mail.js')
-var yelp = require('./yelp');
+var yelp = require('./yelp')
+var menu_utils = require('./menu_utils')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -725,21 +726,26 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     ]
   }
 
-  for (var i = 0; i < foodSession.team_members.length; i++) {
-    var m = foodSession.team_members[i];
-    if (m.email_user) {
-      var mailOptions = {
-        to: `<${m.email}>`,
-        from: `Kip Café <hello@kipthis.com>`,
-        subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
-        html: "<body><p>This is the life and the life will not end</p></body>"
-      };
+  var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, foodSession.convo_initiater.id)
 
-      logging.info('mailOptions', mailOptions);
-      mailer_transport.sendMail(mailOptions, function (err) {
-        if (err) console.log(err);
-      });
-    }
+  //TODO will need to generate a new user ID for the email users at some point
+
+  for (var i = 0; i < foodSession.email_users.length; i++) {
+    var m = foodSession.email_users[i];
+    var mailOptions = {
+      to: `<${m}>`,
+      from: `Kip Café <hello@kipthis.com>`,
+      subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
+      html: "<body><p>" +
+      "This is the life and the life will not end</p>" +
+      // `<a href=${merch_url}>View Full Menu<a>` +
+      "</body>"
+    };
+
+    logging.info('mailOptions', mailOptions);
+    mailer_transport.sendMail(mailOptions, function (err) {
+      if (err) console.log(err);
+    });
   }
 
   foodSession.team_members.map(m => {

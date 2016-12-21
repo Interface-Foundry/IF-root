@@ -5,6 +5,7 @@ var rp = require('request-promise')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
+var menu_utils = require('./menu_utils.js')
 
 var popoutUrl = 'http://localhost:8001/cafe';
 
@@ -130,28 +131,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
     return attachment
   })
 
-  //creates a url for the pop-out menu
-  function getUrl (rest_id, team_id, delivery_ObjectId, user_id) {
-    return rp({
-      url: popoutUrl,
-      method: 'POST',
-      json: {
-        rest_id: rest_id,
-        team_id: team_id,
-        delivery_ObjectId: delivery_ObjectId,
-        user_id: user_id
-      }
-    })
-    .then(function (res) {
-      return res;
-    })
-    .catch(function (err) {
-      kip.debug('ERROR', err)
-    })
-    return url;
-  }
-
-  var merch_url = yield getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, foodSession.convo_initiater.id)
+  //this is generating a different menu for each user, right?
+  var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, message.user_id)
 
   var msg_json = {
     'text': `${foodSession.chosen_restaurant.name} - <http://${merch_url}|View Full Menu>`,
