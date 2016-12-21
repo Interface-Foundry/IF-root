@@ -292,7 +292,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     fallback: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    callback_id: 'address_confirm'
+    callback_id: 'address_confirm',
+ 
   }
 
   var mainAttachment = {
@@ -535,11 +536,11 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     logging.error('error with creating cart payment for some reason', err)
   }
 
-  if (replace) {
-    $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  } else {
+  //if (replace) {
+  //  $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
+  //} else {
     $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  }
+  //}
 }
 
 handlers['food.order.instructions'] = function * (message) {
