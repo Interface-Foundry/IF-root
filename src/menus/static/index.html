@@ -13,6 +13,7 @@
         </div>
         <div class="cart-icon image-container">
           <img src="images/cart-icon.png">
+          <span v-if="cartItemsQty" class="nav-cart-quantity">{{cartItemsQty}}</span>
         </div>
       </nav>
     </header>
@@ -50,31 +51,32 @@
         </div>
         <div class="cart-body">
           <ul>
-            <cart-item v-for="item in cartItems" :item=item></cart-item>
+            <cart-item v-on:remove="removeItem(item)" v-for="item in cartItems" v-on:edit="setEditItem(item)" :item=item></cart-item>
           </ul>
           <div class="cart-totals">
             <div class="total-item">
-              <p class="item-name">Items Subtotal:</p><p class="item-price">${{cartItemsTotal}}</p>
+              <p class="item-name">Items Subtotal:</p><p class="item-price">${{cartItemsTotal.toFixed(2)}}</p>
             </div>
             <div class="total-item">
-              <p class="item-name">Sales Tax:</p><p class="item-price">${{taxAmount}}</p>
+              <p class="item-name">Sales Tax:</p><p class="item-price">${{taxAmount.toFixed(2)}}</p>
             </div>
             <div class="total-item">
-              <p class="item-name">Total:</p><p class="item-price">${{totalCartAmount}}</p>
+              <p class="item-name">Total:</p><p class="item-price">${{totalCartAmount.toFixed(2)}}</p>
             </div>
           </div>
         </div>
         <div class="cart-footer">
-          <button class="base-btn">Complete Order ${{totalCartAmount}} </button>
+          <button class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
         </div>
       </div>
       <div v-else><img src="images/pineapple.png">Your cart is empty</div>
     </div>
-    <selected-item v-on:add="addItemToCart" v-if="selectedItem" @close="selectedItem = null" :item=selectedItem></selected-item>
+    <selected-item  v-if="selectedItem" @close="selectedItem = null" :item=selectedItem v-on:add="addItemToCart"></selected-item>
+    <edit-item v-if="editingItem" @close="editingItem = null" :item=editingItem></selected-item>
   </div>
   <script type="text/x-template" id="cart-item">
     <li class="cart-item">
-      <div class="item-summary"><img src="images/edit-icon.svg"><span class="item-name">({{item.quantity}}) {{item.name}}</span><span class="item-price">${{item.price.toFixed(2)}}</span></div>
+      <div class="item-summary"><img @click="editItem" src="images/edit-icon.svg"><span @click="removeItem">X</span><span class="item-name">({{item.quantity}}) {{item.name}}</span><span class="item-price">${{item.totalPrice}}</span></div>
       <ul class="item-options">
         <li class="item-option-set" v-for="opt in item.options">
           <p class="item-option-name">{{opt.option.name}}</p>
@@ -86,7 +88,7 @@
     </li>
   </script>
   <script type="text/x-template" id="category-item">
-    <li v-on:click="selectItem">
+    <li @click="selectItem">
       <div class="item-title"><p class="item-name">{{item.name}}</p><span class="item-price">${{item.price.toFixed(2)}}</span></div>
       <small class="item-description" v-if="item.description">{{item.description}}</small>
     </li>
@@ -100,7 +102,7 @@
     </div>
   </script>
   <script type="text/x-template" id="choice">
-   <div class="option-choice"> <input  v-on:change="selectChoice" :id="choice.unique_id" v-bind:value="choice.name" :type="type" :name="option.name"> <label :for="choice.unique_id">{{choice.name}} <span v-if="choice.price > 0" class="option-price"> + ${{choice.price.toFixed(2)}}</span></label></div>
+   <div class="option-choice"> <input v-bind:checked="selected" v-on:change="selectChoice" :id="choice.unique_id" :type="type" :name="option.name"> <label :for="choice.unique_id">{{choice.name}} <span v-if="choice.price > 0" class="option-price"> + ${{choice.price.toFixed(2)}}</span></label></div>
   </script>
   <script type="text/x-template" id="item-detail">
     <transition name="modal">
@@ -124,17 +126,49 @@
                 <option-set :item=item :option=option></option-set>
               </div>
               <p>Special Instructions</p>
-              <textarea v-model="instructions" v-on:change="updateInstructions"></textarea>
+              <textarea v-model="instructions"></textarea>
             </div>
             <div class="modal-footer">
-              <button v-on:click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice}} </button>
+              <button @click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice}} </button>
             </div>
           </div>
         </div>
       </div>
     </transition>
   </script>
-  <script src="https://cdn.jsdelivr.net/lodash/4.17.2/lodash.min.js"></script>
+    <script type="text/x-template" id="edit-item">
+    <transition name="modal">
+      <div class="modal-mask">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+            <div class="modal-header">
+              <div class="modal-item-info">
+                <h3>{{item.name}}</h3>
+                <h3>${{item.price.toFixed(2)}}</h3>
+              </div>
+              <div class="modal-close-button" @click="$emit('close')"></div>
+            </div>
+            <div class="item-quantity-selector">
+              <button @click="decreaseQty">-</button>
+              <span>{{quantity}}</span>
+              <button @click="increaseQty">+</button>
+            </div>
+            <div class="modal-body">
+              <div class="option-set" v-for="option in item.children">
+                <option-set :item=item :option=option></option-set>
+              </div>
+              <p>Special Instructions</p>
+              <textarea v-model="instructions"></textarea>
+            </div>
+            <div class="modal-footer">
+              <button @click="updateItem" class="base-btn"> Update Order ${{totalPrice}} </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </script>
+  <script src="js/lodash.js"></script>
   <script src="js/vue.js"></script>
   <script src="js/axios.min.js"></script>
   <script src="js/main.js"></script>
