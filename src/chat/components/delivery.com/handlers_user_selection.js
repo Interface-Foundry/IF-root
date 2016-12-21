@@ -42,6 +42,7 @@ function * infoForChannelOrGroup (slackbot, chosenChannel) {
 // start of actual handlers
 handlers['food.poll.confirm_send_initial'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  console.log('foodsession', foodSession);
   var prevFoodSession = yield db.Delivery.find({team_id: message.source.team, active: false}).limit(1).sort({_id: -1}).exec()
   var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
   prevFoodSession = prevFoodSession[0]

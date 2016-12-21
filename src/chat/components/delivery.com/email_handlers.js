@@ -8,56 +8,149 @@ var $allHandlers // this is how you can access handlers from other files
 // exports
 var handlers = {}
 
+handlers['food.admin.team.add_order_email'] = function * (message) {
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
+  var e = message.source.callback_id;
+  foodSession.email_users.push(e);
+  yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
+  yield handlers['food.admin.team.email_members'](message);
+}
+
+handlers['food.admin.team.remove_order_email'] = function * (message) {
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var e = message.source.callback_id;
+  foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
+  yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
+  yield handlers['food.admin.team.email_members'](message);
+}
+
+handlers['food.admin.team.delete_email'] = function * (message) {
+  console.log('delete email called')
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var et = yield db.email_team.findOne({team_id: message.source.team}).exec()
+  var e = message.source.callback_id;
+
+  if (foodSession.email_users.indexOf(e)) {
+    foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
+    yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
+  }
+
+  et.emails.splice(et.emails.indexOf(e), 1);
+  yield db.email_team.update({team_id: message.source.team}, {$set: {emails: et.emails}})
+
+  yield handlers['food.admin.team.email_members'](message);
+}
+
 handlers['food.admin.team.email_members'] = function * (message) {
+  console.log('@@@@@', message.source.actions);
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var et = yield db.email_team.findOne({team_id: message.source.team});
+
+  var index = parseInt(_.get(message, 'data.value.index')) || 0
+
   var msg_json = {'attachments': []};
 
   if (et) {
+    var addedButton = {
+      "name": 'passthrough',
+      "text": "✓ Added",
+      "type": "button",
+      "value": "food.admin.team.remove_order_email"
+    };
 
-    et.emails.map(function (e) {
+    var addButton = {
+      "name": 'passthrough',
+      "text": "○ Add",
+      "type": "button",
+      "value": "food.admin.team.add_order_email"
+    }
+
+    et.emails.slice(index, index + 4).map(function (e) {
       msg_json.attachments.push({
         "text": e,
         "fallback": "A bridge to the over-man",
-        "callback_id": "The Will to Power",
+        "callback_id": e,
         "attachment_type": "default",
         "actions": [
+          (foodSession.email_users.indexOf(e) > -1 ? addedButton : addButton),
           {
-            "name": 'zarathustra',
-            "text": "✓ Added",
-            "type": "button",
-            "value": "zarathustra"
-          },
-          {
-            "name": "ecce_homo",
+            "name": "passthrough",
             "text": "× Delete",
             "type": "button",
-            "value": "ecce_homo"
+            "value": "food.admin.team.delete_email"
           }
-        ]
-      });
+      ]})
     });
+
+    msg_json.attachments.push({
+      "text": "",
+      "fallback": "fallback",
+      "callback_id": "callback_id",
+      "attachment_type": "default",
+      "actions": [{
+        "name": "food.admin.team.email_members",
+        "text": "< Previous",
+        "type": "button",
+        "value": {
+          index: (index < 4 ? 0 : index - 6)
+        }
+      }, {
+        "name": "food.admin.team.email_members",
+        "text": "Next >",
+        "type": "button",
+        "value": {
+          index: index + 4
+        }
+      }]
+    })
   }
 
   msg_json.attachments.push({
      'mrkdwn_in': [
        'text'
      ],
-     'text': (et ? 'These are your email members' : 'It looks like you don\'t have any email members yet!'),
+     'text': '',
      'fallback': 'I am fallback hear me fall back!',
      'callback_id': 'food.admin.team.add_email',
-     'color': '#3AA3E3',
+    //  'color': '#3AA3E3',
      'attachment_type': 'default',
      'actions': [
        {
          'name': 'passthrough',
          'text': 'Add Email',
-         'style': 'primary',
+         'style': 'default',
          'type': 'button',
          'value': 'food.admin.team.add_email'
        }
      ]
    });
+
+   msg_json.attachments.push({
+      'mrkdwn_in': [
+        'text'
+      ],
+      'text': (et ? `*Added:* ${foodSession.email_users.join(', ')}` : ''),
+      'fallback': 'I am fallback hear me fall back!',
+      'callback_id': 'food.admin.team.add_email',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'actions': [
+        {
+          'name': 'passthrough',
+          'text': 'Finish',
+          'style': 'primary',
+          'type': 'button',
+          'value': 'food.admin.team.members'
+        }
+        // {
+        //   'name': 'passthrough',
+        //   'text': '< Back',
+        //   'style': 'default',
+        //   'type': 'button',
+        //   'value': 'food.admin.team.add_email'
+        // }
+      ]
+    });
 
   $replyChannel.sendReplace(message, 'food.admin.team.email_members', {type: message.origin, data: msg_json})
 }
@@ -136,12 +229,12 @@ handlers['food.admin.team.confirm_email'] = function * (message) {
   et.emails.push(email);
   yield et.save();
 
-  var tm = foodSession.team_members;
-  tm.push({email: email, email_user: true});
+  var tm = foodSession.email_users;
+  tm.push(email);
 
   yield db.Delivery.update({team_id: message.source.team, active: true}, {
     $set: {
-      team_members: tm,
+      email_users: tm,
       data: {}
     }});
 

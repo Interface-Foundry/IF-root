@@ -13,6 +13,7 @@ var deliverySchema = mongoose.Schema({
 
   all_members: [], // not sure how whitelist thing works so just stashing all_members instead of looking up team_members
   team_members: [], // who is in the order
+  email_users: [],
   chosen_location: {  // from slackbot.meta.locations
       label: String,
       coordinates: [Number],

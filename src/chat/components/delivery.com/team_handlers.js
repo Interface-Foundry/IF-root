@@ -27,8 +27,8 @@ handlers['food.admin.team.members'] = function * (message) {
   var attachments = [];
 
   foodSession.team_members.map(user => {
-    if (!user.email) {
-      attachments.push({
+
+        attachments.push({
         mrkdwn_in: ['text'],
         callback_id: user.id,
         text:`*${user.real_name || user.name}* - <@${user.id}|${user.name}>`,
@@ -42,8 +42,7 @@ handlers['food.admin.team.members'] = function * (message) {
           }
         }]
       })
-    }
-  })
+    })
 
   var moreButton = {
     name: 'food.admin.team.members',
