@@ -51,7 +51,7 @@
         </div>
         <div class="cart-body">
           <ul>
-            <cart-item v-on:remove="removeItem(item)" v-for="item in cartItems" v-on:edit="setEditItem(item)" :item=item></cart-item>
+            <cart-item v-on:remove="removeItem(item)" v-for="item in cartItems" :item=item v-on:edit="setEditItem(item)"></cart-item>
           </ul>
           <div class="cart-totals">
             <div class="total-item">
@@ -76,12 +76,12 @@
   </div>
   <script type="text/x-template" id="cart-item">
     <li class="cart-item">
-      <div class="item-summary"><img @click="editItem" src="images/edit-icon.svg"><span @click="removeItem">X</span><span class="item-name">({{item.quantity}}) {{item.name}}</span><span class="item-price">${{item.totalPrice}}</span></div>
+      <div class="item-summary"><img @click="editItem" src="images/edit-icon.svg"><span @click="removeItem">X</span><span class="item-name">({{item.quantity}}) {{item.name}}</span><span class="item-price">${{item.totalPrice.toFixed(2)}}</span></div>
       <ul class="item-options">
         <li class="item-option-set" v-for="opt in item.options">
           <p class="item-option-name">{{opt.option.name}}</p>
           <ul class="item-option-list">
-            <li class="item-choice" v-for="choice in opt.choices">{{choice.name}}</li>
+            <li class="item-choice" v-for="choice in opt.choices">{{choice.name}} <span v-if="choice.price">(+ ${{choice.price}})</span></li>
           </ul>
         </li>
       </ul>
@@ -97,7 +97,7 @@
     <div v-if="!isMealAddition">
       <p> {{option.name}} </p>
       <div class="option-body">
-        <choice v-for="choice in option.children" :option=option :choice=choice :type="inputType">
+        <choice v-on:options="updateOptions" v-for="choice in option.children" :option=option :choice=choice :type="inputType">
       </div>
     </div>
   </script>
@@ -123,13 +123,13 @@
             </div>
             <div class="modal-body">
               <div class="option-set" v-for="option in item.children">
-                <option-set :item=item :option=option></option-set>
+                <option-set v-on:setOptions="setOptions" :item=item :option=option></option-set>
               </div>
               <p>Special Instructions</p>
               <textarea v-model="instructions"></textarea>
             </div>
             <div class="modal-footer">
-              <button @click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice}} </button>
+              <button @click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice.toFixed(2)}} </button>
             </div>
           </div>
         </div>
@@ -155,13 +155,13 @@
             </div>
             <div class="modal-body">
               <div class="option-set" v-for="option in item.children">
-                <option-set :item=item :option=option></option-set>
+                <option-set v-on:setOptions="setOptions" :item=item :option=option></option-set>
               </div>
               <p>Special Instructions</p>
               <textarea v-model="instructions"></textarea>
             </div>
             <div class="modal-footer">
-              <button @click="updateItem" class="base-btn"> Update Order ${{totalPrice}} </button>
+              <button @click="updateItem" class="base-btn"> Update Order ${{totalPrice.toFixed(2)}} </button>
             </div>
           </div>
         </div>

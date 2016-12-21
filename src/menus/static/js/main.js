@@ -11,6 +11,7 @@ Vue.component('choice', {
   },
   methods: {
     selectChoice: function() {
+
       // toggle selected data for checkbox options
       if (this.type === "checkbox") {
         this.selected = !this.selected
@@ -19,6 +20,14 @@ Vue.component('choice', {
       // set selected on radio to true and all other radios to false
       if (this.type === "radio") {
         choiceBus.$emit('radio-selected', this.choice)
+      }
+
+      if (this.choice.price) {
+        if (this.$parent.cost) {
+          this.selected ? this.$parent.cost += this.choice.price : this.$parent.cost -= this.choice.price
+        } else {
+          this.$parent.cost = this.choice.price
+        }
       }
 
       var options = this.$parent.$parent.options;
@@ -32,14 +41,13 @@ Vue.component('choice', {
         newOptions[option.id].choices = []
         newOptions[option.id].choices.push(choice)
       }
-      else if (this.type === "checkbox" && this.selected) {
+      if (this.type === "checkbox" && this.selected) {
         var choiceExists;
         if (option.id in newOptions) {
           // loop through all choices to see if choice exists already
           newOptions[option.id].choices.forEach(function(c) {
             if (c.id === choice.id) {
               choiceExists = true;
-              return
             }
           })
           if (!choiceExists) {
@@ -55,7 +63,7 @@ Vue.component('choice', {
           newOptions[option.id].choices.push(choice)
         }
       }
-      else if (this.type === "checkbox"  && !this.selected) {
+      if (this.type === "checkbox"  && !this.selected) {
         newOptions[option.id].choices.forEach(function(c) {
           if (c.id === choice.id) {
             var i = _.indexOf(newOptions[option.id].choices, choice)
@@ -63,7 +71,15 @@ Vue.component('choice', {
           }
         })
       }
-      this.$set(this.$parent.$parent, 'options', newOptions)
+
+      newOptions[option.id].option.cost = this.$parent.cost
+      if (this.type === "checkbox") {
+        if (option.id in newOptions && !newOptions[option.id].choices.length) {
+          delete newOptions[option.id]
+        }
+      }
+      this.$emit('options', newOptions)
+      //this.$set(this.$parent.$parent, 'options', newOptions)
     }
   },
   created: function() {
@@ -98,6 +114,12 @@ Vue.component('option-set', {
     return {
       isMealAddition: this.option.name === "Meal Additions",
       inputType: this.option.max_selection === 1 ? "radio" : "checkbox",
+      cost: this.option.cost || 0
+    }
+  },
+  methods: {
+    updateOptions: function(options) {
+      this.$emit('setOptions', options)
     }
   }
 })
@@ -125,6 +147,7 @@ Vue.component('edit-item', {
       instructions: this.item.instructions,
       options: this.item.options,
       editedItem: {},
+      optionsCost: this.item.optionsCost
     }
   },
   methods: {
@@ -143,15 +166,32 @@ Vue.component('edit-item', {
       this.editedItem.options = this.options
       this.editedItem.totalPrice = this.totalPrice
       this.editedItem.instructions = this.instructions
+      this.editedItem.optionsCost = this.optionsCost
       var newItem = _.assign({},this.item, this.editedItem)
       var i = _.indexOf(this.$parent.cartItems, this.item);
       this.$set(this.$parent.cartItems, i, newItem)
       this.$emit('close')
+    },
+    setOptions: function(options) {
+      console.log(options)
+      var that = this;
+      var cost = 0;
+      if (_.isEmpty(options)) { this.optionsCost = 0; return; }
+
+      _.forOwn(options, function(val, key) {
+        console.log(key)
+        if (val.option.cost) {
+          cost += val.option.cost
+        }
+      })
+      this.optionsCost = cost;
+      this.options = options;
     }
   },
   computed: {
     totalPrice: function() {
-      return parseFloat((this.item.price * this.quantity)).toFixed(2)
+      var totalPrice = ((this.item.price * this.quantity) + this.optionsCost);
+      return totalPrice
     }
   },
 })
@@ -175,13 +215,15 @@ Vue.component('selected-item', {
       options: {},
       instructions: "",
       quantity: 0,
-      selectedItem: {}
+      selectedItem: {},
+      optionsCost: 0,
     }
   },
   methods: {
     addItemToCart: function() {
       this.selectedItem.quantity = this.quantity
       this.selectedItem.options = this.options
+      this.selectedItem.optionsCost = this.optionsCost
       this.selectedItem.totalPrice = this.totalPrice
       this.selectedItem.instructions = this.instructions
       var newItem = _.assign({},this.item, this.selectedItem)
@@ -198,12 +240,23 @@ Vue.component('selected-item', {
         this.quantity -= 1;
       }
     },
+    setOptions: function(options) {
+      this.options = options;
+      var that = this;
+      this.optionsCost = 0
+      if (_.isEmpty(this.options)) { this.optionsCost = 0 }
+      _.forOwn(this.options, function(val, key) {
+        if (val.option.cost) {
+          that.optionsCost += val.option.cost
+        }
+      })
+    }
   },
   computed: {
     totalPrice: function() {
-      var totalPrice = parseFloat((this.item.price * this.quantity)).toFixed(2)
+      var totalPrice = ((this.item.price * this.quantity) + this.optionsCost);
       return totalPrice
-    },
+    }
   },
   created: function() {
     if (this.item.min_qty) {
