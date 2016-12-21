@@ -63,7 +63,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
         "type": "button",
         "value": "add"
       }, {
-        "name": "removeitem",
+        "name": item.quantity > 1 ? "removeitem" : 'removewarn',
         "text": "—",
         "style": "default",
         "type": "button",
@@ -72,7 +72,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
 
       if (item.quantity > 1 && isAdmin) {
         buttons.push({
-          name: "removeall",
+          name: "removewarn",
           text: 'Remove All',
           style: 'default',
           type: 'button',

@@ -621,7 +621,6 @@ handlers['food.admin_polling_options'] = function * (message) {
     } else if (foodSession.fulfillment_method == 'pickup') {
       var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id && m.ordering.availability.pickup == true)[0]
     }
-
     if(mostRecentMerchant != null){
       var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
       listing.text = `You recently ordered delivery from ${listing.text} \n Order again?`
@@ -720,7 +719,6 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     .sort({_id: -1})
     .limit(1)
     .exec()
-
   // copy all the last ordered stuff to this order
   lastOrdered = lastOrdered[0]
   foodSession.chosen_channel = lastOrdered.chosen_channel
@@ -742,12 +740,17 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     var textWording = 'just you'
   } else if (foodSession.chosen_channel.name === 'everyone') {
     textWording = 'everyone'
-  } else {
+  } else if (foodSession.chosen_channel.id || foodSession.chosen_channel.name){
     textWording = `<#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}>`
+  } else {
+    textWording = '\`' + foodSession.chosen_location.address_1 + '\`'
   }
   var msg_json = {
     'text': '',
     'attachments': [{
+      'mrkdwn_in': [
+          'text'
+        ],
       'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
       'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
       'callback_id': 'reordering_confirmation',
@@ -759,6 +762,11 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
         'style': 'primary',
         'type': 'button',
         'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
+      }, {
+        'name': 'food.admin.team.members.reorder',
+        'value': mostRecentMerchant,
+        'text': `Edit Members`,
+        'type': 'button'
       }, {
         'name': 'passthrough',
         'text': '< Back',
