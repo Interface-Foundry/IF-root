@@ -135,6 +135,7 @@ function getRoute (message) {
 //
 // Set up route handlers
 //
+
 var handlers = {}
 require('./menu_handlers')(replyChannel, handlers)
 require('./cart_handlers')(replyChannel, handlers)

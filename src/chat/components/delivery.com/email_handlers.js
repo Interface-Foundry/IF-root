@@ -1,3 +1,5 @@
+console.log('and now email_handlers.js')
+
 'use strict'
 var _ = require('lodash')
 
@@ -16,6 +18,8 @@ handlers['food.admin.team.add_order_email'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
+//~~~~~~~~~~//
+
 handlers['food.admin.team.remove_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
@@ -23,6 +27,8 @@ handlers['food.admin.team.remove_order_email'] = function * (message) {
   yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
   yield handlers['food.admin.team.email_members'](message);
 }
+
+//~~~~~~~~~~//
 
 handlers['food.admin.team.delete_email'] = function * (message) {
   console.log('delete email called')
@@ -41,29 +47,35 @@ handlers['food.admin.team.delete_email'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
+//~~~~~~~~~~//
+
 handlers['food.admin.team.email_members'] = function * (message) {
-  console.log('@@@@@', message.source.actions);
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var et = yield db.email_team.findOne({team_id: message.source.team});
 
   var index = parseInt(_.get(message, 'data.value.index')) || 0
+  var inc = 4;
 
   var msg_json = {'attachments': []};
 
   if (et) {
     var addedButton = {
-      "name": 'passthrough',
+      "name": "food.admin.team.remove_order_email",
       "text": "✓ Added",
       "type": "button",
-      "value": "food.admin.team.remove_order_email"
+      "value": {
+        index: index
+      }
     };
 
     var addButton = {
-      "name": 'passthrough',
+      "name": "food.admin.team.add_order_email",
       "text": "○ Add",
       "type": "button",
-      "value": "food.admin.team.add_order_email"
-    }
+      "value": {
+        index: index
+      }
+    };
 
     et.emails.slice(index, index + 4).map(function (e) {
       msg_json.attachments.push({
@@ -74,36 +86,47 @@ handlers['food.admin.team.email_members'] = function * (message) {
         "actions": [
           (foodSession.email_users.indexOf(e) > -1 ? addedButton : addButton),
           {
-            "name": "passthrough",
+            "name": "food.admin.team.delete_email",
             "text": "× Delete",
             "type": "button",
-            "value": "food.admin.team.delete_email"
+            "value": {
+              index: index
+            }
           }
-      ]})
+      ]});
     });
-
-    msg_json.attachments.push({
-      "text": "",
-      "fallback": "fallback",
-      "callback_id": "callback_id",
-      "attachment_type": "default",
-      "actions": [{
-        "name": "food.admin.team.email_members",
-        "text": "< Previous",
-        "type": "button",
-        "value": {
-          index: (index < 4 ? 0 : index - 6)
-        }
-      }, {
-        "name": "food.admin.team.email_members",
-        "text": "Next >",
-        "type": "button",
-        "value": {
-          index: index + 4
-        }
-      }]
-    })
   }
+
+  var prev = {
+    "name": "food.admin.team.email_members",
+    "text": "< Previous",
+    "type": "button",
+    "value": {
+      index: index - inc
+    }
+  };
+
+  var next =  {
+    "name": "food.admin.team.email_members",
+    "text": "Next >",
+    "type": "button",
+    "value": {
+      index: index + inc
+    }
+  };
+
+  var scrollButtons = {
+    "text": "",
+    "fallback": "fallback",
+    "callback_id": "callback_id",
+    "attachment_type": "default",
+    "actions": []
+  };
+
+  if (index >= inc) scrollButtons.actions.push(prev);
+  if (index <= et.emails.length-inc) scrollButtons.actions.push(next);
+
+  msg_json.attachments.push(scrollButtons);
 
   msg_json.attachments.push({
      'mrkdwn_in': [
@@ -114,22 +137,20 @@ handlers['food.admin.team.email_members'] = function * (message) {
      'callback_id': 'food.admin.team.add_email',
     //  'color': '#3AA3E3',
      'attachment_type': 'default',
-     'actions': [
-       {
+     'actions': [{
          'name': 'passthrough',
          'text': 'Add Email',
          'style': 'default',
          'type': 'button',
          'value': 'food.admin.team.add_email'
-       }
-     ]
+       }]
    });
 
    msg_json.attachments.push({
       'mrkdwn_in': [
         'text'
       ],
-      'text': (et ? `*Added:* ${foodSession.email_users.join(', ')}` : ''),
+      'text': (foodSession.email_users.length ? `*Added:* ${foodSession.email_users.join(', ')}` : ''),
       'fallback': 'I am fallback hear me fall back!',
       'callback_id': 'food.admin.team.add_email',
       'color': '#3AA3E3',
@@ -150,15 +171,15 @@ handlers['food.admin.team.email_members'] = function * (message) {
         //   'value': 'food.admin.team.add_email'
         // }
       ]
-    });
+  });
 
-  $replyChannel.sendReplace(message, 'food.admin.team.email_members', {type: message.origin, data: msg_json})
+  $replyChannel.sendReplace(message, 'food.admin.team.email_members', {type: message.origin, data: msg_json});
 }
 
 //~~~~~~~~~~//
 
 handlers['food.admin.team.add_email'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
 
   var msg_text = 'Please type an email address below';
   var confirm = false;
