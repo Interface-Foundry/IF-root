@@ -178,12 +178,12 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     'type': 'button'
   })
 
-  //buttons.actions.push({   
-  //  'name': 'food.admin.display_channels',
-  //  'text': 'Use a #channel',
-  //  'type': 'button',
-  //  'value': 'select_team_members'    
-  //})
+  buttons.actions.push({   
+    'name': 'food.admin.display_channels_reorder',
+    'text': 'Use a #channel',
+    'type': 'button',
+    'value': message.data.value  
+  })
 
   buttons.actions.push({
     name: 'food.admin.restaurant.reordering_confirmation',
