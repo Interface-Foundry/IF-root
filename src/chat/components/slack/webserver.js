@@ -337,8 +337,9 @@ app.post('/slackaction', next(function * (req, res) {
           }).catch(console.log.bind(console));
           break;
         case 'removewarn':
+          let matches = parsedIn.original_message.attachments[index].text.match(/<(.+)\|(.+)>/i); //0 is full string, 1 is url, 2 is title
           parsedIn.original_message.attachments[index] = {
-            text: `Are you sure you want to remove the last *${parsedIn.original_message.attachments[index].text.match(/([a-z]+\s+)+/gi)[0]}*?`,
+            text: `Are you sure you want to remove the last *${matches[2]}*?`,
             actions: cardTemplate.cart_check(index),
             mrkdwn_in: ['text'],
             callback_id: parsedIn.original_message.attachments[index].callback_id

@@ -181,7 +181,7 @@ var settings_menu = module.exports.settings_menu = [{
 var cart_check = module.exports.cart_check = function(id) {
 	return [{
 		name: "removeall",
-		text: 'Remove All',
+		text: 'Remove',
 		style: 'danger',
 		type: 'button',
 		value: id
