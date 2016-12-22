@@ -1,31 +1,12 @@
 var _ = require('lodash');
 var cardTemplate = require('./card_templates');
-var slackUtils = require('./utils.js')
-
-
-var actionObj = [
-    {
-      "name": "AddCart",
-      "text": ":thumbsup: Add to Cart",
-      "style": "primary",
-      "type": "button",
-      "value": "yes",
-      "confirm": {
-        "title": "Are you sure?",
-        "text": "This will approve the request.",
-        "ok_text": "Yes",
-        "dismiss_text": "No"
-      }
-    }
-];
-
 
 function truncate(string) {
-   if (string.length > 80)
-      return string.substring(0,80)+'...';
-   else
-      return string;
-};
+  if (string.length > 80)
+    return string.substring(0, 80) + '...';
+  else
+    return string;
+}
 
 var emojis = {
   1: '*1.*',
@@ -34,14 +15,11 @@ var emojis = {
 };
 
 module.exports = function*(message) {
-
-
     var amazon = JSON.parse(message.amazon);
     var r = amazon[message.focus - 1];
 
     // todo get the right image
     var img = _.get(r, 'LargeImage[0].URL[0]') || _.get(r, 'ImageSets[0].ImageSet[0].LargeImage[0].URL[0]')
-
 
     // make the description text
     var attrs = _.get(r, 'ItemAttributes[0]');
@@ -70,26 +48,6 @@ module.exports = function*(message) {
       _.get(attrs, 'Feature[0]') ? ' ○ ' + attrs.Feature.join('\n ○ ') : false
     ].filter(Boolean).join('\n');
 
-  var original = [{
-      "name": "addcart",
-      "text": "Add to Cart",
-      "style": "primary",
-      "type": "button",
-      "value": message.focus
-    }, {
-      "name": "cheaper",
-      "text": "Find Cheaper",
-      "style": "default",
-      "type": "button",
-      "value": message.focus
-    }, {
-      "name": "similar",
-      "text": "Find Similar",
-      "style": "default",
-      "type": "button",
-      "value": message.focus
-    }]
-
   var reply = [{
     text: emojis[message.focus] + ' ' + `<${r.shortened_url}|*${truncate(_.get(r, 'ItemAttributes[0].Title[0]'))}*>`,
     color: '#45a5f4',
@@ -109,7 +67,5 @@ module.exports = function*(message) {
     fallback: 'buttons',
     actions: cardTemplate.focus_home
   }];
-
-
   return reply
 }

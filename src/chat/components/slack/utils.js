@@ -634,20 +634,20 @@ function * constructCart(message, text) {
       "type": "button",
       "value": "add"
     }, {
-      "name": "removeitem",
-      "text": "—",
-      "style": "default",
-      "type": "button",
-      "value": "remove"
-    }];
+        "name": item.quantity > 1 ? "removeitem" : 'removewarn',
+        "text": "—",
+        "style": "default",
+        "type": "button",
+        "value": "remove"
+      }];
 
     if (item.quantity > 1) {
       buttons.push({
-        name: "removeall",
+        name: "removewarn",
         text: 'Remove All',
         style: 'default',
         type: 'button',
-        value: 'removeall'
+        value: 'removewarn'
       })
     }
     item_message.actions = buttons;
