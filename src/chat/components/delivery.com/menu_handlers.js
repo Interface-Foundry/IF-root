@@ -7,8 +7,6 @@ var Cart = require('./Cart')
 var utils = require('./utils.js')
 var menu_utils = require('./menu_utils.js')
 
-var popoutUrl = 'http://localhost:8001/cafe';
-
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other files

@@ -200,7 +200,7 @@ handlers['food.admin.team.add_email'] = function * (message) {
 
   if (message.text && message.text != "food.admin.team.add_email") {
     var email = validateEmail(message.text);
-    var alreadyInDb = yield db.findOne({email: email, team_id: message.source.team});
+    var alreadyInDb = yield db.email_users.findOne({email: email, team_id: message.source.team});
     if (email && !alreadyInDb) {
       confirm = true;
       console.log('email up here:', email)

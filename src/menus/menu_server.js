@@ -20,7 +20,7 @@ var replyChannel = new UserChannel(queue)
 // --------------------------------------------
 
 var cafeMenu = require('../chat/components/delivery.com/Menu.js');
-var menuURL = 'localhost:8001';
+var menuURL = 'http://6945acc9.ngrok.io'
 
 app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -146,5 +146,5 @@ app.post('/order', function (req, res) {
 
 var port = 8001
 app.listen(port, function () {
-  console.log('Listening on ' + port)
+  console.log('Listening excitedly on ' + port)
 })

@@ -726,20 +726,25 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     ]
   }
 
+  console.log('foodSession.email_users', foodSession.email_users)
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
-    var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, m.id)
 
+    var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
+
+    var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, user.id)
+    
     var mailOptions = {
-      to: `<${m.email}>`,
+      to: `<${m}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
-      html: "<body><p>" +
-      "This is the life and the life will not end</p>" +
-      `<a href=${merch_url}>View Full Menu<a>` +
-      "</body>"
+      html: "<html><body>" +
+      '<a href="' + merch_url + '">View Full Menu</a>' +
+      "</body></html>"
     };
+
+    console.log('MAIL OPTIONS', mailOptions)
 
     logging.info('mailOptions', mailOptions);
     mailer_transport.sendMail(mailOptions, function (err) {

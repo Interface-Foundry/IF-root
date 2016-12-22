@@ -1,3 +1,7 @@
+var rp = require('request-promise');
+
+var popoutUrl = 'http://6945acc9.ngrok.io/cafe';
+
 var utils = {};
 
 utils.getUrl = function (rest_id, team_id, delivery_ObjectId, user_id) {
