@@ -66,7 +66,9 @@
           </div>
         </div>
         <div class="cart-footer">
-          <button class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
+          <button v-if="minimumMet" class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
+          <button class="base-btn" disabled v-if="!minimumMet"> There is a minimum order of ${{merchant.minimum}}</button>
+
         </div>
       </div>
       <div v-else><img src="images/pineapple.png">Your cart is empty</div>
@@ -94,8 +96,8 @@
     </li>
   </script>
   <script type="text/x-template" id="option-set">
-    <div v-if="!isMealAddition">
-      <p> {{option.name}} </p>
+    <div>
+      <p> {{option.name}}</p>              
       <div class="option-body">
         <choice v-on:options="updateOptions" v-for="choice in option.children" :option=option :choice=choice :type="inputType">
       </div>

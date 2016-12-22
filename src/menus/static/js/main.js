@@ -5,12 +5,13 @@ Vue.component('choice', {
   props: ['choice', 'type', 'option'],
   data: function() {
     return {
+      selected: false,
       maxSelection : this.option.max_selection,
-      selected: false
+      minSelection : this.option.min_selection,
     }
   },
   methods: {
-    selectChoice: function() {
+    selectChoice: function(event) {
 
       // toggle selected data for checkbox options
       if (this.type === "checkbox") {
@@ -22,6 +23,31 @@ Vue.component('choice', {
         choiceBus.$emit('radio-selected', this.choice)
       }
 
+      var selectedOption;
+      var selectedKey;
+
+      _.pickBy(this.$parent.$parent.options, function(val, key) {
+        selectedOption = val;
+        selectedKey = key;
+      });
+
+      // find choice's option in SelectedItem's options to calculate when we hit max and min selections
+      if (this.option.id === selectedKey && this.selected) {
+        if (selectedOption.choices.length >= this.maxSelection) {
+          this.selected = false;
+          alert("You can only select " + this.maxSelection + " choices.")
+          return
+        }
+
+        if (selectedOption.choices.length < this.minSelection) {
+          this.$parent.remaining = (this.minSelection - (selectedOption.choices.length + 1))
+        }
+      } else if (this.selected) {
+        this.$parent.remaining = (this.minSelection - 1)
+      }
+
+
+      //add or subtract choice from option's cost
       if (this.choice.price) {
         if (this.$parent.cost) {
           this.selected ? this.$parent.cost += this.choice.price : this.$parent.cost -= this.choice.price
@@ -79,7 +105,6 @@ Vue.component('choice', {
         }
       }
       this.$emit('options', newOptions)
-      //this.$set(this.$parent.$parent, 'options', newOptions)
     }
   },
   created: function() {
@@ -112,15 +137,22 @@ Vue.component('option-set', {
   template: '#option-set',
   data: function() {
     return {
-      isMealAddition: this.option.name === "Meal Additions",
       inputType: this.option.max_selection === 1 ? "radio" : "checkbox",
-      cost: this.option.cost || 0
+      cost: this.option.cost || 0,
+      remaining: this.option.min_selection,
+      minSelection: this.option.min_selection
     }
   },
   methods: {
     updateOptions: function(options) {
+      var children = this.$children;
+      children.forEach(function(child) {
+        if (child.selected) { this.remaining -= 1 }
+      })
       this.$emit('setOptions', options)
     }
+  },
+  computed: {
   }
 })
 
@@ -173,13 +205,11 @@ Vue.component('edit-item', {
       this.$emit('close')
     },
     setOptions: function(options) {
-      console.log(options)
       var that = this;
       var cost = 0;
       if (_.isEmpty(options)) { this.optionsCost = 0; return; }
 
       _.forOwn(options, function(val, key) {
-        console.log(key)
         if (val.option.cost) {
           cost += val.option.cost
         }
@@ -278,6 +308,7 @@ var app = new Vue({
     selectedItem: null,
     editingItem: null,
     cartItems: [],
+    reachedMinimum: false
   },
   methods: {
     setSelectedItem: function(item) {
@@ -319,6 +350,13 @@ var app = new Vue({
     },
     showCart: function() {
      return this.cartItems.length ? true : false
+    },
+    minimumMet: function() {
+      if (this.merchant.minimum) {
+        return this.cartItemsTotal >= this.merchant.minimum ? true : false
+      } else {
+        return true
+      }
     }
   },
   watch: {
