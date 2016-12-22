@@ -261,16 +261,7 @@ module.exports.removeFromCart = function (slack_id, user_id, number, type) {
 
     // first just try to remove one item that this user added
     var matching_items = cart.items.filter(function (i) {
-      return i.ASIN === ASIN_to_remove && i.added_by === user_id
-    })
-
-    if (matching_items.length >= 1) {
-      return module.exports.removeFromCartByItem(matching_items.pop())
-    }
-
-    // if no items matching the user_id were found, an admin can still remove any item
-    matching_items = cart.items.filter(function (i) {
-      return i.ASIN === ASIN_to_remove && userIsAdmin
+      return i.ASIN === ASIN_to_remove && (i.added_by === user_id || userIsAdmin)
     })
     
     return module.exports.removeFromCartByItem(matching_items.pop())
@@ -287,7 +278,6 @@ module.exports.removeAllOfItem = function (slack_id, number) {
   return co(function * () {
     var cart = yield getCart(slack_id)
     console.log('got cart')
-
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
 
@@ -301,20 +291,14 @@ module.exports.removeAllOfItem = function (slack_id, number) {
       kip.err('no asin found')
       return cart
     }
-
-    yield cart.items.filter(i => {
+    var matching_items = cart.items.filter(function(i) {
       return i.ASIN === ASIN_to_remove
-    }).map(i => {
-      i.deleted = true
-      return i.save()
     })
 
-    cart.items = cart.items.filter(i => {
-      return i.ASIN !== ASIN_to_remove
-    })
-
-    yield cart.save()
-    return getCart(slack_id)
+    while (matching_items.length > 1) {
+      yield module.exports.removeFromCartByItem(matching_items.pop())
+    }
+    return module.exports.removeFromCartByItem(matching_items.pop())
   })
 }
 
@@ -396,7 +380,6 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
     if (!cart.amazon) {
       kip.debug('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
-      kip.debug(JSON.stringify(amazonCart, null, 2))
       cart.amazon = amazonCart
       cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
       yield cart.save()
@@ -459,7 +442,6 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
       }
       // no error adding item to cart
       else {
-        kip.debug(JSON.stringify(amazonCart, null, 2))
         cart.amazon = amazonCart
         cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
         yield cart.save()

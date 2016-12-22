@@ -288,7 +288,6 @@ app.post('/slackaction', next(function * (req, res) {
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
 
       }
-
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       });
@@ -314,8 +313,12 @@ app.post('/slackaction', next(function * (req, res) {
       })
     } else {
       //actions that do not require processing in reply_logic, skill all dat
-      let index = -1,
-        cart;
+      let cart, index;
+      parsedIn.original_message.attachments.forEach((ele, id) => {
+        if (ele.callback_id === parsedIn.callback_id) {
+          index = id;
+        }
+      });
       switch (action.name) {
         case 'additem':
           parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
@@ -325,25 +328,15 @@ app.post('/slackaction', next(function * (req, res) {
             cart = yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item);
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
-          break
+          break;
         case 'removeitem':
           parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
           co(function*() {
-            parsedIn.original_message.attachments.forEach((ele, id) => {
-              if (ele.callback_id === parsedIn.callback_id) {
-                index = id;
-              }
-            });
             cart = yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index, 'team'); //'team' assumes this is a slack command. need a way to tell
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
-          break
+          break;
         case 'removewarn':
-          parsedIn.original_message.attachments.forEach((ele, id) => {
-            if (ele.callback_id === parsedIn.callback_id) {
-              index = id;
-            }
-          });
           parsedIn.original_message.attachments[index] = {
             text: `Are you sure you want to remove the last *${parsedIn.original_message.attachments[index].text.match(/([a-z]+\s+)+/gi)[0]}*?`,
             actions: cardTemplate.cart_check(index),
@@ -359,18 +352,14 @@ app.post('/slackaction', next(function * (req, res) {
           break;
         case 'removeall':
           // reduces the quantity right way, but for speed we return a hacked message right away
-          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
           co(function*() {
-            parsedIn.original_message.attachments.forEach((ele, id) => {
-              if (ele.callback_id === parsedIn.callback_id) {
-                index = id;
-              }
-            });
-
-            cart = yield kipcart.removeAllOfItem(parsedIn.team.id, action.value)
+            cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index);
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
-          break
+
+          parsedIn.original_message.attachments.splice[index, 1]; //just take it off the list
+          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
+          break;
       }
       var stringOrig = JSON.stringify(parsedIn.original_message)
       let map = {
@@ -435,6 +424,7 @@ function* updateCartMsg(cart, parsedIn) {
 
   let attachments = parsedIn.original_message.attachments.reduce((all, a) => {
   	let item = itemData[a.callback_id];
+
     if (a.callback_id && item) {
       let userString;
       a.actions = (item.showDetail || showEverything) ? [{
@@ -448,7 +438,7 @@ function* updateCartMsg(cart, parsedIn) {
         'text': '—',
         'style': 'default',
         'type': 'button',
-        'value': 'remove'
+        'value': item.quantity > 1 ? "removeitem" : 'removewarn',
       }] : [{
         'name': 'additem',
         'text': '+ Add',
@@ -459,11 +449,11 @@ function* updateCartMsg(cart, parsedIn) {
 
       if (showEverything && item.quantity > 1) {
         a.actions.push({
-          name: "removeall",
+          name: "removewarn",
           text: 'Remove All',
           style: 'default',
           type: 'button',
-          value: 'removeall'
+          value: 'removewarn'
         });
       }
       userString = item.added_by.map(function(u) {
@@ -482,7 +472,9 @@ function* updateCartMsg(cart, parsedIn) {
         itemNum++;
       }
     } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-      a.text = `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`;
+      a.text = (cart.items.length > 0) ? 
+        `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`:
+        'Looks like your cart is empty!'
       all.push(a);
     } else if (a.text && !a.text.includes('Quantity:')) {
       all.push(a);
@@ -502,13 +494,11 @@ function* updateCartMsg(cart, parsedIn) {
     }]
   })
   parsedIn.original_message.attachments = attachments;
-  if (parsedIn.original_message) {
-    request({
-      method: 'POST',
-      uri: parsedIn.response_url,
-      body: JSON.stringify(parsedIn.original_message)
-    });
-  }
+  request({
+    method: 'POST',
+    uri: parsedIn.response_url,
+    body: JSON.stringify(parsedIn.original_message)
+  });
 }
 
 
