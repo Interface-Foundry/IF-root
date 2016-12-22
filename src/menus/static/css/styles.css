@@ -58,6 +58,16 @@ button.base-btn:hover {
   background-color: #3a2b71; 
 }
 
+button.base-btn:disabled {
+  background-color: #B9B9B9;
+  cursor: not-allowed;
+}
+
+button.base-btn:disabled:hover {
+  background-color: #B9B9B9;
+}
+
+
 .container {
   padding-left: 20px;
   padding-right: 20px;
