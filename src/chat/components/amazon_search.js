@@ -163,7 +163,6 @@ var search = function * (params, origin) {
     }
   }
   var originalParams = Object.assign({}, amazonParams)
-
   if (params.color && params.color.name) {
     amazonParams.Keywords = params.color.name
   }
@@ -328,6 +327,7 @@ var search = function * (params, origin) {
   if (results && results.length > 1) {
     kip.debug(`Found ${results.length} results (before paging)`.green)
   }else {
+    kip.debug(`Found ${results.length} results (before paging)`.red)
     return null
   }
   results = results.slice(skip, skip + 3)

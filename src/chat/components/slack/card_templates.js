@@ -214,19 +214,19 @@ var focus_default = module.exports.focus_default = function(message) {
     "text": "Add to Cart",
     "style": "primary",
     "type": "button",
-    "value": message.focus - 1
+    "value": message.focus
   }, {
     "name": "cheaper",
     "text": "Find Cheaper",
     "style": "default",
     "type": "button",
-    "value": message.focus - 1
+    "value": message.focus
   }, {
     "name": "similar",
     "text": "Find Similar",
     "style": "default",
     "type": "button",
-    "value": message.focus - 1
+    "value": message.focus
   }]
 }
 
