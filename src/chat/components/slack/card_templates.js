@@ -351,7 +351,7 @@ var slack_onboard_start = module.exports.slack_onboard_start = [{
   value: "supplies"
 }, {
   name: "onboard.start.remind",
-  text: "Remind Me Later",
+  text: "◷ Remind Me Later",
   style: "default",
   type: "button",
   value: "remind"
@@ -513,7 +513,7 @@ var slack_onboard_member = module.exports.slack_onboard_member = [{
   value: "step_1"
 }, {
   name: "member_onboard.start.reminder",
-  text: "Remind me later",
+  text: "◷ Remind Me Later",
   style: "default",
   type: "button",
   value: "reminder"
