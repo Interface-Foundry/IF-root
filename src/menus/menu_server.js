@@ -35,7 +35,7 @@ app.use('/test', express.static('test'));
 app.use('/ang', express.static('ang'));
 
 var MenuSession = db.Menu_session;
-var Menu = db.Menu;
+var Menu = db.Menus;
 var Merchants = db.Merchants;
 var Delivery = db.Delivery;
 var Messages = db.Messages;
