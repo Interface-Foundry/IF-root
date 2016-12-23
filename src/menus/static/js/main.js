@@ -163,7 +163,6 @@ Vue.component('option-set', {
     else {
       this.inputType = "checkbox"
     }
-
   }
 })
 
