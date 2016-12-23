@@ -256,7 +256,7 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
     }, {
       'text': `< Back`,
       'name': 'food.admin.restaurant.reordering_confirmation',
-      'value': 'food.admin.restaurant.reordering_confirmation',
+      'value': message.data.value,
       'type': 'button'
     }]
   })
