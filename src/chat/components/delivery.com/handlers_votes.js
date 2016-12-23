@@ -739,13 +739,24 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       to: `<${m}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
-      html: "<html><body>" +
-      '<a href="' + merch_url + '">View Full Menu</a><table>' +
-      '<tr><td>FoodOne</td><td>FoodTwo</td><td>FoodThree</td></tr>' +
-      '<tr><td>FoodFour</td><td>FoodFive</td><td>FoodSix</td></tr>' +
-      '<tr><td>FoodSeven</td><td>FoodEight</td><td>FoodNine</td></tr>' +
-      '</table></body></html>'
+      html: '<html><body><p><a href="' + merch_url + '">View Full Menu</a></p><table border="1">'
     };
+
+    var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
+    // console.log(sortedMenu)
+    var quickpicks = sortedMenu.slice(0, 9);
+
+    for (var i = 0 ; i < 3; i++) {
+      mailOptions.html += '<tr>';
+      for (var j = 0; j < 3; j++) {
+        mailOptions.html += `<td><table><tr><td style="font-weight:bold;">${quickpicks[3*i+j].name}</td></tr>` +
+        `<tr><td>${quickpicks[3*i+j].description}</td><td>$${parseFloat(quickpicks[3*i+j].price)}</td></tr>`;
+        mailOptions.html += '</table></td>';
+      }
+      mailOptions.html += '</tr>';
+    }
+
+    mailOptions.html += '</table></body></html>';
 
     console.log('MAIL OPTIONS', mailOptions)
 
