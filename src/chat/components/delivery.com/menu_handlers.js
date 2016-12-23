@@ -50,15 +50,15 @@ handlers['food.menu.quickpicks'] = function * (message) {
   }
   matchingItems = matchingItems.map(i => i.id)
 
-  var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
-    .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
-    .reduce((allIds, order) => {
-      allIds.push(order.deliveryItem.id)
-      return allIds
-    }, [])
+  // var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
+  //   .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
+  //   .reduce((allIds, order) => {
+  //     allIds.push(order.deliveryItem.id)
+  //     return allIds
+  //   }, [])
 
-  recommendedItemIds = _.keys(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {}))
-  recommendedItemIds = recommendedItemIds.map(i => Number(i))
+  // recommendedItemIds = _.keys(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {}))
+  // recommendedItemIds = recommendedItemIds.map(i => Number(i))
   //
   // adding the thing where you show 3 at a time
   // nned to show a few different kinds of itesm.
@@ -66,41 +66,43 @@ handlers['food.menu.quickpicks'] = function * (message) {
   // Items that are in the recommended items array should appear next, say "Recommended"
   // THen the rest of the menu in any order i think
   //
-  var sortOrder = {
-    searched: 6,
-    orderedBefore: 5,
-    recommended: 4,
-    none: 3,
-    indifferent: 2,
-    last: 1
-  }
+  // var sortOrder = {
+  //   searched: 6,
+  //   orderedBefore: 5,
+  //   recommended: 4,
+  //   none: 3,
+  //   indifferent: 2,
+  //   last: 1
+  // }
 
   /*
   not really any good way to order items atm so just going to throw
   everything in last til have some actual way to order things w/ sortOrder
   */
-  var lastItems = ['beverage', 'beverages', 'desserts', 'dessert', 'cold appetizer', 'hot appetizer', 'appetizers', 'appetizers from the kitchen', 'soup', 'soups', 'drinks', 'salads', 'side salads', 'side menu', 'bagged snacks', 'snacks']
+  // var lastItems = ['beverage', 'beverages', 'desserts', 'dessert', 'cold appetizer', 'hot appetizer', 'appetizers', 'appetizers from the kitchen', 'soup', 'soups', 'drinks', 'salads', 'side salads', 'side menu', 'bagged snacks', 'snacks']
 
   var menu = Menu(foodSession.menu)
-  var sortedMenu = menu.allItems().map(i => {
-    // inject the sort order stuff
-    if (matchingItems.includes(i.id)) {
-      i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.id })
-      // i.infoLine = 'Returned from search term'
-    } else if (previouslyOrderedItemIds.includes(i.id)) {
-      i.sortOrder = sortOrder.orderedBefore
-      i.infoLine = 'You ordered this before'
-    } else if (recommendedItemIds.includes(Number(i.unique_id))) {
-      i.sortOrder = sortOrder.recommended
-      i.infoLine = 'Popular Item'
-    } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
-      i.sortOrder = sortOrder.last
-    } else {
-      i.sortOrder = sortOrder.none
-    }
+  // var sortedMenu = menu.allItems().map(i => {
+  //   // inject the sort order stuff
+  //   if (matchingItems.includes(i.id)) {
+  //     i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.id })
+  //     // i.infoLine = 'Returned from search term'
+  //   } else if (previouslyOrderedItemIds.includes(i.id)) {
+  //     i.sortOrder = sortOrder.orderedBefore
+  //     i.infoLine = 'You ordered this before'
+  //   } else if (recommendedItemIds.includes(Number(i.unique_id))) {
+  //     i.sortOrder = sortOrder.recommended
+  //     i.infoLine = 'Popular Item'
+  //   } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
+  //     i.sortOrder = sortOrder.last
+  //   } else {
+  //     i.sortOrder = sortOrder.none
+  //   }
+  //
+  //   return i
+  // }).sort((a, b) => b.sortOrder - a.sortOrder)
 
-    return i
-  }).sort((a, b) => b.sortOrder - a.sortOrder)
+  var sortedMenu = menu_utils.sortMenu(foodSession, user, matchingItems);
 
   var menuItems = sortedMenu.slice(index, index + 3).map(i => {
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)

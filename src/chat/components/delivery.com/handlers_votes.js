@@ -734,14 +734,17 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
 
     var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, user.id)
-    
+
     var mailOptions = {
       to: `<${m}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
       html: "<html><body>" +
-      '<a href="' + merch_url + '">View Full Menu</a>' +
-      "</body></html>"
+      '<a href="' + merch_url + '">View Full Menu</a><table>' +
+      '<tr><td>FoodOne</td><td>FoodTwo</td><td>FoodThree</td></tr>' +
+      '<tr><td>FoodFour</td><td>FoodFive</td><td>FoodSix</td></tr>' +
+      '<tr><td>FoodSeven</td><td>FoodEight</td><td>FoodNine</td></tr>' +
+      '</table></body></html>'
     };
 
     console.log('MAIL OPTIONS', mailOptions)
