@@ -32,7 +32,7 @@ app.use('/test', express.static('test'));
 app.use('/ang', express.static('ang'));
 
 var MenuSession = db.Menu_session;
-var Menu = db.Menu;
+var Menu = db.Menus;
 var Merchants = db.Merchants;
 var Delivery = db.Delivery;
 var Messages = db.Messages;
@@ -50,7 +50,6 @@ app.post('/cafe', (req, res) => co(function * () {
 
   console.log('new menusession created')
 
-  var selected_items = req.body.selected_items;
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
