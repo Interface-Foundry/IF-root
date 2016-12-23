@@ -23,7 +23,6 @@ String.prototype.toObjectId = function () {
 // Show the user their personal cart
 //
 handlers['food.cart.personal'] = function * (message, replace) {
-  console.log('message.user_id', message.user_id)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   var menu = Menu(foodSession.menu)
@@ -213,7 +212,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     }]
   }
 
-  if (slackers) {
+  if (slackers && message.source.user == foodSession.convo_initiater.id) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
@@ -241,29 +240,36 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       type: msgToReplace.origin,
       data: dashboard
     })
-
-  } else if (foodSession.convo_initiater.id === message.source.user) {
-    // admin is done
-    // create the dashboard for the first time for the admin
-    var admin = foodSession.convo_initiater
-    var msg = {
-      mode: 'food',
-      action: 'food.admin.waiting_for_orders',
-      thread_id: admin.dm,
-      origin: message.origin,
-      source: {
-        team: foodSession.team_id,
-        user: admin.id,
-        channel: admin.dm
+  } else {
+    // create the dashboard for the first time
+    foodSession.team_members.map(m => {
+      if(foodSession.confirmed_orders.includes(m.id)){
+        var admin = foodSession.convo_initiater
+        var user = message.source.user
+        var channel = message.source.channel
+        var msg = {
+          mode: 'food',
+          action: 'food.admin.waiting_for_orders',
+          thread_id: m.dm,
+          origin: message.origin,
+          source: {
+            team: foodSession.team_id,
+            user: m.id,
+            channel: m.dm
+          }
+        }
+        var sentMessage = $replyChannel.sendReplace(msg, 'food.admin.waiting_for_orders', {
+          type: msg.origin,
+          data: dashboard
+        })
+        sentMessage.then(function(result) {
+          if(result.source.user === admin.id){
+            foodSession.tracking.confirmed_orders_msg = result._id
+            foodSession.save()
+          }
+        })
       }
-    }
-
-    var sentMessage = yield $replyChannel.send(msg, 'food.admin.waiting_for_orders', {
-      type: msg.origin,
-      data: dashboard
     })
-    foodSession.tracking.confirmed_orders_msg = sentMessage._id
-    yield foodSession.save()
   }
 
   //
@@ -271,7 +277,11 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   //
   if (foodSession.confirmed_orders.length >= foodSession.team_members.length) {
     // take admin to order confirm, not sure if i need to look this up again but doing it for assurance
+
     var adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
+    if(!adminMsg){
+      adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})  //there should be a better way to handle the race condition with the above foodSession.save()
+    }
     yield handlers['food.admin.order.confirm'](adminMsg, true)
   } else {
     logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSession.team_members, 'id'), foodSession.confirmed_orders))
