@@ -1,7 +1,7 @@
 import sys
 import json
 import pytest
-sys.path.append('../picstitch/')
+sys.path.append('src/image_processing/')
 try:
     import server
 except ImportError:
