@@ -6,6 +6,7 @@ services:
 stages:
   - test
   - build
+  - deploy
 
 cache:
   paths:
@@ -21,7 +22,7 @@ test_node:
     - NODE_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/parser/parser.test.js
 
 test_python:
-  image: python:3.5
+  image: python:3
   stage: test
   script:
     - python3 --version
@@ -34,5 +35,11 @@ docker-build-push:
   stage: build
   script:
     - docker login -u gcloud-docker@kip-styles.iam.gserviceaccount.com -u _json_key -p "$(cat src/k8s/other/gcloud.json)" https://gcr.io
-    - docker build -t gcr.io/kip-styles/picstitch:gitlab2 -f Dockerfiles/picstitch.Dockerfile .
-    - docker push gcr.io/kip-styles/picstitch:gitlab2
+    - docker build -t gcr.io/kip-styles/picstitch:$CI_BUILDREF -f Dockerfiles/picstitch.Dockerfile .
+    - docker push gcr.io/kip-styles/picstitch:$CI_BUILDREF
+
+k8s:
+  stage: deploy
+  script:
+    - sed -i "s/IMAGE_TAG/$CI_BUILDREF/" src/k8s/canary/canary.picstitch.yaml
+    - echo "okay we did stuff"
