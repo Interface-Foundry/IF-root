@@ -32,6 +32,7 @@ test_python:
     - pytest tests/picstitch/
 
 docker-build-push:
+  image: docker:latest
   stage: build
   script:
     - docker login -u gcloud-docker@kip-styles.iam.gserviceaccount.com -u _json_key -p "$(cat src/k8s/other/gcloud.json)" https://gcr.io
@@ -39,6 +40,7 @@ docker-build-push:
     - docker push gcr.io/kip-styles/picstitch:$CI_BUILDREF
 
 k8s:
+  image: docker:latest
   stage: deploy
   script:
     - sed -i "s/IMAGE_TAG/$CI_BUILDREF/" src/k8s/canary/canary.picstitch.yaml
