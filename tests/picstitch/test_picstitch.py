@@ -6,7 +6,7 @@ try:
     import server
 except ImportError:
     # not in docker container
-    sys.path.append('../../src/image_processing/')
+    sys.path.append('/builds/kipthis/kip-mirror/src/image_processing/')
 
 # import pytest
 # import requests
