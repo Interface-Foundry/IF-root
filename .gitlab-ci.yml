@@ -5,8 +5,8 @@ services:
 
 stages:
   - test
-  - build
-  - deploy
+  # - build
+  # - deploy
 
 cache:
   paths:
@@ -31,18 +31,18 @@ test_python:
     - pip install -r src/image_processing/requirements.txt
     - pytest tests/picstitch/
 
-docker-build-push:
-  image: docker:latest
-  stage: build
-  script:
-    - echo $CI_BUILD_REF_SLUG
-    - docker login -u gcloud-docker@kip-styles.iam.gserviceaccount.com -u _json_key -p "$(cat src/k8s/other/gcloud.json)" https://gcr.io
-    - docker build -t gcr.io/kip-styles/picstitch:$CI_BUILD_REF_SLUG -f Dockerfiles/picstitch.Dockerfile .
-    - docker push gcr.io/kip-styles/picstitch:$CI_BUILD_REF_SLUG
+# docker-build-push:
+#   image: docker:latest
+#   stage: build
+#   script:
+#     - echo $CI_BUILD_REF
+#     - docker login -u gcloud-docker@kip-styles.iam.gserviceaccount.com -u _json_key -p "$(cat src/k8s/other/gcloud.json)" https://gcr.io
+#     - docker build -t gcr.io/kip-styles/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
+#     - docker push gcr.io/kip-styles/picstitch:$CI_BUILD_REF
 
-k8s:
-  image: docker:latest
-  stage: deploy
-  script:
-    - sed -i "s/IMAGE_TAG/$CI_BUILD_REF_SLUG/" src/k8s/canary/canary.picstitch.yaml
-    - echo "okay we did stuff"
+# k8s:
+#   image: docker:latest
+#   stage: deploy
+#   script:
+#     - sed -i "s/IMAGE_TAG/$CI_BUILD_REF/" src/k8s/canary/canary.picstitch.yaml
+#     - echo "okay we did stuff"
