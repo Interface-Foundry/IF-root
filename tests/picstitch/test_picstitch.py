@@ -4,8 +4,6 @@ sys.path.append('src/image_processing/')
 sys.path.append('/picstitch/')
 sys.path.append('/builds/kipthis/kip-mirror/src/image_processing/')
 
-import server
-
 # import pytest
 # import requests
 
@@ -32,9 +30,13 @@ facebook_data = [{
 
 
 def test_server():
+    import server
     test_client = server.application.test_client()
     response = test_client.post('/',
                                 data=json.dumps(facebook_data),
                                 content_type='application/json')
-
     assert response.status_code == 200
+
+
+def test_failing():
+    assert 200 == 201
