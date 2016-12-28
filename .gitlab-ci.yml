@@ -28,7 +28,7 @@ test_python:
     - python3 --version
     - ls
     - pwd
-    - pip install -r src/image_processing/requirements.txt
+    - pip install -q -r src/image_processing/requirements.txt
     - pytest tests/picstitch/
 
 # docker-build-push:
