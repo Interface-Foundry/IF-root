@@ -5,7 +5,7 @@ services:
 
 stages:
   - test
-  # - build
+  - build
   # - deploy
 
 cache:
@@ -31,14 +31,14 @@ test_python:
     - pip install -q -r src/image_processing/requirements.txt
     - pytest tests/picstitch/
 
-# docker-build-push:
-#   image: docker:latest
-#   stage: build
-#   script:
-#     - echo $CI_BUILD_REF
-#     - docker login -u gcloud-docker@kip-styles.iam.gserviceaccount.com -u _json_key -p "$(cat src/k8s/other/gcloud.json)" https://gcr.io
-#     - docker build -t gcr.io/kip-styles/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
-#     - docker push gcr.io/kip-styles/picstitch:$CI_BUILD_REF
+docker-build-push:
+  image: docker:latest
+  stage: build
+  script:
+    - echo $CI_BUILD_REF
+    - docker login -u gcloud-docker@kip-styles.iam.gserviceaccount.com -u _json_key -p "$(cat src/k8s/other/gcloud.json)" https://gcr.io
+    # - docker build -t gcr.io/kip-styles/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
+    # - docker push gcr.io/kip-styles/picstitch:$CI_BUILD_REF
 
 # k8s:
 #   image: docker:latest
