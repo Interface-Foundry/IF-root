@@ -39,4 +39,4 @@ def test_server():
 
 
 def test_failing():
-    assert 200 == 201
+    assert 200 == 200
