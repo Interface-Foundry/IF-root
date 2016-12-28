@@ -1,12 +1,10 @@
 import sys
 import json
-import pytest
 sys.path.append('src/image_processing/')
-try:
-    import server
-except ImportError:
-    # not in docker container
-    sys.path.append('/builds/kipthis/kip-mirror/src/image_processing/')
+sys.path.append('/picstitch/')
+sys.path.append('/builds/kipthis/kip-mirror/src/image_processing/')
+
+import server
 
 # import pytest
 # import requests
