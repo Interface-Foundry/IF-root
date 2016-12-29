@@ -1,9 +1,11 @@
 var rp = require('request-promise');
 var _ = require('lodash');
 
+var config = require('../../../config')
 var Menu = require('./Menu')
 
-var popoutUrl = 'http://e0616f78.ngrok.ioo/cafe';
+// var popoutUrl = 'http://e0616f78.ngrok.io/cafe';
+var popoutUrl = config.menuURL + '/cafe';
 
 var utils = {};
 
@@ -53,7 +55,9 @@ utils.sortMenu = function (foodSession, user, matchingItems) {
   return sortedMenu
 }
 
-utils.getUrl = function (rest_id, team_id, delivery_ObjectId, user_id) {
+utils.getUrl = function (rest_id, team_id, delivery_ObjectId, user_id, selected_items) {
+  console.log('getUrl called on', popoutUrl);
+  if (!selected_items) selected_items = [];
   return rp({
     url: popoutUrl,
     method: 'POST',
@@ -61,7 +65,8 @@ utils.getUrl = function (rest_id, team_id, delivery_ObjectId, user_id) {
       rest_id: rest_id,
       team_id: team_id,
       delivery_ObjectId: delivery_ObjectId,
-      user_id: user_id
+      user_id: user_id,
+      selected_items: selected_items
     }
   })
   .then(function (res) {

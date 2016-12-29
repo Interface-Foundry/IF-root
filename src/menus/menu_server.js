@@ -1,5 +1,6 @@
 require('../kip');
 require('colors');
+var config = require('../config');
 
 //loads basic server structure
 var bodyParser = require('body-parser');
@@ -20,7 +21,10 @@ var replyChannel = new UserChannel(queue)
 // --------------------------------------------
 
 var cafeMenu = require('../chat/components/delivery.com/Menu.js');
-var menuURL = 'http://6945acc9.ngrok.io'
+// var menuURL = 'http://e0616f78.ngrok.io'
+var menuURL = config.menuURL
+
+console.log('this is a speakerbox', menuURL)
 
 app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -50,6 +54,7 @@ app.post('/cafe', (req, res) => co(function * () {
 
   console.log('new menusession created')
 
+  var selected_items = req.body.selected_items;
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
@@ -62,6 +67,7 @@ app.post('/cafe', (req, res) => co(function * () {
   var merchant = yield Merchants.findOne({id: rest_id});
   ms.merchant.name = merchant.data.summary.name;
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
+  ms.selected_items = selected_items;
   console.log('ms', ms);
 
   yield ms.save();

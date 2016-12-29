@@ -133,9 +133,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
 
   //this is generating a different menu for each user, right?
   var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, message.user_id)
-
   var msg_json = {
-    'text': `${foodSession.chosen_restaurant.name} - <http://${merch_url}|View Full Menu>`,
+    'text': `${foodSession.chosen_restaurant.name} - <${merch_url}|View Full Menu>`,
     'attachments': [
       {
         'mrkdwn_in': [

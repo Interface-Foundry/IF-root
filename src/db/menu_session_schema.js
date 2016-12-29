@@ -20,7 +20,8 @@ var menuSessionSchema = mongoose.Schema({
   ts: {
     type: Date,
     default: Date.now
-  }
+  },
+  selected_items: []
 })
 
 module.exports = mongoose.model('MenuSession', menuSessionSchema)
