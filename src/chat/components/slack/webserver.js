@@ -105,6 +105,22 @@ app.post('/slackaction', next(function * (req, res) {
   var message;
   var parsedIn = JSON.parse(req.body.payload);
 
+  // First reply to slack, then process the request
+  if (parsedIn.original_message) {
+    // var stringOrig = JSON.stringify(parsedIn.original_message)
+    // var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
+    // stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+    // console.log("actually sending message back for real")
+    if (!buttonData && simple_command !== 'channel_btn') {
+      res.status(200)
+      res.end()
+    }
+  } else {
+    console.error('slack buttons broke, need a response_url')
+    res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
+    return
+  }
+
     var action = parsedIn.actions[0];
     kip.debug('incoming action', action);
     kip.debug(action.name.cyan, action.value.yellow);
@@ -134,20 +150,6 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.team = message.source.team.id;
       message.source.user = message.source.user.id;
       message.source.channel = message.source.channel.id;
-
-        // First reply to slack, then process the request
-  if (parsedIn.original_message && (!buttonData || simple_command !== 'channel_btn')) {
-    // var stringOrig = JSON.stringify(parsedIn.original_message)
-    // var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
-    // stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
-    // console.log("actually sending message back for real")
-    res.status(200)
-    res.end()
-  } else {
-    console.error('slack buttons broke, need a response_url')
-    res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
-    return
-  }
 
     if (simple_command == 'cafe_btn') {
           message.mode = 'food'
