@@ -39,13 +39,14 @@ docker-build-push:
   stage: build
   script:
     - echo $CI_BUILD_REF
-    - docker login -u gcloud-docker@kip-styles.iam.gserviceaccount.com -u _json_key -p "$(cat src/k8s/other/gcloud.json)" https://gcr.io
-    # - docker build -t gcr.io/kip-styles/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
-    # - docker push gcr.io/kip-styles/picstitch:$CI_BUILD_REF
+    - docker build -t gcr.io/kip-styles/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
+    - docker tag gcr.io/kip-styles/picstitch:$CI_BUILD_REF gcr.io/kip-styles/picstitch:latest
+    - docker push gcr.io/kip-styles/picstitch:$CI_BUILD_REF
+    - docker push gcr.io/kip-styles/picstitch:latest
 
-# k8s:
-#   image: docker:latest
-#   stage: deploy
-#   script:
-#     - sed -i "s/IMAGE_TAG/$CI_BUILD_REF/" src/k8s/canary/canary.picstitch.yaml
-#     - echo "okay we did stuff"
+k8s:
+  stage: deploy
+  script:
+    - sed -i "s/IMAGE_TAG/$CI_BUILD_REF/" src/k8s/canary/canary.picstitch.yaml
+    - kubectl config view
+    - kubectl --namespace=canary apply -f src/k8s/canary/canary.picstitch.yaml
