@@ -60,6 +60,9 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     } else {
       foodSession.team_members = prevFoodSession.team_members
     }
+    if (prevFoodSession.email_members) {
+      foodSession.email_members = prevFoodSession.email_members;
+    }
     foodSession.chosen_channel = {
       'id': prevFoodSession.chosen_channel.id,
       'name': prevFoodSession.chosen_channel.name,
