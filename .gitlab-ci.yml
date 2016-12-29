@@ -1,8 +1,8 @@
 image: docker:latest
 services:
   - docker:dind
-
 variables:
+  GIT_STRATEGY: fetch
   DOCKER_DRIVER: overlay
   DOCKER_HOST: tcp://localhost:2375
 
