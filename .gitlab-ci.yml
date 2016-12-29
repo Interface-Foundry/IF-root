@@ -1,21 +1,56 @@
-image: google/cloud-sdk
-
+image: docker:latest
 services:
   - docker:dind
+variables:
+  GIT_STRATEGY: fetch
+  DOCKER_DRIVER: overlay
+  DOCKER_HOST: tcp://localhost:2375
 
 stages:
   - test
+  - build
+  - deploy
 
 cache:
   paths:
     - node_modules/
 
-before_script:
-  - gcloud auth activate-service-account --key-file=src/k8s/other/gcloud.json
-  - npm install
-  - npm install --only=dev
-
-test:
+test_node:
+  image: node:6
   stage: test
   script:
+    - npm install
+    - npm install --only=dev
+    - npm install -g mocha
     - NODE_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/parser/parser.test.js
+
+test_python:
+  image: python:3
+  stage: test
+  script:
+    - python3 --version
+    - ls
+    - pwd
+    - pip install -q -r src/image_processing/requirements.txt
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
+    - pytest tests/picstitch/
+
+docker-build-push:
+  stage: build
+  script:
+    - echo $CI_BUILD_REF
+    - docker build -t gcr.io/kip-styles/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
+    - docker tag gcr.io/kip-styles/picstitch:$CI_BUILD_REF gcr.io/kip-styles/picstitch:latest
+    - docker push gcr.io/kip-styles/picstitch:$CI_BUILD_REF
+    - docker push gcr.io/kip-styles/picstitch:latest
+
+k8s:
+  image: google/cloud-sdk
+  stage: deploy
+  script:
+    - sed -i "s/IMAGE_TAG/$CI_BUILD_REF/" src/k8s/canary/canary.picstitch.yaml
+    - gcloud container clusters get-credentials kip
+    - kubectl config view
+    - kubectl --namespace=canary apply -f src/k8s/canary/canary.picstitch.yaml

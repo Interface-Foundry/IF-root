@@ -443,24 +443,30 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   //   })
   // }
 
-  if (slackers.length > 0) {
-    dashboard.attachments.push({
-      color: '#49d63a',
-      mrkdwn_in: ['text'],
-      text: `*Waiting for votes from:* \n${slackers}`,
-      actions: [{
-        name: 'food.admin.restaurant.pick.list',
-        text: 'Finish Voting Early',
-        style: 'default',
-        type: 'button',
-        value: 'food.admin.restaurant.pick.list'
-      }]
-    })
+  if (slackers.length > 0 ) {
+    if(message.source.user == foodSession.convo_initiater.id){
+      dashboard.attachments.push({
+        color: '#49d63a',
+        mrkdwn_in: ['text'],
+        text: `*Waiting for votes from:* \n${slackers}`,
+        actions: [{
+          name: 'food.admin.restaurant.pick.list',
+          text: 'Finish Voting Early',
+          style: 'default',
+          type: 'button',
+          value: 'food.admin.restaurant.pick.list'
+        }]
+      })
+    } else {
+      dashboard.attachments.push({
+        color: '#49d63a',
+        mrkdwn_in: ['text'],
+        text: `*Waiting for votes from:* \n${slackers}`,
+      })
+    }
   }
 
-
-
-  if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
+if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
     // replace admins message
     var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_votes_msg})
     $replyChannel.sendReplace(msgToReplace, 'food.admin.dashboard.cuisine', {
@@ -469,32 +475,41 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     })
   } else {
     // admin is confirming, replace their message
-    var admin = foodSession.convo_initiater
-    var message = {
-      mode: 'food',
-      action: 'admin.restaurant.pick',
-      thread_id: admin.dm,
-      origin: message.origin,
-      source: {
-        team: foodSession.team_id,
-        user: admin.id,
-        channel: admin.dm
+    foodSession.team_members.map(m => {
+      if(foodSession.votes.map(v => v.user).includes(m.id)){
+        var admin = foodSession.convo_initiater
+        var user = message.source.user
+        var channel = message.source.channel
+        var msg = {
+          mode: 'food',
+          action: 'admin.restaurant.pick',
+          thread_id: m.dm,
+          origin: message.origin,
+          source: {
+            team: foodSession.team_id,
+            user: m.id,
+            channel: m.dm
+          }
+         }
+         // if the admin has not yet voted, make sure to set the mode.action to the votable route
+        if (foodSession.votes.map(u => u.user).includes(foodSession.convo_initiater.id)) {
+          var route = 'food.admin.dashboard.cuisine'
+        } else {
+          route = 'food.admin.restaurant.pick'
+        }
+
+        var sentMessage = $replyChannel.send(msg, route, {
+          type: msg.origin,
+          data: dashboard
+        })
+        sentMessage.then(function(result) {
+          if(result.source.user === admin.id){
+            foodSession.tracking.confirmed_votes_msg = sentMessage._id
+            foodSession.save()
+          }
+        })
       }
-    }
-
-    // if the admin has not yet voted, make sure to set the mode.action to the votable route
-    if (foodSession.votes.map(u => u.user).includes(foodSession.convo_initiater.id)) {
-      var route = 'food.admin.dashboard.cuisine'
-    } else {
-      route = 'food.admin.restaurant.pick'
-    }
-
-    var sentMessage = yield $replyChannel.send(message, route, {
-      type: message.origin,
-      data: dashboard
     })
-    foodSession.tracking.confirmed_votes_msg = sentMessage._id
-    yield foodSession.save()
   }
 }
 

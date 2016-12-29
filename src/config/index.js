@@ -14,8 +14,16 @@ overrideIf('LOGGING_CONSOLE_COLORIZE', function(val) {
 	config.logging.console.colorize = asBool(val);
 });
 
+overrideIf('LOGGING_CONSOLE_JSON', function(val) {
+	config.logging.console.json = asBool(val);
+});
+
 overrideIf('LOGGING_CONSOLE_PRETTYPRINT', function(val) {
 	config.logging.console.prettyPrint = asBool(val);
+});
+
+overrideIf('LOGGING_CONSOLE_STRINGIFY', function(val) {
+	config.logging.console.stringify = asBool(val);
 });
 
 overrideIf('PROXY_LUMINATI_ADDR', function(val) {
@@ -29,7 +37,7 @@ function overrideIf(envKey, callback) {
 	}
 }
 
-function asBool(strVal) { return strVal === 'true' || strVal === 'TRUE'; }
+function asBool(strVal) { return strVal === 'true' || strVal === 'TRUE' || strVal === '1'; }
 function asInt(strVal) { return parseInt(strVal); }
 
 module.exports = config;
