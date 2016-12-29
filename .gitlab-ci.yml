@@ -35,7 +35,6 @@ test_python:
     - pytest tests/picstitch/
 
 docker-build-push:
-  image: docker:latest
   stage: build
   script:
     - echo $CI_BUILD_REF
@@ -45,8 +44,10 @@ docker-build-push:
     - docker push gcr.io/kip-styles/picstitch:latest
 
 k8s:
+  image: google/cloud-sdk
   stage: deploy
   script:
     - sed -i "s/IMAGE_TAG/$CI_BUILD_REF/" src/k8s/canary/canary.picstitch.yaml
+    - gcloud container clusters get-credentials kip
     - kubectl config view
     - kubectl --namespace=canary apply -f src/k8s/canary/canary.picstitch.yaml
