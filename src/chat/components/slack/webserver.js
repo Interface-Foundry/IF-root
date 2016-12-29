@@ -111,8 +111,10 @@ app.post('/slackaction', next(function * (req, res) {
     // var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
     // stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
     // console.log("actually sending message back for real")
-    res.status(200)
-    res.end()
+    if (!buttonData && simple_command !== 'channel_btn') {
+      res.status(200)
+      res.end()
+    }
   } else {
     console.error('slack buttons broke, need a response_url')
     res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
@@ -228,7 +230,8 @@ app.post('/slackaction', next(function * (req, res) {
           method: 'POST',
           uri: message.source.response_url,
           body: stringOrig
-        })
+        });
+        return;
       }
       else if (simple_command == 'view_cart_btn') {
           message.mode = 'shopping'

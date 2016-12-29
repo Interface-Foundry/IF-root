@@ -12,21 +12,21 @@ var processData = require('../process');
 var request = require('request');
 var rp = require('request-promise');
 var Fuse = require('fuse.js');
-var tz = require('moment-timezone')
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
+  let action, data;
   if ((!last_action || last_action.indexOf('home') == -1) && (_.get(message,'action') != 'start.supplies')) {
     return yield handlers['start'](message);
   } else {
     if (!message.data){
-      var action = 'text'
+      action = 'text';
     } else {
-      var data = _.split(message.data.value, '.');
-      var action = data[0];
+      data = _.split(message.data.value, '.');
+      action = data[0];
       data.splice(0,1);
     }
-    kip.debug('\n\n\n🤖 action : ',action, 'data: ', data, ' 🤖\n\n\n');
+    kip.debug('\n\n\n🤖 action : ', action, 'data: ', data, ' 🤖\n\n\n');
     return yield handlers[action](message, data);
   }
 }
@@ -927,7 +927,7 @@ handlers['text'] = function * (message) {
   } else {
     return yield handlers['sorry'](message);
   }
-}
+};
 
 
 
@@ -935,16 +935,14 @@ handlers['text'] = function * (message) {
  * catcher
  */
 handlers['sorry'] = function*(message) {
-  if(message.text.includes('amazon.com')){
+  if (message.text.includes('amazon.com')) {
     return; //ignore times people paste stuff in
   }
-  message.text = "Sorry, my brain froze!"
+  message.text = 'Sorry, my brain froze!';
   message.mode = 'onboard';
   message.action = 'home';
   var attachments = [];
   attachments.push({
-    text: 'Don’t have any changes? Type `exit` to quit settings',
-    mrkdwn_in: ['text'],
     fallback: 'Sorry!',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none',
@@ -953,8 +951,7 @@ handlers['sorry'] = function*(message) {
   message.reply = attachments;
 
   return [message];
-
-}
+};
 
 /**
  * send_replace home button
