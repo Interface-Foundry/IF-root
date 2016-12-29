@@ -29,6 +29,9 @@ test_python:
     - ls
     - pwd
     - pip install -q -r src/image_processing/requirements.txt
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
     - pytest tests/picstitch/
 
 docker-build-push:
