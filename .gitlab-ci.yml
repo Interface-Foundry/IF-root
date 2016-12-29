@@ -6,7 +6,7 @@ services:
 stages:
   - test
   - build
-  # - deploy
+  - deploy
 
 cache:
   paths:
