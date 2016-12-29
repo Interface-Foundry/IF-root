@@ -85,6 +85,10 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   var msg_json = {
     'attachments':
     [{
+      'text': `<${'http://kipthis.com/legal.html'}|View Terms of Service>`,
+      'mrkdwn_in': ['text']
+    },
+    {
       'text': 'Great! Which address is this for?',
       'fallback': 'Great! Which address is this for?',
       'callback_id': 'address',
