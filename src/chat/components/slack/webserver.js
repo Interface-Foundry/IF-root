@@ -106,16 +106,10 @@ app.post('/slackaction', next(function * (req, res) {
   var parsedIn = JSON.parse(req.body.payload);
 
   // First reply to slack, then process the request
-  if (parsedIn.original_message) {
-    // var stringOrig = JSON.stringify(parsedIn.original_message)
-    // var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
-    // stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
-    // console.log("actually sending message back for real")
-    if (!buttonData && simple_command !== 'channel_btn') {
-      res.status(200)
-      res.end()
-    }
-  } else {
+  if (!buttonData && simple_command !== 'channel_btn' && parsedIn.original_message) {
+    res.status(200)
+    res.end()
+  } else if (!parsedIn.original_message) {
     console.error('slack buttons broke, need a response_url')
     res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
     return
