@@ -296,7 +296,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           return cart;
         }, [])
         msgData.attachments = [...message.reply || [], ...results || [], {
-          text: '*Success!* You can always type `help` if you have any problems',
           mrkdwn_in: ['text'],
           color: '#A368F0'
         }, ...cardTemplate.slack_shopping_mode];
