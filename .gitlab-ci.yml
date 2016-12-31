@@ -30,7 +30,7 @@ stages:
   before_script:
     - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
   script:
-    - docker pull $KIP_REGISTRY/$IMAGE_NAME:latest
+    # - docker pull $KIP_REGISTRY/$IMAGE_NAME:latest
     - docker build --cache-from $KIP_REGISTRY/$IMAGE_NAME:latest -t $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF -f Dockerfiles/$IMAGE_NAME.Dockerfile .
     - docker tag $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF $KIP_REGISTRY/$IMAGE_NAME:latest
     - docker push $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF
@@ -92,6 +92,11 @@ build:picstitch:
 build:delivery_picstitch:
   variables:
     IMAGE_NAME: delivery_picstitch
+  <<: *build_defintion
+
+build:parser:
+  variables:
+    IMAGE_NAME: parser
   <<: *build_defintion
 
 deploy:delivery_picstitch:
