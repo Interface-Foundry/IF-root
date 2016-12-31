@@ -1,0 +1,95 @@
+#!/bin/bash
+
+##
+# graham
+# info-
+#   none atm
+
+# FROM THE OG ENTRYPOINT FILE
+DATA_DIR="/etc/gitlab-runner"
+LOCAL_CA_PATH="/usr/local/share/ca-certificates/ca.crt"
+CA_CERTIFICATES_PATH=${CA_CERTIFICATES_PATH:-$DATA_DIR/certs/ca.crt}
+
+# GITLAB-RUNNER VARIABLES
+export REGISTER_NON_INTERACTIVE="true"
+export CONFIG_FILE="/etc/gitlab-runner/config.toml"
+export CI_SERVER_URL="https://gitlab.com/ci"
+export REGISTRATION_TOKEN="hdiA6LTw6E6b-UsgMpjJ"
+export RUNNER_ENV="DOCKER_HOST=tcp://127.0.0.1:2375"
+export RUNNER_LIMIT="2"
+export RUNNER_EXECUTOR="kubernetes"
+export RUNNER_NAME="kubernetes-gitlab-runner"
+export KUBERNETES_IMAGE="docker:latest"
+export KUBERNETES_NAMESPACE="gitlab"
+export KUBERNETES_PRIVILEGED="true"
+
+
+# MINIO VARIABLES
+# export MINIO_ADDRESS="minio-helm-thing-minio.gitlab.svc.cluster.local"
+# export MINIO_PORT="9000"
+# export ACCESS_KEY="AKIAIOSFODNN7EXAMPLE"
+# export SECRET_KEY="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+# export BUCKET_NAME="runner"
+# export INSECURE="true"
+# export SHARED="true"
+export CACHE_TYPE="s3"
+export S3_SERVER_ADDRESS="gitlab-cache-minio.gitlab.svc.cluster.local:9000"
+export S3_ACCESS_KEY="DNAMPOSFN7EXAKIAIOLE"
+export S3_SECRET_KEY="ENAMPLEKEYwG/bPxRfiCYEXJalrXUtnFEMI/K7MD"
+export S3_BUCKET_NAME="runner"
+export S3_CACHE_INSECURE="true"
+export CACHE_SHARED="true"
+
+
+# gitlab-ci-multi-runner data directory
+# custom certificate authority path
+update_ca() {
+  echo "Updating CA certificates..."
+  cp "${CA_CERTIFICATES_PATH}" "${LOCAL_CA_PATH}"
+  update-ca-certificates --fresh >/dev/null
+}
+if [ -f "${CA_CERTIFICATES_PATH}" ]; then
+  # update the ca if the custom ca is different than the current
+  cmp --silent "${CA_CERTIFICATES_PATH}" "${LOCAL_CA_PATH}" || update_ca
+fi
+
+# set up the initial settings
+cat <<EOF > $CONFIG_FILE
+concurrent = 2
+heck_interval = 5
+
+EOF
+# echo -e "concurrent = 2\ncheck_interval = 5\n" > $CONFIG_FILE
+
+# launch gitlab-ci-multi-runner passing all arguments
+gitlab-ci-multi-runner register
+gitlab-ci-multi-runner list
+# -n \
+#     --config  \
+#     --url https://gitlab.com/ci \
+#     --env DOCKER_HOST=tcp://127.0.0.1:2375 \
+#     --registration-token "$GITLAB_REGISTRATION_TOKEN" \
+#     --limit 2 \
+#     --executor "kubernetes" \
+#     --description "kubernetes-runner" \
+#     --kubernetes-image "docker:latest" \
+#     --kubernetes-namespace "gitlab" \
+#     --kubernetes-privileged true
+
+# ----- SET UP MINIO CACHE TO BE USED FOR GITLAB RUNNER ------
+# sed -i '/\[runners.cache\]/d' /etc/gitlab-runner/config.toml
+
+# cat <<EOF >> /etc/gitlab-runner/config.toml
+#   [runners.cache]
+#     Type = "$CACHE_TYPE"
+#     ServerAddress = "$MINIO_ADDRESS:$MINIOPORT"
+#     AccessKey = "$ACCESS_KEY"
+#     SecretKey = "$SECRET_KEY"
+#     BucketName = "$BUCKET_NAME"
+#     Insecure = $INSECURE
+#     Shared = $SHARED
+# EOF
+echo -e 'look at registered:\n'
+cat $CONFIG_FILE
+
+exec gitlab-ci-multi-runner "$@"
