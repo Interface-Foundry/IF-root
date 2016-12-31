@@ -35,6 +35,7 @@ app.factory('MenuFactory', function ($http, $location) {
   };
 
   mf.formatCart = function (oldCart) {
+    console.log('old cart', oldCart)
     var cart = [];
 
     for (var i in oldCart) {
@@ -42,12 +43,13 @@ app.factory('MenuFactory', function ($http, $location) {
       item.item_id = String(oldCart[i].id);
       item.item_qty = oldCart[i].item_qty;
       item.instructions = oldCart[i].instructions;
+      //item.long_id = whatever
       item.options = {};
       for (var group in oldCart[i].options) {
         var opGroup = oldCart[i].options[group];
         for (var opId in opGroup) {
           if (opGroup[opId].chosen) {
-            item.options[opId] = 1;
+            item.options[opId] = 1; // might as well set this equal to the long_id
           }
         }
       }
@@ -61,7 +63,7 @@ app.factory('MenuFactory', function ($http, $location) {
   mf.submitOrder = function (cart) {
     ms.then(function (ms) {
       return $http.post('/order', {
-        order: cart,
+        order: cart, //the "order" should have a long_id field (see above)
         user_id: ms.userId,
         deliv_id: ms.foodSessionId
       })

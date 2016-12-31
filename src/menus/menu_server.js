@@ -108,7 +108,7 @@ app.post('/order', function (req, res) {
         console.log(order[i]);
         cart.push({
           added_to_cart: true,
-          item: order[i],
+          item: order[i], //end goal: cart[i].item.long_id = the long id :)
           user_id: user_id
         });
       }
@@ -119,27 +119,27 @@ app.post('/order', function (req, res) {
 
       console.log('updated delivery; looking for source message');
 
-      var foodMessage = yield Messages.find({
-        'source.user': deliv.convo_initiater.id,
-        mode: 'food',
-        incoming: false
-      }).sort('-ts').limit(1);
-
-      foodMessage = foodMessage[0];
-
-      var mess = new Messages({
-        incoming: true,
-        thread_id: foodMessage.thread_id,
-        action: 'cart.personal',
-        user_id: foodMessage.source.user,
-        mode: 'food',
-        origin: 'slack',
-        source: foodMessage.source,
-      })
-
-      yield mess.save();
-
-      yield queue.publish('incoming', mess, ['slack', foodMessage.source.channel, foodMessage.ts, new Date().getSeconds()].join('.'), true)
+      // var foodMessage = yield Messages.find({
+      //   'source.user': deliv.convo_initiater.id,
+      //   mode: 'food',
+      //   incoming: false
+      // }).sort('-ts').limit(1);
+      //
+      // foodMessage = foodMessage[0];
+      //
+      // var mess = new Messages({
+      //   incoming: true,
+      //   thread_id: foodMessage.thread_id,
+      //   action: 'cart.personal',
+      //   user_id: foodMessage.source.user,
+      //   mode: 'food',
+      //   origin: 'slack',
+      //   source: foodMessage.source,
+      // })
+      //
+      // yield mess.save();
+      //
+      // yield queue.publish('incoming', mess, ['slack', foodMessage.source.channel, foodMessage.ts, new Date().getSeconds()].join('.'), true)
 
       console.log('ostensibly done');
       res.send();
