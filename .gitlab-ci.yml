@@ -48,9 +48,9 @@ stages:
     - gcloud config set container/use_client_certificate True
     - gcloud container clusters get-credentials $KUBE_CLUSTER
   script:
-    - sed -i "s/IMAGE_TAG/$CI_BUILD_REF/" $CONTEXT_FILE
-    - kubectl apply -f $CONTEXT_FILE
-    # src/k8s/canary/canary.picstitch.yaml
+    - ls $DEPLOYMENT_DIR
+    - sed -i "s/IMAGE_TAG/$CI_BUILD_REF/" $DEPLOYMENT_DIR/$CONTEXT_FILE
+    - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
   after_script:
     - rm /tmp/KUBERNETES_KEY.json
 
@@ -96,11 +96,13 @@ build:delivery_picstitch:
 
 deploy:delivery_picstitch:
   variables:
-    CONTEXT_FILE: src/k8s/canary/canary.delivery_picstitch.yaml
+    DEPLOYMENT_DIR: src/k8s/canary
+    CONTEXT_FILE: canary.delivery_picstitch.yaml
   <<: *deploy_defintion
 
 deploy:picstitch:
   variables:
-    CONTEXT_FILE: src/k8s/canary/canary.picstitch.yaml
+    DEPLOYMENT_DIR: src/k8s/canary
+    CONTEXT_FILE: canary.picstitch.yaml
   <<: *deploy_defintion
 
