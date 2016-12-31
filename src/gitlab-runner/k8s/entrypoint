@@ -49,7 +49,7 @@ fi
 # set up the initial settings
 cat <<EOF > $CONFIG_FILE
 concurrent = 2
-heck_interval = 5
+check_interval = 5
 
 EOF
 

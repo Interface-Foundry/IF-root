@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.0.2/dumb-init_1.0.2_amd64 /usr/bin/dumb-init
-ADD gitlab-ci-multi-runner_amd64.deb /tmp/gitlab-ci-multi-runner_amd64.deb
+ADD https://gitlab-ci-multi-runner-downloads.s3.amazonaws.com/master/deb/gitlab-ci-multi-runner_amd64.deb /tmp/gitlab-ci-multi-runner_amd64.deb
 RUN chmod +x /usr/bin/dumb-init
 RUN apt-get update -y && \
     apt-get upgrade -y && \
