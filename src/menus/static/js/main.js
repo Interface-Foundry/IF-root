@@ -378,6 +378,7 @@ var app = new Vue({
     }
   },
   created: function() {
+    var that = this;
     var key = window.location.search.split("=")[1]
     var ms = axios.post('/session', {session_token: key})
     .then((response) => {
@@ -390,8 +391,18 @@ var app = new Vue({
       }
       this.menu = menu;
       this.merchant = response.data.merchant;
+      
+      if (response.data.selected_items.length) {
+        var preSelectedId = response.data.selected_items[0]
+        this.menu.forEach(function(item) {
+          if (item.id === preSelectedId) {
+            that.selectedItem = item;
+          }
+        })
+      }      
     })
     .catch((err) => {
+      console.log(err);
     });
   }
 })
