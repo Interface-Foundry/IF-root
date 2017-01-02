@@ -11,8 +11,7 @@ Vue.component('choice', {
     }
   },
   methods: {
-    selectChoice: function(event) {
-      
+    selectChoice: function() {
       // toggle selected data for checkbox options
       if (this.type === "checkbox") {
         this.selected = !this.selected
@@ -20,7 +19,7 @@ Vue.component('choice', {
        
       // set selected on radio to true and all other radios to false
       if (this.type === "radio") {
-        choiceBus.$emit('radio-selected', this.choice)
+        choiceBus.$emit('radio-selected', this.choice) 
       }
       
       var selectedOption;
@@ -32,29 +31,34 @@ Vue.component('choice', {
       });
 
       // find choice's option in SelectedItem's options to calculate when we hit max and min selections
-      if (this.option.id === selectedKey && this.selected) {
+      if (this.type === "checkbox" && this.option.id === selectedKey && this.selected) {
         if (selectedOption.choices.length >= this.maxSelection) {
           this.selected = false;
           alert("You can only select " + this.maxSelection + " choices.")
           return
         }
-
+        
+        /*
         if (selectedOption.choices.length < this.minSelection) {
           this.$parent.remaining = (this.minSelection - (selectedOption.choices.length + 1)) 
         }
-      } else if (this.selected) {
-        this.$parent.remaining = (this.minSelection - 1)
+        } else if (this.selected) {
+          this.$parent.remaining = (this.minSelection - 1)
+        
+        */
       }
-
-      
       //add or subtract choice from option's cost
-      if (this.choice.price) {
+      if (this.choice.price && this.type == "checkbox") {
         if (this.$parent.cost) {
           this.selected ? this.$parent.cost += this.choice.price : this.$parent.cost -= this.choice.price
         } else {
           this.$parent.cost = this.choice.price
         }
-      }      
+      }
+
+      if (this.choice.price && this.type == "radio") {
+        this.$parent.cost = this.choice.price
+      }
 
       var options = this.$parent.$parent.options;
       var option = this.option;
@@ -121,12 +125,10 @@ Vue.component('choice', {
     })
     
     choiceBus.$on('radio-selected', function(selectedChoice) {
-      if (that.type === "radio") {
-        if (selectedChoice.id === choice.id) {
-          that.selected = true
-        } else {
-          that.selected = false
-        } 
+      if (that.type === "radio" && that.choice.id == selectedChoice.id && !that.selected) {
+          that.selected = true; 
+      } else {
+        that.selected = false;
       }
     })
   }
@@ -137,22 +139,30 @@ Vue.component('option-set', {
   template: '#option-set',  
   data: function() {
     return {
-      inputType: this.option.max_selection === 1 ? "radio" : "checkbox",
+      inputType: "", 
       cost: this.option.cost || 0,
-      remaining: this.option.min_selection,
+      //remaining: this.option.min_selection,
       minSelection: this.option.min_selection
     }
   },
   methods: {
     updateOptions: function(options) {
+      /*
       var children = this.$children;
       children.forEach(function(child) {
         if (child.selected) { this.remaining -= 1 }
-      })    
+      })  
+      */
       this.$emit('setOptions', options)
     }
   },
-  computed: {
+  created: function() {
+    if (this.option.max_selection === 1 && this.option.type === "price group") {
+      this.inputType = "radio"
+    } 
+    else {
+      this.inputType = "checkbox"
+    }
   }
 })
 
@@ -361,15 +371,22 @@ var app = new Vue({
   },
   watch: {
     menu: function() {
-      this.navCategories = this.menu.children.slice(0, 5)
-      this.moreCategories = this.menu.children.slice(5, -1)
+      this.navCategories = this.menu.slice(0, 5)
+      this.moreCategories = this.menu.slice(5, -1)
     } 
   },
   created: function() {
     var key = window.location.search.split("=")[1]
     var ms = axios.post('/session', {session_token: key})
     .then((response) => {
-      this.menu = response.data.menu.data[0];
+      var menuData = response.data.menu.data
+      var menu;
+      if (menuData.length > 1) {
+        menu = menuData
+      } else {
+        menu = menuData[0].children
+      }
+      this.menu = menu;
       this.merchant = response.data.merchant;
     })
     .catch((err) => {

@@ -36,7 +36,7 @@
         </ul>
       </div>
       <div class="container menu-content">
-        <div class="category-set" v-for="category in menu.children">
+        <div class="category-set" v-for="category in menu">
           <h2> {{category.name}}</h2>
           <ul>
             <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
@@ -176,8 +176,3 @@
   <script src="js/main.js"></script>                  
 </body>
 </html>
-      
-      
-
-
-
