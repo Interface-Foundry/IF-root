@@ -243,9 +243,7 @@ function printMode(message) {
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS <--lel
 //
-queue.topic('incoming').subscribe(incoming => {
-
-  incoming.ack();
+function replyLogic (incoming) {
 
   co(function * () {
     if (incoming.data.text) {
@@ -497,7 +495,7 @@ queue.topic('incoming').subscribe(incoming => {
     incoming.ack()
     timer.stop()
   }).catch(kip.err)
-})
+}
 
 // pre process incoming messages for canned responses
 function* simple_response(message) {
@@ -696,3 +694,4 @@ LIFE OF  NEKO
 　|￣＼∩・ω・)＼
 　|　 ｜￣￣∪￣｜ ﾁﾗｯ
 `
+module.exports = replyLogic

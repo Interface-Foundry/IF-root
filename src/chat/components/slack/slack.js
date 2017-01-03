@@ -56,6 +56,7 @@ var cardTemplate = require('./card_templates');
 var slackConnections = {}
 var webserver = require('./webserver')
 var bundles = require('../bundles');
+var replyLogic = require('../reply_logic')
 bundles.updater(); //caches bundle items to mongo everyday at midnight
 
 var slackUtils = require('./utils.js')
@@ -142,7 +143,7 @@ function * loadTeam(slackbot) {
       return image_search(data.file.url_private, slackbot.bot.bot_access_token, function (res) {
         message.text = res
         message.save().then(() => {
-          queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
+          replyLogic({data: message})
         })
       })
     }
@@ -155,7 +156,7 @@ function * loadTeam(slackbot) {
 
     // queue it up for processing
     message.save().then(() => {
-      queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
+      replyLogic({data: message})
     })
   })
 }
@@ -187,11 +188,8 @@ function * start () {
 //
 // Mechanism for responding to messages
 //
-kip.debug('subscribing to outgoing.slack hopefully')
-queue.topic('outgoing.slack').subscribe(outgoing => {
-
-  logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
-  outgoing.ack();
+function send (outgoing) {
+  logging.info('outgoing slack message', _.get(outgoing, 'data.text', '[no text]'))
   try {
     var message = outgoing.data;
     var team = _.get(message, 'source.team');
@@ -208,7 +206,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     co(function * () {
       if (message.action === 'typing') {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
-          outgoing.ack()
         })
       }
       kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
@@ -336,21 +333,20 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       outgoing.ack()
     }).then(() => {
-      outgoing.ack()
     }).catch(e => {
       console.log(e.stack)
       bot.rtm.sendMessage("I'm sorry I couldn't quite understand that", message.source.channel, () => {
-        outgoing.ack()
       })
     })
   } catch (e) {
     kip.err(e)
   }
-})
+}
 
 module.exports.slackConnections = slackConnections;
 module.exports.loadTeam = loadTeam
 module.exports.startMockSlack = start
+module.exports.send = send
 
 if (!module.parent) {
   co(start).catch((e) => {

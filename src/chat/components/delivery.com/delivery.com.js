@@ -96,15 +96,9 @@ function * handleMessage (message) {
   } else {
     kip.error('No route handler for ' + route)
     if (route === 'food.results') {
-      // ppl are getting stuck here for some reasonf
-      var newMessage = new db.Message({
-        source: message.source,
-        text: 'exit',
-        mode: 'food',
-        action: 'exit.confirm'
-      })
-      yield newMessage.save()
-      queue.publish('incoming', message, ['slack', 'delivery.com.exit', Math.random().toString(32).slice(2)].join('.'))
+      // ppl are getting stuck here for some reason
+      // so just throw them to the kip menu
+      yield handlers['food.exit.confirm'](message)
     }
   }
   message.save()
@@ -189,7 +183,7 @@ handlers['food.exit'] = function * (message) {
       }
     ]
   }
-  
+
   replyChannel.send(message, 'food.exit.confirm', {type: message.origin, data: msg_json})
 }
 
@@ -214,7 +208,7 @@ handlers['food.exit.confirm'] = function * (message) {
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: slackreply})
   // make sure to remove this user from the food message if they are in it
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  
+
   if(foodSession){
     foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
     foodSession.markModified('team_members')
