@@ -106,14 +106,12 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
     var smallImage = _.get(item, 'SmallImage[0].URL[0]')
     var mediumImage = _.get(item, 'MediumImage[0].URL[0]')
     var largeImage = _.get(item, 'LargeImage[0].URL[0]')
-    var altImage = item.altImage
-    var image;
-    // http://images-na.ssl-images-amazon.com/images/I/61WRcLLvdpL._SL1100_.jpg
-    if (smallImage.indexOf('images-na.ssl-images-amazon.com') > -1 || mediumImage.indexOf('images-na.ssl-images-amazon.com') > -1) {
-      image = 'http://kipthis.com/images/kip_head.png'
-    }else {
-      image = item.altImage || _.get(item, 'SmallImage[0].URL[0]')
-    }
+    var altImage = item.altImage;
+    var image = item.altImage || _.get(item, 'SmallImage[0].URL[0]')
+    // if SSL causes problems for a platform in the future
+    // if (smallImage.indexOf('images-na.ssl-images-amazon.com') > -1 || mediumImage.indexOf('images-na.ssl-images-amazon.com') > -1) {
+    //   image = 'http://kipthis.com/images/kip_head.png'
+    // }
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
