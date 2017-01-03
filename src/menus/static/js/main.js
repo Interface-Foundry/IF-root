@@ -12,6 +12,11 @@ Vue.component('choice', {
   },
   methods: {
     selectChoice: function() {
+      
+      if (this.$parent.isPriceGroup) {
+        this.$parent.item.price = this.choice.price;    
+      }
+
       // toggle selected data for checkbox options
       if (this.type === "checkbox") {
         this.selected = !this.selected
@@ -38,14 +43,6 @@ Vue.component('choice', {
           return
         }
         
-        /*
-        if (selectedOption.choices.length < this.minSelection) {
-          this.$parent.remaining = (this.minSelection - (selectedOption.choices.length + 1)) 
-        }
-        } else if (this.selected) {
-          this.$parent.remaining = (this.minSelection - 1)
-        
-        */
       }
       //add or subtract choice from option's cost
       if (this.choice.price && this.type == "checkbox") {
@@ -55,7 +52,8 @@ Vue.component('choice', {
           this.$parent.cost = this.choice.price
         }
       }
-
+      
+      
       if (this.choice.price && this.type == "radio") {
         this.$parent.cost = this.choice.price
       }
@@ -125,10 +123,12 @@ Vue.component('choice', {
     })
     
     choiceBus.$on('radio-selected', function(selectedChoice) {
-      if (that.type === "radio" && that.choice.id == selectedChoice.id && !that.selected) {
-          that.selected = true; 
-      } else {
-        that.selected = false;
+      if (that.type === "radio") {
+        if (that.choice.id == selectedChoice.id && !that.selected) {
+            that.selected = true; 
+        } else {
+          that.selected = false;
+        } 
       }
     })
   }
@@ -141,18 +141,12 @@ Vue.component('option-set', {
     return {
       inputType: "", 
       cost: this.option.cost || 0,
-      //remaining: this.option.min_selection,
+      isPriceGroup: this.option.type === "price group" ? true : false,
       minSelection: this.option.min_selection
     }
   },
   methods: {
     updateOptions: function(options) {
-      /*
-      var children = this.$children;
-      children.forEach(function(child) {
-        if (child.selected) { this.remaining -= 1 }
-      })  
-      */
       this.$emit('setOptions', options)
     }
   },
@@ -217,20 +211,22 @@ Vue.component('edit-item', {
     setOptions: function(options) {
       var that = this;
       var cost = 0; 
+
       if (_.isEmpty(options)) { this.optionsCost = 0; return; }
       
       _.forOwn(options, function(val, key) {
-        if (val.option.cost) {
+        if (val.option.cost && val.option.type != "price group") {
           cost += val.option.cost      
         }
-      }) 
+      })
+      
       this.optionsCost = cost;
       this.options = options;
     } 
   },
   computed: { 
     totalPrice: function() {
-      var totalPrice = ((this.item.price * this.quantity) + this.optionsCost);
+      var totalPrice = ((this.item.price + this.optionsCost)* this.quantity);
       return totalPrice    
     }    
   },
@@ -286,7 +282,7 @@ Vue.component('selected-item', {
       this.optionsCost = 0
       if (_.isEmpty(this.options)) { this.optionsCost = 0 }
       _.forOwn(this.options, function(val, key) {
-        if (val.option.cost) {
+        if (val.option.cost && val.option.type !== "price group") {
           that.optionsCost += val.option.cost        
         }
       })      
@@ -294,7 +290,7 @@ Vue.component('selected-item', {
   },
   computed: {
     totalPrice: function() {
-      var totalPrice = ((this.item.price * this.quantity) + this.optionsCost);
+      var totalPrice = ((this.item.price + this.optionsCost)* this.quantity);
       return totalPrice
     }
   },
