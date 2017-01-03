@@ -21,10 +21,7 @@ var replyChannel = new UserChannel(queue)
 // --------------------------------------------
 
 var cafeMenu = require('../chat/components/delivery.com/Menu.js');
-// var menuURL = 'http://e0616f78.ngrok.io'
 var menuURL = config.menuURL
-
-console.log('this is a speakerbox', menuURL)
 
 app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -108,7 +105,7 @@ app.post('/order', function (req, res) {
         console.log(order[i]);
         cart.push({
           added_to_cart: true,
-          item: order[i], //end goal: cart[i].item.long_id = the long id :)
+          item: order[i],
           user_id: user_id
         });
       }

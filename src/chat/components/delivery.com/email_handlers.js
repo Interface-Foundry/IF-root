@@ -31,17 +31,18 @@ handlers['food.admin.team.remove_order_email'] = function * (message) {
 //~~~~~~~~~~//
 
 handlers['food.admin.team.delete_email'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
+  // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
 
-  if (foodSession.email_users.indexOf(e)) {
-    foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
-    yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
-  }
+  // if (foodSession.email_users.indexOf(e)) {
+  //   foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
+  //   yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
+  // }
 
   yield db.email_users.remove({team_id: message.source.team, email: e})
 
-  yield handlers['food.admin.team.email_members'](message);
+  // yield handlers['food.admin.team.email_members'](message);
+  yield handlers['food.admin.team.remove_order_email'](message)
 }
 
 //~~~~~~~~~~//
