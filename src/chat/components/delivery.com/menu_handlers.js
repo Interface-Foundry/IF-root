@@ -201,9 +201,15 @@ handlers['food.menu.quickpicks'] = function * (message) {
   }
 
   //budget reminder
-  if (foodSession.budget && Number(foodSession.budget) >= 1) {
+  if (foodSession.budget) {
+    if (Number(foodSession.user_budgets[message.user_id]) >= 1) {
+      var text = `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`
+    }
+    else {
+      var text = `You have already exhausted your budget!`
+    }
     msg_json.attachments.push({
-      'text': `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`,
+      'text': text,
       'mrkdwn_in': ['text']
     });
   }

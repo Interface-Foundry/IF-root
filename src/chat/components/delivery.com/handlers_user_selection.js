@@ -174,6 +174,12 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'type': 'button'
           },
           {
+            'name': 'food.admin.team_budget',
+            'type': 'button',
+            'text': 'Set a Budget',
+            'value': 'food.admin.team_budget'
+          },
+          {
             'name': 'food.admin.display_channels',
             'text': 'Use a #channel',
             'type': 'button',
