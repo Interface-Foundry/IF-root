@@ -97,9 +97,9 @@ app.post('/order', function (req, res) {
       var order = req.body.order;
       var user_id = req.body.user_id;
       var deliv_id = req.body.deliv_id;
-      var deliv = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
+      var foodSession = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
       console.log('found the delivery object');
-      var cart = deliv.cart;
+      var cart = foodSession.cart;
 
       for (var i = 0; i < order.length; i++) {
         console.log(order[i]);
@@ -110,7 +110,12 @@ app.post('/order', function (req, res) {
         });
       }
 
-      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart}});
+      var orders = foodSession.confirmed_orders
+      console.log('orders', orders)
+      orders.push(user_id)
+      console.log('orders plus a new one', orders)
+
+      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, confirmed_orders: orders}});
 
       //----------Message Queue-----------//
 

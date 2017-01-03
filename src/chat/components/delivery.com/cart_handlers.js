@@ -175,6 +175,8 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
+  console.log('####', foodSession.confirmed_orders)
+
   //
   // Reply to the user who either submitted their personal cart or said "no thanks"
   //
@@ -198,9 +200,26 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     .join(', ')
 
   // Show which team members are not in the votes array
-  var slackers = _.difference(foodSession.team_members.map(m => m.id), foodSession.confirmed_orders)
+  var full_email_members = [];
+  for (var i = 0; i < foodSession.email_users.length; i++) {
+    var full_eu = yield db.email_users.findOne({email: foodSession.email_users[i]});
+    full_email_members.push(full_eu);
+  }
+  console.log('full_email_members', full_email_members, foodSession.confirmed_orders)
+
+  var slackers = _.difference(foodSession.team_members.map(m => m.id), _.difference(foodSession.confirmed_orders, full_email_members.map(m => m.id)))
     .map(id => `<@${id}>`)
-    .join(', ')
+
+  var emailer_ids = _.difference(full_email_members.map(m => m.id), _.difference(foodSession.confirmed_orders, slackers))
+  var emailers = [];
+
+  if (emailer_ids) emailer_ids.map(function (eid) {
+    for (var i = 0; i < full_email_members.length; i++) {
+      if (full_email_members[i].id == eid) emailers.push(full_email_members[i].email)
+    }
+  })
+
+  console.log('emailers', emailers)
 
   var dashboard = {
     text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
@@ -212,11 +231,11 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     }]
   }
 
-  if (slackers && message.source.user == foodSession.convo_initiater.id) {
+  if ((slackers || emailers.length) && message.source.user == foodSession.convo_initiater.id) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      text: `*Waiting for order(s) from:*\n${slackers}`,
+      text: `*Waiting for order(s) from:*\n${slackers.concat(emailers).join(', ')}`,
       actions: [{
         name: 'food.admin.order.confirm',
         text: 'Finish Order Early',
@@ -303,7 +322,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     fallback: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     callback_id: 'address_confirm',
- 
+
   }
 
   var mainAttachment = {
