@@ -395,7 +395,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         return _.includes(discounts.teams, foodSession.team_id)
       })
 
-      foodSession.main_amount = order.total + foodSession.service_fee + order.tax + order.delivery_fee + order.convenience_fee
+      foodSession.main_amount = order.total + foodSession.service_fee + order.delivery_fee + order.convenience_fee
+
       if (discountAvail) {
         // this is literally needed to prevent rounding errors
         if (foodSession.coupon.used === false) {
@@ -408,6 +409,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         foodSession.discount_amount = 0.00
       }
       foodSession.calculated_amount = Number((Math.round(((foodSession.main_amount - foodSession.discount_amount) * 1000) / 10) / 100).toFixed(2))
+
+      foodSession.discount_amount = foodSession.discount_amount.toFixed(2)
 
       if (foodSession.calculated_amount < 0.50) {
         foodSession.calculated_amount = 0.50 // stripe thing
@@ -495,7 +498,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
               `*Taxes:* ${foodSession.order.tax.$}\n` +
               `*Delivery Fee:* ${foodSession.order.delivery_fee.$}${convenienceFee}\n` +
               `*Service Fee:* ${foodSession.service_fee.$}\n` +
-              `*Tip:* ${foodSession.tip.amount.$}\n`,
+              `*Tip:* ${foodSession.tip.amount.$}\n` + 
+              `*Discounts:* ${foodSession.discount_amount.$}\n`,
         'callback_id': 'food.admin.cart.info',
         'color': '#3AA3E3',
         'attachment_type': 'default',
