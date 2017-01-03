@@ -1,5 +1,6 @@
 var _ = require('lodash')
 var request = require('request-promise')
+var slack = require('../slack/slack.js')
 
 function cleanAttachment (a) {
   // every attachmnet needs a callback id
@@ -63,12 +64,16 @@ class UserChannel {
               body: JSON.stringify(data.data)
             })
           } else if (replace && newSession.replace_ts) {
-            self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+            slack.send({data: newSession})
           } else if (replace && session.slack_ts) {
             newSession.replace_ts = session.slack_ts
-            self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+            slack.send({data: newSession})
           } else {
-            self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+            if (newSession.origin === 'slack') {
+              slack.send({data: newSession})
+            } else {
+              self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+            }
           }
           resolve(newSession)
         })

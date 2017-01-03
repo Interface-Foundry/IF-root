@@ -96,15 +96,9 @@ function * handleMessage (message) {
   } else {
     kip.error('No route handler for ' + route)
     if (route === 'food.results') {
-      // ppl are getting stuck here for some reasonf
-      var newMessage = new db.Message({
-        source: message.source,
-        text: 'exit',
-        mode: 'food',
-        action: 'exit.confirm'
-      })
-      yield newMessage.save()
-      queue.publish('incoming', message, ['slack', 'delivery.com.exit', Math.random().toString(32).slice(2)].join('.'))
+      // ppl are getting stuck here for some reason
+      // so just throw them to the kip menu
+      yield handlers['food.exit.confirm'](message)
     }
   }
   message.save()
