@@ -10,22 +10,23 @@ var kipcart = require('../cart');
 var bundles = require('../bundles');
 var processData = require('../process');
 var request = require('request');
+var rp = require('request-promise');
 var Fuse = require('fuse.js');
-var tz = require('moment-timezone')
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
+  let action, data;
   if ((!last_action || last_action.indexOf('home') == -1) && (_.get(message,'action') != 'start.supplies')) {
     return yield handlers['start'](message);
   } else {
     if (!message.data){
-      var action = 'text'
+      action = 'text';
     } else {
-      var data = _.split(message.data.value, '.');
-      var action = data[0];
+      data = _.split(message.data.value, '.');
+      action = data[0];
       data.splice(0,1);
     }
-    kip.debug('\n\n\n🤖 action : ',action, 'data: ', data, ' 🤖\n\n\n');
+    kip.debug('\n\n\n🤖 action : ', action, 'data: ', data, ' 🤖\n\n\n');
     return yield handlers[action](message, data);
   }
 }
@@ -572,12 +573,14 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
   let team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
-
+  //lets ask slack what the user's time zone is!
+  let userInfo = yield rp(`https://slack.com/api/users.info?token=${team.bot.bot_access_token}&user=${message.source.user}`);
+  userInfo = JSON.parse(userInfo);
+  let tz = _.get(userInfo, 'user.tz', 'America/New_York'); //default to NY if we can't find one
   let dateDescrip,
     cronTime = {},
     alertTime = data[0],
-    now = new Date(Date.now().toLocaleString('en-US', { timeZone: 'America/New_York' }));
-
+    now = new Date(Date.now().toLocaleString('en-US', { timeZone: tz }));
   switch (alertTime) {
     case 'daily':
       cronTime = {
@@ -586,7 +589,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
         hour: now.getHours(),
         minutes: now.getMinutes()
       }
-      dateDescrip = `at *${now.getHours() < 13 ? now.getHours() : now.getHours() - 12}:${now.getMinutes() < 10? '0' + now.getMinutes(): now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}* every day`;
+      dateDescrip = `at *${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}* every day`;
       break;
     case 'weekly':
       cronTime = {
@@ -596,7 +599,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
         date: '*'
       }
       team.meta.weekly_status_day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
-      dateDescrip = `every *${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()]}* at *${now.getHours() < 13 ? now.getHours() : now.getHours() - 12}:${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}*`;
+      dateDescrip = `every *${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()]}* at *${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}*`;
       break;
     case 'monthly':
       cronTime = {
@@ -606,7 +609,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
         minutes: now.getMinutes()
       }
       team.meta.weekly_status_date = now.getDate();
-      dateDescrip = `on day *${now.getDate()}* of every month at *${now.getHours() < 13 ? now.getHours() : now.getHours() - 12}:${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}*`;
+      dateDescrip = `on day *${now.getDate()}* of every month at *${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}*`;
       break;
     case 'never':
     default:
@@ -614,18 +617,32 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
   }
 
   team.meta.status_interval = alertTime;
-  team.meta.weekly_status_timezone = 'America/New_York';
+  team.meta.weekly_status_timezone = tz;
   team.meta.weekly_status_enabled = (dateDescrip) ? true : false;
-  team.meta.weekly_status_time = `${now.getHours() < 13 ? now.getHours() : now.getHours() - 12}:${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()} ${now.getHours() < 12 ? 'AM' : 'PM'}`
+  team.meta.weekly_status_time = `${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}`
   yield team.save();
   if (dateDescrip) {
     yield utils.setCron(message, {}, cronTime)
   }
-  var messageText = (dateDescrip) ?
+
+  let messageText = (dateDescrip) ?
     `Ok, your team will get reminders ${dateDescrip}.\nAdmins can always edit reminders in Settings` :
     'Ok! I won\'t set any reminders. If you ever want them, you can turn them on in Settings';
   messageText += '\n Thanks and have a great day :)';
-  var attachments = [{
+
+  let attachments = [{
+    text: messageText,
+    color: '#A368F0',
+    fallback: messageText,
+    mrkdwn_in: ['text']
+  }];
+  if(dateDescrip) {
+  	attachments.push({
+  		text: 'We got your timezone from your current slack settings',
+  		mrkdwn_in:['text']
+  	})
+  }
+  attachments.push({
     image_url: "http://tidepools.co/kip/kip_menu.png",
     text: 'Click a mode to start using Kip',
     color: '#45a5f4',
@@ -641,10 +658,9 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
       text: 'Kip Store',
       type: 'button'
     }]
-  }];
-
-  var msg = {
-    text: messageText,
+  });
+  let msg = {
+    text: '',
     action: 'home',
     mode: 'onboard',
     source: message.source,
@@ -911,7 +927,7 @@ handlers['text'] = function * (message) {
   } else {
     return yield handlers['sorry'](message);
   }
-}
+};
 
 
 
@@ -919,16 +935,14 @@ handlers['text'] = function * (message) {
  * catcher
  */
 handlers['sorry'] = function*(message) {
-  if(message.text.includes('amazon.com')){
+  if (message.text.includes('amazon.com')) {
     return; //ignore times people paste stuff in
   }
-  message.text = "Sorry, my brain froze!"
+  message.text = 'Sorry, my brain froze!';
   message.mode = 'onboard';
   message.action = 'home';
   var attachments = [];
   attachments.push({
-    text: 'Don’t have any changes? Type `exit` to quit settings',
-    mrkdwn_in: ['text'],
     fallback: 'Sorry!',
     actions: cardTemplate.slack_onboard_default,
     callback_id: 'none',
@@ -937,8 +951,7 @@ handlers['sorry'] = function*(message) {
   message.reply = attachments;
 
   return [message];
-
-}
+};
 
 /**
  * send_replace home button

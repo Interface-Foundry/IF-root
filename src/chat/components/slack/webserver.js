@@ -106,14 +106,10 @@ app.post('/slackaction', next(function * (req, res) {
   var parsedIn = JSON.parse(req.body.payload);
 
   // First reply to slack, then process the request
-  if (parsedIn.original_message) {
-    // var stringOrig = JSON.stringify(parsedIn.original_message)
-    // var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
-    // stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
-    // console.log("actually sending message back for real")
+  if (!buttonData && simple_command !== 'channel_btn' && parsedIn.original_message) {
     res.status(200)
     res.end()
-  } else {
+  } else if (!parsedIn.original_message) {
     console.error('slack buttons broke, need a response_url')
     res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
     return
@@ -215,11 +211,21 @@ app.post('/slackaction', next(function * (req, res) {
         }
         json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
                                                            // maybe I just don't understand slack yet
+        let stringOrig = JSON.stringify(json);
+        let map = {
+          amp: '&',
+          lt: '<',
+          gt: '>',
+          quot: '"',
+          '#039': "'"
+        }
+        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
         request({
           method: 'POST',
           uri: message.source.response_url,
-          body: JSON.stringify(json)
-        })
+          body: stringOrig
+        });
+        return;
       }
       else if (simple_command == 'view_cart_btn') {
           message.mode = 'shopping'
@@ -279,7 +285,6 @@ app.post('/slackaction', next(function * (req, res) {
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
 
       }
-
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       });
@@ -305,8 +310,12 @@ app.post('/slackaction', next(function * (req, res) {
       })
     } else {
       //actions that do not require processing in reply_logic, skill all dat
-      let index = -1,
-        cart;
+      let cart, index;
+      parsedIn.original_message.attachments.forEach((ele, id) => {
+        if (ele.callback_id === parsedIn.callback_id) {
+          index = id;
+        }
+      });
       switch (action.name) {
         case 'additem':
           parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
@@ -316,44 +325,54 @@ app.post('/slackaction', next(function * (req, res) {
             cart = yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item);
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
-          break
+          break;
         case 'removeitem':
           parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
           co(function*() {
-            parsedIn.original_message.attachments.forEach((ele, id) => {
-              if (ele.callback_id === parsedIn.callback_id) {
-                index = id;
-              }
-            });
             cart = yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index, 'team'); //'team' assumes this is a slack command. need a way to tell
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
-          break
+          break;
+        case 'removewarn':
+          let matches = parsedIn.original_message.attachments[index].text.match(/<(.+)\|(.+)>/i); //0 is full string, 1 is url, 2 is title
+          parsedIn.original_message.attachments[index] = {
+            text: `Are you sure you want to remove the last *${matches[2]}*?`,
+            actions: cardTemplate.cart_check(index),
+            mrkdwn_in: ['text'],
+            callback_id: parsedIn.original_message.attachments[index].callback_id
+          };
+          break;
+        case 'cancelremove':
+          co(function*() {
+            cart = yield kipcart.getCart(parsedIn.team.id); //'team' assumes this is a slack command. need a way to tell
+            yield updateCartMsg(cart, parsedIn);
+          }).catch(console.log.bind(console));
+          break;
         case 'removeall':
           // reduces the quantity right way, but for speed we return a hacked message right away
-          var priceDifference = 0;
-          var updatedMessage = parsedIn.original_message;
-          updatedMessage.attachments = updatedMessage.attachments.reduce((all, a, i) => {
-            if (a.callback_id === parsedIn.callback_id) {
-              var quantity = parseInt(a.text.match(/\d+$/)[0])
-              priceDifference = quantity * parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1));
-              index = i;
-            } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-              a.text = a.text.replace(/\$(\d{1,3},)*(\d{1,3})(\.\d{0,2})?/g, function(total) {
-                return '$' + (parseFloat(total.substr(1)) - priceDifference).toFixed(2)
-              })
-              all.push(a)
-            } else {
-              all.push(a)
-            }
-            return all
-          }, [])
           co(function*() {
-            cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index)
+            cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index);
             yield updateCartMsg(cart, parsedIn);
-          }).catch(console.log.bind(console))
-          break
+          }).catch(console.log.bind(console));
+
+          parsedIn.original_message.attachments.splice[index, 1]; //just take it off the list
+          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
+          break;
       }
+      var stringOrig = JSON.stringify(parsedIn.original_message)
+      let map = {
+        amp: '&',
+        lt: '<',
+        gt: '>',
+        quot: '"',
+        '#039': "'"
+      }
+      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+      request({
+        method: 'POST',
+        uri: parsedIn.response_url,
+        body: stringOrig
+      });
     }
 }))
 
@@ -369,7 +388,9 @@ function clearCartMsg(attachments) {
         'value': 'loading_btn'
       }];
     }
-    all.push(a);
+    if(!(a.text && a.text.includes('Are you sure you want to remove the last'))){
+      all.push(a);
+    }
     return all;
   }, []);
 }
@@ -399,21 +420,23 @@ function* updateCartMsg(cart, parsedIn) {
     }
   })
 
-  let attachments = parsedIn.original_message.attachments.reduce((all, a, i) => {
-    if (a.callback_id && itemData[a.callback_id]) {
+  let attachments = parsedIn.original_message.attachments.reduce((all, a) => {
+  	let item = itemData[a.callback_id];
+
+    if (a.callback_id && item) {
       let userString;
-      a.actions = (itemData[a.callback_id].showDetail || showEverything) ? [{
+      a.actions = (item.showDetail || showEverything) ? [{
         'name': 'additem',
         'text': '+',
         'style': 'default',
         'type': 'button',
         'value': 'add'
       }, {
-        'name': 'removeitem',
+        'name': item.quantity > 1 ? "removeitem" : 'removewarn',
         'text': '—',
         'style': 'default',
         'type': 'button',
-        'value': 'remove'
+        'value': item.quantity > 1 ? "removeitem" : 'removewarn',
       }] : [{
         'name': 'additem',
         'text': '+ Add',
@@ -422,32 +445,34 @@ function* updateCartMsg(cart, parsedIn) {
         'value': 'add'
       }];
 
-      if (showEverything && itemData[a.callback_id].quantity > 1) {
+      if (showEverything && item.quantity > 1) {
         a.actions.push({
-          name: "removeall",
+          name: "removewarn",
           text: 'Remove All',
           style: 'default',
           type: 'button',
-          value: 'removeall'
+          value: 'removewarn'
         });
       }
-      userString = itemData[a.callback_id].added_by.map(function(u) {
+      userString = item.added_by.map(function(u) {
         return '<@' + u + '>';
       }).join(', ');
 
       a.text = [
-        `*${itemNum}.* ` + ((showEverything || itemData[a.callback_id].showDetail) ? `<${itemData[a.callback_id].link}|${itemData[a.callback_id].title}>` : itemData[a.callback_id].title),
-        ((showEverything) ? `*Price:* ${itemData[a.callback_id].price} each` : ''),
+        `*${itemNum}.* ` + ((showEverything || item.showDetail) ? `<${item.link}|${item.title}>` : item.title),
+        ((showEverything) ? `*Price:* ${item.price} each` : ''),
         `*Added by:* ${userString}`,
-        `*Quantity:* ${itemData[a.callback_id].quantity}`,
+        `*Quantity:* ${item.quantity}`,
       ].filter(Boolean).join('\n');
 
-      if (itemData[a.callback_id].quantity > 0) {
+      if (item.quantity > 0) {
         all.push(a);
         itemNum++;
       }
     } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-      a.text = a.text.replace(/\$(\d{1,3},)*(\d{1,3})(\.\d{0,2})?/g, '$' + cart.total);
+      a.text = (cart.items.length > 0) ? 
+        `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`:
+        'Looks like your cart is empty!'
       all.push(a);
     } else if (a.text && !a.text.includes('Quantity:')) {
       all.push(a);
@@ -455,14 +480,23 @@ function* updateCartMsg(cart, parsedIn) {
     return all;
   }, []);
 
+  attachments.push({
+    text: '',
+    callback_id: 'shrug',
+    attachment_type: 'default',
+    actions: [{
+      'name': 'passthrough',
+      'text': 'Home',
+      'type': 'button',
+      'value': 'home'
+    }]
+  })
   parsedIn.original_message.attachments = attachments;
-  if (parsedIn.original_message) {
-    request({
-      method: 'POST',
-      uri: parsedIn.response_url,
-      body: JSON.stringify(parsedIn.original_message)
-    });
-  }
+  request({
+    method: 'POST',
+    uri: parsedIn.response_url,
+    body: JSON.stringify(parsedIn.original_message)
+  });
 }
 
 

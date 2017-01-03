@@ -17,6 +17,37 @@ var $allHandlers
 // exports
 var handlers = {}
 
+handlers['food.admin.confirm_new_session'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSessionStarter = foodSession.convo_initiater.id
+  var msg_json = {
+    title: '',
+    text: `Looks like <@${foodSessionStarter}> is ordering food right now. \nStart a new order anyway?`,
+    attachments: [{
+        'text': '',
+        'fallback': '',
+        'callback_id': '',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'mrkdwn_in': ['text'],
+        'actions': [{
+          'name': 'food.admin.select_address',
+          'text': 'Start New Order',
+          'type': 'button',
+          'value': 'food.admin.select_address'
+        }, {
+          'name': 'passthrough',
+          'text': 'Wait',
+          'type': 'button',
+          'value': 'food.exit.confirm'
+        }]
+      }]
+    }
+
+  $replyChannel.sendReplace(message, 'food.admin.confirm_new_session', {type: message.origin, data: msg_json})
+
+}
+
 handlers['food.admin.select_address'] = function * (message, banner) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
@@ -142,7 +173,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     'name': 'passthrough',
     'text': 'Home',
     'type': 'button',
-    'value': 'food.exit.confirm'
+    'value': 'food.exit.confirm_end_order'
   })
 
   // if user sent in public channel, switch to DMing them
@@ -688,13 +719,11 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     .sort({_id: -1})
     .limit(1)
     .exec()
-
   // copy all the last ordered stuff to this order
   lastOrdered = lastOrdered[0]
   foodSession.chosen_channel = lastOrdered.chosen_channel
   foodSession.chosen_restaurant = lastOrdered.chosen_restaurant
-
-  if (lastOrdered.chosen_channel === 'just_me') {
+  if (lastOrdered.chosen_channel === 'just_me' || lastOrdered.team_members.length<1) {
     // possible last ordered just me is another admin
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
   } else {
@@ -718,8 +747,10 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     var textWording = 'just you'
   } else if (foodSession.chosen_channel.name === 'everyone') {
     textWording = 'everyone'
-  } else {
+  } else if (foodSession.chosen_channel.id || foodSession.chosen_channel.name){
     textWording = `<#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}>`
+  } else {
+    textWording = '\`' + foodSession.chosen_location.address_1 + '\`'
   }
 
   var budgetWording = "?";
@@ -730,6 +761,9 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     'attachments': [{
       'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}${budgetWording}`,
       'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}${budgetWording}?`,
+      'mrkdwn_in': [
+          'text'
+        ],
       'callback_id': 'reordering_confirmation',
       'color': '#3AA3E3',
       'attachment_type': 'default',
@@ -740,6 +774,11 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
         'type': 'button',
         'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
       }, {
+        'name': 'food.admin.team.members.reorder',
+        'value': mostRecentMerchant,
+        'text': `Edit Members`,
+        'type': 'button'
+      }, {
         'name': 'passthrough',
         'text': '< Back',
         'type': 'button',
@@ -749,7 +788,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
         'name': 'passthrough',
         'text': 'Home',
         'type': 'button',
-        'value': 'food.exit.confirm',
+        'value': 'food.exit.confirm_end_order',
         'confirm': {
           'title': 'Are you sure?',
           'text': "Are you sure want to end this order?",

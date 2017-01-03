@@ -22,7 +22,6 @@ String.prototype.toObjectId = function () {
 // Show the user their personal cart
 //
 handlers['food.cart.personal'] = function * (message, replace) {
-  console.log('message.user_id', message.user_id)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   var menu = Menu(foodSession.menu)
@@ -227,7 +226,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     }]
   }
 
-  if (slackers) {
+  if (slackers && message.source.user == foodSession.convo_initiater.id) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
@@ -255,29 +254,36 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       type: msgToReplace.origin,
       data: dashboard
     })
-
-  } else if (foodSession.convo_initiater.id === message.source.user) {
-    // admin is done
-    // create the dashboard for the first time for the admin
-    var admin = foodSession.convo_initiater
-    var msg = {
-      mode: 'food',
-      action: 'food.admin.waiting_for_orders',
-      thread_id: admin.dm,
-      origin: message.origin,
-      source: {
-        team: foodSession.team_id,
-        user: admin.id,
-        channel: admin.dm
+  } else {
+    // create the dashboard for the first time
+    foodSession.team_members.map(m => {
+      if(foodSession.confirmed_orders.includes(m.id)){
+        var admin = foodSession.convo_initiater
+        var user = message.source.user
+        var channel = message.source.channel
+        var msg = {
+          mode: 'food',
+          action: 'food.admin.waiting_for_orders',
+          thread_id: m.dm,
+          origin: message.origin,
+          source: {
+            team: foodSession.team_id,
+            user: m.id,
+            channel: m.dm
+          }
+        }
+        var sentMessage = $replyChannel.sendReplace(msg, 'food.admin.waiting_for_orders', {
+          type: msg.origin,
+          data: dashboard
+        })
+        sentMessage.then(function(result) {
+          if(result.source.user === admin.id){
+            foodSession.tracking.confirmed_orders_msg = result._id
+            foodSession.save()
+          }
+        })
       }
-    }
-
-    var sentMessage = yield $replyChannel.send(msg, 'food.admin.waiting_for_orders', {
-      type: msg.origin,
-      data: dashboard
     })
-    foodSession.tracking.confirmed_orders_msg = sentMessage._id
-    yield foodSession.save()
   }
 
   //
@@ -285,7 +291,11 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   //
   if (foodSession.confirmed_orders.length >= foodSession.team_members.length) {
     // take admin to order confirm, not sure if i need to look this up again but doing it for assurance
+
     var adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
+    if(!adminMsg){
+      adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})  //there should be a better way to handle the race condition with the above foodSession.save()
+    }
     yield handlers['food.admin.order.confirm'](adminMsg, true)
   } else {
     logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSession.team_members, 'id'), foodSession.confirmed_orders))
@@ -306,7 +316,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     fallback: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    callback_id: 'address_confirm'
+    callback_id: 'address_confirm',
+ 
   }
 
   var mainAttachment = {
@@ -347,7 +358,9 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     }
   })
 
-  if (foodSession.tip.percent === 'cash') foodSession.tip_amount = 0.00
+
+
+  if (foodSession.tip.percent === 'cash') foodSession.tip.amount = 0.00
 
   try {
     var order = yield api.createCartForSession(foodSession)
@@ -396,7 +409,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         return _.includes(discounts.teams, foodSession.team_id)
       })
 
-      foodSession.main_amount = order.total + foodSession.service_fee + order.tax + order.delivery_fee + order.convenience_fee
+      foodSession.main_amount = order.total + foodSession.service_fee + order.delivery_fee + order.convenience_fee
+
       if (discountAvail) {
         // this is literally needed to prevent rounding errors
         if (foodSession.coupon.used === false) {
@@ -494,8 +508,16 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         fallback: 'Checkout Total',
         text: `*Cart Subtotal:* ${foodSession.order.subtotal.$}${deliveryDiscount}\n` +
               `*Taxes:* ${foodSession.order.tax.$}\n` +
-              `*Delivery Fee:* ${foodSession.order.delivery_fee.$}${convenienceFee}\n` +
-              `*Service Fee:* ${foodSession.service_fee.$}\n` +
+              `*Delivery Fee:* ${foodSession.order.delivery_fee.$}${convenienceFee}\n`,
+        'callback_id': 'food.admin.cart.info',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'mrkdwn_in': ['text']
+      }
+
+       var infoAttachment2 = {
+        fallback: 'Checkout Total2',
+        text: `*Service Fee:* ${foodSession.service_fee.$}\n` +
               `*Tip:* ${foodSession.tip.amount.$}\n`,
         'callback_id': 'food.admin.cart.info',
         'color': '#3AA3E3',
@@ -504,14 +526,14 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }
 
       if (discountAvail) {
-        infoAttachment.text += `\n*Coupon:* -${foodSession.discount_amount.$}`
+        infoAttachment2.text += `\n*Coupon:* -${foodSession.discount_amount.$}`
       }
 
       if (foodSession.instructions) {
-        infoAttachment.text = `*Delivery Instructions*: _${foodSession.instructions}_\n` + infoAttachment.text
+        infoAttachment2.text = infoAttachment2.text + `*Delivery Instructions*: _${foodSession.instructions}_\n`
       }
 
-      response.attachments = _.flatten([mainAttachment, itemAttachments, tipAttachment, infoAttachment, finalAttachment]).filter(Boolean)
+      response.attachments = _.flatten([mainAttachment, itemAttachments, tipAttachment, infoAttachment, infoAttachment2, finalAttachment]).filter(Boolean)
     } else {
       // some sort of error
       foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -524,16 +546,34 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         attachment_type: 'default'
       }
       response.attachments = _.flatten([mainAttachment, itemAttachments, finalAttachment]).filter(Boolean)
+      response.attachments.push({
+        'text': 'Do you want to restart the order or end the order?',
+        'fallback': 'Do you want to restart the order or end the order?',
+        'attachment_type': 'default',
+        'mrkdwn_in': ['text'],
+        'actions': [{
+          'name': 'food.admin.select_address',
+          'text': 'Restart Order',
+          'type': 'button',
+          'style': 'primary',
+          'value': 'food.admin.select_address'
+        }, {
+          'name': 'food.exit.confirm_end_order',
+          'text': 'End Order',
+          'type': 'button',
+          'value': 'food.exit.confirm_end_order'
+        }]
+       })
     }
   } catch (err) {
     logging.error('error with creating cart payment for some reason', err)
   }
 
-  if (replace) {
-    $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  } else {
+  //if (replace) {
+  //  $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
+  //} else {
     $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  }
+  //}
 }
 
 handlers['food.order.instructions'] = function * (message) {

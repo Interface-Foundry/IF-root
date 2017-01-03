@@ -341,6 +341,16 @@ queue.topic('incoming').subscribe(incoming => {
     if (switchMode(message)) {
       message.mode = switchMode(message);
       if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
+      if (message.mode.match(/(team)/)) {
+        let team = yield db.Slackbots.findOne({
+          'team_id': message.source.team
+        }).exec();
+        let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+        let allow = isAdmin || team.meta.office_assistants == 0;
+        if (!allow) {
+          message.mode = 'shopping'
+        }
+      }
       yield message.save();
     }
 

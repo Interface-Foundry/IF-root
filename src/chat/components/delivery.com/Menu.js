@@ -340,6 +340,7 @@ function nodeOptions (node, cartItem, validate, message) {
           all.push({
             'name': 'More Options',
             'fallback': 'More Options',
+            'callback_id': 'More Options',
             'actions': [{
               'name': 'food.item.loadmore',
               'text': 'More Options',

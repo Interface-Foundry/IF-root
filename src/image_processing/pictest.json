@@ -1,0 +1,286 @@
+{
+  "origin": "slack",
+  "cuisines": [
+    "Mexican"
+  ],
+  "location": {
+    "street": "4301 FAIRFAX DR 100",
+    "city": "ARLINGTON",
+    "state": "VA",
+    "zip": "22203",
+    "longitude": -77.112839,
+    "latitude": 38.882221,
+    "landmark": "Corner of N Fairfax Dr",
+    "extra": [],
+    "distance": 5.5675165133663,
+    "lmp_range": ""
+  },
+  "ordering": {
+    "availability": {
+      "active": true,
+      "pickup": false,
+      "delivery": true,
+      "pickup_supported": false,
+      "delivery_supported": true,
+      "last_pickup_time": null,
+      "last_delivery_time": "2016-12-19 19:45:00",
+      "next_pickup_time": null,
+      "next_delivery_time": null,
+      "next_pickup_timestamp": null,
+      "next_delivery_timestamp": null,
+      "pickup_estimate": 5,
+      "delivery_estimate": 60,
+      "laundry_window_minutes": null
+    },
+    "payment_types": [
+      "credit",
+      "gift card",
+      "promotions"
+    ],
+    "is_rds": true,
+    "rds_name": "Takeout Taxi - Arlington",
+    "time_needed": 30,
+    "specials": [],
+    "last_or_next_order_time": "2016-12-19 19:45:00",
+    "minutes_left_for_ASAP": 155,
+    "order_type": null,
+    "minimum": 30,
+    "order_minimum": {
+      "delivery": {
+        "lowest": 30,
+        "highest": 30
+      },
+      "pickup": 0
+    },
+    "fees": {
+      "sales_tax": 0.1,
+      "delivery_charge": 8.99,
+      "delivery_percent": 0,
+      "other_fees": [
+        {
+          "description": "Convenience Fee",
+          "flat_fee": 0,
+          "percent": 0.101
+        }
+      ]
+    },
+    "disable_tip": false,
+    "delivery_processes_card": true,
+    "is_open": true,
+    "delivery_charge": 8.99,
+    "delivery_percent": 0,
+    "anonymous_cart_price": 0,
+    "enabled_last_mile_providers": []
+  },
+  "summary": {
+    "name": "UNCLE JULIO'S RIO GRANDE CAFE-WASHINGTON, DC)",
+    "phone": "703-578-4325",
+    "description": "",
+    "overall_rating": 40,
+    "num_ratings": 2,
+    "star_ratings": 2,
+    "price_rating": 3,
+    "type": "R",
+    "type_label": "Restaurant",
+    "notes": [],
+    "cuisines": [
+      "Mexican"
+    ],
+    "all_cuisines": [
+      "Mexican"
+    ],
+    "url": {
+      "geo_tag": "arlington",
+      "short_tag": "-rio-grande-cafe-washington-dc-new-",
+      "merchant_type": "restaurant",
+      "complete": "https://www.delivery.com/cities/arlington/categories/restaurant/-rio-grande-cafe-washington-dc-new-",
+      "microsite": null
+    },
+    "activation_date": "2012-11-26",
+    "last_activation_date": "2012-11-26",
+    "last_deactivation_date": null,
+    "menu_template": "M",
+    "merchant_logo": "https://static.delivery.com/merchant_logo.php?id=71471",
+    "merchant_logo_raw": "https://static.delivery.com/merchant_logo.php?w=0&h=0&id=71471",
+    "header_images": [
+      {
+        "height": 160,
+        "width": 320,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432223337555dfe6999270.jpg"
+      },
+      {
+        "height": 160,
+        "width": 1024,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432223337555dfe69aeeb6.jpg"
+      },
+      {
+        "height": 320,
+        "width": 640,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432223337555dfe69d107e.jpg"
+      },
+      {
+        "height": 160,
+        "width": 1920,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432223337555dfe69e5937.jpg"
+      },
+      {
+        "height": 160,
+        "width": 768,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432223338555dfe6a12632.jpg"
+      },
+      {
+        "height": 300,
+        "width": 1920,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432223338555dfe6a2b077.jpg"
+      },
+      {
+        "height": 480,
+        "width": 1080,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432223338555dfe6a460c0.jpg"
+      },
+      {
+        "height": 320,
+        "width": 1536,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432223338555dfe6a66d3d.jpg"
+      },
+      {
+        "height": 160,
+        "width": 320,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302740555f34944bfdd.jpg"
+      },
+      {
+        "height": 160,
+        "width": 1024,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302740555f349464b57.jpg"
+      },
+      {
+        "height": 320,
+        "width": 640,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302740555f3494a34e6.jpg"
+      },
+      {
+        "height": 160,
+        "width": 1920,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302740555f3494c19af.jpg"
+      },
+      {
+        "height": 160,
+        "width": 768,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302740555f3494da2d7.jpg"
+      },
+      {
+        "height": 300,
+        "width": 1920,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302741555f349503b7b.jpg"
+      },
+      {
+        "height": 480,
+        "width": 1080,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302741555f349521195.jpg"
+      },
+      {
+        "height": 320,
+        "width": 1536,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302741555f349541716.jpg"
+      },
+      {
+        "height": 160,
+        "width": 320,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302783555f34bf0470b.jpg"
+      },
+      {
+        "height": 160,
+        "width": 1024,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302783555f34bf19941.jpg"
+      },
+      {
+        "height": 320,
+        "width": 640,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302783555f34bf3381f.jpg"
+      },
+      {
+        "height": 160,
+        "width": 1920,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302783555f34bf54600.jpg"
+      },
+      {
+        "height": 160,
+        "width": 768,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302783555f34bf9622e.jpg"
+      },
+      {
+        "height": 300,
+        "width": 1920,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302783555f34bfcd836.jpg"
+      },
+      {
+        "height": 480,
+        "width": 1080,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302783555f34bfeae05.jpg"
+      },
+      {
+        "height": 320,
+        "width": 1536,
+        "path": "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302784555f34c0168fd.jpg"
+      }
+    ],
+    "categories": [
+      {
+        "name": "Restaurant",
+        "id": 1
+      }
+    ],
+    "category_groups": [
+      {
+        "name": "Food",
+        "id": 1
+      }
+    ],
+    "has_upc": false,
+    "cuisine_weight": 1,
+    "logistics_enabled": false,
+    "re_order_count": 0,
+    "recommended_items": {
+      "854": {
+        "unique_id": 854,
+        "navigation_id": "E854",
+        "name": "CHICKEN FAJITA COBB SALAD",
+        "price": "14.99",
+        "description": "Mixed field greens, mesquite grilled chicken, bacon, sliced avocado, roasted corn, tomatoes, black beans, queso fresco and tortilla strips with three pepper ranch on the side.",
+        "rating": "0.21"
+      },
+      "880": {
+        "unique_id": 880,
+        "navigation_id": "E880",
+        "name": "JUANITA'S PLATTER",
+        "price": "15.99",
+        "description": "Ground beef enchilada with agave queso sauce, pulled chicken enchilada with creamy hatch chile sauce, one crispy taco with beef & one pork tamale with New Mexico red sauce.",
+        "rating": "0.21"
+      }
+    },
+    "is_promoted": false,
+    "promoted_priority": null,
+    "merchant_main": null,
+    "banner_ad": {
+      "priority": null,
+      "url": null,
+      "active": false
+    },
+    "has_ordered": false,
+    "menu_has_images": false
+  },
+  "url": "https://static.delivery.com/merchant_logo.php?id=71471",
+  "yelp_rating": {
+    "restaurant_id": 71471,
+    "name": "Uncle Julio's",
+    "image_url": "https://s3-media3.fl.yelpcdn.com/bphoto/rd-N8lrnlL7MYVa4KIciNw/ms.jpg",
+    "is_claimed": 1,
+    "review_count": 436,
+    "rating": 3.5,
+    "rating_img_url_small": "https://s3-media1.fl.yelpcdn.com/assets/2/www/img/2e909d5d3536/ico/stars/v1/stars_small_3_half.png",
+    "rating_img_url_large": "https://s3-media3.fl.yelpcdn.com/assets/2/www/img/bd9b7a815d1b/ico/stars/v1/stars_large_3_half.png",
+    "restaurant_biz_id_reference_id": 256,
+    "business_id": "uncle-julios-arlington-2",
+    "reviews": []
+  }
+}

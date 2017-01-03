@@ -1,0 +1,113 @@
+image: docker:1.13-rc
+variables:
+  GIT_STRATEGY: fetch
+  privileged: "true"
+  GKE_REGISTRY: https://gcr.io
+  KIP_REGISTRY: gcr.io/kip-styles
+  DOCKER_HOST: tcp://127.0.0.1:2375
+  GCLOUD_SA: gitlab@kip-styles.iam.gserviceaccount.com
+  KUBERNETES_SA: kubernetes@kip-styles.iam.gserviceaccount.com
+  KUBE_CLUSTER: kip
+  PROJECT: kip-styles
+
+services:
+  - docker:1.13-rc-dind
+
+cache:
+  key: "$CI_BUILD_STAGE/$CI_BUILD_REF_NAME"
+  untracked: true
+
+stages:
+  - test
+  - build
+  - deploy
+
+
+.build_template: &build_defintion
+  stage: build
+  only:
+    - dev
+  before_script:
+    - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
+  script:
+    # - docker pull $KIP_REGISTRY/$IMAGE_NAME:latest
+    - docker build --cache-from $KIP_REGISTRY/$IMAGE_NAME:latest -t $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF -f Dockerfiles/$IMAGE_NAME.Dockerfile .
+    - docker tag $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF $KIP_REGISTRY/$IMAGE_NAME:latest
+    - docker push $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/$IMAGE_NAME:latest
+
+.deploy_template: &deploy_defintion
+  image: google/cloud-sdk
+  stage: deploy
+  only:
+    - dev
+  before_script:
+    - echo $KUBERNETES_KEY > /tmp/KUBERNETES_KEY.json
+    - gcloud auth activate-service-account $KUBERNETES_SA --key-file=/tmp/KUBERNETES_KEY.json --project=$PROJECT
+    - gcloud config set compute/zone us-east1-b
+    - gcloud config set container/use_client_certificate True
+    - gcloud container clusters get-credentials $KUBE_CLUSTER
+  script:
+    - ls $DEPLOYMENT_DIR
+    - sed -i "s/IMAGE_TAG/$CI_BUILD_REF/" $DEPLOYMENT_DIR/$CONTEXT_FILE
+    - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
+  after_script:
+    - rm /tmp/KUBERNETES_KEY.json
+
+test:node:
+  image: node:6
+  stage: test
+  script:
+    - npm install
+    - npm install --only=dev
+    - npm install -g mocha
+    - NODE_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/parser/parser.test.js
+  cache:
+    paths:
+      - /usr/local/lib/node_modules
+      - node_modules/
+
+test:python:
+  image: python:3.5
+  stage: test
+  before_script:
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
+  script:
+    - pip install -q -r src/image_processing/requirements.txt
+    - python -c 'import site; print(site.getsitepackages())'
+    - pytest tests/picstitch/
+  cache:
+    paths:
+      - /usr/
+
+
+build:picstitch:
+  variables:
+    IMAGE_NAME: picstitch
+  <<: *build_defintion
+
+
+build:delivery_picstitch:
+  variables:
+    IMAGE_NAME: delivery_picstitch
+  <<: *build_defintion
+
+build:parser:
+  variables:
+    IMAGE_NAME: parser
+  <<: *build_defintion
+
+deploy:delivery_picstitch:
+  variables:
+    DEPLOYMENT_DIR: src/k8s/canary
+    CONTEXT_FILE: canary.delivery_picstitch.yaml
+  <<: *deploy_defintion
+
+deploy:picstitch:
+  variables:
+    DEPLOYMENT_DIR: src/k8s/canary
+    CONTEXT_FILE: canary.picstitch.yaml
+  <<: *deploy_defintion
+
