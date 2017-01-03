@@ -160,8 +160,12 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   if (foodSession.budget) {
     var max = 1.25 * foodSession.team_members.length * foodSession.budget;
-    merchants = merchants.filter(m => m.ordering.minimum <= max);
+    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
     // console.log(merchants[1]);
+    if (cheap_merchants.length == 0) {
+      return merchants
+    }
+    else return cheap_merchants
   }
 
   // next filter out restaurants that don't match the keyword if provided

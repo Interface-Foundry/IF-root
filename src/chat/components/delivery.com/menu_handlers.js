@@ -202,11 +202,11 @@ handlers['food.menu.quickpicks'] = function * (message) {
 
   //budget reminder
   if (foodSession.budget) {
-    if (Number(foodSession.user_budgets[message.user_id]) >= 1) {
+    if (Number(foodSession.user_budgets[message.user_id]) >= 2) {
       var text = `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`
     }
     else {
-      var text = `You have already exhausted your budget!`
+      var text = `_You have already exhausted your budget!_`
     }
     msg_json.attachments.push({
       'text': text,
