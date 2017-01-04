@@ -128,8 +128,7 @@ handlers['food.admin.confirm_budget'] = function * (message) {
     }
   });
 
-  yield $allHandlers['food.admin_polling_options'](message)
-  //make this a sendReplace
+  yield $allHandlers['food.admin_polling_options'](message) //TODO make it stop happening
 }
 
 module.exports = function (replyChannel, allHandlers) {

@@ -735,14 +735,6 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
   }
   foodSession.markModified('team_members')
 
-  if (lastOrdered.budget) {
-    foodSession.budget = lastOrdered.budget;
-    foodSession.user_budgets = {};
-    for (var i = 0; i < foodSession.team_members.length; i++) {
-      foodSession.user_budgets[foodSession.team_members[i].id] = foodSession.budget;
-    }
-  }
-
   yield foodSession.save()
 
   // create attachments, only including most recent merchant if one exists
@@ -757,14 +749,11 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     textWording = '\`' + foodSession.chosen_location.address_1 + '\`'
   }
 
-  var budgetWording = "?";
-  if (foodSession.budget) budgetWording = `, with a budget of $${foodSession.budget} per person?`;
-
   var msg_json = {
     'text': '',
     'attachments': [{
-      'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}${budgetWording}`,
-      'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}${budgetWording}?`,
+      'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
+      'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
       'mrkdwn_in': [
           'text'
         ],
