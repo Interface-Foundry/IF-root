@@ -10,11 +10,18 @@ var handlers = {}
 handlers['food.admin.team_budget'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  var budget_options;
+  var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
+  for (var i = 0; i < locations.length; i++) {
+    if (locations[i].address_1 == foodSession.chosen_location.address_1 && locations[i].zip_code == foodSession.chosen_location.zip_code) {
+      budget_options = locations[i].budgets;
+    }
+  }
+
   var msg_text = 'How much would you like each person on your team to spend on food?';
 
   var parseNumber = function (str) {
     var num = str.match(/([\d]+(?:\.\d\d)?)/);
-    // console.log('Regex returns:', num[1]);
     if (num) return num[1];
     else return null;
   }
@@ -23,22 +30,7 @@ handlers['food.admin.team_budget'] = function * (message) {
 
   if (message.text) {
     var num = parseNumber(message.text)
-    // if (num) {
-    //   if (num <=0) {
-    //      msg_text = "That's not a valid number"
-    //   }
-    //   else {
-    //     // individual_num = Math.round(num/foodSession.team_members.length)
-    //     // yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: num}})
-    //     // console.log('yielded, updated, etc')
-    //     msg_text = `To confirm, you want your team to spend around $${num} per person?`;
-    //     confirm = true;
-    //   }
-    // }
-    // else {
-    //   //send an oops didn't get that message
-    //   msg_text = "I'm sorry, I didn't understand that -- please type a number!"
-    // }
+
     message.data = {};
     message.data.value = {};
     message.data.value.budget = num;
@@ -62,17 +54,14 @@ handlers['food.admin.team_budget'] = function * (message) {
     ]
   }
 
-  // var lastTeamSession = yield db.Delivery.find({team_id: message.source.team}, {possible_budgets: 1}).sort('-time_started').limit(2).exec() //too big yikes
-  // lastTeamSession = lastTeamSession[1]
-
-  for (var i = 0; i < foodSession.possible_budgets.length; i++) {
+  for (var i = 0; i < budget_options.length; i++) {
     msg_json.attachments[0].actions.push({
       'name': 'food.admin.confirm_budget',
-      'text': `$${foodSession.possible_budgets[i]}`,
+      'text': `$${budget_options[i]}`,
       'style': 'default',
       'type': 'button',
       'value': {
-        budget: foodSession.possible_budgets[i],
+        budget: budget_options[i],
         new: true
       }
     })
@@ -103,13 +92,28 @@ handlers['food.admin.confirm_budget'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   if (message.data.value.new) {
-    var pbs = foodSession.possible_budgets;
-    for (var i = 0; i < pbs.length; i++) {
-      if (budget <= pbs[i]) {
-        pbs.splice(i, 0, budget);
-        break;
+
+    var budget_options;
+    var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
+    for (var i = 0; i < locations.length; i++) {
+      if (locations[i].address_1 == foodSession.chosen_location.address_1 && locations[i].zip_code == foodSession.chosen_location.zip_code) {
+        budget_options = locations[i].budgets;
+        var duplicate = false;
+        for (var j = 0; j < budget_options.length; j++) {
+          if (Number(budget) == Number(budget_options[j])) duplicate = true;
+          if (Number(budget) <= Number(budget_options[j])) {
+            budget_options.splice(j, (duplicate ? 1 : 0), budget);
+            break;
+          }
+        }
+        if (Number(budget) > Number(budget_options[budget_options.length])) {
+          budget_options.push(budget)
+        }
+        locations[i].budgets = budget_options
       }
     }
+
+    yield db.slackbots.update({team_id: message.source.team}, {$set: {'meta.locations': locations}})
   }
 
   var user_budgets = {};
@@ -120,8 +124,7 @@ handlers['food.admin.confirm_budget'] = function * (message) {
   yield db.Delivery.update({team_id: message.source.team, active: true}, {
     $set: {
       budget: budget,
-      user_budgets: user_budgets,
-      possible_budgets: (pbs ? pbs : foodSession.possible_budgets)
+      user_budgets: user_budgets
     }
   });
 
