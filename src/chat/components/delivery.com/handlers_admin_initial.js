@@ -724,7 +724,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
   foodSession.chosen_channel = lastOrdered.chosen_channel
   foodSession.chosen_restaurant = lastOrdered.chosen_restaurant
   foodSession.email_users = lastOrdered.email_users
-  
+
   if (lastOrdered.chosen_channel === 'just_me' || lastOrdered.team_members.length<1) {
     // possible last ordered just me is another admin
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
@@ -732,6 +732,15 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     foodSession.team_members = lastOrdered.team_members
   }
   foodSession.markModified('team_members')
+
+  if (lastOrdered.budget) {
+    foodSession.budget = lastOrdered.budget;
+    foodSession.user_budgets = {};
+    for (var i = 0; i < foodSession.team_members.length; i++) {
+      foodSession.user_budgets[foodSession.team_members[i].id] = foodSession.budget;
+    }
+  }
+
   yield foodSession.save()
 
   // create attachments, only including most recent merchant if one exists
@@ -745,14 +754,18 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
   } else {
     textWording = '\`' + foodSession.chosen_location.address_1 + '\`'
   }
+
+  var budgetWording = "?";
+  if (foodSession.budget) budgetWording = `, with a budget of $${foodSession.budget} per person?`;
+
   var msg_json = {
     'text': '',
     'attachments': [{
       'mrkdwn_in': [
           'text'
         ],
-      'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
-      'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
+      'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}${budgetWording}`,
+      'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}${budgetWording}?`,
       'callback_id': 'reordering_confirmation',
       'color': '#3AA3E3',
       'attachment_type': 'default',
