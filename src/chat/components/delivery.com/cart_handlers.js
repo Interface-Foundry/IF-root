@@ -111,8 +111,9 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
     json.attachments.push({
-      'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])}-ish left`,
-      'mrkdwn_in': ['text']
+      'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
+      'mrkdwn_in': ['text'],
+      'color': '#49d63a'
     });
   }
 
@@ -317,7 +318,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     fallback: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     callback_id: 'address_confirm',
- 
+
   }
 
   var mainAttachment = {

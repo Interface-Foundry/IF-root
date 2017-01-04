@@ -210,7 +210,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
     }
     msg_json.attachments.push({
       'text': text,
-      'mrkdwn_in': ['text']
+      'mrkdwn_in': ['text'],
+      'color': '#49d63a'
     });
   }
 
@@ -395,9 +396,15 @@ handlers['food.item.add_to_cart'] = function * (message) {
       return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
         type: 'slack',
         data: {
-          text: '`Please choose something cheaper`',
-          mrkdwn_in: ['text']
-        }
+        //   text: `Please choose something cheaper`,
+        //   mrkdwn_in: ['text'],
+        //   color: '#fc9600'
+          attachments: [{
+            color: '#fc9600',
+            fallback: 'the unfrugal are the devils\'s playthings',
+            text: 'Please choose something cheaper'
+          }]
+        },
       })
     }
 
