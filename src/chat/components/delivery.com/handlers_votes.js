@@ -760,7 +760,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
 
     var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
 
-    var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, user.id)
+    var merch_url = yield menu_utils.getUrl(foodSession, user.id)
 
     var mailOptions = {
       to: `<${m}>`,
@@ -784,7 +784,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     for (var i = 0 ; i < 3; i++) {
       mailOptions.html += '<tr>';
       for (var j = 0; j < 3; j++) {
-        var item_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, user.id, [quickpicks[3*i+j].id])
+        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
         mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `">`
         mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
       }

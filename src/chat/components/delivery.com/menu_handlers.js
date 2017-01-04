@@ -1,7 +1,6 @@
 'use strict'
 var _ = require('lodash')
 var co = require('co')
-var rp = require('request-promise')
 var stable = require('stable')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
@@ -148,7 +147,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   })
 
   //this is generating a different menu for each user, right?
-  var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, message.user_id)
+  var merch_url = yield menu_utils.getUrl(foodSession, message.user_id)
   var msg_json = {
     'text': `${foodSession.chosen_restaurant.name} - <${merch_url}|View Full Menu>`,
     'attachments': [

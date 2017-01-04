@@ -55,16 +55,17 @@ utils.sortMenu = function (foodSession, user, matchingItems) {
   return sortedMenu
 }
 
-utils.getUrl = function (rest_id, team_id, delivery_ObjectId, user_id, selected_items) {
+utils.getUrl = function (foodSession, user_id, selected_items) {
   console.log('getUrl called on', popoutUrl);
   if (!selected_items) selected_items = [];
   return rp({
     url: popoutUrl,
     method: 'POST',
     json: {
-      rest_id: rest_id,
-      team_id: team_id,
-      delivery_ObjectId: delivery_ObjectId,
+      rest_id: foodSession.chosen_restaurant.id,
+      team_id: foodSession.team_id,
+      delivery_ObjectId: foodSession._id,
+      budget: foodSession.budget,
       user_id: user_id,
       selected_items: selected_items
     }

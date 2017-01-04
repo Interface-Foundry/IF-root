@@ -55,11 +55,10 @@ app.post('/cafe', (req, res) => co(function * () {
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
-  console.log('menu found')
-
   ms.menu.data = result.raw_menu.menu;
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.userId = req.body.user_id;
+  ms.budget = req.body.budget;
   ms.merchant.id = rest_id;
   var merchant = yield Merchants.findOne({id: rest_id});
   ms.merchant.name = merchant.data.summary.name;
