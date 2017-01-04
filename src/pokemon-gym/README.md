@@ -1,9 +1,11 @@
 # Pokemon Gym
 
-**How to run on your dev machine**
-* cd to UI/
+**How to modify the UI on your dev machine**
+* cd to pokemon-gym/UI/material
 * npm install && bower install
-* gulp serve
+* cd to pokemon-gym/server
+* node app.js
+* go to localhost:9999 and log in with username: kip, password: vampirecat1200
 
 **How to add more pages**
 * add a link to UI/material/client/app/layout/sidebar.html
