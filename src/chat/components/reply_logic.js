@@ -84,7 +84,7 @@ function typing(message) {
 	queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
-function simplehome(message) {
+function simplehome(message, isAdmin) {
 
 	var slackreply = {
 		text: 'Hi! Thanks for using Kip 😊',
@@ -93,7 +93,7 @@ function simplehome(message) {
 			text: 'Click a mode to start using Kip',
 			color: '#3AA3E3',
 			callback_id: 'wow such home',
-			actions: card_templates.simple_home
+			actions: card_templates.simple_home(isAdmin)
 		}]
 	}
 	var msg = {
@@ -323,8 +323,12 @@ queue.topic('incoming').subscribe(incoming => {
 
     if (isCancelIntent(message)) {
       message.mode = 'shopping';
-      message.action = 'switch'
-      simplehome(message)
+      message.action = 'switch';
+      let team = yield db.Slackbots.findOne({
+        'team_id': message.source.team
+      }).exec();
+      let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+      simplehome(message, isAdmin)
       yield message.save();
       timer.stop();
       return

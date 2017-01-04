@@ -95,23 +95,23 @@ handlers['start'] = function * (message) {
   // Admin-only settings
   //
   if (admins && isAdmin) {
-    if (team.meta.status_interval != 'never' && team.meta.status_interval != 'monthly') {
-       attachments.push({text: 'Your team is set to receive last calls at *' + (team.meta.status_interval != 'daily' ? team.meta.weekly_status_day : '') + ' ' + team.meta.weekly_status_time + '*  on a ' + team.meta.status_interval + ' basis.'
-        + '\nYou can specify the time by saying something like: `8:00 am`'});
-    } else if (team.meta.status_interval == 'monthly') {
-       attachments.push({text: 'Your team is set to receive last calls on day *' + team.meta.weekly_status_date + '* of every month at *' + team.meta.weekly_status_time + '*  '
-        + '\nYou can specify the time by saying something like: `8:00 am`'});
-    } else if (team.meta.status_interval == 'never')    {
-       attachments.push({text: 'Your team is currently not receiving last call notifications.'});
-    }
-    attachments.push({
-      text: 'When do you want last calls to go out?',
-      color: color,
-      mrkdwn_in: ['text'],
-      fallback:'Settings',
-      actions: cardTemplate.settings_intervals(team.meta.status_interval),
-      callback_id: 'none'
-    })
+    // if (team.meta.status_interval != 'never' && team.meta.status_interval != 'monthly') {
+    //    attachments.push({text: 'Your team is set to receive last calls at *' + (team.meta.status_interval != 'daily' ? team.meta.weekly_status_day : '') + ' ' + team.meta.weekly_status_time + '*  on a ' + team.meta.status_interval + ' basis.'
+    //     + '\nYou can specify the time by saying something like: `8:00 am`'});
+    // } else if (team.meta.status_interval == 'monthly') {
+    //    attachments.push({text: 'Your team is set to receive last calls on day *' + team.meta.weekly_status_date + '* of every month at *' + team.meta.weekly_status_time + '*  '
+    //     + '\nYou can specify the time by saying something like: `8:00 am`'});
+    // } else if (team.meta.status_interval == 'never')    {
+    //    attachments.push({text: 'Your team is currently not receiving last call notifications.'});
+    // }
+    // attachments.push({
+    //   text: 'When do you want last calls to go out?',
+    //   color: color,
+    //   mrkdwn_in: ['text'],
+    //   fallback:'Settings',
+    //   actions: cardTemplate.settings_intervals(team.meta.status_interval),
+    //   callback_id: 'none'
+    // })
   }
   
   var buttons = cardTemplate.settings_menu;
@@ -161,7 +161,7 @@ handlers['back'] = function * (message) {
     text: 'Click a mode to start using Kip',
     color: '#3AA3E3',
     callback_id: 'wow such home',
-    actions: cardTemplate.simple_home
+    actions: cardTemplate.simple_home(true)
   }];
   request({
     method: 'POST',

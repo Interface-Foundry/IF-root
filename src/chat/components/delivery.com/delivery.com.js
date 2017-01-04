@@ -210,7 +210,7 @@ handlers['food.exit.confirm'] = function * (message) {
       text: 'Click a mode to start using Kip',
       color: '#3AA3E3',
       callback_id: 'wow such home',
-      actions: card_templates.simple_home
+      actions: card_templates.simple_home(true)
     }]
   }
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: slackreply})

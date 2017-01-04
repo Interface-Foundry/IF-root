@@ -240,7 +240,7 @@ handlers['get-admins.confirm'] = function * (message) {
         text: 'Click a mode to start using Kip',
         color: '#3AA3E3',
         callback_id: 'wow such home',
-        actions: cardTemplate.simple_home
+        actions: cardTemplate.simple_home(false)
       }]
     }
     var msg = {
