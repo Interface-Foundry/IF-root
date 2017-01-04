@@ -88,17 +88,8 @@ handlers['start'] = function * (message) {
   } else if (isAdmin) {
     adminText += '  You can *add admins* with `add @user`.'
   }
+
   attachments.push({text: adminText});
-  if (!isAdmin) {
-    //
-    // Last call alerts personal settings
-    //
-    if (currentUser && _.get(currentUser,'settings.last_call_alerts')) {
-      attachments.push({text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
-    } else {
-      attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
-    }
-  }
  
   //
   // Admin-only settings
@@ -537,7 +528,7 @@ handlers['add_or_remove'] = function * (message) {
           var userToBeNotified = yield db.Chatusers.findOne({id: id});
           var msg = new db.Message();
           msg.source = {};
-          msg.mode = 'settings';
+          msg.mode = 'onboard';
           msg.action = 'home';
           msg.source.team = team.team_id;
           msg.source.channel = userToBeNotified.dm;
@@ -546,17 +537,24 @@ handlers['add_or_remove'] = function * (message) {
           msg.thread_id = userToBeNotified.dm;
           var attachments = [];
           attachments.push({
-            text: '@' + currentUser.name + ' just made you an admin of Kip! You can now add or remove team members, checkout the team cart, start lunch orders, and more!',
-            // image_url: 'https://kipthis.com/kip_modes/mode_teamcart_collect.png',
-            color: '#45a5f4'
+          text: '@' + currentUser.name + ' just made you an admin of Kip!',
+          color: '#45a5f4'
           });
-           attachments.push({
-            image_url: "http://tidepools.co/kip/kip_menu.png",
-            text: 'Click a mode to start using Kip',
-            color: '#3AA3E3',
-            callback_id: 'wow such home',
-            actions: cardTemplate.simple_home
-          });
+          attachments.push({
+              image_url: "http://tidepools.co/kip/kip_menu.png",
+              text: 'We\'ll help you get started :) Choose a Kip mode below to start a tour',
+              fallback: 'Onboard',
+              color: '#45a5f4',
+              mrkdwn_in: ['text'],
+              actions: cardTemplate.slack_onboard_start,
+              callback_id: 'none'
+            })
+          attachments.push({
+              text: '',
+              mrkdwn_in: ['text'],
+              actions: cardTemplate.slack_onboard_default,
+              callback_id: 'none'
+            });
           msg.reply = attachments;
           yield msg.save();
           yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
