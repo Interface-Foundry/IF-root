@@ -204,11 +204,12 @@ app.post('/slackaction', next(function * (req, res) {
         }
         var chunkedButtons = _.chunk(buttons, 5);
         var newRow = {
-          text: buttonRow == 0 ? 'Which channels do you want to include? ' : '',
+          text: parsedIn.original_message.attachments[buttonRow + 1].text,
           actions: chunkedButtons[buttonRow],
           callback_id: 'none',
-          color: parsedIn.original_message.attachments[buttonRow+1].color || null
-        }
+          mrkdwn_in: ['text'],
+          color: parsedIn.original_message.attachments[buttonRow + 1].color || null
+        };
         json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
                                                            // maybe I just don't understand slack yet
         let stringOrig = JSON.stringify(json);
@@ -410,7 +411,8 @@ function* updateCartMsg(cart, parsedIn) {
     all[ele._id].added_by = ele.added_by;
     all[ele._id].title = ele.title;
     all[ele._id].price = ele.price;
-    all[ele._id].link = ele.link
+    all[ele._id].link = ele.link;
+    all[ele._id].ASIN = ele.ASIN;
     return all;
   }, {});
 
@@ -421,8 +423,7 @@ function* updateCartMsg(cart, parsedIn) {
   })
 
   let attachments = parsedIn.original_message.attachments.reduce((all, a) => {
-  	let item = itemData[a.callback_id];
-
+    let item = itemData[a.callback_id];
     if (a.callback_id && item) {
       let userString;
       a.actions = (item.showDetail || showEverything) ? [{
@@ -469,17 +470,24 @@ function* updateCartMsg(cart, parsedIn) {
         all.push(a);
         itemNum++;
       }
+      if (cart.error && cart.errorASIN && cart.errorASIN === item.ASIN) {
+        all.push({
+          text: cart.error,
+          color: '#fc9600',
+          callback_id: 'shrug',
+          attachment_type: 'default'
+        });
+      }
     } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-      a.text = (cart.items.length > 0) ? 
-        `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`:
-        'Looks like your cart is empty!'
+      a.text = (cart.items.length > 0) ?
+        `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>` :
+        'Looks like your cart is empty!';
       all.push(a);
-    } else if (a.text && !a.text.includes('Quantity:')) {
+    } else if (a.text && !a.text.includes('Quantity:') && !a.text.includes('Sorry, Amazon')) {
       all.push(a);
     }
     return all;
   }, []);
-
   attachments.push({
     text: '',
     callback_id: 'shrug',
@@ -490,7 +498,8 @@ function* updateCartMsg(cart, parsedIn) {
       'type': 'button',
       'value': 'home'
     }]
-  })
+  });
+
   parsedIn.original_message.attachments = attachments;
   request({
     method: 'POST',

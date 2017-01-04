@@ -23,6 +23,11 @@ stages:
   - deploy
 
 
+# ------------------------------------------------
+# TEMPLATES
+# ------------------------------------------------
+
+
 .build_template: &build_defintion
   stage: build
   only:
@@ -54,6 +59,11 @@ stages:
   after_script:
     - rm /tmp/KUBERNETES_KEY.json
 
+
+# ------------------------------------------------
+# TEST FOR NODE STUFF
+# ------------------------------------------------
+
 test:node:
   image: node:6
   stage: test
@@ -66,6 +76,11 @@ test:node:
     paths:
       - /usr/local/lib/node_modules
       - node_modules/
+
+
+# ------------------------------------------------
+# TEST FOR PYTHON STUFF
+# ------------------------------------------------
 
 test:python:
   image: python:3.5
@@ -82,22 +97,30 @@ test:python:
     paths:
       - /usr/
 
+# ------------------------------------------------
+# BUILD SECTION USING TEMPLATES
+# notes:
+# ------------------------------------------------
+
+# build:delivery_picstitch:
+#   variables:
+#     IMAGE_NAME: delivery_picstitch
+#   <<: *build_defintion
 
 build:picstitch:
   variables:
     IMAGE_NAME: picstitch
   <<: *build_defintion
 
-
-build:delivery_picstitch:
-  variables:
-    IMAGE_NAME: delivery_picstitch
-  <<: *build_defintion
-
 build:parser:
   variables:
     IMAGE_NAME: parser
   <<: *build_defintion
+
+# ------------------------------------------------
+# DEPLOYMENT SECTION USING TEMPLATES
+# notes:
+# ------------------------------------------------
 
 deploy:delivery_picstitch:
   variables:
