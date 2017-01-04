@@ -337,6 +337,7 @@ handlers['food.choose_address'] = function * (message) {
     foodSession.markModified('merchants')
     foodSession.markModified('cuisines')
     yield foodSession.save()
+    message.text = "";
     yield $allHandlers['food.admin.team_budget'](message)
   } else {
     throw new Error('this route does not handle text input')

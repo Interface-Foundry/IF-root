@@ -10,8 +10,7 @@ var handlers = {}
 handlers['food.admin.team_budget'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
-  var msg_text = 'How much would you like your team to spend on food?';
-
+  var msg_text = 'How much would you like each person on your team to spend on food?';
   // var next_mode = 'food.admin.team_budget';
   var confirm = false;
 
@@ -31,10 +30,10 @@ handlers['food.admin.team_budget'] = function * (message) {
          msg_text = "That's not a valid number"
       }
       else {
-        individual_num = Math.round(num/foodSession.team_members.length)
-        yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: individual_num}})
+        // individual_num = Math.round(num/foodSession.team_members.length)
+        yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: num}})
         console.log('yielded, updated, etc')
-        msg_text = `To confirm, you want your team to spend around $${num}, which works out to around $${individual_num} per person.`;
+        msg_text = `To confirm, you want your team to spend around $${num} per person?`;
         confirm = true;
       }
     }
@@ -69,17 +68,53 @@ handlers['food.admin.team_budget'] = function * (message) {
             'style': 'default',
             'type': 'button',
             'value': 'food.admin.team_budget'
+          }
+        ] : [
+          {
+            'name': 'passthrough',
+            'text': '$10',
+            'style': 'default',
+            'type': 'button',
+            'value': {
+              budget: 10
+            }
+          },
+          {
+            'name': 'food.admin.confirm_budget',
+            'text': '$15',
+            'style': 'default',
+            'type': 'button',
+            'value': {
+              budget: 15
+            }
+          },
+          {
+            'name': 'food.admin.confirm_budget',
+            'text': '$20',
+            'style': 'default',
+            'type': 'button',
+            'value': {
+              budget: 20
+            }
           },
           {
             'name': 'passthrough',
-            'text': '< Back',
+            'text': 'None',
             'style': 'default',
             'type': 'button',
             'value': 'food.admin_polling_options'
           }
-        ] : [])
+        ])
       }
     ]
+  }
+
+  if (!confirm && !message.text) {
+    msg_json.attachments.push({
+      'fallback': 'Search the menu',
+      'text': '✎ Or type a budget below',
+      'mrkdwn_in': ['text']
+    })
   }
 
   $replyChannel.sendReplace(message, 'food.admin.team_budget', {type: message.origin, data: msg_json})
@@ -87,16 +122,18 @@ handlers['food.admin.team_budget'] = function * (message) {
 
 handlers['food.admin.confirm_budget'] = function * (message) {
 
+  budget = message.data.value.budget;
+
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   var user_budgets = {};
   for (var i = 0; i < foodSession.team_members.length; i++) {
-    user_budgets[foodSession.team_members[i].id] = foodSession.temp_budget;
+    user_budgets[foodSession.team_members[i].id] = budget;
   }
 
   yield db.Delivery.update({team_id: message.source.team, active: true}, {
     $set: {
-      budget: foodSession.temp_budget,
+      budget: budget,
       user_budgets: user_budgets
     },
     $unset: {temp_budget: ""}
