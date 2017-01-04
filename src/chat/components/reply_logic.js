@@ -655,7 +655,6 @@ function execute(message) {
 		var messages = yield message.execute.reduce((messages, exec) => {
 				var route = exec.mode + '.' + exec.action
 				kip.debug('route: ', route, 'exec: ', exec)
-
 				//switch between reply_logic and delivery.com.js as necessary
 				var message_promises = exec.mode.match(/^(shopping|settings|team|cart|exit)$/) ? shopping[route](message, exec) : food[route](message);
 				if (!message_promises) {
