@@ -48,6 +48,7 @@
       <div v-if="showCart"  class="cart">
         <div class="cart-header">
           <h3> Your Kip Cafe order</h3>
+          <small v-if="remainingBudget"> You have {{remainingBudget.toFixed(2)}} left to spend</small>
         </div>
         <div class="cart-body">
           <ul>
@@ -66,9 +67,8 @@
           </div>
         </div>
         <div class="cart-footer">
-          <button v-if="minimumMet" class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
-          <button class="base-btn" disabled v-if="!minimumMet"> There is a minimum order of ${{merchant.minimum}}</button>
-
+          <button v-if="!exceedBudget" class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
+          <button class="base-btn" disabled v-if="exceedBudget"> There's only ${{budget.toFixed(2)}} budgeted for this order.</button>
         </div>
       </div>
       <div v-else><img src="images/pineapple.png">Your cart is empty</div>
@@ -97,7 +97,7 @@
   </script>
   <script type="text/x-template" id="option-set">
     <div>
-      <p> {{option.name}}</p>     
+      <p> {{option.name}}</p>
       <div class="option-body">
         <choice v-on:options="updateOptions" v-for="choice in option.children" :option=option :choice=choice :type="inputType">
       </div>
@@ -176,8 +176,3 @@
   <script src="js/main.js"></script>
 </body>
 </html>
-      
-      
-
-
-

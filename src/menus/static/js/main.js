@@ -316,7 +316,7 @@ var app = new Vue({
     selectedItem: null,
     editingItem: null,
     cartItems: [],
-    reachedMinimum: false
+    budget: 0,
   },
   methods: {
     setSelectedItem: function(item) {
@@ -359,11 +359,18 @@ var app = new Vue({
     showCart: function() {
      return this.cartItems.length ? true : false
     },
-    minimumMet: function() {
-      if (this.merchant.minimum) {
-        return this.cartItemsTotal >= this.merchant.minimum ? true : false
+    exceedBudget: function() {
+      if (this.budget) {
+        return this.cartItemsTotal > this.budget ? true : false
       } else {
         return true
+      }
+    },
+    remainingBudget: function() {
+      if ((this.budget - this.cartItemsTotal) > 1.50) {
+        return this.budget - this.cartItemsTotal
+      } else {
+        return 0
       }
     }
   },
@@ -378,6 +385,7 @@ var app = new Vue({
     var key = window.location.search.split("=")[1]
     var ms = axios.post('/session', {session_token: key})
     .then((response) => {
+
       var menuData = response.data.menu.data
       var menu;
       if (menuData.length > 1) {
@@ -387,7 +395,7 @@ var app = new Vue({
       }
       this.menu = menu;
       this.merchant = response.data.merchant;
-
+      this.budget = (response.data.budget * 1.25)
       if (response.data.selected_items.length) {
         var preSelectedId = response.data.selected_items[0]
         this.menu.forEach(function(item) {
