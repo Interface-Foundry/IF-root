@@ -1,7 +1,7 @@
 'use strict'
 var _ = require('lodash')
 var co = require('co')
-var rp = require('request-promise')
+var stable = require('stable')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
@@ -42,7 +42,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
     if (matchingItems !== null) {
       logging.info('we possibly found a food match, hmm')
     } else {
-      logging.info('todo send "couldnot find anything matching text" message to user')
+      logging.info('todo send "could not find anything matching text" message to user')
       matchingItems = []
     }
   } else {
@@ -104,6 +104,21 @@ handlers['food.menu.quickpicks'] = function * (message) {
 
   var sortedMenu = menu_utils.sortMenu(foodSession, user, matchingItems);
 
+  //~~~~~
+  //move items that do not meet the user's current budget to after those that do
+  //using a stable sort, to preserve the order of the previous sort within those two categories
+  if (foodSession.budget) {
+    var current_ub = foodSession.user_budgets[message.user_id] * 1.25;
+    stable.inplace(sortedMenu, function (a, b) { //sorts b before a if true
+      //if b is under-budget and a is not, sort b before a
+      console.log('this is a thing being sorted', a);
+      if (a.price > current_ub && b.price < current_ub) return true;
+      else return false;
+      //but otherwise maintain already-sorted order
+    });
+  }
+  //~~~~~
+
   var menuItems = sortedMenu.slice(index, index + 3).map(i => {
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
@@ -132,7 +147,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   })
 
   //this is generating a different menu for each user, right?
-  var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, message.user_id)
+  var merch_url = yield menu_utils.getUrl(foodSession, message.user_id)
   var msg_json = {
     'text': `${foodSession.chosen_restaurant.name} - <${merch_url}|View Full Menu>`,
     'attachments': [
@@ -189,6 +204,20 @@ handlers['food.menu.quickpicks'] = function * (message) {
         keyword: keyword
       }
     })
+  }
+
+  //budget reminder
+  if (foodSession.budget) {
+    if (Number(foodSession.user_budgets[message.user_id]) >= 2) {
+      var text = `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`
+    }
+    else {
+      var text = `_You have already exhausted your budget!_`
+    }
+    msg_json.attachments.push({
+      'text': text,
+      'mrkdwn_in': ['text']
+    });
   }
 
   //adding writing prompt
@@ -353,9 +382,43 @@ handlers['food.item.instructions.submit'] = function * (message) {
 }
 
 handlers['food.item.add_to_cart'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+
+  //~~~budget~~~//
+
+  if (foodSession.user_budgets) {
+    var budgets = foodSession.user_budgets;
+    var menu = Menu(foodSession.menu);
+    console.log('menu.getCartItemPrice', menu.getCartItemPrice(userItem))
+    console.log('userItem qty', userItem.item.item_qty);
+    var itemPrice = menu.getCartItemPrice(userItem);
+
+    if (itemPrice > (budgets[userItem.user_id]) * 1.25) {
+      yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
+      return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
+        type: 'slack',
+        data: {
+          text: '`Please choose something cheaper`',
+          mrkdwn_in: ['text']
+        }
+      })
+    }
+
+    budgets[userItem.user_id] -= itemPrice;
+
+    yield db.Delivery.update(
+      {team_id: message.source.team, active: true},
+      {$set: {
+        user_budgets: budgets
+      }}
+    );
+  }
+
+  //~~~budget~~~//
+
   var errJson = cart.menu.errors(userItem)
   if (errJson) {
     kip.debug('validation errors, user must fix some things')

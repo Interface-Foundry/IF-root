@@ -8,6 +8,7 @@ var menuSessionSchema = mongoose.Schema({
     type: String,
     index: true
   },
+  budget: Number,
   menu: {
     data: {}
   },

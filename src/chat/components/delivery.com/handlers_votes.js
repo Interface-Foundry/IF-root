@@ -157,6 +157,18 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
 
+  // filter out restaurants whose delivery minimum is significantly above the team's total budget
+
+  if (foodSession.budget) {
+    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
+    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
+    // console.log(merchants[1]);
+    if (cheap_merchants.length == 0) {
+      return merchants
+    }
+    else return cheap_merchants
+  }
+
   // next filter out restaurants that don't match the keyword if provided
   if (keyword) {
     var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, {
@@ -748,8 +760,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
 
     var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
 
-    var merch_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, user.id)
-    console.log('merch_url********', merch_url)
+    var merch_url = yield menu_utils.getUrl(foodSession, user.id)
 
     var mailOptions = {
       to: `<${m}>`,
@@ -761,26 +772,26 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
     var quickpicks = sortedMenu.slice(0, 9);
 
-    function testFunction () {
-      console.log('this is a test')
+    function formatItem (i, j) {
+      return `<table>` +
+      `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
+      `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
+      `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
+      `<tr><p style="color:#fa2d48">Add to Cart</p></tr>` +
+      `</table>`;
     }
 
     for (var i = 0 ; i < 3; i++) {
       mailOptions.html += '<tr>';
       for (var j = 0; j < 3; j++) {
-        var item_url = yield menu_utils.getUrl(foodSession.chosen_restaurant.id, foodSession.team_id, foodSession._id, user.id, [quickpicks[3*i+j].id])
-        console.log('item URL$$$$$$', item_url)
-        mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `"><table><tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
-        `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
-        `<tr><td>${quickpicks[3*i+j].description}</td></tr>`;
-        mailOptions.html += '</table></a></td>';
+        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
+        mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `">`
+        mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
       }
       mailOptions.html += '</tr>';
     }
 
     mailOptions.html += '</table></body></html>';
-
-    console.log('MAIL OPTIONS', mailOptions)
 
     logging.info('mailOptions', mailOptions);
     mailer_transport.sendMail(mailOptions, function (err) {
@@ -789,7 +800,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   }
 
   foodSession.team_members.map(m => {
-    console.log(m)
     var newMessage = {
       incoming: false,
       thread_id: m.dm,

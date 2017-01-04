@@ -1,0 +1,61 @@
+#!/bin/bash
+
+##
+# graham
+# info-
+#   none atm
+
+# FROM THE OG ENTRYPOINT FILE
+DATA_DIR="/etc/gitlab-runner"
+LOCAL_CA_PATH="/usr/local/share/ca-certificates/ca.crt"
+CA_CERTIFICATES_PATH=${CA_CERTIFICATES_PATH:-$DATA_DIR/certs/ca.crt}
+
+# GITLAB-RUNNER VARIABLES
+export REGISTER_NON_INTERACTIVE="true"
+export CONFIG_FILE="/etc/gitlab-runner/config.toml"
+export CI_SERVER_URL="https://gitlab.com/ci"
+export REGISTRATION_TOKEN="hdiA6LTw6E6b-UsgMpjJ"
+export RUNNER_ENV="DOCKER_HOST=tcp://127.0.0.1:2375"
+export RUNNER_LIMIT="2"
+export RUNNER_EXECUTOR="kubernetes"
+export RUNNER_NAME="kubernetes-gitlab-runner"
+export KUBERNETES_IMAGE="docker:latest"
+export KUBERNETES_NAMESPACE="gitlab"
+export KUBERNETES_PRIVILEGED="true"
+
+
+# MINIO VARIABLES
+export CACHE_TYPE="s3"
+export S3_SERVER_ADDRESS="gitlab-cache-minio.gitlab.svc.cluster.local:9000"
+export S3_ACCESS_KEY="DNAMPOSFN7EXAKIAIOLE"
+export S3_SECRET_KEY="ENAMPLEKEYwG/bPxRfiCYEXJalrXUtnFEMI/K7MD"
+export S3_BUCKET_NAME="runner"
+export S3_CACHE_INSECURE="true"
+export CACHE_SHARED="true"
+
+
+# gitlab-ci-multi-runner data directory
+# custom certificate authority path
+update_ca() {
+  echo "Updating CA certificates..."
+  cp "${CA_CERTIFICATES_PATH}" "${LOCAL_CA_PATH}"
+  update-ca-certificates --fresh >/dev/null
+}
+if [ -f "${CA_CERTIFICATES_PATH}" ]; then
+  # update the ca if the custom ca is different than the current
+  cmp --silent "${CA_CERTIFICATES_PATH}" "${LOCAL_CA_PATH}" || update_ca
+fi
+
+# set up the initial settings
+cat <<EOF > $CONFIG_FILE
+concurrent = 2
+check_interval = 5
+
+EOF
+
+# launch gitlab-ci-multi-runner passing all arguments
+gitlab-ci-multi-runner register
+
+cat $CONFIG_FILE
+
+exec gitlab-ci-multi-runner "$@"

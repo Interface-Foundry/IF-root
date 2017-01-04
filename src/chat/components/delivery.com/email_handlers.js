@@ -31,17 +31,18 @@ handlers['food.admin.team.remove_order_email'] = function * (message) {
 //~~~~~~~~~~//
 
 handlers['food.admin.team.delete_email'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
+  // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
 
-  if (foodSession.email_users.indexOf(e)) {
-    foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
-    yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
-  }
+  // if (foodSession.email_users.indexOf(e)) {
+  //   foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
+  //   yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
+  // }
 
   yield db.email_users.remove({team_id: message.source.team, email: e})
 
-  yield handlers['food.admin.team.email_members'](message);
+  // yield handlers['food.admin.team.email_members'](message);
+  yield handlers['food.admin.team.remove_order_email'](message)
 }
 
 //~~~~~~~~~~//
@@ -50,7 +51,6 @@ handlers['food.admin.team.email_members'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   var et = yield db.email_users.find({team_id: message.source.team});
-  console.log('emily taylor', Array.isArray(et), et);
 
   var index = parseInt(_.get(message, 'data.value.index')) || 0
   var inc = 4;
@@ -248,6 +248,9 @@ handlers['food.admin.team.confirm_email'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var email = foodSession.data.temp_email;
 
+  var admin = yield db.Chatusers.findOne({id: message.source.user})
+  // console.log('admin:', admin)
+
   function newId (n) {
     var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     var id = '';
@@ -260,11 +263,14 @@ handlers['food.admin.team.confirm_email'] = function * (message) {
   var eu = new db.Email_user({
     team_id: message.source.team,
     id: newId(10),
-    email: email
+    email: email,
+    tz: admin.tz,
+    tz_label: admin.tz_label,
+    tz_offset: admin.tz_offset
   });
 
   yield eu.save();
-  console.log('the new eu should have been saved');
+  console.log('new eu saved');
 
   var tm = foodSession.email_users;
   tm.push(eu.email);

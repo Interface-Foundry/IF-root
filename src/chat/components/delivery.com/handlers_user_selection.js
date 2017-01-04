@@ -53,7 +53,9 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     } else if (prevFoodSession.chosen_channel.id === 'just_me') {
       textWithPrevChannel = `Send poll for cuisine to _just me_ at \`${addr}\`?`
     } else {
-      textWithPrevChannel = `Send poll for cuisine to <#${prevFoodSession.chosen_channel.id}|${prevFoodSession.chosen_channel.name}> at \`${addr}\`?`
+      textWithPrevChannel = `Send poll for cuisine to <#${prevFoodSession.chosen_channel.id}|${prevFoodSession.chosen_channel.name}> at \`${addr}\``
+      if (prevFoodSession.budget) textWithPrevChannel += ` with a budget of $${prevFoodSession.budget}`
+      textWithPrevChannel += '?';
     }
     if(prevFoodSession.team_members.length < 1){
       foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
@@ -90,6 +92,12 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
+          },
+          {
+            'name': 'food.admin.team_budget',
+            'type': 'button',
+            'text': 'Set a Budget',
+            'value': 'food.admin.team_budget'
           },
           {
             'name': 'passthrough',
@@ -135,12 +143,18 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
 handlers['food.poll.confirm_send'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
+  var budget = foodSession.budget;
 
   if (_.get(foodSession, 'chosen_channel.id')) {
-    var textWithChannelMaybe = `Send poll for cuisine to <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\`?`
+    var textWithChannelMaybe = `Send poll for cuisine to <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
   } else {
-    textWithChannelMaybe = `Send poll for cuisine to the team members at \`${addr}\`?`
+    textWithChannelMaybe = `Send poll for cuisine to the team members at \`${addr}\``
   }
+
+  if (foodSession.budget) {
+    textWithChannelMaybe += `, with a budget of $${foodSession.budget} per person`;
+  }
+  textWithChannelMaybe += '?';
 
   var msg_json = {
     'attachments': [
@@ -166,6 +180,12 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'value': 'food.admin.team.members',
             'text': 'View Team Members',
             'type': 'button'
+          },
+          {
+            'name': 'food.admin.team_budget',
+            'type': 'button',
+            'text': 'Set a Budget',
+            'value': 'food.admin.team_budget'
           },
           {
             'name': 'food.admin.display_channels',

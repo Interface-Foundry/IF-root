@@ -4,6 +4,9 @@ var emailUserSchema = mongoose.Schema({
   team_id: String,
   id: String,
   name: String,
+  tz: String,
+  tz_offset: Number,
+  tz_label: String,
   platform: {
     type: String,
     default: 'email'
@@ -13,6 +16,30 @@ var emailUserSchema = mongoose.Schema({
     unique: true
   },
   is_admin: {
+    type: Boolean,
+    default: false
+  },
+  is_restricted: {
+    type: Boolean,
+    default: false
+  },
+  is_ultra_restricted: {
+    type: Boolean,
+    default: false
+  },
+  is_owner: {
+    type: Boolean,
+    default: false
+  },
+  is_primary_owner: {
+    type: Boolean,
+    default: false
+  },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  is_bot: {
     type: Boolean,
     default: false
   },

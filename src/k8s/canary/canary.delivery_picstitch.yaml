@@ -16,7 +16,7 @@ spec:
         run: delivery-picstitch
     spec:
       containers:
-      - image: gcr.io/kip-styles/delivery_picstitch:c96c27d
+      - image: gcr.io/kip-styles/delivery_picstitch:IMAGE_TAG
         imagePullPolicy: Always
         name: delivery-picstitch
         ports:

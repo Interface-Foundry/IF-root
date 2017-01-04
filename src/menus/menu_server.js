@@ -21,10 +21,7 @@ var replyChannel = new UserChannel(queue)
 // --------------------------------------------
 
 var cafeMenu = require('../chat/components/delivery.com/Menu.js');
-// var menuURL = 'http://e0616f78.ngrok.io'
 var menuURL = config.menuURL
-
-console.log('this is a speakerbox', menuURL)
 
 app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -57,10 +54,10 @@ app.post('/cafe', (req, res) => co(function * () {
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
-  console.log('menu found')
   ms.menu.data = result.raw_menu.menu;
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.userId = req.body.user_id;
+  ms.budget = req.body.budget;
   ms.merchant.id = rest_id;
   var merchant = yield Merchants.findOne({id: rest_id});
   ms.merchant.name = merchant.data.summary.name;
@@ -98,20 +95,25 @@ app.post('/order', function (req, res) {
       var order = req.body.order;
       var user_id = req.body.user_id;
       var deliv_id = req.body.deliv_id;
-      var deliv = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
+      var foodSession = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
       console.log('found the delivery object');
-      var cart = deliv.cart;
+      var cart = foodSession.cart;
 
       for (var i = 0; i < order.length; i++) {
         console.log(order[i]);
         cart.push({
           added_to_cart: true,
-          item: order[i], //end goal: cart[i].item.long_id = the long id :)
+          item: order[i],
           user_id: user_id
         });
       }
 
-      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart}});
+      var orders = foodSession.confirmed_orders
+      console.log('orders', orders)
+      orders.push(user_id)
+      console.log('orders plus a new one', orders)
+
+      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, confirmed_orders: orders}});
 
       //----------Message Queue-----------//
 
