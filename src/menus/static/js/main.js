@@ -370,7 +370,7 @@ var app = new Vue({
       if ((this.budget - this.cartItemsTotal) > 1.50) {
         return this.budget - this.cartItemsTotal
       } else {
-        return 0
+        return false
       }
     }
   },
