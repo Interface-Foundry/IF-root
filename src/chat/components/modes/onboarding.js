@@ -85,7 +85,7 @@ handlers['get-admins.response'] = function * (message) {
   var reply_admin = `Do you want me to take you on a short tour of Kip?`;
   var reply_user = `Why don't you try searching for something? Type something like 'headphones' to search`;
   var reply_failure = "I'm sorry, I couldn't quite understand that, can you clarify for me who manages office purchases? If you want to skip this part, just type 'skip' and we can move on."
-  var admins = []
+  var admins = [];
   var user_is_admin = false
   var team = yield db.Slackbots.findOne({
     'team_id': message.source.team
@@ -116,11 +116,46 @@ handlers['get-admins.response'] = function * (message) {
     team_id: team.team_id,
     is_bot: {$ne: true},
     deleted: {$ne: true}
-  }).select('id name');
-  users.map((u) => {
-    var re = new RegExp('\\b' + u.name + '\\b', 'i')
+  });
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  yield users.map( function * (u) {
+    var re = new RegExp('\\b' + u.id + '\\b', 'i');
     if (message.original_text.match(re)) {
       office_admins.push(u.id);
+      if (u.id != currentUser.id) {
+        var msg = new db.Message();
+        msg.source = {};
+        msg.mode = 'onboard';
+        msg.action = 'home';
+        msg.source.team = team.team_id;
+        msg.source.channel = u.dm;
+        msg.source.user = u.id;
+        msg.user_id = u.id;
+        msg.thread_id = u.dm;
+        var attachments = [];
+        attachments.push({
+          text: '@' + currentUser.name + ' just made you an admin of Kip!',
+          color: '#45a5f4'
+        });
+        attachments.push({
+            image_url: "http://tidepools.co/kip/kip_menu.png",
+            text: 'We\'ll help you get started :) Choose a Kip mode below to start a tour',
+            fallback: 'Onboard',
+            color: '#45a5f4',
+            mrkdwn_in: ['text'],
+            actions: cardTemplate.slack_onboard_start,
+            callback_id: 'none'
+          })
+        attachments.push({
+            text: '',
+            mrkdwn_in: ['text'],
+            actions: cardTemplate.slack_onboard_default,
+            callback_id: 'none'
+          });
+        msg.reply = attachments;
+        yield msg.save();
+        yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
+      }
     }
   });
   office_admins = _.uniq(office_admins);

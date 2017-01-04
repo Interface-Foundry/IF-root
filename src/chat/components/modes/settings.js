@@ -88,17 +88,8 @@ handlers['start'] = function * (message) {
   } else if (isAdmin) {
     adminText += '  You can *add admins* with `add @user`.'
   }
+
   attachments.push({text: adminText});
-  if (!isAdmin) {
-    //
-    // Last call alerts personal settings
-    //
-    if (currentUser && _.get(currentUser,'settings.last_call_alerts')) {
-      attachments.push({text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
-    } else {
-      attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
-    }
-  }
  
   //
   // Admin-only settings
@@ -451,8 +442,8 @@ handlers['set_date'] = function * (message) {
 }
 
 handlers['add_or_remove'] = function * (message) {
- var replies = [];
- var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var replies = [];
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var tokens = message.original_text.toLowerCase().trim().split(' ');
   var currentUser = yield db.Chatusers.findOne({id: message.source.user});
@@ -525,16 +516,48 @@ handlers['add_or_remove'] = function * (message) {
       msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
       return [msg]
     }
-    var shouldReturn = false;
     if (tokens[0] === 'add') {
       if(team.meta.p2p) {
          team.meta.p2p = false;
          kip.debug('P2P mode OFF');
          team.meta.office_assistants = [];
       }
-      userIds.map((id) => {
+      yield userIds.map(function * (id) {
         if (team.meta.office_assistants.indexOf(id) < 0) {
           team.meta.office_assistants.push(id);
+          var userToBeNotified = yield db.Chatusers.findOne({id: id});
+          var msg = new db.Message();
+          msg.source = {};
+          msg.mode = 'onboard';
+          msg.action = 'home';
+          msg.source.team = team.team_id;
+          msg.source.channel = userToBeNotified.dm;
+          msg.source.user = id;
+          msg.user_id = id;
+          msg.thread_id = userToBeNotified.dm;
+          var attachments = [];
+          attachments.push({
+          text: '@' + currentUser.name + ' just made you an admin of Kip!',
+          color: '#45a5f4'
+          });
+          attachments.push({
+              image_url: "http://tidepools.co/kip/kip_menu.png",
+              text: 'We\'ll help you get started :) Choose a Kip mode below to start a tour',
+              fallback: 'Onboard',
+              color: '#45a5f4',
+              mrkdwn_in: ['text'],
+              actions: cardTemplate.slack_onboard_start,
+              callback_id: 'none'
+            })
+          attachments.push({
+              text: '',
+              mrkdwn_in: ['text'],
+              actions: cardTemplate.slack_onboard_default,
+              callback_id: 'none'
+            });
+          msg.reply = attachments;
+          yield msg.save();
+          yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
         }
       })
     } else if (tokens[0] === 'remove') {
@@ -548,9 +571,7 @@ handlers['add_or_remove'] = function * (message) {
         }
       })
     }
-    if (shouldReturn) {
-      return;
-    }
+
     team.markModified('meta.office_assistants');
     yield team.save();
     var msg = message;

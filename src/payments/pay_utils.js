@@ -3,7 +3,6 @@ var request = require('request-promise')
 var _ = require('lodash')
 
 var payConst = require('./pay_const.js')
-var cc = require('./secrets/kip_cc.js')
 
 // tracking for food into cafe-tracking
 var Professor = require('../monitoring/prof_oak.js')
@@ -20,6 +19,13 @@ var queue = require('../chat/components/queue-mongo')
 var UserChannel = require('../chat/components/delivery.com/UserChannel')
 var replyChannel = new UserChannel(queue)
 // --------------------------------------------
+
+if (process.env.NODE_ENV === 'production') {
+  var cc = require('./secrets/kip_cc.js')
+} else {
+  cc = payConst.cc
+}
+
 
 /* this would be for kip to pay for an order once the user has successfully paid stripe
 *
