@@ -269,13 +269,11 @@ function replyLogic (incoming) {
         yield kipcart.addToCart(cart_id, cart_id, results, cart_type);
         logging.debug('added to cart')
         send_text_reply(message, 'Okay :) added that item to cart');
-        incoming.ack()
         timer.stop()
         return
       } catch (e) {
         yield send_text_reply(message, 'oops error, you might need to add that manually');
         timer.stop()
-        incoming.ack()
         return
       }
     }
@@ -331,7 +329,6 @@ function replyLogic (incoming) {
 
     if (isMenuChange(message)) {
       timer.stop();
-      incoming.ack()
       return yield shopping[_.get(message,'action')](message);
     }
     let isLink = yield processProductLink(message);
@@ -420,7 +417,6 @@ function replyLogic (incoming) {
       case 'food':
       case 'cafe':
         yield food(message)
-        return incoming.ack()
       case 'address':
         return
         break;
@@ -500,7 +496,6 @@ function replyLogic (incoming) {
         queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
       })
     }
-    incoming.ack()
     timer.stop()
   }).catch(kip.err)
 }
