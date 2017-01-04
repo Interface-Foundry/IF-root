@@ -23,6 +23,7 @@ var request = require('request')
 var requestPromise = require('request-promise');
 // var init_team = require("../init_team.js");
 var app = express();
+var replyLogic = require('../reply_logic')
 
 app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded({extended:true}));
@@ -150,7 +151,7 @@ app.post('/slackaction', next(function * (req, res) {
           message.action = 'begin'
           message.text = 'food'
           message.save().then(() => {
-            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+            replyLogic({ data: message })
           })
       }
       else if (simple_command == 'shopping_btn') {
@@ -158,7 +159,7 @@ app.post('/slackaction', next(function * (req, res) {
           message.action = 'initial'
           message.text = 'exit'
           message.save().then(() => {
-            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+            replyLogic({ data: message })
           })
       }
       else if (simple_command == 'loading_btn') {
@@ -170,7 +171,7 @@ app.post('/slackaction', next(function * (req, res) {
           message.action = 'reply'
           message.text = 'help'
           message.save().then(() => {
-            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+            replyLogic({ data: message })
           })
       }
       else if (simple_command == 'channel_btn') {
@@ -232,7 +233,7 @@ app.post('/slackaction', next(function * (req, res) {
           message.action = 'cart.view'
           message.text = 'view cart'
           message.save().then(() => {
-            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+            replyLogic({ data: message })
           })
       }
       else if (simple_command == 'address_confirm_btn') {
@@ -246,7 +247,7 @@ app.post('/slackaction', next(function * (req, res) {
         }
         message.source.location = location
         message.save().then(() => {
-          queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          replyLogic({ data: message })
         });
       }
       else if (simple_command == 'send_last_call_btn') {
@@ -254,7 +255,7 @@ app.post('/slackaction', next(function * (req, res) {
         message.action = 'home';
         message.text = 'send last call btn';
         message.save().then(() => {
-          queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          replyLogic({ data: message })
         })
       }
       else if (simple_command.indexOf('address.') > -1) {
@@ -286,7 +287,7 @@ app.post('/slackaction', next(function * (req, res) {
 
       }
       message.save().then(() => {
-        queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+        replyLogic({ data: message })
       });
     }
     else if (buttonData) {
@@ -306,7 +307,7 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.user = message.source.user.id
       message.source.channel = message.source.channel.id
       message.save().then(() => {
-        queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+        replyLogic({ data: message })
       })
     } else {
       //actions that do not require processing in reply_logic, skill all dat
@@ -470,7 +471,7 @@ function* updateCartMsg(cart, parsedIn) {
         itemNum++;
       }
     } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-      a.text = (cart.items.length > 0) ? 
+      a.text = (cart.items.length > 0) ?
         `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`:
         'Looks like your cart is empty!'
       all.push(a);
@@ -553,7 +554,7 @@ app.get('/newslack', function (req, res) {
       })
      // queue it up for processing
       message.save().then(() => {
-        queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
+        replyLogic({ data: message })
       })
      }
   } else {
