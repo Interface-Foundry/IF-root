@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd /webhook-test/
+git pull --rebase origin dev
+git push gitlab dev
