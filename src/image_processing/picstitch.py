@@ -116,7 +116,12 @@ class PicStitch:
         '''
         if self.img_req['origin']:
             if self.img_req['origin'] in ['facebook', 'slack', 'skype']:
+                logging.debug('img_req one of  facebook, slack, skype')
                 self.origin = self.img_req['origin']
+            else:
+                logging.debug('img_req has origin but not of allowed types')
+                logging.debug('img_req: ', self.img_req)
+                self.origin = 'slack'
         else:
             self.origin = 'slack'
             logging.critical('NO_ORIGIN_ASSUMING_SLACK')
