@@ -11,8 +11,6 @@ handlers['food.admin.team_budget'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   var msg_text = 'How much would you like each person on your team to spend on food?';
-  // var next_mode = 'food.admin.team_budget';
-  var confirm = false;
 
   var parseNumber = function (str) {
     var num = str.match(/([\d]+(?:\.\d\d)?)/);
@@ -25,22 +23,27 @@ handlers['food.admin.team_budget'] = function * (message) {
 
   if (message.text) {
     var num = parseNumber(message.text)
-    if (num) {
-      if (num <=0) {
-         msg_text = "That's not a valid number"
-      }
-      else {
-        // individual_num = Math.round(num/foodSession.team_members.length)
-        yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: num}})
-        console.log('yielded, updated, etc')
-        msg_text = `To confirm, you want your team to spend around $${num} per person?`;
-        confirm = true;
-      }
-    }
-    else {
-      //send an oops didn't get that message
-      msg_text = "I'm sorry, I didn't understand that -- please type a number!"
-    }
+    // if (num) {
+    //   if (num <=0) {
+    //      msg_text = "That's not a valid number"
+    //   }
+    //   else {
+    //     // individual_num = Math.round(num/foodSession.team_members.length)
+    //     // yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: num}})
+    //     // console.log('yielded, updated, etc')
+    //     msg_text = `To confirm, you want your team to spend around $${num} per person?`;
+    //     confirm = true;
+    //   }
+    // }
+    // else {
+    //   //send an oops didn't get that message
+    //   msg_text = "I'm sorry, I didn't understand that -- please type a number!"
+    // }
+    message.data = {};
+    message.data.value = {};
+    message.data.value.budget = num;
+    message.data.value.new = true;
+    yield handlers['food.admin.confirm_budget'](message);
   }
 
   var msg_json = {
@@ -54,62 +57,36 @@ handlers['food.admin.team_budget'] = function * (message) {
         'callback_id': 'food.admin.team_budget',
         'color': '#3AA3E3',
         'attachment_type': 'default',
-        'actions': (confirm ? [
-          {
-            'name': 'passthrough',
-            'text': 'Yes, that\'s right',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'food.admin.confirm_budget'
-          }, //food.user.poll
-          {
-            'name': 'food.admin.team_budget',
-            'text': 'No, that\'s not right',
-            'style': 'default',
-            'type': 'button',
-            'value': 'food.admin.team_budget'
-          }
-        ] : [
-          {
-            'name': 'passthrough',
-            'text': '$10',
-            'style': 'default',
-            'type': 'button',
-            'value': {
-              budget: 10
-            }
-          },
-          {
-            'name': 'food.admin.confirm_budget',
-            'text': '$15',
-            'style': 'default',
-            'type': 'button',
-            'value': {
-              budget: 15
-            }
-          },
-          {
-            'name': 'food.admin.confirm_budget',
-            'text': '$20',
-            'style': 'default',
-            'type': 'button',
-            'value': {
-              budget: 20
-            }
-          },
-          {
-            'name': 'passthrough',
-            'text': 'None',
-            'style': 'default',
-            'type': 'button',
-            'value': 'food.admin_polling_options'
-          }
-        ])
+        'actions': []
       }
     ]
   }
 
-  if (!confirm && !message.text) {
+  // var lastTeamSession = yield db.Delivery.find({team_id: message.source.team}, {possible_budgets: 1}).sort('-time_started').limit(2).exec() //too big yikes
+  // lastTeamSession = lastTeamSession[1]
+
+  for (var i = 0; i < foodSession.possible_budgets.length; i++) {
+    msg_json.attachments[0].actions.push({
+      'name': 'food.admin.confirm_budget',
+      'text': `$${foodSession.possible_budgets[i]}`,
+      'style': 'default',
+      'type': 'button',
+      'value': {
+        budget: foodSession.possible_budgets[i],
+        new: true
+      }
+    })
+  }
+
+  msg_json.attachments[0].actions.push({
+    'name': 'passthrough',
+    'text': 'None',
+    'style': 'default',
+    'type': 'button',
+    'value': 'food.admin_polling_options'
+  })
+
+  if (!message.text) {
     msg_json.attachments.push({
       'fallback': 'Search the menu',
       'text': '✎ Or type a budget below',
@@ -123,8 +100,17 @@ handlers['food.admin.team_budget'] = function * (message) {
 handlers['food.admin.confirm_budget'] = function * (message) {
 
   budget = message.data.value.budget;
-
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  if (message.data.value.new) {
+    var pbs = foodSession.possible_budgets;
+    for (var i = 0; i < pbs.length; i++) {
+      if (budget <= pbs[i]) {
+        pbs.splice(i, 0, budget);
+        break;
+      }
+    }
+  }
 
   var user_budgets = {};
   for (var i = 0; i < foodSession.team_members.length; i++) {
@@ -134,9 +120,9 @@ handlers['food.admin.confirm_budget'] = function * (message) {
   yield db.Delivery.update({team_id: message.source.team, active: true}, {
     $set: {
       budget: budget,
-      user_budgets: user_budgets
-    },
-    $unset: {temp_budget: ""}
+      user_budgets: user_budgets,
+      possible_budgets: (pbs ? pbs : foodSession.possible_budgets)
+    }
   });
 
   yield $allHandlers['food.admin_polling_options'](message)

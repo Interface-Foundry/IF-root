@@ -39,7 +39,10 @@ var deliverySchema = mongoose.Schema({
     minimum: Number
   },
   budget: Number,
-  temp_budget: Number,
+  possible_budgets: {
+    type: [Number],
+    default: [10, 15, 20]
+  },
   user_budgets: {},
   menu: {}, // the actual menu for the chosen merchant
   merchants: [], // all possible merchants (based on location)
