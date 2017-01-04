@@ -187,11 +187,14 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     message.markModified('source')
   }
 
-  if (!banner) {
-    $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  } else {
-    return $replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  }
+
+
+  $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  // if (!banner) {
+  //   $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  // } else {
+  //   return $replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  // }
 }
 
 handlers['food.settings.address.remove_select'] = function * (message) {
@@ -334,7 +337,7 @@ handlers['food.choose_address'] = function * (message) {
     foodSession.markModified('merchants')
     foodSession.markModified('cuisines')
     yield foodSession.save()
-    yield handlers['food.admin_polling_options'](message)
+    yield $allHandlers['food.admin.team_budget'](message)
   } else {
     throw new Error('this route does not handle text input')
   }

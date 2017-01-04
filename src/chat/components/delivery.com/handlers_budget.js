@@ -75,7 +75,7 @@ handlers['food.admin.team_budget'] = function * (message) {
             'text': '< Back',
             'style': 'default',
             'type': 'button',
-            'value': 'food.poll.confirm_send_initial'
+            'value': 'food.admin_polling_options'
           }
         ] : [])
       }
@@ -102,7 +102,8 @@ handlers['food.admin.confirm_budget'] = function * (message) {
     $unset: {temp_budget: ""}
   });
 
-  yield $allHandlers['food.poll.confirm_send'](message)
+  yield $allHandlers['food.admin_polling_options'](message)
+  //make this a sendReplace
 }
 
 module.exports = function (replyChannel, allHandlers) {
