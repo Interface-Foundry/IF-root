@@ -409,6 +409,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         foodSession.discount_amount = 0.00
       }
       foodSession.calculated_amount = Number((Math.round(((foodSession.main_amount - foodSession.discount_amount) * 1000) / 10) / 100).toFixed(2))
+      foodSession.calculated_amount = Number((Math.round(((foodSession.calculated_amount + foodSession.tip.amount) * 1000) / 10) / 100).toFixed(2))
 
       if (foodSession.calculated_amount < 0.50) {
         foodSession.calculated_amount = 0.50 // stripe thing
@@ -436,6 +437,10 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         mrkdwn_in: ['text'],
         footer: 'Powered by Delivery.com',
         footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
+      }
+
+      if (foodSession.instructions) {
+        finalAttachment.text = finalAttachment.text + `\n*Delivery Instructions*: _${foodSession.instructions}_\n`
       }
 
       var instructionsButton = {
@@ -513,10 +518,6 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       if (discountAvail) {
         infoAttachment2.text += `\n*Coupon:* -${foodSession.discount_amount.$}`
-      }
-
-      if (foodSession.instructions) {
-        infoAttachment2.text = infoAttachment2.text + `*Delivery Instructions*: _${foodSession.instructions}_\n`
       }
 
       response.attachments = _.flatten([mainAttachment, itemAttachments, tipAttachment, infoAttachment, infoAttachment2, finalAttachment]).filter(Boolean)
