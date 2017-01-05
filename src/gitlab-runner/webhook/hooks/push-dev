@@ -1,19 +1,6 @@
 #!/bin/bash
 
+echo -e "\n==============\nrunning the script and in script\n==============\n"
 cd /IF-root/
-
-# PULL_DIFF=`git diff --name-only | head -1`
-# if [ -z "$PULL_DIFF" ]; then
-#     git pull --rebase
-# else
-
-# git pull --rebase origin dev
-# git push gitlab dev
-
-#     git stash >& /dev/null
-#     git pull --rebase
-#     git stash pop -q
-# fi
-
 git fetch -p origin
 git push --mirror

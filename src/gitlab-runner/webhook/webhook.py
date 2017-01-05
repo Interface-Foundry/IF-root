@@ -55,7 +55,6 @@ def index():
     """
     Main WSGI application entry.
     """
-    print('got something')
     path = normpath(abspath(dirname(__file__)))
 
     # Only POST is implemented

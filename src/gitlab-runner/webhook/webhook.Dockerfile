@@ -17,9 +17,7 @@ RUN git clone --mirror git@github.com:Interface-Foundry/IF-root.git /IF-root/
 
 RUN cd /IF-root/ && \
     git remote set-url --push origin git@gitlab.com:kipthis/IF-root.git && \
-    cat /IF-root/.git/config
-
-# git remote add --mirror=push gitlab git@gitlab.com:kipthis/IF-root.git && \
+    cat /IF-root/config
 
 RUN pip install -r /app/requirements.txt
 WORKDIR /app
