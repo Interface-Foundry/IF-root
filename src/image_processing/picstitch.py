@@ -6,17 +6,10 @@ import random
 import logging
 import textwrap
 import urllib.request
-import numpy as np
 
-from gcloud import storage
 from PIL import Image, ImageFont, ImageDraw
-import boto
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
-
 
 
 def load_number_images():
@@ -33,10 +26,16 @@ def load_number_images():
 
 def load_fonts():
     try:
-        fonts_file = os.path.join(THIS_FOLDER, 'fonts', 'HelveticaNeue-Regular.ttf')
+        fonts_file = os.path.join(
+            THIS_FOLDER,
+            'fonts',
+            'HelveticaNeue-Regular.ttf')
         logging.debug('fonts loaded correctly')
     except:
-        fonts_file = os.path.join('/picstitch', 'fonts', 'HelveticaNeue-Regular.ttf')
+        fonts_file = os.path.join(
+            '/image_processing',
+            'fonts',
+            'HelveticaNeue-Regular.ttf')
         logging.debug('error loading fonts')
     font = {}
     font_size = [x for x in range(12, 30)]
@@ -57,7 +56,8 @@ def load_review_stars():
 
 
 def load_amazon_prime():
-    amzn_prime_logo = Image.open(os.path.join(THIS_FOLDER, 'amazon', 'prime.png'))
+    amzn_prime_logo = Image.open(
+        os.path.join(THIS_FOLDER, 'amazon', 'prime.png'))
     return amzn_prime_logo
 
 
@@ -156,7 +156,8 @@ class PicStitch:
         # arr = np.array(thumb_img)
         # alpha = arr[:, :, 2]
         # n1 = len(alpha)
-        # alpha[:] = np.interp(np.arange(n1), [0, 0.55*n1, 0.75*n1, n1], [255, 255, 0, 0])[:,np.newaxis]
+        # alpha[:] = np.interp(np.arange(n1), [0, 0.55*n1, 0.75*n1, n1],
+        #                            [255, 255, 0, 0])[:,np.newaxis]
         # thumb_img = Image.fromarray(alpha, mode='RGBA')
         img.paste(thumb_img,
                   (self.config['PIC_COORDS']['x'],
@@ -176,7 +177,8 @@ class PicStitch:
             # poly = Image.new('RGBA', (125, 295))
             # pdraw = ImageDraw.Draw(poly)
             # poly_offset = (205, 5)  # location in larger image
-            # pdraw.polygon([(0, 0), (0, 256), (125, 295), (256, 0)], fill="white")
+            # pdraw.polygon(
+            #   [(0, 0), (0, 256), (125, 295), (256, 0)], fill="white")
             # img.paste(poly, poly_offset, mask=poly)
 
         # add price
