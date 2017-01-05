@@ -4,6 +4,8 @@ var _ = require('lodash')
 
 var payConst = require('./pay_const.js')
 
+var cardTemplates = require('../chat/components/slack/card_templates');
+
 // tracking for food into cafe-tracking
 var Professor = require('../monitoring/prof_oak.js')
 var profOak = new Professor.Professor('C33NU7FRC')
@@ -203,34 +205,14 @@ function * onSuccess (payment) {
       } else {
         foodString = itemNames[0]
       }
-
+      var homeMsg = cardTemplates.home_screen(true);
+      homeMsg.type = finalFoodMessage.origin;
+      homeMsg.text = `Your order of ${foodString} is on the way 😊`;
       replyChannel.send(
         msg,
         'food.payment_info',
-        {
-          type: finalFoodMessage.origin,
-          data: {
-            text: `Your order of ${foodString} is on the way 😊`,
-            attachments: [{
-              image_url: 'http://tidepools.co/kip/kip_menu.png',
-              text: 'Click a mode to start using Kip',
-              color: '#3AA3E3',
-              callback_id: 'wow such home',
-              actions: [{
-                name: 'passthrough',
-                value: 'food',
-                text: 'Kip Café',
-                type: 'button'
-              }, {
-                name: 'passthrough',
-                value: 'shopping',
-                text: 'Kip Store',
-                type: 'button'
-              }]
-            }]
-          }
-        })
-    })
+        homeMsg);
+    });
     var htmlForItem = `Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
 
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {

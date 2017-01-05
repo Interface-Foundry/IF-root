@@ -203,16 +203,7 @@ handlers['food.exit.confirm_end_order'] = function * (message) {
 }
 
 handlers['food.exit.confirm'] = function * (message) {
-  var slackreply = {
-    text: 'Hi! Thanks for using Kip 😊',
-    attachments: [{
-      image_url: "http://tidepools.co/kip/kip_menu.png",
-      text: 'Click a mode to start using Kip',
-      color: '#3AA3E3',
-      callback_id: 'wow such home',
-      actions: card_templates.simple_home(true)
-    }]
-  }
+  var slackreply = card_templates.home_screen(true);
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: slackreply})
   // make sure to remove this user from the food message if they are in it
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()

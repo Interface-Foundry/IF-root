@@ -146,12 +146,6 @@ handlers['get-admins.response'] = function * (message) {
             actions: cardTemplate.slack_onboard_start,
             callback_id: 'none'
           })
-        attachments.push({
-            text: '',
-            mrkdwn_in: ['text'],
-            actions: cardTemplate.slack_onboard_default,
-            callback_id: 'none'
-          });
         msg.reply = attachments;
         yield msg.save();
         yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
@@ -233,16 +227,7 @@ handlers['get-admins.confirm'] = function * (message) {
     reply = reply.replace('$ADMINS', admins.map(g => {
     return '<@' + g.id + '>'
     }).join(', ').replace(/,([^,]*)$/, ' and $1'));
-    var slackreply = {
-      text: reply,
-      attachments: [{
-        image_url: "http://tidepools.co/kip/kip_menu.png",
-        text: 'Click a mode to start using Kip',
-        color: '#3AA3E3',
-        callback_id: 'wow such home',
-        actions: cardTemplate.simple_home(false)
-      }]
-    }
+    var slackreply = cardTemplate.home_screen(false);
     var msg = {
       action: 'simplehome',
       mode: 'food',

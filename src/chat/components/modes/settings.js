@@ -156,20 +156,12 @@ handlers['start'] = function * (message) {
 }
 
 handlers['back'] = function * (message) {
-  var attachments = [{
-    image_url: "http://tidepools.co/kip/kip_menu.png",
-    text: 'Click a mode to start using Kip',
-    color: '#3AA3E3',
-    callback_id: 'wow such home',
-    actions: cardTemplate.simple_home(true)
-  }];
   request({
     method: 'POST',
     uri: message.source.response_url,
-    body: JSON.stringify({text: '', attachments: attachments})
+    body: JSON.stringify(cardTemplate.home_screen(true))
   })
 }
-
 
 handlers['status_on'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
@@ -549,12 +541,6 @@ handlers['add_or_remove'] = function * (message) {
               actions: cardTemplate.slack_onboard_start,
               callback_id: 'none'
             })
-          attachments.push({
-              text: '',
-              mrkdwn_in: ['text'],
-              actions: cardTemplate.slack_onboard_default,
-              callback_id: 'none'
-            });
           msg.reply = attachments;
           yield msg.save();
           yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
