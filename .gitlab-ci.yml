@@ -23,6 +23,11 @@ stages:
   - deploy
 
 
+# ------------------------------------------------
+# TEMPLATES
+# ------------------------------------------------
+
+
 .build_template: &build_defintion
   stage: build
   only:
@@ -54,6 +59,11 @@ stages:
   after_script:
     - rm /tmp/KUBERNETES_KEY.json
 
+
+# ------------------------------------------------
+# TEST FOR NODE STUFF
+# ------------------------------------------------
+
 test:node:
   image: node:6
   stage: test
@@ -67,14 +77,22 @@ test:node:
       - /usr/local/lib/node_modules
       - node_modules/
 
+
+# ------------------------------------------------
+# TEST FOR PYTHON STUFF
+# ------------------------------------------------
+
 test:python:
-  image: python:3.5
+  image: python:3.4
   stage: test
   before_script:
+    - echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/GOOGLE_APPLICATION_CREDENTIALS.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/GOOGLE_APPLICATION_CREDENTIALS.json
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
   script:
+    - ls
+    - pwd
     - pip install -q -r src/image_processing/requirements.txt
     - python -c 'import site; print(site.getsitepackages())'
     - pytest tests/picstitch/
@@ -82,22 +100,30 @@ test:python:
     paths:
       - /usr/
 
+# ------------------------------------------------
+# BUILD SECTION USING TEMPLATES
+# notes:
+# ------------------------------------------------
+
+# build:delivery_picstitch:
+#   variables:
+#     IMAGE_NAME: delivery_picstitch
+#   <<: *build_defintion
 
 build:picstitch:
   variables:
     IMAGE_NAME: picstitch
   <<: *build_defintion
 
-
-build:delivery_picstitch:
-  variables:
-    IMAGE_NAME: delivery_picstitch
-  <<: *build_defintion
-
 build:parser:
   variables:
     IMAGE_NAME: parser
   <<: *build_defintion
+
+# ------------------------------------------------
+# DEPLOYMENT SECTION USING TEMPLATES
+# notes:
+# ------------------------------------------------
 
 deploy:delivery_picstitch:
   variables:

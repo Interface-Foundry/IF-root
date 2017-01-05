@@ -1,24 +1,21 @@
 import logging
-import subprocess
 import sys
 
 from googleapiclient import discovery
 import httplib2
-from oauth2client.client import GoogleCredentials
+from oauth2client.service_account import ServiceAccountCredentials
 
-from word_list import action_terms, price_terms, stopwords, \
+from .word_list import action_terms, price_terms, stopwords, \
     invalid_adjectives, purchase_terms, periodical_terms
-
-DEBUG_ = False
-logger = logging.getLogger()
 
 
 def get_service():
-    credentials = GoogleCredentials.get_application_default()
-    scoped_credentials = credentials.create_scoped(
-        ['https://www.googleapis.com/auth/cloud-platform'])
+    # credentials = GoogleCredentials.get_application_default()
+    scopes = ['https://www.googleapis.com/auth/cloud-platform']
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        '/root/secrets/gcloud-natural-language-api.json', scopes=scopes)
     http = httplib2.Http()
-    scoped_credentials.authorize(http)
+    credentials.authorize(http)
     return discovery.build('language', 'v1beta1', http=http)
 
 
@@ -69,42 +66,6 @@ def convert_api_to_dependency_array(resp):
     return dependency_array
 
 
-def syntaxnet_array(text):
-    '''
-    pass text argument to syntaxnet, get dependency tree, must have
-    '''
-    # demo.sh for testing, parser.sh irl
-    if DEBUG_:
-        script_location = 'syntaxnet/demo.sh'
-    else:
-        script_location = './parser.sh'
-    t = 'echo "' + text + '" | ' + script_location
-    t = t.encode('ascii', 'ignore')
-    p = subprocess.Popen(t, stdout=subprocess.PIPE, shell=True)
-    out = p.stdout.read().splitlines()
-    # last item in array is ' ' for some reason
-    try:
-        out.pop()
-    except IndexError:
-        print('Not Parsed correctly')
-        return None
-
-    # fix byte input from shell stuff
-    new_out = []
-    for row in out:
-        new_out.append(row.decode('utf'))
-
-    return new_out
-
-
-def syntaxnet_gcloud(text):
-    '''
-    TODO:
-        - implement syntaxnet_array without piping from .sh
-    '''
-    pass
-
-
 class McParser:
     '''
     # Properties
@@ -115,7 +76,7 @@ class McParser:
 
     '''
 
-    def __init__(self, text, local_or_gcloud='gcloud'):
+    def __init__(self, text):
         '''
         # self.terms = EasyDict({'item_descriptors': [], 'had_find': False})
         '''
@@ -125,7 +86,6 @@ class McParser:
         self.had_more = False
         self.had_question = False
         self.single_focus_single_modify = False
-        self.local_or_gcloud = local_or_gcloud
 
         self.text = text.lower()
         self.tokens = []
@@ -161,19 +121,16 @@ class McParser:
         '''
         self.text = self.text.replace(':', '')
         self.dependency_array = []
-        if self.local_or_gcloud == 'local':
-            logging.info('using local syntaxnet')
-            self.pos_response = syntaxnet_array(self.text)
-            for line in self.pos_response:
-                self.dependency_array.append(line.split('\t'))
-        elif self.local_or_gcloud == 'gcloud':
-            logging.info('using gcloud syntaxnet')
-            self.pos_response = analyze_syntax(
-                self.text, get_native_encoding_type())
-            self.language = self.pos_response['language']
-            self.entities = self.pos_response['entities']
-            self.dependency_array = convert_api_to_dependency_array(
-                self.pos_response)
+
+        logging.info('using gcloud syntaxnet')
+
+        self.pos_response = analyze_syntax(
+            self.text, get_native_encoding_type())
+
+        self.language = self.pos_response['language']
+        self.entities = self.pos_response['entities']
+        self.dependency_array = convert_api_to_dependency_array(
+            self.pos_response)
 
         # self.sorted_array = self.dependency_array.copy()
         # self.sorted_array.sort(key=lambda x: x[6])
@@ -309,11 +266,11 @@ class McParser:
 
             if any(w in self.tokens for w in price_terms['more']):
                 self.price_modifier = 'more'
-                logger.info('modifying price of one with more')
+                logging.info('modifying price of one with more')
 
             elif any(w in self.tokens for w in price_terms['less']):
                 self.price_modifier = 'less'
-                logger.info('modifying price of one with less')
+                logging.info('modifying price of one with less')
 
         elif len(self.focus) > 1:
             self.action = 'modify.all'
@@ -344,7 +301,7 @@ class McParser:
         elif hasattr(self, 'nouns_with_adjectives'):
             self.search_query = self.nouns_with_adjectives
         else:
-            logger.info('using full query')
+            logging.info('using full query')
             self.search_query = self.text
 
     def _simple_case(self):
@@ -357,16 +314,16 @@ class McParser:
             self._create_search()
             if type(self.search_query) is not str:
                 # coerce query into str
-                logger.critical('query isnt a string for some reason')
+                logging.critical('query isnt a string for some reason')
                 try:
-                    logger.debug(str(self.search_query))
+                    logging.debug(str(self.search_query))
                 except:
-                    logger.critical('_something_wrong_trying_to_strng_')
-            logger.info('simple case using query: ' + self.search_query)
+                    logging.critical('_something_wrong_trying_to_strng_')
+            logging.info('simple case using query: ' + self.search_query)
 
         else:
             self.simple_case = False
-            logger.info('not using a simple query')
+            logging.info('not using a simple query')
 
     def output_form(self):
         return self.__dict__

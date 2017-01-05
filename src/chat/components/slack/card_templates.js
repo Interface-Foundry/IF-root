@@ -21,148 +21,86 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
   }]
 }
 
-var simple_home = module.exports.simple_home = [{
-  name: 'passthrough',
-  value: 'food',
-  text: 'Kip Café',
-  type: 'button'
-}, {
-  name: 'passthrough',
-  value: 'shopping',
-  text: 'Kip Store',
-  type: 'button'
-}, {
-  name: 'settings',
-  text: 'Settings',
-  style: 'default',
-  type: 'button',
-  value: 'start'
-}]
+var home_screen = module.exports.home_screen = function(isAdmin) {
+  let home = {
+    text: 'Hi! Thanks for using Kip 😊',
+    attachments: [{
+      'mrkdwn_in': ['text'],
+      text: '*Order Food*\nI can order food for your team! This is filler text etc.',
+      color: '#f43440',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'food',
+        text: 'Kip Café',
+        type: 'button'
+      }]
+    }, {
+      text: '*Get Supplies*\nI can shop for your team! This is filler text blah',
+      'mrkdwn_in': ['text'],
+      color: '#fe9b00',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'shopping',
+        text: 'Kip Store',
+        type: 'button'
+      }]
+    }]
+  };
+  if (isAdmin) {
+    home.attachments.push({
+      text: '',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'settings',
+        text: 'Settings',
+        style: 'default',
+        type: 'button',
+        value: 'start'
+      }]
+    });
+  }
+  return home;
+};
 
-
-// {
-//   name: "onboard.start.confirm_cart_reminder",
-//   text: "Today",
-//   style: "default",
-//   type: "button",
-//   value: "confirm_cart_reminder.today"
-// }
-
-
-var settings_intervals = module.exports.settings_intervals = function(interval) {
+var onboard_home_attachments = module.exports.onboard_home_attachments = function(delay) {
   return [{
-    "name": "settings.cron.daily",
-    "text": ((interval === 'daily') ? '◉' : '◎') + ' Daily',
-    "style": "default",
-    "type": "button",
-    "value": "daily"
+    mrkdwn_in: ['text'],
+    text: '*Order Food*\nI can order food for your team!\nLet me show you how to make lunch easier',
+    color: '#f43440',
+    callback_id: 'wow such home',
+    actions: [{
+      name: 'onboard.start.lunch',
+      text: 'Kip Café',
+      style: 'default',
+      type: 'button',
+      value: 'lunch'
+    }]
   }, {
-    "name": "settings.cron.weekly",
-    "text": ((interval === 'weekly') ? '◉' : '◎') + ' Weekly',
-    "style": "default",
-    "type": "button",
-    "value": "weekly"
+    text: '*Get Supplies*\nI can shop for your team!\nLet me show you how to make team shopping better',
+    mrkdwn_in: ['text'],
+    color: '#fe9b00',
+    callback_id: 'wow such home',
+    actions: [{
+      name: 'onboard.start.supplies',
+      text: 'Kip Store',
+      style: 'default',
+      type: 'button',
+      value: 'supplies'
+    }]
   }, {
-    "name": "settings.cron.monthly",
-    "text": ((interval === 'monthly') ? '◉' : '◎') + ' Monthly',
-    "style": "default",
-    "type": "button",
-    "value": "monthly"
-  }, {
-    "name": "settings.cron.never",
-    "text": ((interval === 'never') ? '◉' : '◎') + ' Never',
-    "style": "default",
-    "type": "button",
-    "value": "never"
+    text: '',
+    callback_id: 'whatevs',
+    actions: [{
+      name: 'onboard.start.remind_later',
+      text: '◷ Remind Me Later',
+      style: 'default',
+      type: 'button',
+      value: `remind_later.${delay}`
+    }]
   }];
-}
-
-var settings_days= module.exports.settings_days = [
-    {
-      "name": "settings.set_day.monday",
-      "text": "Mon",
-      "style": "default",
-      "type": "button",
-      "value": '1'
-    },
-    {
-      "name": "settings.set_day.tuesday",
-      "text": "Tues",
-      "style": "default",
-      "type": "button",
-      "value": '2'
-    },
-     {
-      "name": "settings.set_day.wednesday",
-      "text": "Wed",
-      "style": "default",
-      "type": "button",
-      "value": '3'
-    },
-    {
-      "name": "settings.set_day.thursday",
-      "text": "Thurs",
-      "style": "default",
-      "type": "button",
-      "value": '4'
-    },
-    {
-      "name": "settings.set_day.friday",
-      "text": "Fri",
-      "style": "default",
-      "type": "button",
-      "value": '5'
-    },
-    {
-      "name": "settings.set_day.saturday",
-      "text": "Sat",
-      "style": "default",
-      "type": "button",
-      "value": '6'
-    },
-    {
-      "name": "settings.set_day.sunday",
-      "text": "Sun",
-      "style": "default",
-      "type": "button",
-      "value": '0'
-    }
-  ]
-
-
-var settings_weeks= module.exports.settings_weeks = function(message) {
-  return [
-    {
-      "name": "settings.set_week.1",
-      "text": "1",
-      "style": "default",
-      "type": "button",
-      "value": '1'
-    },
-    {
-      "name": "settings.set_week.2",
-      "text": "2",
-      "style": "default",
-      "type": "button",
-      "value": '2'
-    },
-     {
-      "name": "settings.set_week.3",
-      "text": "3",
-      "style": "default",
-      "type": "button",
-      "value": '3'
-    },
-    {
-      "name": "settings.set_week.4",
-      "text": "4",
-      "style": "default",
-      "type": "button",
-      "value": '4'
-    }
-  ]
-} 
-
+};
 
 var settings_menu = module.exports.settings_menu = [{
     "name": "settings.back",
@@ -243,42 +181,6 @@ var focus_home = module.exports.focus_home = [{
   value: 'view_cart_btn'
 }];
 
-
-var shopping_team_default = module.exports.shopping_team_default = function(id) {
-  return [{
-    "name": "exit",
-    "text": "Exit Members",
-    "style": "primary",
-    "type": "button",
-    "value": "exit"
-  }, {
-    "name": "shopping.home.expand",
-    "text": "🐧",
-    "style": "default",
-    "type": "button",
-    "value": id
-  }]
-}
-
-var shopping_settings_default = module.exports.shopping_settings_default = function(id) {
-
-  return [{
-    name: "exit",
-    text: "Exit Settings",
-    style: "primary",
-    type: "button",
-    value: "exit"
-  }, {
-    name: "shopping.home.expand",
-    text: "🐧",
-    style: "default",
-    type: "button",
-    value: id
-  }]
-
-}
-
-
 var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
   // buttons search for whatever follows search in value. e.g. search.healthy_snacks searches for 'healthy snacks'
   'name': 'search_btn.start.search',
@@ -305,7 +207,6 @@ var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
   type: 'button',
   value: 'view_cart_btn'
 }];
-
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = [{
   image_url: "http://kipthis.com/kip_modes/mode_shopping.png",
@@ -336,27 +237,6 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
 }];
 
 // ONBOARDING MODE TEMPLATES
-
-var slack_onboard_start = module.exports.slack_onboard_start = [{
-  name: "onboard.start.lunch",
-  text: "Kip Café",
-  style: "default",
-  type: "button",
-  value: "lunch"
-}, {
-  name: "onboard.start.supplies",
-  text: "Kip Store",
-  style: "default",
-  type: "button",
-  value: "supplies"
-}, {
-  name: "onboard.start.remind",
-  text: "◷ Remind Me Later",
-  style: "default",
-  type: "button",
-  value: "remind"
-}];
-
 var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
   name: "onboard.supplies.snackbox",
   text: "Snackbox",
@@ -377,14 +257,6 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
   value: "bundle.supplies"
 }];
 
-
-var slack_onboard_default = module.exports.slack_onboard_default = [{
-    "name": "settings.back",
-    "text": "Home",
-    "style": "default",
-    "type": "button"
-  }];
-
 var slack_onboard_basic = module.exports.slack_onboard_basic = [{
   name: "onboard.bundle.yes",
   text: "Yes",
@@ -397,15 +269,7 @@ var slack_onboard_basic = module.exports.slack_onboard_basic = [{
   style: "default",
   type: "button",
   value: "checkout"
-}, 
-// {
-//   name: "onboard.bundle.more",
-//   text: "More Info",
-//   style: "default",
-//   type: "button",
-//   value: "more_info"
-// }
-];
+}];
 
 var slack_onboard_team = module.exports.slack_onboard_team = [{
   name: "onboard.team.send",
@@ -413,111 +277,38 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   style: "primary",
   type: "button",
   value: "member"
-}, {
-  name: "onboard.team.help",
-  text: "Help",
-  style: "primary",
-  type: "button",
-  value: "more_info"
-}, {
-    "name": "settings.back",
-    "text": "Home",
-    "style": "default",
-    "type": "button"
 }];
 
-var cart_reminder = module.exports.cart_reminder = [{
-  name: "onboard.start.confirm_cart_reminder",
-  text: "Daily",
-  style: "default",
-  type: "button",
-  value: "confirm_cart_reminder.daily"
-}, {
-  name: "onboard.start.confirm_cart_reminder",
-  text: "Weekly",
-  style: "default",
-  type: "button",
-  value: "confirm_cart_reminder.weekly"
-}, {
-  name: "onboard.start.confirm_cart_reminder",
-  text: "Monthly",
-  style: "default",
-  type: "button",
-  value: "confirm_cart_reminder.monthly"
-}, {
-  name: "onboard.start.confirm_cart_reminder",
-  text: "Never",
-  style: "default",
-  type: "button",
-  value: "confirm_cart_reminder.never"
-}];
-
-var admin_reminder = module.exports.admin_reminder = [{
-  name: "onboard.start.confirm_admin_reminder",
-  text: "Today",
-  style: "default",
-  type: "button",
-  value: "confirm_admin_reminder.today"
-}, {
-  name: "onboard.start.confirm_admin_reminder",
-  text: "Tomorrow",
-  style: "default",
-  type: "button",
-  value: "confirm_admin_reminder.tomorrow"
-}, {
-  name: "onboard.start.confirm_admin_reminder",
-  text: "1 Week",
-  style: "default",
-  type: "button",
-  value: "confirm_admin_reminder.one_week"
-}, {
-  name: "onboard.start.choose",
-  text: "Choose for me",
-  style: "default",
-  type: "button",
-  value: "confirm_admin_reminder.choose"
-}];
-
-var member_reminder = module.exports.member_reminder = [{
-  name: "member_onboard.start.reminder_confirm",
-  text: "Today",
-  style: "default",
-  type: "button",
-  value: "reminder_confirm.today"
-}, {
-  name: "member_onboard.start.reminder_confirm",
-  text: "Tomorrow",
-  style: "default",
-  type: "button",
-  value: "reminder_confirm.tomorrow"
-}, {
-  name: "member_onboard.start.reminder_confirm",
-  text: "1 Week",
-  style: "default",
-  type: "button",
-  value: "reminder_confirm.one_week"
-}, {
-  name: "member_onboard.start.choose",
-  text: "Choose for me",
-  style: "default",
-  type: "button",
-  value: "reminder_confirm.choose"
-}];
-
-
-var slack_onboard_member = module.exports.slack_onboard_member = [{
-  name: "member_onboard.start.step_1",
-  text: "✓ Ok!",
-  style: "primary",
-  type: "button",
-  value: "step_1"
-}, {
-  name: "member_onboard.start.reminder",
-  text: "◷ Remind Me Later",
-  style: "default",
-  type: "button",
-  value: "reminder"
-}];
+var member_onboard_attachments = module.exports.member_onboard_attachments = function (admin, delay) {
+  return [{
+    'image_url': 'http://kipthis.com/kip_modes/mode_howtousekip.png',
+    'text': '',
+    'mrkdwn_in': [
+      'text',
+      'pretext'
+    ],
+    'color': '#45a5f4'
+  }, {
+    text: `Make <@${admin}>'s life easier! Let me show you how to add items to the team cart`,
+    mrkdwn_in: ['text'],
+    fallback: 'Welcome to Kip!',
+    callback_id: 'none',
+    actions: [{
+      color: '#45a5f4',
+      name: "member_onboard.start.step_1",
+      text: "✓ Ok!",
+      style: "primary",
+      type: "button",
+      value: "step_1"
+    }, {
+      name: 'member_onboard.start.remind_later',
+      text: '◷ Remind Me Later',
+      style: 'default',
+      type: 'button',
+      value: `remind_later.${delay}.${admin}`
+    }]
+  }]
+};
 
 var slack_member_onboard_start = module.exports.slack_member_onboard_start = [{
   "name": "member_onboard.start.step_2",

@@ -3,7 +3,8 @@ var request = require('request-promise')
 var _ = require('lodash')
 
 var payConst = require('./pay_const.js')
-var cc = require('./secrets/kip_cc.js')
+
+var cardTemplates = require('../chat/components/slack/card_templates');
 
 // tracking for food into cafe-tracking
 var Professor = require('../monitoring/prof_oak.js')
@@ -20,6 +21,13 @@ var queue = require('../chat/components/queue-mongo')
 var UserChannel = require('../chat/components/delivery.com/UserChannel')
 var replyChannel = new UserChannel(queue)
 // --------------------------------------------
+
+if (process.env.NODE_ENV === 'production') {
+  var cc = require('./secrets/kip_cc.js')
+} else {
+  cc = payConst.cc
+}
+
 
 /* this would be for kip to pay for an order once the user has successfully paid stripe
 *
@@ -197,34 +205,14 @@ function * onSuccess (payment) {
       } else {
         foodString = itemNames[0]
       }
-
+      var homeMsg = cardTemplates.home_screen(true);
+      homeMsg.type = finalFoodMessage.origin;
+      homeMsg.text = `Your order of ${foodString} is on the way 😊`;
       replyChannel.send(
         msg,
         'food.payment_info',
-        {
-          type: finalFoodMessage.origin,
-          data: {
-            text: `Your order of ${foodString} is on the way 😊`,
-            attachments: [{
-              image_url: 'http://tidepools.co/kip/kip_menu.png',
-              text: 'Click a mode to start using Kip',
-              color: '#3AA3E3',
-              callback_id: 'wow such home',
-              actions: [{
-                name: 'passthrough',
-                value: 'food',
-                text: 'Kip Café',
-                type: 'button'
-              }, {
-                name: 'passthrough',
-                value: 'shopping',
-                text: 'Kip Store',
-                type: 'button'
-              }]
-            }]
-          }
-        })
-    })
+        homeMsg);
+    });
     var htmlForItem = `Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
 
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {

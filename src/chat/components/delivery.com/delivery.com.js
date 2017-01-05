@@ -92,6 +92,8 @@ function * handleMessage (message) {
   // message.mode = 'food'
   // message.action = route.replace(/^food./, '')
   if (handlers[route]) {
+    //waypoint logging
+    db.waypoints.log(0, null, message.user_id, {original_text: message.original_text})
     yield handlers[route](message)
   } else {
     kip.error('No route handler for ' + route)
@@ -189,7 +191,7 @@ handlers['food.exit'] = function * (message) {
       }
     ]
   }
-  
+
   replyChannel.send(message, 'food.exit.confirm', {type: message.origin, data: msg_json})
 }
 
@@ -201,20 +203,11 @@ handlers['food.exit.confirm_end_order'] = function * (message) {
 }
 
 handlers['food.exit.confirm'] = function * (message) {
-  var slackreply = {
-    text: 'Hi! Thanks for using Kip 😊',
-    attachments: [{
-      image_url: "http://tidepools.co/kip/kip_menu.png",
-      text: 'Click a mode to start using Kip',
-      color: '#3AA3E3',
-      callback_id: 'wow such home',
-      actions: card_templates.simple_home
-    }]
-  }
+  var slackreply = card_templates.home_screen(true);
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: slackreply})
   // make sure to remove this user from the food message if they are in it
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  
+
   if(foodSession){
     foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
     foodSession.markModified('team_members')
