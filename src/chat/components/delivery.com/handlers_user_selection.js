@@ -90,22 +90,36 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           {
             'name': 'passthrough',
             'value': 'food.admin.team.members',
-            'text': 'View Team Members',
+            'text': 'Edit Poll Members',
             'type': 'button'
           },
-          {
-            'name': 'food.admin.display_channels',
-            'text': 'Use a #channel',
-            'type': 'button',
-            'value': 'select_team_members'
-          },
+          // {
+          //   'name': 'food.admin.display_channels',
+          //   'text': 'Use a #channel',
+          //   'type': 'button',
+          //   'value': 'select_team_members'
+          // },
+          // {
+          //   'name': 'passthrough',
+          //   'text': '< Back',
+          //   'type': 'button',
+          //   'value': 'food.admin.select_address'
           {
             'name': 'passthrough',
-            'text': '< Back',
-            'type': 'button',
-            'value': 'food.admin.select_address'
+            'value': 'food.user.poll',
+            'text': '> Skip',
+            'type': 'button'
           }
         ]
+      }, {
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': '_Tip:_ `✓ Send Poll` polls your team on what type of food they want',
+        'fallback': 'Send poll for cuisine to the team members',
+        'callback_id': 'food.poll.confirm_send_initial',
+        'attachment_type': 'default',
+        'actions': []
       }
     ]
   }

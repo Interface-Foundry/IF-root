@@ -251,7 +251,11 @@ handlers['food.user.poll'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // ---------------------------------------------
+
   var teamMembers = foodSession.team_members
+
+  console.log('TEAM MEMBERS', teamMembers.length)
+
   if (process.env.NODE_ENV === 'test') {
     teamMembers = [teamMembers[0]]
   }
