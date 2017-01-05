@@ -24,7 +24,7 @@ var couponTeams = [{
     'T1A2KS6KH' // TOPBOTS
   ]
 }, {
-  'couponDiscount': 0.33,
+  'couponDiscount': 0.50,
   'teams': [
     'T167QHT5M',
     'TEST_ING'

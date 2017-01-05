@@ -21,33 +21,86 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
   }]
 }
 
-var simple_home = module.exports.simple_home = [{
-  name: 'passthrough',
-  value: 'food',
-  text: 'Kip Café',
-  type: 'button'
-}, {
-  name: 'passthrough',
-  value: 'shopping',
-  text: 'Kip Store',
-  type: 'button'
-}, {
-  name: 'settings',
-  text: 'Settings',
-  style: 'default',
-  type: 'button',
-  value: 'start'
-}]
+var home_screen = module.exports.home_screen = function(isAdmin) {
+  let home = {
+    text: 'Hi! Thanks for using Kip 😊',
+    attachments: [{
+      'mrkdwn_in': ['text'],
+      text: '*Order Food*\nI can order food for your team! This is filler text etc.',
+      color: '#f43440',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'food',
+        text: 'Kip Café',
+        type: 'button'
+      }]
+    }, {
+      text: '*Get Supplies*\nI can shop for your team! This is filler text blah',
+      'mrkdwn_in': ['text'],
+      color: '#fe9b00',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'shopping',
+        text: 'Kip Store',
+        type: 'button'
+      }]
+    }]
+  };
+  if (isAdmin) {
+    home.attachments.push({
+      text: '',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'settings',
+        text: 'Settings',
+        style: 'default',
+        type: 'button',
+        value: 'start'
+      }]
+    });
+  }
+  return home;
+};
 
-
-// {
-//   name: "onboard.start.confirm_cart_reminder",
-//   text: "Today",
-//   style: "default",
-//   type: "button",
-//   value: "confirm_cart_reminder.today"
-// }
-
+var onboard_home_attachments = module.exports.onboard_home_attachments = function(delay) {
+  return [{
+    mrkdwn_in: ['text'],
+    text: '*Order Food*\nI can order food for your team!\nLet me show you how to make lunch easier',
+    color: '#f43440',
+    callback_id: 'wow such home',
+    actions: [{
+      name: 'onboard.start.lunch',
+      text: 'Kip Café',
+      style: 'default',
+      type: 'button',
+      value: 'lunch'
+    }]
+  }, {
+    text: '*Get Supplies*\nI can shop for your team!\nLet me show you how to make team shopping better',
+    mrkdwn_in: ['text'],
+    color: '#fe9b00',
+    callback_id: 'wow such home',
+    actions: [{
+      name: 'onboard.start.supplies',
+      text: 'Kip Store',
+      style: 'default',
+      type: 'button',
+      value: 'supplies'
+    }]
+  }, {
+    text: '',
+    callback_id: 'whatevs',
+    actions: [{
+      name: 'onboard.start.confirm_admin_reminder',
+      text: '◷ Remind Me Later',
+      style: 'default',
+      type: 'button',
+      value: `confirm_admin_reminder.${delay}`
+    }]
+  }];
+};
 
 var settings_intervals = module.exports.settings_intervals = function(interval) {
   return [{
@@ -243,42 +296,6 @@ var focus_home = module.exports.focus_home = [{
   value: 'view_cart_btn'
 }];
 
-
-var shopping_team_default = module.exports.shopping_team_default = function(id) {
-  return [{
-    "name": "exit",
-    "text": "Exit Members",
-    "style": "primary",
-    "type": "button",
-    "value": "exit"
-  }, {
-    "name": "shopping.home.expand",
-    "text": "🐧",
-    "style": "default",
-    "type": "button",
-    "value": id
-  }]
-}
-
-var shopping_settings_default = module.exports.shopping_settings_default = function(id) {
-
-  return [{
-    name: "exit",
-    text: "Exit Settings",
-    style: "primary",
-    type: "button",
-    value: "exit"
-  }, {
-    name: "shopping.home.expand",
-    text: "🐧",
-    style: "default",
-    type: "button",
-    value: id
-  }]
-
-}
-
-
 var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
   // buttons search for whatever follows search in value. e.g. search.healthy_snacks searches for 'healthy snacks'
   'name': 'search_btn.start.search',
@@ -337,25 +354,6 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
 
 // ONBOARDING MODE TEMPLATES
 
-var slack_onboard_start = module.exports.slack_onboard_start = [{
-  name: "onboard.start.lunch",
-  text: "Kip Café",
-  style: "default",
-  type: "button",
-  value: "lunch"
-}, {
-  name: "onboard.start.supplies",
-  text: "Kip Store",
-  style: "default",
-  type: "button",
-  value: "supplies"
-}, {
-  name: "onboard.start.remind",
-  text: "◷ Remind Me Later",
-  style: "default",
-  type: "button",
-  value: "remind"
-}];
 
 var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
   name: "onboard.supplies.snackbox",
@@ -376,14 +374,6 @@ var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
   type: "button",
   value: "bundle.supplies"
 }];
-
-
-var slack_onboard_default = module.exports.slack_onboard_default = [{
-    "name": "settings.back",
-    "text": "Home",
-    "style": "default",
-    "type": "button"
-  }];
 
 var slack_onboard_basic = module.exports.slack_onboard_basic = [{
   name: "onboard.bundle.yes",
@@ -413,17 +403,6 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   style: "primary",
   type: "button",
   value: "member"
-}, {
-  name: "onboard.team.help",
-  text: "Help",
-  style: "primary",
-  type: "button",
-  value: "more_info"
-}, {
-    "name": "settings.back",
-    "text": "Home",
-    "style": "default",
-    "type": "button"
 }];
 
 var cart_reminder = module.exports.cart_reminder = [{

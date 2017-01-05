@@ -215,13 +215,6 @@ handlers['reminder'] = function(message) {
     callback_id: 'none',
     fallback: 'Ok! When would you like to be reminded?'
   });
-  attachments.push({
-    text: '',
-    mrkdwn_in: ['text'],
-    fallback: 'member_onboard',
-    actions: cardTemplate.slack_onboard_default,
-    callback_id: 'none',
-  });
   var msg = message;
   msg.mode = 'member_onboard'
   msg.action = 'home'
@@ -298,12 +291,6 @@ handlers['reminder_confirm'] = function*(message, data) {
     mrkdwn_in: ['text'],
     fallback: messageText.replace('*', ''),
     callback_id: 'none'
-  }, {
-    text: '',
-    mrkdwn_in: ['text'],
-    fallback: 'member_onboard',
-    actions: cardTemplate.slack_onboard_default,
-    callback_id: 'none'
   }];
 
   msg.action = 'home'
@@ -331,7 +318,6 @@ handlers['sorry'] = function(message) {
     text: 'Don’t have any changes? Type `exit` to quit settings',
     mrkdwn_in: ['text'],
     fallback: 'Sorry!',
-    actions: cardTemplate.slack_onboard_default,
     callback_id: 'none',
     color: '#45a5f4'
   });

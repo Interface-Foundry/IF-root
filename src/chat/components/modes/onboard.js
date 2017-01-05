@@ -42,70 +42,15 @@ handlers['start'] = function * (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  var attachments = [];
-  //adding onboard sticker
-  attachments.push({
-    text: 'Welcome to Kip!  We\'ll help you get started :)',
-    fallback: 'Onboard',
-  });
-  attachments.push({
-      image_url: "http://tidepools.co/kip/kip_menu.png",
-      text: 'Choose a Kip mode below to start a tour',
-      fallback: 'Onboard',
-      color: '#45a5f4',
-      mrkdwn_in: ['text'],
-      actions: cardTemplate.slack_onboard_start,
-      callback_id: 'none'
-    })
-  attachments.push({
-      text: '',
-      mrkdwn_in: ['text'],
-      actions: cardTemplate.slack_onboard_default,
-      callback_id: 'none'
-    });
-
-   var msg = message;
-   msg.mode = 'onboard'
-   msg.text = ''
-   msg.source.team = team_id;
-   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-   msg.reply = attachments;
-   msg.fallback = 'Let\'s get started!';
-   return [msg];
- }
-
- handlers['remind'] = function (message) {
-   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
-   if (team_id == null) {
-     return kip.debug('incorrect team id : ', message);
-   }
-   var attachments = [];
-   attachments.push({
-     text: 'Ok! When would you like to be reminded?',
-     color: '#45a5f4',
-     mrkdwn_in: ['text'],
-     fallback: 'Ok! When would you like to be reminded?',
-     actions: cardTemplate.admin_reminder,
-     callback_id: 'none'
-   });
-   attachments.push({
-     text: '',
-     mrkdwn_in: ['text'],
-     fallback: 'Ok! When would you like to be reminded?',
-     actions: cardTemplate.slack_onboard_default,
-     callback_id: 'none'
-
-   });
-   var msg = message;
-   msg.mode = 'onboard'
-   msg.action = 'home'
-   msg.text = ''
-   msg.source.team = team_id;
-   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-   msg.reply = attachments;
-   msg.fallback = 'Ok! When would you like to be reminded?';
-   return [msg];
- }
+  var msg = message;
+  msg.mode = 'onboard';
+  msg.text = 'Ok, let\'s get you started :)';
+  msg.source.team = team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
+  msg.fallback = 'Let\'s get started!';
+  return [msg];
+};
 
 handlers['confirm_admin_reminder'] = function*(message, data) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
@@ -114,93 +59,51 @@ handlers['confirm_admin_reminder'] = function*(message, data) {
   }).exec();
 
   const ONE_DAY = 24 * 60 * 60 * 1000; //hours in a day * mins in hour * seconds in min * milliseconds in second
-  var dateDescrip,
+  let nextDate,
     msInFuture = -1,
     alertTime = data[0],
     now = new Date();
   switch (alertTime) {
-    case 'today':
-      msInFuture = determineLaterToday();
-      dateDescrip = 'in a bit';
-      break;
     case 'tomorrow':
       msInFuture = ONE_DAY;
-      dateDescrip = 'tomorrow';
+      nextDate = 'one_week';
       break;
     case 'one_week':
       msInFuture = ONE_DAY * 7;
-      dateDescrip = 'next week';
+      nextDate = 'two_week';
       break;
-    case 'choose':
-      msInFuture = ONE_DAY * 3; // 3 days for now
-      dateDescrip = 'in a bit';
+    case 'two_week':
+      msInFuture = ONE_DAY * 14; // 3 days for now
+      nextDate = 'tomorrow';
       break;
     default:
       break;
   }
-  var messageText = (msInFuture > 0) ?
-    `Ok, I'll talk to you ${dateDescrip}.` :
-    'Ok! I won\'t set any reminders.';
-  messageText += ' Thanks and have a great day :)';
+  if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
 
   if (msInFuture > 0) {
-    var currentUser = yield db.Chatusers.findOne({
-      id: message.source.user
-    });
-    var cronAttachments = [];
-    cronAttachments.push({
-      // image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
-      text: 'Hey, it\'s me again. Ready to get started?',
-      fallback: 'Hey, it\'s me again. Ready to get started?'
-    });
-    cronAttachments.push({
-      image_url: "http://tidepools.co/kip/kip_menu.png",
-      text: 'What are you looking for?',
-      color: '#45a5f4',
-      mrkdwn_in: ['text'],
-      fallback: 'What are you looking for?',
-      actions: cardTemplate.slack_onboard_start,
-      callback_id: 'none'
-    })
-    cronAttachments.push({
-      text: '',
-      mrkdwn_in: ['text'],
-      fallback: 'What are you looking for?',
-      actions: cardTemplate.slack_onboard_default,
-      callback_id: 'none'
-    });
     var cronMsg = {
       mode: 'onboard',
       action: 'home',
-      reply: cronAttachments,
+      reply: cardTemplate.onboard_home_attachments(nextDate),
+      text: 'Hey, it\'s me again. Ready to get started?',
       fallback: 'Hey, it\'s me again. Ready to get started?'
-    }
-    createCronJob([currentUser], cronMsg, team, new Date(msInFuture + now.getTime()));
+    };
+    createCronJob([currentUser], cronMsg, team, new Date(msInFuture + now.getTime()), null);
   }
-  var msg = message;
-  var attachments = [];
-  attachments.push({
-    text: messageText,
-    color: '#45a5f4',
-    mrkdwn_in: ['text'],
-    fallback: messageText,
-    callback_id: 'none'
+  var responseMsg = {
+    mode: 'onboard',
+    action: 'home',
+    text: 'Ok, I\'ll talk to you soon!',
+    fallback: 'Ok, I\'ll talk to you soon!'
+  }
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(responseMsg)
   });
-  attachments.push({
-    text: '',
-    mrkdwn_in: ['text'],
-    actions: cardTemplate.slack_onboard_default,
-    callback_id: 'none'
-  });
-  msg.action = 'home'
-  msg.mode = 'onboard'
-  msg.text = ''
-  msg.source.team = team_id;
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  msg.reply = attachments;
-  msg.fallback = messageText;
-  return [msg];
-}
+  return [];
+};
 /**
  * S2
  */
@@ -218,12 +121,6 @@ handlers['supplies'] = function * (message) {
       actions: cardTemplate.slack_onboard_bundles,
       callback_id: 'none'
     })
-  attachments.push({
-      text: '',
-      mrkdwn_in: ['text'],
-      actions: cardTemplate.slack_onboard_default,
-      callback_id: 'none'
-    });
    var msg = message;
    msg.mode = 'onboard'
    msg.action = 'home'
@@ -547,12 +444,6 @@ handlers['reminder'] = function(message) {
     actions: cardTemplate.cart_reminder,
     callback_id: 'none'
   });
-  attachments.push({
-    text: '',
-    mrkdwn_in: ['text'],
-    actions: cardTemplate.slack_onboard_default,
-    callback_id: 'none'
-  });
   var msg = message;
   msg.mode = 'onboard'
   msg.action = 'home'
@@ -642,23 +533,7 @@ handlers['confirm_cart_reminder'] = function*(message, data) {
   		mrkdwn_in:['text']
   	})
   }
-  attachments.push({
-    image_url: "http://tidepools.co/kip/kip_menu.png",
-    text: 'Click a mode to start using Kip',
-    color: '#45a5f4',
-    callback_id: 'wow such home',
-    actions: [{
-      name: 'passthrough',
-      value: 'food',
-      text: 'Kip Café',
-      type: 'button'
-    }, {
-      name: 'passthrough',
-      value: 'shopping',
-      text: 'Kip Store',
-      type: 'button'
-    }]
-  });
+  attachments.push(cardTemplate.home_screen(true));
   let msg = {
     text: '',
     action: 'home',
@@ -941,15 +816,6 @@ handlers['sorry'] = function*(message) {
   message.text = 'Sorry, my brain froze!';
   message.mode = 'onboard';
   message.action = 'home';
-  var attachments = [];
-  attachments.push({
-    fallback: 'Sorry!',
-    actions: cardTemplate.slack_onboard_default,
-    callback_id: 'none',
-    color: '#45a5f4'
-  });
-  message.reply = attachments;
-
   return [message];
 };
 
@@ -972,30 +838,21 @@ handlers['home_btn'] = function * (message) {
       uri: message.source.response_url,
       body: JSON.stringify(json)
     });
-    return
-}
+    return;
+};
 
 /**
  * send_replace back button
  */
-handlers['back_btn'] = function * (message) {
-   var actions = cardTemplate.slack_onboard_default;
-   var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
-   var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
-   if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
-    var json = message.source.original_message;
-    json.attachments[json.attachments.length-1] = {
-        callback_id: 'onboard',
-        actions: cardTemplate.slack_onboard_default
-    }
-    request({
-      method: 'POST',
-      uri: message.source.response_url,
-      body: JSON.stringify(json)
-    });
-    return
-}
-
+handlers['back_btn'] = function*(message) {
+  var json = message.source.original_message;
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(json)
+  });
+  return;
+};
 /**
  * more info / help handler
  */
@@ -1036,8 +893,8 @@ handlers['more_info'] = function * (message, data) {
 }
 const createCronJob = function(people, msg, team, date, onRun) {
   kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
-  new cron.CronJob(date, function() {
-    people.map(function(a) {
+  new cron.CronJob(date, function () {
+    people.map(function (a) {
       var newMessage = new db.Message({
         incoming: false,
         thread_id: a.dm,
@@ -1050,13 +907,13 @@ const createCronJob = function(people, msg, team, date, onRun) {
           channel: a.dm,
           thread_id: a.dm,
           user: a.id,
-          type: 'message',
+          type: 'message'
         },
         reply: msg.reply,
         mode: msg.mode,
         action: msg.action,
         user: a.id
-      })
+      });
       co(publish(newMessage));
     });
     this.stop();
@@ -1073,9 +930,9 @@ const determineLaterToday = function() {
   const ONE_HOUR = 60 * 60 * 1000;
   if (process.env.NODE_ENV.includes('development')) return 20 * 1000; //20 seconds for dev
   else return ONE_HOUR;
-}
+};
 
-function * publish (message) {
+function* publish(message) {
   yield message.save();
   queue.publish('outgoing.' + message.origin, message, message._id + '.reply.update');
 }
