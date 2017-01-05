@@ -1,6 +1,7 @@
-# run with
-# build w/
-# docker run -it --rm --name webhooks -p 5000:5000 python-github-webhooks
+# build with:
+#   docker build -t gcr.io/kip-styles/webhook:latest -f webhook.Dockerfile .
+# push with:
+#    gcloud docker -- push gcr.io/kip-styles/webhook:latest;
 FROM python:3.4
 COPY . /app
 RUN mkdir -p /root/.ssh/ && \
