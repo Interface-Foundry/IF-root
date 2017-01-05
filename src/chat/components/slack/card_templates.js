@@ -21,23 +21,32 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
   }]
 }
 
-var simple_home = module.exports.simple_home = [{
-  name: 'passthrough',
-  value: 'food',
-  text: 'Kip Café',
-  type: 'button'
-}, {
-  name: 'passthrough',
-  value: 'shopping',
-  text: 'Kip Store',
-  type: 'button'
-}, {
-  name: 'settings',
-  text: 'Settings',
-  style: 'default',
-  type: 'button',
-  value: 'start'
-}]
+var simple_home = module.exports.simple_home = function(admin) {
+
+  var attachments = [{
+      name: 'passthrough',
+      value: 'food',
+      text: 'Kip Café',
+      type: 'button'
+    }, {
+      name: 'passthrough',
+      value: 'shopping',
+      text: 'Kip Store',
+      type: 'button'
+    }];
+
+    if (admin) {
+      attachments.push({
+        name: 'settings',
+        text: 'Settings',
+        style: 'default',
+        type: 'button',
+        value: 'start'
+      })
+     }
+
+    return attachments
+}
 
 
 // {

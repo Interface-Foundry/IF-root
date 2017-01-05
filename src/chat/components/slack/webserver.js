@@ -204,7 +204,7 @@ app.post('/slackaction', next(function * (req, res) {
         }
         var chunkedButtons = _.chunk(buttons, 5);
         var newRow = {
-          text: parsedIn.original_message.attachments[buttonRow + 1].text,
+          text: buttonRow == 0 ? parsedIn.original_message.attachments[buttonRow + 1].text : '',
           actions: chunkedButtons[buttonRow],
           callback_id: 'none',
           mrkdwn_in: ['text'],
