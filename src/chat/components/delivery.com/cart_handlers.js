@@ -437,6 +437,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       })
 
       foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
+
       if (discountAvail) {
         // this is literally needed to prevent rounding errors
         if (foodSession.coupon.used === false) {
