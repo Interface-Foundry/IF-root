@@ -117,13 +117,17 @@ handlers['get-admins.response'] = function * (message) {
     is_bot: {$ne: true},
     deleted: {$ne: true}
   });
-  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
-  yield users.map( function * (u) {
+  var currentUser = yield db.Chatusers.findOne({
+    id: message.source.user
+  });
+  yield users.map(function*(u) {
     var re = new RegExp('\\b' + u.id + '\\b', 'i');
     if (message.original_text.match(re)) {
       office_admins.push(u.id);
       if (u.id != currentUser.id) {
         var msg = new db.Message();
+        msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
+        msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
         msg.source = {};
         msg.mode = 'onboard';
         msg.action = 'home';
@@ -132,21 +136,6 @@ handlers['get-admins.response'] = function * (message) {
         msg.source.user = u.id;
         msg.user_id = u.id;
         msg.thread_id = u.dm;
-        var attachments = [];
-        attachments.push({
-          text: '@' + currentUser.name + ' just made you an admin of Kip!',
-          color: '#45a5f4'
-        });
-        attachments.push({
-            image_url: "http://tidepools.co/kip/kip_menu.png",
-            text: 'We\'ll help you get started :) Choose a Kip mode below to start a tour',
-            fallback: 'Onboard',
-            color: '#45a5f4',
-            mrkdwn_in: ['text'],
-            actions: cardTemplate.slack_onboard_start,
-            callback_id: 'none'
-          })
-        msg.reply = attachments;
         yield msg.save();
         yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
       }

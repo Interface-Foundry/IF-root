@@ -93,11 +93,11 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
     text: '',
     callback_id: 'whatevs',
     actions: [{
-      name: 'onboard.start.confirm_admin_reminder',
+      name: 'onboard.start.remind_later',
       text: '◷ Remind Me Later',
       style: 'default',
       type: 'button',
-      value: `confirm_admin_reminder.${delay}`
+      value: `remind_later.${delay}`
     }]
   }];
 };

@@ -13,10 +13,14 @@ var request = require('request');
 var rp = require('request-promise');
 var Fuse = require('fuse.js');
 
+let cronJobs = {}; // hopefully temporary until we get a db solution for cron
+
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
   let action, data;
-  if ((!last_action || last_action.indexOf('home') == -1) && (_.get(message,'action') != 'start.supplies')) {
+  if ((!last_action || last_action.indexOf('home') == -1) && 
+    (_.get(message,'action') != 'start.supplies' && !(_.get(message, 'action').includes('remind_later')))) {
+    kip.debug('\n\n\n🤖 action : ', 'start');
     return yield handlers['start'](message);
   } else {
     if (!message.data){
@@ -31,34 +35,37 @@ function * handle(message) {
   }
 }
 
-
 module.exports.handle = handle;
 
 /**
  * S1
  */
 handlers['start'] = function * (message) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
+  if (cronJobs[message.source.user]) {
+    cronJobs[message.source.user].stop();
+  }
   var msg = message;
   msg.mode = 'onboard';
-  msg.text = 'Ok, let\'s get you started :)';
-  msg.source.team = team_id;
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.action = 'home';
   msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
-  msg.fallback = 'Let\'s get started!';
+  msg.origin = message.origin;
+  msg.source = message.source;
+  msg.text = 'Ok, let\'s get started!';
+  msg.fallback = 'Ok, let\'s get started!';
   return [msg];
 };
 
-handlers['confirm_admin_reminder'] = function*(message, data) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
-  var team = yield db.Slackbots.findOne({
+handlers['remind_later'] = function*(message, data) {
+  let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  let team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
 
-  const ONE_DAY = 24 * 60 * 60 * 1000; //hours in a day * mins in hour * seconds in min * milliseconds in second
+  const ONE_DAY = 24 * 60 * 60 * 1000; // hours in a day * mins in hour * seconds in min * milliseconds in second
   let nextDate,
     msInFuture = -1,
     alertTime = data[0],
@@ -80,35 +87,72 @@ handlers['confirm_admin_reminder'] = function*(message, data) {
       break;
   }
   if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
-
   if (msInFuture > 0) {
-    var cronMsg = {
-      mode: 'onboard',
-      action: 'home',
-      reply: cardTemplate.onboard_home_attachments(nextDate),
-      text: 'Hey, it\'s me again. Ready to get started?',
-      fallback: 'Hey, it\'s me again. Ready to get started?'
-    };
-    createCronJob([currentUser], cronMsg, team, new Date(msInFuture + now.getTime()), null);
+    var currentUser = yield db.Chatusers.findOne({
+      id: message.source.user
+    });
+    let cronMsg = message;
+    cronMsg.mode = 'onboard';
+    cronMsg.action = 'home';
+    cronMsg.reply = cardTemplate.onboard_home_attachments(nextDate);
+    cronMsg.origin = message.origin;
+    cronMsg.source = message.source;
+    cronMsg.text = 'Hey, it\'s me again! Ready to get started?';
+    cronMsg.fallback = 'Hey, it\'s me again! Ready to get started?';
+    cronJobs[message.source.user] = createCronJob(currentUser, cronMsg, team, new Date(msInFuture + now.getTime()));
   }
-  var responseMsg = {
-    mode: 'onboard',
-    action: 'home',
+
+  let laterMsg = {
     text: 'Ok, I\'ll talk to you soon!',
-    fallback: 'Ok, I\'ll talk to you soon!'
-  }
+    fallback: 'Ok, I\'ll talk to you soon!',
+    history: message.history,
+    attachments: [{
+      text: '',
+      callback_id: 'kip!',
+      actions: [{
+        'name': 'onboard.start.start_now',
+        'text': 'Start Now',
+        'style': 'default',
+        'type': 'button',
+        'value': 'start_now.now'
+      }]
+    }]
+  };
   request({
     method: 'POST',
     uri: message.source.response_url,
-    body: JSON.stringify(responseMsg)
+    body: JSON.stringify(laterMsg)
   });
   return [];
 };
+
+handlers['start_now'] = function (message) {
+  if (cronJobs[message.source.user]) {
+    cronJobs[message.source.user].stop();
+  }
+  let msg = {
+    text: 'Ok, let\'s get started!',
+    fallback: 'Ok, let\'s get started!',
+    attachments: cardTemplate.onboard_home_attachments('tomorrow'),
+    origin: message.origin,
+    source: message.source,
+    mode: 'onboard',
+    action: 'home',
+    history: message.history
+  };
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(msg)
+  });
+  return [];
+};
+
 /**
  * S2
  */
 handlers['supplies'] = function * (message) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
@@ -368,7 +412,6 @@ handlers['bundle'] = function * (message, data) {
 }
 
 /**
-
  * S4
  */
 handlers['team'] = function * (message) {
@@ -421,210 +464,6 @@ handlers['team'] = function * (message) {
   msg.reply = attachments;
   return [msg];
 
-}
-
-/**
- * S4A1
- */
-handlers['reminder'] = function(message) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
-  if (team_id == null) {
-    return kip.debug('incorrect team id : ', message);
-  }
-  var attachments = [{
-    text: 'Awesome! I\'ve let them know. ',
-    color: '#45a5f4',
-    mrkdwn_in: ['text'],
-    fallback: 'Step 4: Remind team members about shopping order collections'
-  }];
-  attachments.push({
-    text: '*Step 4:* Remind team members about shopping order collections:',
-    mrkdwn_in: ['text'],
-    color: '#A368F0',
-    actions: cardTemplate.cart_reminder,
-    callback_id: 'none'
-  });
-  var msg = message;
-  msg.mode = 'onboard'
-  msg.action = 'home'
-  msg.text = ''
-  msg.source.team = team_id;
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  msg.reply = attachments;
-  msg.fallback = 'Step 4: Remind team members about shopping order collections'
-  return [msg];
-}
-
-/**
- * S4A2
- */
-
-handlers['confirm_cart_reminder'] = function*(message, data) {
-  let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
-  let team = yield db.Slackbots.findOne({
-    'team_id': team_id
-  }).exec();
-  //lets ask slack what the user's time zone is!
-  let userInfo = yield rp(`https://slack.com/api/users.info?token=${team.bot.bot_access_token}&user=${message.source.user}`);
-  userInfo = JSON.parse(userInfo);
-  let tz = _.get(userInfo, 'user.tz', 'America/New_York'); //default to NY if we can't find one
-  let dateDescrip,
-    cronTime = {},
-    alertTime = data[0],
-    now = new Date(Date.now().toLocaleString('en-US', { timeZone: tz }));
-  switch (alertTime) {
-    case 'daily':
-      cronTime = {
-        day: '1-5',
-        date: '*',
-        hour: now.getHours(),
-        minutes: now.getMinutes()
-      }
-      dateDescrip = `at *${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}* every day`;
-      break;
-    case 'weekly':
-      cronTime = {
-        day: now.getDay(),
-        hour: now.getHours(),
-        minutes: now.getMinutes(),
-        date: '*'
-      }
-      team.meta.weekly_status_day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
-      dateDescrip = `every *${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()]}* at *${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}*`;
-      break;
-    case 'monthly':
-      cronTime = {
-        day: '*',
-        date: now.getDate(),
-        hour: now.getHours(),
-        minutes: now.getMinutes()
-      }
-      team.meta.weekly_status_date = now.getDate();
-      dateDescrip = `on day *${now.getDate()}* of every month at *${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}*`;
-      break;
-    case 'never':
-    default:
-      break;
-  }
-
-  team.meta.status_interval = alertTime;
-  team.meta.weekly_status_timezone = tz;
-  team.meta.weekly_status_enabled = (dateDescrip) ? true : false;
-  team.meta.weekly_status_time = `${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'})}`
-  yield team.save();
-  if (dateDescrip) {
-    yield utils.setCron(message, {}, cronTime)
-  }
-
-  let messageText = (dateDescrip) ?
-    `Ok, your team will get reminders ${dateDescrip}.\nAdmins can always edit reminders in Settings` :
-    'Ok! I won\'t set any reminders. If you ever want them, you can turn them on in Settings';
-  messageText += '\n Thanks and have a great day :)';
-
-  let attachments = [{
-    text: messageText,
-    color: '#A368F0',
-    fallback: messageText,
-    mrkdwn_in: ['text']
-  }];
-  if(dateDescrip) {
-  	attachments.push({
-  		text: 'We got your timezone from your current slack settings',
-  		mrkdwn_in:['text']
-  	})
-  }
-  attachments.push(cardTemplate.home_screen(true));
-  let msg = {
-    text: '',
-    action: 'home',
-    mode: 'onboard',
-    source: message.source,
-    origin: message.origin,
-    reply: attachments,
-    fallback: messageText.replace('*', '')
-  }
-  return [msg];
-}
-
-var createCartMsg = function*(message) {
-  var cart_id = message.source.team,
-    cart = yield kipcart.getCart(cart_id),
-    attachments = [{
-      text: 'Ready to check out? Here\'s your team cart!',
-      color: '#A368F0'
-    }];
-  attachments.push({
-    text: '',
-    color: '#45a5f4',
-    image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
-  });
-  for (var i = 0; i < cart.aggregate_items.length; i++) {
-    var item = cart.aggregate_items[i];
-    // the slack message for just this item in the cart list
-    var item_message = {
-        mrkdwn_in: ['text', 'pretext'],
-        color: '#45a5f4',
-        thumb_url: item.image
-      }
-      // multiple people could have added an item to the cart, so construct a string appropriately
-    var userString = item.added_by.map(function(u) {
-      return '<@' + u + '>';
-    }).join(', ');
-    var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
-    // make the text for this item's message
-    item_message.text = [
-      `*${i + 1}.* ` + `<${link}|${item.title}>`,
-      `*Price:* ${item.price} each`,
-      `*Added by:* ${userString}`,
-      `*Quantity:* ${item.quantity}`,
-    ].filter(Boolean).join('\n');
-    // add the item actions if needed
-    item_message.callback_id = item._id.toString();
-    var buttons = [{
-      "name": "additem",
-      "text": "+",
-      "style": "default",
-      "type": "button",
-      "value": "add"
-    }, {
-      "name": "removeitem",
-      "text": "—",
-      "style": "default",
-      "type": "button",
-      "value": "remove"
-    }];
-
-    if (item.quantity > 1) {
-      buttons.push({
-        name: "removeall",
-        text: 'Remove All',
-        style: 'default',
-        type: 'button',
-        value: 'removeall'
-      })
-    }
-    item_message.actions = buttons;
-    attachments.push(item_message);
-  }
-
-  var summaryText = `*Team Cart Summary*
-   *Total:* ${cart.total}`;
-  summaryText += `
-   <${cart.link}|*➤ Click Here to Checkout*>`;
-  attachments.push({
-    text: summaryText,
-    mrkdwn_in: ['text', 'pretext'],
-    color: '#49d63a'
-  })
-
-  var msg = message;
-  msg.mode = 'shopping'
-  msg.action = 'switch.silent';
-  msg.text = ''
-  msg.source.team = message.source.team;
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  msg.reply = attachments;
-  return msg;
 }
 
 /**
@@ -789,13 +628,13 @@ handlers['text'] = function * (message) {
     } else {
       try {
         if (choice == 'more_info' || choice == 'help') {
-          var data = { lastAction: choice == 'more_info' ? 'bundle.more' : 'team.help'};
+          data = { lastAction: choice == 'more_info' ? 'bundle.more' : 'team.help'};
           if (data.lastAction == 'team.help') message.text = '';
           // kip.debug(' \n\n\n\n\ onboard:788:textHandler: sending data: ', data  ,'\n\n\n\n');
           return yield handlers[choice](message, data);
         }
         return yield handlers[choice](message);
-      } catch(err) {
+      } catch (err) {
         return yield handlers['sorry'](message);
       }
     }
@@ -804,14 +643,12 @@ handlers['text'] = function * (message) {
   }
 };
 
-
-
 /**
  * catcher
  */
 handlers['sorry'] = function*(message) {
   if (message.text.includes('amazon.com')) {
-    return; //ignore times people paste stuff in
+    return; // ignore times people paste stuff in
   }
   message.text = 'Sorry, my brain froze!';
   message.mode = 'onboard';
@@ -819,117 +656,17 @@ handlers['sorry'] = function*(message) {
   return [message];
 };
 
-/**
- * send_replace home button
- */
-handlers['home_btn'] = function * (message) {
-   var actions = cardTemplate.slack_onboard_home;
-   var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec();
-   var isAdmin = team.meta.office_assistants.find( u => { return u == message.source.user });
-   if (!isAdmin) actions.splice(_.findIndex(actions, function(e) {return e.name == 'team'}),1);
-    var json = message.source.original_message;
-    json.attachments[json.attachments.length-1] = {
-        fallback: 'onboard',
-        callback_id: 'onboard',
-        actions: actions
-    }
-    request({
-      method: 'POST',
-      uri: message.source.response_url,
-      body: JSON.stringify(json)
-    });
-    return;
-};
-
-/**
- * send_replace back button
- */
-handlers['back_btn'] = function*(message) {
-  var json = message.source.original_message;
-  request({
-    method: 'POST',
-    uri: message.source.response_url,
-    body: JSON.stringify(json)
-  });
-  return;
-};
-/**
- * more info / help handler
- */
-handlers['more_info'] = function * (message, data) {
-   var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
-   var last_message = history[0];
-   var lastAction = _.get(data,'lastAction') ? _.get(data,'lastAction') : _.get(last_message,'action') ?  _.get(last_message,'action') : 'team.help';
-   var helpText;
-   var helpOptions;
-   switch(lastAction) {
-    case 'bundle.more':
-      helpText = `Selecting 'Yes' will allow you to choose which channels to add to this order.
-  Or simply checkout your items by selecting 'No'`
-      helpOptions = cardTemplate.slack_onboard_basic
-      break
-    case 'team.help':
-      helpText = `Kip will direct message members in each selected channel to help them add items to the cart!`
-      helpOptions = cardTemplate.slack_onboard_team
-      break
-   }
-
-   message.text = "";
-   message.fallback = 'More Info'
-   message.mode = 'onboard';
-   message.action = 'home';
-   var attachments = [];
-   attachments.push({
-      text: helpText,
-      color: '#45a5f4',
-      mrkdwn_in: ['text'],
-      fallback: helpText,
-      actions: helpOptions,
-      callback_id: 'none'
-    });
-   message.reply = attachments;
-   return [message];
-
-}
-const createCronJob = function(people, msg, team, date, onRun) {
+const createCronJob = function(user, msg, team, date) {
   kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
-  new cron.CronJob(date, function () {
-    people.map(function (a) {
-      var newMessage = new db.Message({
-        incoming: false,
-        thread_id: a.dm,
-        resolved: true,
-        user_id: a.id,
-        origin: 'slack',
-        text: '',
-        source: {
-          team: team.team_id,
-          channel: a.dm,
-          thread_id: a.dm,
-          user: a.id,
-          type: 'message'
-        },
-        reply: msg.reply,
-        mode: msg.mode,
-        action: msg.action,
-        user: a.id
-      });
+  return new cron.CronJob(
+    date,
+    () => {
+      var newMessage = new db.Message(msg);
       co(publish(newMessage));
-    });
-    this.stop();
-    if (onRun) { // run another function
-      onRun(new Date());
-    }
-  },
-  function() {
-    kip.debug('just finished the scheduled update thing for team ' + team.team_id + ' ' + team.team_name);
-  }, true, team.meta.weekly_status_timezone);
-};
-// based on the current time, determine a later time
-const determineLaterToday = function() {
-  const ONE_HOUR = 60 * 60 * 1000;
-  if (process.env.NODE_ENV.includes('development')) return 20 * 1000; //20 seconds for dev
-  else return ONE_HOUR;
+      this.stop();
+    },
+    true,
+    team.meta.weekly_status_timezone);
 };
 
 function* publish(message) {

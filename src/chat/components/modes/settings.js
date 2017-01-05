@@ -288,21 +288,8 @@ handlers['add_or_remove'] = function * (message) {
           msg.source.user = id;
           msg.user_id = id;
           msg.thread_id = userToBeNotified.dm;
-          var attachments = [];
-          attachments.push({
-          text: '@' + currentUser.name + ' just made you an admin of Kip!',
-          color: '#45a5f4'
-          });
-          attachments.push({
-              image_url: "http://tidepools.co/kip/kip_menu.png",
-              text: 'We\'ll help you get started :) Choose a Kip mode below to start a tour',
-              fallback: 'Onboard',
-              color: '#45a5f4',
-              mrkdwn_in: ['text'],
-              actions: cardTemplate.slack_onboard_start,
-              callback_id: 'none'
-            })
-          msg.reply = attachments;
+          msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
+          msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
           yield msg.save();
           yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
         }
