@@ -1,6 +1,7 @@
-# run with
-# build w/
-# docker run -it --rm --name webhooks -p 5000:5000 python-github-webhooks
+# build with:
+#   docker build -t gcr.io/kip-styles/webhook:latest -f webhook.Dockerfile .
+# push with:
+#    gcloud docker -- push gcr.io/kip-styles/webhook:latest;
 FROM python:3.4
 COPY . /app
 RUN mkdir -p /root/.ssh/ && \
@@ -13,8 +14,11 @@ RUN mkdir -p /root/.ssh/ && \
     chmod 0600 /root/.ssh/id_rsa && \
     chmod +x /app/hooks/push-dev
 
-RUN git clone --branch dev git@github.com:Interface-Foundry/IF-root.git /webhook-test/ && \
-    cd /webhook-test && git remote add gitlab git@gitlab.com:kipthis/webhook-test.git
+RUN git clone --mirror git@github.com:Interface-Foundry/IF-root.git /IF-root/
+
+RUN cd /IF-root/ && \
+    git remote set-url --push origin git@gitlab.com:kipthis/IF-root.git && \
+    cat /IF-root/config
 
 RUN pip install -r /app/requirements.txt
 WORKDIR /app

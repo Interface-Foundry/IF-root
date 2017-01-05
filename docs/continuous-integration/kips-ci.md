@@ -10,6 +10,21 @@ the command to install the minio deployment would be:
 for what we are doing we also need a /runner folder in the persistent disk (folder is a bucket on the mounted volume i think).  for now, just run this command (which gets the pod then enters and executes the mkdir command):
 `kubectl get pod --namespace=gitlab --selector='app=gitlab-cache-minio' --output='name' | cut -d'/' -f2 | xargs -I {} kubectl exec {} -- /bin/sh -c "mkdir -p /export/runner""`
 
+
+## to access the minio UI thing
+there is printed instructions for how to proxy the minio cache thing to ur local computer but since you may forget, the process would be like:
+
+```
+export POD_NAME=$(kubectl get pods --namespace gitlab -l "app=gitlab-cache-minio" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward $POD_NAME 9000 --namespace gitlab
+```
+at which point you can just goto localhost:9000 and login with the key and pass
+or you can also:
+```
+mc config host add gitlab-cache-minio-local http://localhost:9000  $MINIOACCESSKEY $MINIOSECRETKEY
+mc ls gitlab-cache-minio-local
+```
+
 ### Note:
 a better way to do the above is either a custom helm install the creates /runner (incredibly simple and easy to add), or from within a [init-container/pod for gitlab-runner](http://kubernetes.io/docs/user-guide/accessing-the-cluster/#accessing-the-api-from-a-pod).  Wasnt interested in diving into either atm.
 

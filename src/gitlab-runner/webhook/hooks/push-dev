@@ -1,5 +1,12 @@
 #!/bin/bash
 
-cd /webhook-test/
-git pull --rebase origin dev
-git push gitlab dev
+echo -e "\n===========================\n"
+echo -e "running the script and in script"
+echo -e "\n===========================\n"
+cd /IF-root/
+git fetch -p origin
+git push --mirror
+
+echo -e "\n===========================\n"
+echo -e "mirroring of repo complete"
+echo -e "\n===========================\n"

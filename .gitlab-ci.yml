@@ -83,13 +83,16 @@ test:node:
 # ------------------------------------------------
 
 test:python:
-  image: python:3.5
+  image: python:3.4
   stage: test
   before_script:
+    - echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/GOOGLE_APPLICATION_CREDENTIALS.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/GOOGLE_APPLICATION_CREDENTIALS.json
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
   script:
+    - ls
+    - pwd
     - pip install -q -r src/image_processing/requirements.txt
     - python -c 'import site; print(site.getsitepackages())'
     - pytest tests/picstitch/

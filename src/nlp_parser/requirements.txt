@@ -1,0 +1,5 @@
+easydict
+Flask==0.12
+google-api-python-client==1.5.5
+oauth2client==3.0.0
+gunicorn==19.6.0
