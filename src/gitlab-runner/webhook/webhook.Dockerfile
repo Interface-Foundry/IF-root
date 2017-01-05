@@ -13,8 +13,13 @@ RUN mkdir -p /root/.ssh/ && \
     chmod 0600 /root/.ssh/id_rsa && \
     chmod +x /app/hooks/push-dev
 
-RUN git clone --branch dev git@github.com:Interface-Foundry/IF-root.git /webhook-test/ && \
-    cd /webhook-test && git remote add gitlab git@gitlab.com:kipthis/webhook-test.git
+RUN git clone --mirror git@github.com:Interface-Foundry/IF-root.git /IF-root/
+
+RUN cd /IF-root/ && \
+    git remote set-url --push origin git@gitlab.com:kipthis/IF-root.git && \
+    cat /IF-root/.git/config
+
+# git remote add --mirror=push gitlab git@gitlab.com:kipthis/IF-root.git && \
 
 RUN pip install -r /app/requirements.txt
 WORKDIR /app
