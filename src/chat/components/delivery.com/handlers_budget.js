@@ -10,14 +10,18 @@ var handlers = {}
 handlers['food.admin.team_budget'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
-  var msg_text = 'How much would you like your team to spend on food?';
+  var budget_options;
+  var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
+  for (var i = 0; i < locations.length; i++) {
+    if (locations[i].address_1 == foodSession.chosen_location.address_1 && locations[i].zip_code == foodSession.chosen_location.zip_code) {
+      budget_options = locations[i].budgets;
+    }
+  }
 
-  // var next_mode = 'food.admin.team_budget';
-  var confirm = false;
+  var msg_text = 'How much would you like each person on your team to spend on food?';
 
   var parseNumber = function (str) {
     var num = str.match(/([\d]+(?:\.\d\d)?)/);
-    // console.log('Regex returns:', num[1]);
     if (num) return num[1];
     else return null;
   }
@@ -26,22 +30,12 @@ handlers['food.admin.team_budget'] = function * (message) {
 
   if (message.text) {
     var num = parseNumber(message.text)
-    if (num) {
-      if (num <=0) {
-         msg_text = "That's not a valid number"
-      }
-      else {
-        individual_num = Math.round(num/foodSession.team_members.length)
-        yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {temp_budget: individual_num}})
-        console.log('yielded, updated, etc')
-        msg_text = `To confirm, you want your team to spend around $${num}, which works out to around $${individual_num} per person.`;
-        confirm = true;
-      }
-    }
-    else {
-      //send an oops didn't get that message
-      msg_text = "I'm sorry, I didn't understand that -- please type a number!"
-    }
+
+    message.data = {};
+    message.data.value = {};
+    message.data.value.budget = num;
+    message.data.value.new = true;
+    yield handlers['food.admin.confirm_budget'](message);
   }
 
   var msg_json = {
@@ -55,31 +49,38 @@ handlers['food.admin.team_budget'] = function * (message) {
         'callback_id': 'food.admin.team_budget',
         'color': '#3AA3E3',
         'attachment_type': 'default',
-        'actions': (confirm ? [
-          {
-            'name': 'passthrough',
-            'text': 'Yes, that\'s right',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'food.admin.confirm_budget'
-          }, //food.user.poll
-          {
-            'name': 'food.admin.team_budget',
-            'text': 'No, that\'s not right',
-            'style': 'default',
-            'type': 'button',
-            'value': 'food.admin.team_budget'
-          },
-          {
-            'name': 'passthrough',
-            'text': '< Back',
-            'style': 'default',
-            'type': 'button',
-            'value': 'food.poll.confirm_send_initial'
-          }
-        ] : [])
+        'actions': []
       }
     ]
+  }
+
+  for (var i = 0; i < budget_options.length; i++) {
+    msg_json.attachments[0].actions.push({
+      'name': 'food.admin.confirm_budget',
+      'text': `$${budget_options[i]}`,
+      'style': 'default',
+      'type': 'button',
+      'value': {
+        budget: budget_options[i],
+        new: true
+      }
+    })
+  }
+
+  msg_json.attachments[0].actions.push({
+    'name': 'passthrough',
+    'text': 'None',
+    'style': 'default',
+    'type': 'button',
+    'value': 'food.admin_polling_options'
+  })
+
+  if (!message.text) {
+    msg_json.attachments.push({
+      'fallback': 'Search the menu',
+      'text': '✎ Or type a budget below',
+      'mrkdwn_in': ['text']
+    })
   }
 
   $replyChannel.sendReplace(message, 'food.admin.team_budget', {type: message.origin, data: msg_json})
@@ -87,22 +88,47 @@ handlers['food.admin.team_budget'] = function * (message) {
 
 handlers['food.admin.confirm_budget'] = function * (message) {
 
+  budget = message.data.value.budget;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  if (message.data.value.new) {
+
+    var budget_options;
+    var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
+    for (var i = 0; i < locations.length; i++) {
+      if (locations[i].address_1 == foodSession.chosen_location.address_1 && locations[i].zip_code == foodSession.chosen_location.zip_code) {
+        budget_options = locations[i].budgets;
+        var duplicate = false;
+        for (var j = 0; j < budget_options.length; j++) {
+          if (Number(budget) == Number(budget_options[j])) duplicate = true;
+          if (Number(budget) <= Number(budget_options[j])) {
+            budget_options.splice(j, (duplicate ? 1 : 0), budget);
+            break;
+          }
+        }
+        if (Number(budget) > Number(budget_options[budget_options.length])) {
+          budget_options.push(budget)
+        }
+        locations[i].budgets = budget_options
+      }
+    }
+
+    yield db.slackbots.update({team_id: message.source.team}, {$set: {'meta.locations': locations}})
+  }
 
   var user_budgets = {};
   for (var i = 0; i < foodSession.team_members.length; i++) {
-    user_budgets[foodSession.team_members[i].id] = foodSession.temp_budget;
+    user_budgets[foodSession.team_members[i].id] = budget;
   }
 
   yield db.Delivery.update({team_id: message.source.team, active: true}, {
     $set: {
-      budget: foodSession.temp_budget,
+      budget: budget,
       user_budgets: user_budgets
-    },
-    $unset: {temp_budget: ""}
+    }
   });
 
-  yield $allHandlers['food.poll.confirm_send'](message)
+  yield $allHandlers['food.admin_polling_options'](message) //TODO make it stop happening
 }
 
 module.exports = function (replyChannel, allHandlers) {

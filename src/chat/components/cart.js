@@ -506,8 +506,28 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
       })
       // kip.debug(items_to_add)
       var res = yield client.addCart(items_to_add)
-      kip.debug('errors', _.get(res, 'Request[0].Errors'))
-      timer('rebuilt')
+      var errors = _.get(res, 'Request[0].Errors')
+      kip.debug('errors', errors)
+      if (errors) {
+        // checks to see if error is from too many of specific item in cart,
+        // sends a message if it is
+        let matching_items,
+          invalidQuantityAsin;
+        errors.forEach(ele => {
+          let code = ele.Error[0].Code[0]; // might have to check every on at some point instead of the first
+          let message = ele.Error[0].Message[0];
+          if (code.includes('InvalidQuantity')) {
+            invalidQuantityAsin = message.match(/:\s(\w+)/)[1];
+            matching_items = cart.items.filter(function (i) {
+              return i.ASIN === invalidQuantityAsin;
+            });
+          }
+        });
+        cart = yield module.exports.removeFromCartByItem(matching_items.pop());
+        cart.error = '^ Sorry, Amazon won\'t let me add another to your cart';
+        cart.errorASIN = invalidQuantityAsin;
+      }
+      timer('rebuilt');
     }
 
     // pretty print a nice cart

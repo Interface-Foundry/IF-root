@@ -111,8 +111,9 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
     json.attachments.push({
-      'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])}-ish left`,
-      'mrkdwn_in': ['text']
+      'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
+      'mrkdwn_in': ['text'],
+      'color': '#49d63a'
     });
   }
 

@@ -93,12 +93,12 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
             'type': 'button',
             'value': 'food.user.poll'
           },
-          {
-            'name': 'food.admin.team_budget',
-            'type': 'button',
-            'text': 'Set a Budget',
-            'value': 'food.admin.team_budget'
-          },
+          // {
+          //   'name': 'food.admin.team_budget',
+          //   'type': 'button',
+          //   'text': 'Set a Budget',
+          //   'value': 'food.admin.team_budget'
+          // },
           {
             'name': 'passthrough',
             'value': 'food.admin.team.members',
@@ -181,12 +181,12 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'text': 'View Team Members',
             'type': 'button'
           },
-          {
-            'name': 'food.admin.team_budget',
-            'type': 'button',
-            'text': 'Set a Budget',
-            'value': 'food.admin.team_budget'
-          },
+          // {
+          //   'name': 'food.admin.team_budget',
+          //   'type': 'button',
+          //   'text': 'Set a Budget',
+          //   'value': 'food.admin.team_budget'
+          // },
           {
             'name': 'food.admin.display_channels',
             'text': 'Use a #channel',

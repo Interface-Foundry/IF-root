@@ -92,6 +92,8 @@ function * handleMessage (message) {
   // message.mode = 'food'
   // message.action = route.replace(/^food./, '')
   if (handlers[route]) {
+    //waypoint logging
+    db.waypoints.log(0, null, message.user_id, {original_text: message.original_text})
     yield handlers[route](message)
   } else {
     kip.error('No route handler for ' + route)
