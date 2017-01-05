@@ -1,6 +1,12 @@
 #!/bin/bash
 
-echo -e "\n==============\nrunning the script and in script\n==============\n"
+echo -e "\n===========================\n"
+echo -e "running the script and in script"
+echo -e "\n===========================\n"
 cd /IF-root/
 git fetch -p origin
 git push --mirror
+
+echo -e "\n===========================\n"
+echo -e "mirroring of repo complete"
+echo -e "\n===========================\n"
