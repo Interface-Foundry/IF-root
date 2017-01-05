@@ -85,28 +85,18 @@ function typing(message) {
 }
 
 function simplehome(message, isAdmin) {
+  var slackreply = card_templates.home_screen(isAdmin);
+  var msg = {
+    action: 'simplehome',
+    mode: 'food',
+    source: message.source,
+    origin: message.origin,
+    reply: {
+      data: slackreply
+    }
+  };
 
-	var slackreply = {
-		text: 'Hi! Thanks for using Kip 😊',
-		attachments: [{
-			image_url: "http://tidepools.co/kip/kip_menu.png",
-			text: 'Click a mode to start using Kip',
-			color: '#3AA3E3',
-			callback_id: 'wow such home',
-			actions: card_templates.simple_home(isAdmin)
-		}]
-	}
-	var msg = {
-		action: 'simplehome',
-		mode: 'food',
-		source: message.source,
-		origin: message.origin,
-		reply: {
-			data: slackreply
-		}
-	}
-
-	queue.publish('outgoing.' + message.origin, msg, 'home.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+  queue.publish('outgoing.' + message.origin, msg, 'home.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
 function isCancelIntent(message) {
