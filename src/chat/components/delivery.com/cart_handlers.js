@@ -236,6 +236,9 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     }
   })
 
+  emailers.map(e => {
+    return /\b(.+)@/.match(e)[1]
+  })
   console.log('emailers', emailers)
 
   var dashboard = {
