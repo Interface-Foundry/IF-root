@@ -13,8 +13,8 @@ require('../../src/logging.js')
 // var filePathToUse = testingHelpers.getFileWithModules(`generateAdminCheckout.js`, testingHelpers.DELIVERY_DIR)
 // var generateAdminCheckout = require(filePathToUse).createCostAttachmentsForAdminCheckout
 var generateAdminCheckout = testingHelpers.getFunctionFromModule(
-  'createCostAttachmentsForAdminCheckout',
-  `generateAdminCheckout.js`,
+  'createAttachmentsForAdminCheckout',
+  'generateAdminCheckout.js',
   testingHelpers.DELIVERY_DIR
 )
 
@@ -23,7 +23,6 @@ var generateAdminCheckout = testingHelpers.getFunctionFromModule(
 describe('testing creating admins checkout Attachments', () => {
   it('it should have 3 attachments or something', function * () {
     var mockFoodSession = testingHelpers.getMockData('mockFoodSession', 'mock.foodSession.js')
-    logging.data(generateAdminCheckout(mockFoodSession, 100, feeDebug=true))
-    expect(generateAdminCheckout(mockFoodSession, 100, feeDebug=true)).to.have.length(3)
+    expect(generateAdminCheckout(mockFoodSession, 100, feeDebug=true)).to.have.length(4)
   })
 })
