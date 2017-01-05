@@ -222,7 +222,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     var full_eu = yield db.email_users.findOne({email: foodSession.email_users[i]});
     full_email_members.push(full_eu);
   }
-  console.log('full_email_members', full_email_members, foodSession.confirmed_orders)
+  // console.log('full_email_members', full_email_members, foodSession.confirmed_orders)
 
   var slackers = _.difference(foodSession.team_members.map(m => m.id), _.difference(foodSession.confirmed_orders, full_email_members.map(m => m.id)))
     .map(id => `<@${id}>`)
@@ -236,10 +236,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     }
   })
 
-  emailers.map(e => {
-    return /\b(.+)@/.match(e)[1]
-  })
-  console.log('emailers', emailers)
+  // '✉' ugh, it's an emoji
+  emailers = emailers.map(e => /(.+)@/.exec(e)[1])
+
+  // console.log('emailers', emailers)
 
   var dashboard = {
     text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
@@ -255,7 +255,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      text: `*Waiting for order(s) from:*\n${slackers.concat(emailers).join(', ')}`,
+      text: `*Waiting for order(s) from:*\n${slackers.join(', ')}\n📃 ${emailers.join(', ')}`,
       actions: [{
         name: 'food.admin.order.confirm',
         text: 'Finish Order Early',
