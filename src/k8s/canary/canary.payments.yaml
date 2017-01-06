@@ -9,7 +9,6 @@ spec:
     metadata:
       labels:
         app: payments
-        role: master
         tier: frontend
     spec:
       containers:
@@ -18,14 +17,29 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
-          protocol: TCP
         volumeMounts:
         - mountPath: /kip/payments/secrets/
           name: kip-creditcard
           readOnly: true
-        resources: {}
         securityContext: {}
       volumes:
       - name: kip-creditcard
         secret:
           secretName: kip-cc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments
+  namespace: canary
+  labels:
+    app: payments
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+    protocol: TCP
+  selector:
+    app: payments
