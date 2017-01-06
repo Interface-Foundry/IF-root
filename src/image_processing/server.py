@@ -88,7 +88,7 @@ def upload_to_gcloud(image, gcloud_bucket=get_gcloud()):
     return object_upload.public_url
 
 
-@application.route('/', methods=['POST'])
+@application.route('/', methods=['GET', 'POST'])
 def main():
     '''
     return upload_image_tos_s3(create_image(request.json))
@@ -108,6 +108,12 @@ def main():
     logging.info('request complete. make: %.2fs, upload: %.2fs, total: %.2fs to %s',
                  t2 - t1, t3 - t2, t3 - t1, gc_url)
     return gc_url
+
+
+@application.route('/health')
+def kubernetes_heath_check():
+    return 'health'
+
 
 # load connections to gcloud and aws
 gcloud_bucket = get_gcloud()
