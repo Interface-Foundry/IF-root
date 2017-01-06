@@ -76,5 +76,8 @@ app/phonegap/platforms/ios/Bubbl.li.xcodeproj/project.xcworkspace/xcuserdata/jrb
 TrainingCorpus
 components/cinna-slack/node_modules/*
 src/db/db
+<<<<<<< HEAD
+=======
 
 yarn.lock
+>>>>>>> b2ee966f6ac05c340a658b13c07fe7994f40da5d

@@ -6,8 +6,9 @@ var googl = require('goo.gl')
 var request = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
-
-var yelp = require('./yelp');
+var mailer_transport = require('../../../mail/IF_mail.js')
+var yelp = require('./yelp')
+var menu_utils = require('./menu_utils')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -27,7 +28,7 @@ var handlers = {}
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function voteMessage (foodSession) {
+function voteMessage (foodSession, skip) {
   // present top 2 local avail and then 2 random sample,
   // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
   var orderedCuisines = _.map(_.sortBy(foodSession.cuisines, ['count']), 'name')
@@ -40,7 +41,7 @@ function voteMessage (foodSession) {
 
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
     return {
-      name: 'food.admin.restaurant.pick',
+      name: (skip ? 'food.admin.vote': 'food.admin.restaurant.pick'),
       value: cuisineName,
       text: cuisineName,
       type: 'button'
@@ -130,6 +131,8 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Set a default sort order
   sortOrder = sortOrder || SORT.cuisine
 
+  console.log('foodSession.votes', foodSession._id)
+
   // will multiply by -1 depending on ascending or decscending
   var directionMultiplier = direction === SORT.ascending ? 1 : -1
 
@@ -155,6 +158,18 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   var merchants = foodSession.merchants.filter(m => {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
+
+  // filter out restaurants whose delivery minimum is significantly above the team's total budget
+
+  if (foodSession.budget) {
+    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
+    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
+    // console.log(merchants[1]);
+    if (cheap_merchants.length == 0) {
+      return merchants
+    }
+    else return cheap_merchants
+  }
 
   // next filter out restaurants that don't match the keyword if provided
   if (keyword) {
@@ -244,6 +259,48 @@ handlers['food.user.preferences'] = function * (session) {
   })
 }
 
+handlers['food.admin.vote'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  var admin = foodSession.team_members[0]
+
+  yield db.Delivery.update({team_id: message.source.team, active: true}, {$set: {votes: [{user: admin.id, vote: message.data.value}]}})
+
+  yield handlers['food.admin.restaurant.pick.list'](message)
+}
+
+//for when the admin "skip"s the poll
+handlers['food.admin.poll'] = function * (message) {
+
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var admin = foodSession.team_members[0]
+
+  var source = {
+    type: 'message',
+    channel: admin.dm,
+    user: admin.id,
+    team: message.source.team
+  }
+
+  // generate some random cuisines to vote from
+  var cuisineMessage = voteMessage(foodSession, true)
+
+  var response = {
+    mode: 'food',
+    action: 'user\.poll',
+    thread_id: admin.dm,
+    origin: message.origin,
+    source: source,
+    data: cuisineMessage
+  }
+
+  foodSession.data = { response_history: []}
+  foodSession.data.response_history.push({'handler': 'food.admin.poll', 'response': response.data})
+  yield foodSession.save()
+
+  $replyChannel.sendReplace(message, 'food.admin.poll', {type: 'slack', data: response.data})
+}
+
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
   // going to want to move this to s3 probably
@@ -251,7 +308,9 @@ handlers['food.user.poll'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // ---------------------------------------------
+
   var teamMembers = foodSession.team_members
+
   if (process.env.NODE_ENV === 'test') {
     teamMembers = [teamMembers[0]]
   }
@@ -513,8 +572,11 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
+  console.log('picklistmessage', message);
+  console.log('SORT.cuisine', SORT.cuisine)
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
+  console.log(sort);
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
 
@@ -739,8 +801,54 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       }
     ]
   }
+
+  console.log('foodSession.email_users', foodSession.email_users)
+  for (var i = 0; i < foodSession.email_users.length; i++) {
+
+    var m = foodSession.email_users[i];
+
+    var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
+
+    var merch_url = yield menu_utils.getUrl(foodSession, user.id)
+
+    var mailOptions = {
+      to: `<${m}>`,
+      from: `Kip Café <hello@kipthis.com>`,
+      subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
+      html: '<html><body><p><a href="' + merch_url + '">View Full Menu</a></p><table style="width:100%" border="1">'
+    };
+
+    var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
+    var quickpicks = sortedMenu.slice(0, 9);
+
+    function formatItem (i, j) {
+      return `<table>` +
+      `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
+      `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
+      `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
+      `<tr><p style="color:#fa2d48">Add to Cart</p></tr>` +
+      `</table>`;
+    }
+
+    for (var i = 0 ; i < 3; i++) {
+      mailOptions.html += '<tr>';
+      for (var j = 0; j < 3; j++) {
+        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
+        mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `">`
+        mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
+      }
+      mailOptions.html += '</tr>';
+    }
+
+    mailOptions.html += '</table></body></html>';
+
+    logging.info('mailOptions', mailOptions);
+    mailer_transport.sendMail(mailOptions, function (err) {
+      if (err) console.log(err);
+    });
+  }
+
   foodSession.team_members.map(m => {
-    console.log(m)
     var newMessage = {
       incoming: false,
       thread_id: m.dm,

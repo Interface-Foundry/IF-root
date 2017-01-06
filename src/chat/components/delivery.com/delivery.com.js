@@ -137,6 +137,7 @@ function getRoute (message) {
 //
 // Set up route handlers
 //
+
 var handlers = {}
 require('./menu_handlers')(replyChannel, handlers)
 require('./cart_handlers')(replyChannel, handlers)
@@ -145,6 +146,8 @@ require('./handlers_user_selection')(replyChannel, handlers)
 require('./handlers_votes')(replyChannel, handlers)
 require('./handlers_checkout')(replyChannel, handlers)
 require('./team_handlers')(replyChannel, handlers)
+require('./email_handlers')(replyChannel, handlers)
+require('./handlers_budget')(replyChannel, handlers)
 
 handlers['food.sys_error'] = function * (message) {
   kip.debug('chat message halted.')

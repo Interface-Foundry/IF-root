@@ -1,17 +1,12 @@
+
 var Agenda = require('agenda')
 var config = require('../../config');
 var agenda = new Agenda({db: {address: config.mongodb.url}});
 var co = require('co');
 var _ = require('lodash');
 
-// var jobTypes = ['email'];
-// jobTypes.forEach(function(type) {
 require('./jobs/email')(agenda);
-// })
-
-// if(jobTypes.length) {
-  // agenda.start();
-// }
+require('./jobs/reminder')(agenda);
 
 agenda.on('ready', function () {
   agenda.start();

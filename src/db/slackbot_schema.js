@@ -97,7 +97,11 @@ var slackbotSchema = mongoose.Schema({
       neighborhood: String,
       sublocality: String,
       special_instructions: String,
-      input: String
+      input: String,
+      budgets: {
+        type: [Number],
+        default: [10, 15, 20]
+      }
     }],
     chosen_location: {},
     fulfillment_method: String,
