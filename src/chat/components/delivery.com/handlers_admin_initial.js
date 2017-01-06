@@ -630,7 +630,6 @@ handlers['food.admin_polling_options'] = function * (message) {
         'name': 'food.admin.restaurant.reordering_confirmation',
         'text': '✓ Reorder From Here',
         'type': 'button',
-        'style': 'primary',
         'value': mostRecentMerchant.id
       }]
 
@@ -663,7 +662,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
     {
-      'text': '*Step 4.* Kip polls your team on what type of food they want to eat \n Tap `✓ Start New Poll` to select which team members to poll',
+      'text': '*Step 4.* Kip polls your team on what type of food they want to eat \n Tap `✓ Start New Order` to select which team members to poll',
       'fallback': 'Team voting',
       'callback_id': 'wopr_game',
       'color': '#A368F0',
@@ -676,15 +675,15 @@ handlers['food.admin_polling_options'] = function * (message) {
     'mrkdwn_in': [
       'text'
     ],
-    'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want',
-    'fallback': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want',
+    'text': '', // '*Tip:* `✓ Start New Order` polls your team on what type of food they want',
+    'fallback': '*Tip:* `✓ Start New Order` polls your team on what type of food they want',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
       {
         'name': 'passthrough',
-        'text': '✓ Start New Poll',
+        'text': '✓ Start New Order',
         'style': 'primary',
         'type': 'button',
         'value': 'food.poll.confirm_send_initial'
@@ -958,8 +957,8 @@ handlers['food.restaurants.list.recent'] = function * (message) {
     'mrkdwn_in': [
       'text'
     ],
-    'text': '', //'*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
-    'fallback': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
+    'text': '*Tip:* `✓ Start New Order` polls your team on what type of food they want.',
+    'fallback': '*Tip:* `✓ Start New Order` polls your team on what type of food they want.',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',

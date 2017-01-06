@@ -58,7 +58,7 @@ function voteMessage (foodSession, skip) {
   var admin = foodSession.convo_initiater
 
   var res = {
-    text: `<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!`,
+    text: (skip ? '': `<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!`),
     fallback: '<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!',
     callback_id: 'food.user.poll',
     color: '#3AA3E3',
@@ -428,7 +428,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   kip.debug('numOfResponsesWaitingFor: ', numOfResponsesWaitingFor, ' votes: ', votes)
 
   // replace after votes
-  $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})
+  // $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})
 
   if (numOfResponsesWaitingFor <= 0) {
     yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
