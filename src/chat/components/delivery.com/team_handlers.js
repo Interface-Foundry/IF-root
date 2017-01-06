@@ -9,7 +9,6 @@ var $allHandlers // this is how you can access handlers from other files
 var handlers = {}
 
 handlers['food.admin.team.members'] = function * (message) {
-  console.log(message.data)
   var index = _.get(message, 'data.value.index', 0)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var userToRemove = _.get(message, 'data.value.user_id')
@@ -25,22 +24,25 @@ handlers['food.admin.team.members'] = function * (message) {
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
-  var attachments = foodSession.team_members.map(user => {
-    return {
-      mrkdwn_in: ['text'],
-      callback_id: user.id,
-      text: `*${user.real_name || user.name}* - <@${user.id}|${user.name}>`,
-      actions: [{
-        name: 'food.admin.team.members',
-        text: '× Remove',
-        type: 'button',
-        value: {
-          index: index,
-          user_id: user.id
-        }
-      }]
-    }
-  })
+  var attachments = [];
+
+  foodSession.team_members.map(user => {
+
+        attachments.push({
+        mrkdwn_in: ['text'],
+        callback_id: user.id,
+        text:`*${user.real_name || user.name}* - <@${user.id}|${user.name}>`,
+        actions: [{
+          name: 'food.admin.team.members',
+          text: '× Remove',
+          type: 'button',
+          value: {
+            index: index,
+            user_id: user.id
+          }
+        }]
+      })
+    })
 
   var moreButton = {
     name: 'food.admin.team.members',
@@ -81,11 +83,18 @@ handlers['food.admin.team.members'] = function * (message) {
     style: 'primary'
   })
 
-  buttons.actions.push({   
+  buttons.actions.push({
     'name': 'food.admin.display_channels',
     'text': 'Use a #channel',
     'type': 'button',
-    'value': 'select_team_members'    
+    'value': 'select_team_members'
+  })
+
+  buttons.actions.push({
+    'name': 'passthrough',
+    'text': 'View Email Members',
+    'type': 'button',
+    'value': 'food.admin.team.email_members'
   })
 
   buttons.actions.push({
@@ -104,7 +113,6 @@ handlers['food.admin.team.members'] = function * (message) {
 
   $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: msg_json})
 }
-
 
 handlers['food.admin.team.members.reorder'] = function * (message) {
   var index = _.get(message, 'data.value.index', 0)
@@ -178,11 +186,18 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     'type': 'button'
   })
 
-  buttons.actions.push({   
+  buttons.actions.push({
     'name': 'food.admin.display_channels_reorder',
     'text': 'Use a #channel',
     'type': 'button',
-    'value': message.data.value  
+    'value': message.data.value
+  })
+
+  buttons.actions.push({
+    'name': 'passthrough',
+    'text': 'View Email Members',
+    'type': 'button',
+    'value': 'food.admin.team.email_members'
   })
 
   buttons.actions.push({

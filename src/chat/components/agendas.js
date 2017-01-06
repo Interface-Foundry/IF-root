@@ -1,3 +1,4 @@
+
 var Agenda = require('agenda')
 var config = require('../../config');
 var agenda = new Agenda({db: {address: config.mongodb.url}});

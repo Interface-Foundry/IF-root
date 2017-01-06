@@ -48,7 +48,7 @@ kip@kip.ai
 
 //
 // Process incoming email from sendgrid.  gets the relevant conversation from mongo and passes to io.js
-// assumes everythig is connected to a slack team
+// assumes everything is connected to a slack team
 //
 var processEmail = module.exports.process = function (message) {
   return co(function * () {

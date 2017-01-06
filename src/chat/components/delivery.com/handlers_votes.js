@@ -6,8 +6,9 @@ var googl = require('goo.gl')
 var request = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
-
-var yelp = require('./yelp');
+var mailer_transport = require('../../../mail/IF_mail.js')
+var yelp = require('./yelp')
+var menu_utils = require('./menu_utils')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -157,6 +158,18 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   var merchants = foodSession.merchants.filter(m => {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
+
+  // filter out restaurants whose delivery minimum is significantly above the team's total budget
+
+  if (foodSession.budget) {
+    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
+    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
+    // console.log(merchants[1]);
+    if (cheap_merchants.length == 0) {
+      return merchants
+    }
+    else return cheap_merchants
+  }
 
   // next filter out restaurants that don't match the keyword if provided
   if (keyword) {
@@ -785,8 +798,54 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       }
     ]
   }
+
+  console.log('foodSession.email_users', foodSession.email_users)
+  for (var i = 0; i < foodSession.email_users.length; i++) {
+
+    var m = foodSession.email_users[i];
+
+    var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
+
+    var merch_url = yield menu_utils.getUrl(foodSession, user.id)
+
+    var mailOptions = {
+      to: `<${m}>`,
+      from: `Kip Café <hello@kipthis.com>`,
+      subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
+      html: '<html><body><p><a href="' + merch_url + '">View Full Menu</a></p><table style="width:100%" border="1">'
+    };
+
+    var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
+    var quickpicks = sortedMenu.slice(0, 9);
+
+    function formatItem (i, j) {
+      return `<table>` +
+      `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
+      `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
+      `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
+      `<tr><p style="color:#fa2d48">Add to Cart</p></tr>` +
+      `</table>`;
+    }
+
+    for (var i = 0 ; i < 3; i++) {
+      mailOptions.html += '<tr>';
+      for (var j = 0; j < 3; j++) {
+        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
+        mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `">`
+        mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
+      }
+      mailOptions.html += '</tr>';
+    }
+
+    mailOptions.html += '</table></body></html>';
+
+    logging.info('mailOptions', mailOptions);
+    mailer_transport.sendMail(mailOptions, function (err) {
+      if (err) console.log(err);
+    });
+  }
+
   foodSession.team_members.map(m => {
-    console.log(m)
     var newMessage = {
       incoming: false,
       thread_id: m.dm,

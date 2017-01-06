@@ -63,39 +63,39 @@ if (process.env.NODE_ENV == 'development_alyx') {
 }
 
 if (process.env.NODE_ENV !== 'development') {
-  var tg = new telegram({
-    token: telegramToken,
-    updates: {
-      enabled: true
-    }
-  })
+  // var tg = new telegram({
+  //   token: telegramToken,
+  //   updates: {
+  //     enabled: true
+  //   }
+  // })
 
-  tg.on('message', function (msg) {
+  // tg.on('message', function (msg) {
 
-    // if user sends sticker msg.msg will be undefined
-    if (msg.sticker) {
-      console.log('Telegram message is a sticker: ', msg)
-      return
-    }
+  //   // if user sends sticker msg.msg will be undefined
+  //   if (msg.sticker) {
+  //     console.log('Telegram message is a sticker: ', msg)
+  //     return
+  //   }
 
-    var newTg = {
-      source: {
-        'origin': 'telegram',
-        'channel': msg.from.id.toString(),
-        'org': 'telegram',
-        'id': 'telegram' + '_' + msg.from.id, // for retrieving chat history in node memory,
-      },
-      'msg': msg.text
-    }
+  //   var newTg = {
+  //     source: {
+  //       'origin': 'telegram',
+  //       'channel': msg.from.id.toString(),
+  //       'org': 'telegram',
+  //       'id': 'telegram' + '_' + msg.from.id, // for retrieving chat history in node memory,
+  //     },
+  //     'msg': msg.text
+  //   }
 
-    // console.log('asdf ',newTg)
-    if (process.env.NODE_ENV !== 'development') {
-      console.log('incoming telegram message')
-      console.log(msg)
-      console.log(newTg)
-      preProcess(newTg)
-    }
-  })
+  //   // console.log('asdf ',newTg)
+  //   if (process.env.NODE_ENV !== 'development') {
+  //     console.log('incoming telegram message')
+  //     console.log(msg)
+  //     console.log(newTg)
+  //     preProcess(newTg)
+  //   }
+  // })
 }
 
 // get stored slack users from mongo
