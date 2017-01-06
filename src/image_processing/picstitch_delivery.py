@@ -5,21 +5,16 @@ import time
 import uuid
 import random
 import logging
-import textwrap
 import urllib.request
-import numpy as np
 
-#from gcloud import storage
 from PIL import Image, ImageFont, ImageDraw
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="gcloud_key/KipStyles-8da42a8a7423.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gcloud_key/gcloud-picstitch.json"
 
 '''
-# numbers each picstitch image with the number.png - we no longer do this, right?
+# numbers each picstitch image with the number.png -o longer do this, right?
 # guessing this was the layout from before.
 def load_number_images():
     images = []
@@ -31,22 +26,25 @@ def load_number_images():
     return images
 '''
 
+
 def load_fonts_reg():
     try:
         fonts_fileR = os.path.join(
             os.getcwd(), 'fonts', 'HelveticaNeue-Regular.ttf')
     except:
         fonts_fileR = os.path.join(
-            '/picstitch', 'fonts', 'HelveticaNeue-Regular.ttf')
+            '/image_processing', 'fonts', 'HelveticaNeue-Regular.ttf')
         logging.debug('error loading fonts')
 
     fontR = {}
     font_size = [x for x in range(12, 30)]
-    #defines possible font sizes
+    # defines possible font sizes
     for s in font_size:
         fontR[s] = ImageFont.truetype(fonts_fileR, s)
-        # font[s] defines variable for font size font[15] = helvetic size 15 font
+        # font[s] defines variable for font size font[15] = helvetic size 15
+        # font
     return fontR
+
 
 def load_fonts_bold():
     try:
@@ -55,16 +53,17 @@ def load_fonts_bold():
         logging.debug('fonts loaded correctly')
     except:
         fonts_fileB = os.path.join(
-            '/picstitch', 'fonts', 'HelveticaNeue-Bold.ttf')
+            '/image_processing', 'fonts', 'HelveticaNeue-Bold.ttf')
         logging.debug('error loading fonts')
 
     fontB = {}
     font_size = [x for x in range(12, 30)]
-    #defines possible font sizes
+    # defines possible font sizes
 
     for s in font_size:
         fontB[s] = ImageFont.truetype(fonts_fileB, s)
-        # font[s] defines variable for font size font[15] = helvetic size 15 font
+        # font[s] defines variable for font size font[15] = helvetic size 15
+        # font
     return fontB
 
 
@@ -80,14 +79,14 @@ def load_review_stars():
     return rs_dict
 
 
-#def load_amazon_prime():
+# def load_amazon_prime():
 #    amzn_prime_logo = Image.open(THIS_FOLDER + '/amazon/prime.png')
 #    return amzn_prime_logo
 
 
 def download_image(url):
     logging.info('opening url for' + url)
-    #gc add
+    # gc add
     fd = urllib.request.urlopen(url)
     image_file = io.BytesIO(fd.read())
     image = Image.open(image_file)
@@ -136,11 +135,12 @@ class PicStitch:
         }
     }
     '''
+
     def __init__(self,
                  img_req,
                  # bucket,
                  # gcloud_bucket,
-                 #amazon_prime_image,
+                 # amazon_prime_image,
                  review_stars_images,
                  font_dict_R,
                  font_dict_B):
@@ -174,11 +174,15 @@ class PicStitch:
     def _get_config(self):
         '''
         '''
-        #print (self.img_req['origin'])
 
         if self.img_req['origin']:
             if self.img_req['origin'] in ['facebook', 'slack', 'skype']:
+                logging.debug('img_req one of  facebook, slack, skype')
                 self.origin = self.img_req['origin']
+            else:
+                logging.debug('img_req has origin but not of allowed types')
+                logging.debug('img_req: ', self.img_req)
+                self.origin = 'slack'
         else:
             self.origin = 'slack'
             logging.critical('NO_ORIGIN_ASSUMING_SLACK')
@@ -222,7 +226,7 @@ class PicStitch:
         last_y = 0
         # change from: 5
 
-        print (self.config['TEXTBOX_COORDS'])
+        print(self.config['TEXTBOX_COORDS'])
         x = self.config['TEXTBOX_COORDS']['x']
         # x = self.config['TEXTBOX_COORDS']['x'] - 30
         y = self.config['TEXTBOX_COORDS']['y']
@@ -247,17 +251,17 @@ class PicStitch:
             # if word count for 2 cuisines is less than 20 characters/1 line, inlcude 2 cuisines
             # else include 1 cuisine
             draw.text((x, last_y),
-                cuisines_text,
-                font=self.config['font3'],
-                fill="#3b9ef1")
+                      cuisines_text,
+                      font=self.config['font3'],
+                      fill="#3b9ef1")
         else:
-            draw.text((x, last_y+4),
-                self.img_req['cuisines'][0],
-                font=self.config['font1'],
-                fill="#3b9ef1")
+            draw.text((x, last_y + 4),
+                      self.img_req['cuisines'][0],
+                      font=self.config['font1'],
+                      fill="#3b9ef1")
 
         # add prime logo
-        #if self.prime and self.origin not in ['skype']:
+        # if self.prime and self.origin not in ['skype']:
         #    img.paste(self.amazon_prime_image, (x + 110, last_y + 2))
 
         last_y = last_y + 27
@@ -266,37 +270,36 @@ class PicStitch:
         if self.origin in ['skype', 'facebook']:
             last_y = last_y + 10
 
-
-
         if not 'num_ratings' in self.img_req['summary']:
-            self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+            # setting undefined rating count to zero
+            self.img_req['summary']['num_ratings'] = 0
 
-
-        #yelp vs. delivery.com ratings
-        #we should probably show whatever one has better rating
+        # yelp vs. delivery.com ratings
+        # we should probably show whatever one has better rating
 
         if 'yelp_rating' in self.img_req and 'review_count' in self.img_req['yelp_rating'] and 'rating' in self.img_req['yelp_rating']:
-            #use yelp rating
+            # use yelp rating
             print('USING YELP')
 
             # #if no reviews, set to zero
             # if not 'num_ratings' in self.img_req['summary']:
-            #     self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+            # self.img_req['summary']['num_ratings'] = 0 # setting undefined
+            # rating count to zero
 
             review_count = self.img_req['yelp_rating']['review_count']
             rating = self.img_req['yelp_rating']['rating']
 
         elif 'summary' in self.img_req and 'star_ratings' in self.img_req['summary'] and 'num_ratings' in self.img_req['summary']:
-            #use delivery.com rating
+            # use delivery.com rating
             print('USING DELIVERY.COM')
 
-            #if no reviews, set to zero
+            # if no reviews, set to zero
             # if not 'num_ratings' in self.img_req['summary']:
-            #     self.img_req['summary']['num_ratings'] = 0 # setting undefined rating count to zero
+            # self.img_req['summary']['num_ratings'] = 0 # setting undefined
+            # rating count to zero
 
             review_count = self.img_req['summary']['num_ratings']
             rating = self.img_req['summary']['star_ratings']
-
 
         # draw - (Review Number)
         if review_count > 0:
@@ -355,53 +358,54 @@ class PicStitch:
 
         if 'price_rating' in self.img_req['summary']:
             rating = self.img_req['summary']['price_rating']
-            boldDollars = '$$$$$'[0 : rating]
-            del_est = self.img_req['ordering']['availability']['delivery_estimate']
+            boldDollars = '$$$$$'[0: rating]
+            del_est = self.img_req['ordering'][
+                'availability']['delivery_estimate']
 
             # We will draw light gray $$$$$ first
             # and then over top of that draw bold $$$ for the price rating
             draw.text((x, last_y),
-                '$$$$$' + '   •   ' + str(del_est) + ' mins',
-                font=self.config['font2'],
-                fill="#909497")
+                      '$$$$$' + '   •   ' + str(del_est) + ' mins',
+                      font=self.config['font2'],
+                      fill="#909497")
 
             draw.text((x, last_y),
-                boldDollars,
-                font=self.config['font2'],
-                fill="#404447")
+                      boldDollars,
+                      font=self.config['font2'],
+                      fill="#404447")
             last_y = last_y + 25
 
         if 'minimum' in self.img_req['ordering']:
-            draw.text((x, last_y +4),
-                       '$ ' + str(self.img_req['ordering']['minimum']),
-                       font=self.config['font4'],
-                       fill='#909497')
+            draw.text((x, last_y + 4),
+                      '$ ' + str(self.img_req['ordering']['minimum']),
+                      font=self.config['font4'],
+                      fill='#909497')
             draw.text((x, last_y + 20),
-                       'Minimum',
-                       font=self.config['font2'],
-                       fill='#909497')
+                      'Minimum',
+                      font=self.config['font2'],
+                      fill='#909497')
 
         if 'delivery_charge' in self.img_req['ordering']:
             delivery_charge = self.img_req['ordering']['delivery_charge']
             if delivery_charge == 0:
                 draw.text((x + 90, last_y + 4),
-                           'Free',
-                           font=self.config['font4'],
-                           fill='#37a936')
+                          'Free',
+                          font=self.config['font4'],
+                          fill='#37a936')
                 draw.text((x + 89, last_y + 20),
-                           'Delivery',
-                           font=self.config['font2'],
-                           fill='#37a936')
+                          'Delivery',
+                          font=self.config['font2'],
+                          fill='#37a936')
             else:
                 draw.text((x + 90, last_y + 4),
-                           '$' + str("{0:.2f}".format(delivery_charge)),
-                           font=self.config['font2'],
-                           fill='#37a936')
+                          '$' + str("{0:.2f}".format(delivery_charge)),
+                          font=self.config['font2'],
+                          fill='#37a936')
                 draw.text((x + 89, last_y + 20),
-                           'Delivery Fee',
-                           font=self.config['font2'],
-                           fill='#37a936')
-        ## if 'Size' in self.img_req['name']:
+                          'Delivery Fee',
+                          font=self.config['font2'],
+                          fill='#37a936')
+        # if 'Size' in self.img_req['name']:
         # for z in self.img_req['name']:
         #     ## draw.text((x, last_y), z, font=font2, fill="#2d70c1")
         #     ## size = self.img_req['name']['Size']
@@ -425,8 +429,6 @@ class PicStitch:
  #       Image.open(img)
         self.created_image = img
 
-
-
     def make_image_configs(self):
         logging.debug('using self._make_image_configs')
         config = {}
@@ -441,7 +443,7 @@ class PicStitch:
         config['PIC_SIZE'] = 100, 100
         # amazon pic size
         config['PIC_COORDS'] = {'x': 9, 'y': 9}
-        #former {'x':14, 'y':5}
+        # former {'x':14, 'y':5}
         #                       {'x': 24, 'y': 174},
         #                       {'x': 24, 'y': 336}]
         # where to draw choice numbers
@@ -486,7 +488,7 @@ class PicStitch:
 
     def get_url(self):
         logging.info('getting url')
-        #gc add
+        # gc add
         if self.uploaded_to_gcloud:
             return self.object_upload.public_url
         else:

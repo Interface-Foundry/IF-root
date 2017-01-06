@@ -5,6 +5,7 @@
   "dependencies": {
     "@slack/client": "^3.7.0",
     "accounting": "^0.4.1",
+    "agenda": "^0.9.0",
     "async": "^2.0.0-rc.6",
     "async-co": "^1.4.0",
     "aws-sdk": "^2.3.12",
