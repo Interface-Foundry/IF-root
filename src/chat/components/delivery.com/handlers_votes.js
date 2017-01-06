@@ -27,7 +27,7 @@ var handlers = {}
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function voteMessage (foodSession) {
+function voteMessage (foodSession, skip) {
   // present top 2 local avail and then 2 random sample,
   // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
   var orderedCuisines = _.map(_.sortBy(foodSession.cuisines, ['count']), 'name')
@@ -40,7 +40,7 @@ function voteMessage (foodSession) {
 
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
     return {
-      name: 'food.admin.restaurant.pick',
+      name: (skip ? 'food.admin.vote': 'food.admin.restaurant.pick'),
       value: cuisineName,
       text: cuisineName,
       type: 'button'
@@ -129,6 +129,8 @@ var SORT = {
 function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Set a default sort order
   sortOrder = sortOrder || SORT.cuisine
+
+  console.log('foodSession.votes', foodSession._id)
 
   // will multiply by -1 depending on ascending or decscending
   var directionMultiplier = direction === SORT.ascending ? 1 : -1
@@ -244,6 +246,48 @@ handlers['food.user.preferences'] = function * (session) {
   })
 }
 
+handlers['food.admin.vote'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  var admin = foodSession.team_members[0]
+
+  yield db.Delivery.update({team_id: message.source.team, active: true}, {$set: {votes: [{user: admin.id, vote: message.data.value}]}})
+
+  yield handlers['food.admin.restaurant.pick.list'](message)
+}
+
+//for when the admin "skip"s the poll
+handlers['food.admin.poll'] = function * (message) {
+
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var admin = foodSession.team_members[0]
+
+  var source = {
+    type: 'message',
+    channel: admin.dm,
+    user: admin.id,
+    team: message.source.team
+  }
+
+  // generate some random cuisines to vote from
+  var cuisineMessage = voteMessage(foodSession, true)
+
+  var response = {
+    mode: 'food',
+    action: 'user\.poll',
+    thread_id: admin.dm,
+    origin: message.origin,
+    source: source,
+    data: cuisineMessage
+  }
+
+  foodSession.data = { response_history: []}
+  foodSession.data.response_history.push({'handler': 'food.admin.poll', 'response': response.data})
+  yield foodSession.save()
+
+  $replyChannel.sendReplace(message, 'food.admin.poll', {type: 'slack', data: response.data})
+}
+
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
   // going to want to move this to s3 probably
@@ -253,8 +297,6 @@ handlers['food.user.poll'] = function * (message) {
   // ---------------------------------------------
 
   var teamMembers = foodSession.team_members
-
-  console.log('TEAM MEMBERS', teamMembers.length)
 
   if (process.env.NODE_ENV === 'test') {
     teamMembers = [teamMembers[0]]
@@ -517,8 +559,11 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
+  console.log('picklistmessage', message);
+  console.log('SORT.cuisine', SORT.cuisine)
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
+  console.log(sort);
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
 

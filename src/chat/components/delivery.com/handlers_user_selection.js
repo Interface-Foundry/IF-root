@@ -106,7 +106,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           //   'value': 'food.admin.select_address'
           {
             'name': 'passthrough',
-            'value': 'food.user.poll',
+            'value': 'food.admin.poll',
             'text': '> Skip',
             'type': 'button'
           }
