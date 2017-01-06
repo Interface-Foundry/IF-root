@@ -7,6 +7,7 @@ var _ = require('lodash');
 // var jobTypes = ['email'];
 // jobTypes.forEach(function(type) {
 require('./jobs/email')(agenda);
+require('./jobs/reminder')(agenda);
 // })
 
 // if(jobTypes.length) {

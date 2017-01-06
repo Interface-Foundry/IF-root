@@ -3,17 +3,15 @@ var handlers = module.exports = {};
 var amazon = require('../amazon_search.js');
 var _ = require('lodash');
 var co = require('co');
-var cron = require('cron');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
 var kipcart = require('../cart');
 var winston = require('winston');
 var Fuse = require('fuse.js');
-var request = require('request')
+var request = require('request');
+var agenda = require('../agendas');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
-
-let cronJobs = {};
 
 function* handle(message) {
   let action;
@@ -47,7 +45,7 @@ handlers['step_1'] = function(message) {
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = [{
-    text: '*Step 1:* Find items to add to team cart',
+    text: '*Step 1/3:* Find items to add to team cart',
     mrkdwn_in: ['text'],
     color: '#A368F0',
     fallback: 'Step 1/3: Find items to add to team cart'
@@ -201,12 +199,7 @@ handlers['cart'] = function*(message) {
  * Reminders:
  * Schedules reminders in a cylce of 24 hrs, 1 week, and 2 weeks
  */
-handlers['remind_later'] = function*(message, data) {
-  let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
-  let team = yield db.Slackbots.findOne({
-    'team_id': team_id
-  }).exec();
-
+handlers['remind_later'] = function * (message, data) {
   const ONE_DAY = 24 * 60 * 60 * 1000; // hours in a day * mins in hour * seconds in min * milliseconds in second
   let nextDate,
     msInFuture = -1,
@@ -231,18 +224,16 @@ handlers['remind_later'] = function*(message, data) {
   }
   if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
   if (msInFuture > 0) {
-    var currentUser = yield db.Chatusers.findOne({
-      id: message.source.user
-    });
-    let cronMsg = message;
-    cronMsg.mode = 'member_onboard';
-    cronMsg.action = 'home';
-    cronMsg.reply = cardTemplate.member_onboard_attachments(admin, nextDate);
-    cronMsg.origin = message.origin;
-    cronMsg.source = message.source;
-    cronMsg.text = 'Hey, it\'s me again! Ready to get started?';
-    cronMsg.fallback = 'Hey, it\'s me again! Ready to get started?';
-    cronJobs[message.source.user] = createCronJob(currentUser, cronMsg, team, new Date(msInFuture + now.getTime()));
+    let cronMsg = {
+      mode: 'member_onboard',
+      action: 'home',
+      reply: cardTemplate.member_onboard_attachments(admin, nextDate),
+      origin: message.origin,
+      source: message.source,
+      text: 'Hey, it\'s me again! Ready to get started?',
+      fallback: 'Hey, it\'s me again! Ready to get started?'
+    };
+    scheduleReminder(cronMsg, message.source.user, new Date(msInFuture + now.getTime()));
   }
 
   let laterMsg = {
@@ -272,9 +263,7 @@ handlers['remind_later'] = function*(message, data) {
 handlers['start_now'] = function (message, data) {
 	// when someone clicks the start now button after choosing to
 	// be reminded later
-  if (cronJobs[message.source.user]) {
-    cronJobs[message.source.user].stop();
-  }
+  cancelReminder(message.source.user);
   let admin = data[0];
   let msg = {
     text: 'Ok, let\'s get started!',
@@ -346,25 +335,29 @@ handlers['text'] = function*(message) {
   } else {
     return yield handlers['step_2'](message, [message.text]);
   }
-}
-
-const createCronJob = function (user, msg, team, date) {
-  kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
-  return new cron.CronJob(
-    date,
-    () => {
-      var newMessage = new db.Message(msg);
-      co(publish(newMessage));
-      this.stop();
-    },
-    true,
-    team.meta.weekly_status_timezone);
 };
 
-function * publish (message) {
-  yield message.save();
-  queue.publish('outgoing.' + message.origin, message, message._id + '.reply.update');
-}
+const scheduleReminder = function(msg, userId, date) {
+  kip.debug('\n\n\nsetting reminder for ', date.toLocaleString(), '\n\n\n');
+  agenda.schedule(date, 'onboarding reminder', {
+    msg: JSON.stringify(msg),
+    user: userId
+  });
+};
+
+const cancelReminder = function(userId) {
+  kip.debug(`canceling 'onboarding reminder' for ${userId}`)
+  agenda.cancel({
+    'name': 'onboarding reminder',
+    'data.user': userId
+  }, function(err, numRemoved) {
+    if (!err) {
+      kip.debug(`Canceled ${numRemoved} tasks`);
+    } else {
+      kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
+    }
+  });
+};
 
 // stolen from modes/shopping.js
 //
