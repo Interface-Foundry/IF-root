@@ -187,8 +187,9 @@ handlers['email'] = function * (message, status) {
 
   if (status == 'on') {
     var admins = yield utils.findAdmins(team);
+    var cart_id = message.cart_reference_id || message.source.team;
     yield admins.map( function * (admin) {
-      agenda.now('send email', { userId: _.get(admin,'id'), to: _.get(admin,'profile.email'), subject: 'This is your weekly team cart status email from Kip!' });
+      agenda.now('send cart status email', { userId: _.get(admin,'id'), to: _.get(admin,'profile.email'), subject: 'This is your weekly team cart status email from Kip!', cart_id: cart_id });
     })
   }
   var msg = message;
