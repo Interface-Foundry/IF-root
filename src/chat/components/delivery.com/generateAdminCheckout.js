@@ -19,7 +19,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     'attachment_type': 'default',
     'mrkdwn_in': ['text'],
     'actions': [`15%`, `20%`, `25%`, `Cash`].map((t) => {
-      var baseTipButton = (foodSession.tip.percent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `￮ ${t}`
+      var baseTipButton = (foodSession.tip.percent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `◎ ${t}`
       return {
         'name': 'food.admin.cart.tip',
         'text': baseTipButton,

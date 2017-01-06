@@ -5,21 +5,19 @@ var utils = require('../slack/utils');
 var dutils = require('../delivery.com/utils');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
-var cron = require('cron');
 var kipcart = require('../cart');
 var bundles = require('../bundles');
 var processData = require('../process');
 var request = require('request');
 var rp = require('request-promise');
 var Fuse = require('fuse.js');
-
-let cronJobs = {}; // hopefully temporary until we get a db solution for cron
+var agenda = require('../agendas');
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
-  let action, data;
-  if ((!last_action || last_action.indexOf('home') == -1) && 
-    (_.get(message,'action') != 'start.supplies' && !(_.get(message, 'action').includes('remind_later')))) {
+  let action = _.get(message,'action');
+  let data;
+  if ((!last_action || last_action.indexOf('home') == -1) && (action != 'start.supplies' && !action.includes('handoff') && !action.includes('remind_later'))) {
     kip.debug('\n\n\n🤖 action : ', 'start');
     return yield handlers['start'](message);
   } else {
@@ -45,9 +43,7 @@ handlers['start'] = function * (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  if (cronJobs[message.source.user]) {
-    cronJobs[message.source.user].stop();
-  }
+  cancelReminder(message.source.user);
   var msg = message;
   msg.mode = 'onboard';
   msg.action = 'home';
@@ -60,11 +56,6 @@ handlers['start'] = function * (message) {
 };
 
 handlers['remind_later'] = function*(message, data) {
-  let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
-  let team = yield db.Slackbots.findOne({
-    'team_id': team_id
-  }).exec();
-
   const ONE_DAY = 24 * 60 * 60 * 1000; // hours in a day * mins in hour * seconds in min * milliseconds in second
   let nextDate,
     msInFuture = -1,
@@ -88,18 +79,16 @@ handlers['remind_later'] = function*(message, data) {
   }
   if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
   if (msInFuture > 0) {
-    var currentUser = yield db.Chatusers.findOne({
-      id: message.source.user
-    });
-    let cronMsg = message;
-    cronMsg.mode = 'onboard';
-    cronMsg.action = 'home';
-    cronMsg.reply = cardTemplate.onboard_home_attachments(nextDate);
-    cronMsg.origin = message.origin;
-    cronMsg.source = message.source;
-    cronMsg.text = 'Hey, it\'s me again! Ready to get started?';
-    cronMsg.fallback = 'Hey, it\'s me again! Ready to get started?';
-    cronJobs[message.source.user] = createCronJob(currentUser, cronMsg, team, new Date(msInFuture + now.getTime()));
+    let cronMsg = {
+      mode: 'onboard',
+      action: 'home',
+      reply: cardTemplate.onboard_home_attachments(nextDate),
+      origin: message.origin,
+      source: message.source,
+      text: 'Hey, it\'s me again! Ready to get started?',
+      fallback: 'Hey, it\'s me again! Ready to get started?'
+    };
+    scheduleReminder(cronMsg, message.source.user, new Date(msInFuture + now.getTime()));
   }
 
   let laterMsg = {
@@ -111,8 +100,8 @@ handlers['remind_later'] = function*(message, data) {
       callback_id: 'kip!',
       actions: [{
         'name': 'onboard.start.start_now',
-        'text': 'Start Now',
-        'style': 'default',
+        'text': '▶︎ Start Now',
+        'style': 'primary',
         'type': 'button',
         'value': 'start_now.now'
       }]
@@ -127,9 +116,7 @@ handlers['remind_later'] = function*(message, data) {
 };
 
 handlers['start_now'] = function (message) {
-  if (cronJobs[message.source.user]) {
-    cronJobs[message.source.user].stop();
-  }
+  cancelReminder(message.source.user);
   let msg = {
     text: 'Ok, let\'s get started!',
     fallback: 'Ok, let\'s get started!',
@@ -158,10 +145,10 @@ handlers['supplies'] = function * (message) {
   }
   var attachments = [];
   attachments.push({
-      text: '*Step 1:* Choose a bundle:',
+      text: '*Step 1/3:* Choose a bundle:',
       mrkdwn_in: ['text'],
       color: '#A368F0',
-      fallback:'Step 1: Choose a bundle',
+      fallback:'Step 1/3: Choose a bundle',
       actions: cardTemplate.slack_onboard_bundles,
       callback_id: 'none'
     })
@@ -172,7 +159,7 @@ handlers['supplies'] = function * (message) {
    msg.source.team = team_id;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.reply = attachments;
-   msg.fallback = 'Step 1: Choose a bundle'
+   msg.fallback = 'Step 1/3: Choose a bundle'
    return [msg];
 }
 
@@ -311,7 +298,6 @@ handlers['lunch'] = function * (message) {
 
   msg.reply = msg_json;
   return [msg];
-
 }
 
 /**
@@ -392,7 +378,7 @@ handlers['bundle'] = function * (message, data) {
       color: '#45a5f4'
     })
   attachments.push({
-    text: '*Step 2:* Let your team add items to the cart?',
+    text: '*Step 2/3:* Let your team add items to the cart?',
     mrkdwn_in: ['text'],
     color: '#A368F0',
     fallback: 'Onboard.helper',
@@ -424,7 +410,7 @@ handlers['team'] = function * (message) {
   var attachments = [];
   attachments.push({
     text: '',
-    fallback:'Step 3: Choose the channels you want to include'
+    fallback:'Step 3/3: Choose the channels you want to include'
   });
   var channels = yield utils.getChannels(team);
   var buttons = channels.map(channel => {
@@ -438,8 +424,8 @@ handlers['team'] = function * (message) {
   });
   var chunkedButtons = _.chunk(buttons, 5);
 
-  attachments.push({text: '*Step 3:* Choose the channels you want to include: ', mrkdwn_in: ['text'],
-    color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3: Choose the channels you want to include' , callback_id: "none"});
+  attachments.push({text: '*Step 3/3:* Choose the channels you want to include: ', mrkdwn_in: ['text'],
+    color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
   chunkedButtons.forEach((ele, i) => {
     if (i != 0) {
       attachments.push({text:'', actions: ele, callback_id: 'none'});
@@ -449,7 +435,7 @@ handlers['team'] = function * (message) {
       text: '',
       color: '#45a5f4',
       mrkdwn_in: ['text'],
-      fallback:'Step 3: Choose the channels you want to include',
+      fallback:'Step 3/3: Choose the channels you want to include',
       actions: cardTemplate.slack_onboard_team,
       callback_id: 'none'
     });
@@ -459,7 +445,7 @@ handlers['team'] = function * (message) {
   msg.action = 'home'
   msg.text = '';
   msg.source.team = team.team_id;
-  msg.fallback = 'Step 3: Choose the channels you want to include'
+  msg.fallback = 'Step 3/3: Choose the channels you want to include'
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
   return [msg];
@@ -483,24 +469,6 @@ handlers['member'] = function*(message) {
     channelMembers = channelMembers.concat(members);
   });
   channelMembers = _.uniqBy(channelMembers, a => a.id);
-
-  var attachments = [{
-    'image_url': 'http://kipthis.com/kip_modes/mode_howtousekip.png',
-    'text': '',
-    'mrkdwn_in': [
-      'text',
-      'pretext'
-    ],
-    'color': '#45a5f4'
-  }, {
-    text: `Make <@${message.source.user}>'s life easier! Let me show you how to add items to the team cart`,
-    mrkdwn_in: ['text'],
-    fallback: 'Welcome to Kip!',
-    callback_id: 'none',
-    actions: cardTemplate.slack_onboard_member,
-    color: '#45a5f4'
-  }];
-
   yield channelMembers.map(function * (a) {
     if (a.id == message.source.user) return;
     var newMessage = new db.Message({
@@ -511,7 +479,7 @@ handlers['member'] = function*(message) {
       mode: 'member_onboard',
       fallback: `Make <@${message.source.user}>'s life easier! Let me show you how to add items to the team cart`,
       action: 'home',
-      reply: attachments,
+      reply: cardTemplate.member_onboard_attachments(message.source.user, 'tomorrow'),
       source: {
         team: team.team_id,
         channel: a.dm,
@@ -522,17 +490,32 @@ handlers['member'] = function*(message) {
       user: a,
       user_id: a.id
     });
-    yield newMessage.save()
+    yield newMessage.save();
     queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
   });
-  return handlers['reminder'](message);
-}
+  return handlers['handoff'](message);
+};
+
+handlers['handoff'] = function (message) {
+  var slackreply = cardTemplate.home_screen(true);
+  slackreply.text = 'That\'s it!\nHi! Thanks for using Kip :blush:';
+  var msg = {
+    action: 'simplehome',
+    mode: 'food',
+    source: message.source,
+    origin: message.origin,
+    reply: {
+      data: slackreply
+    }
+  };
+  return [msg];
+};
 
 /**
  * S6
  */
 handlers['checkout'] = function * (message) {
- var cart_id = message.source.team
+ var cart_id = message.source.team;
  var cart = yield kipcart.getCart(cart_id)
   var attachments = [];
   attachments.push({
@@ -656,20 +639,24 @@ handlers['sorry'] = function*(message) {
   return [message];
 };
 
-const createCronJob = function(user, msg, team, date) {
-  kip.debug('\n\n\nsetting cron job: ', date.getSeconds() + ' ' + date.getMinutes() + ' ' + date.getHours() + ' ' + date.getDate() + ' ' + date.getMonth() + ' ' + date.getDay(), '\n\n\n');
-  return new cron.CronJob(
-    date,
-    () => {
-      var newMessage = new db.Message(msg);
-      co(publish(newMessage));
-      this.stop();
-    },
-    true,
-    team.meta.weekly_status_timezone);
+const scheduleReminder = function(msg, userId, date) {
+  kip.debug('\n\n\nsetting reminder for ', date.toLocaleString(), '\n\n\n');
+  agenda.schedule(date, 'onboarding reminder', {
+    msg: JSON.stringify(msg),
+    user: userId
+  });
 };
 
-function* publish(message) {
-  yield message.save();
-  queue.publish('outgoing.' + message.origin, message, message._id + '.reply.update');
-}
+const cancelReminder = function(userId) {
+  kip.debug(`canceling 'onboarding reminder' for ${userId}`)
+  agenda.cancel({
+    'name': 'onboarding reminder',
+    'data.user': userId
+  }, function(err, numRemoved) {
+    if (!err) {
+      kip.debug(`Canceled ${numRemoved} tasks`);
+    } else {
+      kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
+    }
+  });
+};

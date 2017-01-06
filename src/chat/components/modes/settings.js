@@ -10,6 +10,7 @@ var request = require('request');
 var requestP = require('request-promise');
 var date_lib = require('date-fns');
 var cron = require('cron');
+var agenda = require('../agendas');
 //maybe can make this persistent later?
 var cronJobs = {};
 
@@ -184,6 +185,12 @@ handlers['email'] = function * (message, status) {
     })
   }
 
+  if (status == 'on') {
+    var admins = yield utils.findAdmins(team);
+    yield admins.map( function * (admin) {
+      agenda.now('send email', { userId: _.get(admin,'id'), to: _.get(admin,'profile.email'), subject: 'This is your weekly team cart status email from Kip!' });
+    })
+  }
   var msg = message;
   msg.mode = 'settings';
   msg.action = 'home';

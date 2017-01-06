@@ -84,19 +84,19 @@ var parse = module.exports.parse = function(message) {
       }
     });
 
-    var res_rnn = yield request({
-      method: 'POST',
-      url: config.nlp_rnn + '/predict',
-      json: true,
-      body: {
-        text: text,
-        // history: history_array
-      }
-    })
+    // var res_rnn = yield request({
+    //   method: 'POST',
+    //   url: config.nlp_rnn + '/predict',
+    //   json: true,
+    //   body: {
+    //     text: text,
+    //     // history: history_array
+    //   }
+    // })
 
     // welp we'll mutate the shit out of the message here.
     nlpToResult(res_parse, message);
-    debug('_rnn response_: ', res_rnn)
+    // debug('_rnn response_: ', res_rnn)
     return message;
   })
 }

@@ -1,47 +1,20 @@
-# VERSION:        0.7.5
-# REPO/TAG:       gcr.io/kip-styles/rnn:$VERSION
-# DESCRIPTION:    trained LSTM model
-# AUTHOR:         graham annett
-# COMMENTS:
-#
-# SETUP:
-#
-# USAGE:
-#
+FROM python:3.4
+ADD src/nlp_rnn/requirements.txt /tmp/requirements.txt
 
-FROM ubuntu:16.04
-
-MAINTAINER grahama
-
-ENV TF_DOWNLOAD https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.9.0-cp35-cp35m-linux_x86_64.whl
-
-RUN apt-get update && apt-get install -y \
-    python3-dev \
-    python3-pip \
-    python3-numpy \
-    libhdf5-dev \
-    python3-h5py \
-    wget
-
-ADD src/nlp_rnn/src_rnn/requirements.txt /app/requirements.txt
-
-RUN pip3 install $TF_DOWNLOAD && pip3 install -r /app/requirements.txt
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -q libhdf5-dev wget
+RUN pip install -r /tmp/requirements.txt
 
 RUN mkdir /root/.keras/ && \
     echo '{"floatx": "float32", "epsilon": 1e-07, "backend": "tensorflow"}' > /root/.keras/keras.json
 
-RUN wget -P /app/models/ https://storage.googleapis.com/saved-models-bucket/latest_model.hdf5 && \
-    wget -P /app/models/ https://storage.googleapis.com/saved-models-bucket/latest_model.json && \
-    wget -P /app/pkls/ https://storage.googleapis.com/saved-models-bucket/tokenizer.pkl && \
-    wget -P /app/ https://storage.googleapis.com/saved-models-bucket/config.json
+ADD src/nlp_rnn/ /nlp_rnn/
 
-
-WORKDIR /app/
-
-COPY src/nlp_rnn/src_rnn /app
-
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/nlp_creds.json
-
+RUN wget -P /nlp_rnn/models/ https://storage.googleapis.com/saved-models-bucket/latest_model.hdf5 && \
+    wget -P /nlp_rnn/models/ https://storage.googleapis.com/saved-models-bucket/latest_model.json && \
+    wget -P /nlp_rnn/pkls/ https://storage.googleapis.com/saved-models-bucket/tokenizer.pkl && \
+    wget -P /nlp_rnn/ https://storage.googleapis.com/saved-models-bucket/config.json
+ENV GOOGLE_APPLICATION_CREDENTIALS=/nlp_rnn/src/nlp_creds.json
 EXPOSE 8085
-# CMD python3 server.py
-CMD gunicorn --timeout 120 -w 3 --bind 0.0.0.0:8085 main:application
+WORKDIR /nlp_rnn/
+CMD gunicorn --timeout 120 -w 2 --bind 0.0.0.0:8085 main:application

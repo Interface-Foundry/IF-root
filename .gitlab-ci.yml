@@ -54,7 +54,7 @@ stages:
     - gcloud container clusters get-credentials $KUBE_CLUSTER
   script:
     - ls $DEPLOYMENT_DIR
-    - sed -i "s/IMAGE_TAG/$CI_BUILD_REF/" $DEPLOYMENT_DIR/$CONTEXT_FILE
+    - sed -i "s/latest/$CI_BUILD_REF/" $DEPLOYMENT_DIR/$CONTEXT_FILE
     - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
   after_script:
     - rm /tmp/KUBERNETES_KEY.json
@@ -105,10 +105,10 @@ test:python:
 # notes:
 # ------------------------------------------------
 
-# build:delivery_picstitch:
-#   variables:
-#     IMAGE_NAME: delivery_picstitch
-#   <<: *build_defintion
+build:delivery_picstitch:
+  variables:
+    IMAGE_NAME: delivery_picstitch
+  <<: *build_defintion
 
 build:picstitch:
   variables:
@@ -137,3 +137,8 @@ deploy:picstitch:
     CONTEXT_FILE: canary.picstitch.yaml
   <<: *deploy_defintion
 
+deploy:parser:
+  variables:
+    DEPLOYMENT_DIR: src/k8s/canary
+    CONTEXT_FILE: canary.parser.yaml
+  <<: *deploy_defintion

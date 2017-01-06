@@ -13,13 +13,20 @@ m = ModelPredictor()
 logging.info('model loaded')
 
 
-@application.route('/predict', methods=['GET', 'POST'])
+@application.route('/', methods=['POST'])
+@application.route('/predict', methods=['POST'])
 def predict():
     '''
     '''
     text = request.json['text']
     resp = m.return_predictions(text)
     return jsonify(resp)
+
+
+@application.route('/health')
+def kubernetes_heath_check():
+    return 'health'
+
 
 if __name__ == '__main__':
     logging.info('running app on port ' + str(port_num))

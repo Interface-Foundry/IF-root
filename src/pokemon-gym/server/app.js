@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
 const config = require('../../config');
 const request = require('request');
 const async = require('async');
@@ -14,8 +13,8 @@ const db1 = mongoose.createConnection(config.mongodb.url);
 const db2 = mongoose.createConnection(config.mongodb2.url);
 
 const Message = require('../../db/message_schema');
-db1.model('Message', Message);
-db2.model('Message', Message);
+db1.model('Message', Message.schema);
+db2.model('Message', Message.schema);
 const db1Msgs = db1.model('Message');
 const db2Msgs = db2.model('Message');
 
@@ -29,8 +28,6 @@ results.banterCounts = {};
 results.dayOfWeekStats = {};
 
 app.use(bodyParser.json());
-app.use(morgan());
-
 
 app.use(auth('kip', 'vampirecat1200'));
 app.use(express.static(`${__dirname}/../UI/material/client`));
@@ -402,23 +399,23 @@ function doQuery(params,callback){
 //
 // Error monitoring
 //
-var elasticsearch = require('elasticsearch')
-// logs elasticsearch stuff, flesh out later once we know what's useful
-var ESLogger = function(config) {
-    var defaultLogger = function() {};
-
-    this.error = defaultLogger;
-    this.warning = defaultLogger;
-    this.info = defaultLogger;
-    this.debug = defaultLogger;
-    this.trace = defaultLogger;
-    this.close = defaultLogger;
-};
-var es = new elasticsearch.Client({
-    host: config.elasticsearchElk.url,
-    log: ESLogger
-});
-console.log('elasticserach on', config.elasticsearchElk.url)
+// var elasticsearch = require('elasticsearch')
+// // logs elasticsearch stuff, flesh out later once we know what's useful
+// var ESLogger = function(config) {
+//     var defaultLogger = function() {};
+//
+//     this.error = defaultLogger;
+//     this.warning = defaultLogger;
+//     this.info = defaultLogger;
+//     this.debug = defaultLogger;
+//     this.trace = defaultLogger;
+//     this.close = defaultLogger;
+// };
+// var es = new elasticsearch.Client({
+//     host: config.elasticsearchElk.url,
+//     log: ESLogger
+// });
+// console.log('elasticserach on', config.elasticsearchElk.url)
 app.get('/errors/node', function(req, res) {
   var query = {
     index: 'logstash-node',

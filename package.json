@@ -9,6 +9,7 @@
     "async": "^2.0.0-rc.6",
     "async-co": "^1.4.0",
     "aws-sdk": "^2.3.12",
+    "basic-auth-connect": "^1.0.0",
     "bcrypt-nodejs": "latest",
     "bluebird": "^2.9.30",
     "body-parser": "^1.15.2",
