@@ -559,11 +559,8 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-  console.log('picklistmessage', message);
-  console.log('SORT.cuisine', SORT.cuisine)
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
-  console.log(sort);
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
 
