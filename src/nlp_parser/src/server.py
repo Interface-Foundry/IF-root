@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.INFO,
                     format=logFormat)
 
 
+@application.route('/', methods=['GET', 'POST'])
 @application.route('/parse', methods=['GET', 'POST'])
 def parse_message():
     '''
@@ -30,6 +31,11 @@ def parse_message():
     logging.debug('------returning results------')
     logging.info('total syntaxnet time taken ' + str(time.time() - t1))
     return jsonify(resp)
+
+
+@application.route('/health')
+def kubernetes_heath_check():
+    return 'health'
 
 
 if __name__ == '__main__':

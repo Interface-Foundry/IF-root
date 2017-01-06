@@ -1,0 +1,83 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginxconfigmap
+data:
+  nginx.conf: |-
+    server {
+            listen 80 default_server;
+            listen [::]:80 default_server ipv6only=on;
+
+            listen 443 ssl;
+
+            root /usr/share/nginx/html;
+            index index.html;
+
+            server_name localhost;
+            ssl_certificate /etc/nginx/ssl/pay_kipthis_com.crt;
+            ssl_certificate_key /etc/nginx/ssl/pay_kipthis_com.key;
+
+            location / {
+                    try_files $uri $uri/ =404;
+            }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-pay
+  labels:
+    run: nginx-pay
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    protocol: TCP
+    name: https
+  selector:
+    run: nginx-pay
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: nginx-pay
+  name: nginx-pay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: nginx-pay
+  template:
+    metadata:
+      labels:
+        run: nginx-pay
+    spec:
+      containers:
+      - name: nginx-pay
+        image: ymqytw/nginxhttps:1.5
+        command: ["/home/auto-reload-nginx.sh"]
+        ports:
+        - containerPort: 443
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /index.html
+            port: 80
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: secret-volume
+        - mountPath: /etc/nginx/conf.d
+          name: configmap-volume
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: payments-ssl-certs
+      - name: configmap-volume
+        configMap:
+          name: nginxconfigmap

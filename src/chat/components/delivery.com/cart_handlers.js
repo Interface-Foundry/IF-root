@@ -414,16 +414,12 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           amount: fixed dollar amount with cents (calculated on the order.subtotal tho)
           percent: string with value to use on order.total
       }
-
       - afaik order.total seems to include all taxes, fees, and discounts provided by delivery
-
       - main_amount = (order.total + kip_service_fee + tip)
       - discount_amount = main_amount * coupon_discount
       - calculated_amount (total we are charging user) = main_amount - discount_amount
-
       - calculated_amount will be the value passed to payments that is a value in cents
       - tip.amount will be passed to payments as well for delivery.com payment.  its already included in calculated_amount so just leave it
-
       -----
       other:
       dont let orders over 510 go through w/ 99% discount

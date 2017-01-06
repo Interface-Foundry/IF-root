@@ -1,63 +1,42 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  labels:
-    run: rnn
   name: rnn
   namespace: canary
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      run: rnn
   template:
     metadata:
       labels:
-        run: rnn
+        app: rnn
     spec:
       containers:
-      - image: gcr.io/kip-styles/rnn:911b5e3
+      - image: gcr.io/kip-styles/rnn:latest
         imagePullPolicy: Always
         name: rnn
         ports:
         - containerPort: 8085
           protocol: TCP
-        resources: {}
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8085
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      securityContext: {}
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: rnn
   namespace: canary
+  name: rnn
   labels:
-    run: rnn
+    app: rnn
 spec:
   type: LoadBalancer
   ports:
-  - nodePort: 30012
-    port: 80
+  - port: 80
     protocol: TCP
     targetPort: 8085
   selector:
-    run: rnn
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: rnn-ingress
-  namespace: canary
-spec:
-  backend:
-    serviceName: rnn
-    servicePort: 8085
-  rules:
-  - host: dev-rnn.kipthis.com
-    http:
-      paths:
-      - backend:
-          serviceName: rnn
-          servicePort: 8085
+    app: rnn

@@ -1,0 +1,23 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginxconfigmap
+data:
+  nginx.conf: |-
+    server {
+            listen 80 default_server;
+            listen [::]:80 default_server ipv6only=on;
+
+            listen 443 ssl;
+
+            root /usr/share/nginx/html;
+            index index.html;
+
+            server_name localhost;
+            ssl_certificate /etc/nginx/ssl/pay_kipthis_com.crt;
+            ssl_certificate_key /etc/nginx/ssl/pay_kipthis_com.key;
+
+            location / {
+                    try_files $uri $uri/ =404;
+            }
+    }

@@ -11,9 +11,13 @@ import io
 import time
 import os
 
-
+# # ---- Logging prefs -----
+log_format = "[%(asctime)s]       [%(process)d] [%(levelname)-1s] %(message)s"
+date_format = "%Y-%m-%d %H:%M:%S"
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+                    format=log_format,
+                    datefmt=date_format)
+
 
 application = Flask(__name__)
 
@@ -42,17 +46,15 @@ def get_gcloud():
     # gcloud stuff
     gcloud_config = {
         'proj_name': 'kip_styles',
-        'key': 'KipStyles-8da42a8a7423.json',
+        'key': 'gcloud-picstitch.json',
         'bucket': 'if-kip-chat-images'
     }
-
 
     gcloud_key_file = os.path.join(
         os.path.dirname(__file__),
         'gcloud_key',
         gcloud_config['key']
     )
-
 
     gcloud_client = storage.Client(project=gcloud_config['proj_name'])
     gcloud_client = gcloud_client.from_service_account_json(gcloud_key_file)
@@ -77,15 +79,16 @@ def upload_to_gcloud(image, gcloud_bucket=get_gcloud()):
     uploaded = time.time()
 
     if time.time() - start > 1:
-        logging.info('slow upload. save: %.2fs, blob create: %.2fs, string upload %2fs',
-            saved-start, blobbed-saved, uploaded-blobbed)
+        logging.info(
+            'slow upload. save: %.2fs, blob create: %.2fs, string upload %2fs',
+            saved - start, blobbed - saved, uploaded - blobbed)
 
     # public_url is a property func that appears to just be a string-format
     # call. Probably no value in instrumenting.
     return object_upload.public_url
 
 
-@application.route('/', methods=['POST'])
+@application.route('/', methods=['GET', 'POST'])
 def main():
     '''
     return upload_image_tos_s3(create_image(request.json))
@@ -106,6 +109,12 @@ def main():
                  t2 - t1, t3 - t2, t3 - t1, gc_url)
     return gc_url
 
+
+@application.route('/health')
+def kubernetes_heath_check():
+    return 'health'
+
+
 # load connections to gcloud and aws
 gcloud_bucket = get_gcloud()
 review_star_images = load_review_stars()
@@ -113,9 +122,9 @@ amazon_images = load_amazon_prime()
 font_dict = load_fonts()
 
 
-if __name__ == '__main__':
-    port_num = 5000
-    # run app
-    logging.info('__not_threaded__')
-    logging.info('running app on port ' + str(port_num))
-    application.run(host='0.0.0.0', port=port_num, debug=True)
+# if __name__ == '__main__':
+#     port_num = 5000
+#     # run app
+#     logging.info('__not_threaded__')
+#     logging.info('running app on port ' + str(port_num))
+#     application.run(host='0.0.0.0', port=port_num, debug=True)

@@ -1,14 +1,18 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name:
+  name: payments
   namespace: canary
 spec:
+  tls:
+  - hosts:
+    - payments.kipthis.com
+    secretName: payments-ssl-certs
   rules:
-  - host: pay.kipthis.com
+  - host: payments.kipthis.com
     http:
       paths:
       - backend:
           serviceName: payments
-          servicePort: 80
+          servicePort: 8080
         path: /

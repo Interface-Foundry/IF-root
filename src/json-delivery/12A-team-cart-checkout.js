@@ -143,19 +143,19 @@
                 },
                 {
                     "name": "chess",
-                    "text": "￮ 20%",
+                    "text": "◎ 20%",
                     "type": "button",
                     "value": "chess"
                 },
                 {
                     "name": "chess",
-                    "text": "￮ 25%",
+                    "text": "◎ 25%",
                     "type": "button",
                     "value": "chess"
                 },
                 {
                     "name": "chess",
-                    "text": "￮ None",
+                    "text": "◎ None",
                     "type": "button",
                     "value": "chess"
                 }
