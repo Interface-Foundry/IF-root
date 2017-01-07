@@ -1,22 +1,37 @@
+var db = require('../kip.js')
 // create and validate mongoose
 var uuid = require('uuid')
+var _ = require('lodash')
+var co = require('co')
 
-// maybe add expiration and stuff idk
-function * createNewMultiUseCoupon(team, type, amount, uses, code=false, promotion=false) {
-  var coupon = new db.Coupon({
-    coupon_code: code ? code : uuid.v4(),
+
+// maybe add expiration and stuff idk, probably need to
+function * createNewMultiUseCoupon(team, couponType, couponAmount, uses, couponCode=false, promotion=false) {
+  var coupon = new db.Coupon(_.omitBy({
+    team_id: team,
+    coupon_code: couponCode ? couponCode : uuid.v4(),
     quanitity_coupon_can_be_used: uses,
-    coupon_type: type,
-    team_id: team
-  })
+    coupon_discount: couponAmount,
+    coupon_type: couponType,
+    promotion: promotion ? promotion : undefined
+  }, _.isUndefined))
+  yield coupon.save()
+}
 
-  if (promotion) {
-    coupon.promotion = promotion
+function * checkTeamFor50OffFirstOrder(team) {
+  var teamsCoupons = yield db.Coupon.findOne({team_id: team, coupon_code: '50PercentOffFor5Uses'})
+  if (!teamsCoupons) {
+    logging.info('creating coupon for team as they havent dont this before')
+    yield createNewMultiUseCoupon(team, 'percentage', 50, 5, 50, 'PercentOffFor5Uses', 'first 5 uses get 50 percent off')
   }
 }
 
-function checkTeamFor50OffFirstOrder(team) {
-  var teamsCoupons = yield db.Coupon.findOne({team_id: team, coupon_code: '50PercentOffFor5Uses'})
-  if teamsCoupons.length
-  yield
-}
+
+// co(function * () {
+    // yield createNewMultiUseCoupon('12345team', 'percentage', 50, 5, '50PercentOffFor5Uses')
+    // yield db.Coupon.findOne({team_id: '12345team', coupon_code: '50PercentOffFor5Uses'})
+    // yield createNewMultiUseCoupon('12345team', 'percentage', 50, 5, 'Percentofffor')
+    // yield createNewMultiUseCoupon('12345team', 'percentage', 50, 5, 'Percentofffor', 'promotion')
+    // db.connection.close()
+    // var result = _.omitBy(my_object, _.isNil);
+// })
