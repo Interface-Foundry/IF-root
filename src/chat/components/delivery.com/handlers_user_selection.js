@@ -93,7 +93,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
             'text': '✓ Send Poll',
             'style': 'primary',
             'type': 'button',
-            'value': 'food.user.poll'
+            'value': { route: 'food.user.poll' }
           },
           // {
           //   'name': 'food.admin.team_budget',
@@ -103,26 +103,27 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           // },
           {
             'name': 'passthrough',
-            'value': 'food.admin.team.members',
-            'text': 'Edit Poll Members',
+            'value': { route: 'food.admin.team.members' },
+            'text': 'View Team Members',
             'type': 'button'
           },
-          // {
-          //   'name': 'food.admin.display_channels',
-          //   'text': 'Use a #channel',
-          //   'type': 'button',
-          //   'value': 'select_team_members'
-          // },
-          // {
-          //   'name': 'passthrough',
-          //   'text': '< Back',
-          //   'type': 'button',
-          //   'value': 'food.admin.select_address'
+          //{
+          //  'name': 'food.admin.display_channels',
+          // 'text': 'Use a #channel',
+          //  'type': 'button',
+          //  'value': { route: 'food.admin.display_channels', command: 'select_team_members' }
+          //},
+          //{
+          //  'name': 'passthrough',
+          //  'text': '< Back',
+          //  'type': 'button',
+          //  'value': { route: 'food.admin.select_address' }
+          //},
           {
-            'name': 'passthrough',
-            'value': 'food.admin.restaurant.pick.list',
-            'text': '> Skip',
-            'type': 'button'
+             'name': 'Skip',
+             'value: { route: 'food.admin.restaurant.pick.list' },
+             'text': '> Skip',
+             'type': 'button'
           }
         ]
       }, {
@@ -192,11 +193,11 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'text': '✓ Send Poll',
             'style': 'primary',
             'type': 'button',
-            'value': 'food.user.poll'
+            'value': { route: 'food.user.poll' }
           },
           {
             'name': 'passthrough',
-            'value': 'food.admin.team.members',
+            'value': { route: 'food.admin.team.members' },
             'text': 'View Team Members',
             'type': 'button'
           },
@@ -216,7 +217,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'name': 'passthrough',
             'text': '< Back',
             'type': 'button',
-            'value': 'food.admin.select_address'
+            'value': { route: 'food.admin.select_address' }
           }
         ]
       }
@@ -292,16 +293,16 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
       'text': '✓ Collect Orders',
       'style': 'primary',
       'type': 'button',
-      'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
+      'value': { route: 'food.admin.restaurant.confirm_reordering_of_previous_restaurant' }
     }, {
       'name': 'food.admin.team.members.reorder',
-      'value': mostRecentMerchant,
+      'value': { route: 'food.admin.team.members.reorder', merchantId: mostRecentMerchant },
       'text': `Edit Members`,
       'type': 'button'
     }, {
       'text': `< Back`,
       'name': 'food.admin.restaurant.reordering_confirmation',
-      'value': message.data.value,
+      'value': { route: 'food.admin.restaurant.reordering_confirmation' },
       'type': 'button'
     }]
   })
@@ -327,7 +328,7 @@ handlers['food.admin.display_channels'] = function * (message) {
     checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
     return {
       'text': `${checkbox} ${channel.name}`,
-      'value': channel.id,
+      'value': { route: `food.admin.toggle_channel`, channel: channel.id },
       'name': `food.admin.toggle_channel`,
       'type': `button`
     }
@@ -337,7 +338,7 @@ handlers['food.admin.display_channels'] = function * (message) {
     checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
     return {
       'text': `${checkbox} #${channel.name}`,
-      'value': channel.id,
+      'value': { route: `food.admin.toggle_channel`, channel: channel.id },
       'name': `food.admin.toggle_channel`,
       'type': `button`
     }
@@ -371,18 +372,18 @@ handlers['food.admin.display_channels'] = function * (message) {
     'actions': [{
       'text': `✓ Send to Members`,
       'name': 'passthrough',
-      'value': 'food.user.poll',
+      'value': { route: 'food.user.poll' },
       'type': 'button',
       'style': 'primary'
     }, {
       'name': 'passthrough',
-      'value': 'food.admin.team.members',
+      'value': { route: 'food.admin.team.members' },
       'text': `Edit Members`,
       'type': 'button'
     }, {
       'text': `< Back`,
       'name': 'food.poll.confirm_send',
-      'value': 'food.poll.confirm_send',
+      'value': { route: 'food.poll.confirm_send' },
       'type': 'button'
     }]
   })
@@ -426,16 +427,17 @@ handlers['food.admin.toggle_channel_reorder'] = function * (message) {
 handlers['food.admin.toggle_channel'] = function * (message) {
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  if (message.data.value.toLowerCase() === 'everyone') {
+  var channelId = message.slack_action.channel
+  if (channelId.toLowerCase() === 'everyone') {
     foodSession.team_members = foodSession.all_members
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'everyone'
-  } else if (message.data.value.toLowerCase() === 'just_me') {
+  } else if (channelId.toLowerCase() === 'just_me') {
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'just_me'
   } else {
     try {
       // find channel in meta.all_channels
-      var channel = _.find(slackbot.meta.all_channels, {'id': message.data.value})
+      var channel = _.find(slackbot.meta.all_channels, {'id': channelId})
       foodSession.chosen_channel.name = channel.name
       foodSession.chosen_channel.id = channel.id
       foodSession.chosen_channel.is_channel = channel.is_channel

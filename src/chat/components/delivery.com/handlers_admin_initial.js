@@ -131,7 +131,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     'name': 'passthrough',
     'text': 'New Location +',
     'type': 'button',
-    'value': 'food.settings.address.new'
+    'value': { route: 'food.settings.address.new'}
   }]
 
   if (foodSession.onboarding){
@@ -159,7 +159,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
       'name': 'passthrough',
       'text': 'Edit Locations',
       'type': 'button',
-      'value': 'food.settings.address.remove_select'
+      'value': { route: 'food.settings.address.remove_select' }
     })
   }
 
@@ -168,7 +168,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     'name': 'passthrough',
     'text': 'Home',
     'type': 'button',
-    'value': 'food.exit.confirm_end_order'
+    'value': { route: 'food.exit.confirm_end_order' }
   })
 
   // if user sent in public channel, switch to DMing them
@@ -601,21 +601,17 @@ handlers['food.admin_polling_options'] = function * (message) {
       listing.text = `You recently ordered delivery from ${listing.text} \n Order again?`
 
       // allow confirmation
-      listing.actions = [{
-        'name': 'food.admin.restaurant.reordering_confirmation',
-        'text': '✓ Reorder From Here',
-        'type': 'button',
-        'value': mostRecentMerchant.id
-      }]
+      listing.actions = [btn('✓ Reorder From Here', {
+        route: 'food.admin.restaurant.reordering_confirmation',
+        merchantId: mostRecentMerchant.id
+      })]
 
       listing.mrkdwn_in = ['text']
       if (lastOrdered.length > 1) {
-        listing.actions.push({
-          'name': 'food.restaurants.list.recent',
-          'text': 'More Past Orders',
-          'type': 'button',
-          'value': 0
-        })
+        listing.actions.push(btn('More Past Orders', {
+          route: 'food.restaurants.list.recent',
+          index: 0
+        }))
       }
       attachments.push(listing)
     }else if (!foodSession.onboarding) {
@@ -667,19 +663,8 @@ handlers['food.admin_polling_options'] = function * (message) {
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
-      {
-        'name': 'passthrough',
-        'text': '✓ Start New Order',
-        'style': 'primary',
-        'type': 'button',
-        'value': 'food.poll.confirm_send_initial'
-      },
-      {
-        'name': 'passthrough',
-        'text': '< Back',
-        'type': 'button',
-        'value': 'food.admin.select_address'
-      }
+      btn('✓ Start New Poll', { route: 'food.poll.confirm_send_initial' }, {style: 'primary'}),
+      btn('< Back', { route: 'food.admin.select_address' })
     ]
   })
 
@@ -701,7 +686,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
 
   db.waypoints.log(1101, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  var mostRecentMerchant = message.data.value
+  var mostRecentMerchant = message.slack_action.merchantId
   // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
   var lastOrdered = yield db.Delivery.find({team_id: message.source.team, 'chosen_restaurant.id': mostRecentMerchant, active: false})
     .sort({_id: -1})
@@ -742,177 +727,35 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       'callback_id': 'reordering_confirmation',
       'color': '#3AA3E3',
       'attachment_type': 'default',
-      'actions': [{
-        'name': 'passthrough',
-        'text': '✓ Collect Orders',
-        'style': 'primary',
-        'type': 'button',
-        'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
-      }, {
-        'name': 'food.admin.team.members.reorder',
-        'value': mostRecentMerchant,
-        'text': `Edit Members`,
-        'type': 'button'
-      }, {
-        'name': 'passthrough',
-        'text': '< Back',
-        'type': 'button',
-        'value': 'food.admin_polling_options'
-      }//,
-      // {
-      //   'name': 'passthrough',
-      //   'text': 'Home',
-      //   'type': 'button',
-      //   'value': 'food.exit.confirm_end_order',
-      //   'confirm': {
-      //     'title': 'Are you sure?',
-      //     'text': "Are you sure want to end this order?",
-      //     'ok_text': 'Yes',
-      //     'dismiss_text': 'No'
-      //   }
-      // }
+      'actions': [
+        btn('✓ Collect Orders', { route: 'food.admin.restaurant.confirm_reordering_of_previous_restaurant' }, { style: 'primary' }),
+        btn('Edit Members', {
+          route: 'food.admin.team.members.reorder',
+          merchantId: mostRecentMerchant
+        }),
+        btn('< Back', { route: 'food.admin_polling_options' }),
+        btn('Home', {
+          route: 'food.exit.confirm_end_order'
+        }, {
+          'confirm': {
+            'title': 'Are you sure?',
+            'text': "Are you sure want to end this order?",
+            'ok_text': 'Yes',
+            'dismiss_text': 'No'
+          }
+        })
       ]
     }]
   }
   $replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
 }
 
-handlers['food.restaurants.list'] = function * (message) {
-  // here's some mock stuff for now
-  var msg_json = {
-    'text': 'Here are 3 restaurant suggestions based on your recent history. \n Which do you want today?',
-    'attachments': [
-      {
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': '',
-        'image_url': 'http://i.imgur.com/iqjT5iJ.png',
-        'fallback': 'Restaurant 1',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'passthrough',
-            'text': '✓ Choose',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'food.poll.confirm_send'
-          },
-          {
-            'name': 'chess',
-            'text': 'More Info',
-            'type': 'button',
-            'value': 'chess'
-          }
-        ]
-      },
-      {
-        'title': '',
-        'image_url': 'http://i.imgur.com/8Huwjao.png',
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': '',
-        'fallback': 'Restaurant 2',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'passthrough',
-            'text': '✓ Choose',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'food.poll.confirm_send'
-          },
-          {
-            'name': 'chess',
-            'text': 'More Info',
-            'type': 'button',
-            'value': 'chess'
-          }
-        ]
-      },
-      {
-        'title': '',
-        'image_url': 'http://i.imgur.com/fP6EcEm.png',
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': '',
-        'fallback': 'Restaurant 3',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'passthrough',
-            'text': '✓  Choose',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'food.poll.confirm_send'
-          },
-          {
-            'name': 'chess',
-            'text': 'More Info',
-            'type': 'button',
-            'value': 'chess'
-          }
-        ]
-      },
-      {
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': '',
-        'fallback': 'Other options',
-        'callback_id': 'wopr_game',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'chess',
-            'text': '<',
-            'type': 'button',
-            'value': 'chess'
-          },
-          {
-            'name': 'chess',
-            'text': 'More Choices >',
-            'type': 'button',
-            'value': 'chess'
-          }
-          // {
-          //   'name': 'maze',
-          //   'text': 'Sort Price',
-          //   'type': 'button',
-          //   'value': 'maze'
-          // },
-          // {
-          //   'name': 'maze',
-          //   'text': 'Sort Rating',
-          //   'type': 'button',
-          //   'value': 'maze'
-          // }
-          // {
-          //   'name': 'maze',
-          //   'text': 'Sort Distance',
-          //   'type': 'button',
-          //   'value': 'maze'
-          // }
-        ]
-      }
-    ]
-  }
-  $replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
-}
 
 //
 // Return some restaurants, button value is the index offset
 //
 handlers['food.restaurants.list.recent'] = function * (message) {
-  var index = parseInt(_.get(message, 'data.value')) || 0
+  var index = _.get(message, 'slack_action.index', 0)
   var msg_json = { text: 'Looking up your order history for this location...' }
   $replyChannel.sendReplace(message, 'food.waiting', {type: message.origin, data: msg_json})
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -957,19 +800,19 @@ handlers['food.restaurants.list.recent'] = function * (message) {
         'text': '✓ Start New Order',
         'style': 'primary',
         'type': 'button',
-        'value': 'food.poll.confirm_send'
+        'value': {route: 'food.poll.confirm_send'}
       },
       {
         'name': 'food.restaurants.list.recent',
         'text': 'More Past Orders',
         'type': 'button',
-        'value': index + 3
+        'value': {route: 'food.restaurants.list.recent', index: index + 3 }
       },
       {
         'name': 'passthrough',
         'text': '< Back',
         'type': 'button',
-        'value': 'food.admin.select_address'
+        'value': {route: 'food.admin.select_address' }
       }
     ]
   })
