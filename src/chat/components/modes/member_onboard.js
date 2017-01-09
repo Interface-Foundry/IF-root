@@ -195,7 +195,7 @@ handlers['cart'] = function * (message) {
     callback_id: 'take me home pls',
     actions: [{
       'name': 'passthrough',
-      'text': '🎉  Finish',
+      'text': ':tada:\u00A0 Finish',
       'style': 'primary',
       'type': 'button',
       'value': 'home'
