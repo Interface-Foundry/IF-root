@@ -45,23 +45,23 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
   }
 
   return basePrice * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
-      if (!cartItem.item.option_qty.hasOwnProperty(optionId)) {
-        return sum
-      }
-
-      if (optionId === _.get(priceOption, 'id', -1).toString()) {
-        return sum
-      }
-
-      var optionPrice = menu.getItemById(optionId).price
-      var optionQuantity = cartItem.item.option_qty[optionId]
-
-      if (optionPrice && typeof optionQuantity === 'number') {
-        return sum + optionQuantity * optionPrice
-      }
-
+    if (!cartItem.item.option_qty.hasOwnProperty(optionId)) {
       return sum
-    }, 0)
+    }
+
+    if (optionId === _.get(priceOption, 'id', -1).toString()) {
+      return sum
+    }
+
+    var optionPrice = menu.getItemById(optionId).price
+    var optionQuantity = cartItem.item.option_qty[optionId]
+
+    if (optionPrice && typeof optionQuantity === 'number') {
+      return sum + optionQuantity * optionPrice
+    }
+
+    return sum
+  }, 0)
 }
 
 // turns the menu into a single object with keys as item ids
@@ -104,24 +104,24 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
   var parentName = _.get(menu, `flattenedMenu.${item.parentId}.name`)
   var parentDescription = _.get(menu, `flattenedMenu.${item.parentId}.description`)
 
-  //lol
-  if (item.description){
+  // lol
+  if (item.description) {
     var des = `- _${item.description}_`
-  }else {
+  } else {
     var des = ''
   }
-  //lol
-  if(parentDescription){
+  // lol
+  if (parentDescription) {
     var h = '-'
-  }else {
+  } else {
     var h = ''
   }
 
   var json = {
-    text: `${parentName} `+h+` ${parentDescription}
+    text: `${parentName} ` + h + ` ${parentDescription}
       *${item.name}* ${des}`,
     attachments: [{
-      image_url: (item.images.length>0 ? 'https://res.cloudinary.com/delivery-com/image/fetch/w_300,h_240,c_fit/' + encodeURIComponent(item.images[0].url) : ''),
+      image_url: (item.images.length > 0 ? 'https://res.cloudinary.com/delivery-com/image/fetch/w_300,h_240,c_fit/' + encodeURIComponent(item.images[0].url) : ''),
       fallback: item.name + ' - ' + item.description,
       callback_id: 'quantity',
       color: 'grey',
@@ -131,19 +131,19 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
           name: 'food.item.quantity.subtract',
           text: '—',
           type: 'button',
-          value: cartItem.item.item_id
+          value: { route: 'food.item.quantity.subtract', itemId: cartItem.item.item_id }
         },
         {
           name: 'food.null',
           text: cartItem.item.item_qty,
           type: 'button',
-          value: 'food.null'
+          'value': { route: 'food.null' }
         },
         {
           name: 'food.item.quantity.add',
           text: '+',
           type: 'button',
-          value: cartItem.item.item_id
+          value: { route: 'food.item.quantity.add', itemId: cartItem.item.item_id }
         }
       ]
     }]
@@ -172,29 +172,29 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
   }
 
   json.attachments.push({
-    'text': `*Special Instructions:* ${cartItem.item.instructions || "_None_"} \n *Total:* `+fullPrice.$,
+    'text': `*Special Instructions:* ${cartItem.item.instructions || '_None_'} \n *Total:* ` + fullPrice.$,
     'fallback': 'Special Instructions: ${cartItem.item.instructions || "_None_"}',
     'callback_id': 'menu_quickpicks',
     'color': '#49d63a',
     'attachment_type': 'default',
     'mrkdwn_in': ['text'],
     'actions': [{
-        'name': 'food.item.add_to_cart',
-        'text': '✓ Add to Order',
-        'type': 'button',
-        'style': 'primary',
-        'value': cartItem.item.item_id
-      }, {
-        'name': 'food.item.instructions',
-        'text': '✎ Special Instructions',
-        'type': 'button',
-        'value': cartItem.item.item_id
-      }, {
-        'name': 'food.menu.quickpicks',
-        'text': '< Back',
-        'type': 'button',
-        'value': 0
-      }]
+      'name': 'food.item.add_to_cart',
+      'text': '✓ Add to Order',
+      'type': 'button',
+      'style': 'primary',
+      'value': { route: 'food.item.add_to_cart', itemId: cartItem.item.item_id }
+    }, {
+      'name': 'food.item.instructions',
+      'text': '✎ Special Instructions',
+      'type': 'button',
+      'value': { route: 'food.item.instructions', itemId: cartItem.item.item_id }
+    }, {
+      'name': 'food.menu.quickpicks',
+      'text': '< Back',
+      'type': 'button',
+      'value': { route: 'food.menu.quickpicks', index: 0 }
+    }]
   })
   return json
 }
@@ -300,7 +300,6 @@ function nodeOptions (node, cartItem, validate, message) {
 
   // spread out the buttons to multiple attachments if needed
   attachments = attachments.reduce((all, a) => {
-
     var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') : {}
     var groupId = Number(a.callback_id.split('-').slice(-1)[0])
     var optionIndex = optionIndices[groupId] ? optionIndices[groupId] : 1
@@ -311,11 +310,11 @@ function nodeOptions (node, cartItem, validate, message) {
       return all
     } else {
       var actions = a.actions
-      var numActionRows = Math.ceil(actions.length/3)
+      var numActionRows = Math.ceil(actions.length / 3)
       a.actions = actions.splice(0, 3)
       rowCount++
       all.push(a)
-      if(isRequired) { //if option is required, show all
+      if (isRequired) { // if option is required, show all
         while (actions.length > 0) {
           all.push({
             color: a.color,
@@ -325,7 +324,7 @@ function nodeOptions (node, cartItem, validate, message) {
             actions: actions.splice(0, 3)
           })
         }
-      } else { //if option is optional, display 3 at a time.
+      } else { // if option is optional, display 3 at a time.
         while (rowCount < optionIndex) {
           all.push({
             color: a.color,
@@ -336,7 +335,7 @@ function nodeOptions (node, cartItem, validate, message) {
           })
           rowCount++
         }
-        if(numActionRows > optionIndex){
+        if (numActionRows > optionIndex) {
           all.push({
             'name': 'More Options',
             'fallback': 'More Options',
@@ -346,8 +345,9 @@ function nodeOptions (node, cartItem, validate, message) {
               'text': 'More Options',
               'type': 'button',
               'value': {
+                route: 'food.item.loadmore',
                 'item_id': cartItem.item.item_id,
-                'group_id': groupId ,
+                'group_id': groupId,
                 'optionIndices': optionIndices,
                 'row_count': numActionRows
               }

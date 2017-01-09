@@ -82,7 +82,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
   })
 
   var bottom = {
-    'text': '*My Order Total:* '+totalPrice.$,
+    'text': '*My Order Total:* ' + totalPrice.$,
     'mrkdwn_in': ['text'],
     'fallback': 'Confirm personal cart',
     'callback_id': 'wopr_game',
@@ -93,7 +93,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
         'name': 'food.cart.personal.confirm',
         'text': '✓ Finish My Order',
         'type': 'button',
-        'value': 'food.cart.personal.confirm',
+        'value': { route: 'food.cart.personal.confirm' },
         'style': 'primary'
       },
       {
@@ -176,9 +176,9 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
   //
-  // Reply to the user who either submitted their personal cart or said "no thanks"
+  // Reply to the user who either submitted their personal cart or did not want to order
   //
-  if (message.data.value === 'no thanks') {
+  if (message.slack_action.command === 'exit') {
     yield foodSession.update({$pull: {team_members: {id: message.user_id}}}).exec()
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     $replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: `Ok, maybe next time :blush:`}})
@@ -222,12 +222,12 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
         text: 'Finish Order Early',
         style: 'default',
         type: 'button',
-        value: 'food.admin.order.confirm',
+        'value': { route: 'food.admin.order.confirm' },
         confirm: {
-            "title": "Finish Order Early?",
-            "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
-            "ok_text": "Yes",
-            "dismiss_text": "No"
+          'title': 'Finish Order Early?',
+          'text': "This will finish the order. Members that haven't ordered yet won't be able to.",
+          'ok_text': 'Yes',
+          'dismiss_text': 'No'
         }
       }]
     })
@@ -243,7 +243,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   } else {
     // create the dashboard for the first time
     foodSession.team_members.map(m => {
-      if(foodSession.confirmed_orders.includes(m.id)){
+      if (foodSession.confirmed_orders.includes(m.id)) {
         var admin = foodSession.convo_initiater
         var user = message.source.user
         var channel = message.source.channel
@@ -262,8 +262,8 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
           type: msg.origin,
           data: dashboard
         })
-        sentMessage.then(function(result) {
-          if(result.source.user === admin.id){
+        sentMessage.then(function (result) {
+          if (result.source.user === admin.id) {
             foodSession.tracking.confirmed_orders_msg = result._id
             foodSession.save()
           }
@@ -279,8 +279,8 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     // take admin to order confirm, not sure if i need to look this up again but doing it for assurance
 
     var adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
-    if(!adminMsg){
-      adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})  //there should be a better way to handle the race condition with the above foodSession.save()
+    if (!adminMsg) {
+      adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})  // there should be a better way to handle the race condition with the above foodSession.save()
     }
     yield handlers['food.admin.order.confirm'](adminMsg, true)
   } else {
@@ -302,8 +302,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     fallback: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    callback_id: 'address_confirm',
- 
+    callback_id: 'address_confirm'
+
   }
 
   var mainAttachment = {
@@ -343,8 +343,6 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }]
     }
   })
-
-
 
   if (foodSession.tip.percent === 'cash') foodSession.tip_amount = 0.00
 
@@ -462,7 +460,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       //     name: 'food.feedback.new',
       //     text: '⇲ Send feedback',
       //     type: 'button',
-      //     value: 'food.feedback.new'
+      //     'value': { route: 'food.feedback.new' }
       //   })
       // }
       // ------------------------------------
@@ -533,24 +531,24 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           'text': 'Restart Order',
           'type': 'button',
           'style': 'primary',
-          'value': 'food.admin.select_address'
+          'value': { route: 'food.admin.select_address' }
         }, {
           'name': 'food.exit.confirm_end_order',
           'text': 'End Order',
           'type': 'button',
-          'value': 'food.exit.confirm_end_order'
+          'value': { route: 'food.exit.confirm_end_order' }
         }]
-       })
+      })
     }
   } catch (err) {
     logging.error('error with creating cart payment for some reason', err)
   }
 
-  //if (replace) {
+  // if (replace) {
   //  $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  //} else {
-    $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  //}
+  // } else {
+  $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
+  // }
 }
 
 handlers['food.order.instructions'] = function * (message) {

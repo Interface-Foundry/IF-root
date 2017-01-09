@@ -429,7 +429,7 @@ function * buildRestaurantAttachment (restaurant) {
         'text': '✓ Order Here',
         'type': 'button',
         'style': 'primary',
-        'value': restaurant.id
+        'value': { route: 'food.admin.restaurant.confirm', merchantId: restaurant.id }
       }
     ]
   }

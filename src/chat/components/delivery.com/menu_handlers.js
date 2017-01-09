@@ -105,7 +105,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
 
     var attachment = {
-      thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
+      thumb_url: (i.images.length > 0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       color: '#3AA3E3',
@@ -116,12 +116,15 @@ handlers['food.menu.quickpicks'] = function * (message) {
           'text': 'Add to Order',
           'type': 'button',
           'style': 'primary',
-          'value': i.id
+          'value': {
+            route: 'food.item.submenu',
+            itemId: i.id
+          }
         }
       ]
     }
-    desc = (desc.split(' ').length > 26 ? desc.split(' ').slice(0,26).join(' ')+"…" : desc)
-    parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
+    desc = (desc.split(' ').length > 26 ? desc.split(' ').slice(0, 26).join(' ') + '…' : desc)
+    parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0, 26).join(' ') + '…' : parentDescription)
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
   })
@@ -134,20 +137,20 @@ handlers['food.menu.quickpicks'] = function * (message) {
           'text'
         ]
       }].concat(menuItems).concat([{
-      'text': '',
-      'fallback': 'Food option',
-      'callback_id': 'menu_quickpicks',
-      'color': '#3AA3E3',
-      'attachment_type': 'default',
-      'actions': []
-    }])
+        'text': '',
+        'fallback': 'Food option',
+        'callback_id': 'menu_quickpicks',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': []
+      }])
   }
   // if (feedbackOn && msg_json) {
   //   msg_json.attachments[0].actions.push({
   //     name: 'food.feedback.new',
   //     text: '⇲ Send feedback',
   //     type: 'button',
-  //     value: 'food.feedback.new'
+  //     'value': { route: 'food.feedback.new' }
   //   })
   // }
 
@@ -157,6 +160,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
       'text': keyword ? `More "${keyword}" >` : 'More >',
       'type': 'button',
       'value': {
+        route: 'food.menu.quickpicks',
         index: index + 3,
         keyword: keyword
       }
@@ -168,7 +172,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.push({
       name: 'food.menu.quickpicks',
       type: 'button',
-      text: '× Clear'
+      text: '× Clear',
+      value: { route: 'food.menu.quickpicks'}
     })
   }
 
@@ -178,13 +183,14 @@ handlers['food.menu.quickpicks'] = function * (message) {
       text: '<',
       type: 'button',
       value: {
+        route: 'food.menu.quickpicks',
         index: Math.max(index - 3, 0),
         keyword: keyword
       }
     })
   }
 
-  //adding writing prompt
+  // adding writing prompt
   msg_json.attachments.push({
     'fallback': 'Search the menu',
     'text': '✎ Type below to search for menu items (Example: _lunch special_)',
@@ -214,16 +220,16 @@ handlers['food.item.submenu'] = function * (message) {
   yield cart.pullFromDB()
 
   // user clicked button
-  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+  var userItem = yield cart.getItemInProgress(message.slack_action.itemId, message.source.user)
   var json = cart.menu.generateJsonForItem(userItem, false, message)
   $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
-handlers['food.item.loadmore'] = function * (message){
+handlers['food.item.loadmore'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
-  var userItem = yield cart.getItemInProgress(message.data.value.item_id, message.source.user)
-  var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') :  {}
+  var userItem = yield cart.getItemInProgress(message.slack_action.itemId, message.source.user)
+  var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') : {}
   var groupId = parseInt(_.get(message, 'data.value.group_id'))
   var rowCount = parseInt(_.get(message, 'data.value.row_count'))
   optionIndices[groupId] = rowCount
@@ -243,7 +249,7 @@ handlers['food.option.click'] = function * (message) {
   var userItem = yield cart.getItemInProgress(item_id, message.source.user)
   var optionNode = cart.menu.getItemById(option_id)
   userItem.item.option_qty = userItem.item.option_qty || {}
-  //var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
+  // var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
   var optionGroupId = optionNode.parentId
   var optionGroup = cart.menu.getItemById(optionGroupId)
   // Radio buttons, can only toggle one at a time
@@ -274,7 +280,7 @@ handlers['food.option.click'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
-function deleteChildren(node, cartItem, deliveryId) {
+function deleteChildren (node, cartItem, deliveryId) {
   (node.children || []).map(c => {
     if (_.get(cartItem, 'item.option_qty.' + c.id)) {
       kip.debug('deleting', c.id)
