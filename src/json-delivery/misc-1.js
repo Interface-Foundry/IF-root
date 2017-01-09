@@ -120,19 +120,19 @@
             "actions": [
                 {
                     "name": "chess",
-                    "text": "◎ Plain",
+                    "text": "○ Plain",
                     "type": "button",
                     "value": "chess"
                 },
                 {
                     "name": "chess",
-                    "text": "◎ Whole Wheat",
+                    "text": "○ Whole Wheat",
                     "type": "button",
                     "value": "chess"
                 },
                 {
                     "name": "chess",
-                    "text": "◎ Ramen +$2.95",
+                    "text": "○ Ramen +$2.95",
                     "type": "button",
                     "value": "chess"
                 }
@@ -360,7 +360,7 @@
             "actions": [
                 {
                     "name": "chess",
-                    "text": "◎ Plain",
+                    "text": "○ Plain",
                     "type": "button",
                     "value": "chess"
                 },
@@ -372,7 +372,7 @@
                 },
                 {
                     "name": "chess",
-                    "text": "◎ Ramen +$2.95",
+                    "text": "○ Ramen +$2.95",
                     "type": "button",
                     "value": "chess"
                 }
@@ -600,7 +600,7 @@
             "actions": [
                 {
                     "name": "chess",
-                    "text": "◎ Plain",
+                    "text": "○ Plain",
                     "type": "button",
                     "value": "chess"
                 },
@@ -612,7 +612,7 @@
                 },
                 {
                     "name": "chess",
-                    "text": "◎ Ramen +$2.95",
+                    "text": "○ Ramen +$2.95",
                     "type": "button",
                     "value": "chess"
                 }

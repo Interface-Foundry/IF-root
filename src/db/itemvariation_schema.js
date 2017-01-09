@@ -26,4 +26,4 @@ var itemvariationSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model('ItemVariations', itemvariationSchema)
+module.exports = mongoose.model('ItemVariation', itemvariationSchema)

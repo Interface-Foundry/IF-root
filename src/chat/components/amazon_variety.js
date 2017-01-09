@@ -7,7 +7,7 @@ var queue = require('./queue-mongo')
 // var amazon_search = require('./amazon_search.js')
 // var promisify = require('promisify-node')
 // var request = require('request')
-var ItemVariation = db.itemvariation
+var ItemVariation = db.ItemVariation
 
 const constants = require('./constants')
 /*
