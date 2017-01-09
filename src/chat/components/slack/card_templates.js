@@ -273,7 +273,7 @@ var slack_onboard_basic = module.exports.slack_onboard_basic = [{
 
 var slack_onboard_team = module.exports.slack_onboard_team = [{
   name: "onboard.team.send",
-  text: "Notify Channels",
+  text: "Notify Members",
   style: "primary",
   type: "button",
   value: "member"

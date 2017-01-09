@@ -186,6 +186,9 @@ app.post('/slackaction', next(function * (req, res) {
         team.markModified('meta.cart_channels');
         yield team.save();
         var channels = yield utils.getChannels(team);
+         if (channels.length > 9) {
+          channels = channels.slice(0,8);
+        }
         var buttons = channels.map(channel => {
           var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
           return {
