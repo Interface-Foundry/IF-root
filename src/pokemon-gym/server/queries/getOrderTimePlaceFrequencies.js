@@ -3,21 +3,38 @@ const getOrderTimePlaceFrequencies = (delivery) =>
   new Promise((resolve, reject) => {
     delivery.aggregate([
       {
+        $match:
+        {
+          'time_started': { $exists: true },
+          'chosen_location.address_1': { $exists: true}
+        },
+      },
+      {
         $group: {
           _id: {
-            time: {
+            hour: {
               $hour: '$time_started',
             },
-            location: '$chosen_location',
+            address: '$chosen_location.address_1',
+            city: '$chosen_location.city',
+            state: '$chosen_location.state',
+            zip: '$chosen_location.zip_code',
             prov: '$source.origin',
+            //latitude: '$chosen_location.latitude',
+            //longitude: '$chosen_location.longitude',
           },
           count: { $sum: 1 },
         },
       },
-        { $group: {
+      { $group: {
           _id: {
-            time: '$_id.time',
-            location: '$_id.location'
+            hour: '$_id.hour',
+            address: '$_id.address',
+            city: '$_id.city',
+            state: '$_id.state',
+            zip: '$_id.zip',
+            //latitude: '$_id.latitude',
+            //longitude: '$_id.longitude',
           },
           sources: {
             $addToSet: {
@@ -26,6 +43,9 @@ const getOrderTimePlaceFrequencies = (delivery) =>
             },
           },
         },
+      }, 
+      {
+        $sort: {'_id.hour': 1}
       },
     ], (err, result) => {
       if (err) { reject(err); }
@@ -35,8 +55,13 @@ const getOrderTimePlaceFrequencies = (delivery) =>
           ({ num: prevSource.num + source.num })).num;
 
         return {
-          ordertime: order._id.time,
-          orderlocation: order._id.location,
+          hour: order._id.hour,
+          address: order._id.address,
+          city: order._id.city,
+          state: order._id.state,
+          zip: order._id.zip,
+          //latitude: order._id.latitude,
+          //longitude: order._id.longitude,
           total,
         };
       });
