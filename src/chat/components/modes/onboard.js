@@ -618,10 +618,16 @@ handlers['handoff'] = function(message) {
     callback_id: 'take me home pls',
     actions: [{
       'name': 'passthrough',
-      'text': '🎉  Finish',
+      'text': ':tada:\u00A0 Finish',
       'style': 'primary',
       'type': 'button',
       'value': 'home'
+    }, {
+      name: 'view_cart_btn',
+      text: '⁂ View Cart',
+      style: 'default',
+      type: 'button',
+      value: 'view_cart_btn'
     }]
   }];
   let msg = message;

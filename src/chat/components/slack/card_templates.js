@@ -264,11 +264,11 @@ var slack_onboard_basic = module.exports.slack_onboard_basic = [{
   type: "button",
   value: "team"
 }, {
-  name: "onboard.bundle.no",
+  name: "onboard.start.handoff",
   text: "No",
   style: "default",
   type: "button",
-  value: "checkout"
+  value: "handoff"
 }];
 
 var slack_onboard_team = module.exports.slack_onboard_team = [{
