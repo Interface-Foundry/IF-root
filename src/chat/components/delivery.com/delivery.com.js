@@ -69,10 +69,10 @@ if (!module.parent) {
 }
 
 function * handleMessage (message) {
-  // parse the action value objects if they exist
-  try {
-    message.data.value = JSON.parse(message.data.value)
-  } catch (e) {}
+  if (_.get(message, 'slack_action.route') && handlers[message.slack_action.route]) {
+    var reply = yield handlers[message.slack_action.route](message)
+    return reply
+  }
 
   var route = yield getRoute(message)
 

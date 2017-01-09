@@ -19,8 +19,7 @@ var mailerTransport = require('../../mail/IF_mail.js');
 var mongoose = require('mongoose');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
-var Slackbots = db.Slackbots;
-var upload = require('./upload.js');
+var Slackbots = db.Slackbots; var upload = require('./upload.js');
 var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 var queue = require('./queue-mongo');
@@ -241,26 +240,25 @@ function printMode(message) {
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS <--lel
 //
 function replyLogic (incoming) {
-
-  co(function * () {
-    if (incoming.data.text) {
-      console.log('>>>'.yellow, incoming.data.text.yellow)
-    } else if (_.get(incoming, 'data.data.value')) {
-      console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
+  return co(function * () {
+    let message = incoming
+    var timer = new kip.SavedTimer('message.timer', message)
+    kip.debug('slack_action', message.slack_action)
+    if (_.get(message, 'slack_action.route')) {
+      return yield food(message)
     }
-    var timer = new kip.SavedTimer('message.timer', incoming.data)
+
     // skipping histoy and stuff rn b/c i dont have time to do it
-    if (_.get(incoming, 'data.action') == 'item.add') {
-      var selected_data = incoming.data.postback.selected_data;
-      var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data);
+    if (_.get(message, 'action') == 'item.add') {
+      var selected_data = message.postback.selected_data;
+      var results = yield amazon_variety.pickItem(message.sender, selected_data);
       var results = yield amazon_search.lookup(results, results.origin);
 
       logging.debug('taking first item from results')
       var results = results[0]
       logging.debug('raw_results: ', results)
 
-      var history = yield db.Messages.find({thread_id: incoming.data.postback.dataId}).sort('-ts').limit(20);
-      var message = history[0];
+      var history = yield db.Messages.find({thread_id: message.postback.dataId}).sort('-ts').limit(20);
       message.history = history.slice(1);
 
       var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team
@@ -281,13 +279,12 @@ function replyLogic (incoming) {
     timer.tic('getting history');
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
-      thread_id: incoming.data.thread_id,
+      thread_id: message.thread_id,
       ts: {
-        $lte: incoming.data.ts
+        $lte: message.ts
       }
     }).sort('-ts').limit(20)
 
-    var message = history[0]
     message.history = history.slice(1)
 
     if (history[1]) {
@@ -310,7 +307,7 @@ function replyLogic (incoming) {
     timer.tic('got history')
     message._timer = timer
     // fail fast if the message was not in the database
-    if (message._id.toString() !== incoming.data._id.toString()) {
+    if (message._id.toString() !== message._id.toString()) {
       throw new Error('correct message not retrieved from db')
     }
 

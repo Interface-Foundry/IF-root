@@ -138,7 +138,6 @@ function * loadTeam(slackbot) {
 
     // don't talk to yourself
     if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-      logging.debug("don't talk to yourself: data: ",data);
       return; // drop the message before sa ving.
     }
 
@@ -164,7 +163,7 @@ function * loadTeam(slackbot) {
       return image_search(data.file.url_private, slackbot.bot.bot_access_token, function (res) {
         message.text = res
         message.save().then(() => {
-          replyLogic({data: message})
+          replyLogic(message)
         })
       })
     }
@@ -181,7 +180,8 @@ function * loadTeam(slackbot) {
 
     // queue it up for processing
     message.save().then(() => {
-      replyLogic({data: message})
+      console.log(message)
+      replyLogic(message)
     })
   })
 }
