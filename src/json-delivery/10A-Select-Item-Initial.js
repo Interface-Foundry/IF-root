@@ -113,13 +113,13 @@
             "actions": [
                 {
                     "name": "chess",
-                    "text": "◎ Plain",
+                    "text": "○ Plain",
                     "type": "button",
                     "value": "chess"
                 },
                 {
                     "name": "chess",
-                    "text": "◎ Whole Wheat",
+                    "text": "○ Whole Wheat",
                     "type": "button",
                     "value": "chess"
                 }

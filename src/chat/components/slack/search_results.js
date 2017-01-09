@@ -3,9 +3,9 @@ var cardTemplate = require('./card_templates');
 var slackUtils = require('./utils.js')
 
 
-var buttons = function(num, modeIsOnboard) {
-  return modeIsOnboard ? [{
-      "name":  'member_onboard.addcart',
+var buttons = function(num, shortMode, mode) {
+  return shortMode ? [{
+      "name":  `${mode}.addcart`,
       "text": "Add to Cart",
       "style": "primary",
       "type": "button",
@@ -51,8 +51,7 @@ var emojis = {
 //
 // Generate the slack reponse for the search results
 //
-function * results(message, modeIsOnboard = false) {
-
+function * results(message, shortMode = false, modeName) {
   var amazon = JSON.parse(message.amazon);
 
   var results = amazon.map((r, i) => {
@@ -64,7 +63,7 @@ function * results(message, modeIsOnboard = false) {
       mrkdwn_in: ['text', 'pretext', 'title'],
       fallback: 'Search Results',
       callback_id: message._id.toString() + '.' + i,
-      actions: buttons(i+1, modeIsOnboard)
+      actions: buttons(i+1, shortMode, modeName)
     }
   });
   // debugger;
@@ -73,7 +72,7 @@ function * results(message, modeIsOnboard = false) {
   var original = cardTemplate.shopping_home_default(message._id);
   var expandable = yield slackUtils.generateMenuButtons(message)
 
-  if (!modeIsOnboard) {
+  if (!shortMode) {
     actions = actions.concat(original);
   }
 

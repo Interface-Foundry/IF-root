@@ -175,20 +175,29 @@ handlers['email'] = function * (message, status) {
                   "style": "default"
                  }
     _.setWith(attachments,'[2].actions[0]', button ,{})
+    let stringOrig = JSON.stringify({
+      text: '',
+      attachments: attachments
+    });
+    var map = {
+      amp: '&',
+      lt: '<',
+      gt: '>',
+      quot: '"',
+      '#039': "'"
+    }
+    stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
     request({
       method: 'POST',
       uri: message.source.response_url,
-      body: JSON.stringify({
-        text: '',
-        attachments: attachments
-      })
+      body: stringOrig
     })
   }
 
   if (status == 'on') {
     var admins = yield utils.findAdmins(team);
     yield admins.map( function * (admin) {
-      agenda.now('send email', { userId: _.get(admin,'id'), to: _.get(admin,'profile.email'), subject: 'This is your weekly team cart status email from Kip!' });
+      agenda.every('0 15 * * 5','send email', { userId: _.get(admin,'id'), to: _.get(admin,'profile.email'), subject: 'This is your weekly team cart status email from Kip!' });
     })
   }
   var msg = message;

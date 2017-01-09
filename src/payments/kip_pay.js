@@ -264,7 +264,7 @@ app.post('/process', (req, res) => co(function * () {
     foodSession.order['completed_payment'] = true
     yield foodSession.save()
 
-    var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
+    var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1).exec()
     finalFoodMessage = finalFoodMessage[0]
 
     // send message to user

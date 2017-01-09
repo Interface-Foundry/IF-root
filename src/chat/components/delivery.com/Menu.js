@@ -271,7 +271,7 @@ function nodeOptions (node, cartItem, validate, message) {
       if (cartItem.item.option_qty[option.id]) {
         checkbox = allowMultiple ? '✓ ' : '◉ '
       } else {
-        checkbox = allowMultiple ? '☐ ' : '◎ '
+        checkbox = allowMultiple ? '☐ ' : '○ '
       }
       return {
         name: 'food.option.click',
