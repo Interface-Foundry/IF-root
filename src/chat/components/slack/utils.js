@@ -662,6 +662,25 @@ function getDayNum(string) {
   }
 }
 
+//
+// Cleans up the attachments and stuff. mutaties the message in place
+//
+function formatMessage(m) {
+  if (m.attachments) {
+    m.attachments.map((a) => {
+      // every attachmnet needs a callback id
+      a.callback_id = _.get(a, 'callback_id') || 'default'
+
+      // also should json stringify action.value
+      _.get(a, 'actions', []).map(action => {
+        if (typeof action.value !== 'string') {
+          action.value = JSON.stringify(action.value)
+        }
+      })
+    })
+  }
+}
+
 /**
  * Chooses a random hint message for the Kip Store
  * @return {String} a hint, prepended with an unicode symbol
@@ -690,6 +709,7 @@ function randomSearching() {
   let num = Math.floor(Math.random() * messages.length);
   return messages[num];
 }
+
 /**
  * Chooses a random welcome message
  * @return {String} a welcome message, suffixed with a (happy) emoji
@@ -787,5 +807,6 @@ module.exports = {
   randomSearching: randomSearching,
   randomStoreDescrip: randomStoreDescrip,
   randomCafeDescrip: randomCafeDescrip,
-  getSearchButtons: getSearchButtons
-};
+  getSearchButtons: getSearchButtons,
+  formatMessage: formatMessage
+}

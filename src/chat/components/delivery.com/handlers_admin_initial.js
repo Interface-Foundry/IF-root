@@ -57,10 +57,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   db.waypoints.log(1010, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var addressButtons = _.get(team, 'meta.locations', []).map(a => {
-    return btn(a.address_1, {
-        route: 'food.admin.select_address',
-        address: a
-      })
+    return btn(a.address_1, { route: 'food.choose_address', address: a })
   })
 
   //no addresses yet, show onboarding
@@ -249,16 +246,15 @@ handlers['food.settings.address.remove'] = function * (message) {
 // User decides what address they are ordering for. could be that they need to make a new address
 //
 handlers['food.choose_address'] = function * (message) {
-  if (_.get(message, 'source.response_url')) {
-    // slack action button tap
-    try {
-      var location = JSON.parse(message.text)
-    } catch (err) {
-      location = {address_1: message.text}
-      logging.error('error in food.choose_address while trying to get location', err)
-      kip.debug('Could not understand the address the user wanted to use, message.text: ', message.text)
-    // TODO handle the case where they type a new address without clicking the "new" button
-    }
+  if (!_.get(message, 'source.response_url')) {
+    throw new Error('text address selection not implemented')
+  }
+
+  if (!_.get(message, 'slack_action.address')) {
+    throw new Error('expected slack_action.address to exist')
+  }
+
+  var location = message.slack_action.address
 
     var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     foodSession.chosen_location = location
@@ -295,9 +291,6 @@ handlers['food.choose_address'] = function * (message) {
     foodSession.markModified('cuisines')
     yield foodSession.save()
     yield $allHandlers['food.admin.team_budget'](message)
-  } else {
-    throw new Error('this route does not handle text input')
-  }
 }
 
 //

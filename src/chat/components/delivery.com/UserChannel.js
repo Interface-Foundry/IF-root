@@ -1,18 +1,7 @@
 var _ = require('lodash')
 var request = require('request-promise')
 var slack = require('../slack/slack.js')
-
-function cleanAttachment (a) {
-  // every attachmnet needs a callback id
-  a.callback_id = _.get(a, 'callback_id') || 'default'
-
-  // also should json stringify action.value
-  _.get(a, 'actions', []).map(action => {
-    if (typeof action.value === 'object') {
-      action.value = JSON.stringify(action.value)
-    }
-  })
-}
+var slackUtils = require('../slack/utils.js')
 
 class UserChannel {
 
@@ -22,12 +11,12 @@ class UserChannel {
 
       // make sure all attachments have a callback_id
       if (_.get(data, 'attachments', []).length > 0) {
-        data.attachments.map(cleanAttachment)
+        slackUtils.formatMessage(data)
       }
 
       // do the same thing again, because javascript is not statically typed
       if (_.get(data, 'data.attachments', []).length > 0) {
-        data.data.attachments.map(cleanAttachment)
+        slackUtils.formatMessage(data.data)
       }
 
       var newSession = new db.Message({
