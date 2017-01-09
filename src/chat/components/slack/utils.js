@@ -134,11 +134,11 @@ function * getChannels(team) {
   channels = channels.filter( c => { return !c.is_archived });
    // channels.sort(function(a, b) { parseFloat(b['num_members']) - parseFloat(a['num_members']) })
   var generalChannel = channels.find( (c) => { return c.name == 'general' });
-  if (generalChannel) {
-    var generalChannelIndex =  _.findIndex(channels, function(c) { return c.name == 'general'});
-    channels.splice(generalChannelIndex, 1);
-    channels.unshift(generalChannel);
-  }
+  // if (generalChannel) {
+  //   var generalChannelIndex =  _.findIndex(channels, function(c) { return c.name == 'general'});
+  //   channels.splice(generalChannelIndex, 1);
+  //   channels.unshift(generalChannel);
+  // }
   return channels
 }
 
