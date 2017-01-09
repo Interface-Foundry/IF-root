@@ -54,7 +54,8 @@ handlers['start'] = function * (message) {
      buttons = buttons.slice(0,9);
   }
    var chunkedButtons = _.chunk(buttons, 5);
-  attachments.push({text: 'Which channels do you want to include? ', mrkdwn_in: ['text'],
+  attachments.push({image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
+    text: 'Which channels do you want to include? ', mrkdwn_in: ['text'],
     color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
   chunkedButtons.forEach((ele, i) => {
     if (i != 0) {
