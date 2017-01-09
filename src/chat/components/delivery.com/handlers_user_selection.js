@@ -236,7 +236,7 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
     name: `Just Me`,
     id: `just_me`
   }].map((channel) => {
-    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '◎'
+    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
     return {
       'text': `${checkbox} ${channel.name}`,
       'value': channel.id,
@@ -246,7 +246,7 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
   })
 
   var channelButtons = slackbot.meta.all_channels.map((channel) => {
-    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '◎'
+    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
     return {
       'text': `${checkbox} #${channel.name}`,
       'value': channel.id,
@@ -317,7 +317,7 @@ handlers['food.admin.display_channels'] = function * (message) {
     name: `Just Me`,
     id: `just_me`
   }].map((channel) => {
-    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '◎'
+    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
     return {
       'text': `${checkbox} ${channel.name}`,
       'value': channel.id,
@@ -327,7 +327,7 @@ handlers['food.admin.display_channels'] = function * (message) {
   })
 
   var channelButtons = slackbot.meta.all_channels.map((channel) => {
-    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '◎'
+    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
     return {
       'text': `${checkbox} #${channel.name}`,
       'value': channel.id,
