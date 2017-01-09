@@ -2,18 +2,17 @@
 var handlers = module.exports = {};
 var amazon = require('../amazon_search.js');
 var _ = require('lodash');
-var co = require('co');
-var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
 var kipcart = require('../cart');
 var winston = require('winston');
 var Fuse = require('fuse.js');
 var request = require('request');
 var agenda = require('../agendas');
+var queue = require('../queue-mongo');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
-function* handle(message) {
+function * handle(message) {
   let action;
   if (!message.data) {
     action = 'text'
@@ -33,7 +32,7 @@ module.exports.handle = handle;
  * You can search for things you need
  */
 handlers['step_1'] = function(message) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
@@ -41,9 +40,9 @@ handlers['step_1'] = function(message) {
   msg.mode = 'member_onboard';
   msg.action = 'home';
   msg.text = '';
-  msg.fallback = 'Step 1/3: Find items to add to team cart'
+  msg.fallback = 'Step 1/3: Find items to add to team cart';
   msg.source.team = team_id;
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
   msg.reply = [{
     text: '*Step 1/3:* Find items to add to team cart',
     mrkdwn_in: ['text'],
@@ -61,43 +60,60 @@ handlers['step_1'] = function(message) {
     mrkdwn_in: ['text']
   }];
   return [msg];
-}
+};
 
 /*
  * Step 2:
  * Results and adding to cart
  */
-handlers['step_2'] = function*(message, data) {
+handlers['step_2'] = function * (message, data) {
   let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null),
     searchTerm = data[0],
     query = '';
   switch (searchTerm) {
     case 'coding_books':
-      query = 'coding books'
+      query = 'coding books';
       break;
     case 'healthy_snacks':
-      query = 'healthy snacks'
+      query = 'healthy snacks';
       break;
     default:
       query = searchTerm;
       break;
   }
-  let json = message.source.original_message;
+  let json = message.source.original_message ? message.source.original_message : {
+    attachments: []
+  };
   json.attachments = [...json.attachments, {
     'text': 'Searching...',
     mrkdwn_in: ['text']
-  }]
-  request({
-    method: 'POST',
-    uri: message.source.response_url,
-    body: JSON.stringify(json)
-  });
+  }];
+  if (message.source.response_url) {
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify(json)
+    });
+  } else {
+    var newMessage = new db.Message({
+      text: 'Searching...',
+      incoming: false,
+      thread_id: message.thread_id,
+      origin: 'slack',
+      mode: 'member_onboard',
+      fallback: 'Searching...',
+      action: 'home',
+      source: message.source
+    });
+    yield newMessage.save();
+    queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
+  }
   var results = yield amazon.search({
     query: query
   }, message.origin);
 
   if (results == null || !results) {
-    kip.debug('-1')
+    kip.debug('-1');
     return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -105,8 +121,8 @@ handlers['step_2'] = function*(message, data) {
       user_id: 'kip',
       origin: message.origin,
       source: message.source,
-      text: 'Oops! Sorry my brain froze!',
-    })
+      text: 'Oops! Sorry my brain froze!'
+    });
   }
 
   message._timer.tic('done with amazon_search');
@@ -114,18 +130,18 @@ handlers['step_2'] = function*(message, data) {
   var msg = message;
   msg.resolved = true;
   msg.incoming = false;
-  msg.mode = 'member_onboard'
-  msg.action = 'results'
+  msg.mode = 'member_onboard';
+  msg.action = 'results';
   msg.exec = {
     mode: 'member_onboard',
     action: 'step_2',
     params: {
       query: searchTerm
     }
-  }
-  msg.text = ''
+  };
+  msg.text = '';
   msg.source.team = team_id;
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
   msg.amazon = JSON.stringify(results);
   msg.original_query = results.original_query;
   msg.reply = [{
@@ -134,41 +150,43 @@ handlers['step_2'] = function*(message, data) {
     color: '#A368F0',
     fallback: 'Step 2/3: Try adding an item to your basket'
   }];
-  request({
-    method: 'POST',
-    uri: message.source.response_url,
-    body: JSON.stringify(message.source.original_message)
-  });
+  if (message.source.response_url) {
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify(message.source.original_message)
+    });
+  }
   return [msg];
-}
+};
 
 /*
  * Step 3:
  * You can copy/paste etc. text
  */
-handlers['addcart'] = function*(message, data) {
+handlers['addcart'] = function * (message, data) {
   // taken from modes/shopping.js
   var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message);
   winston.debug('raw_results: ', typeof raw_results, raw_results);
   var results = (typeof raw_results == 'array' || typeof raw_results == 'object') ? raw_results : JSON.parse(raw_results);
 
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
-  //Diverting team vs. personal cart based on source origin for now
-  var cart_type = message.source.origin == 'slack' ? 'team' : 'personal';
+  // Diverting team vs. personal cart based on source origin for now
+  var cart_type = message.source.origin === 'slack' ? 'team' : 'personal';
   winston.debug('INSIDE REPLY_LOGIC SAVEE   :   ', data[0] - 1);
   try {
-    yield kipcart.addToCart(cart_id, message.user_id, results[data[0] - 1], cart_type)
+    yield kipcart.addToCart(cart_id, message.user_id, results[data[0] - 1], cart_type);
   } catch (e) {
     kip.err(e);
-    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
   }
 
   // view the cart
   return yield handlers['cart'](message);
-}
+};
 
-//modified version of modes/shopping.js
-handlers['cart'] = function*(message) {
+// modified version of modes/shopping.js
+handlers['cart'] = function * (message) {
   let attachments = [{
     text: '*Step 3/3:* Well done!\n I\'ve added your item to the team cart',
     mrkdwn_in: ['text'],
@@ -185,8 +203,8 @@ handlers['cart'] = function*(message) {
     mode: 'shopping',
     action: 'onboard_cart',
     reply: attachments
-  })
-  var cart_reference_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO
+  });
+  var cart_reference_id = (message.source.origin === 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO
   res.data = yield kipcart.getCart(cart_reference_id);
   res.data = res.data.toObject();
   if (res.data.items.length < 1) {
@@ -287,10 +305,10 @@ handlers['start_now'] = function (message, data) {
  * catcher
  */
 handlers['sorry'] = function(message) {
-  if (message.text.includes('amazon.com')){
-  	return; // ignore times people paste stuff in
+  if (message.text.includes('amazon.com')) {
+    return; // ignore times people paste stuff in
   }
-  message.text = "Sorry, my brain froze!";
+  message.text = 'Sorry, my brain froze!';
   message.mode = 'member_onboard';
   message.action = 'home';
   return [message];
@@ -299,16 +317,16 @@ handlers['sorry'] = function(message) {
 /**
  * Handle user input text
  */
-handlers['text'] = function*(message) {
+handlers['text'] = function * (message) {
   var history = yield db.Messages.find({
     thread_id: message.source.channel
   }).sort('-ts').limit(10);
   var lastMessage = history[1];
   var choices = _.flatten(lastMessage.reply.map(m => {
-    return m.actions
+    return m.actions;
   }).filter(function(n) {
-    return n != undefined
-  }))
+    return n != undefined;
+  }));
   if (!choices) {
     return kip.debug('error: lastMessage: ', choices);
   }
@@ -316,11 +334,11 @@ handlers['text'] = function*(message) {
     shouldSort: true,
     threshold: 0.4,
     keys: ["text"]
-  })
-  var matches = yield fuse.search(message.text)
+  });
+  var matches = yield fuse.search(message.text);
   var choice;
   if (matches.length > 0) {
-    choice = matches[0].text == 'Help' ? 'help' : matches[0].value;
+    choice = matches[0].text === 'Help' ? 'help' : matches[0].value;
     if (choice.indexOf('.') > -1) {
       var handle = choice.split('.')[0];
       var data = [choice.split('.')[1]];
@@ -346,7 +364,7 @@ const scheduleReminder = function(msg, userId, date) {
 };
 
 const cancelReminder = function(userId) {
-  kip.debug(`canceling 'onboarding reminder' for ${userId}`)
+  kip.debug(`canceling 'onboarding reminder' for ${userId}`);
   agenda.cancel({
     'name': 'onboarding reminder',
     'data.user': userId
@@ -365,7 +383,7 @@ const cancelReminder = function(userId) {
 // Recalls more history from the db if it needs to, and the history is just appended
 // to the existing history so you don't need to worry about stuff getting too messed up.
 //
-function* getLatestAmazonResults(message) {
+function * getLatestAmazonResults(message) {
   var results, i = 0;
   while (!results) {
     if (!message.history[i]) {
@@ -378,7 +396,7 @@ function* getLatestAmazonResults(message) {
 
       if (more_history.length === 0) {
         winston.debug(message);
-        throw new Error('Could not find amazon results in message history for message ' + message._id)
+        throw new Error('Could not find amazon results in message history for message ' + message._id);
       }
 
       message.history = message.history.concat(more_history);
@@ -405,9 +423,9 @@ function text_reply(message, text) {
   msg.execute = msg.execute ? msg.execute : [];
   msg.execute.push({
     mode: 'banter',
-    action: 'reply',
-  })
-  return msg
+    action: 'reply'
+  });
+  return msg;
 }
 
 // from modes/shopping.js
@@ -419,7 +437,7 @@ function default_reply(message) {
     resolved: true,
     user_id: 'kip',
     origin: message.origin,
-    text: "I'm sorry I couldn't quite understand that",
+    text: 'I\'m sorry I couldn\'t quite understand that',
     source: message.source
-  })
+  });
 }

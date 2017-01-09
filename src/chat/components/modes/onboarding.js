@@ -130,7 +130,7 @@ handlers['get-admins.response'] = function * (message) {
         msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
         msg.source = {};
         msg.mode = 'onboard';
-        msg.action = 'home';
+        msg.action = 'start.start';
         msg.source.team = team.team_id;
         msg.source.channel = u.dm;
         msg.source.user = u.id;
@@ -152,7 +152,7 @@ handlers['get-admins.response'] = function * (message) {
   if (isAdmin) {
     var next_message = message
     next_message.mode = 'onboard';
-    next_message.action = 'home';
+    next_message.action = 'start.start';
     return yield onboard.handle(next_message);
   } else {
     message.mode = 'onboarding';
@@ -209,7 +209,7 @@ handlers['get-admins.confirm'] = function * (message) {
     next_message.text = reply;
     delete next_message.reply;
     next_message.mode = 'onboard';
-    next_message.action = 'home';
+    next_message.action = 'start.start';
     return yield onboard.handle(next_message);
   } else {
     reply = `Great! I\'ll keep $ADMINS up-to-date on what your team members are adding to the office shopping cart 😊`;
@@ -246,7 +246,7 @@ handlers['get-admins.addme'] = function * (message) {
     next_message.text = '';
     delete next_message.reply;
     next_message.mode = 'onboard';
-    next_message.action = 'home';
+    next_message.action = 'start.start';
    return yield onboard.handle(next_message);
 }
 

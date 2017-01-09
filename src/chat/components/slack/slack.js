@@ -294,7 +294,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         results = results.reduce((cart, item) => { //hide items that the user hasn't added for onboarding
           if (item.text.includes(message.source.user)) cart.push(item);
           return cart;
-        }, [])
+        }, []);
         msgData.attachments = [...message.reply || [], ...results || [], {
           mrkdwn_in: ['text'],
           color: '#A368F0'
@@ -302,8 +302,8 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
-      if (message.mode === 'member_onboard' && message.action === 'results' && message.amazon.length > 0) {
-        let results = yield search_results(message, true);
+      if ((message.mode === 'member_onboard' || message.mode === 'onboard') && message.action === 'results' && message.amazon.length > 0) {
+        let results = yield search_results(message, true, message.mode);
         msgData.attachments = [...message.reply || [], ...results || []];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
