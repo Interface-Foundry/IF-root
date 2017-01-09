@@ -481,27 +481,18 @@ function* updateCartMsg(cart, parsedIn) {
           attachment_type: 'default'
         });
       }
-    } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-      a.text = (cart.items.length > 0) ?
-        `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>` :
-        'Looks like your cart is empty!';
+    } else if (a.text && a.text.includes('Team Cart Summary')) {
+      a.text = (cart.items.length > 0)
+      ? `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`
+      : 'Looks like your cart is empty!';
       all.push(a);
     } else if (a.text && !a.text.includes('Quantity:') && !a.text.includes('Sorry, Amazon')) {
+      all.push(a);
+    } else if (a.actions && a.actions[0].name === 'passthrough') {
       all.push(a);
     }
     return all;
   }, []);
-  attachments.push({
-    text: '',
-    callback_id: 'shrug',
-    attachment_type: 'default',
-    actions: [{
-      'name': 'passthrough',
-      'text': 'Home',
-      'type': 'button',
-      'value': 'home'
-    }]
-  });
 
   parsedIn.original_message.attachments = attachments;
   request({
@@ -510,7 +501,6 @@ function* updateCartMsg(cart, parsedIn) {
     body: JSON.stringify(parsedIn.original_message)
   });
 }
-
 
 app.get('/authorize', function (req, res) {
   console.log('button click')
