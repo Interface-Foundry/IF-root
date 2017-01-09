@@ -78,7 +78,7 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
 
 handlers['food.admin.order.checkout.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(1)
+  var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(1).exec()
   prevMessage = prevMessage[0]
   if (_.get(prevMessage, 'reply')) {
     logging.info('heerrr', prevMessage.reply)
