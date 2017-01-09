@@ -13,6 +13,7 @@ var sleep = require('co-sleep');
 var cardTemplate = require('./card_templates');
 var kipCart = require('../cart');
 var processData = require('../process');
+var util = require('util')
 
 /*
 *
@@ -833,6 +834,9 @@ function formatMessage(m) {
       _.get(a, 'actions', []).map(action => {
         if (typeof action.value !== 'string') {
           action.value = JSON.stringify(action.value)
+        } else {
+          console.log('hey, listen'.cyan, util.inspect(m, {depth: null, colors: true}))
+          throw new Error('you need to refactor the buttons')
         }
       })
     })

@@ -78,19 +78,20 @@ handlers['food.admin.team.members'] = function * (message) {
     name: 'food.user.poll',
     text: '✓ Send Poll',
     type: 'button',
-    style: 'primary'
+    style: 'primary',
+    value: { route: 'food.user.poll' }
   })
 
-  buttons.actions.push({   
+  buttons.actions.push({
     'name': 'food.admin.display_channels',
     'text': 'Use a #channel',
     'type': 'button',
-    'value': 'select_team_members'    
+    'value': { route: 'food.admin.display_channels', command: 'select_team_members'}
   })
 
   buttons.actions.push({
     name: 'passthrough',
-    value: 'food.poll.confirm_send',
+    'value': { route: 'food.poll.confirm_send' },
     text: '< Back',
     type: 'button'
   })
@@ -107,9 +108,9 @@ handlers['food.admin.team.members'] = function * (message) {
 
 
 handlers['food.admin.team.members.reorder'] = function * (message) {
-  var index = _.get(message, 'data.value.index', 0)
+  var index = _.get(message, 'slack_action.index', 0)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var userToRemove = _.get(message, 'data.value.user_id')
+  var userToRemove = _.get(message, 'slack_action.user_id')
   if (userToRemove) {
     kip.debug('removing user', userToRemove)
     foodSession.team_members = foodSession.team_members.filter(user => user.id !== userToRemove)
@@ -132,6 +133,7 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
         text: '× Remove',
         type: 'button',
         value: {
+          route: 'food.admin.team.members.reorder',
           index: index,
           user_id: user.id
         }
@@ -144,6 +146,7 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     text: 'More Users >',
     type: 'button',
     value: {
+      route: 'food.admin.team.members.reorder',
       index: index + 5
     }
   }
@@ -153,6 +156,7 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     text: '<',
     type: 'button',
     value: {
+      route: 'food.admin.team.members.reorder',
       index: Math.max(index - 5, 0)
     }
   }
@@ -175,19 +179,20 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     'name': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant',
     'text': '✓ Collect Orders',
     'style': 'primary',
-    'type': 'button'
+    'type': 'button',
+    value: { route: 'food.admin.restaurant.confirm_reordering_of_previous_restaurant' }
   })
 
-  buttons.actions.push({   
+  buttons.actions.push({
     'name': 'food.admin.display_channels_reorder',
     'text': 'Use a #channel',
     'type': 'button',
-    'value': message.data.value  
+    'value': _.merge(message.slack_action, {route: 'food.admin.display_channels_reorder'})
   })
 
   buttons.actions.push({
     name: 'food.admin.restaurant.reordering_confirmation',
-    value: message.data.value,
+    value: _.merge(message.slack_action, {route: 'food.admin.restaurant.reordering_confirmation'}),
     text: '< Back',
     type: 'button'
   })
