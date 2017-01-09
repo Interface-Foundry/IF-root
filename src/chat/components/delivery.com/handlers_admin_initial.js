@@ -187,14 +187,11 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     message.markModified('source')
   }
 
-
-
-  $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  // if (!banner) {
-  //   $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  // } else {
-  //   return $replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  // }
+  if (!banner) {
+    $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  } else {
+    return $replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  }
 }
 
 handlers['food.settings.address.remove_select'] = function * (message) {
@@ -337,7 +334,6 @@ handlers['food.choose_address'] = function * (message) {
     foodSession.markModified('merchants')
     foodSession.markModified('cuisines')
     yield foodSession.save()
-    message.text = "";
     yield $allHandlers['food.admin.team_budget'](message)
   } else {
     throw new Error('this route does not handle text input')
@@ -406,7 +402,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
     return
   }
 
-  console.log(location)
+  // console.log(location)
 
   var addr = [
     [location.address_1, location.address_2].filter(Boolean).join(' '),
@@ -587,7 +583,8 @@ handlers['food.delivery_or_pickup'] = function * (message) {
   yield handlers['food.admin_polling_options'](message)
 }
 //
-// The user jsut clicked pickup or delivery and is now ready to start ordering
+// The user just clicked pickup or delivery and is now ready to start ordering
+// Or, the user just picked a budget and is now ready to start ordering
 //
 handlers['food.admin_polling_options'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -726,8 +723,6 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
   lastOrdered = lastOrdered[0]
   foodSession.chosen_channel = lastOrdered.chosen_channel
   foodSession.chosen_restaurant = lastOrdered.chosen_restaurant
-  foodSession.email_users = lastOrdered.email_users
-
   if (lastOrdered.chosen_channel === 'just_me' || lastOrdered.team_members.length<1) {
     // possible last ordered just me is another admin
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
@@ -735,7 +730,6 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     foodSession.team_members = lastOrdered.team_members
   }
   foodSession.markModified('team_members')
-
   yield foodSession.save()
 
   // create attachments, only including most recent merchant if one exists
@@ -749,15 +743,14 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
   } else {
     textWording = '\`' + foodSession.chosen_location.address_1 + '\`'
   }
-
   var msg_json = {
     'text': '',
     'attachments': [{
-      'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
-      'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
       'mrkdwn_in': [
           'text'
         ],
+      'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
+      'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
       'callback_id': 'reordering_confirmation',
       'color': '#3AA3E3',
       'attachment_type': 'default',

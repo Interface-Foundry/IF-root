@@ -28,7 +28,7 @@ handlers['food.admin.team_budget'] = function * (message) {
 
   console.log('message.text', message.text)
 
-  if (message.text) {
+  if (message.text && message.text[0] != '{') {
     var num = parseNumber(message.text)
 
     if (num) {
@@ -124,26 +124,26 @@ handlers['food.admin.team_budget'] = function * (message) {
 }
 
 function updateBudget (n, location) {
-  console.log('update budget called')
+  console.log(location.budgets, location.budget_history);
+  console.log('this is n', n)
   var n = Number(n);
   var history = location.budget_history;
   var budgets = location.budgets;
   if (history.indexOf(n) > -1) {
-    history.splice(budgets.indexOf(n), 1)
+    console.log('already in budget history')
+    history.splice(history.indexOf(n), 1)
     history.unshift(n);
   }
   else {
     history.unshift(n)
     if (history.length > 3) history = history.slice(0, 4);
     budgets = history.slice().sort(function (a, b) {return b < a})
-    console.log('budgets; should be sorted history', budgets);
   }
   return [budgets, history];
 }
 
 handlers['food.admin.confirm_budget'] = function * (message) {
 
-  console.log('confirm budget called');
   budget = message.data.value.budget;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
@@ -151,7 +151,6 @@ handlers['food.admin.confirm_budget'] = function * (message) {
     var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
     for (var i = 0; i < locations.length; i++) {
       if (locations[i].address_1 == foodSession.chosen_location.address_1 && locations[i].zip_code == foodSession.chosen_location.zip_code) {
-        console.log('found the correct location');
         var updated = updateBudget(budget, locations[i]);
         console.log('update budget returns', updated)
         locations[i].budgets = updated[0];
