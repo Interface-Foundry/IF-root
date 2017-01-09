@@ -191,7 +191,15 @@ handlers['cart'] = function * (message) {
     text: '*Step 3/3:* Well done!\n I\'ve added your item to the team cart',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Step 3/3: Well done!\n I\'ve added your item to the team cart'
+    fallback: 'Step 3/3: Well done!\n I\'ve added your item to the team cart',
+    callback_id: 'take me home pls',
+    actions: [{
+      'name': 'passthrough',
+      'text': '🎉  Finish',
+      'style': 'primary',
+      'type': 'button',
+      'value': 'home'
+    }]
   }];
   let res = new db.Message({
     incoming: false,
