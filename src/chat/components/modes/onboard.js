@@ -845,7 +845,7 @@ handlers['text'] = function * (message) {
       }
     }
   }  else {
-    return yield handlers['shopping_search'](message, [message.text]);
+    return yield handlers['sorry'](message, [message.text]);
   }
 };
 
