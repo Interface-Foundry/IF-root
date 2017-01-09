@@ -20,7 +20,7 @@ spec:
         - name: PROXY_COUNT
           value: "3"
         - name: POOL_SIZE
-          value: "20"
+          value: "75"
         - name: COUNTRY
           value: us
         - name: MAX_REQUESTS
