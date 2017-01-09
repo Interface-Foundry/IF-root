@@ -43,7 +43,7 @@ function sampleCuisines (foodSession) {
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
     return {
       name: 'food.vote.submit',
-      value: cuisineName,
+      value: { route: 'food.vote.submit', cuisine: cuisineName },
       text: cuisineName,
       type: 'button'
     }
@@ -70,13 +70,13 @@ var userFoodPreferencesPlaceHolder = {
   attachments: [{
     actions: [{
       'name': 'food.user.poll',
-      'value': 'food.user.poll',
+      'value': { route: 'food.user.poll' },
       'text': 'Confirm',
       'type': 'button'
     },
       {
         'name': 'food.user.preference.cancel',
-        'value': 'food.user.preference.cancel',
+        'value': { route: 'food.user.preference.cancel' },
         'text': '× Cancel',
         'type': 'button'
       }]
@@ -155,38 +155,36 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   // now order the restaurants in terms of descending score
 
-  //keep track of the highest yelp review score in this particular batch of restaurants
-  var maxStars = 0;
+  // keep track of the highest yelp review score in this particular batch of restaurants
+  var maxStars = 0
 
   merchants = merchants
     .map(m => {
       m.score = scoreAlgorithms[sortOrder](m)
       if (sortOrder == SORT.cuisine) {
-
-        //score based on yelp reviews
-        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
+        // score based on yelp reviews
+        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating
 
         if (m.stars > maxStars) maxStars = m.stars
       }
-      return m;
+      return m
     })
 
-  //if we are sorting by cuisine type and want to incorporate yelp reviews into the order
+  // if we are sorting by cuisine type and want to incorporate yelp reviews into the order
   if (sortOrder == SORT.cuisine) {
     merchants = merchants
       .map(m => {
+        // normalize yelp score to be in [0, 1]
+        m.stars = m.stars / maxStars
 
-        //normalize yelp score to be in [0, 1]
-        m.stars = m.stars / maxStars;
+        // restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
+        m.score = m.score + m.stars
 
-        //restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
-        m.score = m.score + m.stars;
-
-        return m;
+        return m
       })
   }
 
-  merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
+  merchants.sort((a, b) => directionMultiplier * (a.score - b.score))
 
   // filter out restaurants whose delivery minimum is significantly above the team's total budget
   if (foodSession.budget) {
@@ -270,7 +268,7 @@ handlers['food.user.poll'] = function * (message) {
   console.log('found', teamMembers.length, 'team members')
 
   if (teamMembers.length === 0) {
-    $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
+    $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: {text: 'Oops I had a brain freeze, please try again'}})
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
@@ -311,13 +309,13 @@ handlers['food.vote.submit'] = function * (message) {
           'attachment_type': 'default',
           'actions': [{
             'name': 'passthrough',
-            'value': 'food.begin',
+            'value': { route: 'food.begin' },
             'text': 'Restart Order',
             'style': 'danger',
             'type': 'button'
           }, {
             'name': 'passthrough',
-            'value': 'food.null.continue',
+            'value': { route: 'food.null.continue' },
             'text': '× Cancel',
             'type': 'button'
           }]
@@ -356,11 +354,11 @@ handlers['food.vote.submit'] = function * (message) {
   } else {
     // user used button click
     // No Lunch For Me
-    if (message.data.value === 'user_remove') {
+    if (message.slack_action.command === 'user_remove') {
       yield foodSession.update({$pull: {team_members: {id: message.user_id}}}).exec()
       foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
     } else {
-      yield addVote(message.data.value)
+      yield addVote(message.slack_action.cuisine)
     }
   }
 
@@ -469,7 +467,7 @@ function buildCuisineDashboard(foodSession) {
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`,
       fallback: `*Votes from the group* 👋\n${votes}`,
-      callback_id: 'admin_restaurant_pick',
+      callback_id: 'admin_restaurant_pick'
     }]
   }
 
@@ -658,7 +656,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
             user: m.id,
             channel: m.dm
           }
-         }
+        }
          // if the admin has not yet voted, make sure to set the mode.action to the votable route
         if (foodSession.votes.map(u => u.user).includes(foodSession.convo_initiater.id)) {
           var route = 'food.admin.dashboard.cuisine'
@@ -757,7 +755,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   responseForAdmin.attachments.push(buttons)
 
-  //adding writing prompt
+  // adding writing prompt
   responseForAdmin.attachments.push({
     'fallback': 'Search for a restaurant',
     'text': '✎ Type below to search for a restaurant by name (Example: _Azuki Japanese Restaurant_)',
@@ -793,7 +791,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
+  var merchant = _.find(foodSession.merchants, {id: String(message.slack_action.merchantId)})
   var attachments = []
   // TODO later
 }
@@ -812,10 +810,10 @@ handlers['food.admin.restaurant.search'] = function * (message) {
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
+  var merchant = _.find(foodSession.merchants, {id: String(message.slack_action.merchantId)})
 
   if (!merchant) {
-    merchant = yield api.getMerchant(message.data.value)
+    merchant = yield api.getMerchant(message.slack_action.merchantId)
     foodSession.merchants = [merchant]
     foodSession.markModified('merchants')
     foodSession.save()
@@ -942,13 +940,13 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
             'text': '✓ Yes',
             'type': 'button',
             'style': 'primary',
-            'value': {}
+            'value': { route: 'food.menu.quickpicks' }
           },
           {
             'name': 'food.admin.waiting_for_orders',
             'text': 'No',
             'type': 'button',
-            'value': 'no thanks',
+            'value': { route: 'food.admin.waiting_for_orders', command: 'exit' },
             'confirm': {
               'title': 'Are you sure?',
               'text': "Are you sure you don't want to order food?",
@@ -1029,7 +1027,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       state: {},
       user: m.id
     }
-    $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
+    $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: _.cloneDeep(msgJson)})
   })
 }
 

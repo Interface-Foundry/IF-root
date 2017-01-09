@@ -121,7 +121,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           //},
           {
              'name': 'Skip',
-             'value: { route: 'food.admin.restaurant.pick.list' },
+             'value': { route: 'food.admin.restaurant.pick.list' },
              'text': '> Skip',
              'type': 'button'
           }

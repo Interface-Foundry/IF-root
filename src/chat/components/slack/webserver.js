@@ -99,7 +99,7 @@ app.post('/slackaction', next(function * (req, res) {
   // But if reply logic isn't fast enough, we have to send an OKAY status
   //
   var timeout = co(function * () {
-    yield sleep(3000)
+    yield sleep(2000)
   })
 
   //

@@ -222,7 +222,7 @@ handlers['food.settings.address.remove_select'] = function * (message) {
       'name': 'passthrough',
       'text': 'None, go back',
       'type': 'button',
-      'value': 'food.admin.select_address'
+      'value': { route: 'food.admin.select_address' }
     }]
   })
   $replyChannel.sendReplace(message, 'food.settings.address.remove', {type: message.origin, data: msg_json})
@@ -389,7 +389,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
             name: 'passthrough',
             text: 'Edit Address',
             type: 'button',
-            value: 'food.settings.address.new'
+            'value': { route: 'food.settings.address.new' }
           }
         ]
       },
@@ -423,7 +423,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
   //     name: 'food.feedback.new',
   //     text: '⇲ Send feedback',
   //     type: 'button',
-  //     value: 'food.feedback.new'
+  //     'value': { route: 'food.feedback.new' }
   //   })
   // }
 
