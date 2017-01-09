@@ -62,6 +62,18 @@ function * matchTextToButton (message) {
   }
 }
 
+
+function button(text, data, overrides) {
+  overrides = overrides || {}
+  return _.merge({}, {
+    name: text,
+    text: text,
+    style: 'default',
+    type: 'button',
+    value: data
+  }, overrides)
+}
+
 function defaultReply (message) {
   return new db.Message({
     incoming: false,
@@ -434,5 +446,6 @@ module.exports = {
   send_text_reply: sendTextReply,
   yesOrNo: yesOrNo,
   matchText: matchText,
-  matchTextToButton: matchTextToButton
+  matchTextToButton: matchTextToButton,
+  button: button
 }

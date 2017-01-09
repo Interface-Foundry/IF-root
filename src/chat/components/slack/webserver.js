@@ -17,11 +17,8 @@ var cookieParser = require('cookie-parser')
 var uuid = require('uuid');
 var processData = require('../process');
 var sleep = require('co-sleep');
-// var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
-// var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
 var request = require('request')
-var requestPromise = require('request-promise');
-// var init_team = require("../init_team.js");
+var requestPromise = require('request-promise')
 var app = express();
 var replyLogic = require('../reply_logic')
 
@@ -29,352 +26,347 @@ app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
-// app.listen(3000, function(e) {
-//   if (e) { console.error(e) }
-//   console.log('chat app listening on port 8000 🌏 💬')
-// })
 
-/**
- * handle actions which can be simply translated into text commands, like "2 but cheaper"
- * TODO transform these into "execute" commands instead to avoid doing nlp
- *
- * @param {any} action
-
- */
-function simple_action_handler (action) {
-  switch (action.name) {
-    case 'addcart':
-      return 'save ' + action.value
-    case 'cheaper':
-      if (action.value) {
-        return action.value + ' but cheaper'
-      } else {
-        return 'cheaper'
-      }
-    case 'similar':
-      return 'similar ' + action.value
-    case 'moreinfo':
-      return action.value
-    case 'more':
-      return 'more'
-    case 'cafe_btn':
-      return 'cafe_btn';
-    case 'shopping_btn':
-      return 'shopping_btn';
-    case 'help_btn':
-      return 'help_btn';
-    case 'view_cart_btn':
-      return 'view_cart_btn';
-    case 'team':
-      return 'team';
-    case 'channel_btn':
-      return 'channel_btn';
-    case 'settings':
-      return 'settings';
-    case 'exit':
-      return 'exit';
-    case 'delivery_btn':
-      return 'delivery'
-    case 'pickup_btn':
-      return 'pickup'
-    case 'address_confirm_btn':
-      return 'address_confirm_btn'
-    case 'send_last_call_btn':
-      return 'send_last_call_btn'
-    case 'passthrough':
-      return action.value
-  }
+function isValidReply(r) {
+  kip.debug(r)
+  return _.get(r, 'text') || _.get(r, 'attachments[0]')
 }
 
-function buttonCommand (action) {
-  if (_.includes(action.name, '.')) {
-    return {
-      mode: _.split(action.name, '.', 1)[0],
-      action: _.split(action.name, '.').slice(1).join('.'),
-      value: action.value
-    }
-  }
-}
-
+//
 // incoming slack action
+//
 app.post('/slackaction', next(function * (req, res) {
+
+  // respond to slack healthchecks
   if (!req.body || !req.body.payload) {
-    // probably a health check message from slack
-    res.sendStatus(200)
+    return res.sendStatus(200)
   }
 
-  var message;
-  var parsedIn = JSON.parse(req.body.payload);
+  // parse the payload json
+  const parsedIn = JSON.parse(req.body.payload);
 
-  // First reply to slack, then process the request
-  if (!buttonData && simple_command !== 'channel_btn' && parsedIn.original_message) {
+  // make double sure everything is okay
+  if (!parsedIn.original_message) {
+    res.status(500)
+    return res.end()
+  }
+
+  // check the verification token in production
+  if (process.env.NODE_ENV === 'production' && parsedIn.token !== kip.config.slack.verification_token) {
+    kip.error('Invalid verification token')
+    return res.sendStatus(403)
+  }
+
+  // parse the action value, which should be something like this
+  // {route: 'food.admin.whatever', address: {...}}
+  const action = parsedIn.actions[0]
+  const actionData = JSON.parse(action.value)
+  kip.debug('[button click]'.cyan, actionData)
+
+  var message = new db.Message({
+    incoming: true,
+    thread_id: parsedIn.channel.id,
+    original_text: action.text,
+    text: action.text,
+    user_id: parsedIn.user.id,
+    origin: 'slack',
+    source: {
+      team: parsedIn.team.id,
+      user: parsedIn.user.id,
+      channel: parsedIn.channel.id,
+      type: 'action'
+    },
+    slack_action: actionData
+  })
+
+  //
+  // ask reply_logic for a response
+  //
+  var reply = co(function * () {
+    message.save()
+    return yield replyLogic(message)
+  })
+
+  //
+  // But if reply logic isn't fast enough, we have to send an OKAY status
+  //
+  var timeout = co(function * () {
+    yield sleep(3000)
+  })
+
+  //
+  // RACE to see if reply_logic is faster than 3 s
+  //
+  Promise.race([reply, timeout]).then(r => {
+    // 🏁 🏁 🏁 🏁 🏁 🏁 🏁
+    if (isValidReply(r)) {
+      res.send(r)
+    } else {
+      res.status(200)
+      res.end()
+
+      // lost the race or didn't have a message
+      reply.then(late_reply => {
+        if (isValidReply(late_reply)) {
+          // use request.post to the original url TODO
+          throw new Error('late replies not implemented yet')
+        }
+      })
+    }
+  }).catch(e => {
+    logging.error(e)
     res.status(200)
     res.end()
-  } else if (!parsedIn.original_message) {
-    console.error('slack buttons broke, need a response_url')
-    res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
-    return
-  }
+  })
 
-    var action = parsedIn.actions[0];
-    kip.debug('incoming action', action);
-    kip.debug(action.name.cyan, action.value.yellow);
-    // // check the verification token in production
-    // if (process.env.NODE_ENV === 'production' && parsedIn.token !== kip.config.slack.verification_token) {
-    //   kip.error('Invalid verification token')
-    //   return res.sendStatus(403)
+
+
+    //
+    // if (simple_command) {
+    //   kip.debug('passing through button click as a regular text chat', simple_command.cyan);
+    //   var message = new db.Message({
+    //     incoming: true,
+    //     thread_id: parsedIn.channel.id,
+    //     original_text: simple_command,
+    //     text: simple_command,
+    //     user_id: parsedIn.user.id,
+    //     origin: 'slack',
+    //     source: parsedIn
+    //   });
+    //   // inject source.team and source.user because fuck the fuck out of slack message formats
+    //   message.source.team = message.source.team.id;
+    //   message.source.user = message.source.user.id;
+    //   message.source.channel = message.source.channel.id;
+    //
+    // if (simple_command == 'cafe_btn') {
+    //       message.mode = 'food'
+    //       message.action = 'begin'
+    //       message.text = 'food'
+    //       message.save().then(() => {
+    //         replyLogic({ data: message })
+    //       })
+    //   }
+    //   else if (simple_command == 'shopping_btn') {
+    //       message.mode = 'shopping'
+    //       message.action = 'initial'
+    //       message.text = 'exit'
+    //       message.save().then(() => {
+    //         replyLogic({ data: message })
+    //       })
+    //   }
+    //   else if (simple_command == 'loading_btn') {
+    //   	// responding with nothing means the button does nothing!
+    //     return;
+    //   }
+    //   else if (simple_command == 'help_btn') {
+    //       message.mode = 'banter'
+    //       message.action = 'reply'
+    //       message.text = 'help'
+    //       message.save().then(() => {
+    //         replyLogic({ data: message })
+    //       })
+    //   }
+    //   else if (simple_command == 'channel_btn') {
+    //     var channelId = _.get(parsedIn,'actions[0].value');
+    //     var team_id = message.source.team;
+    //     var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+    //     if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
+    //       // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
+    //       _.remove(team.meta.cart_channels, function(c) { return c == channelId });
+    //     } else {
+    //       team.meta.cart_channels.push(channelId);
+    //     }
+    //     team.markModified('meta.cart_channels');
+    //     yield team.save();
+    //     var channels = yield utils.getChannels(team);
+    //     var buttons = channels.map(channel => {
+    //       var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
+    //       return {
+    //         name: 'channel_btn',
+    //         text: checkbox + channel.name ,
+    //         type: 'button',
+    //         value: channel.id
+    //       }
+    //     });
+    //     var buttonRow;
+    //     var json = parsedIn.original_message;
+    //     for (var i = 0; i < buttons.length; i++) {
+    //       if (buttons[i].value === channelId) {
+    //         buttonRow = Math.floor(i/5);
+    //       }
+    //     }
+    //     var chunkedButtons = _.chunk(buttons, 5);
+    //     var newRow = {
+    //       text: buttonRow == 0 ? 'Which channels do you want to include? ' : '',
+    //       actions: chunkedButtons[buttonRow],
+    //       callback_id: 'none',
+    //       color: parsedIn.original_message.attachments[buttonRow+1].color || null
+    //     }
+    //     json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
+    //                                                        // maybe I just don't understand slack yet
+    //     let stringOrig = JSON.stringify(json);
+    //     let map = {
+    //       amp: '&',
+    //       lt: '<',
+    //       gt: '>',
+    //       quot: '"',
+    //       '#039': "'"
+    //     }
+    //     stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+    //     request({
+    //       method: 'POST',
+    //       uri: message.source.response_url,
+    //       body: stringOrig
+    //     });
+    //     return;
+    //   }
+    //   else if (simple_command == 'view_cart_btn') {
+    //       message.mode = 'shopping'
+    //       message.action = 'cart.view'
+    //       message.text = 'view cart'
+    //       message.save().then(() => {
+    //         replyLogic({ data: message })
+    //       })
+    //   }
+    //   else if (simple_command == 'address_confirm_btn') {
+    //     message.mode = 'address'
+    //     message.action = 'validate'
+    //     var location
+    //     try {
+    //       location = JSON.parse(message.source.original_message.attachments[0].actions[0].value)
+    //     } catch(err) {
+    //       location = _.get(message, 'message.source.original_message.attachments[0].actions[0].value');
+    //     }
+    //     message.source.location = location
+    //     message.save().then(() => {
+    //       replyLogic({ data: message })
+    //     });
+    //   }
+    //   else if (simple_command == 'send_last_call_btn') {
+    //     message.mode = 'settings';
+    //     message.action = 'home';
+    //     message.text = 'send last call btn';
+    //     message.save().then(() => {
+    //       replyLogic({ data: message })
+    //     })
+    //   }
+    //   else if (simple_command.indexOf('address.') > -1) {
+    //     message.mode = simple_command.split('.')[0]
+    //     message.action = simple_command.split('.')[1]
+    //   }
+    //   else if (simple_command == 'settings') {
+    //     message.mode = 'settings';
+    //     message.action = 'home';
+    //   }
+    //   else if (simple_command == 'team') {
+    //     message.mode = 'team';
+    //     message.action = 'home';
+    //   }
+    //   else if (simple_command == 'exit') {
+    //     message.mode = 'exit';
+    //     message.action = 'exit';
+    //     message.text = ''
+    //     var attachments = cardTemplate.slack_shopping_mode;
+    //     var reply = {
+    //       username: 'Kip',
+    //       text: "",
+    //       attachments: attachments,
+    //       fallback: 'Shopping'
+    //     };
+    //     var team = message.source.team;
+    //     var slackBot = slackModule.slackConnections[team];
+    //     slackBot.web.chat.postMessage(message.source.channel, '', reply);
+    //
+    //   }
+    //   message.save().then(() => {
+    //     replyLogic({ data: message })
+    //   });
     // }
-    var action = parsedIn.actions[0];
-    kip.debug(action.name.cyan, action.value.yellow);
-    // for things that i'm just going to parse for
-    var simple_command = simple_action_handler(action);
-    var buttonData = buttonCommand(action);
-    kip.debug('\n\n\nsimple_command: ', simple_command,'\n\n\n');
-    if (simple_command) {
-      kip.debug('passing through button click as a regular text chat', simple_command.cyan);
-      var message = new db.Message({
-        incoming: true,
-        thread_id: parsedIn.channel.id,
-        original_text: simple_command,
-        text: simple_command,
-        user_id: parsedIn.user.id,
-        origin: 'slack',
-        source: parsedIn
-      });
-      // inject source.team and source.user because fuck the fuck out of slack message formats
-      message.source.team = message.source.team.id;
-      message.source.user = message.source.user.id;
-      message.source.channel = message.source.channel.id;
-
-    if (simple_command == 'cafe_btn') {
-          message.mode = 'food'
-          message.action = 'begin'
-          message.text = 'food'
-          message.save().then(() => {
-            replyLogic({ data: message })
-          })
-      }
-      else if (simple_command == 'shopping_btn') {
-          message.mode = 'shopping'
-          message.action = 'initial'
-          message.text = 'exit'
-          message.save().then(() => {
-            replyLogic({ data: message })
-          })
-      }
-      else if (simple_command == 'loading_btn') {
-      	// responding with nothing means the button does nothing!
-        return;
-      }
-      else if (simple_command == 'help_btn') {
-          message.mode = 'banter'
-          message.action = 'reply'
-          message.text = 'help'
-          message.save().then(() => {
-            replyLogic({ data: message })
-          })
-      }
-      else if (simple_command == 'channel_btn') {
-        var channelId = _.get(parsedIn,'actions[0].value');
-        var team_id = message.source.team;
-        var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-        if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
-          // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
-          _.remove(team.meta.cart_channels, function(c) { return c == channelId });
-        } else {
-          team.meta.cart_channels.push(channelId);
-        }
-        team.markModified('meta.cart_channels');
-        yield team.save();
-        var channels = yield utils.getChannels(team);
-        var buttons = channels.map(channel => {
-          var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
-          return {
-            name: 'channel_btn',
-            text: checkbox + channel.name ,
-            type: 'button',
-            value: channel.id
-          }
-        });
-        var buttonRow;
-        var json = parsedIn.original_message;
-        for (var i = 0; i < buttons.length; i++) {
-          if (buttons[i].value === channelId) {
-            buttonRow = Math.floor(i/5);
-          }
-        }
-        var chunkedButtons = _.chunk(buttons, 5);
-        var newRow = {
-          text: buttonRow == 0 ? 'Which channels do you want to include? ' : '',
-          actions: chunkedButtons[buttonRow],
-          callback_id: 'none',
-          color: parsedIn.original_message.attachments[buttonRow+1].color || null
-        }
-        json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
-                                                           // maybe I just don't understand slack yet
-        let stringOrig = JSON.stringify(json);
-        let map = {
-          amp: '&',
-          lt: '<',
-          gt: '>',
-          quot: '"',
-          '#039': "'"
-        }
-        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
-        request({
-          method: 'POST',
-          uri: message.source.response_url,
-          body: stringOrig
-        });
-        return;
-      }
-      else if (simple_command == 'view_cart_btn') {
-          message.mode = 'shopping'
-          message.action = 'cart.view'
-          message.text = 'view cart'
-          message.save().then(() => {
-            replyLogic({ data: message })
-          })
-      }
-      else if (simple_command == 'address_confirm_btn') {
-        message.mode = 'address'
-        message.action = 'validate'
-        var location
-        try {
-          location = JSON.parse(message.source.original_message.attachments[0].actions[0].value)
-        } catch(err) {
-          location = _.get(message, 'message.source.original_message.attachments[0].actions[0].value');
-        }
-        message.source.location = location
-        message.save().then(() => {
-          replyLogic({ data: message })
-        });
-      }
-      else if (simple_command == 'send_last_call_btn') {
-        message.mode = 'settings';
-        message.action = 'home';
-        message.text = 'send last call btn';
-        message.save().then(() => {
-          replyLogic({ data: message })
-        })
-      }
-      else if (simple_command.indexOf('address.') > -1) {
-        message.mode = simple_command.split('.')[0]
-        message.action = simple_command.split('.')[1]
-      }
-      else if (simple_command == 'settings') {
-        message.mode = 'settings';
-        message.action = 'home';
-      }
-      else if (simple_command == 'team') {
-        message.mode = 'team';
-        message.action = 'home';
-      }
-      else if (simple_command == 'exit') {
-        message.mode = 'exit';
-        message.action = 'exit';
-        message.text = ''
-        var attachments = cardTemplate.slack_shopping_mode;
-        var reply = {
-          username: 'Kip',
-          text: "",
-          attachments: attachments,
-          fallback: 'Shopping'
-        };
-        var team = message.source.team;
-        var slackBot = slackModule.slackConnections[team];
-        slackBot.web.chat.postMessage(message.source.channel, '', reply);
-
-      }
-      message.save().then(() => {
-        replyLogic({ data: message })
-      });
-    }
-    else if (buttonData) {
-        kip.debug(' \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n  BUTTODATA:', buttonData,'  \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n')
-      var message = new db.Message({
-        incoming: true,
-        thread_id: parsedIn.channel.id,
-        action: buttonData.action,
-        mode: buttonData.mode,
-        data: buttonData,
-        user_id: parsedIn.user.id,
-        origin: 'slack',
-        source: parsedIn
-      })
-      // inject source.team and source.user because fuck the fuck out of slack message formats
-      message.source.team = message.source.team.id
-      message.source.user = message.source.user.id
-      message.source.channel = message.source.channel.id
-      message.save().then(() => {
-        replyLogic({ data: message })
-      })
-    } else {
-      //actions that do not require processing in reply_logic, skill all dat
-      let cart, index;
-      parsedIn.original_message.attachments.forEach((ele, id) => {
-        if (ele.callback_id === parsedIn.callback_id) {
-          index = id;
-        }
-      });
-      switch (action.name) {
-        case 'additem':
-          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
-          co(function*() {
-            let teamCart = yield kipcart.getCart(parsedIn.team.id);
-            let item = yield db.Items.findById(parsedIn.callback_id).exec();
-            cart = yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item);
-            yield updateCartMsg(cart, parsedIn);
-          }).catch(console.log.bind(console));
-          break;
-        case 'removeitem':
-          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
-          co(function*() {
-            cart = yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index, 'team'); //'team' assumes this is a slack command. need a way to tell
-            yield updateCartMsg(cart, parsedIn);
-          }).catch(console.log.bind(console));
-          break;
-        case 'removewarn':
-          let matches = parsedIn.original_message.attachments[index].text.match(/<(.+)\|(.+)>/i); //0 is full string, 1 is url, 2 is title
-          parsedIn.original_message.attachments[index] = {
-            text: `Are you sure you want to remove the last *${matches[2]}*?`,
-            actions: cardTemplate.cart_check(index),
-            mrkdwn_in: ['text'],
-            callback_id: parsedIn.original_message.attachments[index].callback_id
-          };
-          break;
-        case 'cancelremove':
-          co(function*() {
-            cart = yield kipcart.getCart(parsedIn.team.id); //'team' assumes this is a slack command. need a way to tell
-            yield updateCartMsg(cart, parsedIn);
-          }).catch(console.log.bind(console));
-          break;
-        case 'removeall':
-          // reduces the quantity right way, but for speed we return a hacked message right away
-          co(function*() {
-            cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index);
-            yield updateCartMsg(cart, parsedIn);
-          }).catch(console.log.bind(console));
-
-          parsedIn.original_message.attachments.splice[index, 1]; //just take it off the list
-          parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
-          break;
-      }
-      var stringOrig = JSON.stringify(parsedIn.original_message)
-      let map = {
-        amp: '&',
-        lt: '<',
-        gt: '>',
-        quot: '"',
-        '#039': "'"
-      }
-      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
-      request({
-        method: 'POST',
-        uri: parsedIn.response_url,
-        body: stringOrig
-      });
-    }
+    // else if (buttonData) {
+    //     kip.debug(' \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n  BUTTODATA:', buttonData,'  \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n')
+    //   var message = new db.Message({
+    //     incoming: true,
+    //     thread_id: parsedIn.channel.id,
+    //     action: buttonData.action,
+    //     mode: buttonData.mode,
+    //     data: buttonData,
+    //     user_id: parsedIn.user.id,
+    //     origin: 'slack',
+    //     source: parsedIn
+    //   })
+    //   // inject source.team and source.user because fuck the fuck out of slack message formats
+    //   message.source.team = message.source.team.id
+    //   message.source.user = message.source.user.id
+    //   message.source.channel = message.source.channel.id
+    //   message.save().then(() => {
+    //     replyLogic({ data: message })
+    //   })
+    // } else {
+    //   //actions that do not require processing in reply_logic, skill all dat
+    //   let cart, index;
+    //   parsedIn.original_message.attachments.forEach((ele, id) => {
+    //     if (ele.callback_id === parsedIn.callback_id) {
+    //       index = id;
+    //     }
+    //   });
+    //   switch (action.name) {
+    //     case 'additem':
+    //       parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
+    //       co(function*() {
+    //         let teamCart = yield kipcart.getCart(parsedIn.team.id);
+    //         let item = yield db.Items.findById(parsedIn.callback_id).exec();
+    //         cart = yield kipcart.addExtraToCart(teamCart, parsedIn.team.id, parsedIn.user.id, item);
+    //         yield updateCartMsg(cart, parsedIn);
+    //       }).catch(console.log.bind(console));
+    //       break;
+    //     case 'removeitem':
+    //       parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
+    //       co(function*() {
+    //         cart = yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index, 'team'); //'team' assumes this is a slack command. need a way to tell
+    //         yield updateCartMsg(cart, parsedIn);
+    //       }).catch(console.log.bind(console));
+    //       break;
+    //     case 'removewarn':
+    //       let matches = parsedIn.original_message.attachments[index].text.match(/<(.+)\|(.+)>/i); //0 is full string, 1 is url, 2 is title
+    //       parsedIn.original_message.attachments[index] = {
+    //         text: `Are you sure you want to remove the last *${matches[2]}*?`,
+    //         actions: cardTemplate.cart_check(index),
+    //         mrkdwn_in: ['text'],
+    //         callback_id: parsedIn.original_message.attachments[index].callback_id
+    //       };
+    //       break;
+    //     case 'cancelremove':
+    //       co(function*() {
+    //         cart = yield kipcart.getCart(parsedIn.team.id); //'team' assumes this is a slack command. need a way to tell
+    //         yield updateCartMsg(cart, parsedIn);
+    //       }).catch(console.log.bind(console));
+    //       break;
+    //     case 'removeall':
+    //       // reduces the quantity right way, but for speed we return a hacked message right away
+    //       co(function*() {
+    //         cart = yield kipcart.removeAllOfItem(parsedIn.team.id, index);
+    //         yield updateCartMsg(cart, parsedIn);
+    //       }).catch(console.log.bind(console));
+    //
+    //       parsedIn.original_message.attachments.splice[index, 1]; //just take it off the list
+    //       parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
+    //       break;
+    //   }
+    //   var stringOrig = JSON.stringify(parsedIn.original_message)
+    //   let map = {
+    //     amp: '&',
+    //     lt: '<',
+    //     gt: '>',
+    //     quot: '"',
+    //     '#039': "'"
+    //   }
+    //   stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+    //   request({
+    //     method: 'POST',
+    //     uri: parsedIn.response_url,
+    //     body: stringOrig
+    //   });
+    // }
 }))
 
 function clearCartMsg(attachments) {

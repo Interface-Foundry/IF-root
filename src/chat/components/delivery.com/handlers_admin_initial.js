@@ -2,6 +2,7 @@ var sleep = require('co-sleep')
 var _ = require('lodash')
 
 var utils = require('./utils')
+var btn = utils.button
 var api = require('./api-wrapper')
 var slackUtils = require('../slack/utils.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
@@ -30,20 +31,13 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'mrkdwn_in': ['text'],
-        'actions': [{
-          'name': 'food.admin.select_address',
-          'text': 'Start New Order',
-          'type': 'button',
-          'value': 'food.admin.select_address'
-        }, {
-          'name': 'passthrough',
-          'text': 'Wait',
-          'type': 'button',
-          'value': 'food.exit.confirm'
-        }]
+        'actions': [
+          btn('Start New Order', { route: 'food.admin.select_address' }),
+          btn('Wait', { route: 'food.exit.confirm'})
+        ]
       }]
     }
- 
+
   $replyChannel.sendReplace(message, 'food.admin.confirm_new_session', {type: message.origin, data: msg_json})
 
 }
@@ -51,18 +45,16 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
 handlers['food.admin.select_address'] = function * (message, banner) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  yield [sleep(1000), slackUtils.getTeamMembers(team)]
+  yield slackUtils.getTeamMembers(team)
 
-  message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
   yield foodSession.save()
+
   var addressButtons = _.get(team, 'meta.locations', []).map(a => {
-    return {
-      name: 'passthrough',
-      text: a.address_1,
-      type: 'button',
-      value: JSON.stringify(a)
-    }
+    return btn(a.address_1, {
+        route: 'food.admin.select_address',
+        address: a
+      })
   })
 
   //no addresses yet, show onboarding
@@ -187,11 +179,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     message.markModified('source')
   }
 
-  if (!banner) {
-    $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  } else {
-    return $replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  }
+  return msg_json
 }
 
 handlers['food.settings.address.remove_select'] = function * (message) {
