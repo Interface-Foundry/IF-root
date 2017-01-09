@@ -528,15 +528,24 @@ handlers['team'] = function * (message) {
   var channels = yield utils.getChannels(team);
   var buttons = channels.map(channel => {
     var checkbox = cartChannels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
-      return {
-        name: 'channel_btn',
-        text: checkbox + channel.name,
-        type: 'button',
-        value: channel.id
-      }
+    return {
+      name: 'channel_btn',
+      text: checkbox + channel.name,
+      type: 'button',
+      value: channel.id
+    }
   });
-  var chunkedButtons = _.chunk(buttons, 5);
+  function sortF(a, b){
+    return ((a.text.indexOf('☐ ') > -1) - (b.text.indexOf('☐ ') > -1))
+  }
+  buttons = buttons.sort(sortF)
 
+
+  if (buttons.length > 9) {
+     buttons = buttons.slice(0,8);
+  }
+
+  var chunkedButtons = _.chunk(buttons, 5);
   attachments.push({text: '*Step 3/3:* Choose the channels you want to include: ', mrkdwn_in: ['text'],
     color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
   chunkedButtons.forEach((ele, i) => {
@@ -549,9 +558,17 @@ handlers['team'] = function * (message) {
       color: '#45a5f4',
       mrkdwn_in: ['text'],
       fallback:'Step 3/3: Choose the channels you want to include',
-      actions: cardTemplate.slack_onboard_team,
       callback_id: 'none'
     });
+
+  attachments.push({
+    text: 'Or simply type in the channels you want to include (e.g. #general #marketing #sales) ',
+    color: '#45a5f4',
+    mrkdwn_in: ['text'],
+    fallback:'Or simply type in the channels you want to include (e.g. #general #marketing #sales)',
+    actions: cardTemplate.slack_onboard_team,
+    callback_id: 'none'
+  });
 
   var msg = message;
   msg.mode = 'onboard';
@@ -724,28 +741,63 @@ handlers['text'] = function*(message) {
     thread_id: message.source.channel
   }).sort('-ts').limit(10);
   var lastMessage = history[1];
-  var choices = _.flatten(lastMessage.reply.map(m => {
-    return m.actions
-  }).filter(function(n) {
-    return n != undefined
-  }))
-  if (!choices) {
-    return kip.debug('error: lastMessage: ', choices);
+  var choices = _.flatten(lastMessage.reply.map( m => { return m.actions }).filter(function(n){ return n != undefined }))
+  if (!choices) { return kip.debug('error: lastMessage: ', choices); }
+  var channelSelection = false;
+  if (choices[0].text.indexOf('☐') > -1 || choices[0].text.indexOf('✓') > -1) {
+    channelSelection = true;
+     var team_id = message.source.team;
+     var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+     var channels = yield utils.getChannels(team);
+      var additionalChoices = channels.slice(choices.length, channels.length);
+      additionalChoices = additionalChoices.map(channel => {
+        var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
+        return  {
+          "value": channel.id,
+          "type": "button",
+          "text": channel.name,
+          "name": "channel_btn"
+        }
+      });
+      choices = choices.concat(additionalChoices);
+      choices = choices.map( (choice) => {
+      if (choice.text && (choice.text.indexOf('☐') > -1 || choice.text.indexOf('✓') > -1)) {
+          choice.text = choice.text.replace('☐','');
+          choice.text = choice.text.replace('✓','');
+          choice.text = choice.text.trim();
+       }
+        return choice;
+      })
+      choices = choices.filter((c) => {
+        return c.name == 'channel_btn'
+      })
   }
   var fuse = new Fuse(choices, {
     shouldSort: true,
-    threshold: 0.4,
+    threshold: 0.6,
     keys: ["text"]
-  })
+  });
   var matches = yield fuse.search(message.text);
   var choice;
   if (matches.length > 0) {
-    choice = matches[0].text == 'Help' ? 'help' : matches[0].value;
-    if (choice.indexOf('.') > -1) {
+    if (channelSelection) {
+      choice =matches[0].value;
+      kip.debug('\n\n\n\n\n\n\n onboard.js 659 : choices: ', choices, matches, choice,' \n\n\n\n\n\n\n')
+      if (team.meta.cart_channels.find(id => { return (id == choice) })) {
+        _.remove(team.meta.cart_channels, function(c) { return c == choice });
+      } else {
+        team.meta.cart_channels.push(choice);
+      }
+      team.markModified('meta.cart_channels');
+      yield team.save();
+      return yield handlers['team'](message);
+    }
+    else if (choice.indexOf('.') > -1) {
       var handle = choice.split('.')[0];
       var data = [choice.split('.')[1]];
       return yield handlers[handle](message, data);
-    } else {
+    } 
+    else {
       try {
         kip.debug(`Trying handlers[${choice}](${message})`);
         return yield handlers[choice](message);
