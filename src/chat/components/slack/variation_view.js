@@ -33,7 +33,7 @@ function createButton(name, key, itemId) {
   return {
     name: `variation.select.${itemId}.${key}.${name}`,
     value: `select.${itemId}.${key}.${name}`,
-    text: '◎ ' + _.startCase(name), //or ◉
+    text: '○ ' + _.startCase(name), //or ◉
     type: 'button',
   }
 }
@@ -174,9 +174,9 @@ handlers['select'] = function*(message, data) {
     if (attachment.actions) {
       let actions = attachment.actions.map(button => {
         if (button.value === `select.${itemId}.${key}.${name}`) {
-          button.text = button.text.replace('◎', '◉');
+          button.text = button.text.replace('○', '◉');
         } else if (button.value.includes(key)) {
-          button.text = button.text.replace('◉', '◎');
+          button.text = button.text.replace('◉', '○');
         }
         return button;
       })
