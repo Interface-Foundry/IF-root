@@ -780,8 +780,8 @@ handlers['text'] = function*(message) {
   var matches = yield fuse.search(message.text);
   var choice;
   if (matches.length > 0) {
+    choice = matches[0].value;
     if (channelSelection) {
-      choice =matches[0].value;
       kip.debug('\n\n\n\n\n\n\n onboard.js 659 : choices: ', choices, matches, choice,' \n\n\n\n\n\n\n')
       if (team.meta.cart_channels.find(id => { return (id == choice) })) {
         _.remove(team.meta.cart_channels, function(c) { return c == choice });
