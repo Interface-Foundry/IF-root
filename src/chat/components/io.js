@@ -23,6 +23,7 @@ var conversation_botkit = require('./conversation_botkit')
 var weekly_updates = require('./weekly_updates')
 var kipcart = require('./cart')
 var nlp = require('../../nlp2/api')
+var utils = require('./slack/utils');
 
 // set env vars
 var config = require('../../config')
@@ -978,7 +979,7 @@ function searchBucket (data) {
   if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more') {
     var searcher = {}
     searcher.source = data.source
-    sendTxtResponse(searcher, 'Searching...', 'typing')
+    sendTxtResponse(searcher, utils.randomSearching(), 'typing')
 
     if (data.source.origin == 'slack' && slackUsers[data.source.org]) {
       slackUsers[data.source.org].sendTyping(data.source.channel)

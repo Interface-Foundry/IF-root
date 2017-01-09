@@ -9,6 +9,7 @@ var Fuse = require('fuse.js');
 var request = require('request');
 var agenda = require('../agendas');
 var queue = require('../queue-mongo');
+var utils = require('../slack/utils.js');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
@@ -81,11 +82,12 @@ handlers['step_2'] = function * (message, data) {
       query = searchTerm;
       break;
   }
+  let searchMsg = utils.randomSearching();
   let json = message.source.original_message ? message.source.original_message : {
     attachments: []
   };
   json.attachments = [...json.attachments, {
-    'text': 'Searching...',
+    'text': searchMsg,
     mrkdwn_in: ['text']
   }];
   if (message.source.response_url) {
@@ -96,12 +98,12 @@ handlers['step_2'] = function * (message, data) {
     });
   } else {
     var newMessage = new db.Message({
-      text: 'Searching...',
+      text: searchMsg,
       incoming: false,
       thread_id: message.thread_id,
       origin: 'slack',
       mode: 'member_onboard',
-      fallback: 'Searching...',
+      fallback: searchMsg,
       action: 'home',
       source: message.source
     });

@@ -167,8 +167,9 @@ handlers['shopping_search'] = function*(message, data) {
     json = message.source.original_message ? message.source.original_message : {
       attachments: []
     };
+  let searchMsg = utils.randomSearching();
   json.attachments = [...json.attachments, {
-    'text': 'Searching...',
+    'text': searchMsg,
     mrkdwn_in: ['text']
   }];
   if (message.source.response_url) {
@@ -179,12 +180,12 @@ handlers['shopping_search'] = function*(message, data) {
     });
   } else {
     var newMessage = new db.Message({
-      text: 'Searching...',
+      text: searchMsg,
       incoming: false,
       thread_id: message.thread_id,
       origin: 'slack',
       mode: 'member_onboard',
-      fallback: 'Searching...',
+      fallback: searchMsg,
       action: 'home',
       source: message.source
     });

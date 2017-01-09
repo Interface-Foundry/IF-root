@@ -10,7 +10,8 @@ var cardTemplate = require('../slack/card_templates');
 var request = require('request');
 var slackUtils = require('../slack/utils');
 var queue = require('../queue-mongo');
-var amazon_variety = require('../amazon_variety')
+var amazon_variety = require('../amazon_variety');
+var utils = require('../slack/utils');
 //
 // Handlers take something from the message.execute array and turn it into new messages
 //
@@ -396,29 +397,17 @@ handlers['home.loading'] = function*(message) {
 
   kip.debug(' \n\n\n\n\n\n\n\n\n\n  👳shopping.js:393:home.loading', message,'  \n\n\n\n\n\n\n\n\n\n')
 
-  var message = new db.Message({
+  var msg = new db.Message({
     incoming: false,
     thread_id: message.thread_id,
     resolved: true,
     user_id: 'kip',
     origin: message.origin,
     source: message.source,
-    text: 'Searching...',
+    text: utils.randomSearching()
   })
 
-  yield queue.publish('outgoing.' + message.origin, message, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
-  
-
-   // return new db.Message({
-   //    incoming: false,
-   //    thread_id: message.thread_id,
-   //    mode: 'shopping',
-   //    resolved: true,
-   //    user_id: 'kip',
-   //    origin: message.origin,
-   //    source: message.source,
-   //    text: 'Searching...'
-   //  })
+  yield queue.publish('outgoing.' + msg.origin, msg, msg._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 };
 
 handlers['cart.loading'] = function (message) {
