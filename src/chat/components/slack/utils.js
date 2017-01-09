@@ -497,13 +497,14 @@ function * addViaAsin(asin, message) {
 function * showLoading(message) {
   var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel})
   var json = message.source.original_message;
+  let searchMsg = this.randomSearching();
     if (!json) {
      var msg = new db.Message(message);
      msg.mode = 'loading';
      msg.action = 'show'
      msg.text = '';
      msg.reply = [{
-        text: 'Searching...',
+        text: searchMsg,
         color: '#45a5f4'
       }];
      yield msg.save()
@@ -512,7 +513,7 @@ function * showLoading(message) {
     json.attachments.push({
         fallback: message.action,
         callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
-        text: 'Searching...',
+        text: searchMsg,
         color: '#45a5f4'
     })
     request({
@@ -820,7 +821,28 @@ function getDayNum(string) {
   }
 }
 
+function randomSearching() {
+  let messages = [
+    'Searching...',
+    'Foraging...',
+    'Looking...',
+    'Exploring...',
+    'Seeking...'
+  ];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num];
+}
 
+function randomWelcome() {
+  let messages = [
+    'Welcome to Kip! \u00A0:smile:',
+    'Hi! Thanks for using Kip \u00A0:blush:',
+    'Hey, what do you need? \u00A0:penguin:',
+    'Hi, what can I do for you? \u00A0:slightly_smiling_face:'
+  ];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num];
+}
 
 module.exports = {
   initializeTeam: initializeTeam,
@@ -844,5 +866,7 @@ module.exports = {
   sendLastCalls: sendLastCalls,
   getDayNum: getDayNum,
   constructCart: constructCart,
-  setCron: setCron
-}
+  setCron: setCron,
+  randomWelcome: randomWelcome,
+  randomSearching: randomSearching
+};
