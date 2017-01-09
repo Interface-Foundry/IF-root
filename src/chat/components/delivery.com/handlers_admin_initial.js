@@ -589,6 +589,10 @@ handlers['food.delivery_or_pickup'] = function * (message) {
 handlers['food.admin_polling_options'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: {
+    text: `*Budget*: $${foodSession.budget} / person`
+  }})
+
   // check to make sure restaurants are even open
   if (foodSession.merchants.length === 0) {
     var msg_json = {
@@ -598,7 +602,6 @@ handlers['food.admin_polling_options'] = function * (message) {
     $replyChannel.sendReplace(message, 'food.begin', {type: message.origin, data: msg_json})
     return
   }
-
 
   // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
   var merchantIds = foodSession.merchants.map(m => m.id)
@@ -671,6 +674,17 @@ handlers['food.admin_polling_options'] = function * (message) {
       'mrkdwn_in': ['text']
     })
   }
+
+  // attachments.push({
+  //   'mrkdwn_in': [
+  //     'text'
+  //   ],
+  //   'text': `*Budget*: $${foodSession.budget} / person`,
+  //   'fallback': 'Team budget',
+  //   'callback_id': 'indignata sub umbras',
+  //   'attachment_type': 'default',
+  //   'actions': []
+  // })
 
   attachments.push({
     'mrkdwn_in': [

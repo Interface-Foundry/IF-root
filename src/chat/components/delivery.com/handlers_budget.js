@@ -36,7 +36,7 @@ handlers['food.admin.team_budget'] = function * (message) {
       message.data.value = {};
       message.data.value.budget = num;
       message.data.value.new = true;
-      yield handlers['food.admin.confirm_budget'](message);
+      return yield handlers['food.admin.confirm_budget'](message);
     }
     else {
       yield $replyChannel.send(message, 'food.admin.team_budget', {type: message.origin, data: {
@@ -125,12 +125,10 @@ handlers['food.admin.team_budget'] = function * (message) {
 
 function updateBudget (n, location) {
   console.log(location.budgets, location.budget_history);
-  console.log('this is n', n)
   var n = Number(n);
   var history = location.budget_history;
   var budgets = location.budgets;
   if (history.indexOf(n) > -1) {
-    console.log('already in budget history')
     history.splice(history.indexOf(n), 1)
     history.unshift(n);
   }
@@ -173,7 +171,7 @@ handlers['food.admin.confirm_budget'] = function * (message) {
     }
   });
 
-  yield $allHandlers['food.admin_polling_options'](message) //TODO make it stop happening
+  yield $allHandlers['food.admin_polling_options'](message)
 }
 
 module.exports = function (replyChannel, allHandlers) {
