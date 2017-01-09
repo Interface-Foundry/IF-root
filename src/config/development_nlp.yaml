@@ -8,6 +8,6 @@ slack:
   client_id: "40262605191.99843739429"
   client_secret: 00a0a312ef83e675243ca4102080aae1
   verification_token: twZRwtgqPxHdOMNVru9MqD6p
-  redirect_uri: https://170558f8.ngrok.io/newslack
-kipPayURL: https://fe922461.ngrok.io
+  redirect_uri: https://f0cc489f.ngrok.io/newslack
+kipPayURL: https://dabb163b.ngrok.io
 picstitchDelivery: http://delivery-picstitch.kipthis.com

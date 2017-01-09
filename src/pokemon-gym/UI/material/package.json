@@ -2,7 +2,8 @@
   "name": "material",
   "version": "1.0.0",
   "scripts": {
-    "init": "npm install"
+    "init": "npm install",
+    "start": "gulp serve"
   },
   "devDependencies": {
     "browser-sync": "~2.9.0",

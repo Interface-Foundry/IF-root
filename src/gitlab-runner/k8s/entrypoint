@@ -14,9 +14,9 @@ CA_CERTIFICATES_PATH=${CA_CERTIFICATES_PATH:-$DATA_DIR/certs/ca.crt}
 export REGISTER_NON_INTERACTIVE="true"
 export CONFIG_FILE="/etc/gitlab-runner/config.toml"
 export CI_SERVER_URL="https://gitlab.com/ci"
-export REGISTRATION_TOKEN="hdiA6LTw6E6b-UsgMpjJ"
+export REGISTRATION_TOKEN="2KSZvAyF1sDNxKrZcv_-"
 export RUNNER_ENV="DOCKER_HOST=tcp://127.0.0.1:2375"
-export RUNNER_LIMIT="2"
+export RUNNER_LIMIT="0"
 export RUNNER_EXECUTOR="kubernetes"
 export RUNNER_NAME="kubernetes-gitlab-runner"
 export KUBERNETES_IMAGE="docker:latest"
@@ -48,8 +48,8 @@ fi
 
 # set up the initial settings
 cat <<EOF > $CONFIG_FILE
-concurrent = 2
-check_interval = 5
+concurrent = 6
+check_interval = 4
 
 EOF
 

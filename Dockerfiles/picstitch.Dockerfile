@@ -1,14 +1,12 @@
-FROM python:3
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y -q python3-all python3-pip libfreetype6-dev
+FROM python:3.4
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -q libfreetype6-dev
 ADD src/image_processing/requirements.txt /tmp/requirements.txt
-RUN pip3 install -qr /tmp/requirements.txt
-RUN pip3 install numpy
-ADD src/image_processing /picstitch/
-WORKDIR /picstitch
-EXPOSE 5000
+RUN pip install -qr /tmp/requirements.txt
+ADD src/image_processing /image_processing/
 ENV AWS_ACCESS_KEY_ID=AKIAJEYXGEUG37OMIQKA
 ENV AWS_SECRET_ACCESS_KEY=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
-ENV GOOGLE_APPLICATION_CREDENTIALS=/picstitch/gcloud_key/KipStyles-8da42a8a7423.json
-ADD tests/picstitch/ /tests/
-CMD gunicorn -w 6 --bind 0.0.0.0:5000 main:application
+ENV GOOGLE_APPLICATION_CREDENTIALS=/image_processing/gcloud_key/gcloud-picstitch.json
+EXPOSE 5000
+WORKDIR /image_processing
+ENTRYPOINT ["/usr/local/bin/gunicorn", "--config", "/image_processing/gunicorn.conf.py", "main:application"]

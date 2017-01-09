@@ -2,8 +2,8 @@ import logging
 
 from flask import Flask, request
 
-from picstitch_delivery import load_review_stars, load_fonts_reg, load_fonts_bold, \
-    PicStitch
+from picstitch_delivery import load_review_stars, load_fonts_reg, \
+    load_fonts_bold, PicStitch
 
 from gcloud import storage
 import io
@@ -15,8 +15,13 @@ import os
 # credentials = GoogleCredentials.get_application_default()
 # from googleapiclient.discovery import build
 
+# # ---- Logging prefs -----
+log_format = "[%(asctime)s]       [%(process)d] [%(levelname)-1s] %(message)s"
+date_format = "%Y-%m-%d %H:%M:%S"
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+                    format=log_format,
+                    datefmt=date_format)
+
 
 application = Flask(__name__)
 
@@ -43,7 +48,7 @@ def get_gcloud():
     # gcloud stuff
     gcloud_config = {
         'proj_name': 'kip_styles',
-        'key': 'KipStyles-8da42a8a7423.json',
+        'key': 'gcloud-picstitch.json',
         'bucket': 'if-kip-chat-images'
     }
     gcloud_client = storage.Client(project=gcloud_config[
@@ -64,6 +69,7 @@ def upload_to_gcloud(image, gcloud_bucket=get_gcloud()):
         tmp_img.getvalue(), content_type='image/png')
     return object_upload.public_url
 
+
 # load connections to gcloud and aws
 gcloud_bucket = get_gcloud()
 review_star_images = load_review_stars()
@@ -73,7 +79,8 @@ font_dict_B = load_fonts_bold()
 # print('this is reg:', font_dict_R)
 # print('this is bold:',font_dict_B)
 
-@application.route('/', methods=['GET','POST'])
+
+@application.route('/', methods=['GET', 'POST'])
 def main():
     '''
     return upload_image_tos_s3(create_image(request.json))
@@ -98,6 +105,11 @@ def main():
                  'total time: %s',
                  str(t2 - t1), str(t3 - t2), str(t3 - t1))
     return gc_url
+
+
+@application.route('/health')
+def kubernetes_heath_check():
+    return 'health'
 
 
 if __name__ == '__main__':

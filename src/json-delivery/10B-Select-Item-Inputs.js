@@ -113,7 +113,7 @@
             "actions": [
                 {
                     "name": "chess",
-                    "text": "￮ Plain",
+                    "text": "◎ Plain",
                     "type": "button",
                     "value": "chess"
                 },

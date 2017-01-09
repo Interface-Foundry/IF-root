@@ -5,6 +5,8 @@ var coupon = require('./payments.coupon.js')
 var Menu = require('./Menu')
 var api = require('./api-wrapper')
 
+var createAttachmentsForAdminCheckout = require('./generateAdminCheckout.js').createAttachmentsForAdminCheckout
+
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other methods
@@ -111,8 +113,9 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
     json.attachments.push({
-      'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])}-ish left`,
-      'mrkdwn_in': ['text']
+      'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
+      'mrkdwn_in': ['text'],
+      'color': '#49d63a'
     });
   }
 
@@ -219,7 +222,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     var full_eu = yield db.email_users.findOne({email: foodSession.email_users[i]});
     full_email_members.push(full_eu);
   }
-  console.log('full_email_members', full_email_members, foodSession.confirmed_orders)
+  // console.log('full_email_members', full_email_members, foodSession.confirmed_orders)
 
   var slackers = _.difference(foodSession.team_members.map(m => m.id), _.difference(foodSession.confirmed_orders, full_email_members.map(m => m.id)))
     .map(id => `<@${id}>`)
@@ -233,7 +236,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     }
   })
 
-  console.log('emailers', emailers)
+  // '✉' ugh, it's an emoji
+  emailers = emailers.map(e => /(.+)@/.exec(e)[1])
+
+  // console.log('emailers', emailers)
 
   var dashboard = {
     text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
@@ -249,7 +255,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      text: `*Waiting for order(s) from:*\n${slackers.concat(emailers).join(', ')}`,
+      text: `*Waiting for order(s) from:*\n${slackers.join(', ')}\n📃 ${emailers.join(', ')}`,
       actions: [{
         name: 'food.admin.order.confirm',
         text: 'Finish Order Early',
@@ -408,14 +414,12 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
           amount: fixed dollar amount with cents (calculated on the order.subtotal tho)
           percent: string with value to use on order.total
       }
-
-      - main_amount = (order.total + service_fee + taxes + tip + delivery_fee + convenience_fee)
-      - discount_amount = (main_amount) * tip.percent
+      - afaik order.total seems to include all taxes, fees, and discounts provided by delivery
+      - main_amount = (order.total + kip_service_fee + tip)
+      - discount_amount = main_amount * coupon_discount
       - calculated_amount (total we are charging user) = main_amount - discount_amount
-
       - calculated_amount will be the value passed to payments that is a value in cents
       - tip.amount will be passed to payments as well for delivery.com payment.  its already included in calculated_amount so just leave it
-
       -----
       other:
       dont let orders over 510 go through w/ 99% discount
@@ -428,7 +432,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         return _.includes(discounts.teams, foodSession.team_id)
       })
 
-      foodSession.main_amount = order.total + foodSession.service_fee + order.delivery_fee + order.convenience_fee
+      foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
 
       if (discountAvail) {
         // this is literally needed to prevent rounding errors
@@ -457,114 +461,19 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         })
         return
       }
+
       yield foodSession.save()
 
-      // ----- done with the calculations of values
-      var finalAttachment = {
-        text: `*Order Total:* ${foodSession.calculated_amount.$}`,
-        fallback: `*Order Total:* ${foodSession.calculated_amount.$}`,
-        callback_id: 'admin_order_confirm',
-        color: '#49d63a',
-        attachment_type: 'default',
-        mrkdwn_in: ['text'],
-        footer: 'Powered by Delivery.com',
-        footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
-      }
+      // THIS CREATES THE TIP, DELIVERY.COM COSTS, AND KIP ATTACHMENT
+      var attachmentsRelatedToMoney = createAttachmentsForAdminCheckout(foodSession, totalPrice)
+      response.attachments = [].concat(mainAttachment, itemAttachments, attachmentsRelatedToMoney)
 
-      var instructionsButton = {
-        name: 'food.order.instructions',
-        text: '✎ Add Instructions',
-        type: 'button',
-        value: ''
-      }
-
-      if (totalPrice < foodSession.chosen_restaurant.minimum) {
-        finalAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *_\$${foodSession.chosen_restaurant.minimum}_*`
-        finalAttachment.actions = [{
-          'name': 'food.feedback.new',
-          'text': '⇲ Send feedback',
-          'type': 'button',
-          'value': 'food.feedback.new'
-        }]
-      } else {
-        finalAttachment.actions = [{
-          'name': `food.admin.order.checkout.confirm`,
-          'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
-          'type': `button`,
-          'style': `primary`,
-          'value': `checkout`
-        },
-        instructionsButton
-        ]
-      }
-      // if (feedbackOn && finalAttachment) {
-      //   finalAttachment.actions.push({
-      //     name: 'food.feedback.new',
-      //     text: '⇲ Send feedback',
-      //     type: 'button',
-      //     value: 'food.feedback.new'
-      //   })
-      // }
-      // ------------------------------------
-      // tip attachment
-      var tipTitle = (foodSession.tip.percent === 'cash') ? `Will tip in cash` : `$${foodSession.tip.amount.toFixed(2)}`
-      var tipAttachment = {
-        'title': `Tip: ${tipTitle}`,
-        'fallback': `Tip: ${tipTitle}`,
-        'callback_id': 'food.admin.cart.tip',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'mrkdwn_in': ['text'],
-        'actions': [`15%`, `20%`, `25%`, `Cash`].map((t) => {
-          var baseTipButton = (foodSession.tip.percent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `￮ ${t}`
-          return {
-            'name': 'food.admin.cart.tip',
-            'text': baseTipButton,
-            'type': `button`,
-            'value': t.toLowerCase()
-          }
-        })
-      }
-
-      var deliveryDiscount = (_.get(foodSession, 'order.discount_percent') > 0.00) ? ` _Included ${foodSession.order.discount_percent * 100}% discount from delivery.com_` : ``
-      var convenienceFee = (_.get(foodSession, 'order.convenience_fee') > 0.00) ? ` _This restaurant also has a convience fee of ${foodSession.order.convenience_fee}_` : ``
-
-      var infoAttachment = {
-        fallback: 'Checkout Total',
-        text: `*Cart Subtotal:* ${foodSession.order.subtotal.$}${deliveryDiscount}\n` +
-              `*Taxes:* ${foodSession.order.tax.$}\n` +
-              `*Delivery Fee:* ${foodSession.order.delivery_fee.$}${convenienceFee}\n`,
-        'callback_id': 'food.admin.cart.info',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'mrkdwn_in': ['text']
-      }
-
-       var infoAttachment2 = {
-        fallback: 'Checkout Total2',
-        text: `*Service Fee:* ${foodSession.service_fee.$}\n` +
-              `*Tip:* ${foodSession.tip.amount.$}\n`,
-        'callback_id': 'food.admin.cart.info',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'mrkdwn_in': ['text']
-      }
-
-      if (discountAvail) {
-        infoAttachment2.text += `\n*Coupon:* -${foodSession.discount_amount.$}`
-      }
-
-      if (foodSession.instructions) {
-        infoAttachment2.text = infoAttachment2.text + `*Delivery Instructions*: _${foodSession.instructions}_\n`
-      }
-
-      response.attachments = _.flatten([mainAttachment, itemAttachments, tipAttachment, infoAttachment, infoAttachment2, finalAttachment]).filter(Boolean)
     } else {
       // some sort of error
       foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
       var deliveryError = JSON.parse(foodSession.delivery_error)
       var errorMsg = `Looks like there are ${deliveryError.length} total errors including: ${deliveryError[0].user_msg}`
-      finalAttachment = {
+      var finalAttachment = {
         text: errorMsg,
         fallback: errorMsg,
         callback_id: 'foodConfrimOrder_callbackID',
@@ -594,11 +503,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     logging.error('error with creating cart payment for some reason', err)
   }
 
-  //if (replace) {
-  //  $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  //} else {
-    $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  //}
+  $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
 }
 
 handlers['food.order.instructions'] = function * (message) {
