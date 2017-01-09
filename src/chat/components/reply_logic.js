@@ -336,7 +336,7 @@ queue.topic('incoming').subscribe(incoming => {
     if (switchMode(message)) {
       message.mode = switchMode(message);
       if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
-      if (message.mode.match(/(team)/)) {
+      if (message.mode.match(/(team|onboard)/)) {
         let team = yield db.Slackbots.findOne({
           'team_id': message.source.team
         }).exec();

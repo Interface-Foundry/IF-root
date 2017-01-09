@@ -290,21 +290,18 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       if (message.mode === 'shopping' && message.action === 'onboard_cart') {
-        let results = yield cart(message, bot.slackbot, false)
-        results = results.reduce((cart, item) => { //hide items that the user hasn't added for onboarding
+        let results = yield cart(message, bot.slackbot, false);
+        results = results.reduce((cart, item) => { // hide items that the user hasn't added for onboarding
           if (item.text.includes(message.source.user)) cart.push(item);
           return cart;
         }, []);
-        msgData.attachments = [...message.reply || [], ...results || [], {
-          mrkdwn_in: ['text'],
-          color: '#A368F0'
-        }, ...cardTemplate.slack_shopping_mode];
+        msgData.attachments = [...results || [], ...message.reply || []]; // need a celebration message here
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
       if ((message.mode === 'member_onboard' || message.mode === 'onboard') && message.action === 'results' && message.amazon.length > 0) {
         let results = yield search_results(message, true, message.mode);
-        msgData.attachments = [...message.reply || [], ...results || []];
+        msgData.attachments = [...results || [], ...message.reply || []];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 

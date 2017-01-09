@@ -458,13 +458,13 @@ handlers['bundle'] = function * (message, data) {
     callback_id: 'none'
   });
 
-   var msg = message;
-   msg.mode = 'onboard'
-   msg.action = 'home';
-   msg.text = '';
-   msg.source.team = message.source.team;
-   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-   msg.reply = attachments;
+  var msg = message;
+  msg.mode = 'onboard'
+  msg.action = 'home';
+  msg.text = '';
+  msg.source.team = message.source.team;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.reply = attachments;
   yield utils.hideLoading(message);
   return [msg];
 }
@@ -485,6 +485,11 @@ handlers['addcart'] = function*(message, data) {
   }
 
   // view the cart
+  return yield handlers['cart'](message);
+};
+
+// modified version of modes/shopping.js
+handlers['cart'] = function * (message) {
   let attachments = [{
     text: 'Awesome! You added your first item to the cart!\n*Step 2/3:* Let your team add items to the cart?',
     mrkdwn_in: ['text'],
@@ -494,30 +499,16 @@ handlers['addcart'] = function*(message, data) {
     callback_id: 'none'
   }];
   let msg = message;
-  msg.mode = 'onboard'
-  msg.action = 'home';
+  msg.mode = 'shopping';
+  msg.action = 'onboard_cart';
   msg.text = '';
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
-  return [msg];
-};
 
-// modified version of modes/shopping.js
-handlers['cart'] = function * (message) {
-  
-  let res = new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    source: message.source,
-    mode: 'shopping',
-    action: 'onboard_cart',
-    fallback: 'Awesome! You added your first item to the cart!',
-    reply: attachments
-  });
-  return [res];
+  var cart_reference_id = (message.source.origin === 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO
+  msg.data = yield kipcart.getCart(cart_reference_id);
+  msg.data = msg.data.toObject();
+  return [msg];
 };
 /**
  * S4
@@ -564,7 +555,7 @@ handlers['team'] = function * (message) {
 
   var msg = message;
   msg.mode = 'onboard';
-  msg.action = 'home'
+  msg.action = 'home';
   msg.text = '';
   msg.source.team = team.team_id;
   msg.fallback = 'Step 3/3: Choose the channels you want to include'
@@ -618,18 +609,28 @@ handlers['member'] = function*(message) {
   return handlers['handoff'](message);
 };
 
-handlers['handoff'] = function (message) {
-  var slackreply = cardTemplate.home_screen(true);
-  slackreply.text = 'That\'s it!\nHi! Thanks for using Kip :blush:';
-  var msg = {
-    action: 'simplehome',
-    mode: 'food',
-    source: message.source,
-    origin: message.origin,
-    reply: {
-      data: slackreply
-    }
-  };
+handlers['handoff'] = function(message) {
+  let attachments = [{
+    text: 'That\'s it!\nThanks for adding Kip to your team :blush:',
+    mrkdwn_in: ['text'],
+    color: '#A368F0',
+    fallback: 'That\'s it!\nThanks for adding Kip to your team',
+    callback_id: 'take me home pls',
+    actions: [{
+      'name': 'passthrough',
+      'text': '🎉  Finish',
+      'style': 'primary',
+      'type': 'button',
+      'value': 'home'
+    }]
+  }];
+  let msg = message;
+  msg.mode = 'onboard';
+  msg.action = 'home';
+  msg.text = '';
+  msg.fallback = 'That\'s it!\nThanks for adding Kip to your team';
+  msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
+  msg.reply = attachments;
   return [msg];
 };
 
