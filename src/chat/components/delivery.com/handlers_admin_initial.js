@@ -51,10 +51,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   yield foodSession.save()
 
   var addressButtons = _.get(team, 'meta.locations', []).map(a => {
-    return btn(a.address_1, {
-        route: 'food.admin.select_address',
-        address: a
-      })
+    return btn(a.address_1, { route: 'food.choose_address', address: a })
   })
 
   //no addresses yet, show onboarding
@@ -243,15 +240,15 @@ handlers['food.settings.address.remove'] = function * (message) {
 // User decides what address they are ordering for. could be that they need to make a new address
 //
 handlers['food.choose_address'] = function * (message) {
-  if (_.get(message, 'source.response_url')) {
-    // slack action button tap
-    try {
-      var location = JSON.parse(message.text)
-    } catch (e) {
-      location = {address_1: message.text}
-      kip.debug('Could not understand the address the user wanted to use, message.text: ', message.text)
-    // TODO handle the case where they type a new address without clicking the "new" button
-    }
+  if (!_.get(message, 'source.response_url')) {
+    throw new Error('text address selection not implemented')
+  }
+
+  if (!_.get(message, 'slack_action.address')) {
+    throw new Error('expected slack_action.address to exist')
+  }
+
+  var location = message.slack_action.address
 
     var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     foodSession.chosen_location = location
@@ -272,47 +269,6 @@ handlers['food.choose_address'] = function * (message) {
     $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
 
     foodSession.fulfillment_method = 'delivery'
-    //
-    // Commented out until pickup is reimplemented ----------------------------
-    //
-    // var text = `Cool! You selected \`${location.address_1}\`. We are only doing delivery (no pickup) right now, is that okay?`
-    // var msg_json = {
-    //   'attachments': [
-    //     {
-    //       'mrkdwn_in': [
-    //         'text'
-    //       ],
-    //       'text': text,
-    //       'fallback': text,
-    //       'callback_id': 'wopr_game',
-    //       'color': '#3AA3E3',
-    //       'attachment_type': 'default',
-    //       'actions': [
-    //         {
-    //           'name': 'food.delivery_or_pickup',
-    //           'text': 'Yep!',
-    //           'type': 'button',
-    //           'value': 'delivery'
-    //         },
-    //         // REMOVING THIS UNTIL WE RE ADD PICKUP
-    //         // {
-    //         //   'name': 'food.delivery_or_pickup',
-    //         //   'text': 'Pickup',
-    //         //   'type': 'button',
-    //         //   'value': 'pickup'
-    //         // },
-    //         {
-    //           'name': 'food.settings.address.change',
-    //           'text': '< Change Address',
-    //           'type': 'button',
-    //           'value': 'food.settings.address.change'
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // }
-    // $replyChannel.send(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
-    // ------------------------------------------------------------------------
 
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
     var addr = [foodSession.chosen_location.address_1, foodSession.chosen_location.zip_code].join(' ')
@@ -323,9 +279,6 @@ handlers['food.choose_address'] = function * (message) {
     foodSession.markModified('cuisines')
     yield foodSession.save()
     yield handlers['food.admin_polling_options'](message)
-  } else {
-    throw new Error('this route does not handle text input')
-  }
 }
 
 //

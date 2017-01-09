@@ -820,6 +820,27 @@ function getDayNum(string) {
   }
 }
 
+//
+// Cleans up the attachments and stuff. mutaties the message in place
+//
+function formatMessage(m) {
+  if (m.attachments) {
+    m.attachments.map((a) => {
+      // every attachmnet needs a callback id
+      a.callback_id = _.get(a, 'callback_id') || 'default'
+
+      // also should json stringify action.value
+      _.get(a, 'actions', []).map(action => {
+        if (typeof action.value !== 'string') {
+          action.value = JSON.stringify(action.value)
+        }
+      })
+    })
+  }
+
+  return m
+}
+
 
 
 module.exports = {
@@ -844,5 +865,6 @@ module.exports = {
   sendLastCalls: sendLastCalls,
   getDayNum: getDayNum,
   constructCart: constructCart,
-  setCron: setCron
+  setCron: setCron,
+  formatMessage: formatMessage
 }

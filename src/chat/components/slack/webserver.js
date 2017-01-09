@@ -60,7 +60,14 @@ app.post('/slackaction', next(function * (req, res) {
   // parse the action value, which should be something like this
   // {route: 'food.admin.whatever', address: {...}}
   const action = parsedIn.actions[0]
-  const actionData = JSON.parse(action.value)
+  var actionData
+  try {
+    actionData = JSON.parse(action.value)
+  } catch (e) {
+    console.log('Hey!'.green, 'Looks like you need to', 'R E F A C T O R'.rainbow, 'this action', action)
+    console.log('hint: value should be json'.cyan)
+    throw e
+  }
   kip.debug('[button click]'.cyan, actionData)
 
   var message = new db.Message({
@@ -74,7 +81,8 @@ app.post('/slackaction', next(function * (req, res) {
       team: parsedIn.team.id,
       user: parsedIn.user.id,
       channel: parsedIn.channel.id,
-      type: 'action'
+      type: 'action',
+      response_url: parsedIn.response_url
     },
     slack_action: actionData
   })
@@ -100,7 +108,7 @@ app.post('/slackaction', next(function * (req, res) {
   Promise.race([reply, timeout]).then(r => {
     // 🏁 🏁 🏁 🏁 🏁 🏁 🏁
     if (isValidReply(r)) {
-      res.send(r)
+      res.send(utils.formatMessage(r))
     } else {
       res.status(200)
       res.end()
