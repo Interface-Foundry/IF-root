@@ -89,7 +89,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
       i.infoLine = 'You ordered this before'
     } else if (recommendedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.recommended
-      i.infoLine = 'Popular Item'
+      // i.infoLine = 'Popular Item'
     } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
       i.sortOrder = sortOrder.last
     } else {
@@ -103,6 +103,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
+
+    // console.log('popular item??', i)
 
     var attachment = {
       thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
@@ -122,9 +124,55 @@ handlers['food.menu.quickpicks'] = function * (message) {
     }
     desc = (desc.split(' ').length > 26 ? desc.split(' ').slice(0,26).join(' ')+"…" : desc)
     parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
+
+    //clean out html from descriptions
+    console.log('desc', desc)
+    var html = /<.*>/
+    desc = desc.replace(html, '');
+    parentDescription = parentDescription.replace(html, '');
+
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
   })
+
+  // delendum --> since <more and more> will be in bottommost item
+
+  // if (feedbackOn && msg_json) {
+  //   msg_json.attachments[0].actions.push({
+  //     name: 'food.feedback.new',
+  //     text: '⇲ Send feedback',
+  //     type: 'button',
+  //     value: 'food.feedback.new'
+  //   })
+  // }
+
+  var backButton = {
+    name: 'food.menu.quickpicks',
+    text: '<',
+    type: 'button',
+    value: {
+      index: Math.max(index - 3, 0),
+      keyword: keyword
+    }
+  }
+
+  var moreButton = {
+    'name': 'food.menu.quickpicks',
+    'text': keyword ? `More "${keyword}" >` : 'More >',
+    'type': 'button',
+    'value': {
+      index: index + 3,
+      keyword: keyword
+    }
+  }
+
+  if (!keyword && index > 0) {
+    menuItems[menuItems.length-1].actions.push(backButton)
+  }
+
+  if (!keyword && sortedMenu.length >= index + 4) {
+    menuItems[menuItems.length-1].actions.push(moreButton)
+  }
 
   var msg_json = {
     'text': '',
@@ -142,47 +190,23 @@ handlers['food.menu.quickpicks'] = function * (message) {
       'actions': []
     }])
   }
-  // if (feedbackOn && msg_json) {
-  //   msg_json.attachments[0].actions.push({
-  //     name: 'food.feedback.new',
-  //     text: '⇲ Send feedback',
-  //     type: 'button',
-  //     value: 'food.feedback.new'
-  //   })
-  // }
 
-  if (sortedMenu.length >= index + 4) {
-    msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
-      'name': 'food.menu.quickpicks',
-      'text': keyword ? `More "${keyword}" >` : 'More >',
-      'type': 'button',
-      'value': {
-        index: index + 3,
-        keyword: keyword
-      }
-    })
-  }
-
-  // add the Back button to clear the keyword
+  // place buttons in a separate attachment if the user is searching for a keyword
   if (keyword) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.push({
       name: 'food.menu.quickpicks',
       type: 'button',
       text: '× Clear'
     })
+    if (index > 0) {
+      msg_json.attachments[msg_json.attachments.length - 1].actions.push(backButton)
+    }
+
+    if (sortedMenu.length >= index + 4) {
+      msg_json.attachments[msg_json.attachments.length - 1].actions.push(moreButton)
+    }
   }
 
-  if (index > 0) {
-    msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
-      name: 'food.menu.quickpicks',
-      text: '<',
-      type: 'button',
-      value: {
-        index: Math.max(index - 3, 0),
-        keyword: keyword
-      }
-    })
-  }
 
   //resto name
   msg_json.attachments.push({
@@ -192,14 +216,14 @@ handlers['food.menu.quickpicks'] = function * (message) {
     'fields': [
       {
         'short': true,
-        'value': `Aim to spend $${foodSession.user_budgets[message.source.user]}`
+        'value': `Aim to spend $${foodSession.user_budgets[message.source.user]}!`
       },
       {
         'short': true,
-        'value': `<${foodSession.chosen_restaurant.url}|View Full Menu ⎘>`
+        'value': `*<${foodSession.chosen_restaurant.url}|View Full Menu ⎘>*`
       }
     ],
-    'mrkdwn_in': ['text']
+    'mrkdwn_in': ['text', 'fields']
   })
 
   $replyChannel.send(message, 'food.menu.search', {type: 'slack', data: msg_json})
