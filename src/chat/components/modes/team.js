@@ -70,7 +70,7 @@ handlers['start'] = function * (message) {
       callback_id: 'none'
     });
   attachments.push({
-    'text': '✎ Hint: You can also type the channels to add (Example: #general #marketing #sales)',
+    'text': '✎ Hint: You can also type the channels to add (Example: #nyc-office #research)',
     mrkdwn_in: ['text']
   })
 
@@ -161,7 +161,7 @@ handlers['text'] = function * (message) {
             m = m.replaceAll('>','');
             channelsToAdd.push(m);
           })
-          
+
         } else {
           if (message.text.indexOf('|') > -1) message.text = message.text.split('|')[1];
           message.text = message.text.replaceAll('#','');
