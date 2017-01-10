@@ -1,4 +1,4 @@
-'use strict'
+// 'use strict'
 
 var _ = require('lodash')
 var coupon = require('./payments.coupon.js')
@@ -37,7 +37,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     image_url: 'https://storage.googleapis.com/kip-random/kip-my-cafe-cart.png'
   }
 
-  yield myItems.map((i, index) => {
+  var items = yield myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
     var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
     var quantityAttachment = {
@@ -84,7 +84,8 @@ handlers['food.cart.personal'] = function * (message, replace) {
         attachments: [quantityAttachment]
     }
 
-    $replyChannel.send(message, 'food.cart.persona', {type: 'slack', data: itemMessage})
+    $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: itemMessage})
+
     return quantityAttachment
   })
 
@@ -131,7 +132,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     });
   }
 
-  $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
+  yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
 
   if (replace) {
     $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
@@ -247,10 +248,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     }
   })
 
-  // '✉' ugh, it's an emoji
   emailers = emailers.map(e => /(.+)@/.exec(e)[1])
 
   // console.log('emailers', emailers)
+  var waitingText = (slackers ? '\nSlack: ' + slackers.join(', ') : '') + (emailers.length ? '\nEmail: ' + emailers.join(', ') : '')
 
   var dashboard = {
     text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
@@ -266,7 +267,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      text: `*Waiting for order(s) from:*\n${slackers.join(', ')}\n${emailers.join(', ')}`,
+      text: `*Waiting for order(s) from:*${waitingText}`,
       actions: [{
         name: 'food.admin.order.confirm',
         text: 'Finish Order Early',
