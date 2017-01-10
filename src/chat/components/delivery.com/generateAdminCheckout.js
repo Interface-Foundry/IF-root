@@ -12,7 +12,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
 
   var tipText = (foodSession.tip.percent === 'cash') ? `Will tip in cash` : `${foodSession.tip.amount.$}`
   var tipAttachment = {
-    'title': `Tip: ${tipText}`,
+    'text': 'Tip: ' + `${tipText}`,
     'fallback': `Tip: ${tipText}`,
     'callback_id': 'food.admin.cart.tip',
     'color': '#3AA3E3',
@@ -37,19 +37,19 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
   var orderFees = foodSession.order.fees.reduce((a, b) => a + b.value, 0)
   var feeFromDeliveryLines = ``
   feeFromDeliveryLines += foodSession.order.convenience_fee > feeDebuging ?
-    `*Convenience Fee:* ${foodSession.order.convenience_fee.$}\n` : ``
+    `Convenience Fee: ${foodSession.order.convenience_fee.$}\n` : ``
   feeFromDeliveryLines += foodSession.order.delivery_fee > feeDebuging ?
-    `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` : ``
-
-  var extraFeesFromDelivery = orderFees > feeDebuging ?
-    `*Other Delivery.com Fees: * ${orderFees.$}\n` : ``
+    `Delivery Fee: ${foodSession.order.delivery_fee.$}\n` : ``
+  //
+  var extraFeesFromDelivery = orderFees > feeDebuging ? '' : ''
+    // `Other Delivery.com Fees:  ${orderFees.$}\n` : ``
 
   var deliveryCostsAttachment = {
     fallback: 'Delivery.com Total ',
-    text: `*Cart Subtotal:* ${foodSession.order.subtotal.$}\n` +
-          `*Taxes:* ${foodSession.order.tax.$}\n` +
+    text: `Cart Subtotal: ${foodSession.order.subtotal.$}\n` +
+          `Taxes: ${foodSession.order.tax.$}\n` +
           feeFromDeliveryLines +
-          `*Delivery.com Total:* ${foodSession.order.total.$}\n` +
+          // `Delivery.com Total: ${foodSession.order.total.$}\n` +
           extraFeesFromDelivery +
           deliveryDiscount,
     'callback_id': 'food.admin.cart.info',
@@ -60,13 +60,13 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
 
   // costs that kip calculates and instructions
   var instructionText = _.get(foodSession, 'instructions') ?
-        `*Delivery Instructions*: _${foodSession.instructions}_\n` : ``
+        `Delivery Instructions: _${foodSession.instructions}_\n` : ``
 
-  var kipCoupon = foodSession.discount_amount > feeDebuging ? `*Kip Coupon:* -${foodSession.discount_amount.$}\n` : ``
+  var kipCoupon = foodSession.discount_amount > feeDebuging ? `Kip Coupon: -${foodSession.discount_amount.$}\n` : ``
   var kipCostsAttachment = {
     fallback: 'Tip + Kip Fees + Discounts',
-    text: `*Tip:* ${tipText}\n` +
-          `*Kip Fee:* ${foodSession.service_fee.$}\n` +
+    text: //`Tip: ${tipText}\n` +
+          `Kip Fee: ${foodSession.service_fee.$}\n` +
           kipCoupon +
           instructionText,
     callback_id: 'food.admin.cart.info',
@@ -88,25 +88,25 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
   }
 
+  //
+  // if (totalPrice < foodSession.chosen_restaurant.minimum)  { //should ostensibly never be true
+  //   checkoutAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` +
+  //                              `_\$${foodSession.chosen_restaurant.minimum}_*`
+  //   } else {
+    checkoutAttachment.actions = [{
+      'name': `food.admin.order.checkout.confirm`,
+      'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
+      'type': `button`,
+      'style': `primary`,
+      'value': `checkout`
+    }, {
+      // instructions button
+      name: 'food.order.instructions',
+      text: '✎ Add Instructions',
+      type: 'button',
+      value: ''
+    }]
+    // }
 
-  if (totalPrice < foodSession.chosen_restaurant.minimum)  { //should ostensibly never be true
-    checkoutAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` +
-                               `_\$${foodSession.chosen_restaurant.minimum}_*`
-    } else {
-      checkoutAttachment.actions = [{
-        'name': `food.admin.order.checkout.confirm`,
-        'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
-        'type': `button`,
-        'style': `primary`,
-        'value': `checkout`
-      }, {
-        // instructions button
-        name: 'food.order.instructions',
-        text: '✎ Add Instructions',
-        type: 'button',
-        value: ''
-      }]
-    }
-
-  return [].concat(tipAttachment, deliveryCostsAttachment, kipCostsAttachment, checkoutAttachment)
+  return [].concat(deliveryCostsAttachment, kipCostsAttachment, tipAttachment, checkoutAttachment)
 }

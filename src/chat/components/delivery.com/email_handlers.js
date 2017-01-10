@@ -1,5 +1,3 @@
-console.log('and now email_handlers.js')
-
 'use strict'
 var _ = require('lodash')
 

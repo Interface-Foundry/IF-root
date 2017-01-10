@@ -211,10 +211,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   if (foodSession.budget) {
     var max = 1.25 * foodSession.team_members.length * foodSession.budget;
     var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
-    // console.log(merchants[1]);
-    // 
-    // console.log('please be japanese');
-    // console.log(merchants.slice(0, 5).map(m => m.summary.cuisines), '****', cheap_merchants.slice(0, 5).map(m => m.summary.cuisines))
+    // console.log(merchants[1])
     if (cheap_merchants.length <= 0) {
       return merchants
     }

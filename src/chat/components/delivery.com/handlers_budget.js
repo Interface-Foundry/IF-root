@@ -112,7 +112,7 @@ handlers['food.admin.team_budget'] = function * (message) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.push(noneButton)
   }
 
-  if (!message.text) {
+  if (!message.text || message.text[0] == "{") {
     msg_json.attachments.push({
       'fallback': 'Search the menu',
       'text': '✎ Or type a budget below',
