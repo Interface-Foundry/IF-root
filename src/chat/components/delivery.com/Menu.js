@@ -130,7 +130,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
           name: 'food.item.quantity.subtract',
           text: '—',
           type: 'button',
-          value: { route: 'food.item.quantity.subtract', itemId: cartItem.item.item_id }
+          value: { route: 'food.item.quantity.subtract', item_id: cartItem.item.item_id }
         },
         {
           name: 'food.null',
@@ -142,7 +142,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
           name: 'food.item.quantity.add',
           text: '+',
           type: 'button',
-          value: { route: 'food.item.quantity.add', itemId: cartItem.item.item_id }
+          value: { route: 'food.item.quantity.add', item_id: cartItem.item.item_id }
         }
       ]
     }]
@@ -182,12 +182,12 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
       'text': '✓ Add to Order',
       'type': 'button',
       'style': 'primary',
-      'value': { route: 'food.item.add_to_cart', itemId: cartItem.item.item_id }
+      'value': { route: 'food.item.add_to_cart', item_id: cartItem.item.item_id }
     }, {
       'name': 'food.item.instructions',
       'text': '✎ Special Instructions',
       'type': 'button',
-      'value': { route: 'food.item.instructions', itemId: cartItem.item.item_id }
+      'value': { route: 'food.item.instructions', item_id: cartItem.item.item_id }
     }, {
       'name': 'food.menu.quickpicks',
       'text': '< Back',
