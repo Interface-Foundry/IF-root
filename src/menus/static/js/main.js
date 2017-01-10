@@ -238,11 +238,23 @@ Vue.component('edit-item', {
 Vue.component('category-item', {
   props: ['item'],
   template: '#category-item',
+  data: function() {
+    return {
+      descriptionDisplay: ""
+    }
+  },
   methods: {
     selectItem: function() {
       this.$emit('show')
     }
   },
+  created: function() {
+    if (this.item.description.length >= 70) {
+      this.descriptionDisplay = (this.item.description.slice(0, 70) + "...")
+    } else {
+      this.descriptionDisplay = this.item.description
+    }
+  }
 })
 
 Vue.component('more-selector', {
@@ -366,9 +378,14 @@ var app = new Vue({
     budget: 0,
     fixNav: false,
     user_id: null,
-    food_session_id: null
+    food_session_id: null,
+    notDesktop: screen.width <= 800,
+    isCartVisibleOnMobile: false
   },
   methods: {
+    toggleCartOnMobile: function() {
+      this.notDesktop ? this.isCartVisibleOnMobile = !this.isCartVisibleOnMobile : false;
+    },
     setSelectedItem: function(item) {
       this.selectedItem = item
     },
@@ -379,12 +396,21 @@ var app = new Vue({
       this.editingItem = item
     },
     removeItem: function(item) {
-      var i = _.indexOf(this.cartItems, item);
-      this.cartItems.splice(i, 1)
+      var remove = window.confirm("Are you sure you want to remove " + item.name + "?")
+      if (remove) {
+        var i = _.indexOf(this.cartItems, item);
+        this.cartItems.splice(i, 1)
+      }
+    },
+    scrollToTop: function() {
+      window.scrollTo(0,0)
+      if (this.notDesktop) {
+        this.isCartVisibleOnMobile = false
+      }
     },
     handleScroll: function() {
-      if (Math.floor(window.scrollY) >= 196) {
-        this.fixNav = true
+      if ((Math.floor(window.scrollY) >= 196) && this.notDesktop) {
+        this.fixNav = true    
       } else {
         this.fixNav = false
       }
@@ -400,20 +426,25 @@ var app = new Vue({
         for (var opt in i.options) {
           var choices = i.options[opt].choices;
           choices.forEach(function(choice) {
-            item.option_qty[choice.id] = 1 
+            item.option_qty[choice.id] = 1
           })
         }
-        cart.push(item) 
+        cart.push(item)
       })
       this.submitOrder(cart)
     },
     submitOrder: function(cart) {
+      var that = this;
       axios.post('/order', {order: cart, user_id:this.user_id, deliv_id:this.food_session_id})
       .then(function(res) {
-        console.log(res)  
+        console.log(res)
+        that.cartItems = []
+        if (that.notDesktop) {
+          that.isCartVisibleOnMobile = false
+        }
       })
       .catch(function(err) {
-        console.log(err) 
+        console.log(err)
       })
     }
   },
