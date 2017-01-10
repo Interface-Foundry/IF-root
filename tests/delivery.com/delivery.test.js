@@ -11,13 +11,13 @@ var sleep = require('co-sleep')
 require('../../src/db/')
 require('../../src/logging.js')
 
-var mock = require('./old/mock_slack_users.js')
+var mock = require('../mock_data/mock.slack_users.js')
 // LOCAL IMPORTS
 // var mock = require(path.join(SLACK_DIR, 'mock_slack_users.js'))
 
 // TESTING
 
-describe('testing of delivery.com', () => {
+describe.skip('testing of delivery.com', () => {
   before(function * () {
     this.timeout(10000)
     yield mock.setup()

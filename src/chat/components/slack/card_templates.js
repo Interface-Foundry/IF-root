@@ -1,5 +1,3 @@
-var _ = require('lodash');
-
 var shopping_home_default = module.exports.shopping_home_default = function(id) {
   return [{
     name: "more",
@@ -23,7 +21,7 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
 
 var home_screen = module.exports.home_screen = function(isAdmin) {
   let home = {
-    text: 'Hi! Thanks for using Kip 😊',
+    text: require('./utils').randomWelcome(),
     attachments: [{
       'mrkdwn_in': ['text'],
       text: '*Order Food*\nI can order food for your team! This is filler text etc.',

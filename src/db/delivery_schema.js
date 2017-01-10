@@ -16,7 +16,8 @@ var deliverySchema = mongoose.Schema({
   email_users: [],
   chosen_location: {  // from slackbot.meta.locations
       label: String,
-      coordinates: [Number],
+      latitude: Number,
+      longitude: Number,
       address_1: String,
       address_2: String,
       street: String,
@@ -123,6 +124,9 @@ var deliverySchema = mongoose.Schema({
   },
 
   coupon: {
+    code: {
+      type: String,
+    },
     percent: {
       type: Number
     },

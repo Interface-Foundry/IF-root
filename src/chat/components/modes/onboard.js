@@ -167,8 +167,9 @@ handlers['shopping_search'] = function*(message, data) {
     json = message.source.original_message ? message.source.original_message : {
       attachments: []
     };
+  let searchMsg = utils.randomSearching();
   json.attachments = [...json.attachments, {
-    'text': 'Searching...',
+    'text': searchMsg,
     mrkdwn_in: ['text']
   }];
   if (message.source.response_url) {
@@ -179,12 +180,12 @@ handlers['shopping_search'] = function*(message, data) {
     });
   } else {
     var newMessage = new db.Message({
-      text: 'Searching...',
+      text: searchMsg,
       incoming: false,
       thread_id: message.thread_id,
       origin: 'slack',
       mode: 'member_onboard',
-      fallback: 'Searching...',
+      fallback: searchMsg,
       action: 'home',
       source: message.source
     });
@@ -280,7 +281,7 @@ handlers['lunch'] = function * (message) {
     foodSession.onboarding = false
   }
 
-  addressButtons = _.chunk(addressButtons, 5)
+  addressButtons = _.chunk(addressButtons, 5);
   var msg_json = {
     'attachments':
     [{
@@ -535,6 +536,7 @@ handlers['team'] = function * (message) {
       value: channel.id
     }
   });
+  buttons = _.uniq(buttons);
   function sortF(a, b){
     return ((a.text.indexOf('☐ ') > -1) - (b.text.indexOf('☐ ') > -1))
   }
@@ -542,7 +544,7 @@ handlers['team'] = function * (message) {
 
 
   if (buttons.length > 9) {
-     buttons = buttons.slice(0,8);
+     buttons = buttons.slice(0,9);
   }
 
   var chunkedButtons = _.chunk(buttons, 5);
@@ -550,7 +552,7 @@ handlers['team'] = function * (message) {
     color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
   chunkedButtons.forEach((ele, i) => {
     if (i != 0) {
-      attachments.push({text:'', actions: ele, callback_id: 'none'});
+      attachments.push({text:'', actions: ele, color: '#A368F0',callback_id: 'none'});
     }
   })
   attachments.push({
@@ -560,12 +562,16 @@ handlers['team'] = function * (message) {
       fallback:'Step 3/3: Choose the channels you want to include',
       callback_id: 'none'
     });
+  attachments.push({
+    'text': '✎ Hint: You can also type the channels to add (Example: #nyc-office #research)',
+    mrkdwn_in: ['text']
+  })
 
   attachments.push({
-    text: 'Or simply type in the channels you want to include (e.g. #general #marketing #sales) ',
+    text: '',
     color: '#45a5f4',
     mrkdwn_in: ['text'],
-    fallback:'Or simply type in the channels you want to include (e.g. #general #marketing #sales)',
+    fallback:'yolo',
     actions: cardTemplate.slack_onboard_team,
     callback_id: 'none'
   });
@@ -736,78 +742,115 @@ handlers['checkout'] = function * (message) {
 /**
  * Handle user input text
  */
-handlers['text'] = function*(message) {
+handlers['text'] = function * (message) {
   var history = yield db.Messages.find({
     thread_id: message.source.channel
   }).sort('-ts').limit(10);
   var lastMessage = history[1];
   var choices = _.flatten(lastMessage.reply.map( m => { return m.actions }).filter(function(n){ return n != undefined }))
   if (!choices) { return kip.debug('error: lastMessage: ', choices); }
+  var team_id = message.source.team;
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var channelSelection = false;
-  if (choices[0].text.indexOf('☐') > -1 || choices[0].text.indexOf('✓') > -1) {
-    channelSelection = true;
-     var team_id = message.source.team;
-     var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-     var channels = yield utils.getChannels(team);
-      var additionalChoices = channels.slice(choices.length, channels.length);
-      additionalChoices = additionalChoices.map(channel => {
-        var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
-        return  {
-          "value": channel.id,
-          "type": "button",
-          "text": channel.name,
-          "name": "channel_btn"
-        }
-      });
-      choices = choices.concat(additionalChoices);
-      choices = choices.map( (choice) => {
-      if (choice.text && (choice.text.indexOf('☐') > -1 || choice.text.indexOf('✓') > -1)) {
-          choice.text = choice.text.replace('☐','');
-          choice.text = choice.text.replace('✓','');
-          choice.text = choice.text.trim();
-       }
-        return choice;
-      })
-      choices = choices.filter((c) => {
-        return c.name == 'channel_btn'
-      })
+  var channelsToAdd = [];
+  message.text = message.text.trim();
+  if (message.text.toLowerCase() === 'me' || message.text.includes('@')) {
+    return yield handlers['start'](message, [message.text]);
   }
+  if (_.get(choices,'[0].name') == 'channel_btn') {
+      channelSelection = true;
+      if (message.text.indexOf(' ') > -1) {
+        var segments = message.text.split(/[\s ]+/);
+          segments.forEach( (m) => {
+            if (m.indexOf('|') > -1) m = m.split('|')[1];
+            m = m.replaceAll('#','');
+            m = m.replaceAll('<','');
+            m = m.replaceAll('|','');
+            m = m.replaceAll('>','');
+            channelsToAdd.push(m);
+          })
+        } else {
+          if (message.text.indexOf('|') > -1) message.text = message.text.split('|')[1];
+          message.text = message.text.replaceAll('#','');
+          message.text = message.text.replaceAll('<','');
+          message.text = message.text.replaceAll('|','');
+          message.text = message.text.replaceAll('>','');
+        }
+    }
+  var channels = yield utils.getChannels(team);
+  channels = channels.map(channel => {
+    return  {
+      "value": channel.id,
+      "type": "button",
+      "text": channel.name,
+      "name": "channel_btn"
+    }
+  });
+  choices = choices.concat(channels);
+  choices = _.uniq(choices);
+  choices = choices.map( (choice) => {
+    if (choice.text && (choice.text.indexOf('☐') > -1 || choice.text.indexOf('✓') > -1)) {
+        choice.text = choice.text.replace('☐','');
+        choice.text = choice.text.replace('✓','');
+        choice.text = choice.text.trim();
+     }
+    return choice;
+  })
+  choices = choices.filter((c) => {
+    return c.name == 'channel_btn'
+  });
   var fuse = new Fuse(choices, {
     shouldSort: true,
     threshold: 0.6,
     keys: ["text"]
   });
-  var matches = yield fuse.search(message.text);
-  var choice;
+  var matches = [];
+  if(channelsToAdd.length > 0) {
+    yield channelsToAdd.map( function * (text) {
+      var m = yield fuse.search(text);
+      if (_.get(m,'[0].value')) { matches.push(_.get(m,'[0].value')); } 
+    })
+  } else {
+    matches = yield fuse.search(message.text);
+  }
+
   if (matches.length > 0) {
     choice = matches[0].value;
     if (channelSelection) {
-      kip.debug('\n\n\n\n\n\n\n onboard.js 659 : choices: ', choices, matches, choice,' \n\n\n\n\n\n\n')
-      if (team.meta.cart_channels.find(id => { return (id == choice) })) {
-        _.remove(team.meta.cart_channels, function(c) { return c == choice });
+      if (channelsToAdd.length > 0) {
+          matches.map( (selectedChannel) => {
+            if (team.meta.cart_channels.find(id => { return (id == selectedChannel) })) {
+              _.remove(team.meta.cart_channels, function(c) { return c.trim() == selectedChannel.trim() });
+            } else {
+              team.meta.cart_channels.push(selectedChannel);
+            }
+            return 
+         })
       } else {
-        team.meta.cart_channels.push(choice);
+         if (team.meta.cart_channels.find(id => { return (id == matches[0].value) })) {
+            _.remove(team.meta.cart_channels, function(c) { return c == matches[0].value });
+          } else {
+            team.meta.cart_channels.push(matches[0].value);
+        }
       }
       team.markModified('meta.cart_channels');
       yield team.save();
       return yield handlers['team'](message);
     }
-    else if (choice.indexOf('.') > -1) {
-      var handle = choice.split('.')[0];
-      var data = [choice.split('.')[1]];
+    else if (matches[0].value.indexOf('.') > -1) {
+      var handle = matches[0].value.split('.')[0];
+      var data = [matches[0].value.split('.')[1]];
       return yield handlers[handle](message, data);
     } 
     else {
       try {
-        kip.debug(`Trying handlers[${choice}](${message})`);
-        return yield handlers[choice](message);
+        kip.debug(`Trying handlers[${matches[0].value}](${message})`);
+        return yield handlers[matches[0].value](message);
       } catch (err) {
         return yield handlers['shopping_search'](message, [message.text]);
       }
     }
-  } else if (message.text.toLowerCase() === 'me' || message.text.includes('@')) {
-    return yield handlers['start'](message, [message.text]);
-  } else {
+  }  else {
     return yield handlers['shopping_search'](message, [message.text]);
   }
 };
@@ -910,3 +953,8 @@ function default_reply(message) {
     source: message.source
   });
 }
+
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};

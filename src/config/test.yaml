@@ -14,3 +14,10 @@ neighborhoodServer:
   url: http://localhost:9998
 app:
   publicAPI: http://pikachu.kipapp.co/api
+logging:
+  console:
+    level: data
+    colorize: true
+    prettyPrint: true
+  mongo:
+    enabled: false

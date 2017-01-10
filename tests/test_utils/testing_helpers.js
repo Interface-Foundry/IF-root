@@ -15,11 +15,12 @@ var baseDir = function () {
 
 // constants
 module.exports.DELIVERY_DIR = DELIVERY_DIR = path.join(baseDir, 'src/chat/components/delivery.com')
+module.exports.COUPON_DIR = DELIVERY_DIR = path.join(baseDir, 'src/coupon')
 module.exports.TESTING_DIR = TESTING_DIR = path.join(baseDir, 'tests/mock_data')
 
 
 // test module
-module.exports.getFileWithModules = getFileWithModules = function (filename, filenameDir) {
+function getModule(filename, filenameDir) {
   var filePathFromBase = path.join(filenameDir, filename)
   var fileRelativePath = path.relative(__dirname, filePathFromBase)
   return fileRelativePath
@@ -27,20 +28,27 @@ module.exports.getFileWithModules = getFileWithModules = function (filename, fil
 
 // get a single function to test from a filename/module and location of that
 // filenameDir from root
-module.exports.getFunctionFromModule = function (functionName, filename, filenameDir) {
-  var modulePath = getFileWithModules(filename, filenameDir)
+function getFunctionFromModule(functionName, filename, filenameDir) {
+  var modulePath = getModule(filename, filenameDir)
   var moduleToUse = require(modulePath)
   return moduleToUse[functionName]
 }
 
-module.exports.getMockDataModule = getMockDataModule = function (filename) {
+function getMockDataModule(filename) {
   var mockDataPathFromBase = path.join(TESTING_DIR, filename)
   var mockDataRelativePath = path.relative(__dirname, mockDataPathFromBase)
   return mockDataRelativePath
 }
 
 // get mock data with varName
-module.exports.getMockData = function (varName, filename) {
+function getMockData(varName, filename) {
   var mockData = require(getMockDataModule(filename))
   return mockData[varName]
+}
+
+module.exports = {
+  getModule: getModule,
+  getFunctionFromModule: getFunctionFromModule,
+  getMockDataModule:  getMockDataModule,
+  getMockData: getMockData
 }
