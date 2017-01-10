@@ -1,5 +1,6 @@
 'use strict'
 var _ = require('lodash')
+var stable = require('stable')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
@@ -98,6 +99,20 @@ handlers['food.menu.quickpicks'] = function * (message) {
 
     return i
   }).sort((a, b) => b.sortOrder - a.sortOrder)
+
+//~~~~~
+//move items that do not meet the user's current budget to after those that do
+//using a stable sort, to preserve the order of the previous sort within those two categories
+if (foodSession.budget) {
+  var current_ub = foodSession.user_budgets[message.user_id] * 1.25;
+  stable.inplace(sortedMenu, function (a, b) { //sorts b before a if true
+    //if b is under-budget and a is not, sort b before a
+    if (a.price > current_ub && b.price < current_ub) return true;
+    else return false;
+    //but otherwise maintain already-sorted order
+  });
+}
+//~~~~~
 
   var menuItems = sortedMenu.slice(index, index + 3).reverse().map(i => {
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
@@ -212,11 +227,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
     'fallback': 'Search the menu',
     'text': `*${foodSession.chosen_restaurant.name}*`,
     'color': '#49d63a',
-    'fields': [
-      {
-        'short': true,
-        'value': `Aim to spend $${foodSession.user_budgets[message.source.user]}!`
-      },
+    'fields': [ // first field would be budget
       {
         'short': true,
         'value': `*<${foodSession.chosen_restaurant.url}|View Full Menu ⎘>*`
@@ -224,6 +235,19 @@ handlers['food.menu.quickpicks'] = function * (message) {
     ],
     'mrkdwn_in': ['text', 'fields']
   })
+
+  if (foodSession.budget) {
+    if (Number(foodSession.user_budgets[message.user_id]) >= 2) {
+      var text = `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`
+    }
+    else {
+      var text = `_You have already exhausted your budget!_`
+    }
+    msg_json.attachments[msg_json.attachments.length-1].fields.unshift({
+      'short': true,
+      'value': text
+    });
+  }
 
   $replyChannel.send(message, 'food.menu.search', {type: 'slack', data: msg_json})
 }
@@ -380,9 +404,47 @@ handlers['food.item.instructions.submit'] = function * (message) {
 }
 
 handlers['food.item.add_to_cart'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+
+  //~~~budget~~~//
+
+  if (foodSession.user_budgets) {
+    var budgets = foodSession.user_budgets;
+    var menu = Menu(foodSession.menu);
+    var itemPrice = menu.getCartItemPrice(userItem);
+
+    if (itemPrice > (budgets[userItem.user_id]) * 1.25) {
+      yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
+      return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
+        type: 'slack',
+        data: {
+        //   text: `Please choose something cheaper`,
+        //   mrkdwn_in: ['text'],
+        //   color: '#fc9600'
+          attachments: [{
+            color: '#fc9600',
+            fallback: 'the unfrugal are the devils\'s playthings',
+            text: 'Please choose something cheaper'
+          }]
+        },
+      })
+    }
+
+    budgets[userItem.user_id] -= itemPrice;
+
+    yield db.Delivery.update(
+      {team_id: message.source.team, active: true},
+      {$set: {
+        user_budgets: budgets
+      }}
+    );
+  }
+
+  //~~~budget~~~//
+
   var errJson = cart.menu.errors(userItem)
   if (errJson) {
     kip.debug('validation errors, user must fix some things')
