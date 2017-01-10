@@ -37,11 +37,11 @@ handlers['food.cart.personal'] = function * (message, replace) {
     image_url: 'https://storage.googleapis.com/kip-random/kip-my-cafe-cart.png'
   }
 
-  var lineItems = myItems.map((i, index) => {
+  yield myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
     var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
     var quantityAttachment = {
-      title: item.name + ' – ' + menu.getCartItemPrice(i).$,
+      // title: item.name + ' – ' + menu.getCartItemPrice(i).$,
       text: item.description + instructions,
       fallback: item.description + instructions,
       mrkdwn_in: ['text'],
@@ -79,6 +79,12 @@ handlers['food.cart.personal'] = function * (message, replace) {
       }
     }
 
+    var itemMessage = {
+        text: `*${item.name + ' – ' + menu.getCartItemPrice(i).$}*`,
+        attachments: [quantityAttachment]
+    }
+
+    $replyChannel.send(message, 'food.cart.persona', {type: 'slack', data: itemMessage})
     return quantityAttachment
   })
 
@@ -108,16 +114,24 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   var json = {
     text: `*Confirm Your Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    attachments: [banner].concat(lineItems).concat([bottom])
+    attachments: [banner]//.concat(lineItems)//.concat([bottom])
+  }
+
+//send a final (empty) message with "bottom" and this budget thing
+  var finalMessage = {
+    text: '',
+    attachments: [bottom]
   }
 
   if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
-    json.attachments.push({
+    finalMessage.attachments.push({
       'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
       'mrkdwn_in': ['text'],
       'color': '#49d63a'
     });
   }
+
+  $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
 
   if (replace) {
     $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
@@ -137,7 +151,6 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
   userItem.item.item_qty++;
   foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
   //increment user budget by (new) item price
-  console.log('personal budget: ', foodSession.user_budgets[message.user_id]);
   yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
   yield handlers['food.cart.personal'](message, true)
 }
@@ -191,8 +204,6 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 */
 handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-
-  console.log('####', foodSession.confirmed_orders)
 
   //
   // Reply to the user who either submitted their personal cart or said "no thanks"
@@ -255,7 +266,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      text: `*Waiting for order(s) from:*\n${slackers.join(', ')}\n📃 ${emailers.join(', ')}`,
+      text: `*Waiting for order(s) from:*\n${slackers.join(', ')}\n${emailers.join(', ')}`,
       actions: [{
         name: 'food.admin.order.confirm',
         text: 'Finish Order Early',
