@@ -417,39 +417,14 @@ handlers['bundle'] = function * (message, data) {
     ].filter(Boolean).join('\n');
     // add the item actions if needed
     item_message.callback_id = item._id.toString();
-    var buttons = [{
-      "name": "additem",
-      "text": "+",
-      "style": "default",
-      "type": "button",
-      "value": "add"
-    }, {
-      "name": "removeitem",
-      "text": "—",
-      "style": "default",
-      "type": "button",
-      "value": "remove"
-    }];
-
-    if (item.quantity > 1) {
-      buttons.push({
-        name: "removeall",
-        text: 'Remove All',
-        style: 'default',
-        type: 'button',
-        value: 'removeall'
-      })
-    }
-    item_message.actions = buttons;
     attachments.push(item_message);
    }
-    var summaryText = `*Team Cart Summary*
-    *Total:* ${cart.total}`;
-    attachments.push({
-      text: summaryText,
-      mrkdwn_in: ['text', 'pretext'],
-      color: '#45a5f4'
-    });
+  var summaryText = `*Total:* ${cart.total}`;
+  attachments.push({
+    text: summaryText,
+    mrkdwn_in: ['text', 'pretext'],
+    color: '#45a5f4'
+  });
   attachments.push({
     text: 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?',
     mrkdwn_in: ['text'],

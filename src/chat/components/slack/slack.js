@@ -204,8 +204,9 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       // throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
     }
     var msgData = {
-      icon_url: 'http://kipthis.com/img/kip-icon.png',
-      username: 'Kip'
+      // icon_url: 'http://kipthis.com/img/kip-icon.png',
+      // username: 'Kip',
+      as_user: true
     }
     co(function * () {
       if (message.action === 'typing') {
