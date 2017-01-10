@@ -544,11 +544,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     logging.error('error with creating cart payment for some reason', err)
   }
 
-  // if (replace) {
-  //  $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  // } else {
-  $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
-  // }
+  return response
 }
 
 handlers['food.order.instructions'] = function * (message) {
@@ -582,7 +578,7 @@ handlers['food.admin.cart.tip'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   foodSession.tip.percent = message.slack_action.tip
   yield foodSession.save()
-  yield handlers['food.admin.order.confirm'](message, true)
+  return yield handlers['food.admin.order.confirm'](message, true)
 }
 
 handlers['food.admin.cart.quantity.add'] = function * (message) {
@@ -590,7 +586,7 @@ handlers['food.admin.cart.quantity.add'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var itemObjectID = message.slack_action.item_id
   yield db.Delivery.update({_id: foodSession._id, 'cart._id': itemObjectID.toObjectId()}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
-  yield handlers['food.admin.order.confirm'](message, true)
+  return yield handlers['food.admin.order.confirm'](message, true)
 }
 
 handlers['food.admin.cart.quantity.subtract'] = function * (message) {
@@ -604,7 +600,7 @@ handlers['food.admin.cart.quantity.subtract'] = function * (message) {
   } else {
     yield db.Delivery.update({_id: item._id, 'cart._id': itemObjectID.toObjectId()}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   }
-  yield handlers['food.admin.order.confirm'](message, true)
+  return yield handlers['food.admin.order.confirm'](message, true)
 }
 
 module.exports = function (replyChannel, allHandlers) {
