@@ -837,7 +837,7 @@ function randomWelcome() {
   let messages = [
     'Welcome to Kip! \u00A0:smile:',
     'Hi! Thanks for using Kip \u00A0:blush:',
-    'Hey, what do you need? \u00A0:penguin:',
+    'Hey, what do you need? \u00A0:grinning:',
     'Hi, what can I do for you? \u00A0:slightly_smiling_face:'
   ];
   let num = Math.floor(Math.random() * messages.length);

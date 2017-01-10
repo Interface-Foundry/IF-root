@@ -22,29 +22,7 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
 var home_screen = module.exports.home_screen = function(isAdmin) {
   let home = {
     text: require('./utils').randomWelcome(),
-    attachments: [{
-      'mrkdwn_in': ['text'],
-      text: '*Order Food*\nI can order food for your team! This is filler text etc.',
-      color: '#f43440',
-      callback_id: 'wow such home',
-      actions: [{
-        name: 'passthrough',
-        value: 'food',
-        text: 'Kip Café',
-        type: 'button'
-      }]
-    }, {
-      text: '*Get Supplies*\nI can shop for your team! This is filler text blah',
-      'mrkdwn_in': ['text'],
-      color: '#fe9b00',
-      callback_id: 'wow such home',
-      actions: [{
-        name: 'passthrough',
-        value: 'shopping',
-        text: 'Kip Store',
-        type: 'button'
-      }]
-    }]
+    attachments: []
   };
   if (isAdmin) {
     home.attachments.push({
@@ -52,52 +30,79 @@ var home_screen = module.exports.home_screen = function(isAdmin) {
       callback_id: 'wow such home',
       actions: [{
         name: 'settings',
-        text: 'Settings',
+        text: '⚙️',
         style: 'default',
         type: 'button',
         value: 'start'
       }]
     });
   }
+  home.attachments = home.attachments.concat([{
+    'mrkdwn_in': ['text'],
+    text: '*Kip Café*\nI can order food for your team! This is filler text etc.',
+    color: '#f43440',
+    callback_id: 'wow such home',
+    actions: [{
+      name: 'passthrough',
+      value: 'food',
+      text: 'Order Food',
+      type: 'button'
+    }]
+  }, {
+    text: '*Kip Store*\nI can shop for your team! This is filler text blah',
+    'mrkdwn_in': ['text'],
+    color: '#fe9b00',
+    callback_id: 'wow such home',
+    actions: [{
+      name: 'passthrough',
+      value: 'shopping',
+      text: 'Get Supplies',
+      type: 'button'
+    }]
+  }])
   return home;
 };
 
 var onboard_home_attachments = module.exports.onboard_home_attachments = function(delay) {
-  return [{
+  let reply = [{
     mrkdwn_in: ['text'],
-    text: '*Order Food*\nI can order food for your team!\nLet me show you how to make lunch easier',
+    text: '*Kip Café*\nI can order food for your team!\nLet me show you how to make lunch easier',
     color: '#f43440',
     callback_id: 'wow such home',
     actions: [{
       name: 'onboard.start.lunch',
-      text: 'Kip Café',
+      text: 'Order Food',
       style: 'default',
       type: 'button',
       value: 'lunch'
     }]
   }, {
-    text: '*Get Supplies*\nI can shop for your team!\nLet me show you how to make team shopping better',
+    text: '*Kip Store*\nI can shop for your team!\nLet me show you how to make team shopping better',
     mrkdwn_in: ['text'],
     color: '#fe9b00',
     callback_id: 'wow such home',
     actions: [{
       name: 'onboard.start.supplies',
-      text: 'Kip Store',
+      text: 'Get Supplies',
       style: 'default',
       type: 'button',
       value: 'supplies'
     }]
-  }, {
-    text: '',
-    callback_id: 'whatevs',
-    actions: [{
-      name: 'onboard.start.remind_later',
-      text: '◷ Remind Me Later',
-      style: 'default',
-      type: 'button',
-      value: `remind_later.${delay}`
-    }]
   }];
+  if (delay !== 'initial') {
+    reply.push({
+      text: '',
+      callback_id: 'whatevs',
+      actions: [{
+        name: 'onboard.start.remind_later',
+        text: '◷ Remind Me Later',
+        style: 'default',
+        type: 'button',
+        value: `remind_later.${delay}`
+      }]
+    });
+  }
+  return reply;
 };
 
 var settings_menu = module.exports.settings_menu = [{

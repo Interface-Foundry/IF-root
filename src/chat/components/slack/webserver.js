@@ -334,6 +334,7 @@ app.post('/slackaction', next(function * (req, res) {
         };
         var team = message.source.team;
         var slackBot = slackModule.slackConnections[team];
+        reply.as_user = true;
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
 
       }
