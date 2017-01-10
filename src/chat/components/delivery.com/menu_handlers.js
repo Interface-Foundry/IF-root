@@ -354,7 +354,7 @@ handlers['food.item.instructions.submit'] = function * (message) {
 handlers['food.item.add_to_cart'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
-  var userItem = yield cart.getItemInProgress(message.slack_action, message.source.user)
+  var userItem = yield cart.getItemInProgress(message.slack_action.item_id, message.source.user)
   var errJson = cart.menu.errors(userItem)
   if (errJson) {
     kip.debug('validation errors, user must fix some things')
