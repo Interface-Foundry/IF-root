@@ -563,7 +563,7 @@ handlers['team'] = function * (message) {
       callback_id: 'none'
     });
   attachments.push({
-    'text': '✎ Hint: You can also type the channels to add (Example: #general #marketing #sales)',
+    'text': '✎ Hint: You can also type the channels to add (Example: #nyc-office #research)',
     mrkdwn_in: ['text']
   })
 
@@ -851,7 +851,7 @@ handlers['text'] = function * (message) {
       }
     }
   }  else {
-    return yield handlers['sorry'](message, [message.text]);
+    return yield handlers['shopping_search'](message, [message.text]);
   }
 };
 
