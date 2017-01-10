@@ -131,16 +131,13 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Set a default sort order
   sortOrder = sortOrder || SORT.cuisine
 
-  console.log('please CUISINE??', sortOrder)
-
-  console.log('foodSession.votes', foodSession._id)
-
   // will multiply by -1 depending on ascending or decscending
   var directionMultiplier = direction === SORT.ascending ? 1 : -1
 
   //
   // Different ways to compute the score for a merchant. Higher scores show up first.
   //
+  console.log('foodSession.votes', foodSession.votes)
   var scoreAlgorithms = {
     [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
     [SORT.keyword]: (m) => {
@@ -161,19 +158,8 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
 
-  // filter out restaurants whose delivery minimum is significantly above the team's total budget
 
-  if (foodSession.budget) {
-    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
-    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
-    // console.log(merchants[1]);
-    if (cheap_merchants.length == 0) {
-      return merchants
-    }
-    else return cheap_merchants
-  }
-
-  // next filter out restaurants that don't match the keyword if provided
+  // filter out restaurants that don't match the keyword if provided
   if (keyword) {
     var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, {
       shouldSort: true,
@@ -220,6 +206,20 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   }
 
   merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
+
+  // filter out restaurants whose delivery minimum is significantly above the team's total budget
+  if (foodSession.budget) {
+    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
+    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
+    // console.log(merchants[1]);
+    // 
+    // console.log('please be japanese');
+    // console.log(merchants.slice(0, 5).map(m => m.summary.cuisines), '****', cheap_merchants.slice(0, 5).map(m => m.summary.cuisines))
+    if (cheap_merchants.length <= 0) {
+      return merchants
+    }
+    else return cheap_merchants
+  }
 
   return merchants
 }
