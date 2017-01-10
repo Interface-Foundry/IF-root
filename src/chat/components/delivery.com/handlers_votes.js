@@ -137,7 +137,6 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   //
   // Different ways to compute the score for a merchant. Higher scores show up first.
   //
-  console.log('foodSession.votes', foodSession.votes)
   var scoreAlgorithms = {
     [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
     [SORT.keyword]: (m) => {
@@ -271,6 +270,8 @@ handlers['food.admin.vote'] = function * (message) {
 //for when the admin "skip"s the poll
 handlers['food.admin.poll'] = function * (message) {
 
+db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var admin = foodSession.team_members[0]
 
@@ -307,6 +308,8 @@ handlers['food.user.poll'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // ---------------------------------------------
+
+  db.waypoints.log(1120, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var teamMembers = foodSession.team_members
 
@@ -458,6 +461,8 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
+  db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
   if (message.allow_text_matching && !adminHasVoted) {
     return yield handlers['food.admin.restaurant.pick'](message)
@@ -571,6 +576,9 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
+
+  db.waypoints.log(1140, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
@@ -759,6 +767,9 @@ handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = fu
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1200, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
   var cuisines = _.get(foodSession, 'chosen_restaurant_full.summary.cuisines', []).join(', ')
   var msgJson = {
@@ -798,7 +809,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     ]
   }
 
-  console.log('foodSession.email_users', foodSession.email_users)
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];

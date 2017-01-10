@@ -10,6 +10,9 @@ var handlers = {}
 handlers['food.admin.team_budget'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  //waypoint logging
+  db.waypoints.log(1020, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var budget_options;
   var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
   for (var i = 0; i < locations.length; i++) {
@@ -25,8 +28,6 @@ handlers['food.admin.team_budget'] = function * (message) {
     if (num) return num[1];
     else return null;
   }
-
-  console.log('message.text', message.text)
 
   if (message.text && message.text[0] != '{') {
     var num = parseNumber(message.text)
@@ -89,7 +90,7 @@ handlers['food.admin.team_budget'] = function * (message) {
 
   var noneButton = {
     'name': 'passthrough',
-    'text': 'None',
+    'text': 'No Budget',
     'style': 'default',
     'type': 'button',
     'value': 'food.admin_polling_options'
