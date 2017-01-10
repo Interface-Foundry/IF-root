@@ -22,21 +22,17 @@
         <img src="images/kip-head.png">
         <h1 class="restaurant-name">{{merchant.name}}</h1>
       </div>
-      <div class="category-nav">
+      <div v-bind:class="{fixed: fixNav}" class="category-nav">
         <ul class="container">
-          <li>
-            <a href="#">All</a>
-          </li>        
           <li v-for="category in navCategories">
-            <a href="#">{{category.name}}</a>
+            <category-nav-item :category="category"></category-nav-item>
           </li>
-          <li>
-            <a href="#">More</a>
-          </li>                  
+          <more-selector :categories="moreCategories"></more-selector>
         </ul>
       </div>
       <div class="container menu-content">
         <div class="category-set" v-for="category in menu">
+          <h1 :id="category.id"></h1>
           <h2> {{category.name}}</h2>
           <ul>
             <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
@@ -72,11 +68,24 @@
           
         </div>
       </div>
-      <div v-else><img src="images/pineapple.png">Your cart is empty</div>
+      <div v-else><h1 class="cart-empty-text">Your cart is empty</h1></div>
     </div>
     <selected-item  v-if="selectedItem" @close="selectedItem = null" :item=selectedItem v-on:add="addItemToCart"></selected-item>   
     <edit-item v-if="editingItem" @close="editingItem = null" :item=editingItem></selected-item>        
-  </div>    
+  </div>   
+  <script type="text/x-template" id="category-nav-item">
+    <a @click="setNavItem" v-bind:class="{selected:isSelected}":href="'#' + category.id">{{category.name}}</a>
+  </script>
+  <script type="text/x-template" id="more-selector">
+    <div class="more-categories" v-on:mouseenter="enter" v-on:mouseleave="leave" >
+      <li><a>More <span class="arrow"></span></a></li>
+      <div v-show="showMore" class="categories-dropdown">
+        <ul>
+          <li v-for="category in categories"><a :href="'#' + category.id">{{category.name}}</a></li>
+        </ul>
+      </div>
+    </div>
+  </script>
   <script type="text/x-template" id="cart-item">
     <li class="cart-item">
       <div class="item-summary"><img @click="editItem" src="images/edit-icon.svg"><span @click="removeItem">X</span><span class="item-name">({{item.quantity}}) {{item.name}}</span><span class="item-price">${{item.totalPrice.toFixed(2)}}</span></div>
