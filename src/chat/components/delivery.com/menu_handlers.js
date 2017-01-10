@@ -24,8 +24,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
   var recommendeditem_ids = []
 
   // paging
-  var index = parseInt(_.get(message, 'data.value.index')) || 0
-  var keyword = _.get(message, 'data.value.keyword')
+  var index = parseInt(_.get(message, 'slack_action.index')) || 0
+  var keyword = _.get(message, 'slack_action.keyword')
 
   if (keyword) db.waypoints.log(1211, foodSession._id, message.user_id, {original_text: message.original_text})
   else db.waypoints.log(1210, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -325,9 +325,9 @@ handlers['food.item.loadmore'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.slack_action.item_id, message.source.user)
-  var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') : {}
-  var groupId = parseInt(_.get(message, 'data.value.group_id'))
-  var rowCount = parseInt(_.get(message, 'data.value.row_count'))
+  var optionIndices = _.get(message, 'slack_action.optionIndices') ? _.get(message, 'slack_action.optionIndices') : {}
+  var groupId = parseInt(_.get(message, 'slack_action.group_id'))
+  var rowCount = parseInt(_.get(message, 'slack_action.row_count'))
   optionIndices[groupId] = rowCount
 
   var json = cart.menu.generateJsonForItem(userItem, false, message)
@@ -340,8 +340,8 @@ handlers['food.item.loadmore'] = function * (message) {
 handlers['food.option.click'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
-  var option_id = message.data.value.option_id
-  var item_id = message.data.value.item_id
+  var option_id = message.slack_action.option_id
+  var item_id = message.slack_action.item_id
   var userItem = yield cart.getItemInProgress(item_id, message.source.user)
   var optionNode = cart.menu.getItemById(option_id)
   userItem.item.option_qty = userItem.item.option_qty || {}
@@ -391,7 +391,7 @@ function deleteChildren (node, cartItem, deliveryId) {
 handlers['food.item.quantity.add'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
-  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+  var userItem = yield cart.getItemInProgress(message.slack_action, message.source.user)
   userItem.item.item_qty++
   db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
   var json = cart.menu.generateJsonForItem(userItem, false, message)
@@ -402,7 +402,7 @@ handlers['food.item.quantity.add'] = function * (message) {
 handlers['food.item.quantity.subtract'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
-  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+  var userItem = yield cart.getItemInProgress(message.slack_action, message.source.user)
   if (userItem.item.item_qty === 1) {
     // if it's zero here, go back to the menu view
     message.data = {}
@@ -421,7 +421,7 @@ handlers['food.item.instructions'] = function * (message) {
 
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
-  var item_id = message.data.value
+  var item_id = message.slack_action
   var item = cart.menu.getItemById(item_id)
   var msg = {
     text: `Add Special Instructions for *${item.name}*`,
