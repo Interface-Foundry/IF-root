@@ -84,9 +84,9 @@ handlers['food.cart.personal'] = function * (message, replace) {
         attachments: [quantityAttachment]
     }
 
-    $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: itemMessage})
+    // $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: itemMessage})
 
-    return quantityAttachment
+    return itemMessage
   })
 
   var bottom = {
@@ -130,6 +130,10 @@ handlers['food.cart.personal'] = function * (message, replace) {
       'mrkdwn_in': ['text'],
       'color': '#49d63a'
     });
+  }
+
+  for (var i = 0; i < items.length; i++) {
+    yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: items[i]})
   }
 
   yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
@@ -268,7 +272,23 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       color: '#49d63a',
       mrkdwn_in: ['text'],
       text: `*Waiting for order(s) from:*${waitingText}`,
-      actions: [{
+      actions: []
+    })
+
+    var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
+    var totalPrice = myItems.reduce((sum, i) => {
+      return sum + menu.getCartItemPrice(i)
+    }, 0)
+
+    if (totalPrice < foodSession.chosen_restaurant.minimum) {
+      dashboard.attachments.push({
+        color: '#fc9600',
+        mrkdwn_in: ['text'],
+        text: `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`
+      })
+    }
+    else {
+      dashboard.attachments[dashboard.attachments.length-1].actions.push({
         name: 'food.admin.order.confirm',
         text: 'Finish Order Early',
         style: 'default',
@@ -280,8 +300,8 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
             "ok_text": "Yes",
             "dismiss_text": "No"
         }
-      }]
-    })
+      })
+    }
   }
 
   if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
@@ -440,7 +460,13 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       */
 
       // --- COUPON STUFF
-      var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
+
+      //*****breaking the cart for some reason*****//
+
+      // var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
+      var discountAvail = 0
+
+      //*****breaking the cart for some reason*****//
 
       foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
 

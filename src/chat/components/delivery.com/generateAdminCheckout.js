@@ -89,7 +89,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
   }
 
 
-  if (totalPrice < foodSession.chosen_restaurant.minimum) {
+  if (totalPrice < foodSession.chosen_restaurant.minimum)  { //should ostensibly never be true
     checkoutAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` +
                                `_\$${foodSession.chosen_restaurant.minimum}_*`
     } else {
