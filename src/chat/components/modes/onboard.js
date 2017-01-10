@@ -37,15 +37,34 @@ handlers['start'] = function * (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  cancelReminder(message.source.user);
+  var team = yield db.Slackbots.findOne({team_id: team_id}).exec()
   var msg = message;
   msg.mode = 'onboard';
   msg.action = 'home';
-  msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
+  msg.reply = cardTemplate.onboard_home_attachments('initial');
   msg.origin = message.origin;
   msg.source = message.source;
   msg.text = 'Ok, let\'s get started!';
   msg.fallback = 'Ok, let\'s get started!';
+  let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+  let now = new Date();
+  let cronMsg = {
+    mode: 'onboard',
+    action: 'home',
+    reply: cardTemplate.onboard_home_attachments('tomorrow'),
+    origin: message.origin,
+    source: message.source,
+    text: 'Hey, it\'s me again! Ready to get started?',
+    fallback: 'Hey, it\'s me again! Ready to get started?'
+  };
+  scheduleReminder(
+    'initial reminder',
+    new Date(msInFuture + now.getTime()), {
+      msg: JSON.stringify(cronMsg),
+      user: message.source.user,
+      token: team.bot.bot_access_token,
+      channel: message.source.channel
+    });
   return [msg];
 };
 
@@ -82,7 +101,7 @@ handlers['remind_later'] = function * (message, data) {
       text: 'Hey, it\'s me again! Ready to get started?',
       fallback: 'Hey, it\'s me again! Ready to get started?'
     };
-    scheduleReminder(cronMsg, message.source.user, new Date(msInFuture + now.getTime()));
+    scheduleReminder('onboarding reminder', cronMsg, message.source.user, new Date(msInFuture + now.getTime()));
   }
 
   let laterMsg = {
@@ -110,7 +129,7 @@ handlers['remind_later'] = function * (message, data) {
 };
 
 handlers['start_now'] = function (message) {
-  cancelReminder(message.source.user);
+  cancelReminder('onboarding reminder', message.source.user);
   let msg = {
     text: 'Ok, let\'s get started!',
     fallback: 'Ok, let\'s get started!',
@@ -133,6 +152,7 @@ handlers['start_now'] = function (message) {
  * S2
  */
 handlers['supplies'] = function * (message) {
+  cancelReminder('initial reminder', message.source.user);
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -245,6 +265,7 @@ handlers['shopping_search'] = function*(message, data) {
 };
 
 handlers['lunch'] = function * (message) {
+  cancelReminder('initial reminder', message.source.user);
   var msg = message;
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
@@ -843,18 +864,15 @@ handlers['sorry'] = function*(message) {
   return [message];
 };
 
-const scheduleReminder = function(msg, userId, date) {
-  kip.debug('\n\n\nsetting reminder for ', date.toLocaleString(), '\n\n\n');
-  agenda.schedule(date, 'onboarding reminder', {
-    msg: JSON.stringify(msg),
-    user: userId
-  });
+const scheduleReminder = function(type, time, data) {
+  kip.debug('\n\n\nsetting reminder for ', time.toLocaleString(), '\n\n\n');
+  agenda.schedule(time, type, data);
 };
 
-const cancelReminder = function(userId) {
-  kip.debug(`canceling 'onboarding reminder' for ${userId}`)
+const cancelReminder = function(type, userId) {
+  kip.debug(`canceling ${type} for ${userId}`);
   agenda.cancel({
-    'name': 'onboarding reminder',
+    'name': type,
     'data.user': userId
   }, function(err, numRemoved) {
     if (!err) {

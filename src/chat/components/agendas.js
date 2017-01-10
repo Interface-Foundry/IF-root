@@ -1,15 +1,13 @@
-
-var Agenda = require('agenda')
+var Agenda = require('agenda');
 var config = require('../../config');
 var agenda = new Agenda({db: {address: config.mongodb.url}});
-var co = require('co');
-var _ = require('lodash');
 
 require('./jobs/email')(agenda);
 require('./jobs/reminder')(agenda);
+require('./jobs/initial_reminder')(agenda);
 
 agenda.on('ready', function () {
   agenda.start();
 });
 
-module.exports = agenda
+module.exports = agenda;
