@@ -124,7 +124,6 @@ handlers['food.admin.team_budget'] = function * (message) {
 }
 
 function updateBudget (n, location) {
-  console.log(location.budgets, location.budget_history);
   var n = Number(n);
   var history = location.budget_history;
   var budgets = location.budgets;
@@ -150,7 +149,6 @@ handlers['food.admin.confirm_budget'] = function * (message) {
     for (var i = 0; i < locations.length; i++) {
       if (locations[i].address_1 == foodSession.chosen_location.address_1 && locations[i].zip_code == foodSession.chosen_location.zip_code) {
         var updated = updateBudget(budget, locations[i]);
-        console.log('update budget returns', updated)
         locations[i].budgets = updated[0];
         locations[i].budget_history = updated[1];
       }

@@ -131,6 +131,8 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Set a default sort order
   sortOrder = sortOrder || SORT.cuisine
 
+  console.log('please CUISINE??', sortOrder)
+
   console.log('foodSession.votes', foodSession._id)
 
   // will multiply by -1 depending on ascending or decscending
