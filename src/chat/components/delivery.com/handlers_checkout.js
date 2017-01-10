@@ -30,7 +30,7 @@ handlers['food.admin.order.checkout.address2'] = function * (message) {
         'name': `food.admin.order.checkout.confirm`,
         'text': `None`,
         'type': `button`,
-        'value': `none`
+        'value': { route: `food.admin.order.checkout.confirm`, command: `none` }
       }]
     }]
   }
@@ -98,7 +98,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
     logging.info('saving name of person receiving order: ', message.text)
     if (message.text.split(' ').length > 1) {
       foodSession.convo_initiater.first_name = message.text.split(' ')[0]
-      foodSession.convo_initiater.last_name = message.text.split(' ')[1]
+      foodSession.convo_initiater.last_name = message.text.split(' ').slice(1).join(' ')
       foodSession.markModified('convo_initiater')
       yield foodSession.save()
     } else {
@@ -168,7 +168,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
             'name': `food.admin.order.checkout.name`,
             'text': `Edit`,
             'type': `button`,
-            'value': `edit`
+            'value': { route: `food.admin.order.checkout.name`, command: `edit` }
           }
         ]
       },
@@ -197,7 +197,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
             'name': 'food.admin.order.checkout.address2',
             'text': `Edit`,
             'type': `button`,
-            'value': `edit`
+            'value': { route: 'food.admin.order.checkout.address2', command: `edit` }
           }
         ]
       },
@@ -216,7 +216,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
             'name': `food.admin.order.checkout.phone_number`,
             'text': `Edit`,
             'type': `button`,
-            'value': `edit`
+            'value': { route: `food.admin.order.checkout.phone_number`, command: `edit` }
           }
         ]
       },
@@ -232,7 +232,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
             'name': `food.admin.order.checkout.delivery_instructions`,
             'text': `✎ Edit`,
             'type': `button`,
-            'value': `edit`
+            'value': { route: `food.admin.order.checkout.delivery_instructions` }
           }
         ]
       },
@@ -246,7 +246,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
           'text': `✓ Confirm Address`,
           'type': `button`,
           'style': `primary`,
-          'value': `confirm`
+          'value': { route: `food.admin.order.pay` }
         }]
       }
     ]
@@ -298,12 +298,12 @@ handlers['food.admin.order.pay'] = function * (message) {
         'name': `food.admin.add_new_card`,
         'text': `+ Add New Card`,
         'type': `button`,
-        'value': `add`
+        'value': { route: `food.admin.add_new_card` }
       }, {
         'name': `food.admin.order.confirm`,
         'text': `< Change Order`,
         'type': `button`,
-        'value': `change`
+        'value': { route: `food.admin.order.confirm` }
       }]
     }]
   }
@@ -338,13 +338,13 @@ handlers['food.admin.order.pay'] = function * (message) {
           'text': `✓ Select Card`,
           'type': `button`,
           'style': `primary`,
-          'value': c.card.card_id
+          'value': { route: `food.admin.order.select_card`, card_id: c.card.card_id }
         }, {
           name: 'food.admin.order.remove_card',
           text: 'Remove Card',
           type: 'button',
           style: 'default',
-          value: c.card.card_id,
+          value: { route: 'food.admin.order.remove_card', card_id: c.card.card_id },
           confirm: {
             title: 'Confirm Remove Card',
             text: `Are you sure you want to remove the card ending in ${c.card.last4} from your list of saved credit cards?`,
@@ -361,12 +361,12 @@ handlers['food.admin.order.pay'] = function * (message) {
 }
 
 handlers['food.admin.order.remove_card'] = function * (message) {
-  if (!message.data.value) {
+  if (!message.slack_action.card_id) {
     return logging.error('could not remove card because card_id was undefined')
   }
 
   var slackbot = yield db.Slackbots.update({team_id: message.source.team}, {
-    $pull: {'meta.payments': {'card.card_id': message.data.value}}
+    $pull: {'meta.payments': {'card.card_id': message.slack_action.card_id}}
   }).exec()
 
   return yield handlers['food.admin.order.pay'](message)
@@ -450,7 +450,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var card = _.find(slackbot.meta.payments, {
-    'card': {'card_id': message.source.actions[0].value}
+    'card': {'card_id': message.slack_action.card_id}
   })
 
   // add various shit to the foodSession
@@ -513,7 +513,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
 handlers['food.admin.order.pay.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  var c = _.find(slackbot.meta.payments, {'card': {'card_id': message.source.actions[0].value}})
+  var c = _.find(slackbot.meta.payments, {'card': {'card_id': message.slack_action.card_id}})
   var response = {
     text: ``,
     fallback: `Confirm pay`,
@@ -531,12 +531,12 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
         'text': `✓ Order - \$${foodSession.calculated_amount}`,
         'type': `button`,
         'style': `primary`,
-        'value': c.card.card_id
+        'value': { route: `food.admin.order.select_card`, card_id: c.card.card_id }
       }, {
-        'name': `food.admin.order.select_card`,
+        'name': `food.admin.order.pay`,
         'text': `< Change Card`,
         'type': `button`,
-        'value': 'change'
+        'value': { route: `food.admin.order.pay` }
       }]
     }]
   }
