@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html
 <head>
-  <title>Menu</title>
+  <meta name="viewport" content="width=device-width" />
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Language" content="en">
+  <title>Kip Cafe</title>
   <link rel="stylesheet" type="text/css" href="css/styles.css" />
 </head>
 <body>
   <div id="app" v-cloak>
     <header>
       <nav class="container">
-        <div class="logo image-container">
+        <div @click="scrollToTop" class="logo image-container">
           <img src="images/kip-logo.png">
         </div>
+        <div @click="toggleCartOnMobile"  v-bind:class="{visible: isCartVisibleOnMobile}" class="mobile-cart-indicator"></div>
         <div class="cart-icon image-container">
-          <img src="images/cart-icon.png">
-          <span v-if="cartItemsQty" class="nav-cart-quantity">{{cartItemsQty}}</span>
+          <img @click="toggleCartOnMobile" src="images/cart-icon.png">
+          <span @click="toggleCartOnMobile" v-if="cartItemsQty" class="nav-cart-quantity">{{cartItemsQty}}</span>
         </div>
       </nav>
     </header>
@@ -40,7 +45,7 @@
         </div>
       </div>
     </div>
-    <div class="right-panel">
+    <div v-bind:class="{visible: isCartVisibleOnMobile}" class="right-panel">
       <div v-if="showCart"  class="cart">
         <div class="cart-header">
           <h3> Your Kip Cafe order</h3>
@@ -88,7 +93,7 @@
   </script>
   <script type="text/x-template" id="cart-item">
     <li class="cart-item">
-      <div class="item-summary"><img @click="editItem" src="images/edit-icon.svg"><span @click="removeItem">X</span><span class="item-name">({{item.quantity}}) {{item.name}}</span><span class="item-price">${{item.totalPrice.toFixed(2)}}</span></div>
+      <div class="item-summary"><span class="remove-item-icon" @click="removeItem">X</span><span class="item-name">({{item.quantity}}) {{item.name}}</span><img class="edit-item-icon" @click="editItem" src="images/edit-icon.svg"><span class="item-price">${{item.totalPrice.toFixed(2)}}</span></div>
       <ul class="item-options">
         <li class="item-option-set" v-for="opt in item.options">
           <p class="item-option-name">{{opt.option.name}}</p>   
@@ -102,12 +107,12 @@
   <script type="text/x-template" id="category-item">
     <li @click="selectItem">
       <div class="item-title"><p class="item-name">{{item.name}}</p><span class="item-price">${{item.price.toFixed(2)}}</span></div>
-      <small class="item-description" v-if="item.description">{{item.description}}</small> 
+      <small class="item-description" v-if="item.description">{{descriptionDisplay}}</small> 
     </li>
   </script>
   <script type="text/x-template" id="option-set">
     <div>
-      <p> {{option.name}}</p>              
+      <h5> {{option.name}}</h5>              
       <div class="option-body">
         <choice v-on:options="updateOptions" v-for="choice in option.children" :option=option :choice=choice :type="inputType">
       </div>
@@ -137,9 +142,11 @@
               <div class="option-set" v-for="option in item.children">
                 <option-set v-on:setOptions="setOptions" :item=item :option=option></option-set>
               </div>
-              <p>Special Instructions</p>
-              <textarea v-model="instructions"></textarea>            
             </div>
+            <div class="special-instructions">
+              <h5>Special Instructions</h5>
+              <textarea v-model="instructions"></textarea>    
+            </div>            
             <div class="modal-footer">
               <button @click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice.toFixed(2)}} </button>
             </div>
@@ -169,8 +176,10 @@
               <div class="option-set" v-for="option in item.children">
                 <option-set v-on:setOptions="setOptions" :item=item :option=option></option-set>
               </div>
-              <p>Special Instructions</p>
-              <textarea v-model="instructions"></textarea>            
+            </div>
+            <div class="special-instructions">
+              <h5>Special Instructions</h5>
+              <textarea v-model="instructions"></textarea>    
             </div>
             <div class="modal-footer">
               <button @click="updateItem" class="base-btn"> Update Order ${{totalPrice.toFixed(2)}} </button>
@@ -180,8 +189,11 @@
       </div>
     </transition>
   </script>
-  <script src="js/lodash.min.js"></script>                    
-  <script src="js/vue.min.js"></script>
+  <script src="js/lodash.min.js"></script>   
+  <script src="js/vue.js"></script>
+  <!-- flexbox polyfill -->
+  <script src="js/flexibility.js"></script>
+  <script>flexibility(document.body);</script>
   <script src="js/axios.min.js"></script>      
   <script src="js/main.js"></script>                  
 </body>
