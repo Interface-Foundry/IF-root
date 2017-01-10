@@ -30,10 +30,14 @@ function * updateCouponForCafe(foodSession_id) {
       coupon_code: foodSession.coupon.code,
       available: true
     }).exec()
+
+    // update some qualities since using findoneandupdate idk
     coupon.time.used = Date.now()
     coupon.quanitity_coupon.used++
     coupon.coupon_order.push({
       order_amount: foodSession.order.total,
+      user_id: foodSession.convo_initiater.id,
+      foodsession_id: foodSession._id
     })
     yield coupon.save()
   } catch (err) {
@@ -43,6 +47,6 @@ function * updateCouponForCafe(foodSession_id) {
 
 
 module.exports = {
-  getLatestFoodCoupon: getLatestFoodCoupon
+  getLatestFoodCoupon: getLatestFoodCoupon,
   updateCouponForCafe: updateCouponForCafe
 }

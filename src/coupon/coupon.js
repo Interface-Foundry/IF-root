@@ -1,15 +1,18 @@
-require('../kip.js')
+// require('../kip.js')
 // create and validate mongoose
 var uuid = require('uuid')
 var _ = require('lodash')
-var couponHelpers = require('./coupon_helpers.js')
 
+// function * createCoupon(options) {
+
+//   var coupon = new db.Coupons(_.omitBy(options, _.is)
+// }
 
 /*
 * create a coupon for a team_id that can be used multiple times
 */
 function * createNewMultiUseCoupon(team_id, couponType, couponAmount, uses, couponCode=false, promotion=false) {
-  var coupon = new db.Coupon(_.omitBy({
+  var coupon = new db.Coupons(_.omitBy({
     'team_id': team_id,
     'coupon_code': couponCode ? couponCode : uuid.v4(),
     'quantity_coupon.can_be_used': uses,
@@ -23,8 +26,8 @@ function * createNewMultiUseCoupon(team_id, couponType, couponAmount, uses, coup
 /*
 * same as above but
 */
-function * createNewSingleUseCoupon(team_id, couponType, couponAmount, uses, couponCode=false, promotion=false) {
-  var coupon = new db.Coupon(_.omitBy({
+function * createNewSingleUseCoupon(team_id, couponType, couponAmount, couponCode=false, promotion=false) {
+  var coupon = new db.Coupons(_.omitBy({
     'team_id': team_id,
     'coupon_code': couponCode ? couponCode : uuid.v4(),
     'coupon_discount': couponAmount,
@@ -38,23 +41,25 @@ function * createNewSingleUseCoupon(team_id, couponType, couponAmount, uses, cou
 *
 */
 function * checkTeamFor10PercentOffFirstOrder(team_id) {
-  var teamsCoupons = yield db.Coupon.findOne({team_id: team_id, coupon_code: '10PercentOffFor5Uses'})
+  const couponCode = '10PercentOffFor5Uses'
+  var teamsCoupons = yield db.Coupons.findOne({team_id: team_id, coupon_code: couponCode})
   if (!teamsCoupons) {
     logging.info(`creating coupon for team_id:${team_id} as they havent dont this before`)
-    yield couponHelpers.createNewMultiUseCoupon(team_id, 'percentage', 10, 5, '10PercentOffFor5Uses', 'first 5 uses get 10 percent off')
+    yield createNewMultiUseCoupon(team_id, 'percentage', .10, 5, couponCode, 'first 5 uses get 10% off')
   } else {
     logging.info(`team_id:${team_id} already had 10% off for 5 first orders coupon added`)
   }
 }
 
-function * refreshAllTeamCoupons(team_id) {
+function * refreshTeamCoupons(team_id) {
   yield checkTeamFor10PercentOffFirstOrder(team_id)
 }
 
 
 
 module.exports = {
-  refreshAllTeamsCoupons: refreshAllTeamsCoupons
+  createNewMultiUseCoupon: createNewMultiUseCoupon,
+  refreshTeamCoupons: refreshTeamCoupons
 }
 
 

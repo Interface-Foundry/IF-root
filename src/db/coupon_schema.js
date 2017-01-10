@@ -38,7 +38,7 @@ var couponSchema = mongoose.Schema({
   coupon_order: [{
     order_amount: Number, // value of their order
     user_id: String,
-    delivery_id: {
+    foodsession_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "delivery"
     }
@@ -62,11 +62,13 @@ var couponSchema = mongoose.Schema({
   }
 })
 
-couponSchema.post('save', function (coupon) {
-  if (coupon.quantity_coupon.used <= coupon.quantity_coupon.used) {
+couponSchema.post('init', function (coupon) {
+  if (coupon.quantity_coupon.can_be_used <= coupon.quantity_coupon.used) {
     coupon.available = false
+    coupon.save()
   }
 })
+
 
 // create the model for users and expose it to our app
 module.exports = mongoose.model('Coupon', couponSchema)

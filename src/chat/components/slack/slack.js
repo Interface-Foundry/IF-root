@@ -44,7 +44,7 @@ SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client')
 var co = require('co')
 var _ = require('lodash')
-var kip = require('../../../kip')
+var kip = require('../../../kip.js')
 var queue = require('../queue-mongo')
 var image_search = require('../image_search')
 var search_results = require('./search_results')
@@ -59,6 +59,7 @@ var bundles = require('../bundles');
 bundles.updater(); //caches bundle items to mongo everyday at midnight
 
 var slackUtils = require('./utils.js')
+var coupon = require('../../../coupon/coupon.js')
 
 
 
@@ -78,6 +79,7 @@ function * loadTeam(slackbot) {
 
   co(function * () {
     yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
+    yield coupon.refreshTeamCoupons(slackbot.team_id)
   })
   // TODO figure out how to tell when auth is invalid
   // right now the library just console.log's a message and I can't figure out
