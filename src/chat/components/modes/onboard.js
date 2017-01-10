@@ -851,7 +851,6 @@ handlers['text'] = function * (message) {
       }
     }
   }  else {
-    kip.debug(' \n\n\n\n\n\n\n\n  WHOAA LOL : ', message.text, matches, choices,' \n\n\n\n\n\n\n\n ')
     return yield handlers['sorry'](message, [message.text]);
   }
 };

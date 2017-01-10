@@ -149,6 +149,8 @@ handlers['text'] = function * (message) {
   var channelSelection = false;
   var channelsToAdd = [];
   if (_.get(choices,'[0].name') == 'channel_btn') {
+      channelSelection = true;
+
       if (message.text.indexOf(' ') > -1) {
         var segments = message.text.split(/[\s ]+/);
           segments.forEach( (m) => {
@@ -159,9 +161,15 @@ handlers['text'] = function * (message) {
             m = m.replaceAll('>','');
             channelsToAdd.push(m);
           })
-        } 
+          
+        } else {
+          if (message.text.indexOf('|') > -1) message.text = message.text.split('|')[1];
+          message.text = message.text.replaceAll('#','');
+          message.text = message.text.replaceAll('<','');
+          message.text = message.text.replaceAll('|','');
+          message.text = message.text.replaceAll('>','');
+        }
    }
-  channelSelection = true;
   var channels = yield utils.getChannels(team);
   channels = channels.map(channel => {
     return  {
