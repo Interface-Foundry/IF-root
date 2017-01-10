@@ -427,21 +427,24 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       possibly remove service fee from coupon stuff but do
       */
 
-      // check if team has any hardcoded coupons
-      var discountAvail = _.find(coupon.couponTeams, function (discounts) {
-        return _.includes(discounts.teams, foodSession.team_id)
-      })
+      // --- COUPON STUFF
+      var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
 
       foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
 
       if (discountAvail) {
-        // this is literally needed to prevent rounding errors
-        if (foodSession.coupon.used === false) {
-          foodSession.coupon.used = true
-          foodSession.coupon.percent = discountAvail.couponDiscount
+        if (discountAvail.coupon_type === 'percentage') {
+          logging.info('using coupon')
+          foodSession.coupon.percent = discountAvail.coupon_discount
+          foodSession.coupon.code = discountAvail.coupon.coupon_code
+        } else {
+          logging.error('error we are only using percentage coupons rn with cafe')
+          return
         }
 
-        foodSession.discount_amount = Number((Math.round(((discountAvail.couponDiscount * (foodSession.main_amount)) * 1000) / 10) / 100).toFixed(2))
+        foodSession.discount_amount = Number((Math.round(
+          ((discountAvail.coupon_discount * (foodSession.main_amount)) * 1000) / 10) / 100).toFixed(2)
+        )
       } else {
         foodSession.discount_amount = 0.00
       }
@@ -451,16 +454,16 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         foodSession.calculated_amount = 0.50 // stripe thing
       }
 
-      // check for order over $510 (pre coupon) not processing over $510 (pre coupon)
-      if (_.get(discountAvail, 'couponDiscount', 0) === 0.99 && foodSession.order.total > 510.00) {
-        $replyChannel.send(message, 'food.exit', {
-          type: message.origin,
-          data: {
-            'text': 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions'
-          }
-        })
-        return
-      }
+      // // check for order over $510 (pre coupon) not processing over $510 (pre coupon)
+      // if (_.get(discountAvail, 'couponDiscount', 0) === 0.99 && foodSession.order.total > 510.00) {
+      //   $replyChannel.send(message, 'food.exit', {
+      //     type: message.origin,
+      //     data: {
+      //       'text': 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions'
+      //     }
+      //   })
+      //   return
+      // }
 
       yield foodSession.save()
 

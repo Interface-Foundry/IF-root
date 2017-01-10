@@ -124,6 +124,9 @@ var deliverySchema = mongoose.Schema({
   },
 
   coupon: {
+    code: {
+      type: String,
+    },
     percent: {
       type: Number
     },
