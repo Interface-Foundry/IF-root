@@ -55,19 +55,19 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
           name: 'food.cart.personal.quantity.subtract',
           text: '—',
           type: 'button',
-          value: index
+          value: { route: 'food.cart.personal.quantity.subtract', index: index }
         },
         {
           name: 'food.null',
           text: i.item.item_qty,
           type: 'button',
-          value: item.id
+          value: { route: 'food.null' }
         },
         {
           name: 'food.cart.personal.quantity.add',
           text: '+',
           type: 'button',
-          value: index
+          value: { route: 'food.cart.personal.quantity.add', index: index }
         }
       ]
     }
@@ -103,7 +103,7 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
         'name': 'food.menu.quickpicks',
         'text': '< Order More',
         'type': 'button',
-        'value': ''
+        'value': { route: 'food.menu.quickpicks' }
       }
     ]
   }
@@ -139,7 +139,7 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
 handlers['food.cart.personal.quantity.add'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
-  var index = message.source.actions[0].value
+  var index = message.slack_action.index
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
   //decrement user budget by item price
   if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
@@ -159,7 +159,7 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
 handlers['food.cart.personal.quantity.subtract'] = function * (message, over_budget) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
-  var index = message.source.actions[0].value
+  var index = message.slack_action.index
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
   if (userItem.item.item_qty === 1) {
     // don't let them go down to zero
@@ -600,17 +600,17 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
         'name': `food.admin.cart.quantity.subtract`,
         'text': `—`,
         'type': `button`,
-        'value': item._id.toString()
+        'value': { route: `food.admin.cart.quantity.subtract`, item_id: item._id.toString() }
       }, {
         'name': `food.null`,
         'text': String(item.item.item_qty),
         'type': `button`,
-        'value': item.item.item_id
+        'value': { route: 'food.null', item_id: item.item.item_id }
       }, {
         'name': `food.admin.cart.quantity.add`,
         'text': `+`,
         'type': `button`,
-        'value': item._id.toString()
+        'value': { route: `food.admin.cart.quantity.add`, item_id: item._id.toString() }
       }]
     }
   })
@@ -701,6 +701,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
       //   return
       // }
 
+
       yield foodSession.save()
 
       // THIS CREATES THE TIP, DELIVERY.COM COSTS, AND KIP ATTACHMENT
@@ -769,7 +770,7 @@ handlers['food.member.order.view'] = function * (message) {
 
 handlers['food.admin.cart.tip'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  foodSession.tip.percent = message.source.actions[0].value
+  foodSession.tip.percent = message.slack_action.tip
   yield foodSession.save()
   yield handlers['food.admin.order.confirm'](message, true)
 }
@@ -777,14 +778,14 @@ handlers['food.admin.cart.tip'] = function * (message) {
 handlers['food.admin.cart.quantity.add'] = function * (message) {
   logging.info('attempting to increase quantity of item')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var itemObjectID = message.source.actions[0].value
+  var itemObjectID = message.slack_action.item_id
   yield db.Delivery.update({_id: foodSession._id, 'cart._id': itemObjectID.toObjectId()}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
   yield handlers['food.admin.order.confirm'](message, true)
 }
 
 handlers['food.admin.cart.quantity.subtract'] = function * (message) {
   logging.info('attempting to decrease quantity of item')
-  var itemObjectID = message.source.actions[0].value
+  var itemObjectID = message.slack_action.item_id
   var item = yield db.Delivery.findOne({team_id: message.source.team, active: true}, {'cart': itemObjectID.toObjectId()}).exec()
   if (item.cart[0].item.item_qty === 1) {
     // delete item
