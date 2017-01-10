@@ -1,4 +1,5 @@
 var choiceBus = new Vue({})
+var categoryNavBus = new Vue({})
 
 Vue.component('choice', {
   template: '#choice',
@@ -244,6 +245,52 @@ Vue.component('category-item', {
   },
 })
 
+Vue.component('more-selector', {
+  template: '#more-selector',
+  props: ['categories'],
+  data: function() {
+    return {
+      showMore: false,
+    }
+  },
+  methods: {
+    enter: function() {
+      this.showMore = true
+    },
+    leave: function() {
+      this.showMore = false
+    }
+  },
+})
+
+Vue.component('category-nav-item', {
+  props: ['category'],
+  template: '#category-nav-item',
+  data: function() {
+    return {
+      isSelected: false,
+      id: this.category.id,
+      name: this.category.name
+    }
+  },
+  methods: {
+    setNavItem: function() {
+      categoryNavBus.$emit('nav-item-selected', this)
+    }
+  },
+  created: function() {
+    var that = this;
+    this.id == "all" ? this.isSelected = true : this.isSelected = false
+    categoryNavBus.$on('nav-item-selected', function(item) {
+      if (item == that) {
+        that.isSelected = true
+      } else {
+        that.isSelected = false
+      }
+    })
+  }
+})
+
 
 Vue.component('selected-item', {
   template: '#item-detail',
@@ -311,12 +358,13 @@ var app = new Vue({
   data: {
     merchant: "",
     menu: "",
-    navCategories: null,
-    moreCategories: null,
+    navCategories: [],
+    moreCategories: [],
     selectedItem: null,
     editingItem: null,
     cartItems: [],
     budget: 0,
+    fixNav: false,
   },
   methods: {
     setSelectedItem: function(item) {
@@ -331,7 +379,14 @@ var app = new Vue({
     removeItem: function(item) {
       var i = _.indexOf(this.cartItems, item);
       this.cartItems.splice(i, 1)
-    }
+    },
+    handleScroll () {
+      if (Math.floor(window.scrollY) >= 196) {
+        this.fixNav = true
+      } else {
+        this.fixNav = false
+      }
+    } 
   },
   computed: {
     cartItemsTotal: function() {
@@ -376,16 +431,17 @@ var app = new Vue({
   },
   watch: {
     menu: function() {
-      this.navCategories = this.menu.slice(0, 5)
+      this.navCategories = this.menu.slice(0,5)
       this.moreCategories = this.menu.slice(5, -1)
     }
   },
   created: function() {
+    window.addEventListener('scroll', this.handleScroll);
     var that = this;
     var key = window.location.search.split("=")[1]
     var ms = axios.post('/session', {session_token: key})
     .then((response) => {
-
+      console.log(response)
       var menuData = response.data.menu.data
       var menu;
       if (menuData.length > 1) {
@@ -408,5 +464,5 @@ var app = new Vue({
     .catch((err) => {
       console.log(err);
     });
-  }
+  },
 })
