@@ -281,7 +281,7 @@ handlers['lunch'] = function * (message) {
     foodSession.onboarding = false
   }
 
-  addressButtons = _.chunk(addressButtons, 5)
+  addressButtons = _.chunk(addressButtons, 5);
   var msg_json = {
     'attachments':
     [{
@@ -758,6 +758,7 @@ handlers['text'] = function * (message) {
     return yield handlers['start'](message, [message.text]);
   }
   if (_.get(choices,'[0].name') == 'channel_btn') {
+      channelSelection = true;
       if (message.text.indexOf(' ') > -1) {
         var segments = message.text.split(/[\s ]+/);
           segments.forEach( (m) => {
@@ -768,9 +769,14 @@ handlers['text'] = function * (message) {
             m = m.replaceAll('>','');
             channelsToAdd.push(m);
           })
-        } 
+        } else {
+          if (message.text.indexOf('|') > -1) message.text = message.text.split('|')[1];
+          message.text = message.text.replaceAll('#','');
+          message.text = message.text.replaceAll('<','');
+          message.text = message.text.replaceAll('|','');
+          message.text = message.text.replaceAll('>','');
+        }
     }
-  channelSelection = true;
   var channels = yield utils.getChannels(team);
   channels = channels.map(channel => {
     return  {
@@ -845,6 +851,7 @@ handlers['text'] = function * (message) {
       }
     }
   }  else {
+    kip.debug(' \n\n\n\n\n\n\n\n  WHOAA LOL : ', message.text, matches, choices,' \n\n\n\n\n\n\n\n ')
     return yield handlers['sorry'](message, [message.text]);
   }
 };
