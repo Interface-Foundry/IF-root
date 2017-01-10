@@ -177,18 +177,25 @@ app.post('/slackaction', next(function * (req, res) {
         var channelId = _.get(parsedIn,'actions[0].value');
         var team_id = message.source.team;
         var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+        var history = yield db.Messages.find({
+          thread_id: message.source.channel
+        }).sort('-ts').limit(3);
+        var lastMessage = history[0];
+        var mode = lastMessage.mode;
         if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
           // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
           _.remove(team.meta.cart_channels, function(c) { return c == channelId });
         } else {
           team.meta.cart_channels.push(channelId);
         }
+        team.meta.cart_channels = _.uniq(team.meta.cart_channels);
         team.markModified('meta.cart_channels');
         yield team.save();
         var channels = yield utils.getChannels(team);
          if (channels.length > 9) {
           channels = channels.slice(0,9);
         }
+        var attachments = [];
         var buttons = channels.map(channel => {
           var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
           return {
@@ -198,23 +205,64 @@ app.post('/slackaction', next(function * (req, res) {
             value: channel.id
           }
         });
-        var buttonRow;
-        var json = parsedIn.original_message;
-        for (var i = 0; i < buttons.length; i++) {
-          if (buttons[i].value === channelId) {
-            buttonRow = Math.floor(i/5);
-          }
+        buttons = _.uniq(buttons);
+        function sortF(a, b){
+          return ((a.text.indexOf('☐ ') > -1) - (b.text.indexOf('☐ ') > -1))
+        }
+        buttons = buttons.sort(sortF)
+        if (buttons.length > 9) {
+           buttons = buttons.slice(0,9);
         }
         var chunkedButtons = _.chunk(buttons, 5);
-        var newRow = {
-          text: buttonRow == 0 ? parsedIn.original_message.attachments[buttonRow + 1].text : '',
-          actions: chunkedButtons[buttonRow],
-          callback_id: 'none',
-          mrkdwn_in: ['text'],
-          color: parsedIn.original_message.attachments[buttonRow + 1].color || null
-        };
-        json.attachments.splice(buttonRow + 1, 1, newRow); // I guess there's just a phantom attachment on top????
-                                                           // maybe I just don't understand slack yet
+        if (mode == 'onboard') {
+         attachments.push({text: '*Step 3/3:* Choose the channels you want to include: ', mrkdwn_in: ['text'],
+            color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
+        } else {
+         attachments.push({image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
+          text: 'Which channels do you want to include? ', mrkdwn_in: ['text'],
+          color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
+        }
+        chunkedButtons.forEach((ele, i) => {
+          if (i != 0) {
+            attachments.push({text:'', actions: ele, color: '#A368F0',callback_id: 'none'});
+          }
+        })
+        if (mode == 'onboard') {
+          attachments.push({
+            text: '',
+            color: '#45a5f4',
+            mrkdwn_in: ['text'],
+            fallback:'Step 3/3: Choose the channels you want to include',
+            callback_id: 'none'
+          });
+         } 
+        attachments.push({
+          'text': '✎ Hint: You can also type the channels to add (Example: #nyc-office #research)',
+          mrkdwn_in: ['text']
+         })
+
+        if (mode == 'onboard') {
+          attachments.push({
+            text: '',
+            color: '#45a5f4',
+            mrkdwn_in: ['text'],
+            fallback:'yolo',
+            actions: cardTemplate.slack_onboard_team,
+            callback_id: 'none'
+          });
+        } else {
+          attachments.push({
+            text: '',
+            color: '#45a5f4',
+            mrkdwn_in: ['text'],
+            fallback:'yolo',
+            actions: cardTemplate.team_buttons,
+            callback_id: 'none'
+          });
+        }
+        var json = parsedIn.original_message;
+        json.attachments = attachments
+        kip.debug('\n\n\n\n\n\n\n\n\n\n\n webserver 259: ', mode, json, '\n\n\n\n\n\n\n\n\n\n\n' )
         let stringOrig = JSON.stringify(json);
         let map = {
           amp: '&',

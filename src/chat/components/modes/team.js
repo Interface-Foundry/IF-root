@@ -63,13 +63,6 @@ handlers['start'] = function * (message) {
     }
   })
   attachments.push({
-      text: '',
-      color: '#45a5f4',
-      mrkdwn_in: ['text'],
-      fallback:'Step 3/3: Choose the channels you want to include',
-      callback_id: 'none'
-    });
-  attachments.push({
     'text': '✎ Hint: You can also type the channels to add (Example: #nyc-office #research)',
     mrkdwn_in: ['text']
   })
