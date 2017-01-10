@@ -2,13 +2,16 @@ require('co-mocha')
 
 var _ = require('lodash')
 var expect = require('chai').expect
-var testingHelpers = require('./testing_helpers.js')
+var testingHelpers = require('../test_utils/testing_helpers.js')
 
 require('../../src/kip.js')
 require('../../src/logging.js')
 
-var coupon = require(testingHelpers.getModule('coupon.js', testingHelpers.COUPON_DIR))
-var couponUsing = require(testingHelpers.getModule('couponUsing.js', testingHelpers.COUPON_DIR))
+// var coupon = require(testingHelpers.getModule('coupon.js', testingHelpers.COUPON_DIR))
+// var couponUsing = require(testingHelpers.getModule('couponUsing.js', testingHelpers.COUPON_DIR))
+const COUPON_PATH = '../../src/coupon/'
+var coupon = require(COUPON_PATH + 'coupon.js')
+var couponUsing = require(COUPON_PATH + 'couponUsing.js')
 
 var TEAM_ID = 'TESTING_123'
 var COUPON_TYPE = 'percentage'
