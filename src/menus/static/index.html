@@ -63,7 +63,7 @@
           </div>        
         </div>
         <div class="cart-footer">
-          <button v-if="!exceedBudget" class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
+          <button @click="formatCart" v-if="!exceedBudget" class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
           <button class="base-btn" disabled v-if="exceedBudget"> There's only ${{budget.toFixed(2)}} budgeted for this order.</button>
           
         </div>
@@ -180,8 +180,8 @@
       </div>
     </transition>
   </script>
-  <script src="js/lodash.js"></script>                    
-  <script src="js/vue.js"></script>
+  <script src="js/lodash.min.js"></script>                    
+  <script src="js/vue.min.js"></script>
   <script src="js/axios.min.js"></script>      
   <script src="js/main.js"></script>                  
 </body>
