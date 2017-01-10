@@ -280,7 +280,8 @@ function nodeOptions (node, cartItem, validate, message) {
         value: {
           item_id: cartItem.item.item_id,
           option_id: option.id,
-          optionIndices: optionIndices
+          optionIndices: optionIndices,
+          route: 'food.option.click'
         }
       }
     })
