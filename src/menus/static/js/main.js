@@ -365,6 +365,8 @@ var app = new Vue({
     cartItems: [],
     budget: 0,
     fixNav: false,
+    user_id: null,
+    food_session_id: null
   },
   methods: {
     setSelectedItem: function(item) {
@@ -380,13 +382,40 @@ var app = new Vue({
       var i = _.indexOf(this.cartItems, item);
       this.cartItems.splice(i, 1)
     },
-    handleScroll () {
+    handleScroll: function() {
       if (Math.floor(window.scrollY) >= 196) {
         this.fixNav = true
       } else {
         this.fixNav = false
       }
-    } 
+    },
+    formatCart: function() {
+      var cart = [];
+      this.cartItems.forEach(function(i) {
+        var item = {};
+        item.item_id = i.id;
+        item.item_qty = i.quantity;
+        item.instructions = i.instructions;
+        item.option_qty = {}
+        for (var opt in i.options) {
+          var choices = i.options[opt].choices;
+          choices.forEach(function(choice) {
+            item.option_qty[choice.id] = 1 
+          })
+        }
+        cart.push(item) 
+      })
+      this.submitOrder(cart)
+    },
+    submitOrder: function(cart) {
+      axios.post('/order', {order: cart, user_id:this.user_id, deliv_id:this.food_session_id})
+      .then(function(res) {
+        console.log(res)  
+      })
+      .catch(function(err) {
+        console.log(err) 
+      })
+    }
   },
   computed: {
     cartItemsTotal: function() {
@@ -439,9 +468,10 @@ var app = new Vue({
     window.addEventListener('scroll', this.handleScroll);
     var that = this;
     var key = window.location.search.split("=")[1]
-    var ms = axios.post('/session', {session_token: key})
+    axios.post('/session', {session_token: key})
     .then((response) => {
-      console.log(response)
+      this.user_id = response.data.userId
+      this.food_session_id = response.data.foodSessionId
       var menuData = response.data.menu.data
       var menu;
       if (menuData.length > 1) {
