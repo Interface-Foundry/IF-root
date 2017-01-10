@@ -99,7 +99,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
     return i
   }).sort((a, b) => b.sortOrder - a.sortOrder)
 
-  var menuItems = sortedMenu.slice(index, index + 3).map(i => {
+  var menuItems = sortedMenu.slice(index, index + 3).reverse().map(i => {
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
@@ -126,7 +126,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
     parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
 
     //clean out html from descriptions
-    console.log('desc', desc)
     var html = /<.*>/
     desc = desc.replace(html, '');
     parentDescription = parentDescription.replace(html, '');
