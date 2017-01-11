@@ -10,4 +10,4 @@ spec:
     - secretName: pay.kipthis.com-sslcerts
   backend:
     serviceName: payments
-    servicePort: 8080
+    servicePort: 80
