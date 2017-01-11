@@ -73,7 +73,7 @@ test:node:
     - npm install
     - npm install --only=dev
     - npm install -g mocha
-    - NODE_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/parser/parser.test.js
+    - NODE_ENV=test CONFIG_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/delivery.com/
   cache:
     paths:
       - /usr/local/lib/node_modules
