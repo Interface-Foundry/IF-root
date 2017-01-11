@@ -154,11 +154,12 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
   var index = message.source.actions[0].value
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
   //decrement user budget by item price
-  foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+  if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
   userItem.item.item_qty++;
-  foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+  if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
   //increment user budget by (new) item price
-  yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+  if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+  else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
   yield handlers['food.cart.personal'](message, true)
 }
 
@@ -172,13 +173,14 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message) {
     // don't let them go down to zero
     userItem.deleteMe = true
     foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
-    foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
     yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}, $set: {user_budgets: foodSession.user_budgets}}).exec()
   } else {
-    foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
     userItem.item.item_qty--
-    foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
-    yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+    if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+    if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+    else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   }
 
   yield handlers['food.cart.personal'](message, true)
@@ -364,9 +366,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
 handlers['food.admin.order.confirm'] = function * (message, replace) {
   // show admin final confirm of thing
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
   db.waypoints.log(1300, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
 
   var totalPrice = foodSession.cart.reduce((sum, i) => {
