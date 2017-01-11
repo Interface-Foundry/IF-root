@@ -228,7 +228,6 @@ if (foodSession.budget) {
 
 
   //resto name
-  console.log('this is our cuisine - astronautalis', foodSession.chosen_restaurant.cuisine)
   msg_json.attachments.push({
     'fallback': 'Search the menu',
     'text': `*${foodSession.chosen_restaurant.name}*`,
