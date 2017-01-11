@@ -68,10 +68,9 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   // process user name from previous message
   var response = {
-    'text': `Whats your phone number ${foodSession.convo_initiater.name}\n` +
-            `>Type your phone number below:`,
+    'text': `✎ What's your phone number? (Example: _555 555 5555_)`,
     'fallback': 'Type your phone number below',
-    'callback_id': 'food.admin.order.checkout.phone_number'
+    'callback_id': 'food.admin.order.checkout.phone_number',
   }
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.phone_number', type: message.origin, data: response})
 }
