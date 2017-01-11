@@ -525,7 +525,7 @@ handlers['team'] = function * (message) {
   var attachments = [];
   attachments.push({
     text: '',
-    fallback:'Step 3/3: Choose the channels you want to include'
+    fallback: 'Step 3/3: Choose the channels you want to include'
   });
   var channels = yield utils.getChannels(team);
   var buttons = channels.map(channel => {
@@ -564,7 +564,7 @@ handlers['team'] = function * (message) {
       callback_id: 'none'
     });
   attachments.push({
-    'text': '✎ Hint: You can also type the channels to add (Example: #nyc-office #research)',
+    'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
     mrkdwn_in: ['text']
   })
 
@@ -586,7 +586,6 @@ handlers['team'] = function * (message) {
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
   return [msg];
-
 }
 
 /**

@@ -27,7 +27,7 @@ var queue = require('./queue-mongo');
 var onboarding = require('./modes/onboarding');
 var onboard = require('./modes/onboard');
 var member_onboard = require('./modes/member_onboard');
-
+var collect = require('./modes/collect')
 var settings = require('./modes/settings');
 var team = require('./modes/team');
 var shopping = require('./modes/shopping').handlers;
@@ -173,6 +173,9 @@ function switchMode(message) {
 		'shopping': function() {
 			return 'shopping';
 		},
+    'collect': function() {
+      return 'collect'
+    },
 		'settings': function() {
 			return 'settings';
 		},
@@ -202,6 +205,9 @@ function printMode(message) {
 		case 'shopping':
 			winston.debug('In', 'SHOPPING'.rainbow, 'mode 👚👖👗👝👛👜🏬🏪💳🛍')
 			break
+    case 'collect':
+      winston.debug('In', 'COLLECT'.rainbow, 'mode 👋');
+      break;
 		case 'onboarding':
 			winston.debug('In', 'ONBOARDING'.green, 'mode 👋')
 			break
@@ -320,7 +326,7 @@ queue.topic('incoming').subscribe(incoming => {
         'team_id': message.source.team
       }).exec();
       let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
-      simplehome(message, isAdmin)
+      simplehome(message, isAdmin);
       yield message.save();
       timer.stop();
       return
@@ -337,7 +343,7 @@ queue.topic('incoming').subscribe(incoming => {
     if (switchMode(message)) {
       message.mode = switchMode(message);
       if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
-      if (message.mode.match(/(team|onboard)/)) {
+      if (message.mode.match(/(team|onboard|collect)/)) {
         let team = yield db.Slackbots.findOne({
           'team_id': message.source.team
         }).exec();
@@ -421,6 +427,9 @@ queue.topic('incoming').subscribe(incoming => {
       case 'address':
         return
         break;
+      case 'collect':
+        var replies = yield collect.handle(message);
+        break;
       default:
         logging.debug('DEFAULT SHOPPING MODE')
         // try for simple reply
@@ -437,7 +446,8 @@ queue.topic('incoming').subscribe(incoming => {
         logging.info('👽 passing to nlp: ', message.text)
         if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
           replies = yield execute(message)
-        } else if ((message.text.includes('shop') && !message.execute) || ((message.action === 'switch'||message.action==='initial') && (message.text === 'shopping' || !message.text))) {
+        } else if ((message.text.includes('shop') && !message.execute) ||
+          ((message.action === 'switch' || message.action ==='initial') && (message.text === 'shopping' || !message.text))) {
           message.mode = 'shopping'
           message.action = 'initial'
           message.execute.push({
