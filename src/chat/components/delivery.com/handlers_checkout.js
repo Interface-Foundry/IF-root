@@ -2,7 +2,7 @@ var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
 var sleep = require('co-sleep')
-
+var coupon = require('../../../coupon/couponUsing.js')
 
 // injected dependencies
 var $replyChannel
