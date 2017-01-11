@@ -22,82 +22,112 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
 var home_screen = module.exports.home_screen = function(isAdmin) {
   let home = {
     text: require('./utils').randomWelcome(),
-    attachments: [{
+    attachments: []
+  };
+  if (isAdmin) {
+    home.attachments = [{
       'mrkdwn_in': ['text'],
-      text: '*Order Food*\nI can order food for your team! This is filler text etc.',
+      text: '*Kip Café*\nI can order food for your team! This is filler text etc.',
       color: '#f43440',
       callback_id: 'wow such home',
       actions: [{
         name: 'passthrough',
         value: 'food',
-        text: 'Kip Café',
+        text: 'Collect Food',
         type: 'button'
       }]
     }, {
-      text: '*Get Supplies*\nI can shop for your team! This is filler text blah',
+      text: '*Kip Store*\nI can shop for your team! This is filler text blah',
       'mrkdwn_in': ['text'],
       color: '#fe9b00',
       callback_id: 'wow such home',
       actions: [{
         name: 'passthrough',
         value: 'shopping',
-        text: 'Kip Store',
+        text: 'Collect Supplies',
         type: 'button'
-      }]
-    }]
-  };
-  if (isAdmin) {
-    home.attachments.push({
-      text: '',
-      callback_id: 'wow such home',
-      actions: [{
-        name: 'settings',
-        text: 'Settings',
+      }, {
+        name: 'view_cart_btn',
+        text: '⁂ View Cart',
         style: 'default',
         type: 'button',
-        value: 'start'
+        value: 'view_cart_btn'
       }]
-    });
+    }];
+  } else {
+    home.attachments = [{
+      'mrkdwn_in': ['text'],
+      text: '*Kip Café*\nHungry? I can help you find lunch',
+      color: '#f43440',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'food',
+        text: 'Get Food',
+        type: 'button'
+      }]
+    }, {
+      text: '*Kip Store*\nAdd things you need to your team\'s cart',
+      'mrkdwn_in': ['text'],
+      color: '#fe9b00',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'shopping',
+        text: 'Get Supplies',
+        type: 'button'
+      }, {
+        name: 'view_cart_btn',
+        text: '⁂ View Cart',
+        style: 'default',
+        type: 'button',
+        value: 'view_cart_btn'
+      }]
+    }]
   }
   return home;
 };
 
 var onboard_home_attachments = module.exports.onboard_home_attachments = function(delay) {
-  return [{
+  let reply = [{
     mrkdwn_in: ['text'],
-    text: '*Order Food*\nI can order food for your team!\nLet me show you how to make lunch easier',
+    text: '*Kip Café*\nI can order food for your team!\nLet me show you how to make lunch easier',
     color: '#f43440',
     callback_id: 'wow such home',
     actions: [{
       name: 'onboard.start.lunch',
-      text: 'Kip Café',
+      text: 'Order Food',
       style: 'default',
       type: 'button',
       value: 'lunch'
     }]
   }, {
-    text: '*Get Supplies*\nI can shop for your team!\nLet me show you how to make team shopping better',
+    text: '*Kip Store*\nI can shop for your team!\nLet me show you how to make team shopping better',
     mrkdwn_in: ['text'],
     color: '#fe9b00',
     callback_id: 'wow such home',
     actions: [{
       name: 'onboard.start.supplies',
-      text: 'Kip Store',
+      text: 'Get Supplies',
       style: 'default',
       type: 'button',
       value: 'supplies'
     }]
-  }, {
-    text: '',
-    callback_id: 'whatevs',
-    actions: [{
-      name: 'onboard.start.remind_later',
-      text: '◷ Remind Me Later',
-      style: 'default',
-      type: 'button',
-      value: `remind_later.${delay}`
-    }]
   }];
+  if (delay !== 'initial') {
+    reply.push({
+      text: '',
+      callback_id: 'whatevs',
+      actions: [{
+        name: 'onboard.start.remind_later',
+        text: '◷ Remind Me Later',
+        style: 'default',
+        type: 'button',
+        value: `remind_later.${delay}`
+      }]
+    });
+  }
+  return reply;
 };
 
 var settings_menu = module.exports.settings_menu = [{

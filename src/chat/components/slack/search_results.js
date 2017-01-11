@@ -42,12 +42,6 @@ function truncate(string) {
       return string;
 };
 
-var emojis = {
-  1: '*1.*',
-  2: '*2.*',
-  3: '*3.*'
-};
-
 //
 // Generate the slack reponse for the search results
 //
@@ -57,31 +51,21 @@ function * results(message, shortMode = false, modeName) {
   var results = amazon.map((r, i) => {
     return {
       color: '#45a5f4',
-      text: emojis[i+1] + ' ' + `<${r.shortened_url}|*${truncate(_.get(r, 'ItemAttributes[0].Title[0]'))}*>`,
+      text: `<${r.shortened_url}|*${truncate(_.get(r, 'ItemAttributes[0].Title[0]'))}*>`,
       image_url: r.picstitch_url,
       title_link: r.shortened_url,
       mrkdwn_in: ['text', 'pretext', 'title'],
       fallback: 'Search Results',
       callback_id: message._id.toString() + '.' + i,
-      actions: buttons(i+1, shortMode, modeName)
-    }
+      actions: buttons(i + 1, shortMode, modeName)
+    };
   });
-  // debugger;
-  let actions = [];
-
-  var original = cardTemplate.shopping_home_default(message._id);
-  var expandable = yield slackUtils.generateMenuButtons(message)
-
-  if (!shortMode) {
-    actions = actions.concat(original);
-  }
-
+  results.unshift(results.pop()); // rotate array to 3, 1, 2 order
   results.push({
     fallback: 'Search Results',
     callback_id: 'search_results',
-    actions: actions
-  })
-  yield slackUtils.cacheMenu(message, original, expandable)
+    actions: shortMode ? [] : cardTemplate.shopping_home_default(message._id)
+  });
 
   return results;
 }

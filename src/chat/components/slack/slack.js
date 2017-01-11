@@ -204,8 +204,9 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       // throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
     }
     var msgData = {
-      icon_url: 'http://kipthis.com/img/kip-icon.png',
-      username: 'Kip'
+      // icon_url: 'http://kipthis.com/img/kip-icon.png',
+      // username: 'Kip',
+      as_user: true
     }
     co(function * () {
       if (message.action === 'typing') {
@@ -278,7 +279,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       if (message.mode === 'onboard' && message.action === 'home') {
         msgData.attachments = message.reply;
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
        if (message.mode === 'onboarding') {

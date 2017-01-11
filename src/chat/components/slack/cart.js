@@ -45,7 +45,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     }
     // make the text for this item's message
     item_message.text = [
-      `*${i + 1}.* ` + ((isAdmin || addedByUser) ? `<${link}|${item.title}>` : item.title),
+      ((isAdmin || addedByUser) ? `<${link}|${item.title}>` : item.title),
       ((isAdmin) ? `*Price:* ${item.price} each`: ''),
       `*Added by:* ${userString}`,
       `*Quantity:* ${item.quantity}`,
