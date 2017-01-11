@@ -19,6 +19,9 @@ var handlers = {}
 
 handlers['food.admin.confirm_new_session'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var foodSessionStarter = foodSession.convo_initiater.id
   var msg_json = {
     title: '',
@@ -56,6 +59,9 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
   yield foodSession.save()
+
+  db.waypoints.log(1010, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var addressButtons = _.get(team, 'meta.locations', []).map(a => {
     return {
       name: 'passthrough',
@@ -357,6 +363,9 @@ handlers['food.settings.address.new'] = function * (message) {
 
   //onboarding view
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1012, foodSession._id, message.user_id, {original_text: message.original_text})
+
   if(foodSession.onboarding){
     msg_json.text = ''
     msg_json.attachments.unshift({
@@ -448,6 +457,9 @@ handlers['food.settings.address.confirm'] = function * (message) {
 
   //onboarding view
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1013, foodSession._id, message.user_id, {original_text: message.original_text})
+
   if(foodSession.onboarding){
     msg_json.text = ''
     msg_json.attachments.unshift({
@@ -589,6 +601,8 @@ handlers['food.delivery_or_pickup'] = function * (message) {
 handlers['food.admin_polling_options'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
+
   yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: {
     text: `*Budget*: $${foodSession.budget} / person`
   }})
@@ -727,6 +741,9 @@ handlers['food.admin_polling_options'] = function * (message) {
 
 handlers['food.admin.restaurant.reordering_confirmation'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1101, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var mostRecentMerchant = message.data.value
   // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
   var lastOrdered = yield db.Delivery.find({team_id: message.source.team, 'chosen_restaurant.id': mostRecentMerchant, active: false})

@@ -26,6 +26,8 @@ String.prototype.toObjectId = function () {
 handlers['food.cart.personal'] = function * (message, replace) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
   var totalPrice = myItems.reduce((sum, i) => {
@@ -209,7 +211,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 */
 handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-
+  db.waypoints.log(1240, foodSession._id, message.user_id, {original_text: message.original_text})
   //
   // Reply to the user who either submitted their personal cart or said "no thanks"
   //
@@ -361,7 +363,9 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.order.confirm'] = function * (message, replace) {
-  // show admin final confirm of ting
+  // show admin final confirm of thing
+  db.waypoints.log(1300, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
 
@@ -548,6 +552,10 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 }
 
 handlers['food.order.instructions'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var msg = {
     text: `*Add Special Instructions*`,
     attachments: [{
