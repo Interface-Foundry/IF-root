@@ -468,12 +468,9 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       // --- COUPON STUFF
 
-      //*****breaking the cart for some reason*****//
-
       // var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
-      var discountAvail = 0
-
-      //*****breaking the cart for some reason*****//
+      var discountAvail = 0.0
+      console.log('Cest a travers de large grille', discountAvail, 'devrait etre un chiffre')
 
       foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
 
