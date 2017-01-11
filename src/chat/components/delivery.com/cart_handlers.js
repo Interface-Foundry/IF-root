@@ -477,7 +477,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         if (discountAvail.coupon_type === 'percentage') {
           logging.info('using coupon')
           foodSession.coupon.percent = discountAvail.coupon_discount
-          foodSession.coupon.code = discountAvail.coupon.coupon_code
+          foodSession.coupon.code = discountAvail.coupon_code
         } else {
           logging.error('error we are only using percentage coupons rn with cafe')
           return
