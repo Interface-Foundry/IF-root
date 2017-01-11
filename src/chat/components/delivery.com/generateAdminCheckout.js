@@ -62,16 +62,21 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
   var instructionText = _.get(foodSession, 'instructions') ?
         `Delivery Instructions: _${foodSession.instructions}_\n` : ``
 
-  var kipCoupon = foodSession.discount_amount > feeDebuging ? `Kip Coupon: -${foodSession.discount_amount.$}\n` : ``
+  // var kipCoupon = foodSession.discount_amount > feeDebuging ? `Kip Coupon: -${foodSession.discount_amount.$}\n` : ``
   var kipCostsAttachment = {
     fallback: 'Tip + Kip Fees + Discounts',
     text: //`Tip: ${tipText}\n` +
           `Kip Fee: ${foodSession.service_fee.$}\n` +
-          kipCoupon +
           instructionText,
     callback_id: 'food.admin.cart.info',
     color: '#3AA3E3',
     attachment_type: 'default',
+    mrkdwn_in: ['text']
+  }
+
+  var discountAttachment = {
+    fallback: "discount",
+    text: `Kip Coupon: -${foodSession.discount_amount.$} 🎉`,
     mrkdwn_in: ['text']
   }
 
@@ -105,8 +110,14 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
       text: '✎ Add Instructions',
       type: 'button',
       value: ''
+    },
+    {
+      'name': 'food.admin.select_address',
+      'text': 'Restart Order ↺',
+      'type': 'button',
+      'value': 'food.admin.select_address'
     }]
     // }
 
-  return [].concat(deliveryCostsAttachment, kipCostsAttachment, tipAttachment, checkoutAttachment)
+  return [].concat(deliveryCostsAttachment, kipCostsAttachment, (foodSession.discount_amount > feeDebuging ? discountAttachment: []), tipAttachment, checkoutAttachment)
 }

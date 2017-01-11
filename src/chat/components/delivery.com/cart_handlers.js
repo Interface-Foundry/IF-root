@@ -470,7 +470,6 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       // var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
       var discountAvail = 0.0
-      console.log('Cest a travers de large grille', discountAvail, 'devrait etre un chiffre')
 
       foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
 
@@ -532,7 +531,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         'mrkdwn_in': ['text'],
         'actions': [{
           'name': 'food.admin.select_address',
-          'text': 'Restart Order',
+          'text': 'Restart Order ↺',
           'type': 'button',
           'style': 'primary',
           'value': 'food.admin.select_address'
