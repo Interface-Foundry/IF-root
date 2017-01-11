@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: pay-kipthis-com
+  name: payments
   namespace: canary
   annotations:
     kubernetes.io/ingress.allow-http: "false"
@@ -10,4 +10,4 @@ spec:
     - secretName: pay.kipthis.com-sslcerts
   backend:
     serviceName: payments
-    servicePort: 8080
+    servicePort: 80

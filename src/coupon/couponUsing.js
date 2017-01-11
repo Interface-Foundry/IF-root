@@ -22,8 +22,7 @@ function * getLatestFoodCoupon(team_id) {
 * @param {string}
 *
 */
-function * updateCouponForCafe(foodSession_id) {
-  var foodSession = yield db.Delivery.findOne({_id: foodSession_id}).exec()
+function * updateCouponForCafe(foodSession) {
   try {
     var coupon = yield db.Coupon.findOne({
       team_id: foodSession.team_id,

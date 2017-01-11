@@ -56,7 +56,6 @@ proxy:
     addr: 127.0.0.1:24000
     enabled: false
     intervalMillis: 300000
-    runLocal: false
     customer: kipthis
     password: change_me
     zone: gen

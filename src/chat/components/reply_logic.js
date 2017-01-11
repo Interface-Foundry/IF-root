@@ -40,6 +40,7 @@ var amazon_variety = require('./amazon_variety');
 var variation = require('./slack/variation_view')
 var card_templates = require('./slack/card_templates.js');
 var agenda = require('./agendas');
+require('./proxy/ping');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
