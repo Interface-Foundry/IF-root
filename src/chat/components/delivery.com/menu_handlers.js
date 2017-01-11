@@ -228,7 +228,7 @@ if (foodSession.budget) {
 
 
   //resto name
-  console.log('this is our cuisine - astronautalis', foodSession.cuisines[0])
+  console.log('this is our cuisine - astronautalis', foodSession.chosen_restaurant.cuisine)
   msg_json.attachments.push({
     'fallback': 'Search the menu',
     'text': `*${foodSession.chosen_restaurant.name}*`,
@@ -236,7 +236,7 @@ if (foodSession.budget) {
     'fields': [ // first field would be budget
       {
         'short': true,
-        'value': `*<${foodSession.chosen_restaurant.url}|View Full Menu ${menu_utils.cuisineEmoji(foodSession.cuisines[0])}>*`
+        'value': `*<${foodSession.chosen_restaurant.url}|View Full Menu ${menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine)}>*`
       }
     ],
     'mrkdwn_in': ['text', 'fields']
