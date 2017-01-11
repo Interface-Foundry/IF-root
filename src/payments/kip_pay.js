@@ -261,22 +261,17 @@ app.post('/process', (req, res) => co(function * () {
   // look up user and the last message sent to us in relation to this order
   try {
     var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
-    foodSession.order['completed_payment'] = true
-    yield foodSession.save()
-
     var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1).exec()
     finalFoodMessage = finalFoodMessage[0]
-
+    foodSession.order['completed_payment'] = true
+    yield foodSession.save()
     // send message to user
-    replyChannel.send(
-      finalFoodMessage,
-      'food.payment_info',
-      {
-        type: finalFoodMessage.origin,
-        data: {
-          text: 'Your order was successful and you should receive an email from `Delivery.com` soon!'
-        }
-      })
+
+    replyChannel.send(finalFoodMessage,'food.payment_info',
+    {
+      type: finalFoodMessage.origin,
+      data: {text: 'Your order was successful and you should receive an email from `Delivery.com` soon!'}
+    })
   } catch (err) {
     logging.error('error trying to send message to user', err)
     return

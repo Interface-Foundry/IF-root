@@ -561,9 +561,12 @@ handlers['food.payment_info'] = function * (message) {
 }
 
 handlers['food.done'] = function * (message) {
-  logging.error('saving users info to slackbots and peripheral cleanup')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-
+  // save coupon info
+  if (_.get(foodSession, 'coupon.code')) {
+    logging.info('saving coupon code stuff')
+    yield coupon.updateCouponForCafe(foodSession)
+  }
   // final area to save and reset stuff
   logging.info('saving phone_number... ', foodSession.convo_initiater.phone_number)
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
