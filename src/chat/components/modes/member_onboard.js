@@ -60,6 +60,7 @@ handlers['step_1'] = function(message) {
     'text': '✎ Hint: You can also what you want below (Example: _MacBook Pro Power Cord_)',
     mrkdwn_in: ['text']
   }];
+  cancelReminder('initial reminder', message.source.user);
   return [msg];
 };
 
@@ -261,7 +262,12 @@ handlers['remind_later'] = function * (message, data) {
       text: 'Hey, it\'s me again! Ready to get started?',
       fallback: 'Hey, it\'s me again! Ready to get started?'
     };
-    scheduleReminder(cronMsg, message.source.user, new Date(msInFuture + now.getTime()));
+    scheduleReminder(
+      'onboarding reminder',
+      new Date(msInFuture + now.getTime()), {
+        msg: JSON.stringify(cronMsg),
+        user: message.source.user
+      });
   }
 
   let laterMsg = {
@@ -365,18 +371,15 @@ handlers['text'] = function * (message) {
   }
 };
 
-const scheduleReminder = function(msg, userId, date) {
-  kip.debug('\n\n\nsetting reminder for ', date.toLocaleString(), '\n\n\n');
-  agenda.schedule(date, 'onboarding reminder', {
-    msg: JSON.stringify(msg),
-    user: userId
-  });
+const scheduleReminder = function(type, time, data) {
+  kip.debug('\n\n\nsetting reminder for ', time.toLocaleString(), '\n\n\n');
+  agenda.schedule(time, type, data);
 };
 
-const cancelReminder = function(userId) {
-  kip.debug(`canceling 'onboarding reminder' for ${userId}`);
+const cancelReminder = function(type, userId) {
+  kip.debug(`canceling ${type} for ${userId}`);
   agenda.cancel({
-    'name': 'onboarding reminder',
+    'name': type,
     'data.user': userId
   }, function(err, numRemoved) {
     if (!err) {

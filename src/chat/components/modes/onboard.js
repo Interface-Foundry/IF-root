@@ -435,7 +435,7 @@ handlers['bundle'] = function * (message, data) {
     var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
     // make the text for this item's message
     item_message.text = [
-      `*${i + 1}.* ` + `<${link}|${item.title}>`,
+      `<${link}|${item.title}>`,
       `*Price:* ${item.price} each`,
       `*Added by:* ${userString}`,
       `*Quantity:* ${item.quantity}`,
@@ -615,7 +615,7 @@ handlers['member'] = function*(message) {
       mode: 'member_onboard',
       fallback: `Make <@${message.source.user}>'s life easier! Let me show you how to add items to the team cart`,
       action: 'home',
-      reply: cardTemplate.member_onboard_attachments(message.source.user, 'tomorrow'),
+      reply: cardTemplate.member_onboard_attachments(message.source.user, 'initial'),
       source: {
         team: team.team_id,
         channel: a.dm,
@@ -628,6 +628,35 @@ handlers['member'] = function*(message) {
     });
     yield newMessage.save();
     queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
+    let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+    let now = new Date();
+    let cronMsg = {
+      text: 'Hey, it\'s me again! Ready to get started?',
+      incoming: false,
+      thread_id: a.dm,
+      origin: 'slack',
+      mode: 'member_onboard',
+      fallback: 'Hey, it\'s me again! Ready to get started?',
+      action: 'home',
+      reply: cardTemplate.member_onboard_attachments(message.source.user, 'tomorrow'),
+      source: {
+        team: team.team_id,
+        channel: a.dm,
+        user: a.id,
+        type: 'message',
+        subtype: 'bot_message'
+      },
+      user: a,
+      user_id: a.id
+    }
+    scheduleReminder(
+      'initial reminder',
+      new Date(msInFuture + now.getTime()), {
+        msg: JSON.stringify(cronMsg),
+        user: cronMsg.source.user,
+        token: team.bot.bot_access_token,
+        channel: cronMsg.source.channel
+      });
   });
   return handlers['handoff'](message);
 };

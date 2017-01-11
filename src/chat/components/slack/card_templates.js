@@ -262,8 +262,8 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   value: "member"
 }];
 
-var member_onboard_attachments = module.exports.member_onboard_attachments = function (admin, delay) {
-  return [{
+var member_onboard_attachments = module.exports.member_onboard_attachments = function(admin, delay) {
+  let reply = [{
     'image_url': 'http://kipthis.com/kip_modes/mode_howtousekip.png',
     'text': '',
     'mrkdwn_in': [
@@ -283,14 +283,18 @@ var member_onboard_attachments = module.exports.member_onboard_attachments = fun
       style: "primary",
       type: "button",
       value: "step_1"
-    }, {
+    }]
+  }];
+  if (delay !== 'initial') {
+    reply[1].actions.push({
       name: 'member_onboard.start.remind_later',
       text: '◷ Remind Me Later',
       style: 'default',
       type: 'button',
       value: `remind_later.${delay}.${admin}`
-    }]
-  }]
+    })
+  }
+  return reply
 };
 
 var slack_member_onboard_start = module.exports.slack_member_onboard_start = [{
