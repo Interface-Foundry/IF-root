@@ -269,6 +269,7 @@ handlers['food.admin.vote'] = function * (message) {
 
 //for when the admin "skip"s the poll
 handlers['food.admin.poll'] = function * (message) {
+var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
 db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -576,6 +577,8 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
   db.waypoints.log(1140, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var index = _.get(message, 'data.value.index', 0)

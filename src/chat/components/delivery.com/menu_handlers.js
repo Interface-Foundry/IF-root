@@ -14,6 +14,7 @@ var handlers = {}
 
 handlers['food.menu.quickpicks'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   var previouslyOrderedItemIds = []
   var recommendedItemIds = []
@@ -21,6 +22,9 @@ handlers['food.menu.quickpicks'] = function * (message) {
   // paging
   var index = parseInt(_.get(message, 'data.value.index')) || 0
   var keyword = _.get(message, 'data.value.keyword')
+
+  if (keyword) db.waypoints.log(1211, foodSession._id, message.user_id, {original_text: message.original_text})
+  else db.waypoints.log(1210, foodSession._id, message.user_id, {original_text: message.original_text})
 
   // the keyword match bumps stuff up in the sort order
   if (keyword) {
@@ -268,6 +272,10 @@ handlers['food.menu.search'] = function * (message) {
 // After a user clicks on a menu item, this shows the options, like beef or tofu
 //
 handlers['food.item.submenu'] = function * (message) {
+
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  db.waypoints.log(1220, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
 
@@ -371,6 +379,10 @@ handlers['food.item.quantity.subtract'] = function * (message) {
 }
 
 handlers['food.item.instructions'] = function * (message) {
+
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  db.waypoints.log(1221, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
   var itemId = message.data.value

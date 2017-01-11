@@ -11,6 +11,9 @@ var handlers = {}
 handlers['food.admin.team.members'] = function * (message) {
   var index = _.get(message, 'data.value.index', 0)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1110, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var userToRemove = _.get(message, 'data.value.user_id')
   if (userToRemove) {
     kip.debug('removing user', userToRemove)
@@ -117,6 +120,9 @@ handlers['food.admin.team.members'] = function * (message) {
 handlers['food.admin.team.members.reorder'] = function * (message) {
   var index = _.get(message, 'data.value.index', 0)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1110, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var userToRemove = _.get(message, 'data.value.user_id')
   if (userToRemove) {
     kip.debug('removing user', userToRemove)

@@ -48,6 +48,8 @@ handlers['food.admin.team.delete_email'] = function * (message) {
 handlers['food.admin.team.email_members'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  db.waypoints.log(1112, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var et = yield db.email_users.find({team_id: message.source.team});
 
   var index = parseInt(_.get(message, 'data.value.index')) || 0
