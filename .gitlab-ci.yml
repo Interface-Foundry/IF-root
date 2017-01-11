@@ -67,6 +67,8 @@ stages:
 test:node:
   image: node:6
   stage: test
+  only:
+    - dev
   script:
     - npm install
     - npm install --only=dev
@@ -85,6 +87,8 @@ test:node:
 test:python:
   image: python:3.4
   stage: test
+  only:
+    - dev
   before_script:
     - echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/GOOGLE_APPLICATION_CREDENTIALS.json
     - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/GOOGLE_APPLICATION_CREDENTIALS.json
