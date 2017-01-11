@@ -127,7 +127,7 @@ if (foodSession.budget) {
     // console.log('popular item??', i)
 
     var attachment = {
-      thumb_url: (i.images.length>0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
+      thumb_url: (i.images.length > 0 ? i.images[0].url : 'http://tidepools.co/kip/icons/' + i.name.match(/[a-zA-Z]/i)[0].toUpperCase() + '.png'),
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       color: '#3AA3E3',
@@ -243,7 +243,7 @@ if (foodSession.budget) {
 
   if (foodSession.budget) {
     if (Number(foodSession.user_budgets[message.user_id]) >= 2) {
-      var text = `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`
+      var text = `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`;
     }
     else {
       var text = `_You have already exhausted your budget!_`
@@ -429,7 +429,7 @@ handlers['food.item.add_to_cart'] = function * (message) {
     var menu = Menu(foodSession.menu);
     var itemPrice = menu.getCartItemPrice(userItem);
 
-    if (itemPrice > (budgets[userItem.user_id]) * 1.25) {
+    if (itemPrice > (budgets[userItem.user_id]) * 1.125) {
       yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
       return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
         type: 'slack',

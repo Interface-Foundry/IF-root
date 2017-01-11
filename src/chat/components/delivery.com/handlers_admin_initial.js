@@ -603,9 +603,9 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: {
+  yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ?{
     text: `*Budget*: $${foodSession.budget} / person`
-  }})
+  } : {})})
 
   // check to make sure restaurants are even open
   if (foodSession.merchants.length === 0) {
