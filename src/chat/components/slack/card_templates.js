@@ -25,41 +25,66 @@ var home_screen = module.exports.home_screen = function(isAdmin) {
     attachments: []
   };
   if (isAdmin) {
-    home.attachments.push({
-      text: '',
+    home.attachments = [{
+      'mrkdwn_in': ['text'],
+      text: '*Kip Café*\nI can order food for your team! This is filler text etc.',
+      color: '#f43440',
       callback_id: 'wow such home',
       actions: [{
-        name: 'settings',
-        text: '⚙️',
+        name: 'passthrough',
+        value: 'food',
+        text: 'Collect Food',
+        type: 'button'
+      }]
+    }, {
+      text: '*Kip Store*\nI can shop for your team! This is filler text blah',
+      'mrkdwn_in': ['text'],
+      color: '#fe9b00',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'shopping',
+        text: 'Collect Supplies',
+        type: 'button'
+      }, {
+        name: 'view_cart_btn',
+        text: '⁂ View Cart',
         style: 'default',
         type: 'button',
-        value: 'start'
+        value: 'view_cart_btn'
       }]
-    });
+    }];
+  } else {
+    home.attachments = [{
+      'mrkdwn_in': ['text'],
+      text: '*Kip Café*\nHungry? I can help you find lunch',
+      color: '#f43440',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'food',
+        text: 'Get Food',
+        type: 'button'
+      }]
+    }, {
+      text: '*Kip Store*\nAdd things you need to your team\'s cart',
+      'mrkdwn_in': ['text'],
+      color: '#fe9b00',
+      callback_id: 'wow such home',
+      actions: [{
+        name: 'passthrough',
+        value: 'shopping',
+        text: 'Get Supplies',
+        type: 'button'
+      }, {
+        name: 'view_cart_btn',
+        text: '⁂ View Cart',
+        style: 'default',
+        type: 'button',
+        value: 'view_cart_btn'
+      }]
+    }]
   }
-  home.attachments = home.attachments.concat([{
-    'mrkdwn_in': ['text'],
-    text: '*Kip Café*\nI can order food for your team! This is filler text etc.',
-    color: '#f43440',
-    callback_id: 'wow such home',
-    actions: [{
-      name: 'passthrough',
-      value: 'food',
-      text: 'Order Food',
-      type: 'button'
-    }]
-  }, {
-    text: '*Kip Store*\nI can shop for your team! This is filler text blah',
-    'mrkdwn_in': ['text'],
-    color: '#fe9b00',
-    callback_id: 'wow such home',
-    actions: [{
-      name: 'passthrough',
-      value: 'shopping',
-      text: 'Get Supplies',
-      type: 'button'
-    }]
-  }])
   return home;
 };
 

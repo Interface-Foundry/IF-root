@@ -381,17 +381,8 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     mode: 'shopping',
     action: 'results'
   })
-
 }
 
-handlers['home.expand'] = function*(message, exec) {
-  return yield slackUtils.showMenu(message);
-};
-
-handlers['home.detract'] = function*(message, exec) {
-   return yield slackUtils.hideMenu(message);
-
-};
 
 handlers['home.loading'] = function*(message) {
 

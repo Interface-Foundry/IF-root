@@ -101,7 +101,12 @@ handlers['remind_later'] = function * (message, data) {
       text: 'Hey, it\'s me again! Ready to get started?',
       fallback: 'Hey, it\'s me again! Ready to get started?'
     };
-    scheduleReminder('onboarding reminder', cronMsg, message.source.user, new Date(msInFuture + now.getTime()));
+    scheduleReminder(
+    'onboarding reminder',
+    new Date(msInFuture + now.getTime()), {
+      msg: JSON.stringify(cronMsg),
+      user: message.source.user
+    });
   }
 
   let laterMsg = {
