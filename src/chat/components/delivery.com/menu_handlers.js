@@ -4,6 +4,7 @@ var stable = require('stable')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
+var menu_utils = require('./menu_utils')
 
 // injected dependencies
 var $replyChannel
@@ -227,6 +228,7 @@ if (foodSession.budget) {
 
 
   //resto name
+  console.log('this is our cuisine - astronautalis', foodSession.cuisines[0])
   msg_json.attachments.push({
     'fallback': 'Search the menu',
     'text': `*${foodSession.chosen_restaurant.name}*`,
@@ -234,7 +236,7 @@ if (foodSession.budget) {
     'fields': [ // first field would be budget
       {
         'short': true,
-        'value': `*<${foodSession.chosen_restaurant.url}|View Full Menu ⎘>*`
+        'value': `*<${foodSession.chosen_restaurant.url}|View Full Menu ${menu_utils.cuisineEmoji(foodSession.cuisines[0])}>*`
       }
     ],
     'mrkdwn_in': ['text', 'fields']
