@@ -2,7 +2,7 @@ var cheerio = require('cheerio')
 var _ = require('lodash')
 var uuid = require('uuid')
 var co = require('co')
-var proxy_lib = require('./proxy/proxy_request');
+var proxyRequest = require('./proxy/request').proxyRequest;
 var queue = require('./queue-mongo')
 // var amazon_search = require('./amazon_search.js')
 // var promisify = require('promisify-node')
@@ -88,7 +88,7 @@ function* getVariations(asin, message) {
   }
 
   logging.debug('getting variation in amazon_vareity')
-  proxy_lib.ensured_request(variation.url)
+  proxyRequest(variation.url, 3)
     .then((body) => {
       var $ = cheerio.load(body);
       $('html').find('style').remove()
