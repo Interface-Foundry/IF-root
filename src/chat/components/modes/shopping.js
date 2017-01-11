@@ -32,7 +32,7 @@ handlers['search_btn'] = function*(message, data) {
 }
 
 handlers['shopping.initial'] = function*(message, exec) {
-  //if switching back to shopping mode from food or some other mode
+  // if switching back to shopping mode from food or some other mode
   if (message.text == 'shopping') {
       return new db.Message({
       incoming: false,
@@ -45,7 +45,6 @@ handlers['shopping.initial'] = function*(message, exec) {
       action: 'switch'
       })
   }
-
   // typing(message);
   message._timer.tic('starting amazon_search');
     //NLP classified this query incorrectly - lets remove this after NLP sorts into shopping initial 100%

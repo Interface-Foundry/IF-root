@@ -60,8 +60,6 @@ function simple_action_handler (action) {
       return 'cafe_btn';
     case 'shopping_btn':
       return 'shopping_btn';
-    case 'help_btn':
-      return 'help_btn';
     case 'view_cart_btn':
       return 'view_cart_btn';
     case 'team':
@@ -153,25 +151,26 @@ app.post('/slackaction', next(function * (req, res) {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
       }
-      else if (simple_command == 'shopping_btn') {
-          message.mode = 'shopping'
-          message.action = 'initial'
-          message.text = 'exit'
-          message.save().then(() => {
-            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-          })
+      else if (simple_command === 'shopping_btn' || simple_command === 'shopping') {
+        let team = yield db.Slackbots.findOne({
+          'team_id': message.source.team
+        }).exec();
+        let isAdmin = yield utils.isAdmin(message.source.user, team);
+        message.mode = 'shopping'
+        if (isAdmin) {
+          message.action = 'adminInitial';
+          message.text = 'sendCollect';
+        } else {
+          message.action = 'initial';
+          message.text = 'exit';
+        }
+        message.save().then(() => {
+          queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+        })
       }
       else if (simple_command == 'loading_btn') {
       	// responding with nothing means the button does nothing!
         return;
-      }
-      else if (simple_command == 'help_btn') {
-          message.mode = 'banter'
-          message.action = 'reply'
-          message.text = 'help'
-          message.save().then(() => {
-            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-          })
       }
       else if (simple_command == 'channel_btn') {
         var channelId = _.get(parsedIn,'actions[0].value');
@@ -182,6 +181,7 @@ app.post('/slackaction', next(function * (req, res) {
         }).sort('-ts').limit(3);
         var lastMessage = history[0];
         var mode = lastMessage.mode;
+        kip.debug(`😍  ${JSON.stringify(lastMessage, null, 2)}`)
         if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
           // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
           _.remove(team.meta.cart_channels, function(c) { return c == channelId });
@@ -211,58 +211,26 @@ app.post('/slackaction', next(function * (req, res) {
         }
         buttons = buttons.sort(sortF)
         if (buttons.length > 9) {
-           buttons = buttons.slice(0,9);
+           buttons = buttons.slice(0, 9);
         }
         var chunkedButtons = _.chunk(buttons, 5);
-        if (mode == 'onboard') {
-         attachments.push({text: '*Step 3/3:* Choose the channels you want to include: ', mrkdwn_in: ['text'],
-            color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
-        } else {
-         attachments.push({image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
-          text: 'Which channels do you want to include? ', mrkdwn_in: ['text'],
-          color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
-        }
+        attachments.push({
+          text: lastMessage.reply[1].text,
+          image_url: lastMessage.reply[1].image_url,
+          mrkdwn_in: ['text'],
+          color: '#A368F0',
+          actions: chunkedButtons[0],
+          fallback: lastMessage.reply[1].fallback,
+          callback_id: "none"
+        });
         chunkedButtons.forEach((ele, i) => {
           if (i != 0) {
-            attachments.push({text:'', actions: ele, color: '#A368F0',callback_id: 'none'});
+            attachments.push({text: '', actions: ele, color: '#A368F0', callback_id: 'none'});
           }
         })
-        if (mode == 'onboard') {
-          attachments.push({
-            text: '',
-            color: '#45a5f4',
-            mrkdwn_in: ['text'],
-            fallback:'Step 3/3: Choose the channels you want to include',
-            callback_id: 'none'
-          });
-         } 
-        attachments.push({
-          'text': '✎ Hint: You can also type the channels to add (Example: #nyc-office #research)',
-          mrkdwn_in: ['text']
-         })
-
-        if (mode == 'onboard') {
-          attachments.push({
-            text: '',
-            color: '#45a5f4',
-            mrkdwn_in: ['text'],
-            fallback:'yolo',
-            actions: cardTemplate.slack_onboard_team,
-            callback_id: 'none'
-          });
-        } else {
-          attachments.push({
-            text: '',
-            color: '#45a5f4',
-            mrkdwn_in: ['text'],
-            fallback:'yolo',
-            actions: cardTemplate.team_buttons,
-            callback_id: 'none'
-          });
-        }
+        attachments = attachments.concat([lastMessage.reply[3], lastMessage.reply[4], lastMessage.reply[5]]);
         var json = parsedIn.original_message;
-        json.attachments = attachments
-        kip.debug('\n\n\n\n\n\n\n\n\n\n\n webserver 259: ', mode, json, '\n\n\n\n\n\n\n\n\n\n\n' )
+        json.attachments = attachments;
         let stringOrig = JSON.stringify(json);
         let map = {
           amp: '&',
@@ -322,17 +290,8 @@ app.post('/slackaction', next(function * (req, res) {
         message.action = 'home';
       }
       else if (simple_command == 'exit') {
-        message.mode = 'exit';
-        message.action = 'exit';
-        message.text = ''
-        var attachments = cardTemplate.slack_shopping_mode;
-        var reply = {
-          username: 'Kip',
-          text: "",
-          attachments: attachments,
-          fallback: 'Shopping'
-        };
-        var team = message.source.team;
+        let isAdmin = yield utils.isAdmin(message.source.user, team);
+        let reply = cardTemplate.home_screen(isAdmin);
         var slackBot = slackModule.slackConnections[team];
         reply.as_user = true;
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
