@@ -109,7 +109,7 @@ handlers['initial'] = function*(message) {
     fallback: 'Which channels would you to send a reminder to?',
     actions: [{
       name: 'collect.home.reminder',
-      text: '▷ Notify Members',
+      text: 'Notify Members',
       style: 'primary',
       type: 'button',
       value: 'reminder'
@@ -187,8 +187,8 @@ handlers['reminder'] = function*(message) {
 };
 
 handlers['handoff'] = function(message) {
-  let attachments =  cardTemplate.home_screen(true);
-  attachments.text = 'Ok, I\'ve sent them a reminder. :tada:\nWhat\'s next?'
+  let attachments = cardTemplate.home_screen(true);
+  attachments.text = 'Ok, I\'ve sent them a reminder  :tada:\nWhat\'s next?';
   let msg = {
     action: 'simplehome',
     mode: 'food',
@@ -197,7 +197,7 @@ handlers['handoff'] = function(message) {
     reply: {
       data: attachments
     }
-  }
+  };
   return [msg];
 };
 
