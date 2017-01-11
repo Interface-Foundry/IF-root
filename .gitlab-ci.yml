@@ -120,6 +120,11 @@ build:parser:
     IMAGE_NAME: parser
   <<: *build_defintion
 
+build:payments:
+  variables:
+    IMAGE_NAME: payments
+  <<: *build_defintion
+
 # ------------------------------------------------
 # DEPLOYMENT SECTION USING TEMPLATES
 # notes:
@@ -141,4 +146,10 @@ deploy:parser:
   variables:
     DEPLOYMENT_DIR: src/k8s/canary
     CONTEXT_FILE: canary.parser.yaml
+  <<: *deploy_defintion
+
+deploy:payments:
+  variables:
+    DEPLOYMENT_DIR: src/k8s/canary
+    CONTEXT_FILE: payment.deployment.yaml
   <<: *deploy_defintion
