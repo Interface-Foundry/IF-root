@@ -3,10 +3,6 @@
 var uuid = require('uuid')
 var _ = require('lodash')
 
-// function * createCoupon(options) {
-
-//   var coupon = new db.Coupons(_.omitBy(options, _.is)
-// }
 
 /*
 * create a coupon for a team_id that can be used multiple times
@@ -61,14 +57,3 @@ module.exports = {
   createNewMultiUseCoupon: createNewMultiUseCoupon,
   refreshTeamCoupons: refreshTeamCoupons
 }
-
-
-
-// co(function * () {
-    // yield createNewMultiUseCoupon('12345team', 'percentage', 50, 5, '50PercentOffFor5Uses')
-    // yield db.Coupon.findOne({team_id: '12345team', coupon_code: '50PercentOffFor5Uses'})
-    // yield createNewMultiUseCoupon('12345team', 'percentage', 50, 5, 'Percentofffor')
-    // yield createNewMultiUseCoupon('12345team', 'percentage', 50, 5, 'Percentofffor', 'promotion')
-    // db.connection.close()
-    // var result = _.omitBy(my_object, _.isNil);
-// })

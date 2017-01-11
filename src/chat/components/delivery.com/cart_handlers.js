@@ -1,9 +1,9 @@
 // 'use strict'
 
 var _ = require('lodash')
-var coupon = require('./payments.coupon.js')
 var Menu = require('./Menu')
 var api = require('./api-wrapper')
+var coupon = require('../../../coupon/couponUsing.js')
 
 var createAttachmentsForAdminCheckout = require('./generateAdminCheckout.js').createAttachmentsForAdminCheckout
 
