@@ -1,17 +1,11 @@
 var shopping_home_default = module.exports.shopping_home_default = function(id) {
   return [{
     name: "more",
-    text: "See More Results",
+    text: "More >",
     style: "default",
     type: "button",
     value: "more"
   }, {
-    name: 'view_cart_btn',
-    text: '⁂ View Cart',
-    style: 'default',
-    type: 'button',
-    value: 'view_cart_btn'
-  },  {
     'name': 'passthrough',
     'text': 'Home',
     'type': 'button',
@@ -20,42 +14,10 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
 }
 
 var home_screen = module.exports.home_screen = function(isAdmin) {
-  let home = {
+  let buttonDescrip = isAdmin ? 'Collect' : 'Get';
+  return {
     text: require('./utils').randomWelcome(),
-    attachments: []
-  };
-  if (isAdmin) {
-    home.attachments = [{
-      'mrkdwn_in': ['text'],
-      text: '*Kip Café*\nI can order food for your team! This is filler text etc.',
-      color: '#f43440',
-      callback_id: 'wow such home',
-      actions: [{
-        name: 'passthrough',
-        value: 'food',
-        text: 'Collect Food',
-        type: 'button'
-      }]
-    }, {
-      text: '*Kip Store*\nI can shop for your team! This is filler text blah',
-      'mrkdwn_in': ['text'],
-      color: '#fe9b00',
-      callback_id: 'wow such home',
-      actions: [{
-        name: 'passthrough',
-        value: 'shopping',
-        text: 'Collect Supplies',
-        type: 'button'
-      }, {
-        name: 'view_cart_btn',
-        text: '⁂ View Cart',
-        style: 'default',
-        type: 'button',
-        value: 'view_cart_btn'
-      }]
-    }];
-  } else {
-    home.attachments = [{
+    attachments: [{
       'mrkdwn_in': ['text'],
       text: '*Kip Café*\nHungry? I can help you find lunch',
       color: '#f43440',
@@ -63,7 +25,7 @@ var home_screen = module.exports.home_screen = function(isAdmin) {
       actions: [{
         name: 'passthrough',
         value: 'food',
-        text: 'Get Food',
+        text: `${buttonDescrip} Food`,
         type: 'button'
       }]
     }, {
@@ -72,9 +34,9 @@ var home_screen = module.exports.home_screen = function(isAdmin) {
       color: '#fe9b00',
       callback_id: 'wow such home',
       actions: [{
-        name: 'passthrough',
-        value: 'shopping',
-        text: 'Get Supplies',
+        name: isAdmin ? 'collect.initial' : 'passthrough',
+        value: isAdmin ? 'initial' : 'shopping',
+        text: `${buttonDescrip} Supplies`,
         type: 'button'
       }, {
         name: 'view_cart_btn',
@@ -84,8 +46,7 @@ var home_screen = module.exports.home_screen = function(isAdmin) {
         value: 'view_cart_btn'
       }]
     }]
-  }
-  return home;
+  };
 };
 
 var onboard_home_attachments = module.exports.onboard_home_attachments = function(delay) {
@@ -228,12 +189,6 @@ var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
   'style': 'default',
   'type': 'button',
   'value': 'search.healthy_snacks'
-}, {
-  name: 'view_cart_btn',
-  text: '⁂ View Cart',
-  style: 'default',
-  type: 'button',
-  value: 'view_cart_btn'
 }];
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = [{
@@ -254,7 +209,7 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
   color: "#49d63a"
 }, {
   text: 'Tap to search for something',
-  fallback: 'You are unable to choose a game',
+  fallback: 'Tap to search for something',
   callback_id: 'wopr_game',
   color: "#45a5f4",
   attachment_type: 'default',
@@ -307,8 +262,8 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   value: "member"
 }];
 
-var member_onboard_attachments = module.exports.member_onboard_attachments = function (admin, delay) {
-  return [{
+var member_onboard_attachments = module.exports.member_onboard_attachments = function(admin, delay) {
+  let reply = [{
     'image_url': 'http://kipthis.com/kip_modes/mode_howtousekip.png',
     'text': '',
     'mrkdwn_in': [
@@ -328,14 +283,18 @@ var member_onboard_attachments = module.exports.member_onboard_attachments = fun
       style: "primary",
       type: "button",
       value: "step_1"
-    }, {
+    }]
+  }];
+  if (delay !== 'initial') {
+    reply[1].actions.push({
       name: 'member_onboard.start.remind_later',
       text: '◷ Remind Me Later',
       style: 'default',
       type: 'button',
       value: `remind_later.${delay}.${admin}`
-    }]
-  }]
+    })
+  }
+  return reply
 };
 
 var slack_member_onboard_start = module.exports.slack_member_onboard_start = [{

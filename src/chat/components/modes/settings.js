@@ -380,7 +380,6 @@ handlers['sorry'] = function * (message) {
     })
    message.reply = attachments;
      return [message];
-
 }
 
 

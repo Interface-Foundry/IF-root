@@ -63,7 +63,7 @@ handlers['start'] = function * (message) {
     }
   })
   attachments.push({
-    'text': '✎ Hint: You can also type the channels to add (Example: #nyc-office #research)',
+    'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
     mrkdwn_in: ['text']
   })
 

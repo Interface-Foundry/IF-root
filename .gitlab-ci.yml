@@ -67,11 +67,13 @@ stages:
 test:node:
   image: node:6
   stage: test
+  only:
+    - dev
   script:
     - npm install
     - npm install --only=dev
     - npm install -g mocha
-    - NODE_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/parser/parser.test.js
+    - NODE_ENV=test CONFIG_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/delivery.com/adminCheckout.test.js
   cache:
     paths:
       - /usr/local/lib/node_modules
@@ -85,6 +87,8 @@ test:node:
 test:python:
   image: python:3.4
   stage: test
+  only:
+    - dev
   before_script:
     - echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/GOOGLE_APPLICATION_CREDENTIALS.json
     - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/GOOGLE_APPLICATION_CREDENTIALS.json
