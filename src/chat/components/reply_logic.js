@@ -243,7 +243,10 @@ function replyLogic (incoming) {
   return co(function * () {
     let message = incoming
     var timer = new kip.SavedTimer('message.timer', message)
+
+		// THe secret to the fast actions is that it doesn't go through nlp or anything
     kip.debug('slack_action', message.slack_action)
+
     if (_.get(message, 'slack_action.route')) {
       return yield food(message)
     }

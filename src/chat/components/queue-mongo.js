@@ -2,6 +2,8 @@ var co = require('co')
 var sleep = require('co-sleep')
 var rx = require('rx')
 var hostname = require('os').hostname()
+var slack = require('./slack/slack')
+var _ = require('lodash')
 
 var topics = {
   'incoming': 1,
@@ -34,6 +36,18 @@ function publish (topic, data, key) {
 
   if (!data) {
     throw new Error('cannot publish null message')
+  }
+
+  // catch all slack messages and direcly send them
+  if (topic === 'outgoing.slack') {
+    // kill me why why why do i have to do this
+    if (_.get(data, 'reply.data')) {
+      slack.send({data: data.reply.data}) // wat
+    } else if (data.text || data.attachments) {
+      slack.send({ data: data })
+    } else {
+      slack.send(data)
+    }
   }
 
   // Upsert the thing

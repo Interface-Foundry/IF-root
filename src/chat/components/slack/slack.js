@@ -360,7 +360,6 @@ function send (outgoing) {
         logging.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message.reply,'\n\n\n\n');
       }
 
-      outgoing.ack()
     }).then(() => {
     }).catch(e => {
       console.log(e.stack)
