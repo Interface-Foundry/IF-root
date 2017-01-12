@@ -206,6 +206,26 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = [{
   mrkdwn_in: ['text']
 }];
 
+var slack_bundles = module.exports.slack_bundles = [{
+  name: "bundles.supplies.snackbox",
+  text: "Snackbox",
+  style: "default",
+  type: "button",
+  value: "bundle.snacks"
+}, {
+  name: "bundles.supplies.drinks",
+  text: "Drinks",
+  style: "default",
+  type: "button",
+  value: "bundle.drinks"
+}, {
+  name: "bundles.supplies.supplies",
+  text: "Office Supplies",
+  style: "default",
+  type: "button",
+  value: "bundle.supplies"
+}];
+
 // ONBOARDING MODE TEMPLATES
 var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
   name: "onboard.supplies.snackbox",

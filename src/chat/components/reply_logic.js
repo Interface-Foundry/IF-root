@@ -27,7 +27,8 @@ var queue = require('./queue-mongo');
 var onboarding = require('./modes/onboarding');
 var onboard = require('./modes/onboard');
 var member_onboard = require('./modes/member_onboard');
-var collect = require('./modes/collect')
+var collect = require('./modes/collect');
+var bundles = require('./modes/bundles');
 var settings = require('./modes/settings');
 var team = require('./modes/team');
 var shopping = require('./modes/shopping').handlers;
@@ -176,6 +177,9 @@ function switchMode(message) {
     'collect': function() {
       return 'collect'
     },
+    'bundles': function() {
+      return 'bundles'
+    },
 		'settings': function() {
 			return 'settings';
 		},
@@ -207,6 +211,9 @@ function printMode(message) {
 			break
     case 'collect':
       winston.debug('In', 'COLLECT'.rainbow, 'mode 👋');
+      break;
+    case 'bundles':
+      winston.debug('In', 'BUNDLES'.rainbow, 'mode 👋');
       break;
 		case 'onboarding':
 			winston.debug('In', 'ONBOARDING'.green, 'mode 👋')
@@ -342,8 +349,8 @@ queue.topic('incoming').subscribe(incoming => {
 
     if (switchMode(message)) {
       message.mode = switchMode(message);
-      if (message.mode.match(/(settings|team|onboard)/)) message.action = 'home';
-      if (message.mode.match(/(team|onboard|collect)/)) {
+      if (message.mode.match(/(settings|team|onboard|bundles)/)) message.action = 'home';
+      if (message.mode.match(/(team|onboard|collect|bundles)/)) {
         let team = yield db.Slackbots.findOne({
           'team_id': message.source.team
         }).exec();
@@ -429,6 +436,9 @@ queue.topic('incoming').subscribe(incoming => {
         break;
       case 'collect':
         var replies = yield collect.handle(message);
+        break;
+      case 'bundles':
+        var replies = yield bundles.handle(message);
         break;
       default:
         logging.debug('DEFAULT SHOPPING MODE')
