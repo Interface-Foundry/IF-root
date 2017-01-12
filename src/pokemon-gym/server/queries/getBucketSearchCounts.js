@@ -47,3 +47,7 @@ const getBucketSearchCounts = messages =>
   });
 
 module.exports = getBucketSearchCounts;
+if (!module.parent) {
+  require('../../../kip')
+  getBucketSearchCounts(db.messages).then(console.log.bind(console))
+}

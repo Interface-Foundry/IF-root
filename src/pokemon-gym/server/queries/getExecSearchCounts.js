@@ -49,3 +49,7 @@ const getExecSearchCounts = messages =>
   });
 
 module.exports = getExecSearchCounts;
+if (!module.parent) {
+  require('../../../kip')
+  getExecSearchCounts(db.messages).then(console.log.bind(console))
+}

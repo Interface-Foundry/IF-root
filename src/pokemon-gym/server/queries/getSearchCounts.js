@@ -35,3 +35,4 @@ const getSearchCounts = dbs =>
   });
 
 module.exports = getSearchCounts;
+
