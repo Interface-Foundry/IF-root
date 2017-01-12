@@ -161,7 +161,7 @@ var settings_weeks= module.exports.settings_weeks = function(message) {
       "value": '4'
     }
   ]
-} 
+}
 
 
 var settings_menu = module.exports.settings_menu = [{
@@ -397,7 +397,7 @@ var slack_onboard_basic = module.exports.slack_onboard_basic = [{
   style: "default",
   type: "button",
   value: "checkout"
-}, 
+},
 // {
 //   name: "onboard.bundle.more",
 //   text: "More Info",
