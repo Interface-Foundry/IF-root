@@ -39,12 +39,12 @@ handlers['food.cart.personal'] = function * (message, replace) {
     image_url: 'https://storage.googleapis.com/kip-random/kip-my-cafe-cart.png'
   }
 
-  var items = yield myItems.map((i, index) => {
+  var items = myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
     var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
     var quantityAttachment = {
       // title: item.name + ' – ' + menu.getCartItemPrice(i).$,
-      text: item.description + instructions,
+      text: `*${item.name} – ${menu.getCartItemPrice(i).$}*\n${item.description} ${instructions}`,
       fallback: item.description + instructions,
       mrkdwn_in: ['text'],
       callback_id: item.id,
@@ -81,14 +81,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
       }
     }
 
-    var itemMessage = {
-        text: `*${item.name + ' – ' + menu.getCartItemPrice(i).$}*`,
-        attachments: [quantityAttachment]
-    }
-
-    // $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: itemMessage})
-
-    return itemMessage
+    return quantityAttachment
   })
 
   var bottom = {
@@ -117,28 +110,32 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   var json = {
     text: `*Confirm Your Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    attachments: [banner]//.concat(lineItems)//.concat([bottom])
+    attachments: [banner].concat(items).concat([bottom])
   }
 
-//send a final (empty) message with "bottom" and this budget thing
-  var finalMessage = {
-    text: '',
-    attachments: [bottom]
-  }
+  console.log('ITEMS', items)
 
   if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
-    finalMessage.attachments.push({
+    json.attachments.push({
       'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
       'mrkdwn_in': ['text'],
       'color': '#49d63a'
     });
   }
 
-  for (var i = 0; i < items.length; i++) {
-    yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: items[i]})
-  }
+// //send a final (empty) message with "bottom" and this budget thing
+//   var finalMessage = {
+//     text: '',
+//     attachments: [bottom]
+//   }
 
-  yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
+
+  //
+  // for (var i = 0; i < items.length; i++) {
+  //   yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: items[i]})
+  // }
+  //
+  // yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
 
   if (replace) {
     $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
