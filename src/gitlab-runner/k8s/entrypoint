@@ -48,8 +48,8 @@ fi
 
 # set up the initial settings
 cat <<EOF > $CONFIG_FILE
-concurrent = 6
-check_interval = 4
+concurrent = 2
+check_interval = 5
 
 EOF
 

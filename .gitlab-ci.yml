@@ -31,7 +31,7 @@ stages:
 .build_template: &build_defintion
   stage: build
   only:
-    - dev
+    - master
   before_script:
     - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
   script:
@@ -45,7 +45,7 @@ stages:
   image: google/cloud-sdk
   stage: deploy
   only:
-    - dev
+    - master
   before_script:
     - echo $KUBERNETES_KEY > /tmp/KUBERNETES_KEY.json
     - gcloud auth activate-service-account $KUBERNETES_SA --key-file=/tmp/KUBERNETES_KEY.json --project=$PROJECT
@@ -68,7 +68,7 @@ test:node:
   image: node:6
   stage: test
   only:
-    - dev
+    - master
   script:
     - npm install
     - npm install --only=dev
@@ -88,7 +88,7 @@ test:python:
   image: python:3.4
   stage: test
   only:
-    - dev
+    - master
   before_script:
     - echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/GOOGLE_APPLICATION_CREDENTIALS.json
     - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/GOOGLE_APPLICATION_CREDENTIALS.json
