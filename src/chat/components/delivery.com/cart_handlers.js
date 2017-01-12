@@ -43,7 +43,6 @@ handlers['food.cart.personal'] = function * (message, replace) {
     var item = menu.flattenedMenu[i.item.item_id]
     var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
     var quantityAttachment = {
-      // title: item.name + ' – ' + menu.getCartItemPrice(i).$,
       text: `*${item.name} – ${menu.getCartItemPrice(i).$}*\n${item.description} ${instructions}`,
       fallback: item.description + instructions,
       mrkdwn_in: ['text'],
@@ -112,8 +111,6 @@ handlers['food.cart.personal'] = function * (message, replace) {
     text: `*Confirm Your Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     attachments: [banner].concat(items).concat([bottom])
   }
-
-  console.log('ITEMS', items)
 
   if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
     json.attachments.push({
