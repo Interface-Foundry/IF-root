@@ -393,7 +393,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         return _.includes(discounts.teams, foodSession.team_id)
       })
 
-      foodSession.main_amount = order.total + foodSession.service_fee + order.tax + order.delivery_fee + order.convenience_fee
+      foodSession.main_amount = order.total + foodSession.service_fee + order.delivery_fee + order.convenience_fee
+
       if (discountAvail) {
         // this is literally needed to prevent rounding errors
         if (foodSession.coupon.used === false) {
@@ -491,8 +492,16 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         fallback: 'Checkout Total',
         text: `*Cart Subtotal:* ${foodSession.order.subtotal.$}${deliveryDiscount}\n` +
               `*Taxes:* ${foodSession.order.tax.$}\n` +
-              `*Delivery Fee:* ${foodSession.order.delivery_fee.$}${convenienceFee}\n` +
-              `*Service Fee:* ${foodSession.service_fee.$}\n` +
+              `*Delivery Fee:* ${foodSession.order.delivery_fee.$}${convenienceFee}\n`,
+        'callback_id': 'food.admin.cart.info',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'mrkdwn_in': ['text']
+      }
+
+       var infoAttachment2 = {
+        fallback: 'Checkout Total2',
+        text: `*Service Fee:* ${foodSession.service_fee.$}\n` +
               `*Tip:* ${foodSession.tip.amount.$}\n`,
         'callback_id': 'food.admin.cart.info',
         'color': '#3AA3E3',
@@ -501,14 +510,14 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }
 
       if (discountAvail) {
-        infoAttachment.text += `\n*Coupon:* -${foodSession.discount_amount.$}`
+        infoAttachment2.text += `\n*Coupon:* -${foodSession.discount_amount.$}`
       }
 
       if (foodSession.instructions) {
-        infoAttachment.text = `*Delivery Instructions*: _${foodSession.instructions}_\n` + infoAttachment.text
+        infoAttachment2.text = infoAttachment2.text + `*Delivery Instructions*: _${foodSession.instructions}_\n`
       }
 
-      response.attachments = _.flatten([mainAttachment, itemAttachments, tipAttachment, infoAttachment, finalAttachment]).filter(Boolean)
+      response.attachments = _.flatten([mainAttachment, itemAttachments, tipAttachment, infoAttachment, infoAttachment2, finalAttachment]).filter(Boolean)
     } else {
       // some sort of error
       foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
