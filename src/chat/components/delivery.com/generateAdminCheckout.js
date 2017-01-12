@@ -89,7 +89,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     color: '#49d63a',
     attachment_type: 'default',
     mrkdwn_in: ['text'],
-    footer: 'Powered by Delivery.com',
+    footer: 'Powered by delivery.com',
     footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
   }
 

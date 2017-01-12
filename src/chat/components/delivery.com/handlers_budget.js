@@ -90,7 +90,7 @@ handlers['food.admin.team_budget'] = function * (message) {
 
   var noneButton = {
     'name': 'passthrough',
-    'text': 'No Budget',
+    'text': 'Unlimited',
     'style': 'default',
     'type': 'button',
     'value': 'food.admin_polling_options'

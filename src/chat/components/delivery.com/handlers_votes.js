@@ -671,7 +671,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [],
-    'footer': 'Powered by Delivery.com',
+    'footer': 'Powered by delivery.com',
     'footer_icon': 'http://tidepools.co/kip/dcom_footer.png'
   }
 
@@ -835,7 +835,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
       `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
       `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
-      `<tr><p style="color:#fa2d48">Add to Cart</p></tr>` +
+      `<tr><p style="color:#fa2d48">+ Add to Cart</p></tr>` +
       `</table>`;
     }
 
