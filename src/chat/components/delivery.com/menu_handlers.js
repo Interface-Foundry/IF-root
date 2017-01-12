@@ -135,7 +135,7 @@ if (foodSession.budget) {
       'actions': [
         {
           'name': 'food.item.submenu',
-          'text': 'Add to Order',
+          'text': '+ Add to Order',
           'type': 'button',
           'style': 'primary',
           'value': i.id
