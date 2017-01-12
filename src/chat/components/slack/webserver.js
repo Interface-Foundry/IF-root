@@ -176,11 +176,7 @@ app.post('/slackaction', next(function * (req, res) {
         var channelId = _.get(parsedIn,'actions[0].value');
         var team_id = message.source.team;
         var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-        var history = yield db.Messages.find({
-          thread_id: message.source.channel
-        }).sort('-ts').limit(3);
-        var lastMessage = history[0];
-        var mode = lastMessage.mode;
+        var lastMessage = parsedIn.original_message;
         kip.debug(`😍  ${JSON.stringify(lastMessage, null, 2)}`)
         if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
           // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
@@ -192,8 +188,8 @@ app.post('/slackaction', next(function * (req, res) {
         team.markModified('meta.cart_channels');
         yield team.save();
         var channels = yield utils.getChannels(team);
-         if (channels.length > 9) {
-          channels = channels.slice(0,9);
+        if (channels.length > 9) {
+          channels = channels.slice(0, 9);
         }
         var attachments = [];
         var buttons = channels.map(channel => {
@@ -215,12 +211,12 @@ app.post('/slackaction', next(function * (req, res) {
         }
         var chunkedButtons = _.chunk(buttons, 5);
         attachments.push({
-          text: lastMessage.reply[1].text,
-          image_url: lastMessage.reply[1].image_url,
+          text: lastMessage.attachments[0].text,
+          image_url: lastMessage.attachments[0].image_url,
           mrkdwn_in: ['text'],
           color: '#A368F0',
           actions: chunkedButtons[0],
-          fallback: lastMessage.reply[1].fallback,
+          fallback: lastMessage.attachments[0].fallback,
           callback_id: "none"
         });
         chunkedButtons.forEach((ele, i) => {
@@ -228,7 +224,7 @@ app.post('/slackaction', next(function * (req, res) {
             attachments.push({text: '', actions: ele, color: '#A368F0', callback_id: 'none'});
           }
         })
-        attachments = attachments.concat([lastMessage.reply[3], lastMessage.reply[4], lastMessage.reply[5]]);
+        attachments = attachments.concat(lastMessage.attachments[lastMessage.attachments.length - 2], lastMessage.attachments[lastMessage.attachments.length - 1]);
         var json = parsedIn.original_message;
         json.attachments = attachments;
         let stringOrig = JSON.stringify(json);

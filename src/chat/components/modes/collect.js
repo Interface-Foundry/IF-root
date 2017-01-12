@@ -43,11 +43,6 @@ handlers['initial'] = function*(message) {
     'team_id': team_id
   }).exec();
   var cartChannels = team.meta.cart_channels;
-  var attachments = [];
-  attachments.push({
-    text: '',
-    fallback: 'Which channels would you to send a reminder to?'
-  });
   var channels = yield utils.getChannels(team);
   var buttons = channels.map(channel => {
     var checkbox = cartChannels.find(id => {
@@ -72,14 +67,14 @@ handlers['initial'] = function*(message) {
   }
 
   var chunkedButtons = _.chunk(buttons, 5);
-  attachments.push({
-    text: 'Which channels would you to send a reminder to?',
+  let attachments=[{
+    text: 'Which channels would you like to send a reminder to?',
     mrkdwn_in: ['text'],
     color: '#A368F0',
     actions: chunkedButtons[0],
-    fallback: 'Which channels would you to send a reminder to?',
+    fallback: 'Which channels would you like to send a reminder to?',
     callback_id: 'none'
-  });
+  }];
   chunkedButtons.forEach((ele, i) => {
     if (i !== 0) {
       attachments.push({
@@ -94,7 +89,7 @@ handlers['initial'] = function*(message) {
     text: '',
     color: '#45a5f4',
     mrkdwn_in: ['text'],
-    fallback: 'Which channels would you to send a reminder to?',
+    fallback: 'Which channels would you like to send a reminder to?',
     callback_id: 'none'
   });
   attachments.push({
@@ -106,7 +101,7 @@ handlers['initial'] = function*(message) {
     text: '',
     color: '#45a5f4',
     mrkdwn_in: ['text'],
-    fallback: 'Which channels would you to send a reminder to?',
+    fallback: 'Which channels would you like to send a reminder to?',
     actions: [{
       name: 'collect.home.reminder',
       text: 'Notify Members',
