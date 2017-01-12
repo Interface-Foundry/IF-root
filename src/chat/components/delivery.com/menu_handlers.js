@@ -117,9 +117,9 @@ if (foodSession.budget) {
     //but otherwise maintain already-sorted order
   });
 }
-//~~~~~
 
   var menuItems = sortedMenu.slice(index, index + 3).reverse().map(i => {
+
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
@@ -226,7 +226,7 @@ if (foodSession.budget) {
     }
   }
 
-
+  var url = yield menu_utils.getUrl(foodSession, message.source.user)
   //resto name
   msg_json.attachments.push({
     'fallback': 'Search the menu',
@@ -235,7 +235,7 @@ if (foodSession.budget) {
     'fields': [ // first field would be budget
       {
         'short': true,
-        'value': `*<${foodSession.chosen_restaurant.url}|View Full Menu ${menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine)}>*`
+        'value': `*<${url}|View Full Menu ${menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine)}>*`
       }
     ],
     'mrkdwn_in': ['text', 'fields']

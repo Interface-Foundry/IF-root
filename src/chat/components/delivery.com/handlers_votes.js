@@ -745,8 +745,6 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   }
   var url = yield googl.shorten(merchant.summary.url.complete)
 
-  console.log('HEGEL\'S BAGELS', merchant.summary.cuisines[0])
-
   logging.data('using merchant for food service', merchant.id)
   foodSession.chosen_restaurant = {
     id: merchant.id,
@@ -756,12 +754,9 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     cuisine: merchant.summary.cuisines[0]
   }
 
-  console.log('foodSession.chosen_restaurant', foodSession.chosen_restaurant)
   foodSession.menu = yield api.getMenu(merchant.id)
 
   foodSession.save()
-
-  console.log('moment o\' truth', foodSession.chosen_restaurant)
 
   return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
 }
