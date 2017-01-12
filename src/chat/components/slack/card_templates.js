@@ -23,7 +23,7 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
 
 var simple_home = module.exports.simple_home = [{
   name: 'passthrough',
-  value: 'food',
+  value: { route: 'food.begin' },
   text: 'Kip Café',
   type: 'button'
 }, {

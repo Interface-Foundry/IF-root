@@ -195,8 +195,7 @@ function send (outgoing) {
     var thread_id = _.get(message, 'thread_id');
     var bot = slackConnections[team] ? slackConnections[team] : slackConnections[thread_id];
     if (typeof bot === 'undefined') {
-      logging.error('error with the bot thing, message:', message)
-      // throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
+      logging.error('rtm client not registered for slack team', team, 'outgoing:', outgoing)
     }
     var msgData = {
       icon_url: 'http://kipthis.com/img/kip-icon.png',

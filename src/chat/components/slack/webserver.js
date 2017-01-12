@@ -60,13 +60,14 @@ app.post('/slackaction', next(function * (req, res) {
   // parse the action value, which should be something like this
   // {route: 'food.admin.whatever', address: {...}}
   const action = parsedIn.actions[0]
-  var actionData
+  var actionData = parsedIn.actions[0].value
   try {
-    actionData = JSON.parse(action.value)
+    actionData = JSON.parse(actionData)
   } catch (e) {
     console.log('Hey!'.green, 'Looks like you need to', 'R E F A C T O R'.rainbow, 'this action', action)
     console.log('hint: value should be json'.cyan)
-    throw e
+    actionData = {value: actionData}
+    // throw e
   }
   kip.debug('[button click]'.cyan, actionData)
 

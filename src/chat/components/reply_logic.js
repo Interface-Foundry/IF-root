@@ -39,6 +39,12 @@ var amazon_variety = require('./amazon_variety');
 var variation = require('./slack/variation_view')
 var card_templates = require('./slack/card_templates.js');
 
+
+//
+// Logic handlers
+//
+
+
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
 // I'm sorry i couldn't understand that
@@ -239,6 +245,7 @@ function printMode(message) {
 	}
 }
 
+
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS <--lel
 //
@@ -248,10 +255,9 @@ function replyLogic (incoming) {
     var timer = new kip.SavedTimer('message.timer', message)
 
 		// THe secret to the fast actions is that it doesn't go through nlp or anything
-    kip.debug('slack_action', message.slack_action)
-
     if (_.get(message, 'slack_action.route')) {
-      return yield food(message)
+			logging.debug('using direct action handling')
+      return yield handlers(message)
     }
 
     // skipping histoy and stuff rn b/c i dont have time to do it
