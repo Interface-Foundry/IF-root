@@ -12,10 +12,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
   }
 
   // all the messages which compose the cart
-  var cartObj = [];
-
-  //add mode sticker
-  cartObj.push({
+  var cartObj = [{
     text: 'Here\'s everything you have in your cart',
     color: '#45a5f4',
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png',
@@ -25,13 +22,16 @@ module.exports = function*(message, slackbot, highlight_added_item) {
         'text': 'Home',
         'type': 'button',
         'value': 'home'
-      }, {
-        'name': 'passthrough',
-        'text': '+ Add Bundles',
-        'type': 'button',
-        'value': 'bundles'
       }]
-  })
+  }];
+  if (isAdmin) {
+    cartObj[0].actions.push({
+      'name': 'bundles.home',
+      'text': '+ Add Bundles',
+      'type': 'button',
+      'value': 'home'
+    })
+  }
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];
     var addedByUser = item.added_by.includes(message.source.user);
