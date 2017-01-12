@@ -385,6 +385,7 @@ function * buildRestaurantAttachment (restaurant) {
   try {
     var realImage = yield request({
       uri: kip.config.picstitchDelivery,
+      method: 'POST',
       json: true,
       body: {
         origin: 'slack',
