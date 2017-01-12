@@ -261,7 +261,8 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
       text: `*Collected so far* 👋\n_${allItems}_`,
-      'fallback': `*Collected so far* 👋\n_${allItems}_`
+      'fallback': `*Collected so far* 👋\n_${allItems}_`,
+      actions: []
     }]
   }
 
@@ -277,30 +278,38 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     var totalPrice = myItems.reduce((sum, i) => {
       return sum + menu.getCartItemPrice(i)
     }, 0)
-
-    if (totalPrice < foodSession.chosen_restaurant.minimum) {
-      dashboard.attachments.push({
-        color: '#fc9600',
-        mrkdwn_in: ['text'],
-        text: `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`
-      })
-    }
-    else {
-      dashboard.attachments[dashboard.attachments.length-1].actions.push({
-        name: 'food.admin.order.confirm',
-        text: 'Finish Order Early',
-        style: 'default',
-        type: 'button',
-        value: 'food.admin.order.confirm',
-        confirm: {
-            "title": "Finish Order Early?",
-            "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
-            "ok_text": "Yes",
-            "dismiss_text": "No"
-        }
-      })
-    }
   }
+
+  if (totalPrice < foodSession.chosen_restaurant.minimum) {
+    dashboard.attachments.push({
+      color: '#fc9600',
+      mrkdwn_in: ['text'],
+      text: `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`,
+      actions: []
+    })
+  }
+  else {
+    dashboard.attachments[dashboard.attachments.length-1].actions.push({
+      name: 'food.admin.order.confirm',
+      text: 'Finish Order Early',
+      style: 'default',
+      type: 'button',
+      value: 'food.admin.order.confirm',
+      confirm: {
+          "title": "Finish Order Early?",
+          "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
+          "ok_text": "Yes",
+          "dismiss_text": "No"
+      }
+    })
+  }
+
+  dashboard.attachments[dashboard.attachments.length-1].actions.push({
+    'name': 'food.admin.select_address',
+    'text': '↺ Restart Order',
+    'type': 'button',
+    'value': 'food.admin.select_address'
+  });
 
   if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
     // replace admins message
@@ -525,7 +534,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         'mrkdwn_in': ['text'],
         'actions': [{
           'name': 'food.admin.select_address',
-          'text': 'Restart Order ↺',
+          'text': '↺ Restart Order',
           'type': 'button',
           'style': 'primary',
           'value': 'food.admin.select_address'
