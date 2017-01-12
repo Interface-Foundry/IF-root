@@ -603,7 +603,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': yield viableRestaurants.slice(index, index + 3).map(utils.buildRestaurantAttachment)
+    'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
   var moreButton = {

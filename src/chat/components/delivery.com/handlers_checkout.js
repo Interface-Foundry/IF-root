@@ -2,7 +2,7 @@ var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
 var sleep = require('co-sleep')
-var coupon = require('../../../coupon/couponUsing.js')
+
 
 // injected dependencies
 var $replyChannel
@@ -17,6 +17,9 @@ var handlers = {}
 */
 handlers['food.admin.order.checkout.address2'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1310, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var response = {
     'title': `Whats your apartment or floor number at ${foodSession.chosen_location.address_1}`,
     'text': `Type your apartment or floor number below`,
@@ -54,6 +57,9 @@ handlers['food.admin.order.checkout.address2'] = function * (message) {
 
 handlers['food.admin.order.checkout.name'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1311, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var response = {
     'text': `Hey ${foodSession.convo_initiater.name} what's the full name of the person who will be receiving this order\n` +
             `>Type their name below`,
@@ -67,8 +73,11 @@ handlers['food.admin.order.checkout.name'] = function * (message) {
 handlers['food.admin.order.checkout.phone_number'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   // process user name from previous message
+
+  db.waypoints.log(1313, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var response = {
-    'text': `✎ What's your phone number? (Example: _555 555 5555_)`,
+    'text': `✎ What's your phone number?\nExample: 555 555 5555a`,
     'fallback': 'Type your phone number below',
     'callback_id': 'food.admin.order.checkout.phone_number',
   }
@@ -77,6 +86,9 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
 
 handlers['food.admin.order.checkout.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1320, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(1).exec()
   prevMessage = prevMessage[0]
   if (_.get(prevMessage, 'reply')) {
@@ -86,6 +98,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   var editInfo = {}
 
   editInfo['admin.order.checkout.address2'] = function * (message) {
+    db.waypoints.log(1321, foodSession._id, message.user_id, {original_text: message.original_text})
+
     if (_.get(message, 'source.actions[0].value') === 'none') {
       foodSession.chosen_location.address_2 = ' '
     } else {
@@ -97,6 +111,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   editInfo['admin.order.checkout.name'] = function * (message) {
+    db.waypoints.log(1322, foodSession._id, message.user_id, {original_text: message.original_text})
+
     if (!_.get(message, 'text')) {
       logging.error('message was undefined but we got a handler', message, prevMessage)
       return yield handlers['food.admin.order.checkout.name'](message)
@@ -115,6 +131,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   editInfo['admin.order.checkout.phone_number'] = function * (message) {
+    db.waypoints.log(1323, foodSession._id, message.user_id, {original_text: message.original_text})
+
     var num = message.text.replace(/<tel:([^|]*)\|.*/, '$1')
     var phoneParsed = phone(num)
     if (phoneParsed[0] === undefined) {
@@ -276,6 +294,8 @@ handlers['food.admin.order.checkout.delivery_instructions'] = function * (messag
 handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
+
   yield db.Delivery.update({_id: foodSession._id}, {$set: {'instructions': message.text || ''}}).exec()
   var msg = _.merge({}, message, {
     text: ''
@@ -286,6 +306,8 @@ handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * 
 handlers['food.admin.order.pay'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+
+  db.waypoints.log(1330, foodSession._id, message.user_id, {original_text: message.original_text})
 
   // base response
   var response = {
@@ -385,6 +407,8 @@ handlers['food.admin.order.remove_card'] = function * (message) {
 
 handlers['food.admin.add_new_card'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1331, foodSession._id, message.user_id, {original_text: message.original_text})
 
   // add various shit to the foodSession
   foodSession.payment_post = {
@@ -560,12 +584,11 @@ handlers['food.payment_info'] = function * (message) {
 }
 
 handlers['food.done'] = function * (message) {
+  logging.error('saving users info to slackbots and peripheral cleanup')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  // save coupon info
-  if (_.get(foodSession, 'coupon.code')) {
-    logging.info('saving coupon code stuff')
-    yield coupon.updateCouponForCafe(foodSession)
-  }
+
+  db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
+
   // final area to save and reset stuff
   logging.info('saving phone_number... ', foodSession.convo_initiater.phone_number)
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
