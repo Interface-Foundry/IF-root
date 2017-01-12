@@ -522,11 +522,6 @@ handlers['team'] = function * (message) {
   }
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var cartChannels = team.meta.cart_channels;
-  var attachments = [];
-  attachments.push({
-    text: '',
-    fallback: 'Step 3/3: Choose the channels you want to include'
-  });
   var channels = yield utils.getChannels(team);
   var buttons = channels.map(channel => {
     var checkbox = cartChannels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
@@ -535,7 +530,7 @@ handlers['team'] = function * (message) {
       text: checkbox + channel.name,
       type: 'button',
       value: channel.id
-    }
+    };
   });
   buttons = _.uniq(buttons);
   function sortF(a, b){
@@ -549,8 +544,14 @@ handlers['team'] = function * (message) {
   }
 
   var chunkedButtons = _.chunk(buttons, 5);
-  attachments.push({text: '*Step 3/3:* Choose the channels you want to include: ', mrkdwn_in: ['text'],
-    color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
+  let attachments = [({
+    text: '*Step 3/3:* Choose the channels you want to include: ',
+    mrkdwn_in: ['text'],
+    color: '#A368F0',
+    actions: chunkedButtons[0],
+    fallback: 'Step 3/3: Choose the channels you want to include',
+    callback_id: "none"
+  })];
   chunkedButtons.forEach((ele, i) => {
     if (i != 0) {
       attachments.push({text:'', actions: ele, color: '#A368F0',callback_id: 'none'});
