@@ -42,7 +42,9 @@ function * infoForChannelOrGroup (slackbot, chosenChannel) {
 // start of actual handlers
 handlers['food.poll.confirm_send_initial'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  console.log('foodsession', foodSession);
+
+  db.waypoints.log(1102, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var prevFoodSession = yield db.Delivery.find({team_id: message.source.team, active: false}).limit(1).sort({_id: -1}).exec()
   var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
   prevFoodSession = prevFoodSession[0]
@@ -156,6 +158,9 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
 
 handlers['food.poll.confirm_send'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1102, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
   var budget = foodSession.budget;
 
@@ -226,6 +231,8 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var mostRecentMerchant = message.data.value
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+
+  db.waypoints.log(1111, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var checkbox
   // basic buttons

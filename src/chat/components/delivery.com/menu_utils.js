@@ -4,7 +4,6 @@ var _ = require('lodash');
 var config = require('../../../config')
 var Menu = require('./Menu')
 
-// var popoutUrl = 'http://e0616f78.ngrok.io/cafe';
 var popoutUrl = config.menuURL + '/cafe';
 
 var utils = {};
@@ -56,7 +55,6 @@ utils.sortMenu = function (foodSession, user, matchingItems) {
 }
 
 utils.getUrl = function (foodSession, user_id, selected_items) {
-  console.log('getUrl called on', popoutUrl);
   if (!selected_items) selected_items = [];
   return rp({
     url: popoutUrl,
@@ -77,6 +75,221 @@ utils.getUrl = function (foodSession, user_id, selected_items) {
     kip.debug('ERROR', err)
   })
   return url;
+}
+
+utils.cuisineEmoji = function (cuisine) {
+    var e
+    switch(cuisine){
+        case "Afghan":
+            e = '🍛'
+            break;
+        case "American":
+            e = '🍔'
+            break;
+        case "Argentinian":
+            e = '🍛'
+            break;
+        case "Asian":
+            e = '🍜'
+            break;
+        case "BBQ":
+        case "Barbeque":
+            e = '🔥'
+            break;
+        case "Bagels":
+        case "Bagelry":
+            e = '🗽'
+            break;
+        case "Bakery":
+            e = '🍞'
+            break;
+        case "Bar Food":
+            e = '🍺'
+            break;
+        case "Brazilian":
+            e = '🍛'
+            break;
+        case "Breakfast":
+            e = '🍳'
+            break;
+        case "Brunch":
+            e = '🍳'
+            break;
+        case "Burgers":
+            e = '🍔'
+            break;
+        case "Cafe":
+            e = '☕'
+            break;
+        case "Caribbean":
+            e = '🍛'
+            break;
+        case "Cheesesteaks":
+            e = '🍔'
+            break;
+        case "Chicken":
+            e = '🍗'
+            break;
+        case "Chinese":
+            e = '🍲'
+            break;
+        case "Crepes":
+            e = '🌯'
+            break;
+        case "Cuban":
+            e = '🍛'
+            break;
+        case "Deli":
+            e = '🍔'
+            break;
+        case "Desserts":
+            e = '🍰'
+            break;
+        case "Diner":
+            e = '☕'
+            break;
+        case "Empanadas":
+            e = '🍘'
+            break;
+        case "Ethiopian":
+            e = '🌯'
+            break;
+        case "Farm to Table":
+            e = '🌱'
+            break;
+        case "Fast Food":
+            e = '🍟'
+            break;
+        case "French":
+            e = '🧀'
+            break;
+        case "Frozen Yogurt":
+            e = '🍦'
+            break;
+        case "Fusion":
+            e = '🍳'
+            break;
+        case "German":
+            e = '🌭'
+            break;
+        case "Gluten-Free":
+            e = '🌽'
+            break;
+        case "Greek":
+            e = '🍋'
+            break;
+        case "Hawaiian":
+            e = '🍍'
+            break;
+        case "Healthy":
+            e = '🍏'
+            break;
+        case "Hot Dogs":
+            e = '🌭'
+            break;
+        case "Ice Cream":
+            e = '🍨'
+            break;
+        case "Indian":
+            e = '🍛'
+            break;
+        case "Irish":
+            e = '☘'
+            break;
+        case "Italian":
+            e = '🍝'
+            break;
+        case "Japanese":
+            e = '🍣'
+            break;
+        case "Juice Bar":
+            e = '🍓'
+            break;
+        case "Korean":
+            e = '🌶'
+            break;
+        case "Latin":
+            e = '🌽'
+            break;
+        case "Mediterranean":
+            e = '🍆'
+            break;
+        case "Mexican":
+            e = '🌵'
+            break;
+        case "Middle Eastern":
+            e = '🍆'
+            break;
+        case "Moroccan":
+            e = '🍋'
+            break;
+        case "Peruvian":
+            e = '🍳'
+            break;
+        case "Pizza":
+            e = '🍕'
+            break;
+        case "Polish":
+            e = '🍲'
+            break;
+        case "Russian":
+            e = '🍲'
+            break;
+        case "Salads":
+            e = '🌱'
+            break;
+        case "Sandwiches":
+            e = '🌯'
+            break;
+        case "Seafood":
+            e = '🦀'
+            break;
+        case "Soul Food":
+            e = '🍳'
+            break;
+        case "Soups":
+            e = '🍲'
+            break;
+        case "South American":
+            e = '🌽'
+            break;
+        case "Spanish":
+            e = '🍅'
+            break;
+        case "Steak":
+            e = '🍖'
+            break;
+        case "Sushi":
+            e = '🍣'
+            break;
+        case "Tapas":
+            e = '🍤'
+            break;
+        case "Tex-Mex":
+            e = '🌮'
+            break;
+        case "Thai":
+            e = '🌶'
+            break;
+        case "Turkish":
+            e = '🍢'
+            break;
+        case "Vegan":
+            e = '🌱'
+            break;
+        case "Vegetarian":
+            e = '🌱'
+            break;
+        case "Vietnamese":
+            e = '🍜'
+            break;
+        case "Wings":
+            e = '🍗'
+            break;
+        default:
+            e = '🍳'
+    }
+    return e
 }
 
 module.exports = utils;

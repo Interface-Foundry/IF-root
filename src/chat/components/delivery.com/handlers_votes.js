@@ -131,8 +131,6 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Set a default sort order
   sortOrder = sortOrder || SORT.cuisine
 
-  console.log('foodSession.votes', foodSession._id)
-
   // will multiply by -1 depending on ascending or decscending
   var directionMultiplier = direction === SORT.ascending ? 1 : -1
 
@@ -159,19 +157,8 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
 
-  // filter out restaurants whose delivery minimum is significantly above the team's total budget
 
-  if (foodSession.budget) {
-    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
-    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
-    // console.log(merchants[1]);
-    if (cheap_merchants.length == 0) {
-      return merchants
-    }
-    else return cheap_merchants
-  }
-
-  // next filter out restaurants that don't match the keyword if provided
+  // filter out restaurants that don't match the keyword if provided
   if (keyword) {
     var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, {
       shouldSort: true,
@@ -218,6 +205,17 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   }
 
   merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
+
+  // filter out restaurants whose delivery minimum is significantly above the team's total budget
+  if (foodSession.budget) {
+    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
+    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
+    // console.log(merchants[1])
+    if (cheap_merchants.length <= 0) {
+      return merchants
+    }
+    else return cheap_merchants
+  }
 
   return merchants
 }
@@ -271,6 +269,9 @@ handlers['food.admin.vote'] = function * (message) {
 
 //for when the admin "skip"s the poll
 handlers['food.admin.poll'] = function * (message) {
+var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var admin = foodSession.team_members[0]
@@ -308,6 +309,8 @@ handlers['food.user.poll'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // ---------------------------------------------
+
+  db.waypoints.log(1120, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var teamMembers = foodSession.team_members
 
@@ -459,6 +462,8 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
+  db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
   if (message.allow_text_matching && !adminHasVoted) {
     return yield handlers['food.admin.restaurant.pick'](message)
@@ -572,11 +577,12 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-  console.log('picklistmessage', message);
-  console.log('SORT.cuisine', SORT.cuisine)
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1140, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
-  console.log(sort);
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
 
@@ -665,7 +671,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [],
-    'footer': 'Powered by Delivery.com',
+    'footer': 'Powered by delivery.com',
     'footer_icon': 'http://tidepools.co/kip/dcom_footer.png'
   }
 
@@ -744,7 +750,8 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     id: merchant.id,
     name: merchant.summary.name,
     url: url,
-    minimum: merchant.ordering.minimum
+    minimum: merchant.ordering.minimum,
+    cuisine: merchant.summary.cuisines[0]
   }
 
   foodSession.menu = yield api.getMenu(merchant.id)
@@ -763,6 +770,9 @@ handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = fu
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1200, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
   var cuisines = _.get(foodSession, 'chosen_restaurant_full.summary.cuisines', []).join(', ')
   var msgJson = {
@@ -802,7 +812,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     ]
   }
 
-  console.log('foodSession.email_users', foodSession.email_users)
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
@@ -826,7 +835,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
       `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
       `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
-      `<tr><p style="color:#fa2d48">Add to Cart</p></tr>` +
+      `<tr><p style="color:#fa2d48">+ Add to Cart</p></tr>` +
       `</table>`;
     }
 
