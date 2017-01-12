@@ -67,10 +67,10 @@ handlers['initial'] = function*(message) {
   }
 
   var chunkedButtons = _.chunk(buttons, 5);
-  let attachments=[{
+  let attachments = [{
     text: 'Which channels would you like to send a reminder to?',
     mrkdwn_in: ['text'],
-    color: '#A368F0',
+    color: '#45a5f4',
     actions: chunkedButtons[0],
     fallback: 'Which channels would you like to send a reminder to?',
     callback_id: 'none'
@@ -80,18 +80,12 @@ handlers['initial'] = function*(message) {
       attachments.push({
         text: '',
         actions: ele,
-        color: '#A368F0',
+        color: '#45a5f4',
         callback_id: 'none'
       });
     }
   });
-  attachments.push({
-    text: '',
-    color: '#45a5f4',
-    mrkdwn_in: ['text'],
-    fallback: 'Which channels would you like to send a reminder to?',
-    callback_id: 'none'
-  });
+
   attachments.push({
     'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
     mrkdwn_in: ['text']
@@ -206,13 +200,16 @@ handlers['text'] = function*(message) {
     thread_id: message.source.channel
   }).sort('-ts').limit(10);
   var lastMessage = history[1];
-  var choices = _.flatten(lastMessage.reply.map(m => {
-    return m.actions;
-  }).filter(function(n) {
-    return n !== undefined;
-  }));
-  if (!choices) {
-    return kip.debug('error: lastMessage: ', choices);
+  let choices;
+  if (lastMessage.reply) {
+    choices = _.flatten(lastMessage.reply.map(m => {
+      return m.actions;
+    }).filter(function(n) {
+      return n !== undefined;
+    }));
+  }
+  if (!choices && message.text === 'collect') {
+    return yield handlers['initial'](message);
   }
   var team_id = message.source.team;
   var team = yield db.Slackbots.findOne({

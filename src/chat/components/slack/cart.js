@@ -18,7 +18,19 @@ module.exports = function*(message, slackbot, highlight_added_item) {
   cartObj.push({
     text: 'Here\'s everything you have in your cart',
     color: '#45a5f4',
-    image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
+    image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png',
+    callback_id: 'press me',
+    actions: [{
+        'name': 'passthrough',
+        'text': 'Home',
+        'type': 'button',
+        'value': 'home'
+      }, {
+        'name': 'passthrough',
+        'text': '+ Add Bundles',
+        'type': 'button',
+        'value': 'bundles'
+      }]
   })
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];
@@ -121,17 +133,6 @@ module.exports = function*(message, slackbot, highlight_added_item) {
       color: '#49d63a'
     })
   }
-  cartObj.push({
-    text: '',
-    callback_id: 'shrug',
-    attachment_type: 'default',
-    actions: [{
-      'name': 'passthrough',
-      'text': 'Home',
-      'type': 'button',
-      'value': 'home'
-    }]
-  })
   console.log(cartObj)
   return cartObj;
 }
