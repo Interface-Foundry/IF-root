@@ -92,43 +92,30 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
 };
 
 var settings_menu = module.exports.settings_menu = [{
-    "name": "settings.back",
-    "text": "< Back",
-    "style": "default",
-    "type": "button"
-  },
-  {
-    name: 'team',
-    text: 'Team Members',
-    style: 'default',
-    type: 'button',
-    value: 'start',
-  }];
+  "name": "settings.back",
+  "text": "Home",
+  "style": "default",
+  "type": "button"
+}];
 
 var cart_check = module.exports.cart_check = function(id) {
-	return [{
-		name: "removeall",
-		text: 'Remove',
-		style: 'danger',
-		type: 'button',
-		value: id
-	}, {
-		"name": "cancelremove",
-		"text": "Nevermind",
-		"style": "default",
-		"type": "button",
-		value: 'cancelremove'
-	}]
+  return [{
+    name: "removeall",
+    text: 'Remove',
+    style: 'danger',
+    type: 'button',
+    value: id
+  }, {
+    "name": "cancelremove",
+    "text": "Nevermind",
+    "style": "default",
+    "type": "button",
+    value: 'cancelremove'
+  }]
 }
 
 var team_buttons = module.exports.team_buttons =
   [{
-    name: 'settings',
-    text: '< Back',
-    style: 'default',
-    type: 'button',
-    value: 'start'
-  }, {
     "name": "settings.back",
     "text": "Home",
     "style": "default",

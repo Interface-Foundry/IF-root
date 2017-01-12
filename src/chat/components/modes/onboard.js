@@ -538,7 +538,6 @@ handlers['team'] = function * (message) {
   }
   buttons = buttons.sort(sortF)
 
-
   if (buttons.length > 9) {
      buttons = buttons.slice(0,9);
   }
