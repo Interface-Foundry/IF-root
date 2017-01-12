@@ -577,7 +577,10 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
+<<<<<<< HEAD
 
+=======
+>>>>>>> Menuorder (#674)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1140, foodSession._id, message.user_id, {original_text: message.original_text})

@@ -29,14 +29,8 @@ module.exports = {
   1300: "team cart",
   1301: "team delivery special instructions",
   1310: "apartment number /floor",
-  1311: "checkout name",
-  1312: "feedback for kip",
-  1313: "phone number",
-  1320: "confirm delivery information",
-  1321: "edit address",
-  1322: "edit name",
-  1323: "edit phone number",
-  1330: "checkout",
-  1331: "add new credit card",
-  1332: "done"
+  1311: "feedback for kip",
+  1320: "phone number",
+  1330: "confirm delivery information",
+  1331: "edit deliveree name"
 }
