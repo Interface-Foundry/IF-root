@@ -4,7 +4,6 @@ var _ = require('lodash');
 var config = require('../../../config')
 var Menu = require('./Menu')
 
-// var popoutUrl = 'http://e0616f78.ngrok.io/cafe';
 var popoutUrl = config.menuURL + '/cafe';
 
 var utils = {};
@@ -56,7 +55,6 @@ utils.sortMenu = function (foodSession, user, matchingItems) {
 }
 
 utils.getUrl = function (foodSession, user_id, selected_items) {
-  console.log('getUrl called on', popoutUrl);
   if (!selected_items) selected_items = [];
   return rp({
     url: popoutUrl,
