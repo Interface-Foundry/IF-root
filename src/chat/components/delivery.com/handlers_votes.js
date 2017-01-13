@@ -575,6 +575,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   }
 
   db.waypoints.log(1140, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
@@ -779,6 +780,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       'channel': threadIdForUser,
       'user': member.id,
       'team': member.team_id
+
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
@@ -827,6 +829,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       'user': member.id,
       'team': member.team_id
     }
+  }
 
     var newMessage = {
       'incoming': false,

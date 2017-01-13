@@ -48,7 +48,6 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     fallback: 'Delivery.com Total ',
     text: `Cart Subtotal: ${foodSession.order.subtotal.$}\n` +
           `Taxes: ${foodSession.order.tax.$}\n` +
-          // feeFromDeliveryLines +
           // `Delivery.com Total: ${foodSession.order.total.$}\n` +
           extraFeesFromDelivery +
           deliveryDiscount,
@@ -91,18 +90,6 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     footer: 'Powered by delivery.com',
     footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
   }
-
-  // var instructionAttachment = (instructionText ? {
-  //   text: instructionText,
-  //   mrkdwn_in: ['text'],
-  //   fallback: "these are delivery instructions"
-  // } : [])
-
-  //
-  // if (totalPrice < foodSession.chosen_restaurant.minimum)  { //should ostensibly never be true
-  //   checkoutAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` +
-  //                              `_\$${foodSession.chosen_restaurant.minimum}_*`
-  //   } else {
 
   var restartButton = {
     'name': 'food.admin.select_address',
