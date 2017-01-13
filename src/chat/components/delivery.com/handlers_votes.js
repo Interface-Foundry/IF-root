@@ -778,6 +778,53 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       'channel': threadIdForUser,
       'user': member.id,
       'team': member.team_id
+  for (var i = 0; i < foodSession.email_users.length; i++) {
+
+    var m = foodSession.email_users[i];
+    var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
+    var merch_url = yield menu_utils.getUrl(foodSession, user.id)
+    var mailOptions = {
+      to: `<${m}>`,
+      from: `Kip Café <hello@kipthis.com>`,
+      subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
+      html: '<html><body><p><a href="' + merch_url + '">View Full Menu</a></p><table style="width:100%" border="1">'
+    };
+    var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
+    var quickpicks = sortedMenu.slice(0, 9);
+
+    function formatItem (i, j) {
+      return `<table>` +
+      `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
+      `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
+      `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
+      `<tr><p style="color:#fa2d48">+ Add to Cart</p></tr>` +
+      `</table>`;
+    }
+
+    for (var i = 0 ; i < 3; i++) {
+      mailOptions.html += '<tr>';
+      for (var j = 0; j < 3; j++) {
+        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
+        mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `">`
+        mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
+      }
+      mailOptions.html += '</tr>';
+    }
+  }
+
+  logging.debug('about to send message to each user to confirm if they want to be in order')
+  yield foodSession.team_members.map(function * (member) {
+    logging.debug(`sending message to confirm for each user, current user ${member.name}`)
+    logging.debug('querying for ', member.id)
+    var threadIdForUser = yield db.messages.find({'source.user': member.id, 'mode': 'food', 'incoming': true, 'thread_id': {$exists: true}}).sort({'-ts': -1}).limit(2).exec()
+
+    logging.debug('got thread_id')
+    threadIdForUser = threadIdForUser[0].thread_id
+    var source = {
+      'type': 'message',
+      'channel': threadIdForUser,
+      'user': member.id,
+      'team': member.team_id
     }
 
     var newMessage = {

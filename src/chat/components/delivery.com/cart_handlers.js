@@ -80,7 +80,14 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
       }
     }
 
-    return quantityAttachment
+    var itemMessage = {
+        text: `*${item.name + ' – ' + menu.getCartItemPrice(i).$}*`,
+        attachments: [quantityAttachment]
+    }
+
+    // $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: itemMessage})
+
+    return itemMessage
   })
 
   var bottom = {
@@ -126,20 +133,6 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
       'color': '#fc9600'
     })
   }
-
-// //send a final (empty) message with "bottom" and this budget thing
-//   var finalMessage = {
-//     text: '',
-//     attachments: [bottom]
-//   }
-
-
-  //
-  // for (var i = 0; i < items.length; i++) {
-  //   yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: items[i]})
-  // }
-  //
-  // yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
 
   if (replace) {
     $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
