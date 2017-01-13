@@ -709,10 +709,9 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   }
 
   foodSession.menu = yield api.getMenu(merchant.id)
+  foodSession.save()
 
-  yield foodSession.save()
-
-  yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
+  return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
 }
 
 handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = function * (message) {
@@ -769,59 +768,59 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   }
 
 
-  if (foodSession.email_users.length > 0) {
-    logging.debug('foodSession.email_users', foodSession.email_users)
-    for (var i = 0; i < foodSession.email_users.length; i++) {
+  // if (foodSession.email_users.length > 0) {
+  //   logging.debug('foodSession.email_users', foodSession.email_users)
+  //   for (var i = 0; i < foodSession.email_users.length; i++) {
 
-      var m = foodSession.email_users[i];
+  //     var m = foodSession.email_users[i];
 
-      var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
+  //     var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
 
-      var merch_url = yield menu_utils.getUrl(foodSession, user.id)
+  //     var merch_url = yield menu_utils.getUrl(foodSession, user.id)
 
-      var mailOptions = {
-        to: `<${m}>`,
-        from: `Kip Café <hello@kipthis.com>`,
-        subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
-        html: '<html><body><p><a href="' + merch_url + '">View Full Menu</a></p><table style="width:100%" border="1">'
-      };
+  //     var mailOptions = {
+  //       to: `<${m}>`,
+  //       from: `Kip Café <hello@kipthis.com>`,
+  //       subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
+  //       html: '<html><body><p><a href="' + merch_url + '">View Full Menu</a></p><table style="width:100%" border="1">'
+  //     };
 
-      var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
-      var quickpicks = sortedMenu.slice(0, 9);
+  //     var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
+  //     var quickpicks = sortedMenu.slice(0, 9);
 
-      function formatItem (i, j) {
-        return `<table>` +
-        `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
-        `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
-        `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
-        `<tr><p style="color:#fa2d48">+ Add to Cart</p></tr>` +
-        `</table>`;
-      }
+  //     function formatItem (i, j) {
+  //       return `<table>` +
+  //       `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
+  //       `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
+  //       `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
+  //       `<tr><p style="color:#fa2d48">+ Add to Cart</p></tr>` +
+  //       `</table>`;
+  //     }
 
-      for (var i = 0 ; i < 3; i++) {
-        mailOptions.html += '<tr>';
-        for (var j = 0; j < 3; j++) {
-          var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
-          mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `">`
-          mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
-        }
-        mailOptions.html += '</tr>';
-      }
+  //     for (var i = 0 ; i < 3; i++) {
+  //       mailOptions.html += '<tr>';
+  //       for (var j = 0; j < 3; j++) {
+  //         var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
+  //         mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `">`
+  //         mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
+  //       }
+  //       mailOptions.html += '</tr>';
+  //     }
 
-      mailOptions.html += '</table></body></html>';
+  //     mailOptions.html += '</table></body></html>';
 
-      logging.info('mailOptions', mailOptions)
-      try {
-        yield mailer_transport.sendMail(mailOptions)
-      } catch (err) {
-        logging.error('error with mailer_trainsport in food.admin.restaurant.collect_orders', err)
-      }
-    }
-  }
+  //     logging.info('mailOptions', mailOptions)
+  //     try {
+  //       yield mailer_transport.sendMail(mailOptions)
+  //     } catch (err) {
+  //       logging.error('error with mailer_trainsport in food.admin.restaurant.collect_orders', err)
+  //     }
+  //   }
+  // }
 
   foodSession.team_members.map(function * (m) {
     logging.debug('sending message to confirm for each user')
-    var newMessage = _.merge(message, {
+    var newMessage = {
       'incoming': false,
       'resolved': true,
       'user_id': 'kip',
@@ -834,7 +833,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       },
       'state': {},
       'user': m.id
-    })
+    }
 
     yield $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
   })
