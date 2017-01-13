@@ -272,7 +272,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     })
 
     var items = foodSession.cart.filter(i => i.added_to_cart)
-    var totalPrice = myItems.reduce((sum, i) => {
+    var totalPrice = items.reduce((sum, i) => {
       return sum + menu.getCartItemPrice(i)
     }, 0)
   }
