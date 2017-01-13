@@ -39,11 +39,20 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
     image_url: 'https://storage.googleapis.com/kip-random/kip-my-cafe-cart.png'
   }
 
+<<<<<<< HEAD
   var items = myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
     var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
     var quantityAttachment = {
       text: `*${item.name} – ${menu.getCartItemPrice(i).$}*\n${item.description} ${instructions}`,
+=======
+  var items = yield myItems.map((i, index) => {
+    var item = menu.flattenedMenu[i.item.item_id]
+    var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
+    var quantityAttachment = {
+      // title: item.name + ' – ' + menu.getCartItemPrice(i).$,
+      text: item.description + instructions,
+>>>>>>> 1ef581c031108b05640f3fac259904e56165c588
       fallback: item.description + instructions,
       mrkdwn_in: ['text'],
       callback_id: item.id,
@@ -80,7 +89,18 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
       }
     }
 
+<<<<<<< HEAD
     return quantityAttachment;
+=======
+    var itemMessage = {
+        text: `*${item.name + ' – ' + menu.getCartItemPrice(i).$}*`,
+        attachments: [quantityAttachment]
+    }
+
+    // $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: itemMessage})
+
+    return itemMessage
+>>>>>>> 1ef581c031108b05640f3fac259904e56165c588
   })
 
   var bottom = {
@@ -109,17 +129,32 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
 
   var json = {
     text: `*Confirm Your Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
+<<<<<<< HEAD
     attachments: [banner].concat(items).concat([bottom])
   }
 
   if (foodSession.budget && foodSession.convo_initiater.id != message.source.user && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
     json.attachments.push({
+=======
+    attachments: [banner]//.concat(lineItems)//.concat([bottom])
+  }
+
+//send a final (empty) message with "bottom" and this budget thing
+  var finalMessage = {
+    text: '',
+    attachments: [bottom]
+  }
+
+  if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
+    finalMessage.attachments.push({
+>>>>>>> 1ef581c031108b05640f3fac259904e56165c588
       'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
       'mrkdwn_in': ['text'],
       'color': '#49d63a'
     });
   }
 
+<<<<<<< HEAD
   if (over_budget) {
     json.attachments.push({
       'text': 'Unfortunately that exceeds your budget',
@@ -127,6 +162,14 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
     })
   }
 
+=======
+  for (var i = 0; i < items.length; i++) {
+    yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: items[i]})
+  }
+
+  yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
+
+>>>>>>> 1ef581c031108b05640f3fac259904e56165c588
   if (replace) {
     $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
   } else {
@@ -141,6 +184,7 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
   var index = message.source.actions[0].value
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
   //decrement user budget by item price
+<<<<<<< HEAD
   if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
   userItem.item.item_qty++;
   if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
@@ -152,6 +196,15 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
     yield handlers['food.cart.personal.quantity.subtract'](message, true)
   }
   else yield handlers['food.cart.personal'](message, true)
+=======
+  if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+  userItem.item.item_qty++;
+  if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+  //increment user budget by (new) item price
+  if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+  else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
+  yield handlers['food.cart.personal'](message, true)
+>>>>>>> 1ef581c031108b05640f3fac259904e56165c588
 }
 
 // Handles editing the quantity by using the supplied array index
@@ -164,6 +217,7 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message, over_bud
     // don't let them go down to zero
     userItem.deleteMe = true
     foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
+<<<<<<< HEAD
     if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
     yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}, $set: {user_budgets: foodSession.user_budgets}}).exec()
   } else {
@@ -171,6 +225,15 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message, over_bud
     userItem.item.item_qty--
     if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
     if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+=======
+    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+  } else {
+    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    userItem.item.item_qty--
+    if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+    if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+>>>>>>> 1ef581c031108b05640f3fac259904e56165c588
     else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   }
 
@@ -271,10 +334,40 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       actions: []
     })
 
+<<<<<<< HEAD
     var items = foodSession.cart.filter(i => i.added_to_cart)
     var totalPrice = myItems.reduce((sum, i) => {
       return sum + menu.getCartItemPrice(i)
     }, 0)
+=======
+    var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
+    var totalPrice = myItems.reduce((sum, i) => {
+      return sum + menu.getCartItemPrice(i)
+    }, 0)
+
+    if (totalPrice < foodSession.chosen_restaurant.minimum) {
+      dashboard.attachments.push({
+        color: '#fc9600',
+        mrkdwn_in: ['text'],
+        text: `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`
+      })
+    }
+    else {
+      dashboard.attachments[dashboard.attachments.length-1].actions.push({
+        name: 'food.admin.order.confirm',
+        text: 'Finish Order Early',
+        style: 'default',
+        type: 'button',
+        value: 'food.admin.order.confirm',
+        confirm: {
+            "title": "Finish Order Early?",
+            "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
+            "ok_text": "Yes",
+            "dismiss_text": "No"
+        }
+      })
+    }
+>>>>>>> 1ef581c031108b05640f3fac259904e56165c588
   }
 
   if (totalPrice < foodSession.chosen_restaurant.minimum && message.source.user == foodSession.convo_initiater.id) {
@@ -534,7 +627,17 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         'fallback': 'Do you want to restart the order or end the order?',
         'attachment_type': 'default',
         'mrkdwn_in': ['text'],
+<<<<<<< HEAD
         'actions': [restartButton, {
+=======
+        'actions': [{
+          'name': 'food.admin.select_address',
+          'text': 'Restart Order ↺',
+          'type': 'button',
+          'style': 'primary',
+          'value': 'food.admin.select_address'
+        }, {
+>>>>>>> 1ef581c031108b05640f3fac259904e56165c588
           'name': 'food.exit.confirm_end_order',
           'text': 'End Order',
           'type': 'button',
