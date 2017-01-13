@@ -531,7 +531,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     })
   } else {
     // admin is confirming, replace their message
-    foodSession.team_members.map(m => {
+    foodSession.team_members.map(function * (m) => {
       if (foodSession.votes.map(v => v.user).includes(m.id)) {
         var admin = foodSession.convo_initiater
         var user = message.source.user
@@ -555,8 +555,9 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
         }
 
         var sentMessage = yield $replyChannel.send(msg, route, {'type': msg.origin, 'data': dashboard})
+
         logging.debug('~~~~sentMessage in food.admin.dashboard.cuisine', sentMessage)
-        if (sentMessage.source.user === admin.id) {
+        if (msg.source.user === admin.id) {
           foodSession.tracking.confirmed_votes_msg = sentMessage._id
           foodSession.save()
         }
