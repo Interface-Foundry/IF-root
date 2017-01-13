@@ -501,6 +501,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     }]
   }
 
+  console.log('message.source.user', message.source.user)
   if (slackers.length > 0 ) {
     if(message.source.user == foodSession.convo_initiater.id){
       dashboard.attachments.push({
