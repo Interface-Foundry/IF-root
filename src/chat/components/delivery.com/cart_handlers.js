@@ -80,14 +80,7 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
       }
     }
 
-    var itemMessage = {
-        text: `*${item.name + ' – ' + menu.getCartItemPrice(i).$}*`,
-        attachments: [quantityAttachment]
-    }
-
-    // $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: itemMessage})
-
-    return itemMessage
+    return quantityAttachment;
   })
 
   var bottom = {
@@ -428,8 +421,6 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }]
     }
   })
-
-
 
   if (foodSession.tip.percent === 'cash') foodSession.tip.amount = 0.00
 
