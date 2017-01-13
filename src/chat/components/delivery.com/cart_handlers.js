@@ -23,7 +23,7 @@ String.prototype.toObjectId = function () {
 //
 // Show the user their personal cart
 //
-handlers['food.cart.personal'] = function * (message, replace) {
+handlers['food.cart.personal'] = function * (message, replace, over_budget) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -120,6 +120,13 @@ handlers['food.cart.personal'] = function * (message, replace) {
     });
   }
 
+  if (over_budget) {
+    json.attachments.push({
+      'text': 'Unfortunately that exceeds your budget',
+      'color': '#fc9600'
+    })
+  }
+
 // //send a final (empty) message with "bottom" and this budget thing
 //   var finalMessage = {
 //     text: '',
@@ -154,11 +161,15 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
   //increment user budget by (new) item price
   if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
   else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
-  yield handlers['food.cart.personal'](message, true)
+
+  if (foodSession.budget && foodSession.user_budgets[message.user_id] < 0) {
+    yield handlers['food.cart.personal.quantity.subtract'](message, true)
+  }
+  else yield handlers['food.cart.personal'](message, true)
 }
 
 // Handles editing the quantity by using the supplied array index
-handlers['food.cart.personal.quantity.subtract'] = function * (message) {
+handlers['food.cart.personal.quantity.subtract'] = function * (message, over_budget) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var index = message.source.actions[0].value
@@ -177,7 +188,7 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message) {
     else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   }
 
-  yield handlers['food.cart.personal'](message, true)
+  yield handlers['food.cart.personal'](message, true, over_budget)
 }
 
 //
