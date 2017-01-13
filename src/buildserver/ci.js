@@ -41,7 +41,7 @@ handler.on('push', function (event) {
 
   deploy('HEAD').then(() => {
     var successChat = `Deployed to ${process.env.NODE_ENV} - "${message}"`
-    prof.say(successChat)
+    // prof.say(successChat)
   }).catch((e) => {
     var errorChat = `Error deploying to ${process.env.NODE_ENV}- "${message}"\n${e}`
     prof.say(errorChat)
