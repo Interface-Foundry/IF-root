@@ -652,7 +652,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   // admin is confirming, replace their message
   var admin = foodSession.convo_initiater
-  var msg = {
+  var msg = _.merge(message, {
     mode: 'food',
     action: 'admin.restaurant.pick.list',
     thread_id: admin.dm,
@@ -662,10 +662,10 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       user: admin.id,
       channel: admin.dm
     }
-  }
+  })
 
   logging.debug('sending message to admin: ', msg)
-  $replyChannel.send(message, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
+  $replyChannel.send(msg, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
@@ -815,7 +815,8 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   }
 
   foodSession.team_members.map(m => {
-    var newMessage = {
+
+    var newMessage = _.merge(message, {
       incoming: false,
       thread_id: m.dm,
       resolved: true,
@@ -829,7 +830,8 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       },
       state: {},
       user: m.id
-    }
+    })
+
     $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
   })
 }
