@@ -709,9 +709,9 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
 
   foodSession.menu = yield api.getMenu(merchant.id)
 
-  foodSession.save()
+  yield foodSession.save()
 
-  return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
+  yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
 }
 
 handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = function * (message) {
@@ -722,7 +722,9 @@ handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = fu
 }
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
-  foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  if (foodSession === undefined) {
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  }
 
   db.waypoints.log(1200, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -822,10 +824,10 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       user_id: 'kip',
       origin: 'slack',
       source: {
-        team: m.team_id,
-        user: m.id,
-        channel: m.dm,
-        type: 'message'
+        'team': m.team_id,
+        'user': m.id,
+        'channel': m.dm,
+        'type': 'message'
       },
       state: {},
       user: m.id
