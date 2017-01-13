@@ -265,8 +265,9 @@ handlers['food.choose_address'] = function * (message) {
     // slack action button tap
     try {
       var location = JSON.parse(message.text)
-    } catch (e) {
+    } catch (err) {
       location = {address_1: message.text}
+      logging.error('error in food.choose_address while trying to get location', err)
       kip.debug('Could not understand the address the user wanted to use, message.text: ', message.text)
     // TODO handle the case where they type a new address without clicking the "new" button
     }
@@ -290,51 +291,16 @@ handlers['food.choose_address'] = function * (message) {
     $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
 
     foodSession.fulfillment_method = 'delivery'
-    //
-    // Commented out until pickup is reimplemented ----------------------------
-    //
-    // var text = `Cool! You selected \`${location.address_1}\`. We are only doing delivery (no pickup) right now, is that okay?`
-    // var msg_json = {
-    //   'attachments': [
-    //     {
-    //       'mrkdwn_in': [
-    //         'text'
-    //       ],
-    //       'text': text,
-    //       'fallback': text,
-    //       'callback_id': 'wopr_game',
-    //       'color': '#3AA3E3',
-    //       'attachment_type': 'default',
-    //       'actions': [
-    //         {
-    //           'name': 'food.delivery_or_pickup',
-    //           'text': 'Yep!',
-    //           'type': 'button',
-    //           'value': 'delivery'
-    //         },
-    //         // REMOVING THIS UNTIL WE RE ADD PICKUP
-    //         // {
-    //         //   'name': 'food.delivery_or_pickup',
-    //         //   'text': 'Pickup',
-    //         //   'type': 'button',
-    //         //   'value': 'pickup'
-    //         // },
-    //         {
-    //           'name': 'food.settings.address.change',
-    //           'text': '< Change Address',
-    //           'type': 'button',
-    //           'value': 'food.settings.address.change'
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // }
-    // $replyChannel.send(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
-    // ------------------------------------------------------------------------
 
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
     var addr = [foodSession.chosen_location.address_1, foodSession.chosen_location.zip_code].join(' ')
-    var res = yield api.searchNearby({addr: addr, pickup: false})
+    try {
+      var res = yield api.searchNearby({addr: addr, pickup: false})
+    } catch (err) {
+      logging.error('error while searching delivery.com from food.choose_address', err)
+    }
+
+    logging.info('successfully got merchants from delivery.com')
     foodSession.merchants = _.get(res, 'merchants')
     foodSession.cuisines = _.get(res, 'cuisines')
     foodSession.markModified('merchants')

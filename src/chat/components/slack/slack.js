@@ -141,9 +141,8 @@ function * loadTeam(slackbot) {
       return
     }
 
-    if (data.hidden === true && data.subtype !== 'message_changed') {
+    if ((data.hidden === true) && (data.subtype === 'message_changed')) {
       kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
-      logging.error('data.hidden===true and causing issues in above logic')
       logging.debug('data.hidden', data.hidden)
       logging.debug('data.subtype', data.subtype)
       return
@@ -168,8 +167,7 @@ function * loadTeam(slackbot) {
     try {
       message.text = message.text.trim() // remove extra spaces on edges of string
     } catch (err) {
-      logging.info('error trying to trim message.text, most likely there is no text in message received since its a button or something')
-      // logging.error('error trying to trim message.text, most likely there is no text in message received since its a button or something', message)
+      logging.info('error trying to trim message.text')
     }
 
     // queue it up for processing
