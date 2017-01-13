@@ -767,12 +767,15 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   logging.debug('about to send message to each user to confirm if they want to be in order')
   foodSession.team_members.map(function * (member) {
     logging.debug(`sending message to confirm for each user, current user ${member.name}`)
-    var threadIdForUser = yield db.Messages.find({
-      'source.user': member.id,
-      'mode': 'food',
-      'incoming': true,
-      'thread_id': {$exists: true}
-    }).sort({'-ts': -1}).limit(1).exec()
+    var threadIdForUser = yield db.messages.find({'source.user': member.id, 'mode': 'food', 'incoming': true, 'thread_id': {$exists: true}}).sort({'-ts': -1}).limit(1)
+    // var threadIdForUser = yield db.Messages.find({
+    //   'source.user': member.id,
+    //   'mode': 'food',
+    //   'incoming': true,
+    //   'thread_id': {$exists: true}
+    // }).sort({'-ts': -1}).limit(1).exec()
+
+    logging.debug('got thread_id')
     threadIdForUser = threadIdForUser[0].thread_id
     var source = {
       'type': 'message',
