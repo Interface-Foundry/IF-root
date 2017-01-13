@@ -445,8 +445,9 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 
   if (numOfResponsesWaitingFor <= 0) {
     logging.info('have all the votes')
-    yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
+    // i dont think you trigger dashboard here if all the users have voted
     // yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
+    yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
     logging.info('waiting for more responses have, votes: ', votes.length, 'need ', numOfResponsesWaitingFor, ' more votes')
     yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
@@ -521,7 +522,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     }
   }
 
-if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
+  if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
     // replace admins message
     var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_votes_msg})
     $replyChannel.sendReplace(msgToReplace, 'food.admin.dashboard.cuisine', {
@@ -531,7 +532,7 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
   } else {
     // admin is confirming, replace their message
     foodSession.team_members.map(m => {
-      if(foodSession.votes.map(v => v.user).includes(m.id)){
+      if (foodSession.votes.map(v => v.user).includes(m.id)) {
         var admin = foodSession.convo_initiater
         var user = message.source.user
         var channel = message.source.channel
@@ -553,16 +554,12 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
           route = 'food.admin.restaurant.pick'
         }
 
-        var sentMessage = $replyChannel.send(msg, route, {
-          type: msg.origin,
-          data: dashboard
-        })
-        sentMessage.then(function(result) {
-          if(result.source.user === admin.id){
-            foodSession.tracking.confirmed_votes_msg = sentMessage._id
-            foodSession.save()
-          }
-        })
+        var sentMessage = yield $replyChannel.send(msg, route, {'type': msg.origin, 'data': dashboard})
+        logging.debug('~~~~sentMessage in food.admin.dashboard.cuisine', sentMessage)
+        if (sentMessage.source.user === admin.id) {
+          foodSession.tracking.confirmed_votes_msg = sentMessage._id
+          foodSession.save()
+        }
       }
     })
   }
@@ -596,7 +593,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var viableRestaurants = yield createSearchRanking(foodSession, sort, direction, keyword)
   logging.info('# of restaurants: ', foodSession.merchants.length)
-  logging.data('# of viable restaurants: ', viableRestaurants.length)
+  logging.info('# of viable restaurants: ', viableRestaurants.length)
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
@@ -655,7 +652,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   var msg = _.merge(message, {
     mode: 'food',
     action: 'admin.restaurant.pick.list',
-    thread_id: admin.dm,
     origin: message.origin,
     source: {
       team: foodSession.team_id,
@@ -665,7 +661,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   })
 
   // logging.debug('sending message to admin: ', msg)
-  $replyChannel.send(message, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
+  $replyChannel.send(msg, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
