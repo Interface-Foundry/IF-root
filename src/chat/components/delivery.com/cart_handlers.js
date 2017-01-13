@@ -1,4 +1,4 @@
-'use strict'
+// 'use strict'
 
 var _ = require('lodash')
 var Menu = require('./Menu')
@@ -26,6 +26,8 @@ String.prototype.toObjectId = function () {
 handlers['food.cart.personal'] = function * (message, replace) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
   var totalPrice = myItems.reduce((sum, i) => {
@@ -37,11 +39,11 @@ handlers['food.cart.personal'] = function * (message, replace) {
     image_url: 'https://storage.googleapis.com/kip-random/kip-my-cafe-cart.png'
   }
 
-  var lineItems = myItems.map((i, index) => {
+  var items = yield myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
     var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
     var quantityAttachment = {
-      title: item.name + ' – ' + menu.getCartItemPrice(i).$,
+      // title: item.name + ' – ' + menu.getCartItemPrice(i).$,
       text: item.description + instructions,
       fallback: item.description + instructions,
       mrkdwn_in: ['text'],
@@ -79,7 +81,14 @@ handlers['food.cart.personal'] = function * (message, replace) {
       }
     }
 
-    return quantityAttachment
+    var itemMessage = {
+        text: `*${item.name + ' – ' + menu.getCartItemPrice(i).$}*`,
+        attachments: [quantityAttachment]
+    }
+
+    // $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: itemMessage})
+
+    return itemMessage
   })
 
   var bottom = {
@@ -108,16 +117,28 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   var json = {
     text: `*Confirm Your Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    attachments: [banner].concat(lineItems).concat([bottom])
+    attachments: [banner]//.concat(lineItems)//.concat([bottom])
+  }
+
+//send a final (empty) message with "bottom" and this budget thing
+  var finalMessage = {
+    text: '',
+    attachments: [bottom]
   }
 
   if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
-    json.attachments.push({
+    finalMessage.attachments.push({
       'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
       'mrkdwn_in': ['text'],
       'color': '#49d63a'
     });
   }
+
+  for (var i = 0; i < items.length; i++) {
+    yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: items[i]})
+  }
+
+  yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
 
   if (replace) {
     $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
@@ -133,12 +154,12 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
   var index = message.source.actions[0].value
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
   //decrement user budget by item price
-  foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+  if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
   userItem.item.item_qty++;
-  foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+  if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
   //increment user budget by (new) item price
-  console.log('personal budget: ', foodSession.user_budgets[message.user_id]);
-  yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+  if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+  else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
   yield handlers['food.cart.personal'](message, true)
 }
 
@@ -152,13 +173,14 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message) {
     // don't let them go down to zero
     userItem.deleteMe = true
     foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
-    foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
     yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}, $set: {user_budgets: foodSession.user_budgets}}).exec()
   } else {
-    foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
     userItem.item.item_qty--
-    foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
-    yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+    if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+    if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+    else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   }
 
   yield handlers['food.cart.personal'](message, true)
@@ -191,9 +213,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 */
 handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-
-  console.log('####', foodSession.confirmed_orders)
-
+  db.waypoints.log(1240, foodSession._id, message.user_id, {original_text: message.original_text})
   //
   // Reply to the user who either submitted their personal cart or said "no thanks"
   //
@@ -236,10 +256,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     }
   })
 
-  // '✉' ugh, it's an emoji
   emailers = emailers.map(e => /(.+)@/.exec(e)[1])
 
   // console.log('emailers', emailers)
+  var waitingText = (slackers ? '\nSlack: ' + slackers.join(', ') : '') + (emailers.length ? '\nEmail: ' + emailers.join(', ') : '')
 
   var dashboard = {
     text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
@@ -255,8 +275,24 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
-      text: `*Waiting for order(s) from:*\n${slackers.join(', ')}\n📃 ${emailers.join(', ')}`,
-      actions: [{
+      text: `*Waiting for order(s) from:*${waitingText}`,
+      actions: []
+    })
+
+    var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
+    var totalPrice = myItems.reduce((sum, i) => {
+      return sum + menu.getCartItemPrice(i)
+    }, 0)
+
+    if (totalPrice < foodSession.chosen_restaurant.minimum) {
+      dashboard.attachments.push({
+        color: '#fc9600',
+        mrkdwn_in: ['text'],
+        text: `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`
+      })
+    }
+    else {
+      dashboard.attachments[dashboard.attachments.length-1].actions.push({
         name: 'food.admin.order.confirm',
         text: 'Finish Order Early',
         style: 'default',
@@ -268,8 +304,8 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
             "ok_text": "Yes",
             "dismiss_text": "No"
         }
-      }]
-    })
+      })
+    }
   }
 
   if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
@@ -329,8 +365,11 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.order.confirm'] = function * (message, replace) {
-  // show admin final confirm of ting
+  // show admin final confirm of thing
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1300, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var menu = Menu(foodSession.menu)
 
   var totalPrice = foodSession.cart.reduce((sum, i) => {
@@ -356,7 +395,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     var foodInfo = menu.getItemById(String(item.item.item_id))
     var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
     var textForItem = `*${foodInfo.name} - ${menu.getCartItemPrice(item).$}*\n`
-    textForItem += descriptionString.length > 0 ? `*Options:* ${descriptionString}\n` + `*Added by:* <@${item.user_id}>` : `*Added by:* <@${item.user_id}>`
+    textForItem += descriptionString.length > 0 ? `Options: ${descriptionString}\n` + `Added by: <@${item.user_id}>` : `Added by: <@${item.user_id}>`
     return {
       text: textForItem,
       fallback: textForItem,
@@ -428,7 +467,9 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       */
 
       // --- COUPON STUFF
-      var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
+
+      // var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
+      var discountAvail = 0.0
 
       foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
 
@@ -490,7 +531,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         'mrkdwn_in': ['text'],
         'actions': [{
           'name': 'food.admin.select_address',
-          'text': 'Restart Order',
+          'text': 'Restart Order ↺',
           'type': 'button',
           'style': 'primary',
           'value': 'food.admin.select_address'
@@ -510,6 +551,10 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 }
 
 handlers['food.order.instructions'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var msg = {
     text: `*Add Special Instructions*`,
     attachments: [{

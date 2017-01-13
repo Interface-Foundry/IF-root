@@ -19,6 +19,9 @@ var handlers = {}
 
 handlers['food.admin.confirm_new_session'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var foodSessionStarter = foodSession.convo_initiater.id
   var msg_json = {
     title: '',
@@ -56,6 +59,9 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
   yield foodSession.save()
+
+  db.waypoints.log(1010, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var addressButtons = _.get(team, 'meta.locations', []).map(a => {
     return {
       name: 'passthrough',
@@ -187,14 +193,11 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     message.markModified('source')
   }
 
-
-
-  $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  // if (!banner) {
-  //   $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  // } else {
-  //   return $replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
-  // }
+  if (!banner) {
+    $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  } else {
+    return $replyChannel.send(message, 'food.choose_address', {type: message.origin, data: msg_json})
+  }
 }
 
 handlers['food.settings.address.remove_select'] = function * (message) {
@@ -262,8 +265,9 @@ handlers['food.choose_address'] = function * (message) {
     // slack action button tap
     try {
       var location = JSON.parse(message.text)
-    } catch (e) {
+    } catch (err) {
       location = {address_1: message.text}
+      logging.error('error in food.choose_address while trying to get location', err)
       kip.debug('Could not understand the address the user wanted to use, message.text: ', message.text)
     // TODO handle the case where they type a new address without clicking the "new" button
     }
@@ -287,57 +291,21 @@ handlers['food.choose_address'] = function * (message) {
     $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
 
     foodSession.fulfillment_method = 'delivery'
-    //
-    // Commented out until pickup is reimplemented ----------------------------
-    //
-    // var text = `Cool! You selected \`${location.address_1}\`. We are only doing delivery (no pickup) right now, is that okay?`
-    // var msg_json = {
-    //   'attachments': [
-    //     {
-    //       'mrkdwn_in': [
-    //         'text'
-    //       ],
-    //       'text': text,
-    //       'fallback': text,
-    //       'callback_id': 'wopr_game',
-    //       'color': '#3AA3E3',
-    //       'attachment_type': 'default',
-    //       'actions': [
-    //         {
-    //           'name': 'food.delivery_or_pickup',
-    //           'text': 'Yep!',
-    //           'type': 'button',
-    //           'value': 'delivery'
-    //         },
-    //         // REMOVING THIS UNTIL WE RE ADD PICKUP
-    //         // {
-    //         //   'name': 'food.delivery_or_pickup',
-    //         //   'text': 'Pickup',
-    //         //   'type': 'button',
-    //         //   'value': 'pickup'
-    //         // },
-    //         {
-    //           'name': 'food.settings.address.change',
-    //           'text': '< Change Address',
-    //           'type': 'button',
-    //           'value': 'food.settings.address.change'
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // }
-    // $replyChannel.send(message, 'food.delivery_or_pickup', {type: message.origin, data: msg_json})
-    // ------------------------------------------------------------------------
 
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
     var addr = [foodSession.chosen_location.address_1, foodSession.chosen_location.zip_code].join(' ')
-    var res = yield api.searchNearby({addr: addr, pickup: false})
+    try {
+      var res = yield api.searchNearby({addr: addr, pickup: false})
+    } catch (err) {
+      logging.error('error while searching delivery.com from food.choose_address', err)
+    }
+
+    logging.info('successfully got merchants from delivery.com')
     foodSession.merchants = _.get(res, 'merchants')
     foodSession.cuisines = _.get(res, 'cuisines')
     foodSession.markModified('merchants')
     foodSession.markModified('cuisines')
     yield foodSession.save()
-    message.text = "";
     yield $allHandlers['food.admin.team_budget'](message)
   } else {
     throw new Error('this route does not handle text input')
@@ -361,6 +329,9 @@ handlers['food.settings.address.new'] = function * (message) {
 
   //onboarding view
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1012, foodSession._id, message.user_id, {original_text: message.original_text})
+
   if(foodSession.onboarding){
     msg_json.text = ''
     msg_json.attachments.unshift({
@@ -406,7 +377,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
     return
   }
 
-  console.log(location)
+  // console.log(location)
 
   var addr = [
     [location.address_1, location.address_2].filter(Boolean).join(' '),
@@ -452,6 +423,9 @@ handlers['food.settings.address.confirm'] = function * (message) {
 
   //onboarding view
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1013, foodSession._id, message.user_id, {original_text: message.original_text})
+
   if(foodSession.onboarding){
     msg_json.text = ''
     msg_json.attachments.unshift({
@@ -587,10 +561,17 @@ handlers['food.delivery_or_pickup'] = function * (message) {
   yield handlers['food.admin_polling_options'](message)
 }
 //
-// The user jsut clicked pickup or delivery and is now ready to start ordering
+// The user just clicked pickup or delivery and is now ready to start ordering
+// Or, the user just picked a budget and is now ready to start ordering
 //
 handlers['food.admin_polling_options'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
+
+  yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ?{
+    text: `*Budget*: $${foodSession.budget} / person`
+  } : {})})
 
   // check to make sure restaurants are even open
   if (foodSession.merchants.length === 0) {
@@ -601,7 +582,6 @@ handlers['food.admin_polling_options'] = function * (message) {
     $replyChannel.sendReplace(message, 'food.begin', {type: message.origin, data: msg_json})
     return
   }
-
 
   // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
   var merchantIds = foodSession.merchants.map(m => m.id)
@@ -634,7 +614,6 @@ handlers['food.admin_polling_options'] = function * (message) {
         'name': 'food.admin.restaurant.reordering_confirmation',
         'text': '✓ Reorder From Here',
         'type': 'button',
-        'style': 'primary',
         'value': mostRecentMerchant.id
       }]
 
@@ -667,7 +646,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
     {
-      'text': '*Step 4.* Kip polls your team on what type of food they want to eat \n Tap `✓ Start New Poll` to select which team members to poll',
+      'text': '*Step 4.* Kip polls your team on what type of food they want to eat \n Tap `✓ Start New Order` to select which team members to poll',
       'fallback': 'Team voting',
       'callback_id': 'wopr_game',
       'color': '#A368F0',
@@ -676,19 +655,30 @@ handlers['food.admin_polling_options'] = function * (message) {
     })
   }
 
+  // attachments.push({
+  //   'mrkdwn_in': [
+  //     'text'
+  //   ],
+  //   'text': `*Budget*: $${foodSession.budget} / person`,
+  //   'fallback': 'Team budget',
+  //   'callback_id': 'indignata sub umbras',
+  //   'attachment_type': 'default',
+  //   'actions': []
+  // })
+
   attachments.push({
     'mrkdwn_in': [
       'text'
     ],
-    'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want',
-    'fallback': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want',
+    'text': '', // '*Tip:* `✓ Start New Order` polls your team on what type of food they want',
+    'fallback': '*Tip:* `✓ Start New Order` polls your team on what type of food they want',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
       {
         'name': 'passthrough',
-        'text': '✓ Start New Poll',
+        'text': '✓ Start New Order',
         'style': 'primary',
         'type': 'button',
         'value': 'food.poll.confirm_send_initial'
@@ -717,6 +707,9 @@ handlers['food.admin_polling_options'] = function * (message) {
 
 handlers['food.admin.restaurant.reordering_confirmation'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1101, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var mostRecentMerchant = message.data.value
   // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
   var lastOrdered = yield db.Delivery.find({team_id: message.source.team, 'chosen_restaurant.id': mostRecentMerchant, active: false})
@@ -727,8 +720,6 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
   lastOrdered = lastOrdered[0]
   foodSession.chosen_channel = lastOrdered.chosen_channel
   foodSession.chosen_restaurant = lastOrdered.chosen_restaurant
-  foodSession.email_users = lastOrdered.email_users
-
   if (lastOrdered.chosen_channel === 'just_me' || lastOrdered.team_members.length<1) {
     // possible last ordered just me is another admin
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
@@ -736,7 +727,6 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     foodSession.team_members = lastOrdered.team_members
   }
   foodSession.markModified('team_members')
-
   yield foodSession.save()
 
   // create attachments, only including most recent merchant if one exists
@@ -750,15 +740,14 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
   } else {
     textWording = '\`' + foodSession.chosen_location.address_1 + '\`'
   }
-
   var msg_json = {
     'text': '',
     'attachments': [{
-      'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
-      'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
       'mrkdwn_in': [
           'text'
         ],
+      'text': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
+      'fallback': `Should I collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> from ${textWording}?`,
       'callback_id': 'reordering_confirmation',
       'color': '#3AA3E3',
       'attachment_type': 'default',
@@ -966,15 +955,15 @@ handlers['food.restaurants.list.recent'] = function * (message) {
     'mrkdwn_in': [
       'text'
     ],
-    'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
-    'fallback': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
+    'text': '*Tip:* `✓ Start New Order` polls your team on what type of food they want.',
+    'fallback': '*Tip:* `✓ Start New Order` polls your team on what type of food they want.',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
       {
         'name': 'passthrough',
-        'text': '✓ Start New Poll',
+        'text': '✓ Start New Order',
         'style': 'primary',
         'type': 'button',
         'value': 'food.poll.confirm_send'

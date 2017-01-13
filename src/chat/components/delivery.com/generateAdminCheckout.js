@@ -12,7 +12,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
 
   var tipText = (foodSession.tip.percent === 'cash') ? `Will tip in cash` : `${foodSession.tip.amount.$}`
   var tipAttachment = {
-    'title': `Tip: ${tipText}`,
+    'text': 'Tip: ' + `${tipText}`,
     'fallback': `Tip: ${tipText}`,
     'callback_id': 'food.admin.cart.tip',
     'color': '#3AA3E3',
@@ -37,19 +37,19 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
   var orderFees = foodSession.order.fees.reduce((a, b) => a + b.value, 0)
   var feeFromDeliveryLines = ``
   feeFromDeliveryLines += foodSession.order.convenience_fee > feeDebuging ?
-    `*Convenience Fee:* ${foodSession.order.convenience_fee.$}\n` : ``
+    `Convenience Fee: ${foodSession.order.convenience_fee.$}\n` : ``
   feeFromDeliveryLines += foodSession.order.delivery_fee > feeDebuging ?
-    `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` : ``
-
-  var extraFeesFromDelivery = orderFees > feeDebuging ?
-    `*Other Delivery.com Fees: * ${orderFees.$}\n` : ``
+    `Delivery Fee: ${foodSession.order.delivery_fee.$}\n` : ``
+  //
+  var extraFeesFromDelivery = orderFees > feeDebuging ? '' : ''
+    // `Other Delivery.com Fees:  ${orderFees.$}\n` : ``
 
   var deliveryCostsAttachment = {
     fallback: 'Delivery.com Total ',
-    text: `*Cart Subtotal:* ${foodSession.order.subtotal.$}\n` +
-          `*Taxes:* ${foodSession.order.tax.$}\n` +
+    text: `Cart Subtotal: ${foodSession.order.subtotal.$}\n` +
+          `Taxes: ${foodSession.order.tax.$}\n` +
           feeFromDeliveryLines +
-          `*Delivery.com Total:* ${foodSession.order.total.$}\n` +
+          // `Delivery.com Total: ${foodSession.order.total.$}\n` +
           extraFeesFromDelivery +
           deliveryDiscount,
     'callback_id': 'food.admin.cart.info',
@@ -60,18 +60,23 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
 
   // costs that kip calculates and instructions
   var instructionText = _.get(foodSession, 'instructions') ?
-        `*Delivery Instructions*: _${foodSession.instructions}_\n` : ``
+        `Delivery Instructions: _${foodSession.instructions}_\n` : ``
 
-  var kipCoupon = foodSession.discount_amount > feeDebuging ? `*Kip Coupon:* -${foodSession.discount_amount.$}\n` : ``
+  // var kipCoupon = foodSession.discount_amount > feeDebuging ? `Kip Coupon: -${foodSession.discount_amount.$}\n` : ``
   var kipCostsAttachment = {
     fallback: 'Tip + Kip Fees + Discounts',
-    text: `*Tip:* ${tipText}\n` +
-          `*Kip Fee:* ${foodSession.service_fee.$}\n` +
-          kipCoupon +
+    text: //`Tip: ${tipText}\n` +
+          `Kip Fee: ${foodSession.service_fee.$}\n` +
           instructionText,
     callback_id: 'food.admin.cart.info',
     color: '#3AA3E3',
     attachment_type: 'default',
+    mrkdwn_in: ['text']
+  }
+
+  var discountAttachment = {
+    fallback: "discount",
+    text: `Kip Coupon: -${foodSession.discount_amount.$} 🎉`,
     mrkdwn_in: ['text']
   }
 
@@ -84,29 +89,35 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     color: '#49d63a',
     attachment_type: 'default',
     mrkdwn_in: ['text'],
-    footer: 'Powered by Delivery.com',
+    footer: 'Powered by delivery.com',
     footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
   }
 
+  //
+  // if (totalPrice < foodSession.chosen_restaurant.minimum)  { //should ostensibly never be true
+  //   checkoutAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` +
+  //                              `_\$${foodSession.chosen_restaurant.minimum}_*`
+  //   } else {
+    checkoutAttachment.actions = [{
+      'name': `food.admin.order.checkout.confirm`,
+      'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
+      'type': `button`,
+      'style': `primary`,
+      'value': `checkout`
+    }, {
+      // instructions button
+      name: 'food.order.instructions',
+      text: '✎ Add Instructions',
+      type: 'button',
+      value: ''
+    },
+    {
+      'name': 'food.admin.select_address',
+      'text': 'Restart Order ↺',
+      'type': 'button',
+      'value': 'food.admin.select_address'
+    }]
+    // }
 
-  if (totalPrice < foodSession.chosen_restaurant.minimum) {
-    checkoutAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` +
-                               `_\$${foodSession.chosen_restaurant.minimum}_*`
-    } else {
-      checkoutAttachment.actions = [{
-        'name': `food.admin.order.checkout.confirm`,
-        'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
-        'type': `button`,
-        'style': `primary`,
-        'value': `checkout`
-      }, {
-        // instructions button
-        name: 'food.order.instructions',
-        text: '✎ Add Instructions',
-        type: 'button',
-        value: ''
-      }]
-    }
-
-  return [].concat(tipAttachment, deliveryCostsAttachment, kipCostsAttachment, checkoutAttachment)
+  return [].concat(deliveryCostsAttachment, kipCostsAttachment, (foodSession.discount_amount > feeDebuging ? discountAttachment: []), tipAttachment, checkoutAttachment)
 }

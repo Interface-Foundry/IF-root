@@ -10,6 +10,9 @@ var handlers = {}
 handlers['food.admin.team_budget'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  //waypoint logging
+  db.waypoints.log(1020, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var budget_options;
   var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
   for (var i = 0; i < locations.length; i++) {
@@ -26,9 +29,7 @@ handlers['food.admin.team_budget'] = function * (message) {
     else return null;
   }
 
-  console.log('message.text', message.text)
-
-  if (message.text) {
+  if (message.text && message.text[0] != '{') {
     var num = parseNumber(message.text)
 
     if (num) {
@@ -36,7 +37,7 @@ handlers['food.admin.team_budget'] = function * (message) {
       message.data.value = {};
       message.data.value.budget = num;
       message.data.value.new = true;
-      yield handlers['food.admin.confirm_budget'](message);
+      return yield handlers['food.admin.confirm_budget'](message);
     }
     else {
       yield $replyChannel.send(message, 'food.admin.team_budget', {type: message.origin, data: {
@@ -89,7 +90,7 @@ handlers['food.admin.team_budget'] = function * (message) {
 
   var noneButton = {
     'name': 'passthrough',
-    'text': 'None',
+    'text': 'Unlimited',
     'style': 'default',
     'type': 'button',
     'value': 'food.admin_polling_options'
@@ -112,7 +113,7 @@ handlers['food.admin.team_budget'] = function * (message) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.push(noneButton)
   }
 
-  if (!message.text) {
+  if (!message.text || message.text[0] == "{") {
     msg_json.attachments.push({
       'fallback': 'Search the menu',
       'text': '✎ Or type a budget below',
@@ -123,34 +124,34 @@ handlers['food.admin.team_budget'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.team_budget', {type: message.origin, data: msg_json})
 }
 
+function updateBudget (n, location) {
+  var n = Number(n);
+  var history = location.budget_history;
+  var budgets = location.budgets;
+  if (history.indexOf(n) > -1) {
+    history.splice(history.indexOf(n), 1)
+    history.unshift(n);
+  }
+  else {
+    history.unshift(n)
+    if (history.length > 3) history = history.slice(0, 4);
+    budgets = history.slice().sort(function (a, b) {return b < a})
+  }
+  return [budgets, history];
+}
+
 handlers['food.admin.confirm_budget'] = function * (message) {
 
   budget = message.data.value.budget;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   if (message.data.value.new) {
-
-    var budget_options;
     var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
     for (var i = 0; i < locations.length; i++) {
       if (locations[i].address_1 == foodSession.chosen_location.address_1 && locations[i].zip_code == foodSession.chosen_location.zip_code) {
-        budget_options = locations[i].budgets;
-        var duplicate = false;
-        for (var j = 0; j < budget_options.length; j++) {
-          if (Number(budget) == Number(budget_options[j])) duplicate = true;
-          if (Number(budget) <= Number(budget_options[j])) {
-            budget_options.splice(j, (duplicate ? 1 : 0), budget);
-            break;
-          }
-        }
-        if (Number(budget) > Number(budget_options[budget_options.length-1])) {
-          console.log('new highest budget!:', budget, "-- previously", budget_options[budget_options.length-1])
-          budget_options.push(budget)
-        }
-        else {
-          console.log('no higher budget added', budget, "-- previously", budget_options[budget_options.length-1])
-        }
-        locations[i].budgets = budget_options
+        var updated = updateBudget(budget, locations[i]);
+        locations[i].budgets = updated[0];
+        locations[i].budget_history = updated[1];
       }
     }
 
@@ -169,7 +170,7 @@ handlers['food.admin.confirm_budget'] = function * (message) {
     }
   });
 
-  yield $allHandlers['food.admin_polling_options'](message) //TODO make it stop happening
+  yield $allHandlers['food.admin_polling_options'](message)
 }
 
 module.exports = function (replyChannel, allHandlers) {

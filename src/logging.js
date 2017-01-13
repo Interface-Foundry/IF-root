@@ -15,8 +15,8 @@ var localConfig = {
     error: 0,
     warn: 1,
     data: 2,
-    info: 3,
-    verbose: 4,
+    verbose: 3,
+    info: 4,
     debug: 5,
     silly: 7
   },

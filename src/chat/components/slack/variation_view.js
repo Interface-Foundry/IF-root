@@ -1,12 +1,9 @@
 // when an amazon item requires a specified variation,
 // generates the view to show it
 const _ = require('lodash'),
-  cardTemplate = require('./card_templates'),
   slackUtils = require('./utils.js'),
   amazonSearch = require('../amazon_search'),
-  request = require('request'),
-  kipCart = require('../cart'),
-  cart = require('./cart')
+  request = require('request');
 const handlers = [];
 
 module.exports = function*(message) {
@@ -34,17 +31,18 @@ function createButton(name, key, itemId) {
     name: `variation.select.${itemId}.${key}.${name}`,
     value: `select.${itemId}.${key}.${name}`,
     text: '○ ' + _.startCase(name), //or ◉
-    type: 'button',
-  }
+    type: 'button'
+  };
 }
 
-handlers['reply'] = function*(message) {
+handlers['reply'] = function * (message) {
   let amazon = JSON.parse(message.amazon);
   let itemInfo = (yield amazonSearch.lookup({
     ASIN: amazon.asin
   }, message.origin))[0];
-  let img = _.get(itemInfo, 'LargeImage[0].URL[0]') || _.get(itemInfo, 'ImageSets[0].ImageSet[0].LargeImage[0].URL[0]')
-  let item = yield(new db.Item({
+  let img = _.get(itemInfo, 'LargeImage[0].URL[0]') || _.get(itemInfo, 'ImageSets[0].ImageSet[0].LargeImage[0].URL[0]');
+  let attrs = _.get(itemInfo, 'ItemAttributes[0]');
+  let item = yield (new db.Item({
     ASIN: amazon.asin,
     title: _.get(itemInfo, 'ItemAttributes[0].Title[0]'),
     link: itemInfo.shortened_url,
@@ -55,16 +53,27 @@ handlers['reply'] = function*(message) {
     source_json: JSON.stringify(itemInfo),
     asins: JSON.stringify(amazon.asins),
     config: JSON.stringify({})
-  })).save()
+  })).save();
+
+  let description = [
+    '*' + itemInfo.realPrice + '*',
+    _.get(attrs, 'Feature[0]') ? ' ○ ' + attrs.Feature.join('\n ○ ') : false
+  ].filter(Boolean).join('\n');
 
   let attachments = [{
-    text: 'It looks like that comes with a couple of options. Please select what you want.'
+    text: 'Here\'s what I found!', // COPY!!!
+    color: '#45a5f4'
   }, {
     text: `<${itemInfo.shortened_url}|*${truncate(_.get(itemInfo, 'ItemAttributes[0].Title[0]'))}*>`,
     image_url: img,
     mrkdwn_in: ['text']
+  }, {
+    color: '#45a5f4',
+    text: description,
+    mrkdwn_in: ['text', 'pretext'],
+    callback_id: 'none',
+    fallback: 'focus'
   }];
-
 
   _.forOwn(amazon.variations, (val, key) => {
     let buttons = val.map(name => createButton(name, key, item._id));
@@ -90,10 +99,11 @@ handlers['reply'] = function*(message) {
   attachments.push({
     text: '',
     callback_id: 'ehhhhhh',
+    color: '#49d63a',
     actions: [{
       name: `variation.addcart.${item._id}`,
       value: `addcart.${item._id}`,
-      text: 'Add to Cart',
+      text: '+ Add to Cart',
       style: 'primary',
       type: 'button',
     }, {
@@ -111,45 +121,14 @@ handlers['addcart'] = function*(message, data) {
   let item = yield db.items.findOne({
     '_id': data[0]
   }).exec();
-  let asins = JSON.parse(item.asins),
-    config = JSON.parse(item.config);
-  let numOptions = _.size(asins[0]) - 1;
-  if (_.size(config) != numOptions) {
-    if (!origAttachments[origAttachments.length - 1].text) {
-      origAttachments.push({
-        text: 'Hmm, it looks like you haven\'t selected all of the required options',
-        callback_id: 'none',
-        color: '#FF0000'
-      });
-    }
-    request({
-      method: 'POST',
-      uri: message.source.response_url,
-      body: JSON.stringify({
-        attachments: origAttachments
-      })
-    })
-  } else {
-    let matches = asins.filter(item => {
-      let flag = true;
-      _.forOwn(config, (val, key) => {
-        flag = flag && item[key] === val;
-      })
-      return flag;
-    })
-    if (matches.length > 0) { // there really should only be one match but whatevs
-      // add it to the cart!
-      yield slackUtils.addViaAsin(matches[0].id, message);
-      message.text = 'view cart'
-      return message
-    } else {
-      // I don't think you can buy this combination
-      // we should probably be updating available combinations based on what people select
-      if (origAttachments[origAttachments.length - 1].text) {
-        origAttachments[origAttachments.length - 1].text = 'Hmm, that version doesn\'t seem to be available. Try a different one?';
-      } else {
+  try {
+    let asins = JSON.parse(item.asins),
+      config = JSON.parse(item.config);
+    let numOptions = _.size(asins[0]) - 1;
+    if (_.size(config) != numOptions) {
+      if (!origAttachments[origAttachments.length - 1].text) {
         origAttachments.push({
-          text: 'Hmm, that version doesn\'t seem to be available. Try a different one?',
+          text: 'Hmm, it looks like you haven\'t selected all of the required options',
           callback_id: 'none',
           color: '#FF0000'
         });
@@ -161,9 +140,48 @@ handlers['addcart'] = function*(message, data) {
           attachments: origAttachments
         })
       })
+    } else {
+      let matches = asins.filter(item => {
+        let flag = true;
+        _.forOwn(config, (val, key) => {
+          flag = flag && item[key] === val;
+        })
+        return flag;
+      })
+      if (matches.length > 0) { // there really should only be one match but whatevs
+        // add it to the cart!
+        yield slackUtils.addViaAsin(matches[0].id, message);
+        message.text = 'view cart'
+        return message
+      } else {
+        // I don't think you can buy this combination
+        // we should probably be updating available combinations based on what people select
+        if (origAttachments[origAttachments.length - 1].text) {
+          origAttachments[origAttachments.length - 1].text = 'Hmm, that version doesn\'t seem to be available. Try a different one?';
+        } else {
+          origAttachments.push({
+            text: 'Hmm, that version doesn\'t seem to be available. Try a different one?',
+            callback_id: 'none',
+            color: '#FF0000'
+          });
+        }
+        request({
+          method: 'POST',
+          uri: message.source.response_url,
+          body: JSON.stringify({
+            attachments: origAttachments
+          })
+        });
+      }
     }
+  } catch (err) {
+    kip.debug('JSON err probably, trying with the main ASIN');
+    kip.debug(`item is ${JSON.stringify(item, null, 2)}`);
+    yield slackUtils.addViaAsin(item.ASIN, message);
+    message.text = 'view cart';
+    return message;
   }
-}
+};
 
 handlers['select'] = function*(message, data) {
   let itemId = data[0],

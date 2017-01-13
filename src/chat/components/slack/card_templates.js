@@ -81,7 +81,7 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
       callback_id: 'whatevs',
       actions: [{
         name: 'onboard.start.remind_later',
-        text: '◷ Remind Me Later',
+        text: '◷ Snooze',
         style: 'default',
         type: 'button',
         value: `remind_later.${delay}`
@@ -178,32 +178,54 @@ var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
   'value': 'search.healthy_snacks'
 }];
 
-var slack_shopping_mode = module.exports.slack_shopping_mode = [{
-  image_url: "http://kipthis.com/kip_modes/mode_shopping.png",
-  fallback: 'Welcome to Kip Store',
-  text: "",
-  mrkdwn_in: [
-    "text",
-    "pretext"
-  ],
-  color: "#45a5f4"
+var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
+  return [{
+    image_url: "http://kipthis.com/kip_modes/mode_shopping.png",
+    fallback: 'Welcome to Kip Store',
+    text: "",
+    mrkdwn_in: [
+      "text",
+      "pretext"
+    ],
+    color: "#45a5f4"
+  }, {
+    text: "Tell me what you're looking for, or use `help` for more options",
+    mrkdwn_in: [
+      "text",
+      "pretext"
+    ],
+    color: "#49d63a"
+  }, {
+    text: 'Tap to search for something',
+    fallback: 'Tap to search for something',
+    callback_id: 'wopr_game',
+    color: "#45a5f4",
+    attachment_type: 'default',
+    actions: slack_shopping_buttons
+  }, {
+    text: require('./utils').randomStoreHint(),
+    mrkdwn_in: ['text']
+  }]
+};
+
+var slack_bundles = module.exports.slack_bundles = [{
+  name: "bundles.supplies.snackbox",
+  text: "Snackbox",
+  style: "default",
+  type: "button",
+  value: "bundle.snacks"
 }, {
-  text: "Tell me what you're looking for, or use `help` for more options",
-  mrkdwn_in: [
-    "text",
-    "pretext"
-  ],
-  color: "#49d63a"
+  name: "bundles.supplies.drinks",
+  text: "Drinks",
+  style: "default",
+  type: "button",
+  value: "bundle.drinks"
 }, {
-  text: 'Tap to search for something',
-  fallback: 'Tap to search for something',
-  callback_id: 'wopr_game',
-  color: "#45a5f4",
-  attachment_type: 'default',
-  actions: slack_shopping_buttons
-},{
-  'text': '✂︎ Add items directly from Amazon by pasting the URL and sending it to me',
-  mrkdwn_in: ['text']
+  name: "bundles.supplies.supplies",
+  text: "Office Supplies",
+  style: "default",
+  type: "button",
+  value: "bundle.supplies"
 }];
 
 // ONBOARDING MODE TEMPLATES
@@ -275,7 +297,7 @@ var member_onboard_attachments = module.exports.member_onboard_attachments = fun
   if (delay !== 'initial') {
     reply[1].actions.push({
       name: 'member_onboard.start.remind_later',
-      text: '◷ Remind Me Later',
+      text: '◷ Snooze',
       style: 'default',
       type: 'button',
       value: `remind_later.${delay}.${admin}`

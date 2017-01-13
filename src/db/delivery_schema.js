@@ -38,7 +38,8 @@ var deliverySchema = mongoose.Schema({
     id: String,
     name: String,
     url: String,
-    minimum: Number
+    minimum: Number,
+    cuisine: String
   },
   budget: Number,
   user_budgets: {},

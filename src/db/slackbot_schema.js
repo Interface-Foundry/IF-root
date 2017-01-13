@@ -102,6 +102,10 @@ var slackbotSchema = mongoose.Schema({
       budgets: {
         type: [Number],
         default: [10, 15, 20]
+      },
+      budget_history: {
+        type: [Number],
+        default: [10, 15, 20]
       }
     }],
     chosen_location: {},

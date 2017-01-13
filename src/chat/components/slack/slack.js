@@ -103,7 +103,9 @@ function * loadTeam(slackbot) {
   rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
     kip.debug('got slack message sent from user', data.user, 'on channel', data.channel)
-
+    if ((data.user === undefined) || (data.channel === undefined)) {
+      logging.error('error user undefined in slackl stuff', data)
+    }
     // For channels that are not DM's, only respond if kip is called out by name
     if ('CG'.includes(data.channel[0])) {
       if (data.text && data.text.includes(slackbot.bot.bot_user_id)) {
@@ -132,8 +134,17 @@ function * loadTeam(slackbot) {
     }
 
     // other random things
-    if (data.type !== 'message' || (data.hidden === true) || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { // settings.name = kip's slack username
+    if ((data.type !== 'message') || (data.subtype === 'channel_join') || (data.subtype === 'channel_leave')) { // settings.name = kip's slack username
       kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      logging.debug('data.type', data.type)
+      logging.debug('data.subtype', data.subtype)
+      return
+    }
+
+    if ((data.hidden === true) && (data.subtype === 'message_changed')) {
+      kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      logging.debug('data.hidden', data.hidden)
+      logging.debug('data.subtype', data.subtype)
       return
     }
 
@@ -153,7 +164,11 @@ function * loadTeam(slackbot) {
     // if (message.text.charAt(0) == ':') {
     //   message.text = message.text.substr(1); // remove : from beginning of string
     // }
-    message.text = message.text.trim() // remove extra spaces on edges of string
+    try {
+      message.text = message.text.trim() // remove extra spaces on edges of string
+    } catch (err) {
+      logging.info('error trying to trim message.text')
+    }
 
     // queue it up for processing
     message.save().then(() => {
@@ -234,26 +249,21 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
         return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
+      
       if(message.mode === 'variations' && message.action === 'reply'){
         msgData.attachments = yield variation_view(message);
         msgData.text = '';
         return bot.web.chat.postMessage(message.source.channel, '', msgData);
-
-        // var asin = message.reply[0].id; //just grab the first one for now
-        // yield slackUtils.addViaAsin(asin, message);
-        // message.data = yield kipCart.getCart(message.source.team)
-        // message.mode = 'cart';
-        // message.action = 'view';
       }
+
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         var results = yield search_results(message);
         msgData.attachments = [...message.reply || [], ...results || []];
-        logging.log('sending search results')
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
       if (message.mode === 'shopping' && message.action === 'switch') {
-        msgData.attachments = [...message.reply || [], ...cardTemplate.slack_shopping_mode];
+        msgData.attachments = [...message.reply || [], ...cardTemplate.slack_shopping_mode()];
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
@@ -283,6 +293,11 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       if (message.mode === 'collect' && message.action === 'home') {
+        msgData.attachments = message.reply;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
+      if (message.mode === 'bundles' && message.action === 'home') {
         msgData.attachments = message.reply;
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
