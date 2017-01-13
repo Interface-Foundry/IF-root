@@ -172,7 +172,7 @@ handlers['supplies'] = function * (message) {
       callback_id: 'none'
     });
   attachments.push({
-    'text': '✎ Hint: You can also what you want below (Example: _MacBook Pro Power Cord_)',
+    'text': '✎ Hint: You can also search what you want below (Example: _MacBook Pro Power Cord_)',
     mrkdwn_in: ['text']
   });
    var msg = message;
@@ -537,7 +537,6 @@ handlers['team'] = function * (message) {
     return ((a.text.indexOf('☐ ') > -1) - (b.text.indexOf('☐ ') > -1))
   }
   buttons = buttons.sort(sortF)
-
 
   if (buttons.length > 9) {
      buttons = buttons.slice(0,9);

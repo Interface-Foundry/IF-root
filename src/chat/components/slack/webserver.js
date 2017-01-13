@@ -162,11 +162,11 @@ app.post('/slackaction', next(function * (req, res) {
           message.text = 'sendCollect';
         } else {
           message.action = 'initial';
-          message.text = 'exit';
+          message.text = 'shopping';
         }
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-        })
+        });
       }
       else if (simple_command == 'loading_btn') {
       	// responding with nothing means the button does nothing!
@@ -207,22 +207,13 @@ app.post('/slackaction', next(function * (req, res) {
         }
         buttons = buttons.sort(sortF)
         if (buttons.length > 9) {
-           buttons = buttons.slice(0, 9);
+          buttons = buttons.slice(0, 9);
         }
         var chunkedButtons = _.chunk(buttons, 5);
-        attachments.push({
-          text: lastMessage.attachments[0].text,
-          image_url: lastMessage.attachments[0].image_url,
-          mrkdwn_in: ['text'],
-          color: '#A368F0',
-          actions: chunkedButtons[0],
-          fallback: lastMessage.attachments[0].fallback,
-          callback_id: "none"
-        });
         chunkedButtons.forEach((ele, i) => {
-          if (i != 0) {
-            attachments.push({text: '', actions: ele, color: '#A368F0', callback_id: 'none'});
-          }
+          let newRow = lastMessage.attachments[i];
+          newRow.actions = chunkedButtons[i];
+          attachments.push(newRow);
         })
         attachments = attachments.concat(lastMessage.attachments[lastMessage.attachments.length - 2], lastMessage.attachments[lastMessage.attachments.length - 1]);
         var json = parsedIn.original_message;

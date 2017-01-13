@@ -478,10 +478,6 @@ function * constructCart(message, text) {
     summaryText += `
     <${cart.link}|*➤ Click Here to Checkout*>`;
 
-	if (cart.aggregate_items.length === 0) {
-		summaryText = 'It looks like your cart is empty!'
-	}
-
     attachments.push({
       text: summaryText,
       mrkdwn_in: ['text', 'pretext'],
@@ -639,18 +635,38 @@ function getDayNum(string) {
   }
 }
 
-function randomSearching() {
+/**
+ * Chooses a random hint message for the Kip Store
+ * @return {String} a hint, prepended with an unicode symbol
+ */
+function randomStoreHint() {
   let messages = [
-    'Searching...',
-    'Foraging...',
-    'Looking...',
-    'Exploring...',
-    'Seeking...'
+    '✎ You can also search what you want below (Example: _MacBook Pro Power Cord_)',
+    '✂︎ Add items directly from Amazon by pasting the URL and sending it to me'
   ];
   let num = Math.floor(Math.random() * messages.length);
   return messages[num];
 }
 
+/**
+ * Chooses a random searching messages
+ * @return {String} a searching message, suffixed with an ellipsis
+ */
+function randomSearching() {
+  let messages = [
+    'Searching…',
+    'Foraging…',
+    'Looking…',
+    'Exploring…',
+    'Seeking…'
+  ];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num];
+}
+/**
+ * Chooses a random welcome message
+ * @return {String} a welcome message, suffixed with a (happy) emoji
+ */
 function randomWelcome() {
   let messages = [
     'Welcome to Kip! \u00A0:smile:',
@@ -682,5 +698,6 @@ module.exports = {
   constructCart: constructCart,
   setCron: setCron,
   randomWelcome: randomWelcome,
+  randomStoreHint: randomStoreHint,
   randomSearching: randomSearching
 };

@@ -463,9 +463,6 @@ handlers['cart.view'] = function*(message, exec) {
   winston.debug('reply-473: cart_reference_id: ', cart_reference_id)
   res.data = yield kipcart.getCart(cart_reference_id);
   res.data = res.data.toObject();
-  if (res.data.items.length < 1) {
-    return text_reply(message, 'It looks like your cart is empty');
-  }
   kip.debug('view cart message', res);
   return res;
 };

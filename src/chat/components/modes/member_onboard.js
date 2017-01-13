@@ -57,7 +57,7 @@ handlers['step_1'] = function(message) {
     attachment_type: 'default',
     actions: cardTemplate.slack_member_onboard_start
   }, {
-    'text': '✎ Hint: You can also what you want below (Example: _MacBook Pro Power Cord_)',
+    'text': '✎ Hint: You can also search what you want below (Example: _MacBook Pro Power Cord_)',
     mrkdwn_in: ['text']
   }];
   cancelReminder('initial reminder', message.source.user);
@@ -218,9 +218,6 @@ handlers['cart'] = function * (message) {
   var cart_reference_id = (message.source.origin === 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO
   res.data = yield kipcart.getCart(cart_reference_id);
   res.data = res.data.toObject();
-  if (res.data.items.length < 1) {
-    return text_reply(message, 'It looks like your cart is empty');
-  }
   return [res];
 };
 
