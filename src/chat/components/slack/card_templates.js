@@ -81,7 +81,7 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
       callback_id: 'whatevs',
       actions: [{
         name: 'onboard.start.remind_later',
-        text: '◷ Remind Me Later',
+        text: '◷ Snooze',
         style: 'default',
         type: 'button',
         value: `remind_later.${delay}`
@@ -295,7 +295,7 @@ var member_onboard_attachments = module.exports.member_onboard_attachments = fun
   if (delay !== 'initial') {
     reply[1].actions.push({
       name: 'member_onboard.start.remind_later',
-      text: '◷ Remind Me Later',
+      text: '◷ Snooze',
       style: 'default',
       type: 'button',
       value: `remind_later.${delay}.${admin}`

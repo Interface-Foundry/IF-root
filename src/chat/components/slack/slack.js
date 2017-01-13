@@ -249,21 +249,16 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
         return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
+      
       if(message.mode === 'variations' && message.action === 'reply'){
         msgData.attachments = yield variation_view(message);
         msgData.text = '';
         return bot.web.chat.postMessage(message.source.channel, '', msgData);
-
-        // var asin = message.reply[0].id; //just grab the first one for now
-        // yield slackUtils.addViaAsin(asin, message);
-        // message.data = yield kipCart.getCart(message.source.team)
-        // message.mode = 'cart';
-        // message.action = 'view';
       }
+
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         var results = yield search_results(message);
         msgData.attachments = [...message.reply || [], ...results || []];
-        logging.log('sending search results')
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 

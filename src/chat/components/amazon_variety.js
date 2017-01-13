@@ -3,13 +3,11 @@ var _ = require('lodash')
 var uuid = require('uuid')
 var co = require('co')
 var proxyRequest = require('./proxy/request').proxyRequest;
-var queue = require('./queue-mongo')
-// var amazon_search = require('./amazon_search.js')
-// var promisify = require('promisify-node')
-// var request = require('request')
+var queue = require('./queue-mongo');
+var amazon = require('./amazon_search.js')
 var ItemVariation = db.ItemVariation
 
-const constants = require('./constants')
+const constants = require('./constants');
 /*
 * create pubsub with
 *
@@ -86,42 +84,47 @@ function* getVariations(asin, message) {
     url: 'https://www.amazon.com/dp/' + asin,
     asins: []
   }
-
   logging.debug('getting variation in amazon_vareity')
-  proxyRequest(variation.url, 3)
-    .then((body) => {
-      var $ = cheerio.load(body);
-      $('html').find('style').remove()
-      $('#twisterJsInitializer_feature_div > script').each(function(i, element) {
-        var data = element.children[0].data
-        var lines = data.split('\n')
-        lines = lines.slice(2, lines.length - 3)
-        data = lines.join('\n')
-        eval(data) // returns value that contains dataToReturn var
-        variation.variationValues = dataToReturn.variationValues
-        variation.asinVariationValues = dataToReturn.asinVariationValues
-        variation.asins = createItemArray(variation.variationValues, variation.asinVariationValues)
-      })
-
-      var item = new ItemVariation({
-        mode: constants.ITEM_ADD,
-        topic: constants.BY_ATTRIBUTE,
-        ASIN: variation.base_asin,
-        // remaining: Object.keys(variation.variationValues),
-        variationValues: variation.variationValues,
-        asins: variation.asins,
-        source: message
-      })
-      item.save(function(err) {
-        if (err) throw err
-      })
-
-      pubsubVariation(item, asin, message, message.origin)
-        // logging.debug('getting asin stuff for ASIN: ', )
-      logging.debug('getting asin stuff for source: ', item.source.source.channel)
-
+  let body = yield proxyRequest(variation.url, 3)
+  var $ = cheerio.load(body);
+  $('html').find('style').remove()
+  try {
+    $('#twisterJsInitializer_feature_div > script').each(function(i, element) {
+      var data = element.children[0].data
+      var lines = data.split('\n')
+      lines = lines.slice(2, lines.length - 3)
+      data = lines.join('\n')
+      eval(data) // returns value that contains dataToReturn var
+      variation.variationValues = dataToReturn.variationValues
+      variation.asinVariationValues = dataToReturn.asinVariationValues
+      variation.asins = createItemArray(variation.variationValues, variation.asinVariationValues)
     })
-    .catch(err => kip.debug('Proxy errored out.. ', err));
+
+    let item = new ItemVariation({
+      mode: constants.ITEM_ADD,
+      topic: constants.BY_ATTRIBUTE,
+      ASIN: variation.base_asin,
+      // remaining: Object.keys(variation.variationValues),
+      variationValues: variation.variationValues,
+      asins: variation.asins,
+      source: message
+    })
+    item.save(function(err) {
+      if (err) throw err
+    })
+
+    pubsubVariation(item, asin, message, message.origin)
+      // logging.debug('getting asin stuff for ASIN: ', )
+    logging.debug('getting asin stuff for source: ', item.source.source.channel)
+  } catch (err) {
+    kip.debug(`couldn't get varation bc ${JSON.stringify(err, null, 2)}`);
+    let res = yield amazon.lookup({
+      ASIN: asin,
+      IdType: 'ASIN'
+    });
+    let item = res[0];
+    pubsubVariation(item, asin, message, message.origin);
+  }
 }
 /*
 * createItemReqs should present user in facebook or slack or whatever with

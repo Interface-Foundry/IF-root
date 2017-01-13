@@ -133,30 +133,19 @@ function isMenuChange(message) {
 
 
 function* processProductLink(message) {
-	var text = message.text ? message.text.toLowerCase() : '';
-	if (text.indexOf('www.amazon.com') > -1) {
-		if (text.indexOf('/dp/') > -1) {
-			var asin = text.substr(text.indexOf('/dp/') + 4, 10);
-		} else if (text.indexOf('/gp/') > -1) {
-			var asin = text.substr(text.indexOf('/gp/') + 12, 10);
-		}
-	}
-	if (asin) {
-		var fail = false;
-		try {
-			yield slackUtils.addViaAsin(asin, message);
-		} catch (err) {
-			fail = true;
-			yield amazon_variety.getVariations(asin, message);
-			return;
-		}
-		if (!fail) {
-			message.text = 'view cart';
-			message.mode = 'shopping';
-			message.action = 'initial';
-			yield message.save();
-		}
-	}
+  var text = message.text ? message.text.toLowerCase() : '';
+  let asin;
+  if (text.indexOf('www.amazon.com') > -1) {
+    if (text.indexOf('/dp/') > -1) {
+      asin = text.substr(text.indexOf('/dp/') + 4, 10);
+    } else if (text.indexOf('/gp/') > -1) {
+      asin = text.substr(text.indexOf('/gp/') + 12, 10);
+    }
+  }
+  if (asin) {
+    yield amazon_variety.getVariations(asin, message);
+    return;
+  }
 }
 
 function switchMode(message) {
