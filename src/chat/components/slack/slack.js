@@ -103,7 +103,9 @@ function * loadTeam(slackbot) {
   rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
     kip.debug('got slack message sent from user', data.user, 'on channel', data.channel)
-
+    if ((data.user === undefined) || (data.channel === undefined)) {
+      logging.error('error user undefined in slackl stuff', data)
+    }
     // For channels that are not DM's, only respond if kip is called out by name
     if ('CG'.includes(data.channel[0])) {
       if (data.text && data.text.includes(slackbot.bot.bot_user_id)) {
@@ -132,8 +134,11 @@ function * loadTeam(slackbot) {
     }
 
     // other random things
-    if (data.type !== 'message' || (data.hidden === true) || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { // settings.name = kip's slack username
+    if ((data.type !== 'message') || (data.hidden === true) || (data.subtype === 'channel_join') || (data.subtype === 'channel_leave')) { // settings.name = kip's slack username
       kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      logging.debug('data.type', data.type)
+      logging.debug('data.hidden', data.hidden)
+      logging.debug('data.subtype', data.subtype)
       return
     }
 
