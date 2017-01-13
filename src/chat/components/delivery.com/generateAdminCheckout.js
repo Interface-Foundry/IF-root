@@ -48,7 +48,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     fallback: 'Delivery.com Total ',
     text: `Cart Subtotal: ${foodSession.order.subtotal.$}\n` +
           `Taxes: ${foodSession.order.tax.$}\n` +
-          feeFromDeliveryLines +
+          // feeFromDeliveryLines +
           // `Delivery.com Total: ${foodSession.order.total.$}\n` +
           extraFeesFromDelivery +
           deliveryDiscount,
@@ -63,10 +63,12 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
         `Delivery Instructions: _${foodSession.instructions}_\n` : ``
 
   // var kipCoupon = foodSession.discount_amount > feeDebuging ? `Kip Coupon: -${foodSession.discount_amount.$}\n` : ``
+  //for testing:
+  // var kipCoupon = `Kip Coupon: -0.11\n`
   var kipCostsAttachment = {
-    fallback: 'Tip + Kip Fees + Discounts',
-    text: //`Tip: ${tipText}\n` +
-          `Kip Fee: ${foodSession.service_fee.$}\n` +
+    fallback: 'Tip + Service Fees + Discounts',
+    text: `Delivery Fee: ${foodSession.order.delivery_fee.$}\n` +
+          `Service Fee: ${foodSession.service_fee.$}\n` +
           instructionText,
     callback_id: 'food.admin.cart.info',
     color: '#3AA3E3',
@@ -76,10 +78,9 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
 
   var discountAttachment = {
     fallback: "discount",
-    text: `Kip Coupon: -${foodSession.discount_amount.$} 🎉`,
+    text: `🎉 Kip Coupon: -${foodSession.discount_amount.$}`,
     mrkdwn_in: ['text']
   }
-
 
   // ----- calculated amount is order.total + tip + service_fee - discount_amount
   var checkoutAttachment = {
@@ -119,5 +120,5 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     }]
     // }
 
-  return [].concat(deliveryCostsAttachment, kipCostsAttachment, (foodSession.discount_amount > feeDebuging ? discountAttachment: []), tipAttachment, checkoutAttachment)
+  return [].concat(deliveryCostsAttachment, kipCostsAttachment, (kipCoupon ? discountAttachment: []), tipAttachment, checkoutAttachment)
 }
