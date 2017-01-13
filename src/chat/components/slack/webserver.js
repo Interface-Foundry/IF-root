@@ -162,11 +162,11 @@ app.post('/slackaction', next(function * (req, res) {
           message.text = 'sendCollect';
         } else {
           message.action = 'initial';
-          message.text = 'exit';
+          message.text = 'shopping';
         }
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-        })
+        });
       }
       else if (simple_command == 'loading_btn') {
       	// responding with nothing means the button does nothing!
