@@ -189,13 +189,6 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
     ],
     color: "#45a5f4"
   }, {
-    text: "Tell me what you're looking for, or use `help` for more options",
-    mrkdwn_in: [
-      "text",
-      "pretext"
-    ],
-    color: "#49d63a"
-  }, {
     text: 'Tap to search for something',
     fallback: 'Tap to search for something',
     callback_id: 'wopr_game',

@@ -13,7 +13,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
 
   // all the messages which compose the cart
   var cartObj = [{
-    text: 'Here\'s everything you have in your cart',
+    text: cart.aggregate_items.length > 0 ? 'Here\'s everything you have in your cart': 'It looks like your cart is empty!',
     color: '#45a5f4',
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png',
     callback_id: 'press me',
@@ -109,15 +109,15 @@ module.exports = function*(message, slackbot, highlight_added_item) {
 
   // Only show the purchase link in the summary for office admins.
   if (isAdmin) {
-    var summaryText = `*Team Cart Summary*
- *Total:* ${cart.total}`;
-    summaryText += `
- <${cart.link}|*➤ Click Here to Checkout*>`;
-    cartObj.push({
-      text: summaryText,
-      mrkdwn_in: ['text', 'pretext'],
-      color: '#49d63a'
-    })
+    var summaryText = `*Total:* ${cart.total}`;
+    summaryText += `\n<${cart.link}|*➤ Click Here to Checkout*>`;
+    if (cart.aggregate_items.length > 0) {
+      cartObj.push({
+        text: summaryText,
+        mrkdwn_in: ['text', 'pretext'],
+        color: '#49d63a'
+      })
+    }
   } else {
     //var officeAdmins = slackbot.meta.office_assistants.join(' ')
     let officeAdmins;

@@ -208,7 +208,7 @@ handlers['text'] = function*(message) {
       return n !== undefined;
     }));
   }
-  if (!choices && message.text === 'collect') {
+  if ((!choices || choices.length === 0) && message.text === 'collect') {
     return yield handlers['initial'](message);
   }
   var team_id = message.source.team;
