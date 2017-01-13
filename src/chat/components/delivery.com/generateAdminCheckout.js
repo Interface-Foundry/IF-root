@@ -62,9 +62,8 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
   var instructionText = _.get(foodSession, 'instructions') ?
         `Delivery Instructions: _${foodSession.instructions}_\n` : ``
 
-  // var kipCoupon = foodSession.discount_amount > feeDebuging ? `Kip Coupon: -${foodSession.discount_amount.$}\n` : ``
-  //for testing:
-  // var kipCoupon = `Kip Coupon: -0.11\n`
+  var kipCoupon = foodSession.discount_amount > feeDebuging ? `Kip Coupon: -${foodSession.discount_amount.$}\n` : ``
+
   var kipCostsAttachment = {
     fallback: 'Tip + Service Fees + Discounts',
     text: `Delivery Fee: ${foodSession.order.delivery_fee.$}\n` +
