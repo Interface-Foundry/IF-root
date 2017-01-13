@@ -241,7 +241,7 @@ if (foodSession.budget) {
     'mrkdwn_in': ['text', 'fields']
   })
 
-  if (foodSession.budget) {
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
     if (Number(foodSession.user_budgets[message.user_id]) >= 2) {
       var text = `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`;
     }
@@ -424,7 +424,7 @@ handlers['food.item.add_to_cart'] = function * (message) {
 
   //~~~budget~~~//
 
-  if (foodSession.user_budgets) {
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
     var budgets = foodSession.user_budgets;
     var menu = Menu(foodSession.menu);
     var itemPrice = menu.getCartItemPrice(userItem);
