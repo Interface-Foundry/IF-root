@@ -25,3 +25,10 @@ slack:
   verification_token: b2hLV2HnBtWBmU5NFgDBG8dL
   redirect_uri: https://canary.kipapp.co/newslack
 picstitchDelivery: http://10.142.0.18:5000
+logging:
+  console:
+    level: silly
+    colorize: true
+    prettyPrint: true
+  mongo:
+    enabled: true

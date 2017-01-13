@@ -444,11 +444,11 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   // $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})
 
   if (numOfResponsesWaitingFor <= 0) {
-    yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
+    logging.info('have all the votes')
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
+    // yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
   } else {
-    logging.error('waiting for more responses have, votes: ', votes.length)
-    logging.error('need', numOfResponsesWaitingFor)
+    logging.info('waiting for more responses have, votes: ', votes.length, 'need ', numOfResponsesWaitingFor, ' more votes')
     yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
   }
 }
@@ -457,7 +457,10 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 * Confirm all users have voted for a cuisine
 */
 handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
-  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+  if (foodSession === undefined) {
+    logging.info('foodSession wasnt passed into food.admin.dashboard.cuisine')
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  }
 
   db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -567,7 +570,10 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
 
-  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+  if (foodSession === undefined) {
+    logging.info('foodSession wasnt passed into food.admin.restaurant.pick.list')
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  }
 
   db.waypoints.log(1140, foodSession._id, message.user_id, {original_text: message.original_text})
   var index = _.get(message, 'data.value.index', 0)
@@ -659,9 +665,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     }
   }
 
-  kip.debug('sending message to admin', admin)
-  kip.debug(msg)
-
+  logging.debug('sending message to admin: ', msg)
   $replyChannel.send(msg, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
 }
 
