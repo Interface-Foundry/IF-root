@@ -278,7 +278,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       if (message.mode === 'cart' && message.action === 'view') {
-        msgData.attachments = yield cart(message, bot.slackbot, false)
+        msgData.attachments = yield cart(message, bot.slackbot, true)
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
