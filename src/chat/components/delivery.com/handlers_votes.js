@@ -767,59 +767,61 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     ]
   }
 
-  logging.debug('foodSession.email_users', foodSession.email_users)
-  for (var i = 0; i < foodSession.email_users.length; i++) {
 
-    var m = foodSession.email_users[i];
+  if (foodSession.email_users.length > 0) {
+    logging.debug('foodSession.email_users', foodSession.email_users)
+    for (var i = 0; i < foodSession.email_users.length; i++) {
 
-    var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
+      var m = foodSession.email_users[i];
 
-    var merch_url = yield menu_utils.getUrl(foodSession, user.id)
+      var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
 
-    var mailOptions = {
-      to: `<${m}>`,
-      from: `Kip Café <hello@kipthis.com>`,
-      subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
-      html: '<html><body><p><a href="' + merch_url + '">View Full Menu</a></p><table style="width:100%" border="1">'
-    };
+      var merch_url = yield menu_utils.getUrl(foodSession, user.id)
 
-    var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
-    var quickpicks = sortedMenu.slice(0, 9);
+      var mailOptions = {
+        to: `<${m}>`,
+        from: `Kip Café <hello@kipthis.com>`,
+        subject: `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
+        html: '<html><body><p><a href="' + merch_url + '">View Full Menu</a></p><table style="width:100%" border="1">'
+      };
 
-    function formatItem (i, j) {
-      return `<table>` +
-      `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
-      `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
-      `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
-      `<tr><p style="color:#fa2d48">+ Add to Cart</p></tr>` +
-      `</table>`;
-    }
+      var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
+      var quickpicks = sortedMenu.slice(0, 9);
 
-    for (var i = 0 ; i < 3; i++) {
-      mailOptions.html += '<tr>';
-      for (var j = 0; j < 3; j++) {
-        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
-        mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `">`
-        mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
+      function formatItem (i, j) {
+        return `<table>` +
+        `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
+        `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
+        `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
+        `<tr><p style="color:#fa2d48">+ Add to Cart</p></tr>` +
+        `</table>`;
       }
-      mailOptions.html += '</tr>';
-    }
 
-    mailOptions.html += '</table></body></html>';
+      for (var i = 0 ; i < 3; i++) {
+        mailOptions.html += '<tr>';
+        for (var j = 0; j < 3; j++) {
+          var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
+          mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="` + `${item_url}` + `">`
+          mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
+        }
+        mailOptions.html += '</tr>';
+      }
 
-    logging.info('mailOptions', mailOptions)
-    try {
-      yield mailer_transport.sendMail(mailOptions)
-    } catch (err) {
-      logging.error('error with mailer_trainsport in food.admin.restaurant.collect_orders', err)
+      mailOptions.html += '</table></body></html>';
+
+      logging.info('mailOptions', mailOptions)
+      try {
+        yield mailer_transport.sendMail(mailOptions)
+      } catch (err) {
+        logging.error('error with mailer_trainsport in food.admin.restaurant.collect_orders', err)
+      }
     }
   }
 
   foodSession.team_members.map(function * (m) {
-
+    logging.debug('sending message to confirm for each user')
     var newMessage = _.merge(message, {
       'incoming': false,
-      'thread_id': m.dm,
       'resolved': true,
       'user_id': 'kip',
       'origin': 'slack',
