@@ -271,13 +271,13 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       actions: []
     })
 
-    var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
+    var items = foodSession.cart.filter(i => i.added_to_cart)
     var totalPrice = myItems.reduce((sum, i) => {
       return sum + menu.getCartItemPrice(i)
     }, 0)
   }
 
-  if (totalPrice < foodSession.chosen_restaurant.minimum) {
+  if (totalPrice < foodSession.chosen_restaurant.minimum && message.source.user == foodSession.convo_initiater.id) {
     dashboard.attachments.push({
       color: '#fc9600',
       mrkdwn_in: ['text'],
