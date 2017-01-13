@@ -464,11 +464,6 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   }
 
   db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
-<<<<<<< HEAD
-
-  db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
-=======
->>>>>>> 1ef581c031108b05640f3fac259904e56165c588
 
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
   if (message.allow_text_matching && !adminHasVoted) {
@@ -573,20 +568,14 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-<<<<<<< HEAD
 
-=======
->>>>>>> 1ef581c031108b05640f3fac259904e56165c588
   if (foodSession === undefined) {
     logging.info('foodSession wasnt passed into food.admin.restaurant.pick.list')
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   }
 
   db.waypoints.log(1140, foodSession._id, message.user_id, {original_text: message.original_text})
-<<<<<<< HEAD
 
-=======
->>>>>>> 1ef581c031108b05640f3fac259904e56165c588
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
@@ -778,7 +767,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     ]
   }
 
-<<<<<<< HEAD
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
@@ -810,7 +798,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
       }
       mailOptions.html += '</tr>';
-=======
+
   logging.debug('about to send message to each user to confirm if they want to be in order')
   yield foodSession.team_members.map(function * (member) {
     logging.debug(`sending message to confirm for each user, current user ${member.name}`)
@@ -824,28 +812,9 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       'channel': threadIdForUser,
       'user': member.id,
       'team': member.team_id
->>>>>>> 1ef581c031108b05640f3fac259904e56165c588
     }
   }
 
-<<<<<<< HEAD
-  logging.debug('about to send message to each user to confirm if they want to be in order')
-  yield foodSession.team_members.map(function * (member) {
-    logging.debug(`sending message to confirm for each user, current user ${member.name}`)
-    logging.debug('querying for ', member.id)
-    var threadIdForUser = yield db.messages.find({'source.user': member.id, 'mode': 'food', 'incoming': true, 'thread_id': {$exists: true}}).sort({'-ts': -1}).limit(2).exec()
-
-    logging.debug('got thread_id')
-    threadIdForUser = threadIdForUser[0].thread_id
-    var source = {
-      'type': 'message',
-      'channel': threadIdForUser,
-      'user': member.id,
-      'team': member.team_id
-    }
-
-=======
->>>>>>> 1ef581c031108b05640f3fac259904e56165c588
     var newMessage = {
       'incoming': false,
       'mode': 'food',

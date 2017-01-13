@@ -9,13 +9,9 @@ var nlp = require('../../nlp2/api')
 var banter = require('./banter.js')
 var googl = require('goo.gl')
 
-// <<<<<<< HEAD
-// if (process.env.NODE_ENV === 'developmentxxx') {
-//     googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
-// =======
+
 if (process.env.NODE_ENV === 'development') {
   googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
-// >>>>>>> f816180ab6264904d3801c004d23928a4ddcbf3d
 } else {
   googl.setKey('AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk')
 }

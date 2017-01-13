@@ -77,11 +77,7 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
   db.waypoints.log(1313, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var response = {
-<<<<<<< HEAD
     'text': `✎ What's your phone number?\nExample: 555 555 5555`,
-=======
-    'text': `✎ What's your phone number? (Example: _555 555 5555_)`,
->>>>>>> 1ef581c031108b05640f3fac259904e56165c588
     'fallback': 'Type your phone number below',
     'callback_id': 'food.admin.order.checkout.phone_number',
   }

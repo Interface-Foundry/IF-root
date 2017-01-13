@@ -241,11 +241,7 @@ if (foodSession.budget) {
     'mrkdwn_in': ['text', 'fields']
   })
 
-<<<<<<< HEAD
   if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
-=======
-  if (foodSession.budget) {
->>>>>>> 1ef581c031108b05640f3fac259904e56165c588
     if (Number(foodSession.user_budgets[message.user_id]) >= 2) {
       var text = `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`;
     }
