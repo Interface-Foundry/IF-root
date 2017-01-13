@@ -20,4 +20,4 @@ RUN dpkg -i /tmp/gitlab-ci-multi-runner_amd64.deb; \
     chmod -R 700 /etc/gitlab-runner
 COPY entrypoint /
 RUN chmod +x /entrypoint
-ENTRYPOINT ["/usr/bin/dumb-init", "/entrypoint"]
+ENTRYPOINT ["/usr/bin/dumb-init", "/entrypoint", "run"]
