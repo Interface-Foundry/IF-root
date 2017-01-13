@@ -768,20 +768,25 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   logging.debug('about to send message to each user to confirm if they want to be in order')
   foodSession.team_members.map(function (member) {
     logging.debug(`sending message to confirm for each user, current user ${member.name}`)
+
+    var source = {
+      type: 'message',
+      channel: member.dm,
+      user: member.id,
+      team: member.team_id
+    }
+
     var newMessage = {
       'incoming': false,
-      'resolved': true,
-      'user_id': 'kip',
-      'origin': 'slack',
-      'user': member.id,
-      'source': {
-        'team': member.team_id,
-        'user': member.id,
-        'channel': member.dm,
-        'type': 'message'
-      }
+      'mode': 'food',
+      'action': 'food.admin.restaurant.collect_orders',
+      'thread_id': member.dm,
+      'origin': message.origin,
+      'source': source,
+      'data': msgJson
     }
-    $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
+
+    $replyChannel.send(newMessage, 'food.menu.quickpicks', {'type': newMessage.origin, 'data': newMessage.data})
   })
 }
 
