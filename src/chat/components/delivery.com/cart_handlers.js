@@ -112,7 +112,7 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
     attachments: [banner].concat(items).concat([bottom])
   }
 
-  if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
     json.attachments.push({
       'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
       'mrkdwn_in': ['text'],
@@ -155,14 +155,14 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
   var index = message.source.actions[0].value
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
   //decrement user budget by item price
-  if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
   userItem.item.item_qty++;
-  if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
   //increment user budget by (new) item price
-  if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
   else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
 
-  if (foodSession.budget && foodSession.user_budgets[message.user_id] < 0) {
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user && foodSession.user_budgets[message.user_id] < 0) {
     yield handlers['food.cart.personal.quantity.subtract'](message, true)
   }
   else yield handlers['food.cart.personal'](message, true)
@@ -178,13 +178,13 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message, over_bud
     // don't let them go down to zero
     userItem.deleteMe = true
     foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
-    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
     yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}, $set: {user_budgets: foodSession.user_budgets}}).exec()
   } else {
-    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
     userItem.item.item_qty--
-    if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
-    if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
     else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   }
 
