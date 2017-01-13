@@ -465,6 +465,8 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
 
   db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
 
+  db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
   if (message.allow_text_matching && !adminHasVoted) {
     return yield handlers['food.admin.restaurant.pick'](message)
@@ -798,6 +800,8 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         mailOptions.html += '</a>' + formatItem(i, j)+ '</td>';
       }
       mailOptions.html += '</tr>';
+    }
+  }
 
   logging.debug('about to send message to each user to confirm if they want to be in order')
   yield foodSession.team_members.map(function * (member) {
@@ -813,7 +817,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       'user': member.id,
       'team': member.team_id
     }
-  }
 
     var newMessage = {
       'incoming': false,

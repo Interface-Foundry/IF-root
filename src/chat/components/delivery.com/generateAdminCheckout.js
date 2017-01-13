@@ -121,4 +121,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     restartButton]
     // }
 
-  return [].concat(deliveryCostsAttachment, kipCostsAttachment, (kipCoupon ? discountAttachment: []), tipAttachment, checkoutAttachment)
+    var discount = (kipCoupon ? discountAttachment : []);
+
+    return [].concat(deliveryCostsAttachment, kipCostsAttachment, discount , tipAttachment, checkoutAttachment)
+}
