@@ -301,12 +301,19 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     })
   }
 
-  dashboard.attachments[dashboard.attachments.length-1].actions.push({
+  var restartButton = {
     'name': 'food.admin.select_address',
     'text': '↺ Restart Order',
     'type': 'button',
     'value': 'food.admin.select_address'
-  });
+  }
+  restartButton.confirm = {
+    title: 'Restart Order',
+    text: 'Are you sure you want to restart your order?',
+    ok_text: 'Yes',
+    dismiss_text: 'No'
+  }
+  dashboard.attachments[dashboard.attachments.length-1].actions.push(restartButton);
 
   if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
     // replace admins message
@@ -527,13 +534,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         'fallback': 'Do you want to restart the order or end the order?',
         'attachment_type': 'default',
         'mrkdwn_in': ['text'],
-        'actions': [{
-          'name': 'food.admin.select_address',
-          'text': '↺ Restart Order',
-          'type': 'button',
-          'style': 'primary',
-          'value': 'food.admin.select_address'
-        }, {
+        'actions': [restartButton, {
           'name': 'food.exit.confirm_end_order',
           'text': 'End Order',
           'type': 'button',
