@@ -165,7 +165,12 @@ function * loadTeam(slackbot) {
     // if (message.text.charAt(0) == ':') {
     //   message.text = message.text.substr(1); // remove : from beginning of string
     // }
-    message.text = message.text.trim() // remove extra spaces on edges of string
+    try {
+      message.text = message.text.trim() // remove extra spaces on edges of string
+    } catch (err) {
+      logging.info('error trying to trim message.text, most likely there is no text in message received since its a button or something')
+      // logging.error('error trying to trim message.text, most likely there is no text in message received since its a button or something', message)
+    }
 
     // queue it up for processing
     message.save().then(() => {

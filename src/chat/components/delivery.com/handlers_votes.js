@@ -651,19 +651,23 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   // admin is confirming, replace their message
   var admin = foodSession.convo_initiater
-  var msg = _.merge(message, {
-    mode: 'food',
-    action: 'admin.restaurant.pick.list',
-    origin: message.origin,
-    source: {
-      team: foodSession.team_id,
-      user: admin.id,
-      channel: admin.dm
-    }
-  })
 
+  // var msg = _.merge(message, {
+  //   mode: 'food',
+  //   action: 'admin.restaurant.pick.list',
+  //   origin: message.origin,
+  //   channel: admin.dm,
+  //   source: {
+  //     team: foodSession.team_id,
+  //     user: admin.id,
+  //     channel: admin.dm
+  //   }
+  // })
+
+  var msg = message
+  msg.action = 'admin.restaurant.pick.trying_list'
   // logging.debug('sending message to admin: ', msg)
-  $replyChannel.send(msg, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
+  $replyChannel.send(msg, 'food.admin.restaurant.search', {type: msg.origin, data: responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
