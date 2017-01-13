@@ -531,7 +531,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     })
   } else {
     // admin is confirming, replace their message
-    foodSession.team_members.map(function * (m) => {
+    foodSession.team_members.map(function * (m) {
       if (foodSession.votes.map(v => v.user).includes(m.id)) {
         var admin = foodSession.convo_initiater
         var user = message.source.user
