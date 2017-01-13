@@ -15,17 +15,7 @@ spec:
     spec:
       containers:
       - name: gitlab-runner
-        args:
-          - run
         image: gcr.io/kip-styles/gitlab-runner:latest
         imagePullPolicy: Always
-        volumeMounts:
-        - mountPath: /etc/ssl/certs
-          name: cacerts
-          readOnly: true
         securityContext:
           privileged: true
-      volumes:
-      - hostPath:
-          path: /usr/share/ca-certificates/mozilla
-        name: cacerts
