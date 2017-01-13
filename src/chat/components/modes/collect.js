@@ -147,7 +147,7 @@ handlers['reminder'] = function*(message) {
       text: '',
       actions: cardTemplate.slack_shopping_buttons
     }, {
-      'text': '✂︎ Add items directly from Amazon by pasting the URL and sending it to me',
+      'text': utils.randomStoreHint(),
       mrkdwn_in: ['text']
     }];
     var newMessage = new db.Message({

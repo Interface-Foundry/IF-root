@@ -31,8 +31,8 @@ function createButton(name, key, itemId) {
     name: `variation.select.${itemId}.${key}.${name}`,
     value: `select.${itemId}.${key}.${name}`,
     text: '○ ' + _.startCase(name), //or ◉
-    type: 'button',
-  }
+    type: 'button'
+  };
 }
 
 handlers['reply'] = function * (message) {
@@ -40,7 +40,8 @@ handlers['reply'] = function * (message) {
   let itemInfo = (yield amazonSearch.lookup({
     ASIN: amazon.asin
   }, message.origin))[0];
-  let img = _.get(itemInfo, 'LargeImage[0].URL[0]') || _.get(itemInfo, 'ImageSets[0].ImageSet[0].LargeImage[0].URL[0]')
+  let img = _.get(itemInfo, 'LargeImage[0].URL[0]') || _.get(itemInfo, 'ImageSets[0].ImageSet[0].LargeImage[0].URL[0]');
+  let attrs = _.get(itemInfo, 'ItemAttributes[0]');
   let item = yield (new db.Item({
     ASIN: amazon.asin,
     title: _.get(itemInfo, 'ItemAttributes[0].Title[0]'),
@@ -54,12 +55,24 @@ handlers['reply'] = function * (message) {
     config: JSON.stringify({})
   })).save();
 
+  let description = [
+    '*' + itemInfo.realPrice + '*',
+    _.get(attrs, 'Feature[0]') ? ' ○ ' + attrs.Feature.join('\n ○ ') : false
+  ].filter(Boolean).join('\n');
+
   let attachments = [{
-    text: 'Here\'s what I found' // COPY!!!
+    text: 'Here\'s what I found!', // COPY!!!
+    color: '#45a5f4'
   }, {
     text: `<${itemInfo.shortened_url}|*${truncate(_.get(itemInfo, 'ItemAttributes[0].Title[0]'))}*>`,
     image_url: img,
     mrkdwn_in: ['text']
+  }, {
+    color: '#45a5f4',
+    text: description,
+    mrkdwn_in: ['text', 'pretext'],
+    callback_id: 'none',
+    fallback: 'focus'
   }];
 
   _.forOwn(amazon.variations, (val, key) => {
@@ -86,10 +99,11 @@ handlers['reply'] = function * (message) {
   attachments.push({
     text: '',
     callback_id: 'ehhhhhh',
+    color: '#49d63a',
     actions: [{
       name: `variation.addcart.${item._id}`,
       value: `addcart.${item._id}`,
-      text: 'Add to Cart',
+      text: '+ Add to Cart',
       style: 'primary',
       type: 'button',
     }, {

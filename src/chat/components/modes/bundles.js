@@ -35,7 +35,7 @@ handlers['home'] = function(message) {
     callback_id: 'none'
   });
   attachments.push({
-    'text': '✎ Hint: You can also what you want below (Example: _MacBook Pro Power Cord_)',
+    'text': utils.randomStoreHint(),
     mrkdwn_in: ['text']
   });
   var msg = message;

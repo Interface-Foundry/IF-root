@@ -8,12 +8,6 @@ function truncate(string) {
     return string;
 }
 
-var emojis = {
-  1: '*1.*',
-  2: '*2.*',
-  3: '*3.*'
-};
-
 module.exports = function*(message) {
     var amazon = JSON.parse(message.amazon);
     var r = amazon[message.focus - 1];
@@ -49,7 +43,7 @@ module.exports = function*(message) {
     ].filter(Boolean).join('\n');
 
   var reply = [{
-    text: emojis[message.focus] + ' ' + `<${r.shortened_url}|*${truncate(_.get(r, 'ItemAttributes[0].Title[0]'))}*>`,
+    text: `<${r.shortened_url}|*${truncate(_.get(r, 'ItemAttributes[0].Title[0]'))}*>`,
     color: '#45a5f4',
     mrkdwn_in: ['text'],
     image_url: img,

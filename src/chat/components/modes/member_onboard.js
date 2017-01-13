@@ -57,7 +57,7 @@ handlers['step_1'] = function(message) {
     attachment_type: 'default',
     actions: cardTemplate.slack_member_onboard_start
   }, {
-    'text': '✎ Hint: You can also what you want below (Example: _MacBook Pro Power Cord_)',
+    'text': '✎ Hint: You can also search what you want below (Example: _MacBook Pro Power Cord_)',
     mrkdwn_in: ['text']
   }];
   cancelReminder('initial reminder', message.source.user);
