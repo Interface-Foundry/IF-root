@@ -663,10 +663,8 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   //   }
   // })
 
-  var msg = message
-  msg.action = 'admin.restaurant.pick.trying_list'
-  // logging.debug('sending message to admin: ', msg)
-  $replyChannel.send(msg, 'food.admin.restaurant.search', {type: msg.origin, data: responseForAdmin})
+  logging.debug('sending message to admin: ', message, responseForAdmin)
+  $replyChannel.send(message, 'food.admin.restaurant.search', {'type': message.origin, 'data': responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
