@@ -815,25 +815,25 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     }
   }
 
-  foodSession.team_members.map(m => {
+  foodSession.team_members.map(function * (m) {
 
     var newMessage = _.merge(message, {
-      incoming: false,
-      thread_id: m.dm,
-      resolved: true,
-      user_id: 'kip',
-      origin: 'slack',
-      source: {
+      'incoming': false,
+      'thread_id': m.dm,
+      'resolved': true,
+      'user_id': 'kip',
+      'origin': 'slack',
+      'source': {
         'team': m.team_id,
         'user': m.id,
         'channel': m.dm,
         'type': 'message'
       },
-      state: {},
-      user: m.id
+      'state': {},
+      'user': m.id
     })
 
-    $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
+    yield $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
   })
 }
 
