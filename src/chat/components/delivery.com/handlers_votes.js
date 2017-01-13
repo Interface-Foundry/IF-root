@@ -131,6 +131,8 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Set a default sort order
   sortOrder = sortOrder || SORT.cuisine
 
+  logging.info('foodSession.votes', foodSession._id)
+
   // will multiply by -1 depending on ascending or decscending
   var directionMultiplier = direction === SORT.ascending ? 1 : -1
 
@@ -210,7 +212,6 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   if (foodSession.budget) {
     var max = 1.25 * foodSession.team_members.length * foodSession.budget;
     var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
-    // console.log(merchants[1])
     if (cheap_merchants.length <= 0) {
       return merchants
     }
@@ -313,10 +314,6 @@ handlers['food.user.poll'] = function * (message) {
   db.waypoints.log(1120, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var teamMembers = foodSession.team_members
-
-  if (process.env.NODE_ENV === 'test') {
-    teamMembers = [teamMembers[0]]
-  }
 
   if (teamMembers.length === 0) {
     $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
@@ -497,14 +494,6 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
       callback_id: 'admin_restaurant_pick',
     }]
   }
-  // if (feedbackOn && dashboard) {
-  //   dashboard.attachments[0].actions.push({
-  //     name: 'food.feedback.new',
-  //     text: '⇲ Send feedback',
-  //     type: 'button',
-  //     value: 'food.feedback.new'
-  //   })
-  // }
 
   if (slackers.length > 0 ) {
     if(message.source.user == foodSession.convo_initiater.id){
@@ -577,14 +566,17 @@ if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
   db.waypoints.log(1140, foodSession._id, message.user_id, {original_text: message.original_text})
-
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
+  logging.debug('index is _', index)
+  logging.debug('sorting by _', sort)
+  logging.debug('direction is _', direction)
+  logging.debug('keyword is _', keyword)
 
   // reset to cuisine sort if tyring to keyword sort w/o a keyword
   if (sort === SORT.keyword && !keyword) {
@@ -596,7 +588,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     direction = SORT.descending
   }
 
-  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   var viableRestaurants = yield createSearchRanking(foodSession, sort, direction, keyword)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
@@ -622,45 +613,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var arrow = direction === SORT.descending ? '▾ ' : '▴ '
 
-  // // default price sort direction is ascending
-  // var sortPriceButton = {
-  //   'name': 'food.admin.restaurant.pick.list',
-  //   'text': (sort === SORT.price ? arrow : '') + 'Sort Price',
-  //   'type': 'button',
-  //   'value': {
-  //     index: 0,
-  //     sort: (sort === SORT.price && direction === SORT.descending) ? SORT.keyword : SORT.price,
-  //     keyword: keyword,
-  //     direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending
-  //   }
-  // }
-
-  // // default rating sort direction is descending
-  // var sortRatingButton = {
-  //   'name': 'food.admin.restaurant.pick.list',
-  //   'text': (sort === SORT.rating ? arrow : '') + 'Sort Rating',
-  //   'type': 'button',
-  //   'value': {
-  //     index: 0,
-  //     sort: (sort === SORT.rating && direction === SORT.ascending) ? SORT.keyword : SORT.rating,
-  //     keyword: keyword,
-  //     direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending
-  //   }
-  // }
-
-  // // default distance sort direction is ascending
-  // var sortDistanceButton = {
-  //   'name': 'food.admin.restaurant.pick.list',
-  //   'text': (sort === SORT.distance ? arrow : '') + 'Sort Distance',
-  //   'type': 'button',
-  //   'value': {
-  //     index: 0,
-  //     sort: (sort === SORT.distance && direction === SORT.descending) ? SORT.keyword : SORT.distance,
-  //     keyword: keyword,
-  //     direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending
-  //   }
-  // }
-
   var buttons = {
     'mrkdwn_in': [
       'text'
@@ -671,7 +623,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [],
-    'footer': 'Powered by delivery.com',
+    'footer': 'Powered by Delivery.com',
     'footer_icon': 'http://tidepools.co/kip/dcom_footer.png'
   }
 
@@ -682,8 +634,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   if (index + 3 < viableRestaurants.length) {
     buttons.actions.push(moreButton)
   }
-
-  //buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
 
   responseForAdmin.attachments.push(buttons)
 
@@ -812,6 +762,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     ]
   }
 
+  logging.debug('foodSession.email_users', foodSession.email_users)
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
@@ -851,10 +802,12 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
 
     mailOptions.html += '</table></body></html>';
 
-    logging.info('mailOptions', mailOptions);
-    mailer_transport.sendMail(mailOptions, function (err) {
-      if (err) console.log(err);
-    });
+    logging.info('mailOptions', mailOptions)
+    try {
+      yield mailer_transport.sendMail(mailOptions)
+    } catch (err) {
+      logging.error('error with mailer_trainsport in food.admin.restaurant.collect_orders', err)
+    }
   }
 
   foodSession.team_members.map(m => {
