@@ -664,8 +664,8 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     }
   })
 
-  logging.debug('sending message to admin: ', msg)
-  $replyChannel.send(msg, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
+  // logging.debug('sending message to admin: ', msg)
+  $replyChannel.send(message, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
