@@ -7,6 +7,7 @@ var Fuse = require('fuse.js')
 var queue = require('../queue-mongo')
 var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)
+var yelp = require('./yelp.js')
 
 /*
 * use this to match on terms where key_choices are
@@ -402,14 +403,17 @@ function * buildRestaurantAttachment (restaurant) {
     realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
   }
 
-  var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
+  // var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
+
+  var url = yield yelp(restaurant);
+  console.log('please don\'t be a promise', url)
 
   var obj = {
-    'text': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*> - <${shortenedRestaurantUrl}|View Menu>`,
+    'text': `<${url}|*${restaurant.summary.name}*> - <${url}|Read Reviews>`,
     'image_url': realImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
-    'fallback': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*> - <${shortenedRestaurantUrl}|View Menu>`,
+    'fallback': `<${url}|*${restaurant.summary.name}*> - <${url}|Read Reviews>`,
     'attachment_type': 'default',
     'mrkdwn_in': ['text'],
     'actions': [

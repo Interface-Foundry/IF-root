@@ -355,7 +355,8 @@ handlers['food.user.poll'] = function * (message) {
     foodSession.save()
 
     if (member.id === foodSession.convo_initiater.id) {
-      $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
+      console.log('you are the admin', member)
+      $replyChannel.sendReplace(message, 'food.admin.cuisine.dashboard', {type: 'slack', data: response.data})
     } else {
       $replyChannel.send(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
     }
@@ -455,7 +456,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 
   if (numOfResponsesWaitingFor <= 0) {
     logging.info('have all the votes')
-    // i dont think you trigger dashboard here if all the users have voted
+    // i dont think you trigger food.admin.dashboard.cuisine here if all the users have voted
     // yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
@@ -475,10 +476,10 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
 
   db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
-
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
+
   if (message.allow_text_matching && !adminHasVoted) {
+    console.log('everything happens for a reason :(')
     return yield handlers['food.admin.restaurant.pick'](message)
   }
   // Build the votes tally
@@ -511,7 +512,6 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     }]
   }
 
-  console.log('message.source.user', message.source.user)
   if (slackers.length > 0 ) {
     if(message.source.user == foodSession.convo_initiater.id){
       dashboard.attachments.push({
@@ -597,7 +597,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.debug('direction is _', direction)
   logging.debug('keyword is _', keyword)
 
-  // reset to cuisine sort if tyring to keyword sort w/o a keyword
+  // reset to cuisine sort if trying to keyword sort w/o a keyword
   if (sort === SORT.keyword && !keyword) {
     sort = SORT.cuisine
   }
