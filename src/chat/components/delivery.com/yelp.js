@@ -14,25 +14,26 @@ function tokenize (str) {
   return str.split(' ').join('+');
 }
 
-function matchLocation (restaurants, location) {
-
-  var closest = -1;
-  var smallest = 40000
-  for (var i = 0; i < restaurants.length; i++) {
-    var distance = Math.sqrt(
-      Math.pow(location.latitude - restaurants[i].location.coordinate.latitude, 2)
-    + Math.pow(location.longitude - restaurants[i].location.coordinate.longitude, 2));
-
-    if (distance < smallest) {
-      smallest = distance;
-      closest = i;
-    }
-  }
-
-  //console.log(location.latitude, location.longitude, '//', restaurants[closest].location.coordinate.latitude, restaurants[closest].location.coordinate.longitude);
-  //console.log(restaurants[closest].name);
-  return restaurants[closest];
-}
+//~~~~~we don't need this anymore~~~~~//
+// function matchLocation (restaurants, location) {
+//
+//   var closest = -1;
+//   var smallest = 40000
+//   for (var i = 0; i < restaurants.length; i++) {
+//     var distance = Math.sqrt(
+//       Math.pow(location.latitude - restaurants[i].location.coordinate.latitude, 2)
+//     + Math.pow(location.longitude - restaurants[i].location.coordinate.longitude, 2));
+//
+//     if (distance < smallest) {
+//       smallest = distance;
+//       closest = i;
+//     }
+//   }
+//
+//   //console.log(location.latitude, location.longitude, '//', restaurants[closest].location.coordinate.latitude, restaurants[closest].location.coordinate.longitude);
+//   //console.log(restaurants[closest].name);
+//   return restaurants[closest];
+// }
 
 function yelpRestaurant (merch) {
 

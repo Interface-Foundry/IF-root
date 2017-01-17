@@ -48,13 +48,23 @@ function voteMessage (foodSession, skip) {
     }
   })
   // add cancel button
-  sampleArray.push({
-    name: 'food.admin.restaurant.pick',
-    value: 'user_remove',
-    text: '× No Food for Me',
-    type: 'button',
-    style: 'danger'
-  })
+  if (! skip) {
+    sampleArray.push({
+      name: 'food.admin.restaurant.pick',
+      value: 'user_remove',
+      text: '× No Food for Me',
+      type: 'button',
+      style: 'danger'
+    })
+  }
+  else {
+    sampleArray.push({
+      name: 'food.admin.restaurant.pick.list',
+      value: 'user_remove',
+      text: 'Anything',
+      type: 'button',
+    })
+  }
 
   var admin = foodSession.convo_initiater
 
@@ -289,7 +299,7 @@ db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message
 
   var response = {
     mode: 'food',
-    action: 'user\.poll',
+    action: 'user.poll',
     thread_id: admin.dm,
     origin: message.origin,
     source: source,
@@ -601,8 +611,10 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.info('# of viable restaurants: ', viableRestaurants.length)
 
+  var teamMessage = (foodSession.votes.length < 2 ? '' : 'based on your team vote')
+
   var responseForAdmin = {
-    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
+    'text': `Here are 3 restaurant suggestions${teamMessage}. \n Which do you want today?`,
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
