@@ -185,7 +185,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
 //~~~~~~~~~~//
 
 handlers['food.admin.team.add_email'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
+  // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
 
   var msg_text = 'Please type an email address below';
   var confirm = false;

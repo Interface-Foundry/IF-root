@@ -35,11 +35,12 @@ var MenuSession = db.Menu_session;
 var Menu = db.Menu;
 var Merchants = db.Merchants;
 var Delivery = db.Delivery;
-var Messages = db.Messages;
 
 var ObjectId = require('mongodb').ObjectID;
 
 // require('../chat/components/delivery.com/scrape_menus.js');
+
+// sending over: rest_id, team_id, delivery_ObjectId, user_id, and selected_items
 
 //handle post request with a binder full of data
 app.post('/cafe', (req, res) => co(function * () {
@@ -55,15 +56,35 @@ app.post('/cafe', (req, res) => co(function * () {
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
+  console.log('req.body!!', req.body)
+
   ms.menu.data = result.raw_menu.menu;
   ms.foodSessionId = req.body.delivery_ObjectId;
-  ms.userId = req.body.user_id;
+  ms.user.id = req.body.user_id;
   ms.budget = req.body.budget;
   ms.merchant.id = rest_id;
+
   var merchant = yield Merchants.findOne({id: rest_id});
+
+  ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
   ms.selected_items = selected_items;
+
+  var foodSession = yield db.Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
+
+  ms.admin_name = foodSession.convo_initiater.name //initiatOr oyyyy
+
+  var user = yield db.Chatusers.findOne({id: ms.user.id})
+  if (!user) user = yield db.email_users.findOne({id: ms.user.id}).exec()
+
+  ms.user.is_admin = user.is_admin
+
+  var group = yield db.groups.findOne({team_id: user.team_id}).exec()
+  console.log('group', group)
+
+  // ms.
+
   console.log('ms', ms);
 
   yield ms.save();
@@ -153,5 +174,5 @@ app.post('/order', function (req, res) {
 
 var port = 8001
 app.listen(port, function () {
-  console.log('Listening excitedly on ' + port)
+  console.log('Listening enthusiastically on ' + port)
 })
