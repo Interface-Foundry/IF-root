@@ -2,7 +2,7 @@
 @import url(http://fonts.googleapis.com/css?family=Lato:300,400,700);
 
 @font-face {
-	font-family: "fontawesome";
+	font-family: 'fontawesome';
 	src:url('../fonts/fontawesome.eot');
 	src:url('../fonts/fontawesome.eot?#iefix') format('embedded-opentype'),
 		url('../fonts/fontawesome.svg#fontawesome') format('svg'),
