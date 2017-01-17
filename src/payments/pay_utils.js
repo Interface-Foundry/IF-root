@@ -178,8 +178,8 @@ function * storeCard (pay, charge) {
 function * onSuccess (payment) {
   try {
     // look up user and the last message sent to us in relation to this order
-    var foodSession = yield db.Delivery.findOne({guest_token: payment.order.guest_token}).exec()
-    var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1)
+    var foodSession = yield db.Delivery.findOne({'guest_token': payment.order.guest_token}).exec()
+    var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1).exec()
     finalFoodMessage = finalFoodMessage[0]
     var menu = Menu(foodSession.menu)
     // send message to all the ppl that ordered food
