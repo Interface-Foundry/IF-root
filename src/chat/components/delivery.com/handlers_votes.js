@@ -48,13 +48,23 @@ function voteMessage (foodSession, skip) {
     }
   })
   // add cancel button
-  sampleArray.push({
-    name: 'food.admin.restaurant.pick',
-    value: 'user_remove',
-    text: '× No Food for Me',
-    type: 'button',
-    style: 'danger'
-  })
+  if (! skip) {
+    sampleArray.push({
+      name: 'food.admin.restaurant.pick',
+      value: 'user_remove',
+      text: '× No Food for Me',
+      type: 'button',
+      style: 'danger'
+    })
+  }
+  else {
+    sampleArray.push({
+      name: 'food.admin.restaurant.pick.list',
+      value: 'user_remove',
+      text: 'Anything',
+      type: 'button',
+    })
+  }
 
   var admin = foodSession.convo_initiater
 
@@ -289,7 +299,7 @@ db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message
 
   var response = {
     mode: 'food',
-    action: 'user\.poll',
+    action: 'user.poll',
     thread_id: admin.dm,
     origin: message.origin,
     source: source,
@@ -345,7 +355,8 @@ handlers['food.user.poll'] = function * (message) {
     foodSession.save()
 
     if (member.id === foodSession.convo_initiater.id) {
-      $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
+      console.log('you are the admin', member)
+      $replyChannel.sendReplace(message, 'food.admin.cuisine.dashboard', {type: 'slack', data: response.data})
     } else {
       $replyChannel.send(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
     }
@@ -445,7 +456,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 
   if (numOfResponsesWaitingFor <= 0) {
     logging.info('have all the votes')
-    // i dont think you trigger dashboard here if all the users have voted
+    // i dont think you trigger food.admin.dashboard.cuisine here if all the users have voted
     // yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
@@ -466,7 +477,9 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
+
   if (message.allow_text_matching && !adminHasVoted) {
+    console.log('everything happens for a reason :(')
     return yield handlers['food.admin.restaurant.pick'](message)
   }
   // Build the votes tally
@@ -567,12 +580,14 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
+
   if (foodSession === undefined) {
     logging.info('foodSession wasnt passed into food.admin.restaurant.pick.list')
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   }
 
   db.waypoints.log(1140, foodSession._id, message.user_id, {original_text: message.original_text})
+
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
@@ -582,7 +597,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.debug('direction is _', direction)
   logging.debug('keyword is _', keyword)
 
-  // reset to cuisine sort if tyring to keyword sort w/o a keyword
+  // reset to cuisine sort if trying to keyword sort w/o a keyword
   if (sort === SORT.keyword && !keyword) {
     sort = SORT.cuisine
   }
@@ -596,9 +611,11 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.info('# of viable restaurants: ', viableRestaurants.length)
 
+  var teamMessage = (foodSession.votes.length < 2 ? '' : 'based on your team vote')
+
   var responseForAdmin = {
-    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': yield viableRestaurants.slice(index, index + 3).map(utils.buildRestaurantAttachment)
+    'text': `Here are 3 restaurant suggestions${teamMessage}. \n Which do you want today?`,
+    'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
   var moreButton = {
@@ -627,7 +644,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [],
-    'footer': 'Powered by Delivery.com',
+    'footer': 'Powered by delivery.com',
     'footer_icon': 'http://tidepools.co/kip/dcom_footer.png'
   }
 
@@ -763,9 +780,8 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       }
     ]
   }
-
+  
   yield handlers['food.admin.restaurant.collect_orders.email'](message, foodSession)
-
 
   logging.debug('about to send message to each user to confirm if they want to be in order')
   yield foodSession.team_members.map(function * (member) {

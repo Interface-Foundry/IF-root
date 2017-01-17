@@ -36,13 +36,6 @@ function matchLocation (restaurants, location) {
 
 function yelpRestaurant (merch) {
 
-  //check database or whatever
-
-  return findRestaurant(merch);
-}
-
-function findRestaurant (merch) {
-
   return yelp.search({
     term: tokenize(merch.summary.name),
     radius_filter: 40000,
@@ -56,13 +49,11 @@ function findRestaurant (merch) {
         longitude: merch.location.longitude
       }
     );
-
-    //update database or whatever
-
-    console.log('rating:', correctMerchant.rating);
+    //
+    // console.log(correctMerchant);
 
     // or return anything
-    return correctMerchant.rating;
+    return correctMerchant.url;
   })
   .catch(function (err) {
     console.log('ERROR:', err);

@@ -22,10 +22,11 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
 
   db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  var foodSessionStarter = foodSession.convo_initiater.id
+  var restartText = (foodSession.convo_initiater.id == message.source.user ? `Looks like you already have an order started.`: `Looks like <@${foodSession.convo_initiater.id}> is ordering food right now.`)
+
   var msg_json = {
     title: '',
-    text: `Looks like <@${foodSessionStarter}> is ordering food right now. \nStart a new order anyway?`,
+    text: `${restartText} \nStart a new order anyway?`,
     attachments: [{
         'text': '',
         'fallback': '',
@@ -91,8 +92,8 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   var msg_json = {
     'attachments':
     [{
-      'text': 'Great! Which address is this for?',
-      'fallback': 'Great! Which address is this for?',
+      'text': 'Which address is this food delivery for?',
+      'fallback': 'Which address is this food delivery for??',
       'callback_id': 'address',
       'color': '#3AA3E3',
       'attachment_type': 'default',
@@ -569,9 +570,11 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ?{
+  yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ? {
     text: `*Budget*: $${foodSession.budget} / person`
-  } : {})})
+  } : {
+    text: '*Budget*: Unlimited'
+  })})
 
   // check to make sure restaurants are even open
   if (foodSession.merchants.length === 0) {
@@ -767,19 +770,19 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
         'text': '< Back',
         'type': 'button',
         'value': 'food.admin_polling_options'
-      },
-      {
-        'name': 'passthrough',
-        'text': 'Home',
-        'type': 'button',
-        'value': 'food.exit.confirm_end_order',
-        'confirm': {
-          'title': 'Are you sure?',
-          'text': "Are you sure want to end this order?",
-          'ok_text': 'Yes',
-          'dismiss_text': 'No'
-        }
-      }
+      }//,
+      // {
+      //   'name': 'passthrough',
+      //   'text': 'Home',
+      //   'type': 'button',
+      //   'value': 'food.exit.confirm_end_order',
+      //   'confirm': {
+      //     'title': 'Are you sure?',
+      //     'text': "Are you sure want to end this order?",
+      //     'ok_text': 'Yes',
+      //     'dismiss_text': 'No'
+      //   }
+      // }
       ]
     }]
   }

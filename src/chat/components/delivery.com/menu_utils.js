@@ -74,7 +74,6 @@ utils.getUrl = function (foodSession, user_id, selected_items) {
   .catch(function (err) {
     kip.debug('ERROR', err)
   })
-  return url;
 }
 
 utils.cuisineEmoji = function (cuisine) {

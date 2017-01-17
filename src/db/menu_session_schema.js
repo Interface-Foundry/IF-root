@@ -2,7 +2,12 @@ var mongoose = require('mongoose')
 
 var menuSessionSchema = mongoose.Schema({
   foodSessionId: String,
-  userId: String,
+  user: {
+    id: String,
+    is_admin: Boolean
+  },
+  admin_name: String,
+  team_name: String,
   session_token: {
     // gen key inside object
     type: String,
@@ -15,7 +20,8 @@ var menuSessionSchema = mongoose.Schema({
   merchant: {
     id: String,
     name: String,
-    minimum: String
+    minimum: String,
+    logo: String
   },
   cart: {},
   ts: {

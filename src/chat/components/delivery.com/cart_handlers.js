@@ -23,7 +23,7 @@ String.prototype.toObjectId = function () {
 //
 // Show the user their personal cart
 //
-handlers['food.cart.personal'] = function * (message, replace) {
+handlers['food.cart.personal'] = function * (message, replace, over_budget) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -39,12 +39,11 @@ handlers['food.cart.personal'] = function * (message, replace) {
     image_url: 'https://storage.googleapis.com/kip-random/kip-my-cafe-cart.png'
   }
 
-  var items = yield myItems.map((i, index) => {
+  var items = myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
     var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
     var quantityAttachment = {
-      // title: item.name + ' – ' + menu.getCartItemPrice(i).$,
-      text: item.description + instructions,
+      text: `*${item.name} – ${menu.getCartItemPrice(i).$}*\n${item.description} ${instructions}`,
       fallback: item.description + instructions,
       mrkdwn_in: ['text'],
       callback_id: item.id,
@@ -81,14 +80,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
       }
     }
 
-    var itemMessage = {
-        text: `*${item.name + ' – ' + menu.getCartItemPrice(i).$}*`,
-        attachments: [quantityAttachment]
-    }
-
-    // $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: itemMessage})
-
-    return itemMessage
+    return quantityAttachment;
   })
 
   var bottom = {
@@ -117,28 +109,23 @@ handlers['food.cart.personal'] = function * (message, replace) {
 
   var json = {
     text: `*Confirm Your Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    attachments: [banner]//.concat(lineItems)//.concat([bottom])
+    attachments: [banner].concat(items).concat([bottom])
   }
 
-//send a final (empty) message with "bottom" and this budget thing
-  var finalMessage = {
-    text: '',
-    attachments: [bottom]
-  }
-
-  if (foodSession.budget && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
-    finalMessage.attachments.push({
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
+    json.attachments.push({
       'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
       'mrkdwn_in': ['text'],
       'color': '#49d63a'
     });
   }
 
-  for (var i = 0; i < items.length; i++) {
-    yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: items[i]})
+  if (over_budget) {
+    json.attachments.push({
+      'text': 'Unfortunately that exceeds your budget',
+      'color': '#fc9600'
+    })
   }
-
-  yield $replyChannel.send(message, 'food.cart.personal', {type: 'slack', data: finalMessage})
 
   if (replace) {
     $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
@@ -154,17 +141,21 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
   var index = message.source.actions[0].value
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
   //decrement user budget by item price
-  if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
   userItem.item.item_qty++;
-  if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
   //increment user budget by (new) item price
-  if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
   else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
-  yield handlers['food.cart.personal'](message, true)
+
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user && foodSession.user_budgets[message.user_id] < 0) {
+    yield handlers['food.cart.personal.quantity.subtract'](message, true)
+  }
+  else yield handlers['food.cart.personal'](message, true)
 }
 
 // Handles editing the quantity by using the supplied array index
-handlers['food.cart.personal.quantity.subtract'] = function * (message) {
+handlers['food.cart.personal.quantity.subtract'] = function * (message, over_budget) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var index = message.source.actions[0].value
@@ -173,17 +164,17 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message) {
     // don't let them go down to zero
     userItem.deleteMe = true
     foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
-    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
     yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}, $set: {user_budgets: foodSession.user_budgets}}).exec()
   } else {
-    if (foodSession.budget) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
     userItem.item.item_qty--
-    if (foodSession.budget) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
-    if (foodSession.budget) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
     else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   }
 
-  yield handlers['food.cart.personal'](message, true)
+  yield handlers['food.cart.personal'](message, true, over_budget)
 }
 
 //
@@ -197,7 +188,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   // save their items in their order history
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   user.history.orders = user.history.orders || []
-  yield myItems.map(function * (cartItem) {
+  yield myItems.map(function (cartItem) {
     var deliveryItem = menu.getItemById(cartItem.item.item_id)
     user.history.orders.push({user_id: user._id, session_id: foodSession._id, chosen_restaurant: foodSession.chosen_restaurant, deliveryItem: deliveryItem, cartItem: JSON.stringify(cartItem), ts: Date.now()})
   })
@@ -267,7 +258,8 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
       text: `*Collected so far* 👋\n_${allItems}_`,
-      'fallback': `*Collected so far* 👋\n_${allItems}_`
+      'fallback': `*Collected so far* 👋\n_${allItems}_`,
+      actions: []
     }]
   }
 
@@ -279,34 +271,49 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       actions: []
     })
 
-    var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
-    var totalPrice = myItems.reduce((sum, i) => {
+    var items = foodSession.cart.filter(i => i.added_to_cart)
+    var totalPrice = items.reduce((sum, i) => {
       return sum + menu.getCartItemPrice(i)
     }, 0)
-
-    if (totalPrice < foodSession.chosen_restaurant.minimum) {
-      dashboard.attachments.push({
-        color: '#fc9600',
-        mrkdwn_in: ['text'],
-        text: `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`
-      })
-    }
-    else {
-      dashboard.attachments[dashboard.attachments.length-1].actions.push({
-        name: 'food.admin.order.confirm',
-        text: 'Finish Order Early',
-        style: 'default',
-        type: 'button',
-        value: 'food.admin.order.confirm',
-        confirm: {
-            "title": "Finish Order Early?",
-            "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
-            "ok_text": "Yes",
-            "dismiss_text": "No"
-        }
-      })
-    }
   }
+
+  if (totalPrice < foodSession.chosen_restaurant.minimum && message.source.user == foodSession.convo_initiater.id) {
+    dashboard.attachments.push({
+      color: '#fc9600',
+      mrkdwn_in: ['text'],
+      text: `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`,
+      actions: []
+    })
+  }
+  else {
+    dashboard.attachments[dashboard.attachments.length-1].actions.push({
+      name: 'food.admin.order.confirm',
+      text: 'Finish Order Early',
+      style: 'default',
+      type: 'button',
+      value: 'food.admin.order.confirm',
+      confirm: {
+          "title": "Finish Order Early?",
+          "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
+          "ok_text": "Yes",
+          "dismiss_text": "No"
+      }
+    })
+  }
+
+  var restartButton = {
+    'name': 'food.admin.select_address',
+    'text': '↺ Restart Order',
+    'type': 'button',
+    'value': 'food.admin.select_address'
+  }
+  restartButton.confirm = {
+    title: 'Restart Order',
+    text: 'Are you sure you want to restart your order?',
+    ok_text: 'Yes',
+    dismiss_text: 'No'
+  }
+  dashboard.attachments[dashboard.attachments.length-1].actions.push(restartButton);
 
   if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
     // replace admins message
@@ -422,8 +429,6 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     }
   })
 
-
-
   if (foodSession.tip.percent === 'cash') foodSession.tip.amount = 0.00
 
   try {
@@ -528,13 +533,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         'fallback': 'Do you want to restart the order or end the order?',
         'attachment_type': 'default',
         'mrkdwn_in': ['text'],
-        'actions': [{
-          'name': 'food.admin.select_address',
-          'text': 'Restart Order ↺',
-          'type': 'button',
-          'style': 'primary',
-          'value': 'food.admin.select_address'
-        }, {
+        'actions': [restartButton, {
           'name': 'food.exit.confirm_end_order',
           'text': 'End Order',
           'type': 'button',
@@ -555,7 +554,7 @@ handlers['food.order.instructions'] = function * (message) {
   db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var msg = {
-    text: `*Add Special Instructions*`,
+    text: (foodSession.instructions ? `*Edit Instructions*` : `*Add Special Instructions*`),
     attachments: [{
       text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
       fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
