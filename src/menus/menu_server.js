@@ -170,6 +170,11 @@ app.post('/order', function (req, res) {
   });
 });
 
+// k8s readiness ingress health check
+app.get('/health', function (req, res) {
+  res.sendStatus(200)
+})
+
 var port = 8001
 app.listen(port, function () {
   console.log('Listening enthusiastically on ' + port)
