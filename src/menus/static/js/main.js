@@ -373,7 +373,7 @@ var app = new Vue({
     selectedItem: null,
     editingItem: null,
     cartItems: [],
-    budget: 0,
+    budget: false,
     fixNav: false,
     user_id: null,
     food_session_id: null,
@@ -477,11 +477,11 @@ var app = new Vue({
       if (this.budget) {
         return this.cartItemsTotal > this.budget ? true : false 
       } else {
-        return true
+        return false 
       }
     },
     remainingBudget: function() {
-      if ((this.budget - this.cartItemsTotal) > 1.50) {
+      if (this.budget && (this.budget - this.cartItemsTotal) > 1.50) {
         return this.budget - this.cartItemsTotal  
       } else {
         return false
@@ -511,7 +511,7 @@ var app = new Vue({
       }
       this.menu = menu;
       this.merchant = response.data.merchant;
-      this.budget = (response.data.budget * 1.25)
+      this.budget = response.data.budget? (response.data.budget * 1.25) : false
       if (response.data.selected_items.length) {
         var preSelectedId = response.data.selected_items[0]
         this.menu.forEach(function(item) {
