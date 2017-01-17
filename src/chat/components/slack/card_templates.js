@@ -154,6 +154,19 @@ var cart_check = module.exports.cart_check = function(id) {
   }]
 }
 
+var empty_cart_check = module.exports.empty_cart_check = [{
+  name: "emptycart",
+  text: 'Empty Cart',
+  style: 'danger',
+  type: 'button',
+  value: 'emptycart'
+}, {
+  "name": "cancelemptycart",
+  "text": "Nevermind",
+  "style": "default",
+  "type": "button",
+  value: 'cancelemptycart'
+}]
 var team_buttons = module.exports.team_buttons =
   [{
     "name": "settings.back",
