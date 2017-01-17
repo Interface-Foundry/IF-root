@@ -188,7 +188,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   // save their items in their order history
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   user.history.orders = user.history.orders || []
-  yield myItems.map(function * (cartItem) {
+  yield myItems.map(function (cartItem) {
     var deliveryItem = menu.getItemById(cartItem.item.item_id)
     user.history.orders.push({user_id: user._id, session_id: foodSession._id, chosen_restaurant: foodSession.chosen_restaurant, deliveryItem: deliveryItem, cartItem: JSON.stringify(cartItem), ts: Date.now()})
   })

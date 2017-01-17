@@ -409,11 +409,11 @@ function * buildRestaurantAttachment (restaurant) {
   console.log('please don\'t be a promise', url)
 
   var obj = {
-    'text': `<${url}|*${restaurant.summary.name}*> - <${url}|Read Reviews>`,
+    'text': `<${url}|*${restaurant.summary.name}*> - <${url}|Check on Yelp>`,
     'image_url': realImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
-    'fallback': `<${url}|*${restaurant.summary.name}*> - <${url}|Read Reviews>`,
+    'fallback': `<${url}|*${restaurant.summary.name}*> - <${url}|Check on Yelp>`,
     'attachment_type': 'default',
     'mrkdwn_in': ['text'],
     'actions': [

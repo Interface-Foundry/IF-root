@@ -21,11 +21,12 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text})
+  
+  var restartText = (foodSession.convo_initiater.id == message.source.user ? `Looks like you already have an order started.`: `Looks like <@${foodSession.convo_initiater.id}> is ordering food right now.`)
 
-  var foodSessionStarter = foodSession.convo_initiater.id
   var msg_json = {
     title: '',
-    text: `Looks like <@${foodSessionStarter}> is ordering food right now. \nStart a new order anyway?`,
+    text: `${restartText} \nStart a new order anyway?`,
     attachments: [{
         'text': '',
         'fallback': '',
