@@ -279,8 +279,12 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
 }
 
 handlers['food.admin.order.checkout.delivery_instructions'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  console.log(foodSession.instructions)
+
   var msg = {
-    text: `Add Special Instructions`,
+    text: (foodSession.instructions ? `Edit Instructions` : `Add Special Instructions`),
     attachments: [{
       text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
       fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
@@ -288,11 +292,11 @@ handlers['food.admin.order.checkout.delivery_instructions'] = function * (messag
     }]
   }
 
-  var response = yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.delivery_instructions.submit', {type: message.origin, data: msg})
+  //var response =
+  yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.delivery_instructions.submit', {type: message.origin, data: msg})
 }
 
-handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * (message, foodSession) {
 
   db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
 
