@@ -555,7 +555,7 @@ handlers['food.order.instructions'] = function * (message) {
   db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var msg = {
-    text: `*Add Special Instructions*`,
+    text: (foodSession.instructions ? `*Edit Instructions*` : `*Add Special Instructions*`),
     attachments: [{
       text: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
       fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',

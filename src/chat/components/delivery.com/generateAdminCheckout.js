@@ -113,7 +113,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     }, {
       // instructions button
       name: 'food.order.instructions',
-      text: '✎ Add Instructions',
+      text: (foodSession.instructions ? '✎ Edit Instructions' : '✎ Add Instructions'),
       type: 'button',
       value: '',
       mrkdwn_in: ['text']
