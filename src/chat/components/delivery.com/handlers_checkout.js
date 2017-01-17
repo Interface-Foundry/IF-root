@@ -34,11 +34,6 @@ handlers['food.admin.order.checkout.address2'] = function * (message) {
         'text': `None`,
         'type': `button`,
         'value': `none`
-      }, {
-        'name': 'food.feedback.new',
-        'text': '⇲ Send feedback',
-        'type': 'button',
-        'value': 'food.feedback.new'
       }]
     }]
   }
@@ -336,11 +331,6 @@ handlers['food.admin.order.pay'] = function * (message) {
         'text': `< Change Order`,
         'type': `button`,
         'value': `change`
-      }, {
-        'name': 'food.feedback.new',
-        'text': '⇲ Send feedback',
-        'type': 'button',
-        'value': 'food.feedback.new'
       }]
     }]
   }

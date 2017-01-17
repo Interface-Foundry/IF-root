@@ -179,7 +179,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
     'mrkdwn_in': ['text'],
     'actions': [{
         'name': 'food.item.add_to_cart',
-        'text': '+ Add to Order',
+        'text': '✓ Add to Order',
         'type': 'button',
         'style': 'primary',
         'value': cartItem.item.item_id
