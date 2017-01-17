@@ -23,8 +23,9 @@ spec:
       - backend:
           serviceName: delivery-picstitch
           servicePort: 80
-# - host: dev-rnn.kipthis.com
-#   http:
-#     paths:
-#     - backend:
-#       serviceName
+  - host: cafe.kipthis.com
+    http:
+      paths:
+      - backend:
+        serviceName: cafe-menu
+        servicePort: 80
