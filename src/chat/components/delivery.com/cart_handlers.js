@@ -473,8 +473,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
       // --- COUPON STUFF
 
-      // var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
-      var discountAvail = 0.0
+      var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
 
       foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
 
