@@ -69,7 +69,7 @@
         </div>
         <div class="cart-footer">
           <button @click="formatCart" v-if="!exceedBudget" class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
-          <button class="base-btn" disabled v-if="exceedBudget"> There's only ${{budget.toFixed(2)}} budgeted for this order.</button>
+          <button class="base-btn" disabled v-if="budget && exceedBudget"> There's only ${{budget.toFixed(2)}} budgeted for this order.</button>
         </div>
       </div>
       <div v-else><h1 class="cart-empty-text">Your cart is empty</h1></div>
