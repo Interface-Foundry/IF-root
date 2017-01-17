@@ -130,6 +130,11 @@ nav .cart-icon {
   padding-top: 10px;
 }
 
+nav .image-container:hover {
+  cursor: pointer;  
+}
+
+
 nav .cart-icon img {
   width: 25px;
 }
