@@ -440,6 +440,7 @@ var app = new Vue({
         if (that.notDesktop) {
           that.isCartVisibleOnMobile = false 
         }
+        window.close()
       })
       .catch(function(err) {
         console.log(err) 
