@@ -31,7 +31,10 @@ var localConfig = {
   }
 };
 
-console.log(config.logging.console.level);
+var level_message = "You're logging at level " + config.logging.console.level
+level_message += "\nerror < warn < info < verbose < debug < silly"
+level_message = level_message.replace(new RegExp(config.logging.console.level, 'g'), config.logging.console.level.rainbow)
+console.log(level_message);
 
 var transports = [
   new (winston.transports.Console)({

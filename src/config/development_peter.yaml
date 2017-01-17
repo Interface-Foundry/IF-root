@@ -11,3 +11,6 @@ slack:
   verification_token: qHatSrSqnXj8ElOq5u5JGtMw
   redirect_uri: https://sonux.asuscomm.com/newslack
 picstitchDelivery: http://localhost:5000
+logging: 
+  console:
+    level: silly
