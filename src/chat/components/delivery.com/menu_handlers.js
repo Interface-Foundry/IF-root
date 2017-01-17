@@ -227,6 +227,8 @@ if (foodSession.budget) {
   }
 
   var url = yield menu_utils.getUrl(foodSession, message.source.user)
+  if (!url) url = foodSession.chosen_restaurant.url
+
   //resto name
   msg_json.attachments.push({
     'fallback': 'Search the menu',

@@ -72,9 +72,14 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
   db.waypoints.log(1313, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var response = {
-    'text': `✎ What's your phone number? (Example: _555 555 5555_)`,
+    'text': `What's your phone number?`,
     'fallback': 'Type your phone number below',
     'callback_id': 'food.admin.order.checkout.phone_number',
+    'attachments': [{
+      'fallback': 'example',
+      'text': `✎ Example: _555 555 5555_`,
+      'mrkdwn_in': ['text']
+    }]
   }
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.phone_number', type: message.origin, data: response})
 }
@@ -527,8 +532,8 @@ handlers['food.admin.order.select_card'] = function * (message) {
 
     foodSession.save()
     var response = {
-      'text': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
-      'fallback': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
+      'text': 'Order was successful! You should get an email confirmation soon!',
+      'fallback': 'Order was successful! You should get an email confirmation soon!',
       'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
