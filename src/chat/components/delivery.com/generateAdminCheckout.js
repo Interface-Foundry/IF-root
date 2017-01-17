@@ -10,7 +10,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
   var feeDebuging = feeDebug ? -1.0: 0.00
 
 
-  var tipText = (foodSession.tip.percent === 'cash') ? `Will tip in cash` : `${foodSession.tip.amount.$}`
+  var tipText = (foodSession.tip.percent === 'cash') ? `$0.00 (Will tip in cash)` : `${foodSession.tip.amount.$}`
   var tipAttachment = {
     'text': 'Tip: ' + `${tipText}`,
     'fallback': `Tip: ${tipText}`,
