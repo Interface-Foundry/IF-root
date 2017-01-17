@@ -30,7 +30,7 @@ handlers['home'] = function(message) {
     text: 'Looking for some supplies? Pick a bundle below',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Step 1/3: Choose a bundle',
+    fallback: 'Looking for some supplies? Pick a bundle below',
     actions: cardTemplate.slack_bundles,
     callback_id: 'none'
   });

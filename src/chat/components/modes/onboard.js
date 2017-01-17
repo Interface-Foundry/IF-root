@@ -33,11 +33,6 @@ module.exports.handle = handle;
  * S1
  */
 handlers['start'] = function * (message) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null);
-  if (team_id == null) {
-    return kip.debug('incorrect team id : ', message);
-  }
-  var team = yield db.Slackbots.findOne({team_id: team_id}).exec()
   var msg = message;
   msg.mode = 'onboard';
   msg.action = 'home';
@@ -46,25 +41,6 @@ handlers['start'] = function * (message) {
   msg.source = message.source;
   msg.text = 'Ok, let\'s get started!';
   msg.fallback = 'Ok, let\'s get started!';
-  let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
-  let now = new Date();
-  let cronMsg = {
-    mode: 'onboard',
-    action: 'home',
-    reply: cardTemplate.onboard_home_attachments('tomorrow'),
-    origin: message.origin,
-    source: message.source,
-    text: 'Hey, it\'s me again! Ready to get started?',
-    fallback: 'Hey, it\'s me again! Ready to get started?'
-  };
-  scheduleReminder(
-    'initial reminder',
-    new Date(msInFuture + now.getTime()), {
-      msg: JSON.stringify(cronMsg),
-      user: message.source.user,
-      token: team.bot.bot_access_token,
-      channel: message.source.channel
-    });
   return [msg];
 };
 
@@ -426,7 +402,8 @@ handlers['bundle'] = function * (message, data) {
     var item_message = {
       mrkdwn_in: ['text', 'pretext'],
       color: '#45a5f4',
-      thumb_url: item.image
+      thumb_url: item.image,
+      fallback: 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?'
     }
     // multiple people could have added an item to the cart, so construct a string appropriately
     var userString = item.added_by.map(function(u) {
@@ -449,13 +426,14 @@ handlers['bundle'] = function * (message, data) {
   attachments.push({
     text: summaryText,
     mrkdwn_in: ['text', 'pretext'],
-    color: '#45a5f4'
+    color: '#45a5f4',
+    fallback: 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?'
   });
   attachments.push({
     text: 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Onboard.helper',
+    fallback: 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?',
     actions: cardTemplate.slack_onboard_basic,
     callback_id: 'none'
   });
@@ -464,6 +442,7 @@ handlers['bundle'] = function * (message, data) {
   msg.mode = 'onboard'
   msg.action = 'home';
   msg.text = '';
+  msg.fallback = 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?';
   msg.source.team = message.source.team;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
