@@ -6,6 +6,9 @@ var onboard = require('./onboard');
 var queue = require('../queue-mongo');
 var slackUtils = require('../slack/utils');
 var cardTemplate = require('../slack/card_templates');
+var agenda = require('../agendas');
+var request = require('request');
+var card_templates = require('../slack/card_templates');
 
 /**
  * Main handler which decides what part of the onbaording process the user is at 
@@ -16,13 +19,22 @@ function * handle(message) {
   var last_action = _.get(message, 'history[0].action')
   if (!last_action) {
     return yield handlers['start'](message)
+  } else if (message.action.includes('remind_later' && !message.text)) {
+  	let data = message.action.split('.')[2];
+  	return yield handlers['remind_later'](message, [data]);
+  } else if (message.action.includes('start_now') && !message.text) {
+  	return yield handlers['start_now'](message);
   } else if (last_action === 'get-admins.ask') {
     return yield handlers['get-admins.response'](message)
   } else if(_.get(message,'action') === 'get-admins.confirm') {
     return yield handlers['get-admins.confirm'](message)
   } else if(_.get(message,'action') === 'get-admins.addme') {
     return yield handlers['get-admins.addme'](message)
-  } 
+  } else {
+  	let action = message.action.split('.')[1];
+  	let data = message.action.split('.')[2];
+  	return yield handlers[action](message, [data]);
+  }
 }
 
 module.exports.handle = handle;
@@ -33,28 +45,124 @@ module.exports.handle = handle;
  * @param message a fake message that has the source information about the origin of the conversation (slack, facebook, etc)
  */
 handlers['start'] = function * (message) {
-  kip.debug('starting onboarding conversation')
-  var attachments = [];
-  var welcome = 'Kudos! *Kip* is now officially a member of your team :blush: '
-  attachments.push({
-    image_url: 'https://kipthis.com/kip_modes/mode_success.png',
-    color: '#3AA3E3',
-    mrkdwn_in: ['text'],
-    fallback:'Onboarding',
-    callback_id: 'none'
-  })
-  attachments.push({text: welcome, mrkdwn_in: ['text'],color: '#3AA3E3'})
-  attachments.push({text:  'Who manages the office purchases? Type something like `me` or `me and @jane`', color: '#3AA3E3',
-    mrkdwn_in: [
-        'text',
-        'pretext'
-      ]})
-  var welcome_message = message_tools.text_reply(message,'');
-  welcome_message.reply = attachments;
+  kip.debug('starting onboarding conversation');
+    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null);
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({team_id: team_id}).exec();
+
+  var welcome_message = message_tools.text_reply(message, '');
+  welcome_message.reply = card_templates.onboard_admin_attachments('initial');
   welcome_message.action = 'get-admins.ask';
+
+  let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+  let now = new Date();
+  let cronMsg = {
+    mode: welcome_message.mode,
+    action: 'get-admins.ask',
+    reply: card_templates.onboard_admin_attachments('tomorrow'),
+    origin: message.origin,
+    source: message.source,
+    text: 'Hey, it\'s me again! Ready to get started?',
+    fallback: 'Hey, it\'s me again! Ready to get started?'
+  };
+  scheduleReminder(
+    'initial reminder',
+    new Date(msInFuture + now.getTime()), {
+      msg: JSON.stringify(cronMsg),
+      user: message.source.user,
+      token: team.bot.bot_access_token,
+      channel: message.source.channel
+    });
 
   return [welcome_message];
 }
+
+handlers['remind_later'] = function * (message, data) {
+  const ONE_DAY = 24 * 60 * 60 * 1000; // hours in a day * mins in hour * seconds in min * milliseconds in second
+  let nextDate,
+    msInFuture = -1,
+    alertTime = data[0],
+    now = new Date();
+  switch (alertTime) {
+    case 'tomorrow':
+      msInFuture = ONE_DAY;
+      nextDate = 'one_week';
+      break;
+    case 'one_week':
+      msInFuture = ONE_DAY * 7;
+      nextDate = 'two_week';
+      break;
+    case 'two_week':
+      msInFuture = ONE_DAY * 14; // 3 days for now
+      nextDate = 'tomorrow';
+      break;
+    default:
+      break;
+  }
+  if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
+  if (msInFuture > 0) {
+    let cronMsg = {
+      mode: message.mode,
+      action: 'home',
+      reply: cardTemplate.onboard_admin_attachments(nextDate),
+      origin: message.origin,
+      source: message.source,
+      text: 'Hey, it\'s me again! Ready to get started?',
+      fallback: 'Hey, it\'s me again! Ready to get started?'
+    };
+    scheduleReminder(
+    'onboarding reminder',
+    new Date(msInFuture + now.getTime()), {
+      msg: JSON.stringify(cronMsg),
+      user: message.source.user
+    });
+  }
+
+  let laterMsg = {
+    text: 'Ok, I\'ll talk to you soon!',
+    fallback: 'Ok, I\'ll talk to you soon!',
+    history: message.history,
+    attachments: [{
+      text: '',
+      callback_id: 'kip!',
+      actions: [{
+        'name': 'onboarding.start.start_now',
+        'text': '▶︎ Start Now',
+        'style': 'primary',
+        'type': 'button',
+        'value': 'onboarding.start.start_now'
+      }]
+    }]
+  };
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(laterMsg)
+  });
+  return [];
+};
+
+handlers['start_now'] = function(message) {
+  cancelReminder('onboarding reminder', message.source.user);
+  let msg = {
+    text: 'Ok, let\'s get started!',
+    fallback: 'Ok, let\'s get started!',
+    attachments: card_templates.onboard_admin_attachments('tomorrow'),
+    origin: message.origin,
+    source: message.source,
+    mode: 'get-admins',
+    action: 'home',
+    history: message.history
+  };
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(msg)
+  });
+  return [];
+};
 
 /**
  * Handles asking the user who manages office purchases.
@@ -90,7 +198,7 @@ handlers['get-admins.response'] = function * (message) {
   var team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
-
+  cancelReminder('initial reminder', message.source.user);
   var find = yield db.Slackbots.find({'team_id': message.source.team}).exec();
   if (!find || find && find.length == 0) {
     return kip.debug('could not find team : ', message, find);
@@ -104,7 +212,7 @@ handlers['get-admins.response'] = function * (message) {
     if (g === 'me' || g === 'ME') {
        isAdmin = true;
       team.meta.office_assistants.push(message.user_id);
-      return message.user_id
+      return message.user_id;
     } else {
       team.meta.office_assistants.push(g.replace(/(\<\@|\>)/g, ''));
       return g.replace(/(\<\@|\>)/g, '')
@@ -125,19 +233,35 @@ handlers['get-admins.response'] = function * (message) {
     if (message.original_text.match(re)) {
       office_admins.push(u.id);
       if (u.id != currentUser.id) {
-        var msg = new db.Message();
-        msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
+        let msg = {};
         msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
-        msg.source = {};
-        msg.mode = 'onboard';
-        msg.action = 'start.start';
-        msg.source.team = team.team_id;
-        msg.source.channel = u.dm;
-        msg.source.user = u.id;
         msg.user_id = u.id;
         msg.thread_id = u.dm;
+        msg.mode = 'onboard';
+        msg.action = 'home';
+        msg.reply = cardTemplate.onboard_home_attachments('initial');
+        msg.origin = message.origin;
+        msg.source = {
+          team: team.team_id,
+          channel: u.dm,
+          user: u.id
+        };
+        let cronMsg = msg;
+        msg = new db.Message(msg);
         yield msg.save();
         yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
+
+        cronMsg.reply = cardTemplate.onboard_home_attachments('tomorrow');
+        let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+        let now = new Date();
+        scheduleReminder(
+          'initial reminder',
+          new Date(msInFuture + now.getTime()), {
+            msg: JSON.stringify(cronMsg),
+            user: u.id,
+            token: team.bot.bot_access_token,
+            channel: u.dm
+          });
       }
     }
   });
@@ -250,3 +374,21 @@ handlers['get-admins.addme'] = function * (message) {
    return yield onboard.handle(next_message);
 }
 
+const scheduleReminder = function(type, time, data) {
+  kip.debug('\n\n\nsetting reminder for ', time.toLocaleString(), '\n\n\n');
+  agenda.schedule(time, type, data);
+};
+
+const cancelReminder = function(type, userId) {
+  kip.debug(`canceling ${type} for ${userId}`);
+  agenda.cancel({
+    'name': type,
+    'data.user': userId
+  }, function(err, numRemoved) {
+    if (!err) {
+      kip.debug(`Canceled ${numRemoved} tasks`);
+    } else {
+      kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
+    }
+  });
+};
