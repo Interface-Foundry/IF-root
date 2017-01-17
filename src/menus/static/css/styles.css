@@ -1,0 +1,723 @@
+/*
+/*
+/* Color List
+  light-gray: #F5F5F5;
+  dark-gray: #B9B9B9;
+  red: #EE3A4A;
+  dark-red: #A62934;
+  purple: #6F52D8;
+  dark-purple: #3a2b71;
+  light-blue: #EFF7FE;
+  transparent-purple: rgba(111,82,216,0.12);
+  white: #fff;
+  black: #292929;
+
+*/
+
+
+/*
+/*
+/* show root vue instance once Vue is loaded */
+[v-cloak] { display:none; }
+
+/*
+/*
+/* global styling */
+
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: helvetica;
+  font-weight: 200;
+  min-height: 100%;
+  color: #292929;
+}
+
+#app {
+  height: 100%;
+}
+
+ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+button.base-btn {
+  background-color: #6F52D8;
+  color: #fff;
+  border-radius: 4px;
+  padding: 15px;
+  border: none;
+}
+
+button.base-btn:hover {
+  background-color: #3a2b71; 
+}
+
+button.base-btn:disabled {
+  background-color: #B9B9B9;
+  cursor: not-allowed;
+}
+
+button.base-btn:disabled:hover {
+  background-color: #B9B9B9;
+}
+
+
+.container {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.image-container {
+  display: inline-block;
+}
+
+.left-panel {
+  float: left;
+  width: 70%;
+}
+
+.right-panel {
+  position: fixed;
+  right: 0;
+  width: 30%;
+  height: 100%;
+  top: 0;
+  padding-top: 50px;
+  width: 30%;
+  box-shadow: -3px 0px 6px #b9b9b9;
+  z-index: 10;
+  background-color: #fff;
+}
+
+
+
+/*
+/*
+/* header & nav */
+header{
+  background-color: #EE3A4A;
+  position: fixed;
+  width: 100%;
+  z-index: 50;
+}
+
+nav {
+  -js-display: flex;
+  display: flex;
+  padding: 5px 0;
+}
+
+nav .logo {
+  float: left;
+}
+
+nav .logo img {
+  width: 100px;
+}
+
+nav .cart-icon {
+  margin-left: auto;
+  padding-top: 10px;
+}
+
+nav .image-container:hover {
+  cursor: pointer;  
+}
+
+
+nav .cart-icon img {
+  width: 25px;
+}
+
+nav .mobile-cart-indicator {
+  display: none;  
+}
+
+.nav-cart-quantity {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  border-radius: 100px;
+  background-color: purple;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  line-height: 26px;
+  top: 5px;
+  right: 2px;
+  position: absolute;
+}
+
+/*
+/*
+/* Restaurant header */
+.restaurant-name {
+  position: relative;
+  font-size: 42px;
+  font-weight: 400;
+  left: 20px;
+  top: 25px;
+  display: inline-block;
+}
+
+.category-nav {
+  background-color: #F5F5F5;
+  padding: 15px 0;
+  position: relative;
+}
+
+.category-nav.fixed {
+  position: fixed;
+  width: 70%;
+  top: 54px;
+}
+
+.category-nav ul {
+  -js-display: flex;
+  display:flex;
+  display: -webkit-flex;
+  justify-content: space-around;
+}
+
+.category-nav li {
+  -js-display: flex;
+  display: flex;
+  display: -webkit-flex;
+}
+
+.category-nav li a {
+  display: inline-block;
+  width: 100%;
+  font-weight: 400;
+  color: #292929;
+  padding: 0 5px;
+  text-decoration: none;
+  align-self: center;
+  -webkit-align-self: center;
+  text-align: center;
+  border-radius: 4px;
+  padding: 5px 10px;
+  min-width: 50px;
+}
+
+.category-nav li a.selected {
+  background-color: #6F52D8;  
+  color: #fff;
+}
+
+.category-nav li.more:hover {
+  cursor: pointer;
+}
+
+.category-nav .arrow {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: -1px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid #ccc;
+}
+
+.more-categories {
+  position: relative;  
+}
+
+.more-categories:hover {
+  cursor: pointer;  
+}
+
+.categories-dropdown {
+  box-sizing: border-box;
+  overflow-y: scroll;
+  position: absolute;
+  right: 0;
+  background-color: #fff;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-bottom-color: #ccc;
+  text-align: left;
+  border-radius: 4px;
+  white-space: nowrap; 
+  z-index:1000;
+  top: 28px;
+  color: #292929;
+  font-weight: 400;
+}
+
+.categories-dropdown ul {
+  flex-direction: column;
+  -webkit-flex-direction: column;
+}
+
+.categories-dropdown li {
+  margin-bottom: 10px;  
+}
+
+.categories-dropdown li a {
+  text-align: left;  
+}
+
+.categories-dropdown li a:hover {
+  background-color: #6F52D8;
+  color: #fff; 
+}
+
+.restaurant-header {
+  background: url('../images/food-icons.png');
+  height: 250px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.restaurant-header img {
+    position: relative;
+    top: 70px;
+}
+
+/*
+/*
+/* menu container */
+
+.menu-content {
+  -js-display: flex;
+  display: flex;
+  display: -webkit-flex; 
+  flex-wrap: wrap;
+  -webkit-flex-wrap: wrap;
+}
+
+/*
+/*
+/* menu category */
+
+.category-set {
+  flex: 0 0 100%;
+}
+
+.category-set h2 {
+    padding: 5px 10px;
+    border: 2px dashed #F5F5F5;
+}
+
+.category-set ul {
+  list-style: none;
+  display: inline-block;
+  width: 100%;
+}
+
+
+/*
+/*
+/* category item */
+
+.category-set ul li {
+  border-bottom: 1px solid #F5F5F5;
+  padding: 10px;
+  height: 95px;
+  overflow: hidden;
+  display: inline-block;
+  width: 45%;
+  box-sizing: border-box;
+}
+
+.category-set ul li:hover {
+  background: rgba(111,82,216,0.12);
+  border-bottom: 2px solid #6F52D8;
+  cursor: pointer;
+}
+
+.category-set ul li:nth-child(even) {
+  float: right;
+}
+
+.category-set ul li:nth-child(odd) {
+  float: left;
+}
+
+.item-name {
+  display: inline-block;
+  max-width: 70%;
+  margin: 0;
+}
+
+.item-price {
+  float: right;
+  display: inline-block;
+}
+
+.item-description {
+  color: #B9B9B9;
+}
+
+.option-choice {
+  width: 100%;
+  font-size: 14px;
+  vertical-align: text-top;
+  line-height: 14px;
+}
+
+
+/*
+/*
+/* cart */
+
+.cart {
+  padding: 10px;
+  -js-display: flex;
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column;
+  -webkit-flex-direction: column;
+  min-height: 100%;
+  height: 100%;
+}
+
+.cart-body {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.cart-item {
+  border-bottom: 1px solid #F5F5F5;
+  padding: 10px 0;
+}
+
+.cart-header {
+  border-bottom: 1px solid #F5F5F5;
+}
+
+.cart-totals .total-item {
+  margin-bottom: 10px;
+}
+
+.cart-totals .item-price {
+  margin: 0;
+}
+
+.cart-item .item-options {
+  padding-left: 20px;
+}
+
+.cart-item .item-option-name {
+  font-size: 14px;
+  color: #B9B9B9;
+  margin: 10px 0;
+}
+
+.cart-item .item-choice {
+  font-size: 12px;
+  color: #B9B9B9;
+}
+
+.cart-item .item-option-list {
+  list-style-type: disc;
+  list-style-position: inside;
+}
+
+.cart-item .item-summary img {
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+.cart-item .item-summary img:hover {
+  cursor: pointer;
+}
+
+.cart-footer {
+  border-top: 1px solid #F5F5F5; 
+  height: 200px;
+  flex-shrink: 0;
+  -webkit-flex-shrink: 0;
+}
+
+.cart-footer button {
+  width: 100%;
+  padding:20px;
+  font-size:24px;
+  margin-top: 2%;
+  min-height: 97px;
+}
+
+.cart-empty-text {
+  font-weight: 200;
+  color: #F5F5F5;
+  text-align: center;
+  padding-top: 40px;
+}
+
+/*
+/*
+/* modal styling */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+  -js-display: flex;
+  display: flex;
+  display: -webkit-flex;
+  transition: opacity .3s ease;
+  z-index: 100;
+}
+
+.modal-wrapper {
+  z-index: 9998; 
+  width:90%;
+  margin: auto;
+}
+
+.modal-container {
+  width: 60%;
+  max-width: 600px;
+  margin: 0px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+  transition: all .3s ease;
+  min-height: 400px;
+}
+
+.modal-item-info {
+  width: 90%;
+  display: inline-block;
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.modal-body {
+  min-height: 100px;
+  max-height: 300px;
+  overflow: scroll;
+}
+
+.special-instructions {
+  margin-bottom: 20px;  
+}
+
+.special-instructions textarea {
+  width: 100%;
+  height: 50px;
+  border: 1px solid #B9B9B9;
+  border-radius: 4px;
+  box-sizing: border-box;  
+}
+
+.modal-close-button {
+  float: right;
+  background: url(../images/close-icon.svg);
+  height: 30px;
+  width: 30px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.modal-close-button:hover {
+  cursor: pointer;
+}
+
+.modal-footer {
+  border-top: 1px solid #B9B9B9;
+  padding: 25px 0 0 0;
+}
+
+.modal-footer button {
+  width: 100%;
+  font-size: 18px;  
+}
+
+.option-body {
+  background-color: #EFF7FE;
+  -js-display: flex;
+  display: flex;
+  display: -webkit-flex;
+  -webkit-flex-wrap: wrap;
+  padding: 10px;
+}
+
+.option-list {
+  display: inline;
+  margin: 0 20px 20px 0;
+}
+
+.item-quantity-selector {
+  padding: 20px 0;
+}
+
+.item-quantity-selector button {
+  background-color: white;
+  border-radius: 4px;
+  color: #6F52D8;
+  border: 2px solid #6F52D8;
+  line-height: 19px;
+  font-size: 24px;
+  font-weight: 300;
+  width: 30px;
+  height: 30px;
+}
+
+.item-quantity-selector span {
+  width: 40px;
+  display: inline-block;
+  border: 1px solid #F5F5F5;
+  box-sizing: content-box;
+  height: 30px;
+  line-height: 30px;
+  vertical-align: top;
+  text-align: center;
+  border-radius: 4px;
+}
+
+/*
+ * The following styles are auto-applied to elements with
+ * transition="modal" when their visibility is toggled
+ * by Vue.js.
+ *
+ * You can easily play with the modal transition by editing
+ * these styles.
+ */
+
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-leave-active {
+  opacity: 0;
+}
+
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+}
+
+
+
+/*
+/*
+/*
+/* Tablet and below styling */
+@media (max-width:800px) {
+
+  nav .mobile-cart-indicator {
+    display: block;
+    position: absolute;
+    right: 0;
+    width: 80px;
+    height: 100%;
+    top: 0;      
+  }
+    
+  nav .mobile-cart-indicator.visible {
+    background-color: #A62934;          
+  }  
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  .right-panel {
+    display: none; 
+    width: 100%;
+  }
+
+  .right-panel.visible {
+    display: block  
+  }
+
+  .left-panel {
+    width: 100%;  
+  }
+ 
+  nav .cart-icon {
+    margin: 0; 
+  }
+
+  nav .cart-icon.image-container {
+    position: absolute;
+    right: 10px;    
+  }
+
+  nav .cart-icon img {
+    position: relative;
+    right: 20px;  
+  }
+
+  .restaurant-header {
+    height: auto;
+    padding: 20px 0;
+  }
+
+  .restaurant-header img {
+    display: none;  
+  }
+
+  .restaurant-name {
+    left: 0;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .category-nav {
+    display: none;  
+  }
+ 
+  .cart-body {
+    font-size: .9em;  
+  }
+ 
+  .edit-item-icon {
+    width: 12px;
+    margin-left: 10px;    
+    vertical-align: middle;
+  }
+
+  .remove-item-icon {
+    color: red;
+    background-color: white;
+    border: 1px dotted red;
+    border-radius: 50px;
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+    display: inline-block;
+    font-weight: 500;
+    text-align: center;
+    line-height: 15px;  
+  }
+    
+  .cart-item .item-choice, .item-option-name {
+    font-size: 12px !important; /* don't like this, will fix at some point */  
+  }
+
+  .category-set ul li {
+    width: 100%;  
+  }
+  
+  .modal-wrapper {
+    width: 100%;  
+  }
+
+  .modal-container {
+    width: 80%; 
+    padding: 20px;
+
+  }
+}

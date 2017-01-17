@@ -27,12 +27,12 @@ app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 
-app.use('/', express.static('template'));
+app.use('/', express.static('static'));
 app.use('/test', express.static('test'));
 app.use('/ang', express.static('ang'));
 
 var MenuSession = db.Menu_session;
-var Menu = db.Menu;
+var Menu = db.Menus;
 var Merchants = db.Merchants;
 var Delivery = db.Delivery;
 
@@ -45,7 +45,6 @@ var ObjectId = require('mongodb').ObjectID;
 //handle post request with a binder full of data
 app.post('/cafe', (req, res) => co(function * () {
   console.log('post to cafe')
-
   var ms = new MenuSession({
     session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
   });
@@ -90,7 +89,7 @@ app.post('/cafe', (req, res) => co(function * () {
   yield ms.save();
 
   //return a url w a key in a query string
-  res.send(menuURL + '#?k=' + ms.session_token);
+  res.send(menuURL + '?k=' + ms.session_token);
 }));
 
 //when user hits that url up, post to /session w/key and gets correct pg
