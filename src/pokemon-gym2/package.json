@@ -1,0 +1,22 @@
+{
+  "name": "pokemon-gym",
+  "private": true,
+  "scripts": {
+    "start": "meteor run"
+  },
+  "dependencies": {
+    "babel-runtime": "6.18.0",
+    "d3": "^4.4.1",
+    "datatables.net": "^1.10.13",
+    "eve": "^0.5.0",
+    "event-emitter": "^0.3.4",
+    "eventie": "^1.0.6",
+    "fastclick": "^1.0.6",
+    "get-style-property": "^0.1.1",
+    "jquery": "^3.1.1",
+    "meteor-node-stubs": "~0.2.0",
+    "moment": "^2.17.1",
+    "switchery": "0.0.2",
+    "transitionize": "0.0.3"
+  }
+}

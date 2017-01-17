@@ -1,0 +1,124 @@
+::-webkit-input-placeholder {
+   color: #bfbfbf!important;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   color: #bfbfbf!important;  
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   color: #bfbfbf!important;  
+}
+
+:-ms-input-placeholder {  
+   color: #bfbfbf!important;  
+}
+
+.search-form input::-webkit-input-placeholder {
+   color: #c6d1e2!important;
+}
+
+.search-form input:-moz-placeholder { /* Firefox 18- */
+   color: #c6d1e2!important;  
+}
+
+.search-form input::-moz-placeholder {  /* Firefox 19+ */
+   color: #c6d1e2!important;  
+}
+
+.search-form input:-ms-input-placeholder {  
+   color: #c6d1e2!important;  
+}
+
+.page-content {
+    background: #38434e;
+}
+
+.navbar .logo-box {
+    background: #435360;
+}
+
+.navbar .logo-box a {
+    color: #fff;
+}
+
+.topmenu-outer {
+    background: #435360;
+}
+
+.top-menu .navbar-nav > li > a {
+    color: #fff;
+}
+
+.sidebar {
+    background: #38434e;
+}
+
+.sidebar-profile span small {
+    color: #899dc1;
+}
+
+.menu {
+    background: #38434e;
+}
+
+.menu.accordion-menu a {
+    color: #c6d1e2;
+}
+
+.menu.accordion-menu li {
+    border-bottom: 1px solid #404c57;
+}
+
+.menu.accordion-menu ul.sub-menu li {
+    border: none;
+}
+
+.menu.accordion-menu > li > a:hover {
+    border-radius: 0;
+    background: #323b45;
+}
+
+.menu.accordion-menu > li.active > a,
+.menu.accordion-menu > li.active.open > a {
+    border-radius: 0;
+    background: #30B19B;
+}
+
+.menu.accordion-menu > li.active > a p,
+.menu.accordion-menu > li.active.open > a p,
+.menu.accordion-menu > li.active > a,
+.menu.accordion-menu > li.active.open > a {
+    color: #fff;
+}
+
+.small-sidebar:not(.page-sidebar-fixed) .accordion-menu li.droplink:hover > a,
+.horizontal-bar .accordion-menu > li.droplink:hover > a,
+.menu.accordion-menu li.open > a,
+.hover-menu .accordion-menu > li.droplink:hover > a {
+    background: #323b45;
+    color: #b3bfd0;
+}
+
+body:not(fixed-sidebar) .small-sidebar .horizontal-bar .accordion-menu > li > ul {
+    top: 51px!important;
+}
+
+.menu.accordion-menu ul li a:hover,
+.menu.accordion-menu ul li.active a {
+    background: #3f4b57;
+    color: #b3bfd0;
+}
+
+.menu.accordion-menu ul li a {
+    color: #b3bfd0;
+}
+
+.search-form.boxed-layout-search .input-group,
+.search-form {
+    background: #435360;
+}
+
+.page-footer {
+    background: #38434E;
+}
