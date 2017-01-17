@@ -32,3 +32,4 @@ logging:
     prettyPrint: true
   mongo:
     enabled: true
+menuURL: http://cafe.kipthis.com
