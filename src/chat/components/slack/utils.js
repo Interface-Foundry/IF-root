@@ -478,10 +478,6 @@ function * constructCart(message, text) {
     summaryText += `
     <${cart.link}|*➤ Click Here to Checkout*>`;
 
-	if (cart.aggregate_items.length === 0) {
-		summaryText = 'It looks like your cart is empty!'
-	}
-
     attachments.push({
       text: summaryText,
       mrkdwn_in: ['text', 'pretext'],
