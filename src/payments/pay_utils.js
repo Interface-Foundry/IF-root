@@ -234,7 +234,6 @@ function * onSuccess (payment) {
     mailer_transport.sendMail(mailOptions, function (err) {
       if (err) console.log(err)
     })
-    foodSession.active = false
     yield foodSession.save()
   } catch (err) {
     logging.error('on success messages broke', err)
