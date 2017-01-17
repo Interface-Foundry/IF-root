@@ -104,7 +104,7 @@ function * loadTeam(slackbot) {
 
     kip.debug('got slack message sent from user', data.user, 'on channel', data.channel)
     if ((data.user === undefined) || (data.channel === undefined)) {
-      logging.error('error user undefined in slackl stuff', data)
+      logging.warn('user or channel undefined in slack data')
     }
     // For channels that are not DM's, only respond if kip is called out by name
     if ('CG'.includes(data.channel[0])) {
@@ -249,7 +249,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
         return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
-      
+
       if(message.mode === 'variations' && message.action === 'reply'){
         msgData.attachments = yield variation_view(message);
         msgData.text = '';
