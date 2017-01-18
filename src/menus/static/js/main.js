@@ -374,11 +374,10 @@ var app = new Vue({
     editingItem: null,
     cartItems: [],
     budget: false,
-    fixNav: false,
     user_id: null,
     food_session_id: null,
     notDesktop: screen.width <= 800,
-    isCartVisibleOnMobile: false
+    isCartVisibleOnMobile: false,
   },
   methods: {
     toggleCartOnMobile: function() {
@@ -404,13 +403,6 @@ var app = new Vue({
       window.scrollTo(0,0)
       if (this.notDesktop) {
         this.isCartVisibleOnMobile = false        
-      }
-    },
-    handleScroll: function() {
-      if ((Math.floor(window.scrollY) >= 196) && this.notDesktop) {
-        this.fixNav = true    
-      } else {
-        this.fixNav = false  
       }
     },
     formatCart: function() {
@@ -462,12 +454,8 @@ var app = new Vue({
       }
       return qty
     },
-    taxAmount: function() {
-      var tax = (this.cartItemsTotal * .075)
-      return tax 
-    },
     totalCartAmount: function() {
-      var amount = (this.cartItemsTotal + this.taxAmount)
+      var amount = this.cartItemsTotal
       return amount
     },
     showCart: function() {
@@ -486,6 +474,14 @@ var app = new Vue({
       } else {
         return false
       }
+    },
+    merchantLogo: function() {
+      if (this.merchant.logo) {
+        return this.merchant.logo  
+      } 
+      else {
+        return "https://static.delivery.com/merchant_logo.php?w=0&h=0&id=39847"  
+      }
     }
   },
   watch: {
@@ -495,9 +491,18 @@ var app = new Vue({
     } 
   },
   created: function() {
-    window.addEventListener('scroll', this.handleScroll);    
     var that = this;
     var key = window.location.search.split("=")[1]
+    // account for page refresh once key is gone
+    if (key) {
+      localStorage.setItem('orderKey', key)      
+    } else {
+      key = localStorage.getItem('orderKey')  
+    }
+    if (history.pushState) {
+      var url = window.location.origin + window.location.pathname;
+      window.history.pushState({path: url}, '', url);
+    }
     axios.post('/session', {session_token: key})
     .then((response) => {
       this.user_id = response.data.userId
