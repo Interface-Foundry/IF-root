@@ -31,7 +31,7 @@ meetupAuth:
   consumerSecret: hub4tmkp966ir5q4jaaa41qc4l
   callbackURL: https://kipapp.co/auth/meetup/callback
 mongodb:
-  url: mongodb://localhost:27017/prod
+  url: mongodb://localhost:27017/foundry
   backuphost: localhost
   options:
     server:
