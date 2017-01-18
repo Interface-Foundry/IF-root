@@ -48,23 +48,13 @@ function voteMessage (foodSession, skip) {
     }
   })
   // add cancel button
-  if (! skip) {
-    sampleArray.push({
-      name: 'food.admin.restaurant.pick',
-      value: 'user_remove',
-      text: '× No Food for Me',
-      type: 'button',
-      style: 'danger'
-    })
-  }
-  else {
-    sampleArray.push({
-      name: 'food.admin.restaurant.pick.list',
-      value: 'user_remove',
-      text: 'Anything',
-      type: 'button',
-    })
-  }
+  sampleArray.push({
+    name: 'food.admin.restaurant.pick',
+    value: 'user_remove',
+    text: '× No Food for Me',
+    type: 'button',
+    style: 'danger'
+  })
 
   var admin = foodSession.convo_initiater
 
@@ -299,7 +289,7 @@ db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message
 
   var response = {
     mode: 'food',
-    action: 'user.poll',
+    action: 'user\.poll',
     thread_id: admin.dm,
     origin: message.origin,
     source: source,
@@ -355,8 +345,7 @@ handlers['food.user.poll'] = function * (message) {
     foodSession.save()
 
     if (member.id === foodSession.convo_initiater.id) {
-      console.log('you are the admin', member)
-      $replyChannel.sendReplace(message, 'food.admin.cuisine.dashboard', {type: 'slack', data: response.data})
+      $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
     } else {
       $replyChannel.send(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
     }
@@ -456,7 +445,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 
   if (numOfResponsesWaitingFor <= 0) {
     logging.info('have all the votes')
-    // i dont think you trigger food.admin.dashboard.cuisine here if all the users have voted
+    // i dont think you trigger dashboard here if all the users have voted
     // yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
@@ -476,10 +465,10 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
 
   db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
+  db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
 
+  var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
   if (message.allow_text_matching && !adminHasVoted) {
-    console.log('everything happens for a reason :(')
     return yield handlers['food.admin.restaurant.pick'](message)
   }
   // Build the votes tally
@@ -512,6 +501,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     }]
   }
 
+  console.log('message.source.user', message.source.user)
   if (slackers.length > 0 ) {
     if(message.source.user == foodSession.convo_initiater.id){
       dashboard.attachments.push({
@@ -544,7 +534,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
     })
   } else {
     // admin is confirming, replace their message
-    yield foodSession.team_members.map(function * (m) {
+    foodSession.team_members.map(function * (m) {
       if (foodSession.votes.map(v => v.user).includes(m.id)) {
         var admin = foodSession.convo_initiater
         var user = message.source.user
@@ -597,7 +587,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.debug('direction is _', direction)
   logging.debug('keyword is _', keyword)
 
-  // reset to cuisine sort if trying to keyword sort w/o a keyword
+  // reset to cuisine sort if tyring to keyword sort w/o a keyword
   if (sort === SORT.keyword && !keyword) {
     sort = SORT.cuisine
   }
@@ -611,10 +601,8 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.info('# of viable restaurants: ', viableRestaurants.length)
 
-  var teamMessage = (foodSession.votes.length < 2 ? '' : 'based on your team vote')
-
   var responseForAdmin = {
-    'text': `Here are 3 restaurant suggestions${teamMessage}. \n Which do you want today?`,
+    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
@@ -781,17 +769,20 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     ]
   }
 
-  yield handlers['food.admin.restaurant.collect_orders.email'](message, foodSession)
-
-
   logging.debug('about to send message to each user to confirm if they want to be in order')
   yield foodSession.team_members.map(function * (member) {
     logging.debug(`sending message to confirm for each user, current user ${member.name}`)
+    logging.debug('querying for ', member.id)
+    var threadIdForUser = yield db.messages.find({'source.user': member.id, 'mode': 'food', 'incoming': true, 'thread_id': {$exists: true}}).sort({'-ts': -1}).limit(2).exec()
+
+    logging.debug('got thread_id')
+    threadIdForUser = threadIdForUser[0].thread_id
     var source = {
       'type': 'message',
-      'channel': member.dm,
+      'channel': threadIdForUser,
       'user': member.id,
       'team': member.team_id
+    }
 
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
@@ -846,7 +837,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       'incoming': false,
       'mode': 'food',
       'action': 'food.admin.restaurant.collect_orders',
-      'thread_id': member.dm,
+      'thread_id': threadIdForUser,
       'origin': message.origin,
       'source': source,
       'data': msgJson
@@ -854,55 +845,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
 
     $replyChannel.send(newMessage, 'food.menu.quickpicks', {'type': newMessage.origin, 'data': newMessage.data})
   })
-}
-
-
-handlers['food.admin.restaurant.collect_orders.email'] = function * (message, foodSession) {
-  logging.debug('foodSession.email_users', foodSession.email_users)
-  for (var i = 0; i < foodSession.email_users.length; i++) {
-
-    var m = foodSession.email_users[i];
-    var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
-    var merch_url = yield menu_utils.getUrl(foodSession, user.id)
-
-    var mailOptions = {
-      'to': `<${m}>`,
-      'from': `Kip Café <hello@kipthis.com>`,
-      'subject': `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${foodSession.chosen_restaurant.name}!`,
-      'html': `<html><body><p><a href="${merch_url}">View Full Menu</a></p><table style="width:100%" border="1">`
-    }
-
-    var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
-    var quickpicks = sortedMenu.slice(0, 9);
-
-    function formatItem (i, j) {
-      return `<table>` +
-      `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
-      `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
-      `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
-      `<tr><p style="color:#fa2d48">+ Add to Cart</p></tr>` +
-      `</table>`;
-    }
-
-    for (var i = 0 ; i < 3; i++) {
-      mailOptions.html += '<tr>';
-      for (var j = 0; j < 3; j++) {
-        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
-        mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="${item_url}">`
-        mailOptions.html += `</a>${formatItem(i, j)}</td>`
-      }
-      mailOptions.html += `</tr>`
-    }
-
-    mailOptions.html += `</table></body></html>`
-
-    logging.info('mailOptions', mailOptions)
-    try {
-      yield mailer_transport.sendMail(mailOptions)
-    } catch (err) {
-      logging.error('error with mailer_trainsport in food.admin.restaurant.collect_orders', err)
-    }
-  }
+})
 }
 
 module.exports = function (replyChannel, allHandlers) {
