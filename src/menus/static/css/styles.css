@@ -431,6 +431,9 @@ nav .mobile-cart-indicator {
   vertical-align: top;
 }
 
+.remove-item-icon:hover {
+  cursor: pointer;  
+}
 
 .cart-body {
   overflow-y: auto;

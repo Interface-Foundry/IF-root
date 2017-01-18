@@ -49,7 +49,7 @@
     <div v-bind:class="{visible: isCartVisibleOnMobile}" class="right-panel">
       <div class="cart">
         <div class="cart-header">
-          <h3> Your Kip Café order</h3>
+          <h3 v-if="admin_name"> {{admin_name}}'s Kip Café order for {{team_name}}</h3>
           <small v-if="budget"> Aim to spend {{budget.toFixed(2)}}</small>
         </div>
         <div class="cart-body">
