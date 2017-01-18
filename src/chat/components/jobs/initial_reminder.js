@@ -14,25 +14,24 @@ module.exports = function(agenda) {
         thread_id: channel
       }).sort('-ts').limit(1).exec();
       let ts = prevMessage[0].source.ts;
-
-      kip.debug(`👰👰  token: ${token}, ts: ${ts}, channel: ${channel}`);
-
-      request({
-        uri: `https://slack.com/api/chat.delete?token=${token}&ts=${ts}&channel=${channel}&as_user=true`,
-        method: 'POST',
-        json: true
-      })
-      .then(res => kip.debug(`deleted msg, \n ${JSON.stringify(res, null, 2)}`))
-      .catch(err => kip.debug(`couldn't delete msg, \n${JSON.stringify(err, null, 2)}`));
-      let newMessage = new db.Message(message);
-      newMessage.save((err, res) => {
-        if (!err) {
-          queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update'); // send new message
-        } else {
-          kip.debug(`couldn't save reminder message ${JSON.stringify(err, null, 2)}\n${JSON.stringify(res, null, 2)}`);
-        }
-        done();
-      });
+      yield deleteOldMessage(token, ts, channel);
+      yield publishNewMessage(message);
+      done();
     });
   });
 };
+
+function * deleteOldMessage(token, ts, channel) {
+  kip.debug(`👰👰  token: ${token}, ts: ${ts}, channel: ${channel}`);
+  let res = yield request({
+    uri: `https://slack.com/api/chat.delete?token=${token}&ts=${ts}&channel=${channel}&as_user=true`,
+    method: 'POST',
+    json: true
+  });
+  kip.debug(`deleted msg, \n ${JSON.stringify(res, null, 2)}`);
+}
+
+function * publishNewMessage(message) {
+  let newMessage = new db.Message(message);
+  queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update'); // send new message
+}
