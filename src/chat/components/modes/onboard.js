@@ -41,6 +41,32 @@ handlers['start'] = function * (message) {
   msg.source = message.source;
   msg.text = 'Ok, let\'s get started!';
   msg.fallback = 'Ok, let\'s get started!';
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({
+    team_id: team_id
+  }).exec();
+  let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+  let now = new Date();
+  let cronMsg = {
+    mode: 'onboard',
+    action: 'home',
+    reply: cardTemplate.onboard_home_attachments('tomorrow'),
+    origin: message.origin,
+    source: message.source,
+    text: 'Hey, it\'s me again! Ready to get started?',
+    fallback: 'Hey, it\'s me again! Ready to get started?'
+  };
+  scheduleReminder(
+    'initial reminder',
+    new Date(msInFuture + now.getTime()), {
+      msg: JSON.stringify(cronMsg),
+      user: message.source.user,
+      token: team.bot.bot_access_token,
+      channel: message.source.channel
+    });
   return [msg];
 };
 
@@ -74,8 +100,8 @@ handlers['remind_later'] = function * (message, data) {
       reply: cardTemplate.onboard_home_attachments(nextDate),
       origin: message.origin,
       source: message.source,
-      text: 'Hey, it\'s me again! Ready to get started?',
-      fallback: 'Hey, it\'s me again! Ready to get started?'
+      text: 'Almost there...! :)',
+      fallback: 'Almost there...! :)'
     };
     scheduleReminder(
     'onboarding reminder',
@@ -140,13 +166,13 @@ handlers['supplies'] = function * (message) {
   }
   var attachments = [];
   attachments.push({
-      text: '*Step 1/3:* Choose a bundle:',
+      text: '*Step 1/3:* Choose a pre-packaged bundle:',
       mrkdwn_in: ['text'],
       color: '#A368F0',
-      fallback:'Step 1/3: Choose a bundle',
-      actions: cardTemplate.slack_onboard_bundles,
+      fallback:'Step 1/3: Choose a pre-packaged bundle',
       callback_id: 'none'
     });
+  attachments = attachments.concat(cardTemplate.slack_bundles(true));
   attachments.push({
     'text': '✎ Hint: You can also search what you want below (Example: _MacBook Pro Power Cord_)',
     mrkdwn_in: ['text']
@@ -403,7 +429,7 @@ handlers['bundle'] = function * (message, data) {
       mrkdwn_in: ['text', 'pretext'],
       color: '#45a5f4',
       thumb_url: item.image,
-      fallback: 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?'
+      fallback: 'Thanks for adding your first items to the cart!'
     }
     // multiple people could have added an item to the cart, so construct a string appropriately
     var userString = item.added_by.map(function(u) {
@@ -427,13 +453,13 @@ handlers['bundle'] = function * (message, data) {
     text: summaryText,
     mrkdwn_in: ['text', 'pretext'],
     color: '#45a5f4',
-    fallback: 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?'
+    fallback: 'Thanks for adding your first items to the cart!'
   });
   attachments.push({
-    text: 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?',
+    text: 'Thanks for adding your first items to the cart!',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?',
+    fallback: 'Thanks for adding your first items to the cart!',
     actions: cardTemplate.slack_onboard_basic,
     callback_id: 'none'
   });
@@ -442,7 +468,7 @@ handlers['bundle'] = function * (message, data) {
   msg.mode = 'onboard'
   msg.action = 'home';
   msg.text = '';
-  msg.fallback = 'Awesome! You added your first bundle\n*Step 2/3:* Let your team add items to the cart?';
+  msg.fallback = 'Thanks for adding your first items to the cart!';
   msg.source.team = message.source.team;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
@@ -472,10 +498,10 @@ handlers['addcart'] = function*(message, data) {
 // modified version of modes/shopping.js
 handlers['cart'] = function * (message) {
   let attachments = [{
-    text: 'Awesome! You added your first item to the cart!\n*Step 2/3:* Let your team add items to the cart?',
+    text: 'Thanks for adding your first items to the cart!',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Awesome! You added your first item to the cart!',
+    fallback: 'Thanks for adding your first items to the cart!',
     actions: cardTemplate.slack_onboard_basic,
     callback_id: 'none'
   }];
@@ -491,6 +517,8 @@ handlers['cart'] = function * (message) {
   msg.data = msg.data.toObject();
   return [msg];
 };
+
+
 /**
  * S4
  */
@@ -523,11 +551,11 @@ handlers['team'] = function * (message) {
 
   var chunkedButtons = _.chunk(buttons, 5);
   let attachments = [({
-    text: '*Step 3/3:* Choose the channels you want to include: ',
+    text: '*Step 3/3:* Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include:',
     mrkdwn_in: ['text'],
     color: '#A368F0',
     actions: chunkedButtons[0],
-    fallback: 'Step 3/3: Choose the channels you want to include',
+    fallback: 'Step 3/3: Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include:',
     callback_id: "none"
   })];
   chunkedButtons.forEach((ele, i) => {
@@ -539,7 +567,7 @@ handlers['team'] = function * (message) {
       text: '',
       color: '#45a5f4',
       mrkdwn_in: ['text'],
-      fallback:'Step 3/3: Choose the channels you want to include',
+      fallback:'Step 3/3: Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include:',
       callback_id: 'none'
     });
   attachments.push({
@@ -561,7 +589,7 @@ handlers['team'] = function * (message) {
   msg.action = 'home';
   msg.text = '';
   msg.source.team = team.team_id;
-  msg.fallback = 'Step 3/3: Choose the channels you want to include'
+  msg.fallback = 'Step 3/3: Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include';
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
   return [msg];
@@ -642,10 +670,10 @@ handlers['member'] = function*(message) {
 
 handlers['handoff'] = function(message) {
   let attachments = [{
-    text: 'That\'s it!\nThanks for adding Kip to your team :blush:',
+    text: 'We did it!\nI think I\'m getting the hang of this :blush:',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'That\'s it!\nThanks for adding Kip to your team',
+    fallback: 'We did it!\nI think I\'m getting the hang of this :blush:',
     callback_id: 'take me home pls',
     actions: [{
       'name': 'passthrough',

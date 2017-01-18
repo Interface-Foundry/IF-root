@@ -42,14 +42,14 @@ module.exports.handle = handle;
  */
 handlers['start'] = function * (message) {
   kip.debug('starting onboarding conversation');
-    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null);
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
   var team = yield db.Slackbots.findOne({team_id: team_id}).exec();
 
   var welcome_message = message_tools.text_reply(message, '');
-  welcome_message.reply = card_templates.onboard_admin_attachments('initial');
+  welcome_message.reply = card_templates.onboard_admin_attachments('initial', team.team_name);
   welcome_message.action = 'get-admins.ask';
 
   let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
@@ -57,11 +57,11 @@ handlers['start'] = function * (message) {
   let cronMsg = {
     mode: welcome_message.mode,
     action: 'get-admins.ask',
-    reply: card_templates.onboard_admin_attachments('tomorrow'),
+    reply: card_templates.onboard_admin_attachments('tomorrow', team.team_name),
     origin: message.origin,
     source: message.source,
-    text: 'Hey, it\'s me again! Ready to get started?',
-    fallback: 'Hey, it\'s me again! Ready to get started?'
+    text: 'Almost there...! :)',
+    fallback: 'Almost there...! :)'
   };
   scheduleReminder(
     'initial reminder',
@@ -76,6 +76,11 @@ handlers['start'] = function * (message) {
 }
 
 handlers['remind_later'] = function * (message, data) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({team_id: team_id}).exec();
   const ONE_DAY = 24 * 60 * 60 * 1000; // hours in a day * mins in hour * seconds in min * milliseconds in second
   let nextDate,
     msInFuture = -1,
@@ -102,7 +107,7 @@ handlers['remind_later'] = function * (message, data) {
     let cronMsg = {
       mode: message.mode,
       action: 'home',
-      reply: cardTemplate.onboard_admin_attachments(nextDate),
+      reply: cardTemplate.onboard_admin_attachments(nextDate, team.team_name),
       origin: message.origin,
       source: message.source,
       text: 'Hey, it\'s me again! Ready to get started?',
@@ -327,7 +332,7 @@ handlers['confirm'] = function * (message) {
     reply = reply.replace('$ADMINS', admins.map(g => {
     return '<@' + g.id + '>'
     }).join(', ').replace(/,([^,]*)$/, ' and $1'));
-    var slackreply = cardTemplate.home_screen(false);
+    var slackreply = cardTemplate.home_screen(false, message.source.user);
     var msg = {
       action: 'simplehome',
       mode: 'food',

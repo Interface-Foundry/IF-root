@@ -204,7 +204,7 @@ handlers['food.exit.confirm_end_order'] = function * (message) {
 }
 
 handlers['food.exit.confirm'] = function * (message) {
-  var slackreply = card_templates.home_screen(true);
+  var slackreply = card_templates.home_screen(true, message.source.user);
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: slackreply})
   // make sure to remove this user from the food message if they are in it
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
