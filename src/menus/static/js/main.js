@@ -70,7 +70,7 @@ Vue.component('choice', {
         newOptions[option.id].choices = []
         newOptions[option.id].choices.push(choice)
       }
-
+      
       if (this.type === "checkbox" && this.selected) {
         var choiceExists;
         if (option.id in newOptions) {
@@ -484,7 +484,7 @@ var app = new Vue({
     },
     remainingBudget: function() {
       if (this.budget && (this.budget - this.cartItemsTotal) > 1.50) {
-        return this.budget - this.cartItemsTotal  
+        return this.budget - this.cartItemsTotal
       } else {
         return false
       }
@@ -500,7 +500,7 @@ var app = new Vue({
     window.addEventListener('scroll', this.handleScroll);
     var that = this;
     var key = window.location.search.split("=")[1]
-    axios.post('/session', {session_token: key})
+    axios.post('/menus/session', {session_token: key})
     .then((response) => {
       this.user_id = response.data.userId
       this.food_session_id = response.data.foodSessionId
