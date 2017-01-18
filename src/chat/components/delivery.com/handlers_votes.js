@@ -410,15 +410,6 @@ function buildCuisineDashboard(foodSession) {
 
   var admin = foodSession.convo_initiater
 
-  var res = {
-    text: `<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!`,
-    fallback: '<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!',
-    callback_id: 'food.user.poll',
-    color: '#3AA3E3',
-    attachment_type: 'default',
-    attachments: []
-  }
-
   var dashboard = {
     text: `<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!`,
     fallback: '<@${admin.id}|${admin.name}> is collecting food suggestions, vote now!',
@@ -488,6 +479,8 @@ function sendAdminDashboard(foodSession, message) {
       'text': '✎ Or type what you want below (Example: _japanese_)',
       'mrkdwn_in': ['text']
     })
+  } else {
+    basicDashboard.text = 'Thanks for your vote!'
   }
 
   var existingDashbaord = foodSession.cuisine_dashboards.filter(d => d.user === foodSession.convo_initiater.id)[0]
@@ -512,7 +505,7 @@ function sendAdminDashboard(foodSession, message) {
 // Sends new or updates the user's cuisine vote dashbaord
 //
 function sendUserDashboard(foodSession, message, user) {
-  console.log('send user dashboard', user.id, foodSession.convo_initiater.id)
+  console.log('send user dashboard to', user.id, 'initiated by', foodSession.convo_initiater.id)
   if (user.id === foodSession.convo_initiater.id) {
     return sendAdminDashboard(foodSession, message)
   }
@@ -534,14 +527,16 @@ function sendUserDashboard(foodSession, message, user) {
       'text': '✎ Or type what you want below (Example: _japanese_)',
       'mrkdwn_in': ['text']
     })
+  } else {
+    basicDashboard.text = 'Thanks for your vote!'
   }
-
-
 
   var existingDashbaord = foodSession.cuisine_dashboards.filter(d => d.user === user.id)[0]
   if (existingDashbaord) {
+    logging.debug('found existing dashboard, will attempt to replace it')
     return co(function * () {
       var dashboardMessage = yield db.Messages.findById(existingDashbaord.message)
+      logging.debug(dashboardMessage.slack_ts)
       return yield $replyChannel.sendReplace(dashboardMessage, 'food.admin.poll', {type: 'slack', data: basicDashboard})
     }).catch(logging.error)
   } else {
@@ -563,7 +558,7 @@ function sendUserDashboard(foodSession, message, user) {
       }
       var dashboardMessage = yield $replyChannel.sendReplace(userMessage, 'food.admin.poll', {type: 'slack', data: basicDashboard})
       foodSession.update({$push: { cuisine_dashboards: {
-        user: message.source.user,
+        user: user.id,
         message: dashboardMessage._id
       }}}).exec()
     }).catch(logging.error)
