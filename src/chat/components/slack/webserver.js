@@ -335,15 +335,24 @@ app.post('/slackaction', next(function * (req, res) {
         case 'removewarn':
           let matches = parsedIn.original_message.attachments[index].text.match(/<(.+)\|(.+)>/i); //0 is full string, 1 is url, 2 is title
           parsedIn.original_message.attachments[index] = {
-            text: `Are you sure you want to remove the last *${matches[2]}*?`,
+            text: `Are you sure you want to remove *${matches[2]}* from your cart?`,
             actions: cardTemplate.cart_check(index),
             mrkdwn_in: ['text'],
             callback_id: parsedIn.original_message.attachments[index].callback_id
           };
           break;
+        case 'emptycartwarn':
+          parsedIn.original_message.attachments[index] = {
+            text: `Are you sure you want to empty your cart?`,
+            actions: cardTemplate.empty_cart_check,
+            mrkdwn_in: ['text'],
+            callback_id: parsedIn.original_message.attachments[index].callback_id
+          };
+          break;
+        case 'cancelemptycart':
         case 'cancelremove':
-          co(function*() {
-            cart = yield kipcart.getCart(parsedIn.team.id); //'team' assumes this is a slack command. need a way to tell
+          co(function * () {
+            cart = yield kipcart.getCart(parsedIn.team.id); // 'team' assumes this is a slack command. need a way to tell
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
           break;
@@ -354,9 +363,14 @@ app.post('/slackaction', next(function * (req, res) {
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
 
-          parsedIn.original_message.attachments.splice[index, 1]; //just take it off the list
+          parsedIn.original_message.attachments.splice(index, 1); // just take it off the list
           parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
           break;
+        case 'emptycart':
+          co(function*() {
+            cart = yield kipcart.emptyCart(parsedIn.team.id);
+            yield updateCartMsg(cart, parsedIn);
+          }).catch(console.log.bind(console));
       }
       var stringOrig = JSON.stringify(parsedIn.original_message)
       let map = {
@@ -395,7 +409,6 @@ function clearCartMsg(attachments) {
 }
 
 function* updateCartMsg(cart, parsedIn) {
-  kip.debug('Updating Cart')
   let itemNum = 1,
     team = yield db.slackbots.findOne({
       team_id: parsedIn.team.id
@@ -418,7 +431,7 @@ function* updateCartMsg(cart, parsedIn) {
     if (itemData[ele._id].showDetail || showEverything) {
       itemData[ele._id].link = yield processData.getItemLink(itemData[ele._id].link, parsedIn.user.id, ele._id.toString());
     }
-  })
+  });
 
   let attachments = parsedIn.original_message.attachments.reduce((all, a) => {
     let item = itemData[a.callback_id];
@@ -458,10 +471,10 @@ function* updateCartMsg(cart, parsedIn) {
       }).join(', ');
 
       a.text = [
-        `*${itemNum}.* ` + ((showEverything || item.showDetail) ? `<${item.link}|${item.title}>` : item.title),
+        ((showEverything || item.showDetail) ? `<${item.link}|${item.title}>` : item.title),
         ((showEverything) ? `*Price:* ${item.price} each` : ''),
         `*Added by:* ${userString}`,
-        `*Quantity:* ${item.quantity}`,
+        `*Quantity:* ${item.quantity}`
       ].filter(Boolean).join('\n');
 
       if (item.quantity > 0) {
@@ -476,16 +489,44 @@ function* updateCartMsg(cart, parsedIn) {
           attachment_type: 'default'
         });
       }
-    } else if (a.text && a.text.includes('Team Cart Summary')) {
+    } else if (a.text.includes('*Total:* $')) {
       a.text = (cart.items.length > 0)
-      ? `*Team Cart Summary*\n*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`
-      : 'Looks like your cart is empty!';
+      ? `*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`
+      : '';
       all.push(a);
-    } else if (a.text && !a.text.includes('Quantity:') && !a.text.includes('Sorry, Amazon')) {
-      all.push(a);
-    } else if (a.actions && a.actions[0].name === 'passthrough') {
-      all.push(a);
-    }
+    } else if (a.text.includes('Are you sure') || a.image_url) {
+      let buttons = {
+        text: cart.aggregate_items.length > 0 ? 'Here\'s everything you have in your cart' : 'It looks like your cart is empty!',
+        color: '#45a5f4',
+        image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png',
+        callback_id: 'press me',
+        actions: [{
+          'name': 'passthrough',
+          'text': 'Home',
+          'type': 'button',
+          'value': 'home'
+        }]
+      };
+      if (showEverything) {
+        buttons.actions.push({
+          'name': 'bundles.home',
+          'text': '+ Add Bundles',
+          'type': 'button',
+          'value': 'home'
+        });
+        if (cart.aggregate_items.length > 0) {
+          buttons.actions.push({
+            'name': 'emptycartwarn',
+            'text': 'Empty Cart',
+            'type': 'button',
+            'value': 'emptycartwarn'
+          });
+        }
+      }
+      all.push(buttons);
+	} else if (a.text.includes('*Step 3/3:*')) {
+    all.push(a);
+  }
     return all;
   }, []);
 

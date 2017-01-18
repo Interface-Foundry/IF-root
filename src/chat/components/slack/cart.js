@@ -6,7 +6,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
   var isAdmin = slackbot.meta.office_assistants.includes(message.source.user) || slackbot.meta.office_assistants.length === 0;
 
   // get the latest added item if we need to highlight it
-  if (highlight_added_item) {
+  if (highlight_added_item && cart.items.length>0) {
     var added_item = cart.items[cart.items.length - 1];
     var added_asin = added_item.ASIN;
   }
@@ -30,7 +30,14 @@ module.exports = function*(message, slackbot, highlight_added_item) {
       'text': '+ Add Bundles',
       'type': 'button',
       'value': 'home'
-    })
+    });
+    if (cart.aggregate_items.length > 0)
+      cartObj[0].actions.push({
+        'name': 'emptycartwarn',
+        'text': 'Empty Cart',
+        'type': 'button',
+        'value': 'emptycartwarn'
+      });
   }
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];

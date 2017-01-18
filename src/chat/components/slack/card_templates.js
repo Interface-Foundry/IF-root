@@ -112,7 +112,7 @@ var onboard_admin_attachments = module.exports.onboard_admin_attachments = funct
     image_url: 'https://kipthis.com/kip_modes/mode_success.png',
     color: '#3AA3E3',
     mrkdwn_in: ['text'],
-    fallback: 'Onboarding',
+    fallback: 'Kudos! *Kip* is now officially a member of your team :blush:',
     callback_id: 'none'
   });
   attachments.push({
@@ -154,6 +154,19 @@ var cart_check = module.exports.cart_check = function(id) {
   }]
 }
 
+var empty_cart_check = module.exports.empty_cart_check = [{
+  name: "emptycart",
+  text: 'Empty Cart',
+  style: 'danger',
+  type: 'button',
+  value: 'emptycart'
+}, {
+  "name": "cancelemptycart",
+  "text": "Nevermind",
+  "style": "default",
+  "type": "button",
+  value: 'cancelemptycart'
+}]
 var team_buttons = module.exports.team_buttons =
   [{
     "name": "settings.back",
@@ -165,7 +178,7 @@ var team_buttons = module.exports.team_buttons =
 var focus_default = module.exports.focus_default = function(message) {
   return [{
     "name": "addcart",
-    "text": "Add to Cart",
+    "text": "+ Add to Cart",
     "style": "primary",
     "type": "button",
     "value": message.focus
