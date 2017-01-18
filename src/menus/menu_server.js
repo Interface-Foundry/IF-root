@@ -27,9 +27,13 @@ app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 
-app.use('/', express.static('static'));
+app.use('/menus', express.static('static'));
 app.use('/test', express.static('test'));
 app.use('/ang', express.static('ang'));
+
+var router = express.Router()
+
+app.use('/menus', router)
 
 var MenuSession = db.Menu_session;
 var Menu = db.Menus;
@@ -43,7 +47,7 @@ var ObjectId = require('mongodb').ObjectID;
 // sending over: rest_id, team_id, delivery_ObjectId, user_id, and selected_items
 
 //handle post request with a binder full of data
-app.post('/cafe', (req, res) => co(function * () {
+router.post('/cafe', (req, res) => co(function * () {
   console.log('post to cafe')
   var ms = new MenuSession({
     session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
@@ -84,16 +88,15 @@ app.post('/cafe', (req, res) => co(function * () {
   ms.team_name = sb.team_name
 
   console.log('ms', ms);
-
   yield ms.save();
 
   //return a url w a key in a query string
-  res.send(menuURL + '?k=' + ms.session_token);
+  res.send(menuURL + '/?k=' + ms.session_token);
 }));
 
 //when user hits that url up, post to /session w/key and gets correct pg
 
-app.post('/session', (req, res) => co(function * () {
+router.post('/session', (req, res) => co(function * () {
   if (_.get(req, 'body') && _.get(req, 'body.session_token')) {
     var t = req.body.session_token.replace(/[^\w\s]/gi, '') // clean special char
     try {
@@ -108,7 +111,7 @@ app.post('/session', (req, res) => co(function * () {
 //updates the correct delivery object in the db
 //with the delivery object id saved on the menu session
 
-app.post('/order', function (req, res) {
+router.post('/order', function (req, res) {
   co(function * () {
     console.log('post to /order');
     if (_.get(req, 'body')) {
@@ -139,28 +142,6 @@ app.post('/order', function (req, res) {
 
       console.log('updated delivery; looking for source message');
 
-      // var foodMessage = yield Messages.find({
-      //   'source.user': deliv.convo_initiater.id,
-      //   mode: 'food',
-      //   incoming: false
-      // }).sort('-ts').limit(1);
-      //
-      // foodMessage = foodMessage[0];
-      //
-      // var mess = new Messages({
-      //   incoming: true,
-      //   thread_id: foodMessage.thread_id,
-      //   action: 'cart.personal',
-      //   user_id: foodMessage.source.user,
-      //   mode: 'food',
-      //   origin: 'slack',
-      //   source: foodMessage.source,
-      // })
-      //
-      // yield mess.save();
-      //
-      // yield queue.publish('incoming', mess, ['slack', foodMessage.source.channel, foodMessage.ts, new Date().getSeconds()].join('.'), true)
-
       console.log('ostensibly done');
       res.send();
 
@@ -171,7 +152,7 @@ app.post('/order', function (req, res) {
 });
 
 // k8s readiness ingress health check
-app.get('/health', function (req, res) {
+router.get('/health', function (req, res) {
   res.sendStatus(200)
 })
 
