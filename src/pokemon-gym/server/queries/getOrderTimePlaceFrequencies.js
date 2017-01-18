@@ -1,12 +1,13 @@
 const date = require('../../helpers/date');
-const getOrderTimePlaceFrequencies = (delivery) =>
+const getOrderTimePlaceFrequencies = (delivery, start, end) =>
   new Promise((resolve, reject) => {
     delivery.aggregate([
       {
         $match:
         {
-          'time_started': { $exists: true },
+          'time_started': { $exists: true, $gte: start, $lte: end },
           'chosen_location.address_1': { $exists: true}
+          
         },
       },
       {
@@ -72,5 +73,5 @@ const getOrderTimePlaceFrequencies = (delivery) =>
 module.exports = getOrderTimePlaceFrequencies;
 if (!module.parent) {
   require('../../../kip')
-  getOrderTimePlaceFrequencies(db.delivery).then(console.log.bind(console))
+  getOrderTimePlaceFrequencies(db.delivery, new Date(new Date().setDate(new Date().getDate()-7)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console))
 }

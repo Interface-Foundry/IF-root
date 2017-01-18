@@ -6,7 +6,7 @@ const getWaypointCounts = (waypoints) =>
         $group: {
           _id: {
             waypoint: '$waypoint',
-            //user_id: '$user_id',
+            user_id: '$user_id',
             //delivery_id: '$delivery_id',
           },
           count: { $sum: 1 },
@@ -16,6 +16,7 @@ const getWaypointCounts = (waypoints) =>
         $group: {
           _id: {
             waypoint: '$_id.waypoint',
+            user_id: '$_id.user_id',
           },
           sources: {
             $addToSet: {
@@ -37,10 +38,11 @@ const getWaypointCounts = (waypoints) =>
 
         return {
           waypoint: waypoint._id.waypoint,
+          user_id:waypoint._id.user_id,
           total,
         };
       });
-      resolve(hours);
+      resolve(waypoints);
     });
   });
 
