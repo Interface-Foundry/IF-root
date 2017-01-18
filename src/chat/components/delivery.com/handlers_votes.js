@@ -447,24 +447,21 @@ function buildCuisineDashboard(foodSession) {
 //
 function sendAdminDashboard(foodSession, message) {
   var basicDashboard = buildCuisineDashboard(foodSession)
-  var sampleArray = sampleCuisines(foodSession)
 
   // add the special button to end early
-  basicDashboard.attachments.push({
-    color: '#49d63a',
-    actions: [{
-          name: 'food.admin.restaurant.pick.list',
-          text: 'Finish Voting Early',
-          style: 'default',
-          type: 'button',
-          value: 'food.admin.restaurant.pick.list'
-        }]
-  })
+  basicDashboard.attachments[0].actions = [{
+    name: 'food.admin.restaurant.pick.list',
+    text: 'Finish Voting Early',
+    style: 'default',
+    type: 'button',
+    value: 'food.admin.restaurant.pick.list'
+  }]
 
 
   // add the buttons if they didn't respond already
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
   if (!adminHasVoted) {
+    var sampleArray = sampleCuisines(foodSession)
     basicDashboard.attachments.push({
       'text': 'Tap a button to choose a cuisine',
       'fallback': 'Tap a button to choose a cuisine',
@@ -482,6 +479,7 @@ function sendAdminDashboard(foodSession, message) {
   } else {
     basicDashboard.text = 'Thanks for your vote!'
   }
+
 
   var existingDashbaord = foodSession.cuisine_dashboards.filter(d => d.user === foodSession.convo_initiater.id)[0]
   if (existingDashbaord) {
