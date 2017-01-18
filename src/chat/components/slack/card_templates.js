@@ -50,7 +50,21 @@ var home_screen = module.exports.home_screen = function(isAdmin) {
 };
 
 var onboard_home_attachments = module.exports.onboard_home_attachments = function(delay) {
-  let reply = [{
+  let attachments = []
+  if (delay !== 'initial') {
+    attachments.push({
+      text: '',
+      callback_id: 'whatevs',
+      actions: [{
+        name: 'onboard.start.remind_later',
+        text: '◷ Snooze',
+        style: 'default',
+        type: 'button',
+        value: `remind_later.${delay}`
+      }]
+    })
+  }
+  attachments.push({
     mrkdwn_in: ['text'],
     text: '*Kip Café*\nI can order food for your team!\nLet me show you how to make lunch easier',
     color: '#f43440',
@@ -62,7 +76,8 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
       type: 'button',
       value: 'lunch'
     }]
-  }, {
+  });
+  attachments.push({
     text: '*Kip Store*\nI can shop for your team!\nLet me show you how to make team shopping better',
     mrkdwn_in: ['text'],
     color: '#fe9b00',
@@ -74,22 +89,47 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
       type: 'button',
       value: 'supplies'
     }]
-  }];
+  });
+  return attachments;
+};
+
+var onboard_admin_attachments = module.exports.onboard_admin_attachments = function(delay) {
+  let attachments = [];
   if (delay !== 'initial') {
-    reply.push({
+    attachments.push({
       text: '',
       callback_id: 'whatevs',
       actions: [{
-        name: 'onboard.start.remind_later',
+        name: `onboarding.remind_later.${delay}`,
         text: '◷ Snooze',
         style: 'default',
         type: 'button',
-        value: `remind_later.${delay}`
+        value: `onboarding.remind_later.${delay}`
       }]
     });
   }
-  return reply;
-};
+  attachments.push({
+    image_url: 'https://kipthis.com/kip_modes/mode_success.png',
+    color: '#3AA3E3',
+    mrkdwn_in: ['text'],
+    fallback: 'Onboarding',
+    callback_id: 'none'
+  });
+  attachments.push({
+    text: 'Kudos! *Kip* is now officially a member of your team :blush: ',
+    mrkdwn_in: ['text'],
+    color: '#3AA3E3'
+  })
+  attachments.push({
+    text: 'Who manages the office purchases? Type something like `me` or `me and @jane`',
+    color: '#3AA3E3',
+    mrkdwn_in: [
+      'text',
+      'pretext'
+    ]
+  });
+  return attachments;
+}
 
 var settings_menu = module.exports.settings_menu = [{
   "name": "settings.back",
@@ -114,6 +154,19 @@ var cart_check = module.exports.cart_check = function(id) {
   }]
 }
 
+var empty_cart_check = module.exports.empty_cart_check = [{
+  name: "emptycart",
+  text: 'Empty Cart',
+  style: 'danger',
+  type: 'button',
+  value: 'emptycart'
+}, {
+  "name": "cancelemptycart",
+  "text": "Nevermind",
+  "style": "default",
+  "type": "button",
+  value: 'cancelemptycart'
+}]
 var team_buttons = module.exports.team_buttons =
   [{
     "name": "settings.back",

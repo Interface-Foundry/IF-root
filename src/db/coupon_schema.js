@@ -38,10 +38,7 @@ var couponSchema = mongoose.Schema({
   coupon_order: [{
     order_amount: Number, // value of their order
     user_id: String,
-    foodsession_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "delivery"
-    }
+    foodsession_id: mongoose.Schema.Types.ObjectId
   }],
 
 

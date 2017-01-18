@@ -38,7 +38,7 @@ function * createNewSingleUseCoupon(team_id, couponType, couponAmount, couponCod
 */
 function * checkTeamFor10PercentOffFirstOrder(team_id) {
   const couponCode = '10PercentOffFor5Uses'
-  var teamsCoupons = yield db.Coupons.findOne({team_id: team_id, coupon_code: couponCode})
+  var teamsCoupons = yield db.Coupon.findOne({team_id: team_id, coupon_code: couponCode})
   if (!teamsCoupons) {
     logging.info(`creating coupon for team_id:${team_id} as they havent dont this before`)
     yield createNewMultiUseCoupon(team_id, 'percentage', .10, 5, couponCode, 'first 5 uses get 10% off')

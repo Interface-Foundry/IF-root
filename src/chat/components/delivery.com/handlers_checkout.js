@@ -401,7 +401,7 @@ handlers['food.admin.order.remove_card'] = function * (message) {
     $pull: {'meta.payments': {'card.card_id': message.data.value}}
   }).exec()
 
-  return yield handlers['food.admin.order.pay'](message)
+  yield handlers['food.admin.order.pay'](message)
 }
 
 handlers['food.admin.add_new_card'] = function * (message) {
@@ -447,10 +447,9 @@ handlers['food.admin.add_new_card'] = function * (message) {
     })
     yield foodSession.save()
   } catch (err) {
-    logging.error('error doing kip pay lol', err)
-    $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'ok couldnt submit to kippay try again'}})
-    yield handlers['food.admin.order.pay'](message)
-    return
+    logging.error('error doing kip pay while adding new card', err)
+    $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'Couldnt submit to Kip Pay, try again'}})
+    return yield handlers['food.admin.order.pay'](message)
   }
 
   var response = {
@@ -537,7 +536,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
       'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
-    sleep(5000)
+    yield handlers['food.done'](message)
   } catch (e) {
     logging.error('error doing kip pay in food.admin.order.select_card', e)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kip pay'}})
@@ -575,21 +574,27 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
     }]
   }
   $replyChannel.send(message, 'food.done', {type: message.origin, data: response})
-  yield handlers['food.done'](message)
+  yield handlers['food.done'](message, foodSession)
 }
 
 handlers['food.payment_info'] = function * (message) {
   logging.info('recevied message from pay server')
 }
 
-handlers['food.done'] = function * (message) {
-  logging.error('saving users info to slackbots and peripheral cleanup')
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+handlers['food.done'] = function * (message, foodSession) {
+  logging.info('saving users info to slackbots and peripheral cleanup')
+  if (foodSession === undefined) {
+    logging.warn('foodSession wasnt passed into food.done')
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  }
+  
   db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
 
+  yield handlers['food.need.payments.done'](message, foodSession)
+
   // final area to save and reset stuff
-  logging.info('saving phone_number... ', foodSession.convo_initiater.phone_number)
+  logging.info('saving phone_number... ')
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   user.phone_number = foodSession.convo_initiater.phone_number
   user.first_name = foodSession.convo_initiater.first_name
@@ -600,10 +605,44 @@ handlers['food.done'] = function * (message) {
   logging.info('saving location... ', foodSession.chosen_location)
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   if (!_.find(slackbot.meta.locations, {'address_1': foodSession.chosen_location.address_1})) {
+    logging.debug('location not previously saved')
     slackbot.meta.locations.push(foodSession.chosen_location)
+    yield slackbot.save()
   }
-  yield slackbot.save()
 }
+
+handlers['food.need.payments.done'] = function * (message, foodSession) {
+  if (foodSession === undefined) {
+    logging.warn('foodSession wasnt passed into food.done')
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  }
+  // save info relating to foodSession here but sleep for 100 seconds to let user enter cc
+  var timeStarted = Date.now()
+  timeToWait = 100 * 1000
+
+  while (Date.now() - timeStarted < timeToWait) {
+    logging.info('waiting 20 seconds to see if user has finished checking out')
+    yield sleep(20000)
+    var payment = yield db.Payment.findOne({'order.guest_token': foodSession.guest_token})
+    if (_.get(payment , 'charge.status') === 'succeeded') {
+      logging.info('charge succeeded')
+      foodSession.active = false
+      foodSession.coupon.used = true
+      yield foodSession.save()
+      // save coupon info but needed to wait for payments thing
+      if (_.get(foodSession, 'coupon.code')) {
+        logging.info('saving coupon code stuff')
+        yield coupon.updateCouponForCafe(foodSession)
+      }
+      return
+    } else {
+      logging.info('payment or charge not found yet')
+    }
+  }
+  logging.warn('foodsession never set to false in food.need.payments.done beause of payment.charge.status')
+}
+
+
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel
