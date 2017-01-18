@@ -109,7 +109,7 @@ var onboard_admin_attachments = module.exports.onboard_admin_attachments = funct
     });
   }
   attachments.push({
-    image_url: 'https://kipthis.com/kip_modes/mode_success.png',
+    image_url: 'http://tidepools.co/kip/oregano/thanks.png',
     color: '#3AA3E3',
     mrkdwn_in: ['text'],
     fallback: 'Thanks for inviting me to your team! It’s my first day at <team name> :D\nCould you tell me who buys the office supplies and food? Type `me` or `me and @jane`',
@@ -225,7 +225,7 @@ var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
   return [{
-    image_url: "http://kipthis.com/kip_modes/mode_shopping.png",
+    image_url: "http://tidepools.co/kip/oregano/store.png",
     fallback: 'Welcome to Kip Store',
     text: "",
     mrkdwn_in: [
@@ -252,6 +252,7 @@ var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
     mrkdwn_in: ['text'],
     color: '#3AA3E3',
     callback_id: 'none',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_snacks.png',
     actions: [{
       name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.snackbox',
       text: '+ Add Bundle',
@@ -264,6 +265,7 @@ var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
     mrkdwn_in: ['text'],
     color: '#3AA3E3',
     callback_id: 'none',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_drinks.png',
     actions: [{
       name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.drinks',
       text: '+ Add Bundle',
@@ -276,6 +278,7 @@ var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
     mrkdwn_in: ['text'],
     color: '#3AA3E3',
     callback_id: 'none',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_supplies.png',
     actions: [{
       name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.supplies',
       text: '+ Add Bundle',

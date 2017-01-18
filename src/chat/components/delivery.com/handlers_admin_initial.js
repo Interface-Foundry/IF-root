@@ -121,7 +121,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
       {
         'fallback': 'Kip Cafe',
         'title': '',
-        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
+        'image_url': 'http://tidepools.co/kip/oregano/cafe.png'
       })
   }
 
@@ -284,7 +284,7 @@ handlers['food.choose_address'] = function * (message) {
         {
           'fallback': 'Kip Cafe',
           'title': '',
-          'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png',
+          'image_url': 'http://tidepools.co/kip/oregano/cafe.png',
           'color': '#3AA3E3'
         }
       ]

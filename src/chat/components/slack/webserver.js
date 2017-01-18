@@ -179,7 +179,6 @@ app.post('/slackaction', next(function * (req, res) {
         var lastMessage = parsedIn.original_message;
         kip.debug(`😍  ${JSON.stringify(lastMessage, null, 2)}`)
         if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
-          // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
           _.remove(team.meta.cart_channels, function(c) { return c == channelId });
         } else {
           team.meta.cart_channels.push(channelId);

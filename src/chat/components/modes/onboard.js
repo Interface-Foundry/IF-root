@@ -523,7 +523,7 @@ handlers['cart'] = function * (message) {
  * S4
  */
 handlers['team'] = function * (message) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message, 'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
@@ -559,8 +559,8 @@ handlers['team'] = function * (message) {
     callback_id: "none"
   })];
   chunkedButtons.forEach((ele, i) => {
-    if (i != 0) {
-      attachments.push({text:'', actions: ele, color: '#A368F0',callback_id: 'none'});
+    if (i !== 0) {
+      attachments.push({text:'', actions: ele, color: '#A368F0', callback_id: 'none'});
     }
   })
   attachments.push({
@@ -672,6 +672,7 @@ handlers['handoff'] = function(message) {
   let attachments = [{
     text: 'We did it!\nI think I\'m getting the hang of this :blush:',
     mrkdwn_in: ['text'],
+    image_url: 'http://tidepools.co/kip/oregano/success.png',
     color: '#A368F0',
     fallback: 'We did it!\nI think I\'m getting the hang of this :blush:',
     callback_id: 'take me home pls',
