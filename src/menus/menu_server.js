@@ -55,7 +55,7 @@ app.post('/cafe', (req, res) => co(function * () {
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
-  console.log('req.body!!', req.body)
+  console.log('req.body', req.body)
 
   ms.menu.data = result.raw_menu.menu;
   ms.foodSessionId = req.body.delivery_ObjectId;
@@ -79,10 +79,9 @@ app.post('/cafe', (req, res) => co(function * () {
 
   ms.user.is_admin = user.is_admin
 
-  var group = yield db.groups.findOne({team_id: user.team_id}).exec()
-  console.log('group', group)
+  var sb = yield db.Slackbots.findOne({team_id: foodSession.team_id})
 
-  // ms.
+  ms.team_name = sb.team_name
 
   console.log('ms', ms);
 
