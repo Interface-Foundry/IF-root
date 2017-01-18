@@ -363,7 +363,6 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     printMode(message)
-    debugger;
 
     //MODE SWITCHER
     switch (message.mode) {
