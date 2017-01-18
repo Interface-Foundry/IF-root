@@ -55,9 +55,13 @@ app.post('/cafe', (req, res) => co(function * () {
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
-  console.log('req.body!!', req.body)
-
-  ms.menu.data = result.raw_menu.menu;
+  if (!result) {
+    ms.menu.data = yield db.Delivery.findOne({team_id: req.body.team_id, active: true}).select('menu').exec()
+  } else {
+    ms.menu.data = result.raw_menu.menu;
+  }
+  logging.debug('req.body!!', req.body)
+  logging.debug('here1')
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.user.id = req.body.user_id;
   ms.budget = req.body.budget;
