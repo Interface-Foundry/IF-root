@@ -524,7 +524,9 @@ function* updateCartMsg(cart, parsedIn) {
         }
       }
       all.push(buttons);
-    }
+	} else if (a.text.includes('*Step 3/3:*')) {
+    all.push(a);
+  }
     return all;
   }, []);
 
