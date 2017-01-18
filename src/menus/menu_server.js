@@ -27,7 +27,7 @@ app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 
-app.use('/', express.static('static'));
+app.use('/', express.static(path.join(__dirname, 'static')));
 app.use('/test', express.static('test'));
 app.use('/ang', express.static('ang'));
 
