@@ -44,7 +44,6 @@ Vue.component('choice', {
           return
         }
       }
-
       //add or subtract choice from option's cost
       if (this.choice.price && this.type == "checkbox") {
         if (this.$parent.cost) {
@@ -70,7 +69,7 @@ Vue.component('choice', {
         newOptions[option.id].choices = []
         newOptions[option.id].choices.push(choice)
       }
-      
+
       if (this.type === "checkbox" && this.selected) {
         var choiceExists;
         if (option.id in newOptions) {

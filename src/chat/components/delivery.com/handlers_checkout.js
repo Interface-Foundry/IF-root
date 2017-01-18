@@ -582,10 +582,13 @@ handlers['food.payment_info'] = function * (message) {
 }
 
 handlers['food.done'] = function * (message, foodSession) {
+  logging.info('saving users info to slackbots and peripheral cleanup')
   if (foodSession === undefined) {
     logging.warn('foodSession wasnt passed into food.done')
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   }
+
+  db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
 
   yield handlers['food.need.payments.done'](message, foodSession)
   // final area to save and reset stuff
@@ -636,8 +639,6 @@ handlers['food.need.payments.done'] = function * (message, foodSession) {
   }
   logging.warn('foodsession never set to false in food.need.payments.done beause of payment.charge.status')
 }
-
-
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel
