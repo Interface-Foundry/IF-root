@@ -868,7 +868,7 @@ handlers['food.admin.restaurant.collect_orders.email'] = function * (message, fo
     var mailOptions = {
       'to': `<${m}>`,
       'from': `Kip Café <hello@kipthis.com>`,
-      'subject': `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
+      'subject': `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${foodSession.chosen_restaurant.name}!`,
       'html': `<html><body><p><a href="${merch_url}">View Full Menu</a></p><table style="width:100%" border="1">`
     }
 
