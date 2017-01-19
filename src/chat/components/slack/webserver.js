@@ -602,7 +602,10 @@ app.get('/newslack', function (req, res) {
   }).catch(console.log.bind(console))
 })
 
-
+// k8s readiness ingress health check
+app.get('/health', function (req, res) {
+  res.sendStatus(200)
+})
 
 // app.get('/*', function(req, res, next) {
 //     res.sendfile(defaultPage)

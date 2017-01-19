@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: slack
+    app: slack
   name: slack
 spec:
   ports:
@@ -10,5 +10,5 @@ spec:
     protocol: TCP
     targetPort: 8000
   selector:
-    run: slack
+    app: slack
   type: LoadBalancer
