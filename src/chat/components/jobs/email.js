@@ -1,4 +1,3 @@
-
 var mailer = require('../../../mail/IF_mail.js')
 var fs = require('fs');
 var kipcart = require('../cart');
@@ -15,7 +14,7 @@ module.exports = function(agenda) {
         co(function*(){
             if (!_.get(cart,'aggregate_items')) {
               kip.debug('/jobs/email.js:22: There are no items in cart. Aborting weekly cart status email.');
-              return 
+              return
             }
             var userNames = [];
             yield cart.aggregate_items.map( function * (item) {
@@ -24,7 +23,7 @@ module.exports = function(agenda) {
             })
                  
             var orders = cart.aggregate_items.map( function (item) {
-              var names = item.added_by.map(function(id) { return userNames[id] }) 
+              var names = item.added_by.map(function(id) { return userNames[id] })
               html += `<tr><td>${_.get(item,'title')}</td><td>${_.get(item,'price')}</td><td>${_.get(item,'quantity')}</td><td>${names.join(' ')}</td></tr>`
             });
 

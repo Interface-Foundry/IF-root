@@ -40,7 +40,7 @@
           <h1 :id="category.id"></h1>
           <h2> {{category.name}}</h2>
           <ul>
-            <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
+            <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item>
           </ul>
         </div>
       </div>
@@ -54,7 +54,7 @@
         <div class="cart-body">
           <ul>
             <cart-item v-on:remove="removeItem(item)" v-for="item in cartItems" :item=item v-on:edit="setEditItem(item)"></cart-item>
-          </ul>        
+          </ul>
           <div class="cart-totals">
             <div class="total-item">
               <p class="item-name">Items Subtotal:</p><p class="item-price">${{cartItemsTotal.toFixed(2)}}</p>
@@ -65,19 +65,18 @@
             <div class="total-item">
               <p class="item-name">Total:</p><p class="item-price">${{totalCartAmount.toFixed(2)}}</p>
             </div>
-          </div>        
+          </div>
         </div>
         <div class="cart-footer">
           <button @click="formatCart" v-if="!exceedBudget" class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
           <button class="base-btn" disabled v-if="budget && exceedBudget"> There's only ${{budget.toFixed(2)}} budgeted for this order.</button>
-          
         </div>
       </div>
       <div v-else><h1 class="cart-empty-text">Your cart is empty</h1></div>
     </div>
-    <selected-item  v-if="selectedItem" @close="selectedItem = null" :item=selectedItem v-on:add="addItemToCart"></selected-item>   
-    <edit-item v-if="editingItem" @close="editingItem = null" :item=editingItem></selected-item>        
-  </div>   
+    <selected-item  v-if="selectedItem" @close="selectedItem = null" :item=selectedItem v-on:add="addItemToCart"></selected-item>
+    <edit-item v-if="editingItem" @close="editingItem = null" :item=editingItem></selected-item>
+  </div>
   <script type="text/x-template" id="category-nav-item">
     <a @click="setNavItem" v-bind:class="{selected:isSelected}":href="'#' + category.id">{{category.name}}</a>
   </script>
@@ -96,23 +95,23 @@
       <div class="item-summary"><span class="remove-item-icon" @click="removeItem">X</span><span class="item-name">({{item.quantity}}) {{item.name}}</span><img class="edit-item-icon" @click="editItem" src="images/edit-icon.svg"><span class="item-price">${{item.totalPrice.toFixed(2)}}</span></div>
       <ul class="item-options">
         <li class="item-option-set" v-for="opt in item.options">
-          <p class="item-option-name">{{opt.option.name}}</p>   
-          <ul class="item-option-list"> 
+          <p class="item-option-name">{{opt.option.name}}</p>
+          <ul class="item-option-list">
             <li class="item-choice" v-for="choice in opt.choices">{{choice.name}} <span v-if="choice.price">(+ ${{choice.price}})</span></li>
           </ul>
         </li>
-      </ul> 
+      </ul>
     </li>
-  </script>   
+  </script>
   <script type="text/x-template" id="category-item">
     <li @click="selectItem">
       <div class="item-title"><p class="item-name">{{item.name}}</p><span class="item-price">${{item.price.toFixed(2)}}</span></div>
-      <small class="item-description" v-if="item.description">{{descriptionDisplay}}</small> 
+      <small class="item-description" v-if="item.description">{{descriptionDisplay}}</small>
     </li>
   </script>
   <script type="text/x-template" id="option-set">
     <div>
-      <h5> {{option.name}}</h5>              
+      <h5> {{option.name}}</h5>
       <div class="option-body">
         <choice v-on:options="updateOptions" v-for="choice in option.children" :option=option :choice=choice :type="inputType">
       </div>
@@ -120,7 +119,7 @@
   </script>
   <script type="text/x-template" id="choice">
    <div class="option-choice"> <input v-bind:checked="selected" v-on:change="selectChoice" :id="choice.unique_id" :type="type" :name="option.name"> <label :for="choice.unique_id">{{choice.name}} <span v-if="choice.price > 0" class="option-price"> + ${{choice.price.toFixed(2)}}</span></label></div>
-  </script>  
+  </script>
   <script type="text/x-template" id="item-detail">
     <transition name="modal">
       <div class="modal-mask">
@@ -131,7 +130,7 @@
                 <h3>{{item.name}}</h3>
                 <h3>${{item.price.toFixed(2)}}</h3>
               </div>
-              <div class="modal-close-button" @click="$emit('close')"></div> 
+              <div class="modal-close-button" @click="$emit('close')"></div>
             </div>
             <div class="item-quantity-selector">
               <button @click="decreaseQty">-</button>
@@ -145,8 +144,8 @@
             </div>
             <div class="special-instructions">
               <h5>Special Instructions</h5>
-              <textarea v-model="instructions"></textarea>    
-            </div>            
+              <textarea v-model="instructions"></textarea>
+            </div>
             <div class="modal-footer">
               <button @click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice.toFixed(2)}} </button>
             </div>
@@ -165,7 +164,7 @@
                 <h3>{{item.name}}</h3>
                 <h3>${{item.price.toFixed(2)}}</h3>
               </div>
-              <div class="modal-close-button" @click="$emit('close')"></div> 
+              <div class="modal-close-button" @click="$emit('close')"></div>
             </div>
             <div class="item-quantity-selector">
               <button @click="decreaseQty">-</button>
@@ -179,7 +178,7 @@
             </div>
             <div class="special-instructions">
               <h5>Special Instructions</h5>
-              <textarea v-model="instructions"></textarea>    
+              <textarea v-model="instructions"></textarea>
             </div>
             <div class="modal-footer">
               <button @click="updateItem" class="base-btn"> Update Order ${{totalPrice.toFixed(2)}} </button>
@@ -189,17 +188,12 @@
       </div>
     </transition>
   </script>
-  <script src="js/lodash.min.js"></script>   
+  <script src="js/lodash.min.js"></script>
   <script src="js/vue.js"></script>
   <!-- flexbox polyfill -->
   <script src="js/flexibility.js"></script>
   <script>flexibility(document.body);</script>
-  <script src="js/axios.min.js"></script>      
-  <script src="js/main.js"></script>                  
+  <script src="js/axios.min.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
-      
-      
-
-
-

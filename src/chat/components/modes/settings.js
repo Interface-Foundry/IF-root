@@ -24,7 +24,7 @@ function* handle(message) {
   //     var datum = _.get(message,'data.value');
   //     kip.debug('\n\n\n🤖🤖🤖 action : ', action, ' choice: ', choice, 'datum: ', datum,' 🤖\n\n\n');
   //     return yield handlers[action](message, choice, datum);
-  // } else 
+  // } else
   if (!last_action || last_action != 'home') {
     action = 'start';
   } else if (message.text) {
@@ -93,7 +93,7 @@ handlers['start'] = function * (message) {
   }
 
   attachments.push({text: adminText});
- 
+
   var color = '#45a5f4';
 
   var status = team.meta.weekly_status_enabled ? 'Off' : 'On';
@@ -138,7 +138,7 @@ handlers['start'] = function * (message) {
       })
     })
   }
-  else { 
+  else {
     // for case when settings is typed
     var msg = message;
     msg.mode = 'settings'
@@ -166,7 +166,7 @@ handlers['email'] = function * (message, status) {
   yield team.save();
   if (_.get(message,'source.response_url') && _.get(message,'source.original_message.attachments')) {
     var attachments = _.get(message,'source.original_message.attachments');
-    var button = {  
+    var button = {
                   "id": "1",
                   "name": "settings.email." + reverse.toLowerCase(),
                   "text": "Turn " + reverse + " Email",
@@ -196,6 +196,7 @@ handlers['email'] = function * (message, status) {
 
   if (status == 'on') {
     var admins = yield utils.findAdmins(team);
+    var cart_id = message.cart_reference_id || message.source.team;
     yield admins.map( function * (admin) {
       agenda.every('0 15 * * 5','send email', { userId: _.get(admin,'id'), to: _.get(admin,'profile.email'), subject: 'This is your weekly team cart status email from Kip!' });
     })
@@ -249,7 +250,7 @@ handlers['add_or_remove'] = function * (message) {
           mrkdwn_in: ['text'],
           fallback:'Settings',
           actions: [
-              {   
+              {
                 "name": "settings.back",
                 "text": "Home",
                 "style": "default",
@@ -352,7 +353,7 @@ handlers['sorry'] = function * (message) {
       fallback:'Settings',
       actions: [
           {
-            "style": "primary",    
+            "style": "primary",
             "name": "settings.back",
             "text": "Home",
             "type": "button"
