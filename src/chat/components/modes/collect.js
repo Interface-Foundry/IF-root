@@ -176,7 +176,7 @@ handlers['reminder'] = function*(message) {
 };
 
 handlers['handoff'] = function(message) {
-  let attachments = cardTemplate.home_screen(true);
+  let attachments = cardTemplate.home_screen(true, message.source.user);
   attachments.text = 'Ok, I\'ve sent them a reminder  :tada:\nWhat\'s next?';
   let msg = {
     action: 'simplehome',

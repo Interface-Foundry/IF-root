@@ -31,9 +31,9 @@ handlers['home'] = function(message) {
     mrkdwn_in: ['text'],
     color: '#A368F0',
     fallback: 'Looking for some supplies? Pick a bundle below',
-    actions: cardTemplate.slack_bundles,
     callback_id: 'none'
   });
+  attachments = attachments.concat(cardTemplate.slack_bundles())
   attachments.push({
     'text': utils.randomStoreHint(),
     mrkdwn_in: ['text']

@@ -154,7 +154,7 @@ handlers['back'] = function * (message) {
   request({
     method: 'POST',
     uri: message.source.response_url,
-    body: JSON.stringify(cardTemplate.home_screen(true))
+    body: JSON.stringify(cardTemplate.home_screen(true, message.source.user))
   })
 }
 

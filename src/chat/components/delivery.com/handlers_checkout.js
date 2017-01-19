@@ -2,7 +2,7 @@ var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
 var sleep = require('co-sleep')
-
+var coupon = require('../../../coupon/couponUsing.js')
 
 // injected dependencies
 var $replyChannel
@@ -34,6 +34,11 @@ handlers['food.admin.order.checkout.address2'] = function * (message) {
         'text': `None`,
         'type': `button`,
         'value': `none`
+      }, {
+        'name': 'food.feedback.new',
+        'text': '⇲ Send feedback',
+        'type': 'button',
+        'value': 'food.feedback.new'
       }]
     }]
   }
@@ -336,6 +341,11 @@ handlers['food.admin.order.pay'] = function * (message) {
         'text': `< Change Order`,
         'type': `button`,
         'value': `change`
+      }, {
+        'name': 'food.feedback.new',
+        'text': '⇲ Send feedback',
+        'type': 'button',
+        'value': 'food.feedback.new'
       }]
     }]
   }
@@ -531,8 +541,8 @@ handlers['food.admin.order.select_card'] = function * (message) {
 
     foodSession.save()
     var response = {
-      'text': 'Order was successful! You should get an email confirmation soon!',
-      'fallback': 'Order was successful! You should get an email confirmation soon!',
+      'text': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
+      'fallback': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
       'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
@@ -581,6 +591,7 @@ handlers['food.payment_info'] = function * (message) {
   logging.info('recevied message from pay server')
 }
 
+
 handlers['food.done'] = function * (message, foodSession) {
   logging.info('saving users info to slackbots and peripheral cleanup')
   if (foodSession === undefined) {
@@ -588,7 +599,7 @@ handlers['food.done'] = function * (message, foodSession) {
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   }
 
-  //db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
+  db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
 
   yield handlers['food.need.payments.done'](message, foodSession)
   // final area to save and reset stuff

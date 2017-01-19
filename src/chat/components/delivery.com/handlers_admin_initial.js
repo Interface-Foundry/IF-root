@@ -92,8 +92,8 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   var msg_json = {
     'attachments':
     [{
-      'text': 'Which address is this food delivery for?',
-      'fallback': 'Which address is this food delivery for??',
+      'text': 'Great! Which address is this for?',
+      'fallback': 'Great! Which address is this for?',
       'callback_id': 'address',
       'color': '#3AA3E3',
       'attachment_type': 'default',

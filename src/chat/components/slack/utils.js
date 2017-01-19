@@ -667,12 +667,42 @@ function randomSearching() {
  * Chooses a random welcome message
  * @return {String} a welcome message, suffixed with a (happy) emoji
  */
-function randomWelcome() {
+function randomWelcome(userId) {
   let messages = [
-    'Welcome to Kip! \u00A0:smile:',
-    'Hi! Thanks for using Kip \u00A0:blush:',
-    'Hey, what do you need? \u00A0:grinning:',
-    'Hi, what can I do for you? \u00A0:slightly_smiling_face:'
+    'Hey there, how can I help you today?',
+    'Looking for something? Let me help',
+    'Hey how\'ve you been?',
+    'Did you know the first digital assistant was made in 1992? We’ve come a long way!',
+    'Fun fact: Mars Curiosity Rover has an AI that is programmed to sing happy birthday to itself',
+    `Hey <@${userId}>, what’s up?`,
+    `Hey <@${userId}>, how’s it going?`,
+    `Hey <@${userId}>, good to see you`,
+    `Hey <@${userId}>, what’s happening?`,
+    `Hey, what can I do for you?`
+  ];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num];
+}
+
+function randomCafeDescrip() {
+  let messages = [
+    'I can help you collect food orders for the team',
+    'Let me help you order food for the team',
+    'Make ordering food as easy as a pie',
+    'I’ll love to help you collect orders for food'
+  ];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num];
+}
+
+function randomStoreDescrip() {
+  let messages = [
+    'Short of pencils? Need paper? Let me help!',
+    'I can help you get a list of things your team needs',
+    'Let me help you get all the stuff your team needs',
+    'I’ll put together a list of things your team needs',
+    'I’ll help you get all the team supplies you need',
+    'Don’t waste time, I’ll get the team supplies for you!'
   ];
   let num = Math.floor(Math.random() * messages.length);
   return messages[num];
@@ -699,5 +729,7 @@ module.exports = {
   setCron: setCron,
   randomWelcome: randomWelcome,
   randomStoreHint: randomStoreHint,
-  randomSearching: randomSearching
+  randomSearching: randomSearching,
+  randomStoreDescrip: randomStoreDescrip,
+  randomCafeDescrip: randomCafeDescrip
 };

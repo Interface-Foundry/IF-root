@@ -26,6 +26,8 @@ logging:
     prettyPrint: true
   mongo:
     enabled: false
+  debugFileLine:
+    enabled: false
 meetupAuth:
   consumerKey: vgmujlff2vflhtutplkaf15h
   consumerSecret: hub4tmkp966ir5q4jaaa41qc4l

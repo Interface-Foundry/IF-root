@@ -205,7 +205,7 @@ function * onSuccess (payment) {
       } else {
         foodString = itemNames[0]
       }
-      var homeMsg = cardTemplates.home_screen(true);
+      var homeMsg = cardTemplates.home_screen(true, payment.source.user);
       homeMsg.type = finalFoodMessage.origin;
       homeMsg.text = `Your order of ${foodString} is on the way 😊`;
       replyChannel.send(
