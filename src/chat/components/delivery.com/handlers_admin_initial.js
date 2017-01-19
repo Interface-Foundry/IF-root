@@ -121,7 +121,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
       {
         'fallback': 'Kip Cafe',
         'title': '',
-        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
+        'image_url': 'http://tidepools.co/kip/oregano/cafe.png'
       })
   }
 
@@ -284,7 +284,7 @@ handlers['food.choose_address'] = function * (message) {
         {
           'fallback': 'Kip Cafe',
           'title': '',
-          'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png',
+          'image_url': 'http://tidepools.co/kip/oregano/cafe.png',
           'color': '#3AA3E3'
         }
       ]
@@ -537,6 +537,7 @@ handlers['food.delivery_or_pickup'] = function * (message) {
   // Sometimes we have to wait a ilttle bit for the merchants to finish populating from an earlier step
   // i ended up just sending the reply back in that earlier step w/o waiting for delivery.com, because
   // delivery.com is so slow
+  
   var time = +new Date()
   while (_.get(foodSession, 'merchants.length', 0) <= 0 && (+new Date() - time < 3000)) {
     if (!alreadyWaiting) {
@@ -570,7 +571,7 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ? {
+  yield $replyChannel.sendReplace(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ?{\
     text: `*Budget*: $${foodSession.budget} / person`
   } : {
     text: '*Budget*: Unlimited'

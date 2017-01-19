@@ -88,7 +88,7 @@ function typing(message) {
 }
 
 function simplehome(message, isAdmin) {
-  var slackreply = card_templates.home_screen(isAdmin);
+  var slackreply = card_templates.home_screen(isAdmin, message.source.user);
   var msg = {
     action: 'simplehome',
     mode: 'food',
@@ -363,7 +363,6 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     printMode(message)
-    debugger;
 
     //MODE SWITCHER
     switch (message.mode) {

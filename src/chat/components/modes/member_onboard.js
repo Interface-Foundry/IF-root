@@ -41,6 +41,7 @@ handlers['step_1'] = function(message) {
   msg.mode = 'member_onboard';
   msg.action = 'home';
   msg.text = '';
+  msg.image_url = 'http://tidepools.co/kip/oregano/onboard_3.png';
   msg.fallback = 'Step 1/3: Find items to add to team cart';
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
@@ -194,6 +195,7 @@ handlers['cart'] = function * (message) {
     text: '*Step 3/3:* Well done!\n I\'ve added your item to the team cart',
     mrkdwn_in: ['text'],
     color: '#A368F0',
+    image_url: 'http://tidepools.co/kip/oregano/success.png',
     fallback: 'Step 3/3: Well done!\n I\'ve added your item to the team cart',
     callback_id: 'take me home pls',
     actions: [{

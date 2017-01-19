@@ -4,6 +4,7 @@ var request = require('request-promise')
 var sleep = require('co-sleep')
 
 
+
 // injected dependencies
 var $replyChannel
 var $allHandlers
@@ -589,6 +590,8 @@ handlers['food.done'] = function * (message, foodSession) {
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   }
   
+  db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
+
   db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
 
   yield handlers['food.need.payments.done'](message, foodSession)

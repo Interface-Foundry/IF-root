@@ -13,27 +13,27 @@ Vue.component('choice', {
   },
   methods: {
     selectChoice: function() {
-
+      
       if (this.$parent.isPriceGroup) {
-        this.$parent.item.price = this.choice.price;
+        this.$parent.item.price = this.choice.price;    
       }
 
       // toggle selected data for checkbox options
       if (this.type === "checkbox") {
         this.selected = !this.selected
       }
-
+       
       // set selected on radio to true and all other radios to false
       if (this.type === "radio") {
-        choiceBus.$emit('radio-selected', this.choice)
+        choiceBus.$emit('radio-selected', this.choice) 
       }
-
+      
       var selectedOption;
       var selectedKey;
-
+      
       _.pickBy(this.$parent.$parent.options, function(val, key) {
         selectedOption = val;
-        selectedKey = key;
+        selectedKey = key; 
       });
 
       // find choice's option in SelectedItem's options to calculate when we hit max and min selections
@@ -54,7 +54,6 @@ Vue.component('choice', {
         }
       }
 
-
       if (this.choice.price && this.type == "radio") {
         this.$parent.cost = this.choice.price
       }
@@ -70,6 +69,7 @@ Vue.component('choice', {
         newOptions[option.id].choices = []
         newOptions[option.id].choices.push(choice)
       }
+      
       if (this.type === "checkbox" && this.selected) {
         var choiceExists;
         if (option.id in newOptions) {
@@ -92,6 +92,7 @@ Vue.component('choice', {
           newOptions[option.id].choices.push(choice)
         }
       }
+      
       if (this.type === "checkbox"  && !this.selected) {
         newOptions[option.id].choices.forEach(function(c) {
           if (c.id === choice.id) {
@@ -114,7 +115,7 @@ Vue.component('choice', {
     var choice = this.choice;
     var options = this.$parent.$parent.options;
     var that = this;
-
+    
     _.forOwn(options, function(value, key) {
         value.choices.forEach(function(c) {
           if (c.id === choice.id) {
@@ -122,7 +123,6 @@ Vue.component('choice', {
           }
         })
     })
-
     choiceBus.$on('radio-selected', function(selectedChoice) {
       if (that.type === "radio") {
         if (that.choice.id == selectedChoice.id && !that.selected) {

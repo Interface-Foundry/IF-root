@@ -179,7 +179,6 @@ app.post('/slackaction', next(function * (req, res) {
         var lastMessage = parsedIn.original_message;
         kip.debug(`😍  ${JSON.stringify(lastMessage, null, 2)}`)
         if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
-          // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
           _.remove(team.meta.cart_channels, function(c) { return c == channelId });
         } else {
           team.meta.cart_channels.push(channelId);
@@ -278,7 +277,7 @@ app.post('/slackaction', next(function * (req, res) {
       }
       else if (simple_command == 'exit') {
         let isAdmin = yield utils.isAdmin(message.source.user, team);
-        let reply = cardTemplate.home_screen(isAdmin);
+        let reply = cardTemplate.home_screen(isAdmin, message.source.user);
         var slackBot = slackModule.slackConnections[team];
         reply.as_user = true;
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
@@ -524,7 +523,9 @@ function* updateCartMsg(cart, parsedIn) {
         }
       }
       all.push(buttons);
-    }
+	} else if (a.text.includes('*Step 3/3:*')) {
+    all.push(a);
+  }
     return all;
   }, []);
 

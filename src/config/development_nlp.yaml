@@ -8,16 +8,18 @@ slack:
   client_id: "40262605191.99843739429"
   client_secret: 00a0a312ef83e675243ca4102080aae1
   verification_token: twZRwtgqPxHdOMNVru9MqD6p
-  redirect_uri: https://41a4892a.ngrok.io/newslack
-kipPayURL: https://a3b3598a.ngrok.io
-menuURL: https://f9d513a7.ngrok.io
+  redirect_uri: https://8e957d39.ngrok.io/newslack
+kipPayURL: https://aed70489.ngrok.io
+menuURL: https://3d7b72f7.ngrok.io
 picstitchDelivery: http://delivery-picstitch.kipthis.com
 logging:
   console:
-    level: silly
-    json: true
+    level: debug
+    json: false
     stringify: true
     colorize: true
     prettyPrint: true
   mongo:
     enabled: false
+  debugFileLine:
+    enabled: true

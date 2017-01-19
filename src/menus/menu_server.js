@@ -27,7 +27,7 @@ app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 
-app.use('/menus', express.static('static'));
+app.use('/', express.static(path.join(__dirname, 'static')));
 app.use('/test', express.static('test'));
 app.use('/ang', express.static('ang'));
 
@@ -59,9 +59,13 @@ router.post('/cafe', (req, res) => co(function * () {
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
-  console.log('req.body', req.body)
-
-  ms.menu.data = result.raw_menu.menu;
+  if (!result) {
+    ms.menu.data = yield db.Delivery.findOne({team_id: req.body.team_id, active: true}).select('menu').exec()
+  } else {
+    ms.menu.data = result.raw_menu.menu;
+  }
+  logging.debug('req.body!!', req.body)
+  
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.user.id = req.body.user_id;
   ms.budget = req.body.budget;
@@ -83,6 +87,22 @@ router.post('/cafe', (req, res) => co(function * () {
 
   ms.user.is_admin = user.is_admin
 
+  var group = yield db.groups.findOne({team_id: user.team_id}).exec()
+  console.log('group', group)
+
+  // ms.
+
+  console.log('ms', ms);
+
+  var foodSession = yield db.Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
+
+  ms.admin_name = foodSession.convo_initiater.name //initiatOr oyyyy
+
+  var user = yield db.Chatusers.findOne({id: ms.user.id})
+  if (!user) user = yield db.email_users.findOne({id: ms.user.id}).exec()
+
+  ms.user.is_admin = user.is_admin
+
   var sb = yield db.Slackbots.findOne({team_id: foodSession.team_id})
 
   ms.team_name = sb.team_name
@@ -91,7 +111,7 @@ router.post('/cafe', (req, res) => co(function * () {
   yield ms.save();
 
   //return a url w a key in a query string
-  res.send(menuURL + '/?k=' + ms.session_token);
+  res.send(menuURL + '?k=' + ms.session_token);
 }));
 
 //when user hits that url up, post to /session w/key and gets correct pg
