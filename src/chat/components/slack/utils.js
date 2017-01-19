@@ -209,6 +209,21 @@ function * refreshAllChannels (slackbot) {
   yield slackbot.slackbot.save()
 }
 
+function * refreshAllUserIMs (slackbot) {
+  logging.debug('trying to update all users dms')
+  var userIMInfo = yield slackbot.web.im.list()
+  yield userIMInfo.ims.map(function * (u) {
+    var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
+    if (chatUser.dm !== u.id) {
+      logging.debug('updating user dm', chatUser.name)
+      chatUser.dm = u.id
+      chatUser.save()
+    } else {
+      logging.debug('no need to update user dm', chatUser.name)
+    }
+  })
+}
+
 function * removeCartChannel(message, channel_name) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
   var channels = yield request({url: 'https://slack.com/api/channels.list?token=' + team.bot.bot_access_token, json: true});
@@ -705,6 +720,7 @@ function randomStoreDescrip() {
 }
 
 module.exports = {
+  refreshAllUserIMs: refreshAllUserIMs,
   initializeTeam: initializeTeam,
   findAdmins: findAdmins,
   getTeamMembers: getTeamMembers,
