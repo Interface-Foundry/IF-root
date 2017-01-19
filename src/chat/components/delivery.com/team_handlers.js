@@ -93,12 +93,12 @@ handlers['food.admin.team.members'] = function * (message) {
     'value': 'select_team_members'
   })
 
-  buttons.actions.push({
-    'name': 'passthrough',
-    'text': 'View Email Members',
-    'type': 'button',
-    'value': 'food.admin.team.email_members'
-  })
+  // buttons.actions.push({
+  //   'name': 'passthrough',
+  //   'text': 'View Email Members',
+  //   'type': 'button',
+  //   'value': 'food.admin.team.email_members'
+  // })
 
   buttons.actions.push({
     name: 'passthrough',
@@ -199,12 +199,12 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     'value': message.data.value
   })
 
-  buttons.actions.push({
-    'name': 'passthrough',
-    'text': 'View Email Members',
-    'type': 'button',
-    'value': 'food.admin.team.email_members'
-  })
+  // buttons.actions.push({
+  //   'name': 'passthrough',
+  //   'text': 'View Email Members',
+  //   'type': 'button',
+  //   'value': 'food.admin.team.email_members'
+  // })
 
   buttons.actions.push({
     name: 'food.admin.restaurant.reordering_confirmation',
