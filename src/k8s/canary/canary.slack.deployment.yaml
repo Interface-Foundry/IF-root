@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: slack
+  namespace: canary
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: slack
+    spec:
+      containers:
+      - image: gcr.io/kip-styles/slack:canary
+        imagePullPolicy: Always
+        name: slack
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

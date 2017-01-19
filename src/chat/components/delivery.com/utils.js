@@ -144,6 +144,7 @@ function * initiateDeliverySession (session) {
     team_id: session.source.team,
     is_bot: {$ne: true},
     deleted: {$ne: true},
+    type: {$ne: 'email'}, // the email db.chatusers is outdated
     id: {$ne: 'USLACKBOT'}}).exec()
 
   if (WHITELISTS[session.source.team]) {

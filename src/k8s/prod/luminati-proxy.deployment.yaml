@@ -29,6 +29,8 @@ spec:
           value: "22225"
         - name: LOG
           value: info
+        - name: ZONE
+          value: static
         image: gcr.io/kip-styles/luminati-proxy:20170103
         imagePullPolicy: Always
         name: luminati-proxy
