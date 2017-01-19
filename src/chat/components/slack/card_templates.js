@@ -66,7 +66,7 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
   }
   attachments.push({
     mrkdwn_in: ['text'],
-    text: '*Kip Café*\nI can order food for your team!\nLet me show you how to make lunch easier',
+    text: '*Kip Café*\nI can help you collect food orders for the team',
     color: '#f43440',
     callback_id: 'wow such home',
     actions: [{
@@ -78,7 +78,7 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
     }]
   });
   attachments.push({
-    text: '*Kip Store*\nI can shop for your team!\nLet me show you how to make team shopping better',
+    text: '*Kip Store*\nI can help you get a list of things your team needs',
     mrkdwn_in: ['text'],
     color: '#fe9b00',
     callback_id: 'wow such home',

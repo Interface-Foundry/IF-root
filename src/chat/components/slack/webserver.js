@@ -176,56 +176,41 @@ app.post('/slackaction', next(function * (req, res) {
         var channelId = _.get(parsedIn,'actions[0].value');
         var team_id = message.source.team;
         var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-        var lastMessage = parsedIn.original_message;
-        kip.debug(`😍  ${JSON.stringify(lastMessage, null, 2)}`)
-        if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
-          _.remove(team.meta.cart_channels, function(c) { return c == channelId });
+        let cartChannels = team.meta.cart_channels;
+        if (cartChannels.find(id => { return (id == channelId) })) {
+          _.remove(cartChannels, function(c) { return c == channelId });
         } else {
-          team.meta.cart_channels.push(channelId);
+          cartChannels.push(channelId);
         }
-        team.meta.cart_channels = _.uniq(team.meta.cart_channels);
+        cartChannels = _.uniq(cartChannels);
         team.markModified('meta.cart_channels');
         yield team.save();
-        var channels = yield utils.getChannels(team);
-        if (channels.length > 9) {
-          channels = channels.slice(0, 9);
-        }
-        var attachments = [];
-        var buttons = channels.map(channel => {
-          var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
-          return {
-            name: 'channel_btn',
-            text: checkbox + channel.name ,
-            type: 'button',
-            value: channel.id
-          }
+        let json = parsedIn.original_message;
+        json.attachments = json.attachments.map(row => {
+          if (!row.actions) return row;
+          row.actions = row.actions.map(button => {
+            if (button.value === channelId) {
+              let channelName = button.text;
+              if (channelName.includes('☐')) {
+                channelName = channelName.replace('☐', '✓');
+              } else {
+                channelName = channelName.replace('✓', '☐');
+              }
+              button.text = channelName;
+            }
+            return button;
+          });
+          return row;
         });
-        buttons = _.uniq(buttons);
-        function sortF(a, b){
-          return ((a.text.indexOf('☐ ') > -1) - (b.text.indexOf('☐ ') > -1))
-        }
-        buttons = buttons.sort(sortF)
-        if (buttons.length > 9) {
-          buttons = buttons.slice(0, 9);
-        }
-        var chunkedButtons = _.chunk(buttons, 5);
-        chunkedButtons.forEach((ele, i) => {
-          let newRow = lastMessage.attachments[i];
-          newRow.actions = chunkedButtons[i];
-          attachments.push(newRow);
-        })
-        attachments = attachments.concat(lastMessage.attachments[lastMessage.attachments.length - 2], lastMessage.attachments[lastMessage.attachments.length - 1]);
-        var json = parsedIn.original_message;
-        json.attachments = attachments;
         let stringOrig = JSON.stringify(json);
         let map = {
           amp: '&',
           lt: '<',
           gt: '>',
           quot: '"',
-          '#039': "'"
-        }
-        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+          '#039': '\''
+        };
+        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
         request({
           method: 'POST',
           uri: message.source.response_url,
