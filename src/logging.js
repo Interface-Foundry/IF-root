@@ -67,7 +67,7 @@ logging = new(winston.Logger)({
 })
 
 // show file:line on debug
-if (userConfigFile.logging.debugFileLine.enabled) {
+if (userConfigFile.logging.debugFileLine.enabled === true) {
   logging.filters.push(function(level, msg, meta) {
     if (level === 'debug') {
       var e = new Error()
