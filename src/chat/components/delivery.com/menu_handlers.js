@@ -226,8 +226,8 @@ if (foodSession.budget) {
     }
   }
 
-  var url = yield menu_utils.getUrl(foodSession, message.source.user)
-  if (!url) url = foodSession.chosen_restaurant.url
+  // var url = yield menu_utils.getUrl(foodSession, message.source.user)
+  var url = foodSession.chosen_restaurant.url
 
   //resto name
   msg_json.attachments.push({
