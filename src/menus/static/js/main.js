@@ -43,7 +43,7 @@ Vue.component('choice', {
           alert("You can only select " + this.maxSelection + " choices.")
           return
         }
-        
+
       }
       //add or subtract choice from option's cost
       if (this.choice.price && this.type == "checkbox") {
@@ -53,15 +53,14 @@ Vue.component('choice', {
           this.$parent.cost = this.choice.price
         }
       }
-      
-      
+
       if (this.choice.price && this.type == "radio") {
         this.$parent.cost = this.choice.price
       }
 
       var options = this.$parent.$parent.options;
       var option = this.option;
-      var newOptions = options || {};     
+      var newOptions = options || {};
       var choice = this.choice;
 
       if (this.type === "radio") {
@@ -69,7 +68,8 @@ Vue.component('choice', {
         newOptions[option.id].option = option
         newOptions[option.id].choices = []
         newOptions[option.id].choices.push(choice)
-      } 
+      }
+      
       if (this.type === "checkbox" && this.selected) {
         var choiceExists;
         if (option.id in newOptions) {
@@ -77,36 +77,37 @@ Vue.component('choice', {
           newOptions[option.id].choices.forEach(function(c) {
             if (c.id === choice.id) {
               choiceExists = true;
-            } 
-          }) 
+            }
+          })
           if (!choiceExists) {
             //if option exists but choice doesn't exist, add choice
-            newOptions[option.id].choices.push(choice)             
+            newOptions[option.id].choices.push(choice)
           }
-        } 
+        }
         else {
           //option doesn't exist yet so create it and the choice
           newOptions[option.id] = {}
           newOptions[option.id].option = option
           newOptions[option.id].choices = []
-          newOptions[option.id].choices.push(choice) 
+          newOptions[option.id].choices.push(choice)
         }
-      } 
+      }
+      
       if (this.type === "checkbox"  && !this.selected) {
         newOptions[option.id].choices.forEach(function(c) {
           if (c.id === choice.id) {
             var i = _.indexOf(newOptions[option.id].choices, choice)
-            newOptions[option.id].choices.splice(i, 1)                   
-          }    
+            newOptions[option.id].choices.splice(i, 1)
+          }
         })
       }
-      
-      newOptions[option.id].option.cost = this.$parent.cost           
+
+      newOptions[option.id].option.cost = this.$parent.cost
       if (this.type === "checkbox") {
         if (option.id in newOptions && !newOptions[option.id].choices.length) {
           delete newOptions[option.id]
-        }           
-      }     
+        }
+      }
       this.$emit('options', newOptions)
     }
   },
@@ -122,25 +123,24 @@ Vue.component('choice', {
           }
         })
     })
-    
     choiceBus.$on('radio-selected', function(selectedChoice) {
       if (that.type === "radio") {
         if (that.choice.id == selectedChoice.id && !that.selected) {
-            that.selected = true; 
+            that.selected = true;
         } else {
           that.selected = false;
-        } 
+        }
       }
     })
   }
 })
 
 Vue.component('option-set', {
-  props: ['option', 'item'],  
-  template: '#option-set',  
+  props: ['option', 'item'],
+  template: '#option-set',
   data: function() {
     return {
-      inputType: "", 
+      inputType: "",
       cost: this.option.cost || 0,
       isPriceGroup: this.option.type === "price group" ? true : false,
       minSelection: this.option.min_selection
@@ -154,7 +154,7 @@ Vue.component('option-set', {
   created: function() {
     if (this.option.max_selection === 1 && this.option.type === "price group") {
       this.inputType = "radio"
-    } 
+    }
     else {
       this.inputType = "checkbox"
     }
@@ -163,7 +163,7 @@ Vue.component('option-set', {
 
 
 Vue.component('cart-item', {
-  props: ['item'],  
+  props: ['item'],
   template: '#cart-item',
   methods: {
     editItem: function() {
@@ -171,12 +171,12 @@ Vue.component('cart-item', {
     },
     removeItem: function() {
       this.$emit('remove', this.item)
-    }    
+    }
   }
 })
 
 Vue.component('edit-item', {
-  props: ['item'],  
+  props: ['item'],
   template: '#edit-item',
   data: function() {
     return {
@@ -184,61 +184,61 @@ Vue.component('edit-item', {
       instructions: this.item.instructions,
       options: this.item.options,
       editedItem: {},
-      optionsCost: this.item.optionsCost      
+      optionsCost: this.item.optionsCost
     }
   },
   methods: {
     increaseQty: function() {
       if(this.quantity > 0 && this.quantity < this.item.max_qty) {
-        this.quantity += 1 
-      }  
+        this.quantity += 1
+      }
     },
     decreaseQty: function() {
       if(this.quantity > this.item.min_qty) {
         this.quantity -= 1;
-      }          
+      }
     },
     updateItem: function() {
       this.editedItem.quantity = this.quantity
-      this.editedItem.options = this.options     
+      this.editedItem.options = this.options
       this.editedItem.totalPrice = this.totalPrice
-      this.editedItem.instructions = this.instructions   
+      this.editedItem.instructions = this.instructions
       this.editedItem.optionsCost = this.optionsCost
-      var newItem = _.assign({},this.item, this.editedItem) 
+      var newItem = _.assign({},this.item, this.editedItem)
       var i = _.indexOf(this.$parent.cartItems, this.item);
       this.$set(this.$parent.cartItems, i, newItem)
       this.$emit('close')
     },
     setOptions: function(options) {
       var that = this;
-      var cost = 0; 
+      var cost = 0;
 
       if (_.isEmpty(options)) { this.optionsCost = 0; return; }
-      
+
       _.forOwn(options, function(val, key) {
         if (val.option.cost && val.option.type != "price group") {
-          cost += val.option.cost      
+          cost += val.option.cost
         }
       })
-      
+
       this.optionsCost = cost;
       this.options = options;
-    } 
+    }
   },
-  computed: { 
+  computed: {
     totalPrice: function() {
       var totalPrice = ((this.item.price + this.optionsCost)* this.quantity);
-      return totalPrice    
-    }    
+      return totalPrice
+    }
   },
 })
 
 Vue.component('category-item', {
-  props: ['item'],  
+  props: ['item'],
   template: '#category-item',
   data: function() {
     return {
-      descriptionDisplay: ""  
+      descriptionDisplay: ""
     }
   },
   methods: {
@@ -250,8 +250,8 @@ Vue.component('category-item', {
     if (this.item.description.length >= 70) {
       this.descriptionDisplay = (this.item.description.slice(0, 70) + "...")
     } else {
-      this.descriptionDisplay = this.item.description    
-    } 
+      this.descriptionDisplay = this.item.description
+    }
   }
 })
 
@@ -260,7 +260,7 @@ Vue.component('more-selector', {
   props: ['categories'],
   data: function() {
     return {
-      showMore: false, 
+      showMore: false,
     }
   },
   methods: {
@@ -281,21 +281,21 @@ Vue.component('category-nav-item', {
       isSelected: false,
       id: this.category.id,
       name: this.category.name
-    }  
+    }
   },
   methods: {
     setNavItem: function() {
-      categoryNavBus.$emit('nav-item-selected', this) 
-    }  
+      categoryNavBus.$emit('nav-item-selected', this)
+    }
   },
   created: function() {
     var that = this;
     this.id == "all" ? this.isSelected = true : this.isSelected = false
     categoryNavBus.$on('nav-item-selected', function(item) {
       if (item == that) {
-        that.isSelected = true  
+        that.isSelected = true
       } else {
-        that.isSelected = false  
+        that.isSelected = false
       }
     })
   }
@@ -317,23 +317,23 @@ Vue.component('selected-item', {
   methods: {
     addItemToCart: function() {
       this.selectedItem.quantity = this.quantity
-      this.selectedItem.options = this.options    
+      this.selectedItem.options = this.options
       this.selectedItem.optionsCost = this.optionsCost
       this.selectedItem.totalPrice = this.totalPrice
-      this.selectedItem.instructions = this.instructions    
+      this.selectedItem.instructions = this.instructions
       var newItem = _.assign({},this.item, this.selectedItem)
       this.$parent.addItemToCart(newItem)
       this.$emit('close')
     },
     increaseQty: function() {
       if(this.quantity > 0 && this.quantity < this.item.max_qty) {
-        this.quantity += 1 
-      }  
+        this.quantity += 1
+      }
     },
     decreaseQty: function() {
       if(this.quantity > this.item.min_qty) {
         this.quantity -= 1;
-      }          
+      }
     },
     setOptions: function(options) {
       this.options = options;
@@ -342,9 +342,9 @@ Vue.component('selected-item', {
       if (_.isEmpty(this.options)) { this.optionsCost = 0 }
       _.forOwn(this.options, function(val, key) {
         if (val.option.cost && val.option.type !== "price group") {
-          that.optionsCost += val.option.cost        
+          that.optionsCost += val.option.cost
         }
-      })      
+      })
     }
   },
   computed: {
@@ -397,20 +397,20 @@ var app = new Vue({
       var remove = window.confirm("Are you sure you want to remove " + item.name + "?")
       if (remove) {
         var i = _.indexOf(this.cartItems, item);
-        this.cartItems.splice(i, 1)               
+        this.cartItems.splice(i, 1)
       }
     },
     scrollToTop: function() {
       window.scrollTo(0,0)
       if (this.notDesktop) {
-        this.isCartVisibleOnMobile = false        
+        this.isCartVisibleOnMobile = false
       }
     },
     handleScroll: function() {
       if ((Math.floor(window.scrollY) >= 196) && this.notDesktop) {
-        this.fixNav = true    
+        this.fixNav = true
       } else {
-        this.fixNav = false  
+        this.fixNav = false
       }
     },
     formatCart: function() {
@@ -424,10 +424,10 @@ var app = new Vue({
         for (var opt in i.options) {
           var choices = i.options[opt].choices;
           choices.forEach(function(choice) {
-            item.option_qty[choice.id] = 1 
+            item.option_qty[choice.id] = 1
           })
         }
-        cart.push(item) 
+        cart.push(item)
       })
       this.submitOrder(cart)
     },
@@ -438,12 +438,12 @@ var app = new Vue({
         console.log(res)
         that.cartItems = []
         if (that.notDesktop) {
-          that.isCartVisibleOnMobile = false 
+          that.isCartVisibleOnMobile = false
         }
         window.close()
       })
       .catch(function(err) {
-        console.log(err) 
+        console.log(err)
       })
     }
   },
@@ -464,7 +464,7 @@ var app = new Vue({
     },
     taxAmount: function() {
       var tax = (this.cartItemsTotal * .075)
-      return tax 
+      return tax
     },
     totalCartAmount: function() {
       var amount = (this.cartItemsTotal + this.taxAmount)
@@ -475,14 +475,14 @@ var app = new Vue({
     },
     exceedBudget: function() {
       if (this.budget) {
-        return this.cartItemsTotal > this.budget ? true : false 
+        return this.cartItemsTotal > this.budget ? true : false
       } else {
-        return false 
+        return false
       }
     },
     remainingBudget: function() {
       if (this.budget && (this.budget - this.cartItemsTotal) > 1.50) {
-        return this.budget - this.cartItemsTotal  
+        return this.budget - this.cartItemsTotal
       } else {
         return false
       }
@@ -492,13 +492,13 @@ var app = new Vue({
     menu: function() {
       this.navCategories = this.menu.slice(0,5)
       this.moreCategories = this.menu.slice(5, -1)
-    } 
+    }
   },
   created: function() {
-    window.addEventListener('scroll', this.handleScroll);    
+    window.addEventListener('scroll', this.handleScroll);
     var that = this;
     var key = window.location.search.split("=")[1]
-    axios.post('/session', {session_token: key})
+    axios.post('/menus/session', {session_token: key})
     .then((response) => {
       this.user_id = response.data.userId
       this.food_session_id = response.data.foodSessionId
@@ -519,7 +519,7 @@ var app = new Vue({
             that.selectedItem = item;
           }
         })
-      }      
+      }
     })
     .catch((err) => {
       console.log(err);

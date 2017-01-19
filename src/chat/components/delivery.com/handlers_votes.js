@@ -49,13 +49,13 @@ function sampleCuisines (foodSession) {
     }
   })
   // add cancel button
-    sampleArray.push({
-      name: 'food.admin.restaurant.pick',
-      value: 'user_remove',
-      text: '× No Food for Me',
-      type: 'button',
-      style: 'danger'
-    })
+  sampleArray.push({
+    name: 'food.admin.restaurant.pick',
+    value: 'user_remove',
+    text: '× No Food for Me',
+    type: 'button',
+    style: 'danger'
+  })
 
   return sampleArray
 }
@@ -248,7 +248,7 @@ handlers['food.admin.vote'] = function * (message) {
   yield handlers['food.admin.restaurant.pick.list'](message)
 }
 
-//for when the admin "skip"s the poll
+// mysterious code here
 handlers['food.admin.poll'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -827,7 +827,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       }
     ]
   }
-
+  
   yield handlers['food.admin.restaurant.collect_orders.email'](message, foodSession)
 
   logging.debug('about to send message to each user to confirm if they want to be in order')

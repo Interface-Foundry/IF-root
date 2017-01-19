@@ -2,7 +2,7 @@ var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
 var sleep = require('co-sleep')
-var coupon = require('../../../coupon/couponUsing.js')
+
 
 
 // injected dependencies
@@ -589,6 +589,8 @@ handlers['food.done'] = function * (message, foodSession) {
     logging.warn('foodSession wasnt passed into food.done')
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   }
+  
+  db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
 
   db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
 
