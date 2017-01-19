@@ -17,12 +17,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     color: '#45a5f4',
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png',
     callback_id: 'press me',
-    actions: [{
-        'name': 'passthrough',
-        'text': 'Home',
-        'type': 'button',
-        'value': 'home'
-      }]
+    actions: []
   }];
   if (isAdmin) {
     cartObj[0].actions.push({
@@ -31,14 +26,27 @@ module.exports = function*(message, slackbot, highlight_added_item) {
       'type': 'button',
       'value': 'home'
     });
-    if (cart.aggregate_items.length > 0)
+    if (cart.aggregate_items.length > 0) {
       cartObj[0].actions.push({
-        'name': 'emptycartwarn',
+        'name': 'emptycart',
         'text': 'Empty Cart',
         'type': 'button',
-        'value': 'emptycartwarn'
+        'value': 'emptycart',
+        'confirm': {
+          'title': 'Are you sure?',
+          'text': 'Are you sure you want to empty your cart?',
+          'ok_text': 'Yes',
+          'dismiss_text': 'No'
+        }
       });
+    }
   }
+  cartObj[0].actions.push({
+    'name': 'passthrough',
+    'text': 'Home',
+    'type': 'button',
+    'value': 'home'
+  })
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];
     var addedByUser = item.added_by.includes(message.source.user);

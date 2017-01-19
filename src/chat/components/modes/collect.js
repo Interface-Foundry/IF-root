@@ -14,7 +14,7 @@ winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
  * @param {Message} message       the message that led to this being shown
  * @yield {[Message]} an array of messages
  */
-function* handle(message) {
+function * handle(message) {
   let action;
   if (!message.data) {
     action = 'text';
@@ -34,7 +34,7 @@ module.exports.handle = handle;
  * @param {Message} message       the message that led to this being shown
  * @yield {[Message]} an array of messages
  */
-handlers['initial'] = function*(message) {
+handlers['initial'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -72,11 +72,11 @@ handlers['initial'] = function*(message) {
     : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
   let chunkedButtons = _.chunk(buttons, 5);
   let attachments = [{
-    text: 'Which channels would you like to send a reminder to?',
+    text: 'Which group members would you like to collect orders from?',
     mrkdwn_in: ['text'],
     color: '#45a5f4',
     actions: chunkedButtons[0],
-    fallback: 'Which channels would you like to send a reminder to?',
+    fallback: 'Which group members would you like to collect orders from?',
     callback_id: 'none'
   }];
   chunkedButtons.forEach((ele, i) => {
@@ -99,19 +99,30 @@ handlers['initial'] = function*(message) {
     text: '',
     color: '#45a5f4',
     mrkdwn_in: ['text'],
-    fallback: 'Which channels would you like to send a reminder to?',
+    fallback: 'Which group members would you like to collect orders from?',
     actions: [{
       name: 'collect.home.reminder',
-      text: 'Notify Members',
+      text: 'Ask Them Now',
       style: 'primary',
       type: 'button',
       value: 'reminder'
+    }, {
+      name: 'passthrough',
+      text: 'Just Me',
+      style: 'default',
+      type: 'button',
+      value: 'shopping'
     }, {
       name: 'settings',
       text: '⚙️',
       style: 'default',
       type: 'button',
       value: 'start'
+    }, {
+      'name': 'passthrough',
+      'text': 'Home',
+      'type': 'button',
+      'value': 'home'
     }],
     callback_id: 'none'
   });
@@ -131,7 +142,7 @@ handlers['initial'] = function*(message) {
  * @param {Message} message       the message that led to this being shown
  * @yield {[Message]} an array of messages
  */
-handlers['reminder'] = function*(message) {
+handlers['reminder'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -140,7 +151,7 @@ handlers['reminder'] = function*(message) {
     'team_id': team_id
   }).exec();
   var channelMembers = [];
-  yield team.meta.cart_channels.map(function*(channel) {
+  yield team.meta.cart_channels.map(function * (channel) {
     var members = yield utils.getChannelMembers(team, channel);
     channelMembers = channelMembers.concat(members);
   });
@@ -180,17 +191,20 @@ handlers['reminder'] = function*(message) {
 };
 
 handlers['handoff'] = function(message) {
-  let attachments = cardTemplate.home_screen(true, message.source.user);
-  attachments.text = 'Ok, I\'ve sent them a reminder  :tada:\nWhat\'s next?';
-  let msg = {
-    action: 'simplehome',
-    mode: 'food',
-    source: message.source,
-    origin: message.origin,
-    reply: {
-      data: attachments
-    }
-  };
+  let attachments = [{
+    text: '',
+    actions: cardTemplate.slack_shopping_buttons
+  }, {
+    'text': utils.randomStoreHint(),
+    mrkdwn_in: ['text']
+  }];
+  let msg = message;
+
+  msg.text = 'Ok, I\'ve let them know  :tada:\n Looking for something? ';
+  msg.action = 'switch.silent';
+  msg.mode = 'shopping';
+  msg.reply = attachments;
+
   return [msg];
 };
 
@@ -320,39 +334,9 @@ handlers['text'] = function*(message) {
  * @yield {[Message]} an array of messages
  */
 handlers['sorry'] = function*(message) {
-  message.text = 'Sorry, my brain froze!'
+  message.text = 'Sorry, my brain froze! Type `home` to go home'
   message.mode = 'collect';
   message.action = 'home';
-  var attachments = [];
-  attachments.push({
-    text: 'Don’t have any changes? Type `exit` to quit collect',
-    color: '#49d63a',
-    mrkdwn_in: ['text'],
-    fallback: 'Sorry!',
-    actions: [{
-      'style': 'primary',
-      'name': 'settings.back',
-      'text': 'Home',
-      'type': 'button'
-    }, {
-      'name': 'team',
-      'text': 'Team Members',
-      'style': 'default',
-      'type': 'button',
-      'value': 'team'
-    }, {
-      'name': '',
-      'text': 'View Cart',
-      'style': 'default',
-      'type': 'button',
-      'value': 'team'
-    }],
-    callback_id: 'none'
-  });
-  attachments.map(function(a) {
-    a.mrkdwn_in = ['text'];
-    a.color = '#45a5f4';
-  });
-  message.reply = attachments;
+  message.mrkdwn_in = ['text'];
   return [message];
 };

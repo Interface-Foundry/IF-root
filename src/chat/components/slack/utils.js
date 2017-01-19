@@ -320,11 +320,7 @@ function * showLoading(message) {
      var msg = new db.Message(message);
      msg.mode = 'loading';
      msg.action = 'show'
-     msg.text = '';
-     msg.reply = [{
-        text: searchMsg,
-        color: '#45a5f4'
-      }];
+     msg.text =searchMsg;
      yield msg.save()
      return yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.results');
     }
@@ -339,7 +335,7 @@ function * showLoading(message) {
       uri: message.source.response_url,
       body: JSON.stringify(json)
     });
-    return
+    return;
 }
 
 function * hideLoading(message) {

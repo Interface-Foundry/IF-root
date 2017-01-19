@@ -157,13 +157,8 @@ app.post('/slackaction', next(function * (req, res) {
         }).exec();
         let isAdmin = yield utils.isAdmin(message.source.user, team);
         message.mode = 'shopping'
-        if (isAdmin) {
-          message.action = 'adminInitial';
-          message.text = 'sendCollect';
-        } else {
-          message.action = 'initial';
-          message.text = 'shopping';
-        }
+        message.action = 'initial';
+        message.text = 'shopping';
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         });
@@ -325,21 +320,12 @@ app.post('/slackaction', next(function * (req, res) {
             callback_id: parsedIn.original_message.attachments[index].callback_id
           };
           break;
-        case 'emptycartwarn':
-          parsedIn.original_message.attachments[index] = {
-            text: `Are you sure you want to empty your cart?`,
-            actions: cardTemplate.empty_cart_check,
-            mrkdwn_in: ['text'],
-            callback_id: parsedIn.original_message.attachments[index].callback_id
-          };
-          break;
-        case 'cancelemptycart':
         case 'cancelremove':
           co(function * () {
             cart = yield kipcart.getCart(parsedIn.team.id); // 'team' assumes this is a slack command. need a way to tell
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
-          break;
+          return;
         case 'removeall':
           // reduces the quantity right way, but for speed we return a hacked message right away
           co(function*() {
@@ -351,10 +337,9 @@ app.post('/slackaction', next(function * (req, res) {
           parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
           break;
         case 'emptycart':
-          co(function*() {
-            cart = yield kipcart.emptyCart(parsedIn.team.id);
-            yield updateCartMsg(cart, parsedIn);
-          }).catch(console.log.bind(console));
+          cart = yield kipcart.emptyCart(parsedIn.team.id);
+          yield updateCartMsg(cart, parsedIn);
+          return;
       }
       var stringOrig = JSON.stringify(parsedIn.original_message)
       let map = {
@@ -392,7 +377,7 @@ function clearCartMsg(attachments) {
   }, []);
 }
 
-function* updateCartMsg(cart, parsedIn) {
+function * updateCartMsg(cart, parsedIn) {
   let itemNum = 1,
     team = yield db.slackbots.findOne({
       team_id: parsedIn.team.id
@@ -500,10 +485,16 @@ function* updateCartMsg(cart, parsedIn) {
         });
         if (cart.aggregate_items.length > 0) {
           buttons.actions.push({
-            'name': 'emptycartwarn',
+            'name': 'emptycart',
             'text': 'Empty Cart',
             'type': 'button',
-            'value': 'emptycartwarn'
+            'value': 'emptycart',
+            'confirm': {
+              'title': 'Are you sure?',
+              'text': 'Are you sure you want to empty your cart?',
+              'ok_text': 'Yes',
+              'dismiss_text': 'No'
+            }
           });
         }
       }
