@@ -225,17 +225,9 @@ var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
   return [{
+    text: 'Looking for something?',
+    fallback: 'Looking for something?',
     image_url: "http://tidepools.co/kip/oregano/store.png",
-    fallback: 'Welcome to Kip Store',
-    text: "",
-    mrkdwn_in: [
-      "text",
-      "pretext"
-    ],
-    color: "#45a5f4"
-  }, {
-    text: 'Tap to search for something',
-    fallback: 'Tap to search for something',
     callback_id: 'wopr_game',
     color: "#45a5f4",
     attachment_type: 'default',

@@ -6,14 +6,14 @@ var slackUtils = require('./utils.js')
 var buttons = function(num, shortMode, mode) {
   return shortMode ? [{
       "name":  `${mode}.addcart`,
-      "text": "Add to Cart",
+      "text": "+ Add to Cart",
       "style": "primary",
       "type": "button",
       "value": 'addcart.' + num
     }] : [
     {
       "name": 'addcart',
-      "text": "Add to Cart",
+      "text": "+ Add to Cart",
       "style": "primary",
       "type": "button",
       "value": num
