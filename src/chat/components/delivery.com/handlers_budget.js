@@ -89,11 +89,14 @@ handlers['food.admin.team_budget'] = function * (message) {
   }
 
   var noneButton = {
-    'name': 'passthrough',
+    'name': 'food.admin.confirm_budget',
     'text': 'Unlimited',
     'style': 'default',
     'type': 'button',
-    'value': 'food.admin_polling_options'
+    'value': {
+      budget: 0,
+      new: false
+    }
   };
 
   if (budget_options.length % 5 == 0) {

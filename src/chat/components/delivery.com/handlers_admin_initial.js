@@ -92,8 +92,8 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   var msg_json = {
     'attachments':
     [{
-      'text': 'Great! Which address is this for?',
-      'fallback': 'Great! Which address is this for?',
+      'text': 'Which address is this food delivery for?',
+      'fallback': 'Which address is this food delivery for??',
       'callback_id': 'address',
       'color': '#3AA3E3',
       'attachment_type': 'default',
@@ -570,7 +570,9 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  yield $replyChannel.sendReplace(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ? {
+  console.log('foodSession.budget', foodSession.budget)
+
+  yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ? {
     text: `*Budget*: $${foodSession.budget} / person`
   } : {
     text: '*Budget*: Unlimited'
