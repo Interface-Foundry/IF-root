@@ -11,4 +11,4 @@ spec:
     targetPort: 8000
   selector:
     app: slack
-  type: LoadBalancer
+  type: NodePort

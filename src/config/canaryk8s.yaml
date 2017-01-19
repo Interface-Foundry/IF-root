@@ -13,6 +13,8 @@ picstitchDelivery: http://delivery-picstitch.kipthis.com
 logging:
   console:
     level: silly
+    json: false
+    stringify: false
     colorize: true
     prettyPrint: true
   mongo:

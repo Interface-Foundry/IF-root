@@ -54,25 +54,25 @@ utils.sortMenu = function (foodSession, user, matchingItems) {
   return sortedMenu
 }
 
-utils.getUrl = function * (foodSession, user_id, selected_items) {
-  if (!selected_items) selected_items = [];
-  try {
-    return yield request({
-        url: popoutUrl,
-        method: 'POST',
-        json: {
-          'rest_id': foodSession.chosen_restaurant.id,
-          'team_id': foodSession.team_id,
-          'delivery_ObjectId': foodSession._id,
-          'budget': foodSession.budget,
-          'user_id': user_id,
-          'selected_items': selected_items
-        }
-    })
-  } catch (err) {
-    logging.error('ERROR in getURL', err)
-  }
-}
+// utils.getUrl = function * (foodSession, user_id, selected_items) {
+//   if (!selected_items) selected_items = [];
+//   try {
+//     return yield request({
+//         url: popoutUrl,
+//         method: 'POST',
+//         json: {
+//           'rest_id': foodSession.chosen_restaurant.id,
+//           'team_id': foodSession.team_id,
+//           'delivery_ObjectId': foodSession._id,
+//           'budget': foodSession.budget,
+//           'user_id': user_id,
+//           'selected_items': selected_items
+//         }
+//     })
+//   } catch (err) {
+//     logging.error('ERROR in getURL', err)
+//   }
+// }
 
 utils.cuisineEmoji = function (cuisine) {
     var e

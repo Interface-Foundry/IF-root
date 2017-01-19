@@ -144,8 +144,9 @@ function* processProductLink(message) {
   }
   if (asin) {
     yield amazon_variety.getVariations(asin, message);
-    return;
+    return true;
   }
+  return false;
 }
 
 function switchMode(message) {
@@ -334,8 +335,10 @@ queue.topic('incoming').subscribe(incoming => {
       return yield shopping[_.get(message,'action')](message);
     }
 
-    yield processProductLink(message);
-
+    let isLink = yield processProductLink(message);
+    if (isLink) {
+      return;
+    }
     if (switchMode(message)) {
       message.mode = switchMode(message);
       if (message.mode.match(/(settings|team|onboard|bundles)/)) message.action = 'home';

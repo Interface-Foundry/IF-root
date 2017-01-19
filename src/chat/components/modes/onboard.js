@@ -528,28 +528,35 @@ handlers['team'] = function * (message) {
     return kip.debug('incorrect team id : ', message);
   }
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  var cartChannels = team.meta.cart_channels;
-  var channels = yield utils.getChannels(team);
-  var buttons = channels.map(channel => {
-    var checkbox = cartChannels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
-    return {
-      name: 'channel_btn',
-      text: checkbox + channel.name,
-      type: 'button',
-      value: channel.id
-    };
-  });
-  buttons = _.uniq(buttons);
-  function sortF(a, b){
-    return ((a.text.indexOf('☐ ') > -1) - (b.text.indexOf('☐ ') > -1))
-  }
-  buttons = buttons.sort(sortF)
-
-  if (buttons.length > 9) {
-     buttons = buttons.slice(0,9);
-  }
-
-  var chunkedButtons = _.chunk(buttons, 5);
+  let cartChannels = team.meta.cart_channels;
+  let channels = yield utils.getChannels(team);
+  let selectedChannels = channels.reduce((arr, channel) => {
+    if (cartChannels.includes(channel.id)) {
+      arr.push({
+        name: 'channel_btn',
+        text: `✓ #${channel.name}`,
+        type: 'button',
+        value: channel.id
+      });
+    }
+    return arr;
+  }, []);
+  let unselectedChannels = channels.reduce((arr, channel) => {
+    if (!cartChannels.includes(channel.id)) {
+      arr.push({
+        name: 'channel_btn',
+        text: `☐ #${channel.name}`,
+        type: 'button',
+        value: channel.id
+      });
+    }
+    return arr;
+  }, []);
+  selectedChannels = _.uniq(selectedChannels);
+  unselectedChannels = _.uniq(unselectedChannels);
+  let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
+    : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
+  let chunkedButtons = _.chunk(buttons, 5);
   let attachments = [({
     text: '*Step 3/3:* Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include:',
     mrkdwn_in: ['text'],

@@ -157,13 +157,8 @@ app.post('/slackaction', next(function * (req, res) {
         }).exec();
         let isAdmin = yield utils.isAdmin(message.source.user, team);
         message.mode = 'shopping'
-        if (isAdmin) {
-          message.action = 'adminInitial';
-          message.text = 'sendCollect';
-        } else {
-          message.action = 'initial';
-          message.text = 'shopping';
-        }
+        message.action = 'initial';
+        message.text = 'shopping';
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         });
@@ -176,56 +171,41 @@ app.post('/slackaction', next(function * (req, res) {
         var channelId = _.get(parsedIn,'actions[0].value');
         var team_id = message.source.team;
         var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-        var lastMessage = parsedIn.original_message;
-        kip.debug(`😍  ${JSON.stringify(lastMessage, null, 2)}`)
-        if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
-          _.remove(team.meta.cart_channels, function(c) { return c == channelId });
+        let cartChannels = team.meta.cart_channels;
+        if (cartChannels.find(id => { return (id == channelId) })) {
+          _.remove(cartChannels, function(c) { return c == channelId });
         } else {
-          team.meta.cart_channels.push(channelId);
+          cartChannels.push(channelId);
         }
-        team.meta.cart_channels = _.uniq(team.meta.cart_channels);
+        cartChannels = _.uniq(cartChannels);
         team.markModified('meta.cart_channels');
         yield team.save();
-        var channels = yield utils.getChannels(team);
-        if (channels.length > 9) {
-          channels = channels.slice(0, 9);
-        }
-        var attachments = [];
-        var buttons = channels.map(channel => {
-          var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
-          return {
-            name: 'channel_btn',
-            text: checkbox + channel.name ,
-            type: 'button',
-            value: channel.id
-          }
+        let json = parsedIn.original_message;
+        json.attachments = json.attachments.map(row => {
+          if (!row.actions) return row;
+          row.actions = row.actions.map(button => {
+            if (button.value === channelId) {
+              let channelName = button.text;
+              if (channelName.includes('☐')) {
+                channelName = channelName.replace('☐', '✓');
+              } else {
+                channelName = channelName.replace('✓', '☐');
+              }
+              button.text = channelName;
+            }
+            return button;
+          });
+          return row;
         });
-        buttons = _.uniq(buttons);
-        function sortF(a, b){
-          return ((a.text.indexOf('☐ ') > -1) - (b.text.indexOf('☐ ') > -1))
-        }
-        buttons = buttons.sort(sortF)
-        if (buttons.length > 9) {
-          buttons = buttons.slice(0, 9);
-        }
-        var chunkedButtons = _.chunk(buttons, 5);
-        chunkedButtons.forEach((ele, i) => {
-          let newRow = lastMessage.attachments[i];
-          newRow.actions = chunkedButtons[i];
-          attachments.push(newRow);
-        })
-        attachments = attachments.concat(lastMessage.attachments[lastMessage.attachments.length - 2], lastMessage.attachments[lastMessage.attachments.length - 1]);
-        var json = parsedIn.original_message;
-        json.attachments = attachments;
         let stringOrig = JSON.stringify(json);
         let map = {
           amp: '&',
           lt: '<',
           gt: '>',
           quot: '"',
-          '#039': "'"
-        }
-        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+          '#039': '\''
+        };
+        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
         request({
           method: 'POST',
           uri: message.source.response_url,
@@ -340,21 +320,12 @@ app.post('/slackaction', next(function * (req, res) {
             callback_id: parsedIn.original_message.attachments[index].callback_id
           };
           break;
-        case 'emptycartwarn':
-          parsedIn.original_message.attachments[index] = {
-            text: `Are you sure you want to empty your cart?`,
-            actions: cardTemplate.empty_cart_check,
-            mrkdwn_in: ['text'],
-            callback_id: parsedIn.original_message.attachments[index].callback_id
-          };
-          break;
-        case 'cancelemptycart':
         case 'cancelremove':
           co(function * () {
             cart = yield kipcart.getCart(parsedIn.team.id); // 'team' assumes this is a slack command. need a way to tell
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
-          break;
+          return;
         case 'removeall':
           // reduces the quantity right way, but for speed we return a hacked message right away
           co(function*() {
@@ -366,10 +337,9 @@ app.post('/slackaction', next(function * (req, res) {
           parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
           break;
         case 'emptycart':
-          co(function*() {
-            cart = yield kipcart.emptyCart(parsedIn.team.id);
-            yield updateCartMsg(cart, parsedIn);
-          }).catch(console.log.bind(console));
+          cart = yield kipcart.emptyCart(parsedIn.team.id);
+          yield updateCartMsg(cart, parsedIn);
+          return;
       }
       var stringOrig = JSON.stringify(parsedIn.original_message)
       let map = {
@@ -407,7 +377,7 @@ function clearCartMsg(attachments) {
   }, []);
 }
 
-function* updateCartMsg(cart, parsedIn) {
+function * updateCartMsg(cart, parsedIn) {
   let itemNum = 1,
     team = yield db.slackbots.findOne({
       team_id: parsedIn.team.id
@@ -515,10 +485,16 @@ function* updateCartMsg(cart, parsedIn) {
         });
         if (cart.aggregate_items.length > 0) {
           buttons.actions.push({
-            'name': 'emptycartwarn',
+            'name': 'emptycart',
             'text': 'Empty Cart',
             'type': 'button',
-            'value': 'emptycartwarn'
+            'value': 'emptycart',
+            'confirm': {
+              'title': 'Are you sure?',
+              'text': 'Are you sure you want to empty your cart?',
+              'ok_text': 'Yes',
+              'dismiss_text': 'No'
+            }
           });
         }
       }
