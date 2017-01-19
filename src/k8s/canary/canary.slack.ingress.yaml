@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: echoserver
+  namespace: echoserver
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "gce"
+spec:
+  tls:
+  - hosts:
+    - slack.kipthis.com
+    secretName: slack-tls
+  rules:
+  - host: slack.kipthis.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: slack
+          servicePort: 80
