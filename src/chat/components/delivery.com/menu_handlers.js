@@ -1,6 +1,7 @@
 'use strict'
 var _ = require('lodash')
 var stable = require('stable')
+var striptags = require('striptags')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
@@ -146,9 +147,9 @@ if (foodSession.budget) {
     parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
 
     //clean out html from descriptions
-    var html = /<.*>/
-    desc = desc.replace(html, '');
-    parentDescription = parentDescription.replace(html, '');
+
+    desc = striptags(desc)
+    parentDescription = striptags(parentDescription)
 
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
