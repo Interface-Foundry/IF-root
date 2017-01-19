@@ -51,8 +51,8 @@ handlers['step_1'] = function(message) {
     color: '#A368F0',
     fallback: 'Step 1/3: Find items to add to team cart'
   }, {
-    text: 'Tap to search for something',
-    fallback: 'You are unable to choose a game',
+    text: 'Looking for something?',
+    fallback: 'Looking for something?',
     callback_id: 'wopr_game',
     color: '#3AA3E3',
     attachment_type: 'default',

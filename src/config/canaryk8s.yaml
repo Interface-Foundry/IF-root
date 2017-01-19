@@ -19,4 +19,6 @@ logging:
     prettyPrint: true
   mongo:
     enabled: true
+  debugFileLine:
+    enabled: false
 menuURL: http://cafe.kipthis.com

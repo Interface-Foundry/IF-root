@@ -160,10 +160,12 @@ handlers['reminder'] = function * (message) {
     if (a.id === message.source.user) return;
     let attachments = [{
       text: '',
-      actions: cardTemplate.slack_shopping_buttons
+      image_url: 'http://tidepools.co/kip/oregano/store.png',
+      actions: cardTemplate.slack_shopping_buttons,
+      color: '#45a5f4'
     }, {
       'text': utils.randomStoreHint(),
-      mrkdwn_in: ['text']
+      mrkdwn_in: ['text'],
     }];
     var newMessage = new db.Message({
       text: `Hey <@${message.source.user}> is collecting orders! Let me know what you need`,
@@ -192,7 +194,9 @@ handlers['reminder'] = function * (message) {
 
 handlers['handoff'] = function(message) {
   let attachments = [{
-    text: '',
+    text: 'Looking for something?',
+    color: '#45a5f4',
+    image_url: 'http://tidepools.co/kip/oregano/store.png',
     actions: cardTemplate.slack_shopping_buttons
   }, {
     'text': utils.randomStoreHint(),
@@ -200,11 +204,11 @@ handlers['handoff'] = function(message) {
   }];
   let msg = message;
 
-  msg.text = 'Ok, I\'ve let them know  :tada:\n Looking for something? ';
+  msg.text = 'Ok, I\'ve let them know  :tada:';
   msg.action = 'switch.silent';
   msg.mode = 'shopping';
   msg.reply = attachments;
-
+  msg.image_url = 'http://tidepools.co/kip/oregano/store.png';
   return [msg];
 };
 
