@@ -65,8 +65,8 @@ router.post('/cafe', (req, res) => co(function * () {
   } else {
     ms.menu.data = result.raw_menu.menu;
   }
-
-  ms.menu.data = result.raw_menu.menu;
+  console.log('this is the menu data')
+  console.log(ms.menu.data);
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.user.id = req.body.user_id;
   ms.budget = req.body.budget;
@@ -78,16 +78,8 @@ router.post('/cafe', (req, res) => co(function * () {
 
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
-
-  console.log('woe is me');
-
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
-
-  console.log('super thronos viginti quattuor')
-
   ms.selected_items = req.body.selected_items;
-
-  console.log('me misera')
 
   var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
 
