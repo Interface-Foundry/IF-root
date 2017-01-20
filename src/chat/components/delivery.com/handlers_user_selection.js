@@ -120,7 +120,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           //   'value': 'food.admin.select_address'
           {
             'name': 'passthrough',
-            'value': 'food.admin.poll',
+            'value': 'food.admin.restaurant.pick.list',
             'text': '> Skip',
             'type': 'button'
           }
