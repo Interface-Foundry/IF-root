@@ -500,15 +500,28 @@ var app = new Vue({
     var key = window.location.search.split("=")[1]
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
-      this.user_id = response.data.userId
+      console.log(JSON.stringify(response))
+      this.user_id = response.data.user.id
       this.food_session_id = response.data.foodSessionId
       var menuData = response.data.menu.data
+      console.log(menuData)
       var menu;
+      
+      if (menuData.hasOwnProperty('menu')) {
+        // menus nested deep
+        if (menuData.menu.hasOwnProperty('menu')) {
+          menuData = menuData.menu.menu 
+        } else {
+          menuData = menuData.menu 
+        }
+      }
+      
       if (menuData.length > 1) {
         menu = menuData
       } else {
         menu = menuData[0].children
       }
+      
       this.menu = menu;
       this.merchant = response.data.merchant;
       this.budget = response.data.budget? (response.data.budget * 1.25) : false
