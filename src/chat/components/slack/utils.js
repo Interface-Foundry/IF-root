@@ -355,28 +355,39 @@ function* showLoading(message) {
   return;
 }
 
-function * hideLoading(message) {
-    var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
-    var relevantMessage = history[0];
-    var json =  message.reply;
-    if (!message.source.original_message) {
-     var msg = new db.Message(message);
-     msg.mode = 'loading';
-     msg.action = 'hide';
-     msg.text = '';
-     msg.data =  {hide_ts: relevantMessage.ts};
-     yield msg.save()
-     return yield queue.publish('outgoing.' + msg.origin, msg, msg._id + '.reply.results')
-    }
-    message.source.original_message.attachments.splice(-1,1);
-     request({
+function* hideLoading(message) {
+  var history = yield db.Messages.find({
+    'thread_id': message.source.channel
+  }).sort({
+    '_id': -1
+  }).limit(2).exec();
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({
+    team_id: team_id
+  }).exec();
+  var relevantMessage = history[0];
+  if (!message.source.original_message) {
+    let token = team.bot.bot_access_token,
+      channel = message.source.channel,
+      ts = message.source.ts;
+    yield request({
+      uri: `https://slack.com/api/chat.delete?token=${token}&ts=${ts}&channel=${channel}&as_user=true`,
       method: 'POST',
-      uri: relevantMessage.source.response_url,
-      body: JSON.stringify(message.source.original_message)
+      json: true
     });
-    return
+    return;
+  }
+  message.source.original_message.attachments.splice(-1, 1);
+  request({
+    method: 'POST',
+    uri: relevantMessage.source.response_url,
+    body: JSON.stringify(message.source.original_message)
+  });
+  return;
 }
-
 
 function* sendLastCalls(message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
@@ -702,7 +713,7 @@ function randomCafeDescrip() {
     'I can help you collect food orders for the team',
     'Let me help you order food for the team',
     'Make ordering food as easy as a pie',
-    'I’ll love to help you collect orders for food'
+    'I’d love to help you collect orders for food'
   ];
   let num = Math.floor(Math.random() * messages.length);
   return messages[num];

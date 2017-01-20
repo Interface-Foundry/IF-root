@@ -216,6 +216,7 @@ handlers['handoff'] = function(message) {
     text: 'Looking for something?',
     color: '#45a5f4',
     image_url: 'http://tidepools.co/kip/oregano/store.png',
+    callback_id: 'oops',
     actions: cardTemplate.slack_shopping_buttons
   }, {
     'text': utils.randomStoreHint(),
