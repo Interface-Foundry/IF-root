@@ -45,7 +45,6 @@ handlers['shopping.initial'] = function*(message, exec) {
       action: 'switch'
       })
   }
-  // typing(message);
   message._timer.tic('starting amazon_search');
     //NLP classified this query incorrectly - lets remove this after NLP sorts into shopping initial 100%
    if (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) {
@@ -59,10 +58,9 @@ handlers['shopping.initial'] = function*(message, exec) {
   //end of patch
   var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel})
   // kip.debug('  \n\n\n\n\n\n\n\n\n DIS DAT GOOD SHIT: ', relevantMessage, ' \n\n\n\n\n\n\n\n\n  ')
-  yield slackUtils.showLoading(message);
+  
   var results = yield amazon_search.search(exec.params,message.origin);
-  // yield slackUtils.hideLoading(message);
-
+  yield slackUtils.hideLoading(message);
   if (results == null || !results) {
       return new db.Message({
       incoming: false,
@@ -76,7 +74,6 @@ handlers['shopping.initial'] = function*(message, exec) {
   }
 
   message._timer.tic('done with amazon_search');
-
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -85,7 +82,7 @@ handlers['shopping.initial'] = function*(message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some options you might like. Tap `Add to Cart` to save to your Cart 😊',
+    text: 'Hi, here are some options you might like. Tap `+ Add to Cart` to save to your Cart 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results',
@@ -99,10 +96,10 @@ handlers['shopping.focus'] = function*(message, exec) {
     kip.err('no focus supplied');
     return default_reply(message);
   }
-
+  yield slackUtils.showLoading(message);
   // find the search results this focus query is referencing
   var results = yield getLatestAmazonResults(message);
-
+  yield slackUtils.hideLoading(message);
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -121,10 +118,11 @@ handlers['shopping.focus'] = function*(message, exec) {
 handlers['shopping.more'] = function*(message, exec) {
   exec.params = yield getLatestAmazonQuery(message);
   exec.params.skip = (exec.params.skip || 0) + 3;
-
+  yield slackUtils.showLoading(message);
   var results = yield amazon_search.search(exec.params,message.origin);
-   if (results == null || !results) {
+  yield slackUtils.hideLoading(message);
 
+   if (results == null || !results) {
       return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -144,7 +142,7 @@ handlers['shopping.more'] = function*(message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some more options. Type `more` to see more options or tap `Add to Cart` to save to your Cart 😊',
+    text: 'Hi, here are some more options. Tap `+ Add to Cart` to save to your Cart 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results',
@@ -158,7 +156,7 @@ handlers['shopping.similar'] = function*(message, exec) {
     kip.err('no focus supplied')
     return default_reply(message);
   }
-
+  yield slackUtils.showLoading(message);
   exec.params.skip = 0; //(exec.params.skip || 0) + 3;
 
   if (!exec.params.asin) {
@@ -169,6 +167,7 @@ handlers['shopping.similar'] = function*(message, exec) {
 
 
   var results = yield amazon_search.similar(exec.params,message.origin);
+  yield slackUtils.hideLoading(message);
    if (results == null || !results) {
 
       return new db.Message({
@@ -200,7 +199,7 @@ handlers['shopping.similar'] = function*(message, exec) {
 
 // "cheaper" and "denim"
 handlers['shopping.modify.all'] = function*(message, exec) {
-
+  yield slackUtils.showLoading(message);
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
   kip.debug('old params', old_params);
@@ -255,9 +254,9 @@ handlers['shopping.modify.all'] = function*(message, exec) {
       text: 'Oops! Sorry my brain froze!',
     })
   }
-
-
   var results = yield amazon_search.search(exec.params,message.origin);
+
+  
    if (results == null || !results) {
           winston.debug('-4')
 
@@ -271,7 +270,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
       text: 'Oops! Sorry my brain froze!',
     })
   }
-
+   yield slackUtils.hideLoading(message);
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -280,7 +279,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some different options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    text: 'Hi, here are some different options 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results'
@@ -293,7 +292,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     kip.err('no focus supplied')
     return default_reply(message);
   }
-
+  yield slackUtils.showLoading(message);
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
   kip.debug('old params', old_params);
@@ -351,7 +350,6 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   }
 
   exec.params.query = old_params.query;
-
   if (!exec.params.query) {
     return new db.Message({
       incoming: false,
@@ -366,7 +364,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
 
 
   var results = yield amazon_search.search(exec.params,message.origin);
-
+    yield slackUtils.hideLoading(message);
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,

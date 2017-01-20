@@ -43,8 +43,6 @@ var ObjectId = require('mongodb').ObjectID;
 
 // require('../chat/components/delivery.com/scrape_menus.js');
 
-// sending over: rest_id, team_id, delivery_ObjectId, user_id, and selected_items
-
 //handle post request with a binder full of data
 router.post('/cafe', (req, res) => co(function * () {
   console.log('post to cafe')
@@ -54,13 +52,19 @@ router.post('/cafe', (req, res) => co(function * () {
 
   console.log('new menusession created')
 
-  var selected_items = req.body.selected_items;
+  console.log('req.body', req.body)
+
+  logging.debug('req.body', req.body)
+
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
-  console.log('req.body', req.body)
-
-  ms.menu.data = result.raw_menu.menu;
+  if (!result) {
+    ms.menu.data = yield db.Delivery.findOne({team_id: req.body.team_id, active: true}).select('menu').exec()
+  } else {
+    ms.menu.data = result.raw_menu.menu;
+  }
+  
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.user.id = req.body.user_id;
   ms.budget = req.body.budget;
@@ -71,11 +75,11 @@ router.post('/cafe', (req, res) => co(function * () {
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
-  ms.selected_items = selected_items;
+  ms.selected_items = req.body.selected_items;
 
-  var foodSession = yield db.Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
+  var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
 
-  ms.admin_name = foodSession.convo_initiater.name //initiatOr oyyyy
+  ms.admin_name = foodSession.convo_initiater.name //initiatOr
 
   var user = yield db.Chatusers.findOne({id: ms.user.id})
   if (!user) user = yield db.email_users.findOne({id: ms.user.id}).exec()
@@ -90,7 +94,7 @@ router.post('/cafe', (req, res) => co(function * () {
   yield ms.save();
 
   //return a url w a key in a query string
-  res.send(menuURL + '/?k=' + ms.session_token);
+  res.send(menuURL + '/menus/?k=' + ms.session_token);
 }));
 
 //when user hits that url up, post to /session w/key and gets correct pg

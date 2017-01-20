@@ -76,7 +76,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
       }
     };
 
-    var emails = [];
+    // var emails = [];
     //I don't even know what's going on anymore
     et.slice(index, index + 4).map(function (e) {
       msg_json.attachments.push({

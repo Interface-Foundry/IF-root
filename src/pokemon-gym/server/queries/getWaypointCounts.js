@@ -1,12 +1,18 @@
 const date = require('../../helpers/date');
-const getWaypointCounts = (waypoints) =>
+const getWaypointCounts = (waypoints,start,end) =>
   new Promise((resolve, reject) => {
     waypoints.aggregate([
+      {
+        $match:
+        {
+          'timestamp': { $exists: true, $gte: start, $lte: end },
+        },
+      },
       {
         $group: {
           _id: {
             waypoint: '$waypoint',
-            //user_id: '$user_id',
+            user_id: '$user_id',
             //delivery_id: '$delivery_id',
           },
           count: { $sum: 1 },
@@ -16,6 +22,7 @@ const getWaypointCounts = (waypoints) =>
         $group: {
           _id: {
             waypoint: '$_id.waypoint',
+            user_id: '$_id.user_id',
           },
           sources: {
             $addToSet: {
@@ -37,15 +44,16 @@ const getWaypointCounts = (waypoints) =>
 
         return {
           waypoint: waypoint._id.waypoint,
+          user_id:waypoint._id.user_id,
           total,
         };
       });
-      resolve(hours);
+      resolve(waypoints);
     });
   });
 
 module.exports = getWaypointCounts;
 if (!module.parent) {
   require('../../../kip')
-  getWaypointCounts(db.waypoints).then(console.log.bind(console))
+  getWaypointCounts(db.waypoints,new Date(new Date().setDate(new Date().getDate()-14)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //waypoints of past 2 weeks
 }

@@ -19,13 +19,11 @@ function * handle(message) {
   } else {
     action = 'sorry';
   }
-  kip.debug('\n\n\n🤖 action : ', action,' 🤖\n\n\n');
+  kip.debug('\n\n\n🤖 action : ', action, ' 🤖\n\n\n');
   return yield handlers[action](message);
-
 }
 
 module.exports.handle = handle;
-
 
 handlers['start'] = function * (message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
@@ -33,39 +31,48 @@ handlers['start'] = function * (message) {
     return kip.debug('incorrect team id : ', message);
   }
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  var cartChannels = team.meta.cart_channels;
-  var attachments = [];
-  var channels = yield utils.getChannels(team);
-  var buttons = channels.map(channel => {
-    var checkbox = cartChannels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
-    return {
-      name: 'channel_btn',
-      text: checkbox + channel.name,
-      type: 'button',
-      value: channel.id
+  let attachments = [];
+  let cartChannels = team.meta.cart_channels;
+  let channels = yield utils.getChannels(team);
+  let selectedChannels = channels.reduce((arr, channel) => {
+    if (cartChannels.includes(channel.id)) {
+      arr.push({
+        name: 'channel_btn',
+        text: `✓ #${channel.name}`,
+        type: 'button',
+        value: channel.id
+      });
     }
-  });
-  buttons = _.uniq(buttons);
-  function sortF(a, b){
-    return ((a.text.indexOf('☐ ') > -1) - (b.text.indexOf('☐ ') > -1))
-  }
-  buttons = buttons.sort(sortF)
-  if (buttons.length > 9) {
-     buttons = buttons.slice(0,9);
-  }
-   var chunkedButtons = _.chunk(buttons, 5);
+    return arr;
+  }, []);
+  let unselectedChannels = channels.reduce((arr, channel) => {
+    if (!cartChannels.includes(channel.id)) {
+      arr.push({
+        name: 'channel_btn',
+        text: `☐ #${channel.name}`,
+        type: 'button',
+        value: channel.id
+      });
+    }
+    return arr;
+  }, []);
+  selectedChannels = _.uniq(selectedChannels);
+  unselectedChannels = _.uniq(unselectedChannels);
+  let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
+    : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
+  let chunkedButtons = _.chunk(buttons, 5);
   attachments.push({image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
     text: 'Which channels do you want to include? ', mrkdwn_in: ['text'],
     color: '#A368F0', actions: chunkedButtons[0], fallback:'Step 3/3: Choose the channels you want to include' , callback_id: "none"});
   chunkedButtons.forEach((ele, i) => {
-    if (i != 0) {
-      attachments.push({text:'', actions: ele, color: '#A368F0',callback_id: 'none'});
+    if (i !== 0) {
+      attachments.push({text: '', actions: ele, color: '#A368F0',callback_id: 'none'});
     }
-  })
+  });
   attachments.push({
     'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
     mrkdwn_in: ['text']
-  })
+  });
 
   attachments.push({
     text: '',

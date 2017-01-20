@@ -427,9 +427,8 @@ var app = new Vue({
     },
     submitOrder: function(cart) {
       var that = this;
-      axios.post('/order', {order: cart, user_id:this.user_id, deliv_id:this.food_session_id})
+      axios.post('/menus/order', {order: cart, user_id:this.user_id, deliv_id:this.food_session_id})
       .then(function(res) {
-        console.log(res)
         that.cartItems = []
         if (that.notDesktop) {
           that.isCartVisibleOnMobile = false
@@ -482,7 +481,7 @@ var app = new Vue({
         return this.merchant.logo  
       } 
       else {
-        return "https://static.delivery.com/merchant_logo.php?w=0&h=0&id=39847"  
+        return ""  
       }
     }
   },
@@ -507,17 +506,44 @@ var app = new Vue({
     }
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
-      this.user_id = response.data.userId;
       this.admin_name = response.data.admin_name;
       this.team_name = response.data.team_name;
       this.food_session_id = response.data.foodSessionId;
-      var menuData = response.data.menu.data;
-      var menu;
-      if (menuData.length > 1) {
-        menu = menuData
-      } else {
-        menu = menuData[0].children
+      this.user_id = response.data.user.id
+      this.food_session_id = response.data.foodSessionId
+      
+      var menuData = response.data.menu.data
+      
+      var menu = [];
+        
+      if (menuData.hasOwnProperty('menu')) {
+        menuData = menuData.menu.menu 
       }
+ 
+      if (menuData.length > 1 ) {
+        menuData.forEach(function(m) {
+          if (_.every(m.children, ['type', 'menu'])) {
+            m.children.forEach(function(child) {
+              if (child.type == "menu" && _.every(child.children, ['type', 'item'])) {
+                menu.push(child)     
+              } else if (child.type == "menu" && _.every(child.children, ['type', 'menu'])) {
+                child.children.forEach(function(c) {
+                  menu.push(c); 
+                })
+              }
+            })
+          } else if (_.every(m.children, ['type', 'item'])) {
+            menu.push(m); 
+          }
+        })
+      } else {
+        if (_.every(menuData[0].children, ['type', 'menu'])) {
+          menuData[0].children.forEach(function(c) {
+            menu.push(c);  
+          })  
+        }  
+      }
+       
       this.menu = menu;
       this.merchant = response.data.merchant;
       this.budget = response.data.budget? (response.data.budget * 1.25) : false

@@ -93,8 +93,8 @@ function * loadTeam(slackbot) {
   })
 
   rtm.on(slack.CLIENT_EVENTS.DISCONNECT, (reason) => {
-    kip.log('slack client disconnected', slackbot.team_id)
-    kip.log(reason); // is this even a thing?
+    logging.info('slack client disconnected', slackbot.team_id)
+    logging.info(reason); // is this even a thing?
   })
 
   //
@@ -102,7 +102,7 @@ function * loadTeam(slackbot) {
   //
   rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
-    kip.debug('got slack message sent from user', data.user, 'on channel', data.channel)
+    logging.debug('got slack message sent from user', data.user, 'on channel', data.channel)
     if ((data.user === undefined) || (data.channel === undefined)) {
       logging.warn('user or channel undefined in slack data')
     }
@@ -129,20 +129,20 @@ function * loadTeam(slackbot) {
 
     // don't talk to yourself
     if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-      kip.debug("don't talk to yourself: data: ",data);
+      logging.debug("don't talk to yourself: data: ",data);
       return; // drop the message before sa ving.
     }
 
     // other random things
     if ((data.type !== 'message') || (data.subtype === 'channel_join') || (data.subtype === 'channel_leave')) { // settings.name = kip's slack username
-      kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
       logging.debug('data.type', data.type)
       logging.debug('data.subtype', data.subtype)
       return
     }
 
     if ((data.hidden === true) && (data.subtype === 'message_changed')) {
-      kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
       logging.debug('data.hidden', data.hidden)
       logging.debug('data.subtype', data.subtype)
       return
@@ -204,7 +204,7 @@ function * start () {
 //
 // Mechanism for responding to messages
 //
-kip.debug('subscribing to outgoing.slack hopefully')
+logging.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
   logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
@@ -229,7 +229,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           outgoing.ack()
         })
       }
-      kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
+      logging.debug('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : { reply: message.text }
         if (message.replace_ts) {
@@ -241,6 +241,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         } else {
           return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply, (e, r) => {
             // set the slack_ts from their server so we can update/delete specific messages
+            logging.debug('saving slack timestamp', r.ts, 'to messages.slack_ts')
             db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
           })
         }
@@ -278,7 +279,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       if (message.mode === 'cart' && message.action === 'view') {
-        msgData.attachments = yield cart(message, bot.slackbot, true)
+        msgData.attachments = yield cart(message, bot.slackbot, false)
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
@@ -351,7 +352,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       try {
           bot.web.chat.postMessage(message.source.channel, message.text, null);
        } catch (err) {
-        kip.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message.reply,'\n\n\n\n');
+        logging.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message.reply,'\n\n\n\n');
       }
 
       outgoing.ack()

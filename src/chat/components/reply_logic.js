@@ -88,7 +88,7 @@ function typing(message) {
 }
 
 function simplehome(message, isAdmin) {
-  var slackreply = card_templates.home_screen(isAdmin);
+  var slackreply = card_templates.home_screen(isAdmin, message.source.user);
   var msg = {
     action: 'simplehome',
     mode: 'food',
@@ -144,8 +144,9 @@ function* processProductLink(message) {
   }
   if (asin) {
     yield amazon_variety.getVariations(asin, message);
-    return;
+    return true;
   }
+  return false;
 }
 
 function switchMode(message) {
@@ -300,12 +301,12 @@ queue.topic('incoming').subscribe(incoming => {
       message.prevRoute = message.prevMode + '.' + message.prevAction
     }
     if (!message.mode) {
-      kip.debug('setting mode to prevmode', message.prevMode)
+      logging.debug('setting mode to prevmode', message.prevMode)
       message.mode = message.prevMode
     }
     if (!message.action && message.prevAction) {
       message.action = message.prevAction.match(/(expand|detract)/) ?  'initial' : message.prevAction;
-      kip.debug('setting mode to prevaction', message.action)
+      logging.debug('setting mode to prevaction', message.action)
     }
 
     timer.tic('got history')
@@ -334,8 +335,10 @@ queue.topic('incoming').subscribe(incoming => {
       return yield shopping[_.get(message,'action')](message);
     }
 
-    yield processProductLink(message);
-
+    let isLink = yield processProductLink(message);
+    if (isLink) {
+      return;
+    }
     if (switchMode(message)) {
       message.mode = switchMode(message);
       if (message.mode.match(/(settings|team|onboard|bundles)/)) message.action = 'home';
@@ -363,7 +366,6 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     printMode(message)
-    debugger;
 
     //MODE SWITCHER
     switch (message.mode) {
@@ -438,7 +440,7 @@ queue.topic('incoming').subscribe(incoming => {
       }
         var replies = yield simple_response(message)
         timer.tic('got simple response')
-      kip.debug('simple replies'.cyan, replies)
+      logging.debug('simple replies'.cyan, replies)
         // not a simple reply, do NLP
       if (!replies || replies.length === 0) {
         timer.tic('getting nlp response')
@@ -455,12 +457,12 @@ queue.topic('incoming').subscribe(incoming => {
           });
           replies = yield execute(message);
         } else {
-          kip.debug(`PRENLP message: \n ${JSON.stringify(message, null, 2)}`)
+          logging.debug(`PRENLP message: \n ${JSON.stringify(message, null, 2)}`)
           replies = yield nlp_response(message)
-          kip.debug('+++ NLPRESPONSE ' + replies)
+          logging.debug('+++ NLPRESPONSE ' + replies)
         }
         timer.tic('got nlp response')
-        kip.debug('nlp replies'.cyan,
+        logging.debug('nlp replies'.cyan,
           replies.map(function*(r) {
             return {
               text: r.text,
@@ -469,11 +471,11 @@ queue.topic('incoming').subscribe(incoming => {
           }))
       }
       if (!replies || replies.length === 0) {
-        kip.error('Could not understand message ' + message._id)
+        logging.error('Could not understand message ' + message._id)
         replies = [default_reply(message)]
       }
     }
-    if (replies) kip.debug('num replies', replies.length)
+    if (replies) logging.debug('num replies', replies.length)
     timer.tic('saving message', message)
     yield message.save(); // the incoming message has had some stuff added to it :)
     timer.tic('done saving message', message)
@@ -495,7 +497,7 @@ queue.topic('incoming').subscribe(incoming => {
     timer.tic('sending replies')
     if (replies) {
       yield replies.map((r, i) => {
-        kip.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
+        logging.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
         queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
       })
     }
@@ -506,7 +508,7 @@ queue.topic('incoming').subscribe(incoming => {
 
 // pre process incoming messages for canned responses
 function* simple_response(message) {
-	kip.debug('simple_response begin'.cyan)
+	logging.debug('simple_response begin'.cyan)
 	var replies = []
 
 	// check for canned responses/actions before routing to NLP
@@ -518,7 +520,7 @@ function* simple_response(message) {
 		var reply = banter.checkForCanned(message)
 	}
 
-	kip.debug('prefab reply from banter.js', reply)
+	logging.debug('prefab reply from banter.js', reply)
 
 
 
@@ -627,14 +629,14 @@ function* simple_response(message) {
 	}
 
 	var messages = yield execute(message)
-	kip.debug('simple replies', messages.length)
+	logging.debug('simple replies', messages.length)
 
 	return messages
 }
 
 // use nlp to deterine the intent of the user
 function* nlp_response(message) {
-	kip.debug('nlp_response begin'.cyan);
+	logging.debug('nlp_response begin'.cyan);
 	// the nlp api adds the processing data to the message
 	try {
 		yield nlp.parse(message);
@@ -654,12 +656,12 @@ function* nlp_response(message) {
 
 // do the things
 function execute(message) {
-	kip.debug('exec', message.execute)
+	logging.debug('exec', message.execute)
 	return co(function*() {
 		message._timer.tic('getting messages')
 		var messages = yield message.execute.reduce((messages, exec) => {
 				var route = exec.mode + '.' + exec.action
-				kip.debug('route: ', route, 'exec: ', exec)
+				logging.debug('route: ', route, 'exec: ', exec)
 				//switch between reply_logic and delivery.com.js as necessary
 				var message_promises = exec.mode.match(/^(shopping|settings|team|cart|exit)$/) ? shopping[route](message, exec) : food[route](message);
 				if (!message_promises) {

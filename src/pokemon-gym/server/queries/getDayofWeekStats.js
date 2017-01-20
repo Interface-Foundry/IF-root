@@ -1,5 +1,5 @@
 const date = require('../../helpers/date');
-const getSearchCounts = (messages) =>
+const getDayOfWeekStats = (messages) =>
   new Promise((resolve, reject) => {
     messages.aggregate([
       {
@@ -46,4 +46,8 @@ const getSearchCounts = (messages) =>
     });
   });
 
-module.exports = getSearchCounts;
+module.exports = getDayOfWeekStats;
+if (!module.parent) {
+  require('../../../kip')
+  getDayOfWeekStats(db.messages).then(console.log.bind(console))
+}
