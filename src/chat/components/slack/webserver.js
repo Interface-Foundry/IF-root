@@ -66,6 +66,8 @@ function simple_action_handler (action) {
       return 'team';
     case 'channel_btn':
       return 'channel_btn';
+    case 'collect_select':
+      return 'collect_select';
     case 'settings':
       return 'settings';
     case 'exit':
@@ -104,7 +106,7 @@ app.post('/slackaction', next(function * (req, res) {
   var parsedIn = JSON.parse(req.body.payload);
 
   // First reply to slack, then process the request
-  if (!buttonData && simple_command !== 'channel_btn' && parsedIn.original_message) {
+  if (!buttonData && simple_command !== 'collect_select'&& simple_command !== 'channel_btn'&& parsedIn.original_message) {
     res.status(200)
     res.end()
   } else if (!parsedIn.original_message) {
@@ -167,6 +169,91 @@ app.post('/slackaction', next(function * (req, res) {
       	// responding with nothing means the button does nothing!
         return;
       }
+      else if (simple_command === 'collect_select') {
+        kip.debug(`😃😃${JSON.stringify(parsedIn.actions, null, 2)}`);
+        let selection = parsedIn.actions[0].value;
+        let json = parsedIn.original_message;
+        var team_id = message.source.team;
+        var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+        json.attachments[0].actions = json.attachments[0].actions.map(button => {
+          button.text = button.text.replace('◉', '○');
+          return button;
+        });
+        json.attachments.splice(1, json.attachments.length - 2);
+        switch (selection) {
+          case 'everyone':
+            json.attachments[0].actions[0].text = '◉ Everyone';
+            team.meta.collect_from = 'all';
+            break;
+          case 'justme':
+            json.attachments[0].actions[1].text = '◉ Just Me';
+            team.meta.collect_from = 'me';
+            break;
+          case 'channel':
+            json.attachments[0].actions[2].text = '◉ By Channel';
+            team.meta.collect_from = 'channel';
+            let cartChannels = team.meta.cart_channels;
+            let channels = yield utils.getChannels(team);
+            let selectedChannels = channels.reduce((arr, channel) => {
+              if (cartChannels.includes(channel.id)) {
+                arr.push({
+                  name: 'channel_btn',
+                  text: `✓ #${channel.name}`,
+                  type: 'button',
+                  value: channel.id
+                });
+              }
+              return arr;
+            }, []);
+            let unselectedChannels = channels.reduce((arr, channel) => {
+              if (!cartChannels.includes(channel.id)) {
+                arr.push({
+                  name: 'channel_btn',
+                  text: `☐ #${channel.name}`,
+                  type: 'button',
+                  value: channel.id
+                });
+              }
+              return arr;
+            }, []);
+            selectedChannels = _.uniq(selectedChannels);
+            unselectedChannels = _.uniq(unselectedChannels);
+            let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
+              : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
+            let chunkedButtons = _.chunk(buttons, 5);
+            let channelSection = chunkedButtons.map(buttonRow => {
+              return {
+                text: '',
+                callback_id: 'channel_buttons_idk',
+                actions: buttonRow
+              };
+            });
+            channelSection.push({
+              'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
+              mrkdwn_in: ['text']
+            });
+            channelSection.push(json.attachments.pop());
+            json.attachments = [...json.attachments, ...channelSection];
+            break;
+        }
+        team.markModified('meta.collect_from');
+        yield team.save();
+        let stringOrig = JSON.stringify(json);
+        let map = {
+          amp: '&',
+          lt: '<',
+          gt: '>',
+          quot: '"',
+          '#039': '\''
+        };
+        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
+        request({
+          method: 'POST',
+          uri: message.source.response_url,
+          body: stringOrig
+        });
+        return;
+      }
       else if (simple_command == 'channel_btn') {
         var channelId = _.get(parsedIn,'actions[0].value');
         var team_id = message.source.team;
@@ -177,7 +264,7 @@ app.post('/slackaction', next(function * (req, res) {
         } else {
           cartChannels.push(channelId);
         }
-        cartChannels = _.uniq(cartChannels);
+        team.meta.cart_channels = _.uniq(cartChannels);
         team.markModified('meta.cart_channels');
         yield team.save();
         let json = parsedIn.original_message;

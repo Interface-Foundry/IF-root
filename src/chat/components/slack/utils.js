@@ -82,7 +82,7 @@ function * findAdmins(team) {
 function * isAdmin(userId, team) {
   let adminList = yield findAdmins(team);
   for (var i = 0; i < adminList.length; i++) {
-    if(adminList[i].id === userId){
+    if (adminList[i].id === userId) {
       return true;
     }
   }
@@ -674,7 +674,7 @@ function randomWelcome(userId) {
     `Hey <@${userId}>, how’s it going?`,
     `Hey <@${userId}>, good to see you`,
     `Hey <@${userId}>, what’s happening?`,
-    `Hey, what can I do for you?`
+    'Hey, what can I do for you?'
   ];
   let num = Math.floor(Math.random() * messages.length);
   return messages[num];
