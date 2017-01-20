@@ -75,7 +75,11 @@ router.post('/cafe', (req, res) => co(function * () {
 
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
+
+  console.log('woe is me');
+
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
+
   ms.selected_items = req.body.selected_items;
 
   var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
