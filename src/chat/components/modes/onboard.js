@@ -456,7 +456,7 @@ handlers['bundle'] = function * (message, data) {
     fallback: 'Thanks for adding your first items to the cart!'
   });
   attachments.push({
-    text: 'Thanks for adding your first items to the cart!',
+    text: '*Step 2/3* Thanks for adding your first items to the cart!',
     mrkdwn_in: ['text'],
     color: '#A368F0',
     fallback: 'Thanks for adding your first items to the cart!',
@@ -498,7 +498,7 @@ handlers['addcart'] = function*(message, data) {
 // modified version of modes/shopping.js
 handlers['cart'] = function * (message) {
   let attachments = [{
-    text: 'Thanks for adding your first items to the cart!',
+    text: '*Step 2/3* Thanks for adding your first items to the cart!',
     mrkdwn_in: ['text'],
     color: '#A368F0',
     fallback: 'Thanks for adding your first items to the cart!',
