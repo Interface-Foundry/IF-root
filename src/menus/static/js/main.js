@@ -43,6 +43,7 @@ Vue.component('choice', {
           alert("You can only select " + this.maxSelection + " choices.")
           return
         }
+
       }
       //add or subtract choice from option's cost
       if (this.choice.price && this.type == "checkbox") {
@@ -69,7 +70,6 @@ Vue.component('choice', {
         newOptions[option.id].choices = []
         newOptions[option.id].choices.push(choice)
       }
-
       if (this.type === "checkbox" && this.selected) {
         var choiceExists;
         if (option.id in newOptions) {
@@ -124,7 +124,6 @@ Vue.component('choice', {
     })
 
     choiceBus.$on('radio-selected', function(selectedChoice) {
-
       if (that.type === "radio") {
         if (that.choice.id == selectedChoice.id && !that.selected) {
             that.selected = true;
@@ -434,7 +433,7 @@ var app = new Vue({
     },
     submitOrder: function(cart) {
       var that = this;
-      axios.post('/order', {order: cart, user_id:this.user_id, deliv_id:this.food_session_id})
+      axios.post('/menus/order', {order: cart, user_id:this.user_id, deliv_id:this.food_session_id})
       .then(function(res) {
         console.log(res)
         that.cartItems = []
@@ -501,15 +500,27 @@ var app = new Vue({
     var key = window.location.search.split("=")[1]
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
-      this.user_id = response.data.userId
+      this.user_id = response.data.user.id
       this.food_session_id = response.data.foodSessionId
       var menuData = response.data.menu.data
+      console.log(menuData)
       var menu;
+      
+      if (menuData.hasOwnProperty('menu')) {
+        // menus nested deep
+        if (menuData.menu.hasOwnProperty('menu')) {
+          menuData = menuData.menu.menu 
+        } else {
+          menuData = menuData.menu 
+        }
+      }
+      
       if (menuData.length > 1) {
         menu = menuData
       } else {
         menu = menuData[0].children
       }
+      
       this.menu = menu;
       this.merchant = response.data.merchant;
       this.budget = response.data.budget? (response.data.budget * 1.25) : false
