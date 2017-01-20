@@ -19,7 +19,7 @@ geoipURL: http://www.freegeoip.net/json/
 kipPayURL: https://pay.kipthis.com
 logging:
   console:
-    level: verbose
+    level: debug
     json: false
     stringify: false
     colorize: true
@@ -27,7 +27,7 @@ logging:
   mongo:
     enabled: false
   debugFileLine:
-    enabled: false
+    enabled: true
 meetupAuth:
   consumerKey: vgmujlff2vflhtutplkaf15h
   consumerSecret: hub4tmkp966ir5q4jaaa41qc4l
