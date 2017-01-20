@@ -59,7 +59,7 @@ button.base-btn {
 }
 
 button.base-btn:hover {
-  background-color: #3a2b71;
+  background-color: #3a2b71; 
 }
 
 button.base-btn:disabled {
@@ -131,7 +131,7 @@ nav .cart-icon {
 }
 
 nav .image-container:hover {
-  cursor: pointer;
+  cursor: pointer;  
 }
 
 
@@ -140,7 +140,7 @@ nav .cart-icon img {
 }
 
 nav .mobile-cart-indicator {
-  display: none;
+  display: none;  
 }
 
 .nav-cart-quantity {
@@ -211,7 +211,7 @@ nav .mobile-cart-indicator {
 }
 
 .category-nav li a.selected {
-  background-color: #6F52D8;
+  background-color: #6F52D8;  
   color: #fff;
 }
 
@@ -231,11 +231,11 @@ nav .mobile-cart-indicator {
 }
 
 .more-categories {
-  position: relative;
+  position: relative;  
 }
 
 .more-categories:hover {
-  cursor: pointer;
+  cursor: pointer;  
 }
 
 .categories-dropdown {
@@ -249,7 +249,7 @@ nav .mobile-cart-indicator {
   border-bottom-color: #ccc;
   text-align: left;
   border-radius: 4px;
-  white-space: nowrap;
+  white-space: nowrap; 
   z-index:1000;
   top: 28px;
   color: #292929;
@@ -262,16 +262,16 @@ nav .mobile-cart-indicator {
 }
 
 .categories-dropdown li {
-  margin-bottom: 10px;
+  margin-bottom: 10px;  
 }
 
 .categories-dropdown li a {
-  text-align: left;
+  text-align: left;  
 }
 
 .categories-dropdown li a:hover {
   background-color: #6F52D8;
-  color: #fff;
+  color: #fff; 
 }
 
 .restaurant-header {
@@ -294,7 +294,7 @@ nav .mobile-cart-indicator {
 .menu-content {
   -js-display: flex;
   display: flex;
-  display: -webkit-flex;
+  display: -webkit-flex; 
   flex-wrap: wrap;
   -webkit-flex-wrap: wrap;
 }
@@ -437,7 +437,7 @@ nav .mobile-cart-indicator {
 }
 
 .cart-footer {
-  border-top: 1px solid #F5F5F5;
+  border-top: 1px solid #F5F5F5; 
   height: 200px;
   flex-shrink: 0;
   -webkit-flex-shrink: 0;
@@ -476,7 +476,7 @@ nav .mobile-cart-indicator {
 }
 
 .modal-wrapper {
-  z-index: 9998;
+  z-index: 9998; 
   width:90%;
   margin: auto;
 }
@@ -509,7 +509,7 @@ nav .mobile-cart-indicator {
 }
 
 .special-instructions {
-  margin-bottom: 20px;
+  margin-bottom: 20px;  
 }
 
 .special-instructions textarea {
@@ -517,7 +517,7 @@ nav .mobile-cart-indicator {
   height: 50px;
   border: 1px solid #B9B9B9;
   border-radius: 4px;
-  box-sizing: border-box;
+  box-sizing: border-box;  
 }
 
 .modal-close-button {
@@ -540,7 +540,7 @@ nav .mobile-cart-indicator {
 
 .modal-footer button {
   width: 100%;
-  font-size: 18px;
+  font-size: 18px;  
 }
 
 .option-body {
@@ -622,42 +622,42 @@ nav .mobile-cart-indicator {
     right: 0;
     width: 80px;
     height: 100%;
-    top: 0;
+    top: 0;      
   }
-
+    
   nav .mobile-cart-indicator.visible {
-    background-color: #A62934;
-  }
+    background-color: #A62934;          
+  }  
   .container {
     padding-left: 10px;
     padding-right: 10px;
   }
-
+  
   .right-panel {
-    display: none;
+    display: none; 
     width: 100%;
   }
 
   .right-panel.visible {
-    display: block
+    display: block  
   }
 
   .left-panel {
-    width: 100%;
+    width: 100%;  
   }
-
+ 
   nav .cart-icon {
-    margin: 0;
+    margin: 0; 
   }
 
   nav .cart-icon.image-container {
     position: absolute;
-    right: 10px;
+    right: 10px;    
   }
 
   nav .cart-icon img {
     position: relative;
-    right: 20px;
+    right: 20px;  
   }
 
   .restaurant-header {
@@ -666,7 +666,7 @@ nav .mobile-cart-indicator {
   }
 
   .restaurant-header img {
-    display: none;
+    display: none;  
   }
 
   .restaurant-name {
@@ -674,18 +674,18 @@ nav .mobile-cart-indicator {
     text-align: center;
     width: 100%;
   }
-
+  
   .category-nav {
-    display: none;
+    display: none;  
   }
-
+ 
   .cart-body {
-    font-size: .9em;
+    font-size: .9em;  
   }
-
+ 
   .edit-item-icon {
     width: 12px;
-    margin-left: 10px;
+    margin-left: 10px;    
     vertical-align: middle;
   }
 
@@ -700,23 +700,23 @@ nav .mobile-cart-indicator {
     display: inline-block;
     font-weight: 500;
     text-align: center;
-    line-height: 15px;
+    line-height: 15px;  
   }
-
+    
   .cart-item .item-choice, .item-option-name {
-    font-size: 12px !important; /* don't like this, will fix at some point */
+    font-size: 12px !important; /* don't like this, will fix at some point */  
   }
 
   .category-set ul li {
-    width: 100%;
+    width: 100%;  
   }
-
+  
   .modal-wrapper {
-    width: 100%;
+    width: 100%;  
   }
 
   .modal-container {
-    width: 80%;
+    width: 80%; 
     padding: 20px;
 
   }
