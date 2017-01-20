@@ -214,7 +214,7 @@ function * refreshAllUserIMs (slackbot) {
   var userIMInfo = yield slackbot.web.im.list()
   yield userIMInfo.ims.map(function * (u) {
     var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
-    if (chatUser.dm !== u.id) {
+    if (_.get(chatUser, 'dm') !== u.id) {
       logging.debug('updating user dm', chatUser.name)
       chatUser.dm = u.id
       chatUser.save()
