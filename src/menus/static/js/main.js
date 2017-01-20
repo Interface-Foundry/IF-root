@@ -500,7 +500,6 @@ var app = new Vue({
     var key = window.location.search.split("=")[1]
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
-      console.log(JSON.stringify(response))
       this.user_id = response.data.user.id
       this.food_session_id = response.data.foodSessionId
       var menuData = response.data.menu.data
