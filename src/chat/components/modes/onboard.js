@@ -416,7 +416,7 @@ handlers['bundle'] = function * (message, data) {
  var choice = data[0];
  var cart_id = message.cart_reference_id || message.source.team;
  yield utils.showLoading(message);
- yield bundles.addBundleToCart(choice, message.user_id,cart_id);
+ yield bundles.addBundleToCart(choice, message.user_id, cart_id, true);
 
  // var cart_id = message.source.team
  var cart = yield kipcart.getCart(cart_id);
