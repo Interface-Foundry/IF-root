@@ -65,16 +65,13 @@ router.post('/cafe', (req, res) => co(function * () {
   } else {
     ms.menu.data = result.raw_menu.menu;
   }
-  console.log('this is the menu data')
-  console.log(ms.menu.data);
+  
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.user.id = req.body.user_id;
   ms.budget = req.body.budget;
   ms.merchant.id = rest_id;
 
   var merchant = yield Merchants.findOne({id: rest_id});
-
-  console.log('found merchant')
 
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
@@ -83,20 +80,14 @@ router.post('/cafe', (req, res) => co(function * () {
 
   var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
 
-  console.log('found food sesh')
-
   ms.admin_name = foodSession.convo_initiater.name //initiatOr
 
   var user = yield db.Chatusers.findOne({id: ms.user.id})
   if (!user) user = yield db.email_users.findOne({id: ms.user.id}).exec()
 
-  console.log('found user')
-
   ms.user.is_admin = user.is_admin
 
   var sb = yield db.Slackbots.findOne({team_id: foodSession.team_id})
-
-  console.log('found slackbot')
 
   ms.team_name = sb.team_name
 
