@@ -327,30 +327,32 @@ function * addViaAsin(asin, message) {
     }
 }
 
-function * showLoading(message) {
-  var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel})
+function* showLoading(message) {
+  var relevantMessage = yield db.Messages.findOne({
+    'thread_id': message.source.channel
+  })
   var json = message.source.original_message;
-  let searchMsg = this.randomSearching();
-    if (!json) {
-     var msg = new db.Message(message);
-     msg.mode = 'loading';
-     msg.action = 'show'
-     msg.text =searchMsg;
-     yield msg.save()
-     return yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.results');
-    }
-    json.attachments.push({
-        fallback: message.action,
-        callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
-        text: searchMsg,
-        color: '#45a5f4'
-    })
-    request({
-      method: 'POST',
-      uri: message.source.response_url,
-      body: JSON.stringify(json)
-    });
-    return;
+  let searchText = this.randomSearching();
+  if (!json) {
+    var msg = new db.Message(message);
+    msg.mode = 'loading';
+    msg.action = 'show'
+    msg.text = searchText;
+    yield msg.save()
+    return yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.results');
+  }
+  json.attachments.push({
+    fallback: message.action,
+    callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
+    text: searchText,
+    color: '#45a5f4'
+  })
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(json)
+  });
+  return;
 }
 
 function * hideLoading(message) {
