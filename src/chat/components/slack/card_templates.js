@@ -284,7 +284,7 @@ var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
 
 var slack_onboard_basic = module.exports.slack_onboard_basic = [{
   name: "onboard.bundle.yes",
-  text: "Continue",
+  text: "➤ Continue",
   style: "primary",
   type: "button",
   value: "team"

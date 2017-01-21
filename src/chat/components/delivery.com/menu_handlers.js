@@ -227,8 +227,8 @@ if (foodSession.budget) {
     }
   }
 
-  var url = yield menu_utils.getUrl(foodSession, message.source.user)
-  // var url = foodSession.chosen_restaurant.url
+  if (process.env.NODE_ENV == 'development_hannah') var url = yield menu_utils.getUrl(foodSession, message.source.user)
+  else var url = foodSession.chosen_restaurant.url
 
   //resto name
   msg_json.attachments.push({

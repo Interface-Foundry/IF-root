@@ -4,7 +4,7 @@ var uuid = require('uuid')
 var co = require('co')
 var proxyRequest = require('./proxy/request').proxyRequest;
 var queue = require('./queue-mongo');
-var amazon = require('./amazon_search.js')
+var amazon = require('./amazon_search.js');
 var ItemVariation = db.Itemvariation;
 
 const constants = require('./constants');

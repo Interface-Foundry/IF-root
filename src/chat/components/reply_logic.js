@@ -143,7 +143,9 @@ function* processProductLink(message) {
     }
   }
   if (asin) {
+    yield slackUtils.showLoading(message);
     yield amazon_variety.getVariations(asin, message);
+    yield slackUtils.hideLoading(message);
     return true;
   }
   return false;
@@ -334,7 +336,6 @@ queue.topic('incoming').subscribe(incoming => {
       incoming.ack()
       return yield shopping[_.get(message,'action')](message);
     }
-
     let isLink = yield processProductLink(message);
     if (isLink) {
       return;

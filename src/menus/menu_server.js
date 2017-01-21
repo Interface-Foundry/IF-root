@@ -64,7 +64,6 @@ router.post('/cafe', (req, res) => co(function * () {
   } else {
     ms.menu.data = result.raw_menu.menu;
   }
-  
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.user.id = req.body.user_id;
   ms.budget = req.body.budget;
@@ -74,7 +73,11 @@ router.post('/cafe', (req, res) => co(function * () {
 
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
+
+  console.log('woe is me');
+
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
+
   ms.selected_items = req.body.selected_items;
 
   var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
@@ -120,6 +123,9 @@ router.post('/order', function (req, res) {
     if (_.get(req, 'body')) {
       var order = req.body.order;
       var user_id = req.body.user_id;
+
+      console.log('req.body', req.body)
+
       var deliv_id = req.body.deliv_id;
       var foodSession = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
       console.log('found the delivery object');
@@ -143,7 +149,31 @@ router.post('/order', function (req, res) {
 
       //----------Message Queue-----------//
 
-      console.log('updated delivery; looking for source message');
+        console.log('updated delivery; looking for source message');
+
+        var foodMessage = yield db.Messages.find({
+          'source.user': user_id,
+          mode: 'food',
+          incoming: false
+        }).sort('-ts').limit(1);
+
+        console.log('found foodmessage')
+
+        foodMessage = foodMessage[0];
+
+        var mess = new db.Messages({
+          incoming: true,
+          thread_id: foodMessage.thread_id,
+          action: 'cart.personal',
+          user_id: foodMessage.source.user,
+          mode: 'food',
+          origin: 'slack',
+          source: foodMessage.source,
+        })
+
+        yield mess.save();
+
+        yield queue.publish('incoming', mess, ['slack', foodMessage.source.channel, foodMessage.ts, new Date().getSeconds()].join('.'), true)
 
       console.log('ostensibly done');
       res.send();

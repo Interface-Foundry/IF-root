@@ -107,10 +107,11 @@ handlers['reply'] = function * (message) {
       style: 'primary',
       type: 'button',
     }, {
-      'name': 'settings.back',
+      'name': 'passthrough',
       'text': 'Home',
       'style': 'default',
-      'type': 'button'
+      'type': 'button',
+      'value': 'home'
     }]
   })
   return attachments;
@@ -121,14 +122,50 @@ handlers['addcart'] = function*(message, data) {
   let item = yield db.items.findOne({
     '_id': data[0]
   }).exec();
-  try {
-    let asins = JSON.parse(item.asins),
-      config = JSON.parse(item.config);
-    let numOptions = _.size(asins[0]) - 1;
-    if (_.size(config) != numOptions) {
-      if (!origAttachments[origAttachments.length - 1].text) {
+  let asins = JSON.parse(item.asins),
+    config = JSON.parse(item.config);
+  let numOptions = _.size(asins[0]) - 1;
+  if (numOptions < 0) {
+    // no combinations, just add the asin
+    yield slackUtils.addViaAsin(item.ASIN, message);
+    message.text = 'view cart';
+    return message;
+  } else if (_.size(config) !== numOptions) {
+    if (!origAttachments[origAttachments.length - 1].text) {
+      origAttachments.push({
+        text: 'Hmm, it looks like you haven\'t selected all of the required options',
+        callback_id: 'none',
+        color: '#FF0000'
+      });
+    }
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify({
+        attachments: origAttachments
+      })
+    });
+  } else {
+    let matches = asins.filter(item => {
+      let flag = true;
+      _.forOwn(config, (val, key) => {
+        flag = flag && item[key] === val;
+      });
+      return flag;
+    });
+    if (matches.length > 0) { // there really should only be one match but whatevs
+      // add it to the cart!
+      yield slackUtils.addViaAsin(matches[0].id, message);
+      message.text = 'view cart';
+      return message;
+    } else {
+      // I don't think you can buy this combination
+      // we should probably be updating available combinations based on what people select
+      if (origAttachments[origAttachments.length - 1].text) {
+        origAttachments[origAttachments.length - 1].text = 'Hmm, that combination doesn\'t seem to be available. Try a different one?';
+      } else {
         origAttachments.push({
-          text: 'Hmm, it looks like you haven\'t selected all of the required options',
+          text: 'Hmm, that combination doesn\'t seem to be available. Try a different one?',
           callback_id: 'none',
           color: '#FF0000'
         });
@@ -139,47 +176,8 @@ handlers['addcart'] = function*(message, data) {
         body: JSON.stringify({
           attachments: origAttachments
         })
-      })
-    } else {
-      let matches = asins.filter(item => {
-        let flag = true;
-        _.forOwn(config, (val, key) => {
-          flag = flag && item[key] === val;
-        })
-        return flag;
-      })
-      if (matches.length > 0) { // there really should only be one match but whatevs
-        // add it to the cart!
-        yield slackUtils.addViaAsin(matches[0].id, message);
-        message.text = 'view cart'
-        return message
-      } else {
-        // I don't think you can buy this combination
-        // we should probably be updating available combinations based on what people select
-        if (origAttachments[origAttachments.length - 1].text) {
-          origAttachments[origAttachments.length - 1].text = 'Hmm, that version doesn\'t seem to be available. Try a different one?';
-        } else {
-          origAttachments.push({
-            text: 'Hmm, that version doesn\'t seem to be available. Try a different one?',
-            callback_id: 'none',
-            color: '#FF0000'
-          });
-        }
-        request({
-          method: 'POST',
-          uri: message.source.response_url,
-          body: JSON.stringify({
-            attachments: origAttachments
-          })
-        });
-      }
+      });
     }
-  } catch (err) {
-    kip.debug('JSON err probably, trying with the main ASIN');
-    kip.debug(`item is ${JSON.stringify(item, null, 2)}`);
-    yield slackUtils.addViaAsin(item.ASIN, message);
-    message.text = 'view cart';
-    return message;
   }
 };
 

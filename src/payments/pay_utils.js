@@ -5,6 +5,7 @@ var _ = require('lodash')
 var payConst = require('./pay_const.js')
 
 var cardTemplates = require('../chat/components/slack/card_templates');
+var slackUtils = require('../chat/components/slack/utils')
 
 // tracking for food into cafe-tracking
 var Professor = require('../monitoring/prof_oak.js')
@@ -181,6 +182,9 @@ function * onSuccess (payment) {
     var foodSession = yield db.Delivery.findOne({'guest_token': payment.order.guest_token}).exec()
     var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1).exec()
     finalFoodMessage = finalFoodMessage[0]
+    var team = yield db.Slackbots.findOne({
+      'team_id': finalFoodMessage.source.team
+    }).exec();
     var menu = Menu(foodSession.menu)
     // send message to all the ppl that ordered food
     foodSession.confirmed_orders.map(userId => {
@@ -205,9 +209,11 @@ function * onSuccess (payment) {
       } else {
         foodString = itemNames[0]
       }
-      var homeMsg = cardTemplates.home_screen(true, payment.source.user);
+      var isAdmin = team.meta.office_assistants.includes(user.id);
+      var homeMsg = {};
+      homeMsg.data = cardTemplates.home_screen(isAdmin, user.id);
       homeMsg.type = finalFoodMessage.origin;
-      homeMsg.text = `Your order of ${foodString} is on the way 😊`;
+      homeMsg.data.text = `Your order of ${foodString} is on the way 😊`;
       replyChannel.send(
         msg,
         'food.payment_info',

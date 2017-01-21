@@ -49,7 +49,7 @@ handlers['step_1'] = function(message) {
     text: '*Step 1/3:* Find items to add to team cart',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Step 1/3: Find items to add to team cart'
+    fallback: 'Find items to add to team cart'
   }, {
     text: 'Looking for something?',
     fallback: 'Looking for something?',
@@ -152,7 +152,7 @@ handlers['step_2'] = function * (message, data) {
     text: '*Step 2/3:* Try adding an item to your basket',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Step 2/3: Try adding an item to your basket'
+    fallback: 'Try adding an item to your basket'
   }];
   if (message.source.response_url) {
     request({
@@ -196,7 +196,7 @@ handlers['cart'] = function * (message) {
     mrkdwn_in: ['text'],
     color: '#A368F0',
     image_url: 'http://tidepools.co/kip/oregano/success.png',
-    fallback: 'Step 3/3: Well done!\n I\'ve added your item to the team cart',
+    fallback: 'Well done!\n I\'ve added your item to the team cart',
     callback_id: 'take me home pls',
     actions: [{
       'name': 'passthrough',

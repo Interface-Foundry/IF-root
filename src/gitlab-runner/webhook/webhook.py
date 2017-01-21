@@ -55,6 +55,7 @@ def index():
     """
     Main WSGI application entry.
     """
+    logging.info('got request')
     path = normpath(abspath(dirname(__file__)))
 
     # Only POST is implemented
@@ -65,6 +66,7 @@ def index():
     with open(join(path, 'config.json'), 'r') as cfg:
         config = loads(cfg.read())
 
+    logging.info('loaded config')
     hooks = config.get('hooks_path', join(path, 'hooks'))
 
     # Allow Github IPs only
@@ -80,9 +82,11 @@ def index():
         else:
             abort(403)
 
+    logging.info('checking for enforce secret')
     # Enforce secret
     secret = config.get('enforce_secret', '')
     if secret:
+        logging.info('enforce secret')
         # Only SHA1 is supported
         header_signature = request.headers.get('X-Hub-Signature')
         if header_signature is None:
@@ -111,6 +115,7 @@ def index():
     if event == 'ping':
         return dumps({'msg': 'pong'})
 
+    logging.info('gathering data')
     # Gather data
     try:
         payload = request.json
@@ -140,9 +145,11 @@ def index():
             # Push events provide a full Git ref in 'ref' and not a 'ref_type'.
             branch = payload['ref'].split('/')[2]
 
+        logging.info('got branch')
     except KeyError:
         # If the payload structure isn't what we expect, we'll live without
         # the branch name
+        logging.info('missed branch')
         pass
 
     # All current events have a repository, but some legacy events do not,
@@ -166,21 +173,21 @@ def index():
     scripts.append(join(hooks, 'all'))
 
     # Check permissions
-    scripts = [s for s in scripts if isfile(s) and access(s, X_OK)]
-    if not scripts:
-        return ''
+    # scripts = [s for s in scripts if isfile(s) and access(s, X_OK)]
+    # if not scripts:
+    #     return ''
 
     # Save payload to temporal file
-    osfd, tmpfile = mkstemp()
-    with fdopen(osfd, 'w') as pf:
-        pf.write(dumps(payload))
+    # osfd, tmpfile = mkstemp()
+    # with fdopen(osfd, 'w') as pf:
+    #     pf.write(dumps(payload))
 
     # Run scripts
     # t = Thread(target=run_scripts, args=(scripts, tmpfile, event))
     # t.start()
     logging.info('running a script...')
     subprocess.Popen(["/app/hooks/push-dev"])
-    remove(tmpfile)
+    # remove(tmpfile)
     return dumps({'msg': 'hopefully cloning'})
 
 

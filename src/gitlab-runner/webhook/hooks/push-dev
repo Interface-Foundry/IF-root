@@ -3,6 +3,7 @@
 echo -e "\n===========================\n"
 echo -e "running the script and in script"
 echo -e "\n===========================\n"
+
 cd /IF-root/
 git fetch -p origin
 git push --mirror

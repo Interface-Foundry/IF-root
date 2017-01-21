@@ -17,13 +17,8 @@ logging:
   mongo:
     enabled: true
 mongodb:
-  url: mongodb://mongodb-beta-server-1,mongodb-beta-server-2/foundry
+  url: mongodb://mongodb-beta-server-1/foundry
   backuphost: mongodb-beta-server-1
-  options:
-    replset:
-      rs_name: rs0
-      socketOptions:
-        keepAlive: 1
 neighborhoodServer:
   url: http://localhost:9998
 nlp: http://parser:8083

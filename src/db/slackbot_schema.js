@@ -54,7 +54,7 @@ var slackbotSchema = mongoose.Schema({
       default: 'Friday'
     },
     weekly_status_date: {
-      type: Number,
+      type: Number
     },
     weekly_status_time: {
       type: String,
@@ -75,6 +75,11 @@ var slackbotSchema = mongoose.Schema({
         default: true
       }
     }],
+    collect_from: {
+      type: String,
+      enum: ['me', 'all', 'channel'],
+      default: 'all'
+    },
     cart_channels: [String],
     deleted: {
       type: Boolean,

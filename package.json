@@ -91,6 +91,7 @@
     "stable": "^0.1.5",
     "static-kdtree": "^1.0.1",
     "stripe": "^4.12.0",
+    "striptags": "^2.2.1",
     "sync-request": "^2.0.1",
     "telegram-bot-api": "^1.0.0",
     "thunkify-wrap": "^1.0.4",

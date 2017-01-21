@@ -14,7 +14,7 @@ menuURL: https://3d7b72f7.ngrok.io
 picstitchDelivery: http://delivery-picstitch.kipthis.com
 logging:
   console:
-    level: debug
+    level: silly
     json: false
     stringify: true
     colorize: true

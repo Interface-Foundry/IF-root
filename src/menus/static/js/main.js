@@ -543,7 +543,6 @@ var app = new Vue({
           })  
         }  
       }
-       
       this.menu = menu;
       this.merchant = response.data.merchant;
       this.budget = response.data.budget? (response.data.budget * 1.25) : false
