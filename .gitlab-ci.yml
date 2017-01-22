@@ -157,3 +157,39 @@ deploy:payments:
     DEPLOYMENT_DIR: src/k8s/canary
     CONTEXT_FILE: payment.deployment.yaml
   <<: *deploy_defintion
+
+#---------------
+
+# build_canary:
+#   stage: build
+#   only:
+#     - dev
+#   before_script:
+#     - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
+#   script:
+#     - docker build -t $KIP_REGISTRY/reply_logic:$CI_BUILD_REF -f Dockerfiles/canary.reply_logic.Dockerfile .
+#     - docker build -t $KIP_REGISTRY/slack:$CI_BUILD_REF -f Dockerfiles/canary.slack.Dockerfile .
+#     - docker tag $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF $KIP_REGISTRY/$IMAGE_NAME:latest
+#     - docker push $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF
+#     - docker push $KIP_REGISTRY/$IMAGE_NAME:latest
+
+# deploy_canary:
+#   image: google/cloud-sdk
+#   stage: deploy
+#   only:
+#     - dev
+#   before_script:
+#     - echo $KUBERNETES_KEY > /tmp/KUBERNETES_KEY.json
+#     - gcloud auth activate-service-account $KUBERNETES_SA --key-file=/tmp/KUBERNETES_KEY.json --project=$PROJECT
+#     - gcloud config set compute/zone us-east1-b
+#     - gcloud config set container/use_client_certificate True
+#     - gcloud container clusters get-credentials $KUBE_CLUSTER
+#   script:
+#     - ls $DEPLOYMENT_DIR
+#     - sed -i "s/latest/$CI_BUILD_REF/" $DEPLOYMENT_DIR/$CONTEXT_FILE
+#     - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
+#     - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
+#     - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
+#   after_script:
+#     - rm /tmp/KUBERNETES_KEY.json
+

@@ -1,17 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: canary
-  namespace: canary
+  name: production
+  namespace: production
 spec:
   rules:
-  - host: dev-picstitch.kipthis.com
+  - host: picstitch.kipthis.com
     http:
       paths:
       - backend:
           serviceName: picstitch
           servicePort: 80
-  - host: dev-parser.kipthis.com
+  - host: parser.kipthis.com
     http:
       paths:
       - backend:
@@ -23,7 +23,7 @@ spec:
       - backend:
           serviceName: delivery-picstitch
           servicePort: 80
-  - host: dev-cafe.kipthis.com
+  - host: cafe.kipthis.com
     http:
       paths:
       - backend:

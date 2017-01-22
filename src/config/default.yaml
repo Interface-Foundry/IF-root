@@ -80,4 +80,4 @@ twitterAuth:
   consumerSecret: N5SmhOhWzUJwPbofLpCi0BlJ8T4M3bACpiFBaB1nHdNIOQEu6R,
   callbackURL: https://kipapp.co/auth/twitter/callback
 # picstitch: http://localhost:5000
-menuURL: http://localhost:8001
+menuURL: http://dev-cafe.kipthis.com

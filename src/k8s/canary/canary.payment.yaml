@@ -26,3 +26,33 @@ spec:
       - name: kip-creditcard
         secret:
           secretName: kip-cc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments
+  namespace: canary
+  labels:
+    app: payments
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    app: payments
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: payments
+  namespace: canary
+  annotations:
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  tls:
+    - secretName: pay.kipthis.com-sslcerts
+  backend:
+    serviceName: payments
+    servicePort: 80
