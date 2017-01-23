@@ -570,9 +570,9 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  console.log('foodSession.budget', foodSession.budget)
+  logging.debug('foodSession.budget', foodSession.budget)
 
-  yield $replyChannel.send(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ? {
+  yield $replyChannel.sendReplace(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ? {
     text: `*Budget*: $${foodSession.budget} / person`
   } : {
     text: '*Budget*: Unlimited'

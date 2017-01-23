@@ -257,7 +257,7 @@ if (foodSession.budget) {
     });
   }
 
-  $replyChannel.send(message, 'food.menu.search', {type: 'slack', data: msg_json})
+  $replyChannel.sendReplace(message, 'food.menu.search', {type: 'slack', data: msg_json})
 }
 
 // just like pressing a category button
