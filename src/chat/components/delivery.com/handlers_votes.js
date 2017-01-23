@@ -836,8 +836,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       mailOptions.html += '<tr>';
       for (var j = 0; j < 3; j++) {
         var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
-        console.log('item url', item_url)
-        mailOptions.html += `<td><a style="display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
+        mailOptions.html += `<td><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
         mailOptions.html += formatItem(i, j) + '</a>' + '</td>';
       }
       mailOptions.html += '</tr>';
@@ -846,7 +845,6 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     mailOptions.html += '</table></body></html>';
 
     logging.info('mailOptions', mailOptions);
-    console.log('mailOptions', mailOptions)
     mailer_transport.sendMail(mailOptions, function (err) {
       if (err) console.log(err);
     });
