@@ -2,6 +2,8 @@
 var _ = require('lodash')
 var stable = require('stable')
 var striptags = require('striptags')
+
+var config = require('../../../config')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
@@ -227,7 +229,7 @@ if (foodSession.budget) {
     }
   }
 
-  if (process.env.NODE_ENV == 'development_hannah') var url = yield menu_utils.getUrl(foodSession, message.source.user)
+  if (config.menuURL) var url = yield menu_utils.getUrl(foodSession, message.source.user)
   else var url = foodSession.chosen_restaurant.url
 
   //resto name
