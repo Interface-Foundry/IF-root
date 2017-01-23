@@ -319,27 +319,10 @@ var checkForCanned = function (message) {
     case textSimilar(input, 'wtv') > 90:
     case textSimilar(input, 'whatever') > 60:
       flag = 'basic' // do this action
-      res = "Looks like I didn't answer your question properly. I'm not very smart yet, maybe this will help?\n" +
-
-        "Tell me what you're looking for, like `headphones`, and I'll show you three options: :one: :two: or :three:\n" +
-        'Use commands to refine your search, for example:\n\n' +
-
-        '`more` : view more search results\n' +
-        '`more like 3` : find similar items to search result :three:\n\n' +
-
-        '`2` : check for product details for item :two:\n' +
-        '`1 but cheaper` : finds :one: or similar in a lower price\n' +
-        '`2 but in XL` : finds :two: or similar in size XL\n' +
-        '`3 but in blue` : finds :three: or similar in color blue\n' +
-        '`2 but in wool` : finds :two: or similar with wool fabric\n\n' +
-
-        '`buy 1` : to buy item :one:\n' +
-        '`save 2` : save item :two: to cart\n' +
-        '`view cart` : see all items in the cart\n' +
-        '`remove 3` : to remove item :three: from cart\n\n' +
-
-        '`help` : view guidelines\n' +
-        'Try it now! Maybe you need new headphones? Type `headphones` to start.'
+      res = "Looks like I didn't answer your question properly. I'm not very smart yet, maybe this will help?\n\n"
+      + 'Hi I’m Kip, I’m a penguin that helps you collect food orders and shopping requests for office supplies. My job is to provide the team everything they need to feel happy and comfortable! :slightly_smiling_face:\n\n' 
+      + 'Start a new food order or shopping request by tapping Home button.\n\n' 
+      + 'Still lost? Try our <https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.s53szsikr|FAQ> or let my developers know at hello@kipthis.com';
       break
 
     case textSimilar(input, "What's your hobby") > 60:
@@ -732,37 +715,9 @@ var checkForCanned = function (message) {
     case textSimilar(input, 'wut') > 70:
     case textSimilar(input, 'wtf') > 70:
       flag = 'basic'
-
-      // if (origin == 'skype') {
-      // res = "I'm Kip, your penguin shopper.\n " +
-      //   "Tell me what you're looking for, and I'll show you three options.\n " +
-      //   'Try it now! Maybe you need new headphones? Type <b>headphones</b> to start.'
-
-      // } 
-      //   else{
-            res = 'I\'m Kip, your penguin shopper.\n' +
-
-            'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n' +
-              'Use commands to refine your search, for example:\n\n' +
-
-            '`more` : view more search results\n' +
-              '`more like 3` : find similar items to search result :three:\n\n' +
-
-            '`2` : check for product details for item :two:\n' +
-              '`1 but cheaper` : finds :one: or similar in a lower price\n' +
-              '`2 but in XL` : finds :two: or similar in size XL\n' +
-              '`3 but in blue` : finds :three: or similar in color blue\n' +
-              '`2 but in wool` : finds :two: or similar with wool fabric\n\n' +
-
-            '`buy 1` : to buy item :one:\n' +
-              '`save 2` : save item :two: to cart\n' +
-              '`view cart` : see all items in the cart\n' +
-              '`remove 3` : to remove item :three: from cart\n\n' +
-
-            '`help` : view guidelines\n' +
-              'Try it now! Maybe you need new headphones? Type `headphones` to start.'
-        // }
-
+      res = 'Hi I’m Kip, I’m a penguin that helps you collect food orders and shopping requests for office supplies. My job is to provide the team everything they need to feel happy and comfortable! :slightly_smiling_face:\n\n' 
+      + 'Start a new food order or shopping request by tapping Home button.\n\n' 
+      + 'Still lost? Try our <https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.s53szsikr|FAQ> or let my developers know at hello@kipthis.com';
       break
 
     case textSimilar(input, 'trending now') > 90:

@@ -118,8 +118,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
   }
 
   var json = {
-    text: `${parentName} `+h+` ${parentDescription}
-      *${item.name}* ${des}`,
+    text: `*${item.name}* ${des}`,
     attachments: [{
       image_url: (item.images.length>0 ? 'https://res.cloudinary.com/delivery-com/image/fetch/w_300,h_240,c_fit/' + encodeURIComponent(item.images[0].url) : ''),
       fallback: item.name + ' - ' + item.description,
@@ -180,7 +179,7 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
     'mrkdwn_in': ['text'],
     'actions': [{
         'name': 'food.item.add_to_cart',
-        'text': '+ Add to Order',
+        'text': '✓ Add to Order',
         'type': 'button',
         'style': 'primary',
         'value': cartItem.item.item_id

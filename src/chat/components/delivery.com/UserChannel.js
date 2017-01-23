@@ -64,6 +64,9 @@ class UserChannel {
             })
           } else if (replace && newSession.replace_ts) {
             self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+          } else if (replace && session.slack_ts) {
+            newSession.replace_ts = session.slack_ts
+            self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
           } else {
             self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
           }

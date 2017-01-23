@@ -41,6 +41,7 @@ handlers['step_1'] = function(message) {
   msg.mode = 'member_onboard';
   msg.action = 'home';
   msg.text = '';
+  msg.image_url = 'http://tidepools.co/kip/oregano/onboard_3.png';
   msg.fallback = 'Step 1/3: Find items to add to team cart';
   msg.source.team = team_id;
   msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
@@ -48,10 +49,10 @@ handlers['step_1'] = function(message) {
     text: '*Step 1/3:* Find items to add to team cart',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Step 1/3: Find items to add to team cart'
+    fallback: 'Find items to add to team cart'
   }, {
-    text: 'Tap to search for something',
-    fallback: 'You are unable to choose a game',
+    text: 'Looking for something?',
+    fallback: 'Looking for something?',
     callback_id: 'wopr_game',
     color: '#3AA3E3',
     attachment_type: 'default',
@@ -151,7 +152,7 @@ handlers['step_2'] = function * (message, data) {
     text: '*Step 2/3:* Try adding an item to your basket',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Step 2/3: Try adding an item to your basket'
+    fallback: 'Try adding an item to your basket'
   }];
   if (message.source.response_url) {
     request({
@@ -194,7 +195,8 @@ handlers['cart'] = function * (message) {
     text: '*Step 3/3:* Well done!\n I\'ve added your item to the team cart',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Step 3/3: Well done!\n I\'ve added your item to the team cart',
+    image_url: 'http://tidepools.co/kip/oregano/success.png',
+    fallback: 'Well done!\n I\'ve added your item to the team cart',
     callback_id: 'take me home pls',
     actions: [{
       'name': 'passthrough',

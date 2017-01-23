@@ -19,13 +19,15 @@ geoipURL: http://www.freegeoip.net/json/
 kipPayURL: https://pay.kipthis.com
 logging:
   console:
-    level: verbose
+    level: debug
     json: false
     stringify: false
     colorize: true
     prettyPrint: true
   mongo:
     enabled: false
+  debugFileLine:
+    enabled: true
 meetupAuth:
   consumerKey: vgmujlff2vflhtutplkaf15h
   consumerSecret: hub4tmkp966ir5q4jaaa41qc4l
@@ -78,4 +80,4 @@ twitterAuth:
   consumerSecret: N5SmhOhWzUJwPbofLpCi0BlJ8T4M3bACpiFBaB1nHdNIOQEu6R,
   callbackURL: https://kipapp.co/auth/twitter/callback
 # picstitch: http://localhost:5000
-menuURL: http://localhost:8001
+menuURL: http://dev-cafe.kipthis.com

@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: replylogic
+  name: replylogic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: replylogic
+  template:
+    metadata:
+      labels:
+        run: replylogic
+    spec:
+      containers:
+      - env:
+        - name: PROXY_LUMINATI_ADDR
+          value: http://luminati-proxy.default.svc.cluster.local:22225
+        # - name: LOGGING_CONSOLE_COLORIZE
+        #   value: "false"
+        # - name: LOGGING_CONSOLE_JSON
+        #   value: "true"
+        # - name: LOGGING_CONSOLE_PRETTYPRINT
+        #   value: "false"
+        # - name: LOGGING_CONSOLE_STRINGIFY
+        #   value: "true"
+        image: gcr.io/kip-styles/reply_logic:c1b9c03
+        imagePullPolicy: Always
+        name: replylogic
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

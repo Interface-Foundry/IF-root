@@ -10,7 +10,7 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
   var feeDebuging = feeDebug ? -1.0: 0.00
 
 
-  var tipText = (foodSession.tip.percent === 'cash') ? `Will tip in cash` : `${foodSession.tip.amount.$}`
+  var tipText = (foodSession.tip.percent === 'cash') ? `$0.00 (Will tip in cash)` : `${foodSession.tip.amount.$}`
   var tipAttachment = {
     'text': 'Tip: ' + `${tipText}`,
     'fallback': `Tip: ${tipText}`,
@@ -48,7 +48,6 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     fallback: 'Delivery.com Total ',
     text: `Cart Subtotal: ${foodSession.order.subtotal.$}\n` +
           `Taxes: ${foodSession.order.tax.$}\n` +
-          feeFromDeliveryLines +
           // `Delivery.com Total: ${foodSession.order.total.$}\n` +
           extraFeesFromDelivery +
           deliveryDiscount,
@@ -58,16 +57,13 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     'mrkdwn_in': ['text']
   }
 
-  // costs that kip calculates and instructions
-  var instructionText = _.get(foodSession, 'instructions') ?
-        `Delivery Instructions: _${foodSession.instructions}_\n` : ``
+  // costs that kip calculates
+  var kipCoupon = foodSession.discount_amount > feeDebuging ? `Kip Coupon: -${foodSession.discount_amount.$}\n` : ``
 
-  // var kipCoupon = foodSession.discount_amount > feeDebuging ? `Kip Coupon: -${foodSession.discount_amount.$}\n` : ``
   var kipCostsAttachment = {
-    fallback: 'Tip + Kip Fees + Discounts',
-    text: //`Tip: ${tipText}\n` +
-          `Kip Fee: ${foodSession.service_fee.$}\n` +
-          instructionText,
+    fallback: 'Tip + Service Fees + Discounts',
+    text: `Delivery Fee: ${foodSession.order.delivery_fee.$}\n` +
+          `Service Fee: ${foodSession.service_fee.$}\n`,
     callback_id: 'food.admin.cart.info',
     color: '#3AA3E3',
     attachment_type: 'default',
@@ -76,15 +72,17 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
 
   var discountAttachment = {
     fallback: "discount",
-    text: `Kip Coupon: -${foodSession.discount_amount.$} 🎉`,
+    text: `🎉 Kip Coupon: -${foodSession.discount_amount.$}`,
     mrkdwn_in: ['text']
   }
 
+  var instructionText = _.get(foodSession, 'instructions') ?
+        `\nDelivery Instructions: _${foodSession.instructions}_\n` : ``
 
   // ----- calculated amount is order.total + tip + service_fee - discount_amount
   var checkoutAttachment = {
     fallback: `*Order Total:* ${foodSession.calculated_amount.$}`,
-    text: `*Order Total:* ${foodSession.calculated_amount.$}`,
+    text: `*Order Total:* ${foodSession.calculated_amount.$}` + instructionText,
     callback_id: 'admin_order_confirm',
     color: '#49d63a',
     attachment_type: 'default',
@@ -93,11 +91,19 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     footer_icon: 'http://tidepools.co/kip/dcom_footer.png'
   }
 
-  //
-  // if (totalPrice < foodSession.chosen_restaurant.minimum)  { //should ostensibly never be true
-  //   checkoutAttachment.text += `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` +
-  //                              `_\$${foodSession.chosen_restaurant.minimum}_*`
-  //   } else {
+  var restartButton = {
+    'name': 'food.admin.select_address',
+    'text': '↺ Restart Order',
+    'type': 'button',
+    'value': 'food.admin.select_address'
+  }
+  restartButton.confirm = {
+    title: 'Restart Order',
+    text: 'Are you sure you want to restart your order? Your current order will be lost.',
+    ok_text: 'Yes',
+    dismiss_text: 'No'
+  }
+
     checkoutAttachment.actions = [{
       'name': `food.admin.order.checkout.confirm`,
       'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
@@ -107,17 +113,15 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     }, {
       // instructions button
       name: 'food.order.instructions',
-      text: '✎ Add Instructions',
+      text: (foodSession.instructions ? '✎ Edit Instructions' : '✎ Add Instructions'),
       type: 'button',
-      value: ''
+      value: '',
+      mrkdwn_in: ['text']
     },
-    {
-      'name': 'food.admin.select_address',
-      'text': 'Restart Order ↺',
-      'type': 'button',
-      'value': 'food.admin.select_address'
-    }]
+    restartButton]
     // }
 
-  return [].concat(deliveryCostsAttachment, kipCostsAttachment, (foodSession.discount_amount > feeDebuging ? discountAttachment: []), tipAttachment, checkoutAttachment)
+    var discount = (kipCoupon ? discountAttachment : []);
+
+    return [].concat(deliveryCostsAttachment, kipCostsAttachment, discount , tipAttachment, checkoutAttachment)
 }

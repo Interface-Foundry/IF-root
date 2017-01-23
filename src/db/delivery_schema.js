@@ -82,32 +82,26 @@ var deliverySchema = mongoose.Schema({
     }
   },
 
-  // chosen_channels: [{
-  //   channel_name: String,
-  //   channel_id: String,
-  //   is_channel: { // if its not a channel its a group
-  //     type: Boolean,
-  //     default: true
-  //   }
-  // }],
-
   fulfillment_method: String,
   instructions: String,
   time_started: {
     type: Date,
     default: Date.now
   },
-  votes: [], // members votes, like "Frozen Yogurt" (should also be stored in chatuser_schema)
+  cuisine_dashboards: [{
+    user: String,
+    message: mongoose.Schema.ObjectId
+  }],
+  votes: [{
+    user: String,
+    vote: String
+  }], // members votes, like "Frozen Yogurt" (should also be stored in chatuser_schema)
   conversations: {},
 
   // remove this later
   mode: String,
   action: String,
   data: {}, // \shrug
-  tracking: {
-    confirmed_votes_msg: String,
-    confirmed_orders_msg: String
-  },
   delivery_post: {},
   order: {}, // info after adding items to cart
   tip: {

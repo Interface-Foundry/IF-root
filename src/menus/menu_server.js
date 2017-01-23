@@ -27,54 +27,84 @@ app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 
-app.use('/', express.static('template'));
+app.use('/menus', express.static('static'));
 app.use('/test', express.static('test'));
 app.use('/ang', express.static('ang'));
 
+var router = express.Router()
+
+app.use('/menus', router)
+
 var MenuSession = db.Menu_session;
-var Menu = db.Menu;
+var Menu = db.Menus;
 var Merchants = db.Merchants;
 var Delivery = db.Delivery;
-var Messages = db.Messages;
 
 var ObjectId = require('mongodb').ObjectID;
 
 // require('../chat/components/delivery.com/scrape_menus.js');
 
 //handle post request with a binder full of data
-app.post('/cafe', (req, res) => co(function * () {
+router.post('/cafe', (req, res) => co(function * () {
   console.log('post to cafe')
-
   var ms = new MenuSession({
     session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
   });
 
   console.log('new menusession created')
 
-  var selected_items = req.body.selected_items;
+  console.log('req.body', req.body)
+
+  logging.debug('req.body', req.body)
+
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
 
-  ms.menu.data = result.raw_menu.menu;
+  if (!result) {
+    ms.menu.data = yield db.Delivery.findOne({team_id: req.body.team_id, active: true}).select('menu').exec()
+  } else {
+    ms.menu.data = result.raw_menu.menu;
+  }
+
   ms.foodSessionId = req.body.delivery_ObjectId;
-  ms.userId = req.body.user_id;
+  ms.user.id = req.body.user_id;
   ms.budget = req.body.budget;
   ms.merchant.id = rest_id;
-  var merchant = yield Merchants.findOne({id: rest_id});
-  ms.merchant.name = merchant.data.summary.name;
-  ms.merchant.minimum = merchant.data.ordering.minimum + "";
-  ms.selected_items = selected_items;
-  console.log('ms', ms);
 
+  var merchant = yield Merchants.findOne({id: rest_id});
+
+  ms.merchant.logo = merchant.data.summary.merchant_logo
+  ms.merchant.name = merchant.data.summary.name;
+
+  console.log('woe is me');
+
+  ms.merchant.minimum = merchant.data.ordering.minimum + "";
+
+  ms.selected_items = req.body.selected_items;
+
+  var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
+
+  ms.admin_name = foodSession.convo_initiater.name //initiatOr
+
+  var user = yield db.Chatusers.findOne({id: ms.user.id})
+  if (!user) user = yield db.email_users.findOne({id: ms.user.id}).exec()
+
+  ms.user.is_admin = user.is_admin
+
+  var sb = yield db.Slackbots.findOne({team_id: foodSession.team_id})
+
+  ms.team_name = sb.team_name
+
+  console.log('ms', ms);
   yield ms.save();
 
   //return a url w a key in a query string
-  res.send(menuURL + '#?k=' + ms.session_token);
+  res.send(menuURL + '/?k=' + ms.session_token);
 }));
 
 //when user hits that url up, post to /session w/key and gets correct pg
 
-app.post('/session', (req, res) => co(function * () {
+router.post('/session', (req, res) => co(function * () {
   if (_.get(req, 'body') && _.get(req, 'body.session_token')) {
     var t = req.body.session_token.replace(/[^\w\s]/gi, '') // clean special char
     try {
@@ -89,12 +119,15 @@ app.post('/session', (req, res) => co(function * () {
 //updates the correct delivery object in the db
 //with the delivery object id saved on the menu session
 
-app.post('/order', function (req, res) {
+router.post('/order', function (req, res) {
   co(function * () {
     console.log('post to /order');
     if (_.get(req, 'body')) {
       var order = req.body.order;
       var user_id = req.body.user_id;
+
+      console.log('req.body', req.body)
+
       var deliv_id = req.body.deliv_id;
       var foodSession = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
       console.log('found the delivery object');
@@ -118,29 +151,31 @@ app.post('/order', function (req, res) {
 
       //----------Message Queue-----------//
 
-      console.log('updated delivery; looking for source message');
+        console.log('updated delivery; looking for source message');
 
-      // var foodMessage = yield Messages.find({
-      //   'source.user': deliv.convo_initiater.id,
-      //   mode: 'food',
-      //   incoming: false
-      // }).sort('-ts').limit(1);
-      //
-      // foodMessage = foodMessage[0];
-      //
-      // var mess = new Messages({
-      //   incoming: true,
-      //   thread_id: foodMessage.thread_id,
-      //   action: 'cart.personal',
-      //   user_id: foodMessage.source.user,
-      //   mode: 'food',
-      //   origin: 'slack',
-      //   source: foodMessage.source,
-      // })
-      //
-      // yield mess.save();
-      //
-      // yield queue.publish('incoming', mess, ['slack', foodMessage.source.channel, foodMessage.ts, new Date().getSeconds()].join('.'), true)
+        var foodMessage = yield db.Messages.find({
+          'source.user': user_id,
+          mode: 'food',
+          incoming: false
+        }).sort('-ts').limit(1);
+
+        console.log('found foodmessage')
+
+        foodMessage = foodMessage[0];
+
+        var mess = new db.Messages({
+          incoming: true,
+          thread_id: foodMessage.thread_id,
+          action: 'cart.personal',
+          user_id: foodMessage.source.user,
+          mode: 'food',
+          origin: 'slack',
+          source: foodMessage.source,
+        })
+
+        yield mess.save();
+
+        yield queue.publish('incoming', mess, ['slack', foodMessage.source.channel, foodMessage.ts, new Date().getSeconds()].join('.'), true)
 
       console.log('ostensibly done');
       res.send();
@@ -151,7 +186,12 @@ app.post('/order', function (req, res) {
   });
 });
 
+// k8s readiness ingress health check
+app.get('/health', function (req, res) {
+  res.sendStatus(200)
+})
+
 var port = 8001
 app.listen(port, function () {
-  console.log('Listening excitedly on ' + port)
+  console.log('Listening enthusiastically on ' + port)
 })

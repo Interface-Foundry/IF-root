@@ -82,7 +82,7 @@ function * findAdmins(team) {
 function * isAdmin(userId, team) {
   let adminList = yield findAdmins(team);
   for (var i = 0; i < adminList.length; i++) {
-    if(adminList[i].id === userId){
+    if (adminList[i].id === userId) {
       return true;
     }
   }
@@ -209,6 +209,21 @@ function * refreshAllChannels (slackbot) {
   yield slackbot.slackbot.save()
 }
 
+function * refreshAllUserIMs (slackbot) {
+  logging.debug('trying to update all users dms')
+  var userIMInfo = yield slackbot.web.im.list()
+  yield userIMInfo.ims.map(function * (u) {
+    var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
+    if (_.get(chatUser, 'dm') !== u.id) {
+      logging.debug('updating user dm', chatUser.name)
+      chatUser.dm = u.id
+      chatUser.save()
+    } else {
+      logging.debug('no need to update user dm', chatUser.name)
+    }
+  })
+}
+
 function * removeCartChannel(message, channel_name) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
   var channels = yield request({url: 'https://slack.com/api/channels.list?token=' + team.bot.bot_access_token, json: true});
@@ -312,58 +327,67 @@ function * addViaAsin(asin, message) {
     }
 }
 
-function * showLoading(message) {
-  var relevantMessage = yield db.Messages.findOne({'thread_id': message.source.channel})
+function* showLoading(message) {
+  var relevantMessage = yield db.Messages.findOne({
+    'thread_id': message.source.channel
+  })
   var json = message.source.original_message;
-  let searchMsg = this.randomSearching();
-    if (!json) {
-     var msg = new db.Message(message);
-     msg.mode = 'loading';
-     msg.action = 'show'
-     msg.text = '';
-     msg.reply = [{
-        text: searchMsg,
-        color: '#45a5f4'
-      }];
-     yield msg.save()
-     return yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.results');
-    }
-    json.attachments.push({
-        fallback: message.action,
-        callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
-        text: searchMsg,
-        color: '#45a5f4'
-    })
-    request({
-      method: 'POST',
-      uri: message.source.response_url,
-      body: JSON.stringify(json)
-    });
-    return
+  let searchText = this.randomSearching();
+  if (!json) {
+    var msg = new db.Message(message);
+    msg.mode = 'loading';
+    msg.action = 'show'
+    msg.text = searchText;
+    yield msg.save()
+    return yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.results');
+  }
+  json.attachments.push({
+    fallback: message.action,
+    callback_id: message.action + (+(Math.random() * 100).toString().slice(3)).toString(36),
+    text: searchText,
+    color: '#45a5f4'
+  })
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: JSON.stringify(json)
+  });
+  return;
 }
 
-function * hideLoading(message) {
-    var history = yield db.Messages.find({'thread_id': message.source.channel}).sort({'_id':-1}).limit(2).exec();
-    var relevantMessage = history[0];
-    var json =  message.reply;
-    if (!message.source.original_message) {
-     var msg = new db.Message(message);
-     msg.mode = 'loading';
-     msg.action = 'hide';
-     msg.text = '';
-     msg.data =  {hide_ts: relevantMessage.ts};
-     yield msg.save()
-     return yield queue.publish('outgoing.' + msg.origin, msg, msg._id + '.reply.results')
-    }
-    message.source.original_message.attachments.splice(-1,1);
-     request({
+function* hideLoading(message) {
+  var history = yield db.Messages.find({
+    'thread_id': message.source.channel
+  }).sort({
+    '_id': -1
+  }).limit(2).exec();
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({
+    team_id: team_id
+  }).exec();
+  var relevantMessage = history[0];
+  if (!message.source.original_message) {
+    let token = team.bot.bot_access_token,
+      channel = message.source.channel,
+      ts = message.source.ts;
+    yield request({
+      uri: `https://slack.com/api/chat.delete?token=${token}&ts=${ts}&channel=${channel}&as_user=true`,
       method: 'POST',
-      uri: relevantMessage.source.response_url,
-      body: JSON.stringify(message.source.original_message)
+      json: true
     });
-    return
+    return;
+  }
+  message.source.original_message.attachments.splice(-1, 1);
+  request({
+    method: 'POST',
+    uri: relevantMessage.source.response_url,
+    body: JSON.stringify(message.source.original_message)
+  });
+  return;
 }
-
 
 function* sendLastCalls(message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
@@ -667,18 +691,49 @@ function randomSearching() {
  * Chooses a random welcome message
  * @return {String} a welcome message, suffixed with a (happy) emoji
  */
-function randomWelcome() {
+function randomWelcome(userId) {
   let messages = [
-    'Welcome to Kip! \u00A0:smile:',
-    'Hi! Thanks for using Kip \u00A0:blush:',
-    'Hey, what do you need? \u00A0:grinning:',
-    'Hi, what can I do for you? \u00A0:slightly_smiling_face:'
+    'Hey there, how can I help you today?',
+    'Looking for something? Let me help',
+    'Hey how\'ve you been?',
+    'Did you know the first digital assistant was made in 1992? We’ve come a long way!',
+    'Fun fact: Mars Curiosity Rover has an AI that is programmed to sing happy birthday to itself',
+    `Hey <@${userId}>, what’s up?`,
+    `Hey <@${userId}>, how’s it going?`,
+    `Hey <@${userId}>, good to see you`,
+    `Hey <@${userId}>, what’s happening?`,
+    'Hey, what can I do for you?'
+  ];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num];
+}
+
+function randomCafeDescrip() {
+  let messages = [
+    'I can help you collect food orders for the team',
+    'Let me help you order food for the team',
+    'Make ordering food as easy as a pie',
+    'I’d love to help you collect orders for food'
+  ];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num];
+}
+
+function randomStoreDescrip() {
+  let messages = [
+    'Short of pencils? Need paper? Let me help!',
+    'I can help you get a list of things your team needs',
+    'Let me help you get all the stuff your team needs',
+    'I’ll put together a list of things your team needs',
+    'I’ll help you get all the team supplies you need',
+    'Don’t waste time, I’ll get the team supplies for you!'
   ];
   let num = Math.floor(Math.random() * messages.length);
   return messages[num];
 }
 
 module.exports = {
+  refreshAllUserIMs: refreshAllUserIMs,
   initializeTeam: initializeTeam,
   findAdmins: findAdmins,
   getTeamMembers: getTeamMembers,
@@ -699,5 +754,7 @@ module.exports = {
   setCron: setCron,
   randomWelcome: randomWelcome,
   randomStoreHint: randomStoreHint,
-  randomSearching: randomSearching
+  randomSearching: randomSearching,
+  randomStoreDescrip: randomStoreDescrip,
+  randomCafeDescrip: randomCafeDescrip
 };

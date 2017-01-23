@@ -1,0 +1,24 @@
+env: canaryk8s
+isProduction: true
+mongodb:
+  url: mongodb://10.142.0.18/foundry
+picstitch: http://dev-picstitch.kipthis.com
+nlp: http://dev-parser.kipthis.com
+slack:
+  client_id: "2804113073.84166691729"
+  client_secret: 39126ac7842f6e3a010f94b9a79282f6
+  verification_token: b2hLV2HnBtWBmU5NFgDBG8dL
+  redirect_uri: https://slack.kipthis.com/newslack
+picstitchDelivery: http://delivery-picstitch.kipthis.com
+logging:
+  console:
+    level: silly
+    json: false
+    stringify: false
+    colorize: true
+    prettyPrint: true
+  mongo:
+    enabled: true
+  debugFileLine:
+    enabled: false
+menuURL: http://cafe.kipthis.com

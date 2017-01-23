@@ -1,6 +1,7 @@
 'use strict'
 var _ = require('lodash')
 var stable = require('stable')
+var striptags = require('striptags')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
@@ -146,9 +147,9 @@ if (foodSession.budget) {
     parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
 
     //clean out html from descriptions
-    var html = /<.*>/
-    desc = desc.replace(html, '');
-    parentDescription = parentDescription.replace(html, '');
+
+    desc = striptags(desc)
+    parentDescription = striptags(parentDescription)
 
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
@@ -226,7 +227,9 @@ if (foodSession.budget) {
     }
   }
 
-  var url = yield menu_utils.getUrl(foodSession, message.source.user)
+  if (process.env.NODE_ENV == 'development_hannah') var url = yield menu_utils.getUrl(foodSession, message.source.user)
+  else var url = foodSession.chosen_restaurant.url
+
   //resto name
   msg_json.attachments.push({
     'fallback': 'Search the menu',
@@ -241,7 +244,7 @@ if (foodSession.budget) {
     'mrkdwn_in': ['text', 'fields']
   })
 
-  if (foodSession.budget) {
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
     if (Number(foodSession.user_budgets[message.user_id]) >= 2) {
       var text = `Aim to spend around $${Math.round(foodSession.user_budgets[message.user_id])}!`;
     }
@@ -254,7 +257,7 @@ if (foodSession.budget) {
     });
   }
 
-  $replyChannel.send(message, 'food.menu.search', {type: 'slack', data: msg_json})
+  $replyChannel.sendReplace(message, 'food.menu.search', {type: 'slack', data: msg_json})
 }
 
 // just like pressing a category button
@@ -424,7 +427,7 @@ handlers['food.item.add_to_cart'] = function * (message) {
 
   //~~~budget~~~//
 
-  if (foodSession.user_budgets) {
+  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
     var budgets = foodSession.user_budgets;
     var menu = Menu(foodSession.menu);
     var itemPrice = menu.getCartItemPrice(userItem);

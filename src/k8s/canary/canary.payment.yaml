@@ -1,0 +1,58 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: payments
+  namespace: canary
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: payments
+        tier: frontend
+    spec:
+      containers:
+      - name: payments
+        image: gcr.io/kip-styles/payments:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: /kip/payments/secrets/
+          name: kip-creditcard
+          readOnly: true
+        securityContext: {}
+      volumes:
+      - name: kip-creditcard
+        secret:
+          secretName: kip-cc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments
+  namespace: canary
+  labels:
+    app: payments
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    app: payments
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: payments
+  namespace: canary
+  annotations:
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  tls:
+    - secretName: pay.kipthis.com-sslcerts
+  backend:
+    serviceName: payments
+    servicePort: 80

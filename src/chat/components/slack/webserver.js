@@ -66,6 +66,8 @@ function simple_action_handler (action) {
       return 'team';
     case 'channel_btn':
       return 'channel_btn';
+    case 'collect_select':
+      return 'collect_select';
     case 'settings':
       return 'settings';
     case 'exit':
@@ -104,7 +106,7 @@ app.post('/slackaction', next(function * (req, res) {
   var parsedIn = JSON.parse(req.body.payload);
 
   // First reply to slack, then process the request
-  if (!buttonData && simple_command !== 'channel_btn' && parsedIn.original_message) {
+  if (!buttonData && simple_command !== 'collect_select'&& simple_command !== 'channel_btn'&& parsedIn.original_message) {
     res.status(200)
     res.end()
   } else if (!parsedIn.original_message) {
@@ -157,13 +159,8 @@ app.post('/slackaction', next(function * (req, res) {
         }).exec();
         let isAdmin = yield utils.isAdmin(message.source.user, team);
         message.mode = 'shopping'
-        if (isAdmin) {
-          message.action = 'adminInitial';
-          message.text = 'sendCollect';
-        } else {
-          message.action = 'initial';
-          message.text = 'shopping';
-        }
+        message.action = 'initial';
+        message.text = 'shopping';
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         });
@@ -172,61 +169,130 @@ app.post('/slackaction', next(function * (req, res) {
       	// responding with nothing means the button does nothing!
         return;
       }
-      else if (simple_command == 'channel_btn') {
-        var channelId = _.get(parsedIn,'actions[0].value');
+      else if (simple_command === 'collect_select') {
+        kip.debug(`😃😃${JSON.stringify(parsedIn.actions, null, 2)}`);
+        let selection = parsedIn.actions[0].value;
+        let json = parsedIn.original_message;
         var team_id = message.source.team;
         var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-        var lastMessage = parsedIn.original_message;
-        kip.debug(`😍  ${JSON.stringify(lastMessage, null, 2)}`)
-        if (team.meta.cart_channels.find(id => { return (id == channelId) })) {
-          // kip.debug(' \n\n\n\n\n removing channel:', team.meta.cart_channels.find(id => { return (id == channelId) }),' \n\n\n\n\n ');
-          _.remove(team.meta.cart_channels, function(c) { return c == channelId });
-        } else {
-          team.meta.cart_channels.push(channelId);
-        }
-        team.meta.cart_channels = _.uniq(team.meta.cart_channels);
-        team.markModified('meta.cart_channels');
-        yield team.save();
-        var channels = yield utils.getChannels(team);
-        if (channels.length > 9) {
-          channels = channels.slice(0, 9);
-        }
-        var attachments = [];
-        var buttons = channels.map(channel => {
-          var checkbox = team.meta.cart_channels.find(id => { return (id == channel.id) }) ? '✓ ' : '☐ ';
-          return {
-            name: 'channel_btn',
-            text: checkbox + channel.name ,
-            type: 'button',
-            value: channel.id
-          }
+        json.attachments[0].actions = json.attachments[0].actions.map(button => {
+          button.text = button.text.replace('◉', '○');
+          return button;
         });
-        buttons = _.uniq(buttons);
-        function sortF(a, b){
-          return ((a.text.indexOf('☐ ') > -1) - (b.text.indexOf('☐ ') > -1))
+        json.attachments.splice(1, json.attachments.length - 2);
+        switch (selection) {
+          case 'everyone':
+            json.attachments[0].actions[0].text = '◉ Everyone';
+            team.meta.collect_from = 'all';
+            break;
+          case 'justme':
+            json.attachments[0].actions[1].text = '◉ Just Me';
+            team.meta.collect_from = 'me';
+            break;
+          case 'channel':
+            json.attachments[0].actions[2].text = '◉ By Channel';
+            team.meta.collect_from = 'channel';
+            let cartChannels = team.meta.cart_channels;
+            let channels = yield utils.getChannels(team);
+            let selectedChannels = channels.reduce((arr, channel) => {
+              if (cartChannels.includes(channel.id)) {
+                arr.push({
+                  name: 'channel_btn',
+                  text: `✓ #${channel.name}`,
+                  type: 'button',
+                  value: channel.id
+                });
+              }
+              return arr;
+            }, []);
+            let unselectedChannels = channels.reduce((arr, channel) => {
+              if (!cartChannels.includes(channel.id)) {
+                arr.push({
+                  name: 'channel_btn',
+                  text: `☐ #${channel.name}`,
+                  type: 'button',
+                  value: channel.id
+                });
+              }
+              return arr;
+            }, []);
+            selectedChannels = _.uniq(selectedChannels);
+            unselectedChannels = _.uniq(unselectedChannels);
+            let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
+              : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
+            let chunkedButtons = _.chunk(buttons, 5);
+            let channelSection = chunkedButtons.map(buttonRow => {
+              return {
+                text: '',
+                callback_id: 'channel_buttons_idk',
+                actions: buttonRow
+              };
+            });
+            channelSection.push({
+              'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
+              mrkdwn_in: ['text']
+            });
+            channelSection.push(json.attachments.pop());
+            json.attachments = [...json.attachments, ...channelSection];
+            break;
         }
-        buttons = buttons.sort(sortF)
-        if (buttons.length > 9) {
-          buttons = buttons.slice(0, 9);
-        }
-        var chunkedButtons = _.chunk(buttons, 5);
-        chunkedButtons.forEach((ele, i) => {
-          let newRow = lastMessage.attachments[i];
-          newRow.actions = chunkedButtons[i];
-          attachments.push(newRow);
-        })
-        attachments = attachments.concat(lastMessage.attachments[lastMessage.attachments.length - 2], lastMessage.attachments[lastMessage.attachments.length - 1]);
-        var json = parsedIn.original_message;
-        json.attachments = attachments;
+        team.markModified('meta.collect_from');
+        yield team.save();
         let stringOrig = JSON.stringify(json);
         let map = {
           amp: '&',
           lt: '<',
           gt: '>',
           quot: '"',
-          '#039': "'"
+          '#039': '\''
+        };
+        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
+        request({
+          method: 'POST',
+          uri: message.source.response_url,
+          body: stringOrig
+        });
+        return;
+      }
+      else if (simple_command == 'channel_btn') {
+        var channelId = _.get(parsedIn,'actions[0].value');
+        var team_id = message.source.team;
+        var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+        let cartChannels = team.meta.cart_channels;
+        if (cartChannels.find(id => { return (id == channelId) })) {
+          _.remove(cartChannels, function(c) { return c == channelId });
+        } else {
+          cartChannels.push(channelId);
         }
-        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+        team.meta.cart_channels = _.uniq(cartChannels);
+        team.markModified('meta.cart_channels');
+        yield team.save();
+        let json = parsedIn.original_message;
+        json.attachments = json.attachments.map(row => {
+          if (!row.actions) return row;
+          row.actions = row.actions.map(button => {
+            if (button.value === channelId) {
+              let channelName = button.text;
+              if (channelName.includes('☐')) {
+                channelName = channelName.replace('☐', '✓');
+              } else {
+                channelName = channelName.replace('✓', '☐');
+              }
+              button.text = channelName;
+            }
+            return button;
+          });
+          return row;
+        });
+        let stringOrig = JSON.stringify(json);
+        let map = {
+          amp: '&',
+          lt: '<',
+          gt: '>',
+          quot: '"',
+          '#039': '\''
+        };
+        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
         request({
           method: 'POST',
           uri: message.source.response_url,
@@ -278,7 +344,7 @@ app.post('/slackaction', next(function * (req, res) {
       }
       else if (simple_command == 'exit') {
         let isAdmin = yield utils.isAdmin(message.source.user, team);
-        let reply = cardTemplate.home_screen(isAdmin);
+        let reply = cardTemplate.home_screen(isAdmin, message.source.user);
         var slackBot = slackModule.slackConnections[team];
         reply.as_user = true;
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
@@ -341,21 +407,12 @@ app.post('/slackaction', next(function * (req, res) {
             callback_id: parsedIn.original_message.attachments[index].callback_id
           };
           break;
-        case 'emptycartwarn':
-          parsedIn.original_message.attachments[index] = {
-            text: `Are you sure you want to empty your cart?`,
-            actions: cardTemplate.empty_cart_check,
-            mrkdwn_in: ['text'],
-            callback_id: parsedIn.original_message.attachments[index].callback_id
-          };
-          break;
-        case 'cancelemptycart':
         case 'cancelremove':
           co(function * () {
             cart = yield kipcart.getCart(parsedIn.team.id); // 'team' assumes this is a slack command. need a way to tell
             yield updateCartMsg(cart, parsedIn);
           }).catch(console.log.bind(console));
-          break;
+          return;
         case 'removeall':
           // reduces the quantity right way, but for speed we return a hacked message right away
           co(function*() {
@@ -367,10 +424,9 @@ app.post('/slackaction', next(function * (req, res) {
           parsedIn.original_message.attachments = clearCartMsg(parsedIn.original_message.attachments);
           break;
         case 'emptycart':
-          co(function*() {
-            cart = yield kipcart.emptyCart(parsedIn.team.id);
-            yield updateCartMsg(cart, parsedIn);
-          }).catch(console.log.bind(console));
+          cart = yield kipcart.emptyCart(parsedIn.team.id);
+          yield updateCartMsg(cart, parsedIn);
+          return;
       }
       var stringOrig = JSON.stringify(parsedIn.original_message)
       let map = {
@@ -408,7 +464,7 @@ function clearCartMsg(attachments) {
   }, []);
 }
 
-function* updateCartMsg(cart, parsedIn) {
+function * updateCartMsg(cart, parsedIn) {
   let itemNum = 1,
     team = yield db.slackbots.findOne({
       team_id: parsedIn.team.id
@@ -516,15 +572,23 @@ function* updateCartMsg(cart, parsedIn) {
         });
         if (cart.aggregate_items.length > 0) {
           buttons.actions.push({
-            'name': 'emptycartwarn',
+            'name': 'emptycart',
             'text': 'Empty Cart',
             'type': 'button',
-            'value': 'emptycartwarn'
+            'value': 'emptycart',
+            'confirm': {
+              'title': 'Are you sure?',
+              'text': 'Are you sure you want to empty your cart?',
+              'ok_text': 'Yes',
+              'dismiss_text': 'No'
+            }
           });
         }
       }
       all.push(buttons);
-    }
+	} else if (a.text.includes('*Step 3/3:*')) {
+    all.push(a);
+  }
     return all;
   }, []);
 
@@ -601,7 +665,10 @@ app.get('/newslack', function (req, res) {
   }).catch(console.log.bind(console))
 })
 
-
+// k8s readiness ingress health check
+app.get('/health', function (req, res) {
+  res.sendStatus(200)
+})
 
 // app.get('/*', function(req, res, next) {
 //     res.sendfile(defaultPage)

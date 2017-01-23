@@ -17,23 +17,19 @@ var card_templates = require('../slack/card_templates');
  */
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action')
+  cancelReminder('initial reminder', message.source.user);
+  cancelReminder('onboard reminder', message.source.user);
+  if (last_action && (last_action.includes('start_now') || last_action.includes('remind_later'))) {
+    last_action = 'get-admins.ask'; // this is the only workaround I can think of
+  }
   if (!last_action) {
-    return yield handlers['start'](message)
-  } else if (message.action.includes('remind_later' && !message.text)) {
-  	let data = message.action.split('.')[2];
-  	return yield handlers['remind_later'](message, [data]);
-  } else if (message.action.includes('start_now') && !message.text) {
-  	return yield handlers['start_now'](message);
-  } else if (last_action === 'get-admins.ask') {
-    return yield handlers['get-admins.response'](message)
-  } else if(_.get(message,'action') === 'get-admins.confirm') {
-    return yield handlers['get-admins.confirm'](message)
-  } else if(_.get(message,'action') === 'get-admins.addme') {
-    return yield handlers['get-admins.addme'](message)
+    return yield handlers['start'](message);
+  } else if (!message.text) {
+    let [action, data] = message.action.split('.');
+    kip.debug(`forwarding to onboarding[${action}](message, [${data}])`);
+    return yield handlers[action](message, [data]);
   } else {
-  	let action = message.action.split('.')[1];
-  	let data = message.action.split('.')[2];
-  	return yield handlers[action](message, [data]);
+    return yield handlers['response'](message);
   }
 }
 
@@ -46,14 +42,14 @@ module.exports.handle = handle;
  */
 handlers['start'] = function * (message) {
   kip.debug('starting onboarding conversation');
-    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null);
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
   var team = yield db.Slackbots.findOne({team_id: team_id}).exec();
 
   var welcome_message = message_tools.text_reply(message, '');
-  welcome_message.reply = card_templates.onboard_admin_attachments('initial');
+  welcome_message.reply = card_templates.onboard_admin_attachments('initial', team.team_name);
   welcome_message.action = 'get-admins.ask';
 
   let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
@@ -61,11 +57,11 @@ handlers['start'] = function * (message) {
   let cronMsg = {
     mode: welcome_message.mode,
     action: 'get-admins.ask',
-    reply: card_templates.onboard_admin_attachments('tomorrow'),
+    reply: card_templates.onboard_admin_attachments('tomorrow', team.team_name),
     origin: message.origin,
     source: message.source,
-    text: 'Hey, it\'s me again! Ready to get started?',
-    fallback: 'Hey, it\'s me again! Ready to get started?'
+    text: 'Almost there...! :)',
+    fallback: 'Almost there...! :)'
   };
   scheduleReminder(
     'initial reminder',
@@ -80,6 +76,11 @@ handlers['start'] = function * (message) {
 }
 
 handlers['remind_later'] = function * (message, data) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({team_id: team_id}).exec();
   const ONE_DAY = 24 * 60 * 60 * 1000; // hours in a day * mins in hour * seconds in min * milliseconds in second
   let nextDate,
     msInFuture = -1,
@@ -106,7 +107,7 @@ handlers['remind_later'] = function * (message, data) {
     let cronMsg = {
       mode: message.mode,
       action: 'home',
-      reply: cardTemplate.onboard_admin_attachments(nextDate),
+      reply: cardTemplate.onboard_admin_attachments(nextDate, team.team_name),
       origin: message.origin,
       source: message.source,
       text: 'Hey, it\'s me again! Ready to get started?',
@@ -128,11 +129,11 @@ handlers['remind_later'] = function * (message, data) {
       text: '',
       callback_id: 'kip!',
       actions: [{
-        'name': 'onboarding.start.start_now',
+        'name': 'onboarding.start_now.start_now',
         'text': '▶︎ Start Now',
         'style': 'primary',
         'type': 'button',
-        'value': 'onboarding.start.start_now'
+        'value': 'onboarding.start_now.start_now'
       }]
     }]
   };
@@ -152,7 +153,7 @@ handlers['start_now'] = function(message) {
     attachments: card_templates.onboard_admin_attachments('tomorrow'),
     origin: message.origin,
     source: message.source,
-    mode: 'get-admins',
+    mode: 'onboarding',
     action: 'home',
     history: message.history
   };
@@ -170,7 +171,7 @@ handlers['start_now'] = function(message) {
  * 
  * @param message the latest message from the user
  */
-handlers['get-admins.ask'] = function * (message) {
+handlers['ask'] = function * (message) {
   var reply = 'Who manages the office purchases? Type something like `me` or `me and @jane`'
   // if not slack, move on to the next part of the onboarding convo
   if (message.origin !== 'slack') {
@@ -188,13 +189,7 @@ handlers['get-admins.ask'] = function * (message) {
  * 
  * @param message the latest message from the user
  */
-handlers['get-admins.response'] = function * (message) {
-  var reply_success = `Great! I\'ll keep $ADMINS up-to-date on what your team members are adding to the office shopping cart 😊`;
-  var reply_admin = `Do you want me to take you on a short tour of Kip?`;
-  var reply_user = `Why don't you try searching for something? Type something like 'headphones' to search`;
-  var reply_failure = "I'm sorry, I couldn't quite understand that, can you clarify for me who manages office purchases? If you want to skip this part, just type 'skip' and we can move on."
-  var admins = [];
-  var user_is_admin = false
+handlers['response'] = function * (message) {
   var team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
@@ -203,14 +198,14 @@ handlers['get-admins.response'] = function * (message) {
   if (!find || find && find.length == 0) {
     return kip.debug('could not find team : ', message, find);
   } else {
-    var team = find[0];
+    team = find[0];
   }
 
   var office_admins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
   var isAdmin;
   office_admins = office_admins.map(g => {
     if (g === 'me' || g === 'ME') {
-       isAdmin = true;
+      isAdmin = true;
       team.meta.office_assistants.push(message.user_id);
       return message.user_id;
     } else {
@@ -266,17 +261,15 @@ handlers['get-admins.response'] = function * (message) {
     }
   });
   office_admins = _.uniq(office_admins);
-  // add the admin strings into the reply message
-  reply_success = reply_success.replace('$ADMINS', office_admins.map(g => {
-    return '<@' + g + '>'
-  }).join(', ').replace(/,([^,]*)$/, ' and $1'));
   message.mode = 'onboarding';
   message.action = 'get-admins.response';
 
   if (isAdmin) {
-    var next_message = message
+    var next_message = message;
+    next_message.text = 'onboard';
     next_message.mode = 'onboard';
     next_message.action = 'start.start';
+    delete next_message.data;
     return yield onboard.handle(next_message);
   } else {
     message.mode = 'onboarding';
@@ -284,23 +277,23 @@ handlers['get-admins.response'] = function * (message) {
     var attachments = [];
     attachments.push({
       text: 'Are you sure you don\'t want to be an admin for team *' + team.team_name + '*?',
-      fallback: 'You are unable to choose a game',
+      fallback: 'Are you sure you don\'t want to be an admin for team *' + team.team_name + '*?',
       callback_id: 'wopr_game',
       color: '#3AA3E3',
       mrkdwn_in: ['text', 'pretext'],
       attachment_type: 'default',
       actions: [{
-        name: "onboarding.get-admins.confirm",
+        name: "onboarding.confirm",
         text: "Confirm",
         style: "primary",
         type: "button",
-        value: "onboarding.get-admins.confirm"
+        value: "get-admins.confirm"
       }, {
-        name: "onboarding.get-admins.addme",
+        name: "onboarding.addme",
         text: "Add me as an Admin!",
         style: "default",
         type: "button",
-        value: "onboarding.get-admins.addme"
+        value: "get-admins.addme"
       }]
     });
     message.reply = attachments;
@@ -314,7 +307,7 @@ handlers['get-admins.response'] = function * (message) {
  * 
  * @param message the latest message from the user
  */
-handlers['get-admins.confirm'] = function * (message) {
+handlers['confirm'] = function * (message) {
   var team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
@@ -330,8 +323,7 @@ handlers['get-admins.confirm'] = function * (message) {
     })
     yield team.save();
     var next_message = message;
-    next_message.text = reply;
-    delete next_message.reply;
+    next_message.text = 'onboard';
     next_message.mode = 'onboard';
     next_message.action = 'start.start';
     return yield onboard.handle(next_message);
@@ -340,7 +332,7 @@ handlers['get-admins.confirm'] = function * (message) {
     reply = reply.replace('$ADMINS', admins.map(g => {
     return '<@' + g.id + '>'
     }).join(', ').replace(/,([^,]*)$/, ' and $1'));
-    var slackreply = cardTemplate.home_screen(false);
+    var slackreply = cardTemplate.home_screen(false, message.source.user);
     var msg = {
       action: 'simplehome',
       mode: 'food',
@@ -360,18 +352,20 @@ handlers['get-admins.confirm'] = function * (message) {
  * 
  * @param message the latest message from the user
  */
-handlers['get-admins.addme'] = function * (message) {
+handlers['addme'] = function*(message) {
   var team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
-    team.meta.office_assistants.push(message.source.user);
-    yield team.save()
-    var next_message = message;
-    next_message.text = '';
-    delete next_message.reply;
-    next_message.mode = 'onboard';
-    next_message.action = 'start.start';
-   return yield onboard.handle(next_message);
+  team.meta.office_assistants.push(message.source.user);
+  yield team.save()
+
+  var msg = {
+    action: 'start.start',
+    mode: 'onboard',
+    source: message.source,
+    origin: message.origin
+  }
+  return yield onboard.handle(msg);
 }
 
 const scheduleReminder = function(type, time, data) {

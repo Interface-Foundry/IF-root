@@ -1,4 +1,3 @@
-const date = require('../../helpers/date');
 const getSlackHistogram = (messages) =>
   new Promise((resolve, reject) => {
     messages.aggregate([

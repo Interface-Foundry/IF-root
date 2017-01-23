@@ -13,13 +13,13 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
   }]
 }
 
-var home_screen = module.exports.home_screen = function(isAdmin) {
+var home_screen = module.exports.home_screen = function(isAdmin, userId) {
   let buttonDescrip = isAdmin ? 'Collect' : 'Get';
   return {
-    text: require('./utils').randomWelcome(),
+    text: require('./utils').randomWelcome(userId),
     attachments: [{
       'mrkdwn_in': ['text'],
-      text: '*Kip Café*\nHungry? I can help you find lunch',
+      text: '*Kip Café*\n' + require('./utils').randomCafeDescrip(),
       color: '#f43440',
       callback_id: 'wow such home',
       actions: [{
@@ -29,7 +29,7 @@ var home_screen = module.exports.home_screen = function(isAdmin) {
         type: 'button'
       }]
     }, {
-      text: '*Kip Store*\nAdd things you need to your team\'s cart',
+      text: '*Kip Store*\n'+ require('./utils').randomStoreDescrip(),
       'mrkdwn_in': ['text'],
       color: '#fe9b00',
       callback_id: 'wow such home',
@@ -66,7 +66,7 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
   }
   attachments.push({
     mrkdwn_in: ['text'],
-    text: '*Kip Café*\nI can order food for your team!\nLet me show you how to make lunch easier',
+    text: '*Kip Café*\nI can help you collect food orders for the team',
     color: '#f43440',
     callback_id: 'wow such home',
     actions: [{
@@ -78,7 +78,7 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
     }]
   });
   attachments.push({
-    text: '*Kip Store*\nI can shop for your team!\nLet me show you how to make team shopping better',
+    text: '*Kip Store*\nI can help you get a list of things your team needs',
     mrkdwn_in: ['text'],
     color: '#fe9b00',
     callback_id: 'wow such home',
@@ -93,7 +93,7 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
   return attachments;
 };
 
-var onboard_admin_attachments = module.exports.onboard_admin_attachments = function(delay) {
+var onboard_admin_attachments = module.exports.onboard_admin_attachments = function(delay, teamName) {
   let attachments = [];
   if (delay !== 'initial') {
     attachments.push({
@@ -109,24 +109,16 @@ var onboard_admin_attachments = module.exports.onboard_admin_attachments = funct
     });
   }
   attachments.push({
-    image_url: 'https://kipthis.com/kip_modes/mode_success.png',
+    image_url: 'http://tidepools.co/kip/oregano/thanks.png',
     color: '#3AA3E3',
     mrkdwn_in: ['text'],
-    fallback: 'Onboarding',
+    fallback: 'Thanks for inviting me to your team! It’s my first day at <team name> :D\nCould you tell me who buys the office supplies and food? Type `me` or `me and @jane`',
     callback_id: 'none'
   });
   attachments.push({
-    text: 'Kudos! *Kip* is now officially a member of your team :blush: ',
+    text: `Thanks for inviting me to your team! It’s my first day at *${teamName}* :D\nCould you tell me who buys the office supplies and food? Type \`me\` or \`me and @jane\``,
     mrkdwn_in: ['text'],
     color: '#3AA3E3'
-  })
-  attachments.push({
-    text: 'Who manages the office purchases? Type something like `me` or `me and @jane`',
-    color: '#3AA3E3',
-    mrkdwn_in: [
-      'text',
-      'pretext'
-    ]
   });
   return attachments;
 }
@@ -178,7 +170,7 @@ var team_buttons = module.exports.team_buttons =
 var focus_default = module.exports.focus_default = function(message) {
   return [{
     "name": "addcart",
-    "text": "Add to Cart",
+    "text": "+ Add to Cart",
     "style": "primary",
     "type": "button",
     "value": message.focus
@@ -233,17 +225,9 @@ var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
   return [{
-    image_url: "http://kipthis.com/kip_modes/mode_shopping.png",
-    fallback: 'Welcome to Kip Store',
-    text: "",
-    mrkdwn_in: [
-      "text",
-      "pretext"
-    ],
-    color: "#45a5f4"
-  }, {
-    text: 'Tap to search for something',
-    fallback: 'Tap to search for something',
+    text: 'Looking for something?',
+    fallback: 'Looking for something?',
+    image_url: "http://tidepools.co/kip/oregano/store.png",
     callback_id: 'wopr_game',
     color: "#45a5f4",
     attachment_type: 'default',
@@ -254,65 +238,68 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
   }]
 };
 
-var slack_bundles = module.exports.slack_bundles = [{
-  name: "bundles.supplies.snackbox",
-  text: "Snackbox",
-  style: "default",
-  type: "button",
-  value: "bundle.snacks"
-}, {
-  name: "bundles.supplies.drinks",
-  text: "Drinks",
-  style: "default",
-  type: "button",
-  value: "bundle.drinks"
-}, {
-  name: "bundles.supplies.supplies",
-  text: "Office Supplies",
-  style: "default",
-  type: "button",
-  value: "bundle.supplies"
-}];
-
-// ONBOARDING MODE TEMPLATES
-var slack_onboard_bundles = module.exports.slack_onboard_bundles = [{
-  name: "onboard.supplies.snackbox",
-  text: "Snackbox",
-  style: "default",
-  type: "button",
-  value: "bundle.snacks"
-}, {
-  name: "onboard.supplies.drinks",
-  text: "Drinks",
-  style: "default",
-  type: "button",
-  value: "bundle.drinks"
-}, {
-  name: "onboard.supplies.supplies",
-  text: "Office Supplies",
-  style: "default",
-  type: "button",
-  value: "bundle.supplies"
-}];
+var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
+  let attachments = [{
+    text: '*Snackbox*\nAll the snacks your team needs for your office',
+    mrkdwn_in: ['text'],
+    color: '#3AA3E3',
+    callback_id: 'none',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_snacks.png',
+    actions: [{
+      name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.snackbox',
+      text: '+ Add Bundle',
+      style: 'primary',
+      type: 'button',
+      value: 'bundle.snacks'
+    }]
+  }, {
+    text: '*Drinks*\nAll the drinks your team needs for your office',
+    mrkdwn_in: ['text'],
+    color: '#3AA3E3',
+    callback_id: 'none',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_drinks.png',
+    actions: [{
+      name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.drinks',
+      text: '+ Add Bundle',
+      style: 'primary',
+      type: 'button',
+      value: 'bundle.drinks'
+    }]
+  }, {
+    text: '*Supplies*\nAll the office supplies you need',
+    mrkdwn_in: ['text'],
+    color: '#3AA3E3',
+    callback_id: 'none',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_supplies.png',
+    actions: [{
+      name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.supplies',
+      text: '+ Add Bundle',
+      style: 'primary',
+      type: 'button',
+      value: 'bundle.supplies'
+    }]
+  }];
+  return attachments;
+};
 
 var slack_onboard_basic = module.exports.slack_onboard_basic = [{
   name: "onboard.bundle.yes",
-  text: "Yes",
+  text: "➤ Continue",
   style: "primary",
   type: "button",
   value: "team"
-}, {
-  name: "onboard.start.handoff",
-  text: "No",
-  style: "default",
-  type: "button",
-  value: "handoff"
 }];
 
 var slack_onboard_team = module.exports.slack_onboard_team = [{
   name: "onboard.team.send",
-  text: "Notify Members",
+  text: "✔︎ Update Members",
   style: "primary",
+  type: "button",
+  value: "member"
+}, {
+  name: "onboard.handoff",
+  text: "Only Me",
+  style: "default",
   type: "button",
   value: "member"
 }];
