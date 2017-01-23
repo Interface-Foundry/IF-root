@@ -249,8 +249,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
   emailers = emailers.map(e => /(.+)@/.exec(e)[1])
 
+  var slackText = (emailers.length ? '\nSlack: ' : '\n') + slackers.join(', ')
+
   // console.log('emailers', emailers)
-  var waitingText = (slackers ? '\nSlack: ' + slackers.join(', ') : '') + (emailers.length ? '\nEmail: ' + emailers.join(', ') : '')
+  var waitingText = (slackers ? slackText : '') + (emailers.length ? '\nEmail: ' + emailers.join(', ') : '')
 
   var dashboard = {
     text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
