@@ -24,10 +24,11 @@
     </header>
     <div class="left-panel">
       <div class="container restaurant-header">
-        <img src="images/kip-head.png">
+        <img :src="merchantLogo">
         <h1 class="restaurant-name">{{merchant.name}}</h1>
+        <small id="budget-text" v-if="budget"> Aim to spend ${{budget.toFixed(2)}}</small>        
       </div>
-      <div v-bind:class="{fixed: fixNav}" class="category-nav">
+      <div class="category-nav">
         <ul class="container">
           <li v-for="category in navCategories">
             <category-nav-item :category="category"></category-nav-item>
@@ -38,7 +39,7 @@
       <div class="container menu-content">
         <div class="category-set" v-for="category in menu">
           <h1 :id="category.id"></h1>
-          <h2> {{category.name}}</h2>
+          <h4> {{category.name.toUpperCase()}}</h4>
           <ul>
             <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
           </ul>
@@ -46,44 +47,45 @@
       </div>
     </div>
     <div v-bind:class="{visible: isCartVisibleOnMobile}" class="right-panel">
-      <div v-if="showCart"  class="cart">
+      <div class="cart">
         <div class="cart-header">
-          <h3> Your Kip Cafe order</h3>
-          <small v-if="remainingBudget"> You have {{remainingBudget.toFixed(2)}} left to spend</small>
+          <h3 v-if="admin_name"> {{admin_name}}'s Kip Café order for {{team_name}}</h3>
+          <small v-if="budget"> Aim to spend {{budget.toFixed(2)}}</small>
         </div>
         <div class="cart-body">
-          <ul>
-            <cart-item v-on:remove="removeItem(item)" v-for="item in cartItems" :item=item v-on:edit="setEditItem(item)"></cart-item>
-          </ul>        
-          <div class="cart-totals">
-            <div class="total-item">
-              <p class="item-name">Items Subtotal:</p><p class="item-price">${{cartItemsTotal.toFixed(2)}}</p>
+          <div v-if="!showCart"><h1 class="cart-empty-text"> <span class="inline-emoji">👀 </span>It's time to fill up this cart! </h1></div>        
+          <div v-if="showCart">
+            <ul>
+              <cart-item v-on:remove="removeItem(item)" v-for="item in cartItems" :item=item v-on:edit="setEditItem(item)"></cart-item>
+            </ul>        
+            <div class="cart-totals">
+              <div class="total-item">
+                <p class="item-name">Total:</p><p class="item-price">${{totalCartAmount.toFixed(2)}}</p>
+              </div>
             </div>
-            <div class="total-item">
-              <p class="item-name">Sales Tax:</p><p class="item-price">${{taxAmount.toFixed(2)}}</p>
-            </div>
-            <div class="total-item">
-              <p class="item-name">Total:</p><p class="item-price">${{totalCartAmount.toFixed(2)}}</p>
-            </div>
-          </div>        
+          </div>
         </div>
-        <div class="cart-footer">
-          <button @click="formatCart" v-if="!exceedBudget" class="base-btn">Complete Order ${{totalCartAmount.toFixed(2)}} </button>
-          <button class="base-btn" disabled v-if="budget && exceedBudget"> There's only ${{budget.toFixed(2)}} budgeted for this order.</button>
-          
+        <div v-if="showCart" class="cart-footer">
+          <button @click="formatCart" v-if="!exceedBudget" class="base-btn"><span class="inline-emoji"> ✅ </span> Finish Order ${{totalCartAmount.toFixed(2)}} </button>
+          <button class="base-btn" disabled v-if="budget && exceedBudget"> There's only ${{budget.toFixed(2)}} budgeted for this order.</button>  
         </div>
       </div>
-      <div v-else><h1 class="cart-empty-text">Your cart is empty</h1></div>
     </div>
+    <footer v-if="menu">
+      <div class="container">
+        <span> Powered by: </span><img src="images/delivery-logo.png">
+        <a target="blank" href="https://kipthis.com/legal.html">Kip's Terms of Use </a>
+      </div>
+    </footer>        
     <selected-item  v-if="selectedItem" @close="selectedItem = null" :item=selectedItem v-on:add="addItemToCart"></selected-item>   
-    <edit-item v-if="editingItem" @close="editingItem = null" :item=editingItem></selected-item>        
-  </div>   
+    <edit-item v-if="editingItem" @close="editingItem = null" :item=editingItem></selected-item>       
+  </div>  
   <script type="text/x-template" id="category-nav-item">
-    <a @click="setNavItem" v-bind:class="{selected:isSelected}":href="'#' + category.id">{{category.name}}</a>
+    <a @click="setNavItem" :href="'#' + category.id">{{category.name}}</a>
   </script>
   <script type="text/x-template" id="more-selector">
     <div class="more-categories" v-on:mouseenter="enter" v-on:mouseleave="leave" >
-      <li><a>More <span class="arrow"></span></a></li>
+      <li><a>More <span v-bind:class="{rotated:showMore}" class="arrow"></span></a></li>
       <div v-show="showMore" class="categories-dropdown">
         <ul>
           <li v-for="category in categories"><a :href="'#' + category.id">{{category.name}}</a></li>
