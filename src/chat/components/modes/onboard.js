@@ -705,7 +705,7 @@ handlers['member'] = function*(message) {
       mode: 'member_onboard',
       fallback: `Make <@${message.source.user}>'s life easier! Let me show you how to add items to the team cart`,
       action: 'home',
-      reply: cardTemplate.member_onboard_attachments(message.source.user, 'initial'),
+      reply: cardTemplate.member_onboard_attachments(message.source.user, a.id, 'initial'),
       source: {
         team: team.team_id,
         channel: a.dm,
