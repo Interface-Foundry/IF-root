@@ -578,12 +578,6 @@ handlers['food.admin_polling_options'] = function * (message) {
     fallback: 'budget per person'
   }
 
-  // yield $replyChannel.sendReplace(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ? {
-  //   text: `*Budget*: $${foodSession.budget} / person`
-  // } : {
-  //   text: '*Budget*: Unlimited'
-  // })})
-
   // check to make sure restaurants are even open
   if (foodSession.merchants.length === 0) {
     var msg_json = {
