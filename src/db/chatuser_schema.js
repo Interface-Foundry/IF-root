@@ -15,6 +15,14 @@ var chatuserSchema = mongoose.Schema({
     items: [String]
   },
   onboarded: Boolean,
+  admin_shop_onboarded: {
+  	type: Boolean,
+  	default: false
+  },
+  member_shop_onboarded: {
+  	type: Boolean,
+  	default: false
+  },
   ts: String,
   origin: String,
   type: { type: String }, // slack, telegram, skype, etc.
