@@ -202,36 +202,28 @@ var focus_home = module.exports.focus_home = [{
   value: 'view_cart_btn'
 }];
 
-var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
-  // buttons search for whatever follows search in value. e.g. search.healthy_snacks searches for 'healthy snacks'
-  'name': 'search_btn.start.search',
-  'text': 'Headphones',
-  'style': 'default',
-  'type': 'button',
-  'value': 'search.headphones'
-}, {
-  'name': 'search_btn.start.search',
-  'text': 'Coding Books',
-  'style': 'default',
-  'type': 'button',
-  'value': 'search.coding_books'
-}, {
-  'name': 'search_btn.start.search',
-  'text': 'Healthy Snacks',
-  'style': 'default',
-  'type': 'button',
-  'value': 'search.healthy_snacks'
-}];
+var slack_shopping_buttons = module.exports.slack_shopping_buttons = function() {
+  let searchTerms = require('./utils').getSearchButtons();
+  return searchTerms.map(term => {
+    return {
+      'name': 'search_btn.start.search',
+      'text': term,
+      'style': 'default',
+      'type': 'button',
+      'value': `search.${term.replace(' ', '_')}`
+    };
+  });
+};
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
   return [{
     text: 'Looking for something?',
     fallback: 'Looking for something?',
     image_url: "http://tidepools.co/kip/oregano/store.png",
-    callback_id: 'wopr_game',
+    callback_id: 'idkmybff',
     color: "#45a5f4",
     attachment_type: 'default',
-    actions: slack_shopping_buttons
+    actions: slack_shopping_buttons()
   }, {
     text: require('./utils').randomStoreHint(),
     mrkdwn_in: ['text']

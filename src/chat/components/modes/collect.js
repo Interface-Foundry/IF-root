@@ -110,7 +110,6 @@ handlers['initial'] = function * (message) {
     });
     attachments = attachments.concat(channelSection);
   }
-  
   attachments.push({
     text: '',
     color: '#49d63a',
@@ -118,16 +117,10 @@ handlers['initial'] = function * (message) {
     fallback: 'Which group members would you like to collect orders from?',
     actions: [{
       name: 'collect.home.reminder',
-      text: 'Ask Now',
+      text: 'Collect Orders',
       style: 'primary',
       type: 'button',
       value: 'reminder'
-    }, {
-      name: 'passthrough',
-      text: 'Just Me',
-      style: 'default',
-      type: 'button',
-      value: 'shopping'
     }, {
       name: 'settings',
       text: '⚙️',
@@ -186,7 +179,8 @@ handlers['reminder'] = function * (message) {
     let attachments = [{
       text: '',
       image_url: 'http://tidepools.co/kip/oregano/store.png',
-      actions: cardTemplate.slack_shopping_buttons,
+      callback_id: 'shopping_btns',
+      actions: cardTemplate.slack_shopping_buttons(),
       color: '#45a5f4'
     }, {
       'text': utils.randomStoreHint(),
@@ -223,7 +217,7 @@ handlers['handoff'] = function(message) {
     color: '#45a5f4',
     image_url: 'http://tidepools.co/kip/oregano/store.png',
     callback_id: 'oops',
-    actions: cardTemplate.slack_shopping_buttons
+    actions: cardTemplate.slack_shopping_buttons()
   }, {
     'text': utils.randomStoreHint(),
     mrkdwn_in: ['text']
