@@ -1,26 +1,26 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: slack
-  namespace: production
+  namespace: canary
+  name: cafe-menu
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: slack
+        app: cafe-menu
     spec:
       containers:
-      - image: gcr.io/kip-styles/slack:latest
+      - image: gcr.io/kip-styles/cafe_menu:canary
         imagePullPolicy: Always
-        name: slack
+        name: delivery-picstitch
         ports:
-        - containerPort: 8000
+        - containerPort: 8001
           protocol: TCP
         readinessProbe:
           httpGet:
             path: /health
-            port: 8000
+            port: 8001
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
@@ -28,15 +28,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: cafe-menu
+  namespace: canary
   labels:
-    app: slack
-  name: slack
-  namespace: production
+    run: cafe-menu
 spec:
+  type: NodePort
   ports:
   - port: 80
     protocol: TCP
-    targetPort: 8000
+    targetPort: 8001
   selector:
-    app: slack
-  type: NodePort
+    app: cafe-menu

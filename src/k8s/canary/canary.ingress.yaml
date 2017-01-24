@@ -17,7 +17,7 @@ spec:
       - backend:
           serviceName: parser
           servicePort: 80
-  - host: delivery-picstitch.kipthis.com
+  - host: dev-delivery-picstitch.kipthis.com
     http:
       paths:
       - backend:

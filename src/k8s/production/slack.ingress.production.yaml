@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: slack
+  namespace: production
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "gce"
+spec:
+  tls:
+  - hosts:
+    - juniper.kipthis.com
+    secretName: slack-tls
+  backend:
+    serviceName: slack
+    servicePort: 80

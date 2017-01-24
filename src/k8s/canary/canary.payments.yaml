@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: payments
-        image: gcr.io/kip-styles/payments:latest
+        image: gcr.io/kip-styles/payments:canary
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -42,17 +42,3 @@ spec:
     targetPort: 8080
   selector:
     app: payments
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: payments
-  namespace: canary
-  annotations:
-    kubernetes.io/ingress.allow-http: "false"
-spec:
-  tls:
-    - secretName: pay.kipthis.com-sslcerts
-  backend:
-    serviceName: payments
-    servicePort: 80

@@ -43,3 +43,18 @@ spec:
       restartPolicy: Always
       securityContext: {}
       terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: luminati-proxy
+  name: luminati-proxy
+spec:
+  ports:
+  - port: 22225
+    protocol: TCP
+    targetPort: 22225
+  selector:
+    run: luminati-proxy
+  type: ClusterIP

@@ -1,26 +1,26 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: slack
+  name: parser
   namespace: production
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: slack
+        app: parser
     spec:
       containers:
-      - image: gcr.io/kip-styles/slack:latest
+      - image: gcr.io/kip-styles/parser:latest
         imagePullPolicy: Always
-        name: slack
+        name: parser
         ports:
-        - containerPort: 8000
+        - containerPort: 8083
           protocol: TCP
         readinessProbe:
           httpGet:
             path: /health
-            port: 8000
+            port: 8083
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
@@ -28,15 +28,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: slack
-  name: slack
+  name: parser
   namespace: production
+  labels:
+    app: parser
 spec:
+  type: NodePort
   ports:
   - port: 80
     protocol: TCP
-    targetPort: 8000
+    targetPort: 8083
   selector:
-    app: slack
-  type: NodePort
+    app: parser

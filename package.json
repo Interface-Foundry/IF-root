@@ -54,7 +54,7 @@
     "moment-timezone": "^0.5.3",
     "mongo-sanitize": "^1.0.0",
     "mongodb": "^2.2.12",
-    "mongoose": "^4.5.8",
+    "mongoose": "4.5.10",
     "mongoose-hook-ensure-indexes": "^0.1.4",
     "natural": "^0.4.0",
     "node-cloud-vision-api": "^0.2.0",

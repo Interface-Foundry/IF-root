@@ -4,6 +4,7 @@ metadata:
   labels:
     run: replylogic
   name: replylogic
+  namespace: production
 spec:
   replicas: 1
   selector:
@@ -26,10 +27,9 @@ spec:
         #   value: "false"
         # - name: LOGGING_CONSOLE_STRINGIFY
         #   value: "true"
-        image: gcr.io/kip-styles/reply_logic:c1b9c03
+        image: gcr.io/kip-styles/reply_logic:latest
         imagePullPolicy: Always
         name: replylogic
-        resources: {}
         terminationMessagePath: /dev/termination-log
       dnsPolicy: ClusterFirst
       restartPolicy: Always
