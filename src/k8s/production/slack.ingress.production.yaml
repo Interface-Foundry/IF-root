@@ -9,7 +9,7 @@ metadata:
 spec:
   tls:
   - hosts:
-    - juniper.kipthis.com
+    - slack.kipthis.com
     secretName: slack-tls
   backend:
     serviceName: slack

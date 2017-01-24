@@ -9,8 +9,8 @@ metadata:
 spec:
   tls:
   - hosts:
-    - slack.kipthis.com
-    secretName: slack-tls
+    - dev-slack.kipthis.com
+    secretName: dev-slack-tls
   backend:
     serviceName: slack
     servicePort: 80
