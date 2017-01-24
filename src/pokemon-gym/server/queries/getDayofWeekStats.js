@@ -1,4 +1,3 @@
-const date = require('../../helpers/date');
 const getDayOfWeekStats = (messages) =>
   new Promise((resolve, reject) => {
     messages.aggregate([
@@ -33,13 +32,15 @@ const getDayOfWeekStats = (messages) =>
           ({ num: prevSource.num + source.num })).num;
 
         return {
-          dayString: date.daysOfWeek[day._id.day],
+          dayString: date[day._id.day],
           dayNumber: day._id.day,
           total,
+          /*
           sources: [...sources, {
             source: 'total',
             num: total,
           }],
+          */
         };
       });
       resolve(days);
