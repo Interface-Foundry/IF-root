@@ -1,13 +1,12 @@
 var handlers = module.exports = {};
 var _ = require('lodash');
-var co = require('co');
 var utils = require('../slack/utils');
 var queue = require('../queue-mongo');
 var cardTemplate = require('../slack/card_templates');
 var request = require('request');
 var agenda = require('../agendas');
 
-function* handle(message) {
+function * handle(message) {
   let action;
   if (!message.data && message.text && message.text !== 'home') {
     action = getAction(message.text);
@@ -16,12 +15,12 @@ function* handle(message) {
   } else {
     var data = _.split(message.action, '.');
     action = data[0].trim();
-    var choice = data[1]; 
+    var choice = data[1];
     var datum = _.get(message, 'data.value');
     kip.debug('\n\n\n🤖🤖🤖 action : ', action, ' choice: ', choice, 'datum: ', datum, ' 🤖\n\n\n');
     return yield handlers[action](message, choice, datum);
   }
-  return yield handlers[action](message)
+  return yield handlers[action](message);
 }
 
 module.exports.handle = handle;
@@ -30,18 +29,18 @@ module.exports.handle = handle;
  * Show the user all the settings they have access to
  */
 handlers['start'] = function * (message) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
   var find = yield db.Slackbots.find({'team_id': team_id}).exec();
-  if (!find || find && find.length == 0) {
+  if (!find || find && find.length === 0) {
     return kip.debug('could not find team : ', team_id, find);
   } else {
     var team = find[0];
   }
   var attachments = [];
-  //adding settings mode sticker
+  // adding settings mode sticker
   attachments.push({
     image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
     text: ''
@@ -84,44 +83,41 @@ handlers['start'] = function * (message) {
   var color = '#45a5f4';
   var status = team.meta.weekly_status_enabled ? 'Off' : 'On';
   attachments.push({
-      text: 'Do you want to receive weekly email updates on your team cart status?',
-      color: color,
-      mrkdwn_in: ['text'],
-      fallback:'Settings',
-      actions: [{
-        name: 'settings.email.' + status.toLowerCase(),
-        text: 'Turn ' + status + ' Updates',
-        style: team.meta.weekly_status_enabled ? 'danger' : 'primary',
-        type: 'button',
-        value: team.meta.weekly_status_enabled ? '0' : '1'
-      }],
-      callback_id: 'email'
-  })
-  if (team.meta.weekly_status_enabled) { // I kind of hate this but ok
-    attachments[attachments.length - 1].actions[0].confirm = {
-      'title': 'Are you sure?',
-      'text': 'This will turn off email updates that keep you up to date with what your team has added to the team cart',
-      'ok_text': 'Turn off Updates',
-      'dismiss_text': 'Nevermind'
-    }
-  }
-
+    text: 'Do you want to receive weekly email updates on your team cart status?',
+    color: color,
+    mrkdwn_in: ['text'],
+    fallback: 'Settings',
+    actions: [{
+      name: 'settings.email.' + status.toLowerCase(),
+      text: 'Turn ' + status + ' Updates',
+      style: team.meta.weekly_status_enabled ? 'danger' : 'primary',
+      type: 'button',
+      value: team.meta.weekly_status_enabled ? '0' : '1',
+      confirm: team.meta.weekly_status_enabled ? {
+        'title': 'Are you sure?',
+        'text': 'This will turn off email updates that keep you up to date with what your team has added to the team cart',
+        'ok_text': 'Turn off Updates',
+        'dismiss_text': 'Nevermind'
+      } : undefined
+    }],
+    callback_id: 'email'
+  });
   var buttons = cardTemplate.settings_menu;
 
   attachments.push({
-      text: '',
-      color: color,
-      mrkdwn_in: ['text'],
-      fallback:'Settings',
-      actions: buttons,
-      callback_id: 'none'
-    })
+    text: '',
+    color: color,
+    mrkdwn_in: ['text'],
+    fallback: 'Settings',
+    actions: buttons,
+    callback_id: 'none'
+  });
     // console.log('SETTINGS ATTACHMENTS ',attachments);
     // make all the attachments markdown
-    attachments.map(function(a) {
-      a.mrkdwn_in =  ['text'];
-      a.color = '#45a5f4';
-    })
+  attachments.map(function(a) {
+    a.mrkdwn_in = ['text'];
+    a.color = '#45a5f4';
+  });
   if (message.source.response_url) {
     request({
       method: 'POST',
@@ -130,30 +126,28 @@ handlers['start'] = function * (message) {
         text: '',
         attachments: attachments
       })
-    })
-  }
-  else {
+    });
+  } else {
     // for case when settings is typed
     var msg = message;
-    msg.mode = 'settings'
-    msg.text = ''
+    msg.mode = 'settings';
+    msg.text = '';
     msg.source.team = team_id;
-    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
     msg.reply = attachments;
-    kip.debug(`😀😀\n${JSON.stringify(msg, null, 2)}`);
     return [msg];
   }
-}
+};
 
 handlers['back'] = function * (message) {
   request({
     method: 'POST',
     uri: message.source.response_url,
     body: JSON.stringify(cardTemplate.home_screen(true, message.source.user))
-  })
-}
+  });
+};
 
-handlers['admins'] = function*(message, data) {
+handlers['admins'] = function * (message, data) {
   let msg = message.source.original_message;
   let adminSection = [msg.attachments[1]];
   if (data === 'add') {
@@ -169,7 +163,7 @@ handlers['admins'] = function*(message, data) {
         type: 'button',
         value: 'back'
       }]
-    }
+    };
   } else if (data === 'remove') {
     let team = yield db.Slackbots.findOne({
       'team_id': message.source.team
@@ -190,7 +184,7 @@ handlers['admins'] = function*(message, data) {
           'ok_text': `Remove ${admin.name}`,
           'dismiss_text': 'Nevermind'
         }
-      }
+      };
     });
     adminButtons.unshift({
       name: 'settings.admins.back',
@@ -198,7 +192,7 @@ handlers['admins'] = function*(message, data) {
       style: 'default',
       type: 'button',
       value: 'back'
-    })
+    });
     adminButtons = _.chunk(adminButtons, 5);
     adminSection = adminButtons.map((actions, index) => {
       let attachment = {
@@ -206,7 +200,7 @@ handlers['admins'] = function*(message, data) {
         callback_id: 'admin',
         actions: actions,
         text: ''
-      }
+      };
       if (!index) {
         attachment.text = 'Tap admins you want to remove';
       }
@@ -251,31 +245,29 @@ handlers['admins'] = function*(message, data) {
   }
 
   let attachments = [msg.attachments[0], ...adminSection];
-  kip.debug(`😶😶  ${JSON.stringify(adminSection, null, 2)}`)
-  msg.attachments.shift(); //remove the first element
-  while(msg.attachments[0].callback_id === 'admin'){
-    msg.attachments.shift(); //remove all admin sections
+  msg.attachments.shift(); // remove the first element
+  while (msg.attachments[0].callback_id === 'admin') {
+    msg.attachments.shift(); // remove all admin sections
   }
   msg.attachments = [...attachments, ...msg.attachments];
-  kip.debug(`😶😶  ${JSON.stringify(msg.attachments, null, 2)}`)
   let stringOrig = JSON.stringify(msg);
   var map = {
     amp: '&',
     lt: '<',
     gt: '>',
     quot: '"',
-    '#039': "'"
-  }
-  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+    '#039': '\''
+  };
+  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
   request({
     method: 'POST',
     uri: message.source.response_url,
     body: stringOrig
-  })
-}
+  });
+};
 
-handlers['remove'] = function*(message, data) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+handlers['remove'] = function * (message, data) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   var team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
@@ -300,7 +292,7 @@ handlers['remove'] = function*(message, data) {
         'ok_text': `Remove ${admin.name}`,
         'dismiss_text': 'Nevermind'
       }
-    }
+    };
   });
   adminButtons.unshift({
     name: 'settings.admins.back',
@@ -308,7 +300,7 @@ handlers['remove'] = function*(message, data) {
     style: 'default',
     type: 'button',
     value: 'back'
-  })
+  });
   adminButtons = _.chunk(adminButtons, 5);
   adminSection = adminButtons.map((actions, index) => {
     let attachment = {
@@ -316,7 +308,7 @@ handlers['remove'] = function*(message, data) {
       callback_id: 'admin',
       actions: actions,
       text: ''
-    }
+    };
     if (!index) {
       attachment.text = 'Tap admins you want to remove';
     }
@@ -324,33 +316,29 @@ handlers['remove'] = function*(message, data) {
   });
 
   let attachments = [msg.attachments[0], ...adminSection];
-  kip.debug(`😶😶  ${JSON.stringify(adminSection, null, 2)}`)
   msg.attachments.shift(); // remove the first element
   while (msg.attachments[0].callback_id === 'admin') {
     msg.attachments.shift(); // remove all admin sections
   }
   msg.attachments = [...attachments, ...msg.attachments];
-  kip.debug(`😶😶  ${JSON.stringify(msg.attachments, null, 2)}`)
   let stringOrig = JSON.stringify(msg);
   var map = {
     amp: '&',
     lt: '<',
     gt: '>',
     quot: '"',
-    '#039': "'"
-  }
-  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+    '#039': '\''
+  };
+  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
   request({
     method: 'POST',
     uri: message.source.response_url,
     body: stringOrig
-  })
-
+  });
   return [];
-}
+};
 
 handlers['email'] = function * (message, status) {
-  kip.debug(`😘😘\n${JSON.stringify(message, null, 2)}`)
   let msg = message.source.original_message;
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   var team = yield db.Slackbots.findOne({
@@ -359,7 +347,6 @@ handlers['email'] = function * (message, status) {
   team.meta.weekly_status_enabled = !team.meta.weekly_status_enabled;
   var status = team.meta.weekly_status_enabled ? 'Off' : 'On';
   yield team.save();
-  var color = '#45a5f4';
   let button = [{
     name: 'settings.email.' + status.toLowerCase(),
     text: 'Turn ' + status + ' Updates',
@@ -374,37 +361,38 @@ handlers['email'] = function * (message, status) {
     } : undefined
   }];
   let emailIndex;
-  msg.attachments.forEach((ele, i)=>{
-    if(ele.callback_id === 'email'){
+  msg.attachments.forEach((ele, i) => {
+    if (ele.callback_id === 'email') {
       emailIndex = i;
     }
-  })
+  });
   msg.attachments[emailIndex].actions = button;
-  
   let stringOrig = JSON.stringify(msg);
   var map = {
     amp: '&',
     lt: '<',
     gt: '>',
     quot: '"',
-    '#039': "'"
-  }
-  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+    '#039': '\''
+  };
+  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
   request({
     method: 'POST',
     uri: message.source.response_url,
     body: stringOrig
-  })
-  if (status.toLowerCase() == 'on') {
+  });
+  if (status.toLowerCase() === 'on') {
     var admins = team.meta.office_assistants;
-    var cart_id = message.cart_reference_id || message.source.team;
-    yield admins.map( function * (admin) {
-      agenda.every('0 15 * * 5','send email', { userId: _.get(admin,'id'), to: _.get(admin,'profile.email'), subject: 'This is your weekly team cart status email from Kip!' });
-    })
+    yield admins.map(function * (admin) {
+      agenda.every('0 15 * * 5', 'send email', {
+        userId: _.get(admin, 'id'),
+        to: _.get(admin, 'profile.email'),
+        subject: 'This is your weekly team cart status email from Kip!'
+      });
+    });
   }
   return [];
-}
-
+};
 
 handlers['add_or_remove'] = function * (message) {
   var replies = [];
