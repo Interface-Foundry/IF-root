@@ -478,10 +478,10 @@ var app = new Vue({
     },
     merchantLogo: function() {
       if (this.merchant.logo) {
-        return this.merchant.logo  
-      } 
+        return this.merchant.logo
+      }
       else {
-        return ""  
+        return ""
       }
     }
   },
@@ -496,9 +496,9 @@ var app = new Vue({
     var key = window.location.search.split("=")[1]
     // account for page refresh once key is gone
     if (key) {
-      localStorage.setItem('orderKey', key)      
+      localStorage.setItem('orderKey', key)
     } else {
-      key = localStorage.getItem('orderKey')  
+      key = localStorage.getItem('orderKey')
     }
     if (history.pushState) {
       var url = window.location.origin + window.location.pathname;
@@ -511,47 +511,49 @@ var app = new Vue({
       this.food_session_id = response.data.foodSessionId;
       this.user_id = response.data.user.id
       this.food_session_id = response.data.foodSessionId
-      
+
       var menuData = response.data.menu.data
-      
+
       var menu = [];
-        
+
       if (menuData.hasOwnProperty('menu')) {
-        menuData = menuData.menu.menu 
+        menuData = menuData.menu.menu
       }
- 
+
       if (menuData.length > 1 ) {
         menuData.forEach(function(m) {
           if (_.every(m.children, ['type', 'menu'])) {
             m.children.forEach(function(child) {
               if (child.type == "menu" && _.every(child.children, ['type', 'item'])) {
-                menu.push(child)     
+                menu.push(child)
               } else if (child.type == "menu" && _.every(child.children, ['type', 'menu'])) {
                 child.children.forEach(function(c) {
-                  menu.push(c); 
+                  menu.push(c);
                 })
               }
             })
           } else if (_.every(m.children, ['type', 'item'])) {
-            menu.push(m); 
+            menu.push(m);
           }
         })
       } else {
         if (_.every(menuData[0].children, ['type', 'menu'])) {
           menuData[0].children.forEach(function(c) {
-            menu.push(c);  
-          })  
-        }  
+            menu.push(c);
+          })
+        }
       }
       this.menu = menu;
       this.merchant = response.data.merchant;
       this.budget = response.data.budget ? response.data.budget : false
       if (response.data.selected_items.length) {
         var preSelectedId = response.data.selected_items[0]
-        this.menu.forEach(function(item) {
-          if (item.id === preSelectedId) {
-            that.selectedItem = item;
-          }
+        this.menu.forEach(function(category) {
+          category.forEach(function (item) {
+            if (item.id === preSelectedId) {
+              that.selectedItem = item;
+            }
+          })
         })
       }
     })
