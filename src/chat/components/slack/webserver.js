@@ -229,8 +229,8 @@ app.post('/slackaction', next(function * (req, res) {
             }, []);
             selectedChannels = _.uniq(selectedChannels);
             unselectedChannels = _.uniq(unselectedChannels);
-            let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
-              : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
+            let buttons = (selectedChannels.length > 5) ? selectedChannels // always show all selected channels
+              : selectedChannels.concat(unselectedChannels.splice(0, 5 - selectedChannels.length));
             let chunkedButtons = _.chunk(buttons, 5);
             let channelSection = chunkedButtons.map(buttonRow => {
               return {
@@ -238,6 +238,18 @@ app.post('/slackaction', next(function * (req, res) {
                 callback_id: 'channel_buttons_idk',
                 actions: buttonRow
               };
+            });
+            channelSection.push({
+              text: '',
+              callback_id: 'channel_select',
+              attachment_type: 'default',
+              fallback: 'update your slack to see this!',
+              actions: [{
+                name: 'channel_list',
+                text: 'Choose which channels you want',
+                type: 'select',
+                data_source: 'channels'
+            	}]
             });
             channelSection.push({
               'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
@@ -264,11 +276,8 @@ app.post('/slackaction', next(function * (req, res) {
           body: stringOrig
         });
         return;
-      }
-      else if (simple_command == 'channel_btn') {
-        var channelId = _.get(parsedIn,'actions[0].value');
-        var team_id = message.source.team;
-        var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+      } else if (simple_command == 'channel_btn') {
+        var channelId = _.get(parsedIn, 'actions[0].value');
         let cartChannels = team.meta.cart_channels;
         if (cartChannels.find(id => { return (id == channelId) })) {
           _.remove(cartChannels, function(c) { return c == channelId });
