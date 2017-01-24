@@ -38,7 +38,7 @@
       </div>
       <div class="container menu-content">
         <div class="category-set" v-for="category in menu">
-          <h1 :id="category.id"></h1>
+          <span class="category-anchor" :id="category.id"></span>
           <h4> {{category.name.toUpperCase()}}</h4>
           <ul>
             <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
@@ -87,8 +87,8 @@
     <div class="more-categories" v-on:mouseenter="enter" v-on:mouseleave="leave" >
       <li><a>More <span v-bind:class="{rotated:showMore}" class="arrow"></span></a></li>
       <div v-show="showMore" class="categories-dropdown">
-        <ul>
-          <li v-for="category in categories"><a :href="'#' + category.id">{{category.name}}</a></li>
+      <ul>
+        <li v-for="category in categories"><category-nav-item  :category="category"></category-nav-item></li>
         </ul>
       </div>
     </div>
