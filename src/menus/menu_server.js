@@ -29,6 +29,7 @@ app.use(jsonParser);
 
 app.use('/menus', express.static('static'));
 app.use('/test', express.static('test'));
+app.use('/ang', express.static('ang'));
 
 var router = express.Router()
 
@@ -64,6 +65,7 @@ router.post('/cafe', (req, res) => co(function * () {
   } else {
     ms.menu.data = result.raw_menu.menu;
   }
+
   ms.foodSessionId = req.body.delivery_ObjectId;
   ms.user.id = req.body.user_id;
   ms.budget = req.body.budget;
@@ -97,7 +99,7 @@ router.post('/cafe', (req, res) => co(function * () {
   yield ms.save();
 
   //return a url w a key in a query string
-  res.send(menuURL + '/menus/?k=' + ms.session_token);
+  res.send(menuURL + '/?k=' + ms.session_token);
 }));
 
 //when user hits that url up, post to /session w/key and gets correct pg
