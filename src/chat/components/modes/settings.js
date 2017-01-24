@@ -295,20 +295,56 @@ handlers['add_or_remove'] = function * (message) {
       yield userIds.map(function * (id) {
         if (team.meta.office_assistants.indexOf(id) < 0) {
           team.meta.office_assistants.push(id);
-          var userToBeNotified = yield db.Chatusers.findOne({id: id});
+          var userToBeNotified = yield db.Chatusers.findOne({
+            id: id
+          });
           var msg = new db.Message();
-          msg.source = {};
-          msg.mode = 'onboard';
-          msg.action = 'home';
-          msg.source.team = team.team_id;
-          msg.source.channel = userToBeNotified.dm;
-          msg.source.user = id;
-          msg.user_id = id;
-          msg.thread_id = userToBeNotified.dm;
-          msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
-          msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
-          yield msg.save();
-          yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
+          if (!userToBeNotified.admin_shop_onboarded) {
+            msg.source = {};
+            msg.mode = 'onboard';
+            msg.action = 'home';
+            msg.source.team = team.team_id;
+            msg.source.channel = userToBeNotified.dm;
+            msg.source.user = id;
+            msg.user_id = id;
+            msg.thread_id = userToBeNotified.dm;
+            msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
+            msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
+            yield msg.save();
+            yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
+          } else {
+            let attachments = [{
+              text: '\nLooks like you\'ve done this before :blush:\nIf you need a refresher, I can start your tour again',
+              mrkdwn_in: ['text'],
+              color: '#A368F0',
+              callback_id: 'take me home pls',
+              actions: [{
+                'name': 'onboard.restart',
+                'text': 'Teach Me',
+                'style': 'primary',
+                'type': 'button',
+                'value': 'restart'
+              }, {
+                name: 'passthrough',
+                text: 'Home',
+                style: 'default',
+                type: 'button',
+                value: 'home'
+              }]
+            }];
+            msg.source = {};
+            msg.mode = 'onboard';
+            msg.action = 'home';
+            msg.source.team = team.team_id;
+            msg.source.channel = userToBeNotified.dm;
+            msg.source.user = id;
+            msg.user_id = id;
+            msg.thread_id = userToBeNotified.dm;
+            msg.text = `<@${message.source.user}> just made you an admin of Kip!`;
+            msg.reply = attachments;
+            yield msg.save();
+            yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
+          }
         }
       })
     } else if (tokens[0] === 'remove') {

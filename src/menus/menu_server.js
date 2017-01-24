@@ -185,7 +185,7 @@ router.post('/order', function (req, res) {
 });
 
 // k8s readiness ingress health check
-router.get('/health', function (req, res) {
+app.get('/health', function (req, res) {
   res.sendStatus(200)
 })
 

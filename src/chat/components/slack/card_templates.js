@@ -304,7 +304,7 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   value: "member"
 }];
 
-var member_onboard_attachments = module.exports.member_onboard_attachments = function(admin, delay) {
+var member_onboard_attachments = module.exports.member_onboard_attachments = function(admin, user, delay) {
   let reply = [{
     'image_url': 'http://kipthis.com/kip_modes/mode_howtousekip.png',
     'text': '',
@@ -314,7 +314,7 @@ var member_onboard_attachments = module.exports.member_onboard_attachments = fun
     ],
     'color': '#45a5f4'
   }, {
-    text: `Make <@${admin}>'s life easier! Let me show you how to add items to the team cart`,
+    text: `Hi <@${user}>! I'm Kip and I help <@${admin}> collect food orders and shopping requests\nMy job is to provide the team (that’s you!) everything they need to feel happy and comfortable! :)\n Let me show you how to add things to the team cart`,
     mrkdwn_in: ['text'],
     fallback: 'Welcome to Kip!',
     callback_id: 'none',

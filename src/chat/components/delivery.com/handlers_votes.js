@@ -728,7 +728,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   // })
 
   logging.debug('sending message to admin: ', message, responseForAdmin)
-  $replyChannel.send(message, 'food.admin.restaurant.search', {'type': message.origin, 'data': responseForAdmin})
+  $replyChannel.sendReplace(message, 'food.admin.restaurant.search', {'type': message.origin, 'data': responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
@@ -850,7 +850,12 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       'data': msgJson
     }
 
-    $replyChannel.send(newMessage, 'food.menu.quickpicks', {'type': newMessage.origin, 'data': newMessage.data})
+    // replace the admin message, send a new one to other users
+    if (member.id === foodSession.convo_initiater.id) {
+      $replyChannel.sendReplace(message, 'food.menu.quickpicks', {'type': newMessage.origin, 'data': newMessage.data})
+    } else {
+      $replyChannel.send(newMessage, 'food.menu.quickpicks', {'type': newMessage.origin, 'data': newMessage.data})
+    }
   })
 }
 
