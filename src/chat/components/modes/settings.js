@@ -40,11 +40,6 @@ handlers['start'] = function * (message) {
   } else {
     var team = find[0];
   }
-  var teamMembers = yield utils.getTeamMembers(team);
-  var admins = yield utils.findAdmins(team);
-  var currentUser = yield db.Chatusers.findOne({id: message.source.user}).exec();
-
-  var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
   var attachments = [];
   //adding settings mode sticker
   attachments.push({
@@ -56,17 +51,17 @@ handlers['start'] = function * (message) {
   // Admins
   //
   var adminNames = team.meta.office_assistants.map(function(user_id) {
-    return '<@' + user_id + '>';
+    return `<@${user_id}>`;
   });
   if (adminNames.length > 1) {
     var last = adminNames.pop();
-    adminNames[adminNames.length-1] += ' and ' + last;
+    adminNames[adminNames.length - 1] += ' and ' + last;
   }
-
-  if(adminNames.length < 1){
-    var adminText = 'I\'m not managed by anyone right now.';
+  let adminText;
+  if (adminNames.length < 1) {
+    adminText = 'I\'m not managed by anyone right now.';
   } else {
-    var adminText = 'I\'m managed by ' + adminNames.join(', ') + '.';
+    adminText = 'I\'m managed by ' + adminNames.join(', ') + '.';
   }
 
   attachments.push({
@@ -95,7 +90,7 @@ handlers['start'] = function * (message) {
       fallback:'Settings',
       actions: [{
         name: 'settings.email.' + status.toLowerCase(),
-        text: 'Turn ' + status + ' Email',
+        text: 'Turn ' + status + ' Updates',
         style: team.meta.weekly_status_enabled ? 'danger' : 'primary',
         type: 'button',
         value: team.meta.weekly_status_enabled ? '0' : '1'
@@ -180,11 +175,11 @@ handlers['admins'] = function*(message, data) {
       'team_id': message.source.team
     }).exec();
     let admins = yield utils.findAdmins(team);
-    let testAdmins = [{id:1, name: 'A'}, {id:2, name: 'B'}, {id:3, name: 'C'}, {id:4, name: 'D'}, {id:5, name: 'F'}]
-    admins = admins.concat(testAdmins);
+    // let testAdmins = [{id:1, name: 'A'}, {id:2, name: 'B'}, {id:3, name: 'C'}, {id:4, name: 'D'}, {id:5, name: 'F'}]
+    // admins = admins.concat(testAdmins);
     let adminButtons = admins.map((admin) => {
       return {
-        name: 'settings.remove' + admin.id,
+        name: 'settings.remove.' + admin.id,
         text: `× ${admin.name}`,
         style: 'danger',
         type: 'button',
@@ -212,7 +207,7 @@ handlers['admins'] = function*(message, data) {
         actions: actions,
         text: ''
       }
-      if(!index) {
+      if (!index) {
         attachment.text = 'Tap admins you want to remove';
       }
       return attachment;
@@ -221,20 +216,20 @@ handlers['admins'] = function*(message, data) {
     let team = yield db.Slackbots.findOne({
       'team_id': message.source.team
     }).exec();
-    let admins = yield utils.findAdmins(team);
-    let adminNames = admins.map((admin) => {
-      return `<@${admin.id}>`;
-    })
+    let admins = team.meta.office_assistants;
+    let adminText;
+    var adminNames = admins.map(function(user_id) {
+      return `<@${user_id}>`;
+    });
     if (adminNames.length > 1) {
       var last = adminNames.pop();
       adminNames[adminNames.length - 1] += ' and ' + last;
     }
     if (adminNames.length < 1) {
-      var adminText = 'I\'m not managed by anyone right now.';
+      adminText = 'I\'m not managed by anyone right now.';
     } else {
-      var adminText = 'I\'m managed by ' + adminNames.join(', ') + '.';
+      adminText = 'I\'m managed by ' + adminNames.join(', ') + '.';
     }
-    
     adminSection = [{
       callback_id: 'admin',
       color: '#45a5f4',
@@ -279,6 +274,81 @@ handlers['admins'] = function*(message, data) {
   })
 }
 
+handlers['remove'] = function*(message, data) {
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  var team = yield db.Slackbots.findOne({
+    'team_id': team_id
+  }).exec();
+  let msg = message.source.original_message;
+  let adminSection = msg.attachments[0];
+  team.meta.office_assistants = _.without(team.meta.office_assistants, data);
+  team.markModified('meta.office_assistants');
+  yield team.save();
+  let admins = yield utils.findAdmins(team);
+  // let testAdmins = [{id:1, name: 'A'}, {id:2, name: 'B'}, {id:3, name: 'C'}, {id:4, name: 'D'}, {id:5, name: 'F'}]
+  // admins = admins.concat(testAdmins);
+  let adminButtons = admins.map((admin) => {
+    return {
+      name: 'settings.remove.' + admin.id,
+      text: `× ${admin.name}`,
+      style: 'danger',
+      type: 'button',
+      value: admin.id,
+      confirm: {
+        'title': 'Are you sure?',
+        'text': `This will remove all of ${admin.name}'s abilities as an admin and make them a normal user`,
+        'ok_text': `Remove ${admin.name}`,
+        'dismiss_text': 'Nevermind'
+      }
+    }
+  });
+  adminButtons.unshift({
+    name: 'settings.admins.back',
+    text: '< Back',
+    style: 'default',
+    type: 'button',
+    value: 'back'
+  })
+  adminButtons = _.chunk(adminButtons, 5);
+  adminSection = adminButtons.map((actions, index) => {
+    let attachment = {
+      color: '#45a5f4',
+      callback_id: 'admin',
+      actions: actions,
+      text: ''
+    }
+    if (!index) {
+      attachment.text = 'Tap admins you want to remove';
+    }
+    return attachment;
+  });
+
+  let attachments = [msg.attachments[0], ...adminSection];
+  kip.debug(`😶😶  ${JSON.stringify(adminSection, null, 2)}`)
+  msg.attachments.shift(); // remove the first element
+  while (msg.attachments[0].callback_id === 'admin') {
+    msg.attachments.shift(); // remove all admin sections
+  }
+  msg.attachments = [...attachments, ...msg.attachments];
+  kip.debug(`😶😶  ${JSON.stringify(msg.attachments, null, 2)}`)
+  let stringOrig = JSON.stringify(msg);
+  var map = {
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    '#039': "'"
+  }
+  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+  request({
+    method: 'POST',
+    uri: message.source.response_url,
+    body: stringOrig
+  })
+
+  return [];
+}
+
 handlers['email'] = function * (message, status) {
   kip.debug(`😘😘\n${JSON.stringify(message, null, 2)}`)
   let msg = message.source.original_message;
@@ -292,7 +362,7 @@ handlers['email'] = function * (message, status) {
   var color = '#45a5f4';
   let button = [{
     name: 'settings.email.' + status.toLowerCase(),
-    text: 'Turn ' + status + ' Email',
+    text: 'Turn ' + status + ' Updates',
     style: team.meta.weekly_status_enabled ? 'danger' : 'primary',
     type: 'button',
     value: team.meta.weekly_status_enabled ? 'on' : 'off',
@@ -326,7 +396,7 @@ handlers['email'] = function * (message, status) {
     body: stringOrig
   })
   if (status.toLowerCase() == 'on') {
-    var admins = yield utils.findAdmins(team);
+    var admins = team.meta.office_assistants;
     var cart_id = message.cart_reference_id || message.source.team;
     yield admins.map( function * (admin) {
       agenda.every('0 15 * * 5','send email', { userId: _.get(admin,'id'), to: _.get(admin,'profile.email'), subject: 'This is your weekly team cart status email from Kip!' });
