@@ -215,7 +215,7 @@ handlers['food.exit.confirm'] = function * (message) {
     if (foodSession.team_members.length <= 0){
       foodSession.active = false
     }
-    foodSession.save()
+    yield foodSession.save()
   }
 }
 
