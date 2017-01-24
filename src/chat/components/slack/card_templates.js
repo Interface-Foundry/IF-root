@@ -290,7 +290,7 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   value: "member"
 }, {
   name: "onboard.handoff",
-  text: "Only Me",
+  text: "> Skip",
   style: "default",
   type: "button",
   value: "member"
