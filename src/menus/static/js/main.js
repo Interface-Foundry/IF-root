@@ -545,7 +545,7 @@ var app = new Vue({
       }
       this.menu = menu;
       this.merchant = response.data.merchant;
-      this.budget = response.data.budget? (response.data.budget * 1.25) : false
+      this.budget = response.data.budget ? response.data.budget : false
       if (response.data.selected_items.length) {
         var preSelectedId = response.data.selected_items[0]
         this.menu.forEach(function(item) {
