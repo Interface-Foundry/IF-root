@@ -911,19 +911,69 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   })
 }
 
-handlers['food.admin.restaurant.collect_orders.email'] = function * (message, foodSession) {
-  logging.debug('foodSession.email_users', foodSession.email_users)
+handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
+  console.log('admin collect orders called')
+  foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
+  var cuisines = _.get(foodSession, 'chosen_restaurant_full.summary.cuisines', []).join(', ')
+  var msgJson = {
+    'text': `<@${foodSession.convo_initiater.id}|${foodSession.convo_initiater.name}> chose <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> - ${cuisines} - est. wait time ${waitTime} min`,
+    'attachments': [
+      {
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': 'Want to be in this order?',
+        'fallback': 'Want to be in this order?',
+        'callback_id': 'food.participate.confirmation',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'food.menu.quickpicks',
+            'text': '✓ Yes',
+            'type': 'button',
+            'style': 'primary',
+            'value': {}
+          },
+          {
+            'name': 'food.admin.waiting_for_orders',
+            'text': 'No',
+            'type': 'button',
+            'value': 'no thanks',
+            'confirm': {
+              'title': 'Are you sure?',
+              'text': "Are you sure you don't want to order food?",
+              'ok_text': 'Yes',
+              'dismiss_text': 'No'
+            }
+          }
+        ]
+      }
+    ]
+  }
+  console.log('just finished that big message')
+  console.log('foodSession is a thing', foodSession)
+  console.log('foodSession.email_users', foodSession.email_users)
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
+
     var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
+
     var merch_url = yield menu_utils.getUrl(foodSession, user.id)
+
+    console.log('foodSession.team_id', foodSession.team_id)
+    var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
+    console.log('slackbot', slackbot)
+
     var mailOptions = {
-      'to': `<${m}>`,
-      'from': `Kip Café <hello@kipthis.com>`,
-      'subject': `Kip Café Food Selection at ${foodSession.chosen_restaurant.name}`,
-      'html': `<html><body><p><a href="${merch_url}">View Full Menu</a></p><table style="width:100%" border="1">`
-    }
+      to: `<${m}>`,
+      from: `Kip Café <hello@kipthis.com>`,
+      subject: `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${slackbot.team_name}!`,
+      html: '<html><body><h1>' +`${foodSession.chosen_restaurant.name}` +
+        '</h1><p><a style="color:#47a2fc;" href="' + merch_url + '">Click to View Full Menu ' + menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine) + '</a></p><table style="width:100%" border="1">'
+    };
 
     var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
     var quickpicks = sortedMenu.slice(0, 9);
@@ -933,7 +983,7 @@ handlers['food.admin.restaurant.collect_orders.email'] = function * (message, fo
       `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
       `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
       `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
-      `<tr><p style="color:#fa2d48">+ Add to Cart</p></tr>` +
+      `<tr><p style="color:#fa2d48">Add to Cart</p></tr>` +
       `</table>`;
     }
 
@@ -941,23 +991,39 @@ handlers['food.admin.restaurant.collect_orders.email'] = function * (message, fo
       mailOptions.html += '<tr>';
       for (var j = 0; j < 3; j++) {
         var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
-        mailOptions.html += `<td><a style="color:black;text-decoration:none;" href="${item_url}">`
-        mailOptions.html += `</a>${formatItem(i, j)}</td>`
+        mailOptions.html += `<td><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
+        mailOptions.html += formatItem(i, j) + '</a>' + '</td>';
       }
-      mailOptions.html += `</tr>`
+      mailOptions.html += '</tr>';
     }
 
-    mailOptions.html += `</table></body></html>`
+    mailOptions.html += '</table></body></html>';
 
-    logging.info('mailOptions', mailOptions)
-    try {
-      yield mailer_transport.sendMail(mailOptions)
-    } catch (err) {
-      logging.error('error with mailer_trainsport in food.admin.restaurant.collect_orders', err)
-    }
+    logging.info('mailOptions', mailOptions);
+    mailer_transport.sendMail(mailOptions, function (err) {
+      if (err) console.log(err);
+    });
   }
-}
 
+  foodSession.team_members.map(m => {
+    var newMessage = {
+      incoming: false,
+      thread_id: m.dm,
+      resolved: true,
+      user_id: 'kip',
+      origin: 'slack',
+      source: {
+        team: m.team_id,
+        user: m.id,
+        channel: m.dm,
+        type: 'message'
+      },
+      state: {},
+      user: m.id
+    }
+    $replyChannel.send(newMessage, 'food.menu.quickpicks', {type: 'slack', data: msgJson})
+  })
+}
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel

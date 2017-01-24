@@ -549,7 +549,7 @@ var app = new Vue({
       if (response.data.selected_items.length) {
         var preSelectedId = response.data.selected_items[0]
         this.menu.forEach(function(category) {
-          category.forEach(function (item) {
+          category.children.forEach(function (item) {
             if (item.id === preSelectedId) {
               that.selectedItem = item;
             }
