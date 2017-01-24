@@ -23,6 +23,11 @@ var replyChannel = new UserChannel(queue)
 var cafeMenu = require('../chat/components/delivery.com/Menu.js');
 var menuURL = config.menuURL
 
+// k8s readiness ingress health check
+app.get('/health', function (req, res) {
+  res.sendStatus(200)
+})
+
 app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
@@ -185,11 +190,6 @@ router.post('/order', function (req, res) {
     }
   });
 });
-
-// k8s readiness ingress health check
-app.get('/health', function (req, res) {
-  res.sendStatus(200)
-})
 
 var port = 8001
 app.listen(port, function () {

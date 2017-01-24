@@ -123,6 +123,12 @@ handlers['initial'] = function * (message) {
       type: 'button',
       value: 'reminder'
     }, {
+      name: 'passthrough',
+      text: 'Just Me',
+      style: 'default',
+      type: 'button',
+      value: 'shopping'
+    }, {
       name: 'settings',
       text: '⚙️',
       style: 'default',

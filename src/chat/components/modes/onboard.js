@@ -33,41 +33,82 @@ module.exports.handle = handle;
  * S1
  */
 handlers['start'] = function * (message) {
-  var msg = message;
-  msg.mode = 'onboard';
-  msg.action = 'home';
-  msg.reply = cardTemplate.onboard_home_attachments('initial');
-  msg.origin = message.origin;
-  msg.source = message.source;
-  msg.text = 'Ok, let\'s get started!';
-  msg.fallback = 'Ok, let\'s get started!';
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
-  if (team_id == null) {
-    return kip.debug('incorrect team id : ', message);
-  }
-  var team = yield db.Slackbots.findOne({
-    team_id: team_id
+  var user = yield db.Chatusers.findOne({
+    id: message.source.user
   }).exec();
-  let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
-  let now = new Date();
-  let cronMsg = {
-    mode: 'onboard',
-    action: 'home',
-    reply: cardTemplate.onboard_home_attachments('tomorrow'),
-    origin: message.origin,
-    source: message.source,
-    text: 'Hey, it\'s me again! Ready to get started?',
-    fallback: 'Hey, it\'s me again! Ready to get started?'
-  };
-  scheduleReminder(
-    'initial reminder',
-    new Date(msInFuture + now.getTime()), {
-      msg: JSON.stringify(cronMsg),
-      user: message.source.user,
-      token: team.bot.bot_access_token,
-      channel: message.source.channel
-    });
+  let msg = message;
+  if (!user.admin_shop_onboarded) {
+    msg.mode = 'onboard';
+    msg.action = 'home';
+    msg.reply = cardTemplate.onboard_home_attachments('initial');
+    msg.origin = message.origin;
+    msg.source = message.source;
+    msg.text = 'Ok, let\'s get started!';
+    msg.fallback = 'Ok, let\'s get started!';
+    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
+    if (team_id == null) {
+      return kip.debug('incorrect team id : ', message);
+    }
+    var team = yield db.Slackbots.findOne({
+      team_id: team_id
+    }).exec();
+    let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+    let now = new Date();
+    let cronMsg = {
+      mode: 'onboard',
+      action: 'home',
+      reply: cardTemplate.onboard_home_attachments('tomorrow'),
+      origin: message.origin,
+      source: message.source,
+      text: 'Hey, it\'s me again! Ready to get started?',
+      fallback: 'Hey, it\'s me again! Ready to get started?'
+    };
+    scheduleReminder(
+      'initial reminder',
+      new Date(msInFuture + now.getTime()), {
+        msg: JSON.stringify(cronMsg),
+        user: message.source.user,
+        token: team.bot.bot_access_token,
+        channel: message.source.channel
+      });
+  } else {
+    let attachments = [{
+      text: 'Looks like you\'ve done this before! :blush:\nIf you need a refresher, I can give you some help though',
+      mrkdwn_in: ['text'],
+      color: '#A368F0',
+      callback_id: 'take me home pls',
+      actions: [{
+        'name': 'onboard.restart',
+        'text': 'Teach Me',
+        'style': 'primary',
+        'type': 'button',
+        'value': 'restart'
+      }, {
+        name: 'passthrough',
+        text: 'Home',
+        style: 'default',
+        type: 'button',
+        value: 'home'
+      }]
+    }];
+    msg = message;
+    msg.mode = 'onboard';
+    msg.action = 'home';
+    msg.text = '';
+    msg.fallback = 'Looks like you\'ve done this before!';
+    msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
+    msg.reply = attachments;
+  }
   return [msg];
+};
+
+handlers['restart'] = function * (message) {
+  var user = yield db.Chatusers.findOne({
+    id: message.source.user
+  }).exec();
+  user.admin_shop_onboarded = false;
+  yield user.save();
+  return yield handlers['start'](message);
 };
 
 handlers['remind_later'] = function * (message, data) {
@@ -160,32 +201,38 @@ handlers['start_now'] = function (message) {
  */
 handlers['supplies'] = function * (message) {
   cancelReminder('initial reminder', message.source.user);
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null);
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
+  var user = yield db.Chatusers.findOne({
+    id: message.source.user
+  }).exec();
+  user.admin_shop_onboarded = true;
+  user.markModified('admin_shop_onboarded');
+  yield user.save();
   var attachments = [];
   attachments.push({
-      text: '*Step 1/3:* Choose a pre-packaged bundle:',
-      mrkdwn_in: ['text'],
-      color: '#A368F0',
-      fallback:'Step 1/3: Choose a pre-packaged bundle',
-      callback_id: 'none'
-    });
+    text: '*Step 1/3:* Choose a pre-packaged bundle:',
+    mrkdwn_in: ['text'],
+    color: '#A368F0',
+    fallback: 'Step 1/3: Choose a pre-packaged bundle',
+    callback_id: 'none'
+  });
   attachments = attachments.concat(cardTemplate.slack_bundles(true));
   attachments.push({
     'text': '✎ Hint: You can also search what you want below (Example: _MacBook Pro Power Cord_)',
     mrkdwn_in: ['text']
   });
-   var msg = message;
-   msg.mode = 'onboard'
-   msg.action = 'home'
-   msg.text = ''
-   msg.source.team = team_id;
-   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-   msg.reply = attachments;
-   msg.fallback = 'Step 1/3: Choose a bundle'
-   return [msg];
+  var msg = message;
+  msg.mode = 'onboard'
+  msg.action = 'home'
+  msg.text = ''
+  msg.source.team = team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  msg.reply = attachments;
+  msg.fallback = 'Step 1/3: Choose a bundle'
+  return [msg];
 };
 
 handlers['shopping_search'] = function*(message, data) {
@@ -416,7 +463,7 @@ handlers['bundle'] = function * (message, data) {
  var choice = data[0];
  var cart_id = message.cart_reference_id || message.source.team;
  yield utils.showLoading(message);
- yield bundles.addBundleToCart(choice, message.user_id, cart_id, true);
+ yield bundles.addBundleToCart(choice, message.user_id, cart_id);
 
  // var cart_id = message.source.team
  var cart = yield kipcart.getCart(cart_id);
@@ -644,7 +691,12 @@ handlers['member'] = function*(message) {
   }
   channelMembers = _.uniqBy(channelMembers, a => a.id);
   yield channelMembers.map(function * (a) {
-    if (a.id == message.source.user) return;
+    let isAdmin = yield utils.isAdmin(a.id, team);
+    let isMemberOnboarded = a.member_shop_onboarded;
+    if (isAdmin || isMemberOnboarded) return; // don't send this to admins
+    a.member_shop_onboarded = true;
+    a.markModified('member_shop_onboarded');
+    yield a.save();
     var newMessage = new db.Message({
       text: '',
       incoming: false,
@@ -653,7 +705,7 @@ handlers['member'] = function*(message) {
       mode: 'member_onboard',
       fallback: `Make <@${message.source.user}>'s life easier! Let me show you how to add items to the team cart`,
       action: 'home',
-      reply: cardTemplate.member_onboard_attachments(message.source.user, 'initial'),
+      reply: cardTemplate.member_onboard_attachments(message.source.user, a.id, 'initial'),
       source: {
         team: team.team_id,
         channel: a.dm,
@@ -725,7 +777,7 @@ handlers['handoff'] = function(message) {
   msg.mode = 'onboard';
   msg.action = 'home';
   msg.text = '';
-  msg.fallback = 'That\'s it!\nThanks for adding Kip to your team';
+  msg.fallback = 'We did it!\nI think I\'m getting the hang of this :blush:';
   msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
   msg.reply = attachments;
   return [msg];

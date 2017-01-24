@@ -50,7 +50,7 @@ function sampleCuisines (foodSession) {
   })
   // add cancel button
     sampleArray.push({
-      name: 'food.admin.restaurant.pick',
+      name: 'food.vote.abstain',
       value: 'user_remove',
       text: '× No Food for Me',
       type: 'button',
@@ -370,6 +370,9 @@ handlers['food.vote.submit'] = function * (message) {
     return sendUserDashboard(foodSession, message, member)
   })
 
+  var isAdmin = message.source.user === foodSession.convo_initiater.id
+  var adminIsOut = isAdmin || foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
+
   // if this is the last vote, then send the choices to the admin
   var numOfResponsesWaitingFor = foodSession.team_members.length - _.uniq(foodSession.votes.map(v => v.user)).length
   var votes = foodSession.votes
@@ -380,7 +383,52 @@ handlers['food.vote.submit'] = function * (message) {
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
     logging.info('waiting for more responses have, votes: ', votes.length, 'need ', numOfResponsesWaitingFor, ' more votes')
+    if (adminIsOut) {
+      sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+    }
   }
+}
+
+//
+// No Food For Me
+//
+handlers['food.vote.abstain'] = function * (message) {
+  // TODO add metric for "No food for me" click
+
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  // some states
+  var isAdmin = message.source.user === foodSession.convo_initiater.id
+  var adminIsOut = isAdmin || foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
+
+  // if user is not the admin, take them to shopping mode
+  if (!isAdmin) {
+
+    // This route takes them to the home menu and also removes them from the current foodSession
+    yield $allHandlers['food.exit.confirm'](message)
+
+  }
+
+  // re-send all the dashbaords to all the remaining team members
+  foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.source.user)
+  foodSession.team_members.map(user => {
+    sendUserDashboard(foodSession, message, user)
+  })
+
+  // oops well the above didn't send the admin the dashboard if they were the one that clicked "No Food"
+  if (isAdmin) {
+    // the 'food.exit.confirm' handler used above removes normal users from the order, here we have to
+    // manually remove the admin from foodSession.team_members
+    foodSession.markModified('team_members')
+    yield foodSession.save()
+    sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+  }
+
+  // omg another case: when the admin has already clicked "No Food" and then another user clicks "No Food"
+  if (!isAdmin && adminIsOut) {
+    sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+  }
+  
 }
 
 function buildCuisineDashboard(foodSession) {
@@ -446,6 +494,7 @@ function buildCuisineDashboard(foodSession) {
 // Sends new or updates the admin's cuisine vote dashboard
 //
 function sendAdminDashboard(foodSession, message) {
+  logging.debug('sending admin dashboard')
   var basicDashboard = buildCuisineDashboard(foodSession)
 
   // add the special button to end early
@@ -460,7 +509,8 @@ function sendAdminDashboard(foodSession, message) {
 
   // add the buttons if they didn't respond already
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
-  if (!adminHasVoted) {
+  var adminInOrder = foodSession.team_members.map(u => u.id).includes(foodSession.convo_initiater.id)
+  if (!adminHasVoted && adminInOrder) {
     var sampleArray = sampleCuisines(foodSession)
     basicDashboard.attachments.push({
       'text': 'Tap a button to choose a cuisine',
@@ -476,6 +526,8 @@ function sendAdminDashboard(foodSession, message) {
       'text': '✎ Or type what you want below (Example: _japanese_)',
       'mrkdwn_in': ['text']
     })
+  } else if (!adminInOrder) {
+    basicDashboard.text = 'Waiting for teammates to submit votes'
   } else {
     basicDashboard.text = 'Thanks for your vote!'
   }

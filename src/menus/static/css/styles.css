@@ -46,6 +46,24 @@ ul {
   list-style: none;
 }
 
+footer {
+  clear: both;
+  width: 100%;
+  height: 50px;
+  left: 0;
+  right: 0;
+  position: relative;
+}
+
+footer span {
+  color: #B9B9B9; 
+}
+
+footer img {
+  width: 100px;
+  vertical-align: middle;
+}
+
 button:hover {
   cursor: pointer;
 }
@@ -166,27 +184,37 @@ nav .mobile-cart-indicator {
   font-size: 42px;
   font-weight: 400;
   left: 20px;
-  top: 25px;
+  top: 130px;
   display: inline-block;
 }
 
+.restaurant-header {
+  background: url('../images/food-icons.png');
+  height: 250px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.restaurant-header img {
+    position: relative;
+    top: 130px;
+}
+
+
 .category-nav {
   background-color: #F5F5F5;
-  padding: 15px 0;
+  padding: 10px 0;
   position: relative;
 }
 
-.category-nav.fixed {
-  position: fixed;
-  width: 70%;
-  top: 54px;
-}
 
 .category-nav ul {
   -js-display: flex;
   display:flex;
   display: -webkit-flex;
   justify-content: space-around;
+  margin: 0;
 }
 
 .category-nav li {
@@ -210,9 +238,9 @@ nav .mobile-cart-indicator {
   min-width: 50px;
 }
 
-.category-nav li a.selected {
+.category-nav li a:hover {
   background-color: #6F52D8;  
-  color: #fff;
+  color: #fff;    
 }
 
 .category-nav li.more:hover {
@@ -228,6 +256,14 @@ nav .mobile-cart-indicator {
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
   border-top: 8px solid #ccc;
+  transition: all 1s ease;
+  -webkit-transition: all .3s ease;
+  -moz-transition: all .3s ease;
+  -o-transition: all .3s ease;
+}
+
+.category-nav .arrow.rotated {
+  transform: rotate(180deg);  
 }
 
 .more-categories {
@@ -274,18 +310,6 @@ nav .mobile-cart-indicator {
   color: #fff; 
 }
 
-.restaurant-header {
-  background: url('../images/food-icons.png');
-  height: 250px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-}
-
-.restaurant-header img {
-    position: relative;
-    top: 70px;
-}
 
 /*
 /*
@@ -305,11 +329,24 @@ nav .mobile-cart-indicator {
 
 .category-set {
   flex: 0 0 100%;
+  -webkit-flex: 0 0 100%;
+  margin-top: 30px; 
+}
+
+.category-anchor {
+  display:block;
+  position: relative;
+  top:-80px;
+  visibility:hidden;
 }
 
 .category-set h2 {
     padding: 5px 10px;
-    border: 2px dashed #F5F5F5;
+}
+
+.category-set h4 {
+  margin: 10px 0;
+  color: #B9B9B9;
 }
 
 .category-set ul {
@@ -385,6 +422,26 @@ nav .mobile-cart-indicator {
   height: 100%;
 }
 
+.remove-item-icon {
+  color: red;
+  background-color: white;
+  border: 1px dotted red;
+  border-radius: 50px;
+  width: 15px;
+  height: 15px;
+  margin-right: 10px;
+  display: inline-block;
+  font-weight: 500;
+  text-align: center;
+  line-height: 16px;
+  font-size: 12px;
+  vertical-align: top;
+}
+
+.remove-item-icon:hover {
+  cursor: pointer;  
+}
+
 .cart-body {
   overflow-y: auto;
   flex-grow: 1;
@@ -397,10 +454,26 @@ nav .mobile-cart-indicator {
 
 .cart-header {
   border-bottom: 1px solid #F5F5F5;
+  padding-bottom: 20px;
+}
+
+.cart-header h3 {
+  margin-bottom: 0;
+}
+
+.cart-header small {
+  font-style: italic;  
+}
+
+.edit-item-icon {
+  width: 14px;
+  margin: 0 10px;    
+  vertical-align: top;  
 }
 
 .cart-totals .total-item {
   margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .cart-totals .item-price {
@@ -427,11 +500,6 @@ nav .mobile-cart-indicator {
   list-style-position: inside;
 }
 
-.cart-item .item-summary img {
-  vertical-align: middle;
-  margin-right: 5px;
-}
-
 .cart-item .item-summary img:hover {
   cursor: pointer;
 }
@@ -453,9 +521,14 @@ nav .mobile-cart-indicator {
 
 .cart-empty-text {
   font-weight: 200;
-  color: #F5F5F5;
+  color: #B9B9B9;
   text-align: center;
   padding-top: 40px;
+}
+
+.inline-emoji {
+  vertical-align: middle;  
+  margin-right: 5px;
 }
 
 /*
@@ -608,14 +681,19 @@ nav .mobile-cart-indicator {
   transform: scale(1.1);
 }
 
-
+#budget-text {
+  display: none;
+}
 
 /*
 /*
 /*
 /* Tablet and below styling */
 @media (max-width:800px) {
-
+  
+  #budget-text {
+    display: block;  
+  }
   nav .mobile-cart-indicator {
     display: block;
     position: absolute;
@@ -662,17 +740,24 @@ nav .mobile-cart-indicator {
 
   .restaurant-header {
     height: auto;
-    padding: 20px 0;
+    text-align: center;
+    padding: 0;
+    position: relative;
+    top: 70px;
   }
 
   .restaurant-header img {
-    display: none;  
+    border: 5px solid #F5F5F5;
+    border-radius: 100px;
+    top: 0px;
   }
 
   .restaurant-name {
     left: 0;
     text-align: center;
     width: 100%;
+    margin: 0;
+    top: 0px;
   }
   
   .category-nav {
@@ -682,27 +767,7 @@ nav .mobile-cart-indicator {
   .cart-body {
     font-size: .9em;  
   }
- 
-  .edit-item-icon {
-    width: 12px;
-    margin-left: 10px;    
-    vertical-align: middle;
-  }
-
-  .remove-item-icon {
-    color: red;
-    background-color: white;
-    border: 1px dotted red;
-    border-radius: 50px;
-    width: 15px;
-    height: 15px;
-    margin-right: 10px;
-    display: inline-block;
-    font-weight: 500;
-    text-align: center;
-    line-height: 15px;  
-  }
-    
+  
   .cart-item .item-choice, .item-option-name {
     font-size: 12px !important; /* don't like this, will fix at some point */  
   }

@@ -368,17 +368,18 @@ var app = new Vue({
   data: {
     merchant: "",
     menu: "",
+    admin_name: "",
+    team_name: "",
     navCategories: [],
     moreCategories: [],
     selectedItem: null,
     editingItem: null,
     cartItems: [],
     budget: false,
-    fixNav: false,
     user_id: null,
     food_session_id: null,
     notDesktop: screen.width <= 800,
-    isCartVisibleOnMobile: false
+    isCartVisibleOnMobile: false,
   },
   methods: {
     toggleCartOnMobile: function() {
@@ -406,13 +407,6 @@ var app = new Vue({
         this.isCartVisibleOnMobile = false
       }
     },
-    handleScroll: function() {
-      if ((Math.floor(window.scrollY) >= 196) && this.notDesktop) {
-        this.fixNav = true
-      } else {
-        this.fixNav = false
-      }
-    },
     formatCart: function() {
       var cart = [];
       this.cartItems.forEach(function(i) {
@@ -435,7 +429,6 @@ var app = new Vue({
       var that = this;
       axios.post('/menus/order', {order: cart, user_id:this.user_id, deliv_id:this.food_session_id})
       .then(function(res) {
-        console.log(res)
         that.cartItems = []
         if (that.notDesktop) {
           that.isCartVisibleOnMobile = false
@@ -462,12 +455,8 @@ var app = new Vue({
       }
       return qty
     },
-    taxAmount: function() {
-      var tax = (this.cartItemsTotal * .075)
-      return tax
-    },
     totalCartAmount: function() {
-      var amount = (this.cartItemsTotal + this.taxAmount)
+      var amount = this.cartItemsTotal
       return amount
     },
     showCart: function() {
@@ -486,6 +475,14 @@ var app = new Vue({
       } else {
         return false
       }
+    },
+    merchantLogo: function() {
+      if (this.merchant.logo) {
+        return this.merchant.logo  
+      } 
+      else {
+        return ""  
+      }
     }
   },
   watch: {
@@ -495,35 +492,60 @@ var app = new Vue({
     }
   },
   created: function() {
-    window.addEventListener('scroll', this.handleScroll);
     var that = this;
     var key = window.location.search.split("=")[1]
+    // account for page refresh once key is gone
+    if (key) {
+      localStorage.setItem('orderKey', key)      
+    } else {
+      key = localStorage.getItem('orderKey')  
+    }
+    if (history.pushState) {
+      var url = window.location.origin + window.location.pathname;
+      window.history.pushState({path: url}, '', url);
+    }
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
+      this.admin_name = response.data.admin_name;
+      this.team_name = response.data.team_name;
+      this.food_session_id = response.data.foodSessionId;
       this.user_id = response.data.user.id
       this.food_session_id = response.data.foodSessionId
+      
       var menuData = response.data.menu.data
-      console.log(menuData)
-      var menu;
       
+      var menu = [];
+        
       if (menuData.hasOwnProperty('menu')) {
-        // menus nested deep
-        if (menuData.menu.hasOwnProperty('menu')) {
-          menuData = menuData.menu.menu 
-        } else {
-          menuData = menuData.menu 
-        }
+        menuData = menuData.menu.menu 
       }
-      
-      if (menuData.length > 1) {
-        menu = menuData
+ 
+      if (menuData.length > 1 ) {
+        menuData.forEach(function(m) {
+          if (_.every(m.children, ['type', 'menu'])) {
+            m.children.forEach(function(child) {
+              if (child.type == "menu" && _.every(child.children, ['type', 'item'])) {
+                menu.push(child)     
+              } else if (child.type == "menu" && _.every(child.children, ['type', 'menu'])) {
+                child.children.forEach(function(c) {
+                  menu.push(c); 
+                })
+              }
+            })
+          } else if (_.every(m.children, ['type', 'item'])) {
+            menu.push(m); 
+          }
+        })
       } else {
-        menu = menuData[0].children
+        if (_.every(menuData[0].children, ['type', 'menu'])) {
+          menuData[0].children.forEach(function(c) {
+            menu.push(c);  
+          })  
+        }  
       }
-      
       this.menu = menu;
       this.merchant = response.data.merchant;
-      this.budget = response.data.budget? (response.data.budget * 1.25) : false
+      this.budget = response.data.budget ? response.data.budget : false
       if (response.data.selected_items.length) {
         var preSelectedId = response.data.selected_items[0]
         this.menu.forEach(function(item) {

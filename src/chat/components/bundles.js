@@ -16,8 +16,7 @@ var supplies = module.exports.supplies = ['B00006IFKT', 'B01A6JLR88', 'B01G7J5QN
 var bundles = { snacks: snacks, drinks: drinks, supplies: supplies }
 
 
-var addBundleToCart = module.exports.addBundleToCart = function * (bundle, userId, cart_id, clearCart = false) {
-  if (clearCart) yield kipcart.emptyCart(cart_id);
+var addBundleToCart = module.exports.addBundleToCart = function * (bundle, userId, cart_id) {
  var items = yield db.Item.find({'bundle': bundle, 'available': true},{'source_json':1 });
  if (!items || items.length < 1) {
  	kip.debug(' \n\n\n bundle:24:items not cached in mongo, updating bundle \n\n\n');

@@ -61,22 +61,25 @@ function * initializeTeam(team, auth) {
 function * findAdmins(team) {
   var admins = [];
   var adminIds = team.meta.office_assistants;
-  var members = yield db.Chatusers.find({team_id: team.team_id}).exec();
-  return co(function * (){
+  var members = yield db.Chatusers.find({
+    team_id: team.team_id
+  }).exec();
+  return co(function * () {
     yield eachSeries(members, function * (user) {
-      if ( adminIds.indexOf(user.id) > -1) {
+      if (adminIds.indexOf(user.id) > -1) {
         admins.push(user);
         if (!user.is_admin) {
           user.is_admin = true;
           yield user.save();
         }
-      }
-      else if ( adminIds.indexOf(user.id) == -1 && user.is_admin ) {
+      } else if (adminIds.indexOf(user.id) === -1 && user.is_admin) {
         user.is_admin = false;
         yield user.save();
       }
     });
-  }).then( function() { return admins });
+  }).then(function() {
+    return admins;
+  });
 }
 
 function * isAdmin(userId, team) {
