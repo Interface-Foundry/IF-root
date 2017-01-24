@@ -436,6 +436,16 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       yield addVote(message.data.value)
     }
   }
+
+  // update all the user's dashbaords
+  yield foodSession.team_members.map(function (member) {
+    return sendUserDashboard(foodSession, message, member)
+  })
+
+  var isAdmin = message.source.user === foodSession.convo_initiater.id
+  var adminIsOut = isAdmin || foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
+
+  // if this is the last vote, then send the choices to the admin
   var numOfResponsesWaitingFor = foodSession.team_members.length - _.uniq(foodSession.votes.map(v => v.user)).length
   var votes = foodSession.votes
   kip.debug('numOfResponsesWaitingFor: ', numOfResponsesWaitingFor, ' votes: ', votes)
@@ -447,10 +457,53 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
-    logging.error('waiting for more responses have, votes: ', votes.length)
-    logging.error('need', numOfResponsesWaitingFor)
-    yield handlers['food.admin.dashboard.cuisine'](message, foodSession)
+    logging.info('waiting for more responses have, votes: ', votes.length, 'need ', numOfResponsesWaitingFor, ' more votes')
+    if (adminIsOut) {
+      sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+    }
   }
+}
+
+//
+// No Food For Me
+//
+handlers['food.vote.abstain'] = function * (message) {
+  // TODO add metric for "No food for me" click
+
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  // some states
+  var isAdmin = message.source.user === foodSession.convo_initiater.id
+  var adminIsOut = isAdmin || foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
+
+  // if user is not the admin, take them to shopping mode
+  if (!isAdmin) {
+
+    // This route takes them to the home menu and also removes them from the current foodSession
+    yield $allHandlers['food.exit.confirm'](message)
+
+  }
+
+  // re-send all the dashbaords to all the remaining team members
+  foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.source.user)
+  foodSession.team_members.map(user => {
+    sendUserDashboard(foodSession, message, user)
+  })
+
+  // oops well the above didn't send the admin the dashboard if they were the one that clicked "No Food"
+  if (isAdmin) {
+    // the 'food.exit.confirm' handler used above removes normal users from the order, here we have to
+    // manually remove the admin from foodSession.team_members
+    foodSession.markModified('team_members')
+    yield foodSession.save()
+    sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+  }
+
+  // omg another case: when the admin has already clicked "No Food" and then another user clicks "No Food"
+  if (!isAdmin && adminIsOut) {
+    sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+  }
+
 }
 
 /*
@@ -502,26 +555,162 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   // }
 
   if (slackers.length > 0 ) {
-    if(message.source.user == foodSession.convo_initiater.id){
-      dashboard.attachments.push({
-        color: '#49d63a',
-        mrkdwn_in: ['text'],
-        text: `*Waiting for votes from:* \n${slackers}`,
-        actions: [{
-          name: 'food.admin.restaurant.pick.list',
-          text: 'Finish Voting Early',
-          style: 'default',
-          type: 'button',
-          value: 'food.admin.restaurant.pick.list'
-        }]
-      })
-    } else {
-      dashboard.attachments.push({
-        color: '#49d63a',
-        mrkdwn_in: ['text'],
-        text: `*Waiting for votes from:* \n${slackers}`,
-      })
-    }
+    dashboard.attachments.push({
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      text: `*Waiting for votes from:* \n${slackers}`
+    })
+  } else {
+    dashboard.attachments.push({
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      text: '*Team has finished voting* Drumroll, please'
+    })
+  }
+
+  return dashboard
+}
+
+//
+// Sends new or updates the admin's cuisine vote dashboard
+//
+function sendAdminDashboard(foodSession, message) {
+  logging.debug('sending admin dashboard')
+  var basicDashboard = buildCuisineDashboard(foodSession)
+
+  // add the special button to end early
+  basicDashboard.attachments[0].actions = [{
+    name: 'food.admin.restaurant.pick.list',
+    text: 'Finish Voting Early',
+    style: 'default',
+    type: 'button',
+    value: 'food.admin.restaurant.pick.list'
+  }]
+
+
+  // add the buttons if they didn't respond already
+  var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
+  var adminInOrder = foodSession.team_members.map(u => u.id).includes(foodSession.convo_initiater.id)
+  if (!adminHasVoted && adminInOrder) {
+    var sampleArray = sampleCuisines(foodSession)
+    basicDashboard.attachments.push({
+      'text': 'Tap a button to choose a cuisine',
+      'fallback': 'Tap a button to choose a cuisine',
+      'callback_id': 'food.user.poll',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'actions': sampleArray
+    })
+
+    basicDashboard.attachments.push({
+      'fallback': 'Search for a restaurant',
+      'text': '✎ Or type what you want below (Example: _japanese_)',
+      'mrkdwn_in': ['text']
+    })
+  } else if (!adminInOrder) {
+    basicDashboard.text = 'Waiting for teammates to submit votes'
+  } else {
+    basicDashboard.text = 'Thanks for your vote!'
+  }
+
+
+  var existingDashbaord = foodSession.cuisine_dashboards.filter(d => d.user === foodSession.convo_initiater.id)[0]
+  if (existingDashbaord) {
+    return co(function * () {
+      var dashboardMessage = yield db.Messages.findById(existingDashbaord.message)
+      return yield $replyChannel.sendReplace(dashboardMessage, 'food.admin.poll', {type: 'slack', data: basicDashboard})
+    }).catch(logging.error)
+  } else {
+    return co(function * () {
+      var dashboardMessage = yield $replyChannel.sendReplace(message, 'food.admin.poll', {type: 'slack', data: basicDashboard})
+      foodSession.update({$push: { cuisine_dashboards: {
+        user: message.source.user,
+        message: dashboardMessage._id
+      }}}).exec()
+    }).catch(logging.error)
+  }
+
+}
+
+//
+// Sends new or updates the user's cuisine vote dashbaord
+//
+function sendUserDashboard(foodSession, message, user) {
+  console.log('send user dashboard to', user.id, 'initiated by', foodSession.convo_initiater.id)
+  if (user.id === foodSession.convo_initiater.id) {
+    return sendAdminDashboard(foodSession, message)
+  }
+  var userHasVoted = foodSession.votes.map(v => v.user).includes(user.id)
+  var basicDashboard = buildCuisineDashboard(foodSession)
+  var sampleArray = sampleCuisines(foodSession)
+  if (!userHasVoted) {
+    basicDashboard.attachments.push({
+      'text': 'Tap a button to choose a cuisine',
+      'fallback': 'Tap a button to choose a cuisine',
+      'callback_id': 'food.user.poll',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'actions': sampleArray
+    })
+
+    basicDashboard.attachments.push({
+      'fallback': 'Search for a restaurant',
+      'text': '✎ Or type what you want below (Example: _japanese_)',
+      'mrkdwn_in': ['text']
+    })
+  } else {
+    basicDashboard.text = 'Thanks for your vote!'
+  }
+
+  var existingDashbaord = foodSession.cuisine_dashboards.filter(d => d.user === user.id)[0]
+  if (existingDashbaord) {
+    logging.debug('found existing dashboard, will attempt to replace it')
+    return co(function * () {
+      var dashboardMessage = yield db.Messages.findById(existingDashbaord.message)
+      logging.debug(dashboardMessage.slack_ts)
+      return yield $replyChannel.sendReplace(dashboardMessage, 'food.admin.poll', {type: 'slack', data: basicDashboard})
+    }).catch(logging.error)
+  } else {
+    return co(function * () {
+      var source = {
+        'type': 'message',
+        'channel': user.dm,
+        'user': user.id,
+        'team': user.team_id
+      }
+
+      var userMessage = {
+        'incoming': false,
+        'mode': 'food',
+        'action': 'food.vote.submit',
+        'thread_id': user.dm,
+        'origin': message.origin,
+        'source': source
+      }
+      var dashboardMessage = yield $replyChannel.sendReplace(userMessage, 'food.admin.poll', {type: 'slack', data: basicDashboard})
+      foodSession.update({$push: { cuisine_dashboards: {
+        user: user.id,
+        message: dashboardMessage._id
+      }}}).exec()
+    }).catch(logging.error)
+  }
+}
+
+
+/*
+* Confirm all users have voted for a cuisine
+*/
+handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
+  if (foodSession === undefined) {
+    logging.info('foodSession wasnt passed into food.admin.dashboard.cuisine')
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  }
+
+  db.waypoints.log(1130, foodSession._id, message.user_id, {original_text: message.original_text})
+
+  var userHasVoted = foodSession.votes.map(v => v.user).includes(message.source.user)
+  if (message.allow_text_matching && !userHasVoted) {
+    return yield handlers['food.admin.restaurant.pick'](message)
   }
 
 if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {

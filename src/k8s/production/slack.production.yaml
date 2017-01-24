@@ -1,16 +1,42 @@
 apiVersion: extensions/v1beta1
-kind: Ingress
+kind: Deployment
 metadata:
   name: slack
   namespace: production
-  annotations:
-    kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: "gce"
 spec:
-  tls:
-  - hosts:
-    - juniper.kipthis.com
-    secretName: slack-tls
-  backend:
-    serviceName: slack
-    servicePort: 80
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: slack
+    spec:
+      containers:
+      - image: gcr.io/kip-styles/slack:latest
+        imagePullPolicy: Always
+        name: slack
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: slack
+  name: slack
+  namespace: production
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: slack
+  type: NodePort

@@ -52,7 +52,7 @@ neighborhoodServer:
   url: http://pikachu.kipapp.co:9998
 nlp: http://kadabra.kipapp.co:8083
 picstitch: http://kadabra.kipapp.co:5000
-picstitchDelivery: http://canary.kipapp.co:5000
+picstitchDelivery: http://dev-delivery-picstitch.kipthis.com
 proxy:
   luminati:
     addr: 127.0.0.1:24000
