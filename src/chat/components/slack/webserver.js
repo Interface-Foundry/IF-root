@@ -249,7 +249,7 @@ app.post('/slackaction', next(function * (req, res) {
                 text: 'Choose which channels you want',
                 type: 'select',
                 data_source: 'channels'
-            	}]
+              }]
             });
             channelSection.push({
               'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
