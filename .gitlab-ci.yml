@@ -84,112 +84,135 @@ test:node:
 # TEST FOR PYTHON STUFF
 # ------------------------------------------------
 
-test:python:
-  image: python:3.4
-  stage: test
-  only:
-    - master
-  before_script:
-    - echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/GOOGLE_APPLICATION_CREDENTIALS.json
-    - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/GOOGLE_APPLICATION_CREDENTIALS.json
-    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-  script:
-    - ls
-    - pwd
-    - pip install -q -r src/image_processing/requirements.txt
-    - python -c 'import site; print(site.getsitepackages())'
-    - pytest tests/picstitch/
-  cache:
-    paths:
-      - /usr/
+# test:python:
+#   image: python:3.4
+#   stage: test
+#   only:
+#     - master
+#   before_script:
+#     - echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/GOOGLE_APPLICATION_CREDENTIALS.json
+#     - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/GOOGLE_APPLICATION_CREDENTIALS.json
+#     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+#     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+#   script:
+#     - ls
+#     - pwd
+#     - pip install -q -r src/image_processing/requirements.txt
+#     - python -c 'import site; print(site.getsitepackages())'
+#     - pytest tests/picstitch/
+#   cache:
+#     paths:
+#       - /usr/
 
 # ------------------------------------------------
 # BUILD SECTION USING TEMPLATES
 # notes:
 # ------------------------------------------------
 
-build:delivery_picstitch:
-  variables:
-    IMAGE_NAME: delivery_picstitch
-  <<: *build_defintion
+# build:delivery_picstitch:
+#   variables:
+#     IMAGE_NAME: delivery_picstitch
+#   <<: *build_defintion
 
-build:picstitch:
-  variables:
-    IMAGE_NAME: picstitch
-  <<: *build_defintion
+# build:picstitch:
+#   variables:
+#     IMAGE_NAME: picstitch
+#   <<: *build_defintion
 
-build:parser:
-  variables:
-    IMAGE_NAME: parser
-  <<: *build_defintion
+# build:parser:
+#   variables:
+#     IMAGE_NAME: parser
+#   <<: *build_defintion
 
-build:payments:
-  variables:
-    IMAGE_NAME: payments
-  <<: *build_defintion
+# build:payments:
+#   variables:
+#     IMAGE_NAME: payments
+#   <<: *build_defintion
 
 # ------------------------------------------------
 # DEPLOYMENT SECTION USING TEMPLATES
 # notes:
 # ------------------------------------------------
 
-deploy:delivery_picstitch:
-  variables:
-    DEPLOYMENT_DIR: src/k8s/canary
-    CONTEXT_FILE: canary.delivery_picstitch.yaml
-  <<: *deploy_defintion
+# deploy:delivery_picstitch:
+#   variables:
+#     DEPLOYMENT_DIR: src/k8s/production
+#     CONTEXT_FILE: canary.delivery_picstitch.yaml
+#   <<: *deploy_defintion
 
-deploy:picstitch:
-  variables:
-    DEPLOYMENT_DIR: src/k8s/canary
-    CONTEXT_FILE: canary.picstitch.yaml
-  <<: *deploy_defintion
+# deploy:picstitch:
+#   variables:
+#     DEPLOYMENT_DIR: src/k8s/canary
+#     CONTEXT_FILE: canary.picstitch.yaml
+#   <<: *deploy_defintion
 
-deploy:parser:
-  variables:
-    DEPLOYMENT_DIR: src/k8s/canary
-    CONTEXT_FILE: canary.parser.yaml
-  <<: *deploy_defintion
+# deploy:parser:
+#   variables:
+#     DEPLOYMENT_DIR: src/k8s/canary
+#     CONTEXT_FILE: canary.parser.yaml
+#   <<: *deploy_defintion
 
-deploy:payments:
-  variables:
-    DEPLOYMENT_DIR: src/k8s/canary
-    CONTEXT_FILE: payment.deployment.yaml
-  <<: *deploy_defintion
+# deploy:payments:
+#   variables:
+#     DEPLOYMENT_DIR: src/k8s/canary
+#     CONTEXT_FILE: payment.deployment.yaml
+#   <<: *deploy_defintion
 
 #---------------
 
-# build_canary:
-#   stage: build
-#   only:
-#     - dev
-#   before_script:
-#     - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
-#   script:
-#     - docker build -t $KIP_REGISTRY/reply_logic:$CI_BUILD_REF -f Dockerfiles/canary.reply_logic.Dockerfile .
-#     - docker build -t $KIP_REGISTRY/slack:$CI_BUILD_REF -f Dockerfiles/canary.slack.Dockerfile .
-#     - docker tag $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF $KIP_REGISTRY/$IMAGE_NAME:latest
-#     - docker push $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF
-#     - docker push $KIP_REGISTRY/$IMAGE_NAME:latest
+build_canary:
+  stage: build
+  only:
+    - dev
+  before_script:
+    - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
+  script:
+    - docker build -t $KIP_REGISTRY/reply_logic:$CI_BUILD_REF -f Dockerfiles/canary.reply_logic.Dockerfile .
+    - docker build -t $KIP_REGISTRY/slack:$CI_BUILD_REF -f Dockerfiles/canary.slack.Dockerfile .
+    - docker build -t $KIP_REGISTRY/payments:$CI_BUILD_REF -f Dockerfiles/canary.payments.Dockerfile .
+    - docker build -t $KIP_REGISTRY/parser:$CI_BUILD_REF -f Dockerfiles/parser.Dockerfile .
+    - docker build -t $KIP_REGISTRY/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
+    - docker build -t $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF -f Dockerfiles/delivery_picstitch.Dockerfile .
 
-# deploy_canary:
-#   image: google/cloud-sdk
-#   stage: deploy
-#   only:
-#     - dev
-#   before_script:
-#     - echo $KUBERNETES_KEY > /tmp/KUBERNETES_KEY.json
-#     - gcloud auth activate-service-account $KUBERNETES_SA --key-file=/tmp/KUBERNETES_KEY.json --project=$PROJECT
-#     - gcloud config set compute/zone us-east1-b
-#     - gcloud config set container/use_client_certificate True
-#     - gcloud container clusters get-credentials $KUBE_CLUSTER
-#   script:
-#     - ls $DEPLOYMENT_DIR
-#     - sed -i "s/latest/$CI_BUILD_REF/" $DEPLOYMENT_DIR/$CONTEXT_FILE
-#     - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
-#     - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
-#     - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
-#   after_script:
-#     - rm /tmp/KUBERNETES_KEY.json
+    - docker tag $KIP_REGISTRY/reply_logic:$CI_BUILD_REF $KIP_REGISTRY/reply_logic:latest
+    - docker tag $KIP_REGISTRY/slack:$CI_BUILD_REF $KIP_REGISTRY/slack:latest
+    - docker tag $KIP_REGISTRY/payments:$CI_BUILD_REF $KIP_REGISTRY/payments:latest
+    - docker tag $KIP_REGISTRY/parser:$CI_BUILD_REF $KIP_REGISTRY/parser:latest
+    - docker tag $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF $KIP_REGISTRY/delivery_picstitch:latest
+    - docker tag $KIP_REGISTRY/picstitch:$CI_BUILD_REF $KIP_REGISTRY/picstitch:latest
+
+    - docker push $KIP_REGISTRY/reply_logic:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/slack:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/parser:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/picstitch:$CI_BUILD_REF
+
+deploy_canary:
+  image: google/cloud-sdk
+  stage: deploy
+  only:
+    - dev
+  before_script:
+    - echo $KUBERNETES_KEY > /tmp/KUBERNETES_KEY.json
+    - gcloud auth activate-service-account $KUBERNETES_SA --key-file=/tmp/KUBERNETES_KEY.json --project=$PROJECT
+    - gcloud config set compute/zone us-east1-b
+    - gcloud config set container/use_client_certificate True
+    - gcloud container clusters get-credentials $KUBE_CLUSTER
+  script:
+    - ls $DEPLOYMENT_DIR
+    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.parser.yaml
+    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.replylogic.yaml
+    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.slack.yaml
+    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.payments.yaml
+    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.delivery_picstitch.yaml
+    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.picstitch.yaml
+    - kubectl apply -f src/k8s/canary/canary.parser.yaml
+    - kubectl apply -f src/k8s/canary/canary.replylogic.yaml
+    - kubectl apply -f src/k8s/canary/canary.slack.yaml
+    - kubectl apply -f src/k8s/canary/canary.payments.yaml
+    - kubectl apply -f src/k8s/canary/canary.delivery_picstitch.yaml
+    - kubectl apply -f src/k8s/canary/canary.picstitch.yaml
+  after_script:
+    - rm /tmp/KUBERNETES_KEY.json
 

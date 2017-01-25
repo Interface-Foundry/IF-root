@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: payments
-        image: gcr.io/kip-styles/payments:canary
+        image: gcr.io/kip-styles/payments:CANARYIMAGE
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

@@ -11,7 +11,7 @@ spec:
         app: cafe-menu
     spec:
       containers:
-      - image: gcr.io/kip-styles/cafe_menu:canary
+      - image: gcr.io/kip-styles/cafe_menu:CANARYIMAGE
         imagePullPolicy: Always
         name: delivery-picstitch
         ports:
