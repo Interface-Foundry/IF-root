@@ -180,7 +180,7 @@ build_canary_node:
     - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
 
 
-build_canary_node:
+build_canary_python:
   stage: build
   only:
     - dev
