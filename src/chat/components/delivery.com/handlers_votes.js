@@ -909,9 +909,11 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       }
     ]
   }
-  console.log('just finished that big message')
-  console.log('foodSession is a thing', foodSession)
-  console.log('foodSession.email_users', foodSession.email_users)
+
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
+  var slackLink = 'https://slack.com/signin/find'
+
+
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
@@ -920,16 +922,13 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
 
     var merch_url = yield menu_utils.getUrl(foodSession, user.id)
 
-    console.log('foodSession.team_id', foodSession.team_id)
-    var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
-    console.log('slackbot', slackbot)
-
     var mailOptions = {
       to: `<${m}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${slackbot.team_name}!`,
-      html: '<html><body><h1>' +`${foodSession.chosen_restaurant.name}` +
-        '</h1><p><a style="color:#47a2fc;" href="' + merch_url + '">Click to View Full Menu ' + menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine) + '</a></p><table style="width:100%" border="1">'
+      html: '<html><body><h1>' + '<img src="http://tidepools.co/kip/oregano/cafe.png"><br/>' +
+        `${foodSession.chosen_restaurant.name}` + '</h1>' +
+      '<p><a style="color:#47a2fc;text-decoration:none;" href="' + merch_url + '">Click to View Full Menu ' + menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine) + '</a></p><table style="width:100%" border="1">'
     };
 
     var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
@@ -954,7 +953,9 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       mailOptions.html += '</tr>';
     }
 
-    mailOptions.html += '</table></body></html>';
+    mailOptions.html += '</table><br/>' +
+    '<a style="color:#47a2fc;text-decoration:none;" href="https://kipthis.com/legal.html">Terms of Service</a>'
+    '</body></html>';
 
     logging.info('mailOptions', mailOptions);
     mailer_transport.sendMail(mailOptions, function (err) {
