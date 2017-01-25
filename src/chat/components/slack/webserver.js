@@ -246,7 +246,6 @@ app.post('/slackaction', next(function * (req, res) {
         team.meta.cart_channels = [channelId];
         team.markModified('meta.cart_channels');
         yield team.save();
-
         return;
       }
       else if (simple_command == 'view_cart_btn') {
