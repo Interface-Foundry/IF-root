@@ -944,14 +944,14 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       subject: `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${slackbot.team_name}!`,
       html: '<html><body>' + '<img src="http://tidepools.co/kip/oregano/cafe.png"><br/>' +
         `<h1 style="font-size:2em;">${foodSession.chosen_restaurant.name}` + '</h1>' +
-      '<p><a style="color:#47a2fc;text-decoration:none;" href="' + merch_url + '">Click to View Full Menu ' + menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine) + '</a></p><table style="width:100%" border="1">'
+      '<p><a style="color:#47a2fc;text-decoration:none;" href="' + merch_url + '">Click to View Full Menu ' + menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine) + '</a></p><table style="width:100%" border="0">'
     };
 
     var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
     var quickpicks = sortedMenu.slice(0, 9);
 
     function formatItem (i, j) {
-      return `<table>` +
+      return `<table border="0">` +
       `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
       `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
       `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
@@ -963,7 +963,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       mailOptions.html += '<tr>';
       for (var j = 0; j < 3; j++) {
         var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
-        mailOptions.html += `<td><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
+        mailOptions.html += `<td bgcolor="#F5F5F5"><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
         mailOptions.html += formatItem(i, j) + '</a>' + '</td>';
       }
       mailOptions.html += '</tr>';
