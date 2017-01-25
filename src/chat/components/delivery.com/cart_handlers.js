@@ -352,6 +352,7 @@ function * sendOrderProgressDashboards (foodSession, message) {
       var adminDashboard = _.find(foodSession.order_dashboards, {user: foodSession.convo_initiater.id})
       if (adminDashboard) {
         logging.debug('sending cart to admin, replacing existing dashboard')
+<<<<<<< HEAD
         // return co(function *() {
         var msg = yield db.Messages.findById(adminDashboard.message)
         return yield handlers['food.admin.order.confirm'](msg, foodSession)
@@ -369,12 +370,32 @@ function * sendOrderProgressDashboards (foodSession, message) {
           'action': 'food.admin.cart'
         }
         return yield handlers['food.admin.order.confirm'](adminDashboard, foodSession)
+=======
+        return co(function *() {
+          var msg = yield db.Messages.findById(adminDashboard.message)
+          return yield handlers['food.admin.order.confirm'](msg, foodSession)
+        })
+      } else {
+        logging.debug('sending cart to admin, with new message')
+        adminDashboard = {
+          source: {
+            user: foodSession.convo_initiater.id,
+            team: message.source.team,
+            channel: foodSession.convo_initiater.dm
+          },
+          thread_id: foodSession.convo_initiater.dm,
+          mode: 'food',
+          action: 'food.admin.cart'
+        }
+        return handlers['food.admin.order.confirm'](adminDashboard, foodSession)
+>>>>>>> 0ea930df1... fixing team cart, closes #711
       }
     }
 
     // send or update the dashbaord message
     var existingDashbaord = foodSession.order_dashboards.filter(d => d.user === user.id)[0]
     if (existingDashbaord) {
+<<<<<<< HEAD
       try {
         msg = yield db.Messages.findById(existingDashbaord.message)
         yield $replyChannel.sendReplace(msg, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
@@ -385,6 +406,25 @@ function * sendOrderProgressDashboards (foodSession, message) {
       // send the dashboard for the first time for the user that just submitted personal cart
       msg = yield $replyChannel.sendReplace(message, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
       yield foodSession.update({$push: {'order_dashboards': {'user': message.source.user, 'message': msg._id}}})
+=======
+      db.Messages.findById(existingDashbaord.message, function (e, msg) {
+        if (e) return logging.error(e)
+        $replyChannel.sendReplace(msg, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
+      })
+      return Promise.resolve()
+    } else if (user.id === message.source.user) {
+
+      // send the dashbaord for the first time for the user that just submitted personal cart
+      return co(function * () {
+        var msg = yield $replyChannel.sendReplace(message, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
+        yield foodSession.update({$push: { order_dashboards: {
+          user: message.source.user,
+          message: msg._id
+        }}}).exec()
+
+
+      }).catch(logging.error)
+>>>>>>> 0ea930df1... fixing team cart, closes #711
     }
   })
 }
@@ -567,6 +607,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
 handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
+<<<<<<< HEAD
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
   lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
@@ -609,6 +650,10 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   })
 
   foodSession = foodSession ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+=======
+  foodSession = foodSession ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+>>>>>>> 0ea930df1... fixing team cart, closes #711
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
@@ -671,6 +716,20 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     logging.error('error running createCartForSession', e)
     return
   }
+<<<<<<< HEAD
+=======
+
+    if (order !== null) {
+      // order is successful
+      foodSession.order = order
+      foodSession.markModified('order')
+      yield foodSession.save()
+
+      if (foodSession.tip.percent !== 'cash') {
+        foodSession.tip.amount = (Number(foodSession.tip.percent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
+        foodSession.save()
+      }
+>>>>>>> 0ea930df1... fixing team cart, closes #711
 
   if (order !== null) {
     // order is successful
@@ -781,7 +840,11 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
      })
     }
 
+<<<<<<< HEAD
   return yield $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
+=======
+  return yield $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
+>>>>>>> 0ea930df1... fixing team cart, closes #711
 }
 
 handlers['food.order.instructions'] = function * (message) {
