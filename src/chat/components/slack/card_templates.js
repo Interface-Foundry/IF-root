@@ -118,7 +118,7 @@ var onboard_admin_attachments = module.exports.onboard_admin_attachments = funct
   attachments.push({
     text: `Thanks for inviting me to your team! It’s my first day at *${teamName}* :D\nCould you tell me who buys the office supplies and food? Type \`me\` or \`me and @jane\``,
     mrkdwn_in: ['text'],
-    color: '#3AA3E3'
+    color: '#45a5f4'
   });
   return attachments;
 }

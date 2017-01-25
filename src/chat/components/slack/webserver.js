@@ -240,7 +240,7 @@ app.post('/slackaction', next(function * (req, res) {
               };
             });
             channelSection.push({
-              text: '',
+              text: 'test',
               callback_id: 'channel_select',
               attachment_type: 'default',
               fallback: 'update your slack to see this!',
@@ -590,7 +590,7 @@ function * updateCartMsg(cart, parsedIn) {
       if (cart.error && cart.errorASIN && cart.errorASIN === item.ASIN) {
         all.push({
           text: cart.error,
-          color: '#fc9600',
+          color: '#fe9b00',
           callback_id: 'shrug',
           attachment_type: 'default'
         });

@@ -139,7 +139,7 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
   if (over_budget) {
     json.attachments.push({
       'text': 'Unfortunately that exceeds your budget',
-      'color': '#fc9600'
+      'color': '#fe9b00'
     })
   }
 
@@ -474,7 +474,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
   if (totalPrice < foodSession.chosen_restaurant.minimum && message.source.user == foodSession.convo_initiater.id) {
     dashboard.attachments.push({
-      color: '#fc9600',
+      color: '#fe9b00',
       mrkdwn_in: ['text'],
       text: `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`,
       actions: []

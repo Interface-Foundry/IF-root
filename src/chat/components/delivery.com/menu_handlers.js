@@ -455,9 +455,9 @@ handlers['food.item.add_to_cart'] = function * (message) {
         data: {
         //   text: `Please choose something cheaper`,
         //   mrkdwn_in: ['text'],
-        //   color: '#fc9600'
+        //   color: '#fe9b00'
           attachments: [{
-            color: '#fc9600',
+            color: '#fe9b00',
             fallback: 'the unfrugal are the devils\'s playthings',
             text: 'Please choose something cheaper'
           }]
