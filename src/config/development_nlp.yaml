@@ -10,7 +10,7 @@ slack:
   verification_token: twZRwtgqPxHdOMNVru9MqD6p
   redirect_uri: https://8e957d39.ngrok.io/newslack
 kipPayURL: https://aed70489.ngrok.io
-menuURL: https://a06de068.ngrok.io
+menuURL: http://localhost:8001/menus
 picstitchDelivery: http://delivery-picstitch.kipthis.com
 logging:
   console:
