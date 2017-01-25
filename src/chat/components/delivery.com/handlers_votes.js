@@ -6,6 +6,7 @@ var googl = require('goo.gl')
 var request = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
+var cuisineClassifier = require('./cuisine_classifier.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
 var yelp = require('./yelp')
 var menu_utils = require('./menu_utils')
@@ -257,13 +258,7 @@ handlers['food.admin.poll'] = function * (message) {
 
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
-  console.log('in route food.user.poll')
-  // going to want to move this to s3 probably
-  // ---------------------------------------------
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-
-  // ---------------------------------------------
-
   db.waypoints.log(1120, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var teamMembers = foodSession.team_members
@@ -339,17 +334,9 @@ handlers['food.vote.submit'] = function * (message) {
     // user typed something
     logging.info('using text matching for cuisine choice')
 
-    // if user has already voted and types something again
-
-    var res = yield utils.matchText(message.text, foodSession.cuisines, {
-      shouldSort: true,
-      threshold: 0.4,
-      distance: 5,
-      tokenize: true,
-      keys: ['name']
-    })
+    var res = cuisineClassifier(message.text, foodSession.cuisines)
     if (res !== null) {
-      yield addVote(res[0].name)
+      yield addVote(res)
     } else {
       yield addVote(message.text)
     }
