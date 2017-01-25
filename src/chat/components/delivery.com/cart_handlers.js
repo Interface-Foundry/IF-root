@@ -299,7 +299,6 @@ function * sendOrderProgressDashboards (foodSession, message) {
   //
   // send the dashboards to all the users that are ready to get dashboards
   //
-
   yield dashboardUsers.map(function * (user) {
     var isAdmin = user.id === foodSession.convo_initiater.id
     logging.debug('sending dashboard to user', user.id, 'isAdmin?', isAdmin)

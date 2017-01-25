@@ -278,8 +278,6 @@ function nodeOptions (node, cartItem, validate, message) {
         })
       };
     });
-
-    kip.debug(`✅  ${JSON.stringify(options, null, 2)}`)
     a.actions = [{
       name: 'food.option.click',
       text: 'Choose an addon',
@@ -311,7 +309,6 @@ function nodeOptions (node, cartItem, validate, message) {
       });
       a.text = '';
     }
-
     a.actions = selections.pop();
 
     all.push(a);
