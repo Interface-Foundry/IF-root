@@ -211,7 +211,8 @@ function * sendOrderProgressDashboards(foodSession, message) {
   logging.debug('sending order progress dashboards')
 
   // we'll have to send the dashboard to the admin even if they are not hungry
-  var adminIsNotHungry = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
+  const adminIsNotHungry = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
+  const allOrdersIn = foodSession.confirmed_orders.length >= foodSession.team_members.length
 
   // make the list of things that hungry team members have ordered
   var menu = Menu(foodSession.menu)
@@ -267,7 +268,6 @@ function * sendOrderProgressDashboards(foodSession, message) {
     })
   }
 
-
   // get the list of users that we have to send a dashboard to
   var dashboardUsers = foodSession.team_members.filter(user => {
     return foodSession.confirmed_orders.includes(user.id)
@@ -279,18 +279,17 @@ function * sendOrderProgressDashboards(foodSession, message) {
     dashboardUsers.push(foodSession.convo_initiater)
   }
 
-
   //
   // send the dashboards to all the users that are ready to get dashboards
   //
-  dashboardUsers.map(user => {
+  yield dashboardUsers.map(user => {
     var isAdmin = user.id === foodSession.convo_initiater.id
     logging.debug('sending dashboard to user', user.id, 'isAdmin?', isAdmin)
     var thisDashboard = _.cloneDeep(dashboard) // because mutating objects in a loop is bad
 
     // add the control buttons for the admin
-    if (isAdmin) {
-      var minimumMet = false
+    if (isAdmin && !allOrdersIn) {
+
       var finishEarlyButton = {
         name: 'food.admin.order.confirm',
         text: 'Finish Order Early',
@@ -304,6 +303,7 @@ function * sendOrderProgressDashboards(foodSession, message) {
             "dismiss_text": "No"
         }
       }
+
       var restartOrderButton = {
         'name': 'food.admin.select_address',
         'text': '↺ Restart Order',
@@ -316,6 +316,13 @@ function * sendOrderProgressDashboards(foodSession, message) {
           dismiss_text: 'No'
         }
       }
+
+      const items = foodSession.cart.filter(i => i.added_to_cart)
+      const totalPrice = items.reduce((sum, i) => {
+        return sum + menu.getCartItemPrice(i) * i.item.item_qty
+      }, 0)
+      const minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum
+
       thisDashboard.attachments.push({
         color: minimumMet ? '#3AA3E3' : '#fc9600',
         mrkdwn_in: ['text'],
@@ -323,6 +330,29 @@ function * sendOrderProgressDashboards(foodSession, message) {
         text: minimumMet ? 'Finish Order Early' : `*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`,
         actions: minimumMet ? [finishEarlyButton, restartOrderButton] : [restartOrderButton]
       })
+    } else if (isAdmin && allOrdersIn) {
+      // send the team cart to the admin
+      var adminDashboard = _.find(foodSession.order_dashboards, {user: foodSession.convo_initiater.id})
+      if (adminDashboard) {
+        logging.debug('sending cart to admin, replacing existing dashboard')
+        return co(function *() {
+          var msg = yield db.Messages.findById(adminDashboard.message)
+          return yield handlers['food.admin.order.confirm'](msg, foodSession)
+        })
+      } else {
+        logging.debug('sending cart to admin, with new message')
+        adminDashboard = {
+          source: {
+            user: foodSession.convo_initiater.id,
+            team: message.source.team,
+            channel: foodSession.convo_initiater.dm
+          },
+          thread_id: foodSession.convo_initiater.dm,
+          mode: 'food',
+          action: 'food.admin.cart'
+        }
+        return handlers['food.admin.order.confirm'](adminDashboard, foodSession)
+      }
     }
 
     // send or update the dashbaord message
@@ -330,8 +360,9 @@ function * sendOrderProgressDashboards(foodSession, message) {
     if (existingDashbaord) {
       db.Messages.findById(existingDashbaord.message, function (e, msg) {
         if (e) return logging.error(e)
-        return $replyChannel.sendReplace(msg, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
+        $replyChannel.sendReplace(msg, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
       })
+      return Promise.resolve()
     } else if (user.id === message.source.user) {
 
       // send the dashbaord for the first time for the user that just submitted personal cart
@@ -341,6 +372,8 @@ function * sendOrderProgressDashboards(foodSession, message) {
           user: message.source.user,
           message: msg._id
         }}}).exec()
+
+
       }).catch(logging.error)
     }
   })
@@ -421,12 +454,13 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       text: `*Waiting for order(s) from:*${waitingText}`,
       actions: []
     })
-
-    var items = foodSession.cart.filter(i => i.added_to_cart)
-    var totalPrice = items.reduce((sum, i) => {
-      return sum + menu.getCartItemPrice(i)
-    }, 0)
   }
+
+  var items = foodSession.cart.filter(i => i.added_to_cart)
+  var totalPrice = items.reduce((sum, i) => {
+    return sum + menu.getCartItemPrice(i)
+  }, 0)
+
 
   if (totalPrice < foodSession.chosen_restaurant.minimum && message.source.user == foodSession.convo_initiater.id) {
     dashboard.attachments.push({
@@ -523,11 +557,11 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   }
 }
 
-handlers['food.admin.order.confirm'] = function * (message, replace) {
+handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession = foodSession ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
-  db.waypoints.log(1300, foodSession._id, message.user_id, {original_text: message.original_text})
+  db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
 
@@ -585,6 +619,11 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
   try {
     var order = yield api.createCartForSession(foodSession)
+  } catch (e) {
+    logging.error('error running createCartForSession', e)
+    return
+  }
+
     if (order !== null) {
       // order is successful
       foodSession.order = order
@@ -693,11 +732,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
         }]
        })
     }
-  } catch (err) {
-    logging.error('error with creating cart payment for some reason', err)
-  }
 
-  $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
+  return yield $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
 }
 
 handlers['food.order.instructions'] = function * (message) {
