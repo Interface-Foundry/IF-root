@@ -952,19 +952,22 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
     var quickpicks = sortedMenu.slice(0, 9);
 
+    var row_length = 2;
+    var column_length = 3;
+
     function formatItem (i, j) {
       return `<table border="0">` +
-      `<tr><td style="font-weight:bold;width:70%">${quickpicks[3*i+j].name}</td>` +
-      `<td style="width:30%;">$${parseFloat(quickpicks[3*i+j].price).toFixed(2)}</td></tr>` +
-      `<tr><td>${quickpicks[3*i+j].description}</td></tr>` +
+      `<tr><td style="font-weight:bold;width:70%">${quickpicks[row_length*i+j].name}</td>` +
+      `<td style="width:30%;">$${parseFloat(quickpicks[row_length*i+j].price).toFixed(2)}</td></tr>` +
+      `<tr><td>${quickpicks[row_length*i+j].description}</td></tr>` +
       `<tr><p style="color:#fa2d48">Add to Cart</p></tr>` +
       `</table>`;
     }
 
-    for (var i = 0 ; i < 3; i++) {
+    for (var i = 0 ; i < column_length; i++) {
       mailOptions.html += '<tr>';
-      for (var j = 0; j < 3; j++) {
-        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[3*i+j].id])
+      for (var j = 0; j < row_length; j++) {
+        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[row_length*i+j].id])
         mailOptions.html += `<td bgcolor="#F5F5F5"><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
         mailOptions.html += formatItem(i, j) + '</a>' + '</td>';
       }
@@ -972,7 +975,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     }
 
     mailOptions.html += '</table><br/>' +
-    `<a style="color:#47a2fc;text-decoration:none;" href="${slackLink}">Join your team on Slack!</a><br/>` +
+    `<a style="color:#47a2fc;text-decoration:none;" href="${slackLink}">Join your team on Slack!</a><br/><br/>` +
     '<a style="color:#47a2fc;text-decoration:none;" href="https://kipthis.com/legal.html">Terms of Service</a>' +
     '</body></html>';
 
