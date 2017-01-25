@@ -938,13 +938,15 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
 
     var merch_url = yield menu_utils.getUrl(foodSession, user.id)
 
+    var resto = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id});
+
     var mailOptions = {
       to: `<${m}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${slackbot.team_name}!`,
       html: '<html><body>' + '<img src="http://tidepools.co/kip/oregano/cafe.png"><br/>' +
         `<h1 style="font-size:2em;">${foodSession.chosen_restaurant.name}` + '</h1>' +
-      '<p><a style="color:#47a2fc;text-decoration:none;" href="' + merch_url + '">Click to View Full Menu ' + menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine) + '</a></p><table style="width:100%" border="0">'
+      '<p><a style="color:#47a2fc;text-decoration:none;" href="' + merch_url + '">Click to View Full Menu ' + menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a></p><table style="width:100%" border="0">'
     };
 
     var sortedMenu = menu_utils.sortMenu(foodSession, user, []);

@@ -232,6 +232,8 @@ if (foodSession.budget) {
   if (config.menuURL) var url = yield menu_utils.getUrl(foodSession, message.source.user)
   else var url = foodSession.chosen_restaurant.url
 
+  var resto = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id});
+
   //resto name
   msg_json.attachments.push({
     'fallback': 'Search the menu',
@@ -240,7 +242,7 @@ if (foodSession.budget) {
     'fields': [ // first field would be budget
       {
         'short': true,
-        'value': `*<${url}|View Full Menu ${menu_utils.cuisineEmoji(foodSession.chosen_restaurant.cuisine)}>*`
+        'value': `*<${url}|View Full Menu ${menu_utils.cuisineEmoji(resto.data.summary.cuisines[0])}>*`
       }
     ],
     'mrkdwn_in': ['text', 'fields']
