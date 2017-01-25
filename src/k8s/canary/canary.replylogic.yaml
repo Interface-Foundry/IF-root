@@ -27,7 +27,7 @@ spec:
         #   value: "false"
         # - name: LOGGING_CONSOLE_STRINGIFY
         #   value: "true"
-        image: gcr.io/kip-styles/reply_logic:canary
+        image: gcr.io/kip-styles/reply_logic:CANARYIMAGE
         imagePullPolicy: Always
         name: replylogic
         terminationMessagePath: /dev/termination-log

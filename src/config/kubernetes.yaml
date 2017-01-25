@@ -1,25 +1,38 @@
 env: production
 isProduction: true
-mongodb:
-  url: mongodb://jolteon.internal.kipapp.co/foundry?&connectTimeoutMS=600000&socketTimeoutMS=600000
-  backuphost: jolteon.internal.kipapp.co
-  options:
-    replset:
-      rs_name: foundry
-      socketOptions:
-        keepAlive: 1
 elasticsearch:
   url: http://elasticsearch-cerulean.internal.kipapp.co:9200
-elasticsearchElk:
-  url: http://elasticsearch-cerulean.internal.kipapp.co:9200
+kipPayURL: https://pay.kipthis.com
+logging:
+  console:
+    level: info
+    colorize: true
+    prettyPrint: true
+  mongo:
+    enabled: true
+mongodb:
+  url: mongodb://10.142.0.13,10.142.0.14/foundry
+  backuphost: "10.142.0.13"
+  options:
+    replset:
+      rs_name: rs0
+      socketOptions:
+        keepAlive: 1
+nlp: http://parser.kipthis.com
+picstitch: http://picstitch.kipthis.com
+proxy:
+  luminati:
+    enabled: true
+    password: e49d4ega1696
+  mesh:
+    password: 9fSvNH@aB4Hs2s>qcatsoupkanyecandle
 redis:
   port: 6379
   url: redis-thunder.internal.kipapp.co
-geoipURL: http://localhost:8080/json/
-neighborhoodServer:
-  url: http://localhost:9998
-app:
-  publicAPI: https://kipapp.co/styles/api
-picstitch: http://localhost:5000
-nlp: http://localhost:8083
-doc2vec: http://localhost:8084
+slack:
+  client_id: "2804113073.14708197459"
+  client_secret: d4c324bf9caa887a66870abacb3d7cb5
+  verification_token: P30EDlNgjsl9i15ZQBOElJls
+  redirect_uri: https://slack.kipthis.com/newslack
+menuURL: http://cafe.kipthis.com
+picstitchDelivery: http://delivery-picstitch.kipthis.com

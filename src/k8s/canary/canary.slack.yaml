@@ -11,7 +11,7 @@ spec:
         app: slack
     spec:
       containers:
-      - image: gcr.io/kip-styles/slack:canary
+      - image: gcr.io/kip-styles/slack:CANARYIMAGE
         imagePullPolicy: Always
         name: slack
         ports:

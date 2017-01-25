@@ -68,9 +68,15 @@ function * loadTeam(slackbot) {
     logging.info('already loaded team', slackbot.team_name)
     return
   }
-  var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '')
-  rtm.start()
-  var web = new slack.WebClient(slackbot.bot.bot_access_token || '')
+
+  try {
+    var web = new slack.WebClient(slackbot.bot.bot_access_token || '')
+    var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '')
+    rtm.start()
+  } catch (err) {
+    logging.error('error when loading slackbot.bot', slackbot.bot)
+    return
+  }
   slackConnections[slackbot.team_id] = {
     rtm: rtm,
     web: web,
@@ -78,9 +84,10 @@ function * loadTeam(slackbot) {
   }
 
   co(function * () {
-    yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
-    yield slackUtils.refreshAllUserIMs(slackConnections[slackbot.team_id])
-    yield coupon.refreshTeamCoupons(slackbot.team_id)
+    logging.info('refreshing all teams and various stuff does not work in k8s on startup')
+    // yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
+    // yield slackUtils.refreshAllUserIMs(slackConnections[slackbot.team_id])
+    // yield coupon.refreshTeamCoupons(slackbot.team_id)
   })
   // TODO figure out how to tell when auth is invalid
   // right now the library just console.log's a message and I can't figure out

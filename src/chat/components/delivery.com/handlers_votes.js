@@ -797,22 +797,30 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   // admin is confirming, replace their message
   var admin = foodSession.convo_initiater
-  var msg = {
-    mode: 'food',
-    action: 'admin.restaurant.pick.list',
-    thread_id: admin.dm,
-    origin: message.origin,
-    source: {
-      team: foodSession.team_id,
-      user: admin.id,
-      channel: admin.dm
-    }
+
+  if (message.source.user === admin.id) {
+    var msg = message
+  } else if (_.find(foodSession.cuisine_dashboards, {user: admin.id})) {
+    var dashboard = _.find(foodSession.cuisine_dashboards, {user: admin.id})
+    msg = yield db.Messages.findById(dashboard.message)
+  } else {
+    msg = _.merge({}, message, {
+      mode: 'food',
+      action: 'admin.restaurant.pick.list',
+      origin: message.origin,
+      channel: admin.dm,
+      thread_id: admin.dm,
+      user_id: admin.id,
+      source: {
+        team: foodSession.team_id,
+        user: admin.id,
+        channel: admin.dm
+      }
+    })
   }
 
-  kip.debug('sending message to admin', admin)
-  kip.debug(msg)
-
-  $replyChannel.send(msg, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
+  logging.debug('sending message to admin: ', message, responseForAdmin)
+  $replyChannel.sendReplace(msg, 'food.admin.restaurant.search', {'type': message.origin, 'data': responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
