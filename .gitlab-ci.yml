@@ -1,5 +1,6 @@
-image: docker:1.13-rc
+image: docker:1.13
 variables:
+  DOCKER_DRIVER: overlay
   GIT_STRATEGY: fetch
   privileged: "true"
   GKE_REGISTRY: https://gcr.io
@@ -11,7 +12,7 @@ variables:
   PROJECT: kip-styles
 
 services:
-  - docker:1.13-rc-dind
+  - docker:1.13-dind
 
 cache:
   key: "$CI_BUILD_STAGE/$CI_BUILD_REF_NAME"
