@@ -1041,48 +1041,14 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
 
     var m = foodSession.email_users[i];
     var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
-    var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m)
-
-    var resto = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id});
+    var html = yield email_utils.quickpickHTML(foodSession, slacklink, m)
 
     var mailOptions = {
       to: `<${m}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${slackbot.team_name}!`,
-      html: '<html><body>' + '<img src="http://tidepools.co/kip/oregano/cafe.png"><br/>' +
-        `<h1 style="font-size:2em;">${foodSession.chosen_restaurant.name}` + '</h1>' +
-      '<p><a style="color:#47a2fc;text-decoration:none;" href="' + merch_url + '">Click to View Full Menu ' + menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a></p><table style="width:100%" border="0">'
+      html: html
     };
-
-    var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
-    var quickpicks = sortedMenu.slice(0, 9);
-
-    var row_length = 2;
-    var column_length = 3;
-
-    function formatItem (i, j) {
-      return `<table border="0">` +
-      `<tr><td style="font-weight:bold;width:70%">${quickpicks[row_length*i+j].name}</td>` +
-      `<td style="width:30%;">$${parseFloat(quickpicks[row_length*i+j].price).toFixed(2)}</td></tr>` +
-      `<tr><td>${quickpicks[row_length*i+j].description}</td></tr>` +
-      `<tr><p style="color:#fa2d48">Add to Cart</p></tr>` +
-      `</table>`;
-    }
-
-    for (var i = 0 ; i < column_length; i++) {
-      mailOptions.html += '<tr>';
-      for (var j = 0; j < row_length; j++) {
-        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[row_length*i+j].id])
-        mailOptions.html += `<td bgcolor="#F5F5F5"><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
-        mailOptions.html += formatItem(i, j) + '</a>' + '</td>';
-      }
-      mailOptions.html += '</tr>';
-    }
-
-    mailOptions.html += '</table><br/>' +
-    `<a style="color:#47a2fc;text-decoration:none;" href="${slackLink}">Join your team on Slack!</a><br/><br/>` +
-    '<a style="color:#47a2fc;text-decoration:none;" href="https://kipthis.com/legal.html">Terms of Service</a>' +
-    '</body></html>';
 
     logging.info('mailOptions', mailOptions);
      mailer_transport.sendMail(mailOptions, function (err) {
