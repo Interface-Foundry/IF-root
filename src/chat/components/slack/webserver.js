@@ -208,6 +208,7 @@ app.post('/slackaction', next(function * (req, res) {
             let channelSection = {
               text: '',
               callback_id: 'channel_buttons_idk',
+
               actions: [{
                 name: 'channel_btn',
                 text: 'Choose which channels you want',
@@ -246,6 +247,7 @@ app.post('/slackaction', next(function * (req, res) {
         team.meta.cart_channels = [channelId];
         team.markModified('meta.cart_channels');
         yield team.save();
+
         return;
       }
       else if (simple_command == 'view_cart_btn') {
