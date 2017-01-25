@@ -3,7 +3,7 @@ var _ = require('lodash')
 
 var sleep = require('co-sleep')
 var googl = require('goo.gl')
-var request = require('request-promise')
+var rp = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
 var mailer_transport = require('../../../mail/IF_mail.js')
@@ -919,8 +919,16 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   }
 
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
-  var slackLink = 'https://slack.com/signin/find'
 
+  var options = {
+    uri: 'https://slack.com/api/team.info',
+    json: true,
+    qs: {
+      token: slackbot.bot.bot_access_token
+    }
+  }
+  var team_info = yield rp(options);
+  var slackLink = 'https://' + team_info.team.domain + '.slack.com'
 
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
@@ -962,7 +970,8 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     }
 
     mailOptions.html += '</table><br/>' +
-    '<a style="color:#47a2fc;text-decoration:none;" href="https://kipthis.com/legal.html">Terms of Service</a>'
+    `<a style="color:#47a2fc;text-decoration:none;" href="${slackLink}">Join your team on Slack!</a><br/>` +
+    '<a style="color:#47a2fc;text-decoration:none;" href="https://kipthis.com/legal.html">Terms of Service</a>' +
     '</body></html>';
 
     logging.info('mailOptions', mailOptions);
