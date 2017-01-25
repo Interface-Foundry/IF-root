@@ -113,6 +113,9 @@ app.post('/slackaction', next(function * (req, res) {
     console.error('slack buttons broke, need a response_url')
     res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
     return
+  } else {
+    res.status(200)
+    res.end()
   }
 
     var action = parsedIn.actions[0];

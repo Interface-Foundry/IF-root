@@ -68,9 +68,15 @@ function * loadTeam(slackbot) {
     logging.info('already loaded team', slackbot.team_name)
     return
   }
-  var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '')
-  rtm.start()
-  var web = new slack.WebClient(slackbot.bot.bot_access_token || '')
+
+  try {
+    var web = new slack.WebClient(slackbot.bot.bot_access_token || '')
+    var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '')
+    rtm.start()
+  } catch (err) {
+    logging.error('error when loading slackbot.bot', slackbot.bot)
+    return
+  }
   slackConnections[slackbot.team_id] = {
     rtm: rtm,
     web: web,
