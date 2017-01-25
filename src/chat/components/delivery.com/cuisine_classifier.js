@@ -1,21 +1,18 @@
 var Fuse = require('fuse.js')
-console.time('loading data')
 var cuisines = require('./cuisine_classifier.json')
-console.timeEnd('loading data')
 
-console.time('data->array')
 cuisines = Object.keys(cuisines).map(function (name) {
   return {
     'name': name,
     'possibleValues': cuisines[name]
   }
 })
-console.timeEnd('data->array')
 
-function cuisineClassifier (text) {
+function cuisineClassifier (text, otherCuisines) {
   var baseOptions = {
     shouldSort: true,
-    threshold: 0.6,
+    threshold: 0.3,
+    distance: 3,
     keys: ['name']
   }
 
@@ -23,33 +20,56 @@ function cuisineClassifier (text) {
   var res = fuse.search(text)
 
   if (res.length > 0) {
+    logging.info('matched with cuisine.json item')
     res = res[0].possibleValues
     return Object.keys(res).reduce(function (a, b) {
-      var s = res[a] > res[b] ? a : b
+      var cuisine = res[a] > res[b] ? a : b
       // return res[a] > res[b] ? a : b
-      return s
+      return cuisine
     })
   } else {
-    // no matches
-    return null
+    logging.info('no cuisine matches with parameters from cuisine.json file')
+    // no matches from cuisine.json searcher
+    var extraOptions = {
+      shouldSort: true,
+      threshold: 0.4,
+      distance: 5,
+      tokenize: true,
+      keys: ['name']
+    }
+
+    fuse = new Fuse(otherCuisines, extraOptions)
+    res = fuse.search(text)
+
+    if (res.length > 0) {
+      return res[0].name
+    }
   }
+  logging.warn('no results from cuisineClassifier, returning null')
+  return null
 }
 
-// module.exports.cuisineClassifier = cuisineClassifier
+module.exports = cuisineClassifier
 
-if (!module.parent) {
-  var co = require('co')
-  // wow such test
-  co(function * () {
-    console.time('searching1')
-    console.log(cuisineClassifier('lasange'))
-    console.timeEnd('searching1')
-    console.time('searching1')
-    console.log(cuisineClassifier('lasangs'))
-    console.timeEnd('searching1')
+// example for testing
+// if (!module.parent) {
+//   var logging = require('../../../logging.js')
+//   var co = require('co')
 
-    console.time('searching2')
-    console.log(cuisineClassifier('salmon rollz'))
-    console.timeEnd('searching2')
-  })
-}
+//   // wow such test
+//   co(function * () {
+//     console.time('searching1')
+//     console.log(cuisineClassifier('lasange'))
+//     console.timeEnd('searching1')
+//     console.time('searching1')
+//     console.log(cuisineClassifier('lasangs'))
+//     console.timeEnd('searching1')
+
+//     console.time('searching2')
+//     console.log(cuisineClassifier('cheeseburger'))
+//     console.timeEnd('searching2')
+//     console.time('searching2')
+//     console.log(cuisineClassifier('salmon roll'))
+//     console.timeEnd('searching2')
+//   })
+// }
