@@ -169,7 +169,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
           'text': 'Finish',
           'style': 'primary',
           'type': 'button',
-          'value': 'food.admin.team.members'
+          'value': 'food.admin.team.members' // but should sometimes be reorder confirmation
         }
         // {
         //   'name': 'passthrough',

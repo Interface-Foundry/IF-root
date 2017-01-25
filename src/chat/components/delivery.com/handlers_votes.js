@@ -1,15 +1,16 @@
 'use strict'
 var _ = require('lodash')
-
+var co = require('co')
 var sleep = require('co-sleep')
 var googl = require('goo.gl')
 var rp = require('request-promise')
+
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
 var mailer_transport = require('../../../mail/IF_mail.js')
 var yelp = require('./yelp')
 var menu_utils = require('./menu_utils')
-var co = require('co')
+var email_utils = require('./email_utils')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -704,7 +705,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': yield viableRestaurants.slice(index, index + 3).map(utils.buildRestaurantAttachment)
+    'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
   var moreButton = {
@@ -927,60 +928,25 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
       token: slackbot.bot.bot_access_token
     }
   }
+
   var team_info = yield rp(options);
-  var slackLink = 'https://' + team_info.team.domain + '.slack.com'
+  var slacklink = 'https://' + team_info.team.domain + '.slack.com'
 
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
-
     var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
-
-    var merch_url = yield menu_utils.getUrl(foodSession, user.id)
-
-    var resto = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id});
+    var html = yield email_utils.quickpickHTML(foodSession, slacklink, m)
 
     var mailOptions = {
       to: `<${m}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${slackbot.team_name}!`,
-      html: '<html><body>' + '<img src="http://tidepools.co/kip/oregano/cafe.png"><br/>' +
-        `<h1 style="font-size:2em;">${foodSession.chosen_restaurant.name}` + '</h1>' +
-      '<p><a style="color:#47a2fc;text-decoration:none;" href="' + merch_url + '">Click to View Full Menu ' + menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a></p><table style="width:100%" border="0">'
+      html: html
     };
 
-    var sortedMenu = menu_utils.sortMenu(foodSession, user, []);
-    var quickpicks = sortedMenu.slice(0, 9);
-
-    var row_length = 2;
-    var column_length = 3;
-
-    function formatItem (i, j) {
-      return `<table border="0">` +
-      `<tr><td style="font-weight:bold;width:70%">${quickpicks[row_length*i+j].name}</td>` +
-      `<td style="width:30%;">$${parseFloat(quickpicks[row_length*i+j].price).toFixed(2)}</td></tr>` +
-      `<tr><td>${quickpicks[row_length*i+j].description}</td></tr>` +
-      `<tr><p style="color:#fa2d48">Add to Cart</p></tr>` +
-      `</table>`;
-    }
-
-    for (var i = 0 ; i < column_length; i++) {
-      mailOptions.html += '<tr>';
-      for (var j = 0; j < row_length; j++) {
-        var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[row_length*i+j].id])
-        mailOptions.html += `<td bgcolor="#F5F5F5"><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
-        mailOptions.html += formatItem(i, j) + '</a>' + '</td>';
-      }
-      mailOptions.html += '</tr>';
-    }
-
-    mailOptions.html += '</table><br/>' +
-    `<a style="color:#47a2fc;text-decoration:none;" href="${slackLink}">Join your team on Slack!</a><br/><br/>` +
-    '<a style="color:#47a2fc;text-decoration:none;" href="https://kipthis.com/legal.html">Terms of Service</a>' +
-    '</body></html>';
-
     logging.info('mailOptions', mailOptions);
-    mailer_transport.sendMail(mailOptions, function (err) {
+     mailer_transport.sendMail(mailOptions, function (err) {
       if (err) console.log(err);
     });
   }
