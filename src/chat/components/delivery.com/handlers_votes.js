@@ -537,11 +537,11 @@ function sendAdminDashboard(foodSession, message) {
   if (existingDashbaord) {
     return co(function * () {
       var dashboardMessage = yield db.Messages.findById(existingDashbaord.message)
-      return yield $replyChannel.sendReplace(dashboardMessage, 'food.admin.poll', {type: 'slack', data: basicDashboard})
+      return yield $replyChannel.sendReplace(dashboardMessage, 'food.vote.submit', {type: 'slack', data: basicDashboard})
     }).catch(logging.error)
   } else {
     return co(function * () {
-      var dashboardMessage = yield $replyChannel.sendReplace(message, 'food.admin.poll', {type: 'slack', data: basicDashboard})
+      var dashboardMessage = yield $replyChannel.sendReplace(message, 'food.vote.submit', {type: 'slack', data: basicDashboard})
       foodSession.update({$push: { cuisine_dashboards: {
         user: message.source.user,
         message: dashboardMessage._id
@@ -587,7 +587,7 @@ function sendUserDashboard(foodSession, message, user) {
     return co(function * () {
       var dashboardMessage = yield db.Messages.findById(existingDashbaord.message)
       logging.debug(dashboardMessage.slack_ts)
-      return yield $replyChannel.sendReplace(dashboardMessage, 'food.admin.poll', {type: 'slack', data: basicDashboard})
+      return yield $replyChannel.sendReplace(dashboardMessage, 'food.vote.submit', {type: 'slack', data: basicDashboard})
     }).catch(logging.error)
   } else {
     return co(function * () {
@@ -606,7 +606,7 @@ function sendUserDashboard(foodSession, message, user) {
         'origin': message.origin,
         'source': source
       }
-      var dashboardMessage = yield $replyChannel.sendReplace(userMessage, 'food.admin.poll', {type: 'slack', data: basicDashboard})
+      var dashboardMessage = yield $replyChannel.sendReplace(userMessage, 'food.vote.submit', {type: 'slack', data: basicDashboard})
       foodSession.update({$push: { cuisine_dashboards: {
         user: user.id,
         message: dashboardMessage._id
