@@ -68,6 +68,12 @@ handlers['initial'] = function * (message) {
     fallback: 'Which group members would you like to collect orders from?',
     callback_id: 'none'
   }];
+  let okButtonText = '';
+  if (team.meta.collect_from === 'me') {
+    okButtonText = 'Start Shopping';
+  } else {
+    okButtonText = 'Collect Order';
+  }
 
   if (team.meta.collect_from === 'channel') {
     let cartChannels = team.meta.cart_channels;
@@ -119,7 +125,7 @@ handlers['initial'] = function * (message) {
     fallback: 'Which group members would you like to collect orders from?',
     actions: [{
       name: 'collect.home.reminder',
-      text: '✔ Collect Orders',
+      text: okButtonText,
       style: 'primary',
       type: 'button',
       value: 'reminder'
