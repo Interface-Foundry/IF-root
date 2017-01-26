@@ -258,22 +258,24 @@ class PicStitch:
 
         last_y = last_y + 5
 
-        for i, z in enumerate(self.img_req['name']):
-            # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
-            countLines = 0
-            filler = ''
-            for line in textwrap.wrap(z, width=self.config['BOX_WIDTH']):
-                countLines += 1
-                if i >= 2:
-                    filler = '...'
-                draw.text((x, last_y - 0),
-                          line + filler,
-                          font=self.config['font2'],
-                          fill="#909497")
-                last_y += self.config['font2'].getsize(line)[1]
-                last_y = last_y + 2
-            if i >= 2:
-                break
+
+        filler = ''
+        add_filler = False
+        wrap_list_of_lists = [textwrap.wrap(l, width=self.config['BOX_WIDTH']) for l in self.img_req['name']]
+        wrap_list = [item for sublist in wrap_list_of_lists for item in sublist]
+        if len(wrap_list) > 3:
+            add_filler = True
+            wrap_list = wrap_list[:3]
+        for i, line in enumerate(wrap_list):
+            if add_filler and len(wrap_list) == i + 1:
+                filler = '...'
+            draw.text((x, last_y - 0),
+                      line + filler,
+                      font=self.config['font2'],
+                      fill="#909497")
+            last_y += self.config['font2'].getsize(line)[1]
+            last_y = last_y + 2
+
         y += self.config['font1'].getsize(line)[1]
         last_y = y
 
