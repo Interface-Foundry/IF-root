@@ -258,7 +258,6 @@ app.post('/slackaction', next(function * (req, res) {
         return;
       } else if (simple_command === 'channel_btn') {
         let team_id = message.source.team;
-        kip.debug(`😀😀  ${JSON.stringify(action, null, 2)}`)
         let channelId = (action.selected_options) ? action.selected_options[0].value : action.value;
         let team = yield db.Slackbots.findOne({
           'team_id': team_id
