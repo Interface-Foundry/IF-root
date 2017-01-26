@@ -180,10 +180,13 @@ build_canary_node:
     - docker push $KIP_REGISTRY/slack:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF
+<<<<<<< HEAD
 
     - docker push $KIP_REGISTRY/slack:canary
     - docker push $KIP_REGISTRY/payments:canary
     - docker push $KIP_REGISTRY/cafe_menu:canary
+=======
+>>>>>>> forgot to push cafe
 
 build_canary_python:
   stage: build
