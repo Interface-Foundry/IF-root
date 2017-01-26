@@ -512,7 +512,6 @@ queue.topic('incoming').subscribe(incoming => {
       })
     }
     timer.stop()
-    yield slackUtils.hideLoading(message);
   }).catch(kip.err)
 })
 

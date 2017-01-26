@@ -82,29 +82,22 @@ handlers['initial'] = function * (message) {
       if (cartChannels.includes(channel.id)) {
         arr.push({
           name: 'channel_btn',
-          text: `✓ #${channel.name}`,
+          text: `× #${channel.name}`,
           type: 'button',
-          value: channel.id
-        });
-      }
-      return arr;
-    }, []);
-    let unselectedChannels = channels.reduce((arr, channel) => {
-      if (!cartChannels.includes(channel.id)) {
-        arr.push({
-          name: 'channel_btn',
-          text: `☐ #${channel.name}`,
-          type: 'button',
+          style: 'danger',
           value: channel.id
         });
       }
       return arr;
     }, []);
     selectedChannels = _.uniq(selectedChannels);
-    unselectedChannels = _.uniq(unselectedChannels);
-    let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
-      : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
-    let chunkedButtons = _.chunk(buttons, 5);
+    selectedChannels.push({
+      name: 'channel_btn',
+      text: 'Choose which channels you want',
+      type: 'select',
+      data_source: 'channels'
+    });
+    let chunkedButtons = _.chunk(selectedChannels, 5);
     let channelSection = chunkedButtons.map(buttonRow => {
       return {
         text: '',
@@ -112,12 +105,9 @@ handlers['initial'] = function * (message) {
         actions: buttonRow
       };
     });
-    channelSection.push({
-      'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
-      mrkdwn_in: ['text']
-    });
     attachments = attachments.concat(channelSection);
   }
+
   attachments.push({
     text: '',
     color: '#49d63a',
