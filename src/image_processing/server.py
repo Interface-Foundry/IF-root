@@ -122,9 +122,9 @@ amazon_images = load_amazon_prime()
 font_dict = load_fonts()
 
 
-# if __name__ == '__main__':
-#     port_num = 5000
-#     # run app
-#     logging.info('__not_threaded__')
-#     logging.info('running app on port ' + str(port_num))
-#     application.run(host='0.0.0.0', port=port_num, debug=True)
+if __name__ == '__main__':
+    port_num = 5000
+    # run app
+    logging.info('__not_threaded__')
+    logging.info('running app on port ' + str(port_num))
+    application.run(host='0.0.0.0', port=port_num, debug=True)

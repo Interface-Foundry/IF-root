@@ -22,7 +22,7 @@ module.exports = function(agenda) {
 };
 
 function * deleteOldMessage(token, ts, channel) {
-  kip.debug(`👰👰  token: ${token}, ts: ${ts}, channel: ${channel}`);
+  kip.debug(`deleting old message with token: ${token}, ts: ${ts}, channel: ${channel}`);
   let res = yield request({
     uri: `https://slack.com/api/chat.delete?token=${token}&ts=${ts}&channel=${channel}&as_user=true`,
     method: 'POST',
