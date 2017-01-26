@@ -248,6 +248,7 @@ if (foodSession.budget) {
     if (index > 0) {
       msg_json.attachments[msg_json.attachments.length - 1].actions.push(backButton)
     }
+  }
 
   if (index > 0) {
     msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
