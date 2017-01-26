@@ -450,6 +450,18 @@ app.post('/slackaction', next(function * (req, res) {
     }
 }))
 
+app.post('/menuorder', (req, res) => {
+  // check the verification token
+  if (req.body.verification_token !== kip.config.slack.verification_token) {
+    res.status(403)
+    return res.end()
+  }
+
+  queue.publish(req.body.topic, req.body.message, 'defaultId')
+  res.status(200)
+  res.end()
+})
+
 function clearCartMsg(attachments) {
   //clears all but the updating message of buttons
   return attachments.reduce((all, a) => {

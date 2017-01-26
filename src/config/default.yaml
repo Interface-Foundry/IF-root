@@ -80,4 +80,7 @@ twitterAuth:
   consumerSecret: N5SmhOhWzUJwPbofLpCi0BlJ8T4M3bACpiFBaB1nHdNIOQEu6R,
   callbackURL: https://kipapp.co/auth/twitter/callback
 # picstitch: http://localhost:5000
+slack:
+  internal_host: http://localhost:8000
+  verification_token: oOEhFUU59ocPm1LpEELeqDj7A
 menuURL: http://localhost:8001/menus

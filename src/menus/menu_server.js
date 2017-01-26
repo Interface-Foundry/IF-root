@@ -13,12 +13,11 @@ var crypto = require('crypto');
 var co = require('co');
 var _ = require('lodash');
 var path = require('path')
+var request = require('request-promise')
 
 // VARIOUS STUFF TO POST BACK TO USER EASILY
 // --------------------------------------------
-var queue = require('../chat/components/queue-direct')
 var UserChannel = require('../chat/components/delivery.com/UserChannel')
-var replyChannel = new UserChannel(queue)
 // --------------------------------------------
 
 var cafeMenu = require('../chat/components/delivery.com/Menu.js');
@@ -181,7 +180,16 @@ router.post('/order', function (req, res) {
 
         yield mess.save();
 
-        yield queue.publish('incoming', mess, ['slack', foodMessage.source.channel, foodMessage.ts, new Date().getSeconds()].join('.'), true)
+        request.post({
+          url: kip.config.slack.internal_host + '/menuorder',
+          json: true,
+          body: {
+            topic: 'incoming',
+            verification_token: kip.config.slack.verification_token,
+            message: mess
+          }
+
+        })
 
       console.log('ostensibly done');
       res.send();
