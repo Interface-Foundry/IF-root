@@ -183,6 +183,11 @@ build_canary_node:
     - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF
 
+    - docker push $KIP_REGISTRY/reply_logic:canary
+    - docker push $KIP_REGISTRY/slack:canary
+    - docker push $KIP_REGISTRY/payments:canary
+    - docker push $KIP_REGISTRY/cafe_menu:canary
+
 
 build_canary_python:
   stage: build
@@ -202,6 +207,10 @@ build_canary_python:
     - docker push $KIP_REGISTRY/parser:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/picstitch:$CI_BUILD_REF
+
+    - docker push $KIP_REGISTRY/parser:canary
+    - docker push $KIP_REGISTRY/delivery_picstitch:canary
+    - docker push $KIP_REGISTRY/picstitch:canary
 
 deploy_canary:
   image: google/cloud-sdk
