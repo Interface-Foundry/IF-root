@@ -1,6 +1,5 @@
 require('../kip');
-require('colors');
-var config = require('../config');
+const config = kip.config
 
 //loads basic server structure
 var bodyParser = require('body-parser');
@@ -15,10 +14,6 @@ var _ = require('lodash');
 var path = require('path')
 var request = require('request-promise')
 
-// VARIOUS STUFF TO POST BACK TO USER EASILY
-// --------------------------------------------
-var UserChannel = require('../chat/components/delivery.com/UserChannel')
-// --------------------------------------------
 
 var cafeMenu = require('../chat/components/delivery.com/Menu.js');
 var menuURL = config.menuURL
@@ -51,14 +46,14 @@ var ObjectId = require('mongodb').ObjectID;
 
 //handle post request with a binder full of data
 router.post('/cafe', (req, res) => co(function * () {
-  console.log('post to cafe')
+  logging.debug('post to cafe')
   var ms = new MenuSession({
     session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
   });
 
-  console.log('new menusession created')
+  logging.debug('new menusession created')
 
-  console.log('req.body', req.body)
+  logging.debug('req.body', req.body)
 
   logging.debug('req.body', req.body)
 
@@ -81,7 +76,7 @@ router.post('/cafe', (req, res) => co(function * () {
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
 
-  console.log('woe is me');
+  logging.debug('woe is me');
 
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
 
@@ -100,7 +95,7 @@ router.post('/cafe', (req, res) => co(function * () {
 
   ms.team_name = sb.team_name
 
-  console.log('ms', ms);
+  logging.debug('ms', ms);
   yield ms.save();
 
   //return a url w a key in a query string
@@ -126,20 +121,20 @@ router.post('/session', (req, res) => co(function * () {
 
 router.post('/order', function (req, res) {
   co(function * () {
-    console.log('post to /order');
+    logging.debug('post to /order');
     if (_.get(req, 'body')) {
       var order = req.body.order;
       var user_id = req.body.user_id;
 
-      console.log('req.body', req.body)
+      logging.debug('req.body', req.body)
 
       var deliv_id = req.body.deliv_id;
       var foodSession = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
-      console.log('found the delivery object');
+      logging.debug('found the delivery object');
       var cart = foodSession.cart;
 
       for (var i = 0; i < order.length; i++) {
-        console.log(order[i]);
+        logging.debug(order[i]);
         cart.push({
           added_to_cart: true,
           item: order[i],
@@ -148,15 +143,15 @@ router.post('/order', function (req, res) {
       }
 
       var orders = foodSession.confirmed_orders
-      console.log('orders', orders)
+      logging.debug('orders', orders)
       orders.push(user_id)
-      console.log('orders plus a new one', orders)
+      logging.debug('orders plus a new one', orders)
 
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, confirmed_orders: orders}});
 
       //----------Message Queue-----------//
 
-        console.log('updated delivery; looking for source message');
+        logging.debug('updated delivery; looking for source message');
 
         var foodMessage = yield db.Messages.find({
           'source.user': user_id,
@@ -164,7 +159,7 @@ router.post('/order', function (req, res) {
           incoming: false
         }).sort('-ts').limit(1);
 
-        console.log('found foodmessage')
+        logging.debug('found foodmessage')
 
         foodMessage = foodMessage[0];
 
@@ -191,7 +186,7 @@ router.post('/order', function (req, res) {
 
         })
 
-      console.log('ostensibly done');
+      logging.debug('ostensibly done');
       res.send();
 
       //----------Message Queue-----------//
@@ -202,5 +197,5 @@ router.post('/order', function (req, res) {
 
 var port = 8001
 app.listen(port, function () {
-  console.log('Listening enthusiastically on ' + port)
+  logging.info('Listening enthusiastically on ' + port)
 })
