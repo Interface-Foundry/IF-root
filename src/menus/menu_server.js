@@ -12,6 +12,7 @@ var volleyball = require('volleyball');
 var crypto = require('crypto');
 var co = require('co');
 var _ = require('lodash');
+var path = require('path')
 
 // VARIOUS STUFF TO POST BACK TO USER EASILY
 // --------------------------------------------
@@ -32,9 +33,9 @@ app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 
-app.use('/menus', express.static('static'));
-app.use('/test', express.static('test'));
-app.use('/ang', express.static('ang'));
+app.use('/menus', express.static(path.join(__dirname, 'static')));
+app.use('/test', express.static(path.join(__dirname, 'test')));
+app.use('/ang', express.static(path.join(__dirname, 'ang')));
 
 var router = express.Router()
 
