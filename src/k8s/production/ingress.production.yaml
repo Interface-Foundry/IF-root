@@ -23,9 +23,11 @@ spec:
       - backend:
           serviceName: parser
           servicePort: 80
-  # - host: cafe.kipthis.com
-  #   http:
-  #     paths:
-  #     - backend:
-  #         serviceName: cafe-menu
-  #         servicePort: 80
+  - host: cafe.kipthis.com
+    http:
+      paths:
+      - backend:
+          serviceName: cafe-menu
+          servicePort: 80
+
+

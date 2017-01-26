@@ -331,12 +331,12 @@ function * addViaAsin(asin, message) {
 }
 
 function* showLoading(message) {
-  var relevantMessage = yield db.Messages.findOne({
-    'thread_id': message.source.channel
-  })
+  kip.debug(`👚👖👗👝👛👜🏬🏪💳🛍`)
   var json = message.source.original_message;
   let searchText = this.randomSearching();
+  kip.debug(`👚👖👗👝👛👜🏬🏪💳🛍`)
   if (!json) {
+    kip.debug(`👚👖👗👝👛👜🏬🏪💳🛍`)
     var msg = new db.Message(message);
     msg.mode = 'loading';
     msg.action = 'show'
@@ -735,6 +735,33 @@ function randomStoreDescrip() {
   return messages[num];
 }
 
+function randomSearchTerm () {
+  let messages = [
+    'Headphones',
+    'Phones',
+    'Coding Books',
+    'Healthy Snacks',
+    'Keyboards',
+    'Mouse',
+    'Laptops',
+    'Water Bottles',
+    'Coffee',
+    'Notebooks',
+    'Penguin Snacks'
+  ];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num];
+}
+
+function getSearchButtons() {
+  let buttons = [];
+  while (buttons.length < 3) {
+    buttons.push(randomSearchTerm());
+    buttons = _.uniqWith(buttons, (a, b) => a === b);
+  }
+  return buttons;
+}
+
 module.exports = {
   refreshAllUserIMs: refreshAllUserIMs,
   initializeTeam: initializeTeam,
@@ -759,5 +786,6 @@ module.exports = {
   randomStoreHint: randomStoreHint,
   randomSearching: randomSearching,
   randomStoreDescrip: randomStoreDescrip,
-  randomCafeDescrip: randomCafeDescrip
+  randomCafeDescrip: randomCafeDescrip,
+  getSearchButtons: getSearchButtons
 };

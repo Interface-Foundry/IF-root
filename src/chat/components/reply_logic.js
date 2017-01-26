@@ -445,6 +445,7 @@ queue.topic('incoming').subscribe(incoming => {
         // not a simple reply, do NLP
       if (!replies || replies.length === 0) {
         timer.tic('getting nlp response')
+        yield slackUtils.showLoading(message);
         logging.info('👽 passing to nlp: ', message.text)
         if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
           replies = yield execute(message)
@@ -470,6 +471,7 @@ queue.topic('incoming').subscribe(incoming => {
               execute: r.execute
             }
           }))
+        yield slackUtils.hideLoading(message);
       }
       if (!replies || replies.length === 0) {
         logging.error('Could not understand message ' + message._id)

@@ -21,4 +21,4 @@ logging:
     enabled: true
   debugFileLine:
     enabled: true
-menuURL: http://dev-cafe.kipthis.com
+menuURL: http://dev-cafe.kipthis.com/menus

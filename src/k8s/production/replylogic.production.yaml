@@ -19,19 +19,18 @@ spec:
       - env:
         - name: PROXY_LUMINATI_ADDR
           value: http://luminati-proxy.default.svc.cluster.local:22225
-        # - name: LOGGING_CONSOLE_COLORIZE
-        #   value: "false"
-        # - name: LOGGING_CONSOLE_JSON
-        #   value: "true"
-        # - name: LOGGING_CONSOLE_PRETTYPRINT
-        #   value: "false"
-        # - name: LOGGING_CONSOLE_STRINGIFY
-        #   value: "true"
+        - name: LOGGING_CONSOLE_COLORIZE
+          value: "false"
+        - name: LOGGING_CONSOLE_JSON
+          value: "true"
+        - name: LOGGING_CONSOLE_PRETTYPRINT
+          value: "false"
+        - name: LOGGING_CONSOLE_STRINGIFY
+          value: "true"
         image: gcr.io/kip-styles/reply_logic:latest
         imagePullPolicy: Always
         name: replylogic
         terminationMessagePath: /dev/termination-log
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      securityContext: {}
       terminationGracePeriodSeconds: 30

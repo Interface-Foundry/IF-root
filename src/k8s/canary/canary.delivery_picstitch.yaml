@@ -11,7 +11,7 @@ spec:
         app: delivery-picstitch
     spec:
       containers:
-      - image: gcr.io/kip-styles/delivery_picstitch:latest
+      - image: gcr.io/kip-styles/delivery_picstitch:CANARYIMAGE
         imagePullPolicy: Always
         name: delivery-picstitch
         ports:

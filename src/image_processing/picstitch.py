@@ -150,7 +150,8 @@ class PicStitch:
         logging.debug('making image for__: ' + str(self.img_req))
         thumb_img = download_image(self.img_req['url'])
         logging.debug('using pic_size:' + str(self.config['PIC_SIZE']))
-        thumb_img.thumbnail(self.config['PIC_SIZE'], Image.ANTIALIAS)
+        thumb_img = thumb_img.resize(self.config['PIC_SIZE'], Image.ANTIALIAS)
+        # thumb_img.thumbnail(self.config['PIC_SIZE'], Image.ANTIALIAS)
 
         # post image thumbnail
         # arr = np.array(thumb_img)
@@ -182,16 +183,21 @@ class PicStitch:
             # img.paste(poly, poly_offset, mask=poly)
 
         # add price
-        draw.text((x, last_y),
+        draw.text((x, 0), # last_y - 5),
                   self.img_req['price'],
                   font=self.config['font1'],
                   fill="#f54740")
 
         # add prime logo
         if self.prime and self.origin not in ['skype']:
-            img.paste(self.amazon_prime_image, (x + 110, last_y + 2))
+            # resize it to be more like kip cafe
+            amzn_width, amzn_height = self.amazon_prime_image.size
+            resize_proportion = 0.8
+            amzn_width = round(amzn_width * resize_proportion)
+            amzn_height = round(amzn_height * resize_proportion)
+            img.paste(self.amazon_prime_image.resize((amzn_width, amzn_height), Image.ANTIALIAS), (x + 140, 0)) # last_y + 2))
 
-        last_y = last_y + 27
+        last_y = last_y + 20
 
         # move reviews down a bit
         if self.origin in ['skype', 'facebook']:
@@ -224,7 +230,7 @@ class PicStitch:
             selectRating = str(selectRating)
 
             img.paste(self.review_stars_images[selectRating],
-                      (x, last_y + 3),
+                      (x, last_y),
                       mask=self.review_stars_images[selectRating])
 
             # make number count in blue to right of stars
@@ -252,21 +258,22 @@ class PicStitch:
 
         last_y = last_y + 5
 
-        for z in self.img_req['name']:
+        for i, z in enumerate(self.img_req['name']):
             # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
             countLines = 0
+            filler = ''
             for line in textwrap.wrap(z, width=self.config['BOX_WIDTH']):
                 countLines += 1
-                if countLines < 3:
-                    filler = ''
-                    if countLines == 3:
-                        filler = '...'
-                    draw.text((x - 3, last_y),
-                              line + filler,
-                              font=self.config['font2'],
-                              fill="#909497")
-                    last_y += self.config['font2'].getsize(line)[1]
-                    last_y = last_y + 2
+                if i >= 2:
+                    filler = '...'
+                draw.text((x, last_y - 0),
+                          line + filler,
+                          font=self.config['font2'],
+                          fill="#909497")
+                last_y += self.config['font2'].getsize(line)[1]
+                last_y = last_y + 2
+            if i >= 2:
+                break
         y += self.config['font1'].getsize(line)[1]
         last_y = y
 
@@ -275,30 +282,29 @@ class PicStitch:
     def make_image_configs(self):
         logging.debug('using self._make_image_configs')
         config = {}
-        config['CHAT_WIDTH'] = 365
-        config['CHAT_HEIGHT'] = 140
-        config['PADDING'] = 5
+        config['CHAT_WIDTH'] = 324
+        config['CHAT_HEIGHT'] = 110
+        config['PADDING'] = 0
         config['BGCOLOR'] = 'white'
         config['length'] = 3
         config['biggest_width'] = 0
         config['biggest_height'] = 0
         config['thumbnails'] = []
-        config['PIC_SIZE'] = 130, 130
-        config['CHAT_WIDTH'] = 365
-        config['CHAT_HEIGHT'] = 140
+        config['PIC_SIZE'] = 110, 110
         # where to draw main pics
-        config['PIC_COORDS'] = {'x': 14, 'y': 5}
+
+        config['PIC_COORDS'] = {'x': 0, 'y': 0}
         #                       {'x': 24, 'y': 174},
         #                       {'x': 24, 'y': 336}]
         # where to draw choice numbers
-        config['TEXTBOX_COORDS'] = [{'x': 190, 'y': 10}]
+        config['TEXTBOX_COORDS'] = [{'x': 150, 'y': 0}]
         #                           {'x': 190, 'y': 174},
         #                           {'x': 190, 'y': 336}]
 
         config['BOX_WIDTH'] = 30
         config['font1'] = self.font_dict[16]
-        config['font2'] = self.font_dict[13]
-        config['review_count_font'] = self.font_dict[13]
+        config['font2'] = self.font_dict[14]
+        config['review_count_font'] = self.font_dict[14]
 
         if self.origin in ['facebook']:
             logging.debug('using origin==facebook in config')

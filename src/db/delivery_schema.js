@@ -92,6 +92,10 @@ var deliverySchema = mongoose.Schema({
     user: String,
     message: mongoose.Schema.ObjectId
   }],
+  order_dashboards: [{
+    user: String,
+    message: mongoose.Schema.ObjectId
+  }],
   votes: [{
     user: String,
     vote: String
