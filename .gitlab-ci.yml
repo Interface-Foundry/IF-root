@@ -181,6 +181,7 @@ build_canary_node:
     - docker push $KIP_REGISTRY/reply_logic:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/slack:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF
 
 
 build_canary_python:
