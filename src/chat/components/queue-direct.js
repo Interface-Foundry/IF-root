@@ -39,20 +39,10 @@ function publish (topic, data, key) {
     throw new Error('cannot publish null message')
   }
 
-  var promise = new Promise((resolve, reject) => {
-    data.ack = function (e) {
-      if (e) {
-        reject(e)
-      } else {
-        resolve()
-      }
-    }
-  })
-
   // hit the subscribers
   subscribers.filter(s => s.topic === topic).map(s => s.fn(data))
 
-  return promise
+  return Promise.resolve()
 
 }
 
