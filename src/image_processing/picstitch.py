@@ -258,14 +258,13 @@ class PicStitch:
 
         last_y = last_y + 5
 
-        for z in self.img_req['name']:
+        for i, z in enumerate(self.img_req['name']):
             # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
             countLines = 0
+            filler = ''
             for line in textwrap.wrap(z, width=self.config['BOX_WIDTH']):
                 countLines += 1
-                if countLines < 3:
-                    filler = ''
-                if countLines == 3:
+                if i >= 2:
                     filler = '...'
                 draw.text((x, last_y - 0),
                           line + filler,
@@ -273,6 +272,8 @@ class PicStitch:
                           fill="#909497")
                 last_y += self.config['font2'].getsize(line)[1]
                 last_y = last_y + 2
+            if i >= 2:
+                break
         y += self.config['font1'].getsize(line)[1]
         last_y = y
 
