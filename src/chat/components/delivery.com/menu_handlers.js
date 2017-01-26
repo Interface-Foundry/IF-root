@@ -263,6 +263,10 @@ if (foodSession.budget) {
     })
   }
 
+  if (config.menuURL) var url = yield menu_utils.getUrl(foodSession, message.source.user)
+  else var url = foodSession.chosen_restaurant.url
+
+
   // adding writing prompt
   msg_json.attachments.push({
     'fallback': 'Search the menu',
@@ -456,7 +460,7 @@ handlers['food.item.add_to_cart'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
-  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+  var userItem = yield cart.getItemInProgress(message.slack_action.item_id, message.source.user)
 
   //~~~budget~~~//
 
