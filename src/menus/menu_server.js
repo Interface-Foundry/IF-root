@@ -12,6 +12,7 @@ var crypto = require('crypto');
 var co = require('co');
 var _ = require('lodash');
 var path = require('path')
+var request = require('request-promise')
 
 var Menu = require('../chat/components/delivery.com/Menu.js')
 var menuURL = config.menuURL
