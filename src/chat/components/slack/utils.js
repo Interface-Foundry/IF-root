@@ -676,6 +676,12 @@ function formatMessage(m) {
       _.get(a, 'actions', []).map(action => {
         if (typeof action.value !== 'string') {
           action.value = JSON.stringify(action.value)
+        } else if (action.value.match(/^food\./)) {
+          action.value = { route: action.value }
+          action.value = JSON.stringify(action.value)
+        } else if (action.name.match(/^food\./)) {
+          action.value = { route: action.name }
+          action.value = JSON.stringify(action.value)
         } else {
           console.log('bad value', action.value)
           console.log('hey, listen'.cyan, util.inspect(m, {depth: null, colors: true}))
@@ -684,7 +690,7 @@ function formatMessage(m) {
       })
     })
   }
-  
+
   return m
 }
 

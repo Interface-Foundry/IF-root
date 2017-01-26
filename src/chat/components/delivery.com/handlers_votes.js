@@ -51,7 +51,7 @@ function sampleCuisines (foodSession) {
   // add cancel button
     sampleArray.push({
       name: 'food.vote.abstain',
-      value: 'user_remove',
+      value: {route: 'food.vote.abstain'},
       text: '× No Food for Me',
       type: 'button',
       style: 'danger'
@@ -501,7 +501,7 @@ function sendAdminDashboard(foodSession, message) {
     text: 'Finish Voting Early',
     style: 'default',
     type: 'button',
-    value: 'food.admin.restaurant.pick.list'
+    value: { route: 'food.admin.restaurant.pick.list' }
   }]
 
 
