@@ -65,20 +65,20 @@ stages:
 # TEST FOR NODE STUFF
 # ------------------------------------------------
 
-test:node:
-  image: node:6
-  stage: test
-  only:
-    - master
-  script:
-    - npm install
-    - npm install --only=dev
-    - npm install -g mocha
-    - NODE_ENV=test CONFIG_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/delivery.com/adminCheckout.test.js
-  cache:
-    paths:
-      - /usr/local/lib/node_modules
-      - node_modules/
+# test:node:
+#   image: node:6
+#   stage: test
+#   only:
+#     - master
+#   script:
+#     - npm install
+#     - npm install --only=dev
+#     - npm install -g mocha
+#     - NODE_ENV=test CONFIG_ENV=test PRINT_DATA=true mocha --require should --reporter spec tests/delivery.com/adminCheckout.test.js
+#   cache:
+#     paths:
+#       - /usr/local/lib/node_modules
+#       - node_modules/
 
 
 # ------------------------------------------------
