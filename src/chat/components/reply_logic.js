@@ -471,6 +471,7 @@ queue.topic('incoming').subscribe(incoming => {
               execute: r.execute
             }
           }))
+        yield slackUtils.hideLoading(message);
       }
       if (!replies || replies.length === 0) {
         logging.error('Could not understand message ' + message._id)
@@ -505,7 +506,6 @@ queue.topic('incoming').subscribe(incoming => {
     }
     incoming.ack()
     timer.stop()
-    yield slackUtils.hideLoading(message);
   }).catch(kip.err)
 })
 
