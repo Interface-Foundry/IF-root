@@ -2,7 +2,7 @@ var handlers = module.exports = {};
 var _ = require('lodash');
 var utils = require('../slack/utils');
 var dutils = require('../delivery.com/utils');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var cardTemplate = require('../slack/card_templates');
 var kipcart = require('../cart');
 var bundles = require('../bundles');

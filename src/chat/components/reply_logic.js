@@ -23,7 +23,7 @@ var Slackbots = db.Slackbots;
 var upload = require('./upload.js');
 var email = require('./email');
 /////////// LOAD INCOMING ////////////////
-var queue = require('./queue-mongo');
+var queue = require('./queue-direct');
 var onboarding = require('./modes/onboarding');
 var onboard = require('./modes/onboard');
 var member_onboard = require('./modes/member_onboard');
@@ -242,7 +242,9 @@ function printMode(message) {
 //
 queue.topic('incoming').subscribe(incoming => {
 
-  incoming.ack();
+	incoming = {
+		data: incoming, // for olde times sake
+	}
 
   co(function * () {
     if (incoming.data.text) {
@@ -271,13 +273,11 @@ queue.topic('incoming').subscribe(incoming => {
         yield kipcart.addToCart(cart_id, cart_id, results, cart_type);
         logging.debug('added to cart')
         send_text_reply(message, 'Okay :) added that item to cart');
-        incoming.ack()
         timer.stop()
         return
       } catch (e) {
         yield send_text_reply(message, 'oops error, you might need to add that manually');
         timer.stop()
-        incoming.ack()
         return
       }
     }
@@ -333,7 +333,6 @@ queue.topic('incoming').subscribe(incoming => {
 
     if (isMenuChange(message)) {
       timer.stop();
-      incoming.ack()
       return yield shopping[_.get(message,'action')](message);
     }
     let isLink = yield processProductLink(message);
@@ -422,7 +421,6 @@ queue.topic('incoming').subscribe(incoming => {
       case 'food':
       case 'cafe':
         yield food(message)
-        return incoming.ack()
       case 'address':
         return
         break;
@@ -504,7 +502,6 @@ queue.topic('incoming').subscribe(incoming => {
         queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
       })
     }
-    incoming.ack()
     timer.stop()
   }).catch(kip.err)
 })

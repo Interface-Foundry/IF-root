@@ -1,7 +1,7 @@
 
 var co = require('co');
 var kip = require('kip');
-var queue = require('./queue-mongo');
+var queue = require('./queue-direct');
 var db = require('../../db');
 var Chatuser = db.Chatuser;
 var _ = require('lodash');

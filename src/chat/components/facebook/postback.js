@@ -1,5 +1,5 @@
 var co = require('co')
-var queue = require('../queue-mongo')
+var queue = require('../queue-direct')
 var _ = require('lodash')
 var request = require('request')
 var async = require('async')

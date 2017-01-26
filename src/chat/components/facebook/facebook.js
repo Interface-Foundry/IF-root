@@ -59,7 +59,7 @@
 require('../../../kip')
 
 var co = require('co')
-var queue = require('../queue-mongo')
+var queue = require('../queue-direct')
 var _ = require('lodash')
 var http = require('http')
 var request = require('request')

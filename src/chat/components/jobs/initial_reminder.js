@@ -1,4 +1,4 @@
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var request = require('request-promise');
 var co = require('co');
 // if someone doesn't interact with first message

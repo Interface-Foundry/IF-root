@@ -1,7 +1,7 @@
 //
 // "Actions" are what slack calls buttons
 //
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var refresh_team = require('../refresh_team');
 var express = require('express');
 var co = require('co');

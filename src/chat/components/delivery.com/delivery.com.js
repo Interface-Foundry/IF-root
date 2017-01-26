@@ -4,7 +4,7 @@ var co = require('co')
 var _ = require('lodash')
 
 var api = require('./api-wrapper')
-var queue = require('../queue-mongo')
+var queue = require('../queue-direct')
 
 var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)

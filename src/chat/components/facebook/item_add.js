@@ -3,7 +3,7 @@ var _ = require('lodash')
 var http = require('http')
 var request = require('request')
 
-var queue = require('../queue-mongo')
+var queue = require('../queue-direct')
 // set env vars
 
 /**

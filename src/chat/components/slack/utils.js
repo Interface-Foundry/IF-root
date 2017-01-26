@@ -7,7 +7,7 @@ var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require(
 var jstz = require('jstz');
 var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var cron = require('cron');
 var sleep = require('co-sleep');
 var cardTemplate = require('./card_templates');
