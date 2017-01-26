@@ -234,3 +234,78 @@ deploy_canary:
   after_script:
     - rm /tmp/KUBERNETES_KEY.json
 
+# -----------
+
+build_production_node:
+  stage: build
+  only:
+    - master
+  before_script:
+    - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
+  script:
+    - docker build -t $KIP_REGISTRY/reply_logic:$CI_BUILD_REF -f Dockerfiles/reply_logic.Dockerfile .
+    - docker build -t $KIP_REGISTRY/slack:$CI_BUILD_REF -f Dockerfiles/slack.Dockerfile .
+    - docker build -t $KIP_REGISTRY/payments:$CI_BUILD_REF -f Dockerfiles/payments.Dockerfile .
+    - docker build -t $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF -f Dockerfiles/cafe_menu.Dockerfile .
+
+    - docker tag $KIP_REGISTRY/reply_logic:$CI_BUILD_REF $KIP_REGISTRY/reply_logic:latest
+    - docker tag $KIP_REGISTRY/slack:$CI_BUILD_REF $KIP_REGISTRY/slack:latest
+    - docker tag $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF $KIP_REGISTRY/cafe_menu:latest
+    - docker tag $KIP_REGISTRY/payments:$CI_BUILD_REF $KIP_REGISTRY/payments:latest
+
+    - docker push $KIP_REGISTRY/reply_logic:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/slack:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
+
+
+build_production_python:
+  stage: build
+  only:
+    - master
+  before_script:
+    - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
+  script:
+    - docker build -t $KIP_REGISTRY/parser:$CI_BUILD_REF -f Dockerfiles/parser.Dockerfile .
+    - docker build -t $KIP_REGISTRY/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
+    - docker build -t $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF -f Dockerfiles/delivery_picstitch.Dockerfile .
+
+    - docker tag $KIP_REGISTRY/parser:$CI_BUILD_REF $KIP_REGISTRY/parser:latest
+    - docker tag $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF $KIP_REGISTRY/delivery_picstitch:latest
+    - docker tag $KIP_REGISTRY/picstitch:$CI_BUILD_REF $KIP_REGISTRY/picstitch:latest
+
+    - docker push $KIP_REGISTRY/parser:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/picstitch:$CI_BUILD_REF
+
+deploy_production:
+  image: google/cloud-sdk
+  stage: deploy
+  only:
+    - master
+  before_script:
+    - echo $KUBERNETES_KEY > /tmp/KUBERNETES_KEY.json
+    - gcloud auth activate-service-account $KUBERNETES_SA --key-file=/tmp/KUBERNETES_KEY.json --project=$PROJECT
+    - gcloud config set compute/zone us-east1-b
+    - gcloud config set container/use_client_certificate True
+    - gcloud container clusters get-credentials $KUBE_CLUSTER
+  script:
+    - ls $DEPLOYMENT_DIR
+
+    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/parser.production.yaml
+    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/replylogic.production.yaml
+    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/slack.production.yaml
+    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/cafe_menu.production.yaml
+    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/payments.production.yaml
+    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/delivery_picstitch.production.yaml
+    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/picstitch.production.yaml
+
+    - kubectl apply -f src/k8s/production/parser.production.yaml --namespace=production
+    - kubectl apply -f src/k8s/production/replylogic.production.yaml --namespace=production
+    - kubectl apply -f src/k8s/production/slack.production.yaml --namespace=production
+    - kubectl apply -f src/k8s/production/cafe_menu.production.yaml --namespace=production
+    - kubectl apply -f src/k8s/production/payments.production.yaml --namespace=production
+    - kubectl apply -f src/k8s/production/delivery_picstitch.production.yaml --namespace=production
+    - kubectl apply -f src/k8s/production/picstitch.production.yaml --namespace=production
+  after_script:
+    - rm /tmp/KUBERNETES_KEY.json
+
