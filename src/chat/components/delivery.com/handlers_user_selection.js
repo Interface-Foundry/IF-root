@@ -305,35 +305,26 @@ handlers['food.admin.display_channels'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
-  var checkbox
   // basic buttons
+  let chosenId = _.get(foodSession, 'chosen_channel.id');
   var genericButtons = [{
-    name: `Everyone`,
-    id: `everyone`
+    'text': `${chosenId === 'everyone' ? '◉' : '○'} Everyone`,
+    'value': 'everyone',
+    'name': 'food.admin.toggle_channel',
+    'type': 'button'
   }, {
-    name: `Just Me`,
-    id: `just_me`
-  }].map((channel) => {
-    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
-    return {
-      'text': `${checkbox} ${channel.name}`,
-      'value': channel.id,
-      'name': `food.admin.toggle_channel`,
-      'type': `button`
-    }
-  })
+    'text': `${chosenId === 'just_me' ? '◉' : '○'} Just Me`,
+    'value': 'just_me',
+    'name': 'food.admin.toggle_channel',
+    'type': 'button'
+  }, {
+    name: 'food.admin.toggle_channel',
+    text: `${(chosenId !== 'just_me' && chosenId !== 'everyone') ? '◉' : '○'} By Channel`,
+    type: 'button',
+    value: 'channel'
+  }];
 
-  var channelButtons = slackbot.meta.all_channels.map((channel) => {
-    checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
-    return {
-      'text': `${checkbox} #${channel.name}`,
-      'value': channel.id,
-      'name': `food.admin.toggle_channel`,
-      'type': `button`
-    }
-  })
-
-  var groupedButtons = _.chunk(genericButtons.concat(channelButtons), 5)
+  var groupedButtons = _.chunk(genericButtons, 5);
   var msg_json = {
     title: `Which team members are you ordering food for?`,
     attachments: groupedButtons.map((buttonGroup) => {
@@ -344,13 +335,44 @@ handlers['food.admin.display_channels'] = function * (message) {
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'actions': buttonGroup,
-        'mrkdwn_in':['text']
+        'mrkdwn_in': ['text']
       }
     })
   }
 
   msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
 
+  if (chosenId !== 'just_me' && chosenId !== 'everyone') {
+    let channelName;
+    slackbot.meta.all_channels.map((channel) => {
+      if (channel.id === chosenId) {
+        channelName = channel.name;
+      }
+    });
+    let actions = [];
+    if (channelName) {
+      actions.push({
+        'text': `#${channelName}`,
+        'name': 'loading',
+        'value': 'show',
+        'type': 'default',
+        'style': 'primary'
+      });
+    }
+    actions.push({
+      name: 'food.admin.toggle_channel',
+      text: 'Choose which channels you want',
+      type: 'select',
+      data_source: 'channels'
+    });
+    msg_json.attachments.push({
+      'text': '',
+      'color': '#45A5F4',
+      'callback_id': 'channel_select',
+      'attachment_type': 'default',
+      'actions': actions
+    })
+  }
   // final attachment with send, edit members, < back
   msg_json.attachments.push({
     'text': ``,
@@ -376,7 +398,6 @@ handlers['food.admin.display_channels'] = function * (message) {
       'type': 'button'
     }]
   })
-
   $replyChannel.sendReplace(message, 'food.admin.select_channel', {type: message.origin, data: msg_json})
 }
 
@@ -421,10 +442,13 @@ handlers['food.admin.toggle_channel'] = function * (message) {
   } else if (message.data.value.toLowerCase() === 'just_me') {
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'just_me'
+  } else if (message.data.value.toLowerCase() === 'channel') {
+    foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'channel'
   } else {
     try {
       // find channel in meta.all_channels
-      var channel = _.find(slackbot.meta.all_channels, {'id': message.data.value})
+      let channelId = message.source.actions[0].selected_options[0].value;
+      var channel = _.find(slackbot.meta.all_channels, {'id': channelId})
       foodSession.chosen_channel.name = channel.name
       foodSession.chosen_channel.id = channel.id
       foodSession.chosen_channel.is_channel = channel.is_channel
