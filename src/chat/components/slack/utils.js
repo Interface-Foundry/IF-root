@@ -684,6 +684,8 @@ function formatMessage(m) {
       })
     })
   }
+  
+  return m
 }
 
 /**

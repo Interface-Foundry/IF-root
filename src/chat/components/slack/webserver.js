@@ -28,7 +28,7 @@ app.use(bodyParser.json());
 
 
 function isValidReply(r) {
-  kip.debug(r)
+  // kip.debug(r)
   return _.get(r, 'text') || _.get(r, 'attachments[0]')
 }
 
@@ -36,14 +36,13 @@ function isValidReply(r) {
 // incoming slack action
 //
 app.post('/slackaction', next(function * (req, res) {
-
   // respond to slack healthchecks
   if (!req.body || !req.body.payload) {
     return res.sendStatus(200)
   }
 
   // parse the payload json
-  const parsedIn = JSON.parse(req.body.payload);
+  const parsedIn = JSON.parse(req.body.payload)
 
   // make double sure everything is okay
   if (!parsedIn.original_message) {
@@ -108,7 +107,10 @@ app.post('/slackaction', next(function * (req, res) {
   Promise.race([reply, timeout]).then(r => {
     // 🏁 🏁 🏁 🏁 🏁 🏁 🏁
     if (isValidReply(r)) {
-      res.send(utils.formatMessage(r))
+      logging.debug('sending message')
+      var msg = utils.formatMessage(r)
+      // logging.debug(msg)
+      res.send(msg)
     } else {
       res.status(200)
       res.end()

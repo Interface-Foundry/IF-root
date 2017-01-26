@@ -34,9 +34,9 @@ handlers['food.admin.team_budget'] = function * (message) {
 
     if (num) {
       message.data = {};
-      message.data.value = {};
-      message.data.value.budget = num;
-      message.data.value.new = true;
+      message.slack_action = {};
+      message.slack_action.budget = num;
+      message.slack_action.new = true;
       return yield handlers['food.admin.confirm_budget'](message);
     }
     else {
@@ -83,7 +83,8 @@ handlers['food.admin.team_budget'] = function * (message) {
       'type': 'button',
       'value': {
         budget: budget_options[i],
-        new: true
+        new: true,
+        route: 'food.admin.confirm_budget'
       }
     })
   }
@@ -95,7 +96,8 @@ handlers['food.admin.team_budget'] = function * (message) {
     'type': 'button',
     'value': {
       budget: 0,
-      new: false
+      new: false,
+      route: 'food.admin.confirm_budget'
     }
   };
 
@@ -145,10 +147,10 @@ function updateBudget (n, location) {
 
 handlers['food.admin.confirm_budget'] = function * (message) {
 
-  budget = message.data.value.budget;
+  budget = message.slack_action.budget;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
-  if (message.data.value.new) {
+  if (message.slack_action.new) {
     var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
     for (var i = 0; i < locations.length; i++) {
       if (locations[i].address_1 == foodSession.chosen_location.address_1 && locations[i].zip_code == foodSession.chosen_location.zip_code) {

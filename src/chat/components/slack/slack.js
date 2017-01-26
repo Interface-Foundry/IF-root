@@ -143,16 +143,16 @@ function * loadTeam(slackbot) {
 
     // other random things
     if ((data.type !== 'message') || (data.subtype === 'channel_join') || (data.subtype === 'channel_leave')) { // settings.name = kip's slack username
-      logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
-      logging.debug('data.type', data.type)
-      logging.debug('data.subtype', data.subtype)
+      // logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      // logging.debug('data.type', data.type)
+      // logging.debug('data.subtype', data.subtype)
       return
     }
 
     if ((data.hidden === true) && (data.subtype === 'message_changed')) {
-      logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
-      logging.debug('data.hidden', data.hidden)
-      logging.debug('data.subtype', data.subtype)
+      // logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      // logging.debug('data.hidden', data.hidden)
+      // logging.debug('data.subtype', data.subtype)
       return
     }
 
