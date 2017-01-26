@@ -608,8 +608,6 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
 
     yield $replyChannel.sendReplace(msg, 'food.exit.confirm', {type: 'slack', data: json})
   })
-
-
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)

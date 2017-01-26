@@ -134,7 +134,7 @@ app.post('/slackaction', next(function * (req, res) {
     //   kip.error('Invalid verification token')
     //   return res.sendStatus(403)
     // }
-    var action = parsedIn.actions[0];
+
     kip.debug(action.name.cyan, action.value.yellow);
     // for things that i'm just going to parse for
     var simple_command = simple_action_handler(action);
@@ -209,51 +209,28 @@ app.post('/slackaction', next(function * (req, res) {
               if (cartChannels.includes(channel.id)) {
                 arr.push({
                   name: 'channel_btn',
-                  text: `✓ #${channel.name}`,
+                  text: `× #${channel.name}`,
                   type: 'button',
-                  value: channel.id
-                });
-              }
-              return arr;
-            }, []);
-            let unselectedChannels = channels.reduce((arr, channel) => {
-              if (!cartChannels.includes(channel.id)) {
-                arr.push({
-                  name: 'channel_btn',
-                  text: `☐ #${channel.name}`,
-                  type: 'button',
+                  style: 'danger',
                   value: channel.id
                 });
               }
               return arr;
             }, []);
             selectedChannels = _.uniq(selectedChannels);
-            unselectedChannels = _.uniq(unselectedChannels);
-            let buttons = (selectedChannels.length > 5) ? selectedChannels // always show all selected channels
-              : selectedChannels.concat(unselectedChannels.splice(0, 5 - selectedChannels.length));
-            let chunkedButtons = _.chunk(buttons, 5);
+            selectedChannels.push({
+              name: 'channel_btn',
+              text: 'Choose which channels you want',
+              type: 'select',
+              data_source: 'channels'
+            });
+            let chunkedButtons = _.chunk(selectedChannels, 5);
             let channelSection = chunkedButtons.map(buttonRow => {
               return {
                 text: '',
                 callback_id: 'channel_buttons_idk',
                 actions: buttonRow
               };
-            });
-            channelSection.push({
-              text: 'test',
-              callback_id: 'channel_select',
-              attachment_type: 'default',
-              fallback: 'update your slack to see this!',
-              actions: [{
-                name: 'channel_list',
-                text: 'Choose which channels you want',
-                type: 'select',
-                data_source: 'channels'
-              }]
-            });
-            channelSection.push({
-              'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
-              mrkdwn_in: ['text']
             });
             channelSection.push(json.attachments.pop());
             json.attachments = [...json.attachments, ...channelSection];
@@ -276,11 +253,18 @@ app.post('/slackaction', next(function * (req, res) {
           body: stringOrig
         });
         return;
-      } else if (simple_command == 'channel_btn') {
-        var channelId = _.get(parsedIn, 'actions[0].value');
+      } else if (simple_command === 'channel_btn') {
+        let team_id = message.source.team;
+        kip.debug(`😀😀  ${JSON.stringify(action, null, 2)}`)
+        let channelId = (action.selected_options) ? action.selected_options[0].value : action.value;
+        let team = yield db.Slackbots.findOne({
+          'team_id': team_id
+        }).exec();
         let cartChannels = team.meta.cart_channels;
-        if (cartChannels.find(id => { return (id == channelId) })) {
-          _.remove(cartChannels, function(c) { return c == channelId });
+        if (cartChannels.find(id => { return (id === channelId) })) {
+          _.remove(cartChannels, function(c) {
+            return c == channelId
+          });
         } else {
           cartChannels.push(channelId);
         }
@@ -288,22 +272,39 @@ app.post('/slackaction', next(function * (req, res) {
         team.markModified('meta.cart_channels');
         yield team.save();
         let json = parsedIn.original_message;
-        json.attachments = json.attachments.map(row => {
-          if (!row.actions) return row;
-          row.actions = row.actions.map(button => {
-            if (button.value === channelId) {
-              let channelName = button.text;
-              if (channelName.includes('☐')) {
-                channelName = channelName.replace('☐', '✓');
-              } else {
-                channelName = channelName.replace('✓', '☐');
-              }
-              button.text = channelName;
-            }
-            return button;
-          });
-          return row;
+        let channels = yield utils.getChannels(team);
+        let selectedChannels = channels.reduce((arr, channel) => {
+          if (cartChannels.includes(channel.id)) {
+            arr.push({
+              name: 'channel_btn',
+              text: `× #${channel.name}`,
+              type: 'button',
+              style: 'danger',
+              value: channel.id
+            });
+          }
+          return arr;
+        }, []);
+        selectedChannels = _.uniq(selectedChannels);
+        selectedChannels.push({
+          name: 'channel_btn',
+          text: 'Choose which channels you want',
+          type: 'select',
+          data_source: 'channels'
         });
+        let chunkedButtons = _.chunk(selectedChannels, 5);
+        let channelSection = chunkedButtons.map(buttonRow => {
+          return {
+            text: '',
+            callback_id: 'channel_buttons_idk',
+            actions: buttonRow
+          };
+        });
+        channelSection.push(json.attachments.pop());
+        while (json.attachments[json.attachments.length - 1].callback_id === 'channel_buttons_idk') {
+          json.attachments.pop();
+        }
+        json.attachments = [...json.attachments, ...channelSection];
         let stringOrig = JSON.stringify(json);
         let map = {
           amp: '&',
