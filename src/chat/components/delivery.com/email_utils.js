@@ -40,7 +40,7 @@ utils.quickpickHTML = function * (foodSession, slacklink, email) {
     html += '</tr>';
   }
 
-  html += '</table><br/>'
+  html += '</table>' + br
 
   //footer
   html += `<p><a style="color:${kip_blue};" href="' + merch_url + '">Click to View Full Menu `
@@ -57,10 +57,10 @@ utils.quickpickHTML = function * (foodSession, slacklink, email) {
 
 utils.formatItem = function (i, j, quickpicks) {
   return `<table border="0">` +
-  `<tr><td style="font-weight:bold;width:70%">${quickpicks[row_length*i+j].name}</td>` +
-  `<td style="width:30%;">$${parseFloat(quickpicks[row_length*i+j].price).toFixed(2)}</td></tr>` +
+  `<tr><td style="font-weight:bold;">${quickpicks[row_length*i+j].name}</td></tr>` +
   `<tr><td>${quickpicks[row_length*i+j].description}</td></tr>` +
-  `<tr><p style="color:${kip_blue}">Add to Cart</p></tr>` +
+  `<tr><td style="padding:8px 0 8px 0;font-weight:bold;">$${parseFloat(quickpicks[row_length*i+j].price).toFixed(2)}</td></tr>` +
+  `<tr><td><div style="display:inline-block;background-color:white;border-radius:8px;border-color:${kip_blue};border-style:solid;border-width:2px;"><p style="font-weight:bold;color:${kip_blue}">&nbsp;&nbsp;&nbsp;Add to Cart&nbsp;&nbsp;&nbsp;</p></div></td></tr>` +
   `</table>`;
 }
 
