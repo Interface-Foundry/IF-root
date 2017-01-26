@@ -1,3 +1,7 @@
+import React from 'react';
+import d3, {D3Grid,D3Axis} from "d3";
+import resizeMixin from "./utils/ReactMixins";
+
 var StackChart=React.createClass({
     propTypes: {
         width:React.PropTypes.number,

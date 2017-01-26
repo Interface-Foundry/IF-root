@@ -1,3 +1,6 @@
+var $ = require ('jquery');
+import ReactDOM from 'react-dom';
+
 var resizeMixin={
     componentWillMount:function(){
 

@@ -1,3 +1,8 @@
+import React from 'react';
+import d3 from "d3";
+import InsetShadow from "./utils/SVGDefs";
+
+
 var ProgressChart=React.createClass({
     propTypes: {
         width:React.PropTypes.number,

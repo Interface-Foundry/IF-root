@@ -1,3 +1,8 @@
+import React from 'react';
+import d3 from "d3";
+import resizeMixin from "./utils/ReactMixins";
+
+
 var BarChart=React.createClass({
     getDefaultProps: function() {
         return {

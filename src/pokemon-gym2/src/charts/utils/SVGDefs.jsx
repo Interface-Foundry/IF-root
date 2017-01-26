@@ -1,3 +1,5 @@
+import React from 'react';
+
 var InsetShadow=React.createClass({
 
     propTypes: {

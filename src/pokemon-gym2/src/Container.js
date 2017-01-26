@@ -1,35 +1,59 @@
-var eventEmitter=new EventEmitter();
+import React, { Component } from 'react';
+import d3 from "d3";
+import moment from "moment";
 
-var Range=React.createClass({
-    propTypes: {
+import D3TimeAreaChart from "./charts/AreaChart.jsx";
+import BarChart from "./charts/BarChart.jsx";
+import DonutChart from "./charts/DonutChart.jsx";
+import D3TimeLineChart from "./charts/LineChart.jsx";
+import ProgressChart from "./charts/ProgressChart.jsx";
+import StackChart from "./charts/StackChart.jsx";
+import eventEmitter from "events";
+
+class Container extends Component {
+  render() {
+    return (
+      <div className="Container">
+        <MainRangeSelection/>
+        <Cards />
+        <MainContainer />
+        <SubContainer />
+      </div>
+
+    );
+  }
+}
+
+class Range extends Component {
+    propTypes = {
         loadData:React.PropTypes.func,
         defaultSelection:React.PropTypes.bool,
         master:React.PropTypes.bool
-    },
-    getDefaultProps: function() {
+    }
+    getDefaultProps() {
         return {
             defaultSelection:false,
             master:false
         };
-    },
-    getInitialState:function(){
+    }
+    getInitialState(){
         return {
             defaultSelection:false
         };
-    },
+    }
 
-    componentWillReceiveProps: function(newProps) {
+    componentWillReceiveProps(newProps) {
 
         if (newProps.defaultSelection != this.state.defaultSelection) {
             this.setState({defaultSelection: newProps.defaultSelection});
         }
-    },
+    }
 
-    componentWillMount:function(){
+    componentWillMount(){
         this.setState({defaultSelection:this.props.defaultSelection});
-    },
+    }
 
-    toggleSection:function(){
+    toggleSection(){
         if(this.props.master){
 
             eventEmitter.emitEvent("reload",[!this.state.defaultSelection]);
@@ -37,9 +61,9 @@ var Range=React.createClass({
             this.props.loadData(!this.state.defaultSelection);
         }
         this.setState({defaultSelection:!this.state.defaultSelection});
-    },
+    }
 
-    selectColor:function(){
+    selectColor(){
         if(this.state.defaultSelection){
             this.fill7='#e58c72';
             this.fill30='#8f8f8f';
@@ -47,9 +71,9 @@ var Range=React.createClass({
             this.fill30='#e58c72';
             this.fill7='#8f8f8f';
         }
-    },
+    }
 
-    render:function(){
+    render(){
 
         this.selectColor();
 
@@ -70,23 +94,24 @@ var Range=React.createClass({
             </div>
         );
     }
-});
+}
 
-var Panel=React.createClass({
-    render:function() {
+class Panel extends Component {
+    render() {
         return (
             <div className="bg">
                 {this.props.children}
             </div>
         );
     }
-});
+}
 
-var PanelHeader=React.createClass({
-    propTypes: {
+class PanelHeader extends Component {
+    propTypes = {
         title:React.PropTypes.string
-    },
-    render: function () {
+    }
+
+    render() {
         return (
             <div className="panel-header">
                 <div className="pull-left panel-title">{this.props.title}</div>
@@ -97,11 +122,11 @@ var PanelHeader=React.createClass({
             </div>
         );
     }
-});
+}
 
 
-var MainRangeSelection=React.createClass({
-    render:function(){
+class MainRangeSelection extends Component {
+    render(){
         return(
             <div className="row range-custom">
                 <div className="range-custom-child">
@@ -110,27 +135,27 @@ var MainRangeSelection=React.createClass({
             </div>
         );
     }
-});
+}
 
-var Cards=React.createClass({
+class Cards extends Component{
 
-    getInitialState:function(){
+    getInitialState(){
         return {
             defaultSelection:false
         };
-    },
-    componentWillMount:function(){
+    }
+    componentWillMount(){
         eventEmitter.addListener("reload",this.reloadData);
 
-    },
-    componentWillUnmount:function(){
+    }
+    componentWillUnmount(){
         eventEmitter.removeListener("reload",this.reloadData);
 
-    },
-    reloadData:function(defaultValue){
+    }
+    reloadData(defaultValue){
         this.setState({defaultSelection:defaultValue});
-    },
-    getData:function(){
+    }
+    getData(){
         var color=['#53c79f','#64b0cc','#7a6fca','#ca6f96','#e58c72','#e5c072'];
         var heading=['Visitors','Search','Apps','Reply','Shares','Post'];
 
@@ -176,8 +201,8 @@ var Cards=React.createClass({
         });
 
         return cards;
-    },
-    render:function(){
+    }
+    render(){
 
 
         var cards=this.getData();
@@ -189,32 +214,32 @@ var Cards=React.createClass({
             </div>
         );
     }
-});
+};
 
-var SubContainer=React.createClass({
-    getInitialState:function(){
+class SubContainer extends Component{
+    getInitialState(){
         return {
             defaultBar:false,
             defaultPie:false,
             dataPie:[],
             dataBar:[]
         };
-    },
-    componentWillMount:function(){
+    }
+    componentWillMount(){
         this.reloadBarData();
         this.reloadPieData();
         eventEmitter.addListener("reload",this.reloadData);
 
-    },
-    componentWillUnmount:function(){
+    }
+    componentWillUnmount(){
         eventEmitter.removeListener("reload",this.reloadData);
 
-    },
-    reloadData:function(defaultValue){
+    }
+    reloadData(defaultValue){
         this.reloadBarData(defaultValue);
         this.reloadPieData(defaultValue);
-    },
-    reloadBarData:function(defaultValue){
+    }
+    reloadBarData(defaultValue){
         var dataBar=[
             { month:'Jan', new:20, old:30 },
             { month:'Feb', new:29, old:83 },
@@ -236,8 +261,8 @@ var SubContainer=React.createClass({
         }
 
         this.setState({dataBar:dataBar,defaultBar:defaultValue});
-    },
-    reloadPieData:function(defaultValue){
+    }
+    reloadPieData(defaultValue){
 
         var dataPie = [
             { name: 'Maintenance' },
@@ -257,8 +282,8 @@ var SubContainer=React.createClass({
 
         this.setState({dataPie:dataPie,defaultPie:defaultValue});
 
-    },
-    render:function(){
+    }
+    render(){
 
         var color=['#53c79f','#e58c72','#7a6fca','#ca6f96','#64b0cc','#e5c072'];
 
@@ -301,31 +326,30 @@ var SubContainer=React.createClass({
             </div>
         );
     }
-});
+};
 
-
-var MainContainer=React.createClass({
-    getInitialState:function(){
+class MainContainer extends Component{
+    getInitialState(){
         return {
             defaultLine:false,
             defaultArea:false,
             dataLine:true,
             dataArea:true
         };
-    },
-    componentWillMount:function(){
+    }
+    componentWillMount(){
         this.loadLineChart();
         this.loadAreaChart();
         eventEmitter.addListener("reload",this.reloadData);
-    },
-    componentWillUnmount:function(){
+    }
+    componentWillUnmount(){
         eventEmitter.removeListener("reload",this.reloadData);
-    },
-    reloadData:function(defaultValue){
+    }
+    reloadData(defaultValue){
         this.loadLineChart(defaultValue);
         this.loadAreaChart(defaultValue);
-    },
-    loadLineChart:function(defaultValue){
+    }
+    loadLineChart(defaultValue){
 
         var count=7;
 
@@ -342,9 +366,9 @@ var MainContainer=React.createClass({
             data[i]=d;
         }
         this.setState({dataLine:data,defaultLine:defaultValue});
-    },
+    }
 
-    loadAreaChart:function(defaultValue) {
+    loadAreaChart(defaultValue) {
 
         var count=7;
         if(!defaultValue){
@@ -375,9 +399,9 @@ var MainContainer=React.createClass({
 
         this.setState({dataArea:dataArea,defaultArea:defaultValue});
 
-    },
+    }
 
-    render:function(){
+    render(){
 
         var margin={
             top: 20, right: 30, bottom: 20, left: 50
@@ -428,22 +452,7 @@ var MainContainer=React.createClass({
             </div>
         );
     }
-});
+};
 
 
-var Page=React.createClass({
-    render:function(){
-        return(
-            <div className="container">
-                <MainRangeSelection/>
-                <Cards />
-                <MainContainer />
-                <SubContainer />
-            </div>
-        );
-    }
-});
-
-
-
-ReactDOM.render(<Page/>,document.getElementById("body"));
+export default Container;
