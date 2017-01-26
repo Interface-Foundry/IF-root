@@ -936,6 +936,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
      mailer_transport.sendMail(mailOptions, function (err) {
       if (err) console.log(err);
     });
+    logging.info('email sent')
   }
 
   foodSession.team_members.map(m => {
