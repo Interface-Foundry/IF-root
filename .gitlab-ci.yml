@@ -171,10 +171,12 @@ build_canary_node:
     - docker build -t $KIP_REGISTRY/reply_logic:$CI_BUILD_REF -f Dockerfiles/canary.reply_logic.Dockerfile .
     - docker build -t $KIP_REGISTRY/slack:$CI_BUILD_REF -f Dockerfiles/canary.slack.Dockerfile .
     - docker build -t $KIP_REGISTRY/payments:$CI_BUILD_REF -f Dockerfiles/canary.payments.Dockerfile .
+    - docker build -t $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF -f Dockerfiles/canary.cafe_menu.Dockerfile .
 
-    - docker tag $KIP_REGISTRY/reply_logic:$CI_BUILD_REF $KIP_REGISTRY/reply_logic:latest
-    - docker tag $KIP_REGISTRY/slack:$CI_BUILD_REF $KIP_REGISTRY/slack:latest
-    - docker tag $KIP_REGISTRY/payments:$CI_BUILD_REF $KIP_REGISTRY/payments:latest
+    - docker tag $KIP_REGISTRY/reply_logic:$CI_BUILD_REF $KIP_REGISTRY/reply_logic:canary
+    - docker tag $KIP_REGISTRY/slack:$CI_BUILD_REF $KIP_REGISTRY/slack:canary
+    - docker tag $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF $KIP_REGISTRY/cafe_menu:canary
+    - docker tag $KIP_REGISTRY/payments:$CI_BUILD_REF $KIP_REGISTRY/payments:canary
 
     - docker push $KIP_REGISTRY/reply_logic:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/slack:$CI_BUILD_REF
@@ -192,9 +194,9 @@ build_canary_python:
     - docker build -t $KIP_REGISTRY/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
     - docker build -t $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF -f Dockerfiles/delivery_picstitch.Dockerfile .
 
-    - docker tag $KIP_REGISTRY/parser:$CI_BUILD_REF $KIP_REGISTRY/parser:latest
-    - docker tag $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF $KIP_REGISTRY/delivery_picstitch:latest
-    - docker tag $KIP_REGISTRY/picstitch:$CI_BUILD_REF $KIP_REGISTRY/picstitch:latest
+    - docker tag $KIP_REGISTRY/parser:$CI_BUILD_REF $KIP_REGISTRY/parser:canary
+    - docker tag $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF $KIP_REGISTRY/delivery_picstitch:canary
+    - docker tag $KIP_REGISTRY/picstitch:$CI_BUILD_REF $KIP_REGISTRY/picstitch:canary
 
     - docker push $KIP_REGISTRY/parser:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF
@@ -213,15 +215,19 @@ deploy_canary:
     - gcloud container clusters get-credentials $KUBE_CLUSTER
   script:
     - ls $DEPLOYMENT_DIR
+
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.parser.yaml
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.replylogic.yaml
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.slack.yaml
+    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.cafe_menu.yaml
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.payments.yaml
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.delivery_picstitch.yaml
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.picstitch.yaml
+
     - kubectl apply -f src/k8s/canary/canary.parser.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.replylogic.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.slack.yaml --namespace=canary
+    - kubectl apply -f src/k8s/canary/canary.cafe_menu.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.payments.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.delivery_picstitch.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.picstitch.yaml --namespace=canary
