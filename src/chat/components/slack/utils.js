@@ -331,12 +331,12 @@ function * addViaAsin(asin, message) {
 }
 
 function* showLoading(message) {
-  var relevantMessage = yield db.Messages.findOne({
-    'thread_id': message.source.channel
-  })
+  kip.debug(`👚👖👗👝👛👜🏬🏪💳🛍`)
   var json = message.source.original_message;
   let searchText = this.randomSearching();
+  kip.debug(`👚👖👗👝👛👜🏬🏪💳🛍`)
   if (!json) {
+    kip.debug(`👚👖👗👝👛👜🏬🏪💳🛍`)
     var msg = new db.Message(message);
     msg.mode = 'loading';
     msg.action = 'show'

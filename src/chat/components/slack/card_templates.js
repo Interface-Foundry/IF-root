@@ -288,12 +288,6 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   style: "primary",
   type: "button",
   value: "member"
-}, {
-  name: "onboard.handoff",
-  text: "> Skip",
-  style: "default",
-  type: "button",
-  value: "member"
 }];
 
 var member_onboard_attachments = module.exports.member_onboard_attachments = function(admin, user, delay) {

@@ -503,7 +503,7 @@ handlers['add_or_remove'] = function * (message) {
               callback_id: 'take me home pls',
               actions: [{
                 'name': 'onboard.restart',
-                'text': 'Teach Me',
+                'text': 'Refresh Me',
                 'style': 'primary',
                 'type': 'button',
                 'value': 'restart'

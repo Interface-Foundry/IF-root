@@ -79,7 +79,7 @@ handlers['start'] = function * (message) {
       callback_id: 'take me home pls',
       actions: [{
         'name': 'onboard.restart',
-        'text': 'Teach Me',
+        'text': 'Refresh Me',
         'style': 'primary',
         'type': 'button',
         'value': 'restart'
@@ -648,9 +648,9 @@ handlers['team'] = function * (message) {
     text: '',
     color: '#45a5f4',
     mrkdwn_in: ['text'],
-    fallback:'yolo',
+    fallback: 'yolo',
     actions: cardTemplate.slack_onboard_team,
-    callback_id: 'none'
+    callback_id: 'onboard_team'
   });
 
   var msg = message;
