@@ -1,4 +1,4 @@
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 module.exports = function(agenda) {
   agenda.define('onboarding reminder', function(job, done) {
     let message = JSON.parse(job.attrs.data.msg);

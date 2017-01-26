@@ -18,7 +18,7 @@ var Menu = require('../chat/components/delivery.com/Menu')
 
 // VARIOUS STUFF TO POST BACK TO USER EASILY
 // --------------------------------------------
-var queue = require('../chat/components/queue-mongo')
+var queue = require('../chat/components/queue-direct')
 var UserChannel = require('../chat/components/delivery.com/UserChannel')
 var replyChannel = new UserChannel(queue)
 // --------------------------------------------

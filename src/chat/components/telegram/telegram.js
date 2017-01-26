@@ -2,7 +2,7 @@ var telegram = require('telegram-bot-api');
 var co = require('co');
 var kip = require('kip');
 var async = require('async');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var db = require('../../../db')
 var _ = require('lodash');
 var telegramToken;
