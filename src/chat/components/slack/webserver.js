@@ -208,7 +208,6 @@ app.post('/slackaction', next(function * (req, res) {
             let channelSection = {
               text: '',
               callback_id: 'channel_buttons_idk',
-
               actions: [{
                 name: 'channel_btn',
                 text: 'Choose which channels you want',

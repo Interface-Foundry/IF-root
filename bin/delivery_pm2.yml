@@ -1,4 +1,5 @@
 apps:
   - script: src/chat/components/slack/slack.js
+  - script: src/chat/components/reply_logic.js
   - script: src/payments/kip_pay.js
   - script: src/menus/menu_server.js
