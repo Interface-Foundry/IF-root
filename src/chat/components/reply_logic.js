@@ -248,7 +248,13 @@ function replyLogic (incoming) {
     kip.debug('slack_action', message.slack_action)
 
     if (_.get(message, 'slack_action.route')) {
-      return yield food(message)
+			if (message.slack_action.route.split('.')[0] === 'food') {
+				return yield food(message)
+			} else {
+				message.mode = message.slack_action.route.split('.')[0]
+				message.action = message.slack_action.route.split('.').slice(1).join('.')
+			}
+
     }
 
     // skipping histoy and stuff rn b/c i dont have time to do it
@@ -481,7 +487,7 @@ function replyLogic (incoming) {
           try {
             r.save()
           } catch (err) {
-            logging.debug('could not save ' + r, err)
+            logging.debug('could not save ', err)
           }
         } else {
           logging.debug('reply_logic:316:r does not exist ' + r)
@@ -491,8 +497,8 @@ function replyLogic (incoming) {
     timer.tic('done saving replies')
     timer.tic('sending replies')
     if (replies) {
-      yield replies.map((r, i) => {
-        logging.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
+      yield replies.filter(Boolean).map((r, i) => {
+        logging.debug('\n\n\n🤖 🤖 🤖 reply  ', r.toObject(), '\n\n\n')
         queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
       })
     }

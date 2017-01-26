@@ -29,6 +29,7 @@ var messageSchema = mongoose.Schema({
   //
   original_text: String, // raw incoming message (if applicable)
   slack_action: {}, // slack button tap stuff
+  data: {}, /// also the lsack button tap stuff, for old times sake
 
   //
   // Kip processing stuff

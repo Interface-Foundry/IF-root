@@ -63,9 +63,17 @@ app.post('/slackaction', next(function * (req, res) {
   try {
     actionData = JSON.parse(action.value)
   } catch (e) {
-    console.log('Hey!'.green, 'Looks like you need to', 'R E F A C T O R'.rainbow, 'this action', action)
-    console.log('hint: value should be json'.cyan)
-    throw e
+
+    // in shopping mode there is too much to refactor right no, so catch the old ways of doing things
+    if (action.name) {
+      actionData = {}
+      actionData.route = action.name
+      actionData.value = action.value
+    } else {
+      console.log('Hey!'.green, 'Looks like you need to', 'R E F A C T O R'.rainbow, 'this action', action)
+      console.log('hint: value should be json'.cyan)
+      throw e
+    }
   }
   kip.debug('[button click]'.cyan, actionData)
 
@@ -83,7 +91,8 @@ app.post('/slackaction', next(function * (req, res) {
       type: 'action',
       response_url: parsedIn.response_url
     },
-    slack_action: actionData
+    slack_action: actionData,
+    data: actionData
   })
 
   //

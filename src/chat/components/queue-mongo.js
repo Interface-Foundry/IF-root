@@ -42,7 +42,7 @@ function publish (topic, data, key) {
   if (topic === 'outgoing.slack') {
     // kill me why why why do i have to do this
     if (_.get(data, 'reply.data')) {
-      slack.send({data: data.reply.data}) // wat
+      slack.send({ data: data }) // wat
     } else if (data.text || data.attachments) {
       slack.send({ data: data })
     } else {

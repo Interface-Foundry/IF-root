@@ -24,7 +24,7 @@ var home_screen = module.exports.home_screen = function(isAdmin, userId) {
       callback_id: 'wow such home',
       actions: [{
         name: 'passthrough',
-        value: 'food',
+        value: {route: 'food.begin'},
         text: `${buttonDescrip} Food`,
         type: 'button'
       }]
@@ -35,7 +35,7 @@ var home_screen = module.exports.home_screen = function(isAdmin, userId) {
       callback_id: 'wow such home',
       actions: [{
         name: isAdmin ? 'collect.initial' : 'passthrough',
-        value: isAdmin ? 'initial' : 'shopping',
+        value: { route: isAdmin ? 'shopping.initial' : 'shopping' },
         text: `${buttonDescrip} Supplies`,
         type: 'button'
       }, {
