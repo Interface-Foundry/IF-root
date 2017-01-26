@@ -28,6 +28,6 @@ const getActiveSessions = (delivery) =>
 
 module.exports = getActiveSessions;
 if (!module.parent) {
-  require('../../kip')
+  require('../../../kip')
   getActiveSessions(db.delivery).then(console.log.bind(console))
 }

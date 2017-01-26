@@ -71,6 +71,6 @@ const getOrderTimePlaceFrequencies = (delivery, start, end) =>
 
 module.exports = getOrderTimePlaceFrequencies;
 if (!module.parent) {
-  require('../../kip')
+  require('../../../kip')
   getOrderTimePlaceFrequencies(db.delivery, new Date(new Date().setDate(new Date().getDate()-7)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //orders of past week
 }

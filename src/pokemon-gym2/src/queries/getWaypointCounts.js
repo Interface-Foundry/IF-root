@@ -53,6 +53,6 @@ const getWaypointCounts = (waypoints,start,end) =>
 
 module.exports = getWaypointCounts;
 if (!module.parent) {
-  require('../../kip')
+  require('../../../kip')
   getWaypointCounts(db.waypoints,new Date(new Date().setDate(new Date().getDate()-14)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //waypoints of past 2 weeks
 }

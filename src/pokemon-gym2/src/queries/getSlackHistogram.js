@@ -51,6 +51,6 @@ const getSlackHistogram = (messages) =>
 
 module.exports = getSlackHistogram;
 if (!module.parent) {
-  require('../../kip')
+  require('../../../kip')
   getSlackHistogram(db.messages).then(console.log.bind(console))
 }

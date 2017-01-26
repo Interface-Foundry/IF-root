@@ -10,6 +10,13 @@ import ProgressChart from "./charts/ProgressChart.jsx";
 import StackChart from "./charts/StackChart.jsx";
 import eventEmitter from "events";
 import logo from './kip.png';
+import getActiveSessions from './queries/getActiveSessions.js';
+import getDayofWeekStats from './queries/getDayofWeekStats.js';
+import getMessageHistory from './queries/getMessageHistory.js';
+import getOrderTimePlaceFrequencies from './queries/getOrderTimePlaceFrequencies.js';
+import getSlackHistogram from './queries/getSlackHistogram.js';
+import getWaypointCounts from './queries/getWaypointCounts.js';
+import db from '../../../kip.js';
 
 class Charts extends Component {
   render() {
@@ -20,10 +27,16 @@ class Charts extends Component {
 }
 
 class MainContainer extends Component{
+/*
   getData(){
     var data = [{key: 'a', value: 4},{key: 'b', value: 6},{key: 'c', value: 10},{key:'d',value:16}]
     return data
   };
+*/
+
+  getData(){
+    var data = getDayofWeekStats
+  }
 
 /*
   render(){
