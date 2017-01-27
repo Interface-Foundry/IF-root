@@ -355,8 +355,8 @@ handlers['food.admin.display_channels'] = function * (message) {
         'text': `#${channelName}`,
         'name': 'loading',
         'value': 'show',
-        'type': 'default',
-        'style': 'primary'
+        'type': 'button',
+        'style': 'default'
       });
     }
     actions.push({
