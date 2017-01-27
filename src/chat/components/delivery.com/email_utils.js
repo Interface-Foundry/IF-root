@@ -60,7 +60,8 @@ utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
 }
 
 utils.formatItem = function (i, j, quickpicks) {
-  return `<table border="0" style="position:absolute;"><tr style="position:absolute;top:30px;"><td>` +
+  return `<table border="0" style="position:absolute;">`
+    + `<tr style="position:absolute;top:30px;"><td>` +
   `<table><tr><td style="font-weight:bold;">${quickpicks[row_length*i+j].name}</td></tr>` +
   `<tr><td>${quickpicks[row_length*i+j].description}</td></tr></table></td></tr>` +
   `<tr><td><table><tr><td style="padding:8px 0 8px 0;font-weight:bold;">$${parseFloat(quickpicks[row_length*i+j].price).toFixed(2)}</td></tr>` +
