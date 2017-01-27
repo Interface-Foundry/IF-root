@@ -46,13 +46,12 @@ utils.quickpickHTML = function * (foodSession, slacklink, email) {
   html += `<p><a style="color:${kip_blue};" href="' + merch_url + '">Click to View Full Menu `
   html += menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a>' + br + br
 
-  html += `<table border="0" style="padding:10px;width:600px;background-color:${kip_blue};">`
-  html += `<tr></tr>`
-  html += `<tr></tr>`
-  html += `</table>` + br
+  html += `<table border="0" style="padding:10px;width:600px;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%">`
+  html += `<tr style="width:100%"><td style="width:100%;text-align:center;"><a style="color:white;text-decoration:none;font-size:150%;text-align:center;" href="${slacklink}">Click to join your team on Slack!</a></td></tr></table>`
+  html += `<table><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;color:white;text-align:right;">Kip © 2017</p></td>`
+  html += `<td style="width:300px;"><a style="padding:0 20px 0 20px;color:white;text-decoration:none;" href="https://kipthis.com/legal.html">Terms of Use</a></td></tr>`
+  html += `</table></td></tr></table>` + br
 
-  html += `<a style="color:${kip_blue};text-decoration:none;" href="${slacklink}">Join your team on Slack!</a>` + br + br
-  html += `<a style="color:${kip_blue};text-decoration:none;" href="https://kipthis.com/legal.html">Terms of Service</a>`
   html += '</body></html>'
 
   return html;
