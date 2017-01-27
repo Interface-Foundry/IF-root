@@ -4,7 +4,7 @@
 
 var assert = require('assert');
 var expect = require('chai').expect;
-var queue = require('../chat/components/queue-mongo');
+var queue = require('../chat/components/queue-direct');
 var co = require('co');
 var message = new db.Message({ 
 	thread_id: 'facebook_1000206960095603',

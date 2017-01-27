@@ -6,7 +6,7 @@ var co = require('co');
 var utils = require('../slack/utils');
 var Fuse = require('fuse.js');
 var momenttz = require('moment-timezone');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var cardTemplate = require('../slack/card_templates');
 var request = require('request');
 

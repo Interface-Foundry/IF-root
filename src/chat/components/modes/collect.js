@@ -5,7 +5,7 @@ var cardTemplate = require('../slack/card_templates');
 var winston = require('winston');
 var utils = require('../slack/utils.js');
 var Fuse = require('fuse.js');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var agenda = require('../agendas');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';

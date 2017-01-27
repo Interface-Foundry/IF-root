@@ -8,7 +8,7 @@ var winston = require('winston');
 var Fuse = require('fuse.js');
 var request = require('request');
 var agenda = require('../agendas');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var utils = require('../slack/utils.js');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
