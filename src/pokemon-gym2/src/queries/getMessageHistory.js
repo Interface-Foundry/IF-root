@@ -1,5 +1,3 @@
-import db from '../../../kip';
-
 const getMessageHistory = (messages,user) =>
   new Promise((resolve, reject) => {
     messages.aggregate([
@@ -48,3 +46,8 @@ const getMessageHistory = (messages,user) =>
   });
 
 module.exports = getMessageHistory;
+if (!module.parent) {
+  require('../../../kip')
+  getMessageHistory(db.messages, 'U3620AA5T').then(console.log.bind(console))
+  getMessageHistory(db.messages, 'kip').then(console.log.bind(console))
+}

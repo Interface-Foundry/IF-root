@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
+
+/*
 import d3 from "d3";
 import moment from "moment";
+*/
 
+/*
 import D3TimeAreaChart from "./charts/AreaChart.jsx";
 import BarChart from "./charts/BarChart.jsx";
 import DonutChart from "./charts/DonutChart.jsx";
@@ -10,12 +14,13 @@ import ProgressChart from "./charts/ProgressChart.jsx";
 import StackChart from "./charts/StackChart.jsx";
 import EventEmitter from "events";
 import logo from './logo.svg';
+*/
 
 import Charts from './Charts';
 import './App.css';
 
 
-var eventEmitter=new EventEmitter();
+//var eventEmitter=new EventEmitter();
 
 class App extends Component {
   render() {
