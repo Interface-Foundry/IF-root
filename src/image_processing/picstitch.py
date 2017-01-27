@@ -150,18 +150,21 @@ class PicStitch:
         logging.debug('making image for__: ' + str(self.img_req))
         thumb_img = download_image(self.img_req['url'])
         logging.debug('using pic_size:' + str(self.config['PIC_SIZE']))
-        thumb_img = thumb_img.resize(self.config['PIC_SIZE'], Image.ANTIALIAS)
-        # thumb_img.thumbnail(self.config['PIC_SIZE'], Image.ANTIALIAS)
 
-        # post image thumbnail
-        # arr = np.array(thumb_img)
-        # alpha = arr[:, :, 2]
-        # n1 = len(alpha)
-        # alpha[:] = np.interp(np.arange(n1), [0, 0.55*n1, 0.75*n1, n1],
-        #                            [255, 255, 0, 0])[:,np.newaxis]
-        # thumb_img = Image.fromarray(alpha, mode='RGBA')
+        orig_sizing = self.config['PIC_SIZE'][0]
+
+        if thumb_img.size[1] < thumb_img.size[0]:
+            x1 = round(
+                (thumb_img.size[0] / thumb_img.size[1]) * orig_sizing)
+            self.config['PIC_SIZE'] = x1, x1
+        thumb_img.thumbnail(self.config['PIC_SIZE'], Image.ANTIALIAS)
+
+        sub_amount = 0
+        if thumb_img.size[0] > orig_sizing:
+            sub_amount = thumb_img.size[0] - orig_sizing
+
         img.paste(thumb_img,
-                  (self.config['PIC_COORDS']['x'],
+                  (round(self.config['PIC_COORDS']['x'] - sub_amount),
                    self.config['PIC_COORDS']['y']))
 
         # post text
@@ -183,7 +186,7 @@ class PicStitch:
             # img.paste(poly, poly_offset, mask=poly)
 
         # add price
-        draw.text((x, 0), # last_y - 5),
+        draw.text((x, 0),  # last_y - 5),
                   self.img_req['price'],
                   font=self.config['font1'],
                   fill="#f54740")
@@ -195,7 +198,8 @@ class PicStitch:
             resize_proportion = 0.8
             amzn_width = round(amzn_width * resize_proportion)
             amzn_height = round(amzn_height * resize_proportion)
-            img.paste(self.amazon_prime_image.resize((amzn_width, amzn_height), Image.ANTIALIAS), (x + 140, 0)) # last_y + 2))
+            img.paste(self.amazon_prime_image.resize(
+                (amzn_width, amzn_height), Image.ANTIALIAS), (x + 140, 0))  # last_y + 2))
 
         last_y = last_y + 20
 
@@ -258,22 +262,25 @@ class PicStitch:
 
         last_y = last_y + 5
 
-        for i, z in enumerate(self.img_req['name']):
-            # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
-            countLines = 0
-            filler = ''
-            for line in textwrap.wrap(z, width=self.config['BOX_WIDTH']):
-                countLines += 1
-                if i >= 2:
-                    filler = '...'
-                draw.text((x, last_y - 0),
-                          line + filler,
-                          font=self.config['font2'],
-                          fill="#909497")
-                last_y += self.config['font2'].getsize(line)[1]
-                last_y = last_y + 2
-            if i >= 2:
-                break
+        filler = ''
+        add_filler = False
+        wrap_list_of_lists = [textwrap.wrap(
+            l, width=self.config['BOX_WIDTH']) for l in self.img_req['name']]
+        wrap_list = [
+            item for sublist in wrap_list_of_lists for item in sublist]
+        if len(wrap_list) > 3:
+            add_filler = True
+            wrap_list = wrap_list[:3]
+        for i, line in enumerate(wrap_list):
+            if add_filler and len(wrap_list) == i + 1:
+                filler = '...'
+            draw.text((x, last_y - 0),
+                      line + filler,
+                      font=self.config['font2'],
+                      fill="#909497")
+            last_y += self.config['font2'].getsize(line)[1]
+            last_y = last_y + 2
+
         y += self.config['font1'].getsize(line)[1]
         last_y = y
 

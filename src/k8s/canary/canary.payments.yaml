@@ -17,15 +17,14 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
-        volumeMounts:
-        - mountPath: /kip/payments/secrets/
-          name: kip-creditcard
-          readOnly: true
-        securityContext: {}
-      volumes:
-      - name: kip-creditcard
-        secret:
-          secretName: kip-cc
+        # volumeMounts:
+        # - mountPath: /kip/payments/secrets/
+        #   name: kip-creditcard
+        #   readOnly: true
+      # volumes:
+      # - name: kip-creditcard
+      #   secret:
+      #     secretName: kip-cc
 ---
 apiVersion: v1
 kind: Service

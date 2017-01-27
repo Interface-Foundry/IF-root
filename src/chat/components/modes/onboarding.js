@@ -3,7 +3,7 @@ var message_tools = require('../message_tools')
 module.exports = {}
 var handlers = module.exports.handlers = {}
 var onboard = require('./onboard');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var slackUtils = require('../slack/utils');
 var cardTemplate = require('../slack/card_templates');
 var agenda = require('../agendas');

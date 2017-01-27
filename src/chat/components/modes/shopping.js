@@ -9,7 +9,7 @@ var kipcart = require('../cart');
 var cardTemplate = require('../slack/card_templates');
 var request = require('request');
 var slackUtils = require('../slack/utils');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var amazon_variety = require('../amazon_variety');
 var utils = require('../slack/utils');
 //

@@ -4,7 +4,7 @@ var googl = require('goo.gl')
 var request = require('request-promise')
 var Fuse = require('fuse.js')
 
-var queue = require('../queue-mongo')
+var queue = require('../queue-direct')
 var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)
 var yelp = require('./yelp.js')

@@ -3,7 +3,7 @@ var _ = require('lodash')
 var uuid = require('uuid')
 var co = require('co')
 var proxyRequest = require('./proxy/request').proxyRequest;
-var queue = require('./queue-mongo');
+var queue = require('./queue-direct');
 var amazon = require('./amazon_search.js');
 var ItemVariation = db.Itemvariation;
 
