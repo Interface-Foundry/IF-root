@@ -923,7 +923,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
 
     var m = foodSession.email_users[i];
     var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
-    var html = yield email_utils.quickpickHTML(foodSession, slacklink, m)
+    var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m)
 
     var mailOptions = {
       to: `<${m}>`,

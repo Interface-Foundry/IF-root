@@ -10,7 +10,7 @@ var ryan_grey = "#F5F5F5"
 
 var utils = {};
 
-utils.quickpickHTML = function * (foodSession, slacklink, email) {
+utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
 
   var user = yield db.email_users.findOne({email: email, team_id: foodSession.team_id});
   var merch_url = yield menu_utils.getUrl(foodSession, user.id)
@@ -22,10 +22,11 @@ utils.quickpickHTML = function * (foodSession, slacklink, email) {
   //header
   var html = '<html><body>';
   html += header + br
-  html += `<h1 style="font-size:2em;">${foodSession.chosen_restaurant.name}</h1>` + br
+  html += `<h1 style="font-size:2em;">${foodSession.chosen_restaurant.name}</h1>`
+  html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} is collecting food orders from ${foodSession.chosen_restaurant.name}.&#010;Click here to order from the full menu:</p>`
   html += `<p><a style="color:${kip_blue}" href="' + merch_url + '">Click to View Full Menu `
-  html += menu_utils.cuisineEmoji(resto.data.summary.cuisines[0])
-  html += '</a></p>'
+  html += menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a></p>'
+  html += `<p>Or simply click a menu item below:</p>`
 
   //quickpicks
   html += '<table style="width:100%" border="0">'
@@ -47,9 +48,10 @@ utils.quickpickHTML = function * (foodSession, slacklink, email) {
   html += menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a>' + br + br
 
   html += `<table border="0" style="padding:10px;width:600px;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%">`
-  html += `<tr style="width:100%"><td style="width:100%;text-align:center;"><a style="color:white;text-decoration:none;font-size:150%;text-align:center;" href="${slacklink}">Click to join your team on Slack!</a></td></tr></table>`
-  html += `<table><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;color:white;text-align:right;">Kip © 2017</p></td>`
-  html += `<td style="width:300px;"><a style="padding:0 20px 0 20px;color:white;text-decoration:none;" href="https://kipthis.com/legal.html">Terms of Use</a></td></tr>`
+  html += `<tr style="width:100%"><td style="width:100%;text-align:center;"><img height="16" width="16" src="http://tidepools.co/kip/oregano/Slack_Icon.png">`
+  html += `<a style="color:white;text-decoration:none;font-size:140%;text-align:center;" href="${slacklink}">&nbsp;Click to join your team on Slack!</a></td></tr></table>`
+  html += `<table><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;font-size:85%;color:white;text-align:right;">Kip © 2017</p></td>`
+  html += `<td style="width:300px;"><a style="padding:0 20px 0 20px;color:white;text-decoration:none;font-size:85%" href="https://kipthis.com/legal.html">Terms of Use</a></td></tr>`
   html += `</table></td></tr></table>` + br
 
   html += '</body></html>'
