@@ -322,8 +322,10 @@ handlers['food.item.loadmore'] = function * (message){
 handlers['food.option.click'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
-  var option_id = message.data.value.option_id
-  var item_id = message.data.value.item_id
+  let itemValue = JSON.parse(message.source.actions[0].selected_options[0].value)
+  kip.debug(`😎 \n ${JSON.stringify(itemValue)}`)
+  var option_id = itemValue.option_id
+  var item_id = itemValue.item_id
   var userItem = yield cart.getItemInProgress(item_id, message.source.user)
   var optionNode = cart.menu.getItemById(option_id)
   userItem.item.option_qty = userItem.item.option_qty || {}
