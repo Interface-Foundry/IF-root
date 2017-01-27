@@ -168,26 +168,21 @@ build_canary_node:
   before_script:
     - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
   script:
-    # - docker build -t $KIP_REGISTRY/reply_logic:$CI_BUILD_REF -f Dockerfiles/canary.reply_logic.Dockerfile .
     - docker build -t $KIP_REGISTRY/slack:$CI_BUILD_REF -f Dockerfiles/canary.slack.Dockerfile .
     - docker build -t $KIP_REGISTRY/payments:$CI_BUILD_REF -f Dockerfiles/canary.payments.Dockerfile .
     - docker build -t $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF -f Dockerfiles/canary.cafe_menu.Dockerfile .
 
-    # - docker tag $KIP_REGISTRY/reply_logic:$CI_BUILD_REF $KIP_REGISTRY/reply_logic:canary
     - docker tag $KIP_REGISTRY/slack:$CI_BUILD_REF $KIP_REGISTRY/slack:canary
     - docker tag $KIP_REGISTRY/payments:$CI_BUILD_REF $KIP_REGISTRY/payments:canary
     - docker tag $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF $KIP_REGISTRY/cafe_menu:canary
 
-    # - docker push $KIP_REGISTRY/reply_logic:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/slack:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF
 
-    # - docker push $KIP_REGISTRY/reply_logic:canary
     - docker push $KIP_REGISTRY/slack:canary
     - docker push $KIP_REGISTRY/payments:canary
     - docker push $KIP_REGISTRY/cafe_menu:canary
-
 
 build_canary_python:
   stage: build
@@ -227,7 +222,6 @@ deploy_canary:
     - ls $DEPLOYMENT_DIR
 
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.parser.yaml
-    # - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.replylogic.yaml
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.slack.yaml
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.cafe_menu.yaml
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.payments.yaml
@@ -235,7 +229,6 @@ deploy_canary:
     - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.picstitch.yaml
 
     - kubectl apply -f src/k8s/canary/canary.parser.yaml --namespace=canary
-    # - kubectl apply -f src/k8s/canary/canary.replylogic.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.slack.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.cafe_menu.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.payments.yaml --namespace=canary
@@ -243,7 +236,6 @@ deploy_canary:
     - kubectl apply -f src/k8s/canary/canary.picstitch.yaml --namespace=canary
   after_script:
     - rm /tmp/KUBERNETES_KEY.json
-
 # -----------
 
 build_production_node:
@@ -253,17 +245,14 @@ build_production_node:
   before_script:
     - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
   script:
-    # - docker build -t $KIP_REGISTRY/reply_logic:$CI_BUILD_REF -f Dockerfiles/reply_logic.Dockerfile .
     - docker build -t $KIP_REGISTRY/slack:$CI_BUILD_REF -f Dockerfiles/slack.Dockerfile .
     - docker build -t $KIP_REGISTRY/payments:$CI_BUILD_REF -f Dockerfiles/payments.Dockerfile .
     - docker build -t $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF -f Dockerfiles/cafe_menu.Dockerfile .
 
-    # - docker tag $KIP_REGISTRY/reply_logic:$CI_BUILD_REF $KIP_REGISTRY/reply_logic:latest
     - docker tag $KIP_REGISTRY/slack:$CI_BUILD_REF $KIP_REGISTRY/slack:latest
     - docker tag $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF $KIP_REGISTRY/cafe_menu:latest
     - docker tag $KIP_REGISTRY/payments:$CI_BUILD_REF $KIP_REGISTRY/payments:latest
 
-    # - docker push $KIP_REGISTRY/reply_logic:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/slack:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF
     - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
@@ -303,7 +292,6 @@ deploy_production:
     - ls $DEPLOYMENT_DIR
 
     - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/parser.production.yaml
-    # - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/replylogic.production.yaml
     - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/slack.production.yaml
     - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/cafe_menu.production.yaml
     - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/payments.production.yaml
@@ -311,7 +299,6 @@ deploy_production:
     - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/picstitch.production.yaml
 
     - kubectl apply -f src/k8s/production/parser.production.yaml --namespace=production
-    # - kubectl apply -f src/k8s/production/replylogic.production.yaml --namespace=production
     - kubectl apply -f src/k8s/production/slack.production.yaml --namespace=production
     - kubectl apply -f src/k8s/production/cafe_menu.production.yaml --namespace=production
     - kubectl apply -f src/k8s/production/payments.production.yaml --namespace=production
