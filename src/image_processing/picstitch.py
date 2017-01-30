@@ -161,17 +161,20 @@ class PicStitch:
 
         sub_amount = 0
         if thumb_img.size[0] > orig_sizing:
-            sub_amount = thumb_img.size[0] - orig_sizing
+            # sub_amount = thumb_img.size[0] - orig_sizing
+            sub_amount = 0
 
         img.paste(thumb_img,
                   (round(self.config['PIC_COORDS']['x'] - sub_amount),
                    self.config['PIC_COORDS']['y']))
-
         # post text
         last_y = 5
         x = self.config['TEXTBOX_COORDS'][0]['x'] - 30
         y = self.config['TEXTBOX_COORDS'][0]['y']
+
         draw = ImageDraw.Draw(img, 'RGBA')
+        draw.rectangle(((orig_sizing, 0), (self.config[
+                       'CHAT_WIDTH'], self.config['CHAT_HEIGHT'])), fill="white")
 
         if self.origin is 'skype':
             last_y = last_y + 50

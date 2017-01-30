@@ -76,7 +76,7 @@ setTimeout(function() {
   		   		  let cs = yield db.carts.find({'slack_id': qkey});
   	  			  console.log('\n found asin falling within 3 months: asin:',m.data.asin,' for cart: ', qkey,'\n');
 		   		  m.data.category = category ? category : null;
-		   		  m.data.purchased = date ? date : null;
+		   		  m.data.purchased = purchaseDate ? purchaseDate : null;
 	  			  m.data.purchase_quantity = quantity ? quantity : null;
 	  			  m.data.device = device ? device : null;
 		  		  yield m.save();
@@ -118,7 +118,7 @@ setTimeout(function() {
 		   			}
 	  				console.log('\n found asin falling within 3 months: asin:',m.data.asin,' for cart: ', qkey,'\n');
 		   			m.data.category = category ? category : null;
-		   		    m.data.purchased = date ? date : null;
+		   		    m.data.purchased = purchaseDate ? purchaseDate : null;
 	  			    m.data.purchase_quantity = quantity ? quantity : null;
 	  			    m.data.device = device ? device : null;
 		  			yield m.save();

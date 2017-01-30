@@ -1,12 +1,13 @@
 //csv verified 
 
-var db = require("/db");
+var db = require("./db");
 var async = require("async");
 var _ = require("lodash");
 var rp = require("request-promise");
 var url = "https://www.googleapis.com/urlshortener/v1/url?shortUrl=";
 var opt = "&projection=FULL&key=AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk";
 var count = 0;
+
 setTimeout(
   function() {
     db.messages
@@ -51,16 +52,11 @@ setTimeout(
                   let shortClick;
                   let longClick;
                   //only log metrics for links that were clicked
-                  if (
-                    _.get(data.analytics, "allTime.shortUrlClicks") &&
-                      _.get(data.analytics, "allTime.longUrlClicks")
-                  ) {
-                    shortClick = parseFloat(
-                      _.get(data.analytics, "allTime.shortUrlClicks")
-                    );
-                    longClick = parseFloat(
-                      _.get(data.analytics, "allTime.longUrlClicks")
-                    );
+                  if (_.get(data.analytics, "allTime.shortUrlClicks")) {
+                    shortClick = parseFloat(_.get(data.analytics, "allTime.shortUrlClicks"));
+                  }
+                  if (_.get(data.analytics, "allTime.longUrlClicks")) {
+                    longClick = parseFloat(_.get(data.analytics, "allTime.longUrlClicks"));
                   }
                   if (shortClick > 0 || longClick > 0) {
                     data.id = goog;
