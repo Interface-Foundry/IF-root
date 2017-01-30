@@ -1,4 +1,4 @@
-const getSuccessfulCafePayments = (payments, start, end) =>
+const getSuccessfulCafePaymentsTokens = (payments, start, end) =>
   new Promise((resolve, reject) => {
     payments.aggregate([
       {
@@ -36,15 +36,15 @@ const getSuccessfulCafePayments = (payments, start, end) =>
           //order: payment._id.order,
           //ts: payment._id.ts,
           //charge: payment._id.charge,
-          guest_token: payment._id.guest_token,
+          paymentToken: payment._id.guest_token,
         };
       });
       resolve(payments);
     });
   });
 
-module.exports = getSuccessfulCafePayments;
+module.exports = getSuccessfulCafePaymentsTokens;
 if (!module.parent) {
   require('../../../kip')
-  getSuccessfulCafePayments(db.payments, new Date(new Date().setDate(new Date().getDate()-28)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past half year
+  getSuccessfulCafePaymentsTokens(db.payments, new Date(new Date().setDate(new Date().getDate()-28)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past half year
 }
