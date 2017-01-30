@@ -6,8 +6,10 @@ kipPayURL: https://pay.kipthis.com
 logging:
   console:
     level: info
-    colorize: true
-    prettyPrint: true
+    json: true
+    stringify: true
+    colorize: false
+    prettyPrint: false
   mongo:
     enabled: true
 mongodb:
@@ -22,6 +24,7 @@ nlp: http://parser.kipthis.com
 picstitch: http://picstitch.kipthis.com
 proxy:
   luminati:
+    addr: http://luminati-proxy.default.svc.cluster.local:22225
     enabled: true
     password: e49d4ega1696
   mesh:
