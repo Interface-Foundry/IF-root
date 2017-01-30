@@ -2,6 +2,8 @@ require('../logging')
 var request = require('request-promise')
 var _ = require('lodash')
 
+var ObjectId = require('mongodb').ObjectID;
+
 var payConst = require('./pay_const.js')
 
 var cardTemplates = require('../chat/components/slack/card_templates');
@@ -219,21 +221,54 @@ function * onSuccess (payment) {
         'food.payment_info',
         homeMsg);
     });
-    var htmlForItem = `Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
 
-    var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
+    //constants
+    var br = '<br/>'
+    var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">'
+    var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
+    var date = new Date()
+
+    var formatTime = function (date) {
+      var minutes = date.getMinutes()
+      var hours = date.getHours()
+      return (hours > 9 ? '' + hours : '0' + hours) + ':' + (minutes > 9 ? '' + minutes : '0' + minutes)
+    }
+
+    var formatDate = function (date) {
+      var month = date.getMonth() + 1
+      var day = date.getDate()
+      var year = date.getFullYear()
+      return (month > 9 ? '' + month : '0' + month) + '/' + (day > 9 ? '' + day: '0' + day) + '/' + year
+    }
+
+    //header
+
+    var html = `<html>${header}` + br;
+    html += `<h1 style="font-size:2em;">Order Receipt</h1>`
+    html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from ${foodSession.chosen_restaurant.name} at ${formatTime(date)} on ${formatDate(date)}</p>`
+    html += `\nHere is a list of items:\n` + br;
+
+    //column headings
+    html += `<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
+
+    //items ordered
+    foodSession.cart.filter(i => i.added_to_cart).map((item) => {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
-      htmlForItem += `<tr><td>${foodInfo.name}</td><td>${descriptionString}</td><td>${menu.getCartItemPrice(item).toFixed(2)}</td><td>${user[0].real_name}</td></tr>`
+      html += `<tr><td>${foodInfo.name}</td><td>${descriptionString}</td><td>${menu.getCartItemPrice(item).toFixed(2)}</td><td>${user[0].real_name}</td></tr>`
     })
+
+    //itemized charges
+
+    //footer
 
     // send confirmation email to admin
     var mailOptions = {
       to: `${foodSession.convo_initiater.name} <${foodSession.convo_initiater.email}>`,
       from: `Kip Café <hello@kipthis.com>`,
-      subject: `Kip Café Order Receipt for ${foodSession.chosen_restaurant.name}`,
-      html: `${htmlForItem}</thead></table>`
+      subject: `Your Order Receipt for ${foodSession.chosen_restaurant.name}`,
+      html: `${html}</thead></table></html>`
     }
 
     logging.info('mailOptions', mailOptions)
