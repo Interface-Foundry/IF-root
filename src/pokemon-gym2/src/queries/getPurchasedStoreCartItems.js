@@ -1,4 +1,4 @@
-const getPurchasedCartItems = (carts, start, end) =>
+const getPurchasedStoreCartItems = (carts, start, end) =>
   new Promise((resolve, reject) => {
     carts.aggregate([
       {
@@ -73,8 +73,8 @@ const getPurchasedCartItems = (carts, start, end) =>
     });
   });
 
-module.exports = getPurchasedCartItems;
+module.exports = getPurchasedStoreCartItems;
 if (!module.parent) {
   require('../../../kip')
-  getPurchasedCartItems(db.carts, new Date(new Date().setDate(new Date().getDate()-180)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past half year
+  getPurchasedStoreCartItems(db.carts, new Date(new Date().setDate(new Date().getDate()-180)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past half year
 }
