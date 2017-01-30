@@ -24,8 +24,8 @@ utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
   html += header + br
   html += `<h1 style="font-size:2em;">${foodSession.chosen_restaurant.name}</h1>`
   html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} is collecting food orders from ${foodSession.chosen_restaurant.name}.&#010;Click here to order from the full menu:</p>`
-  html += `<p><a style="color:${kip_blue}" href="' + merch_url + '">Click to View Full Menu `
-  html += menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a></p>'
+  html += `<p><a style="font-size:130%;color:${kip_blue}" href="` + merch_url + `">Click to View Full Menu`
+  html += ' ' + menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a></p>'
   html += `<p>Or simply click a menu item below:</p>`
 
   //quickpicks
@@ -35,7 +35,7 @@ utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
     html += '<tr>';
     for (var j = 0; j < row_length; j++) {
       var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[row_length*i+j].id])
-      html += `<td style="width:300px;padding:10px;position:absolute;" bgcolor=${ryan_grey}><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
+      html += `<td style="width:300px;padding:10px;margin:1em;position:absolute;" bgcolor=${ryan_grey}><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
       html += this.formatItem(i, j, quickpicks) + '</a>' + '</td>';
     }
     html += '</tr>';
@@ -44,8 +44,8 @@ utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
   html += '</table>' + br
 
   //footer
-  html += `<p><a style="color:${kip_blue};" href="' + merch_url + '">Click to View Full Menu `
-  html += menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a>' + br + br
+  html += `<p><a style="line-height:115%;font-size:130%;color:${kip_blue};" href="` + merch_url + `">Click to View Full Menu`
+  html += ' ' + menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a>' + br + br
 
   html += `<table border="0" style="padding:10px;width:600px;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%">`
   html += `<tr style="width:100%"><td style="width:100%;text-align:center;"><img height="16" width="16" src="http://tidepools.co/kip/oregano/Slack_Icon.png">`
@@ -66,7 +66,7 @@ utils.formatItem = function (i, j, quickpicks) {
   `<tr><td>${quickpicks[row_length*i+j].description}</td></tr></table></td></tr>` +
   `<tr><td><table><tr><td style="padding:8px 0 8px 0;font-weight:bold;">$${parseFloat(quickpicks[row_length*i+j].price).toFixed(2)}</td></tr>` +
   `<tr><td><div style="display:inline-block;background-color:white;border-radius:8px;border-color:${kip_blue};border-style:solid;border-width:2px;">` +
-  `<p style="font-weight:bold;color:${kip_blue}">&nbsp;&nbsp;&nbsp;Add to Cart&nbsp;&nbsp;&nbsp;</p></div></td></tr></table>` +
+  `<p style="margin:0.575em 0 0.575em 0;font-weight:bold;color:${kip_blue}">&nbsp;&nbsp;&nbsp;Add to Cart&nbsp;&nbsp;&nbsp;</p></div></td></tr></table>` +
   `</td></tr></table>`;
 }
 
