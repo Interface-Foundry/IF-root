@@ -29,13 +29,13 @@ utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
   html += `<p>Or simply click a menu item below:</p>`
 
   //quickpicks
-  html += '<table style="width:100%" border="0">'
+  html += '<table style="width:100%;border-spacing:5.5px;" border="0">'
 
   for (var i = 0 ; i < column_length; i++) {
     html += '<tr>';
     for (var j = 0; j < row_length; j++) {
       var item_url = yield menu_utils.getUrl(foodSession, user.id, [quickpicks[row_length*i+j].id])
-      html += `<td style="width:300px;padding:10px;margin:1em;position:absolute;" bgcolor=${ryan_grey}><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
+      html += `<td style="width:300px;padding:10px;position:absolute;" bgcolor=${ryan_grey}><a style="color:black;text-decoration:none;display:block;width:100%;height:100%" href="` + `${item_url}` + `">`
       html += this.formatItem(i, j, quickpicks) + '</a>' + '</td>';
     }
     html += '</tr>';
@@ -47,10 +47,10 @@ utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
   html += `<p><a style="line-height:115%;font-size:130%;color:${kip_blue};" href="` + merch_url + `">Click to View Full Menu`
   html += ' ' + menu_utils.cuisineEmoji(resto.data.summary.cuisines[0]) + '</a>' + br + br
 
-  html += `<table border="0" style="padding:10px;width:600px;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%">`
+  html += `<table border="0" style="padding:10px;width:100%;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="border-spacing:0 20px;border-radius:4px;width:100%">`
   html += `<tr style="width:100%"><td style="width:100%;text-align:center;"><img height="16" width="16" src="http://tidepools.co/kip/oregano/Slack_Icon.png">`
   html += `<a style="color:white;text-decoration:none;font-size:140%;text-align:center;" href="${slacklink}">&nbsp;Click to join your team on Slack!</a></td></tr></table>`
-  html += `<table><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;font-size:85%;color:white;text-align:right;">Kip © 2017</p></td>`
+  html += `<table style="width:100%;"><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;font-size:85%;color:white;text-align:right;">Kip © 2017</p></td>`
   html += `<td style="width:300px;"><a style="padding:0 20px 0 20px;color:white;text-decoration:none;font-size:85%" href="https://kipthis.com/legal.html">Terms of Use</a></td></tr>`
   html += `</table></td></tr></table>` + br
 
