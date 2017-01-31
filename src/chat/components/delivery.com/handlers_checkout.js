@@ -591,7 +591,6 @@ handlers['food.done'] = function * (message, foodSession) {
 
   db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  yield handlers['food.need.payments.done'](message, foodSession)
   // final area to save and reset stuff
   logging.info('saving phone_number... ')
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
@@ -601,29 +600,30 @@ handlers['food.done'] = function * (message, foodSession) {
   yield user.save()
 
   // slackbot save info
-  logging.info('saving location... ', foodSession.chosen_location)
+  logging.info('saving location... ')
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   if (!_.find(slackbot.meta.locations, {'address_1': foodSession.chosen_location.address_1})) {
     logging.debug('location not previously saved')
     slackbot.meta.locations.push(foodSession.chosen_location)
     yield slackbot.save()
   }
+  yield handlers['food.need.payments.done'](message, foodSession)
 }
 
 handlers['food.need.payments.done'] = function * (message, foodSession) {
   if (foodSession === undefined) {
     logging.warn('foodSession wasnt passed into food.done')
-    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+    foodSession = yield db.Delivery.findOne({'team_id': message.source.team, 'active': true}).exec()
   }
   // save info relating to foodSession here but sleep for 100 seconds to let user enter cc
   var timeStarted = Date.now()
-  timeToWait = 100 * 1000
+  var timeToWait = 100 * 1000
 
   while (Date.now() - timeStarted < timeToWait) {
     logging.info('waiting 20 seconds to see if user has finished checking out')
     yield sleep(20000)
     var payment = yield db.Payment.findOne({'order.guest_token': foodSession.guest_token})
-    if (_.get(payment , 'charge.status') === 'succeeded') {
+    if (_.get(payment, 'charge.status') === 'succeeded') {
       logging.info('charge succeeded')
       foodSession.active = false
       foodSession.coupon.used = true
