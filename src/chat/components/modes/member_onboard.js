@@ -195,7 +195,7 @@ handlers['cart'] = function * (message) {
     text: '*Step 3/3:* Woohoo! You added one for the team **highfive**\nNow you can help make your team\'s life easier by adding things you need throughout the week',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    image_url: 'http://tidepools.co/kip/oregano/success.png',
+    image_url: 'http://tidepools.co/kip/oregano/success.gif',
     fallback: 'Well done!\n I\'ve added your item to the team cart',
     callback_id: 'take me home pls',
     actions: [{

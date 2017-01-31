@@ -331,7 +331,6 @@ function * addViaAsin(asin, message) {
 }
 
 function* showLoading(message) {
-	kip.debug(`😅  ${JSON.stringify(json, null, 2)}`)
   var json = message.source.original_message;
   let searchText = this.randomSearching();
   if (!json) {
