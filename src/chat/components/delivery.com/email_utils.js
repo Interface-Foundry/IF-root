@@ -6,7 +6,7 @@ var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">';
 var br = '<br/>'
 
 var kip_blue = '#47a2fc'
-var ryan_grey = "#F5F5F5"
+var ryan_grey = '#F5F5F5'
 
 var utils = {};
 
