@@ -150,9 +150,10 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
   else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
 
   if (foodSession.budget && foodSession.convo_initiater.id != message.source.user && foodSession.user_budgets[message.user_id] < 0) {
-    yield handlers['food.cart.personal.quantity.subtract'](message, true)
+    yield handlers['food.cart.personal.quantity.subtract'](message)
+  } else {
+    yield handlers['food.cart.personal'](message, foodSession)
   }
-  else yield handlers['food.cart.personal'](message, true)
 }
 
 // Handles editing the quantity by using the supplied array index
@@ -186,28 +187,30 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
 
-  // save their items in their order history
-  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
-  user.history.orders = user.history.orders || []
-  yield myItems.map(function (cartItem) {
-    var deliveryItem = menu.getItemById(cartItem.item.item_id)
-    user.history.orders.push({user_id: user._id, session_id: foodSession._id, chosen_restaurant: foodSession.chosen_restaurant, deliveryItem: deliveryItem, cartItem: JSON.stringify(cartItem), ts: Date.now()})
-  })
-  yield user.save((err) => {
-    if (err) logging.error(err)
+  var currentTime = Date.now()
+  var itemArray = myItems.map(item => {
+    var deliveryItem = menu.getItemById(item.item.item_id)
+    return {
+      'session_id': foodSession._id,
+      'chosen_restaurant': foodSession.chosen_restaurant,
+      'deliveryItem': deliveryItem,
+      'ts': currentTime
+    }
   })
 
+  // save their items in their order history
+  yield db.Chatusers.update({'id': message.user_id, 'is_bot': false}, {$push: {'history.orders': {$each: itemArray}}}).exec()
   foodSession.confirmed_orders.push(message.source.user)
   foodSession.save()
 
+  logging.warn('fuck it')
   yield sendOrderProgressDashboards(foodSession, message)
-
 }
 
 //
 // Sends ALL the order progress dashboards
 //
-function * sendOrderProgressDashboards(foodSession, message) {
+function * sendOrderProgressDashboards (foodSession, message) {
   logging.debug('sending order progress dashboards')
 
   // we'll have to send the dashboard to the admin even if they are not hungry
@@ -225,11 +228,11 @@ function * sendOrderProgressDashboards(foodSession, message) {
   var dashboard = {
     text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
     attachments: [{
-      color: '#3AA3E3',
-      mrkdwn_in: ['text'],
-      text: `*Collected so far* 👋\n_${itemList}_`,
+      'color': '#3AA3E3',
+      'mrkdwn_in': ['text'],
+      'text': `*Collected so far* 👋\n_${itemList}_`,
       'fallback': `*Collected so far* 👋\n_${itemList}_`,
-      actions: []
+      'actions': []
     }]
   }
 
@@ -282,7 +285,8 @@ function * sendOrderProgressDashboards(foodSession, message) {
   //
   // send the dashboards to all the users that are ready to get dashboards
   //
-  yield dashboardUsers.map(user => {
+
+  yield dashboardUsers.map(function * (user) {
     var isAdmin = user.id === foodSession.convo_initiater.id
     logging.debug('sending dashboard to user', user.id, 'isAdmin?', isAdmin)
     var thisDashboard = _.cloneDeep(dashboard) // because mutating objects in a loop is bad
@@ -291,16 +295,16 @@ function * sendOrderProgressDashboards(foodSession, message) {
     if (isAdmin && !allOrdersIn) {
 
       var finishEarlyButton = {
-        name: 'food.admin.order.confirm',
-        text: 'Finish Order Early',
-        style: 'default',
-        type: 'button',
-        value: 'food.admin.order.confirm',
-        confirm: {
-            "title": "Finish Order Early?",
-            "text": "This will finish the order. Members that haven't ordered yet won't be able to.",
-            "ok_text": "Yes",
-            "dismiss_text": "No"
+        'name': 'food.admin.order.confirm',
+        'text': 'Finish Order Early',
+        'style': 'default',
+        'type': 'button',
+        'value': 'food.admin.order.confirm',
+        'confirm': {
+          'title': `Finish Order Early?`,
+          'text': `This will finish the order. Members that haven't ordered yet won't be able to.`,
+          'ok_text': `Yes`,
+          'dismiss_text': `No`
         }
       }
 
@@ -309,11 +313,11 @@ function * sendOrderProgressDashboards(foodSession, message) {
         'text': '↺ Restart Order',
         'type': 'button',
         'value': 'food.admin.select_address',
-        confirm: {
-          title: 'Restart Order',
-          text: 'Are you sure you want to restart your order?',
-          ok_text: 'Yes',
-          dismiss_text: 'No'
+        'confirm': {
+          'title': 'Restart Order',
+          'text': 'Are you sure you want to restart your order?',
+          'ok_text': 'Yes',
+          'dismiss_text': 'No'
         }
       }
 
@@ -324,61 +328,53 @@ function * sendOrderProgressDashboards(foodSession, message) {
       const minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum
 
       thisDashboard.attachments.push({
-        color: minimumMet ? '#3AA3E3' : '#fc9600',
-        mrkdwn_in: ['text'],
-        fallback: 'Finish Order Early',
-        text: minimumMet ? 'Finish Order Early' : `*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`,
-        actions: minimumMet ? [finishEarlyButton, restartOrderButton] : [restartOrderButton]
+        'color': minimumMet ? '#3AA3E3' : '#fc9600',
+        'mrkdwn_in': ['text'],
+        'fallback': 'Finish Order Early',
+        'text': minimumMet ? 'Finish Order Early' : `*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_${foodSession.chosen_restaurant.minimum.$}_*`,
+        'actions': minimumMet ? [finishEarlyButton, restartOrderButton] : [restartOrderButton]
       })
     } else if (isAdmin && allOrdersIn) {
       // send the team cart to the admin
       var adminDashboard = _.find(foodSession.order_dashboards, {user: foodSession.convo_initiater.id})
       if (adminDashboard) {
         logging.debug('sending cart to admin, replacing existing dashboard')
-        return co(function *() {
-          var msg = yield db.Messages.findById(adminDashboard.message)
-          return yield handlers['food.admin.order.confirm'](msg, foodSession)
-        })
+        // return co(function *() {
+        var msg = yield db.Messages.findById(adminDashboard.message)
+        return yield handlers['food.admin.order.confirm'](msg, foodSession)
+        // })
       } else {
         logging.debug('sending cart to admin, with new message')
         adminDashboard = {
-          source: {
-            user: foodSession.convo_initiater.id,
-            team: message.source.team,
-            channel: foodSession.convo_initiater.dm
+          'source': {
+            'user': foodSession.convo_initiater.id,
+            'team': message.source.team,
+            'channel': foodSession.convo_initiater.dm
           },
-          thread_id: foodSession.convo_initiater.dm,
-          mode: 'food',
-          action: 'food.admin.cart'
+          'thread_id': foodSession.convo_initiater.dm,
+          'mode': 'food',
+          'action': 'food.admin.cart'
         }
-        return handlers['food.admin.order.confirm'](adminDashboard, foodSession)
+        return yield handlers['food.admin.order.confirm'](adminDashboard, foodSession)
       }
     }
 
     // send or update the dashbaord message
     var existingDashbaord = foodSession.order_dashboards.filter(d => d.user === user.id)[0]
     if (existingDashbaord) {
-      db.Messages.findById(existingDashbaord.message, function (e, msg) {
-        if (e) return logging.error(e)
-        $replyChannel.sendReplace(msg, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
-      })
-      return Promise.resolve()
+      try {
+        msg = yield db.Messages.findById(existingDashbaord.message)
+        yield $replyChannel.sendReplace(msg, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
+      } catch (err) {
+        logging.error('could not find find existing dashboard or something', err)
+      }
     } else if (user.id === message.source.user) {
-
-      // send the dashbaord for the first time for the user that just submitted personal cart
-      return co(function * () {
-        var msg = yield $replyChannel.sendReplace(message, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
-        yield foodSession.update({$push: { order_dashboards: {
-          user: message.source.user,
-          message: msg._id
-        }}}).exec()
-
-
-      }).catch(logging.error)
+      // send the dashboard for the first time for the user that just submitted personal cart
+      msg = yield $replyChannel.sendReplace(message, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
+      yield foodSession.update({$push: {'order_dashboards': {'user': message.source.user, 'message': msg._id}}})
     }
   })
 }
-
 
 /*
 * Confirm all users have voted for s12
@@ -510,32 +506,30 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     })
   } else {
     // create the dashboard for the first time
-    foodSession.team_members.map(m => {
-      if(foodSession.confirmed_orders.includes(m.id)){
+    foodSession.team_members.map(function * (member) {
+      if (foodSession.confirmed_orders.includes(member.id)) {
         var admin = foodSession.convo_initiater
         var user = message.source.user
-        var channel = message.source.channel
         var msg = {
-          mode: 'food',
-          action: 'food.admin.waiting_for_orders',
-          thread_id: m.dm,
-          origin: message.origin,
-          source: {
-            team: foodSession.team_id,
-            user: m.id,
-            channel: m.dm
+          'mode': 'food',
+          'action': 'food.admin.waiting_for_orders',
+          'thread_id': member.dm,
+          'origin': message.origin,
+          'source': {
+            'team': foodSession.team_id,
+            'user': member.id,
+            'channel': member.dm
           }
         }
-        var sentMessage = $replyChannel.sendReplace(msg, 'food.admin.waiting_for_orders', {
-          type: msg.origin,
-          data: dashboard
+        var sentMessage = yield $replyChannel.sendReplace(msg, 'food.admin.waiting_for_orders', {
+          'type': msg.origin,
+          'data': dashboard
         })
-        sentMessage.then(function(result) {
-          if(result.source.user === admin.id){
-            foodSession.tracking.confirmed_orders_msg = result._id
-            foodSession.save()
-          }
-        })
+
+        if (member.id === admin.id) {
+          foodSession.tracking.confirmed_orders_msg = sentMessage._id
+          yield foodSession.save()
+        }
       }
     })
   }
@@ -547,10 +541,11 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     // take admin to order confirm, not sure if i need to look this up again but doing it for assurance
 
     var adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
-    if(!adminMsg){
-      adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})  //there should be a better way to handle the race condition with the above foodSession.save()
+    if (!adminMsg) {
+      // there should be a better way to handle the race condition with the above foodSession.save()
+      adminMsg = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
     }
-    yield handlers['food.admin.order.confirm'](adminMsg, true)
+    yield handlers['food.admin.order.confirm'](adminMsg, foodSession)
   } else {
     logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSession.team_members, 'id'), foodSession.confirmed_orders))
     return
@@ -559,7 +554,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
 handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
-  foodSession = foodSession ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  if (foodSession === undefined) foodSession = yield db.Delivery.findOne({'team_id': message.source.team, 'active': true}).exec()
 
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
@@ -571,9 +566,9 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // ------------------------------------
   // main response and attachment
   var response = {
-    text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    fallback: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-    callback_id: 'address_confirm',
+    'text': `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
+    'fallback': `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
+    'callback_id': 'address_confirm'
 
   }
 
@@ -590,13 +585,13 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     var textForItem = `*${foodInfo.name} - ${menu.getCartItemPrice(item).$}*\n`
     textForItem += descriptionString.length > 0 ? `Options: ${descriptionString}\n` + `Added by: <@${item.user_id}>` : `Added by: <@${item.user_id}>`
     return {
-      text: textForItem,
-      fallback: textForItem,
-      callback_id: 'foodInfoItems_wopr',
-      color: '#3AA3E3',
-      attachment_type: 'default',
-      mrkdwn_in: ['text'],
-      actions: [{
+      'text': textForItem,
+      'fallback': textForItem,
+      'callback_id': 'foodInfoItems_wopr',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'mrkdwn_in': ['text'],
+      'actions': [{
         'name': `food.admin.cart.quantity.subtract`,
         'text': `—`,
         'type': `button`,
@@ -619,118 +614,118 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
 
   try {
     var order = yield api.createCartForSession(foodSession)
-  } catch (e) {
-    logging.error('error running createCartForSession', e)
+  } catch (err) {
+    logging.error('error running createCartForSession', err)
     return
   }
 
-    if (order !== null) {
-      // order is successful
-      foodSession.order = order
-      foodSession.markModified('order')
-      yield foodSession.save()
+  if (order !== null) {
+    // order is successful
+    foodSession.order = order
+    foodSession.markModified('order')
+    yield foodSession.save()
 
-      if (foodSession.tip.percent !== 'cash') {
-        foodSession.tip.amount = (Number(foodSession.tip.percent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
-        foodSession.save()
-      }
+    if (foodSession.tip.percent !== 'cash') {
+      foodSession.tip.amount = (Number(foodSession.tip.percent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
+      foodSession.save()
+    }
 
-      /*
-      --------- create/explain values here -----------------------
-      notes:
-      - service_fee = $.99 for kip
-      - subtotal = the subtotal from delivery.com for the items
-      - delivery_fee = delivery_fee from delivery.com
-      - convenience_fee = possible value from delivery.com
-      - order.discount_percent = discount from delivery.com, include as note on total/subtotal maybe
-      - taxes = taxes from order.taxes
-      - total = the total from delivery.com (subtotal + taxes - discount)
-      - tip = {
-          amount: fixed dollar amount with cents (calculated on the order.subtotal tho)
-          percent: string with value to use on order.total
-      }
-      - afaik order.total seems to include all taxes, fees, and discounts provided by delivery
-      - main_amount = (order.total + kip_service_fee + tip)
-      - discount_amount = main_amount * coupon_discount
-      - calculated_amount (total we are charging user) = main_amount - discount_amount
-      - calculated_amount will be the value passed to payments that is a value in cents
-      - tip.amount will be passed to payments as well for delivery.com payment.  its already included in calculated_amount so just leave it
-      -----
-      other:
-      dont let orders over 510 go through w/ 99% discount
-      order.subtotal will be incorrect if delivery.com is using built in discount (i.e. 10% off for 30$ or more)
-      possibly remove service fee from coupon stuff but do
-      */
+    /*
+    --------- create/explain values here -----------------------
+    notes:
+    - service_fee = $.99 for kip
+    - subtotal = the subtotal from delivery.com for the items
+    - delivery_fee = delivery_fee from delivery.com
+    - convenience_fee = possible value from delivery.com
+    - order.discount_percent = discount from delivery.com, include as note on total/subtotal maybe
+    - taxes = taxes from order.taxes
+    - total = the total from delivery.com (subtotal + taxes - discount)
+    - tip = {
+        amount: fixed dollar amount with cents (calculated on the order.subtotal tho)
+        percent: string with value to use on order.total
+    }
+    - afaik order.total seems to include all taxes, fees, and discounts provided by delivery
+    - main_amount = (order.total + kip_service_fee + tip)
+    - discount_amount = main_amount * coupon_discount
+    - calculated_amount (total we are charging user) = main_amount - discount_amount
+    - calculated_amount will be the value passed to payments that is a value in cents
+    - tip.amount will be passed to payments as well for delivery.com payment.  its already included in calculated_amount so just leave it
+    -----
+    other:
+    dont let orders over 510 go through w/ 99% discount
+    order.subtotal will be incorrect if delivery.com is using built in discount (i.e. 10% off for 30$ or more)
+    possibly remove service fee from coupon stuff but do
+    */
 
-      // --- COUPON STUFF
+    // --- COUPON STUFF
 
-      var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
+    var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
 
-      foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
+    foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
 
-      if (discountAvail) {
-        if (discountAvail.coupon_type === 'percentage') {
-          logging.info('using coupon')
-          foodSession.coupon.percent = discountAvail.coupon_discount
-          foodSession.coupon.code = discountAvail.coupon_code
-        } else {
-          logging.error('error we are only using percentage coupons rn with cafe')
-          return
-        }
-
-        foodSession.discount_amount = Number((Math.round(
-          ((discountAvail.coupon_discount * (foodSession.main_amount)) * 1000) / 10) / 100).toFixed(2)
-        )
+    if (discountAvail) {
+      if (discountAvail.coupon_type === 'percentage') {
+        logging.info('using coupon')
+        foodSession.coupon.percent = discountAvail.coupon_discount
+        foodSession.coupon.code = discountAvail.coupon_code
       } else {
-        foodSession.discount_amount = 0.00
-      }
-      foodSession.calculated_amount = Number((Math.round(((foodSession.main_amount - foodSession.discount_amount) * 1000) / 10) / 100).toFixed(2))
-
-      if (foodSession.calculated_amount < 0.50) {
-        foodSession.calculated_amount = 0.50 // stripe thing
+        logging.error('error we are only using percentage coupons rn with cafe')
+        return
       }
 
-      // // check for order over $510 (pre coupon) not processing over $510 (pre coupon)
-      // if (_.get(discountAvail, 'couponDiscount', 0) === 0.99 && foodSession.order.total > 510.00) {
-      //   $replyChannel.send(message, 'food.exit', {
-      //     type: message.origin,
-      //     data: {
-      //       'text': 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions'
-      //     }
-      //   })
-      //   return
-      // }
-
-      yield foodSession.save()
-
-      // THIS CREATES THE TIP, DELIVERY.COM COSTS, AND KIP ATTACHMENT
-      var attachmentsRelatedToMoney = createAttachmentsForAdminCheckout(foodSession, totalPrice)
-      response.attachments = [].concat(mainAttachment, itemAttachments, attachmentsRelatedToMoney)
-
+      foodSession.discount_amount = Number((Math.round(
+        ((discountAvail.coupon_discount * (foodSession.main_amount)) * 1000) / 10) / 100).toFixed(2)
+      )
     } else {
-      // some sort of error
-      foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-      var deliveryError = JSON.parse(foodSession.delivery_error)
-      var errorMsg = `Looks like there are ${deliveryError.length} total errors including: ${deliveryError[0].user_msg}`
-      var finalAttachment = {
-        text: errorMsg,
-        fallback: errorMsg,
-        callback_id: 'foodConfrimOrder_callbackID',
-        attachment_type: 'default'
-      }
-      response.attachments = _.flatten([mainAttachment, itemAttachments, finalAttachment]).filter(Boolean)
-      response.attachments.push({
-        'text': 'Do you want to restart the order or end the order?',
-        'fallback': 'Do you want to restart the order or end the order?',
-        'attachment_type': 'default',
-        'mrkdwn_in': ['text'],
-        'actions': [restartButton, {
-          'name': 'food.exit.confirm_end_order',
-          'text': 'End Order',
-          'type': 'button',
-          'value': 'food.exit.confirm_end_order'
-        }]
-       })
+      foodSession.discount_amount = 0.00
+    }
+    foodSession.calculated_amount = Number((Math.round(((foodSession.main_amount - foodSession.discount_amount) * 1000) / 10) / 100).toFixed(2))
+
+    if (foodSession.calculated_amount < 0.50) {
+      foodSession.calculated_amount = 0.50 // stripe thing
+    }
+
+    // // check for order over $510 (pre coupon) not processing over $510 (pre coupon)
+    // if (_.get(discountAvail, 'couponDiscount', 0) === 0.99 && foodSession.order.total > 510.00) {
+    //   $replyChannel.send(message, 'food.exit', {
+    //     type: message.origin,
+    //     data: {
+    //       'text': 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions'
+    //     }
+    //   })
+    //   return
+    // }
+
+    yield foodSession.save()
+
+    // THIS CREATES THE TIP, DELIVERY.COM COSTS, AND KIP ATTACHMENT
+    var attachmentsRelatedToMoney = createAttachmentsForAdminCheckout(foodSession, totalPrice)
+    response.attachments = [].concat(mainAttachment, itemAttachments, attachmentsRelatedToMoney)
+
+  } else {
+    // some sort of error
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+    var deliveryError = JSON.parse(foodSession.delivery_error)
+    var errorMsg = `Looks like there are ${deliveryError.length} total errors including: ${deliveryError[0].user_msg}`
+    var finalAttachment = {
+      text: errorMsg,
+      fallback: errorMsg,
+      callback_id: 'foodConfrimOrder_callbackID',
+      attachment_type: 'default'
+    }
+    response.attachments = _.flatten([mainAttachment, itemAttachments, finalAttachment]).filter(Boolean)
+    response.attachments.push({
+      'text': 'Do you want to restart the order or end the order?',
+      'fallback': 'Do you want to restart the order or end the order?',
+      'attachment_type': 'default',
+      'mrkdwn_in': ['text'],
+      'actions': [restartButton, {
+        'name': 'food.exit.confirm_end_order',
+        'text': 'End Order',
+        'type': 'button',
+        'value': 'food.exit.confirm_end_order'
+      }]
+     })
     }
 
   return yield $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
@@ -771,7 +766,7 @@ handlers['food.admin.cart.tip'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   foodSession.tip.percent = message.source.actions[0].value
   yield foodSession.save()
-  yield handlers['food.admin.order.confirm'](message, true)
+  yield handlers['food.admin.order.confirm'](message)
 }
 
 handlers['food.admin.cart.quantity.add'] = function * (message) {
@@ -779,7 +774,7 @@ handlers['food.admin.cart.quantity.add'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var itemObjectID = message.source.actions[0].value
   yield db.Delivery.update({_id: foodSession._id, 'cart._id': itemObjectID.toObjectId()}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
-  yield handlers['food.admin.order.confirm'](message, true)
+  yield handlers['food.admin.order.confirm'](message)
 }
 
 handlers['food.admin.cart.quantity.subtract'] = function * (message) {
@@ -793,7 +788,7 @@ handlers['food.admin.cart.quantity.subtract'] = function * (message) {
   } else {
     yield db.Delivery.update({_id: item._id, 'cart._id': itemObjectID.toObjectId()}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   }
-  yield handlers['food.admin.order.confirm'](message, true)
+  yield handlers['food.admin.order.confirm'](message)
 }
 
 module.exports = function (replyChannel, allHandlers) {
