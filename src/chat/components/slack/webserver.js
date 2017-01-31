@@ -114,7 +114,7 @@ app.post('/slackaction', next(function * (req, res) {
   var parsedIn = JSON.parse(req.body.payload);
 
   // First reply to slack, then process the request
-  if (!buttonData && simple_command !== 'collect_select'&& simple_command !== 'channel_btn'&& parsedIn.original_message) {
+  if (!buttonData && simple_command !== 'collect_select' && simple_command !== 'channel_btn'&& parsedIn.original_message) {
     res.status(200)
     res.end()
   } else if (!parsedIn.original_message) {
