@@ -29,6 +29,11 @@ class UserChannel {
         data.data.attachments.map(cleanAttachment)
       }
 
+      // have seen a few times session.origin/mode/etc dont exist.
+      // should probably find a better solution or why that is happening but idc rn
+      if (session.origin === undefined) session.origin = 'slack'
+      if (session.mode === undefined) session.mode = 'food'
+
       var newSession = new db.Message({
         incoming: false,
         thread_id: session.thread_id,
@@ -36,7 +41,7 @@ class UserChannel {
         user_id: 'kip',
         origin: session.origin,
         source: session.source,
-        mode: session.mode || 'food',
+        mode: session.mode,
         action: session.action,
         state: session.state,
         user: session.source.user
@@ -44,11 +49,11 @@ class UserChannel {
       if (replace && session.slack_ts) {
         newSession.replace_ts = session.slack_ts
       }
-      newSession['reply'] = data;
-      newSession.mode = nextHandlerID.split('.')[0];
-      newSession.action = nextHandlerID.split('.').slice(1).join('.');
-      kip.debug('inside channel.send(). Session mode is ' + newSession.mode);
-      kip.debug('inside channel.send(). Session action is ' + newSession.action);
+      newSession['reply'] = data
+      newSession.mode = nextHandlerID.split('.')[0]
+      newSession.action = nextHandlerID.split('.').slice(1).join('.')
+      kip.debug('inside channel.send(). Session mode is ' + newSession.mode)
+      kip.debug('inside channel.send(). Session action is ' + newSession.action)
       var self = this
       return new Promise((resolve, reject) => {
         newSession.save(function (err, saved) {

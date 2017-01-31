@@ -62,28 +62,6 @@ function sampleCuisines (foodSession) {
 }
 
 
-var userFoodPreferencesPlaceHolder = {
-  text: 'Here we would ask user for preferences if they didnt have it',
-  fallback: 'Any preferences?',
-  callback_id: 'confirm.user.preferences',
-  color: 'grey',
-  attachment_type: 'default',
-  attachments: [{
-    actions: [{
-      'name': 'food.user.poll',
-      'value': 'food.user.poll',
-      'text': 'Confirm',
-      'type': 'button'
-    },
-      {
-        'name': 'food.user.preference.cancel',
-        'value': 'food.user.preference.cancel',
-        'text': '× Cancel',
-        'type': 'button'
-      }]
-  }]
-}
-
 //
 // enum for sort orders
 //
@@ -214,28 +192,47 @@ function getVotesFromMembers (messages) {
   return _.map(messages, 'data.vote')
 }
 
-// check for user preferences/diet/etc, skipping for now
+function sendUserPreferences (foodSession, message, member) {
+  var userPreferences = {
+    mode: 'food',
+    action: 'user.poll',
+    thread_id: member.dm,
+    origin: message.origin,
+    source: message.source,
+    res: {
+      'text': 'Here we would ask user for preferences if they didnt have it',
+      'fallback': 'Any preferences?',
+      'callback_id': 'confirm.user.preferences',
+      'color': 'grey',
+      'attachment_type': 'default',
+      'attachments': [{
+        'actions': [{
+          'name': 'food.user.poll',
+          'value': 'food.user.poll',
+          'text': 'Confirm',
+          'type': 'button'
+        },
+          {
+            'name': 'food.user.preference.cancel',
+            'value': 'food.user.preference.cancel',
+            'text': '× Cancel',
+            'type': 'button'
+          }]
+      }]
+    }
+  }
+  userPreferences.source.user = member.id
+  userPreferences.source.channel = member.dm
+  $replyChannel.send(userPreferences, 'food.user.poll', {type: 'slack', data: userPreferences.res})
+}
+
+// check for user preferences/diet/etc, not currently being sent.
 handlers['food.user.preferences'] = function * (session) {
   var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false, id: {$ne: 'USLACKBOT'}})
-  if (process.env.NODE_ENV === 'test') {
-    teamMembers = [teamMembers[0]]
-  }
-  if (teamMembers.length < 1) {
-    kip.debug('fetching team members...')
-    teamMembers = yield team_utils.getChatUsers(message)
-  }
+
+
   teamMembers.map(function (member) {
-    var userPreferences = {
-      mode: 'food',
-      action: 'user.poll',
-      thread_id: member.dm,
-      origin: session.origin,
-      source: session.source,
-      res: userFoodPreferencesPlaceHolder
-    }
-    userPreferences.source.user = member.id
-    userPreferences.source.channel = member.dm
-    $replyChannel.send(userPreferences, 'food.user.poll', {type: 'slack', data: userPreferences.res})
+    sendUserPreferences(foodSession, message, member)
   })
 }
 
