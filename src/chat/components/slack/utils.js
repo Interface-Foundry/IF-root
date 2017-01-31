@@ -331,12 +331,10 @@ function * addViaAsin(asin, message) {
 }
 
 function* showLoading(message) {
-  kip.debug(`👚👖👗👝👛👜🏬🏪💳🛍`)
+	kip.debug(`😅  ${JSON.stringify(json, null, 2)}`)
   var json = message.source.original_message;
   let searchText = this.randomSearching();
-  kip.debug(`👚👖👗👝👛👜🏬🏪💳🛍`)
   if (!json) {
-    kip.debug(`👚👖👗👝👛👜🏬🏪💳🛍`)
     var msg = new db.Message(message);
     msg.mode = 'loading';
     msg.action = 'show'
@@ -350,10 +348,19 @@ function* showLoading(message) {
     text: searchText,
     color: '#45a5f4'
   })
+  var stringOrig = JSON.stringify(json)
+  let map = {
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    '#039': "'"
+  }
+  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
   request({
     method: 'POST',
     uri: message.source.response_url,
-    body: JSON.stringify(json)
+    body: stringOrig
   });
   return;
 }
@@ -384,10 +391,19 @@ function* hideLoading(message) {
     return;
   }
   message.source.original_message.attachments.splice(-1, 1);
+  var stringOrig = JSON.stringify(message.source.original_message)
+  let map = {
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    '#039': "'"
+  }
+  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
   request({
     method: 'POST',
-    uri: relevantMessage.source.response_url,
-    body: JSON.stringify(message.source.original_message)
+    uri: message.source.response_url,
+    body: stringOrig
   });
   return;
 }

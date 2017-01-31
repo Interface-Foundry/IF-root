@@ -193,49 +193,6 @@ function getVotesFromMembers (messages) {
   return _.map(messages, 'data.vote')
 }
 
-function sendUserPreferences (foodSession, message, member) {
-  var userPreferences = {
-    mode: 'food',
-    action: 'user.poll',
-    thread_id: member.dm,
-    origin: message.origin,
-    source: message.source,
-    res: {
-      'text': 'Here we would ask user for preferences if they didnt have it',
-      'fallback': 'Any preferences?',
-      'callback_id': 'confirm.user.preferences',
-      'color': 'grey',
-      'attachment_type': 'default',
-      'attachments': [{
-        'actions': [{
-          'name': 'food.user.poll',
-          'value': 'food.user.poll',
-          'text': 'Confirm',
-          'type': 'button'
-        },
-          {
-            'name': 'food.user.preference.cancel',
-            'value': 'food.user.preference.cancel',
-            'text': '× Cancel',
-            'type': 'button'
-          }]
-      }]
-    }
-  }
-  userPreferences.source.user = member.id
-  userPreferences.source.channel = member.dm
-  $replyChannel.send(userPreferences, 'food.user.poll', {type: 'slack', data: userPreferences.res})
-}
-
-// check for user preferences/diet/etc, not currently being sent.
-handlers['food.user.preferences'] = function * (session) {
-  var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false, id: {$ne: 'USLACKBOT'}})
-
-
-  teamMembers.map(function (member) {
-    sendUserPreferences(foodSession, message, member)
-  })
-}
 
 handlers['food.admin.vote'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -267,11 +224,135 @@ handlers['food.user.poll'] = function * (message) {
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
-  teamMembers.map(function (member) {
+  yield teamMembers.map(function * (member) {
     sendUserDashboard(foodSession, message, member)
+    // if (_.get(member, 'food_preferences.asked') === true) {
+    //   sendUserDashboard(foodSession, message, member)
+    // } else {
+    //   // send user thing for food pref
+    //   yield handlers['food.user.preferences'](message, member, foodSession)
+    // }
   })
 }
 
+handlers['food.user.preferences'] = function * (message, member, foodSession) {
+  // seems to be an error sometimes idk
+  if (_.get(member, 'id') === undefined) {
+    logging.error('error with member, just continue on')
+    sendUserDashboard(foodSession, message, member)
+  }
+  // find user in db, present items, if they click update their profile and their object in the foodsession
+  var user = yield db.Chatusers.findOne({'id': member.id, deleted: {$ne: true}}).exec()
+
+  if ((_.get(user, 'food_preferences.asked') === undefined) || (_.get(user, 'food_preferences.asked') === false)) {
+    user.food_preferences = {
+      asked: true,
+      vegetarian: false,
+      vegan: false,
+      pescetarian: false,
+      paleo: false,
+      peanut: false,
+      gluten: false,
+      shellfish: false,
+      chicken: false
+    }
+    yield user.save()
+  }
+
+  var attachment1 = {
+    'text': `Type or tap any dietary concerns you have`,
+    'fallback': `Type or tap any dietary concerns you have`,
+    'callback_id': 'food.admin.restaurant.pick.diet',
+    'attachment_type': 'default',
+    'actions': ['vegetarian', 'pescetarian', 'paleo', 'vegan'].map((food) => {
+      var checkbox = (_.get(user, `food_preferences.${food}`) === true) ? '✓' : '☐'
+      return {
+        'name': 'food.user.preferences.toggle',
+        'value': food,
+        'text': `${checkbox} ${food}`,
+        'type': 'button'
+      }
+    })
+  }
+
+  var attachment2 = {
+    'text': ``,
+    'fallback': `Type or tap any dietary concerns you have`,
+    'callback_id': 'food.admin.restaurant.pick.allergy',
+    'attachment_type': 'default',
+    'actions': ['peanut', 'gluten', 'shellfish', 'chicken'].map((food) => {
+      var checkbox = (_.get(user, `food_preferences.${food}`) === true) ? '✓' : '☐'
+      return {
+        'name': 'food.user.preferences.toggle',
+        'value': food,
+        'text': `${checkbox} ${food}`,
+        'type': 'button'
+      }
+    })
+  }
+
+  var attachment3 = {
+    'text': '',
+    'fallback': 'Done with food preferences',
+    'callback_id': 'food.user.preferences',
+    'attachment_type': 'default',
+    'actions': [{
+      'name': 'food.user.preferences.done',
+      'value': 'food.user.preferences.done',
+      'text': 'Done',
+      'type': 'button'
+    }]
+  }
+
+  var userPreferences = _.merge(message, {
+    'mode': 'food',
+    'action': 'user.preferences',
+    'thread_id': user.dm,
+    'origin': message.origin,
+    'source': {
+      'type': 'message',
+      'channel': user.dm,
+      'user': user.id,
+      'team': user.team_id
+    },
+    'data': {
+      'text': 'Hey do you have any',
+      'fallback': 'Food allergies or preferences?',
+      'callback_id': 'food.user.preferences',
+      'color': 'grey',
+      'attachment_type': 'default',
+      'attachments': [attachment1, attachment2, attachment3]
+    }
+  })
+
+  yield $replyChannel.sendReplace(userPreferences, 'food.user.preferences', {type: 'slack', data: userPreferences.data})
+}
+
+handlers['food.user.preferences.toggle'] = function * (message) {
+  // update the chatuser item
+  var user = yield db.Chatusers.findOne({'id': message.source.user})
+  var foodPreferenceToggle = message.data.value
+  logging.debug('toggling ', foodPreferenceToggle)
+  user.food_preferences[foodPreferenceToggle] = !user.food_preferences[foodPreferenceToggle]
+  yield user.save()
+  yield handlers['food.user.preferences'](message, user)
+}
+
+handlers['food.user.preferences.done'] = function * (message) {
+  // get users document and update the delivery object
+  var user = yield db.Chatusers.findOne({'id': message.source.user}).exec()
+  yield db.Delivery.update({
+    'team_id': message.source.team,
+    'team_members.id': message.source.user,
+    'active': true
+  }, {
+    $set: {'team_members.$': user}
+  }).exec()
+
+  var foodSession = yield db.Delivery.findOne({'team_id': message.source.team, active: true}).exec()
+  var member = _.find(foodSession.team_members, {'id': message.source.user})
+  sendUserDashboard(foodSession, message, member)
+}
 //
 // User just clicked "thai" or something
 //
@@ -561,6 +642,13 @@ function sendUserDashboard(foodSession, message, user) {
       'fallback': 'Search for a restaurant',
       'text': '✎ Or type what you want below (Example: _japanese_)',
       'mrkdwn_in': ['text']
+      // 'actions': [{
+      //   'name': 'food.user.preferences',
+      //   'text': 'Edit my food preferences',
+      //   'style': 'default',
+      //   'type': 'button',
+      //   'value': 'food.user.preferences'
+      // }]
     })
   } else {
     basicDashboard.text = 'Thanks for your vote!'

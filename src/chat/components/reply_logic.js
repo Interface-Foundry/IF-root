@@ -407,6 +407,7 @@ queue.topic('incoming').subscribe(incoming => {
         break;
       case 'search_btn':
         if (message.origin === 'slack') {
+          yield slackUtils.showLoading(message);
           var data = _.split(message.data.value, '.');
           var action = data[0];
           data.splice(0, 1);

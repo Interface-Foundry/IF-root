@@ -63,6 +63,7 @@ function simple_action_handler (action) {
     case 'view_cart_btn':
       return 'view_cart_btn';
     case 'team':
+    case 'members':
       return 'team';
     case 'channel_btn':
       return 'channel_btn';
