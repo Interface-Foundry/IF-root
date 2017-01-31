@@ -26,21 +26,45 @@ function plotData() {
 const lineChartData = plotData();
 
 
+const orderTimePlaceFrequencies = [ { hour: 10, location: [ '122 W 27th St' ], total: 1 },
+  { hour: 11,
+    location: [ '7502 178th St', '122 W 27th St' ],
+    total: 9 },
+  { hour: 12,
+    location: [ '7502 178th St', '122 W 27th St' ],
+    total: 8 },
+  { hour: 13,
+    location: [ '7502 178th St', '122 W 27th St' ],
+    total: 3 },
+  { hour: 14,
+    location: [ '122 W 27th St', '902 Broadway' ],
+    total: 8 },
+  { hour: 15,
+    location: [ '7502 178th St', '122 W 27th St', '902 Broadway' ],
+    total: 23 },
+  { hour: 16,
+    location: [ '122 W 27th St', '902 Broadway', '7502 178th St' ],
+    total: 9 },
+  { hour: 17, location: [ '122 W 27th St' ], total: 4 },
+  { hour: 18, location: [ '122 W 27th St' ], total: 6 } ];
+
+
+
 const pieChartData = [
   { name: 'Group A', value: 400 }, { name: 'Group B', value: 300 },
   { name: 'Group C', value: 300 }, { name: 'Group D', value: 200 },
   { name: 'Group E', value: 278 }, { name: 'Group F', value: 189 },
 ];
 
-const BarChartData = [
-  { name: 'Page A', uv: 4000.343, pv: 2400, amt: 2400 },
-  { name: 'Page B', uv: 3000.6756754, pv: 1398, amt: 2210 },
-  { name: 'Page C', uv: 2000.987654, pv: 9800, amt: 2290 },
-  { name: 'Page D', uv: 2780.472384, pv: 3908, amt: 2000 },
-  { name: 'Page E', uv: 1890.98347593, pv: 4800, amt: 2181 },
-  { name: 'Page F', uv: 2390.28913479283, pv: 3800, amt: 2500 },
-  { name: 'Page G', uv: 3490.2345678, pv: 4300, amt: 2100 },
+const dayOfWeekStats = [ { dayString: 'Sunday', dayNumber: 1, total: 7932 },
+  { dayString: 'Monday', dayNumber: 2, total: 21892 },
+  { dayString: 'Tuesday', dayNumber: 3, total: 42004 },
+  { dayString: 'Wednesday', dayNumber: 4, total: 29934 },
+  { dayString: 'Thursday', dayNumber: 5, total: 26266 },
+  { dayString: 'Friday', dayNumber: 6, total: 25602 },
+  { dayString: 'Saturday', dayNumber: 7, total: 7219 } 
 ];
+
 
 function displayFlotCharts(props, context) {
   context.setTitle(title);
@@ -87,20 +111,20 @@ function displayFlotCharts(props, context) {
 
 
         <div className="col-lg-6">
-          <Panel header={<span>Bar Chart Example</span>} >
+          <Panel header={<span>Total # of Messages by Day of Week</span>} >
             <div>
               <ResponsiveContainer width="100%" aspect={2}>
                 <BarChart
-                  data={BarChartData}
+                  data={dayOfWeekStats}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                  <XAxis dataKey="name" />
+                  <XAxis dataKey="dayString" />
                   <YAxis />
                   <CartesianGrid strokeDasharray="3 3" />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="pv" fill="#8884d8" />
-                  <Bar dataKey="uv" fill="#82ca9d" />
+                  <Bar dataKey="total" fill="#8884d8" />
+
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -108,9 +132,21 @@ function displayFlotCharts(props, context) {
         </div>
 
         <div className="col-lg-6">
-          <Panel header={<span>Multiple Axes Line Chart Example</span>} >
+          <Panel header={<span>Orders by Time of Day in the past Month</span>} >
             <div>
-              Panel contents
+              <ResponsiveContainer width="100%" aspect={2}>
+                <BarChart
+                  data={orderTimePlaceFrequencies}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <XAxis dataKey="hour" />
+                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="total" fill="#FA74AA" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </Panel>
         </div>

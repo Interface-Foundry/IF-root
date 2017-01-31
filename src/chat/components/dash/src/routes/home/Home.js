@@ -97,11 +97,6 @@ function Home(props, context) {
                           Alyx Baldwin
                           </Alert>
                         </td>
-                        <td>
-                         <Alert bsStyle="success">
-                          Alyx Baldwin
-                          </Alert>
-                        </td>
                         <td>  
                           <Alert bsStyle="success">
                             Shnozzleberries

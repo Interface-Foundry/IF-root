@@ -34,6 +34,9 @@ const getDayOfWeekStats = (messages) =>
           },
         },
       },
+      {
+        $sort: {'_id.day': 1}
+      },
     ], (err, result) => {
       if (err) { reject(err); }
       const days = result.map(day => {

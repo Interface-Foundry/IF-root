@@ -16,23 +16,25 @@ const getOrderTimePlaceFrequencies = (delivery, start, end) =>
               $hour: '$time_started',
             },
             address: '$chosen_location.address_1',
-            city: '$chosen_location.city',
-            state: '$chosen_location.state',
-            zip: '$chosen_location.zip_code',
+            //city: '$chosen_location.city',
+            //state: '$chosen_location.state',
+            //zip: '$chosen_location.zip_code',
             prov: '$source.origin',
+            //location: '$chosen_location',
             //latitude: '$chosen_location.latitude',
             //longitude: '$chosen_location.longitude',
           },
+          
           count: { $sum: 1 },
         },
       },
       { $group: {
           _id: {
             hour: '$_id.hour',
-            address: '$_id.address',
-            city: '$_id.city',
-            state: '$_id.state',
-            zip: '$_id.zip',
+            //address: '$_id.address',
+            //city: '$_id.city',
+            //state: '$_id.state',
+            //zip: '$_id.zip',
             //latitude: '$_id.latitude',
             //longitude: '$_id.longitude',
           },
@@ -42,6 +44,7 @@ const getOrderTimePlaceFrequencies = (delivery, start, end) =>
               num: '$count',
             },
           },
+          location: { $addToSet: '$_id.address' }
         },
       }, 
       {
@@ -55,11 +58,12 @@ const getOrderTimePlaceFrequencies = (delivery, start, end) =>
           ({ num: prevSource.num + source.num })).num;
 
         return {
-          hour: order._id.hour,
-          address: order._id.address,
-          city: order._id.city,
-          state: order._id.state,
-          zip: order._id.zip,
+          hour: order._id.hour - 5,
+          location: order.location,
+          //address: order._id.address,
+          //city: order._id.city,
+          //state: order._id.state,
+          //zip: order._id.zip,
           //latitude: order._id.latitude,
           //longitude: order._id.longitude,
           total,
@@ -72,5 +76,5 @@ const getOrderTimePlaceFrequencies = (delivery, start, end) =>
 module.exports = getOrderTimePlaceFrequencies;
 if (!module.parent) {
   require('../../../kip')
-  getOrderTimePlaceFrequencies(db.delivery, new Date(new Date().setDate(new Date().getDate()-7)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //orders of past week
+  getOrderTimePlaceFrequencies(db.delivery, new Date(new Date().setDate(new Date().getDate()-30)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //orders of past month
 }

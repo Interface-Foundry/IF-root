@@ -3228,6 +3228,18 @@ module.exports =
               ),
               _react2.default.createElement(
                 'li',
+                null,
+                _react2.default.createElement(
+                  'a',
+                  { href: '', onClick: function onClick(e) {
+                      e.preventDefault();_history2.default.push('/flotcharts');
+                    } },
+                  _react2.default.createElement('i', { className: 'fa fa fa-comments-o fa-fw' }),
+                  ' \xA0 Slack Team Stats'
+                )
+              ),
+              _react2.default.createElement(
+                'li',
                 { className: (0, _classnames2.default)({ active: !this.state.samplePagesCollapsed }) },
                 _react2.default.createElement(
                   'a',
@@ -4054,15 +4066,6 @@ module.exports =
                         _reactBootstrap.Alert,
                         { bsStyle: 'success' },
                         'kipsearch'
-                      )
-                    ),
-                    _react2.default.createElement(
-                      'td',
-                      null,
-                      _react2.default.createElement(
-                        _reactBootstrap.Alert,
-                        { bsStyle: 'success' },
-                        'Alyx Baldwin'
                       )
                     ),
                     _react2.default.createElement(
@@ -24300,9 +24303,23 @@ module.exports =
   }
   var lineChartData = plotData();
   
+  var orderTimePlaceFrequencies = [{ hour: 10, location: ['122 W 27th St'], total: 1 }, { hour: 11,
+    location: ['7502 178th St', '122 W 27th St'],
+    total: 9 }, { hour: 12,
+    location: ['7502 178th St', '122 W 27th St'],
+    total: 8 }, { hour: 13,
+    location: ['7502 178th St', '122 W 27th St'],
+    total: 3 }, { hour: 14,
+    location: ['122 W 27th St', '902 Broadway'],
+    total: 8 }, { hour: 15,
+    location: ['7502 178th St', '122 W 27th St', '902 Broadway'],
+    total: 23 }, { hour: 16,
+    location: ['122 W 27th St', '902 Broadway', '7502 178th St'],
+    total: 9 }, { hour: 17, location: ['122 W 27th St'], total: 4 }, { hour: 18, location: ['122 W 27th St'], total: 6 }];
+  
   var pieChartData = [{ name: 'Group A', value: 400 }, { name: 'Group B', value: 300 }, { name: 'Group C', value: 300 }, { name: 'Group D', value: 200 }, { name: 'Group E', value: 278 }, { name: 'Group F', value: 189 }];
   
-  var BarChartData = [{ name: 'Page A', uv: 4000.343, pv: 2400, amt: 2400 }, { name: 'Page B', uv: 3000.6756754, pv: 1398, amt: 2210 }, { name: 'Page C', uv: 2000.987654, pv: 9800, amt: 2290 }, { name: 'Page D', uv: 2780.472384, pv: 3908, amt: 2000 }, { name: 'Page E', uv: 1890.98347593, pv: 4800, amt: 2181 }, { name: 'Page F', uv: 2390.28913479283, pv: 3800, amt: 2500 }, { name: 'Page G', uv: 3490.2345678, pv: 4300, amt: 2100 }];
+  var dayOfWeekStats = [{ dayString: 'Sunday', dayNumber: 1, total: 7932 }, { dayString: 'Monday', dayNumber: 2, total: 21892 }, { dayString: 'Tuesday', dayNumber: 3, total: 42004 }, { dayString: 'Wednesday', dayNumber: 4, total: 29934 }, { dayString: 'Thursday', dayNumber: 5, total: 26266 }, { dayString: 'Friday', dayNumber: 6, total: 25602 }, { dayString: 'Saturday', dayNumber: 7, total: 7219 }];
   
   function displayFlotCharts(props, context) {
     context.setTitle(title);
@@ -24393,7 +24410,7 @@ module.exports =
             { header: _react2.default.createElement(
                 'span',
                 null,
-                'Bar Chart Example'
+                'Total # of Messages by Day of Week'
               ) },
             _react2.default.createElement(
               'div',
@@ -24404,16 +24421,15 @@ module.exports =
                 _react2.default.createElement(
                   _recharts.BarChart,
                   {
-                    data: BarChartData,
+                    data: dayOfWeekStats,
                     margin: { top: 5, right: 30, left: 20, bottom: 5 }
                   },
-                  _react2.default.createElement(_recharts.XAxis, { dataKey: 'name' }),
+                  _react2.default.createElement(_recharts.XAxis, { dataKey: 'dayString' }),
                   _react2.default.createElement(_recharts.YAxis, null),
                   _react2.default.createElement(_recharts.CartesianGrid, { strokeDasharray: '3 3' }),
                   _react2.default.createElement(_recharts.Tooltip, null),
                   _react2.default.createElement(_recharts.Legend, null),
-                  _react2.default.createElement(_recharts.Bar, { dataKey: 'pv', fill: '#8884d8' }),
-                  _react2.default.createElement(_recharts.Bar, { dataKey: 'uv', fill: '#82ca9d' })
+                  _react2.default.createElement(_recharts.Bar, { dataKey: 'total', fill: '#8884d8' })
                 )
               )
             )
@@ -24427,12 +24443,28 @@ module.exports =
             { header: _react2.default.createElement(
                 'span',
                 null,
-                'Multiple Axes Line Chart Example'
+                'Orders by Time of Day in the past Month'
               ) },
             _react2.default.createElement(
               'div',
               null,
-              'Panel contents'
+              _react2.default.createElement(
+                _recharts.ResponsiveContainer,
+                { width: '100%', aspect: 2 },
+                _react2.default.createElement(
+                  _recharts.BarChart,
+                  {
+                    data: orderTimePlaceFrequencies,
+                    margin: { top: 5, right: 30, left: 20, bottom: 5 }
+                  },
+                  _react2.default.createElement(_recharts.XAxis, { dataKey: 'hour' }),
+                  _react2.default.createElement(_recharts.YAxis, null),
+                  _react2.default.createElement(_recharts.CartesianGrid, { strokeDasharray: '3 3' }),
+                  _react2.default.createElement(_recharts.Tooltip, null),
+                  _react2.default.createElement(_recharts.Legend, null),
+                  _react2.default.createElement(_recharts.Bar, { dataKey: 'total', fill: '#FA74AA' })
+                )
+              )
             )
           )
         ),
