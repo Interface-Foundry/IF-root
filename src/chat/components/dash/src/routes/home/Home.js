@@ -10,7 +10,6 @@ import {
 import s from './Home.css';
 import StatWidget from '../../components/Widget';
 import Donut from '../../components/Donut';
-import SubSidebar from '../../components/SubSidebar';
 
 import {
   Tooltip,
@@ -33,154 +32,150 @@ const data = [
 function Home(props, context) {
   context.setTitle(title);
   return (
-    <div>
-      <div>
-        <SubSidebar className="pull-left" style={{"top":"0"}} />
-      </div>
-      <div>
-        <div>     
-          <div className="pull-right col-lg-10">
-            <Panel
-              header={<span>
-                <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
-                <div className="pull-right">
-                  <DropdownButton title="Dropdown" bsSize="xs" pullRight id="dropdownButton1" >
-                    <MenuItem eventKey="1">Action</MenuItem>
-                    <MenuItem eventKey="2">Another action</MenuItem>
-                    <MenuItem eventKey="3">Something else here</MenuItem>
-                    <MenuItem divider />
-                    <MenuItem eventKey="4">Separated link</MenuItem>
-                  </DropdownButton>
-                </div>
-              </span>}>
-              <div>
-                <ResponsiveContainer width="100%" aspect={2}>
-                  <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <CartesianGrid stroke="#ccc" />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="uv" stackId="1" stroke="#8884d8" fill="#8884d8" />
-                    <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-                    <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
-                  </AreaChart>
-                </ResponsiveContainer>
+    <div className="container-fluid">
+      <div className='row'>
+        <div>
+          <Panel
+            header={<span>
+              <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
+              <div className="pull-right">
+                <DropdownButton title="Dropdown" bsSize="xs" pullRight id="dropdownButton1" >
+                  <MenuItem eventKey="1">Action</MenuItem>
+                  <MenuItem eventKey="2">Another action</MenuItem>
+                  <MenuItem eventKey="3">Something else here</MenuItem>
+                  <MenuItem divider />
+                  <MenuItem eventKey="4">Separated link</MenuItem>
+                </DropdownButton>
               </div>
-            </Panel>
-
-            <Panel >
-            <Table>
-              <thead>
-                  <tr>
-                      <th>Date / Time</th>
-                      <th>Team</th>
-                      <th>User</th>
-                      <th>Item</th>
-                      <th>Price</th>
-                      <th>Quantity</th>
-                      <th>Total</th>
-                      <th>Cart ID</th>
-                      <th>Platform</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  <tr data-toggle="collapse" data-target="#demo1" className="accordion-toggle">
-                      <td> 
-                        <Alert bsStyle="success">
-                         01/15/17 3:15 pm
-                        </Alert>
-                      </td>
-                      <td>
-                       <Alert bsStyle="success">
-                         kipsearch
-                        </Alert>
-                      </td>
-                      <td>
-                       <Alert bsStyle="success">
-                        Alyx Baldwin
-                        </Alert>
-                      </td>
-                      <td>
-                       <Alert bsStyle="success">
-                        Alyx Baldwin
-                        </Alert>
-                      </td>
-                      <td>  
-                        <Alert bsStyle="success">
-                          Shnozzleberries
+            </span>}>
+              <ResponsiveContainer width="100%" aspect={2}>
+                <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <CartesianGrid stroke="#ccc" />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="uv" stackId="1" stroke="#8884d8" fill="#8884d8" />
+                  <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
+                  <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
+                </AreaChart>
+              </ResponsiveContainer>
+          </Panel>
+        </div>
+      </div>
+      <div className='row'>
+        <div>
+          <Panel>
+            <div className="table-responsive">
+              <Table>
+                <thead>
+                    <tr>
+                        <th>Date / Time</th>
+                        <th>Team</th>
+                        <th>User</th>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Cart ID</th>
+                        <th>Platform</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-toggle="collapse" data-target="#demo1" className="accordion-toggle">
+                        <td> 
+                          <Alert bsStyle="success">
+                           01/15/17 3:15 pm
                           </Alert>
-                      </td>
-                      <td>  
-                        <Alert bsStyle="success">
-                          $2,321.55
+                        </td>
+                        <td>
+                         <Alert bsStyle="success">
+                           kipsearch
                           </Alert>
-                      </td>
-                      <td>  
-                        <Alert bsStyle="success">
-                          2
+                        </td>
+                        <td>
+                         <Alert bsStyle="success">
+                          Alyx Baldwin
                           </Alert>
-                      </td>
-                       <td>  
-                        <Alert bsStyle="success">
-                          $5,643.10
+                        </td>
+                        <td>
+                         <Alert bsStyle="success">
+                          Alyx Baldwin
                           </Alert>
-                      </td>
-                       <td>  
-                        <Alert bsStyle="success">
-                          slack_212344234
-                          </Alert>
-                      </td>
+                        </td>
+                        <td>  
+                          <Alert bsStyle="success">
+                            Shnozzleberries
+                            </Alert>
+                        </td>
+                        <td>  
+                          <Alert bsStyle="success">
+                            $2,321.55
+                            </Alert>
+                        </td>
+                        <td>  
+                          <Alert bsStyle="success">
+                            2
+                            </Alert>
+                        </td>
                          <td>  
-                        <Alert bsStyle="success">
-                          slack
-                          </Alert>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td colspan="12" className="hiddenRow">
-                          <div className="accordian-body collapse" id="demo1">
-                              <h1>Hi from the hiddenRow</h1>
-                          </div>
-                      </td>
-                  </tr>
-              </tbody>
-            </Table>
-              <Alert bsStyle="success">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                <a
-                  href=""
-                  onClick={(e) => { e.preventDefault(); }}
-                  className="alert-link"
-                >Alert Link</a>.
-              </Alert>
-              <Alert bsStyle="info">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                <a
-                  href=""
-                  onClick={(e) => { e.preventDefault(); }}
-                  className="alert-link"
-                >Alert Link</a>.
-              </Alert>
-              <Alert bsStyle="warning">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                <a
-                  href=""
-                  onClick={(e) => { e.preventDefault(); }}
-                  className="alert-link"
-                >Alert Link</a>.
-              </Alert>
-              <Alert bsStyle="danger">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                <a
-                  href=""
-                  onClick={(e) => { e.preventDefault(); }}
-                  className="alert-link"
-                >Alert Link</a>.
-              </Alert>
-            </Panel>
+                          <Alert bsStyle="success">
+                            $5,643.10
+                            </Alert>
+                        </td>
+                         <td>  
+                          <Alert bsStyle="success">
+                            slack_212344234
+                            </Alert>
+                        </td>
+                           <td>  
+                          <Alert bsStyle="success">
+                            slack
+                            </Alert>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan="12" className="hiddenRow">
+                            <div className="accordian-body collapse" id="demo1">
+                                <h1>Hi from the hiddenRow</h1>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+              </Table>
             </div>
-
-
+            <Alert bsStyle="success">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              <a
+                href=""
+                onClick={(e) => { e.preventDefault(); }}
+                className="alert-link"
+              >Alert Link</a>.
+            </Alert>
+            <Alert bsStyle="info">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              <a
+                href=""
+                onClick={(e) => { e.preventDefault(); }}
+                className="alert-link"
+              >Alert Link</a>.
+            </Alert>
+            <Alert bsStyle="warning">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              <a
+                href=""
+                onClick={(e) => { e.preventDefault(); }}
+                className="alert-link"
+              >Alert Link</a>.
+            </Alert>
+            <Alert bsStyle="danger">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              <a
+                href=""
+                onClick={(e) => { e.preventDefault(); }}
+                className="alert-link"
+              >Alert Link</a>.
+            </Alert>
+          </Panel>
         </div>
       </div>
     </div>

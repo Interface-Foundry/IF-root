@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import history from '../../core/history';
+import SubSidebar from '../../components/SubSidebar';
 
 class Sidebar extends Component {
 
@@ -18,7 +19,8 @@ class Sidebar extends Component {
   render() {
     return (
       <div className="navbar-default sidebar" style={{ marginLeft: '-20px' }} role="navigation">
-        <div className="sidebar-nav navbar-collapse collapse">
+
+        <div className="sidebar-nav navbar-collapse collapse category-sidebar">
           <ul className="nav in" id="side-menu">
             <li>
               <a href="" onClick={(e) => { e.preventDefault(); history.push('/'); }} >
@@ -77,6 +79,8 @@ class Sidebar extends Component {
             </li>
           </ul>
         </div>
+
+        <SubSidebar className="sidebar-nav navbar-collapse collapse" />
       </div>
     );
   }

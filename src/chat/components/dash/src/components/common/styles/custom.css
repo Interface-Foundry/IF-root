@@ -1,0 +1,18 @@
+.sidebar {
+    display: flex;
+    min-width: 330px;
+}
+
+@media(min-width:768px) {
+	#page-wrapper {
+		margin: 0 0 0 330px;
+	}
+}
+
+.category-sidebar {
+    min-width: 170px;
+}
+
+.sidebar-nav {
+	width: 50%;
+}
