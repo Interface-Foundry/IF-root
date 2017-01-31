@@ -10,7 +10,14 @@ var db = require('../../db');
 
 var history = require("./history.js");
 var processData = require("./process.js");
-var ioKip = require("./io.js");
+var ioKip = {
+  outgoingResponse: function (){
+    logging.error('deprecated function')
+  },
+  sendTxtResponse: function () {
+    logging.error('deprecated function')
+  }
+}
 var kip = require('../../kip')
 
 var debug = true || process.env.NODE_ENV=='production' ? function(){} : console.log.bind(console);

@@ -4,24 +4,43 @@ body {
   background-color: #315481;
   background-image: linear-gradient(to bottom, #315481, #918e82 100%);
   background-attachment: fixed;
- 
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
- 
   padding: 0;
   margin: 0;
  
   font-size: 14px;
 }
+
+.wrapper {
+    /*width:500px; */
+    /*margin:0 auto;*/
+}
+
+.dropbox {
+  top: 100px;
+}
+
  
 .container {
-  max-width: 600px;
-  margin: 0 auto;
-  min-height: 100%;
+  max-width: 90%;
+  /*margin: 0 auto;*/
+  /*float: center;*/
+  /*min-height: 100%;*/
   background: white;
+  overflow:auto;
+}
+
+.sidebar { 
+  float: left;
+  width: 200px;
+  height: 1000px;
+  /*position: fixed;*/
+  background: #d2edf4;
+  background-image: linear-gradient(to bottom, #d0edf5, #e1e5f0 100%);
 }
  
 header {
@@ -48,8 +67,12 @@ form {
   margin-bottom: -10px;
   position: relative;
 }
+
+div {
+    border:0.5px solid #333;
+}
  
-.new-task input {
+.new-metric input {
   box-sizing: border-box;
   padding: 10px 0;
   background: transparent;
@@ -59,7 +82,7 @@ form {
   font-size: 1em;
 }
  
-.new-task input:focus{
+.new-metric input:focus{
   outline: 0;
 }
  

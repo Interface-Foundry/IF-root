@@ -4,13 +4,12 @@ var chai = require('chai')
 var expect = require('chai').expect
 var chaiHttp = require('chai-http');
 
-require('../../src/db/')
+var db = require('../../src/db/')
 
 var app
 
 describe('testing for kip pay', () => {
   before('set up kip pay and payments', () => {
-    chai.should()
     chai.use(chaiHttp)
     // actual app
     app = require('../../src/payments/kip_pay.js').kipPay

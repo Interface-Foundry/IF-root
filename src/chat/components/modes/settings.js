@@ -279,21 +279,34 @@ handlers['remove'] = function * (message, data) {
   let admins = yield utils.findAdmins(team);
   // let testAdmins = [{id:1, name: 'A'}, {id:2, name: 'B'}, {id:3, name: 'C'}, {id:4, name: 'D'}, {id:5, name: 'F'}]
   // admins = admins.concat(testAdmins);
-  let adminButtons = admins.map((admin) => {
-    return {
-      name: 'settings.remove.' + admin.id,
-      text: `× ${admin.name}`,
-      style: 'danger',
-      type: 'button',
-      value: admin.id,
-      confirm: {
-        'title': 'Are you sure?',
-        'text': `This will remove all of ${admin.name}'s abilities as an admin and make them a normal user`,
-        'ok_text': `Remove ${admin.name}`,
-        'dismiss_text': 'Nevermind'
-      }
-    };
-  });
+  let adminButtons;
+  if (team.meta.office_assistants.length > 1) {
+    adminButtons = admins.map((admin) => {
+      return {
+        name: 'settings.remove.' + admin.id,
+        text: `× ${admin.name}`,
+        style: 'danger',
+        type: 'button',
+        value: admin.id,
+        confirm: {
+          'title': 'Are you sure?',
+          'text': `This will remove all of ${admin.name}'s abilities as an admin and make them a normal user`,
+          'ok_text': `Remove ${admin.name}`,
+          'dismiss_text': 'Nevermind'
+        }
+      };
+    });
+  } else { // no removing the last person
+    adminButtons = admins.map((admin) => {
+      return {
+        name: 'loading',
+        text: `${admin.name}`,
+        style: 'default',
+        type: 'button',
+        value: 'skip'
+      };
+    });
+  }
   adminButtons.unshift({
     name: 'settings.admins.back',
     text: '< Back',
@@ -394,170 +407,133 @@ handlers['email'] = function * (message, status) {
   return [];
 };
 
-handlers['add_or_remove'] = function * (message) {
+handlers['add_or_remove'] = function*(message) {
   var replies = [];
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
-  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  var team = yield db.Slackbots.findOne({
+    'team_id': team_id
+  }).exec();
   var tokens = message.original_text.toLowerCase().trim().split(' ');
-  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
-  var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
-  if (isAdmin && ['add', 'remove'].indexOf(tokens[0]) >= 0) {
-    // look for users mentioned with the @ symbol
-    var userIds = tokens.filter((t) => {
-      return t.indexOf('<@') === 0;
-    }).map((u) => {
-      return u.replace(/(\<\@|\>)/g, '').toUpperCase();
-    });
-    // also look for users mentioned by name without the @ symbol
-    var users = yield db.Chatusers.find({
-      team_id: team.team_id,
-      is_bot: {
-        $ne: true
-      },
-      deleted: {
-        $ne: true
+  // look for users mentioned with the @ symbol
+  var userIds = tokens.filter((t) => {
+    return t.indexOf('<@') > -1;
+  }).map((u) => {
+    return u.replace(/(\<\@|\>)/g, '').toUpperCase();
+  });
+  // also look for users mentioned by name without the @ symbol
+  var users = yield db.Chatusers.find({
+    team_id: team.team_id,
+    is_bot: {
+      $ne: true
+    },
+    deleted: {
+      $ne: true
+    }
+  }).select('id name').exec();
+  users.map((u) => {
+    var re = new RegExp('\\b' + u.name + '\\b', 'i')
+    if (message.text.match(re)) {
+      userIds.push(u.id);
+    }
+  });
+  if (tokens[0] === 'add') {
+    if (team.meta.p2p) {
+      team.meta.p2p = false;
+      kip.debug('P2P mode OFF');
+      team.meta.office_assistants = [message.source.user];
+    }
+    yield userIds.map(function * (id) {
+      if (team.meta.office_assistants.indexOf(id) < 0) {
+        team.meta.office_assistants.push(id);
       }
-    }).select('id name').exec();
-    users.map((u) => {
-      var re = new RegExp('\\b' + u.name + '\\b', 'i')
-      if (message.text.match(re)) {
-        userIds.push(u.id);
-      }
-    });
-    if (userIds.length === 0) {
-      // return yield handlers['home.sorry'][message]
-      var attachments = [];
-       attachments.push({
-          text: 'Don’t have any changes? Type `exit` to quit settings',
-          color: '#49d63a',
-          mrkdwn_in: ['text'],
-          fallback:'Settings',
-          actions: [
-              {
-                "name": "settings.back",
-                "text": "Home",
-                "style": "default",
-                "type": "button"
-              },
-              {
-                "name": "team",
-                "text": "Team Members",
-                "style": "default",
-                "type": "button",
-                "value": "team"
-              },
-              {
-                "name": "viewcart",
-                "text": "View Cart",
-                "style": "default",
-                "type": "button",
-                "value": "viewcart"
-              }
-          ],
-          callback_id: 'none'
+      if (id !== message.source.user) {
+      	let msg = db.Message();
+        let userToBeNotified = yield db.Chatusers.findOne({
+          id: id
         });
-      attachments.map(function(a) {
-        a.mrkdwn_in =  ['text'];
-        a.color = '#45a5f4';
-      })
-      var msg = message;
-      msg.mode = 'settings'
-      msg.action = 'home'
-      msg.text = "We couldn't find that user!";
-      msg.reply = attachments;
-      msg.source.team = team.team_id;
-      msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-      return [msg]
-    }
-    if (tokens[0] === 'add') {
-      if(team.meta.p2p) {
-         team.meta.p2p = false;
-         kip.debug('P2P mode OFF');
-         team.meta.office_assistants = [];
+        let attachments = [{
+          text: '\nLooks like you\'ve done this before :blush:\nIf you need a refresher, I can start your tour again',
+          mrkdwn_in: ['text'],
+          color: '#A368F0',
+          callback_id: 'take me home pls',
+          actions: [{
+            'name': 'onboard.restart',
+            'text': 'Refresh Me',
+            'style': 'primary',
+            'type': 'button',
+            'value': 'restart'
+          }, {
+            name: 'passthrough',
+            text: 'Home',
+            style: 'default',
+            type: 'button',
+            value: 'home'
+          }]
+        }];
+        msg.source = {};
+        msg.mode = 'onboard';
+        msg.action = 'home';
+        msg.source.team = team.team_id;
+        msg.source.channel = userToBeNotified.dm;
+        msg.source.user = id;
+        msg.user_id = id;
+        msg.thread_id = userToBeNotified.dm;
+        msg.text = `<@${message.source.user}> just made you an admin of Kip!`;
+        msg.reply = attachments;
+        yield msg.save();
+        yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
       }
-      yield userIds.map(function * (id) {
-        if (team.meta.office_assistants.indexOf(id) < 0) {
-          team.meta.office_assistants.push(id);
-          var userToBeNotified = yield db.Chatusers.findOne({
-            id: id
-          });
-          var msg = new db.Message();
-          if (!userToBeNotified.admin_shop_onboarded) {
-            msg.source = {};
-            msg.mode = 'onboard';
-            msg.action = 'home';
-            msg.source.team = team.team_id;
-            msg.source.channel = userToBeNotified.dm;
-            msg.source.user = id;
-            msg.user_id = id;
-            msg.thread_id = userToBeNotified.dm;
-            msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
-            msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
-            yield msg.save();
-            yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
-          } else {
-            let attachments = [{
-              text: '\nLooks like you\'ve done this before :blush:\nIf you need a refresher, I can start your tour again',
-              mrkdwn_in: ['text'],
-              color: '#A368F0',
-              callback_id: 'take me home pls',
-              actions: [{
-                'name': 'onboard.restart',
-                'text': 'Refresh Me',
-                'style': 'primary',
-                'type': 'button',
-                'value': 'restart'
-              }, {
-                name: 'passthrough',
-                text: 'Home',
-                style: 'default',
-                type: 'button',
-                value: 'home'
-              }]
-            }];
-            msg.source = {};
-            msg.mode = 'onboard';
-            msg.action = 'home';
-            msg.source.team = team.team_id;
-            msg.source.channel = userToBeNotified.dm;
-            msg.source.user = id;
-            msg.user_id = id;
-            msg.thread_id = userToBeNotified.dm;
-            msg.text = `<@${message.source.user}> just made you an admin of Kip!`;
-            msg.reply = attachments;
-            yield msg.save();
-            yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
-          }
+    });
+  } else if (tokens[0] === 'remove') {
+    userIds.map((id) => {
+      if (team.meta.office_assistants.indexOf(id) >= 0) {
+        var index = team.meta.office_assistants.indexOf(id);
+        // check to see if there is only one admin left, if so you cant remove the last remaining admin
+        if (team.meta.office_assistants.length !== 1) {
+          team.meta.office_assistants.splice(index, 1);
         }
-      })
-    } else if (tokens[0] === 'remove') {
-      userIds.map((id) => {
-        if (team.meta.office_assistants.indexOf(id) >= 0) {
-          var index = team.meta.office_assistants.indexOf(id);
-          //check to see if there is only one admin left, if so you cant remove the last remaining admin
-          if (team.meta.office_assistants.length != 1) {
-            team.meta.office_assistants.splice(index, 1);
-          }
-        }
-      })
-    }
-
-    team.markModified('meta.office_assistants');
-    yield team.save();
-    var msg = message;
-    msg.mode = 'settings';
-    msg.action = 'home';
-    msg.text = 'Ok, I have updated your settings!';
-    msg.execute = [ { 
-      "mode": "settings",
-      "action": "home",
-      "_id": message._id
-    } ];
-    msg.source.team = team.team_id;
-    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-    replies.push(msg)
+      }
+    });
+  } else {
+    team.meta.office_assistants = _.xor(team.meta.office_assistants, userIds);
   }
- return yield handlers['start'](msg) //actually showing results instead of just saying you updated settings...should be both eventually
+
+  yield team.meta.office_assistants.map(function * (id) {
+    let userToBeNotified = yield db.Chatusers.findOne({
+      id: id
+    });
+    let msg = new db.Message();
+    if (!userToBeNotified.admin_shop_onboarded) {
+      msg.source = {};
+      msg.mode = 'onboard';
+      msg.action = 'home';
+      msg.source.team = team.team_id;
+      msg.source.channel = userToBeNotified.dm;
+      msg.source.user = id;
+      msg.user_id = id;
+      msg.thread_id = userToBeNotified.dm;
+      msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
+      msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
+      yield msg.save();
+      yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
+    }
+  });
+
+  team.markModified('meta.office_assistants');
+  yield team.save();
+  let msg = message;
+  msg.mode = 'settings';
+  msg.action = 'home';
+  msg.text = 'Ok, I have updated your settings!';
+  msg.execute = [{ 
+    "mode": "settings",
+    "action": "home",
+    "_id": message._id
+  }];
+  msg.source.team = team.team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  replies.push(msg) 
+  return yield handlers['start'](msg) // actually showing results instead of just saying you updated settings...should be both eventually
 }
 
 handlers['sorry'] = function * (message) {
@@ -602,8 +578,6 @@ handlers['sorry'] = function * (message) {
      return [message];
 }
 
-
-
 function getAction(text) {
   var action;
   if (isAddOrRemove(text)) {
@@ -617,10 +591,11 @@ function getAction(text) {
 }
 
 function isAddOrRemove(input) {
-    var regex = /^(add|remove|add @|remove @)/;
-    if (input.toLowerCase().trim().match(regex)) {
-      return true;
-    } else {
-      return false;
-    }
+  var regex = /^(add|remove|add @|remove @|<@.+>)/;
+  kip.debug(input.toLowerCase().trim())
+  if (input.toLowerCase().trim().match(regex)) {
+    return true;
+  } else {
+    return false;
+  }
 }

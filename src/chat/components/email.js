@@ -13,7 +13,11 @@
 var co = require('co')
 require('promisify-global')
 var db = require('../../db')
-var iokip = require('./io')
+var iokip = {
+  parsereply: function () {
+    logging.error('function deprecated')
+  }
+}
 var uuid = require('uuid')
 var _ = require('lodash')
 var linkify = require('linkifyjs')
