@@ -1,4 +1,4 @@
-const getSuccessfulCafePaymentsTokens = (payments, start, end) =>
+const getSuccessfulCafePaymentTokens = (payments, start, end) =>
   new Promise((resolve, reject) => {
     payments.aggregate([
       {
@@ -43,8 +43,8 @@ const getSuccessfulCafePaymentsTokens = (payments, start, end) =>
     });
   });
 
-module.exports = getSuccessfulCafePaymentsTokens;
+module.exports = getSuccessfulCafePaymentTokens;
 if (!module.parent) {
   require('../../../kip')
-  getSuccessfulCafePaymentsTokens(db.payments, new Date(new Date().setDate(new Date().getDate()-28)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past half year
+  getSuccessfulCafePaymentTokens(db.payments, new Date(new Date().setDate(new Date().getDate()-28)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past half year
 }
