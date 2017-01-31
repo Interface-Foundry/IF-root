@@ -228,6 +228,8 @@ function * onSuccess (payment) {
     var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">'
     var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
     var date = new Date()
+    var kip_blue = '#47a2fc'
+    var ryan_grey = '#F5F5F5'
 
     var formatTime = function (date) {
       var minutes = date.getMinutes()
@@ -247,20 +249,39 @@ function * onSuccess (payment) {
     var html = `<html>${header}` + br;
     html += `<h1 style="font-size:2em;">Order Receipt</h1>`
     html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from ${foodSession.chosen_restaurant.name} at ${formatTime(date)} on ${formatDate(date)}</p>`
-    html += `\nHere is a list of items:\n` + br;
+    html += `\nHere is a list of items:\n`
 
     //column headings
-    html += `<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
+    html += `<table border="0" style="margin-top:4px;border-color:${kip_blue};border-spacing:4px;"><thead style="color:white;background-color:${kip_blue}"><tr><th>Menu Item</th>`
+    html += `<th>Item Options</th>`
+    html += `<th>Price</th>`
+    html += `<th>Recipient</th></tr></thead>`
 
     //items ordered
     foodSession.cart.filter(i => i.added_to_cart).map((item) => {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
-      html += `<tr><td>${foodInfo.name}</td><td>${descriptionString}</td><td>${menu.getCartItemPrice(item).toFixed(2)}</td><td>${user[0].real_name}</td></tr>`
+      html += `<tr><td style="background-color:${ryan_grey};"><b>${foodInfo.name}</b></td>`
+      html += `<td style="background-color:${ryan_grey};">${descriptionString}</td>`
+      html += `<td style="background-color:${ryan_grey};"><b>${menu.getCartItemPrice(item).toFixed(2)}</b></td>`
+      html += `<td style="background-color:${ryan_grey};"><p>${user[0].first_name} ${user[0].last_name}</p><p>@${user[0].name}</p></td></tr>`
     })
 
+    html += `</thead></table>` + br
+
     //itemized charges
+
+    var line_item_style = `padding:0 0 0 8px;margin:2px;`
+
+    html += `<div style="border-left:4px solid ${kip_blue};">`
+    html += `<p style="${line_item_style}">Cart Subtotal: ${foodSession.order.subtotal.$}</p>`
+    html += `<p style="${line_item_style}">Tax: ${foodSession.order.tax.$}</p>`
+    html += `<p style="${line_item_style}">Delivery Fee: ${foodSession.order.delivery_fee.$}</p>`
+    html += `<p style="${line_item_style}">Service Fee: ${foodSession.service_fee.$}</p>`
+    if (foodSession.discount_amount) html += `🎉 Kip Coupon: -${foodSession.discount_amount.$}`
+    html += `<p style="${line_item_style}">Tip: ${(foodSession.tip.percent === 'cash') ? '$0.00 (Will tip in cash)' : foodSession.tip.amount.$}</p>`
+    html += `<p style="${line_item_style}"><b>Order Total: ${foodSession.calculated_amount.$}</b></p></div>`
 
     //footer
 
@@ -269,7 +290,7 @@ function * onSuccess (payment) {
       to: `${foodSession.convo_initiater.name} <${foodSession.convo_initiater.email}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `Your Order Receipt for ${foodSession.chosen_restaurant.name}`,
-      html: `${html}</thead></table></html>`
+      html: `${html}</html>`
     }
 
     logging.info('mailOptions', mailOptions)
