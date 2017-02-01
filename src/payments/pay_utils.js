@@ -272,11 +272,13 @@ function * onSuccess (payment) {
       html += `<p><a href="https://${slackbot.team_name}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
     })
 
-    html += `</thead></table>` + br
+    html += `</thead></table>` + br + br
 
     //itemized charges
 
     var line_item_style = `padding:0 0 0 8px;margin:2px;`
+
+    html += `<table border="0"><tr><td style="width:300px;">`
 
     html += `<div style="border-left:4px solid ${kip_blue};">`
     html += `<p style="${line_item_style}">Cart Subtotal: ${foodSession.order.subtotal.$}</p>`
@@ -287,7 +289,17 @@ function * onSuccess (payment) {
     html += `<p style="${line_item_style}">Tip: ${(foodSession.tip.percent === 'cash') ? '$0.00 (Will tip in cash)' : foodSession.tip.amount.$}</p>`
     html += `<p style="${line_item_style}"><b>Order Total: ${foodSession.calculated_amount.$}</b></p></div>`
 
+    //misc Information
+    html += `</td style="width=300px;"><td>`
+    html += `<p style="${line_item_style}"><b>Delivery Address:</b></p><br/><p style="${line_item_style}">${foodSession.chosen_location.address_1}</p>`
+    if (foodSession.chosen_location.address_2) html += `<p style="${line_item_style}">${foodSession.chosen_location.address_2}</p>`
+    html += `<p style="${line_item_style}">${foodSession.chosen_location.city}, ${foodSession.chosen_location.state} </p>`
+    html += `<p style="${line_item_style}">${foodSession.chosen_location.zip_code}</p>` + br
+    if (foodSession.instructions) html += `<p style="${line_item_style}"><i>${foodSession.instructions}</i></p>`
+    html += `</td></tr></table>`
+
     //footer
+    html += `<p style="text-decoration:none;color:grey;"><img height="16" width="16" alt="delivery.com" src="http://tidepools.co/kip/dcom_footer.png">Powered by delivery.com</p>`
 
     // send confirmation email to admin
     var mailOptions = {
