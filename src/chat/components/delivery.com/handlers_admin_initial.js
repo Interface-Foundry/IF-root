@@ -725,12 +725,21 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
   lastOrdered = lastOrdered[0]
   foodSession.chosen_channel = lastOrdered.chosen_channel
   foodSession.chosen_restaurant = lastOrdered.chosen_restaurant
-  if (lastOrdered.chosen_channel === 'just_me' || lastOrdered.team_members.length<1) {
+
+  if (lastOrdered.chosen_channel === 'just_me' || lastOrdered.team_members.length < 1) {
     // possible last ordered just me is another admin
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
   } else {
     foodSession.team_members = lastOrdered.team_members
   }
+
+  if (!_.find(lastOrdered.team_members, {'id': foodSession.convo_initiater.id})) {
+    // user not in the last ordered delivery team members since different convo_init probably
+    logging.info('adding current convo init to team_members')
+    var convoInitUser = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id, deleted: {$ne: true}}).exec()
+    foodSession.team_members.push(convoInitUser)
+  }
+
   foodSession.markModified('team_members')
   yield foodSession.save()
 
