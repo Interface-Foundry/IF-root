@@ -248,11 +248,11 @@ function * onSuccess (payment) {
 
     var html = `<html>${header}` + br;
     html += `<h1 style="font-size:2em;">Order Receipt</h1>`
-    html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from ${foodSession.chosen_restaurant.name} at ${formatTime(date)} on ${formatDate(date)}</p>`
+    html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> at ${formatTime(date)} on ${formatDate(date)}</p>`
     html += `\nHere is a list of items:\n`
 
     //column headings
-    html += `<table border="0" style="margin-top:4px;border-color:${kip_blue};border-spacing:4px;"><thead style="color:white;background-color:${kip_blue}"><tr><th>Menu Item</th>`
+    html += `<table border="0" style="margin-top:4px;width:600px;border-spacing:5.5px;"><thead style="color:white;background-color:${kip_blue}"><tr><th>Menu Item</th>`
     html += `<th>Item Options</th>`
     html += `<th>Price</th>`
     html += `<th>Recipient</th></tr></thead>`
@@ -262,10 +262,14 @@ function * onSuccess (payment) {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
+
+      console.log(`link to user dm: https://${slackbot.team_name}.slack.com/messages/@${user[0]}`)
+
       html += `<tr><td style="background-color:${ryan_grey};"><b>${foodInfo.name}</b></td>`
       html += `<td style="background-color:${ryan_grey};">${descriptionString}</td>`
       html += `<td style="background-color:${ryan_grey};"><b>${menu.getCartItemPrice(item).toFixed(2)}</b></td>`
-      html += `<td style="background-color:${ryan_grey};"><p>${user[0].first_name} ${user[0].last_name}</p><p>@${user[0].name}</p></td></tr>`
+      html += `<td style="background-color:${ryan_grey};"><p>${user[0].first_name} ${user[0].last_name}</p>`
+      html += `<p><a href="https://${slackbot.team_name}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
     })
 
     html += `</thead></table>` + br
