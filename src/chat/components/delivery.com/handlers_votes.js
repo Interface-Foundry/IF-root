@@ -224,7 +224,7 @@ handlers['food.user.poll'] = function * (message) {
   }
 
   yield teamMembers.map(function * (member) {
-    sendUserDashboard(foodSession, message, member)
+    yield sendUserDashboard(foodSession, message, member)
     // if (_.get(member, 'food_preferences.asked') === true) {
     //   sendUserDashboard(foodSession, message, member)
     // } else {
@@ -238,7 +238,7 @@ handlers['food.user.preferences'] = function * (message, member, foodSession) {
   // seems to be an error sometimes idk
   if (_.get(member, 'id') === undefined) {
     logging.error('error with member, just continue on')
-    sendUserDashboard(foodSession, message, member)
+    yield sendUserDashboard(foodSession, message, member)
   }
   // find user in db, present items, if they click update their profile and their object in the foodsession
   var user = yield db.Chatusers.findOne({'id': member.id, deleted: {$ne: true}}).exec()
@@ -558,7 +558,7 @@ function buildCuisineDashboard(foodSession) {
 //
 // Sends new or updates the admin's cuisine vote dashboard
 //
-function sendAdminDashboard(foodSession, message) {
+function * sendAdminDashboard(foodSession, message, user) {
   logging.debug('sending admin dashboard')
   var basicDashboard = buildCuisineDashboard(foodSession)
 
@@ -576,7 +576,11 @@ function sendAdminDashboard(foodSession, message) {
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
   var adminInOrder = foodSession.team_members.map(u => u.id).includes(foodSession.convo_initiater.id)
   if (!adminHasVoted && adminInOrder) {
-    var sampleArray = sampleCuisines(foodSession)
+    var prevMessage = yield db.Message.find({
+      'source.user': user.id
+    }).sort('-ts').limit(1).exec()
+    prevMessage = prevMessage[0];
+    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
     basicDashboard.attachments.push({
       'text': 'Tap a button to choose a cuisine',
       'fallback': 'Tap a button to choose a cuisine',
@@ -619,15 +623,17 @@ function sendAdminDashboard(foodSession, message) {
 //
 // Sends new or updates the user's cuisine vote dashbaord
 //
-function sendUserDashboard(foodSession, message, user) {
+function * sendUserDashboard(foodSession, message, user) {
   console.log('send user dashboard to', user.id, 'initiated by', foodSession.convo_initiater.id)
   if (user.id === foodSession.convo_initiater.id) {
-    return sendAdminDashboard(foodSession, message)
+    return yield sendAdminDashboard(foodSession, message, user)
   }
   var userHasVoted = foodSession.votes.map(v => v.user).includes(user.id)
   var basicDashboard = buildCuisineDashboard(foodSession)
-  var sampleArray = sampleCuisines(foodSession)
   if (!userHasVoted) {
+    var prevMessage = yield db.Message.find({'source.user': user.id}).sort('-ts').limit(1).exec()
+    prevMessage = prevMessage[0];
+    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
     basicDashboard.attachments.push({
       'text': 'Tap a button to choose a cuisine',
       'fallback': 'Tap a button to choose a cuisine',
