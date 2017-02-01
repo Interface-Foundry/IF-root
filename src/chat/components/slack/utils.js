@@ -785,16 +785,16 @@ function getSearchButtons() {
   return buttons;
 }
 
-function* couponText(team) {
+function * couponText(team) {
   let coupon = yield db.Coupons.find({
     team_id: team
   }).exec();
   return coupon.reduce((text, coupon) => {
-    if (coupon.available && coupon.coupon_type==='percentage') {
-      let totalCoupons = coupon.quantity_coupon.can_be_used,
-        usedCoupons = coupon.quantity_coupon.used,
-        percentOff = coupon.coupon_discount * 100;
-      text += `${totalCoupons - usedCoupons} × [_${percentOff}% Off Coupon_]  \n`;
+    let totalCoupons = coupon.quantity_coupon.can_be_used,
+      usedCoupons = coupon.quantity_coupon.used;
+    if (coupon.available && coupon.coupon_type === 'percentage' && totalCoupons - usedCoupons > 0) {
+      let percentOff = coupon.coupon_discount * 100;
+      text += `▸ ${totalCoupons - usedCoupons} × [_${percentOff}% Off Coupon_]  \n`;
     }
     return text;
   }, '');
