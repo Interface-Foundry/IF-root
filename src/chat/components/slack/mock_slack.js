@@ -96,15 +96,10 @@ function run_chat_server () {
       if (e) {
         reject(e)
       }
-      console.log('mock slack chat server listening on port 8080, ' + randomThing())
+      console.log('mock slack chat server listening on port 8080')
       resolve()
     })
   })
-}
-
-function randomThing () {
-  var things = ["ma'am", 'sir', 'dude', 'man', 'bro', 'dad', 'bitch', 'commander', 'Sir!', 'captain', 'lieutenant', 'i guess', 'probably...']
-  return things[Math.random(things.length) | 0]
 }
 
 var ALL_THE_RTM_CLIENTS = {}

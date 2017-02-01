@@ -293,7 +293,7 @@ function * setup () {
 
   yield require('../../src/chat/components/slack/test_team_1').reset()
   yield require('../../src/chat/components/slack/slack').startMockSlack()
-  yield require('../../src/chat/components/reply_logic.js')
+  //yield require('../../src/chat/components/reply_logic.js')
 
   console.log('Done with setup'.green)
   console.log()
