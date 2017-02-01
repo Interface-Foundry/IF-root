@@ -212,16 +212,36 @@ function * onSuccess (payment) {
         foodString = itemNames[0]
       }
 
-      var isAdmin = team.meta.office_assistants.includes(user.id);
-      var homeMsg = {};
-      homeMsg.data = cardTemplates.home_screen(isAdmin, user.id);
-      homeMsg.type = finalFoodMessage.origin;
-      homeMsg.data.text = `Your order of ${foodString} is on the way 😊`;
-      replyChannel.send(
-        msg,
-        'food.payment_info',
-        homeMsg);
-    });
+
+      var isAdmin = team.meta.office_assistants.includes(user.id)
+      var msg = _.merge(finalFoodMessage, {
+        'incoming': false,
+        'mode': 'food',
+        'action': 'payment_info',
+        'thread_id': user.dm,
+        'source': {
+          'type': 'message',
+          'user': user.id,
+          'channel': user.dm,
+          'team': foodSession.team_id
+        }
+      })
+
+      var json = {
+        'text': `Your order of ${foodString} is on the way 😊`,
+        'callback_id': 'food.payment_info',
+        'fallback': `Your order is on the way`,
+        'attachment_type': 'default',
+        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id).attachments)
+      }
+
+      replyChannel.send(msg, 'food.payment_info', {
+        'type': finalFoodMessage.origin,
+        'data': json
+      })
+    })
+
+    // var htmlForItem = `Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
 
     //constants
     var br = '<br/>'
@@ -262,8 +282,6 @@ function * onSuccess (payment) {
       var foodInfo = menu.getItemById(String(item.item.item_id))
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
-
-      console.log('suntne instructions?', item.item)
 
       html += `<tr><td style="background-color:${ryan_grey};"><b>${foodInfo.name}</b></td>`
       html += `<td style="background-color:${ryan_grey};"><p>${descriptionString}</p>`
@@ -318,6 +336,7 @@ function * onSuccess (payment) {
       logging.error('error mailing after payment submitted', e)
     }
     yield foodSession.save()
+
   } catch (err) {
     logging.error('on success messages broke', err)
   }
