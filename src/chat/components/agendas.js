@@ -7,7 +7,7 @@ require('./jobs/reminder')(agenda);
 require('./jobs/initial_reminder')(agenda);
 require('./jobs/feature_rollout')(agenda);
 
-let cartEmailInterval = (process.env.JOB_CART_EMAIL && typeof process.env.JOB_CART_EMAIL == 'string') ? process.env.JOB_CART_EMAIL : '00 15 * * 6';
+let cartEmailInterval = (process.env.JOB_CART_EMAIL && typeof process.env.JOB_CART_EMAIL == 'string') ? process.env.JOB_CART_EMAIL : '00 15 * * 5';
 let featureInterval = (process.env.JOB_FEATURE_ROLLOUT && typeof process.env.JOB_FEATURE_ROLLOUT == 'string') ? process.env.JOB_FEATURE_ROLLOUT : false;
 
 agenda.on('ready', function () {
