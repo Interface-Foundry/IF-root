@@ -25,6 +25,34 @@ function plotData() {
 }
 const lineChartData = plotData();
 
+const waypointsCount = [ { waypoint: 1001, users: [ 'U3620AA5T' ], total: 12 },
+  { waypoint: 1010, users: [ 'U3620AA5T' ], total: 12 },
+  { waypoint: 1020, users: [ 'U3620AA5T' ], total: 11 },
+  { waypoint: 1100, users: [ 'U3620AA5T' ], total: 11 },
+  { waypoint: 1101, users: [ 'U3620AA5T' ], total: 4 },
+  { waypoint: 1102, users: [ 'U3620AA5T' ], total: 7 },
+  { waypoint: 1110, users: [ 'U3620AA5T' ], total: 7 },
+  { waypoint: 1111, users: [ 'U3620AA5T' ], total: 4 },
+  { waypoint: 1120, users: [ 'U3620AA5T' ], total: 7 },
+  { waypoint: 1121, users: [ 'U3620AA5T' ], total: 1 },
+  { waypoint: 1130, users: [ 'U3620AA5T' ], total: 1 },
+  { waypoint: 1140,
+    users: [ 'U3H5E1ANN', 'U3620AA5T' ],
+    total: 29 },
+  { waypoint: 1200, users: [ 'U3620AA5T' ], total: 6 },
+  { waypoint: 1210, users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 6 },
+  { waypoint: 1211, users: [ 'U3620AA5T' ], total: 1 },
+  { waypoint: 1220, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 4 },
+  { waypoint: 1230, users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 3 },
+  { waypoint: 1240, users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 1 },
+  { waypoint: 1300, users: [ 'U3620AA5T' ], total: 2 },
+  { waypoint: 1310, users: [ 'U3620AA5T' ], total: 1 },
+  { waypoint: 1313, users: [ 'U3620AA5T' ], total: 1 },
+  { waypoint: 1320, users: [ 'U3620AA5T' ], total: 3 },
+  { waypoint: 1321, users: [ 'U3620AA5T' ], total: 1 },
+  { waypoint: 1323, users: [ 'U3620AA5T' ], total: 1 },
+  { waypoint: 1330, users: [ 'U3620AA5T' ], total: 1 },
+  { waypoint: 1332, users: [ 'U3620AA5T' ], total: 1 } ];
 
 const orderTimePlaceFrequencies = [ { hour: 10, location: [ '122 W 27th St' ], total: 1 },
   { hour: 11,
@@ -152,9 +180,17 @@ function displayFlotCharts(props, context) {
         </div>
 
         <div className="col-lg-6">
-          <Panel header={<span>Moving Line Chart Example</span>} >
+          <Panel header={<span>Waypoints of past 2 weeks</span>} >
             <div>
-              Panel contents
+              <LineChart width={600} height={300} data={waypointsCount}
+                margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+                <XAxis dataKey="waypoint"/>
+                <YAxis/>
+                <CartesianGrid strokeDasharray="3 3"/>
+                <Tooltip/>
+                <Legend />
+                <Line type="monotone" dataKey="total" stroke="#8884d8" activeDot={{r: 8}}/>
+              </LineChart>
             </div>
           </Panel>
         </div>

@@ -76,5 +76,5 @@ const getPurchasedStoreCartItems = (carts, start, end) =>
 module.exports = getPurchasedStoreCartItems;
 if (!module.parent) {
   require('../../../kip')
-  getPurchasedStoreCartItems(db.carts, new Date(new Date().setDate(new Date().getDate()-180)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past half year
+  getPurchasedStoreCartItems(db.carts, new Date(new Date().setDate(new Date().getDate()-365)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past year
 }
