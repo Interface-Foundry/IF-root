@@ -14,7 +14,7 @@ module.exports = function(agenda) {
     co( function * () {
       logging.info('started job: send cart status email');
       let slackbots = yield db.Slackbots.find({'meta.weekly_status_enabled': true});
-      let teams = yield slackbots.map( function * (team) { 
+      let teams = yield slackbots.map( function * (team) {
         let admins = yield utils.findAdmins(team);
         return { team: team, admins: admins }
       });
@@ -27,7 +27,8 @@ module.exports = function(agenda) {
           if (!cart || !(cart && _.get(cart,'aggregate_items') && _.get(cart,'aggregate_items').length > 0)) return callback()
           async.eachSeries(obj.admins, function(admin, callback2){
             co(function * () {
-              let html = `Thank you for using Kip! Here is the list of items in your team cart:\n\n<table border="1"><thead><tr><th>Item</th><th>Price</th><th>Quantity</th><th>Added By</th></tr></thead>`
+              let html = `Thank you for using Kip! Here is the list of items in your team cart:\n\n`
+              html += `<table border="1"><thead><tr><th>Item</th><th>Price</th><th>Quantity</th><th>Added By</th></tr></thead>`
               let userNames = [];
               yield cart.aggregate_items.map( function * (item) {
                 let addedUser = yield db.Chatusers.find({'id': item.added_by[0]}).limit(1).exec();
@@ -39,7 +40,8 @@ module.exports = function(agenda) {
               });
               html += `<tr><a href=${cart.link}>Check out now!</a></tr>`
               let payload = {
-                to: `"${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
+                //please remember to change this back
+                to: 'hannah.katznelson@gmail.com',//`"${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
                 from: `Kip Café <hello@kipthis.com>`,
                 subject: 'This is your weekly team cart status email from Kip!',
                 html: html
@@ -52,7 +54,7 @@ module.exports = function(agenda) {
             })
           }, function(err){
             setTimeout(callback, 2000)
-          }) 
+          })
        })
       }, function(err){
         if(err) logging.err('job: weekly cart snapshots err', err)
