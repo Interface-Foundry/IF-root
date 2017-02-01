@@ -153,6 +153,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
     }
     logging.info('saving phone number: ', num, 'from', message.text)
     foodSession.chosen_location.phone_number = phoneParsed[0]
+    foodSession.convo_initiater.phone_number = phoneParsed[0]
     foodSession.markModified('chosen_location')
     yield foodSession.save()
   }
@@ -167,8 +168,11 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   if (!foodSession.convo_initiater.last_name) {
     return yield handlers['food.admin.order.checkout.name'](message)
   }
-  if (!foodSession.chosen_location.phone_number) {
+  if (!foodSession.convo_initiater.phone_number) {
     return yield handlers['food.admin.order.checkout.phone_number'](message)
+  } else {
+    foodSession.chosen_location.phone_number = foodSession.convo_initiater.phone_number
+    yield foodSession.save()
   }
 
   var deliveryInstructionsText = foodSession.instructions || ''
@@ -541,11 +545,11 @@ handlers['food.admin.order.select_card'] = function * (message) {
       'callback_id': `food.admin.select_card`
     }
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
-    yield handlers['food.done'](message)
   } catch (e) {
     logging.error('error doing kip pay in food.admin.order.select_card', e)
     $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: {text: 'couldnt submit to kip pay'}})
   }
+  return yield handlers['food.done'](message)
 }
 
 handlers['food.admin.order.pay.confirm'] = function * (message) {
@@ -579,39 +583,45 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
     }]
   }
   $replyChannel.send(message, 'food.done', {type: message.origin, data: response})
-  yield handlers['food.done'](message, foodSession)
+  return yield handlers['food.done'](message)
 }
 
 handlers['food.payment_info'] = function * (message) {
   logging.info('recevied message from pay server')
 }
 
-
-handlers['food.done'] = function * (message, foodSession) {
-  logging.info('saving users info to slackbots and peripheral cleanup')
-  if (foodSession === undefined) {
-    logging.warn('foodSession wasnt passed into food.done')
-    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  }
-
-  db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
-
+handlers['food.admin.save_info'] = function * (message, foodSession) {
   // final area to save and reset stuff
+  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false})
+
   logging.info('saving phone_number... ')
-  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
-  user.phone_number = foodSession.convo_initiater.phone_number
+  user.phone_number = foodSession.chosen_location.phone_number
   user.first_name = foodSession.convo_initiater.first_name
   user.last_name = foodSession.convo_initiater.last_name
   yield user.save()
 
   // slackbot save info
   logging.info('saving location... ')
-  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  if (!_.find(slackbot.meta.locations, {'address_1': foodSession.chosen_location.address_1})) {
-    logging.debug('location not previously saved')
-    slackbot.meta.locations.push(foodSession.chosen_location)
-    yield slackbot.save()
+  try {
+    yield db.Slackbot.update({
+      'team_id': message.source.team,
+      'meta.locations.address_1': foodSession.chosen_location.address_1
+    }, {
+      $set: {'meta.locations.$': foodSession.chosen_location}
+    }, {
+      upsert: true
+    })
+  } catch (err) {
+    logging.error('error updating slackbot.meta.locations', err)
   }
+}
+
+handlers['food.done'] = function * (message) {
+  logging.info('saving users info to slackbots and peripheral cleanup')
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.original_text})
+  yield handlers['food.admin.save_info'](message, foodSession)
   yield handlers['food.need.payments.done'](message, foodSession)
 }
 
