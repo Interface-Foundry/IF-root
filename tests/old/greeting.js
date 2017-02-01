@@ -14,8 +14,8 @@ describe('greeting', () => {
     user.chatuser.id.should.equal('bamf_yolo')
     user.chatuser.team_id.should.equal('yolo')
 
-    var res = yield user.text('food', {expect: 2})
-    _.get(res, '[0]attachments[0].image_url').should.equal('http://kipthis.com/kip_modes/mode_cafe.png')
-    _.get(res, '[1]attachments[0].text').should.equal('Great! Which address is this for?')
+    var res = yield user.text('food', {expect: 1})
+    console.log(res)
+    _.get(res, 'text', '').should.endWith('Start a new order anyway?')
   })
 })

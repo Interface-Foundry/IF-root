@@ -1,4 +1,4 @@
-var mock = require('../mock_slack_users.js')
+var mock = require('../mock.slack_users.js')
 var should = require('should')
 require('co-mocha')
 var _ = require('lodash')
