@@ -13,13 +13,13 @@ var shopping_home_default = module.exports.shopping_home_default = function(id) 
   }]
 }
 
-var home_screen = module.exports.home_screen = function(isAdmin, userId) {
+var home_screen = module.exports.home_screen = function(isAdmin, userId, couponText) {
   let buttonDescrip = isAdmin ? 'Collect' : 'Get';
   return {
     text: require('./utils').randomWelcome(userId),
     attachments: [{
       'mrkdwn_in': ['text'],
-      text: '*Kip Café*\n' + require('./utils').randomCafeDescrip(),
+      text: `${require('./utils').randomEmoji(true)}*Kip Café*\n${require('./utils').randomCafeDescrip()}\n${couponText}`,
       color: '#f43440',
       callback_id: 'wow such home',
       actions: [{
@@ -29,7 +29,7 @@ var home_screen = module.exports.home_screen = function(isAdmin, userId) {
         type: 'button'
       }]
     }, {
-      text: '*Kip Store*\n'+ require('./utils').randomStoreDescrip(),
+      text: `${require('./utils').randomEmoji(false)}*Kip Store*\n${require('./utils').randomStoreDescrip()}`,
       'mrkdwn_in': ['text'],
       color: '#fe9b00',
       callback_id: 'wow such home',

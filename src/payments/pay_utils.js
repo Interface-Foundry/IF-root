@@ -193,6 +193,7 @@ function * onSuccess (payment) {
 
     finalFoodMessage = finalFoodMessage[0]
     var team = yield db.Slackbots.findOne({'team_id': finalFoodMessage.source.team}).exec()
+    let couponText = yield slackUtils.couponText(finalFoodMessage.source.team);
     var menu = Menu(foodSession.menu)
     // send message to all the ppl that ordered food
     var uniqOrders = _.uniq(foodSession.confirmed_orders)
@@ -223,13 +224,12 @@ function * onSuccess (payment) {
           'team': foodSession.team_id
         }
       })
-
       var json = {
         'text': `Your order of ${foodString} is on the way 😊`,
         'callback_id': 'food.payment_info',
         'fallback': `Your order is on the way`,
         'attachment_type': 'default',
-        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id).attachments)
+        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
       }
 
       replyChannel.send(msg, 'food.payment_info', {
