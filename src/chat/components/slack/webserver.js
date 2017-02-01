@@ -344,7 +344,7 @@ app.post('/slackaction', next(function * (req, res) {
         message.mode = 'settings';
         message.action = 'home';
       }
-      else if (simple_command == 'team') {
+      else if (simple_command == 'team' || simple_command === 'members') {
         message.mode = 'team';
         message.action = 'home';
       }

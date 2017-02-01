@@ -12,7 +12,7 @@ var request = require('request');
 
 function * handle(message) {
   let action = message.action;
-  if (!message.data && message.text.trim() == 'team') {
+  if (!message.data && (message.text.trim() == 'team' || message.text.trim() == 'members')) {
     action = 'start';
   } else if (!message.data && message.text && message.text.trim != 'team') {
     action = 'text';

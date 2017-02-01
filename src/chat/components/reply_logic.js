@@ -175,6 +175,9 @@ function switchMode(message) {
 		'settings': function() {
 			return 'settings';
 		},
+    'members': function () {
+      return 'team';
+    },
 		'team': function() {
 			return 'team';
 		},
@@ -415,6 +418,7 @@ queue.topic('incoming').subscribe(incoming => {
         }
         break;
       case 'team':
+      case 'members':
         if (message.origin === 'slack') {
           var replies = yield team.handle(message);
         }

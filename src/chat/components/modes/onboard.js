@@ -755,7 +755,7 @@ handlers['handoff'] = function(message) {
   let attachments = [{
     text: 'We did it!\nI think I\'m getting the hang of this :blush:',
     mrkdwn_in: ['text'],
-    image_url: 'http://tidepools.co/kip/oregano/success.png',
+    image_url: 'http://tidepools.co/kip/oregano/success.gif',
     color: '#A368F0',
     fallback: 'We did it!\nI think I\'m getting the hang of this :blush:',
     callback_id: 'take me home pls',
