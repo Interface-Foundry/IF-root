@@ -175,6 +175,9 @@ function switchMode(message) {
 		'settings': function() {
 			return 'settings';
 		},
+    'members': function () {
+      return 'team';
+    },
 		'team': function() {
 			return 'team';
 		},
@@ -366,7 +369,10 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     printMode(message)
-
+    let team = yield db.Slackbots.findOne({
+      'team_id': message.source.team
+    }).exec();
+    let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
     //MODE SWITCHER
     switch (message.mode) {
       case 'onboarding':
@@ -407,6 +413,7 @@ queue.topic('incoming').subscribe(incoming => {
         break;
       case 'search_btn':
         if (message.origin === 'slack') {
+          yield slackUtils.showLoading(message);
           var data = _.split(message.data.value, '.');
           var action = data[0];
           data.splice(0, 1);
@@ -414,7 +421,8 @@ queue.topic('incoming').subscribe(incoming => {
         }
         break;
       case 'team':
-        if (message.origin === 'slack') {
+      case 'members':
+        if (message.origin === 'slack' && isAdmin) {
           var replies = yield team.handle(message);
         }
         break;

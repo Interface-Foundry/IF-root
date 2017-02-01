@@ -63,6 +63,7 @@ function simple_action_handler (action) {
     case 'view_cart_btn':
       return 'view_cart_btn';
     case 'team':
+    case 'members':
       return 'team';
     case 'channel_btn':
       return 'channel_btn';
@@ -182,7 +183,7 @@ app.post('/slackaction', next(function * (req, res) {
           return button;
         });
         json.attachments.splice(1, json.attachments.length - 2);
-        let okButtonText = (json.attachments[json.attachments.length - 1].callback_id !== 'onboard_team') ? 'Collect Orders' : '✔︎ Update Members';
+        let okButtonText = '✔︎ Update Members';
         switch (selection) {
           case 'everyone':
             json.attachments[0].actions[0].text = '◉ Everyone';
@@ -343,7 +344,7 @@ app.post('/slackaction', next(function * (req, res) {
         message.mode = 'settings';
         message.action = 'home';
       }
-      else if (simple_command == 'team') {
+      else if (simple_command == 'team' || simple_command === 'members') {
         message.mode = 'team';
         message.action = 'home';
       }

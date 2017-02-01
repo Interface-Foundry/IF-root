@@ -4,6 +4,10 @@ var request = require('request-promise')
 var sleep = require('co-sleep')
 var coupon = require('../../../coupon/couponUsing.js')
 
+var mailer_transport = require('../../../mail/IF_mail.js')
+var cardTemplates = require('../slack/card_templates.js')
+var Menu = require('./Menu')
+
 // injected dependencies
 var $replyChannel
 var $allHandlers
@@ -610,6 +614,85 @@ handlers['food.done'] = function * (message, foodSession) {
   yield handlers['food.need.payments.done'](message, foodSession)
 }
 
+function * onSuccess (message, foodSession) {
+  var banner = {
+    title: '',
+    image_url: 'https://storage.googleapis.com/kip-random/cafe_success.gif'
+  }
+
+  try {
+    var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
+    var menu = Menu(foodSession.menu)
+    // send message to all the ppl that ordered food
+    var uniqOrders = _.uniq(foodSession.confirmed_orders)
+    yield uniqOrders.map(function * (userId) {
+      var user = _.find(foodSession.team_members, {'id': userId}) // find returns the first one
+
+      var itemNames = foodSession.cart
+        .filter(i => i.user_id === userId && i.added_to_cart)
+        .map(i => menu.getItemById(i.item.item_id).name)
+        .map(name => '*' + name + '*') // be bold
+
+      if (itemNames.length > 1) {
+        var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
+      } else {
+        foodString = itemNames[0]
+      }
+
+      var isAdmin = team.meta.office_assistants.includes(user.id)
+      var msg = _.merge(message, {
+        'incoming': false,
+        'mode': 'food',
+        'action': 'payment_info',
+        'thread_id': user.dm,
+        'source': {
+          'type': 'message',
+          'user': user.id,
+          'channel': user.dm,
+          'team': foodSession.team_id
+        }
+      })
+
+      var json = {
+        'text': `Your order of ${foodString} is on the way 😊`,
+        'callback_id': 'food.payment_info',
+        'fallback': `Your order is on the way`,
+        'attachment_type': 'default',
+        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id).attachments)
+      }
+
+      yield $replyChannel.send(msg, 'food.need.payments.done', {type: message.origin, data: json})
+    })
+
+    var htmlForItem = `Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
+
+    var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
+      var foodInfo = menu.getItemById(String(item.item.item_id))
+      var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
+      var user = foodSession.team_members.filter(j => j.id === item.user_id)
+      htmlForItem += `<tr><td>${foodInfo.name}</td><td>${descriptionString}</td><td>${menu.getCartItemPrice(item).toFixed(2)}</td><td>${user[0].real_name}</td></tr>`
+    })
+
+    // send confirmation email to admin
+    var mailOptions = {
+      to: `${foodSession.convo_initiater.name} <${foodSession.convo_initiater.email}>`,
+      from: `Kip Café <hello@kipthis.com>`,
+      subject: `Kip Café Order Receipt for ${foodSession.chosen_restaurant.name}`,
+      html: `${htmlForItem}</thead></table>`
+    }
+
+    logging.info('mailOptions', mailOptions)
+
+    try {
+      mailer_transport.sendMail(mailOptions)
+    } catch (e) {
+      logging.error('error mailing after payment submitted', e)
+    }
+  } catch (err) {
+    logging.error('on success messages broke', err)
+  }
+}
+
 handlers['food.need.payments.done'] = function * (message, foodSession) {
   if (foodSession === undefined) {
     logging.warn('foodSession wasnt passed into food.done')
@@ -617,17 +700,18 @@ handlers['food.need.payments.done'] = function * (message, foodSession) {
   }
   // save info relating to foodSession here but sleep for 100 seconds to let user enter cc
   var timeStarted = Date.now()
-  var timeToWait = 100 * 1000
+  var timeToWait = 5 * 60000 // 5 minutes
 
   while (Date.now() - timeStarted < timeToWait) {
-    logging.info('waiting 20 seconds to see if user has finished checking out')
-    yield sleep(20000)
+    logging.info('waiting 3 seconds to see if user has finished checking out')
+    yield sleep(3000)
     var payment = yield db.Payment.findOne({'order.guest_token': foodSession.guest_token})
     if (_.get(payment, 'charge.status') === 'succeeded') {
       logging.info('charge succeeded')
       foodSession.active = false
       foodSession.coupon.used = true
       yield foodSession.save()
+      yield onSuccess(message, foodSession)
       // save coupon info but needed to wait for payments thing
       if (_.get(foodSession, 'coupon.code')) {
         logging.info('saving coupon code stuff')

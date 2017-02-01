@@ -21,6 +21,21 @@ String.prototype.toObjectId = function () {
   return new ObjectId(this.toString())
 }
 
+var restartButton = {
+  'name': 'food.admin.select_address',
+  'text': '↺ Restart Order',
+  'type': 'button',
+  'value': 'food.admin.select_address'
+}
+
+restartButton.confirm = {
+  title: 'Restart Order',
+  text: 'Are you sure you want to restart your order?',
+  ok_text: 'Yes',
+  dismiss_text: 'No'
+}
+
+
 //
 // Show the user their personal cart
 //

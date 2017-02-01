@@ -8,6 +8,13 @@ var agenda = require('../agendas');
 
 function * handle(message) {
   let action;
+  let team = yield db.Slackbots.findOne({
+    'team_id': message.source.team
+  }).exec();
+  let isAdmin = yield utils.isAdmin(message.source.user, team);
+  if (!isAdmin) {
+    return yield handlers['not_admin'](message);
+  }
   if (!message.data && message.text && message.text !== 'home') {
     action = getAction(message.text);
   } else if (!message.data) {
@@ -72,25 +79,29 @@ handlers['start'] = function * (message) {
       style: 'default',
       type: 'button',
       value: 'admins.add'
-    }, {
+    }]
+  });
+  if (team.meta.office_assistants.length > 1) {
+    attachments[attachments.length - 1].actions.push({
       name: 'settings.admins.remove',
       text: 'Remove Admins',
       style: 'default',
       type: 'button',
       value: 'admins.remove'
-    }]
-  });
+    });
+  }
   var color = '#45a5f4';
   var status = team.meta.weekly_status_enabled ? 'Off' : 'On';
+  let statusWord = team.meta.weekly_status_enabled ? ' ' : ' *not* ';
   attachments.push({
-    text: 'Do you want to receive weekly email updates on your team cart status?',
+    text: `You are${statusWord}currently recieving email updates`,
     color: color,
     mrkdwn_in: ['text'],
     fallback: 'Settings',
     actions: [{
       name: 'settings.email.' + status.toLowerCase(),
       text: 'Turn ' + status + ' Updates',
-      style: team.meta.weekly_status_enabled ? 'danger' : 'primary',
+      style: team.meta.weekly_status_enabled ? 'default' : 'primary',
       type: 'button',
       value: team.meta.weekly_status_enabled ? '0' : '1',
       confirm: team.meta.weekly_status_enabled ? {
@@ -169,23 +180,36 @@ handlers['admins'] = function * (message, data) {
       'team_id': message.source.team
     }).exec();
     let admins = yield utils.findAdmins(team);
-    // let testAdmins = [{id:1, name: 'A'}, {id:2, name: 'B'}, {id:3, name: 'C'}, {id:4, name: 'D'}, {id:5, name: 'F'}]
-    // admins = admins.concat(testAdmins);
-    let adminButtons = admins.map((admin) => {
-      return {
-        name: 'settings.remove.' + admin.id,
-        text: `× ${admin.name}`,
-        style: 'danger',
-        type: 'button',
-        value: admin.id,
-        confirm: {
-          'title': 'Are you sure?',
-          'text': `This will remove all of ${admin.name}'s abilities as an admin and make them a normal user`,
-          'ok_text': `Remove ${admin.name}`,
-          'dismiss_text': 'Nevermind'
-        }
-      };
-    });
+    let adminButtons;
+    if (team.meta.office_assistants.length > 1) {
+      adminButtons = admins.map((admin) => {
+        return {
+          name: 'settings.remove.' + admin.id,
+          text: `× ${admin.name}`,
+          style: 'danger',
+          type: 'button',
+          value: admin.id,
+          confirm: {
+            'title': 'Are you sure?',
+            'text': `This will remove all of ${admin.name}'s abilities as an admin and make them a normal user`,
+            'ok_text': `Remove ${admin.name}`,
+            'dismiss_text': 'Nevermind'
+          }
+        };
+      });
+    } else { // no removing the last person
+      adminButtons = admins.map((admin) => {
+        return {
+          name: 'loading',
+          text: `${admin.name}`,
+          style: 'default',
+          type: 'button',
+          value: 'skip'
+        };
+      });
+    }
+    kip.debug(`😜\n${JSON.stringify(adminButtons, null, 2)}`)
+  kip.debug(`😜\n${JSON.stringify(admins, null, 2)}`)
     adminButtons.unshift({
       name: 'settings.admins.back',
       text: '< Back',
@@ -234,14 +258,17 @@ handlers['admins'] = function * (message, data) {
         style: 'default',
         type: 'button',
         value: 'admins.add'
-      }, {
+      }]
+    }];
+    if (team.meta.office_assistants.length > 1) {
+      adminSection.actions.push({
         name: 'settings.admins.remove',
         text: 'Remove Admins',
         style: 'default',
         type: 'button',
         value: 'admins.remove'
-      }]
-    }];
+      });
+    }
   }
 
   let attachments = [msg.attachments[0], ...adminSection];
@@ -307,6 +334,7 @@ handlers['remove'] = function * (message, data) {
       };
     });
   }
+
   adminButtons.unshift({
     name: 'settings.admins.back',
     text: '< Back',
@@ -351,7 +379,7 @@ handlers['remove'] = function * (message, data) {
   return [];
 };
 
-handlers['email'] = function * (message, status) {
+handlers['email'] = function * (message) {
   let msg = message.source.original_message;
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
   var team = yield db.Slackbots.findOne({
@@ -363,7 +391,7 @@ handlers['email'] = function * (message, status) {
   let button = [{
     name: 'settings.email.' + status.toLowerCase(),
     text: 'Turn ' + status + ' Updates',
-    style: team.meta.weekly_status_enabled ? 'danger' : 'primary',
+    style: team.meta.weekly_status_enabled ? 'default' : 'primary',
     type: 'button',
     value: team.meta.weekly_status_enabled ? 'on' : 'off',
     confirm: team.meta.weekly_status_enabled ? {
@@ -373,13 +401,14 @@ handlers['email'] = function * (message, status) {
       'dismiss_text': 'Nevermind'
     } : undefined
   }];
-  let emailIndex;
-  msg.attachments.forEach((ele, i) => {
-    if (ele.callback_id === 'email') {
-      emailIndex = i;
+  let statusWord = team.meta.weekly_status_enabled ? ' ' : ' *not* ';
+  msg.attachments = msg.attachments.map((attachment) => {
+    if (attachment.callback_id === 'email') {
+      attachment.actions = button;
+      attachment.text = `You are${statusWord}currently recieving email updates`;
     }
+    return attachment;
   });
-  msg.attachments[emailIndex].actions = button;
   let stringOrig = JSON.stringify(msg);
   var map = {
     amp: '&',
@@ -442,46 +471,9 @@ handlers['add_or_remove'] = function*(message) {
       kip.debug('P2P mode OFF');
       team.meta.office_assistants = [message.source.user];
     }
-    yield userIds.map(function * (id) {
+    yield userIds.map(function*(id) {
       if (team.meta.office_assistants.indexOf(id) < 0) {
         team.meta.office_assistants.push(id);
-      }
-      if (id !== message.source.user) {
-      	let msg = db.Message();
-        let userToBeNotified = yield db.Chatusers.findOne({
-          id: id
-        });
-        let attachments = [{
-          text: '\nLooks like you\'ve done this before :blush:\nIf you need a refresher, I can start your tour again',
-          mrkdwn_in: ['text'],
-          color: '#A368F0',
-          callback_id: 'take me home pls',
-          actions: [{
-            'name': 'onboard.restart',
-            'text': 'Refresh Me',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'restart'
-          }, {
-            name: 'passthrough',
-            text: 'Home',
-            style: 'default',
-            type: 'button',
-            value: 'home'
-          }]
-        }];
-        msg.source = {};
-        msg.mode = 'onboard';
-        msg.action = 'home';
-        msg.source.team = team.team_id;
-        msg.source.channel = userToBeNotified.dm;
-        msg.source.user = id;
-        msg.user_id = id;
-        msg.thread_id = userToBeNotified.dm;
-        msg.text = `<@${message.source.user}> just made you an admin of Kip!`;
-        msg.reply = attachments;
-        yield msg.save();
-        yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
       }
     });
   } else if (tokens[0] === 'remove') {
@@ -514,6 +506,35 @@ handlers['add_or_remove'] = function*(message) {
       msg.thread_id = userToBeNotified.dm;
       msg.reply = cardTemplate.onboard_home_attachments('tomorrow');
       msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
+    } else if (userToBeNotified.admin_shop_onboarded) {
+      let attachments = [{
+        text: 'Looks like you\'ve done this before! :blush:\nIf you need a refresher, I can give you some help though',
+        mrkdwn_in: ['text'],
+        color: '#A368F0',
+        callback_id: 'take me home pls',
+        actions: [{
+          'name': 'onboard.restart',
+          'text': 'Refresh Me',
+          'style': 'primary',
+          'type': 'button',
+          'value': 'restart'
+        }, {
+          name: 'passthrough',
+          text: 'Home',
+          style: 'default',
+          type: 'button',
+          value: 'home'
+        }]
+      }];
+      msg = message;
+      msg.mode = 'onboard';
+      msg.action = 'home';
+      msg.text = '';
+      msg.fallback = 'Looks like you\'ve done this before!';
+      msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
+      msg.reply = attachments;
+    }
+    if (message.source.user !== id) {
       yield msg.save();
       yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
     }
@@ -535,6 +556,33 @@ handlers['add_or_remove'] = function*(message) {
   replies.push(msg) 
   return yield handlers['start'](msg) // actually showing results instead of just saying you updated settings...should be both eventually
 }
+
+handlers['not_admin'] = function*(message) {
+  let attachments = [{
+    text: 'Sorry, it looks like you aren\'t an admin anymore!',
+    mrkdwn_in: ['text'],
+    color: '#A368F0',
+    callback_id: 'take me home pls',
+    actions: [{
+      name: 'passthrough',
+      text: 'Home',
+      style: 'default',
+      type: 'button',
+      value: 'home'
+    }]
+  }];
+  if (message.source && message.source.response_url) {
+    yield request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: JSON.stringify({
+        text: '',
+        attachments: attachments
+      })
+    });
+  }
+  return [];
+};
 
 handlers['sorry'] = function * (message) {
    message.text = "Sorry, my brain froze!"

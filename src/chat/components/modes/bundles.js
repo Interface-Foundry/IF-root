@@ -38,6 +38,16 @@ handlers['home'] = function(message) {
     'text': utils.randomStoreHint(),
     mrkdwn_in: ['text']
   });
+  attachments.push({
+    text: '',
+    actions: [{
+      name: 'passthrough',
+      text: 'Home',
+      style: 'default',
+      type: 'button',
+      value: 'home'
+    }]
+  });
   var msg = message;
   msg.mode = 'shopping';
   msg.action = 'switch.silent';
