@@ -19,6 +19,9 @@ import schema from './data/schema';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
 import { port, auth } from './config';
+import graffiti from '@risingstack/graffiti';
+import { getSchema } from '@risingstack/graffiti-mongoose';
+import MetricSchema from './data/models/mongo/metric_schema';
 
 const app = express();
 
@@ -70,6 +73,14 @@ app.use('/graphql', expressGraphQL(req => ({
   pretty: process.env.NODE_ENV !== 'production',
 })));
 
+
+app.use(graffiti.express({
+  schema: getSchema([MetricSchema]),
+  context: {} // custom context
+}));
+// app.use(graffiti.express({
+//   schema
+// }));
 //
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------

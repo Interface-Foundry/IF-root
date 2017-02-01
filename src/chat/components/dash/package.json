@@ -5,6 +5,7 @@
     "npm": ">=3.3 <4"
   },
   "dependencies": {
+    "@risingstack/graffiti": "^3.3.0",
     "@risingstack/graffiti-mongoose": "^6.0.0",
     "babel-polyfill": "6.13.0",
     "babel-runtime": "6.11.6",

@@ -57,10 +57,10 @@ var slackConnections = {}
 var webserver = require('./webserver')
 var bundles = require('../bundles');
 bundles.updater(); //caches bundle items to mongo everyday at midnight
-
 var slackUtils = require('./utils.js')
 var coupon = require('../../../coupon/coupon.js')
 var agenda = require('../agendas');
+
 
 require('../reply_logic')
 
