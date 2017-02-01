@@ -119,7 +119,9 @@ utils.sendConfirmationEmail = function * (foodSession) {
   //column headings
   html += `<table border="0" style="margin-top:4px;width:600px;border-spacing:5.5px;"><thead style="color:white;background-color:${kip_blue}"><tr><th>Menu Item</th>`
   html += `<th>Item Options</th>`
-  html += `<th>Price</th>`
+  html += `<th>Quantity</th>`
+  html += `<th>Unit Price</th>`
+  html += `<th>Total Price</th>`
   html += `<th>Recipient</th></tr></thead>`
 
   //items ordered
@@ -127,13 +129,17 @@ utils.sendConfirmationEmail = function * (foodSession) {
     var foodInfo = menu.getItemById(String(item.item.item_id))
     var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
     var user = foodSession.team_members.filter(j => j.id === item.user_id)
+    var td_style = 'style="background-color:' + ryan_grey + ';padding:8px;"'
 
-    html += `<tr><td style="background-color:${ryan_grey};"><b>${foodInfo.name}</b></td>`
-    html += `<td style="background-color:${ryan_grey};"><p>${descriptionString}</p>`
+    html += `<tr><td ${td_style};"><b>${foodInfo.name}</b></td>`
+    html += `<td ${td_style}"><p>${descriptionString}</p>`
     html += `${(item.item.instructions ? '<p><i>' + item.item.instructions + '</i></p>': '')}</td>`
-    html += `<td style="background-color:${ryan_grey};"><b>${menu.getCartItemPrice(item).toFixed(2)}</b></td>`
-    html += `<td style="background-color:${ryan_grey};"><p>${user[0].first_name} ${user[0].last_name}</p>`
-    html += `<p><a href="https://${team_url}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
+    html += `<td ${td_style}><p style="text-align:center;"><b>${item.item.item_qty}</b></p></td>`
+    html += `<td ${td_style}><p style="text-align:center;"><b>${(menu.getCartItemPrice(item).toFixed(2) / item.item.item_qty).toFixed(2)}</b></p></td>`
+    html += `<td ${td_style}><p style="text-align:center;"><b>${menu.getCartItemPrice(item).toFixed(2)}</b></p></td>`
+    html += `<td ${td_style}"><p>${user[0].first_name} ${user[0].last_name}</p>`
+    html += `<p>@${user[0].name}</p></td></tr>`
+    // html += `<p><a href="https://${team_url}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
   })
 
   html += `</thead></table>` + br + br
@@ -171,7 +177,8 @@ utils.sendConfirmationEmail = function * (foodSession) {
 
   html += `<table border="0" style="padding:10px;width:100%;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="border-spacing:0 20px;border-radius:4px;width:100%">`
   html += `<tr style="width:100%"><td style="width:100%;text-align:center;"><img height="16" width="16" src="http://tidepools.co/kip/oregano/Slack_Icon.png">`
-  html += `<a href="https://${team_url}.slack.com/messages/${order_users}/" style="color:white;text-decoration:none;font-size:140%;text-align:center;">&nbsp;Click to chat with your food crew!</a></td></tr></table>`
+  html += `<b style="color:white;text-decoration:none;font-weight:normal;font-size:160%;text-align:center;">&nbsp; Enjoy your food!</b></td></tr></table>`
+  // html += `<a href="https://${team_url}.slack.com/messages/${order_users}/" style="color:white;text-decoration:none;font-size:140%;text-align:center;">&nbsp;Click to chat with your food crew!</a></td></tr></table>`
   html += `<table style="width:100%;"><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;font-size:85%;color:white;text-align:right;">Kip © 2017</p></td>`
   html += `<td style="width:300px;"><a style="padding:0 20px 0 20px;color:white;text-decoration:none;font-size:85%" href="https://kipthis.com/legal.html">Terms of Use</a></td></tr>`
   html += `</table></td></tr></table>` + br
