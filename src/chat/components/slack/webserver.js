@@ -347,7 +347,8 @@ app.post('/slackaction', next(function * (req, res) {
       }
       else if (simple_command == 'exit') {
         let isAdmin = yield utils.isAdmin(message.source.user, team);
-        let reply = cardTemplate.home_screen(isAdmin, message.source.user);
+        let couponText = yield utils.couponText(message.source.team);
+        let reply = cardTemplate.home_screen(isAdmin, message.source.user, couponText);
         var slackBot = slackModule.slackConnections[team];
         reply.as_user = true;
         slackBot.web.chat.postMessage(message.source.channel, '', reply);

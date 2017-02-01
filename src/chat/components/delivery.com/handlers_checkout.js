@@ -6,6 +6,7 @@ var coupon = require('../../../coupon/couponUsing.js')
 
 var mailer_transport = require('../../../mail/IF_mail.js')
 var cardTemplates = require('../slack/card_templates.js')
+var utils = require('../slack/utils.js')
 var Menu = require('./Menu')
 
 // injected dependencies
@@ -662,13 +663,13 @@ function * onSuccess (message, foodSession) {
           'team': foodSession.team_id
         }
       })
-
+      let couponText = yield utils.couponText(message.source.team);
       var json = {
         'text': `Your order of ${foodString} is on the way 😊`,
         'callback_id': 'food.payment_info',
         'fallback': `Your order is on the way`,
         'attachment_type': 'default',
-        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id).attachments)
+        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
       }
 
       yield $replyChannel.send(msg, 'food.need.payments.done', {type: message.origin, data: json})
