@@ -58,9 +58,9 @@ describe('testing for kip pay', () => {
     expect(res).to.have.property('token')
   })
 
-  it.skip('hit /charge with previously used card', function * () {
+  it('hit /charge with previously used card', function * () {
 
-    var res = yield chai.request(kipPay).post('/charge').send({
+    var res = yield chai.request(app).post('/charge').send({
       '_id': '_testing',
       'kip_token': 'mooseLogicalthirteen$*optimumNimble!Cake',
       'active': true,
@@ -87,15 +87,15 @@ describe('testing for kip pay', () => {
         'order_type': `delivery`
       },
       'saved_card': {
-        'vendor': 'VISA',
-        'customer_id': '123456',
-        'card_id': card.card.card_id
+        'vendor': 'stripe',
+        'customer_id': 'cus_9grP86UTH1SgNx',
+        'card_id': 'card_19NTgcI2kQvuYJlVqCzSnZpA'
       }
     })
     res = JSON.parse(res.res.text)
     expect(res).to.have.property('newAcct')
     expect(res).to.have.property('processing')
-    expect(res).to.have.property('url')
+    expect(res).to.have.property('msg')
   })
 
 })

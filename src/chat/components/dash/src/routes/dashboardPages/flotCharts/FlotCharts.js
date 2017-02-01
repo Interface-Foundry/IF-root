@@ -6,7 +6,7 @@ import {
   LineChart, Tooltip, PieChart, Pie,
   Line, XAxis, YAxis, Legend,
   CartesianGrid, Bar, BarChart,
-  ResponsiveContainer } from '../../../vendor/recharts';
+  ResponsiveContainer, AreaChart, Area } from '../../../vendor/recharts';
 
 const title = 'Flot Charts';
 
@@ -106,17 +106,18 @@ function displayFlotCharts(props, context) {
 
       <div className="row">
         <div className="col-lg-12">
-          <Panel header={<span>Line Chart Example</span>} >
+          <Panel header={<span>Waypoints of past 2 weeks</span>} >
             <div>
               <ResponsiveContainer width="100%" aspect={2}>
-                <LineChart data={lineChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid stroke="#ccc" />
-                  <XAxis />
-                  <YAxis />
+                <AreaChart width={600} height={400} data={waypointsCount}
+                  margin={{top: 10, right: 30, left: 0, bottom: 0}}>
+                  <XAxis dataKey="waypoint"/>
+                  <YAxis/>
+                  <CartesianGrid strokeDasharray="3 3"/>
                   <Tooltip />
-                  <Line type="monotone" dataKey="sine" stroke="#8884d8" />
-                  <Line type="monotone" dataKey="cosine" stroke="#82ca9d" />
-                </LineChart>
+                  <Legend />
+                  <Area type='monotone' dataKey='total' stroke='#000000' fill='#BBB44F' />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </Panel>
@@ -151,7 +152,7 @@ function displayFlotCharts(props, context) {
                   <CartesianGrid strokeDasharray="3 3" />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="total" fill="#8884d8" />
+                  <Bar dataKey="total" fill="#F2D2C4" />
 
                 </BarChart>
               </ResponsiveContainer>
@@ -180,17 +181,9 @@ function displayFlotCharts(props, context) {
         </div>
 
         <div className="col-lg-6">
-          <Panel header={<span>Waypoints of past 2 weeks</span>} >
+          <Panel header={<span>CHARTS!</span>} >
             <div>
-              <LineChart width={600} height={300} data={waypointsCount}
-                margin={{top: 5, right: 30, left: 20, bottom: 5}}>
-                <XAxis dataKey="waypoint"/>
-                <YAxis/>
-                <CartesianGrid strokeDasharray="3 3"/>
-                <Tooltip/>
-                <Legend />
-                <Line type="monotone" dataKey="total" stroke="#8884d8" activeDot={{r: 8}}/>
-              </LineChart>
+              Another chart here plz.
             </div>
           </Panel>
         </div>
