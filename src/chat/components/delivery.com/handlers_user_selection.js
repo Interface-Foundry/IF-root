@@ -48,8 +48,10 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
   var prevFoodSession = yield db.Delivery.find({team_id: message.source.team, active: false}).limit(1).sort({_id: -1}).exec()
   var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
   prevFoodSession = prevFoodSession[0]
+  console.log('AAAAAAAAAAAAAA', prevFoodSession.chosen_channel.id)
   if (_.get(prevFoodSession, 'chosen_channel.name')) {
     // allow special cases for everyone, just me and channel specifics
+    
     if (prevFoodSession.chosen_channel.id === 'everyone') {
       var textWithPrevChannel = `Send poll for cuisine to _everyone_ at \`${addr}\`?`
     } else if (prevFoodSession.chosen_channel.id === 'just_me') {
@@ -95,29 +97,12 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
             'type': 'button',
             'value': 'food.user.poll'
           },
-          // {
-          //   'name': 'food.admin.team_budget',
-          //   'type': 'button',
-          //   'text': 'Set a Budget',
-          //   'value': 'food.admin.team_budget'
-          // },
           {
             'name': 'passthrough',
             'value': 'food.admin.team.members',
             'text': 'Edit Poll Members',
             'type': 'button'
           },
-          // {
-          //   'name': 'food.admin.display_channels',
-          //   'text': 'Use a #channel',
-          //   'type': 'button',
-          //   'value': 'select_team_members'
-          // },
-          // {
-          //   'name': 'passthrough',
-          //   'text': '< Back',
-          //   'type': 'button',
-          //   'value': 'food.admin.select_address'
           {
             'name': 'passthrough',
             'value': 'food.admin.restaurant.pick.list',
@@ -165,10 +150,29 @@ handlers['food.poll.confirm_send'] = function * (message) {
   var budget = foodSession.budget;
 
   if (_.get(foodSession, 'chosen_channel.id')) {
-    var textWithChannelMaybe = `Send poll for cuisine to <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
+    if (foodSession.chosen_channel.id === 'everyone') {
+      var textWithChannelMaybe = `Send poll for cuisine to _everyone_ at \`${addr}\`?`
+    } else if (foodSession.chosen_channel.id === 'just_me') {
+      textWithChannelMaybe = `Send poll for cuisine to _just me_ at \`${addr}\`?`
+    } else {
+      textWithChannelMaybe = `Send poll for cuisine to <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
+      if (foodSession.budget) textWithPrevChannel += ` with a budget of $${foodSession.budget}`
+      textWithChannelMaybe += '?';
+    }
   } else {
     textWithChannelMaybe = `Send poll for cuisine to the team members at \`${addr}\``
   }
+/*
+  if (foodSession.chosen_channel.id === 'everyone') {
+      var textWithChannelMaybe = `Send poll for cuisine to _everyone_ at \`${addr}\`?`
+    } else if (foodSession.chosen_channel.id === 'just_me') {
+      textWithChannelMaybe = `Send poll for cuisine to _just me_ at \`${addr}\`?`
+    } else {
+      textWithChannelMaybe = `Send poll for cuisine to <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
+      if (foodSession.budget) textWithPrevChannel += ` with a budget of $${foodSession.budget}`
+      textWithChannelMaybe += '?';
+    }
+*/
 
   if (foodSession.budget) {
     textWithChannelMaybe += `, with a budget of $${foodSession.budget} per person`;
@@ -197,26 +201,14 @@ handlers['food.poll.confirm_send'] = function * (message) {
           {
             'name': 'passthrough',
             'value': 'food.admin.team.members',
-            'text': 'View Team Members',
+            'text': 'Edit Poll Members',
             'type': 'button'
-          },
-          // {
-          //   'name': 'food.admin.team_budget',
-          //   'type': 'button',
-          //   'text': 'Set a Budget',
-          //   'value': 'food.admin.team_budget'
-          // },
-          {
-            'name': 'food.admin.display_channels',
-            'text': 'Use a #channel',
-            'type': 'button',
-            'value': 'select_team_members'
           },
           {
             'name': 'passthrough',
-            'text': '< Back',
-            'type': 'button',
-            'value': 'food.admin.select_address'
+            'value': 'food.admin.restaurant.pick.list',
+            'text': '> Skip',
+            'type': 'button'
           }
         ]
       }
