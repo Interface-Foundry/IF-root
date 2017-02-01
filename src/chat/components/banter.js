@@ -321,7 +321,7 @@ var checkForCanned = function (message) {
       flag = 'basic' // do this action
       res = "Looks like I didn't answer your question properly. I'm not very smart yet, maybe this will help?\n\n"
       + 'Hi I’m Kip, I’m a penguin that helps you collect food orders and shopping requests for office supplies. My job is to provide the team everything they need to feel happy and comfortable! :slightly_smiling_face:\n\n' 
-      + 'Start a new food order or shopping request by tapping Home button.\n\n' 
+      + 'Start a new food order or shopping request by typing `home`.\n\n' 
       + 'Still lost? Try our <https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.s53szsikr|FAQ> or let my developers know at hello@kipthis.com';
       break
 
@@ -716,7 +716,7 @@ var checkForCanned = function (message) {
     case textSimilar(input, 'wtf') > 70:
       flag = 'basic'
       res = 'Hi I’m Kip, I’m a penguin that helps you collect food orders and shopping requests for office supplies. My job is to provide the team everything they need to feel happy and comfortable! :slightly_smiling_face:\n\n' 
-      + 'Start a new food order or shopping request by tapping Home button.\n\n' 
+      + 'Start a new food order or shopping request by typing `home`.\n\n' 
       + 'Still lost? Try our <https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.s53szsikr|FAQ> or let my developers know at hello@kipthis.com';
       break
 

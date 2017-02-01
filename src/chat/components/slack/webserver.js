@@ -183,7 +183,7 @@ app.post('/slackaction', next(function * (req, res) {
           return button;
         });
         json.attachments.splice(1, json.attachments.length - 2);
-        let okButtonText = (json.attachments[json.attachments.length - 1].callback_id !== 'onboard_team') ? 'Collect Orders' : '✔︎ Update Members';
+        let okButtonText = '✔︎ Update Members';
         switch (selection) {
           case 'everyone':
             json.attachments[0].actions[0].text = '◉ Everyone';

@@ -369,7 +369,10 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     printMode(message)
-
+    let team = yield db.Slackbots.findOne({
+      'team_id': message.source.team
+    }).exec();
+    let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
     //MODE SWITCHER
     switch (message.mode) {
       case 'onboarding':
@@ -419,7 +422,7 @@ queue.topic('incoming').subscribe(incoming => {
         break;
       case 'team':
       case 'members':
-        if (message.origin === 'slack') {
+        if (message.origin === 'slack' && isAdmin) {
           var replies = yield team.handle(message);
         }
         break;
