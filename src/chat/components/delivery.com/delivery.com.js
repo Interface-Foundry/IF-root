@@ -14,6 +14,7 @@ var feedbackOn = false
 var feedbackTracker = {}
 
 var card_templates = require('../slack/card_templates');
+var utils = require('../slack/utils');
 
 // injected dependencies
 var $replyChannel
@@ -204,7 +205,8 @@ handlers['food.exit.confirm_end_order'] = function * (message) {
 }
 
 handlers['food.exit.confirm'] = function * (message) {
-  var slackreply = card_templates.home_screen(true, message.source.user);
+  let couponText = yield utils.couponText(message.source.team);
+  var slackreply = card_templates.home_screen(true, message.source.user, couponText);
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: slackreply})
   // make sure to remove this user from the food message if they are in it
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()

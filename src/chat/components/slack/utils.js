@@ -768,6 +768,14 @@ function randomSearchTerm () {
   return messages[num];
 }
 
+function randomEmoji (isCafe) {
+  let messages = isCafe
+    ? ['🍕', '🍩', '🍔', '🍰', '🍴', '🍣', '🍲', '🍪', '🍛']
+    : ['🛍', '🛒', '🎁', '📦', '📓', '✏️', '📚', '🖇', '💻'];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num] + '\u00A0 ';
+}
+
 function getSearchButtons() {
   let buttons = [];
   while (buttons.length < 3) {
@@ -775,6 +783,21 @@ function getSearchButtons() {
     buttons = _.uniqWith(buttons, (a, b) => a === b);
   }
   return buttons;
+}
+
+function* couponText(team) {
+  let coupon = yield db.Coupons.find({
+    team_id: team
+  }).exec();
+  return coupon.reduce((text, coupon) => {
+    if (coupon.available && coupon.coupon_type==='percentage') {
+      let totalCoupons = coupon.quantity_coupon.can_be_used,
+        usedCoupons = coupon.quantity_coupon.used,
+        percentOff = coupon.coupon_discount * 100;
+      text += `${totalCoupons - usedCoupons} × [_${percentOff}% Off Coupon_]  \n`;
+    }
+    return text;
+  }, '');
 }
 
 module.exports = {
@@ -802,5 +825,7 @@ module.exports = {
   randomSearching: randomSearching,
   randomStoreDescrip: randomStoreDescrip,
   randomCafeDescrip: randomCafeDescrip,
-  getSearchButtons: getSearchButtons
+  getSearchButtons: getSearchButtons,
+  randomEmoji: randomEmoji,
+  couponText: couponText
 };
