@@ -183,7 +183,6 @@ app.post('/slackaction', next(function * (req, res) {
           return button;
         });
         json.attachments.splice(1, json.attachments.length - 2);
-        let okButtonText = (json.attachments[json.attachments.length - 1].callback_id !== 'onboard_team') ? 'Collect Orders' : '✔︎ Update Members';
         switch (selection) {
           case 'everyone':
             json.attachments[0].actions[0].text = '◉ Everyone';
@@ -192,7 +191,6 @@ app.post('/slackaction', next(function * (req, res) {
           case 'justme':
             json.attachments[0].actions[1].text = '◉ Just Me';
             team.meta.collect_from = 'me';
-            okButtonText = (json.attachments[json.attachments.length - 1].callback_id !== 'onboard_team') ? 'Start Shopping' : 'Tell Them Later';
             break;
           case 'channel':
             json.attachments[0].actions[2].text = '◉ By Channel';
@@ -243,7 +241,6 @@ app.post('/slackaction', next(function * (req, res) {
         }
         team.markModified('meta.collect_from');
         yield team.save();
-        json.attachments[json.attachments.length - 1].actions[0].text = okButtonText;
         let stringOrig = JSON.stringify(json);
         let map = {
           amp: '&',

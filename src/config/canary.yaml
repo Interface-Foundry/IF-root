@@ -22,3 +22,4 @@ logging:
   debugFileLine:
     enabled: true
 menuURL: http://dev-cafe.kipthis.com/menus
+kipPayURL: https://dev-pay.kipthis.com

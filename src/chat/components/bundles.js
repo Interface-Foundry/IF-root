@@ -8,12 +8,12 @@ var cron = require('cron');
 
 
 // EDIT BUNDLES HERE THE ASIN OF THE AMAZON PRODUCT  //
-var snacks = module.exports.snacks = ['B017L0BL5E', 'B013YT9VWG', 'B00JW4T466'];
-var drinks = module.exports.drinks = ['B0048IAH30', 'B00L84GH9K', 'B00787YLJE'];
-var supplies = module.exports.supplies = ['B00006IFKT', 'B01A6JLR88', 'B01G7J5QN8'];
+var snacks = module.exports.snacks = ['B00I669OKW', 'B00I669IIU', 'B00YMSKGVO'];
+var drinks = module.exports.drinks = ['B00HZYDYYI', 'B002N3I6VM', 'B00NP79AI8'];
+var energy = module.exports.energy = ['B00CZ2KYRU', 'B00HZYD5KQ', 'B00JQQBUZS'];
 // ------------------------------------------------ //
 
-var bundles = { snacks: snacks, drinks: drinks, supplies: supplies }
+var bundles = { snacks: snacks, drinks: drinks, energy: energy }
 
 
 var addBundleToCart = module.exports.addBundleToCart = function * (bundle, userId, cart_id) {

@@ -232,7 +232,7 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
 
 var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
   let attachments = [{
-    text: '*Snackbox*\nAll the snacks your team needs for your office',
+    text: '*Healthy Bars*\nWholesome, delicious snacks packed with protein and nutrition',
     mrkdwn_in: ['text'],
     color: '#3AA3E3',
     callback_id: 'none',
@@ -245,11 +245,11 @@ var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
       value: 'bundle.snacks'
     }]
   }, {
-    text: '*Drinks*\nAll the drinks your team needs for your office',
+    text: '*Thirst Quenchers*\nRehydrate with refreshing fizz and pure water',
     mrkdwn_in: ['text'],
     color: '#3AA3E3',
     callback_id: 'none',
-    thumb_url: 'http://tidepools.co/kip/oregano/bundle_drinks.png',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_water.png',
     actions: [{
       name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.drinks',
       text: '+ Add Bundle',
@@ -258,17 +258,17 @@ var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
       value: 'bundle.drinks'
     }]
   }, {
-    text: '*Supplies*\nAll the office supplies you need',
+    text: '*Energy Up*\nBoost your performance with a quick power up',
     mrkdwn_in: ['text'],
     color: '#3AA3E3',
     callback_id: 'none',
-    thumb_url: 'http://tidepools.co/kip/oregano/bundle_supplies.png',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_drinks.png',
     actions: [{
-      name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.supplies',
+      name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.energy',
       text: '+ Add Bundle',
       style: 'primary',
       type: 'button',
-      value: 'bundle.supplies'
+      value: 'bundle.energy'
     }]
   }];
   return attachments;
