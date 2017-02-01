@@ -625,7 +625,7 @@ function * onSuccess (message, foodSession) {
     var menu = Menu(foodSession.menu)
     // send message to all the ppl that ordered food
     var uniqOrders = _.uniq(foodSession.confirmed_orders)
-    uniqOrders.map(userId => {
+    yield uniqOrders.map(function * (userId) {
       var user = _.find(foodSession.team_members, {'id': userId}) // find returns the first one
 
       var itemNames = foodSession.cart
@@ -660,7 +660,8 @@ function * onSuccess (message, foodSession) {
         'attachment_type': 'default',
         'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id).attachments)
       }
-      $replyChannel.send(msg, 'food.need.payments.done', {type: message.origin, data: json})
+
+      yield $replyChannel.send(msg, 'food.need.payments.done', {type: message.origin, data: json})
     })
 
     var htmlForItem = `Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
