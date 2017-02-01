@@ -423,16 +423,6 @@ handlers['email'] = function * (message) {
     uri: message.source.response_url,
     body: stringOrig
   });
-  if (status.toLowerCase() === 'on') {
-    var admins = team.meta.office_assistants;
-    yield admins.map(function * (admin) {
-      agenda.every('0 15 * * 5', 'send email', {
-        userId: _.get(admin, 'id'),
-        to: _.get(admin, 'profile.email'),
-        subject: 'This is your weekly team cart status email from Kip!'
-      });
-    });
-  }
   return [];
 };
 
