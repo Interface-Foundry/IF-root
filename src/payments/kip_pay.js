@@ -57,7 +57,7 @@ var profOak = new Professor.Professor('C33NU7FRC')
 
 // VARIOUS STUFF TO POST BACK TO USER EASILY
 // --------------------------------------------
-var queue = require('../chat/components/queue-mongo')
+var queue = require('../chat/components/queue-direct')
 var UserChannel = require('../chat/components/delivery.com/UserChannel')
 var replyChannel = new UserChannel(queue)
 // --------------------------------------------
@@ -279,7 +279,7 @@ app.post('/process', (req, res) => co(function * () {
 
   try {
     // send success messages to order members
-    yield payUtils.onSuccess(payment)
+    // yield payUtils.onSuccess(payment)
     profOak.say(`order completed for team: ${payment.order.team_id}`)
   } catch (err) {
     logging.error('error onSuccess of payment', err)
@@ -330,7 +330,7 @@ function * chargeById (payment) {
       }
 
       yield payment.save()
-      yield payUtils.onSuccess(payment)
+      // yield payUtils.onSuccess(payment)
     } catch (err) {
       logging.error('error after charging stripe but attempting to charge delivery.com', err)
     }

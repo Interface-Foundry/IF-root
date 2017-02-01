@@ -3,7 +3,7 @@ var message_tools = require('../message_tools')
 module.exports = {}
 var handlers = module.exports.handlers = {}
 var onboard = require('./onboard');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var slackUtils = require('../slack/utils');
 var cardTemplate = require('../slack/card_templates');
 var agenda = require('../agendas');
@@ -229,34 +229,71 @@ handlers['response'] = function * (message) {
       office_admins.push(u.id);
       if (u.id != currentUser.id) {
         let msg = {};
-        msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
-        msg.user_id = u.id;
-        msg.thread_id = u.dm;
-        msg.mode = 'onboard';
-        msg.action = 'home';
-        msg.reply = cardTemplate.onboard_home_attachments('initial');
-        msg.origin = message.origin;
-        msg.source = {
-          team: team.team_id,
-          channel: u.dm,
-          user: u.id
-        };
-        let cronMsg = msg;
-        msg = new db.Message(msg);
-        yield msg.save();
-        yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
+        if (!u.admin_shop_onboarded) {
+          msg.text = `<@${message.source.user}> just made you an admin of Kip!\nWe'll help you get started :) Choose a Kip mode below to start a tour`;
+          msg.user_id = u.id;
+          msg.thread_id = u.dm;
+          msg.mode = 'onboard';
+          msg.action = 'home';
+          msg.reply = cardTemplate.onboard_home_attachments('initial');
+          msg.origin = message.origin;
+          msg.source = {
+            team: team.team_id,
+            channel: u.dm,
+            user: u.id
+          };
+          let cronMsg = msg;
+          msg = new db.Message(msg);
+          yield msg.save();
+          yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
 
-        cronMsg.reply = cardTemplate.onboard_home_attachments('tomorrow');
-        let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
-        let now = new Date();
-        scheduleReminder(
-          'initial reminder',
-          new Date(msInFuture + now.getTime()), {
-            msg: JSON.stringify(cronMsg),
-            user: u.id,
-            token: team.bot.bot_access_token,
-            channel: u.dm
-          });
+          cronMsg.reply = cardTemplate.onboard_home_attachments('tomorrow');
+          let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+          let now = new Date();
+          scheduleReminder(
+            'initial reminder',
+            new Date(msInFuture + now.getTime()), {
+              msg: JSON.stringify(cronMsg),
+              user: u.id,
+              token: team.bot.bot_access_token,
+              channel: u.dm
+            });
+        } else {
+          let attachments = [{
+            text: 'Looks like you\'ve done this before :blush:\nIf you need a refresher, I can start your tour again',
+            mrkdwn_in: ['text'],
+            color: '#A368F0',
+            callback_id: 'take me home pls',
+            actions: [{
+              'name': 'onboard.restart',
+              'text': 'Refresh Me',
+              'style': 'primary',
+              'type': 'button',
+              'value': 'restart'
+            }, {
+              name: 'passthrough',
+              text: 'Home',
+              style: 'default',
+              type: 'button',
+              value: 'home'
+            }]
+          }];
+          msg.text = `<@${message.source.user}> just made you an admin of Kip!`;
+          msg.mode = 'onboard';
+          msg.action = 'home';
+          msg.user_id = u.id;
+          msg.thread_id = u.dm;
+          msg.origin = message.origin;
+          msg.source = {
+            team: team.team_id,
+            channel: u.dm,
+            user: u.id
+          };
+          msg.reply = attachments;
+          msg = new db.Message(msg);
+          yield msg.save();
+          yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
+        }
       }
     }
   });

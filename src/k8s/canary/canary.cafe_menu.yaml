@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: canary
+  name: cafe-menu
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cafe-menu
+    spec:
+      containers:
+      - image: gcr.io/kip-styles/cafe_menu:CANARYIMAGE
+        imagePullPolicy: Always
+        name: delivery-picstitch
+        ports:
+        - containerPort: 8001
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cafe-menu
+  namespace: canary
+  labels:
+    run: cafe-menu
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8001
+  selector:
+    app: cafe-menu

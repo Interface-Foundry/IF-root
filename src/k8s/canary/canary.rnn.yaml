@@ -11,7 +11,7 @@ spec:
         app: rnn
     spec:
       containers:
-      - image: gcr.io/kip-styles/rnn:latest
+      - image: gcr.io/kip-styles/rnn:CANARYIMAGE
         imagePullPolicy: Always
         name: rnn
         ports:

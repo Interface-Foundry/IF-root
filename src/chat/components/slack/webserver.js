@@ -1,7 +1,7 @@
 //
 // "Actions" are what slack calls buttons
 //
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var refresh_team = require('../refresh_team');
 var express = require('express');
 var co = require('co');
@@ -63,6 +63,7 @@ function simple_action_handler (action) {
     case 'view_cart_btn':
       return 'view_cart_btn';
     case 'team':
+    case 'members':
       return 'team';
     case 'channel_btn':
       return 'channel_btn';
@@ -113,6 +114,9 @@ app.post('/slackaction', next(function * (req, res) {
     console.error('slack buttons broke, need a response_url')
     res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
     return
+  } else {
+    res.status(200)
+    res.end()
   }
 
     var action = parsedIn.actions[0];
@@ -170,7 +174,6 @@ app.post('/slackaction', next(function * (req, res) {
         return;
       }
       else if (simple_command === 'collect_select') {
-        kip.debug(`😃😃${JSON.stringify(parsedIn.actions, null, 2)}`);
         let selection = parsedIn.actions[0].value;
         let json = parsedIn.original_message;
         var team_id = message.source.team;
@@ -338,7 +341,7 @@ app.post('/slackaction', next(function * (req, res) {
         message.mode = 'settings';
         message.action = 'home';
       }
-      else if (simple_command == 'team') {
+      else if (simple_command == 'team' || simple_command === 'members') {
         message.mode = 'team';
         message.action = 'home';
       }
@@ -444,6 +447,18 @@ app.post('/slackaction', next(function * (req, res) {
       });
     }
 }))
+
+app.post('/menuorder', (req, res) => {
+  // check the verification token
+  if (req.body.verification_token !== kip.config.slack.verification_token) {
+    res.status(403)
+    return res.end()
+  }
+
+  queue.publish(req.body.topic, req.body.message, 'defaultId')
+  res.status(200)
+  res.end()
+})
 
 function clearCartMsg(attachments) {
   //clears all but the updating message of buttons

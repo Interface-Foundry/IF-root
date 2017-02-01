@@ -7,7 +7,7 @@ var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require(
 var jstz = require('jstz');
 var amazon = require('../amazon_search.js');
 var kipcart = require('../cart');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var cron = require('cron');
 var sleep = require('co-sleep');
 var cardTemplate = require('./card_templates');
@@ -61,22 +61,25 @@ function * initializeTeam(team, auth) {
 function * findAdmins(team) {
   var admins = [];
   var adminIds = team.meta.office_assistants;
-  var members = yield db.Chatusers.find({team_id: team.team_id}).exec();
-  return co(function * (){
+  var members = yield db.Chatusers.find({
+    team_id: team.team_id
+  }).exec();
+  return co(function * () {
     yield eachSeries(members, function * (user) {
-      if ( adminIds.indexOf(user.id) > -1) {
+      if (adminIds.indexOf(user.id) > -1) {
         admins.push(user);
         if (!user.is_admin) {
           user.is_admin = true;
           yield user.save();
         }
-      }
-      else if ( adminIds.indexOf(user.id) == -1 && user.is_admin ) {
+      } else if (adminIds.indexOf(user.id) === -1 && user.is_admin) {
         user.is_admin = false;
         yield user.save();
       }
     });
-  }).then( function() { return admins });
+  }).then(function() {
+    return admins;
+  });
 }
 
 function * isAdmin(userId, team) {
@@ -328,9 +331,6 @@ function * addViaAsin(asin, message) {
 }
 
 function* showLoading(message) {
-  var relevantMessage = yield db.Messages.findOne({
-    'thread_id': message.source.channel
-  })
   var json = message.source.original_message;
   let searchText = this.randomSearching();
   if (!json) {
@@ -347,10 +347,19 @@ function* showLoading(message) {
     text: searchText,
     color: '#45a5f4'
   })
+  var stringOrig = JSON.stringify(json)
+  let map = {
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    '#039': "'"
+  }
+  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
   request({
     method: 'POST',
     uri: message.source.response_url,
-    body: JSON.stringify(json)
+    body: stringOrig
   });
   return;
 }
@@ -381,10 +390,19 @@ function* hideLoading(message) {
     return;
   }
   message.source.original_message.attachments.splice(-1, 1);
+  var stringOrig = JSON.stringify(message.source.original_message)
+  let map = {
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    '#039': "'"
+  }
+  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
   request({
     method: 'POST',
-    uri: relevantMessage.source.response_url,
-    body: JSON.stringify(message.source.original_message)
+    uri: message.source.response_url,
+    body: stringOrig
   });
   return;
 }
@@ -732,6 +750,33 @@ function randomStoreDescrip() {
   return messages[num];
 }
 
+function randomSearchTerm () {
+  let messages = [
+    'Headphones',
+    'Phones',
+    'Coding Books',
+    'Healthy Snacks',
+    'Keyboards',
+    'Mouse',
+    'Laptops',
+    'Water Bottles',
+    'Coffee',
+    'Notebooks',
+    'Penguin Snacks'
+  ];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num];
+}
+
+function getSearchButtons() {
+  let buttons = [];
+  while (buttons.length < 3) {
+    buttons.push(randomSearchTerm());
+    buttons = _.uniqWith(buttons, (a, b) => a === b);
+  }
+  return buttons;
+}
+
 module.exports = {
   refreshAllUserIMs: refreshAllUserIMs,
   initializeTeam: initializeTeam,
@@ -756,5 +801,6 @@ module.exports = {
   randomStoreHint: randomStoreHint,
   randomSearching: randomSearching,
   randomStoreDescrip: randomStoreDescrip,
-  randomCafeDescrip: randomCafeDescrip
+  randomCafeDescrip: randomCafeDescrip,
+  getSearchButtons: getSearchButtons
 };

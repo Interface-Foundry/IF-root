@@ -4,7 +4,7 @@ var googl = require('goo.gl')
 var request = require('request-promise')
 var Fuse = require('fuse.js')
 
-var queue = require('../queue-mongo')
+var queue = require('../queue-direct')
 var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)
 var yelp = require('./yelp.js')
@@ -407,14 +407,13 @@ function * buildRestaurantAttachment (restaurant) {
   // var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
 
   var url = yield yelp(restaurant);
-  console.log('please don\'t be a promise', url)
 
   var obj = {
-    'text': `<${url}|*${restaurant.summary.name}*> - <${url}|Check on Yelp>`,
+    'text': `<${url}|*${restaurant.summary.name}*> - <${url}|Check out on Yelp>`,
     'image_url': realImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
-    'fallback': `<${url}|*${restaurant.summary.name}*> - <${url}|Check on Yelp>`,
+    'fallback': `<${url}|*${restaurant.summary.name}*> - <${url}|Check out on Yelp>`,
     'attachment_type': 'default',
     'mrkdwn_in': ['text'],
     'actions': [

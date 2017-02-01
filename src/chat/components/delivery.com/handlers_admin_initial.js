@@ -572,11 +572,17 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   logging.debug('foodSession.budget', foodSession.budget)
 
-  yield $replyChannel.sendReplace(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ? {
-    text: `*Budget*: $${foodSession.budget} / person`
-  } : {
-    text: '*Budget*: Unlimited'
-  })})
+  var budgetAttachment = {
+    text: (foodSession.budget ? `*Budget*: $${foodSession.budget} / person` : '*Budget*: Unlimited'),
+    mrkdwn_in: ['text'],
+    fallback: 'budget per person'
+  }
+
+  // yield $replyChannel.sendReplace(message, 'food.admin_polling_options', {type: message.origin, data: (foodSession.budget ? {
+  //   text: `*Budget*: $${foodSession.budget} / person`
+  // } : {
+  //   text: '*Budget*: Unlimited'
+  // })})
 
   // check to make sure restaurants are even open
   if (foodSession.merchants.length === 0) {
@@ -600,7 +606,7 @@ handlers['food.admin_polling_options'] = function * (message) {
   var mostRecentSession = lastOrdered[0]
   lastOrdered = _.uniq(lastOrdered.map(message => message.chosen_restaurant.id)) // list of unique restaurants
   // create attachments, only including most recent merchant if one exists
-  var attachments = []
+  var attachments = [budgetAttachment]
 
   if (mostRecentSession) {
 // build the regular listing as if it were a choice presented to the admin in the later steps,

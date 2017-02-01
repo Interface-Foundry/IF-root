@@ -11,7 +11,7 @@ spec:
         app: slack
     spec:
       containers:
-      - image: gcr.io/kip-styles/slack:canary
+      - image: gcr.io/kip-styles/slack:CANARYIMAGE
         imagePullPolicy: Always
         name: slack
         ports:
@@ -31,6 +31,7 @@ metadata:
   labels:
     app: slack
   name: slack
+  namespace: canary
 spec:
   ports:
   - port: 80
@@ -39,20 +40,3 @@ spec:
   selector:
     app: slack
   type: NodePort
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: slack
-  namespace: canary
-  annotations:
-    kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: "gce"
-spec:
-  tls:
-  - hosts:
-    - slack.kipthis.com
-    secretName: slack-tls
-  backend:
-    serviceName: slack
-    servicePort: 80

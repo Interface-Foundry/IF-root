@@ -202,36 +202,28 @@ var focus_home = module.exports.focus_home = [{
   value: 'view_cart_btn'
 }];
 
-var slack_shopping_buttons = module.exports.slack_shopping_buttons = [{
-  // buttons search for whatever follows search in value. e.g. search.healthy_snacks searches for 'healthy snacks'
-  'name': 'search_btn.start.search',
-  'text': 'Headphones',
-  'style': 'default',
-  'type': 'button',
-  'value': 'search.headphones'
-}, {
-  'name': 'search_btn.start.search',
-  'text': 'Coding Books',
-  'style': 'default',
-  'type': 'button',
-  'value': 'search.coding_books'
-}, {
-  'name': 'search_btn.start.search',
-  'text': 'Healthy Snacks',
-  'style': 'default',
-  'type': 'button',
-  'value': 'search.healthy_snacks'
-}];
+var slack_shopping_buttons = module.exports.slack_shopping_buttons = function() {
+  let searchTerms = require('./utils').getSearchButtons();
+  return searchTerms.map(term => {
+    return {
+      'name': 'search_btn.start.search',
+      'text': term,
+      'style': 'default',
+      'type': 'button',
+      'value': `search.${term.replace(' ', '_')}`
+    };
+  });
+};
 
 var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
   return [{
     text: 'Looking for something?',
     fallback: 'Looking for something?',
     image_url: "http://tidepools.co/kip/oregano/store.png",
-    callback_id: 'wopr_game',
+    callback_id: 'idkmybff',
     color: "#45a5f4",
     attachment_type: 'default',
-    actions: slack_shopping_buttons
+    actions: slack_shopping_buttons()
   }, {
     text: require('./utils').randomStoreHint(),
     mrkdwn_in: ['text']
@@ -240,7 +232,7 @@ var slack_shopping_mode = module.exports.slack_shopping_mode = function() {
 
 var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
   let attachments = [{
-    text: '*Snackbox*\nAll the snacks your team needs for your office',
+    text: '*Healthy Bars*\nWholesome, delicious snacks packed with protein and nutrition',
     mrkdwn_in: ['text'],
     color: '#3AA3E3',
     callback_id: 'none',
@@ -253,11 +245,11 @@ var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
       value: 'bundle.snacks'
     }]
   }, {
-    text: '*Drinks*\nAll the drinks your team needs for your office',
+    text: '*Thirst Quenchers*\nRehydrate with refreshing fizz and pure water',
     mrkdwn_in: ['text'],
     color: '#3AA3E3',
     callback_id: 'none',
-    thumb_url: 'http://tidepools.co/kip/oregano/bundle_drinks.png',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_water.png',
     actions: [{
       name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.drinks',
       text: '+ Add Bundle',
@@ -266,17 +258,17 @@ var slack_bundles = module.exports.slack_bundles = function(isOnboard = false) {
       value: 'bundle.drinks'
     }]
   }, {
-    text: '*Supplies*\nAll the office supplies you need',
+    text: '*Energy Up*\nBoost your performance with a quick power up',
     mrkdwn_in: ['text'],
     color: '#3AA3E3',
     callback_id: 'none',
-    thumb_url: 'http://tidepools.co/kip/oregano/bundle_supplies.png',
+    thumb_url: 'http://tidepools.co/kip/oregano/bundle_drinks.png',
     actions: [{
-      name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.supplies',
+      name: (isOnboard ? 'onboard' : 'bundles') + '.supplies.energy',
       text: '+ Add Bundle',
       style: 'primary',
       type: 'button',
-      value: 'bundle.supplies'
+      value: 'bundle.energy'
     }]
   }];
   return attachments;
@@ -296,15 +288,9 @@ var slack_onboard_team = module.exports.slack_onboard_team = [{
   style: "primary",
   type: "button",
   value: "member"
-}, {
-  name: "onboard.handoff",
-  text: "Only Me",
-  style: "default",
-  type: "button",
-  value: "member"
 }];
 
-var member_onboard_attachments = module.exports.member_onboard_attachments = function(admin, delay) {
+var member_onboard_attachments = module.exports.member_onboard_attachments = function(admin, user, delay) {
   let reply = [{
     'image_url': 'http://kipthis.com/kip_modes/mode_howtousekip.png',
     'text': '',
@@ -314,7 +300,7 @@ var member_onboard_attachments = module.exports.member_onboard_attachments = fun
     ],
     'color': '#45a5f4'
   }, {
-    text: `Make <@${admin}>'s life easier! Let me show you how to add items to the team cart`,
+    text: `Hi <@${user}>! I'm Kip and I help <@${admin}> collect food orders and shopping requests\nMy job is to provide the team (that’s you!) everything they need to feel happy and comfortable! :)\n Let me show you how to add things to the team cart`,
     mrkdwn_in: ['text'],
     fallback: 'Welcome to Kip!',
     callback_id: 'none',

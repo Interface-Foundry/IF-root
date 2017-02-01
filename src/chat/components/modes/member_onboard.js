@@ -8,7 +8,7 @@ var winston = require('winston');
 var Fuse = require('fuse.js');
 var request = require('request');
 var agenda = require('../agendas');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
 var utils = require('../slack/utils.js');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
@@ -58,7 +58,7 @@ handlers['step_1'] = function(message) {
     attachment_type: 'default',
     actions: cardTemplate.slack_member_onboard_start
   }, {
-    'text': '✎ Hint: You can also search what you want below (Example: _MacBook Pro Power Cord_)',
+    'text': '✎ Hint: You can also search what you want below (Example: _iPhone Charger_)',
     mrkdwn_in: ['text']
   }];
   cancelReminder('initial reminder', message.source.user);
@@ -149,10 +149,10 @@ handlers['step_2'] = function * (message, data) {
   msg.amazon = JSON.stringify(results);
   msg.original_query = results.original_query;
   msg.reply = [{
-    text: '*Step 2/3:* Try adding an item to your basket',
+    text: '*Step 2/3:* Try adding something to the team cart by tapping `+ Add to Cart`',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Try adding an item to your basket'
+    fallback: 'Try adding something to the team cart by tapping \'+ Add to Cart\''
   }];
   if (message.source.response_url) {
     request({
@@ -192,10 +192,10 @@ handlers['addcart'] = function * (message, data) {
 // modified version of modes/shopping.js
 handlers['cart'] = function * (message) {
   let attachments = [{
-    text: '*Step 3/3:* Well done!\n I\'ve added your item to the team cart',
+    text: '*Step 3/3:* Woohoo! You added one for the team **highfive**\nNow you can help make your team\'s life easier by adding things you need throughout the week',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    image_url: 'http://tidepools.co/kip/oregano/success.png',
+    image_url: 'http://tidepools.co/kip/oregano/success.gif',
     fallback: 'Well done!\n I\'ve added your item to the team cart',
     callback_id: 'take me home pls',
     actions: [{
@@ -255,11 +255,11 @@ handlers['remind_later'] = function * (message, data) {
     let cronMsg = {
       mode: 'member_onboard',
       action: 'home',
-      reply: cardTemplate.member_onboard_attachments(admin, nextDate),
+      reply: cardTemplate.member_onboard_attachments(admin, message.source.user, nextDate),
       origin: message.origin,
       source: message.source,
-      text: 'Hey, it\'s me again! Ready to get started?',
-      fallback: 'Hey, it\'s me again! Ready to get started?'
+      text: 'Do you have a minute? I’ll show you how to add things to the team cart :)',
+      fallback: 'Do you have a minute? I’ll show you how to add things to the team cart :)'
     };
     scheduleReminder(
       'onboarding reminder',
@@ -301,7 +301,7 @@ handlers['start_now'] = function (message, data) {
   let msg = {
     text: 'Ok, let\'s get started!',
     fallback: 'Ok, let\'s get started!',
-    attachments: cardTemplate.member_onboard_attachments(admin, 'tomorrow'),
+    attachments: cardTemplate.member_onboard_attachments(admin, message.source.user, 'tomorrow'),
     origin: message.origin,
     source: message.source,
     mode: 'member_onboard',

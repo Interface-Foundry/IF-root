@@ -1,35 +1,25 @@
-env: production
+env: canary
 isProduction: true
 mongodb:
   url: mongodb://10.142.0.18/foundry
-  backuphost: jolteon.internal.kipapp.co
-elasticsearch:
-  url: http://elasticsearch-cerulean.internal.kipapp.co:9200
-elasticsearchElk:
-  url: http://elasticsearch-cerulean.internal.kipapp.co:9200
-redis:
-  port: 6379
-  url: redis-thunder.internal.kipapp.co
-geoipURL: http://localhost:8080/json/
-neighborhoodServer:
-  url: http://localhost:9998
-app:
-  publicAPI: https://kipapp.co/styles/api
-picstitch: http://104.196.30.108:5000
-nlp: http://104.196.51.184:8083
-nlp_rnn: http://104.196.1.204:8085
-doc2vec: http://localhost:8084
+picstitch: http://dev-picstitch.kipthis.com
+nlp: http://dev-parser.kipthis.com
 slack:
   client_id: "2804113073.84166691729"
   client_secret: 39126ac7842f6e3a010f94b9a79282f6
   verification_token: b2hLV2HnBtWBmU5NFgDBG8dL
-  redirect_uri: https://canary.kipapp.co/newslack
-picstitchDelivery: http://10.142.0.18:5000
+  redirect_uri: https://slack.kipthis.com/newslack
+picstitchDelivery: http://dev-delivery-picstitch.kipthis.com
 logging:
   console:
     level: silly
+    json: false
+    stringify: false
     colorize: true
     prettyPrint: true
   mongo:
     enabled: true
-menuURL: http://cafe.kipthis.com
+  debugFileLine:
+    enabled: true
+menuURL: http://dev-cafe.kipthis.com/menus
+kipPayURL: https://dev-pay.kipthis.com

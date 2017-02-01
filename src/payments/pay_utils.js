@@ -18,7 +18,7 @@ var Menu = require('../chat/components/delivery.com/Menu')
 
 // VARIOUS STUFF TO POST BACK TO USER EASILY
 // --------------------------------------------
-var queue = require('../chat/components/queue-mongo')
+var queue = require('../chat/components/queue-direct')
 var UserChannel = require('../chat/components/delivery.com/UserChannel')
 var replyChannel = new UserChannel(queue)
 // --------------------------------------------
@@ -28,7 +28,6 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   cc = payConst.cc
 }
-
 
 /* this would be for kip to pay for an order once the user has successfully paid stripe
 *
@@ -177,27 +176,28 @@ function * storeCard (pay, charge) {
 * @param {Object} payment object
 */
 function * onSuccess (payment) {
+  var banner = {
+    title: '',
+    image_url: 'https://storage.googleapis.com/kip-random/cafe_success.gif'
+  }
+
   try {
     // look up user and the last message sent to us in relation to this order
     var foodSession = yield db.Delivery.findOne({'guest_token': payment.order.guest_token}).exec()
-    var finalFoodMessage = yield db.Messages.find({'source.user': foodSession.convo_initiater.id, mode: `food`, incoming: false}).sort('-ts').limit(1).exec()
+
+    var finalFoodMessage = yield db.Messages.find({
+      'source.user': foodSession.convo_initiater.id,
+      'mode': 'food',
+      'incoming': false
+    }).sort('-ts').limit(1).exec()
+
     finalFoodMessage = finalFoodMessage[0]
-    var team = yield db.Slackbots.findOne({
-      'team_id': finalFoodMessage.source.team
-    }).exec();
+    var team = yield db.Slackbots.findOne({'team_id': finalFoodMessage.source.team}).exec()
     var menu = Menu(foodSession.menu)
     // send message to all the ppl that ordered food
-    foodSession.confirmed_orders.map(userId => {
-      var user = _.find(foodSession.team_members, {id: userId}) // find returns the first one
-
-      var msg = _.merge({}, finalFoodMessage, {
-        thread_id: user.dm,
-        source: {
-          user: user.id,
-          team: foodSession.team_id,
-          channel: user.dm
-        }
-      })
+    var uniqOrders = _.uniq(foodSession.confirmed_orders)
+    uniqOrders.map(userId => {
+      var user = _.find(foodSession.team_members, {'id': userId}) // find returns the first one
 
       var itemNames = foodSession.cart
         .filter(i => i.user_id === userId && i.added_to_cart)
@@ -209,16 +209,35 @@ function * onSuccess (payment) {
       } else {
         foodString = itemNames[0]
       }
-      var isAdmin = team.meta.office_assistants.includes(user.id);
-      var homeMsg = {};
-      homeMsg.data = cardTemplates.home_screen(isAdmin, user.id);
-      homeMsg.type = finalFoodMessage.origin;
-      homeMsg.data.text = `Your order of ${foodString} is on the way 😊`;
-      replyChannel.send(
-        msg,
-        'food.payment_info',
-        homeMsg);
-    });
+
+      var isAdmin = team.meta.office_assistants.includes(user.id)
+      var msg = _.merge(finalFoodMessage, {
+        'incoming': false,
+        'mode': 'food',
+        'action': 'payment_info',
+        'thread_id': user.dm,
+        'source': {
+          'type': 'message',
+          'user': user.id,
+          'channel': user.dm,
+          'team': foodSession.team_id
+        }
+      })
+
+      var json = {
+        'text': `Your order of ${foodString} is on the way 😊`,
+        'callback_id': 'food.payment_info',
+        'fallback': `Your order is on the way`,
+        'attachment_type': 'default',
+        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id).attachments)
+      }
+
+      replyChannel.send(msg, 'food.payment_info', {
+        'type': finalFoodMessage.origin,
+        'data': json
+      })
+    })
+
     var htmlForItem = `Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
 
     var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
@@ -237,9 +256,12 @@ function * onSuccess (payment) {
     }
 
     logging.info('mailOptions', mailOptions)
-    mailer_transport.sendMail(mailOptions, function (err) {
-      if (err) console.log(err)
-    })
+
+    try {
+      mailer_transport.sendMail(mailOptions)
+    } catch (e) {
+      logging.error('error mailing after payment submitted', e)
+    }
     yield foodSession.save()
   } catch (err) {
     logging.error('on success messages broke', err)

@@ -45,7 +45,7 @@ var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require(
 var co = require('co')
 var _ = require('lodash')
 var kip = require('../../../kip.js')
-var queue = require('../queue-mongo')
+var queue = require('../queue-direct')
 var image_search = require('../image_search')
 var search_results = require('./search_results')
 var variation_view = require('./variation_view')
@@ -62,15 +62,23 @@ var slackUtils = require('./utils.js')
 var coupon = require('../../../coupon/coupon.js')
 
 
+require('../reply_logic')
+
 
 function * loadTeam(slackbot) {
   if (slackConnections[slackbot.team_id]) {
     logging.info('already loaded team', slackbot.team_name)
     return
   }
-  var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '')
-  rtm.start()
-  var web = new slack.WebClient(slackbot.bot.bot_access_token || '')
+
+  try {
+    var web = new slack.WebClient(slackbot.bot.bot_access_token || '')
+    var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '')
+    rtm.start()
+  } catch (err) {
+    logging.error('error when loading slackbot.bot', slackbot.bot)
+    return
+  }
   slackConnections[slackbot.team_id] = {
     rtm: rtm,
     web: web,
@@ -78,9 +86,10 @@ function * loadTeam(slackbot) {
   }
 
   co(function * () {
-    yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
-    yield slackUtils.refreshAllUserIMs(slackConnections[slackbot.team_id])
-    yield coupon.refreshTeamCoupons(slackbot.team_id)
+    logging.info('refreshing all teams and various stuff does not work in k8s on startup')
+    // yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
+    // yield slackUtils.refreshAllUserIMs(slackConnections[slackbot.team_id])
+    // yield coupon.refreshTeamCoupons(slackbot.team_id)
   })
   // TODO figure out how to tell when auth is invalid
   // right now the library just console.log's a message and I can't figure out
@@ -209,7 +218,9 @@ logging.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
   logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
-  outgoing.ack();
+  outgoing = {
+    data: outgoing
+  }
   try {
     var message = outgoing.data;
     var team = _.get(message, 'source.team');
@@ -227,7 +238,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     co(function * () {
       if (message.action === 'typing') {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
-          outgoing.ack()
         })
       }
       logging.debug('message.mode: ', message.mode, ' message.action: ', message.action);
@@ -356,13 +366,10 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         logging.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message.reply,'\n\n\n\n');
       }
 
-      outgoing.ack()
     }).then(() => {
-      outgoing.ack()
     }).catch(e => {
       console.log(e.stack)
       bot.rtm.sendMessage("I'm sorry I couldn't quite understand that", message.source.channel, () => {
-        outgoing.ack()
       })
     })
   } catch (e) {

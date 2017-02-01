@@ -4,7 +4,7 @@ var co = require('co')
 var _ = require('lodash')
 
 var api = require('./api-wrapper')
-var queue = require('../queue-mongo')
+var queue = require('../queue-direct')
 
 var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)
@@ -197,10 +197,10 @@ handlers['food.exit'] = function * (message) {
 }
 
 handlers['food.exit.confirm_end_order'] = function * (message) {
-    var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-    foodSession.active = false
-    yield foodSession.save()
-    yield handlers['food.exit.confirm'](message)
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.active = false
+  yield foodSession.save()
+  yield handlers['food.exit.confirm'](message)
 }
 
 handlers['food.exit.confirm'] = function * (message) {
@@ -215,7 +215,7 @@ handlers['food.exit.confirm'] = function * (message) {
     if (foodSession.team_members.length <= 0){
       foodSession.active = false
     }
-    foodSession.save()
+    yield foodSession.save()
   }
 }
 

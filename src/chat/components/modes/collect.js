@@ -5,7 +5,8 @@ var cardTemplate = require('../slack/card_templates');
 var winston = require('winston');
 var utils = require('../slack/utils.js');
 var Fuse = require('fuse.js');
-var queue = require('../queue-mongo');
+var queue = require('../queue-direct');
+var agenda = require('../agendas');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
@@ -110,7 +111,6 @@ handlers['initial'] = function * (message) {
     });
     attachments = attachments.concat(channelSection);
   }
-  
   attachments.push({
     text: '',
     color: '#49d63a',
@@ -118,7 +118,7 @@ handlers['initial'] = function * (message) {
     fallback: 'Which group members would you like to collect orders from?',
     actions: [{
       name: 'collect.home.reminder',
-      text: 'Ask Now',
+      text: '✔ Collect Orders',
       style: 'primary',
       type: 'button',
       value: 'reminder'
@@ -152,7 +152,7 @@ handlers['initial'] = function * (message) {
  * @param {Message} message       the message that led to this being shown
  * @yield {[Message]} an array of messages
  */
-handlers['reminder'] = function * (message) {
+handlers['reminder'] = function*(message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -160,7 +160,7 @@ handlers['reminder'] = function * (message) {
   var team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
-  var channelMembers = [];
+  let channelMembers = [];
   switch (team.meta.collect_from) {
     case 'channel':
       yield team.meta.cart_channels.map(function*(channel) {
@@ -175,56 +175,113 @@ handlers['reminder'] = function * (message) {
       break;
   }
   channelMembers = _.uniqBy(channelMembers, a => a.id);
-  yield channelMembers.map(function*(a) {
+  yield channelMembers.map(function * (a) {
     if (a.id === message.source.user) return;
-    let attachments = [{
-      text: '',
-      image_url: 'http://tidepools.co/kip/oregano/store.png',
-      actions: cardTemplate.slack_shopping_buttons,
-      color: '#45a5f4'
-    }, {
-      'text': utils.randomStoreHint(),
-      mrkdwn_in: ['text'],
-    }];
-    var newMessage = new db.Message({
-      text: `Hey <@${message.source.user}> is collecting orders! Let me know what you need`,
-      incoming: false,
-      thread_id: a.dm,
-      origin: 'slack',
-      mode: 'shopping',
-      fallback: `Hey <@${message.source.user}> is collecting orders! Let me know what you need`,
-      action: 'switch.silent',
-      reply: attachments,
-      source: {
-        team: team.team_id,
-        channel: a.dm,
-        user: a.id,
-        type: 'message',
-        subtype: 'bot_message'
-      },
-      user: a,
-      user_id: a.id
-    });
+    let attachments = [], newMessage;
+    if (a.member_shop_onboarded) {
+      attachments = [{
+        text: '',
+        image_url: 'http://tidepools.co/kip/oregano/store.png',
+        callback_id: 'shopping_btns',
+        actions: cardTemplate.slack_shopping_buttons(),
+        color: '#45a5f4'
+      }, {
+        'text': utils.randomStoreHint(),
+        mrkdwn_in: ['text']
+      }];
+      newMessage = new db.Message({
+        text: `Hey <@${message.source.user}> is collecting shopping orders! Let me know what you need`,
+        incoming: false,
+        thread_id: a.dm,
+        origin: 'slack',
+        mode: 'shopping',
+        fallback: `Hey <@${message.source.user}> is collecting shopping orders! Let me know what you need`,
+        action: 'switch.silent',
+        reply: attachments,
+        source: {
+          team: team.team_id,
+          channel: a.dm,
+          user: a.id,
+          type: 'message',
+          subtype: 'bot_message'
+        },
+        user: a,
+        user_id: a.id
+      });
+    } else {
+      a.member_shop_onboarded = true;
+      a.markModified('member_shop_onboarded');
+      yield a.save();
+      newMessage = new db.Message({
+        text: `Hey <@${message.source.user}> is collecting shopping orders!`,
+        incoming: false,
+        thread_id: a.dm,
+        origin: 'slack',
+        mode: 'member_onboard',
+        fallback: `Hey <@${message.source.user}> is collecting shopping orders!\nIt looks like this is your first time ordering, let me show you how I can make your life a bit easier`,
+        action: 'home',
+        reply: cardTemplate.member_onboard_attachments(message.source.user, a.id, 'initial'),
+        source: {
+          team: team.team_id,
+          channel: a.dm,
+          user: a.id,
+          type: 'message',
+          subtype: 'bot_message'
+        },
+        user: a,
+        user_id: a.id
+      });
+      newMessage.reply[1].text = 'It looks like this is your first time ordering, let me show you how I can make your life a bit easier';
+      let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+      let now = new Date();
+      let cronMsg = {
+        text: 'Hey, it\'s me again! Ready to get started?',
+        incoming: false,
+        thread_id: a.dm,
+        origin: 'slack',
+        mode: 'member_onboard',
+        fallback: 'Hey, it\'s me again! Ready to get started?',
+        action: 'home',
+        reply: cardTemplate.member_onboard_attachments(message.source.user, 'tomorrow'),
+        source: {
+          team: team.team_id,
+          channel: a.dm,
+          user: a.id,
+          type: 'message',
+          subtype: 'bot_message'
+        },
+        user: a,
+        user_id: a.id
+      };
+      scheduleReminder(
+        'initial reminder',
+        new Date(msInFuture + now.getTime()), {
+          msg: JSON.stringify(cronMsg),
+          user: cronMsg.source.user,
+          token: team.bot.bot_access_token,
+          channel: cronMsg.source.channel
+        });
+    }
     yield newMessage.save();
     queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
   });
-  return handlers['handoff'](message);
+  return handlers['handoff'](message, channelMembers.length > 0);
 };
 
-handlers['handoff'] = function(message) {
+handlers['handoff'] = function(message, askedMembers) {
   let attachments = [{
     text: 'Looking for something?',
     color: '#45a5f4',
     image_url: 'http://tidepools.co/kip/oregano/store.png',
     callback_id: 'oops',
-    actions: cardTemplate.slack_shopping_buttons
+    actions: cardTemplate.slack_shopping_buttons()
   }, {
     'text': utils.randomStoreHint(),
     mrkdwn_in: ['text']
   }];
   let msg = message;
 
-  msg.text = 'Ok, I\'ve let them know  :tada:';
+  msg.text = askedMembers ? 'Ok, I\'ve let them know  :tada:' : '';
   msg.action = 'switch.silent';
   msg.mode = 'shopping';
   msg.reply = attachments;
@@ -363,4 +420,9 @@ handlers['sorry'] = function*(message) {
   message.action = 'home';
   message.mrkdwn_in = ['text'];
   return [message];
+};
+
+const scheduleReminder = function(type, time, data) {
+  kip.debug('\n\n\nsetting reminder for ', time.toLocaleString(), '\n\n\n');
+  agenda.schedule(time, type, data);
 };

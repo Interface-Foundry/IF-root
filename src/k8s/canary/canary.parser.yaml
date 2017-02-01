@@ -11,7 +11,7 @@ spec:
         app: parser
     spec:
       containers:
-      - image: gcr.io/kip-styles/parser:latest
+      - image: gcr.io/kip-styles/parser:CANARYIMAGE
         imagePullPolicy: Always
         name: parser
         ports:

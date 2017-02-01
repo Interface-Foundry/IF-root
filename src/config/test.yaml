@@ -1,6 +1,6 @@
 env: test
 mongodb:
-  url: mongodb://localhost/foundry
+  url: mongodb://127.0.0.1:27017/foundry
   options:
     replset:
       rs_name: rs0

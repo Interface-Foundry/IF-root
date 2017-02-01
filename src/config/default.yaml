@@ -52,7 +52,7 @@ neighborhoodServer:
   url: http://pikachu.kipapp.co:9998
 nlp: http://kadabra.kipapp.co:8083
 picstitch: http://kadabra.kipapp.co:5000
-picstitchDelivery: http://canary.kipapp.co:5000
+picstitchDelivery: http://dev-delivery-picstitch.kipthis.com
 proxy:
   luminati:
     addr: 127.0.0.1:24000
@@ -80,4 +80,7 @@ twitterAuth:
   consumerSecret: N5SmhOhWzUJwPbofLpCi0BlJ8T4M3bACpiFBaB1nHdNIOQEu6R,
   callbackURL: https://kipapp.co/auth/twitter/callback
 # picstitch: http://localhost:5000
-menuURL: http://dev-cafe.kipthis.com
+slack:
+  internal_host: http://localhost:8000
+  verification_token: oOEhFUU59ocPm1LpEELeqDj7A
+menuURL: http://localhost:8001/menus

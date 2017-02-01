@@ -412,7 +412,6 @@ handlers['food.admin.toggle_channel_reorder'] = function * (message) {
       foodSession.team_members = foodSession.all_members.filter(user => {
         return _.includes(resp.members, user.id)
       })
-      logging.info('filtered down members to these members: ', foodSession.team_members)
     } catch (err) {
       $replyChannel.send(message, 'food.admin.select_channel_reorder', {type: message.origin, data: {text: 'hmm that didn\'t seem to work'}})
       logging.error('error getting members', err)

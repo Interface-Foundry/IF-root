@@ -15,6 +15,14 @@ var chatuserSchema = mongoose.Schema({
     items: [String]
   },
   onboarded: Boolean,
+  admin_shop_onboarded: {
+  	type: Boolean,
+  	default: false
+  },
+  member_shop_onboarded: {
+  	type: Boolean,
+  	default: false
+  },
   ts: String,
   origin: String,
   type: { type: String }, // slack, telegram, skype, etc.
@@ -74,7 +82,45 @@ var chatuserSchema = mongoose.Schema({
   },
   phone_number: String,
   first_name: String,
-  last_name: String
+  last_name: String,
+  food_preferences: {
+    asked: {
+      type: Boolean,
+      default: false
+    },
+    vegetarian: {
+      type: Boolean,
+      default: false
+    },
+    vegan: {
+      type: Boolean,
+      default: false
+    },
+    pescetarian: {
+      type: Boolean,
+      default: false
+    },
+    paleo: {
+      type: Boolean,
+      default: false
+    },
+    peanut: {
+      type: Boolean,
+      default: false
+    },
+    gluten: {
+      type: Boolean,
+      default: false
+    },
+    shellfish: {
+      type: Boolean,
+      default: false
+    },
+    chicken: {
+      type: Boolean,
+      default: false
+    }
+  }
 
 })
 

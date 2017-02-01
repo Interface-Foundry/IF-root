@@ -23,7 +23,7 @@ var Slackbots = db.Slackbots;
 var upload = require('./upload.js');
 var email = require('./email');
 /////////// LOAD INCOMING ////////////////
-var queue = require('./queue-mongo');
+var queue = require('./queue-direct');
 var onboarding = require('./modes/onboarding');
 var onboard = require('./modes/onboard');
 var member_onboard = require('./modes/member_onboard');
@@ -175,6 +175,9 @@ function switchMode(message) {
 		'settings': function() {
 			return 'settings';
 		},
+    'members': function () {
+      return 'team';
+    },
 		'team': function() {
 			return 'team';
 		},
@@ -242,7 +245,9 @@ function printMode(message) {
 //
 queue.topic('incoming').subscribe(incoming => {
 
-  incoming.ack();
+	incoming = {
+		data: incoming, // for olde times sake
+	}
 
   co(function * () {
     if (incoming.data.text) {
@@ -271,13 +276,11 @@ queue.topic('incoming').subscribe(incoming => {
         yield kipcart.addToCart(cart_id, cart_id, results, cart_type);
         logging.debug('added to cart')
         send_text_reply(message, 'Okay :) added that item to cart');
-        incoming.ack()
         timer.stop()
         return
       } catch (e) {
         yield send_text_reply(message, 'oops error, you might need to add that manually');
         timer.stop()
-        incoming.ack()
         return
       }
     }
@@ -333,7 +336,6 @@ queue.topic('incoming').subscribe(incoming => {
 
     if (isMenuChange(message)) {
       timer.stop();
-      incoming.ack()
       return yield shopping[_.get(message,'action')](message);
     }
     let isLink = yield processProductLink(message);
@@ -367,7 +369,10 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     printMode(message)
-
+    let team = yield db.Slackbots.findOne({
+      'team_id': message.source.team
+    }).exec();
+    let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
     //MODE SWITCHER
     switch (message.mode) {
       case 'onboarding':
@@ -408,6 +413,7 @@ queue.topic('incoming').subscribe(incoming => {
         break;
       case 'search_btn':
         if (message.origin === 'slack') {
+          yield slackUtils.showLoading(message);
           var data = _.split(message.data.value, '.');
           var action = data[0];
           data.splice(0, 1);
@@ -415,14 +421,14 @@ queue.topic('incoming').subscribe(incoming => {
         }
         break;
       case 'team':
-        if (message.origin === 'slack') {
+      case 'members':
+        if (message.origin === 'slack' && isAdmin) {
           var replies = yield team.handle(message);
         }
         break;
       case 'food':
       case 'cafe':
         yield food(message)
-        return incoming.ack()
       case 'address':
         return
         break;
@@ -445,6 +451,7 @@ queue.topic('incoming').subscribe(incoming => {
         // not a simple reply, do NLP
       if (!replies || replies.length === 0) {
         timer.tic('getting nlp response')
+        yield slackUtils.showLoading(message);
         logging.info('👽 passing to nlp: ', message.text)
         if (message.execute && message.execute.length >= 1 || message.mode === 'food') {
           replies = yield execute(message)
@@ -470,6 +477,7 @@ queue.topic('incoming').subscribe(incoming => {
               execute: r.execute
             }
           }))
+        yield slackUtils.hideLoading(message);
       }
       if (!replies || replies.length === 0) {
         logging.error('Could not understand message ' + message._id)
@@ -502,7 +510,6 @@ queue.topic('incoming').subscribe(incoming => {
         queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
       })
     }
-    incoming.ack()
     timer.stop()
   }).catch(kip.err)
 })
