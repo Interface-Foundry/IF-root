@@ -231,13 +231,14 @@ handlers['food.user.poll'] = function * (message) {
   }
 
   yield teamMembers.map(function * (member) {
-    logging.debug('checkign if we should do food_preferences')
-    if (triggerPreferences && (_.get(member, 'food_preferences.asked') !== true)) {
-      // send user thing for food pref if triggerPref const and havent asked
-      yield handlers['food.user.preferences'](message, member, foodSession)
-    } else {
-      yield sendUserDashboard(foodSession, message, member)
-    }
+
+    yield sendUserDashboard(foodSession, message, member)
+    // if (_.get(member, 'food_preferences.asked') === true) {
+    //   sendUserDashboard(foodSession, message, member)
+    // } else {
+    //   // send user thing for food pref
+    //   yield handlers['food.user.preferences'](message, member, foodSession)
+    // }
   })
 }
 
@@ -597,12 +598,15 @@ function * sendAdminDashboard(foodSession, message, user) {
     }).sort('-ts').limit(1).exec()
     prevMessage = prevMessage[0];
     var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
+<<<<<<< HEAD
 
     // make sure the message that we are stripping the buttons from is actually a dashboard message
     if (sampleArray.length !== 5 || !sampleArray[4].text.includes('No Food for Me')) {
       sampleArray = sampleCuisines(foodSession)
     }
 
+=======
+>>>>>>> - No more switching cuisine buttons on people
     basicDashboard.attachments.push({
       'text': 'Tap a button to choose a cuisine',
       'fallback': 'Tap a button to choose a cuisine',
@@ -656,12 +660,15 @@ function * sendUserDashboard(foodSession, message, user) {
     var prevMessage = yield db.Message.find({'source.user': user.id}).sort('-ts').limit(1).exec()
     prevMessage = prevMessage[0];
     var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
+<<<<<<< HEAD
 
     // make sure the message that we are stripping the buttons from is actually a dashboard message
     if (sampleArray.length !== 5 || !sampleArray[4].text.includes('No Food for Me')) {
       sampleArray = sampleCuisines(foodSession)
     }
 
+=======
+>>>>>>> - No more switching cuisine buttons on people
     basicDashboard.attachments.push({
       'text': 'Tap a button to choose a cuisine',
       'fallback': 'Tap a button to choose a cuisine',
