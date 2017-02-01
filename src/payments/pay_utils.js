@@ -263,10 +263,11 @@ function * onSuccess (payment) {
       var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
       var user = foodSession.team_members.filter(j => j.id === item.user_id)
 
-      console.log(`link to user dm: https://${slackbot.team_name}.slack.com/messages/@${user[0]}`)
+      console.log('suntne instructions?', item.item)
 
       html += `<tr><td style="background-color:${ryan_grey};"><b>${foodInfo.name}</b></td>`
-      html += `<td style="background-color:${ryan_grey};">${descriptionString}</td>`
+      html += `<td style="background-color:${ryan_grey};"><p>${descriptionString}</p>`
+      html += `${(item.item.instructions ? '<p><i>' + item.item.instructions + '</i></p>': '')}</td>`
       html += `<td style="background-color:${ryan_grey};"><b>${menu.getCartItemPrice(item).toFixed(2)}</b></td>`
       html += `<td style="background-color:${ryan_grey};"><p>${user[0].first_name} ${user[0].last_name}</p>`
       html += `<p><a href="https://${slackbot.team_name}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
