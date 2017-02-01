@@ -7,19 +7,27 @@ require('./jobs/reminder')(agenda);
 require('./jobs/initial_reminder')(agenda);
 require('./jobs/feature_rollout')(agenda);
 
+let cartEmailInterval = (process.env.JOB_CART_EMAIL && typeof process.env.JOB_CART_EMAIL == 'string') ? process.env.JOB_CART_EMAIL : '00 15 * * 6';
+let featureInterval = (process.env.JOB_FEATURE_ROLLOUT && typeof process.env.JOB_FEATURE_ROLLOUT == 'string') ? process.env.JOB_FEATURE_ROLLOUT : false;
 
 agenda.on('ready', function () {
+	logging.info('Send cart status email jobs to run at: ', cartEmailInterval);
+	logging.info('Feature rollout jobs to run at: ', featureInterval);
+
 	//clear and restart jobs 
 	agenda.cancel({name: 'send cart status email'}, function(err, numRemoved) {
 		if (err) console.log(err);
-		console.log('Restarting send cart status email jobs ', numRemoved);
 	});
 	agenda.cancel({name: 'feature rollout'}, function(err, numRemoved) {
 		if (err) console.log(err);
-		console.log('Restarting feature rollout jobs ', numRemoved);
 	});	
-  agenda.every('43 15 * * *', 'send cart status email', {});
-  agenda.every('44 15 * * *', 'feature rollout', { feature: 'oregano'});
+	if (cartEmailInterval) { 
+		agenda.every(cartEmailInterval, 'send cart status email', {});
+	}
+  if (featureInterval) {
+		logging.info('Set up feature roll out jobs.');
+  	agenda.every(featureInterval, 'feature rollout', { feature: 'oregano'});
+  }
   agenda.start();
 });
 
