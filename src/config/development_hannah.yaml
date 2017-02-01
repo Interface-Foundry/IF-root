@@ -9,6 +9,8 @@ mongodb:
         keepAlive: 1
 elasticsearch:
   url: http://localhost:9200
+nlp: http://dev-parser.kipthis.com
+nlp_rnn: http://dev-rnn.kipthis.com
 slack:
   client_id: "110519934743.109767556243"
   client_secret: 4b3e730b1162664f10f4f23865e0964c
