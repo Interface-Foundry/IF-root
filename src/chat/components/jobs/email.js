@@ -112,7 +112,7 @@ module.exports = function(agenda) {
               html += `</table></td></tr></table><br></html>`
 
               let payload = {
-                to: "${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
+                to: `"${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
                 from: `Kip Store <hello@kipthis.com>`,
                 subject: `[Kip] ` + obj.team.team_name + ` team cart updates for the week of ` + date,
                 html: html
