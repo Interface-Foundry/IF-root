@@ -46,6 +46,7 @@ handlers['start'] = function * (message) {
   } else {
     var team = find[0];
   }
+  yield utils.getTeamMembers(team);
   var attachments = [];
   // adding settings mode sticker
   attachments.push({
