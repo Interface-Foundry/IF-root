@@ -221,12 +221,15 @@ function nodeOptions (node, cartItem, validate, message) {
     if (g.min_selection === 0) {
       if (g.max_selection >= g.children.length) {
         a.text += '\n Optional - Choose as many as you like.'
+        a.color = 'grey'
       } else {
         a.text += `
  Optional - Choose up to ${g.max_selection}.`
         if (numSelected > g.max_selection) {
           a.text += '\n`Maximum number of options exceeded`'
           a.color = '#fa951b'
+        } else {
+          a.color = 'grey'
         }
       }
     } else {
