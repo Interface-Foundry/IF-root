@@ -200,22 +200,37 @@ function * getTeamMembers(team) {
 *
 */
 
-
 function * refreshAllChannels (slackbot) {
-  var botChannelArray = yield slackbot.web.channels.list()
-  var botGroupArray = yield slackbot.web.groups.list()
-  var botsChannels = botChannelArray.channels.concat(botGroupArray.groups)
-  logging.info(`adding ${botsChannels.length} to slackbots.meta`)
-  slackbot.slackbot.meta.all_channels = botsChannels.filter(c => !c.is_archived).map((channel) => {
-    return _.pick(channel, 'id', 'name', 'is_channel')
+  // need the web api client real quick quick
+  logging.debug('trying to update all channels')
+  var slackbotWeb = new slack.WebClient(slackbot.bot.bot_access_token)
+  var botChannelArray = yield slackbotWeb.channels.list()
+  var botGroupArray = yield slackbotWeb.groups.list()
+  // multi person im
+  botGroupArray = botGroupArray.groups.filter(c => !c.is_mpim && !c.is_archived).map((group) => {
+    return {
+      'id': group.id,
+      'name': group.name,
+      'is_channel': false
+    }
   })
-  yield slackbot.slackbot.save()
+
+  botChannelArray = botChannelArray.channels.filter(c => !c.is_archived).map((channel) => {
+    return {
+      'id': channel.id,
+      'name': channel.name,
+      'is_channel': true
+    }
+  })
+  slackbot.meta.all_channels = botChannelArray.concat(botGroupArray)
+  yield slackbot.save()
 }
 
-function * refreshAllUserIMs (slackbotAccessToken) {
-  var slackbotWeb = new slack.WebClient(slackbotAccessToken)
+function * refreshAllUserIMs (slackbot) {
   logging.debug('trying to update all users dms')
+  var slackbotWeb = new slack.WebClient(slackbot.bot.bot_access_token)
   var userIMInfo = yield slackbotWeb.im.list()
+
   yield userIMInfo.ims.map(function * (u) {
     var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
     if (_.get(chatUser, 'dm') !== u.id) {
