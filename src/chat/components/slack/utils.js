@@ -212,9 +212,10 @@ function * refreshAllChannels (slackbot) {
   yield slackbot.slackbot.save()
 }
 
-function * refreshAllUserIMs (slackbot) {
+function * refreshAllUserIMs (slackbotAccessToken) {
+  var slackbotWeb = new slack.WebClient(slackbotAccessToken)
   logging.debug('trying to update all users dms')
-  var userIMInfo = yield slackbot.web.im.list()
+  var userIMInfo = yield slackbotWeb.im.list()
   yield userIMInfo.ims.map(function * (u) {
     var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
     if (_.get(chatUser, 'dm') !== u.id) {

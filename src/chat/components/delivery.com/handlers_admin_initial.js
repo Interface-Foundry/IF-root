@@ -54,8 +54,9 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
 
 handlers['food.admin.select_address'] = function * (message, banner) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
+  logging.debug('doing slackutils stuff in here')
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  yield [sleep(1000), slackUtils.getTeamMembers(team)]
+  yield [slackUtils.refreshAllUserIMs(team.bot.bot_access_token), slackUtils.getTeamMembers(team)]
 
   message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
@@ -296,6 +297,7 @@ handlers['food.choose_address'] = function * (message) {
     // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
     var addr = [foodSession.chosen_location.address_1, foodSession.chosen_location.zip_code].join(' ')
     try {
+      //
       var res = yield api.searchNearby({addr: addr, pickup: false})
     } catch (err) {
       logging.error('error while searching delivery.com from food.choose_address', err)
