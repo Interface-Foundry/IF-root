@@ -627,7 +627,7 @@ handlers['food.done'] = function * (message) {
 }
 
 function * onSuccess (message, foodSession) {
-  console.log('handler on success called')
+  logging.debug('handler on success called')
   var banner = {
     title: '',
     image_url: 'https://storage.googleapis.com/kip-random/cafe_success.gif'
@@ -653,7 +653,7 @@ function * onSuccess (message, foodSession) {
       }
 
       var isAdmin = team.meta.office_assistants.includes(user.id)
-      var msg = _.merge(message, {
+      var msg = _.merge({}, {
         'incoming': false,
         'mode': 'food',
         'action': 'payment_info',
@@ -665,7 +665,7 @@ function * onSuccess (message, foodSession) {
           'team': foodSession.team_id
         }
       })
-      let couponText = yield utils.couponText(message.source.team);
+      let couponText = yield utils.couponText(message.source.team)
       var json = {
         'text': `Your order of ${foodString} is on the way 😊`,
         'callback_id': 'food.payment_info',
@@ -675,35 +675,9 @@ function * onSuccess (message, foodSession) {
       }
 
       yield $replyChannel.send(msg, 'food.need.payments.done', {type: message.origin, data: json})
-      console.log('about to send confirmation email')
+      logging.debug('about to send confirmation email')
       yield email_utils.sendConfirmationEmail(foodSession)
     })
-
-
-  //   var htmlForItem = `Thank you for your order. Here is the list of items.\n<table border="1"><thead><tr><th>Menu Item</th><th>Item Options</th><th>Price</th><th>Recipient</th></tr></thead>`
-  //
-  //   var orders = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
-  //     var foodInfo = menu.getItemById(String(item.item.item_id))
-  //     var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
-  //     var user = foodSession.team_members.filter(j => j.id === item.user_id)
-  //     htmlForItem += `<tr><td>${foodInfo.name}</td><td>${descriptionString}</td><td>${menu.getCartItemPrice(item).toFixed(2)}</td><td>${user[0].real_name}</td></tr>`
-  //   })
-  //
-  //   // send confirmation email to admin
-  //   var mailOptions = {
-  //     to: `${foodSession.convo_initiater.name} <${foodSession.convo_initiater.email}>`,
-  //     from: `Kip Café <hello@kipthis.com>`,
-  //     subject: `Kip Café Order Receipt for ${foodSession.chosen_restaurant.name}`,
-  //     html: `${htmlForItem}</thead></table>`
-  //   }
-  //
-  //   logging.info('mailOptions', mailOptions)
-  //
-  //   try {
-  //     mailer_transport.sendMail(mailOptions)
-  //   } catch (e) {
-  //     logging.error('error mailing after payment submitted', e)
-  //   }
   } catch (err) {
     logging.error('on success messages broke', err)
   }
