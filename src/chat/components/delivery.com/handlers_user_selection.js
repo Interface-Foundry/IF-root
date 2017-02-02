@@ -48,7 +48,6 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
   var prevFoodSession = yield db.Delivery.find({team_id: message.source.team, active: false}).limit(1).sort({_id: -1}).exec()
   var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
   prevFoodSession = prevFoodSession[0]
-  console.log('AAAAAAAAAAAAAA', prevFoodSession.chosen_channel.id)
   if (_.get(prevFoodSession, 'chosen_channel.name')) {
     // allow special cases for everyone, just me and channel specifics
     
