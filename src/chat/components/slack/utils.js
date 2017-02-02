@@ -232,7 +232,19 @@ function * refreshAllUserIMs (slackbot) {
   var userIMInfo = yield slackbotWeb.im.list()
 
   yield userIMInfo.ims.map(function * (u) {
+    // don't care about clippy, i mean slackbot (ugh)
+    if (u.user === 'USLACKBOT') {
+      return
+    }
+
     var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
+    if (!chatUser) {
+      logging.error('tried to refresh IM for unexistant user', {
+        IM: u,
+        slackbot: slackbot
+      })
+      return
+    }
     if (_.get(chatUser, 'dm') !== u.id) {
       logging.debug('updating user dm', chatUser.name)
       chatUser.dm = u.id

@@ -675,12 +675,12 @@ function * onSuccess (message, foodSession) {
       }
 
       yield $replyChannel.send(msg, 'food.need.payments.done', {type: message.origin, data: json})
-      logging.debug('about to send confirmation email')
-      yield email_utils.sendConfirmationEmail(foodSession)
     })
   } catch (err) {
     logging.error('on success messages broke', err)
   }
+  logging.debug('about to send confirmation email')
+  yield email_utils.sendConfirmationEmail(foodSession)
 }
 
 handlers['food.need.payments.done'] = function * (message, foodSession) {
