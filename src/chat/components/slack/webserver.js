@@ -132,6 +132,7 @@ app.post('/slackaction', next(function * (req, res) {
     // for things that i'm just going to parse for
     var simple_command = simple_action_handler(action);
     var buttonData = buttonCommand(action);
+
     kip.debug('\n\n\nsimple_command: ', simple_command,'\n\n\n');
     if (simple_command) {
       kip.debug('passing through button click as a regular text chat', simple_command.cyan);
@@ -148,6 +149,10 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.team = message.source.team.id;
       message.source.user = message.source.user.id;
       message.source.channel = message.source.channel.id;
+      var team_id = message.source.team;
+      var team = yield db.Slackbots.findOne({
+        'team_id': team_id
+      }).exec();
 
     if (simple_command == 'cafe_btn') {
           message.mode = 'food'
@@ -157,18 +162,16 @@ app.post('/slackaction', next(function * (req, res) {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
       }
-      else if (simple_command === 'shopping_btn' || simple_command === 'shopping') {
-        let team = yield db.Slackbots.findOne({
-          'team_id': message.source.team
-        }).exec();
-        let isAdmin = yield utils.isAdmin(message.source.user, team);
-        message.mode = 'shopping'
-        message.action = 'initial';
-        message.text = 'shopping';
-        message.save().then(() => {
-          queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-        });
-      }
+    else if (simple_command === 'shopping_btn' || simple_command === 'shopping') {
+      message.text = '';
+      let msgData = {
+        attachments: [...cardTemplate.slack_shopping_mode()],
+        as_user: true
+      };
+      let slackBot = slackModule.slackConnections[team.team_id];
+      slackBot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      return;
+    }
       else if (simple_command == 'loading_btn') {
       	// responding with nothing means the button does nothing!
         return;
@@ -176,8 +179,6 @@ app.post('/slackaction', next(function * (req, res) {
       else if (simple_command === 'collect_select') {
         let selection = parsedIn.actions[0].value;
         let json = parsedIn.original_message;
-        var team_id = message.source.team;
-        var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
         json.attachments[0].actions = json.attachments[0].actions.map(button => {
           button.text = button.text.replace('◉', '○');
           return button;
@@ -349,7 +350,7 @@ app.post('/slackaction', next(function * (req, res) {
         let isAdmin = yield utils.isAdmin(message.source.user, team);
         let couponText = yield utils.couponText(message.source.team);
         let reply = cardTemplate.home_screen(isAdmin, message.source.user, couponText);
-        var slackBot = slackModule.slackConnections[team];
+        let slackBot = slackModule.slackConnections[team];
         reply.as_user = true;
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
 
