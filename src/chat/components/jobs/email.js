@@ -121,7 +121,7 @@ module.exports = function(agenda) {
 
               let payload = {
                 //please remember to change this back
-                to: '"Hannah Lorane Katznelson" <hannah.katznelson@gmail.com>',//`"${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
+                to: `"${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
                 from: `Kip Store <hello@kipthis.com>`,
                 subject: `Kip ` + obj.team.team_name + ` updates for the week of ` + date,
                 html: html
