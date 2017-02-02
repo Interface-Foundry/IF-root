@@ -13,5 +13,5 @@ slack:
   client_id: "105555369782.117559561207"
   client_secret: 0ccce527e8ab02cfdbe3ef63a4e16bac
   verification_token: SeSOXUklO1kRQLu5sNHXilMn
-  redirect_uri: https://dc5502bc.ngrok.io/newslack
+  redirect_uri: https://9e69172c.ngrok.io/newslack
 kipPayURL: https://14b5c738.ngrok.io
