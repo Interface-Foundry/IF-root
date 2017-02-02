@@ -524,9 +524,11 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
             });
           }
         });
-        cart = yield module.exports.removeFromCartByItem(matching_items.pop());
-        cart.error = '^ Sorry, Amazon won\'t let me add another to your cart';
-        cart.errorASIN = invalidQuantityAsin;
+        if (matching_items) {
+          cart = yield module.exports.removeFromCartByItem(matching_items.pop());
+          cart.error = '^ Sorry, Amazon won\'t let me add another to your cart';
+          cart.errorASIN = invalidQuantityAsin;
+        }
       }
       timer('rebuilt');
     }
