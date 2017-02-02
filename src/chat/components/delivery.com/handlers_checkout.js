@@ -553,7 +553,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
           'name': 'passthrough',
           'text': 'Home',
           'type': 'button',
-          'value': 'food.exit.confirm_end_order'
+          'value': 'food.exit.confirm'
         }]
       }]
     }
