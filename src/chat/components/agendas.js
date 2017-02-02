@@ -5,7 +5,6 @@ var agenda = new Agenda({db: {address: config.mongodb.url}});
 require('./jobs/email')(agenda);
 require('./jobs/reminder')(agenda);
 require('./jobs/initial_reminder')(agenda);
-require('./jobs/feature_rollout')(agenda);
 
 agenda.on('ready', function () {
 	agenda.cancel({name: 'send cart status email'}, function(err, numRemoved) {
