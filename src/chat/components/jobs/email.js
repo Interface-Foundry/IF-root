@@ -8,7 +8,6 @@ var async = require('async');
 var kipcart = require('../cart');
 var utils = require('../slack/utils');
 
-
 module.exports = function(agenda) {
   agenda.define('send cart status email', function (job, done) {
     co( function * () {
@@ -23,10 +22,9 @@ module.exports = function(agenda) {
         co( function * () {
           console.log('getting admins')
           if (!(_.get(obj,'admins') && _.get(obj,'admins').length > 0)) return callback();
-          console.log('passed the getting admins thing')
           let carts = yield db.Carts.find({"slack_id": obj.team.team_id}).populate('items').exec();
           let cart = _.get(carts,'[0]');
-          console.log('got the cart: ', cart)
+          // console.log('got the cart: ', cart)
           if (!cart || !(cart && _.get(cart,'aggregate_items') && _.get(cart,'aggregate_items').length > 0)) return callback()
           async.eachSeries(obj.admins, function(admin, callback2){
             co(function * () {
@@ -49,8 +47,6 @@ module.exports = function(agenda) {
               console.log('switching to grid')
               grid += checkout + `<br/><br/>`
 
-              console.log('beginning table')
-
               //table headings
               grid += `Thank you for using Kip! Here is the list of items in your team cart:\n\n<br/>`
               grid += `<table style="width:100%;border-spacing:5.5px;" border="0">`
@@ -64,7 +60,6 @@ module.exports = function(agenda) {
               let lastNames = [];
               var cart_total = 0;
 
-              console.log('beginning table items')
               yield cart.aggregate_items.map( function * (item) {
                 let addedUser = yield db.Chatusers.find({'id': item.added_by[0]}).limit(1).exec();
                 userNames[_.get(addedUser,'[0].id')] = _.get(addedUser,'[0].name')
@@ -93,7 +88,6 @@ module.exports = function(agenda) {
                 let qty = _.get(item, 'quantity')
                 let total_price = '$' + (Number(price.slice(1, price.length)) * Number(qty)).toFixed(2)
                 console.log('date', date)
-                // console.log('CART', Object.keys(cart))
                 cart_total += Number(total_price.slice(1, total_price.length))
 
                 grid += `<tr><td style="padding:10px;position:absolute;" bgcolor=${ryan_grey}><a style="text-decoration:none;color:${kip_blue};" href="${item.link}">${_.get(item,'title')}</a></td>`
@@ -103,10 +97,6 @@ module.exports = function(agenda) {
               grid += `</table>`
               html += `<br/><p style="font-weight:bold;">Cart Total: $${cart_total.toFixed(2)}</p>`
               html += grid
-
-
-              // console.log('OBJ', obj)
-              console.log('built table')
 
               //footer
               html += `<br/><p style="font-weight:bold;">Cart Total: $${cart_total.toFixed(2)}</p>`
@@ -121,17 +111,13 @@ module.exports = function(agenda) {
               html += `<td style="width:300px;"><a style="padding:0 20px 0 20px;color:white;text-decoration:none;font-size:85%" href="https://kipthis.com/legal.html">Terms of Use</a></td></tr>`
               html += `</table></td></tr></table><br></html>`
 
-              console.log('built html')
-
               let payload = {
-                //please remember to change this back
-                to: `"Hannah Lorane Katznelson", <hannah.katznelson@gmail.com>`,//"${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
+                to: "${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
                 from: `Kip Store <hello@kipthis.com>`,
                 subject: `[Kip] ` + obj.team.team_name + ` team cart updates for the week of ` + date,
                 html: html
               }
 
-              console.log('built payload')
               mailer.sendMail(payload, function(err, info) {
                 if (err) return kip.debug(' \n\n\n\n /jobs/email.js: error sending email: ', err, ' \n\n\n\n ');
                 logging.info('job: sent cart snapshot email to ', admin.name, ' for team ', obj.team.team_name, ' ',obj.team.team_id, ' info: ', info);
