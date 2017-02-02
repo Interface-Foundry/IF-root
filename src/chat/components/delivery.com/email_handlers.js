@@ -21,8 +21,10 @@ handlers['food.admin.team.add_order_email'] = function * (message) {
 handlers['food.admin.team.remove_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
-  foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
-  yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
+  if (foodSession.email_users.indexOf(e) > -1) {
+    foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
+    yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
+  }
   yield handlers['food.admin.team.email_members'](message);
 }
 
@@ -167,7 +169,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
           'text': 'Finish',
           'style': 'primary',
           'type': 'button',
-          'value': 'food.admin.team.members'
+          'value': 'food.admin.team.members' // but should sometimes be reorder confirmation
         }
         // {
         //   'name': 'passthrough',

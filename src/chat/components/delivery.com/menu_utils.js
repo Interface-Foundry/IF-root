@@ -76,6 +76,7 @@ utils.getUrl = function * (foodSession, user_id, selected_items) {
 }
 
 utils.cuisineEmoji = function (cuisine) {
+    console.log('CUISINE', cuisine);
     var e
     switch(cuisine){
         case "Afghan":

@@ -53,9 +53,7 @@ router.post('/cafe', (req, res) => co(function * () {
 
   logging.debug('new menusession created')
 
-  logging.debug('req.body', req.body)
-
-  logging.debug('req.body', req.body)
+  // logging.debug('req.body', req.body)
 
   var rest_id = req.body.rest_id;
   var result = yield Menu.findOne({merchant_id: rest_id});
@@ -76,8 +74,6 @@ router.post('/cafe', (req, res) => co(function * () {
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
 
-  logging.debug('woe is me');
-
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
 
   ms.selected_items = req.body.selected_items;
@@ -95,7 +91,7 @@ router.post('/cafe', (req, res) => co(function * () {
 
   ms.team_name = sb.team_name
 
-  logging.debug('ms', ms);
+  // logging.debug('ms', ms);
   yield ms.save();
 
   //return a url w a key in a query string
@@ -126,7 +122,7 @@ router.post('/order', function (req, res) {
       var order = req.body.order;
       var user_id = req.body.user_id;
 
-      logging.debug('req.body', req.body)
+      // logging.debug('req.body', req.body)
 
       var deliv_id = req.body.deliv_id;
       var foodSession = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
@@ -134,7 +130,7 @@ router.post('/order', function (req, res) {
       var cart = foodSession.cart;
 
       for (var i = 0; i < order.length; i++) {
-        logging.debug(order[i]);
+        // logging.debug(order[i]);
         cart.push({
           added_to_cart: true,
           item: order[i],
@@ -143,9 +139,8 @@ router.post('/order', function (req, res) {
       }
 
       var orders = foodSession.confirmed_orders
-      logging.debug('orders', orders)
+      // logging.debug('orders', orders)
       orders.push(user_id)
-      logging.debug('orders plus a new one', orders)
 
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, confirmed_orders: orders}});
 
