@@ -135,3 +135,4 @@ module.exports = function(agenda) {
       })
   })
  });
+}

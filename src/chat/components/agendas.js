@@ -8,6 +8,7 @@ require('./jobs/initial_reminder')(agenda);
 require('./jobs/home_button')(agenda);
 require('./jobs/clear_response_url')(agenda);
 
+
 agenda.on('ready', function () {
 	agenda.cancel({name: 'send cart status email'}, function(err, numRemoved) {
 		if (err) console.log(err);
@@ -18,6 +19,7 @@ agenda.on('ready', function () {
 	// agenda.create('send cart status email', {}).schedule('6:45pm').repeatEvery('1 day', { timezone: 'America/New_York'}).save();
 	// agenda.create('feature rollout', { feature: 'oregano'}).schedule('6:45pm').repeatEvery('1 day', { timezone: 'America/New_York'}).save();
   // agenda.start();
+
 
 });
 
