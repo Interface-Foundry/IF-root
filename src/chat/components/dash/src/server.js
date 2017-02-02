@@ -66,16 +66,20 @@ app.get('/login/facebook/return',
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
-app.use('/graphql', expressGraphQL(req => ({
-  schema,
-  graphiql: true,
-  rootValue: { request: req },
-  pretty: process.env.NODE_ENV !== 'production',
-})));
+// app.use('/graphql', expressGraphQL(req => ({
+//   schema,
+//   graphiql: true,
+//   rootValue: { request: req },
+//   pretty: process.env.NODE_ENV !== 'production',
+// })));
 
+const options = {
+  mutation: false, // mutation fields can be disabled
+  allowMongoIDMutation: false // mutation of mongo _id can be enabled
+};
 
 app.use(graffiti.express({
-  schema: getSchema([MetricSchema]),
+  schema: getSchema([MetricSchema], options),
   context: {} // custom context
 }));
 // app.use(graffiti.express({

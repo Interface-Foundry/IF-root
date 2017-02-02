@@ -197,17 +197,20 @@ module.exports =
   //
   // Register API middleware
   // -----------------------------------------------------------------------------
-  app.use('/graphql', (0, _expressGraphql2.default)(function (req) {
-    return {
-      schema: _schema2.default,
-      graphiql: true,
-      rootValue: { request: req },
-      pretty: ("development") !== 'production'
-    };
-  }));
+  // app.use('/graphql', expressGraphQL(req => ({
+  //   schema,
+  //   graphiql: true,
+  //   rootValue: { request: req },
+  //   pretty: process.env.NODE_ENV !== 'production',
+  // })));
+  
+  var options = {
+    mutation: false, // mutation fields can be disabled
+    allowMongoIDMutation: false // mutation of mongo _id can be enabled
+  };
   
   app.use(_graffiti2.default.express({
-    schema: (0, _graffitiMongoose.getSchema)([_metric_schema2.default]),
+    schema: (0, _graffitiMongoose.getSchema)([_metric_schema2.default], options),
     context: {} // custom context
   }));
   // app.use(graffiti.express({
@@ -2122,7 +2125,7 @@ module.exports =
   
   var MetricListType = new _graphql.GraphQLList(_MetricType2.default);
   
-  console.log('wtf is metrics ', _metric_schema2.default);
+  // console.log('wtf is metrics ', Metrics)
   var metricsList = {
     type: MetricListType,
     resolve: function resolve() {
@@ -24529,6 +24532,10 @@ module.exports =
   }
   var lineChartData = plotData();
   
+  var waypointsCount = [{ waypoint: 1001, users: ['U3620AA5T'], total: 12 }, { waypoint: 1010, users: ['U3620AA5T'], total: 12 }, { waypoint: 1020, users: ['U3620AA5T'], total: 11 }, { waypoint: 1100, users: ['U3620AA5T'], total: 11 }, { waypoint: 1101, users: ['U3620AA5T'], total: 4 }, { waypoint: 1102, users: ['U3620AA5T'], total: 7 }, { waypoint: 1110, users: ['U3620AA5T'], total: 7 }, { waypoint: 1111, users: ['U3620AA5T'], total: 4 }, { waypoint: 1120, users: ['U3620AA5T'], total: 7 }, { waypoint: 1121, users: ['U3620AA5T'], total: 1 }, { waypoint: 1130, users: ['U3620AA5T'], total: 1 }, { waypoint: 1140,
+    users: ['U3H5E1ANN', 'U3620AA5T'],
+    total: 29 }, { waypoint: 1200, users: ['U3620AA5T'], total: 6 }, { waypoint: 1210, users: ['U3H5E1ANN', 'U3620AA5T'], total: 6 }, { waypoint: 1211, users: ['U3620AA5T'], total: 1 }, { waypoint: 1220, users: ['U3620AA5T', 'U3H5E1ANN'], total: 4 }, { waypoint: 1230, users: ['U3H5E1ANN', 'U3620AA5T'], total: 3 }, { waypoint: 1240, users: ['U3H5E1ANN', 'U3620AA5T'], total: 1 }, { waypoint: 1300, users: ['U3620AA5T'], total: 2 }, { waypoint: 1310, users: ['U3620AA5T'], total: 1 }, { waypoint: 1313, users: ['U3620AA5T'], total: 1 }, { waypoint: 1320, users: ['U3620AA5T'], total: 3 }, { waypoint: 1321, users: ['U3620AA5T'], total: 1 }, { waypoint: 1323, users: ['U3620AA5T'], total: 1 }, { waypoint: 1330, users: ['U3620AA5T'], total: 1 }, { waypoint: 1332, users: ['U3620AA5T'], total: 1 }];
+  
   var orderTimePlaceFrequencies = [{ hour: 10, location: ['122 W 27th St'], total: 1 }, { hour: 11,
     location: ['7502 178th St', '122 W 27th St'],
     total: 9 }, { hour: 12,
@@ -24576,7 +24583,7 @@ module.exports =
             { header: _react2.default.createElement(
                 'span',
                 null,
-                'Line Chart Example'
+                'Waypoints of past 2 weeks'
               ) },
             _react2.default.createElement(
               'div',
@@ -24585,14 +24592,15 @@ module.exports =
                 _recharts.ResponsiveContainer,
                 { width: '100%', aspect: 2 },
                 _react2.default.createElement(
-                  _recharts.LineChart,
-                  { data: lineChartData, margin: { top: 10, right: 30, left: 0, bottom: 0 } },
-                  _react2.default.createElement(_recharts.CartesianGrid, { stroke: '#ccc' }),
-                  _react2.default.createElement(_recharts.XAxis, null),
+                  _recharts.AreaChart,
+                  { width: 600, height: 400, data: waypointsCount,
+                    margin: { top: 10, right: 30, left: 0, bottom: 0 } },
+                  _react2.default.createElement(_recharts.XAxis, { dataKey: 'waypoint' }),
                   _react2.default.createElement(_recharts.YAxis, null),
+                  _react2.default.createElement(_recharts.CartesianGrid, { strokeDasharray: '3 3' }),
                   _react2.default.createElement(_recharts.Tooltip, null),
-                  _react2.default.createElement(_recharts.Line, { type: 'monotone', dataKey: 'sine', stroke: '#8884d8' }),
-                  _react2.default.createElement(_recharts.Line, { type: 'monotone', dataKey: 'cosine', stroke: '#82ca9d' })
+                  _react2.default.createElement(_recharts.Legend, null),
+                  _react2.default.createElement(_recharts.Area, { type: 'monotone', dataKey: 'total', stroke: '#000000', fill: '#BBB44F' })
                 )
               )
             )
@@ -24655,7 +24663,7 @@ module.exports =
                   _react2.default.createElement(_recharts.CartesianGrid, { strokeDasharray: '3 3' }),
                   _react2.default.createElement(_recharts.Tooltip, null),
                   _react2.default.createElement(_recharts.Legend, null),
-                  _react2.default.createElement(_recharts.Bar, { dataKey: 'total', fill: '#8884d8' })
+                  _react2.default.createElement(_recharts.Bar, { dataKey: 'total', fill: '#F2D2C4' })
                 )
               )
             )
@@ -24702,12 +24710,12 @@ module.exports =
             { header: _react2.default.createElement(
                 'span',
                 null,
-                'Moving Line Chart Example'
+                'CHARTS!'
               ) },
             _react2.default.createElement(
               'div',
               null,
-              'Panel contents'
+              'Another chart here plz.'
             )
           )
         ),

@@ -9,7 +9,7 @@ import {
 
 const MetricListType = new ListType(MetricType);
 
-console.log('wtf is metrics ', Metrics)
+// console.log('wtf is metrics ', Metrics)
 const metricsList = {  
   type: MetricListType,
   resolve: () => {
