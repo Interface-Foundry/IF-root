@@ -561,6 +561,14 @@ function buildCuisineDashboard(foodSession) {
 //
 function * sendAdminDashboard(foodSession, message, user) {
   logging.debug('sending admin dashboard')
+
+  // wait a little and refresh the foodSession to make sure we're using the most recent votes
+  // but don't wait if the user is the admin because we want their own clicks to be responsive
+  if (message.source.user !== foodSession.convo_initiater.id) {
+    yield sleep(2000)
+    foodSession = yield db.Delivery.findById(foodSession._id).exec()
+  }
+
   var basicDashboard = buildCuisineDashboard(foodSession)
 
   // add the special button to end early
