@@ -543,8 +543,21 @@ handlers['food.admin.order.select_card'] = function * (message) {
     var response = {
       'text': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
       'fallback': 'Order was successful! You should get an email confirmation from `Delivery.com` soon',
-      'callback_id': `food.admin.select_card`
+      'callback_id': `food.admin.select_card`,
+      'attachments': [{
+        'fallback': 'Home',
+        'callback_id': 'Home',
+        'color': 'grey',
+        'attachment_type': 'default',
+        'actions': [{
+          'name': 'passthrough',
+          'text': 'Home',
+          'type': 'button',
+          'value': 'food.exit.confirm_end_order'
+        }]
+      }]
     }
+    
     $replyChannel.sendReplace(message, 'food.admin.order.pay.confirm', {type: message.origin, data: response})
   } catch (e) {
     logging.error('error doing kip pay in food.admin.order.select_card', e)
