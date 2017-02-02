@@ -137,7 +137,7 @@ utils.sendConfirmationEmail = function * (foodSession) {
     html += `<td ${td_style}><p style="text-align:center;"><b>${item.item.item_qty}</b></p></td>`
     html += `<td ${td_style}><p style="text-align:center;"><b>${(menu.getCartItemPrice(item).toFixed(2) / item.item.item_qty).toFixed(2)}</b></p></td>`
     html += `<td ${td_style}><p style="text-align:center;"><b>${menu.getCartItemPrice(item).toFixed(2)}</b></p></td>`
-    html += `<td ${td_style}"><p>${user[0].first_name} ${user[0].last_name}</p>`
+    if (user[0].first_name && user[0].last_name) html += `<td ${td_style}"><p>${user[0].first_name} ${user[0].last_name}</p>`
     html += `<p>@${user[0].name}</p></td></tr>`
     // html += `<p><a href="https://${team_url}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
   })
