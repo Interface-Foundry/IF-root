@@ -21,14 +21,32 @@ module.exports = function(agenda) {
       logging.info('\nfound teams in db: ', teams.length,'\n');
       async.eachSeries(teams, function(obj, callback) {
         co( function * () {
+          console.log('getting admins')
           if (!(_.get(obj,'admins') && _.get(obj,'admins').length > 0)) return callback();
+          console.log('passed the getting admins thing')
           let carts = yield db.Carts.find({"slack_id": obj.team.team_id}).populate('items').exec();
           let cart = _.get(carts,'[0]');
+          console.log('got the cart: ', cart)
           if (!cart || !(cart && _.get(cart,'aggregate_items') && _.get(cart,'aggregate_items').length > 0)) return callback()
           async.eachSeries(obj.admins, function(admin, callback2){
             co(function * () {
-              let html = `Thank you for using Kip! Here is the list of items in your team cart:\n\n`
-              html += `<table border="1"><thead><tr><th>Item</th><th>Price</th><th>Quantity</th><th>Added By</th></tr></thead>`
+
+              //email consts
+              const kip_blue = '#47a2fc'
+              const ryan_grey = '#F5F5F5'
+
+              //html for email
+              let html = `<html>`
+
+              //header
+              html += `<img src="http://tidepools.co/kip/oregano/onboard_3.png">`
+              html += `<h1 style="font-size:2em;">Team Cart</h1>`
+
+              //table headings
+              html += `Thank you for using Kip! Here is the list of items in your team cart:\n\n`
+              html += `<table style="width:100%;border-spacing:5.5px;" border="0"><thead><tr><th>Item</th><th>Price</th><th>Quantity</th><th>Added By</th></tr></thead>`
+
+              // items in the cart
               let userNames = [];
               yield cart.aggregate_items.map( function * (item) {
                 let addedUser = yield db.Chatusers.find({'id': item.added_by[0]}).limit(1).exec();
@@ -36,14 +54,21 @@ module.exports = function(agenda) {
               })
               let orders = cart.aggregate_items.map( function (item) {
                 let names = item.added_by.map(function(id) { return userNames[id] })
-                html += `<tr><td>${_.get(item,'title')}</td><td>${_.get(item,'price')}</td><td>${_.get(item,'quantity')}</td><td>${names.join(' ')}</td></tr>`
+                html += `<tr><td style="padding:10px;position:absolute;" bgcolor=${ryan_grey}>${_.get(item,'title')}</td>`
+                html += `<td style="padding:10px;position:absolute;" bgcolor=${ryan_grey}>${_.get(item,'price')}</td>`
+                html += `<td style="padding:10px;position:absolute;" bgcolor=${ryan_grey}>${_.get(item,'quantity')}</td>`
+                html += `<td style="padding:10px;position:absolute;" bgcolor=${ryan_grey}>${names.join(' ')}</td></tr>`
               });
-              html += `<tr><a href=${cart.link}>Check out now!</a></tr>`
+              html += `</table>`
+
+              //footer
+              html += `<br/><a href=${cart.link}>Check out now!</a></html>`
+
               let payload = {
                 //please remember to change this back
-                to: 'hannah.katznelson@gmail.com',//`"${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
+                to: '"Hannah Lorane Katznelson" <hannah.katznelson@gmail.com>',//`"${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
                 from: `Kip Café <hello@kipthis.com>`,
-                subject: 'This is your weekly team cart status email from Kip!',
+                subject: 'Your weekly team cart status email from Kip!',
                 html: html
               }
               mailer.sendMail(payload, function(err, info) {
