@@ -207,7 +207,7 @@ function * refreshAllChannels (slackbot) {
   var botChannelArray = yield slackbotWeb.channels.list()
   var botGroupArray = yield slackbotWeb.groups.list()
   // multi person im
-  botGroupArray = botGroupArray.groups.filter(c => !c.is_mpim && !c.is_archived).map((group) => {
+  botGroupArray = botGroupArray.groups.filter(c => !c.is_mpim || !c.is_archived).map((group) => {
     return {
       'id': group.id,
       'name': group.name,
@@ -230,25 +230,17 @@ function * refreshAllUserIMs (slackbot) {
   logging.debug('trying to update all users dms')
   var slackbotWeb = new slack.WebClient(slackbot.bot.bot_access_token)
   var userIMInfo = yield slackbotWeb.im.list()
+  // don't care about clippy, i mean slackbot (ugh)
+  userIMInfo = userIMInfo.ims.filter(u => u.user !== 'USLACKBOT' || u.is_user_deleted !== true)
 
-  yield userIMInfo.ims.map(function * (u) {
-    // don't care about clippy, i mean slackbot (ugh)
-    if (u.user === 'USLACKBOT') {
-      return
-    }
-
+  yield userIMInfo.map(function * (u) {
     var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
     if (!chatUser) {
-      logging.error('tried to refresh IM for unexistant user', {
-        IM: u,
-        slackbot: slackbot
-      })
-      return
-    }
-    if (_.get(chatUser, 'dm') !== u.id) {
+      logging.warn('tried to refresh IM for nonexistant user', u)
+    } else if (_.get(chatUser, 'dm') !== u.id) {
       logging.debug('updating user dm', chatUser.name)
       chatUser.dm = u.id
-      chatUser.save()
+      yield chatUser.save()
     } else {
       logging.debug('no need to update user dm', chatUser.name)
     }
