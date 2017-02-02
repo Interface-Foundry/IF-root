@@ -56,7 +56,8 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   logging.debug('doing slackutils stuff in here')
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  yield [slackUtils.refreshAllUserIMs(team.bot.bot_access_token), slackUtils.getTeamMembers(team)]
+  // yield [slackUtils.refreshAllUserIMs(team.bot.bot_access_token), slackUtils.getTeamMembers(team)]
+  yield [slackUtils.getTeamMembers(team)]
 
   message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
