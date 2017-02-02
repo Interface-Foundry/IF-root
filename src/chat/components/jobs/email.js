@@ -107,7 +107,7 @@ module.exports = function(agenda) {
               //footer
               html += `<br/><p style="font-weight:bold;">Cart Total: $${cart_total.toFixed(2)}</p>`
               // html += `<br/><a href=${cart.link}>Check out now!</a><br/>`
-              html += checkout + `<br/>`
+              html += checkout + `<br/><br/>`
 
               html += `<br/><table border="0" style="padding:10px;width:100%;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="border-spacing:0 20px;border-radius:4px;width:100%">`
               html += `<tr style="width:100%"><td><div style="position:absolute;width:100%;height:100%;text-align:center;"><img height="16" width="16" src="http://tidepools.co/kip/oregano/Slack_Icon.png">`
