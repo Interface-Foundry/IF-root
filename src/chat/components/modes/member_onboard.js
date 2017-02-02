@@ -197,7 +197,7 @@ handlers['cart'] = function * (message) {
     color: '#A368F0',
     image_url: 'http://tidepools.co/kip/oregano/success.gif',
     fallback: 'Well done!\n I\'ve added your item to the team cart',
-    callback_id: 'take me home pls',
+    callback_id: 'cart_onboard_head',
     actions: [{
       'name': 'passthrough',
       'text': ':tada:\u00A0 Finish',
