@@ -508,7 +508,7 @@ function * updateCartMsg(cart, parsedIn) {
 
   let attachments = parsedIn.original_message.attachments.reduce((all, a) => {
     let item = itemData[a.callback_id];
-    if (a.callback_id && item) {
+    if (item) {
       let userString;
       a.actions = (item.showDetail || showEverything) ? [{
         'name': 'additem',
@@ -562,17 +562,17 @@ function * updateCartMsg(cart, parsedIn) {
           attachment_type: 'default'
         });
       }
-    } else if (a.text.includes('*Total:* $')) {
+    } else if (a.callback_id === 'cart_admin_summary') {
       a.text = (cart.items.length > 0)
       ? `*Total:* ${cart.total}\n<${cart.link}|*➤ Click Here to Checkout*>`
       : '';
       all.push(a);
-    } else if (a.text.includes('Are you sure') || a.image_url) {
+    } else if (a.callback_id === 'cart_head') {
       let buttons = {
         text: cart.aggregate_items.length > 0 ? 'Here\'s everything you have in your cart' : 'It looks like your cart is empty!',
         color: '#45a5f4',
         image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png',
-        callback_id: 'press me',
+        callback_id: 'cart_head',
         actions: [{
           'name': 'passthrough',
           'text': 'Home',
@@ -603,9 +603,9 @@ function * updateCartMsg(cart, parsedIn) {
         }
       }
       all.push(buttons);
-	} else if (a.text.includes('*Step 3/3:*')) {
-    all.push(a);
-  }
+	} else if (a.callback_id === 'cart_member_summary' || a.callback_id === 'cart_onboard_head') {
+      all.push(a);
+    }
     return all;
   }, []);
 

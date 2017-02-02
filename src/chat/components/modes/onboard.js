@@ -508,7 +508,7 @@ handlers['bundle'] = function * (message, data) {
     color: '#A368F0',
     fallback: 'Thanks for adding your first items to the cart!',
     actions: cardTemplate.slack_onboard_basic,
-    callback_id: 'none'
+    callback_id: 'cart_onboard_head'
   });
 
   var msg = message;
@@ -550,7 +550,7 @@ handlers['cart'] = function * (message) {
     color: '#A368F0',
     fallback: 'Thanks for adding your first items to the cart!',
     actions: cardTemplate.slack_onboard_basic,
-    callback_id: 'none'
+    callback_id: 'cart_onboard_head'
   }];
   let msg = message;
   msg.mode = 'shopping';

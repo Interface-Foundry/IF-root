@@ -258,11 +258,12 @@ module.exports.removeFromCart = function (slack_id, user_id, number, type) {
     }
 
     // first just try to remove one item that this user added
+    
     var matching_items = cart.items.filter(function (i) {
       return i.ASIN === ASIN_to_remove && (i.added_by === user_id || userIsAdmin)
-    })
-    
-    return module.exports.removeFromCartByItem(matching_items.pop())
+    });
+    if (matching_items.length < 1) return cart;
+    return module.exports.removeFromCartByItem(matching_items.pop());
   })
 }
 
