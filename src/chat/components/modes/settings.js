@@ -210,8 +210,6 @@ handlers['admins'] = function * (message, data) {
         };
       });
     }
-    kip.debug(`😜\n${JSON.stringify(adminButtons, null, 2)}`)
-  kip.debug(`😜\n${JSON.stringify(admins, null, 2)}`)
     adminButtons.unshift({
       name: 'settings.admins.back',
       text: '< Back',
