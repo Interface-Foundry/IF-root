@@ -279,7 +279,7 @@ app.post('/process', (req, res) => co(function * () {
 
   try {
     // send success messages to order members
-    yield payUtils.onSuccess(payment)
+    // yield payUtils.onSuccess(payment)
     profOak.say(`order completed for team: ${payment.order.team_id}`)
   } catch (err) {
     logging.error('error onSuccess of payment', err)
