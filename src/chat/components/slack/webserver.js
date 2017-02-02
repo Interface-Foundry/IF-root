@@ -511,17 +511,17 @@ function * updateCartMsg(cart, parsedIn) {
     if (item) {
       let userString;
       a.actions = (item.showDetail || showEverything) ? [{
-        'name': 'additem',
-        'text': '+',
-        'style': 'default',
-        'type': 'button',
-        'value': 'add'
-      }, {
         'name': item.quantity > 1 ? "removeitem" : 'removewarn',
         'text': '—',
         'style': 'default',
         'type': 'button',
         'value': item.quantity > 1 ? "removeitem" : 'removewarn',
+      }, {
+        'name': 'additem',
+        'text': '+',
+        'style': 'default',
+        'type': 'button',
+        'value': 'add'
       }] : [{
         'name': 'additem',
         'text': '+ Add',
