@@ -85,12 +85,6 @@ function * loadTeam(slackbot) {
     slackbot: slackbot
   }
 
-  // co(function * () {
-    // logging.info('refreshing all teams and various stuff does not work in k8s on startup')
-    // yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
-    // yield slackUtils.refreshAllUserIMs(slackConnections[slackbot.team_id])
-    // yield coupon.refreshTeamCoupons(slackbot.team_id)
-  // })
   // TODO figure out how to tell when auth is invalid
   // right now the library just console.log's a message and I can't figure out
   // how to intercept that event.
