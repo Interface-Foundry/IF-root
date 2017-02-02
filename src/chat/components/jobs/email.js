@@ -57,11 +57,15 @@ module.exports = function(agenda) {
 
               // items in the cart
               let userNames = [];
+              let firstNames = [];
+              let lastNames = [];
               var cart_total = 0;
 
               yield cart.aggregate_items.map( function * (item) {
                 let addedUser = yield db.Chatusers.find({'id': item.added_by[0]}).limit(1).exec();
                 userNames[_.get(addedUser,'[0].id')] = _.get(addedUser,'[0].name')
+                firstNames[_.get(addedUser,'[0].id')] = _.get(addedUser,'[0].first_name')
+                lastNames[_.get(addedUser,'[0].id')] = _.get(addedUser,'[0].last_name')
               })
 
               var formatDate = function (date) {
@@ -73,7 +77,14 @@ module.exports = function(agenda) {
               var date = formatDate(new Date())
 
               yield cart.aggregate_items.map( function (item) {
+                console.log('item', item)
                 let names = item.added_by.map(function(id) { return userNames[id] })
+                let full_name = item.added_by.map(function (id) {
+                  if (firstNames[id] && lastNames[id]) {
+                    return firstNames[id] + ' ' + lastNames[id]
+                  }
+                  else return ''
+                })
                 let price = _.get(item,'price')
                 let qty = _.get(item, 'quantity')
                 let total_price = '$' + (Number(price.slice(1, price.length)) * Number(qty)).toFixed(2)
@@ -85,12 +96,12 @@ module.exports = function(agenda) {
                 html += `<td style="padding:10px;position:absolute;text-align:center;" bgcolor=${ryan_grey}>${qty}</td>`
                 html += `<td style="padding:10px;position:absolute;text-align:center;" bgcolor=${ryan_grey}>${price}</td>`
                 html += `<td style="padding:10px;position:absolute;text-align:center;" bgcolor=${ryan_grey}>${total_price}</td>`
-                html += `<td style="padding:10px;position:absolute;" bgcolor=${ryan_grey}>@${names.join(' ')}</td></tr>`
+                html += `<td style="padding:10px;position:absolute;" bgcolor=${ryan_grey}><p>${full_name}</p><p>@${names.join(' ')}</p></td></tr>`
               })
               html += `</table>`
 
-              console.log('OBJ', obj)
-
+              // console.log('OBJ', obj)
+              console.log('names???', firstNames, lastNames)
               console.log('built table')
 
               //footer
