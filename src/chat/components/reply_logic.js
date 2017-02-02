@@ -87,8 +87,8 @@ function typing(message) {
 	queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
-function simplehome(message, isAdmin) {
-  var slackreply = card_templates.home_screen(isAdmin, message.source.user);
+function simplehome(message, isAdmin, couponText) {
+  var slackreply = card_templates.home_screen(isAdmin, message.source.user, couponText);
   var msg = {
     action: 'simplehome',
     mode: 'food',
@@ -328,7 +328,8 @@ queue.topic('incoming').subscribe(incoming => {
         'team_id': message.source.team
       }).exec();
       let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
-      simplehome(message, isAdmin);
+      let couponText = yield slackUtils.couponText(message.source.team);
+      simplehome(message, isAdmin, couponText);
       yield message.save();
       timer.stop();
       return

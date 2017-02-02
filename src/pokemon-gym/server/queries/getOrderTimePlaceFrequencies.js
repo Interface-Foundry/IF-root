@@ -1,4 +1,3 @@
-const date = require('../../helpers/date');
 const getOrderTimePlaceFrequencies = (delivery, start, end) =>
   new Promise((resolve, reject) => {
     delivery.aggregate([

@@ -1,4 +1,3 @@
-const date = require('../../helpers/date');
 const getActiveSessions = (delivery) =>
   new Promise((resolve, reject) => {
     delivery.aggregate([

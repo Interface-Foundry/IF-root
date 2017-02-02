@@ -46,6 +46,7 @@ handlers['start'] = function * (message) {
   } else {
     var team = find[0];
   }
+  yield utils.getTeamMembers(team);
   var attachments = [];
   // adding settings mode sticker
   attachments.push({
@@ -151,10 +152,11 @@ handlers['start'] = function * (message) {
 };
 
 handlers['back'] = function * (message) {
+  let couponText = yield utils.couponText(message.source.team);
   request({
     method: 'POST',
     uri: message.source.response_url,
-    body: JSON.stringify(cardTemplate.home_screen(true, message.source.user))
+    body: JSON.stringify(cardTemplate.home_screen(true, message.source.user, couponText))
   });
 };
 

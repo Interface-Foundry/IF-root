@@ -1,13 +1,8 @@
-const date = require('../../helpers/date');
 const getMessageHistory = (messages,user) =>
   new Promise((resolve, reject) => {
     messages.aggregate([
       {
-        $match: {
-          ts: {
-            $gte: new Date(new Date().setDate(new Date().getDate()-2))
-          }
-        }
+         $match : { user_id : user }
       },
       {
         $group: {
@@ -24,7 +19,7 @@ const getMessageHistory = (messages,user) =>
       {
         $sort: {'_id.ts': -1}
       },
-      { $limit : 50 },
+      { $limit : 20 },
       /*
       {
         $unwind: "$_id.attachments", 
@@ -53,5 +48,6 @@ const getMessageHistory = (messages,user) =>
 module.exports = getMessageHistory;
 if (!module.parent) {
   require('../../../kip')
-  getMessageHistory(db.messages).then(console.log.bind(console))
+  getMessageHistory(db.messages, 'U3620AA5T').then(console.log.bind(console))
+  getMessageHistory(db.messages, 'kip').then(console.log.bind(console))
 }

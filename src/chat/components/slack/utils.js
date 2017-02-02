@@ -212,9 +212,10 @@ function * refreshAllChannels (slackbot) {
   yield slackbot.slackbot.save()
 }
 
-function * refreshAllUserIMs (slackbot) {
+function * refreshAllUserIMs (slackbotAccessToken) {
+  var slackbotWeb = new slack.WebClient(slackbotAccessToken)
   logging.debug('trying to update all users dms')
-  var userIMInfo = yield slackbot.web.im.list()
+  var userIMInfo = yield slackbotWeb.im.list()
   yield userIMInfo.ims.map(function * (u) {
     var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
     if (_.get(chatUser, 'dm') !== u.id) {
@@ -768,6 +769,14 @@ function randomSearchTerm () {
   return messages[num];
 }
 
+function randomEmoji (isCafe) {
+  let messages = isCafe
+    ? ['🍕', '🍩', '🍔', '🍰', '🍴', '🍣', '🍲', '🍪', '🍛']
+    : ['🛍', '🛒', '🎁', '📦', '📓', '✏️', '📚', '🖇', '💻'];
+  let num = Math.floor(Math.random() * messages.length);
+  return messages[num] + '\u00A0 ';
+}
+
 function getSearchButtons() {
   let buttons = [];
   while (buttons.length < 3) {
@@ -775,6 +784,21 @@ function getSearchButtons() {
     buttons = _.uniqWith(buttons, (a, b) => a === b);
   }
   return buttons;
+}
+
+function * couponText(team) {
+  let coupon = yield db.Coupons.find({
+    team_id: team
+  }).exec();
+  return coupon.reduce((text, coupon) => {
+    let totalCoupons = coupon.quantity_coupon.can_be_used,
+      usedCoupons = coupon.quantity_coupon.used;
+    if (coupon.available && coupon.coupon_type === 'percentage' && totalCoupons - usedCoupons > 0) {
+      let percentOff = coupon.coupon_discount * 100;
+      text += `▸ ${totalCoupons - usedCoupons} × [_${percentOff}% Off Coupon_]  \n`;
+    }
+    return text;
+  }, '');
 }
 
 module.exports = {
@@ -802,5 +826,7 @@ module.exports = {
   randomSearching: randomSearching,
   randomStoreDescrip: randomStoreDescrip,
   randomCafeDescrip: randomCafeDescrip,
-  getSearchButtons: getSearchButtons
+  getSearchButtons: getSearchButtons,
+  randomEmoji: randomEmoji,
+  couponText: couponText
 };

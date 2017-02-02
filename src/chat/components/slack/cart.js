@@ -16,7 +16,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     text: cart.aggregate_items.length > 0 ? 'Here\'s everything you have in your cart': 'It looks like your cart is empty!',
     color: '#45a5f4',
     image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png',
-    callback_id: 'press me',
+    callback_id: 'cart_head',
     actions: []
   }];
   if (isAdmin) {
@@ -130,7 +130,8 @@ module.exports = function*(message, slackbot, highlight_added_item) {
       cartObj.push({
         text: summaryText,
         mrkdwn_in: ['text', 'pretext'],
-        color: '#49d63a'
+        color: '#49d63a',
+        callback_id: 'cart_admin_summary'
       })
     }
   } else {
@@ -145,7 +146,8 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     cartObj.push({
       text: '_Office admins ' + officeAdmins + ' can checkout the Team Cart_',
       mrkdwn_in: ['text', 'pretext'],
-      color: '#49d63a'
+      color: '#49d63a',
+      callback_id: 'cart_member_summary'
     })
   }
   console.log(cartObj)

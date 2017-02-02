@@ -43,6 +43,7 @@ handlers['initial'] = function * (message) {
   var team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
+  yield utils.getTeamMembers(team);
 
   let attachments = [{
     text: 'Which group members would you like to collect orders from?',

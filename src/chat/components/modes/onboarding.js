@@ -369,7 +369,8 @@ handlers['confirm'] = function * (message) {
     reply = reply.replace('$ADMINS', admins.map(g => {
     return '<@' + g.id + '>'
     }).join(', ').replace(/,([^,]*)$/, ' and $1'));
-    var slackreply = cardTemplate.home_screen(false, message.source.user);
+    let couponText = yield slackUtils.couponText(message.source.team);
+    var slackreply = cardTemplate.home_screen(false, message.source.user, couponText);
     var msg = {
       action: 'simplehome',
       mode: 'food',

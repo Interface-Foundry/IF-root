@@ -228,13 +228,11 @@ if (foodSession.budget) {
       msg_json.attachments[msg_json.attachments.length - 1].actions.push(moreButton)
     }
   }
-
   if (config.menuURL) var url = yield menu_utils.getUrl(foodSession, message.source.user)
   else var url = foodSession.chosen_restaurant.url
 
   var resto = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id});
 
-  //resto name
   msg_json.attachments.push({
     'fallback': 'Search the menu',
     'text': `*${foodSession.chosen_restaurant.name}*`,
@@ -242,7 +240,7 @@ if (foodSession.budget) {
     'fields': [ // first field would be budget
       {
         'short': true,
-        'value': `*<${url}|View Full Menu ${menu_utils.cuisineEmoji(resto.data.summary.cuisines[0])}>*`
+        'value': `*<${!url.error ? url : foodSession.chosen_restaurant.url}|View Full Menu ${menu_utils.cuisineEmoji(resto.data.summary.cuisines[0])}>*`
       }
     ],
     'mrkdwn_in': ['text', 'fields']
