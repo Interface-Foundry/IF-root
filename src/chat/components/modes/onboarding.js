@@ -18,7 +18,7 @@ var card_templates = require('../slack/card_templates');
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action')
   cancelReminder('initial reminder', message.source.user);
-  cancelReminder('onboard reminder', message.source.user);
+  cancelReminder('onboarding reminder', message.source.user);
   if (last_action && (last_action.includes('start_now') || last_action.includes('remind_later'))) {
     last_action = 'get-admins.ask'; // this is the only workaround I can think of
   }
