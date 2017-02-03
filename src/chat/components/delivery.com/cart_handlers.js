@@ -571,6 +571,39 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
   if (foodSession === undefined) foodSession = yield db.Delivery.findOne({'team_id': message.source.team, 'active': true}).exec()
 
+  teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
+  lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
+
+/*
+  yield lateMembers.map(function * (userId) {
+    var user = _.find(foodSession.team_members, {'id': userId}) // find returns the first one
+
+    var isAdmin = team.meta.office_assistants.includes(user.id)
+    var msg = _.merge({}, {
+      'incoming': false,
+      'mode': 'food',
+      'thread_id': user.dm,
+      'source': {
+        'type': 'message',
+        'user': user.id,
+        'channel': user.dm,
+        'team': foodSession.team_id
+      }
+      })
+
+    var json = {
+      'text': `Your order of ${foodString} is on the way ??`,
+      'callback_id': 'food.payment_info',
+      'fallback': `Your order is on the way`,
+      'attachment_type': 'default',
+      'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
+    }
+
+      yield $replyChannel.sendReplace(msg, 'food.need.payments.done', {type: message.origin, data: json})
+    })
+
+*/
+
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
@@ -743,7 +776,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
      })
     }
 
-  return yield $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
+  return yield $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
 }
 
 handlers['food.order.instructions'] = function * (message) {
