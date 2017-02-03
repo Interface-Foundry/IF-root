@@ -187,6 +187,12 @@ function * start () {
     yield slack.run_chat_server()
   }
 
+  // remove any bots with bad auth
+  if (process.env.NODE_ENV !== 'text') {
+    var preen = require('./find_bad_slackbots').preen
+    yield preen()
+  }
+
   var slackbots = yield db.Slackbots.find({
     'meta.deleted': {
       $ne: true
