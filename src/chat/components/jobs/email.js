@@ -8,42 +8,116 @@ var async = require('async');
 var kipcart = require('../cart');
 var utils = require('../slack/utils');
 
-
 module.exports = function(agenda) {
   agenda.define('send cart status email', function (job, done) {
     co( function * () {
       logging.info('started job: send cart status email');
       let slackbots = yield db.Slackbots.find({'meta.weekly_status_enabled': true});
-      let teams = yield slackbots.map( function * (team) { 
+      let teams = yield slackbots.map( function * (team) {
         let admins = yield utils.findAdmins(team);
         return { team: team, admins: admins }
       });
       logging.info('\nfound teams in db: ', teams.length,'\n');
       async.eachSeries(teams, function(obj, callback) {
         co( function * () {
+          console.log('getting admins')
           if (!(_.get(obj,'admins') && _.get(obj,'admins').length > 0)) return callback();
           let carts = yield db.Carts.find({"slack_id": obj.team.team_id}).populate('items').exec();
           let cart = _.get(carts,'[0]');
+          // console.log('got the cart: ', cart)
           if (!cart || !(cart && _.get(cart,'aggregate_items') && _.get(cart,'aggregate_items').length > 0)) return callback()
           async.eachSeries(obj.admins, function(admin, callback2){
             co(function * () {
-              let html = `Thank you for using Kip! Here is the list of items in your team cart:\n\n<table border="1"><thead><tr><th>Item</th><th>Price</th><th>Quantity</th><th>Added By</th></tr></thead>`
+
+              //email consts
+              const kip_blue = '#47a2fc'
+              const ryan_grey = '#F5F5F5'
+              const checkout = `<a href="${cart.link}"><div style="display:inline-block;background-color:white;border-radius:8px;border-color:${kip_blue};border-style:solid;border-width:2px;">` +
+              `<p style="margin:0.575em 0 0.575em 0;font-weight:bold;color:${kip_blue}">&nbsp;&nbsp;&nbsp;Check out now!&nbsp;&nbsp;&nbsp;</p></div></a>`
+
+              //html for email
+              let html = `<html>`
+              console.log('beginning to build html')
+
+              //header
+              html += `<img src="http://tidepools.co/kip/oregano/onboard_3.png">`
+              html += `<h1 style="font-size:2em;">Team Cart</h1>`
+              // html += `<br/><a href=${cart.link}>Check out now!</a><br/>`
+              var grid = '';
+              console.log('switching to grid')
+              grid += checkout + `<br/><br/>`
+
+              //table headings
+              grid += `Thank you for using Kip! Here is the list of items in your team cart:\n\n<br/>`
+              grid += `<table style="width:100%;border-spacing:5.5px;" border="0">`
+              grid += `<thead style="padding:5px 0 5px 0;color:white;background-color:${kip_blue}"><tr><th>Item</th>`
+              grid += `<th>Price</th>`
+              grid += `<th>Added By</th></tr></thead>`
+
+              // items in the cart
               let userNames = [];
+              let firstNames = [];
+              let lastNames = [];
+              var cart_total = 0;
+
               yield cart.aggregate_items.map( function * (item) {
                 let addedUser = yield db.Chatusers.find({'id': item.added_by[0]}).limit(1).exec();
                 userNames[_.get(addedUser,'[0].id')] = _.get(addedUser,'[0].name')
+                firstNames[_.get(addedUser,'[0].id')] = _.get(addedUser,'[0].first_name')
+                lastNames[_.get(addedUser,'[0].id')] = _.get(addedUser,'[0].last_name')
               })
-              let orders = cart.aggregate_items.map( function (item) {
+
+              var formatDate = function (date) {
+                var month = date.getMonth() + 1
+                var day = date.getDate()
+                var year = date.getFullYear()
+                return (month > 9 ? '' + month : '0' + month) + '/' + (day > 9 ? '' + day: '0' + day) + '/' + year
+              }
+              var date = formatDate(new Date())
+
+              yield cart.aggregate_items.map( function (item) {
+                console.log('item', item)
                 let names = item.added_by.map(function(id) { return userNames[id] })
-                html += `<tr><td>${_.get(item,'title')}</td><td>${_.get(item,'price')}</td><td>${_.get(item,'quantity')}</td><td>${names.join(' ')}</td></tr>`
-              });
-              html += `<tr><a href=${cart.link}>Check out now!</a></tr>`
+                let full_name = item.added_by.map(function (id) {
+                  if (firstNames[id] && lastNames[id]) {
+                    return firstNames[id] + ' ' + lastNames[id]
+                  }
+                  else return ''
+                })
+                let price = _.get(item,'price')
+                let qty = _.get(item, 'quantity')
+                let total_price = '$' + (Number(price.slice(1, price.length)) * Number(qty)).toFixed(2)
+                console.log('date', date)
+                cart_total += Number(total_price.slice(1, total_price.length))
+
+                grid += `<tr><td style="padding:10px;position:absolute;" bgcolor=${ryan_grey}><a style="text-decoration:none;color:${kip_blue};" href="${item.link}">${_.get(item,'title')}</a></td>`
+                grid += `<td style="padding:10px;position:absolute;text-align:center;" bgcolor=${ryan_grey}>` + ( qty > 1 ? `<p>${price}&nbsp;&nbsp;(x${qty})</p><hr>`: '') + `<p><b>${total_price}</b></p></td>`
+                grid += `<td style="padding:10px;position:absolute;" bgcolor=${ryan_grey}><p>${full_name}</p><p>@${names.join(' ')}</p></td></tr>`
+              })
+              grid += `</table>`
+              html += `<br/><p style="font-weight:bold;">Cart Total: $${cart_total.toFixed(2)}</p>`
+              html += grid
+
+              //footer
+              html += `<br/><p style="font-weight:bold;">Cart Total: $${cart_total.toFixed(2)}</p>`
+              // html += `<br/><a href=${cart.link}>Check out now!</a><br/>`
+              console.log('cart total added')
+              html += checkout + `<br/><br/>`
+
+              html += `<br/><table border="0" style="padding:10px;width:100%;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="border-spacing:0 20px;border-radius:4px;width:100%">`
+              html += `<tr style="width:100%"><td><div style="position:absolute;width:100%;height:100%;text-align:center;"><img height="16" width="16" src="http://tidepools.co/kip/oregano/Slack_Icon.png">`
+              html += `<a style="text-decoration:none;" href="${cart.link}"><b style="color:white;text-decoration:none;font-weight:normal;font-size:160%;text-align:center;">&nbsp; View Cart on Slack</b></a></div></td></tr></table>`
+              html += `<table style="width:100%;"><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;font-size:85%;color:white;text-align:right;">Kip © 2017</p></td>`
+              html += `<td style="width:300px;"><a style="padding:0 20px 0 20px;color:white;text-decoration:none;font-size:85%" href="https://kipthis.com/legal.html">Terms of Use</a></td></tr>`
+              html += `</table></td></tr></table><br></html>`
+
               let payload = {
                 to: `"${_.get(admin,'name')}" <${_.get(admin,'profile.email')}>`,
-                from: `Kip Café <hello@kipthis.com>`,
-                subject: 'This is your weekly team cart status email from Kip!',
+                from: `Kip Store <hello@kipthis.com>`,
+                subject: `[Kip] ` + obj.team.team_name + ` team cart updates for the week of ` + date,
                 html: html
               }
+
               mailer.sendMail(payload, function(err, info) {
                 if (err) return kip.debug(' \n\n\n\n /jobs/email.js: error sending email: ', err, ' \n\n\n\n ');
                 logging.info('job: sent cart snapshot email to ', admin.name, ' for team ', obj.team.team_name, ' ',obj.team.team_id, ' info: ', info);
@@ -52,7 +126,7 @@ module.exports = function(agenda) {
             })
           }, function(err){
             setTimeout(callback, 2000)
-          }) 
+          })
        })
       }, function(err){
         if(err) logging.err('job: weekly cart snapshots err', err)

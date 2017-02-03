@@ -232,7 +232,6 @@ if (foodSession.budget) {
   else var url = foodSession.chosen_restaurant.url
 
   var resto = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id});
-  //resto name
 
   msg_json.attachments.push({
     'fallback': 'Search the menu',
@@ -434,6 +433,8 @@ handlers['food.item.add_to_cart'] = function * (message) {
     var budgets = foodSession.user_budgets;
     var menu = Menu(foodSession.menu);
     var itemPrice = menu.getCartItemPrice(userItem);
+
+    console.log('itemPrice is:', itemPrice)
 
     if (itemPrice > (budgets[userItem.user_id]) * 1.125) {
       yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});

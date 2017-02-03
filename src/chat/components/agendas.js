@@ -13,8 +13,9 @@ agenda.on('ready', function () {
 	});
 	agenda.cancel({name: 'feature rollout'}, function(err, numRemoved) {
 		if (err) console.log(err);
-	});	
-	// agenda.create('send cart status email', {}).schedule('11:21am').repeatEvery('1 day', { timezone: 'America/New_York'}).save();
+	});
+	agenda.create('send cart status email', {}).schedule('17:33pm').repeatEvery('1 day', { timezone: 'America/New_York'}).save();
+	agenda.create('feature rollout', { feature: 'oregano'}).schedule('6:30pm').repeatEvery('1 day', { timezone: 'America/New_York'}).save();
   agenda.start();
 });
 
