@@ -6,32 +6,43 @@ import {
   GraphQLScalarType as GraphQLScalarType
 } from 'graphql';
 
-import { GraphQLError } from 'graphql/error';
-import { Kind } from 'graphql/language';
+// import { GraphQLError } from 'graphql/error';
+// import { Kind } from 'graphql/language';
 
-var ObjectType = new GraphQLScalarType({
-  name: 'ObjectType',
-  serialize: value => {
-    return value;
-  },
-  parseValue: value => {
-    return value;
-  },
-  parseLiteral: ast => {
-    if (ast.kind !== Kind.OBJECT) {
-      throw new GraphQLError("Query error: Can only parse object but got a: " + ast.kind, [ast]);
-    }
-    return ast.value;
-  }
-});
+// var ObjectType = new GraphQLScalarType({
+//   name: 'ObjectType',
+//   serialize: value => {
+//     return value;
+//   },
+//   parseValue: value => {
+//     return value;
+//   },
+//   parseLiteral: ast => {
+//     if (ast.kind !== Kind.OBJECT) {
+//       throw new GraphQLError("Query error: Can only parse object but got a: " + ast.kind, [ast]);
+//     }
+//     return ast.value;
+//   }
+// });
 
 
 const MetricType = new GraphQLObjectType({
   name: 'Metric',
-  fields: {
-    metric: { type: StringType },
-    data: { type: ObjectType },
-    ts: { type: StringType }
+  fields: () => {
+    return {
+      metric: { 
+        type: StringType,
+        resolve(metric) {
+          return metric.metric
+        }
+       },
+       data: { 
+        type: StringType,
+        resolve(metric) {
+          return metric.data
+        }
+       },
+    }
   },
 });
 

@@ -9,6 +9,7 @@
 
 import sequelize from '../sequelize';
 import User from './User';
+import Metric from './Metric';
 import UserLogin from './UserLogin';
 import UserClaim from './UserClaim';
 import UserProfile from './UserProfile';
@@ -39,4 +40,4 @@ function sync(...args) {
 }
 
 export default { sync };
-export { User, UserLogin, UserClaim, UserProfile };
+export { Metric, User, UserLogin, UserClaim, UserProfile };

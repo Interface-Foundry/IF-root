@@ -15,7 +15,7 @@ import {
 import me from './queries/me';
 import content from './queries/content';
 import news from './queries/news';
-import metricsList from './queries/metrics';
+import metrics from './queries/metrics';
 
 
 const schema = new Schema({
@@ -25,7 +25,7 @@ const schema = new Schema({
       me,
       content,
       news,
-      metricsList
+      metrics
     },
   }),
 });

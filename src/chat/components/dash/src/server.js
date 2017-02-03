@@ -66,22 +66,30 @@ app.get('/login/facebook/return',
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
-// app.use('/graphql', expressGraphQL(req => ({
-//   schema,
-//   graphiql: true,
-//   rootValue: { request: req },
-//   pretty: process.env.NODE_ENV !== 'production',
-// })));
+app.use('/graphql', expressGraphQL(req => ({
+  schema: schema,
+  pretty: true,
+  graphiql: true,
+  // rootValue: { request: req },
+  // pretty: process.env.NODE_ENV !== 'production',
+})));
 
-const options = {
-  mutation: false, // mutation fields can be disabled
-  allowMongoIDMutation: false // mutation of mongo _id can be enabled
-};
 
-app.use(graffiti.express({
-  schema: getSchema([MetricSchema], options),
-  context: {} // custom context
-}));
+models.sync().catch(err => console.error(err.stack)).then(() => {
+  app.listen(port, () => {
+    console.log(`The server is running at http://localhost:${port}/`);
+  });
+});
+
+// const options = {
+//   mutation: false, // mutation fields can be disabled
+//   allowMongoIDMutation: false // mutation of mongo _id can be enabled
+// };
+
+// app.use(graffiti.express({
+//   schema: getSchema([MetricSchema], options),
+//   context: {} // custom context
+// }));
 // app.use(graffiti.express({
 //   schema
 // }));
@@ -155,10 +163,4 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-/* eslint-disable no-console */
-models.sync().catch(err => console.error(err.stack)).then(() => {
-  app.listen(port, () => {
-    console.log(`The server is running at http://localhost:${port}/`);
-  });
-});
-/* eslint-enable no-console */
+
