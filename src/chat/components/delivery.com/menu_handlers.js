@@ -232,7 +232,6 @@ if (foodSession.budget) {
   else var url = foodSession.chosen_restaurant.url
 
   var resto = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id});
-  //resto name
 
   msg_json.attachments.push({
     'fallback': 'Search the menu',
