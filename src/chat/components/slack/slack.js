@@ -190,7 +190,8 @@ function * start () {
   // remove any bots with bad auth
   if (process.env.NODE_ENV !== 'text') {
     var preen = require('./find_bad_slackbots').preen
-    yield preen()
+    var cron = require('cron')
+    new cron.CronJob('0 0 0 * * *', preen, null, true)
   }
 
   var slackbots = yield db.Slackbots.find({
