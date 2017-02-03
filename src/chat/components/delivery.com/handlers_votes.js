@@ -590,6 +590,12 @@ function * sendAdminDashboard(foodSession, message, user) {
     }).sort('-ts').limit(1).exec()
     prevMessage = prevMessage[0];
     var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
+
+    // make sure the message that we are stripping the buttons from is actually a dashboard message
+    if (sampleArray.length !== 5 || !sampleArray[4].text.includes('No Food for Me')) {
+      sampleArray = sampleCuisines(foodSession)
+    }
+
     basicDashboard.attachments.push({
       'text': 'Tap a button to choose a cuisine',
       'fallback': 'Tap a button to choose a cuisine',
@@ -643,6 +649,12 @@ function * sendUserDashboard(foodSession, message, user) {
     var prevMessage = yield db.Message.find({'source.user': user.id}).sort('-ts').limit(1).exec()
     prevMessage = prevMessage[0];
     var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
+
+    // make sure the message that we are stripping the buttons from is actually a dashboard message
+    if (sampleArray.length !== 5 || !sampleArray[4].text.includes('No Food for Me')) {
+      sampleArray = sampleCuisines(foodSession)
+    }
+
     basicDashboard.attachments.push({
       'text': 'Tap a button to choose a cuisine',
       'fallback': 'Tap a button to choose a cuisine',
