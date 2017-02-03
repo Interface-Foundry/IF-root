@@ -4,9 +4,14 @@ module.exports = function(agenda) {
   agenda.define('append home', function(job, done) {
     let message = JSON.parse(job.attrs.data.msg);
     let hasHome = checkForHome(message);
+    let attachments = message.attachments;
     if (!hasHome) {
       co(function * () {
-        message.attachments.push({
+        attachments = attachments.map(a => {
+          a.text = a.text ? a.text : '';
+          return a;
+        });
+        attachments.push({
           text: '',
           callback_id: 'appendedHome',
           actions: [{
@@ -18,7 +23,7 @@ module.exports = function(agenda) {
           }]
         });
         yield request({
-          uri: `https://slack.com/api/chat.update?token=${job.attrs.data.token}&ts=${message.ts}&channel=${job.attrs.data.channel}&as_user=true&attachments=${stringify(message.attachments)}&text=${message.text}`
+          uri: `https://slack.com/api/chat.update?token=${job.attrs.data.token}&ts=${message.ts}&channel=${job.attrs.data.channel}&as_user=true&attachments=${stringify(attachments)}&text=${message.text}`
         });
         done();
       });
@@ -45,5 +50,6 @@ function stringify(text) {
   stringOrig = stringOrig.replace(/[\u007F-\uFFFF]/g, function(chr) {
     return '\\u' + ('0000' + chr.charCodeAt(0).toString(16)).substr(-4);
   });
+  kip.debug(`😇  ${stringOrig}`)
   return stringOrig;
 }
