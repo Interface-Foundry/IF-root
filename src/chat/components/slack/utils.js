@@ -207,7 +207,7 @@ function * refreshAllChannels (slackbot) {
   var botChannelArray = yield slackbotWeb.channels.list()
   var botGroupArray = yield slackbotWeb.groups.list()
   // multi person im
-  botGroupArray = botGroupArray.groups.filter(c => !c.is_mpim || !c.is_archived).map((group) => {
+  botGroupArray = botGroupArray.groups.filter(c => !c.is_mpim && !c.is_archived).map((group) => {
     return {
       'id': group.id,
       'name': group.name,
