@@ -82,7 +82,9 @@ utils.sendConfirmationEmail = function * (foodSession) {
   var menu = Menu(foodSession.menu)
   var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">'
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
-  var date = new Date()
+  // var date = new Date()
+  var date = foodSession.order.order_time;
+  console.log('this is the new date format', date);
 
   var options = {
     uri: 'https://slack.com/api/team.info',
@@ -96,24 +98,25 @@ utils.sendConfirmationEmail = function * (foodSession) {
   var team_url = team_info.team.domain;
   // var slacklink = 'https://' + team_info.team.domain + '.slack.com'
 
-  var formatTime = function (date) {
-    var minutes = date.getMinutes()
-    var hours = date.getHours()
-    return (hours > 9 ? '' + hours : '0' + hours) + ':' + (minutes > 9 ? '' + minutes : '0' + minutes)
-  }
+  // var formatTime = function (date) {
+  //   return "^^I am a time^^"
+  //   // var minutes = date.getMinutes()
+  //   // var hours = date.getHours()
+  //   // return (hours > 9 ? '' + hours : '0' + hours) + ':' + (minutes > 9 ? '' + minutes : '0' + minutes)
+  // }
 
   var formatDate = function (date) {
-    var month = date.getMonth() + 1
-    var day = date.getDate()
-    var year = date.getFullYear()
-    return (month > 9 ? '' + month : '0' + month) + '/' + (day > 9 ? '' + day: '0' + day) + '/' + year
+    var year = date.slice(0, 4)
+    var month = date.slice(5, 7)
+    var day = date.slice(8, 10)
+    return month + '/' + day + '/' + year;
   }
 
   //header
 
   var html = `<html>${header}` + br;
   html += `<h1 style="font-size:2em;">Order Receipt</h1>`
-  html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> at ${formatTime(date)} on ${formatDate(date)}</p>`
+  html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> on ${formatDate(date)}</p>`
   html += `\nHere is a list of items:\n`
 
   //column headings
