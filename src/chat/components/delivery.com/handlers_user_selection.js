@@ -50,7 +50,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
   prevFoodSession = prevFoodSession[0]
   if (_.get(prevFoodSession, 'chosen_channel.name')) {
     // allow special cases for everyone, just me and channel specifics
-    
+
     if (prevFoodSession.chosen_channel.id === 'everyone') {
       var textWithPrevChannel = `Send poll for cuisine to _everyone_ at \`${addr}\`?`
     } else if (prevFoodSession.chosen_channel.id === 'just_me') {
@@ -58,15 +58,24 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     } else {
       textWithPrevChannel = `Send poll for cuisine to <#${prevFoodSession.chosen_channel.id}|${prevFoodSession.chosen_channel.name}> at \`${addr}\``
       if (prevFoodSession.budget) textWithPrevChannel += ` with a budget of $${prevFoodSession.budget}`
-      textWithPrevChannel += '?';
+      textWithPrevChannel += '?'
     }
-    if(prevFoodSession.team_members.length < 1){
+    if (prevFoodSession.team_members.length < 1) {
       foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
     } else {
-      foodSession.team_members = prevFoodSession.team_members
+      if (prevFoodSession.chosen_channel.id === 'just_me') {
+        foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
+      } else {
+        foodSession.team_members = prevFoodSession.team_members
+        if (prevFoodSession.team_members.find(c => c.id !== message.user_id)) {
+          // convo_init not in prevFoodSession.team_members, just adding them alongside
+          var convoInit = yield db.Chatusers.findOne({id: message.user_id, is_bot: {$ne: true}}).exec()
+          foodSession.team_memebers.push(convoInit)
+        }
+      }
     }
     if (prevFoodSession.email_members) {
-      foodSession.email_members = prevFoodSession.email_members;
+      foodSession.email_members = prevFoodSession.email_members
     }
     foodSession.chosen_channel = {
       'id': prevFoodSession.chosen_channel.id,
@@ -122,7 +131,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     ]
   }
 
-  if(foodSession.onboarding){
+  if (foodSession.onboarding) {
     msg_json.attachments.unshift(
     // {
     //   'text': '',
@@ -130,11 +139,11 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     //   'color': '#A368F0',
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
-    {
-      'text':'*Step 5.* Choose who you want to be part of your food order',
-      'color':'#A368F0',
-      'mrkdwn_in': ['text']
-    })
+      {
+        'text': `*Step 5.* Choose who you want to be part of your food order`,
+        'color': `#A368F0`,
+        'mrkdwn_in': ['text']
+      })
   }
 
   $replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
