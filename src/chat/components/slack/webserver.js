@@ -641,6 +641,7 @@ app.get('/newslack', function (req, res) {
      var existingTeam = yield db.Slackbots.findOne({'team_id': _.get(res_auth,'team_id'), 'deleted': { $ne:true } }).exec();
      if ( _.get(existingTeam, 'team_id')) {
         _.merge(existingTeam, res_auth);
+        existingTeam.meta.deleted = false;
         yield existingTeam.save();
         yield utils.initializeTeam(existingTeam, res_auth);
         yield slackModule.loadTeam(existingTeam)

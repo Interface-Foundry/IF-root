@@ -21,11 +21,11 @@ spec:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 120
+          initialDelaySeconds: 100
           timeoutSeconds: 3
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      terminationGracePeriodSeconds: 120
+      terminationGracePeriodSeconds: 100
 ---
 apiVersion: v1
 kind: Service

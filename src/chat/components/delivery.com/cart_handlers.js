@@ -569,7 +569,29 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
 handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
-  if (foodSession === undefined) foodSession = yield db.Delivery.findOne({'team_id': message.source.team, 'active': true}).exec()
+  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+  teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
+  lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
+  var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
+
+  yield lateMembers.map(function * (userId) {
+    var user = _.find(foodSession.team_members, {'id': userId})
+    var msg = _.merge({}, {
+        'incoming': false,
+        'mode': 'food',
+        'action': 'payment_info',
+        'thread_id': user.dm,
+        'source': {
+          'type': 'message',
+          'user': user.id,
+          'channel': user.dm,
+          'team': foodSession.team_id
+        }
+      })
+
+    yield $replyChannel.sendReplace(msg, 'food.exit.confirm', {type: 'slack', data: {text: `The collection of orders has ended. Sorry.`}})
+  })
+
 
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
@@ -743,7 +765,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
      })
     }
 
-  return yield $replyChannel.sendReplace(message, 'food.admin.order.confirm', {type: message.origin, data: response})
+  return yield $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
 }
 
 handlers['food.order.instructions'] = function * (message) {
