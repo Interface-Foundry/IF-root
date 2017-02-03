@@ -85,12 +85,6 @@ function * loadTeam(slackbot) {
     slackbot: slackbot
   }
 
-  // co(function * () {
-    // logging.info('refreshing all teams and various stuff does not work in k8s on startup')
-    // yield slackUtils.refreshAllChannels(slackConnections[slackbot.team_id])
-    // yield slackUtils.refreshAllUserIMs(slackConnections[slackbot.team_id])
-    // yield coupon.refreshTeamCoupons(slackbot.team_id)
-  // })
   // TODO figure out how to tell when auth is invalid
   // right now the library just console.log's a message and I can't figure out
   // how to intercept that event.
@@ -113,9 +107,6 @@ function * loadTeam(slackbot) {
   rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
     logging.debug('got slack message sent from user', data.user, 'on channel', data.channel)
-    if ((data.user === undefined) || (data.channel === undefined)) {
-      logging.warn('user or channel undefined in slack data')
-    }
     // For channels that are not DM's, only respond if kip is called out by name
     if ('CG'.includes(data.channel[0])) {
       if (data.text && data.text.includes(slackbot.bot.bot_user_id)) {

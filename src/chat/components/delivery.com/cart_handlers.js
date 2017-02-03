@@ -346,7 +346,7 @@ function * sendOrderProgressDashboards (foodSession, message) {
         'color': minimumMet ? '#3AA3E3' : '#fc9600',
         'mrkdwn_in': ['text'],
         'fallback': 'Finish Order Early',
-        'text': minimumMet ? 'Finish Order Early' : `*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_${foodSession.chosen_restaurant.minimum.$}_*`,
+        'text': minimumMet ? '' : `*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_${foodSession.chosen_restaurant.minimum.$}_*`,
         'actions': minimumMet ? [finishEarlyButton, restartOrderButton] : [restartOrderButton]
       })
     } else if (isAdmin && allOrdersIn) {

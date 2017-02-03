@@ -84,17 +84,17 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     if (isAdmin || addedByUser) {
       item_message.callback_id = item._id.toString();
       buttons = [{
-        "name": "additem",
-        "text": "+",
-        "style": "default",
-        "type": "button",
-        "value": "add"
-      }, {
         "name": item.quantity > 1 ? "removeitem" : 'removewarn',
         "text": "—",
         "style": "default",
         "type": "button",
         "value": "remove"
+      }, {
+        "name": "additem",
+        "text": "+",
+        "style": "default",
+        "type": "button",
+        "value": "add"
       }];
 
       if (item.quantity > 1 && isAdmin) {

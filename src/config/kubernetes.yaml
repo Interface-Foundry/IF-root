@@ -37,5 +37,6 @@ slack:
   client_secret: d4c324bf9caa887a66870abacb3d7cb5
   verification_token: P30EDlNgjsl9i15ZQBOElJls
   redirect_uri: https://slack.kipthis.com/newslack
+  internal_host: https://slack.kipthis.com
 menuURL: http://cafe.kipthis.com/menus
 picstitchDelivery: http://delivery-picstitch.kipthis.com

@@ -210,8 +210,6 @@ handlers['admins'] = function * (message, data) {
         };
       });
     }
-    kip.debug(`😜\n${JSON.stringify(adminButtons, null, 2)}`)
-  kip.debug(`😜\n${JSON.stringify(admins, null, 2)}`)
     adminButtons.unshift({
       name: 'settings.admins.back',
       text: '< Back',
@@ -479,10 +477,17 @@ handlers['add_or_remove'] = function*(message) {
       }
     });
   } else {
-    team.meta.office_assistants = _.xor(team.meta.office_assistants, userIds);
+    let newAdmins = _.xor(team.meta.office_assistants, userIds);
+    if (newAdmins.length === 0) {
+      // no removing the last admin ever
+      team.meta.office_assistants = _.union(team.meta.office_assistants, userIds);
+    } else {
+      team.meta.office_assistants = newAdmins;
+    }
   }
 
   yield team.meta.office_assistants.map(function * (id) {
+    if (message.source.user === id) return;
     let userToBeNotified = yield db.Chatusers.findOne({
       id: id
     });
@@ -518,18 +523,21 @@ handlers['add_or_remove'] = function*(message) {
           value: 'home'
         }]
       }];
-      msg = message;
+      msg.source = {};
       msg.mode = 'onboard';
       msg.action = 'home';
       msg.text = '';
       msg.fallback = 'Looks like you\'ve done this before!';
+      msg.source.team = team.team_id;
+      msg.source.channel = userToBeNotified.dm;
+      msg.source.user = id;
+      msg.user_id = id;
+      msg.thread_id = userToBeNotified.dm;
       msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
       msg.reply = attachments;
     }
-    if (message.source.user !== id) {
-      yield msg.save();
-      yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
-    }
+    yield msg.save();
+    yield queue.publish('outgoing.' + message.origin, msg, msg._id + '.reply.notification');
   });
 
   team.markModified('meta.office_assistants');
@@ -632,7 +640,6 @@ function getAction(text) {
 
 function isAddOrRemove(input) {
   var regex = /^(add|remove|add @|remove @|<@.+>)/;
-  kip.debug(input.toLowerCase().trim())
   if (input.toLowerCase().trim().match(regex)) {
     return true;
   } else {

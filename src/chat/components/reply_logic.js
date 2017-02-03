@@ -370,10 +370,10 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     printMode(message)
-    let team = yield db.Slackbots.findOne({
+    let teamInfo = yield db.Slackbots.findOne({
       'team_id': message.source.team
     }).exec();
-    let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
+    let isAdmin = yield slackUtils.isAdmin(message.source.user, teamInfo);
     //MODE SWITCHER
     switch (message.mode) {
       case 'onboarding':

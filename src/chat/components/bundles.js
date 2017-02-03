@@ -8,9 +8,9 @@ var cron = require('cron');
 
 
 // EDIT BUNDLES HERE THE ASIN OF THE AMAZON PRODUCT  //
-var snacks = module.exports.snacks = ['B00I669OKW', 'B00I669IIU', 'B00YMSKGVO'];
+var snacks = module.exports.snacks = ['B0074CDYI2', 'B008749N8Q', 'B007PE7ANY'];
 var drinks = module.exports.drinks = ['B00HZYDYYI', 'B002N3I6VM', 'B00NP79AI8'];
-var energy = module.exports.energy = ['B00CZ2KYRU', 'B00HZYD5KQ', 'B00JQQBUZS'];
+var energy = module.exports.energy = ['B00CZ2KYRU', 'B00DS4Q1IK', 'B00JQQBUZS'];
 // ------------------------------------------------ //
 
 var bundles = { snacks: snacks, drinks: drinks, energy: energy }

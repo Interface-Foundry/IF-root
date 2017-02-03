@@ -15,3 +15,14 @@ slack:
   verification_token: rF1BCPsHSBpLyw80aQ7FCGhN
   redirect_uri: https://50975b80.ngrok.io/newslack
 kipPayURL: https://e6a3d0d7.ngrok.io
+logging:
+  console:
+    level: info
+    json: false
+    stringify: false
+    colorize: true
+    prettyPrint: true
+  mongo:
+    enabled: false
+  debugFileLine:
+    enabled: false
