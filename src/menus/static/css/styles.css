@@ -344,6 +344,9 @@ nav .mobile-cart-indicator {
     padding: 5px 10px;
 }
 
+.category-description {
+  font-style: italic;
+}
 .category-set h4 {
   margin: 10px 0;
   color: #B9B9B9;
@@ -351,8 +354,16 @@ nav .mobile-cart-indicator {
 
 .category-set ul {
   list-style: none;
-  display: inline-block;
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
   width: 100%;
+  flex-direction: column;
+  -webkit-flex-direction: column;
+  moz-flex-direction: column;
+  flex-flow: wrap;
+  -webkit-flex-flow: wrap;
+  -moz-flex-flow: wrap;
 }
 
 
@@ -363,11 +374,15 @@ nav .mobile-cart-indicator {
 .category-set ul li {
   border-bottom: 1px solid #F5F5F5;
   padding: 10px;
-  height: 95px;
-  overflow: hidden;
-  display: inline-block;
-  width: 45%;
+  height: 100%;
+  -webkit-flex: 0 0 48%;
+  -moz-flex: 0 0 48%;
+  flex: 0 0 48%;
+  margin-right: 10px;
   box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  min-height: 100px;
 }
 
 .category-set ul li:hover {
@@ -376,15 +391,8 @@ nav .mobile-cart-indicator {
   cursor: pointer;
 }
 
-.category-set ul li:nth-child(even) {
-  float: right;
-}
-
-.category-set ul li:nth-child(odd) {
-  float: left;
-}
-
 .item-name {
+  font-weight: bold;
   display: inline-block;
   max-width: 70%;
   margin: 0;
@@ -690,7 +698,12 @@ nav .mobile-cart-indicator {
 /*
 /* Tablet and below styling */
 @media (max-width:800px) {
-  
+  .category-set ul li {
+    flex: 0 0 100%;
+    -webkit-flex: 0 0 100%;
+    -moz-flex: 0 0 100%;
+  }
+
   #budget-text {
     display: block;  
   }
