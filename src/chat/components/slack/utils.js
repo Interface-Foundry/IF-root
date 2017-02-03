@@ -222,7 +222,8 @@ function * refreshAllChannels (slackbot) {
       'is_channel': true
     }
   })
-  slackbot.meta.all_channels = botChannelArray.concat(botGroupArray)
+  // slackbot.meta.all_channels = botChannelArray.concat(botGroupArray)
+  slackbot.meta.all_channels = botChannelArray
   yield slackbot.save()
 }
 
