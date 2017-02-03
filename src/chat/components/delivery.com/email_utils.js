@@ -119,9 +119,7 @@ utils.sendConfirmationEmail = function * (foodSession) {
   //column headings
   html += `<table border="0" style="margin-top:4px;width:600px;border-spacing:5.5px;"><thead style="color:white;background-color:${kip_blue}"><tr><th>Menu Item</th>`
   html += `<th>Item Options</th>`
-  html += `<th>Quantity</th>`
-  html += `<th>Unit Price</th>`
-  html += `<th>Total Price</th>`
+  html += `<th>Price</th>`
   html += `<th>Recipient</th></tr></thead>`
 
   //items ordered
@@ -131,13 +129,15 @@ utils.sendConfirmationEmail = function * (foodSession) {
     var user = foodSession.team_members.filter(j => j.id === item.user_id)
     var td_style = 'style="background-color:' + ryan_grey + ';padding:8px;"'
 
+    var price_expansion = ( item.item.item_qty > 1 ? `<p style="text-align:center;">$${(menu.getCartItemPrice(item).toFixed(2) / item.item.item_qty).toFixed(2)} (x${item.item.item_qty})</p><hr>` : '')
+
     html += `<tr><td ${td_style};"><b>${foodInfo.name}</b></td>`
     html += `<td ${td_style}"><p>${descriptionString}</p>`
     html += `${(item.item.instructions ? '<p><i>' + item.item.instructions + '</i></p>': '')}</td>`
-    html += `<td ${td_style}><p style="text-align:center;"><b>${item.item.item_qty}</b></p></td>`
-    html += `<td ${td_style}><p style="text-align:center;"><b>${(menu.getCartItemPrice(item).toFixed(2) / item.item.item_qty).toFixed(2)}</b></p></td>`
-    html += `<td ${td_style}><p style="text-align:center;"><b>${menu.getCartItemPrice(item).toFixed(2)}</b></p></td>`
+    html += `<td ${td_style}>` + price_expansion + `<p style="text-align:center;"><b>$${menu.getCartItemPrice(item).toFixed(2)}</b></p></td>`
+    // console.log('USER', user)
     if (user[0].first_name && user[0].last_name) html += `<td ${td_style}"><p>${user[0].first_name} ${user[0].last_name}</p>`
+    else html += `<td ${td_style}>`
     html += `<p>@${user[0].name}</p></td></tr>`
     // html += `<p><a href="https://${team_url}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
   })

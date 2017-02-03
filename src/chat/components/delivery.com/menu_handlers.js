@@ -434,6 +434,8 @@ handlers['food.item.add_to_cart'] = function * (message) {
     var menu = Menu(foodSession.menu);
     var itemPrice = menu.getCartItemPrice(userItem);
 
+    console.log('itemPrice is:', itemPrice)
+
     if (itemPrice > (budgets[userItem.user_id]) * 1.125) {
       yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
       return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
