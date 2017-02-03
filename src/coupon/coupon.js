@@ -47,10 +47,9 @@ function * checkTeamFor10PercentOffFirstOrder(team_id) {
   }
 }
 
-function * refreshTeamCoupons(team_id) {
+function * refreshTeamCoupons (team_id) {
   yield checkTeamFor10PercentOffFirstOrder(team_id)
 }
-
 
 
 module.exports = {
