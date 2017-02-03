@@ -4,6 +4,7 @@ var _ = require('lodash')
 var utils = require('./utils')
 var api = require('./api-wrapper')
 var slackUtils = require('../slack/utils.js')
+var coupon = require('../../../coupon/coupon.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
 
 // turn feedback buttons on/off
@@ -57,7 +58,11 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   logging.debug('doing slackutils stuff in here')
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   // yield [slackUtils.refreshAllUserIMs(team.bot.bot_access_token), slackUtils.getTeamMembers(team)]
-  yield [slackUtils.refreshAllUserIMs(team), slackUtils.refreshAllChannels(team)]
+  yield [
+    slackUtils.refreshAllUserIMs(team),
+    slackUtils.refreshAllChannels(team),
+    coupon.refreshTeamCoupons(team.team_id)
+    ]
 
   message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
