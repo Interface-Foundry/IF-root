@@ -569,40 +569,29 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
 handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
-  if (foodSession === undefined) foodSession = yield db.Delivery.findOne({'team_id': message.source.team, 'active': true}).exec()
-
+  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
   lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
+  var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
 
-/*
   yield lateMembers.map(function * (userId) {
-    var user = _.find(foodSession.team_members, {'id': userId}) // find returns the first one
-
-    var isAdmin = team.meta.office_assistants.includes(user.id)
+    var user = _.find(foodSession.team_members, {'id': userId})
     var msg = _.merge({}, {
-      'incoming': false,
-      'mode': 'food',
-      'thread_id': user.dm,
-      'source': {
-        'type': 'message',
-        'user': user.id,
-        'channel': user.dm,
-        'team': foodSession.team_id
-      }
+        'incoming': false,
+        'mode': 'food',
+        'action': 'payment_info',
+        'thread_id': user.dm,
+        'source': {
+          'type': 'message',
+          'user': user.id,
+          'channel': user.dm,
+          'team': foodSession.team_id
+        }
       })
 
-    var json = {
-      'text': `Your order of ${foodString} is on the way ??`,
-      'callback_id': 'food.payment_info',
-      'fallback': `Your order is on the way`,
-      'attachment_type': 'default',
-      'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
-    }
+    yield $replyChannel.sendReplace(msg, 'food.exit.confirm', {type: 'slack', data: {text: `The collection of orders has ended. Sorry.`}})
+  })
 
-      yield $replyChannel.sendReplace(msg, 'food.need.payments.done', {type: message.origin, data: json})
-    })
-
-*/
 
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
