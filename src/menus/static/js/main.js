@@ -247,11 +247,7 @@ Vue.component('category-item', {
     }
   },
   created: function() {
-    if (this.item.description.length >= 70) {
-      this.descriptionDisplay = (this.item.description.slice(0, 70) + "...")
-    } else {
-      this.descriptionDisplay = this.item.description
-    }
+    this.descriptionDisplay = this.item.description        
   }
 })
 
@@ -301,6 +297,15 @@ Vue.component('category-nav-item', {
   }
 })
 
+Vue.component('post-checkout', {
+  template: "#post-checkout",
+  props: ['admin_name', 'team_name'],
+  data: function() {
+    return {
+      remaining: 5
+    }
+  },
+})
 
 Vue.component('selected-item', {
   template: '#item-detail',
@@ -376,6 +381,7 @@ var app = new Vue({
     editingItem: null,
     cartItems: [],
     budget: false,
+    userCheckedOut: false,
     user_id: null,
     food_session_id: null,
     notDesktop: screen.width <= 800,
@@ -433,7 +439,7 @@ var app = new Vue({
         if (that.notDesktop) {
           that.isCartVisibleOnMobile = false
         }
-        window.close()
+        that.userCheckedOut = true;
       })
       .catch(function(err) {
         console.log(err)
@@ -506,6 +512,7 @@ var app = new Vue({
     }
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
+      console.log(response)
       this.admin_name = response.data.admin_name;
       this.team_name = response.data.team_name;
       this.food_session_id = response.data.foodSessionId;
