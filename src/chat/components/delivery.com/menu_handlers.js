@@ -95,7 +95,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
       // i.infoLine = 'Returned from search term'
     } else if (previouslyOrderedItemIds.includes(i.id)) {
       i.sortOrder = sortOrder.orderedBefore
-      i.infoLine = 'You ordered this before'
+      i.infoLine = '_You ordered this before_'
     } else if (recommendedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.recommended
       // i.infoLine = 'Popular Item'
@@ -135,6 +135,7 @@ if (foodSession.budget) {
       fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       color: '#3AA3E3',
       attachment_type: 'default',
+      mrkdwn_in: ['text'],
       'actions': [
         {
           'name': 'food.item.submenu',
