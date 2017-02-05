@@ -6,7 +6,7 @@ var promisify = require('promisify-node');
 var options = {
 	auth: {
 		api_user:'IF_mail',
-		api_key: 'yLh6_foodistasty_q!WfT]7a',
+		api_key: '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',
 	}
 }
 
