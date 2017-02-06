@@ -138,22 +138,26 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
-  var attachments = foodSession.team_members.map(user => {
-    return {
-      mrkdwn_in: ['text'],
-      callback_id: user.id,
-      text: `*${user.real_name || user.name}* - <@${user.id}|${user.name}>`,
-      actions: [{
-        name: 'food.admin.team.members.reorder',
-        text: '× Remove',
-        type: 'button',
-        value: {
-          index: index,
-          user_id: user.id
-        }
-      }]
-    }
-  })
+
+ var attachments = [];
+
+ foodSession.team_members.map(user => {
+
+        attachments.push({
+        mrkdwn_in: ['text'],
+        callback_id: user.id,
+        text:`*${user.real_name || user.name}* - <@${user.id}|${user.name}>`,
+        actions: [{
+          name: 'food.admin.team.members',
+          text: '× Remove',
+          type: 'button',
+          value: {
+            index: index,
+            user_id: user.id
+          }
+        }]
+      })
+    })
 
   var moreButton = {
     name: 'food.admin.team.members.reorder',
