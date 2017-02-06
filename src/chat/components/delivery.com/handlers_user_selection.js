@@ -170,17 +170,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
   } else {
     textWithChannelMaybe = `Send poll for cuisine to the team members at \`${addr}\``
   }
-/*
-  if (foodSession.chosen_channel.id === 'everyone') {
-      var textWithChannelMaybe = `Send poll for cuisine to _everyone_ at \`${addr}\`?`
-    } else if (foodSession.chosen_channel.id === 'just_me') {
-      textWithChannelMaybe = `Send poll for cuisine to _just me_ at \`${addr}\`?`
-    } else {
-      textWithChannelMaybe = `Send poll for cuisine to <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
-      if (foodSession.budget) textWithPrevChannel += ` with a budget of $${foodSession.budget}`
-      textWithChannelMaybe += '?';
-    }
-*/
+
 
   if (foodSession.budget) {
     textWithChannelMaybe += `, with a budget of $${foodSession.budget} per person`;
