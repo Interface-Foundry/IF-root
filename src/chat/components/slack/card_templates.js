@@ -49,7 +49,7 @@ var home_screen = module.exports.home_screen = function(isAdmin, userId, couponT
   };
 };
 
-var onboard_home_attachments = module.exports.onboard_home_attachments = function(delay) {
+var onboard_home_attachments = module.exports.onboard_home_attachments = function(delay, couponText) {
   let attachments = []
   if (delay !== 'initial') {
     attachments.push({
@@ -66,7 +66,7 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
   }
   attachments.push({
     mrkdwn_in: ['text'],
-    text: '*Kip Café*\nI can help you collect food orders for the team',
+    text: `${require('./utils').randomEmoji(true)}*Kip Café*\nI can help you collect food orders for your team\n${couponText}`,
     color: '#f43440',
     callback_id: 'wow such home',
     actions: [{
@@ -78,7 +78,7 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
     }]
   });
   attachments.push({
-    text: '*Kip Store*\nI can help you get a list of things your team needs',
+    text: `${require('./utils').randomEmoji(false)}*Kip Store*\nI can help get you a list of things your team needs`,
     mrkdwn_in: ['text'],
     color: '#fe9b00',
     callback_id: 'wow such home',

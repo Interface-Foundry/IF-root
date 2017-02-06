@@ -127,11 +127,13 @@ function * loadTeam(slackbot) {
       origin: 'slack',
       source: data
     })
+    
 
     // don't talk to yourself
     if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-      logging.debug("don't talk to yourself: data: ",data);
-      return; // drop the message before sa ving.
+      logging.debug("don't talk to yourself: data: ", data);
+      updateHomeButtonAppender(message, slackbot.bot.bot_access_token);
+      return; // drop the message before saving.
     }
 
     // other random things
@@ -139,6 +141,7 @@ function * loadTeam(slackbot) {
       logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
       logging.debug('data.type', data.type)
       logging.debug('data.subtype', data.subtype)
+      updateHomeButtonAppender(message, slackbot.bot.bot_access_token);
       return
     }
 
@@ -146,6 +149,7 @@ function * loadTeam(slackbot) {
       logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
       logging.debug('data.hidden', data.hidden)
       logging.debug('data.subtype', data.subtype)
+      updateHomeButtonAppender(message, slackbot.bot.bot_access_token);
       return
     }
 
@@ -178,6 +182,28 @@ function * loadTeam(slackbot) {
   })
 }
 
+function updateHomeButtonAppender(message, token) {
+  let now = new Date();
+  let msInFuture = process.env.NODE_ENV.includes('development') ? 1000 * 20 : 1000 * 60 * 20;
+  agenda.cancel({
+    'name': 'append home',
+    'data.user': message.user
+  }, function(err, numRemoved) {
+    if (!err) {
+      kip.debug(`Canceled ${numRemoved} tasks`);
+    } else {
+      kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
+    }
+  });
+  let msg = message.attachments ? message : (message.source.attachments ? message.source : message.source.message);
+  agenda.schedule(new Date(msInFuture + now.getTime()),
+    'append home', {
+      msg: JSON.stringify(msg),
+      token: token,
+      channel: message.source.channel
+    });
+}
+
 //
 // slackbots
 //
@@ -185,6 +211,13 @@ function * start () {
   if (process.env.NODE_ENV === 'test') {
     console.log('starting mock slack server')
     yield slack.run_chat_server()
+  }
+
+  // remove any bots with bad auth
+  if (process.env.NODE_ENV !== 'text') {
+    var preen = require('./find_bad_slackbots').preen
+    var cron = require('cron')
+    new cron.CronJob('0 0 0 * * *', preen, null, true)
   }
 
   var slackbots = yield db.Slackbots.find({
