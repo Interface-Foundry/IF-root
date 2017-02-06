@@ -15,7 +15,7 @@ var path = require('path')
 var request = require('request-promise')
 
 
-var cafeMenu = require('../chat/components/delivery.com/Menu.js');
+var Menu = require('../chat/components/delivery.com/Menu.js')
 var menuURL = config.menuURL
 
 // k8s readiness ingress health check
@@ -138,6 +138,17 @@ router.post('/order', function (req, res) {
         });
       }
 
+      console.log('about to make the menu')
+      var menu = Menu(foodSession.menu)
+      console.log('made the menu')
+      for (var i = 0; i < cart.length; i++) {
+        console.log('cart[i]', cart[i])
+        console.log('this is an f', menu.getCartItemPrice)
+        menu.getCartItemPrice(cart[i])
+      }
+
+      // var money_spent = cart.map(item => Number(menu.getCartItemPrice(item))).reduce((a, b) => a + b)
+      console.log('money spent', money_spent)
       var orders = foodSession.confirmed_orders
       // logging.debug('orders', orders)
       orders.push(user_id)

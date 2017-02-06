@@ -64,7 +64,7 @@ utils.getUrl = function * (foodSession, user_id, selected_items) {
           'rest_id': foodSession.chosen_restaurant.id,
           'team_id': foodSession.team_id,
           'delivery_ObjectId': foodSession._id,
-          'budget': foodSession.budget,
+          'budget': (foodSession.user_budgets[user_id] ? foodSession.user_budgets[user_id] : foodSession.budget),
           'user_id': user_id,
           'selected_items': selected_items
         }
