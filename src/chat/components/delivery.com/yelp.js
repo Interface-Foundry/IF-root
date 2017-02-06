@@ -35,25 +35,23 @@ function matchLocation (restaurants, location) {
 }
 
 function yelpRestaurant (merch) {
-
   return yelp.search({
     term: tokenize(merch.summary.name),
     radius_filter: 40000,
     location: merch.location.city
   })
   .then(function (data) {
-    var correctMerchant = matchLocation (
+    return matchLocation (
       data.businesses,
       {
         latitude: merch.location.latitude,
         longitude: merch.location.longitude
       }
-    );
-    //
-    // console.log(correctMerchant);
-
-    // or return anything
-    return correctMerchant.url;
+    )
+  })
+  .then (function (correctMerchant) {
+    if (correctMerchant) return correctMerchant.url;
+    else return merch.summary.url.complete
   })
   .catch(function (err) {
     console.log('ERROR:', err);
