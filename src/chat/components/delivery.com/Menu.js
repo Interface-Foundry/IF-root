@@ -31,10 +31,8 @@ Menu.prototype.getItemById = function (id) {
 
 // gets the price for a cartItem, which is one of the objects in the delivery_schema cart array
 Menu.prototype.getCartItemPrice = function (cartItem) {
-  console.log('getcartitempricecalled')
   var menu = this
   var item = this.getItemById(cartItem.item.item_id)
-  console.log('item constructed', item)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
   var basePrice
   var hasPriceGroup = item.children.map(c => c.type).includes('price group')
@@ -45,8 +43,6 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
   } else {
     basePrice = item.price
   }
-
-  console.log('set base price')
 
   return basePrice * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
       if (!cartItem.item.option_qty.hasOwnProperty(optionId)) {
