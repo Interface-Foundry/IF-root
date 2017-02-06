@@ -332,7 +332,13 @@ handlers['food.settings.address.new'] = function * (message) {
     'attachments': [{
       'fallback': "What's the address for the order?",
       'text': '✎ Type your address below (Example: _902 Broadway 10010_)',
-      'mrkdwn_in': ['text']
+      'mrkdwn_in': ['text'],
+      'actions': [{
+        'name': 'food.admin.select_address',
+        'text': '< Back',
+        'type': 'button',
+        'value': 'food.admin.select_address'
+      }]
     }]
   }
 
