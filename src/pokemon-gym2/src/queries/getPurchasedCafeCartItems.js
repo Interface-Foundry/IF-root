@@ -2,7 +2,7 @@ const getSuccessfulCafePaymentTokens = require('./getSuccessfulCafePaymentTokens
 
 const getPurchasedCafeCartItems = (delivery, start, end) =>
   new Promise((resolve, reject) => {
-    var successfulPayments = getSuccessfulCafePaymentTokens(db.payments, new Date(new Date().setDate(new Date().getDate()-28)), new Date(new Date().setDate(new Date().getDate())))
+    var successfulPayments = getSuccessfulCafePaymentTokens(db.payments, start, end)
     var paymentTokens = []
     successfulPayments.then(function(paymentArray){
       paymentTokens = paymentArray.map((payment) => payment.paymentToken)
@@ -10,14 +10,15 @@ const getPurchasedCafeCartItems = (delivery, start, end) =>
         {
           $match : { 
             time_started: { $exists: true, $gte: start, $lte: end },
-            guest_token: { $exists: true, $in: paymentTokens}  //
+            guest_token: { $exists: true, $in: paymentTokens}
           },
         },
         {
           $group: {
             _id: {
               guest_token: '$guest_token',
-              items: '$order.cart'
+              items: '$order.cart',
+              team_id: '$team_id',
             },
             
           },
@@ -31,7 +32,7 @@ const getPurchasedCafeCartItems = (delivery, start, end) =>
           return {
             item: cart._id.items,
             cartToken: cart._id.guest_token,
-
+            team_id: cart._id.team_id,
           };
         });
         
@@ -44,7 +45,6 @@ const getPurchasedCafeCartItems = (delivery, start, end) =>
 module.exports = getPurchasedCafeCartItems;
 if (!module.parent) {
   require('../../../kip')
-  getPurchasedCafeCartItems(db.delivery, new Date(new Date().setDate(new Date().getDate()-28)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past half year
- 
+  getPurchasedCafeCartItems(db.delivery, new Date(new Date().setDate(new Date().getDate()-365)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past year
 }
 

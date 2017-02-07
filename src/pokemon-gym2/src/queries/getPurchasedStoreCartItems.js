@@ -11,6 +11,7 @@ const getPurchasedStoreCartItems = (carts, start, end) =>
         $group: {
           _id: {
             items: '$amazon.CartItems',
+            id: '$slack_id'
           },
         },
       },
@@ -21,7 +22,7 @@ const getPurchasedStoreCartItems = (carts, start, end) =>
         $group: {
           _id: {
             items: '$_id.items',
-            
+            id: '$_id.id'
           },
         },
       }, 
@@ -65,7 +66,7 @@ const getPurchasedStoreCartItems = (carts, start, end) =>
           CartItemId:cart._id.items.CartItem.CartItemId,
           Price: cart._id.items.CartItem.Price.FormattedPrice,
           ProductGroup: cart._id.items.CartItem.ProductGroup,
-          //Quantity: cart._id.items.CartItem.Quantity,
+          GroupID: cart._id.id
 
         };
       });

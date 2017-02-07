@@ -46,5 +46,5 @@ const getSuccessfulCafePaymentTokens = (payments, start, end) =>
 module.exports = getSuccessfulCafePaymentTokens;
 if (!module.parent) {
   require('../../../kip')
-  getSuccessfulCafePaymentTokens(db.payments, new Date(new Date().setDate(new Date().getDate()-28)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past half year
+  getSuccessfulCafePaymentTokens(db.payments, new Date(new Date().setDate(new Date().getDate()-365)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console)) //cart of past year
 }
