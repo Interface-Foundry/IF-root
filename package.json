@@ -30,6 +30,7 @@
     "csvtojson": "^1.1.2",
     "date-fns": "^1.18.0",
     "debug": "^2.2.0",
+    "email-validator": "^1.0.7",
     "emoji-text": "^0.2.6",
     "everyconfig": "^1.0.2",
     "express": "^4.13.4",
