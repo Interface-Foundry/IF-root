@@ -22,10 +22,21 @@ module.exports = function(agenda) {
             value: 'home'
           }]
         });
-        yield request({
-          uri: `https://slack.com/api/chat.update?token=${job.attrs.data.token}&ts=${message.ts}&channel=${job.attrs.data.channel}&as_user=true&attachments=${stringify(attachments)}&text=${message.text}`
-        });
-        done();
+        request.post({
+          url: 'https://slack.com/api/chat.update',
+          json: true,
+          form: {
+            token: job.attrs.data.token,
+            ts: message.ts,
+            channel: job.attrs.data.channel,
+            as_user: true,
+            attachments: stringify(attachments),
+            text: message.text
+          }
+        })
+        .then(res => kip.debug(`♻️  Tried to add home button, res is:\n${JSON.stringify(res, null, 2)}`))
+        .catch(err => kip.debug(`😡 Couldn't add home, err is:\n${JSON.stringify(err, null, 2)}`))
+        .then(() => done());
       });
     }
   });
@@ -46,10 +57,17 @@ function checkForHome(message) {
 }
 
 function stringify(text) {
-  let stringOrig = JSON.stringify(text);
+  let stringOrig = JSON.stringify(text, '\n');
   stringOrig = stringOrig.replace(/[\u007F-\uFFFF]/g, function(chr) {
     return '\\u' + ('0000' + chr.charCodeAt(0).toString(16)).substr(-4);
   });
-  kip.debug(`😇  ${stringOrig}`)
+  let map = {
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    '#039': '\''
+  };
+  stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
   return stringOrig;
 }
