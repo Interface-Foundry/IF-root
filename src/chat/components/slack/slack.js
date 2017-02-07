@@ -273,7 +273,10 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       as_user: true
     }
     co(function * () {
-      startResponseUrlClearTimer(message._id);
+      if (message._id) {
+        startResponseUrlClearTimer(message._id);
+      }
+
       if (message.action === 'typing') {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
         })

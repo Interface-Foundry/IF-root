@@ -4,7 +4,7 @@ module.exports = function(agenda) {
   agenda.define('append home', function(job, done) {
     let message = JSON.parse(job.attrs.data.msg);
     let hasHome = checkForHome(message);
-    let attachments = message.attachments;
+    let attachments = message.attachments ? message.attachments : [];
     if (!hasHome) {
       co(function * () {
         attachments = attachments.map(a => {
@@ -34,10 +34,12 @@ module.exports = function(agenda) {
             text: message.text
           }
         })
-        .then(res => kip.debug(`♻️  Tried to add home button, res is:\n${JSON.stringify(res, null, 2)}`))
-        .catch(err => kip.debug(`😡 Couldn't add home, err is:\n${JSON.stringify(err, null, 2)}`))
+        .then(() => kip.debug('♻️  Tried to add home button, if it isn\'t there it\'s a slack problem'))
+        .catch(() => kip.debug('😡 Couldn\'t add home, problem on our end'))
         .then(() => done());
       });
+    } else {
+      done();
     }
   });
 };
@@ -57,7 +59,7 @@ function checkForHome(message) {
 }
 
 function stringify(text) {
-  let stringOrig = JSON.stringify(text, '\n');
+  let stringOrig = JSON.stringify(text);
   stringOrig = stringOrig.replace(/[\u007F-\uFFFF]/g, function(chr) {
     return '\\u' + ('0000' + chr.charCodeAt(0).toString(16)).substr(-4);
   });
