@@ -96,6 +96,7 @@ utils.sendConfirmationEmail = function * (foodSession) {
 
   var team_info = yield rp(options);
   var team_url = team_info.team.domain;
+  
   // var slacklink = 'https://' + team_info.team.domain + '.slack.com'
 
   // var formatTime = function (date) {
