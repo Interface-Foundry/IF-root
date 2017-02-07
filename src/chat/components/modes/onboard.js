@@ -38,9 +38,10 @@ handlers['start'] = function * (message) {
   }).exec();
   let msg = message;
   if (!user.admin_shop_onboarded) {
+    let couponText = yield utils.couponText(message.source.team);
     msg.mode = 'onboard';
     msg.action = 'home';
-    msg.reply = cardTemplate.onboard_home_attachments('initial');
+    msg.reply = cardTemplate.onboard_home_attachments('initial', couponText);
     msg.origin = message.origin;
     msg.source = message.source;
     msg.text = 'Ok, let\'s get started!';
@@ -57,7 +58,7 @@ handlers['start'] = function * (message) {
     let cronMsg = {
       mode: 'onboard',
       action: 'home',
-      reply: cardTemplate.onboard_home_attachments('tomorrow'),
+      reply: cardTemplate.onboard_home_attachments('tomorrow', couponText),
       origin: message.origin,
       source: message.source,
       text: 'Hey, it\'s me again! Ready to get started?',
@@ -134,11 +135,12 @@ handlers['remind_later'] = function * (message, data) {
       break;
   }
   if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
+  let couponText = yield utils.couponText(message.source.team);
   if (msInFuture > 0) {
     let cronMsg = {
       mode: 'onboard',
       action: 'home',
-      reply: cardTemplate.onboard_home_attachments(nextDate),
+      reply: cardTemplate.onboard_home_attachments(nextDate, couponText),
       origin: message.origin,
       source: message.source,
       text: 'Almost there...! :)',
@@ -176,12 +178,13 @@ handlers['remind_later'] = function * (message, data) {
   return [];
 };
 
-handlers['start_now'] = function (message) {
+handlers['start_now'] = function * (message) {
   cancelReminder('onboarding reminder', message.source.user);
+  let couponText = yield utils.couponText(message.source.team);
   let msg = {
     text: 'Ok, let\'s get started!',
     fallback: 'Ok, let\'s get started!',
-    attachments: cardTemplate.onboard_home_attachments('tomorrow'),
+    attachments: cardTemplate.onboard_home_attachments('tomorrow', couponText),
     origin: message.origin,
     source: message.source,
     mode: 'onboard',

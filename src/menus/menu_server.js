@@ -15,7 +15,7 @@ var path = require('path')
 var request = require('request-promise')
 
 
-var cafeMenu = require('../chat/components/delivery.com/Menu.js');
+var Menu = require('../chat/components/delivery.com/Menu.js')
 var menuURL = config.menuURL
 
 // k8s readiness ingress health check
@@ -36,7 +36,7 @@ var router = express.Router()
 app.use('/menus', router)
 
 var MenuSession = db.Menu_session;
-var Menu = db.Menus;
+// var Menu = db.Menus;
 var Merchants = db.Merchants;
 var Delivery = db.Delivery;
 
@@ -56,7 +56,7 @@ router.post('/cafe', (req, res) => co(function * () {
   // logging.debug('req.body', req.body)
 
   var rest_id = req.body.rest_id;
-  var result = yield Menu.findOne({merchant_id: rest_id});
+  var result = yield db.Menus.findOne({merchant_id: rest_id});
 
   if (!result) {
     ms.menu.data = yield db.Delivery.findOne({team_id: req.body.team_id, active: true}).select('menu').exec()
@@ -128,6 +128,8 @@ router.post('/order', function (req, res) {
       var foodSession = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
       logging.debug('found the delivery object');
       var cart = foodSession.cart;
+      var menu = Menu(foodSession.menu)
+      var money_spent = 0;
 
       for (var i = 0; i < order.length; i++) {
         // logging.debug(order[i]);
@@ -136,13 +138,20 @@ router.post('/order', function (req, res) {
           item: order[i],
           user_id: user_id
         });
+
+        if (foodSession.budget) {
+          money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))
+        }
       }
+
+      var user_budgets = foodSession.user_budgets
+      user_budgets[user_id] -= money_spent
 
       var orders = foodSession.confirmed_orders
       // logging.debug('orders', orders)
       orders.push(user_id)
 
-      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, confirmed_orders: orders}});
+      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, confirmed_orders: orders, user_budgets: user_budgets}});
 
       //----------Message Queue-----------//
 

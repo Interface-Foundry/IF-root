@@ -82,7 +82,9 @@ utils.sendConfirmationEmail = function * (foodSession) {
   var menu = Menu(foodSession.menu)
   var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">'
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
-  var date = new Date()
+  // var date = new Date()
+  var date = foodSession.order.order_time;
+  console.log('this is the new date format', date);
 
   var options = {
     uri: 'https://slack.com/api/team.info',
@@ -96,32 +98,31 @@ utils.sendConfirmationEmail = function * (foodSession) {
   var team_url = team_info.team.domain;
   // var slacklink = 'https://' + team_info.team.domain + '.slack.com'
 
-  var formatTime = function (date) {
-    var minutes = date.getMinutes()
-    var hours = date.getHours()
-    return (hours > 9 ? '' + hours : '0' + hours) + ':' + (minutes > 9 ? '' + minutes : '0' + minutes)
-  }
+  // var formatTime = function (date) {
+  //   return "^^I am a time^^"
+  //   // var minutes = date.getMinutes()
+  //   // var hours = date.getHours()
+  //   // return (hours > 9 ? '' + hours : '0' + hours) + ':' + (minutes > 9 ? '' + minutes : '0' + minutes)
+  // }
 
   var formatDate = function (date) {
-    var month = date.getMonth() + 1
-    var day = date.getDate()
-    var year = date.getFullYear()
-    return (month > 9 ? '' + month : '0' + month) + '/' + (day > 9 ? '' + day: '0' + day) + '/' + year
+    var year = date.slice(0, 4)
+    var month = date.slice(5, 7)
+    var day = date.slice(8, 10)
+    return month + '/' + day + '/' + year;
   }
 
   //header
 
   var html = `<html>${header}` + br;
   html += `<h1 style="font-size:2em;">Order Receipt</h1>`
-  html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> at ${formatTime(date)} on ${formatDate(date)}</p>`
+  html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> on ${formatDate(date)}</p>`
   html += `\nHere is a list of items:\n`
 
   //column headings
   html += `<table border="0" style="margin-top:4px;width:600px;border-spacing:5.5px;"><thead style="color:white;background-color:${kip_blue}"><tr><th>Menu Item</th>`
   html += `<th>Item Options</th>`
-  html += `<th>Quantity</th>`
-  html += `<th>Unit Price</th>`
-  html += `<th>Total Price</th>`
+  html += `<th>Price</th>`
   html += `<th>Recipient</th></tr></thead>`
 
   //items ordered
@@ -131,13 +132,15 @@ utils.sendConfirmationEmail = function * (foodSession) {
     var user = foodSession.team_members.filter(j => j.id === item.user_id)
     var td_style = 'style="background-color:' + ryan_grey + ';padding:8px;"'
 
+    var price_expansion = ( item.item.item_qty > 1 ? `<p style="text-align:center;">$${(menu.getCartItemPrice(item).toFixed(2) / item.item.item_qty).toFixed(2)} (x${item.item.item_qty})</p><hr>` : '')
+
     html += `<tr><td ${td_style};"><b>${foodInfo.name}</b></td>`
     html += `<td ${td_style}"><p>${descriptionString}</p>`
     html += `${(item.item.instructions ? '<p><i>' + item.item.instructions + '</i></p>': '')}</td>`
-    html += `<td ${td_style}><p style="text-align:center;"><b>${item.item.item_qty}</b></p></td>`
-    html += `<td ${td_style}><p style="text-align:center;"><b>${(menu.getCartItemPrice(item).toFixed(2) / item.item.item_qty).toFixed(2)}</b></p></td>`
-    html += `<td ${td_style}><p style="text-align:center;"><b>${menu.getCartItemPrice(item).toFixed(2)}</b></p></td>`
-    html += `<td ${td_style}"><p>${user[0].first_name} ${user[0].last_name}</p>`
+    html += `<td ${td_style}>` + price_expansion + `<p style="text-align:center;"><b>$${menu.getCartItemPrice(item).toFixed(2)}</b></p></td>`
+    // console.log('USER', user)
+    if (user[0].first_name && user[0].last_name) html += `<td ${td_style}"><p>${user[0].first_name} ${user[0].last_name}</p>`
+    else html += `<td ${td_style}>`
     html += `<p>@${user[0].name}</p></td></tr>`
     // html += `<p><a href="https://${team_url}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
   })

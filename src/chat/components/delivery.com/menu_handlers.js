@@ -95,7 +95,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
       // i.infoLine = 'Returned from search term'
     } else if (previouslyOrderedItemIds.includes(i.id)) {
       i.sortOrder = sortOrder.orderedBefore
-      i.infoLine = 'You ordered this before'
+      i.infoLine = '_You ordered this before_'
     } else if (recommendedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.recommended
       // i.infoLine = 'Popular Item'
@@ -135,6 +135,7 @@ if (foodSession.budget) {
       fallback: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       color: '#3AA3E3',
       attachment_type: 'default',
+      mrkdwn_in: ['text'],
       'actions': [
         {
           'name': 'food.item.submenu',
@@ -232,7 +233,6 @@ if (foodSession.budget) {
   else var url = foodSession.chosen_restaurant.url
 
   var resto = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id});
-  //resto name
 
   msg_json.attachments.push({
     'fallback': 'Search the menu',
@@ -244,8 +244,17 @@ if (foodSession.budget) {
         'value': `*<${!url.error ? url : foodSession.chosen_restaurant.url}|View Full Menu ${menu_utils.cuisineEmoji(resto.data.summary.cuisines[0])}>*`
       }
     ],
-    'mrkdwn_in': ['text', 'fields']
+    'mrkdwn_in': ['text', 'fields'],
+    'actions': []
   })
+
+  if (foodSession.cart.filter(function (item) { return item.user_id == message.user_id }).length) {
+    msg_json.attachments[msg_json.attachments.length-1].actions.push({
+      name: 'food.cart.personal',
+      type: 'button',
+      text: 'View My Cart'
+    })
+  }
 
   if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
     if (Number(foodSession.user_budgets[message.user_id]) >= 2) {
@@ -434,6 +443,8 @@ handlers['food.item.add_to_cart'] = function * (message) {
     var budgets = foodSession.user_budgets;
     var menu = Menu(foodSession.menu);
     var itemPrice = menu.getCartItemPrice(userItem);
+
+    console.log('itemPrice is:', itemPrice)
 
     if (itemPrice > (budgets[userItem.user_id]) * 1.125) {
       yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});

@@ -126,12 +126,15 @@ function * loadTeam(slackbot) {
       user_id: data.user,
       origin: 'slack',
       source: data
-    })
+    });
+
+    // scheduled tasks
+    updateHomeButtonAppender(message, slackbot.bot.bot_access_token);
 
     // don't talk to yourself
     if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-      logging.debug("don't talk to yourself: data: ",data);
-      return; // drop the message before sa ving.
+      logging.debug("don't talk to yourself: data: ", data);
+      return; // drop the message before saving.
     }
 
     // other random things
@@ -178,6 +181,38 @@ function * loadTeam(slackbot) {
   })
 }
 
+function updateHomeButtonAppender(message, token) {
+  let now = new Date();
+  let msInFuture = process.env.NODE_ENV.includes('development') ? 1000 * 20 : 1000 * 60 * 20;
+  agenda.cancel({
+    'name': 'append home',
+    'data.user': message.user
+  }, function(err, numRemoved) {
+    if (!err) {
+      kip.debug(`Canceled ${numRemoved} append home tasks`);
+    } else {
+      kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
+    }
+  });
+  let msg = message.attachments ? message : (message.source.attachments ? message.source : message.source.message);
+  agenda.schedule(
+    new Date(msInFuture + now.getTime()),
+    'append home', {
+      msg: JSON.stringify(msg),
+      token: token,
+      channel: message.source.channel
+    });
+}
+
+function startResponseUrlClearTimer(id) {
+  let now = new Date();
+  let msInFuture = 1000 * 60 * 30;
+  let reminderTime = new Date(msInFuture + now.getTime());
+  agenda.schedule(reminderTime, 'clear response', {
+    msgId: id
+  });
+}
+
 //
 // slackbots
 //
@@ -214,7 +249,7 @@ function * start () {
 //
 logging.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
-
+  kip.debug(`😁  Outgoing is\n${JSON.stringify(outgoing, null, 2)}`)
   logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
   outgoing = {
     data: outgoing
@@ -234,6 +269,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       as_user: true
     }
     co(function * () {
+      startResponseUrlClearTimer(message._id);
       if (message.action === 'typing') {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
         })
@@ -312,7 +348,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
-       if (message.mode === 'onboarding') {
+      if (message.mode === 'onboarding') {
         msgData.attachments = message.reply;
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }

@@ -93,12 +93,14 @@ handlers['food.admin.team.members'] = function * (message) {
     'value': 'select_team_members'
   })
 
-  buttons.actions.push({
-    'name': 'passthrough',
-    'text': 'View Email Members',
-    'type': 'button',
-    'value': 'food.admin.team.email_members'
-  })
+  if (process.env.NODE_ENV == 'development_hannah') {
+    buttons.actions.push({
+      'name': 'passthrough',
+      'text': 'View Email Members',
+      'type': 'button',
+      'value': 'food.admin.team.email_members'
+    })
+  }
 
   buttons.actions.push({
     name: 'passthrough',
@@ -136,22 +138,26 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
-  var attachments = foodSession.team_members.map(user => {
-    return {
-      mrkdwn_in: ['text'],
-      callback_id: user.id,
-      text: `*${user.real_name || user.name}* - <@${user.id}|${user.name}>`,
-      actions: [{
-        name: 'food.admin.team.members.reorder',
-        text: '× Remove',
-        type: 'button',
-        value: {
-          index: index,
-          user_id: user.id
-        }
-      }]
-    }
-  })
+
+ var attachments = [];
+
+ foodSession.team_members.map(user => {
+
+        attachments.push({
+        mrkdwn_in: ['text'],
+        callback_id: user.id,
+        text:`*${user.real_name || user.name}* - <@${user.id}|${user.name}>`,
+        actions: [{
+          name: 'food.admin.team.members',
+          text: '× Remove',
+          type: 'button',
+          value: {
+            index: index,
+            user_id: user.id
+          }
+        }]
+      })
+    })
 
   var moreButton = {
     name: 'food.admin.team.members.reorder',

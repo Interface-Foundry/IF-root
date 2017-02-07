@@ -579,7 +579,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     var msg = _.merge({}, {
         'incoming': false,
         'mode': 'food',
-        'action': 'payment_info',
+        'action': 'end_order',
         'thread_id': user.dm,
         'source': {
           'type': 'message',
@@ -588,8 +588,26 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
           'team': foodSession.team_id
         }
       })
+    var json = {
+        'text': `The collection of orders has ended. Sorry.`,
+        'callback_id': 'food.end_order',
+        'fallback': `The collection of orders has ended. Sorry.`,
+        'attachment_type': 'default',
+        'attachments': [{
+          'fallback': 'Home',
+          'callback_id': 'Home',
+          'color': 'grey',
+          'attachment_type': 'default',
+          'actions': [{
+            'name': 'passthrough',
+            'text': 'Home',
+            'type': 'button',
+            'value': 'food.exit.confirm'
+          }]
+        }]
+      }
 
-    yield $replyChannel.sendReplace(msg, 'food.exit.confirm', {type: 'slack', data: {text: `The collection of orders has ended. Sorry.`}})
+    yield $replyChannel.sendReplace(msg, 'food.exit.confirm', {type: 'slack', data: json})
   })
 
 
