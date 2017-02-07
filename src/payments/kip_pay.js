@@ -72,12 +72,6 @@ app.get('/test', (req, res) => co(function * () {
   res.status(200).send({'test': 'passed'})
 }))
 
-app.post('/test2', function(req, res) {
-  if (_.get(req, 'body.geo')) {
-    return res.status(200).send({'asdf': req.body.geo})
-  }
-  return res.status(200).send({'asdf': 'failed'})
-})
 
 // post a new charge for kip user
 app.post('/charge', (req, res) => co(function * () {
