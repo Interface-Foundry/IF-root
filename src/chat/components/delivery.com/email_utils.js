@@ -96,7 +96,7 @@ utils.sendConfirmationEmail = function * (foodSession) {
 
   var team_info = yield rp(options);
   var team_url = team_info.team.domain;
-  
+
   // var slacklink = 'https://' + team_info.team.domain + '.slack.com'
 
   // var formatTime = function (date) {
@@ -113,11 +113,14 @@ utils.sendConfirmationEmail = function * (foodSession) {
     return month + '/' + day + '/' + year;
   }
 
+  var merchant = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id})
+  var phone_number = merchant.data.summary.phone;
+
   //header
 
   var html = `<html>${header}` + br;
   html += `<h1 style="font-size:2em;">Order Receipt</h1>`
-  html += `<p>${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> on ${formatDate(date)}</p>`
+  html += `<p style="color:black;text-decoration:none;">${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a>${(phone_number ? ' (' + phone_number + ')' : '')} on ${formatDate(date)}</p>`
   html += `\nHere is a list of items:\n`
 
   //column headings
