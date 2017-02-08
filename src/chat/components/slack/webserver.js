@@ -28,6 +28,12 @@ app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
+// allow webserver.js to call handlers_checkout functions
+var foodHandlers = {}
+var UserChannel = require('../delivery.com/UserChannel')
+var replyChannel = new UserChannel(queue)
+require('../delivery.com/handlers_checkout.js')(replyChannel, foodHandlers)
+
 // app.listen(3000, function(e) {
 //   if (e) { console.error(e) }
 //   console.log('chat app listening on port 8000 🌏 💬')
@@ -461,6 +467,22 @@ app.post('/menuorder', (req, res) => {
   res.status(200)
   res.end()
 })
+
+app.post('/cafeorder', (req, res) => co(function * () {
+  if (req.body.status === 'new_credit_card') {
+    // remove the click to pay for when user has entered new card
+    logging.debug('entered their credit card and successful')
+    yield foodHandlers['food.new_credit_card.success'](req.body.guest_token)
+  } else if (req.body.status === 'previous_credit_card') {
+    logging.debug('previously used credit card success')
+    // trigger handler_checkout for when user has previously used card
+    yield foodHandlers['food.previous_credit_card.success'](req.body.guest_token)
+  } else {
+    logging.error('didnt get expected response in /cafeorder')
+    return res.sendStatus(403)
+  }
+  return res.sendStatus(200)
+}))
 
 function clearCartMsg(attachments) {
   //clears all but the updating message of buttons
