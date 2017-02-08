@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta http-equiv="Content-Language" content="en">
   <title>Kip Cafe</title>
-  <link rel="stylesheet" type="text/css" href="css/styles.css" />
+  <link rel="stylesheet" type="text/css" href="css/compiled.css" />
 </head>
 <body>
   <div id="app" v-cloak>
@@ -38,9 +38,11 @@
       </div>
       <div class="container menu-content">
         <div class="category-set" v-for="category in menu">
-          <span class="category-anchor" :id="category.id"></span>
-          <h4> {{category.name.toUpperCase()}}</h4>
-          <p class="category-description" v-if="category.description">{{category.description}}</p>
+          <span class="category-anchor" :id="category.id"></span>          
+          <div class="category-overview">
+            <h4> {{category.name.toUpperCase()}}</h4>
+            <p class="category-description" v-if="category.description">{{category.description}}</p>
+          </div>
           <ul>
             <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
           </ul>
@@ -97,15 +99,15 @@
   </script>
   <script type="text/x-template" id="cart-item">
     <li class="cart-item">
-      <div class="item-summary"><span class="remove-item-icon" @click="removeItem">X</span><span class="item-name">({{item.quantity}}) {{item.name}}</span><img class="edit-item-icon" @click="editItem" src="images/edit-icon.svg"><span class="item-price">${{item.totalPrice.toFixed(2)}}</span></div>
+      <div class="item-summary"><span class="remove-item-icon" @click="removeItem">X</span><span class="item-name"><span v-if="item.quantity > 1">({{item.quantity}})</span> <span v-else>{{item.quantity}}</span>{{item.name}}</span><img class="edit-item-icon" @click="editItem" src="images/edit-icon.svg"><span class="item-price">${{item.totalPrice.toFixed(2)}}</span></div>
       <ul class="item-options">
         <li class="item-option-set" v-for="opt in item.options">
-          <p class="item-option-name">{{opt.option.name}}</p>   
           <ul class="item-option-list"> 
             <li class="item-choice" v-for="choice in opt.choices">{{choice.name}} <span v-if="choice.price">(+ ${{choice.price}})</span></li>
           </ul>
         </li>
-      </ul> 
+      </ul>
+      <span class='item-instructions' v-if="item.instructions">{{item.instructions}}</span>
     </li>
   </script>   
   <script type="text/x-template" id="category-item">
