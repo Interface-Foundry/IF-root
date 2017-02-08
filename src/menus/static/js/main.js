@@ -514,7 +514,6 @@ var app = new Vue({
     }
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
-      console.log(response)
       this.admin_name = response.data.admin_name;
       this.team_name = response.data.team_name;
       this.food_session_id = response.data.foodSessionId;
