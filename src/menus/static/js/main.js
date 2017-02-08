@@ -510,7 +510,7 @@ var app = new Vue({
     }
     if (history.pushState) {
       var url = window.location.origin + window.location.pathname;
-      window.history.pushState({path: url}, '', url);
+      history.replaceState({path: url}, '', url);
     }
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
