@@ -1,4 +1,4 @@
-require('../../src/db')
+require('../../src/kip')
 var co = require('co')
 var _ = require('lodash')
 var request = require('request-promise')

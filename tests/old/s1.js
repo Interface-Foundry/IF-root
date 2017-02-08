@@ -1,9 +1,9 @@
 // SET UP AND CONSTS
-const SLACK_DIR = '../../../chat/components/delivery.com/'
+const DELIVERY_DIR = '../../../chat/components/delivery.com/'
 const SLACK_DIR = '../../../chat/components/slack/'
 
 // LOCAL IMPORTS
-var mock = require('../mock_slack_users.js')
+var mock = require('../mock_data/mock.slack_users.js')
 
 // TESTING
 require('co-mocha')
@@ -16,13 +16,15 @@ describe('greeting', () => {
     yield mock.setup()
   })
   it('should allow an admin to start an order with a saved address', function * () {
-    this.timeout(5000)
+    this.timeout(10000)
     var user = yield mock.Admin()
     user.chatuser.id.should.equal('admin_yolo')
     user.chatuser.team_id.should.equal('yolo')
 
     // Start the food convo with the admin
-    var msg = yield user.text('food', {expect: 2})
+    var msg = yield user.text('food', {expect: 1})
+    msg = yield user.tap(msg, 0, 0)
+
     _.get(msg, '[0].attachments[0].text', '').should.equal("")
     _.get(msg, '[0].attachments[0].image_url', 'default').should.equal("http://kipthis.com/kip_modes/mode_cafe.png")
     _.get(msg, '[1].attachments[0].text', '').should.equal("Great! Which address is this for?")
