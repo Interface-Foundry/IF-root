@@ -83,7 +83,7 @@
     <post-checkout v-if="userCheckedOut" @close="userCheckedOut = false" :team_name=team_name :admin_name=admin_name></post-checkout>         
   </div>  
   <script type="text/x-template" id="category-nav-item">
-    <a @click="setNavItem" :href="'#' + category.id">{{category.name}}</a>
+    <a href="javascript:void(0)" @click="setNavItem">{{category.name}}</a>
   </script>
   <script type="text/x-template" id="more-selector">
     <div class="more-categories" v-on:mouseenter="enter" v-on:mouseleave="leave" >
