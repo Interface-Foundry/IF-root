@@ -40,6 +40,7 @@
         <div class="category-set" v-for="category in menu">
           <span class="category-anchor" :id="category.id"></span>
           <h4> {{category.name.toUpperCase()}}</h4>
+          <p class="category-description" v-if="category.description">{{category.description}}</p>
           <ul>
             <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
           </ul>
@@ -78,10 +79,11 @@
       </div>
     </footer>        
     <selected-item  v-if="selectedItem" @close="selectedItem = null" :item=selectedItem v-on:add="addItemToCart"></selected-item>   
-    <edit-item v-if="editingItem" @close="editingItem = null" :item=editingItem></selected-item>       
+    <edit-item v-if="editingItem" @close="editingItem = null" :item=editingItem></edit-item>       
+    <post-checkout v-if="userCheckedOut" @close="userCheckedOut = false" :team_name=team_name :admin_name=admin_name></post-checkout>         
   </div>  
   <script type="text/x-template" id="category-nav-item">
-    <a @click="setNavItem" :href="'#' + category.id">{{category.name}}</a>
+    <a href="javascript:void(0)" @click="setNavItem">{{category.name}}</a>
   </script>
   <script type="text/x-template" id="more-selector">
     <div class="more-categories" v-on:mouseenter="enter" v-on:mouseleave="leave" >
@@ -122,7 +124,24 @@
   </script>
   <script type="text/x-template" id="choice">
    <div class="option-choice"> <input v-bind:checked="selected" v-on:change="selectChoice" :id="choice.unique_id" :type="type" :name="option.name"> <label :for="choice.unique_id">{{choice.name}} <span v-if="choice.price > 0" class="option-price"> + ${{choice.price.toFixed(2)}}</span></label></div>
-  </script>  
+ </script> 
+   <script type="text/x-template" id="post-checkout">
+    <transition name="modal">
+      <div class="modal-mask">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+            <div class="modal-close-button" @click="$emit('close')"></div>           
+            <div class="modal-header">
+              <h3> Thanks!</h3>
+            </div>
+            <div class="modal-body">
+            <p> 🎉 Your items have been added to cart, please switch back to Slack to confirm your order</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </script>
   <script type="text/x-template" id="item-detail">
     <transition name="modal">
       <div class="modal-mask">

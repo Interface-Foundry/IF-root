@@ -247,11 +247,7 @@ Vue.component('category-item', {
     }
   },
   created: function() {
-    if (this.item.description.length >= 70) {
-      this.descriptionDisplay = (this.item.description.slice(0, 70) + "...")
-    } else {
-      this.descriptionDisplay = this.item.description
-    }
+    this.descriptionDisplay = this.item.description        
   }
 })
 
@@ -293,6 +289,8 @@ Vue.component('category-nav-item', {
     this.id == "all" ? this.isSelected = true : this.isSelected = false
     categoryNavBus.$on('nav-item-selected', function(item) {
       if (item == that) {
+        var title = document.getElementById(that.category.id)
+        window.scrollTo(0, title.offsetTop)
         that.isSelected = true
       } else {
         that.isSelected = false
@@ -301,6 +299,15 @@ Vue.component('category-nav-item', {
   }
 })
 
+Vue.component('post-checkout', {
+  template: "#post-checkout",
+  props: ['admin_name', 'team_name'],
+  data: function() {
+    return {
+      remaining: 5
+    }
+  },
+})
 
 Vue.component('selected-item', {
   template: '#item-detail',
@@ -376,6 +383,7 @@ var app = new Vue({
     editingItem: null,
     cartItems: [],
     budget: false,
+    userCheckedOut: false,
     user_id: null,
     food_session_id: null,
     notDesktop: screen.width <= 800,
@@ -433,7 +441,7 @@ var app = new Vue({
         if (that.notDesktop) {
           that.isCartVisibleOnMobile = false
         }
-        window.close()
+        window.close();
       })
       .catch(function(err) {
         console.log(err)
@@ -502,7 +510,7 @@ var app = new Vue({
     }
     if (history.pushState) {
       var url = window.location.origin + window.location.pathname;
-      window.history.pushState({path: url}, '', url);
+      history.replaceState({path: url}, '', url);
     }
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
