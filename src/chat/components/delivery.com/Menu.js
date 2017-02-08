@@ -258,7 +258,7 @@ function nodeOptions (node, cartItem, validate, message) {
       }
     }
     let options = g.children.map(option => {
-      let price
+      let price;
       if (g.type === 'price group') {
         // price groups are like 'small, medium or large' and so each one is the base price
         price = ' $' + option.price
@@ -274,7 +274,8 @@ function nodeOptions (node, cartItem, validate, message) {
         value: JSON.stringify({
           item_id: cartItem.item.item_id,
           option_id: option.id,
-          optionIndices: optionIndices
+          optionIndices: optionIndices,
+          single_select: ((g.min_selection === g.max_selection) && g.min_selection === 1) || (g.min_selection === 0 && g.max_selection === 1)
         })
       };
     });
@@ -284,16 +285,13 @@ function nodeOptions (node, cartItem, validate, message) {
       type: 'select',
       options: options
     }];
-
-    if (numSelected < g.max_selection) {
-      selections.push({
-        name: 'food.option.click',
-        text: 'Choose an addon',
-        type: 'select',
-        options: options
-      });
-    }
-
+    let selections = [];
+    selections.push({
+      name: 'food.option.click',
+      text: 'Choose an addon',
+      type: 'select',
+      options: options
+    });
     selections = _.reverse(_.chunk(selections, 4));
 
     while (selections.length > 1) {
@@ -310,7 +308,6 @@ function nodeOptions (node, cartItem, validate, message) {
       a.text = '';
     }
     a.actions = selections.pop();
-
     all.push(a);
 
     // Submenu part
@@ -322,7 +319,7 @@ function nodeOptions (node, cartItem, validate, message) {
     })
 
     return all
-  }, [])
+  }, []);
   return attachments
 }
 

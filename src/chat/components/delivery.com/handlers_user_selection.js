@@ -458,8 +458,10 @@ handlers['food.admin.toggle_channel'] = function * (message) {
       foodSession.team_members = foodSession.all_members.filter(user => {
         return _.includes(resp.members, user.id)
       })
-      return [];
       logging.info('filtered down members to these members: ', foodSession.team_members)
+      foodSession.markModified('team_members')
+      yield foodSession.save()
+      return [];
     } catch (err) {
       $replyChannel.send(message, 'food.admin.select_channel', {type: message.origin, data: {text: 'hmm that didn\'t seem to work'}})
       logging.error('error getting members', err)

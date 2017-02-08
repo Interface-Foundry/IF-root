@@ -340,8 +340,9 @@ handlers['food.option.click'] = function * (message) {
   }
 
   kip.debug('option_qty', userItem.item.option_qty)
-
+  let isSingleChoice = JSON.parse(_.get(message, 'source.actions[0].selected_options[0].value')).single_select;
   var json = cart.menu.generateJsonForItem(userItem, false, message)
+  if (isSingleChoice) return [];
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 

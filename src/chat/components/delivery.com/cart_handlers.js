@@ -607,6 +607,8 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
 
     yield $replyChannel.sendReplace(msg, 'food.exit.confirm', {type: 'slack', data: json})
   })
+
+  foodSession = foodSession ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
@@ -665,8 +667,8 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
 
   try {
     var order = yield api.createCartForSession(foodSession)
-  } catch (err) {
-    logging.error('error running createCartForSession', err)
+  } catch (e) {
+    logging.error('error running createCartForSession', e)
     return
   }
 
