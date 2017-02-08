@@ -105,10 +105,10 @@ Menu.prototype.generateJsonForItem = function (cartItem, validate, message) {
   var parentDescription = _.get(menu, `flattenedMenu.${item.parentId}.description`)
 
   //lol
-  if (item.description){
-    var des = `- _${item.description}_`
-  }else {
-    var des = ''
+  if (item.description) {
+    var des = `- _${item.description.replace('\n', '_\n_')}_`
+  } else {
+    des = ''
   }
   //lol
   if(parentDescription){
