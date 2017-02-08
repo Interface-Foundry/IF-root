@@ -141,8 +141,10 @@ var deliverySchema = mongoose.Schema({
   payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later
   guest_token: String, // related to creating a guest token per session
-  completed_payment: Boolean,
-
+  completed_payment: {
+    default: false,
+    type: Boolean
+  },
   // errors
   delivery_error: String
 })
