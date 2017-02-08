@@ -289,6 +289,8 @@ Vue.component('category-nav-item', {
     this.id == "all" ? this.isSelected = true : this.isSelected = false
     categoryNavBus.$on('nav-item-selected', function(item) {
       if (item == that) {
+        var title = document.getElementById(that.category.id)
+        window.scrollTo(0, title.offsetTop)
         that.isSelected = true
       } else {
         that.isSelected = false
@@ -439,7 +441,7 @@ var app = new Vue({
         if (that.notDesktop) {
           that.isCartVisibleOnMobile = false
         }
-        that.userCheckedOut = true;
+        window.close();
       })
       .catch(function(err) {
         console.log(err)
