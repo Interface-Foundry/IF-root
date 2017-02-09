@@ -2,8 +2,9 @@ var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
 var sleep = require('co-sleep')
-var coupon = require('../../../coupon/couponUsing.js')
+var validator = require('isemail')
 
+var coupon = require('../../../coupon/couponUsing.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
 var cardTemplates = require('../slack/card_templates.js')
 var utils = require('../slack/utils.js')
@@ -208,6 +209,25 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       },
       {
         'title': '',
+        'mrkdwn_in': ['text'],
+        'text': `*Email:*\n` +
+                `${foodSession.convo_initiater.email}`,
+        'fallback': `*Email:*\n` +
+                `${foodSession.convo_initiater.email}`,
+        'callback_id': `food.admin.order.checkout.confirm`,
+        'color': `#3AA3E3`,
+        'attachment_type': `default`,
+        'actions': [
+          {
+            'name': `food.admin.order.checkout.email`,
+            'text': `Edit`,
+            'type': `button`,
+            'value': `edit`
+          }
+        ]
+      },
+      {
+        'title': '',
         'mrkdwn_in': [`text`],
         'text': `*Address:*\n` +
                 `${foodSession.chosen_location.address_1} ${foodSession.chosen_location.city}, ${foodSession.chosen_location.state} ${foodSession.chosen_location.zip_code}`,
@@ -311,6 +331,51 @@ handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * 
   db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
 
   yield db.Delivery.update({_id: foodSession._id}, {$set: {'instructions': message.text || ''}}).exec()
+  var msg = _.merge({}, message, {
+    text: ''
+  })
+  return yield handlers['food.admin.order.checkout.confirm'](msg)
+}
+
+handlers['food.admin.order.checkout.email'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  console.log(foodSession.convo_initiater.email)
+
+  var msg = {
+    text: `Edit Email Address`,
+    attachments: [{
+      text: '✎ Type your email address below (Example: _kipthepenguin@kipthis.com_)',
+      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
+      mrkdwn_in: ['text']
+    }]
+  }
+
+  //var response =
+  yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.email.submit', {type: message.origin, data: msg})
+}
+
+handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSession) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  // db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
+  var email = message.text.split('|')[1].split('>')[0]
+  var valid = validator.validate(email)
+  if (!valid) {
+    // not a valid email
+    $replyChannel.send(
+      message,
+      'food.admin.order.checkout.email',
+      {
+        type: message.origin,
+        data: {'text': `Unfortunately that email was invalid - try again?`}
+      })
+    return yield handlers['food.admin.order.checkout.email'](message)
+  }
+
+  if (valid) foodSession.convo_initiater.email = email;
+  yield foodSession.save();
+  // yield db.Delivery.update({team_id: message.source.team, active: true}, {$set: {'convo_initiater.email': message.text || foodSession.convo_initiater.email}}).exec()
   var msg = _.merge({}, message, {
     text: ''
   })
