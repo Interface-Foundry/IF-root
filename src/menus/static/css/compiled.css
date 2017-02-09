@@ -146,8 +146,10 @@ nav .logo img {
 }
 
 nav .cart-icon {
-  margin-left: auto;
   padding-top: 10px;
+  position: relative;
+  display: flex;
+  margin-left: auto;
 }
 
 nav .image-container:hover {
@@ -156,7 +158,7 @@ nav .image-container:hover {
 
 
 nav .cart-icon img {
-  width: 25px;
+  height: 25px;
 }
 
 nav .mobile-cart-indicator {
@@ -173,8 +175,8 @@ nav .mobile-cart-indicator {
   font-size: 16px;
   text-align: center;
   line-height: 26px;
-  top: 5px;
-  right: 2px;
+  top: 2px;
+  right: -20px;
   position: absolute;
 }
 
@@ -673,6 +675,14 @@ nav .mobile-cart-indicator {
   font-size: 18px;  
 }
 
+.option-required {
+  padding: 3px;
+  border-radius: 4px;
+  background-color: rgba(111,82,216,0.12);
+  color: #3a2b71;
+  font-size: 12px;
+}
+
 .option-body {
   background-color: #EFF7FE;
   -js-display: flex;
@@ -773,8 +783,8 @@ nav .mobile-cart-indicator {
     background-color: #A62934;          
   }  
   .container {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 30px;
+    padding-right: 30px;
   }
   
   .right-panel {
@@ -787,22 +797,9 @@ nav .mobile-cart-indicator {
   }
 
   .left-panel {
-    width: 100%;  
+    width: 100%; 
   }
  
-  nav .cart-icon {
-    margin: 0; 
-  }
-
-  nav .cart-icon.image-container {
-    position: absolute;
-    right: 10px;    
-  }
-
-  nav .cart-icon img {
-    position: relative;
-    right: 20px;  
-  }
 
   .restaurant-header {
     height: auto;

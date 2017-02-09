@@ -118,14 +118,14 @@
   </script>
   <script type="text/x-template" id="option-set">
     <div>
-      <h5> {{option.name}}</h5>              
+      <h5> {{option.name}} <span class="option-required" v-if="required">required</span> </h5>          
       <div class="option-body">
         <choice v-on:options="updateOptions" v-for="choice in option.children" :option=option :choice=choice :type="inputType">
       </div>
     </div>
   </script>
   <script type="text/x-template" id="choice">
-   <div class="option-choice"> <input v-bind:checked="selected" v-on:change="selectChoice" :id="choice.unique_id" :type="type" :name="option.name"> <label :for="choice.unique_id">{{choice.name}} <span v-if="choice.price > 0" class="option-price"> + ${{choice.price.toFixed(2)}}</span></label></div>
+   <div class="option-choice"> <input v-bind:checked="selected" v-on:change="selectChoice" :id="choice.unique_id" :type="type" :name="option.id"> <label :for="choice.unique_id">{{choice.name}} <span v-if="choice.price > 0" class="option-price"> + ${{choice.price.toFixed(2)}}</span></label></div>
  </script> 
    <script type="text/x-template" id="post-checkout">
     <transition name="modal">
@@ -171,7 +171,7 @@
               <textarea v-model="instructions"></textarea>    
             </div>            
             <div class="modal-footer">
-              <button @click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice.toFixed(2)}} </button>
+            <button :disabled="!requiredDone" @click="addItemToCart" class="base-btn"> Add to Order ${{totalPrice.toFixed(2)}} </button>
             </div>
           </div>
         </div>
