@@ -1,8 +1,5 @@
-//how many items purchased in shopping 
-//how many items purchased in cafe  
-// # shopping orders
-// # cafe orders
-//how many members in the team
+const getPurchasedCafeCartItems = require('./getPurchasedCafeCartItems');
+const getPurchasedStoreCartItems = require('./getPurchasedStoreCartItems');
 
 const getTeams = (slackbots) =>
   new Promise((resolve, reject) => {
@@ -27,9 +24,70 @@ const getTeams = (slackbots) =>
     });
   });
 
+const getStoreCartItemCount = (team, carts, start, end) =>
+  new Promise((resolve, reject) => {
+    var purchasedStoreCartItems = getPurchasedStoreCartItems(carts, start, end)
+
+    purchasedStoreCartItems.then(function(cartItems){
+      var item_count = cartItems.filter(function(cart){return cart.GroupID === team.id;}).length     
+      resolve(item_count)
+    })
+
+  });
 
 
-const getTeamStats = (slackbots, delivery, start, end) =>
+const getStoreOrderCount = (team, carts, start, end) =>
+   new Promise((resolve, reject) => {
+     var purchasedStoreCartItems = getPurchasedStoreCartItems(carts, start, end)
+
+    purchasedStoreCartItems.then(function(cartItems){
+      var uniqueOrders = new Set();
+      cartItems.map(function(cart) { 
+        if(cart.GroupID == team.id){  
+          uniqueOrders.add(cart.GroupID);
+        }
+      });
+      resolve(uniqueOrders.size)
+    })
+
+
+  });
+
+
+
+const getCafeCartItemCount = (team, delivery, start, end) =>
+  new Promise((resolve, reject) => {
+    var purchasedCafeCartItems = getPurchasedCafeCartItems(delivery, start, end)
+
+    purchasedCafeCartItems.then(function(cartItems){
+       var item_count = cartItems.filter(function(cart){return cart.team_id === team.id;}).length     
+       resolve(item_count)
+    })
+
+  });
+
+
+
+
+const getCafeOrderCount = (team, delivery,start,end) =>
+  new Promise((resolve, reject) => {
+    var purchasedCafeCartItems = getPurchasedCafeCartItems(delivery, start, end)
+
+    purchasedCafeCartItems.then(function(cartItems){
+      var uniqueOrders = new Set();
+      cartItems.map(function(cart) { 
+        if(cart.team_id == team.id){  
+          uniqueOrders.add(cart.cartToken);
+        }
+      });
+      resolve(uniqueOrders.size)
+    })
+
+
+  });
+
+
+const getTeamStats = (slackbots, carts, delivery, start, end) =>
   new Promise((resolve, reject) => {
     var teams = getTeams(slackbots)
 
@@ -38,54 +96,13 @@ const getTeamStats = (slackbots, delivery, start, end) =>
 
     teams.then(function(teamArray){
 
-      team_stats = teamArray.map((team) => { //for each team
-
-      // get # items purchased in shopping (cart schema) filter by team.id
-      var purchasedStoreCartItems = getPurchasedStoreCartItems(carts, start, end)
-      
-
-      // get # items purchased in cafe (delivery schema) filter by team.id
-      var purchasedCafeCartItems = getPurchasedCafeCartItems(delivery, start, end)
-
-
-      // get # shopping orders (from purchasedStoreCartItems, get unique GroupID)
-      
-
-
-      // get # cafe orders ( from purchasedCafeCartItems, get unique cartTokens )
-
-
-
-/*
-        delivery.aggregate([
-          {
-
-          }
-          {
-            $group: {
-              _id: {
-                team_id: '$team_id',
-              },
-              count: { $sum: 1 },
-              carts: { $push: {cart: '$cart'}  },
-            },
-          },
-
-        ], (err, result) => {
-          if (err) { reject(err); }
-          const carts = result.map(cart => {
-            return {
-              team_id: cart._id.team_id,
-              count: cart.count,
-              //cart: cart.carts,
-            };
-          });
-          resolve(carts);
-        });
-*/
-
+      team_stats = teamArray.map((team) => {
+        var storeCartItemCount = getStoreCartItemCount(team, carts, start, end)
+        var storeOrderCount = getStoreOrderCount(team, carts, start, end)
+        var cafeCartItemCount = getCafeCartItemCount(team, delivery, start, end)
+        var cafeOrderCount = getCafeOrderCount(team, delivery,start,end)
+        Promise.all([storeCartItemCount,storeOrderCount,cafeCartItemCount,cafeOrderCount]).then(values => {console.log(team.id,': ',values)})
       })
-
 
     })
   });
@@ -95,6 +112,6 @@ const getTeamStats = (slackbots, delivery, start, end) =>
 module.exports = getTeamStats;
 if (!module.parent) {
   require('../../../kip')
-  getTeamStats(db.slackbots, db.delivery, new Date(new Date().setDate(new Date().getDate()-365)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console))
+  getTeamStats(db.slackbots, db.carts, db.delivery, new Date(new Date().setDate(new Date().getDate()-365)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console))
 }
 
