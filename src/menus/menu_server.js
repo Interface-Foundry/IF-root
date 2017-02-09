@@ -152,12 +152,6 @@ router.post('/order', function (req, res) {
 
       console.log('calculated money spent')
 
-      // var orders = foodSession.confirmed_orders
-      // logging.debug('orders', orders)
-      // orders.push(user_id)
-
-      console.log('registered user as having ordered')
-
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
 
       console.log('updated the delivery object')
