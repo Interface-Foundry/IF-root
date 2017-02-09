@@ -368,7 +368,7 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSe
       'food.admin.order.checkout.email',
       {
         type: message.origin,
-        data: {'text': `hmm there was an error with that number, try again?`}
+        data: {'text': `Unfortunately that email was invalid - try again?`}
       })
     return yield handlers['food.admin.order.checkout.email'](message)
   }
