@@ -138,9 +138,10 @@ router.post('/order', function (req, res) {
           item: order[i],
           user_id: user_id
         });
-
+        console.log('added everything to the cart')
         if (foodSession.budget) {
           money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))
+          console.log('calculated money spent')
         }
       }
 
@@ -151,13 +152,13 @@ router.post('/order', function (req, res) {
 
       console.log('calculated money spent')
 
-      var orders = foodSession.confirmed_orders
+      // var orders = foodSession.confirmed_orders
       // logging.debug('orders', orders)
-      orders.push(user_id)
+      // orders.push(user_id)
 
       console.log('registered user as having ordered')
 
-      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, confirmed_orders: orders, user_budgets: user_budgets}});
+      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
 
       console.log('updated the delivery object')
 
