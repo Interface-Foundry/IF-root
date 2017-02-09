@@ -25,7 +25,7 @@ const getWaypointCounts = (waypoints,start,end) =>
           },
           sources: {
             $addToSet: {
-              //source: '$_id.prov',
+              source: '$_id.prov',
               num: '$count',
             },
           },
