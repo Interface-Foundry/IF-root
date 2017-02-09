@@ -365,7 +365,7 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSe
     // not a valid email
     $replyChannel.send(
       message,
-      'food.admin.order.checkout.phone_number',
+      'food.admin.order.checkout.email',
       {
         type: message.origin,
         data: {'text': `hmm there was an error with that number, try again?`}
