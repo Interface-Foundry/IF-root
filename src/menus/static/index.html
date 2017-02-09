@@ -111,7 +111,7 @@
     </li>
   </script>   
   <script type="text/x-template" id="category-item">
-    <li @click="selectItem">
+    <li v-if="item.price" @click="selectItem">
       <div class="item-title"><p class="item-name">{{item.name}}</p><span class="item-price">${{item.price.toFixed(2)}}</span></div>
       <small class="item-description" v-if="item.description">{{descriptionDisplay}}</small> 
     </li>
