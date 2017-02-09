@@ -55,7 +55,7 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
 
 handlers['food.admin.select_address'] = function * (message, banner) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  
+
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   if (process.env.NODE_ENV !== 'test') {
     logging.debug('doing slackutils stuff in here')
@@ -66,7 +66,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
       coupon.refreshTeamCoupons(team.team_id)
       ]
   }
-
+  logging.debug('initialting delivery session')
   message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
   yield foodSession.save()
@@ -204,6 +204,8 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     message.markModified('source')
   }
 
+  logging.debug('sending message to start a new cafe')
+
   if (!banner) {
     $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
   } else {
@@ -251,6 +253,7 @@ handlers['food.settings.address.remove_select'] = function * (message) {
       'value': 'food.admin.select_address'
     }]
   })
+
   $replyChannel.sendReplace(message, 'food.settings.address.remove', {type: message.origin, data: msg_json})
 }
 

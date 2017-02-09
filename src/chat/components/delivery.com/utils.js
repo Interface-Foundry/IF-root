@@ -117,6 +117,7 @@ function * initiateDeliverySession (session) {
   var foodSessions = yield db.Delivery.find({team_id: session.source.team, active: true}).exec()
 
   if (foodSessions) {
+    logging.debug('found', foodSessions.length, 'active sessions')
     yield foodSessions.map((session) => {
       logging.info('send message to old admin that their order is being canceled')
       // var lastMessage = yield db.Messages.find({
@@ -129,8 +130,9 @@ function * initiateDeliverySession (session) {
 
       // replyChannel.send(lastMessage[0], 'food.cancel_previous', {type: session.origin, data: {text: 'Hey we are canceling your old order! Someone is starting a new order'}})
       session.active = false
-      session.save()
+      return session.save()
     })
+    logging.debug('done saving old active sessions')
   }
 
   // TEMP HACK for Spark demo
@@ -183,6 +185,7 @@ function * initiateDeliverySession (session) {
   if (_.get(admin, 'phone_number')) {
     newSession.convo_initiater.phone_number = admin.phone_number
   }
+  logging.debug('done creating new session')
   return newSession
 }
 

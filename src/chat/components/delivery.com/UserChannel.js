@@ -62,14 +62,18 @@ class UserChannel {
             throw Error(err)
           }
           if (replace && _.get(session, 'source.response_url')) {
+            logging.debug('using response_url to replace message', session.source.response_url)
             request({
               method: 'POST',
               uri: session.source.response_url,
-              body: JSON.stringify(data.data)
+              json: true,
+              body: data.data
             })
           } else if (replace && newSession.replace_ts) {
+            logging.debug('using replace_ts to replace message')
             self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
           } else if (replace && session.slack_ts) {
+            logging.debug('using replace_ts to replace message')
             newSession.replace_ts = session.slack_ts
             self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
           } else {

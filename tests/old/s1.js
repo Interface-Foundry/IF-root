@@ -24,16 +24,11 @@ describe('greeting', () => {
     // Start the food convo with the admin
     var msg = yield user.text('food', {expect: 1})
     msg = yield user.tap(msg, 0, 0)
-
-    _.get(msg, '[0].attachments[0].text', '').should.equal("")
-    _.get(msg, '[0].attachments[0].image_url', 'default').should.equal("http://kipthis.com/kip_modes/mode_cafe.png")
-    _.get(msg, '[1].attachments[0].text', '').should.equal("Great! Which address is this for?")
-    _.get(msg, '[1].attachments[0].actions.length', 0).should.equal(2)
-    _.get(msg, '[1].attachments[0].actions[0].text', '').should.equal('21 Essex St 10002')
-    _.get(msg, '[1].attachments[0].actions[1].text', '').should.equal('New +')
+    yield mock.format(msg, 's1.1')
 
     // choose a saved address
-    msg = yield user.tap(msg[1], 0, 0)
+    msg = yield user.tap(msg, 0, 0)
+    yield mock.format(msg, 's1.2')
 
     // goes to s2
     })

@@ -3,6 +3,8 @@ var co = require('co')
 var _ = require('lodash')
 var request = require('request-promise')
 var mongodb = require('mongodb')
+var fs = require('mz/fs')
+var path = require('path')
 
 /**
  * creates a mock user
@@ -91,10 +93,10 @@ User.prototype.tap = function (message, attachment_index, action_index, options)
       attachment_id: attachment_index.toString(),
       token: 'blorp',
       original_message: JSON.stringify(message),
-      response_url: 'http://localhost:8080/action_response/' + user.team_id + '/' + 'TODO' // TODO make delayed action responses work
+      response_url: 'http://localhost:8080/action_response/' + slackbot.bot.bot_access_token
     }
     // register a listener with mock_slack.js
-    return request({
+    return yield request({
       method: 'POST',
       uri: 'http://localhost:8080/tap/' + slackbot.bot.bot_access_token,
       body: {
@@ -103,7 +105,7 @@ User.prototype.tap = function (message, attachment_index, action_index, options)
       },
       json: true
     })
-  })
+  }).catch(e => { logging.error('error in mock slack user tap', e)})
 }
 
 /**
@@ -295,12 +297,31 @@ function * setup () {
   yield require('../../src/chat/components/slack/slack').startMockSlack()
   //yield require('../../src/chat/components/reply_logic.js')
 
-  console.log('Done with setup'.green)
-  console.log()
+  logging.debug('Done with setup'.green)
+  logging.debug()
+}
+
+var assert = require('assert')
+
+//
+// Checks the format of a test message
+// if we haven't saved a test message yet, it saves one
+//
+function * format(msg, label) {
+  var file = path.join(__dirname, label + '.testcase.json')
+  var exists = yield fs.exists(file)
+  if (!exists) {
+    yield fs.writeFile(file, JSON.stringify(msg))
+  } else {
+    var expected = yield fs.readFile(file, 'utf8')
+    expected = JSON.parse(expected)
+    assert.deepEqual(expected, msg)
+  }
 }
 
 module.exports = {
   ExistingUser: ExistingUser,
   Admin: Admin,
-  setup: setup
+  setup: setup,
+  format: format
 }

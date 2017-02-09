@@ -7,7 +7,7 @@ require('colors')
 var team = require('./test_team_1')
 
 function run_chat_server () {
-  console.log('running mock slack server')
+  logging.debug('running mock slack server')
   return new Promise((resolve, reject) => {
     var express = require('express')
     var app = express()
@@ -18,7 +18,7 @@ function run_chat_server () {
      * Listen for mock taps
      */
     app.post('/tap/:access_token', (req, res) => {
-      console.log('very tap')
+      logging.debug('tap', req.body)
       var options = req.body.options || { expect: 1 }
       var messages = []
       // register listeners
@@ -57,12 +57,11 @@ function run_chat_server () {
      * Listen for mock texts
      */
     app.post('/text/:access_token', (req, res) => {
-      console.log('wow such text')
       var options = req.body.options || { expect: 1 }
       var messages = []
       // register listeners
       ALL_THE_WEB_CLIENTS[req.params.access_token].on_next((message) => {
-        console.log('incoming webmessage', message)
+        logging.debug('incoming webmessage', message)
         if (options.expect > 1) {
           messages.push(message)
           if (messages.length === options.expect) {
@@ -73,7 +72,7 @@ function run_chat_server () {
         }
       })
       ALL_THE_RTM_CLIENTS[req.params.access_token].on_next((message) => {
-        console.log('incoming rtm message', message)
+        logging.debug('incoming rtm message', message)
         if (options.expect > 1) {
           messages.push(message)
           if (messages.length === options.expect) {
@@ -91,14 +90,19 @@ function run_chat_server () {
     /**
      * URL for mock delayed action responses
      */
-    app.post('action_response/:team_id/:message_id', (req, res) => {
-      console.log('not implemented yet')
+    app.post('/action_response/:access_token', (req, res) => {
+      logging.debug('replying to slack action for team', req.params.access_token)
+
+      ALL_THE_WEB_CLIENTS[req.params.access_token].chat.postMessage(null, null, req.body)
+
+      req.status(200)
+      req.end()
     })
     app.listen(8080, function (e) {
       if (e) {
         reject(e)
       }
-      console.log('mock slack chat server listening on port 8080')
+      logging.info('mock slack chat server listening on port 8080')
       resolve()
     })
   })
@@ -113,7 +117,7 @@ var ALL_THE_WEB_CLIENTS = {}
  * @param {any} access_token
  */
 function RtmClient (access_token) {
-  console.log('registering mock RtmClient', access_token)
+  logging.info('registering mock RtmClient', access_token)
   this.access_token = access_token
   var me = this
   this.on_next = function (callback) {
@@ -145,25 +149,33 @@ RtmClient.prototype.on = function (ev, fn) {
  * @param {any} access_token
  */
 function WebClient (access_token) {
-  console.log('registering mock WebClient', access_token)
+  logging.info('registering mock WebClient', access_token)
   this.access_token = access_token
   ALL_THE_WEB_CLIENTS[access_token] = this
   var next_callback
   this.on_next = function (callback) {
     next_callback = callback
   }
+
   function postMessage (channel, text, message) {
     // pass the message to the test framework here
     if (typeof next_callback === 'function') {
-      console.log('testing posting slack mock')
       next_callback(message)
+    } else {
+      logging.debug('no next_callback defined')
     }
   }
-  return {
-    chat: {
-      postMessage: postMessage
-    }
+
+  function update(ts, channel, text, message) {
+    postMessage(channel, text, message)
   }
+
+  this.chat = {
+    postMessage: postMessage,
+    update: update
+  }
+
+  return this
 }
 
 module.exports = {
