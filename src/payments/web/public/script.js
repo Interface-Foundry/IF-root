@@ -157,7 +157,7 @@ function process(data){
 
       var handler = StripeCheckout.configure({
           key: stripeKey,
-          image: 'https://kipthis.com/images/kip_head.png',
+          image: 'img/kip-head.png',
           locale: 'auto',
           token: function(token) {
             $.ajax({
