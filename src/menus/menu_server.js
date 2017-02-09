@@ -130,7 +130,7 @@ router.post('/order', function (req, res) {
       var cart = foodSession.cart;
       var menu = Menu(foodSession.menu)
       var money_spent = 0;
-
+      console.log('got cart and menu')
       for (var i = 0; i < order.length; i++) {
         // logging.debug(order[i]);
         cart.push({
@@ -144,14 +144,22 @@ router.post('/order', function (req, res) {
         }
       }
 
+      console.log('added everything to team cart')
+
       var user_budgets = foodSession.user_budgets
       user_budgets[user_id] -= money_spent
+
+      console.log('calculated money spent')
 
       var orders = foodSession.confirmed_orders
       // logging.debug('orders', orders)
       orders.push(user_id)
 
+      console.log('registered user as having ordered')
+
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, confirmed_orders: orders, user_budgets: user_budgets}});
+
+      console.log('updated the delivery object')
 
       //----------Message Queue-----------//
 

@@ -336,11 +336,16 @@ function * sendOrderProgressDashboards (foodSession, message) {
         }
       }
 
+      // logging.debug('foodSession.cart', foodSession.cart)
+
+      foodSession.cart.map(i => logging.debug('added to cart?', i.added_to_cart))
       const items = foodSession.cart.filter(i => i.added_to_cart)
       const totalPrice = items.reduce((sum, i) => {
         return sum + menu.getCartItemPrice(i) * i.item.item_qty
       }, 0)
       const minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum
+
+      logging.debug('#############minimumMet', minimumMet)
 
       thisDashboard.attachments.push({
         'color': minimumMet ? '#3AA3E3' : '#fc9600',
