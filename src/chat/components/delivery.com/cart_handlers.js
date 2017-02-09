@@ -40,7 +40,6 @@ restartButton.confirm = {
 // Show the user their personal cart
 //
 handlers['food.cart.personal'] = function * (message, replace, over_budget) {
-  logging.debug('food.cart.personal called wooooo')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -202,8 +201,6 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
-  logging.debug('this should contain my added items / = 1', myItems.length)
-  logging.debug('do we know who the user is?', message.user_id)
   var currentTime = Date.now()
   var itemArray = myItems.map(item => {
     var deliveryItem = menu.getItemById(item.item.item_id)
@@ -338,16 +335,11 @@ function * sendOrderProgressDashboards (foodSession, message) {
         }
       }
 
-      // logging.debug('foodSession.cart', foodSession.cart)
-
-      foodSession.cart.map(i => logging.debug('added to cart?', i.added_to_cart))
       const items = foodSession.cart.filter(i => i.added_to_cart)
       const totalPrice = items.reduce((sum, i) => {
         return sum + menu.getCartItemPrice(i) * i.item.item_qty
       }, 0)
       const minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum
-
-      logging.debug('#############minimumMet', minimumMet)
 
       thisDashboard.attachments.push({
         'color': minimumMet ? '#3AA3E3' : '#fc9600',
