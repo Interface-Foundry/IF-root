@@ -7,6 +7,7 @@
   dark-red: #A62934;
   purple: #6F52D8;
   dark-purple: #3a2b71;
+  green: #0dce76;
   light-blue: #EFF7FE;
   transparent-purple: rgba(111,82,216,0.12);
   white: #fff;
@@ -672,7 +673,12 @@ nav .mobile-cart-indicator {
 
 .modal-footer button {
   width: 100%;
-  font-size: 18px;  
+  font-size: 18px; 
+  background-color: #0dce76;
+}
+
+.modal-footer button:hover {
+  background-color: #09a65f;
 }
 
 .option-required {
@@ -706,13 +712,19 @@ nav .mobile-cart-indicator {
 .item-quantity-selector button {
   background-color: white;
   border-radius: 4px;
-  color: #6F52D8;
-  border: 2px solid #6F52D8;
+  color: #B9B9B9;
+  border: 2px solid #B9B9B9;
   line-height: 19px;
   font-size: 24px;
   font-weight: 300;
   width: 30px;
   height: 30px;
+}
+
+.item-quantity-selector button:disabled {
+  color: rgba(111,82,216,0.12);
+  border: 2px solid rgba(111,82,216,0.12);  
+  cursor: not-allowed;
 }
 
 .item-quantity-selector span {

@@ -157,7 +157,7 @@
               <div class="modal-close-button" @click="$emit('close')"></div> 
             </div>
             <div class="item-quantity-selector">
-              <button @click="decreaseQty">-</button>
+              <button :disabled="quantity == 1" @click="decreaseQty">-</button>
               <span>{{quantity}}</span>
               <button @click="increaseQty">+</button>
             </div>

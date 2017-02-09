@@ -159,8 +159,8 @@ Vue.component('option-set', {
     if (this.option.min_selection === 1) {
       this.required = true;
     }
-    if (this.option.max_selection === 1 && this.option.min_selection === 1) {
-      this.inputType = "radio";
+    if (this.option.max_selection === 1) {
+      this.inputType = "radio"
     }
     else {
       this.inputType = "checkbox"
