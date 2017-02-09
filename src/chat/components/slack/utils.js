@@ -152,46 +152,38 @@ function * getChannels(team) {
 * @returns {array} returns chatuser objects
 *
 */
-function * getTeamMembers(team) {
-  if (process.env.NODE_ENV === 'test') return;
-  var members = [];
-  var teamMembers = yield db.Chatusers.find({team_id: team.team_id, is_bot: false}).exec();
-  var res_dm = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token); // has direct message id
-  var res_prof = yield request('https://slack.com/api/users.list?token=' + team.bot.bot_access_token); // has all the profile info such as name, email, etc
-  res_dm = JSON.parse(res_dm);
-  res_prof = JSON.parse(res_prof);
-  var teamIds = teamMembers.map(function(u){ return u.id });
-  var bots = res_prof.members.filter( (e) => { return e.is_bot }).map((e) => { return e.id });
-  return co(function * (){
-    yield eachSeries(res_prof.members, function * (u) {
-      if (!u.deleted) {
-          if ( teamIds.indexOf(u.id) == -1 && u.id != 'USLACKBOT' && bots.indexOf(u.id) == -1) {
-            var user = new db.Chatuser();
-            user.platform = 'slack';
-            var dm = res_dm.ims.find( (d) => { return d.user == u.id })
-            if (dm) {
-              dm = dm.id
-            } else {
-             var res_dm2 = yield request('https://slack.com/api/im.open?token=' + team.bot.bot_access_token + '&&user='+u.id); // has direct message id
-             res_dm2 = JSON.parse(res_dm2);
-              if (_.get(res_dm2,'channel.id')) {
-                var dm = _.get(res_dm2,'channel.id')
-              }
-            }
-            user.dm = dm;
-            user.is_bot =  bots.indexOf(u.id) == -1 ? false : true;
-            user = _.merge(user, u);
-            yield user.save();
-            members.push(user);
-          } else if (teamIds.indexOf(u.id) > -1) {
-            var user = yield db.Chatusers.findOne({ id: u.id}).exec();
-            if (user != null && user != undefined) {
-              members.push(user)
-            }
-          }
-      }
-    });
-  }).then( function() { return members });
+function * getTeamMembers (slackbot) {
+  var slackbotWeb = new slack.WebClient(slackbot.bot.bot_access_token)
+  var userIMInfo = yield slackbotWeb.im.list()
+  var usersArray = yield slackbotWeb.users.list()
+
+  var members = yield usersArray.members.map(function * (user) {
+    var savedUser = yield db.Chatusers.findOne({id: user.id})
+    // check if user is in our database
+    if (!savedUser) {
+      // insert new user under slack platform if they dont exist
+      savedUser = new db.Chatuser(user)
+      savedUser.platform = 'slack'
+    } else {
+      _.merge(savedUser, {
+        // could add other features from slack api user object here to merge
+        deleted: user.deleted
+      })
+    }
+    // check if user has open dm
+    var userDM = userIMInfo.ims.find(i => i.user)
+    if (!userDM) {
+      // open new dm if user doesnt have one open w/ bot
+      userDM = yield slackbotWeb.im.open(user.id)
+      savedUser.dm = userDM.channel.id
+    } else if (_.get(savedUser, 'dm') !== userDM.id) {
+      // if their DM channel isnt equal to what we have saved, update it
+      savedUser.dm = userDM.id
+    }
+    yield savedUser.save()
+    return savedUser
+  })
+  return members
 }
 
 /*
