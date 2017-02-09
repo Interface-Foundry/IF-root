@@ -153,36 +153,44 @@ function * getChannels(team) {
 *
 */
 function * getTeamMembers (slackbot) {
-  var slackbotWeb = new slack.WebClient(slackbot.bot.bot_access_token)
-  var userIMInfo = yield slackbotWeb.im.list()
-  var usersArray = yield slackbotWeb.users.list()
+  try {
+    var slackbotWeb = new slack.WebClient(slackbot.bot.bot_access_token)
+    var userIMInfo = yield slackbotWeb.im.list()
+    var usersArray = yield slackbotWeb.users.list()
+  } catch (err) {
+    logging.error('error gettign im.list/users.list from slack for slackbot', slackbot)
+  }
 
-  var members = yield usersArray.members.map(function * (user) {
-    var savedUser = yield db.Chatusers.findOne({id: user.id})
-    // check if user is in our database
-    if (!savedUser) {
-      // insert new user under slack platform if they dont exist
-      savedUser = new db.Chatuser(user)
-      savedUser.platform = 'slack'
-    } else {
-      _.merge(savedUser, {
-        // could add other features from slack api user object here to merge
-        deleted: user.deleted
-      })
-    }
-    // check if user has open dm
-    var userDM = userIMInfo.ims.find(i => i.user)
-    if (!userDM) {
-      // open new dm if user doesnt have one open w/ bot
-      userDM = yield slackbotWeb.im.open(user.id)
-      savedUser.dm = userDM.channel.id
-    } else if (_.get(savedUser, 'dm') !== userDM.id) {
-      // if their DM channel isnt equal to what we have saved, update it
-      savedUser.dm = userDM.id
-    }
-    yield savedUser.save()
-    return savedUser
-  })
+  try {
+    var members = yield usersArray.members.map(function * (user) {
+      var savedUser = yield db.Chatusers.findOne({id: user.id})
+      // check if user is in our database
+      if (!savedUser) {
+        // insert new user under slack platform if they dont exist
+        savedUser = new db.Chatuser(user)
+        savedUser.platform = 'slack'
+      } else {
+        _.merge(savedUser, {
+          // could add other features from slack api user object here to merge
+          deleted: user.deleted
+        })
+      }
+      // check if user has open dm
+      var userDM = userIMInfo.ims.find(i => i.user)
+      if (!userDM) {
+        // open new dm if user doesnt have one open w/ bot
+        userDM = yield slackbotWeb.im.open(user.id)
+        savedUser.dm = userDM.channel.id
+      } else if (_.get(savedUser, 'dm') !== userDM.id) {
+        // if their DM channel isnt equal to what we have saved, update it
+        savedUser.dm = userDM.id
+      }
+      yield savedUser.save()
+      return savedUser
+    })
+  } catch (err) {
+    logging.error('error updating chatuser array', usersArray)
+  }
   return members
 }
 
