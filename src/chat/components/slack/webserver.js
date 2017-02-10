@@ -106,7 +106,8 @@ function buttonCommand (action) {
 app.post('/slackaction', next(function * (req, res) {
   if (!req.body || !req.body.payload) {
     // probably a health check message from slack
-    res.sendStatus(200)
+    logging.info('got slackaction without an action payload', req.body)
+    return res.sendStatus(200)
   }
 
   var message;
