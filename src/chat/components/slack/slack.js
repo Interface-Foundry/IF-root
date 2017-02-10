@@ -209,7 +209,7 @@ function startResponseUrlClearTimer(id) {
   let msInFuture = 1000 * 60 * 30;
   let reminderTime = new Date(msInFuture + now.getTime());
   agenda.schedule(reminderTime, 'clear response', {
-    msgId: id
+    msgId: id.toString()
   });
 }
 
