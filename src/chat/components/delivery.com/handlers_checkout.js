@@ -674,19 +674,19 @@ handlers['food.admin.save_info'] = function * (message, foodSession) {
   yield user.save()
 
   // slackbot save info
-  logging.info('saving location... ')
-  try {
-    yield db.Slackbot.update({
-      'team_id': message.source.team,
-      'meta.locations.address_1': foodSession.chosen_location.address_1
-    }, {
-      $set: {'meta.locations.$': foodSession.chosen_location}
-    }, {
-      upsert: true
-    })
-  } catch (err) {
-    logging.error('error updating slackbot.meta.locations', err)
-  }
+  // logging.info('saving location... ')
+  // try {
+  //   yield db.Slackbot.update({
+  //     'team_id': message.source.team,
+  //     'meta.locations.address_1': foodSession.chosen_location.address_1
+  //   }, {
+  //     $set: {'meta.locations.$': foodSession.chosen_location}
+  //   }, {
+  //     upsert: true
+  //   })
+  // } catch (err) {
+  //   logging.error('error updating slackbot.meta.locations', err)
+  // }
 }
 
 handlers['food.done'] = function * (message) {
