@@ -83,6 +83,15 @@ function * findAdmins(team) {
 }
 
 function * isAdmin(userId, team) {
+  if (typeof userId === 'undefined') {
+    throw new Error('cannot determine if an undefined user is an admin')
+  }
+
+  if (typeof team === 'undefined') {
+    logging.error('cannot determine if user', userId, 'is admin of an undefined team')
+    return false;
+  }
+
   let adminList = yield findAdmins(team);
   for (var i = 0; i < adminList.length; i++) {
     if (adminList[i].id === userId) {
@@ -430,6 +439,10 @@ function* hideLoading(message) {
 
 function* sendLastCalls(message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  if (!team_id) {
+    logging.error('could not find team_id associated with message', message)
+    throw new Error('could not find team_id associated with message', message)
+  }
   var team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
@@ -552,10 +565,14 @@ function * constructCart(message, text) {
 
 
 function * sendCartToAdmins(message,team) {
+  if (typeof team === 'undefined') {
+    logging.error('cannot send cart to admin of undefined team. message was', message)
+    return
+  }
+
    var cutoff = new Date("2016-12-14T23:07:00.417Z");
    var added = new Date(team.meta.dateAdded)
    var copy;
-   // kip.debug('EUREKA ',added, cutoff, (added < cutoff))
    if (added < cutoff) {
     copy =  'Hi, we added a new feature to get cart status updates from what your team is adding to the cart';
    } else {
