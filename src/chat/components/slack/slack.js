@@ -205,11 +205,15 @@ function updateHomeButtonAppender(message, token) {
 }
 
 function startResponseUrlClearTimer(id) {
+  if (typeof id === 'undefined') {
+    logging.error("cannot start response url clear timer for a message without an id")
+    return;
+  }
   let now = new Date();
   let msInFuture = 1000 * 60 * 30;
   let reminderTime = new Date(msInFuture + now.getTime());
   agenda.schedule(reminderTime, 'clear response', {
-    msgId: id
+    msgId: id.toString()
   });
 }
 

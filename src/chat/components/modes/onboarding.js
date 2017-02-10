@@ -348,6 +348,10 @@ handlers['confirm'] = function * (message) {
   var team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
+  if (typeof team === 'undefined') {
+    logging.error("could not find team asoociate with message", message)
+    throw new Error('cannot confirm for unknown team')
+  }
   var admins = yield slackUtils.findAdmins(team);
   var reply = '';
   if (team.meta.office_assistants.length == 0) {

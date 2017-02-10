@@ -181,6 +181,10 @@ handlers['admins'] = function * (message, data) {
     let team = yield db.Slackbots.findOne({
       'team_id': message.source.team
     }).exec();
+    if (typeof team === 'undefined') {
+      logging.error('cannot find admins of undefined team. message was', message)
+      throw new Error('team undefined')
+    }
     let admins = yield utils.findAdmins(team);
     let adminButtons;
     if (team.meta.office_assistants.length > 1) {
