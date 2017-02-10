@@ -23,20 +23,28 @@ function run_chat_server () {
       var messages = []
       // register listeners
       ALL_THE_WEB_CLIENTS[req.params.access_token].on_next((message) => {
+        logging.debug('outgoing message')
+
         if (options.expect > 1) {
           messages.push(message)
           if (messages.length === options.expect) {
             res.send(messages)
+          } else {
+            logging.debug('expecting ' + (options.expect - messages.length) + ' more...')
           }
         } else {
           res.send(message)
         }
       })
       ALL_THE_RTM_CLIENTS[req.params.access_token].on_next((message) => {
+        logging.debug('outgoing message')
+
         if (options.expect > 1) {
           messages.push(message)
           if (messages.length === options.expect) {
             res.send(messages)
+          } else {
+            logging.debug('expecting ' + (options.expect - messages.length) + ' more...')
           }
         } else {
           res.send(message)

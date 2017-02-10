@@ -1,4 +1,4 @@
-var mock = require('../mock.slack_users.js')
+var mock = require('../mock_data/mock.slack_users.js')
 var should = require('should')
 require('co-mocha')
 var _ = require('lodash')
@@ -9,37 +9,25 @@ describe('greeting', () => {
     yield mock.setup()
   })
   it('should allow an admin to start an order for delivery', function * () {
-    this.timeout(10000)
+    this.timeout(20000)
     var user = yield mock.Admin()
     user.chatuser.id.should.equal('admin_yolo')
     user.chatuser.team_id.should.equal('yolo')
 
     // Start the food convo with the admin
-    var msg = yield user.text('food', {expect: 2})
+    var msg = yield user.text('food')
+    yield mock.format(msg, 's1.0.confirm_new')
 
-    // choose a saved address
-    msg = yield user.tap(msg[1], 0, 0)
+    // choose "Start Anyway" to go to the addresses
+    msg = yield user.tap(msg, 0, 0)
+    yield mock.format(msg, 's1.a.addresses')
 
-    // S2A
-    _.get(msg, 'attachments[0].text', '').should.equal('Cool! You selected `21 Essex St 10002`. Delivery or Pickup?')
-    _.get(msg, 'attachments[0].actions.length', 0).should.equal(3)
-    _.get(msg, 'attachments[0].actions[0].text', '').should.equal('Delivery')
-    _.get(msg, 'attachments[0].actions[1].text', '').should.equal('Pickup')
-    _.get(msg, 'attachments[0].actions[2].text', '').should.equal('< Change Address')
-
-    // tap delivery trigger S2B
+    // tap address to go to the budget selection
     msg = yield user.tap(msg, 0, 0, {expect: 2})
+    yield mock.format(msg, 's1.b.budget')
 
-    _.get(msg, '[0].text', '').should.equal('Searching your area for good food...')
-    _.get(msg, '1.attachments.0.text', '').replace(/goo.gl\/[A-Z]+/i, '').should.equal('You ordered `Delivery` from <https://|*Lily\'s*> recently, order again?')
-    _.get(msg, '1.attachments.1.text', '').should.equal('*Tip:* `✓ Start New Poll` polls your team on what type of food they want.')
-
-    _.get(msg, '1.attachments[0].actions.length', 0).should.equal(1)
-    _.get(msg, '1.attachments[1].actions.length', 0).should.equal(2)
-
-    _.get(msg, '1.attachments.0.actions.0.text', '').should.equal('✓ Choose')
-    _.get(msg, '1.attachments.1.actions.0.text', '').should.equal('✓ Start New Poll')
-    _.get(msg, '1.attachments.1.actions.1.text', '').should.equal('× Cancel')
-
+    // tap "Unlimited" to go to the Last Delivery or Pickup order screen
+    msg = yield user.tap(msg[1], 0, 3)
+    yield mock.format(msg, 's2.b.previous')
   })
 })
