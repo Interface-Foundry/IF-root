@@ -293,7 +293,8 @@ function * setup () {
     throw new Error('must run as NODE_ENV=test')
   }
 
-  yield require('../../src/chat/components/slack/test_team_1').reset()
+  yield require('./test_team_fresh_install').reset()
+  yield require('./test_team_power_users').reset()
   yield require('../../src/chat/components/slack/slack').startMockSlack()
 
   logging.debug('Done with setup'.green)

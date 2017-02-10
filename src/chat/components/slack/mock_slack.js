@@ -4,8 +4,6 @@ var request = require('request-promise')
 require('../../../logging')
 require('colors')
 
-var team = require('./test_team_1')
-
 function run_chat_server () {
   logging.debug('running mock slack server')
   return new Promise((resolve, reject) => {
