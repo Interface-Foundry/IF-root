@@ -34,7 +34,6 @@ function * initializeTeam(team, auth) {
  team.meta.addedBy = typeof team.meta.addedBy == 'string' ? team.meta.addedBy : auth.user_id;
  var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
  res_chan = JSON.parse(res_chan);
- debugger;
  if (!(team.meta.cart_channels && team.meta.cart_channels.length > 0)) {
   var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
   team.meta.cart_channels.push(generalChannel.id);
@@ -59,27 +58,28 @@ function * initializeTeam(team, auth) {
 *
 */
 function * findAdmins(team) {
-  var admins = [];
-  var adminIds = team.meta.office_assistants;
-  var members = yield db.Chatusers.find({
-    team_id: team.team_id
-  }).exec();
-  return co(function * () {
-    yield eachSeries(members, function * (user) {
-      if (adminIds.indexOf(user.id) > -1) {
-        admins.push(user);
-        if (!user.is_admin) {
-          user.is_admin = true;
-          yield user.save();
-        }
-      } else if (adminIds.indexOf(user.id) === -1 && user.is_admin) {
-        user.is_admin = false;
-        yield user.save();
-      }
-    });
-  }).then(function() {
-    return admins;
-  });
+  if (typeof team === 'undefined') {
+    throw new Error('Cannot find admins of undefined team')
+  }
+
+  // I guess some teams don't have admins assigned?
+  if (!_.get(team, 'meta.office_assistants')) {
+    logging.warn('team', team.team_name, 'has no admins')
+    return []
+  }
+
+  // get the full chatuser for each admin id
+  return yield team.meta.office_assistants.map(function * (admin_id) {
+    var user = yield db.chatusers.findOne({id: admin_id}).exec()
+
+    // make double sure that the user is_admin for some reason (idk why)
+    if (!user.is_admin) {
+      user.is_admin = true
+      yield user.save()
+    }
+
+    return user
+  })
 }
 
 function * isAdmin(userId, team) {
