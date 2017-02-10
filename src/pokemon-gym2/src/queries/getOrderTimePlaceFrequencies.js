@@ -58,7 +58,7 @@ const getOrderTimePlaceFrequencies = (delivery, start, end) =>
           ({ num: prevSource.num + source.num })).num;
 
         return {
-          hour: order._id.hour - 5,
+          hour: order._id.hour,
           location: order.location,
           //address: order._id.address,
           //city: order._id.city,
