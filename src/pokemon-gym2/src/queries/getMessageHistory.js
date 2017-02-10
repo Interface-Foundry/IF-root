@@ -1,3 +1,4 @@
+//get the message data that has been sent to and from the user
 const getMessageHistory = (messages,user) =>
   new Promise((resolve, reject) => {
     messages.aggregate([

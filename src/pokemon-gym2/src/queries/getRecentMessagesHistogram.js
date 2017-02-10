@@ -52,7 +52,7 @@ const getSlackHistogram = (messages) =>
 module.exports = getSlackHistogram;
 if (!module.parent) {
   require('../../../kip')
-  console.log('Histogram that shows how many messages have been sent in the recent hours')
+  console.log('Histogram that shows how many messages have been sent in the recent hours of the past day')
   console.log('Hour: 0 means "in the last hour", hour: 1 is "one hour ago" etc')
   getSlackHistogram(db.messages).then(console.log.bind(console))
 }

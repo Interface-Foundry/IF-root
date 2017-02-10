@@ -5,6 +5,7 @@ const getWaypointCounts = (waypoints,start,end) =>
         $match:
         {
           'timestamp': { $exists: true, $gte: start, $lte: end },
+          'waypoint': { $ne: 0 }
         },
       },
       {
@@ -55,11 +56,5 @@ const getWaypointCounts = (waypoints,start,end) =>
 module.exports = getWaypointCounts;
 if (!module.parent) {
   require('../../../kip')
-  getWaypointCounts(db.waypoints,new Date(new Date().setDate(new Date().getDate()-1)), new Date(new Date().setDate(new Date().getDate()))).then(r => {
-  var fs = require('fs');
-  fs.writeFileSync('waypoints.json', JSON.stringify(r))
-  console.log(r)
-  console.log('wrote waypoints.json')
-  process.exit(0)
-}) //waypoints of past 2 weeks
+  getWaypointCounts(db.waypoints,new Date(new Date().setDate(new Date().getDate()-365)), new Date(new Date().setDate(new Date().getDate()))).then(console.log.bind(console))
 }

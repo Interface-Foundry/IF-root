@@ -8,9 +8,15 @@ const date = {
   7: 'Saturday',
 };
 
+//gets total number of user messages by day of week
 const getDayOfWeekStats = (messages) =>
   new Promise((resolve, reject) => {
     messages.aggregate([
+      {
+        $match: {
+          incoming: {$ne: false}
+        }
+      },
       {
         $group: {
           _id: {

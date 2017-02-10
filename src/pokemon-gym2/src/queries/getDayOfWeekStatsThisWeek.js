@@ -8,13 +8,14 @@ const date = {
   7: 'Saturday',
 };
 
+//gets number of user messages by day of week from past 7 days
 const getDayOfWeekStats = (messages) =>
   new Promise((resolve, reject) => {
     messages.aggregate([
       {
         $match: {
           ts: {$gte: new Date(new Date().setDate(new Date().getDate()-7)) },
-          incoming: {$ne: true}
+          incoming: {$ne: false}
         }
       },
       {
