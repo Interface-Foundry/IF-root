@@ -67,7 +67,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   recommendedItemIds = recommendedItemIds.map(i => Number(i))
   //
   // adding the thing where you show 3 at a time
-  // nned to show a few different kinds of itesm.
+  // need to show a few different kinds of items.
   // Items that you have ordered before appear first, and should say something like "Last ordered Oct 5"
   // Items that are in the recommended items array should appear next, say "Recommended"
   // THen the rest of the menu in any order i think
@@ -95,7 +95,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
       // i.infoLine = 'Returned from search term'
     } else if (previouslyOrderedItemIds.includes(i.id)) {
       i.sortOrder = sortOrder.orderedBefore
-      i.infoLine = '_You ordered this before_'
+      i.infoLine = '_You\'ve ordered this before_'
     } else if (recommendedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.recommended
       // i.infoLine = 'Popular Item'

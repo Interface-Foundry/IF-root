@@ -48,12 +48,12 @@ handlers['food.admin.team.delete_email'] = function * (message) {
 //~~~~~~~~~~//
 
 handlers['food.admin.team.email_members'] = function * (message) {
+  var reorder = message.history[1]._doc.action === 'admin.team.members.reorder'
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1112, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var et = yield db.email_users.find({team_id: message.source.team});
-
   var index = parseInt(_.get(message, 'data.value.index')) || 0
   var inc = 4;
 
@@ -165,11 +165,11 @@ handlers['food.admin.team.email_members'] = function * (message) {
       'attachment_type': 'default',
       'actions': [
         {
-          'name': 'passthrough',
+          'name': (reorder ? 'food.admin.team.members.reorder' : 'food.admin.team.members'),
           'text': 'Finish',
           'style': 'primary',
           'type': 'button',
-          'value': 'food.admin.team.members' // but should sometimes be reorder confirmation
+          'value': (reorder ? message.history[1]._doc.data.value : '')//'food.admin.team.members' // but should sometimes be reorder confirmation
         }
         // {
         //   'name': 'passthrough',
