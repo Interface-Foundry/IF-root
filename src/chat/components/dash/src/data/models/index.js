@@ -8,8 +8,12 @@
  */
 
 import sequelize from '../sequelize';
-import User from './User';
 import Metric from './Metric';
+import Message from './Message';
+import Cart from './Cart';
+import Delivery from './Delivery';
+
+import User from './User';
 import UserLogin from './UserLogin';
 import UserClaim from './UserClaim';
 import UserProfile from './UserProfile';
@@ -40,4 +44,4 @@ function sync(...args) {
 }
 
 export default { sync };
-export { Metric, User, UserLogin, UserClaim, UserProfile };
+export { Message, Metric, Cart, Delivery, User, UserLogin, UserClaim, UserProfile };

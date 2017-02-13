@@ -7,10 +7,8 @@ import {
 } from 'graphql';
 import Conn from '../sequelize';
 
-
 const MetricListType = new ListType(MetricType);
 
-// console.log('wtf is metrics ', Metrics)
 const metrics = {  
   type: MetricListType,
   args: {
@@ -19,13 +17,16 @@ const metrics = {
     },
     data: {
       type: StringType
-    }
+    },
+    timestamp: {
+        type: StringType
+       }
   },
   resolve (root, args) {
-   return Conn.models.metric.findAll({where: {
-    metric: 'shopping.link.click'
-   }})
+   return Conn.models.metric.findAll({ limit: 1000, order: [['timestamp', 'DESC']]})
   }
 }
 
 export default metrics;
+
+

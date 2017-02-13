@@ -1,6 +1,7 @@
 
 import {
-  GraphQLObjectType as GraphQLObjectType,
+  GraphQLIDType as IDType,
+  GraphQLObjectType as ObjectType,
   GraphQLString as StringType,
   GraphQLNonNull as NonNull,
   GraphQLScalarType as GraphQLScalarType
@@ -26,10 +27,16 @@ import {
 // });
 
 
-const MetricType = new GraphQLObjectType({
+const MetricType = new ObjectType({
   name: 'Metric',
   fields: () => {
     return {
+      id: { 
+        type: StringType,
+        resolve(metric) {
+          return metric.id
+        }
+      },
       metric: { 
         type: StringType,
         resolve(metric) {

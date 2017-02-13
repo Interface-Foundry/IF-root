@@ -1,0 +1,267 @@
+foundry:
+  delivery:
+    :columns:
+    - id:
+      :source: _id
+      :type: TEXT
+    - active: 
+      :source: active
+      :type: BOOLEAN 
+    - session_id:
+      :source: session_id
+      :type: TEXT
+    - team_id: 
+      :source: team_id
+      :type: TEXT
+    - onboarding:
+      :source: onboarding 
+      :type: BOOLEAN
+    # - all_members:
+    #   :source: all_members
+    #   :type: TEXT ARRAY
+    # - team_members:
+    #   :source: team_members
+    #   :type: TEXT ARRAY
+    # - email_users:
+    #   :source: email_users
+    #   :type: TEXT ARRAY
+    # - chosen_location: 
+    #   :source: chosen_location
+    #   :type: TEXT ARRAY
+    - chosen_restaurant: 
+      :source: chosen_restaurant
+      :type: TEXT
+    - budget:
+      :source: budget   
+      :type: TEXT
+    - user_budgets: 
+      :source: user_budgets
+      :type: TEXT
+    - menu: 
+      :source: menu
+      :type: TEXT
+    # - merchants:
+    #   :source: merchants
+    #   :type: TEXT ARRAY
+    # - cuisines:
+    #   :source: cuisines
+    #   :type: TEXT ARRAY
+    # - cart:
+    #   :source: carts
+    #   :type: TEXT ARRAY
+    # - convo_initiater:
+    #   :source: convo_initiater
+    #   :type: JSON ARRAY
+    - chosen_channel:
+      :source: chosen_channel
+      :type: TEXT 
+    - fulfillment_method:
+      :source: fulfillment_method
+      :type: TEXT 
+    - instructions:
+      :source: instructions
+      :type: TEXT
+    - time_started:
+      :source: time_started
+      :type: DATE
+    # - cuisine_dashboards:
+    #   :source: cuisine_dashboards
+    #   :type: JSON ARRAY
+    # - order_dashboards:
+    #   :source: order_dashboards
+    #   :type: JSON ARRAY
+    # - votes:
+    #   :source: votes
+    #   :type: JSON ARRAY
+    # - conversations:
+    #   :source: conversations
+    #   :type: JSON ARRAY
+    - mode: 
+      :source: mode
+      :type: TEXT
+    - action: 
+      :source: action
+      :type: TEXT
+    - data: 
+      :source: data
+      :type: TEXT
+    - delivery_post: 
+      :source: delivery_post
+      :type: TEXT
+    - order: 
+      :source: order
+      :type: TEXT
+    - tip: 
+      :source: tip
+      :type: TEXT
+    - service_fee: 
+      :source: service_fee
+      :type: TEXT
+    - coupon: 
+      :source: coupon
+      :type: TEXT
+    - main_amount: 
+      :source: main_amount
+      :type: TEXT
+    - calculated_amount: 
+      :source: calculated_amount
+      :type: TEXT
+    - discount_amount: 
+      :source: discount_amount
+      :type: TEXT 
+    - payment_post: 
+      :source: payment_post
+      :type: TEXT
+    - payment: 
+      :source: payment
+      :type: TEXT
+    # - confirmed_orders: 
+    #   :source: confirmed_orders
+    #   :type: JSON ARRAY
+    - guest_token: 
+      :source: guest_token
+      :type: TEXT
+    - completed_payment:
+      :source: completed_payment 
+      :type: BOOLEAN
+    - delivery_error:
+      :source: delivery_error
+      :type: TEXT
+    :meta:
+      :table: delivery
+      :extra_props: true
+ #  carts: 
+ #    :columns:
+ #    - id:
+ #      :source: _id
+ #      :type: TEXT
+ #    - amazon:
+ #      :source: amazon
+ #      :type: TEXT
+ #    - slack_id: 
+ #      :source: slack_id
+ #      :type: TEXT
+ #    - items:
+ #      :source: items 
+ #      :type: TEXT ARRAY
+ #    - purchased:
+ #      :source: purchased
+ #      :type: BOOLEAN
+ #    - deleted:
+ #      :source: deleted
+ #      :type: BOOLEAN
+ #    - created_date: 
+ #      :source: created_date
+ #      :type: TEXT
+ #    - purchased_date: 
+ #      :source: purchased_date
+ #      :type: DATE
+ #    - type: 
+ #      :source: type 
+ #      :type: TEXT
+ #    - link:
+ #      :source: link
+ #      :type: TEXT
+ #    :meta:
+ #      :table: carts
+ #      :extra_props: true
+ # metrics:
+ #    :columns:
+ #    - id:
+ #      :source: _id
+ #      :type: TEXT
+ #    - metric:
+ #      :source: metric
+ #      :type: TEXT
+ #    - data:
+ #      :source: data
+ #      :type: TEXT
+ #    - userId:
+ #      :source: userId
+ #      :type: TEXT
+ #    - timestamp:
+ #      :source: timestamp
+ #      :type: DATE
+ #    :meta:
+ #      :table: metrics
+ #      :extra_props: true
+ #  messages: 
+ #    :columns:
+ #    - id:
+ #      :source: _id
+ #      :type: TEXT
+ #    - thread_id: 
+ #      :source: thread_id
+ #      :type: TEXT
+ #    - origin: 
+ #      :source: origin 
+ #      :type: TEXT
+ #    - mode:
+ #      :source: mode
+ #      :type: TEXT
+ #    - action:
+ #      :source: action
+ #      :type: TEXT
+ #    - team:
+ #      :source: source.team
+ #      :type: TEXT
+ #    - channel:
+ #      :source: source.channel
+ #      :type: TEXT
+ #    - user: 
+ #      :source: source.user
+ #      :type: TEXT
+ #    - user_id: 
+ #      :source: user_id 
+ #      :type: TEXT
+ #    - cart_reference_id: 
+ #      :source: cart_reference_id 
+ #      :type: TEXT
+ #    - incoming:
+ #      :source: incoming
+ #      :type: BOOLEAN
+ #    - original_text: 
+ #      :source: original_text 
+ #      :type: TEXT
+ #    - text: 
+ #      :source: text 
+ #      :type: TEXT
+ #    - original_query: 
+ #      :source: original_query 
+ #      :type: TEXT
+ #    - url_shorten:
+ #      :source: urlShorten
+ #      :type: TEXT ARRAY
+ #    - ts: 
+ #      :source: ts
+ #      :type: DATE
+ #    - source_ts: 
+ #      :source: source.ts
+ #      :type: TEXT
+ #    - slack_ts: 
+ #      :source: slack_ts 
+ #      :type: TEXT
+ #    - replace_ts: 
+ #      :source: replace_ts 
+ #      :type: TEXT
+ #    - action_ts: 
+ #      :source: source.action_ts 
+ #      :type: TEXT
+ #    - amazon:
+ #      :source: amazon
+ #      :type: TEXT
+ #    :meta:
+ #      :table: messages
+ #      :extra_props: true
+   
+
+
+    
+    
+    
+
+
+
+
+
+
