@@ -1,28 +1,27 @@
 var request = require('request-promise');
-var co = require('co');
+
 module.exports = function(agenda) {
   agenda.define('append home', function(job, done) {
     let message = JSON.parse(job.attrs.data.msg);
     let hasHome = checkForHome(message);
     let attachments = message.attachments ? message.attachments : [];
     if (!hasHome) {
-      co(function * () {
-        attachments = attachments.map(a => {
-          a.text = a.text ? a.text : '';
-          return a;
-        });
-        attachments.push({
-          text: '',
-          callback_id: 'appendedHome',
-          actions: [{
-            name: 'passthrough',
-            text: 'Home',
-            style: 'default',
-            type: 'button',
-            value: 'home'
-          }]
-        });
-        request.post({
+      attachments = attachments.map(a => {
+        a.text = a.text ? a.text : '';
+        return a;
+      });
+      attachments.push({
+        text: '',
+        callback_id: 'appendedHome',
+        actions: [{
+          name: 'passthrough',
+          text: 'Home',
+          style: 'default',
+          type: 'button',
+          value: 'home'
+        }]
+      });
+      request.post({
           url: 'https://slack.com/api/chat.update',
           json: true,
           form: {
@@ -37,7 +36,6 @@ module.exports = function(agenda) {
         .then(() => kip.debug('♻️  Tried to add home button, if it isn\'t there it\'s a slack problem'))
         .catch(() => kip.debug('😡 Couldn\'t add home, problem on our end'))
         .then(() => done());
-      });
     } else {
       done();
     }
