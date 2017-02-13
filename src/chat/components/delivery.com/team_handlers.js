@@ -85,6 +85,13 @@ handlers['food.admin.team.members'] = function * (message) {
     type: 'button',
     style: 'primary'
   })
+  
+  buttons.actions.push({
+    'name': 'passthrough',
+    'value': 'food.admin.restaurant.pick.list',
+    'text': '> Skip',
+    'type': 'button'
+  })
 
   buttons.actions.push({
     'name': 'food.admin.display_channels',
