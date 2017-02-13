@@ -119,6 +119,7 @@ router.post('/order', function (req, res) {
   co(function * () {
     logging.debug('post to /order');
     if (_.get(req, 'body')) {
+      logging.info('req.body', req.body)
       var order = req.body.order;
       var user_id = req.body.user_id;
 
@@ -140,6 +141,9 @@ router.post('/order', function (req, res) {
         });
         console.log('added everything to the cart')
         if (foodSession.budget) {
+          console.log('calculating money spent')
+          console.log(cart)
+          console.log(cart[cart.length-1])
           money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))
           console.log('calculated money spent')
         }
@@ -158,17 +162,23 @@ router.post('/order', function (req, res) {
 
       //----------Message Queue-----------//
 
-        logging.debug('updated delivery; looking for source message');
+      logging.debug('updated delivery; looking for source message');
+      logging.debug('user_id', user_id)
 
-        var foodMessage = yield db.Messages.find({
-          'source.user': user_id,
-          mode: 'food',
-          incoming: false
-        }).sort('-ts').limit(1);
+      var foodMessage = yield db.Messages.find({
+        'source.user': user_id,
+        mode: 'food',
+        incoming: false
+      }).sort('-ts').limit(1);
 
-        logging.debug('found foodmessage')
+      if (foodMessage) {
+        logging.debug('found foodmessage', foodMessage)
 
         foodMessage = foodMessage[0];
+
+        logging.debug('foodMessage.source', foodMessage.source)
+        logging.debug('foodMessage.thread_id', foodMessage.thread_id)
+        logging.debug('foodMessage.source.user', foodMessage.source.user)
 
         var mess = new db.Messages({
           incoming: true,
@@ -190,8 +200,20 @@ router.post('/order', function (req, res) {
             verification_token: kip.config.slack.verification_token,
             message: mess
           }
-
         })
+      }
+      else {
+        logging.info('email user')
+
+        var eu = yield db.email_users.findOne({id: user_id});
+
+        var mailOptions = {
+          to: `<${eu.mail}>`,
+          from: `Kip Café <hello@kipthis.com>`,
+          subject: `I am the subject of an email`,
+          html: `<p>I am the body of an email. Murder murder all she wrote.</p>`
+        };
+      }
 
       logging.debug('ostensibly done');
       res.send();

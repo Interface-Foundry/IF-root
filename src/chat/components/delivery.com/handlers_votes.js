@@ -1033,7 +1033,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
-    var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
+    // var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
     var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m)
 
     var mailOptions = {
