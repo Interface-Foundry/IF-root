@@ -7,6 +7,11 @@ import {
   Line, XAxis, YAxis, Legend,
   CartesianGrid, Bar, BarChart,
   ResponsiveContainer, AreaChart, Area } from '../../../vendor/recharts';
+import {
+  MenuItem,
+  DropdownButton,
+  ListGroup, ListGroupItem, Alert, Table
+} from 'react-bootstrap';
 
 const title = 'Flot Charts';
 
@@ -25,34 +30,32 @@ function plotData() {
 }
 const lineChartData = plotData();
 
-const waypointsCount = [ { waypoint: 1001, users: [ 'U3620AA5T' ], total: 12 },
-  { waypoint: 1010, users: [ 'U3620AA5T' ], total: 12 },
-  { waypoint: 1020, users: [ 'U3620AA5T' ], total: 11 },
-  { waypoint: 1100, users: [ 'U3620AA5T' ], total: 11 },
-  { waypoint: 1101, users: [ 'U3620AA5T' ], total: 4 },
-  { waypoint: 1102, users: [ 'U3620AA5T' ], total: 7 },
-  { waypoint: 1110, users: [ 'U3620AA5T' ], total: 7 },
-  { waypoint: 1111, users: [ 'U3620AA5T' ], total: 4 },
-  { waypoint: 1120, users: [ 'U3620AA5T' ], total: 7 },
-  { waypoint: 1121, users: [ 'U3620AA5T' ], total: 1 },
-  { waypoint: 1130, users: [ 'U3620AA5T' ], total: 1 },
-  { waypoint: 1140,
-    users: [ 'U3H5E1ANN', 'U3620AA5T' ],
-    total: 29 },
-  { waypoint: 1200, users: [ 'U3620AA5T' ], total: 6 },
-  { waypoint: 1210, users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 6 },
+const waypointsCount = [ 
+  { waypoint: 1001, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 111 },
+  { waypoint: 1010,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 129 },
+  { waypoint: 1020,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 118 },
+  { waypoint: 1100,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 124 },
+  { waypoint: 1101, users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 109 },
+  { waypoint: 1102,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 62 },
+  { waypoint: 1110,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 93 },
+  { waypoint: 1111,users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 32 },
+  { waypoint: 1112, users: [ 'U3620AA5T' ], total: 2 },
+  { waypoint: 1120, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 32 },
+  { waypoint: 1140, users: [ 'U3620AA5T' ], total: 14 },
+  { waypoint: 1210, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 153 },
   { waypoint: 1211, users: [ 'U3620AA5T' ], total: 1 },
-  { waypoint: 1220, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 4 },
-  { waypoint: 1230, users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 3 },
-  { waypoint: 1240, users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 1 },
-  { waypoint: 1300, users: [ 'U3620AA5T' ], total: 2 },
-  { waypoint: 1310, users: [ 'U3620AA5T' ], total: 1 },
-  { waypoint: 1313, users: [ 'U3620AA5T' ], total: 1 },
-  { waypoint: 1320, users: [ 'U3620AA5T' ], total: 3 },
-  { waypoint: 1321, users: [ 'U3620AA5T' ], total: 1 },
-  { waypoint: 1323, users: [ 'U3620AA5T' ], total: 1 },
-  { waypoint: 1330, users: [ 'U3620AA5T' ], total: 1 },
-  { waypoint: 1332, users: [ 'U3620AA5T' ], total: 1 } ];
+  { waypoint: 1220, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 56 },
+  { waypoint: 1230, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 42 },
+  { waypoint: 1240, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 4 },
+  { waypoint: 1300, users: [ 'U3620AA5T' ], total: 38 },
+  { waypoint: 1310, users: [ 'U3620AA5T' ], total: 2 },
+  { waypoint: 1313, users: [ 'U3620AA5T' ], total: 2 },
+  { waypoint: 1320, users: [ 'U3620AA5T' ], total: 24 },
+  { waypoint: 1321, users: [ 'U3620AA5T' ], total: 2 },
+  { waypoint: 1323, users: [ 'U3620AA5T' ], total: 2 },
+  { waypoint: 1330, users: [ 'U3620AA5T' ], total: 19 },
+  { waypoint: 1332, users: [ 'U3620AA5T' ], total: 19 } ];
+
 
 const orderTimePlaceFrequencies = [ { hour: 10, location: [ '122 W 27th St' ], total: 1 },
   { hour: 11,
@@ -93,9 +96,62 @@ const dayOfWeekStats = [ { dayString: 'Sunday', dayNumber: 1, total: 7932 },
   { dayString: 'Saturday', dayNumber: 7, total: 7219 } 
 ];
 
+const waypointPaths = [ { user_id: 'U3620AA5T',
+    delivery_id: '5893b7b089e0703570babd89',
+    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1320, 1330, 1332 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '5892659913ab2a227a1ea48a',
+    waypoints: [ 1010, 1020, 1100, 1102, 1110, 1102, 1001 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '5895047bb3074c3f909c96ce',
+    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '5894ee05bb800e3cb9503b73',
+    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1001 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '589399ab11fcfe31a66b05f9',
+    waypoints: [ 1010, 1020, 1100, 1102, 1120, 1001 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '58935f5e98bebb26266fa531',
+    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1210, 1210, 1001 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '58939c05d587703221ca6f03',
+    waypoints: [ 1010, 1020, 1100, 1102, 1120, 1001 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '5894e1f7f03d1a3ae913db08',
+    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1001 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '58926f4d93284623848a4ddd',
+    waypoints: [ 1010, 1020, 1100, 1101, 1110, 1101, 1110, 1111, 1101, 1210, 1210, 1001 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '58811857501827a9cf0b8507',
+    waypoints: [ 1010, 1020, 1100, 1101, 1110, 1111, 1111, 1001 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '5887d7100e4f9e65a4a9002c',
+    waypoints: [ 1010, 1020, 1100, 1102, 1110, 1120, 1121, 1140, 1200, 1210, 1001 ] },
+  { user_id: 'U3620AA5T',
+    delivery_id: '58926618c5802e22c0aa41de',
+    waypoints: [ 1010, 1020, 1100, 1102, 1110, 1102, 1001 ] }
+];
+
+
 
 function displayFlotCharts(props, context) {
   context.setTitle(title);
+  var rows = [];
+  for (var i = 0; i < waypointPaths.length; i++) {
+    rows.push(<tr>
+      <td> 
+        {waypointPaths[i].user_id}
+      </td>
+      <td>
+      {waypointPaths[i].delivery_id}
+      </td>
+      <td>
+        {waypointPaths[i].waypoints.map((waypoint,j) => waypoint+'->')}
+      </td>
+    </tr>)
+  }
   return (
     <div>
       <div className="row">
@@ -106,21 +162,25 @@ function displayFlotCharts(props, context) {
 
       <div className="row">
         <div className="col-lg-12">
-          <Panel header={<span>Waypoints of past 2 weeks</span>} >
-            <div>
-              <ResponsiveContainer width="100%" aspect={2}>
-                <AreaChart width={600} height={400} data={waypointsCount}
-                  margin={{top: 10, right: 30, left: 0, bottom: 0}}>
-                  <XAxis dataKey="waypoint"/>
-                  <YAxis/>
-                  <CartesianGrid strokeDasharray="3 3"/>
-                  <Tooltip />
-                  <Legend />
-                  <Area type='monotone' dataKey='total' stroke='#000000' fill='#BBB44F' />
-                </AreaChart>
-              </ResponsiveContainer>
+
+          <Panel>
+            <div className="table-responsive">
+              <Table>
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Delivery ID</th>
+                        <th>FoodSession Waypoint Route</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {rows}
+                </tbody>
+              </Table>
             </div>
           </Panel>
+
+
         </div>
       </div>
 
@@ -181,11 +241,23 @@ function displayFlotCharts(props, context) {
         </div>
 
         <div className="col-lg-6">
-          <Panel header={<span>CHARTS!</span>} >
+
+          <Panel header={<span>Waypoints of past 2 weeks</span>} >
             <div>
-              Another chart here plz.
+              <ResponsiveContainer width="100%" aspect={2}>
+                <AreaChart width={600} height={400} data={waypointsCount}
+                  margin={{top: 10, right: 30, left: 0, bottom: 0}}>
+                  <XAxis dataKey="waypoint"/>
+                  <YAxis/>
+                  <CartesianGrid strokeDasharray="3 3"/>
+                  <Tooltip />
+                  <Legend />
+                  <Area type='monotone' dataKey='total' stroke='#000000' fill='#BBB44F' />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </Panel>
+
         </div>
 
         <div className="col-lg-12">
