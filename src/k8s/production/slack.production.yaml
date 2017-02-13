@@ -21,12 +21,14 @@ spec:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 60
+          initialDelaySeconds: 30
           timeoutSeconds: 3
         livenessProbe:
           httpGet:
             path: /health
             port: 8000
+          initialDelaySeconds: 30
+          timeoutSeconds: 2
       dnsPolicy: ClusterFirst
       restartPolicy: Always
 ---

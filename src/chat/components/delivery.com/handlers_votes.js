@@ -26,6 +26,8 @@ var $allHandlers
 // exports
 var handlers = {}
 
+
+const triggerPreferences = false
 /*
 * S5
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
@@ -213,6 +215,7 @@ handlers['food.admin.poll'] = function * (message) {
 
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
+  logging.debug('in food.user.poll')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1120, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -220,18 +223,21 @@ handlers['food.user.poll'] = function * (message) {
   console.log('found', teamMembers.length, 'team members')
 
   if (teamMembers.length === 0) {
-    $replyChannel.sendReplace(message, 'food.admin.select_address', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
+    $replyChannel.sendReplace(message, 'food.admin.select_address', {
+      type: message.origin,
+      data: {text: 'Oops I had a brain freeze, please try again'}
+    })
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
   yield teamMembers.map(function * (member) {
-    yield sendUserDashboard(foodSession, message, member)
-    // if (_.get(member, 'food_preferences.asked') === true) {
-    //   sendUserDashboard(foodSession, message, member)
-    // } else {
-    //   // send user thing for food pref
-    //   yield handlers['food.user.preferences'](message, member, foodSession)
-    // }
+    logging.debug('checkign if we should do food_preferences')
+    if (triggerPreferences && (_.get(member, 'food_preferences.asked') !== true)) {
+      // send user thing for food pref if triggerPref const and havent asked
+      yield handlers['food.user.preferences'](message, member, foodSession)
+    } else {
+      yield sendUserDashboard(foodSession, message, member)
+    }
   })
 }
 
@@ -351,8 +357,9 @@ handlers['food.user.preferences.done'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({'team_id': message.source.team, active: true}).exec()
   var member = _.find(foodSession.team_members, {'id': message.source.user})
-  sendUserDashboard(foodSession, message, member)
+  yield sendUserDashboard(foodSession, message, member)
 }
+
 //
 // User just clicked "thai" or something
 //
