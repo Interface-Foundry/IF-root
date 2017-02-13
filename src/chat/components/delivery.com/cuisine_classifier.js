@@ -42,7 +42,7 @@ function cuisineClassifier (text, otherCuisines) {
     res = fuse.search(text)
 
     if (res.length > 0) {
-      return res[0].name
+      return text
     }
   }
   logging.warn('no results from cuisineClassifier, returning null')
