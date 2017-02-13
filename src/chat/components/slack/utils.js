@@ -58,8 +58,8 @@ function * initializeTeam(team, auth) {
 *
 */
 function * findAdmins(team) {
-  if (typeof team === 'undefined') {
-    throw new Error('Cannot find admins of undefined team')
+  if (!team) {
+    throw new Error('Cannot find admins of null team')
   }
 
   // I guess some teams don't have admins assigned?
@@ -83,11 +83,11 @@ function * findAdmins(team) {
 }
 
 function * isAdmin(userId, team) {
-  if (typeof userId === 'undefined') {
+  if (!userId) {
     throw new Error('cannot determine if an undefined user is an admin')
   }
 
-  if (typeof team === 'undefined') {
+  if (!team) {
     logging.error('cannot determine if user', userId, 'is admin of an undefined team')
     return false;
   }
