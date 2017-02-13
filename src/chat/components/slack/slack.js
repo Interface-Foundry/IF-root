@@ -423,7 +423,15 @@ module.exports.loadTeam = loadTeam
 module.exports.startMockSlack = start
 
 if (!module.parent) {
+  // running node slack.js
+  console.log('In main slack function')
   co(start).catch((e) => {
     kip.error(e, 'error loading slackbots')
   })
+
+  console.log('setting interval to print slackConnections every second')
+  setInterval(() =>{
+    console.log(slackConnections)
+  }, 1000)
+
 }

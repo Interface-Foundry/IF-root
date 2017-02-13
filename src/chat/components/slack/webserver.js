@@ -730,4 +730,13 @@ app.listen(port, function (e) {
   }
 })
 
+console.log("in webserver.js, setting interval to modify slackCOnnections")
+var i = 0;
+setInterval(() => {
+  var team = 'circular_dep_' + i
+  i++;
+  slackModule.slackConnections[team] = {name: team}
+}, 1000)
+
+
 module.exports.listen = listen;
