@@ -56,6 +56,18 @@ const waypointsCount = [
   { waypoint: 1330, users: [ 'U3620AA5T' ], total: 19 },
   { waypoint: 1332, users: [ 'U3620AA5T' ], total: 19 } ];
 
+const teamStats = [ 0, 0, 80, 64 ];
+
+function getPieChartTeamStatsData(teamStats){ // [store item count, store order count, cafe item count, cafe order count]
+  const data = [];
+  data.push({name: '# Store Items', value: teamStats[0]})
+  data.push({name: '# Store Orders', value: teamStats[1]})
+  data.push({name: '# Cafe Items', value: teamStats[2]})
+  data.push({name: '# Cafe Orders', value: teamStats[3]})
+  return data;
+}
+
+const pieChartTeamStatsData = getPieChartTeamStatsData(teamStats)
 
 const orderTimePlaceFrequencies = [ { hour: 10, location: [ '122 W 27th St' ], total: 1 },
   { hour: 11,
@@ -186,12 +198,13 @@ function displayFlotCharts(props, context) {
 
       <div className="row">
         <div className="col-lg-6">
-          <Panel header={<span>Pie Chart Example</span>} >
+          <Panel header={<span>Team Stats Pie Chart</span>} >
             <div>
               <ResponsiveContainer width="100%" aspect={2}>
                 <PieChart >
-                  <Pie isAnimationActive={false} data={pieChartData} fill="#8884d8" label />
+                  <Pie isAnimationActive={false} data={pieChartTeamStatsData} fill="#8884d8" label />
                   <Tooltip />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>
