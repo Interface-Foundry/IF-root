@@ -186,7 +186,7 @@ function * loadTeam(slackbot) {
 
 function updateHomeButtonAppender(message, token) {
   let now = new Date();
-  let msInFuture = process.env.NODE_ENV.includes('development') ? 1000 * 20 : 1000 * 60 * 20;
+  let msInFuture = 1000 * 60 * 20;
   agenda.cancel({
     'name': 'append home',
     'data.user': message.user

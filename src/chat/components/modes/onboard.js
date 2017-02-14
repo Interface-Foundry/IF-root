@@ -603,38 +603,18 @@ handlers['team'] = function * (message) {
   }];
 
   if (team.meta.collect_from === 'channel') {
-    let cartChannels = team.meta.cart_channels;
-    let channels = yield utils.getChannels(team);
-    let selectedChannels = channels.reduce((arr, channel) => {
-      if (cartChannels.includes(channel.id)) {
-        arr.push({
-          name: 'channel_btn',
-          text: `× #${channel.name}`,
-          type: 'button',
-          style: 'danger',
-          value: channel.id
-        });
-      }
-      return arr;
-    }, []);
-    selectedChannels = _.uniq(selectedChannels);
-    selectedChannels.push({
-      name: 'channel_btn',
-      text: 'Choose which channels you want',
-      type: 'select',
-      data_source: 'channels'
-    });
-    let chunkedButtons = _.chunk(selectedChannels, 5);
-    let channelSection = chunkedButtons.map(buttonRow => {
-      return {
-        text: '',
-        callback_id: 'channel_buttons_idk',
-        actions: buttonRow
-      };
-    });
-    attachments = attachments.concat(channelSection);
+    let channelSection = {
+      text: '',
+      callback_id: 'channel_buttons_idk',
+      actions: [{
+        name: 'channel_btn',
+        text: 'Choose which channels you want',
+        type: 'select',
+        data_source: 'channels'
+      }]
+    };
+    attachments.push(channelSection);
   }
- 
 
   attachments.push({
     text: '',
