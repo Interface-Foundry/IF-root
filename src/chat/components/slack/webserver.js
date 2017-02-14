@@ -674,7 +674,11 @@ app.get('/newslack', (req, res) => co(function * () {
       form: body,
       json: true
     })
+  } catch (err) {
+    logging.error('error getting res_auth from Slack', err, body)
+  }
 
+  try {
     if (_.get(res_auth, 'ok')) {
       var existingTeam = yield db.Slackbots.findOne({
         'team_id': res_auth.team_id,
