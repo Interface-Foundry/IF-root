@@ -73,7 +73,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
   // THen the rest of the menu in any order i think
   //
   var sortOrder = {
-    searched: 6,
+    searched: 7,
+    preferences: 6,
     orderedBefore: 5,
     recommended: 4,
     none: 3,
@@ -108,18 +109,19 @@ handlers['food.menu.quickpicks'] = function * (message) {
     return i
   }).sort((a, b) => b.sortOrder - a.sortOrder)
 
-//~~~~~
-//move items that do not meet the user's current budget to after those that do
-//using a stable sort, to preserve the order of the previous sort within those two categories
-if (foodSession.budget) {
-  var current_ub = foodSession.user_budgets[message.user_id] * 1.25;
-  stable.inplace(sortedMenu, function (a, b) { //sorts b before a if true
-    //if b is under-budget and a is not, sort b before a
-    if (a.price > current_ub && b.price < current_ub) return true;
-    else return false;
-    //but otherwise maintain already-sorted order
-  });
-}
+  // ~~~~~
+  // move items that do not meet the user's current budget to after those that
+  // do using a stable sort, to preserve the order of the previous sort within
+  // those two categories
+  if (foodSession.budget) {
+    var current_ub = foodSession.user_budgets[message.user_id] * 1.25
+    stable.inplace(sortedMenu, function (a, b) { //sorts b before a if true
+      // if b is under-budget and a is not, sort b before a
+      if (a.price > current_ub && b.price < current_ub) return true
+      else return false
+      // but otherwise maintain already-sorted order
+    });
+  }
 
   var menuItems = sortedMenu.slice(index, index + 3).reverse().map(i => {
 
