@@ -109,7 +109,8 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
 
   //header
   var html = `<html>${header}` + br;
-  html += `<h1 style="font-size:2em;">Order Receipt</h1>`
+  html += `<h1>Your order from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> has been successfully submitted!</h1>`
+  html += `<p>Please email ${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} at ${foodSession.convo_initiater.email} with any issues.</p>`
   // html += `<p style="color:black;text-decoration:none;">${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a>${(phone_number ? ' (' + phone_number + ')' : '')} on ${formatDate(date)}</p>`
   html += `\nHere is a list of items:\n`
 
@@ -131,10 +132,6 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
     html += `<td ${td_style}"><p>${descriptionString}</p>`
     html += `${(item.item.instructions ? '<p><i>' + item.item.instructions + '</i></p>': '')}</td>`
     html += `<td ${td_style}>` + price_expansion + `<p style="text-align:center;"><b>$${menu.getCartItemPrice(item).toFixed(2)}</b></p></td>`
-    // console.log('USER', user)
-    // if (user[0].first_name && user[0].last_name) html += `<td ${td_style}"><p>${user[0].first_name} ${user[0].last_name}</p>`
-    // else html += `<td ${td_style}>`
-    // html += `<p>@${user[0].name}</p></td>`
     html +=`</tr>`
     // html += `<p><a href="https://${team_url}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
   })
@@ -142,28 +139,7 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
   html += `</thead></table>` + br + br
 
   //itemized charges
-
   var line_item_style = `padding:0 0 0 8px;margin:2px;`
-
-  // html += `<table border="0"><tr><td style="width:300px;">`
-  //
-  // html += `<div style="border-left:4px solid ${kip_blue};">`
-  // html += `<p style="${line_item_style}">Cart Subtotal: ${foodSession.order.subtotal.$}</p>`
-  // html += `<p style="${line_item_style}">Tax: ${foodSession.order.tax.$}</p>`
-  // html += `<p style="${line_item_style}">Delivery Fee: ${foodSession.order.delivery_fee.$}</p>`
-  // html += `<p style="${line_item_style}">Service Fee: ${foodSession.service_fee.$}</p>`
-  // if (foodSession.discount_amount) html += `🎉 Kip Coupon: -${foodSession.discount_amount.$}`
-  // html += `<p style="${line_item_style}">Tip: ${(foodSession.tip.percent === 'cash') ? '$0.00 (Will tip in cash)' : foodSession.tip.amount.$}</p>`
-  // html += `<p style="${line_item_style}"><b>Order Total: ${foodSession.calculated_amount.$}</b></p></div>`
-  //
-  // //misc Information
-  // html += `</td style="width=300px;"><td>`
-  // html += `<p style="${line_item_style}"><b>Delivery Address:</b></p><br/><p style="${line_item_style}">${foodSession.chosen_location.address_1}</p>`
-  // if (foodSession.chosen_location.address_2) html += `<p style="${line_item_style}">${foodSession.chosen_location.address_2}</p>`
-  // html += `<p style="${line_item_style}">${foodSession.chosen_location.city}, ${foodSession.chosen_location.state} </p>`
-  // html += `<p style="${line_item_style}">${foodSession.chosen_location.zip_code}</p>` + br
-  // if (foodSession.instructions) html += `<p style="${line_item_style}"><i>${foodSession.instructions}</i></p>`
-  // html += `</td></tr></table>`
 
   //footer
   html += `<p style="text-decoration:none;color:grey;"><img height="14" width="14" alt="delivery.com" src="http://tidepools.co/kip/dcom_footer.png"> Powered by delivery.<span>com</p>` + br
