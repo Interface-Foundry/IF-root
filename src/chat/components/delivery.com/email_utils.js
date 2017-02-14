@@ -135,11 +135,7 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
     html +=`</tr>`
     // html += `<p><a href="https://${team_url}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
   })
-
   html += `</thead></table>` + br + br
-
-  //itemized charges
-  var line_item_style = `padding:0 0 0 8px;margin:2px;`
 
   //footer
   html += `<p style="text-decoration:none;color:grey;"><img height="14" width="14" alt="delivery.com" src="http://tidepools.co/kip/dcom_footer.png"> Powered by delivery.<span>com</p>` + br
@@ -150,8 +146,8 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
 
   html += `<table border="0" style="padding:10px;width:100%;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="border-spacing:0 20px;border-radius:4px;width:100%">`
   html += `<tr style="width:100%"><td><div style="position:absolute;width:100%;height:100%;text-align:center;"><img style="position:relative;down:10px;" height="28" width="28" src="http://tidepools.co/kip/head_squared.png">`
-  html += `<b style="color:white;text-decoration:none;font-weight:normal;font-size:160%;text-align:center;">&nbsp; Enjoy your food!</b></div></td></tr></table>`
-  // html += `<a href="https://${team_url}.slack.com/messages/${order_users}/" style="color:white;text-decoration:none;font-size:140%;text-align:center;">&nbsp;Click to chat with your food crew!</a></td></tr></table>`
+  // html += `<b style="color:white;text-decoration:none;font-weight:normal;font-size:160%;text-align:center;">&nbsp; Enjoy your food!</b></div></td></tr></table>`
+  html += `<b><a href="https://${team_url}.slack.com/" style="color:white;text-decoration:none;font-size:160%;text-align:center;">&nbsp;Join your team on Slack!</a></b></td></tr></table>`
   html += `<table style="width:100%;"><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;font-size:85%;color:white;text-align:right;">Kip © 2017</p></td>`
   html += `<td style="width:300px;"><a style="padding:0 20px 0 20px;color:white;text-decoration:none;font-size:85%" href="https://kipthis.com/legal.html">Terms of Use</a></td></tr>`
   html += `</table></td></tr></table>` + br
