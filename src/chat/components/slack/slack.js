@@ -67,8 +67,11 @@ require('../reply_logic')
 
 function * loadTeam(slackbot) {
   if (slackConnections[slackbot.team_id]) {
-    logging.info('already loaded team', slackbot.team_name)
-    return
+    logging.info('team already loaded into slackConnections', slackbot.team_name)
+    if (slackConnections[slackbot.team_id].rtm.connected === true) {
+      logging.warn('team already connected', slackbot.team_name)
+      return
+    }
   }
 
   try {

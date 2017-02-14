@@ -366,6 +366,7 @@ app.post('/slackaction', next(function * (req, res) {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       });
     }
+
     else if (buttonData) {
         kip.debug(' \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n  BUTTODATA:', buttonData,'  \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n')
       var message = new db.Message({
@@ -637,74 +638,90 @@ function * updateCartMsg(cart, parsedIn) {
     method: 'POST',
     uri: parsedIn.response_url,
     body: JSON.stringify(parsedIn.original_message)
-  });
+  })
 }
 
 app.get('/authorize', function (req, res) {
-  console.log('button click')
-  res.redirect('https://slack.com/oauth/authorize?scope=commands+bot+users:read&client_id=' + kip.config.slack.client_id)
+  logging.info('button click @ /authorize')
+  res.redirect(`https://slack.com/oauth/authorize?scope=commands+bot+users:read&client_id=${kip.config.slack.client_id}`)
 })
 
-app.get('/newslack', function (req, res) {
-  console.log('new slack integration request');
-    co(function * () {
+app.get('/newslack', (req, res) => co(function * () {
+  logging.info('new slack integration request')
 
   if (!req.query.code) {
-    console.error(new Date())
-    console.error('no code in the callback url, cannot proceed with new slack integration')
+    logging.warn('no code in the callback url, cannot proceed with new slack integration')
+    if (process.env.NODE_ENV === 'production') {
+      // res.status(200).send({'Error': 'not a valid route with no code'})
+      res.redirect('/add.html')
+    } else {
+      res.redirect('/test-button.html')
+    }
     return
   }
-  var body = {
-    code: req.query.code,
-    redirect_uri: kip.config.slack.redirect_uri
-  }
-  var res_auth = yield requestPromise({ url: 'https://' + kip.config.slack.client_id + ':' + kip.config.slack.client_secret + '@slack.com/api/oauth.access',method: 'POST',form: body})
-  res_auth = JSON.parse(res_auth);
-  if (_.get(res_auth,'ok')) {
-     var existingTeam = yield db.Slackbots.findOne({'team_id': _.get(res_auth,'team_id'), 'deleted': { $ne:true } }).exec();
-     if ( _.get(existingTeam, 'team_id')) {
-        _.merge(existingTeam, res_auth);
-        existingTeam.meta.deleted = false;
-        yield existingTeam.save();
-        yield utils.initializeTeam(existingTeam, res_auth);
+
+  try {
+    var body = {
+      client_id: kip.config.slack.client_id,
+      client_secret: kip.config.slack.client_secret,
+      code: req.query.code,
+      redirect_uri: kip.config.slack.redirect_uri
+    }
+
+    var res_auth = yield requestPromise({
+      url: 'https://slack.com/api/oauth.access',
+      method: 'POST',
+      form: body,
+      json: true
+    })
+
+    if (_.get(res_auth, 'ok')) {
+      var existingTeam = yield db.Slackbots.findOne({
+        'team_id': res_auth.team_id,
+        'deleted': {$ne: true}
+      })
+      if (_.get(existingTeam, 'team_id')) {
+        _.merge(existingTeam, res_auth)
+        existingTeam.meta.deleted = false
+        yield existingTeam.save()
+        yield utils.initializeTeam(existingTeam, res_auth)
         yield slackModule.loadTeam(existingTeam)
-     } else {
-      var bot = new db.Slackbot(res_auth);
-      yield bot.save();
-      yield utils.initializeTeam(bot, res_auth);
-      yield slackModule.loadTeam(bot)
-      var user = yield db.Chatuser.findOne({ id: _.get(res_auth,'user_id')}).exec()
-      var message= new db.Message({
-        incoming: false,
-        thread_id: user.dm,
-        resolved: true,
-        user_id: user.id,
-        origin: 'slack',
-        text: '',
-        source:  {
-          team: bot.team_id,
-          channel: user.dm,
+      } else {
+        var bot = new db.Slackbot(res_auth)
+        yield bot.save()
+        yield [utils.initializeTeam(bot, res_auth), utils.refreshAllUserIMs(bot)]
+        yield slackModule.loadTeam(bot)
+        var user = yield db.Chatuser.findOne({id: res_auth.user_id}).exec()
+        var message = new db.Message({
+          incoming: false,
           thread_id: user.dm,
-          user: user.id,
-          type: 'message',
-        },
-        mode: 'onboarding',
-        action: 'home',
-        user: user.id
-      })
-     // queue it up for processing
-      message.save().then(() => {
+          resolved: true,
+          user_id: user.id,
+          origin: 'slack',
+          text: '',
+          source: {
+            'team': bot.team_id,
+            'channel': user.dm,
+            'thread_id': user.dm,
+            'user': user.id,
+            'type': 'message'
+          },
+          mode: 'onboarding',
+          action: 'home',
+          user: user.id
+        })
+        // queue it up for processing
+        yield message.save()
         queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
-      })
-     }
-  } else {
-    kip.debug(res_auth)
-   }
-
-  res.redirect('/thanks.html')
-
-  }).catch(console.log.bind(console))
-})
+      }
+    } else {
+      kip.error('res_auth not ok in /newslack', res_auth)
+    }
+    res.redirect('/thanks.html')
+  } catch (err) {
+    logging.error('error adding team', res_auth)
+  }
+}))
 
 // k8s readiness ingress health check
 app.get('/health', function (req, res) {
