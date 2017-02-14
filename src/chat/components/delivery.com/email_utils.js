@@ -83,6 +83,12 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
     subject: `Your order for ${foodSession.chosen_restaurant.name} has been submitted!`,
     html: `<html>Speakerboxxx / The Love Below</html>`
   }
+
+  try {
+    mailer_transport.sendMail(mailOptions)
+  } catch (e) {
+    logging.error('error mailing after payment submitted', e)
+  }
 }
 
 utils.sendConfirmationEmail = function * (foodSession) {

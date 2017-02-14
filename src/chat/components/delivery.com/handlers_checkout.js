@@ -712,11 +712,13 @@ handlers['food.payments.done'] = function * (message, foodSession) {
     yield foodSession.save()
     yield handlers['food.payments.done.team'](message, foodSession)
 
-    logging.debug('about to send confirmation email')
-    yield email_utils.sendConfirmationEmail(foodSession)
-    foodSession.email_users.map(function * (email) {
+    logging.debug('foodSession.email_users', foodSession.email_users)
+    yield foodSession.email_users.map(function * (email) {
+      console.log('email:', email)
       yield email_utils.sendEmailUserConfirmations(foodSession, email)
     })
+    logging.debug('about to send confirmation email')
+    yield email_utils.sendConfirmationEmail(foodSession)
     // save coupon info but needed to wait for payments thing
     if (_.get(foodSession, 'coupon.code')) {
       logging.info('saving coupon code stuff')
@@ -742,41 +744,42 @@ handlers['food.payments.done.team'] = function * (message, foodSession) {
     var uniqOrders = _.uniq(foodSession.confirmed_orders)
     yield uniqOrders.map(function * (userId) {
       var user = _.find(foodSession.team_members, {'id': userId}) // find returns the first one
+      if (user) {
+        var itemNames = foodSession.cart
+          .filter(i => i.user_id === userId && i.added_to_cart)
+          .map(i => menu.getItemById(i.item.item_id).name)
+          .map(name => '*' + name + '*') // be bold
 
-      var itemNames = foodSession.cart
-        .filter(i => i.user_id === userId && i.added_to_cart)
-        .map(i => menu.getItemById(i.item.item_id).name)
-        .map(name => '*' + name + '*') // be bold
-
-      if (itemNames.length > 1) {
-        var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
-      } else {
-        foodString = itemNames[0]
-      }
-
-      var isAdmin = team.meta.office_assistants.includes(user.id)
-      var msg = _.merge({}, {
-        'incoming': false,
-        'mode': 'food',
-        'action': 'payment_info',
-        'thread_id': user.dm,
-        'source': {
-          'type': 'message',
-          'user': user.id,
-          'channel': user.dm,
-          'team': foodSession.team_id
+        if (itemNames.length > 1) {
+          var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
+        } else {
+          foodString = itemNames[0]
         }
-      })
-      var couponText = yield utils.couponText(message.source.team)
-      var json = {
-        'text': `Your order of ${foodString} is on the way 😊`,
-        'callback_id': 'food.charge_succeeded',
-        'fallback': `Your order is on the way`,
-        'attachment_type': 'default',
-        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
-      }
 
-      yield $replyChannel.send(msg, 'food.payments.done.team', {type: message.origin, data: json})
+        var isAdmin = team.meta.office_assistants.includes(userId)
+        var msg = _.merge({}, {
+          'incoming': false,
+          'mode': 'food',
+          'action': 'payment_info',
+          'thread_id': user.dm,
+          'source': {
+            'type': 'message',
+            'user': user.id,
+            'channel': user.dm,
+            'team': foodSession.team_id
+          }
+        })
+        var couponText = yield utils.couponText(message.source.team)
+        var json = {
+          'text': `Your order of ${foodString} is on the way 😊`,
+          'callback_id': 'food.charge_succeeded',
+          'fallback': `Your order is on the way`,
+          'attachment_type': 'default',
+          'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
+        }
+
+        yield $replyChannel.send(msg, 'food.payments.done.team', {type: message.origin, data: json})
+      }
     })
   } catch (err) {
     logging.error('on success messages broke', err)
