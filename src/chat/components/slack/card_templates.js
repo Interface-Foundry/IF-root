@@ -112,7 +112,7 @@ var onboard_admin_attachments = module.exports.onboard_admin_attachments = funct
     image_url: 'http://tidepools.co/kip/oregano/thanks.png',
     color: '#3AA3E3',
     mrkdwn_in: ['text'],
-    fallback: 'Thanks for inviting me to your team! It’s my first day at <team name> :D\nCould you tell me who buys the office supplies and food? Type `me` or `me and @jane`',
+    fallback: 'Thanks for inviting me to your team!',
     callback_id: 'none'
   });
   attachments.push({
