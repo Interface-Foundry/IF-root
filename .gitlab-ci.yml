@@ -236,7 +236,6 @@ deploy_canary:
     - kubectl apply -f src/k8s/canary/canary.delivery_picstitch.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.picstitch.yaml --namespace=canary
   after_script:
-<<<<<<< HEAD
     - rm /tmp/KUBERNETES_KEY.json
 # -----------
 

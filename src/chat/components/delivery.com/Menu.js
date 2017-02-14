@@ -309,7 +309,6 @@ function nodeOptions (node, cartItem, validate, message) {
     }
     a.actions = selections.pop();
     all.push(a);
-
     // Submenu part
     g.children.map(option => {
       if (cartItem.item.option_qty[option.id] && _.get(option, 'children.0')) {

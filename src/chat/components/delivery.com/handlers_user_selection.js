@@ -458,6 +458,7 @@ handlers['food.admin.toggle_channel'] = function * (message) {
       foodSession.team_members = foodSession.all_members.filter(user => {
         return _.includes(resp.members, user.id)
       })
+      return [];
       logging.info('filtered down members to these members: ', foodSession.team_members)
       foodSession.markModified('team_members')
       yield foodSession.save()
