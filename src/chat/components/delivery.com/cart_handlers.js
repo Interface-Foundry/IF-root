@@ -217,7 +217,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   foodSession.confirmed_orders.push(message.source.user)
   foodSession.save()
 
-  logging.warn('fuck it') //this is not being called when ordering from the popout
+  logging.warn('fuck it')
   yield sendOrderProgressDashboards(foodSession, message)
 }
 
@@ -568,13 +568,19 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
 handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
+  logging.debug('inside food.admin.order.confirm')
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+  logging.debug('have foodSession')
   teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
+  logging.debug('teamMembers', teamMembers)
   lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
+  logging.debug('lateMembers', lateMembers)
   var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
 
   yield lateMembers.map(function * (userId) {
+    logging.debug('mapping this function over lateMembers')
     var user = _.find(foodSession.team_members, {'id': userId})
+    // logging.debug('user', Object.keys(user))
     var msg = _.merge({}, {
         'incoming': false,
         'mode': 'food',
@@ -587,6 +593,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
           'team': foodSession.team_id
         }
       })
+    logging.debug('msg created')
     var json = {
         'text': `The collection of orders has ended. Sorry.`,
         'callback_id': 'food.end_order',
@@ -605,39 +612,55 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
           }]
         }]
       }
+      logging.debug('json created')
 
     yield $replyChannel.sendReplace(msg, 'food.exit.confirm', {type: 'slack', data: json})
+    logging.debug('collection over messages sent to late member')
   })
-
 
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
+  logging.debug('menu created')
 
   var totalPrice = foodSession.cart.reduce((sum, i) => {
     return sum + menu.getCartItemPrice(i)
   }, 0)
+  logging.debug('totalPrice', totalPrice)
   // ------------------------------------
   // main response and attachment
   var response = {
     'text': `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     'fallback': `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     'callback_id': 'address_confirm'
-
   }
+  logging.debug('response')
 
   var mainAttachment = {
     'title': '',
     'image_url': `https://storage.googleapis.com/kip-random/kip-team-cafe-cart.png`
   }
+  logging.debug('mainAttachment')
 
   // ------------------------------------
   // item attachment with items and prices
-  var itemAttachments = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
+  var itemAttachments = yield foodSession.cart.filter(i => i.added_to_cart).map(function * (item) {
+    logging.debug('mapping function over items added 2 cart')
     var foodInfo = menu.getItemById(String(item.item.item_id))
     var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
     var textForItem = `*${foodInfo.name} - ${menu.getCartItemPrice(item).$}*\n`
-    textForItem += descriptionString.length > 0 ? `Options: ${descriptionString}\n` + `Added by: <@${item.user_id}>` : `Added by: <@${item.user_id}>`
+    logging.debug('foodInfo, descriptionString, textForItem')
+
+    var email_user = yield db.email_users.findOne({id: item.user_id}).exec()
+    if (email_user) {
+      logging.debug('email_user')
+      var userText = email_user.email
+    }
+    else var userText = '<@' + item.user_id + '>'
+    logging.debug('userText', userText)
+
+    textForItem += descriptionString.length > 0 ? `Options: ${descriptionString}\n` + `Added by: ${userText}` : `Added by: ${userText}`
+    logging.debug('textForItem')
     return {
       'text': textForItem,
       'fallback': textForItem,
@@ -663,7 +686,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
       }]
     }
   })
-
+  logging.debug('item attachments built')
   if (foodSession.tip.percent === 'cash') foodSession.tip.amount = 0.00
 
   try {
@@ -672,17 +695,19 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     logging.error('error running createCartForSession', err)
     return
   }
-
+  logging.debug('created order')
   if (order !== null) {
     // order is successful
     foodSession.order = order
     foodSession.markModified('order')
     yield foodSession.save()
+    logging.debug('foodSession updated w order')
 
     if (foodSession.tip.percent !== 'cash') {
       foodSession.tip.amount = (Number(foodSession.tip.percent.replace('%', '')) / 100.0 * foodSession.order.subtotal).toFixed(2)
       foodSession.save()
     }
+    logging.debug('and with tip')
 
     /*
     --------- create/explain values here -----------------------
@@ -714,6 +739,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     // --- COUPON STUFF
 
     var discountAvail = yield coupon.getLatestFoodCoupon(foodSession.team_id)
+    logging.debug('discountAvail', discountAvail)
 
     foodSession.main_amount = order.total + foodSession.service_fee + foodSession.tip.amount
 
@@ -751,10 +777,12 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     // }
 
     yield foodSession.save()
+    logging.debug('a bunch of cost / discount calculations')
 
     // THIS CREATES THE TIP, DELIVERY.COM COSTS, AND KIP ATTACHMENT
     var attachmentsRelatedToMoney = createAttachmentsForAdminCheckout(foodSession, totalPrice)
     response.attachments = [].concat(mainAttachment, itemAttachments, attachmentsRelatedToMoney)
+    logging.debug('costs attachments added to response')
 
   } else {
     // some sort of error
@@ -783,6 +811,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     }
 
   return yield $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
+  logging.debug('done with the handler :)')
 }
 
 handlers['food.order.instructions'] = function * (message) {

@@ -1,11 +1,10 @@
 var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
-var sleep = require('co-sleep')
 var validator = require('isemail')
+var co = require('co')
 
 var coupon = require('../../../coupon/couponUsing.js')
-var mailer_transport = require('../../../mail/IF_mail.js')
 var cardTemplates = require('../slack/card_templates.js')
 var utils = require('../slack/utils.js')
 var Menu = require('./Menu')
@@ -715,6 +714,9 @@ handlers['food.payments.done'] = function * (message, foodSession) {
 
     logging.debug('about to send confirmation email')
     yield email_utils.sendConfirmationEmail(foodSession)
+    foodSession.email_users.map(function * (email) {
+      yield email_utils.sendEmailUserConfirmations(foodSession, email)
+    })
     // save coupon info but needed to wait for payments thing
     if (_.get(foodSession, 'coupon.code')) {
       logging.info('saving coupon code stuff')

@@ -170,8 +170,8 @@ router.post('/order', function (req, res) {
         mode: 'food',
         incoming: false
       }).sort('-ts').limit(1);
-
-      if (foodMessage) {
+      console.log('foodMessage', foodMessage)
+      if (foodMessage && foodMessage.length) {
         logging.debug('found foodmessage', foodMessage)
 
         foodMessage = foodMessage[0];
@@ -204,6 +204,9 @@ router.post('/order', function (req, res) {
       }
       else {
         logging.info('email user')
+
+        foodSession.confirmed_orders.push(user_id)
+        foodSession.save()
 
         var eu = yield db.email_users.findOne({id: user_id});
 

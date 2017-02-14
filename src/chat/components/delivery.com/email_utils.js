@@ -75,6 +75,16 @@ utils.formatItem = function (i, j, quickpicks) {
   `</td></tr></table>`;
 }
 
+utils.sendEmailUserConfirmations = function * (foodSession, email) {
+  console.log('SENDEMAILUSERCONFIRMATION CALLED')
+  var mailOptions = {
+    to: `<${email}>`,
+    from: `Kip Café <hello@kipthis.com>`,
+    subject: `Your order for ${foodSession.chosen_restaurant.name} has been submitted!`,
+    html: `<html>Speakerboxxx / The Love Below</html>`
+  }
+}
+
 utils.sendConfirmationEmail = function * (foodSession) {
 
   console.log('pay_utils send confirmation email called')
@@ -82,7 +92,6 @@ utils.sendConfirmationEmail = function * (foodSession) {
   var menu = Menu(foodSession.menu)
   var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">'
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
-  // var date = new Date()
   var date = foodSession.order.order_time;
   console.log('this is the new date format', date);
 
