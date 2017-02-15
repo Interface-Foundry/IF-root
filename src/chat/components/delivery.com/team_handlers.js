@@ -85,7 +85,7 @@ handlers['food.admin.team.members'] = function * (message) {
     type: 'button',
     style: 'primary'
   })
-  
+
   buttons.actions.push({
     'name': 'passthrough',
     'value': 'food.admin.restaurant.pick.list',
@@ -103,7 +103,7 @@ handlers['food.admin.team.members'] = function * (message) {
   if (process.env.NODE_ENV == 'development_hannah') {
     buttons.actions.push({
       'name': 'passthrough',
-      'text': 'View Email Members',
+      'text': 'Email Members',
       'type': 'button',
       'value': 'food.admin.team.email_members'
     })
@@ -215,7 +215,7 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
   if (process.env.NODE_ENV == 'development_hannah') {
     buttons.actions.push({
       'name': 'passthrough',
-      'text': 'View Email Members',
+      'text': 'Email Members',
       'type': 'button',
       'value': 'food.admin.team.email_members'
     })

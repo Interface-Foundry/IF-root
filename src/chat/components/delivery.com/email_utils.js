@@ -112,7 +112,7 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
   html += `<h1>Your order from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> has been successfully submitted!</h1>`
   html += `<p>Please email ${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} at ${foodSession.convo_initiater.email} with any issues.</p>`
   // html += `<p style="color:black;text-decoration:none;">${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a>${(phone_number ? ' (' + phone_number + ')' : '')} on ${formatDate(date)}</p>`
-  html += `\nHere is a list of items:\n`
+  // html += `\nHere is a list of items:\n`
 
   //column headings
   html += `<table border="0" style="margin-top:4px;width:600px;border-spacing:5.5px;"><thead style="color:white;background-color:${kip_blue}"><tr><th>Menu Item</th>`
