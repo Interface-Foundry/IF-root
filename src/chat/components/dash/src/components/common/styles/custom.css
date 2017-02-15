@@ -3,10 +3,18 @@
     min-width: 330px;
 }
 
-.resizable-chart {
-	height: 250px;
+.resizable {
+	min-height: 150px;
+	height: 200px;
 	resize: vertical;
 	overflow: auto;
+	margin: -15px;
+	padding: 15px;
+}
+
+.panel-body {
+	padding: 0;
+	margin: 15px;
 }
 
 @media(min-width:768px) {
@@ -17,6 +25,7 @@
 
 .category-sidebar {
     min-width: 170px;
+    border-right: 1px solid #e7e7e7;
 }
 
 .sidebar-nav {
