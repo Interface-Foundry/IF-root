@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 require("source-map-support").install();
 module.exports =
 /******/ (function(modules) { // webpackBootstrap
@@ -1171,11 +1169,23 @@ module.exports =
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.UserProfile = exports.UserClaim = exports.UserLogin = exports.User = exports.Delivery = exports.Cart = exports.Metric = exports.Message = undefined;
+  exports.UserProfile = exports.UserClaim = exports.UserLogin = exports.User = exports.Delivery = exports.Cart = exports.Metric = exports.Message = exports.Chatuser = exports.Slackbot = undefined;
   
   var _sequelize = __webpack_require__(33);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
+  
+  var _Slackbot = __webpack_require__(225);
+  
+  var _Slackbot2 = _interopRequireDefault(_Slackbot);
+  
+  var _Chatuser = __webpack_require__(227);
+  
+  var _Chatuser2 = _interopRequireDefault(_Chatuser);
+  
+  var _Delivery = __webpack_require__(38);
+  
+  var _Delivery2 = _interopRequireDefault(_Delivery);
   
   var _Metric = __webpack_require__(35);
   
@@ -1188,10 +1198,6 @@ module.exports =
   var _Cart = __webpack_require__(37);
   
   var _Cart2 = _interopRequireDefault(_Cart);
-  
-  var _Delivery = __webpack_require__(38);
-  
-  var _Delivery2 = _interopRequireDefault(_Delivery);
   
   var _User = __webpack_require__(39);
   
@@ -1244,6 +1250,8 @@ module.exports =
   }
   
   exports.default = { sync: sync };
+  exports.Slackbot = _Slackbot2.default;
+  exports.Chatuser = _Chatuser2.default;
   exports.Message = _Message2.default;
   exports.Metric = _Metric2.default;
   exports.Cart = _Cart2.default;
@@ -1882,6 +1890,14 @@ module.exports =
   
   var _deliveries2 = _interopRequireDefault(_deliveries);
   
+  var _teams = __webpack_require__(222);
+  
+  var _teams2 = _interopRequireDefault(_teams);
+  
+  var _users = __webpack_require__(228);
+  
+  var _users2 = _interopRequireDefault(_users);
+  
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
   var schema = new _graphql.GraphQLSchema({
@@ -1892,7 +1908,9 @@ module.exports =
         metrics: _metrics2.default,
         carts: _carts2.default,
         deliveries: _deliveries2.default,
-        me: _me2.default
+        me: _me2.default,
+        teams: _teams2.default,
+        users: _users2.default
       }
     })
   });
@@ -25091,6 +25109,8 @@ module.exports =
   
   var _recharts = __webpack_require__(129);
   
+  var _reactBootstrap = __webpack_require__(66);
+  
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
   var title = 'Flot Charts';
@@ -25110,9 +25130,7 @@ module.exports =
   }
   var lineChartData = plotData();
   
-  var waypointsCount = [{ waypoint: 1001, users: ['U3620AA5T'], total: 12 }, { waypoint: 1010, users: ['U3620AA5T'], total: 12 }, { waypoint: 1020, users: ['U3620AA5T'], total: 11 }, { waypoint: 1100, users: ['U3620AA5T'], total: 11 }, { waypoint: 1101, users: ['U3620AA5T'], total: 4 }, { waypoint: 1102, users: ['U3620AA5T'], total: 7 }, { waypoint: 1110, users: ['U3620AA5T'], total: 7 }, { waypoint: 1111, users: ['U3620AA5T'], total: 4 }, { waypoint: 1120, users: ['U3620AA5T'], total: 7 }, { waypoint: 1121, users: ['U3620AA5T'], total: 1 }, { waypoint: 1130, users: ['U3620AA5T'], total: 1 }, { waypoint: 1140,
-    users: ['U3H5E1ANN', 'U3620AA5T'],
-    total: 29 }, { waypoint: 1200, users: ['U3620AA5T'], total: 6 }, { waypoint: 1210, users: ['U3H5E1ANN', 'U3620AA5T'], total: 6 }, { waypoint: 1211, users: ['U3620AA5T'], total: 1 }, { waypoint: 1220, users: ['U3620AA5T', 'U3H5E1ANN'], total: 4 }, { waypoint: 1230, users: ['U3H5E1ANN', 'U3620AA5T'], total: 3 }, { waypoint: 1240, users: ['U3H5E1ANN', 'U3620AA5T'], total: 1 }, { waypoint: 1300, users: ['U3620AA5T'], total: 2 }, { waypoint: 1310, users: ['U3620AA5T'], total: 1 }, { waypoint: 1313, users: ['U3620AA5T'], total: 1 }, { waypoint: 1320, users: ['U3620AA5T'], total: 3 }, { waypoint: 1321, users: ['U3620AA5T'], total: 1 }, { waypoint: 1323, users: ['U3620AA5T'], total: 1 }, { waypoint: 1330, users: ['U3620AA5T'], total: 1 }, { waypoint: 1332, users: ['U3620AA5T'], total: 1 }];
+  var waypointsCount = [{ waypoint: 1001, users: ['U3620AA5T', 'U3H5E1ANN'], total: 111 }, { waypoint: 1010, users: ['U3620AA5T', 'U3H5E1ANN'], total: 129 }, { waypoint: 1020, users: ['U3620AA5T', 'U3H5E1ANN'], total: 118 }, { waypoint: 1100, users: ['U3620AA5T', 'U3H5E1ANN'], total: 124 }, { waypoint: 1101, users: ['U3H5E1ANN', 'U3620AA5T'], total: 109 }, { waypoint: 1102, users: ['U3620AA5T', 'U3H5E1ANN'], total: 62 }, { waypoint: 1110, users: ['U3620AA5T', 'U3H5E1ANN'], total: 93 }, { waypoint: 1111, users: ['U3H5E1ANN', 'U3620AA5T'], total: 32 }, { waypoint: 1112, users: ['U3620AA5T'], total: 2 }, { waypoint: 1120, users: ['U3620AA5T', 'U3H5E1ANN'], total: 32 }, { waypoint: 1140, users: ['U3620AA5T'], total: 14 }, { waypoint: 1210, users: ['U3620AA5T', 'U3H5E1ANN'], total: 153 }, { waypoint: 1211, users: ['U3620AA5T'], total: 1 }, { waypoint: 1220, users: ['U3620AA5T', 'U3H5E1ANN'], total: 56 }, { waypoint: 1230, users: ['U3620AA5T', 'U3H5E1ANN'], total: 42 }, { waypoint: 1240, users: ['U3620AA5T', 'U3H5E1ANN'], total: 4 }, { waypoint: 1300, users: ['U3620AA5T'], total: 38 }, { waypoint: 1310, users: ['U3620AA5T'], total: 2 }, { waypoint: 1313, users: ['U3620AA5T'], total: 2 }, { waypoint: 1320, users: ['U3620AA5T'], total: 24 }, { waypoint: 1321, users: ['U3620AA5T'], total: 2 }, { waypoint: 1323, users: ['U3620AA5T'], total: 2 }, { waypoint: 1330, users: ['U3620AA5T'], total: 19 }, { waypoint: 1332, users: ['U3620AA5T'], total: 19 }];
   
   var orderTimePlaceFrequencies = [{ hour: 10, location: ['122 W 27th St'], total: 1 }, { hour: 11,
     location: ['7502 178th St', '122 W 27th St'],
@@ -25132,8 +25150,58 @@ module.exports =
   
   var dayOfWeekStats = [{ dayString: 'Sunday', dayNumber: 1, total: 7932 }, { dayString: 'Monday', dayNumber: 2, total: 21892 }, { dayString: 'Tuesday', dayNumber: 3, total: 42004 }, { dayString: 'Wednesday', dayNumber: 4, total: 29934 }, { dayString: 'Thursday', dayNumber: 5, total: 26266 }, { dayString: 'Friday', dayNumber: 6, total: 25602 }, { dayString: 'Saturday', dayNumber: 7, total: 7219 }];
   
+  var waypointPaths = [{ user_id: 'U3620AA5T',
+    delivery_id: '5893b7b089e0703570babd89',
+    waypoints: [1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1320, 1330, 1332] }, { user_id: 'U3620AA5T',
+    delivery_id: '5892659913ab2a227a1ea48a',
+    waypoints: [1010, 1020, 1100, 1102, 1110, 1102, 1001] }, { user_id: 'U3620AA5T',
+    delivery_id: '5895047bb3074c3f909c96ce',
+    waypoints: [1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300] }, { user_id: 'U3620AA5T',
+    delivery_id: '5894ee05bb800e3cb9503b73',
+    waypoints: [1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1001] }, { user_id: 'U3620AA5T',
+    delivery_id: '589399ab11fcfe31a66b05f9',
+    waypoints: [1010, 1020, 1100, 1102, 1120, 1001] }, { user_id: 'U3620AA5T',
+    delivery_id: '58935f5e98bebb26266fa531',
+    waypoints: [1010, 1020, 1100, 1101, 1210, 1210, 1210, 1001] }, { user_id: 'U3620AA5T',
+    delivery_id: '58939c05d587703221ca6f03',
+    waypoints: [1010, 1020, 1100, 1102, 1120, 1001] }, { user_id: 'U3620AA5T',
+    delivery_id: '5894e1f7f03d1a3ae913db08',
+    waypoints: [1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1001] }, { user_id: 'U3620AA5T',
+    delivery_id: '58926f4d93284623848a4ddd',
+    waypoints: [1010, 1020, 1100, 1101, 1110, 1101, 1110, 1111, 1101, 1210, 1210, 1001] }, { user_id: 'U3620AA5T',
+    delivery_id: '58811857501827a9cf0b8507',
+    waypoints: [1010, 1020, 1100, 1101, 1110, 1111, 1111, 1001] }, { user_id: 'U3620AA5T',
+    delivery_id: '5887d7100e4f9e65a4a9002c',
+    waypoints: [1010, 1020, 1100, 1102, 1110, 1120, 1121, 1140, 1200, 1210, 1001] }, { user_id: 'U3620AA5T',
+    delivery_id: '58926618c5802e22c0aa41de',
+    waypoints: [1010, 1020, 1100, 1102, 1110, 1102, 1001] }];
+  
   function displayFlotCharts(props, context) {
     context.setTitle(title);
+    var rows = [];
+    for (var i = 0; i < waypointPaths.length; i++) {
+      rows.push(_react2.default.createElement(
+        'tr',
+        null,
+        _react2.default.createElement(
+          'td',
+          null,
+          waypointPaths[i].user_id
+        ),
+        _react2.default.createElement(
+          'td',
+          null,
+          waypointPaths[i].delivery_id
+        ),
+        _react2.default.createElement(
+          'td',
+          null,
+          waypointPaths[i].waypoints.map(function (waypoint, j) {
+            return waypoint + '->';
+          })
+        )
+      ));
+    }
     return _react2.default.createElement(
       'div',
       null,
@@ -25158,27 +25226,40 @@ module.exports =
           { className: 'col-lg-12' },
           _react2.default.createElement(
             _Panel2.default,
-            { header: _react2.default.createElement(
-                'span',
-                null,
-                'Waypoints of past 2 weeks'
-              ) },
+            null,
             _react2.default.createElement(
               'div',
-              null,
+              { className: 'table-responsive' },
               _react2.default.createElement(
-                _recharts.ResponsiveContainer,
-                { width: '100%', aspect: 2 },
+                _reactBootstrap.Table,
+                null,
                 _react2.default.createElement(
-                  _recharts.AreaChart,
-                  { width: 600, height: 400, data: waypointsCount,
-                    margin: { top: 10, right: 30, left: 0, bottom: 0 } },
-                  _react2.default.createElement(_recharts.XAxis, { dataKey: 'waypoint' }),
-                  _react2.default.createElement(_recharts.YAxis, null),
-                  _react2.default.createElement(_recharts.CartesianGrid, { strokeDasharray: '3 3' }),
-                  _react2.default.createElement(_recharts.Tooltip, null),
-                  _react2.default.createElement(_recharts.Legend, null),
-                  _react2.default.createElement(_recharts.Area, { type: 'monotone', dataKey: 'total', stroke: '#000000', fill: '#BBB44F' })
+                  'thead',
+                  null,
+                  _react2.default.createElement(
+                    'tr',
+                    null,
+                    _react2.default.createElement(
+                      'th',
+                      null,
+                      'User ID'
+                    ),
+                    _react2.default.createElement(
+                      'th',
+                      null,
+                      'Delivery ID'
+                    ),
+                    _react2.default.createElement(
+                      'th',
+                      null,
+                      'FoodSession Waypoint Route'
+                    )
+                  )
+                ),
+                _react2.default.createElement(
+                  'tbody',
+                  null,
+                  rows
                 )
               )
             )
@@ -25288,12 +25369,26 @@ module.exports =
             { header: _react2.default.createElement(
                 'span',
                 null,
-                'CHARTS!'
+                'Waypoints of past 2 weeks'
               ) },
             _react2.default.createElement(
               'div',
               null,
-              'Another chart here plz.'
+              _react2.default.createElement(
+                _recharts.ResponsiveContainer,
+                { width: '100%', aspect: 2 },
+                _react2.default.createElement(
+                  _recharts.AreaChart,
+                  { width: 600, height: 400, data: waypointsCount,
+                    margin: { top: 10, right: 30, left: 0, bottom: 0 } },
+                  _react2.default.createElement(_recharts.XAxis, { dataKey: 'waypoint' }),
+                  _react2.default.createElement(_recharts.YAxis, null),
+                  _react2.default.createElement(_recharts.CartesianGrid, { strokeDasharray: '3 3' }),
+                  _react2.default.createElement(_recharts.Tooltip, null),
+                  _react2.default.createElement(_recharts.Legend, null),
+                  _react2.default.createElement(_recharts.Area, { type: 'monotone', dataKey: 'total', stroke: '#000000', fill: '#BBB44F' })
+                )
+              )
             )
           )
         ),
@@ -32258,6 +32353,1058 @@ module.exports =
 
   module.exports = require("mongoose");
 
+/***/ },
+/* 222 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  
+  var _SlackbotType = __webpack_require__(226);
+  
+  var _SlackbotType2 = _interopRequireDefault(_SlackbotType);
+  
+  var _graphql = __webpack_require__(44);
+  
+  var _sequelize = __webpack_require__(33);
+  
+  var _sequelize2 = _interopRequireDefault(_sequelize);
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  
+  var SlackbotListType = new _graphql.GraphQLList(_SlackbotType2.default);
+  
+  var teams = {
+    type: SlackbotListType,
+  
+    args: {
+  
+      id: {
+        type: _graphql.GraphQLString
+      },
+  
+      team_id: {
+        type: _graphql.GraphQLString
+      },
+  
+      access_token: {
+        type: _graphql.GraphQLString
+      },
+  
+      scope: {
+        type: _graphql.GraphQLString
+      },
+  
+      team_name: {
+        type: _graphql.GraphQLString
+      },
+  
+      incoming_webhook_url: {
+        type: _graphql.GraphQLString
+      },
+  
+      incoming_webhook_channel: {
+        type: _graphql.GraphQLString
+      },
+  
+      bot_user_id: {
+        type: _graphql.GraphQLString
+      },
+  
+      bot_access_token: {
+        type: _graphql.GraphQLString
+      },
+  
+      dateAdded: {
+        type: _graphql.GraphQLString
+      },
+  
+      addedBy: {
+        type: _graphql.GraphQLString
+      },
+  
+      initialized: {
+        type: _graphql.GraphQLString
+      },
+  
+      // office_assistants: {
+      //   type: DataType.ARRAY(DataType.STRING(255))
+      // },
+  
+      status_interval: {
+        type: _graphql.GraphQLString
+      },
+  
+      weekly_status_enabled: {
+        type: _graphql.GraphQLString
+      },
+  
+      weekly_status_day: {
+        type: _graphql.GraphQLString
+      },
+  
+      weekly_status_date: {
+        type: _graphql.GraphQLString
+      },
+  
+      weekly_status_time: {
+        type: _graphql.GraphQLString
+      },
+  
+      weekly_status_timezone: {
+        type: _graphql.GraphQLString
+      },
+  
+      city: {
+        type: _graphql.GraphQLString
+      },
+  
+      // cart_channels: {
+      //   type: DataType.ARRAY(DataType.STRING(255))
+      // },
+  
+      collect_from: {
+        type: _graphql.GraphQLString
+      },
+  
+      deleted: {
+        type: _graphql.GraphQLString
+      },
+  
+      chosen_location: {
+        type: _graphql.GraphQLString
+      },
+  
+      fulfillment_method: {
+        type: _graphql.GraphQLString
+      },
+  
+      mock: {
+        type: _graphql.GraphQLString
+      },
+  
+      p2p: {
+        type: _graphql.GraphQLString
+      },
+  
+      used_coupons: {
+        type: _graphql.GraphQLString
+      }
+    },
+    resolve: function resolve(root, args) {
+      return _sequelize2.default.models.slackbot.findAll({ limit: 1000, order: [['dateAdded', 'DESC']] });
+    }
+  };
+  
+  exports.default = teams;
+
+/***/ },
+/* 223 */,
+/* 224 */,
+/* 225 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  
+  var _sequelize = __webpack_require__(34);
+  
+  var _sequelize2 = _interopRequireDefault(_sequelize);
+  
+  var _sequelize3 = __webpack_require__(33);
+  
+  var _sequelize4 = _interopRequireDefault(_sequelize3);
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  
+  var Slackbot = _sequelize4.default.define('slackbot', {
+    id: {
+      type: _sequelize2.default.UUID,
+      defaultValue: _sequelize2.default.UUIDV1,
+      primaryKey: true
+    },
+  
+    team_id: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    access_token: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    scope: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    team_name: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    incoming_webhook_url: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    incoming_webhook_channel: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    bot_user_id: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    bot_access_token: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    dateAdded: {
+      type: _sequelize2.default.DATE()
+    },
+  
+    addedBy: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    initialized: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    office_assistants: {
+      type: _sequelize2.default.ARRAY(_sequelize2.default.STRING(255))
+    },
+  
+    status_interval: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    weekly_status_enabled: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    weekly_status_day: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    weekly_status_date: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    weekly_status_time: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    weekly_status_timezone: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    city: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    cart_channels: {
+      type: _sequelize2.default.ARRAY(_sequelize2.default.STRING(255))
+    },
+  
+    collect_from: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    deleted: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    chosen_location: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    fulfillment_method: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    mock: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    p2p: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    used_coupons: {
+      type: _sequelize2.default.STRING(255)
+    }
+  
+  }, {
+    timestamps: false
+  });
+  
+  exports.default = Slackbot;
+
+/***/ },
+/* 226 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  
+  var _graphql = __webpack_require__(44);
+  
+  var SlackbotType = new _graphql.GraphQLObjectType({
+    name: 'Slackbot',
+    fields: function fields() {
+      return {
+        id: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.id;
+          }
+        },
+  
+        team_id: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.team_id;
+          }
+        },
+  
+        access_token: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.access_token;
+          }
+        },
+  
+        scope: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.scope;
+          }
+        },
+  
+        team_name: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.team_name;
+          }
+        },
+  
+        incoming_webhook_url: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.incoming_webhook_url;
+          }
+        },
+  
+        incoming_webhook_channel: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.incoming_webhook_channel;
+          }
+        },
+  
+        bot_user_id: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.bot_user_id;
+          }
+        },
+  
+        bot_access_token: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.bot_access_token;
+          }
+        },
+  
+        dateAdded: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.dateAdded;
+          }
+        },
+  
+        addedBy: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.addedBy;
+          }
+        },
+  
+        initialized: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.initialized;
+          }
+        },
+  
+        // office_assistants: {
+        //   type: DataType.ARRAY(DataType.STRING(255))
+        // },
+  
+        status_interval: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.status_interval;
+          }
+        },
+  
+        weekly_status_enabled: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.weekly_status_enabled;
+          }
+        },
+  
+        weekly_status_day: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.weekly_status_day;
+          }
+        },
+  
+        weekly_status_date: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.weekly_status_date;
+          }
+        },
+  
+        weekly_status_time: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.weekly_status_time;
+          }
+        },
+  
+        weekly_status_timezone: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.weekly_status_timezone;
+          }
+        },
+  
+        city: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.city;
+          }
+        },
+  
+        // cart_channels: {
+        //   type: DataType.ARRAY(DataType.STRING(255))
+        // },
+  
+        collect_from: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.collect_from;
+          }
+        },
+  
+        deleted: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.deleted;
+          }
+        },
+  
+        chosen_location: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.chosen_location;
+          }
+        },
+  
+        fulfillment_method: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.fulfillment_method;
+          }
+        },
+  
+        mock: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.mock;
+          }
+        },
+  
+        p2p: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.p2p;
+          }
+        },
+  
+        used_coupons: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(slackbot) {
+            return slackbot.used_coupons;
+          }
+        }
+  
+      };
+    }
+  });
+  
+  exports.default = SlackbotType;
+
+/***/ },
+/* 227 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  
+  var _sequelize = __webpack_require__(34);
+  
+  var _sequelize2 = _interopRequireDefault(_sequelize);
+  
+  var _sequelize3 = __webpack_require__(33);
+  
+  var _sequelize4 = _interopRequireDefault(_sequelize3);
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  
+  var Chatuser = _sequelize4.default.define('chatuser', {
+    id: {
+      type: _sequelize2.default.UUID,
+      defaultValue: _sequelize2.default.UUIDV1,
+      primaryKey: true
+    },
+  
+    platform: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    onboarded: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    admin_shop_onboarded: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    member_shop_onboarded: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    ts: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    origin: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    type: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    dm: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    team_id: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    name: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    deleted: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    color: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    real_name: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    tz: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    tz_label: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    tz_offset: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    country: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    is_admin: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    is_owner: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    is_primary_owner: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    is_restricted: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    is_ultra_restricted: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    is_bot: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    has_2fa: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    last_call_alerts: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    emailNotification: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    awaiting_email_response: {
+      type: _sequelize2.default.BOOLEAN()
+    },
+  
+    phone_number: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    first_name: {
+      type: _sequelize2.default.STRING(255)
+    },
+  
+    last_name: {
+      type: _sequelize2.default.STRING(255)
+    }
+  
+  }, {
+    timestamps: false
+  });
+  
+  exports.default = Chatuser;
+
+/***/ },
+/* 228 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  
+  var _ChatuserType = __webpack_require__(229);
+  
+  var _ChatuserType2 = _interopRequireDefault(_ChatuserType);
+  
+  var _graphql = __webpack_require__(44);
+  
+  var _sequelize = __webpack_require__(33);
+  
+  var _sequelize2 = _interopRequireDefault(_sequelize);
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  
+  var ChatuserListType = new _graphql.GraphQLList(_ChatuserType2.default);
+  
+  var users = {
+    type: ChatuserListType,
+    args: {
+      id: {
+        type: _graphql.GraphQLString
+      },
+  
+      platform: {
+        type: _graphql.GraphQLString
+      },
+  
+      onboarded: {
+        type: _graphql.GraphQLString
+      },
+  
+      admin_shop_onboarded: {
+        type: _graphql.GraphQLString
+      },
+  
+      member_shop_onboarded: {
+        type: _graphql.GraphQLString
+      },
+  
+      ts: {
+        type: _graphql.GraphQLString
+      },
+  
+      origin: {
+        type: _graphql.GraphQLString
+      },
+  
+      type: {
+        type: _graphql.GraphQLString
+      },
+  
+      dm: {
+        type: _graphql.GraphQLString
+      },
+  
+      team_id: {
+        type: _graphql.GraphQLString
+      },
+  
+      name: {
+        type: _graphql.GraphQLString
+      },
+  
+      deleted: {
+        type: _graphql.GraphQLString
+      },
+  
+      color: {
+        type: _graphql.GraphQLString
+      },
+  
+      real_name: {
+        type: _graphql.GraphQLString
+      },
+  
+      tz: {
+        type: _graphql.GraphQLString
+      },
+  
+      tz_label: {
+        type: _graphql.GraphQLString
+      },
+  
+      tz_offset: {
+        type: _graphql.GraphQLString
+      },
+  
+      country: {
+        type: _graphql.GraphQLString
+      },
+  
+      is_admin: {
+        type: _graphql.GraphQLString
+      },
+  
+      is_owner: {
+        type: _graphql.GraphQLString
+      },
+  
+      is_primary_owner: {
+        type: _graphql.GraphQLString
+      },
+  
+      is_restricted: {
+        type: _graphql.GraphQLString
+      },
+  
+      is_ultra_restricted: {
+        type: _graphql.GraphQLString
+      },
+  
+      is_bot: {
+        type: _graphql.GraphQLString
+      },
+  
+      has_2fa: {
+        type: _graphql.GraphQLString
+      },
+  
+      last_call_alerts: {
+        type: _graphql.GraphQLString
+      },
+  
+      emailNotification: {
+        type: _graphql.GraphQLString
+      },
+  
+      awaiting_email_response: {
+        type: _graphql.GraphQLString
+      },
+  
+      phone_number: {
+        type: _graphql.GraphQLString
+      },
+  
+      first_name: {
+        type: _graphql.GraphQLString
+      },
+  
+      last_name: {
+        type: _graphql.GraphQLString
+      }
+    },
+    resolve: function resolve(root, args) {
+      return _sequelize2.default.models.chatuser.findAll({ limit: 10000, order: [['tz', 'DESC']] });
+    }
+  };
+  
+  exports.default = users;
+
+/***/ },
+/* 229 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  
+  var _graphql = __webpack_require__(44);
+  
+  var ChatuserType = new _graphql.GraphQLObjectType({
+    name: 'Chatuser',
+    fields: function fields() {
+      return {
+        id: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.id;
+          }
+        },
+  
+        platform: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.platform;
+          }
+        },
+  
+        onboarded: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.onboarded;
+          }
+        },
+  
+        admin_shop_onboarded: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.admin_shop_onboarded;
+          }
+        },
+  
+        member_shop_onboarded: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.member_shop_onboarded;
+          }
+        },
+  
+        ts: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.ts;
+          }
+        },
+  
+        origin: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.origin;
+          }
+        },
+  
+        type: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.type;
+          }
+        },
+  
+        dm: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.dm;
+          }
+        },
+  
+        team_id: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.team_id;
+          }
+        },
+  
+        name: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.name;
+          }
+        },
+  
+        deleted: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.deleted;
+          }
+        },
+  
+        color: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.color;
+          }
+        },
+  
+        real_name: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.real_name;
+          }
+        },
+  
+        tz: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.tz;
+          }
+        },
+  
+        tz_label: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.tz_label;
+          }
+        },
+  
+        tz_offset: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.tz_offset;
+          }
+        },
+  
+        country: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.country;
+          }
+        },
+  
+        is_admin: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.is_admin;
+          }
+        },
+  
+        is_owner: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.is_owner;
+          }
+        },
+  
+        is_primary_owner: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.is_primary_owner;
+          }
+        },
+  
+        is_restricted: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.is_restricted;
+          }
+        },
+  
+        is_ultra_restricted: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.is_ultra_restricted;
+          }
+        },
+  
+        is_bot: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.is_bot;
+          }
+        },
+  
+        has_2fa: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.has_2fa;
+          }
+        },
+  
+        last_call_alerts: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.last_call_alerts;
+          }
+        },
+  
+        emailNotification: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.emailNotification;
+          }
+        },
+  
+        awaiting_email_response: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.awaiting_email_response;
+          }
+        },
+  
+        phone_number: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.phone_number;
+          }
+        },
+  
+        first_name: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.first_name;
+          }
+        },
+  
+        last_name: {
+          type: _graphql.GraphQLString,
+          resolve: function resolve(chatuser) {
+            return chatuser.last_name;
+          }
+        }
+      };
+    }
+  });
+  
+  exports.default = ChatuserType;
+
 /***/ }
 /******/ ]);
-//# sourceMappingURL=server.js.map>>>>>>> alter certain message and order queries for easier use in the dashboard. added a flowchart page to the sidebar
+//# sourceMappingURL=server.js.map

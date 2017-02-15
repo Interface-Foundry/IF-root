@@ -8,6 +8,10 @@ import messages from './queries/messages';
 import carts from './queries/carts';
 import me from './queries/me';
 import deliveries from './queries/deliveries';
+import teams from './queries/teams';
+import users from './queries/users';
+
+
 
 
 const schema = new Schema({
@@ -19,6 +23,8 @@ const schema = new Schema({
       carts,
       deliveries,
       me,
+      teams,
+      users
     },
   }),
 });
