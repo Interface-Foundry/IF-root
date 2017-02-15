@@ -252,7 +252,8 @@ utils.sendConfirmationEmail = function * (foodSession) {
   html += `</td></tr></table>`
 
   //footer
-  html += `<p style="text-decoration:none;color:grey;"><img height="14" width="14" alt="delivery.com" src="http://tidepools.co/kip/dcom_footer.png"> Powered by delivery.<span>com</p>` + br
+  // html += `<p style="text-decoration:none;color:grey;"><img height="14" width="14" alt="delivery.com" src="http://tidepools.co/kip/dcom_footer.png"> Powered by delivery.<span>com</p>` + br
+  html += `<p style="font-size:90%;position:absolute;text-decoration:none;color:grey;"><img style="display:inline-block;position:relative;top:12px" height="22" width="22" alt="kip head" src="http://tidepools.co/kip/head_squared.png"> Powered by Kip + delivery.<span>com</p>` + br
 
   order_users = '@' + foodSession.all_members.map(function (member) {
     return member.name
