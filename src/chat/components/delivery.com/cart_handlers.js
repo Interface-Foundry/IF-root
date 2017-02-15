@@ -229,7 +229,7 @@ function * sendOrderProgressDashboards (foodSession, message) {
 
   // we'll have to send the dashboard to the admin even if they are not hungry
   const adminIsNotHungry = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
-  const allOrdersIn = foodSession.confirmed_orders.length >= foodSession.team_members.length
+  const allOrdersIn = foodSession.confirmed_orders.length >= foodSession.team_members.length + foodSession.email_users.length
 
   // make the list of things that hungry team members have ordered
   var menu = Menu(foodSession.menu)
@@ -267,7 +267,7 @@ function * sendOrderProgressDashboards (foodSession, message) {
     slackers = slackers.join(' ')
   }
 
-  var emailers = ''  // TODO
+  var emailers = foodSession.email_users.join(', ')
 
   if (slackers.length > 0 || emailers.length > 0) {
     logging.debug('slackers', slackers, 'emailers', emailers)
@@ -275,7 +275,7 @@ function * sendOrderProgressDashboards (foodSession, message) {
     if (slackers && !emailers) waitingText += slackers
     else if (emailers && !slackers) waitingText += emailers
     else {
-      waitingText += `\nSlack: ${slackers}\nemail: ${emailers}`
+      waitingText += `\nSlack: ${slackers}\nEmail: ${emailers}`
     }
     dashboard.attachments.push({
       mrkdwn_in: ['text'],
@@ -615,7 +615,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
 
   var totalPrice = foodSession.cart.reduce((sum, i) => {
     return sum + menu.getCartItemPrice(i)
-  }, 0
+  }, 0)
   // ------------------------------------
   // main response and attachment
   var response = {
@@ -753,7 +753,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     //   return
     // }
 
-    yield foodSession.save(
+    yield foodSession.save()
 
     // THIS CREATES THE TIP, DELIVERY.COM COSTS, AND KIP ATTACHMENT
     var attachmentsRelatedToMoney = createAttachmentsForAdminCheckout(foodSession, totalPrice)

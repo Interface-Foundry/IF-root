@@ -110,7 +110,6 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
   //header
   var html = `<html>${header}` + br;
   html += `<h1>Your order from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> has been successfully submitted!</h1>`
-  html += `<p>Please email ${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} at ${foodSession.convo_initiater.email} with any issues.</p>`
   // html += `<p style="color:black;text-decoration:none;">${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a>${(phone_number ? ' (' + phone_number + ')' : '')} on ${formatDate(date)}</p>`
   // html += `\nHere is a list of items:\n`
 
@@ -138,14 +137,11 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
   html += `</thead></table>` + br + br
 
   //footer
-  html += `<p style="text-decoration:none;color:grey;"><img height="14" width="14" alt="delivery.com" src="http://tidepools.co/kip/dcom_footer.png"> Powered by delivery.<span>com</p>` + br
-
-  // order_users = '@' + foodSession.all_members.map(function (member) {
-  //   return member.name
-  // }).join(',')
+  html += `<p>Please email ${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} at ${foodSession.convo_initiater.email} from ${slackbot.team_name} with any issues.</p>` + br
+  html += `<p style="font-size:90%;position:absolute;text-decoration:none;color:grey;"><img style="display:inline-block;position:relative;top:12px" height="22" width="22" alt="kip head" src="http://tidepools.co/kip/head_squared.png"> Powered by Kip + delivery.<span>com</p>` + br
 
   html += `<table border="0" style="padding:10px;width:100%;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="border-spacing:0 20px;border-radius:4px;width:100%">`
-  html += `<tr style="width:100%"><td><div style="position:absolute;width:100%;height:100%;text-align:center;"><img style="position:relative;down:10px;" height="28" width="28" src="http://tidepools.co/kip/head_squared.png">`
+  html += `<tr style="width:100%"><td><div style="position:absolute;width:100%;height:100%;text-align:center;"><img height="26" width="26" src="http://tidepools.co/kip/oregano/Slack_Icon.png">`
   // html += `<b style="color:white;text-decoration:none;font-weight:normal;font-size:160%;text-align:center;">&nbsp; Enjoy your food!</b></div></td></tr></table>`
   html += `<b><a href="https://${team_url}.slack.com/" style="color:white;text-decoration:none;font-size:160%;text-align:center;">&nbsp;Join your team on Slack!</a></b></td></tr></table>`
   html += `<table style="width:100%;"><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;font-size:85%;color:white;text-align:right;">Kip © 2017</p></td>`
