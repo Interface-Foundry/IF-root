@@ -172,6 +172,11 @@ function * getTeamMembers (slackbot) {
 
   try {
     var members = yield usersArray.members.map(function * (user) {
+      // don't DM bots
+      if (user.is_bot) {
+        return
+      }
+
       var savedUser = yield db.Chatusers.findOne({id: user.id})
       // check if user is in our database
       if (!savedUser) {
@@ -199,6 +204,7 @@ function * getTeamMembers (slackbot) {
     })
   } catch (err) {
     logging.error('error updating chatuser array', usersArray)
+    logging.error(err)
   }
   return members
 }
@@ -241,7 +247,7 @@ function * refreshAllUserIMs (slackbot) {
   var slackbotWeb = new slack.WebClient(slackbot.bot.bot_access_token)
   var userIMInfo = yield slackbotWeb.im.list()
   // don't care about clippy, i mean slackbot (ugh)
-  userIMInfo = userIMInfo.ims.filter(u => u.user !== 'USLACKBOT' || u.is_user_deleted !== true)
+  userIMInfo = userIMInfo.ims.filter(u => u.user !== 'USLACKBOT' && u.is_user_deleted !== true)
 
   yield userIMInfo.map(function * (u) {
     var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
