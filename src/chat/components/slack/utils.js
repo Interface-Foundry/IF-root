@@ -167,10 +167,10 @@ function * getTeamMembers (slackbot) {
     var userIMInfo = yield slackbotWeb.im.list()
     var usersArray = yield slackbotWeb.users.list()
   } catch (err) {
-    logging.error('error gettign im.list/users.list from slack for slackbot', slackbot)
+    logging.error('error gettign im.list/users.list from slack for slackbot', slackbot.team_id, slackbot.team_name)
+    return []
   }
 
-  try {
     var members = yield usersArray.members.map(function * (user) {
       // don't DM bots
       if (user.is_bot) {
@@ -193,7 +193,12 @@ function * getTeamMembers (slackbot) {
       var userDM = userIMInfo.ims.find(i => i.user === user.id)
       if (!userDM) {
         // open new dm if user doesnt have one open w/ bot
-        userDM = yield slackbotWeb.im.open(user.id)
+        try {
+          userDM = yield slackbotWeb.im.open(user.id)
+        } catch (e) {
+          logging.error('cannot open dm for user', user.id)
+          return savedUser
+        }
         savedUser.dm = userDM.channel.id
       } else if (_.get(savedUser, 'dm') !== userDM.id) {
         // if their DM channel isnt equal to what we have saved, update it
@@ -202,10 +207,6 @@ function * getTeamMembers (slackbot) {
       yield savedUser.save()
       return savedUser
     })
-  } catch (err) {
-    logging.error('error updating chatuser array', usersArray)
-    logging.error(err)
-  }
   return members
 }
 
