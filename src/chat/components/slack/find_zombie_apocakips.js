@@ -28,17 +28,9 @@ co( function * () {
   console.log('kip user id is', kipUserID);
 
 
-//use https://slack.com/api/im.list?token= to find the im/dm "id" associated with the "user" id in the previous step
-
-  //let url = 'https://slack.com/api/users.getPresence?token='
-  //let url = 'https://slack.com/api/users.info?token='
-
-
+  //use https://slack.com/api/im.list?token= to find the im/dm "id" associated with the "user" id in the previous step
   url = 'https://slack.com/api/im.list?token='
   fullUrl = url+team.bot.bot_access_token
-
-
-
   fullUrl = fullUrl+'&pretty=1';
 
   try {
@@ -46,28 +38,44 @@ co( function * () {
   } catch(err) {
     // console.log(err)
   }
-  console.log('im channel list is', res);
+  imChannelList = res.ims.map((channel) => channel.id)
+  console.log('im channel list is', imChannelList);
 
 
-
-//from slack test
-//D35830MUG twong with twong
-//D3H3RUMV0 twong with kip
-//D36N1KYDC twong with twong9790-kipbot
-//D3HRQL2MV twong with terrotim
-
-//not from slack test
-//D364RAWNR twong with slackbot
-//D36N1KYDC twong with twong9790-kipbot
-//D3GE1QBQ8 terrotim with twong9790-kipbot
-
-//get IM history from all dm channel
-/*
+  //get IM history from all dm channel
   url = 'https://slack.com/api/im.history?token='
   fullUrl = url+team.bot.bot_access_token
-  channelArg = '&channel=D3GE1QBQ8&count=5'
+  
+  //replace D36N1KYDC with channel id obtained externally
+  channelArg = '&channel='+'D36N1KYDC'+'&count=30'
   fullUrl = fullUrl + channelArg
-*/
+
+  try {
+    res = JSON.parse(yield rp({ url: fullUrl, method: "GET" }));
+  } catch(err) {
+    // console.log(err)
+  }
+ 
+
+  //console.log('past 30 messages:', res.messages);
+  var senderList = res.messages.map((message) => message.username||message.user)
+
+
+  var numKipMessages = 0;
+  var numUserMessages = 0;
+  senderList.map(function(sender){
+    if (sender.includes("kip")){
+      return numKipMessages++;
+    } else {
+      return numUserMessages++;
+    }
+  })
+  console.log('# kip messages: ', numKipMessages)
+  console.log('# user messages: ', numUserMessages)
+  console.log(numKipMessages>numUserMessages ? 'kip not a zombie here' : 'kip is a zombie here')
+
+
+
 
 	
 	// https://slack.com/api/team.info
