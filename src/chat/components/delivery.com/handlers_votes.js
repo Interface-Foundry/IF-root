@@ -9,7 +9,6 @@ var api = require('./api-wrapper.js')
 var utils = require('./utils')
 var cuisineClassifier = require('./cuisine_classifier.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
-var yelp = require('./yelp')
 var menu_utils = require('./menu_utils')
 var email_utils = require('./email_utils')
 
