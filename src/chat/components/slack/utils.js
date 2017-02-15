@@ -185,7 +185,7 @@ function * getTeamMembers (slackbot) {
         })
       }
       // check if user has open dm
-      var userDM = userIMInfo.ims.find(i => i.user)
+      var userDM = userIMInfo.ims.find(i => i.user === user.id)
       if (!userDM) {
         // open new dm if user doesnt have one open w/ bot
         userDM = yield slackbotWeb.im.open(user.id)
