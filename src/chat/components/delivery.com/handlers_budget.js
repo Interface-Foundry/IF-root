@@ -46,7 +46,7 @@ handlers['food.admin.team_budget'] = function * (message) {
             'text'
           ],
           'text': "I didn\'t understand that - please type a number or click one of buttons",
-          'color': '#fe9b00',
+          'color': '#fc9600',
           'attachment_type': 'default',
           'actions': [],
           'callback_id': 'food.admin.team_budget',

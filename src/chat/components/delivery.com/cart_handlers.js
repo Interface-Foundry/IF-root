@@ -139,7 +139,7 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
   if (over_budget) {
     json.attachments.push({
       'text': 'Unfortunately that exceeds your budget',
-      'color': '#fe9b00'
+      'color': '#fc9600'
     })
   }
 
@@ -201,9 +201,6 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
-
-  logging.debug('this should contain my added items / = 1', myItems.length)
-  logging.debug('do we know who the user is?', message.user_id)
   var currentTime = Date.now()
   var itemArray = myItems.map(item => {
     var deliveryItem = menu.getItemById(item.item.item_id)
@@ -302,6 +299,7 @@ function * sendOrderProgressDashboards (foodSession, message) {
   //
   // send the dashboards to all the users that are ready to get dashboards
   //
+
   yield dashboardUsers.map(function * (user) {
     var isAdmin = user.id === foodSession.convo_initiater.id
     logging.debug('sending dashboard to user', user.id, 'isAdmin?', isAdmin)
@@ -476,7 +474,7 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
   if (totalPrice < foodSession.chosen_restaurant.minimum && message.source.user == foodSession.convo_initiater.id) {
     dashboard.attachments.push({
-      color: '#fe9b00',
+      color: '#fc9600',
       mrkdwn_in: ['text'],
       text: `\n*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_\$${foodSession.chosen_restaurant.minimum}_*`,
       actions: []
@@ -611,7 +609,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     yield $replyChannel.sendReplace(msg, 'food.exit.confirm', {type: 'slack', data: json})
   })
 
-  foodSession = foodSession ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
@@ -670,8 +668,8 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
 
   try {
     var order = yield api.createCartForSession(foodSession)
-  } catch (e) {
-    logging.error('error running createCartForSession', e)
+  } catch (err) {
+    logging.error('error running createCartForSession', err)
     return
   }
 
@@ -782,7 +780,8 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
         'value': 'food.exit.confirm_end_order'
       }]
      })
-  }
+    }
+
   return yield $replyChannel.send(message, 'food.admin.order.confirm', {type: message.origin, data: response})
 }
 

@@ -14,6 +14,7 @@ var _ = require('lodash');
 var path = require('path')
 var request = require('request-promise')
 
+
 var Menu = require('../chat/components/delivery.com/Menu.js')
 var menuURL = config.menuURL
 
@@ -150,15 +151,6 @@ router.post('/order', function (req, res) {
       user_budgets[user_id] -= money_spent
 
       console.log('calculated money spent')
-
-      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
-
-      console.log('updated the delivery object')
-      // var orders = foodSession.confirmed_orders
-      // logging.debug('orders', orders)
-      // orders.push(user_id)
-
-      console.log('registered user as having ordered')
 
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
 
