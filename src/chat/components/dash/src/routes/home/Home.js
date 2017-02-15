@@ -48,7 +48,7 @@ function Home(props, context) {
                 </DropdownButton>
               </div>
             </span>}>
-              <ResponsiveContainer width="100%" aspect={2}>
+              <ResponsiveContainer className="resizable-chart">
                 <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
                   <XAxis dataKey="name" />
                   <YAxis />

@@ -3,6 +3,12 @@
     min-width: 330px;
 }
 
+.resizable-chart {
+	height: 250px;
+	resize: vertical;
+	overflow: auto;
+}
+
 @media(min-width:768px) {
 	#page-wrapper {
 		margin: 0 0 0 330px;
