@@ -26,7 +26,12 @@ function * handle (message) {
   } else if (!message.text) {
     let [action, data] = message.action.split('.');
     kip.debug(`forwarding to onboarding[${action}](message, [${data}])`);
-    return yield handlers[action](message, [data]);
+    try {
+      yield handlers[action](message, [data])
+    } catch (err) {
+      logging.error('error trying to use handler for this message in onboarding handlers', message)
+    }
+    return
   } else {
     return yield handlers['response'](message);
   }

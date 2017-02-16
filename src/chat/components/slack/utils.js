@@ -20,36 +20,53 @@ var processData = require('../process');
 *
 */
 
-
 /*
 * returns creates chat users for a team
 * @param {Object} slackbot object
 * @returns {Object} slackbot object
 *
 */
-function * initializeTeam(team, auth) {
- if (!auth.user_id) {
-    return kip.error('Could not find the user who added slackbot ' + team._id)
- }
- team.meta.addedBy = typeof team.meta.addedBy == 'string' ? team.meta.addedBy : auth.user_id;
- var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
- res_chan = JSON.parse(res_chan);
- if (!(team.meta.cart_channels && team.meta.cart_channels.length > 0)) {
-  var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
-  team.meta.cart_channels.push(generalChannel.id);
- }
- team.meta.office_assistants = _.uniq(team.meta.office_assistants);
- debugger;
- team.meta.all_channels = res_chan.channels.map(c => _.pick(c, 'id', 'name', 'is_channel'));
- team.markModified('meta.cart_channels');
- team.markModified('meta.all_channels');
- team.markModified('meta.office_assistants');
- yield team.save();
- yield getTeamMembers(team);
- return team;
+function * initializeTeam (team, auth) {
+  if (!auth.user_id) {
+    kip.error('Could not find the user who added slackbot ', auth)
+    throw new Error('Could not find the user who added slackbot')
+  }
+
+  if (!_.get(team, 'meta')) {
+    kip.error('team doesnt have proper meta field', team)
+    throw new Error('team object doesnt have meta object, important for init team')
+  }
+
+  team.meta.addedBy = (typeof team.meta.addedBy === 'string') ? team.meta.addedBy : auth.user_id
+
+  // lists all members in a channel
+  var slackbotWeb = new slack.WebClient(team.bot.bot_access_token)
+  var botChannelArray = yield slackbotWeb.channels.list()
+
+  // dont add archived channels to all channels since we arent tracking what is archived
+  botChannelArray = botChannelArray.channels.filter(channel => channel.is_archived === false)
+
+  if (_.get(team, 'meta.cart_channels').length <= 0) {
+    logging.info('no cart_channels adding #general for team: ', team.team_id)
+    var generalChannel = botChannelArray.find((c) => {
+      return c.name === 'general'
+    })
+    team.meta.cart_channels.push(generalChannel.id)
+  }
+
+  if (_.get(team, 'meta.office_assistants').length <= 0) {
+    logging.info('no office_assistants, using the person who authorized initially: ', auth.user_id)
+    team.meta.office_assistants = [auth.user_id]
+  }
+  team.meta.office_assistants = _.uniq(team.meta.office_assistants)
+  team.meta.all_channels = botChannelArray.map(c => _.pick(c, 'id', 'name', 'is_channel'))
+  team.markModified('meta.cart_channels')
+  team.markModified('meta.all_channels')
+  team.markModified('meta.office_assistants')
+  yield team.save()
+  yield getTeamMembers(team)
+  return team
 }
-
-
 
 /*
 * returns admins of a team. will appropriately update chatusers based on latest slackbot.meta.office_assistants field
