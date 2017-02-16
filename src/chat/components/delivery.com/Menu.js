@@ -257,8 +257,9 @@ function nodeOptions (node, cartItem, validate, message) {
         }
       }
     }
-    let options = g.children.map(option => {
-      let price;
+
+    a.actions = g.children.map(option => {
+      var checkbox, price
       if (g.type === 'price group') {
         // price groups are like 'small, medium or large' and so each one is the base price
         price = ' $' + option.price
@@ -269,46 +270,25 @@ function nodeOptions (node, cartItem, validate, message) {
         price = ''
       }
 
+      if (cartItem.item.option_qty[option.id]) {
+        checkbox = allowMultiple ? '✓ ' : '◉ '
+      } else {
+        checkbox = allowMultiple ? '☐ ' : '○ '
+      }
       return {
-        text: option.name + price,
-        value: JSON.stringify({
+        name: 'food.option.click',
+        text: checkbox + option.name + price,
+        type: 'button',
+        value: {
           item_id: cartItem.item.item_id,
           option_id: option.id,
-          optionIndices: optionIndices,
-          single_select: ((g.min_selection === g.max_selection) && g.min_selection === 1) || (g.min_selection === 0 && g.max_selection === 1)
-        })
-      };
-    });
-    a.actions = [{
-      name: 'food.option.click',
-      text: 'Choose an addon',
-      type: 'select',
-      options: options
-    }];
-    let selections = [];
-    selections.push({
-      name: 'food.option.click',
-      text: 'Choose an addon',
-      type: 'select',
-      options: options
-    });
-    selections = _.reverse(_.chunk(selections, 4));
+          optionIndices: optionIndices
+        }
+      }
+    })
 
-    while (selections.length > 1) {
-      let actions = selections.pop();
-      all.push({
-        fallback: 'Meal option',
-        callback_id: g.id,
-        color: a.color,
-        attachment_type: 'default',
-        mrkdwn_in: ['text'],
-        text: a.text,
-        actions: actions
-      });
-      a.text = '';
-    }
-    a.actions = selections.pop();
-    all.push(a);
+    all.push(a)
+
     // Submenu part
     g.children.map(option => {
       if (cartItem.item.option_qty[option.id] && _.get(option, 'children.0')) {
@@ -318,7 +298,69 @@ function nodeOptions (node, cartItem, validate, message) {
     })
 
     return all
-  }, []);
+  }, [])
+
+  // spread out the buttons to multiple attachments if needed
+  attachments = attachments.reduce((all, a) => {
+
+    var optionIndices = _.get(message, 'data.value.optionIndices') ? _.get(message, 'data.value.optionIndices') : {}
+    var groupId = Number(a.callback_id.split('-').slice(-1)[0])
+    var optionIndex = optionIndices[groupId] ? optionIndices[groupId] : 1
+    var isRequired = a.text ? a.text.indexOf('Required') !== -1 : false
+    var rowCount = 0
+    if (_.get(a, 'actions.length', 0) <= 3) {
+      all.push(a)
+      return all
+    } else {
+      var actions = a.actions
+      var numActionRows = Math.ceil(actions.length/3)
+      a.actions = actions.splice(0, 3)
+      rowCount++
+      all.push(a)
+      if(isRequired) { //if option is required, show all
+        while (actions.length > 0) {
+          all.push({
+            color: a.color,
+            fallback: a.fallback,
+            callback_id: 'even more actions',
+            attachment_type: 'default',
+            actions: actions.splice(0, 3)
+          })
+        }
+      } else { //if option is optional, display 3 at a time.
+        while (rowCount < optionIndex) {
+          all.push({
+            color: a.color,
+            fallback: a.fallback,
+            callback_id: 'even more actions',
+            attachment_type: 'default',
+            actions: actions.splice(0, 3)
+          })
+          rowCount++
+        }
+        if(numActionRows > optionIndex){
+          all.push({
+            'name': 'More Options',
+            'fallback': 'More Options',
+            'callback_id': 'More Options',
+            'actions': [{
+              'name': 'food.item.loadmore',
+              'text': 'More Options',
+              'type': 'button',
+              'value': {
+                'item_id': cartItem.item.item_id,
+                'group_id': groupId ,
+                'optionIndices': optionIndices,
+                'row_count': numActionRows
+              }
+            }]
+          })
+        }
+      }
+      return all
+    }
+  }, [])
+
   return attachments
 }
 
