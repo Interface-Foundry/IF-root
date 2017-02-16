@@ -231,8 +231,8 @@ handlers['food.user.poll'] = function * (message) {
   }
 
   yield teamMembers.map(function * (member) {
-    logging.debug('checkign if we should do food_preferences')
-    if (triggerPreferences && (_.get(member, 'food_preferences.asked') !== true)) {
+    logging.debug('checking if we should do food_preferences')
+    if (kip.config.preferences.asking && (_.get(member, 'food_preferences.asked') !== true)) {
       // send user thing for food pref if triggerPref const and havent asked
       yield handlers['food.user.preferences'](message, member, foodSession)
     } else {

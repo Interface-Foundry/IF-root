@@ -1,6 +1,9 @@
 env: default
 isProduction: false
-
+preferences:
+  asking: false
+  suggestions: false
+  model: training
 app:
   port: 2997
   publicAPI: http://pikachu.kipapp.co/api
