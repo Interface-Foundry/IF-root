@@ -1,16 +1,27 @@
-require('../../kip')
+require('../../../kip')
 var co = require('co')
+var doMessage = require('../do_message')
 
-// this won't work well with the queue
+var ids = ['T1JTUM7RN']
 
 co(function * () {
   // find the teams to send onboarding
-  var teams = db.Slackbots.find({}).exec()
-  
+  var teams = yield db.Slackbots.find({team_id: {$in: ids}}).exec()
+  yield teams.map(function * (t) {
+    console.log('sending onboarding for team', t.team_name)
+    return yield sendOnboarding(t.meta.addedBy)
+  })
+}).catch(e => {
+  logging.error(e)
 })
 
 function * sendOnboarding(user_id) {
-  var user = yield db.Chatusers.find({id: user_id})
+  logging.debug('user_id', user_id)
+  var user = yield db.Chatusers.findOne({id: user_id}).exec()
+  if (user.id !== user_id) {
+    throw new Error('u made bad')
+  }
+  logging.debug(user.toObject())
 
   var message = new db.Message({
       incoming: false,
@@ -20,7 +31,7 @@ function * sendOnboarding(user_id) {
       origin: 'slack',
       text: '',
       source: {
-        'team': slackbot.team_id,
+        'team': user.team_id,
         'channel': user.dm,
         'thread_id': user.dm,
         'user': user.id,
@@ -29,8 +40,10 @@ function * sendOnboarding(user_id) {
       mode: 'onboarding',
       action: 'start'
     })
+
+  console.log(message.toObject)
     // queue it up for processing
     yield message.save()
-    queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
-
+    yield doMessage(message)
 }
+

@@ -101,7 +101,8 @@ function * findAdmins(team) {
 
 function * isAdmin(userId, team) {
   if (!userId) {
-    throw new Error('cannot determine if an undefined user is an admin')
+    logging.error('cannot determine if an undefined user is an admin')
+    return false
   }
 
   if (!team) {

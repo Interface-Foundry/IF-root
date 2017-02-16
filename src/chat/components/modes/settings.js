@@ -11,6 +11,7 @@ function * handle(message) {
   let team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
+  logging.debug('checking if user is admin for settings')
   let isAdmin = yield utils.isAdmin(message.source.user, team);
   if (!isAdmin) {
     return yield handlers['not_admin'](message);
