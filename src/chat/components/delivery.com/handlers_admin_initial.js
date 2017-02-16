@@ -54,7 +54,7 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
 }
 
 handlers['food.admin.select_address'] = function * (message, banner) {
-  // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
+  // loading chat users here for now, can remove once init_team is fully implemented to create chat user objects
   logging.debug('doing slackutils stuff in here')
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
@@ -62,7 +62,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     slackUtils.refreshAllUserIMs(team),
     slackUtils.refreshAllChannels(team),
     coupon.refreshTeamCoupons(team.team_id)
-    ]
+  ]
 
   message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
@@ -90,7 +90,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     foodSession.onboarding = true
     banner = false
   }
-  //dont use onboarding for this session
+  //don't use onboarding for this session
   else {
     foodSession.onboarding = false
   }

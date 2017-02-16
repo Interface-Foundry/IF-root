@@ -151,6 +151,7 @@ function * initiateDeliverySession (session) {
     teamMembers = teamMembers.filter(u => WHITELISTS[session.source.team].includes(u.name))
   }
 
+  
   var admin = yield db.Chatuser.findOne({id: session.source.user}).exec()
   var newSession = new db.Delivery({
     active: true,
