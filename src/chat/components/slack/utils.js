@@ -833,7 +833,7 @@ function randomSearchTerm () {
 function randomEmoji (isCafe) {
   let messages = isCafe
     ? ['🍕', '🍩', '🍔', '🍰', '🍴', '🍣', '🍲', '🍪', '🍛']
-    : ['🛍', '🛒', '🎁', '📦', '📓', '✏️', '📚', '🖇', '💻'];
+    : ['🛍', '🎁', '📦', '📓', '✏️', '📚', '🖇', '💻'];
   let num = Math.floor(Math.random() * messages.length);
   return messages[num] + '\u00A0 ';
 }

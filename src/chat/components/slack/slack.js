@@ -263,7 +263,6 @@ function * start () {
 //
 logging.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
-  kip.debug(`😁  Outgoing is\n${JSON.stringify(outgoing, null, 2)}`)
   logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
   outgoing = {
     data: outgoing

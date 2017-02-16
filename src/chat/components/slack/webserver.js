@@ -184,7 +184,7 @@ app.post('/slackaction', next(function * (req, res) {
         return;
       }
       else if (simple_command === 'collect_select') {
-        let selection = parsedIn.actions[0].value;
+        let selection = action.value;
         let json = parsedIn.original_message;
         json.attachments[0].actions = json.attachments[0].actions.map(button => {
           button.text = button.text.replace('◉', '○');
