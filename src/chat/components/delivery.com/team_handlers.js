@@ -205,12 +205,14 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     'value': message.data.value
   })
 
-  buttons.actions.push({
-    'name': 'passthrough',
-    'text': 'View Email Members',
-    'type': 'button',
-    'value': 'food.admin.team.email_members'
-  })
+  if (process.env.NODE_ENV == 'development_hannah') {
+    buttons.actions.push({
+      'name': 'passthrough',
+      'text': 'View Email Members',
+      'type': 'button',
+      'value': 'food.admin.team.email_members'
+    })
+  }
 
   buttons.actions.push({
     name: 'food.admin.restaurant.reordering_confirmation',
