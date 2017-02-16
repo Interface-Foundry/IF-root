@@ -1,15 +1,14 @@
-
-
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import {
   MenuItem,
   DropdownButton,
-  Panel, PageHeader, ListGroup, ListGroupItem, Button, Alert, Table
+  Panel, PageHeader, ListGroup, ListGroupItem, Button, Alert
 } from 'react-bootstrap';
 import s from './Home.css';
 import StatWidget from '../../components/Widget';
 import Donut from '../../components/Donut';
+import Table from '../../components/Table';
 
 import {
   Tooltip,
@@ -28,6 +27,40 @@ const data = [
   { name: 'Page F', uv: 2390, pv: 3800, amt: 2500, value: 700 },
   { name: 'Page G', uv: 3490, pv: 4300, amt: 2100, value: 100 },
 ];
+
+const heads = [
+  'Date / Time',
+  'Team',
+  'User',
+  'Item',
+  'Price',
+  'Quantity',
+  'Total',
+  'Cart ID',
+  'Platform'
+];
+
+const tableData = [
+  ['01/15/17 3:15 pm',
+    'kipsearch',
+    'Alyx Baldwin',
+    'Shnozzleberries',
+    '$2,321.55',
+    '2',
+    '$5,643.10',
+    'slack_212344234',
+    'slack'
+  ], ['01/15/17 3:15 pm',
+    'kipsearch',
+    'Alyx Baldwin',
+    'Shnozzleberries',
+    '$2,321.55',
+    '2',
+    '$5,643.10',
+    'slack_212344234',
+    'slack'
+  ]
+]
 
 function Home(props, context) {
   context.setTitle(title);
@@ -68,110 +101,8 @@ function Home(props, context) {
         <div>
           <Panel>
             <div className="table-responsive">
-              <Table>
-                <thead>
-                    <tr>
-                        <th>Date / Time</th>
-                        <th>Team</th>
-                        <th>User</th>
-                        <th>Item</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                        <th>Cart ID</th>
-                        <th>Platform</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr data-toggle="collapse" data-target="#demo1" className="accordion-toggle">
-                        <td> 
-                          <Alert bsStyle="success">
-                           01/15/17 3:15 pm
-                          </Alert>
-                        </td>
-                        <td>
-                         <Alert bsStyle="success">
-                           kipsearch
-                          </Alert>
-                        </td>
-                        <td>
-                         <Alert bsStyle="success">
-                          Alyx Baldwin
-                          </Alert>
-                        </td>
-                        <td>  
-                          <Alert bsStyle="success">
-                            Shnozzleberries
-                            </Alert>
-                        </td>
-                        <td>  
-                          <Alert bsStyle="success">
-                            $2,321.55
-                            </Alert>
-                        </td>
-                        <td>  
-                          <Alert bsStyle="success">
-                            2
-                            </Alert>
-                        </td>
-                         <td>  
-                          <Alert bsStyle="success">
-                            $5,643.10
-                            </Alert>
-                        </td>
-                         <td>  
-                          <Alert bsStyle="success">
-                            slack_212344234
-                            </Alert>
-                        </td>
-                           <td>  
-                          <Alert bsStyle="success">
-                            slack
-                            </Alert>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colSpan="12" className="hiddenRow">
-                            <div className="accordian-body collapse" id="demo1">
-                                <h1>Hi from the hiddenRow</h1>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-              </Table>
+            	<Table heads={heads} data={tableData}/>
             </div>
-            <Alert bsStyle="success">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              <a
-                href=""
-                onClick={(e) => { e.preventDefault(); }}
-                className="alert-link"
-              >Alert Link</a>.
-            </Alert>
-            <Alert bsStyle="info">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              <a
-                href=""
-                onClick={(e) => { e.preventDefault(); }}
-                className="alert-link"
-              >Alert Link</a>.
-            </Alert>
-            <Alert bsStyle="warning">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              <a
-                href=""
-                onClick={(e) => { e.preventDefault(); }}
-                className="alert-link"
-              >Alert Link</a>.
-            </Alert>
-            <Alert bsStyle="danger">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              <a
-                href=""
-                onClick={(e) => { e.preventDefault(); }}
-                className="alert-link"
-              >Alert Link</a>.
-            </Alert>
           </Panel>
         </div>
       </div>
