@@ -35,7 +35,6 @@ restartButton.confirm = {
   dismiss_text: 'No'
 }
 
-
 //
 // Show the user their personal cart
 //
@@ -45,8 +44,14 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
   db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
-  var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
+  console.log('message.user_id', message.user_id)
+  var myItems = foodSession.cart.filter(function (i) {
+    console.log('i.user_id', i.user_id, i.added_to_cart)
+    return i.user_id === message.user_id && i.added_to_cart
+  })
+  logging.debug('MY ITEMS', myItems.length)
   var totalPrice = myItems.reduce((sum, i) => {
+    logging.debug('sum, i', sum, typeof i)
     return sum + menu.getCartItemPrice(i)
   }, 0)
 
@@ -335,11 +340,14 @@ function * sendOrderProgressDashboards (foodSession, message) {
         }
       }
 
-      const items = foodSession.cart.filter(i => i.added_to_cart)
-      const totalPrice = items.reduce((sum, i) => {
+      var menu = Menu(foodSession.menu)
+
+      var items = foodSession.cart.filter(i => i.added_to_cart)
+      var totalPrice = items.reduce(function (sum, i) {
         return sum + menu.getCartItemPrice(i) * i.item.item_qty
       }, 0)
-      const minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum
+
+      var minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum
 
       thisDashboard.attachments.push({
         'color': minimumMet ? '#3AA3E3' : '#fc9600',

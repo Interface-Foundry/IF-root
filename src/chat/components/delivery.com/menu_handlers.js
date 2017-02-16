@@ -482,6 +482,7 @@ handlers['food.item.add_to_cart'] = function * (message) {
     kip.debug('validation errors, user must fix some things')
     return $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: errJson})
   }
+  console.log('userItem', userItem, '********')
   userItem.added_to_cart = true
   yield db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.added_to_cart': true}}).exec()
 

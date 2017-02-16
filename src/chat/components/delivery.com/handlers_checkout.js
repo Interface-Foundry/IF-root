@@ -798,7 +798,7 @@ handlers['food.new_credit_card.success'] = function * (guestToken) {
   }).sort({ts: -1}).limit(1).exec()
   lastMsg = lastMsg[0]
 
-  logging.debug('heres the lastMsg', lastMsg)
+  // logging.debug('heres the lastMsg', lastMsg)
   yield $replyChannel.sendReplace(lastMsg, 'food.new_credit_card.success', {
     type: 'slack',
     data: {'text': 'New card worked!'}
