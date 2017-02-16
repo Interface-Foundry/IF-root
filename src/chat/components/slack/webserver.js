@@ -732,6 +732,26 @@ app.get('/health', function (req, res) {
   res.sendStatus(200)
 })
 
+//
+// allow messages to come in from external sources
+// you can use this with queue_insert.js
+//
+app.get('/incoming', function (req, res) {
+
+  // verify the request
+  if (!_.get(req, 'body.verificationToken') !== config.queueVerificationToken) {
+    res.status(504)
+    return res.end()
+  }
+
+  if (!_.get(req, 'body.message')) {
+    res.status(500)
+    return res.end()
+  }
+
+  queue.publish('incoming', req.body.message)
+})
+
 // app.get('/*', function(req, res, next) {
 //     res.sendfile(defaultPage)
 // })
