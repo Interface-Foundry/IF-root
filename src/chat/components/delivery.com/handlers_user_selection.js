@@ -402,18 +402,19 @@ handlers['food.admin.display_channels'] = function * (message) {
 }
 
 handlers['food.admin.toggle_channel_reorder'] = function * (message) {
+  let dataValue = _.get(message, 'data.value', _.get(message, 'source.actions[0].selected_options[0].value'));
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  if (message.data.value.toLowerCase() === 'everyone') {
+  if (dataValue.toLowerCase() === 'everyone') {
     foodSession.team_members = foodSession.all_members
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'everyone'
-  } else if (message.data.value.toLowerCase() === 'just_me') {
+  } else if (dataValue.toLowerCase() === 'just_me') {
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'just_me'
   } else {
     try {
       // find channel in meta.all_channels
-      var channel = _.find(slackbot.meta.all_channels, {'id': message.data.value})
+      var channel = _.find(slackbot.meta.all_channels, {'id': dataValue})
       foodSession.chosen_channel.name = channel.name
       foodSession.chosen_channel.id = channel.id
       foodSession.chosen_channel.is_channel = channel.is_channel
@@ -423,6 +424,9 @@ handlers['food.admin.toggle_channel_reorder'] = function * (message) {
       foodSession.team_members = foodSession.all_members.filter(user => {
         return _.includes(resp.members, user.id)
       })
+      foodSession.markModified('team_members')
+      yield foodSession.save()
+      return [];
     } catch (err) {
       $replyChannel.send(message, 'food.admin.select_channel_reorder', {type: message.origin, data: {text: 'hmm that didn\'t seem to work'}})
       logging.error('error getting members', err)
@@ -434,15 +438,16 @@ handlers['food.admin.toggle_channel_reorder'] = function * (message) {
 }
 
 handlers['food.admin.toggle_channel'] = function * (message) {
+  let dataValue =_.get(message, 'data.value', _.get(message, 'source.actions[0].selected_options[0].value'));
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  if (message.data.value.toLowerCase() === 'everyone') {
+  if (dataValue.toLowerCase() === 'everyone') {
     foodSession.team_members = foodSession.all_members
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'everyone'
-  } else if (message.data.value.toLowerCase() === 'just_me') {
+  } else if (dataValue.toLowerCase() === 'just_me') {
     foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'just_me'
-  } else if (message.data.value.toLowerCase() === 'channel') {
+  } else if (dataValue.toLowerCase() === 'channel') {
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'channel'
   } else {
     try {
