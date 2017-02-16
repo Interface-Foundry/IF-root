@@ -9,5 +9,5 @@ slack:
   verification_token: qHatSrSqnXj8ElOq5u5JGtMw
 logging:
   console:
-    level: silly
+    level: warn
 menuURL: 'http://localhost:8001/menus'

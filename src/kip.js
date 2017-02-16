@@ -42,7 +42,7 @@ function error (e, message, data) {
   }
 
   stack = stack.toString()
-  console.error(stack.red)
+  logging.error(stack.red)
 
   ;(new db.Error({
     message: message,
@@ -65,7 +65,7 @@ function log () {
   var args = Array.prototype.slice.call(arguments).map((o) => {
     return ['string', 'number', 'boolean'].indexOf(typeof o) >= 0 ? o : JSON.stringify(o, null, 2)
   })
-  console.log.apply(console, args)
+  logging.info.apply(console, args)
 }
 
 /**

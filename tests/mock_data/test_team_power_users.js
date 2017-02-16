@@ -5,11 +5,10 @@ function ISODate (d) { return new Date(d) }
 var team = {}
 
 team.slackbot = {
-  '_id': ObjectId('576d982221ab4abcecfbf0ac'),
   'access_token': 'xxx', // never used, instead we use bot.bot_access_token
   'scope': 'identify,bot',
   'team_name': 'Yolo Testing Inc.',
-  'team_id': 'yolo',
+  'team_id': 'team_stronk',
   'meta': {
     'cart_channels': [
       'C1JTZAENT'
@@ -19,7 +18,7 @@ team.slackbot = {
     'weekly_status_day': 'Friday',
     'weekly_status_enabled': true,
     'office_assistants': [
-      'admin_yolo'
+      'admin_team_stronk'
     ],
     'initialized': true,
     'dateAdded': ISODate('2016-06-24T20:29:22.265Z'),
@@ -38,8 +37,8 @@ team.slackbot = {
     mock: true
   },
   'bot': {
-    'bot_user_id': 'kip_yolo',
-    'bot_access_token': 'xoxb-yolo'
+    'bot_user_id': 'kip_team_stronk',
+    'bot_access_token': 'xoxb-team_stronk'
   },
   '__v': 1
 }
@@ -60,8 +59,7 @@ function chatusersToGroup () {
 }
 
 team.chatusers = [{
-  '_id': ObjectId('57e133b74f94faa56ce2401e'),
-  'id': 'admin_yolo',
+  'id': 'admin_team_stronk',
   'dm': 'D1K8798Q4',
   'is_bot': false,
   'is_ultra_restricted': false,
@@ -73,7 +71,7 @@ team.chatusers = [{
     'avatar_hash': 'g3a213561353',
     'real_name': 'Admin Yolo',
     'real_name_normalized': 'Admin Yolo',
-    'email': 'admin.yolo@gmail.com',
+    'email': 'admin.team_stronk@gmail.com',
     'image_24': 'https://secure.gravatar.com/avatar/3a21356135360f9e4b72ba546863d3de.jpg?s=24&d=https%3A%2F%2Fa.slack-edge.com%2F0180%2Fimg%2Favatars%2Fava_0021-24.png',
     'image_32': 'https://secure.gravatar.com/avatar/3a21356135360f9e4b72ba546863d3de.jpg?s=32&d=https%3A%2F%2Fa.slack-edge.com%2F66f9%2Fimg%2Favatars%2Fava_0021-32.png',
     'image_48': 'https://secure.gravatar.com/avatar/3a21356135360f9e4b72ba546863d3de.jpg?s=48&d=https%3A%2F%2Fa.slack-edge.com%2F3654%2Fimg%2Favatars%2Fava_0021-48.png',
@@ -88,11 +86,10 @@ team.chatusers = [{
   'color': '9f69e7',
   'deleted': false,
   'name': 'admin',
-  'team_id': 'yolo',
+  'team_id': 'team_stronk',
   'takenPreferences': false
 }, {
-  '_id': ObjectId('57e133b74f94faa56ce2401f'),
-  'id': 'bamf_yolo',
+  'id': 'bamf_team_stronk',
   'dm': 'D1KARK0F6',
   'is_bot': false,
   'is_ultra_restricted': false,
@@ -119,11 +116,10 @@ team.chatusers = [{
   'color': '674b1b',
   'deleted': false,
   'name': 'bamf',
-  'team_id': 'yolo',
+  'team_id': 'team_stronk',
   'takenPreferences': false
 }, {
-  '_id': ObjectId('57e133b14f94faa56ce24015'),
-  'id': 'kip_yolo',
+  'id': 'kip_team_stronk',
   'dm': null,
   'is_bot': true,
   'is_ultra_restricted': false,
@@ -149,7 +145,7 @@ team.chatusers = [{
   'color': '4bbe2e',
   'deleted': false,
   'name': 'kip',
-  'team_id': 'yolo',
+  'team_id': 'team_stronk',
   'takenPreferences': false
 }]
 
@@ -185,7 +181,9 @@ module.exports = team
 
 if (!module.parent) {
   var co = require('co')
-  co(team.reset).catch(e => {
+  co(team.reset).then(() => {
+    process.exit(0)
+  }).catch(e => {
     console.error(e)
   })
 }

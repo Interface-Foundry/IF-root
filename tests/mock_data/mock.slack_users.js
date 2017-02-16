@@ -268,9 +268,10 @@ User.prototype.goto = function (step) {
 /**
  * gets a fresh conversation for a user that we know about in the database
  */
-function * ExistingUser () {
+function * ExistingUser (id) {
+  id = id || 'bamf_yolo'
   var user = new User({
-    id: 'bamf_yolo'
+    id: id
   })
   return user
 }

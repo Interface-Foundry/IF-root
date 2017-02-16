@@ -5,7 +5,6 @@ function ISODate (d) { return new Date(d) }
 var team = {}
 
 team.slackbot = {
-  '_id': ObjectId('576d982221ab4abcecfbf0ac'),
   'access_token': 'xxx', // never used, instead we use bot.bot_access_token
   'scope': 'identify,bot',
   'team_name': 'Yolo Testing Inc.',
@@ -48,7 +47,6 @@ function chatusersToGroup () {
 }
 
 team.chatusers = [{
-  '_id': ObjectId('57e133b74f94faa56ce2401e'),
   'id': 'admin_yolo',
   'dm': 'D1K8798Q4',
   'is_bot': false,
@@ -79,7 +77,6 @@ team.chatusers = [{
   'team_id': 'yolo',
   'takenPreferences': false
 }, {
-  '_id': ObjectId('57e133b74f94faa56ce2401f'),
   'id': 'bamf_yolo',
   'dm': 'D1KARK0F6',
   'is_bot': false,
@@ -110,7 +107,6 @@ team.chatusers = [{
   'team_id': 'yolo',
   'takenPreferences': false
 }, {
-  '_id': ObjectId('57e133b14f94faa56ce24015'),
   'id': 'kip_yolo',
   'dm': null,
   'is_bot': true,
@@ -173,7 +169,9 @@ module.exports = team
 
 if (!module.parent) {
   var co = require('co')
-  co(team.reset).catch(e => {
+  co(team.reset).then(() => {
+    process.exit(0)
+  }).catch(e => {
     console.error(e)
   })
 }
