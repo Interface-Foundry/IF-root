@@ -200,12 +200,11 @@ app.post('/slackaction', next(function * (req, res) {
           case 'justme':
             json.attachments[0].actions[1].text = '◉ Just Me';
             team.meta.collect_from = 'me';
-            okButtonText = (json.attachments[json.attachments.length - 1].callback_id !== 'onboard_team') ? 'Start Shopping' : 'Tell Them Later';
             break;
           case 'channel':
             json.attachments[0].actions[2].text = '◉ By Channel';
             team.meta.collect_from = 'channel';
-            let channelSection = {
+            let channelSection = [{
               text: '',
               callback_id: 'channel_buttons_idk',
               actions: [{
@@ -214,7 +213,7 @@ app.post('/slackaction', next(function * (req, res) {
                 type: 'select',
                 data_source: 'channels'
               }]
-            };
+            }];
             channelSection.push(json.attachments.pop());
             json.attachments = [...json.attachments, ...channelSection];
             break;

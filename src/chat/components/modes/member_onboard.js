@@ -250,7 +250,7 @@ handlers['remind_later'] = function * (message, data) {
     default:
       break;
   }
-  if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
+  // if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
   if (msInFuture > 0) {
     let cronMsg = {
       mode: 'member_onboard',

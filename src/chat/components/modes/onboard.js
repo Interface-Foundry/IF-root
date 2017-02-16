@@ -53,7 +53,7 @@ handlers['start'] = function * (message) {
     var team = yield db.Slackbots.findOne({
       team_id: team_id
     }).exec();
-    let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+    let msInFuture =60 * 60 * 1000; // if in dev, 20 seconds
     let now = new Date();
     let cronMsg = {
       mode: 'onboard',
@@ -134,7 +134,7 @@ handlers['remind_later'] = function * (message, data) {
     default:
       break;
   }
-  if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
+  // if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
   let couponText = yield utils.couponText(message.source.team);
   if (msInFuture > 0) {
     let cronMsg = {
@@ -578,6 +578,9 @@ handlers['team'] = function * (message) {
     return kip.debug('incorrect team id : ', message);
   }
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  team.meta.collect_from = 'channel';
+  team.markModified('meta.collect_from');
+  yield team.save();
   let attachments = [{
     text: '*Step 3/3:* Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include:',
     mrkdwn_in: ['text'],
@@ -690,7 +693,7 @@ handlers['member'] = function*(message) {
     });
     yield newMessage.save();
     queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
-    let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+    // let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
     let now = new Date();
     let cronMsg = {
       text: 'Hey, it\'s me again! Ready to get started?',

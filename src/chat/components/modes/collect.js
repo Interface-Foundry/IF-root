@@ -15,7 +15,7 @@ winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
  * @param {Message} message       the message that led to this being shown
  * @yield {[Message]} an array of messages
  */
-function * handle(message) {
+function* handle(message) {
   let action;
   if (!message.data) {
     action = 'text';
@@ -35,7 +35,7 @@ module.exports.handle = handle;
  * @param {Message} message       the message that led to this being shown
  * @yield {[Message]} an array of messages
  */
-handlers['initial'] = function * (message) {
+handlers['initial'] = function*(message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -153,9 +153,10 @@ handlers['reminder'] = function*(message) {
       break;
   }
   channelMembers = _.uniqBy(channelMembers, a => a.id);
-  yield channelMembers.map(function * (a) {
+  yield channelMembers.map(function*(a) {
     if (a.id === message.source.user) return;
-    let attachments = [], newMessage;
+    let attachments = [],
+      newMessage;
     if (a.member_shop_onboarded) {
       attachments = [{
         text: '',
@@ -210,7 +211,7 @@ handlers['reminder'] = function*(message) {
         user_id: a.id
       });
       newMessage.reply[1].text = 'It looks like this is your first time ordering, let me show you how I can make your life a bit easier';
-      let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+      let msInFuture = 60 * 60 * 1000; // if in dev, 20 seconds
       let now = new Date();
       let cronMsg = {
         text: 'Hey, it\'s me again! Ready to get started?',
@@ -247,6 +248,7 @@ handlers['reminder'] = function*(message) {
 };
 
 handlers['handoff'] = function(message, askedMembers) {
+
   let attachments = [{
     text: 'Looking for something?',
     color: '#45a5f4',

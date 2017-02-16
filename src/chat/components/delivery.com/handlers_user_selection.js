@@ -263,7 +263,7 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'actions': buttonGroup,
-        'mrkdwn_in':['text']
+        'mrkdwn_in': ['text']
       }
     })
   }
@@ -343,22 +343,7 @@ handlers['food.admin.display_channels'] = function * (message) {
   msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
 
   if (chosenId !== 'just_me' && chosenId !== 'everyone') {
-    let channelName;
-    slackbot.meta.all_channels.map((channel) => {
-      if (channel.id === chosenId) {
-        channelName = channel.name;
-      }
-    });
     let actions = [];
-    if (channelName) {
-      actions.push({
-        'text': `#${channelName}`,
-        'name': 'loading',
-        'value': 'show',
-        'type': 'button',
-        'style': 'default'
-      });
-    }
     actions.push({
       name: 'food.admin.toggle_channel',
       text: 'Choose which channels you want',
