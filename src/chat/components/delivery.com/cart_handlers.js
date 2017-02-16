@@ -40,18 +40,15 @@ restartButton.confirm = {
 //
 handlers['food.cart.personal'] = function * (message, replace, over_budget) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  console.log("foodSession.cart.length", foodSession.cart.length) // already duplicated
 
   db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
-  console.log('message.user_id', message.user_id)
   var myItems = foodSession.cart.filter(function (i) {
-    console.log('i.user_id', i.user_id, i.added_to_cart)
     return i.user_id === message.user_id && i.added_to_cart
   })
-  logging.debug('MY ITEMS', myItems.length)
   var totalPrice = myItems.reduce((sum, i) => {
-    logging.debug('sum, i', sum, typeof i)
     return sum + menu.getCartItemPrice(i)
   }, 0)
 
@@ -204,6 +201,7 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message, over_bud
 //
 handlers['food.cart.personal.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  // logging.debug('foodSession.cart.length', foodSession.cart.length) //already duplicated
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
   var currentTime = Date.now()
@@ -235,6 +233,7 @@ function * sendOrderProgressDashboards (foodSession, message) {
   // we'll have to send the dashboard to the admin even if they are not hungry
   const adminIsNotHungry = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
   const allOrdersIn = foodSession.confirmed_orders.length >= foodSession.team_members.length + foodSession.email_users.length
+  logging.debug('allOrdersIn:', allOrdersIn)
 
   // make the list of things that hungry team members have ordered
   var menu = Menu(foodSession.menu)
@@ -263,6 +262,14 @@ function * sendOrderProgressDashboards (foodSession, message) {
     full_email_members.push(full_eu);
   }
 
+  var emailers = []
+  full_email_members.map(function (eu) {
+    if (foodSession.confirmed_orders.indexOf(eu.id) < 0) {
+      emailers.push(eu.email)
+    }
+  })
+  emailers = emailers.join(', ')
+
   var slackers = _.difference(foodSession.team_members.map(m => m.id), _.difference(foodSession.confirmed_orders, full_email_members.map(m => m.id)))
     .map(id => `<@${id}>`)
 
@@ -271,8 +278,6 @@ function * sendOrderProgressDashboards (foodSession, message) {
   } else {
     slackers = slackers.join(' ')
   }
-
-  var emailers = foodSession.email_users.join(', ')
 
   if (slackers.length > 0 || emailers.length > 0) {
     logging.debug('slackers', slackers, 'emailers', emailers)
@@ -304,7 +309,6 @@ function * sendOrderProgressDashboards (foodSession, message) {
   //
   // send the dashboards to all the users that are ready to get dashboards
   //
-
   yield dashboardUsers.map(function * (user) {
     var isAdmin = user.id === foodSession.convo_initiater.id
     logging.debug('sending dashboard to user', user.id, 'isAdmin?', isAdmin)
@@ -577,9 +581,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+  logging.debug('foodSession.cart.length', foodSession.cart.length) // duplication has happened OH GOD IT'S JOHN CARPENTER'S "Thing"
   teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
   lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
-  var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
+  // var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
 
   yield lateMembers.map(function * (userId) {
     var user = _.find(foodSession.team_members, {'id': userId})

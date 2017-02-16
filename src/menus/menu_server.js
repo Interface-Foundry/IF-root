@@ -132,8 +132,9 @@ router.post('/order', function (req, res) {
       var menu = Menu(foodSession.menu)
       var money_spent = 0;
       console.log('got cart and menu')
+      console.log('ORDER', order) //not yet in duplicate
       for (var i = 0; i < order.length; i++) {
-        // logging.debug(order[i]);
+        logging.debug(order[i]);
         cart.push({
           added_to_cart: true,
           item: order[i],
@@ -150,6 +151,7 @@ router.post('/order', function (req, res) {
       }
 
       console.log('added everything to team cart')
+      console.log('cart length', cart.length)
 
       var user_budgets = foodSession.user_budgets
       user_budgets[user_id] -= money_spent
@@ -208,14 +210,14 @@ router.post('/order', function (req, res) {
         foodSession.confirmed_orders.push(user_id)
         foodSession.save()
 
-        var eu = yield db.email_users.findOne({id: user_id});
+        // var eu = yield db.email_users.findOne({id: user_id});
 
-        var mailOptions = {
-          to: `<${eu.mail}>`,
-          from: `Kip Café <hello@kipthis.com>`,
-          subject: `I am the subject of an email`,
-          html: `<p>I am the body of an email. Murder murder all she wrote.</p>`
-        };
+        // var mailOptions = {
+        //   to: `<${eu.mail}>`,
+        //   from: `Kip Café <hello@kipthis.com>`,
+        //   subject: `I am the subject of an email`,
+        //   html: `<p>I am the body of an email. Murder murder all she wrote.</p>`
+        // };
       }
 
       logging.debug('ostensibly done');
