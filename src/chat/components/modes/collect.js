@@ -317,7 +317,7 @@ handlers['text'] = function*(message) {
     thread_id: message.source.channel
   }).sort('-ts').limit(10);
   var lastMessage = history[1];
-  let choices;
+  let choices = [];
   if (lastMessage.reply) {
     choices = _.flatten(lastMessage.reply.map(m => {
       return m.actions;
