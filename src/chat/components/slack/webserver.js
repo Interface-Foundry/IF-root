@@ -660,6 +660,7 @@ app.get('/newslack', (req, res) => co(function * () {
     return
   }
 
+  // request oauth tokens from slack if they are adding kip
   try {
     var body = {
       client_id: kip.config.slack.client_id,
@@ -678,53 +679,52 @@ app.get('/newslack', (req, res) => co(function * () {
     logging.error('error getting res_auth from Slack', err, body)
   }
 
-  try {
-    if (_.get(res_auth, 'ok')) {
-      var existingTeam = yield db.Slackbots.findOne({
-        'team_id': res_auth.team_id,
-        'deleted': {$ne: true}
-      })
-      if (_.get(existingTeam, 'team_id')) {
-        _.merge(existingTeam, res_auth)
-        existingTeam.meta.deleted = false
-        yield existingTeam.save()
-        yield utils.initializeTeam(existingTeam, res_auth)
-        yield slackModule.loadTeam(existingTeam)
-      } else {
-        var bot = new db.Slackbot(res_auth)
-        yield bot.save()
-        yield [utils.initializeTeam(bot, res_auth), utils.refreshAllUserIMs(bot)]
-        yield slackModule.loadTeam(bot)
-        var user = yield db.Chatuser.findOne({id: res_auth.user_id}).exec()
-        var message = new db.Message({
-          incoming: false,
-          thread_id: user.dm,
-          resolved: true,
-          user_id: user.id,
-          origin: 'slack',
-          text: '',
-          source: {
-            'team': bot.team_id,
-            'channel': user.dm,
-            'thread_id': user.dm,
-            'user': user.id,
-            'type': 'message'
-          },
-          mode: 'onboarding',
-          action: 'home',
-          user: user.id
-        })
-        // queue it up for processing
-        yield message.save()
-        queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
-      }
-    } else {
-      kip.error('res_auth not ok in /newslack', res_auth)
-    }
-    res.redirect('/thanks.html')
-  } catch (err) {
-    logging.error('error adding team', res_auth)
+  if (_.get(res_auth, 'ok') !== true) {
+    logging.error('res_auth not ok in /newslack', res_auth)
+    throw new Error('Response for oauth.access not ok')
   }
+
+  var existingTeam = yield db.Slackbots.findOne({
+    'team_id': res_auth.team_id,
+    'deleted': {$ne: true}
+  })
+
+  if (_.get(existingTeam, 'team_id')) {
+    logging.info('team exists previously while using /newslack')
+    _.merge(existingTeam, res_auth)
+    existingTeam.meta.deleted = false
+    yield existingTeam.save()
+    yield [utils.initializeTeam(existingTeam, res_auth), utils.getTeamMembers(existingTeam)]
+    yield slackModule.loadTeam(existingTeam)
+  } else {
+    logging.info('creating new slackbot for team: ', res_auth.team_id)
+    var slackbot = new db.Slackbot(res_auth)
+    yield slackbot.save()
+    yield [utils.initializeTeam(slackbot, res_auth), utils.getTeamMembers(slackbot)]
+    yield slackModule.loadTeam(slackbot)
+    var user = yield db.Chatuser.findOne({id: res_auth.user_id}).exec()
+    var message = new db.Message({
+      incoming: false,
+      thread_id: user.dm,
+      resolved: true,
+      user_id: user.id,
+      origin: 'slack',
+      text: '',
+      source: {
+        'team': slackbot.team_id,
+        'channel': user.dm,
+        'thread_id': user.dm,
+        'user': user.id,
+        'type': 'message'
+      },
+      mode: 'onboarding',
+      action: 'start'
+    })
+    // queue it up for processing
+    yield message.save()
+    queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
+  }
+  res.redirect('/thanks.html')
 }))
 
 // k8s readiness ingress health check

@@ -246,8 +246,15 @@ function * start () {
   kip.log('found', slackbots.length, 'slackbots')
 
   // Just need the RTM client to listen for messages
-  yield slackbots.map(slackbot => {
-    return loadTeam(slackbot)
+
+  // chunk so we load in smaller groups
+  var chunkedSlackbots = _.chunk(slackbots, 10)
+
+  yield chunkedSlackbots.map(function * (groups) {
+    logging.info('loading chunked bots instead of at once: ', groups.length)
+    yield groups.map(slackbot => {
+      return loadTeam(slackbot)
+    })
   })
 }
 
