@@ -134,33 +134,28 @@ router.post('/order', function (req, res) {
       console.log('got cart and menu')
       console.log('ORDER', order) //not yet in duplicate
       for (var i = 0; i < order.length; i++) {
-        logging.debug(order[i]);
+        // logging.debug(order[i]);
         cart.push({
           added_to_cart: true,
           item: order[i],
           user_id: user_id
         });
-        console.log('added everything to the cart')
+
         if (foodSession.budget) {
           console.log('calculating money spent')
-          console.log(cart)
           console.log(cart[cart.length-1])
-          money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))
-          console.log('calculated money spent')
-        }
+          money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))        }
       }
-
-      console.log('added everything to team cart')
+      console.log('CART', cart) //not  yet duplicate
+      console.log('added everything to the cart')
       console.log('cart length', cart.length)
 
       var user_budgets = foodSession.user_budgets
       user_budgets[user_id] -= money_spent
-
       console.log('calculated money spent')
 
-      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
-
-      console.log('updated the delivery object')
+      // yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
+      // console.log('updated the delivery object')
 
       //----------Message Queue-----------//
 
@@ -171,11 +166,10 @@ router.post('/order', function (req, res) {
         'source.user': user_id,
         mode: 'food',
         incoming: false
-      }).sort('-ts').limit(1);
+      }).sort('-ts').limit(1)
       console.log('foodMessage', foodMessage)
-      if (foodMessage && foodMessage.length) {
-        logging.debug('found foodmessage', foodMessage)
 
+      if (foodMessage && foodMessage.length) {
         foodMessage = foodMessage[0];
 
         logging.debug('foodMessage.source', foodMessage.source)
@@ -208,7 +202,8 @@ router.post('/order', function (req, res) {
         logging.info('email user')
 
         foodSession.confirmed_orders.push(user_id)
-        foodSession.save()
+        foodSession.save() //I BET THIS IS WHAT IS DOING IT FUCK YOU
+        //hopefully please omg
 
         // var eu = yield db.email_users.findOne({id: user_id});
 
@@ -217,7 +212,7 @@ router.post('/order', function (req, res) {
           mode: 'food',
           incoming: false
         }).sort('-ts').limit(1);
-        console.log('alternateFoodMessage', alternateFoodMessage)
+        // console.log('alternateFoodMessage', alternateFoodMessage)
         alternateFoodMessage = alternateFoodMessage[0]
 
         var mess = new db.Messages({

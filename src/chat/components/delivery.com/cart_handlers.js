@@ -227,6 +227,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 handlers['food.cart.update_dashboards'] = function * (message) {
   console.log('you can have the whole world or be satisfied with the boulevard')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  logging.debug('duplicated?', foodSession.cart.length) //yes is duplicated here
   return yield sendOrderProgressDashboards(foodSession, message)
 }
 
