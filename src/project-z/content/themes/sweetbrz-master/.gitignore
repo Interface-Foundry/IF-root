@@ -1,0 +1,9 @@
+*~
+.settings
+.buildpath
+.project
+.metadata
+*.log
+bin/
+node_modules/
+build/

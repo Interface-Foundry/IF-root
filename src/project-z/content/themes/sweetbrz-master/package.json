@@ -1,0 +1,24 @@
+{
+  "name": "SweetBRZ",
+  "version": "0.0.1",
+  "description": "Ghost CMS Bootstrap 4 Theme!",
+  "private": true,
+  "main": "Gruntfile.js",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-bower-task": "^0.4.0",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-csslint": "^1.0.0",
+    "grunt-contrib-cssmin": "^1.0.2",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-uglify": "^2.0.0",
+    "jshint": "^2.9.2"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "author": "yed30"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "sweetbrz",
+  "version": "0.0.1",
+  "description": "Ghost CMS Bootstrap 4 Theme!",
+  "authors": [
+    "yed30"
+  ],
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "Gruntfile.js",
+    ".*",
+    "*.json"
+  ],
+  "dependencies": {
+    "bootstrap": "~4.0.0",
+    "fancybox": "2.1.5",
+    "fontawesome": "*",
+    "prism": "^1.5.1"
+  },
+  "resolutions": {
+    "bootstrap": "~4.0.0"
+  }
+}

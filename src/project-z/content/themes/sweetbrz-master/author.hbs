@@ -1,0 +1,10 @@
+{{!< default}}
+<div class="post-image-container" {{#if author.cover}} style="background-image: url({{author.cover}})"{{/if}}>>
+      <div class="post-image-filter">
+        <div class="text-xs-center post-info">
+          <h1 class="post-title animated fadeInUp">{{author.name}}</h1>
+        <span>{{author.bio}}</span>
+        </div>
+      </div>
+</div>
+{{>loop}}

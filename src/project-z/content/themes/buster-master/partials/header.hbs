@@ -1,0 +1,17 @@
+<header class="header" id="header">
+    <div class="menu-button" onclick="toggle_navigation();">
+        <i class="fa fa-bars" aria-hidden="true"></i>
+    </div>
+    <div class="header-logo-container">
+        {{#if @blog.logo}}
+        <a onclick="toggle_infocard();"><img class="header-logo" src="{{@blog.logo}}" alt="{{@blog.title}}" /></a>
+    {{else}}
+        <a onclick="toggle_infocard();"><svg class="header-logo"/></a>
+    {{/if}}
+    </div>
+    {{#if @blog.navigation}}
+        <nav class="top-navigation-wrapper">
+            {{navigation}}
+        </nav>
+    {{/if}}
+</header>

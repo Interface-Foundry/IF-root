@@ -1,0 +1,169 @@
+body {
+  background-color: #F7F8FA;
+}
+a{
+  color: #1E7C23;
+}
+.card-primary {
+    background-color: #1E7C23;
+    border-color: #1E7C23;
+}
+
+nav.top {
+  line-height: 40px;
+  border-bottom-color: #0275d8;
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+}
+
+.navbar-light .navbar-brand {
+  font-size: 35px;
+  color: #1E7C23;
+}
+
+img.img-credits-author{
+  height: 50px;
+}
+
+div.container{
+  border-radius: 5px;
+}
+
+div.credits {
+border-top: 7px solid #0275D8;
+}
+
+h4.card-title a{
+  text-decoration: none;
+}
+
+i.rss{
+  color: #FF6600;
+}
+
+i.linkedin{
+  color: #077B5;
+}
+
+i.googleplus{
+  color: #DD4B39;
+}
+
+i.github{
+  color: #333;
+}
+
+img.img-author{
+  height: 20px;
+  margin-right: 15px;
+}
+
+img.img-post-author{
+  height: 40px;
+}
+
+p.card-text a{
+  text-decoration: none;
+}
+
+div.post-image-container{
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  height: 600px;
+}
+
+h1.post-title{
+  font-size: 4.5rem;
+  color: white;
+}
+
+.undecorated{
+  text-decoration: none;
+  color:white;
+}
+
+#footer .colophon {
+    padding: 50px 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#footer {
+    background: #252525;
+    color: #999;
+    font-size: 12px;
+    font-size: 1.2rem;
+    -webkit-animation-delay: 1s;
+    animation-delay: 1s;
+}
+
+div.post-info{
+  width: 700px;
+  margin: auto;
+  padding: 60px 20px 20px 20px;
+  color: #FFF;
+}
+
+div.post-info a{
+  text-decoration: none;
+  color: #FFF;
+}
+
+div.bg-white{
+  background-color: white;
+}
+
+div.post-image-filter{
+    background: rgba(0,0,0,0.47);
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.card-img-top{
+    height: 80px;
+}
+/* Keep images centered, and allow images wider than the main
+   text column to break out. */
+
+.post-content img {
+    display: block;
+    max-width: 720px;
+    height: auto;
+    padding: 0.6em 0;
+    /* Centers an image by (1) pushing its left edge to the
+       center of its container and (2) shifting the entire image
+       in the opposite direction by half its own width.
+       Works for images that are larger than their containers. */
+    position: relative;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    /* for Safari and iOS */
+    -ms-transform: translateX(-50%);
+    /* for IE9 */
+    transform: translateX(-50%);
+}
+
+
+/* Bootstrap issue with Google Custom Search */
+.gsc-control-cse .gsc-table-result {
+	font-family : inherit;
+}
+
+.gsc-control-cse .gsc-input-box {
+	height : inherit;
+}
+.gsc-resultsRoot,
+.gsc-tabData,
+.gsc-tabdActive
+input.gsc-input,
+.gsc-input-box,
+.gsc-input-box-hover,
+.gsc-input-box-focus,
+.gsc-search-button, input.gsc-search-button-v2 {
+	box-sizing  : content-box;
+	line-height : normal;
+	margin-top  : 0px;
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {{! Document Settings }}
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    {{! Page Meta }}
+    <title>{{meta_title}}</title>
+    <meta name="description" content="{{meta_description}}" />
+
+    {{! Styles }}
+    <link rel="stylesheet" href="{{asset "lib/fontawesome/font-awesome.min.css"}}">
+    <link rel="stylesheet" href="{{asset "lib/bootstrap/bootstrap.min.css"}}" >
+    <link rel="stylesheet" href="{{asset "lib/fancybox/jquery.fancybox.css"}}" />
+    <link rel="stylesheet" href="{{asset "css/prism.min.css"}}">
+    <link rel="stylesheet" href="{{asset "css/sweetbrz.css"}}">
+    
+    <link rel="shortcut icon" href="{{asset "/favicon.ico"}}">
+
+    {{! Responsive Meta Tags }}
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {{ghost_head}}
+</head>
+<body class="{{body_class}}">
+  <header>
+    {{>header}}
+  </header>
+  <div class="main">
+    {{{body}}}
+  </div>
+  <br />
+  {{>foot}}
+  {{ghost_foot}}
+  <!-- Compressed JavaScript -->
+  <script src="{{asset "lib/jquery/jquery.min.js"}}"></script>
+  <script src="{{asset "lib/tether/tether.min.js"}}"></script>
+  <script src="{{asset "lib/bootstrap/bootstrap.min.js"}}" ></script>
+  <script src="{{asset "lib/fancybox/jquery.fancybox.pack.js"}}"></script>
+  <script src="{{asset "js/prism.min.js"}}"></script>
+  <script src="{{asset "js/sweetbrz.js"}}"></script>
+</body>
+</html>

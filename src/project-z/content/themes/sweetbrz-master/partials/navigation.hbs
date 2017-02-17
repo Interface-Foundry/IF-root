@@ -1,0 +1,17 @@
+<div class="collapse" id="exCollapsingNavbar">
+  {{#if @blog.navigation}}
+  <div>
+   <ul class="nav nav-pills">
+      {{#foreach navigation}}
+        <li class="nav-item">
+          <a class="nav-link" href=" {{url}}">{{label}}</a>
+        </li>
+      {{/foreach}}
+    </ul>
+  </div>
+  {{/if}}
+  <div class="googlesearch">
+<gcse:search></gcse:search>
+</div>
+{{tags}}
+</div>
