@@ -17,5 +17,5 @@ slack:
   client_secret: 4b3e730b1162664f10f4f23865e0964c
   verification_token: PyeQ1gjE81cbAWFshg24to0U
   redirect_uri: https://0582f004.ngrok.io/newslack
-kipPayURL: https://692d850d.ngrok.io
-menuURL: http://34a4437c.ngrok.io/menus
+kipPayURL: https://50ad31f7.ngrok.io
+menuURL: http://c7ed392d.ngrok.io/menus

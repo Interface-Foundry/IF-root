@@ -212,12 +212,35 @@ router.post('/order', function (req, res) {
 
         // var eu = yield db.email_users.findOne({id: user_id});
 
-        // var mailOptions = {
-        //   to: `<${eu.mail}>`,
-        //   from: `Kip Café <hello@kipthis.com>`,
-        //   subject: `I am the subject of an email`,
-        //   html: `<p>I am the body of an email. Murder murder all she wrote.</p>`
-        // };
+        var alternateFoodMessage = yield db.Messages.find({
+          'source.user': foodSession.convo_initiater.id,
+          mode: 'food',
+          incoming: false
+        }).sort('-ts').limit(1);
+        console.log('alternateFoodMessage', alternateFoodMessage)
+        alternateFoodMessage = alternateFoodMessage[0]
+
+        var mess = new db.Messages({
+          incoming: true,
+          thread_id: alternateFoodMessage.thread_id,
+          action: 'cart.update_dashboards',
+          user_id: user_id,
+          mode: 'food',
+          origin: 'slack',
+          source: alternateFoodMessage.source,
+        })
+
+        yield mess.save();
+
+        request.post({
+          url: kip.config.slack.internal_host + '/menuorder',
+          json: true,
+          body: {
+            topic: 'incoming',
+            verification_token: kip.config.slack.verification_token,
+            message: mess
+          }
+        })
       }
 
       logging.debug('ostensibly done');

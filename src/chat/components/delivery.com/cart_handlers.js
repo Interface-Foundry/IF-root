@@ -224,6 +224,11 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   yield sendOrderProgressDashboards(foodSession, message)
 }
 
+handlers['food.cart.update_dashboards'] = function * (message) {
+  console.log('you can have the whole world or be satisfied with the boulevard')
+  return;
+}
+
 //
 // Sends ALL the order progress dashboards
 //
