@@ -113,7 +113,7 @@ function saveClick(productId,userId,url,req){
 	  if (err){
 	  	console.error('Mongo err ',err)
 	  }else {
-		console.log('click saved!');
+		
 	  }
 	});
 }		
