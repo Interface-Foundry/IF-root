@@ -13,7 +13,7 @@ import {
   ListGroup, ListGroupItem, Alert, Table
 } from 'react-bootstrap';
 
-const title = 'Attack as Smelts';
+const title = 'Stack All Salts';
 
 function plotData() {
   const data = [];
@@ -147,39 +147,7 @@ const waypointPaths = [ { user_id: 'U3620AA5T',
     waypoints: [ 1010, 1020, 1100, 1102, 1110, 1102, 1001 ] }
 ];
 
-const heads = [
-  'Date / Time',
-  'Team',
-  'User',
-  'Item',
-  'Price',
-  'Quantity',
-  'Total',
-  'Cart ID',
-  'Platform'
-];
 
-const tableData = [
-  ['01/15/17 3:15 pm',
-    'kipsearch',
-    'Alyx Baldwin',
-    'Shnozzleberries',
-    '$2,321.55',
-    '2',
-    '$5,643.10',
-    'slack_212344234',
-    'slack'
-  ], ['01/22/17 8:15 pm',
-    'kipsearch',
-    'Alyx Baldwin',
-    'Berryberries',
-    '$1,218.63',
-    '5',
-    '$6,093.15',
-    'slack_212344234',
-    'slack'
-  ]
-];
 
 function displayFlotCharts(props, context) {
   context.setTitle(title);
@@ -203,29 +171,18 @@ function displayFlotCharts(props, context) {
     cells.push(<Cell fill={COLORS[i]} />)
   }
   
-  var orderhead = [];
-  for (var i = 0; i < heads.length; i++){
-    orderhead.push(<th>{heads[i]}</th>)
-  }  
-  var orders = [];
-  for (var i = 0; i < tableData.length; i++){
-    orders.push(<tr>
-      {tableData[i].map((order) => (<td>{order}</td>))}
-    </tr>)
-  }
-
-
   return (
     <div>
       <div className="row">
         <div className="col-lg-12">
-          <PageHeader>Tack Steam Slats</PageHeader>
+          <PageHeader>All stack slats</PageHeader>
         </div>
       </div>
 
       <div className="row">
         <div className="col-lg-12">
-          <Panel header={<span>Table of Waypoint Routes</span>}>
+
+          <<Panel header={<span>Table of Waypoint Routes</span>}>
             <div className="table-responsive">
               <Table>
                 <thead>
@@ -241,25 +198,8 @@ function displayFlotCharts(props, context) {
               </Table>
             </div>
           </Panel>
-        </div>
-      </div>
 
-      <div className="row">
-        <div className="col-lg-12">
-          <Panel header={<span>Team Order Stats</span>}>
-            <div className="table-responsive">
-              <Table>
-                <thead>
-                    <tr>
-                        {orderhead}
-                    </tr>
-                </thead>
-                <tbody>
-                  {orders}
-                </tbody>
-              </Table>
-            </div>
-          </Panel>
+
         </div>
       </div>
 
@@ -346,7 +286,6 @@ function displayFlotCharts(props, context) {
     </div>
   );
 }
-
 displayFlotCharts.contextTypes = { setTitle: PropTypes.func.isRequired };
 
 export default displayFlotCharts;

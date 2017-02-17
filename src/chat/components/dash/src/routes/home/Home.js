@@ -58,13 +58,13 @@ const tableData = [
     '$5,643.10',
     'slack_212344234',
     'slack'
-  ], ['01/15/17 3:15 pm',
+  ], ['01/22/17 8:15 pm',
     'kipsearch',
     'Alyx Baldwin',
-    'Shnozzleberries',
-    '$2,321.55',
-    '2',
-    '$5,643.10',
+    'Berryberries',
+    '$1,218.63',
+    '5',
+    '$6,093.15',
     'slack_212344234',
     'slack'
   ]
