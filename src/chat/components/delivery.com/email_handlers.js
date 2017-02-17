@@ -8,11 +8,24 @@ var $allHandlers // this is how you can access handlers from other files
 // exports
 var handlers = {}
 
+
 handlers['food.admin.team.add_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var e = message.source.callback_id;
   foodSession.email_users.push(e);
   yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
+  yield handlers['food.admin.team.email_members'](message);
+}
+
+//~~~~~~~~~~//
+
+handlers['food.admin.team.add_all_emails'] = function * (message) {
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
+  var et = yield db.email_users.find({team_id: message.source.team});
+  et.map(function (eu) {
+    foodSession.email_users.push(eu.email)
+  })
+  yield foodSession.save()
   yield handlers['food.admin.team.email_members'](message);
 }
 
@@ -86,7 +99,6 @@ handlers['food.admin.team.email_members'] = function * (message) {
     };
 
     // var emails = [];
-    //I don't even know what's going on anymore
     et.slice(index, index + 4).map(function (e) {
       msg_json.attachments.push({
         "text": e.email,
@@ -107,7 +119,6 @@ handlers['food.admin.team.email_members'] = function * (message) {
           }
       ]});
     });
-
 
     var prev = {
       "name": "food.admin.team.email_members",
@@ -167,6 +178,15 @@ handlers['food.admin.team.email_members'] = function * (message) {
            reorder: reorder,
            resto: previousRestaurant
          }
+       }, {
+         'name': 'food.admin.team.add_all_emails',
+         'text': 'Add All',
+         'style': 'default',
+         'type': 'button',
+         'value': {
+           reorder: reorder,
+           resto: previousRestaurant
+         }
        }]
    });
 
@@ -201,6 +221,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
 }
 
 //~~~~~~~~~~//
+
 
 handlers['food.admin.team.add_email'] = function * (message) {
   // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
