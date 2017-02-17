@@ -12,7 +12,7 @@ function * handle(message) {
     'team_id': message.source.team
   }).exec();
   let isAdmin = yield utils.isAdmin(message.source.user, team);
-  if (!isAdmin) {
+  if (!isAdmin && team.meta.office_assistants.length > 0) {
     return yield handlers['not_admin'](message);
   }
   if (!message.data && message.text && message.text !== 'home') {
