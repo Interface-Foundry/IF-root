@@ -3,28 +3,27 @@ import {
   GraphQLObjectType as ObjectType,
 } from 'graphql';
 
-import metrics from './queries/metrics';
-import messages from './queries/messages';
-import carts from './queries/carts';
-import me from './queries/me';
-import deliveries from './queries/deliveries';
 import teams from './queries/teams';
 import users from './queries/users';
-
-
-
+import deliveries from './queries/deliveries';
+import carts from './queries/carts';
+import items from './queries/items';
+import metrics from './queries/metrics';
+import messages from './queries/messages';
+import me from './queries/me';
 
 const schema = new Schema({
   query: new ObjectType({
     name: 'Query',
     fields: {
+      teams,
+      users,
+      deliveries,
+      carts,
+      items,
       messages,
       metrics,
-      carts,
-      deliveries,
-      me,
-      teams,
-      users
+      me
     },
   }),
 });

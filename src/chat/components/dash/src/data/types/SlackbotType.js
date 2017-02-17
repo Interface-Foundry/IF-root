@@ -4,8 +4,14 @@ import {
   GraphQLString as StringType,
   GraphQLNonNull as NonNull,
   GraphQLScalarType as GraphQLScalarType,
-  GraphQLList as ListType
+  GraphQLList as ListType,
+  GraphQLInt
 } from 'graphql';
+import Slackbot from '../models/Slackbot';
+import DeliveryType from './DeliveryType';
+import ChatuserType from './ChatuserType';
+
+import {resolver} from 'graphql-sequelize';
 
 const SlackbotType = new ObjectType({
   name: 'Slackbot',
@@ -201,10 +207,68 @@ const SlackbotType = new ObjectType({
         resolve(slackbot) {
           return slackbot.used_coupons
         }
-      }
+      },
 
+      members: {
+        type: new ListType(ChatuserType),
+        args: {
+          limit: {
+            type: GraphQLInt
+          },
+          offset: {
+            type: GraphQLInt
+          },
+          order: {
+            type: StringType
+          },
+          first: {
+            type: GraphQLInt
+          }
+      }, resolve: resolver(Slackbot.Members, {
+        before: function (options, args) {
+          if (args.first) {
+            options.order = options.order || [];
+            options.order.push(['time_started', 'ASC']);
+            if (args.first !== 0) {
+              options.limit = args.first;
+            }
+          }
+          return options;
+        }
+      })
+    },
+
+
+    food_sessions: {
+        type: new ListType(DeliveryType),
+        args: {
+          limit: {
+            type: GraphQLInt
+          },
+          offset: {
+            type: GraphQLInt
+          },
+          order: {
+            type: StringType
+          },
+          first: {
+            type: GraphQLInt
+          }
+      }, resolve: resolver(Slackbot.Deliveries, {
+        before: function (options, args) {
+          if (args.first) {
+            options.order = options.order || [];
+            options.order.push(['time_started', 'ASC']);
+            if (args.first !== 0) {
+              options.limit = args.first;
+            }
+          }
+          return options;
+        }
+      })
     }
-  },
+  }
+ },
 });
 
 export default SlackbotType;

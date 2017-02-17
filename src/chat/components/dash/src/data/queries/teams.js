@@ -6,8 +6,9 @@ import {
   GraphQLNonNull as NonNull,
 } from 'graphql';
 import Conn from '../sequelize';
-
+import Slackbot from '../models/Slackbot';
 const SlackbotListType = new ListType(SlackbotType);
+import {resolver} from 'graphql-sequelize';
 
 const teams = {  
   type: SlackbotListType,
@@ -128,9 +129,11 @@ const teams = {
         type:  StringType
       }
   },
-  resolve (root, args) {
-   return Conn.models.slackbot.findAll({ limit: 1000, order: [['dateAdded', 'DESC']]})
-  }
+  resolve: resolver(Slackbot)
+
+  // resolve (root, args) {
+  //  return Conn.models.slackbot.findAll({ limit: 100, order: [['dateAdded', 'DESC']]})
+  // }
 }
 
 export default teams;

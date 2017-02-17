@@ -1,5 +1,6 @@
 import DataType from 'sequelize';
 import Conn from '../sequelize';
+import Item from './Item';
 
 const Cart = Conn.define('cart', {
   id: {
@@ -43,5 +44,8 @@ const Cart = Conn.define('cart', {
 },{
     timestamps: false
 });
+
+// Cart.hasMany(Item);
+// Item.belongsTo(Cart);
 
 export default Cart;

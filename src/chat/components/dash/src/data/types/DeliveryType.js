@@ -4,8 +4,14 @@ import {
   GraphQLString as StringType,
   GraphQLNonNull as NonNull,
   GraphQLScalarType as GraphQLScalarType,
-  GraphQLList as ListType
+  GraphQLList as ListType,
+  GraphQLBoolean as BooleanType
 } from 'graphql';
+
+import {resolver} from 'graphql-sequelize';
+
+import TeamType from './SlackbotType'
+import TeamModel from '../models/Slackbot'
 
 const DeliveryType = new ObjectType({
   name: 'Delivery',
@@ -36,7 +42,7 @@ const DeliveryType = new ObjectType({
         type: StringType,
         resolve(delivery) {
           return delivery.team_id
-        }
+        }    
       },
 
       onboarding: {
@@ -201,7 +207,7 @@ const DeliveryType = new ObjectType({
       },
 
       completed_payment: {
-        type:  StringType,
+        type:  BooleanType,
         resolve(delivery) {
           return delivery.completed_payment
         }

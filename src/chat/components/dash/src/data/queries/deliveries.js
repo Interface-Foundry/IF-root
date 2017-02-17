@@ -4,6 +4,7 @@ import {
   GraphQLList as ListType,
   GraphQLString as StringType,
   GraphQLNonNull as NonNull,
+  GraphQLBoolean as BooleanType
 } from 'graphql';
 import Conn from '../sequelize';
 
@@ -121,7 +122,7 @@ const deliveries = {
       },
 
       completed_payment: {
-        type:  StringType
+        type:  BooleanType
       },
 
       delivery_error: {
@@ -129,7 +130,8 @@ const deliveries = {
       },
   },
   resolve (root, args) {
-   return Conn.models.delivery.findAll({ limit: 10000, order: [['time_started', 'DESC']]})
+   return Conn.models.delivery.findAll({ where: args})
+   // limit: 1000, order: [['time_started', 'DESC']]
   }
 }
 

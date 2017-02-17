@@ -1,5 +1,6 @@
 import DataType from 'sequelize';
 import Conn from '../sequelize';
+import Team from './Slackbot';
 
 const Delivery = Conn.define('delivery', {
   id: {
@@ -121,7 +122,19 @@ const Delivery = Conn.define('delivery', {
   },
   
 },{
-    timestamps: false
+    timestamps: false,
+     freezeTableName: true
 });
+
+
+// // Defines "IS A" relationship: [Patient] IS A [User]
+// Patient.belongsTo(models.User, {
+//     foreignKey: {
+//       name: 'id',
+//       type: DataTypes.INTEGER,
+//       primaryKey: true
+//     },
+//     foreignKeyConstraint: true
+// })
 
 export default Delivery;

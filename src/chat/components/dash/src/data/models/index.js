@@ -11,9 +11,10 @@ import sequelize from '../sequelize';
 import Slackbot from './Slackbot';
 import Chatuser from './Chatuser';
 import Delivery from './Delivery';
-import Metric from './Metric';
-import Message from './Message';
 import Cart from './Cart';
+import Item from './Item';
+import Message from './Message';
+import Metric from './Metric';
 
 import User from './User';
 import UserLogin from './UserLogin';
@@ -46,4 +47,4 @@ function sync(...args) {
 }
 
 export default { sync };
-export { Slackbot, Chatuser, Message, Metric, Cart, Delivery, User, UserLogin, UserClaim, UserProfile };
+export { Slackbot, Chatuser, Delivery, Cart, Item, Message, Metric, User, UserLogin, UserClaim, UserProfile };

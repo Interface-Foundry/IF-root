@@ -1,15 +1,19 @@
 import DataType from 'sequelize';
 import Conn from '../sequelize';
+import Delivery from './Delivery';
+import Chatuser from './Chatuser';
+
 
 const Slackbot = Conn.define('slackbot', {
   id: {
-    type: DataType.UUID,
-    defaultValue: DataType.UUIDV1,
-    primaryKey: true,
+    type: DataType.STRING(255)
   },
 
   team_id: {
-    type: DataType.STRING(255)
+    // type: DataType.STRING(255)
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV1,
+    primaryKey: true,
   },
 
   access_token: {
@@ -119,5 +123,10 @@ const Slackbot = Conn.define('slackbot', {
 },{
     timestamps: false
 });
+
+Slackbot.Deliveries = Slackbot.hasMany(Delivery, { as: 'food_sessions', foreignKey: 'team_id'});
+Delivery.Team = Delivery.belongsTo(Slackbot, { as: 'team', foreignKey: 'team_id'});
+Slackbot.Members = Slackbot.hasMany(Chatuser, { as: 'members', foreignKey: 'team_id'});
+Chatuser.Team = Chatuser.belongsTo(Slackbot, { as: 'team', foreignKey: 'team_id'});
 
 export default Slackbot;

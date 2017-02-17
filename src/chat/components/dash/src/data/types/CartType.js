@@ -7,6 +7,8 @@ import {
   GraphQLList as ListType
 } from 'graphql';
 
+import ItemType from './ItemType'
+
 const CartType = new ObjectType({
   name: 'Cart',
   fields: () => {
@@ -41,14 +43,12 @@ const CartType = new ObjectType({
           return cart.deleted
         }
        },
-
        created_date: {
           type: StringType,
           resolve(cart) {
            return cart.created_date
           }
         },
-
        purchased_date: {
           type: StringType,
           resolve(cart) {
