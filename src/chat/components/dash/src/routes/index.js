@@ -15,7 +15,7 @@ import home from './home';
 import login from './login';
 import table from './dashboardPages/tables';
 import button from './dashboardPages/buttons';
-import flotcharts from './dashboardPages/flotCharts';
+import slackteamstats from './dashboardPages/slackteamstats';
 import forms from './dashboardPages/forms';
 import grid from './dashboardPages/grid';
 import icons from './dashboardPages/icons';
@@ -54,7 +54,7 @@ export default [
       // contact,
       table,
       button,
-      flotcharts,
+      slackteamstats,
       forms,
       grid,
       icons,

@@ -40,7 +40,7 @@ class Sidebar extends Component {
               </a>
             </li>
             <li>
-              <a href="" onClick={(e) => { e.preventDefault(); history.push('/flotcharts'); }} >
+              <a href="" onClick={(e) => { e.preventDefault(); history.push('/slackteamstats'); }} >
                 <i className="fa fa fa-comments-o fa-fw" /> &nbsp; Slack Team Stats
               </a>
             </li>

@@ -1,9 +1,9 @@
 import React from 'react';
-import FlotCharts from './FlotCharts';
+import FlotCharts from './slackteamstats';
 
 export default {
 
-  path: '/flotcharts',
+  path: '/slackteamstats',
 
   action() {
     return <FlotCharts />;

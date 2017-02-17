@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/lib/Button';
 import Panel from 'react-bootstrap/lib/Panel';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
 import {
-  LineChart, Tooltip, PieChart, Pie,
+  LineChart, Sector, Cell, Tooltip, PieChart, Pie,
   Line, XAxis, YAxis, Legend,
   CartesianGrid, Bar, BarChart,
   ResponsiveContainer, AreaChart, Area } from '../../../vendor/recharts';
@@ -56,7 +56,8 @@ const waypointsCount = [
   { waypoint: 1330, users: [ 'U3620AA5T' ], total: 19 },
   { waypoint: 1332, users: [ 'U3620AA5T' ], total: 19 } ];
 
-const teamStats = [ 0, 0, 80, 64 ];
+const teamStats = [ 16, 11, 80, 64 ];
+const COLORS = ['#FF0000', '#FF8888', '#0000FF', '#8888FF'];
 
 function getPieChartTeamStatsData(teamStats){ // [store item count, store order count, cafe item count, cafe order count]
   const data = [];
@@ -164,6 +165,12 @@ function displayFlotCharts(props, context) {
       </td>
     </tr>)
   }
+
+  var cells = [];
+  for (var i = 0; i < teamStats.length; i++){
+    cells.push(<Cell fill={COLORS[i]} />)
+  }
+  
   return (
     <div>
       <div className="row">
@@ -202,7 +209,9 @@ function displayFlotCharts(props, context) {
             <div>
               <ResponsiveContainer width="100%" aspect={2}>
                 <PieChart >
-                  <Pie isAnimationActive={false} data={pieChartTeamStatsData} fill="#8884d8" label />
+                  <Pie isAnimationActive={false} data={pieChartTeamStatsData}  label>
+                    {cells}
+                  </Pie>
                   <Tooltip />
                   <Legend />
                 </PieChart>
