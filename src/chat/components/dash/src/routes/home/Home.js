@@ -9,6 +9,7 @@ import s from './Home.css';
 import StatWidget from '../../components/Widget';
 import Donut from '../../components/Donut';
 import Table from '../../components/Table';
+import TeamSideBar from '../../components/TeamSideBar';
 
 import {
   Tooltip,
@@ -18,6 +19,13 @@ import {
 
 const title = 'Pokemon Gym - Escape Velocity';
 
+
+/************************************************
+    ┏━┳━┳┓┏┳━┳┓┏━┓┏━┳━┳━━┳━┓
+    ┃━┫╻┃ ┗┛┃┃┃┃┃━┫┃┃┃╻┣ ┓┏┫╻┃
+    ┣━┃╻┃ ┃┃┃┏┫┗┫━┫┃┃┃╻┃ ┃┃┃╻┃
+    ┗━┻┻┻┻┻┻┛┗━┻━┛┗━┻┻┛┗┛┗┻┛
+************************************************/
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400, value: 600 },
   { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, value: 300 },
@@ -60,7 +68,8 @@ const tableData = [
     'slack_212344234',
     'slack'
   ]
-]
+];
+/* *********************************************** */
 
 function Home(props, context) {
   context.setTitle(title);

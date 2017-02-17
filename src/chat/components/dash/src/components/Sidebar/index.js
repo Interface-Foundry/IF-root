@@ -1,7 +1,29 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import history from '../../core/history';
-import SubSidebar from '../../components/SubSidebar';
+import TeamSideBar from '../../components/TeamSideBar';
+
+const Teams = [
+  {name : 'Team A', url: '/'},
+  {name : 'Team B', url: '/'},
+  {name : 'Team C', url: '/'},
+  {name : 'Team D', url: '/'},
+  {name : 'Team E', url: '/'},
+  {name : 'Team F', url: '/'},
+  {name : 'Team G', url: '/'},
+  {name : 'Team H', url: '/'},
+  {name : 'Team I', url: '/'},
+  {name : 'Team J', url: '/'},
+  {name : 'Team K', url: '/'},
+  {name : 'Team L', url: '/'},
+  {name : 'Team M', url: '/'},
+  {name : 'Team N', url: '/'},
+  {name : 'Team O', url: '/'},
+  {name : 'Team P', url: '/'},
+  {name : 'Team Q', url: '/'},
+  {name : 'Team R', url: '/'},
+  {name : 'Team S', url: '/'}
+]
 
 class Sidebar extends Component {
 
@@ -84,7 +106,7 @@ class Sidebar extends Component {
           </ul>
         </div>
 
-        <SubSidebar className="sidebar-nav navbar-collapse collapse" />
+        <TeamSideBar className="sidebar-nav navbar-collapse collapse" teams={Teams} />
       </div>
     );
   }
