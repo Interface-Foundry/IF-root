@@ -4,30 +4,16 @@
 // Returns the URL for the current object scope i.e. If inside a post scope will return post permalink
 // `absolute` flag outputs absolute URL, else URL is relative
 
-var config          = require('../config'),
-    schema          = require('../data/schema').checks,
-    url;
+var hbs            = require('express-hbs'),
+    getMetaDataUrl = require('../data/meta/url');
 
-url = function (options) {
-    var absolute = options && options.hash.absolute;
+function url(options) {
+    var absolute = options && options.hash.absolute,
+        url = getMetaDataUrl(this, absolute);
 
-    if (schema.isPost(this)) {
-        return config.urlFor('post', {post: this}, absolute);
-    }
+    url = encodeURI(decodeURI(url));
 
-    if (schema.isTag(this)) {
-        return config.urlFor('tag', {tag: this}, absolute);
-    }
-
-    if (schema.isUser(this)) {
-        return config.urlFor('author', {author: this}, absolute);
-    }
-
-    if (schema.isNav(this)) {
-        return config.urlFor('nav', {nav: this}, absolute);
-    }
-
-    return config.urlFor(this, absolute);
-};
+    return new hbs.SafeString(url);
+}
 
 module.exports = url;

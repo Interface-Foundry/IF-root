@@ -5,7 +5,6 @@ var supportedLocales    = ['en'],
     fs                  = require('fs'),
     chalk               = require('chalk'),
     MessageFormat       = require('intl-messageformat'),
-    errors              = require('./errors'),
 
     // TODO: fetch this dynamically based on overall blog settings (`key = "defaultLang"` in the `settings` table
     currentLocale       = 'en',
@@ -18,10 +17,10 @@ I18n = {
      * Helper method to find and compile the given data context with a proper string resource.
      *
      * @param {string} path Path with in the JSON language file to desired string (ie: "errors.init.jsNotBuilt")
-     * @param {json} context
+     * @param {object} [bindings]
      * @returns {string}
      */
-    t: function t(path, context) {
+    t: function t(path, bindings) {
         var string = I18n.findString(path),
             msg;
 
@@ -33,11 +32,11 @@ I18n = {
             string.forEach(function (s) {
                 var m = new MessageFormat(s, currentLocale);
 
-                msg.push(m.format(context));
+                msg.push(m.format(bindings));
             });
         } else {
             msg = new MessageFormat(string, currentLocale);
-            msg = msg.format(context);
+            msg = msg.format(bindings);
         }
 
         return msg;
@@ -51,11 +50,14 @@ I18n = {
      */
     findString: function findString(msgPath) {
         var matchingString, path;
-
         // no path? no string
         if (_.isEmpty(msgPath) || !_.isString(msgPath)) {
             chalk.yellow('i18n:t() - received an empty path.');
             return '';
+        }
+
+        if (blos === undefined) {
+            I18n.init();
         }
 
         matchingString = blos;
@@ -67,7 +69,7 @@ I18n = {
         });
 
         if (_.isNull(matchingString)) {
-            errors.logError('Unable to find matching path [' + msgPath + '] in locale file.');
+            console.error('Unable to find matching path [' + msgPath + '] in locale file.\n');
             matchingString = 'i18n error: path "' + msgPath + '" was not found.';
         }
 
@@ -82,7 +84,14 @@ I18n = {
     init: function init() {
         // read file for current locale and keep its content in memory
         blos = fs.readFileSync(__dirname + '/translations/' + currentLocale + '.json');
-        blos = JSON.parse(blos);
+
+        // if translation file is not valid, you will see an error
+        try {
+            blos = JSON.parse(blos);
+        } catch (err) {
+            blos = undefined;
+            throw err;
+        }
 
         if (global.Intl) {
             // Determine if the built-in `Intl` has the locale data we need.

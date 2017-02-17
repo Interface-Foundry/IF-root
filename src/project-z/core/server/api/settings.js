@@ -7,6 +7,7 @@ var _            = require('lodash'),
     canThis      = require('../permissions').canThis,
     errors       = require('../errors'),
     utils        = require('./utils'),
+    i18n         = require('../i18n'),
 
     docName      = 'settings',
     settings,
@@ -36,9 +37,9 @@ var _            = require('lodash'),
 */
 updateConfigCache = function () {
     var errorMessages = [
-        'Error: Invalid JSON in settings.labs',
-        'The column with key "labs" could not be parsed as JSON',
-        'Please try updating a setting on the labs page, or manually editing your DB'
+        i18n.t('errors.api.settings.invalidJsonInLabs'),
+        i18n.t('errors.api.settings.labsColumnCouldNotBeParsed'),
+        i18n.t('errors.api.settings.tryUpdatingLabs')
     ], labsValue = {};
 
     if (settingsCache.labs && settingsCache.labs.value) {
@@ -57,7 +58,11 @@ updateConfigCache = function () {
             cover: (settingsCache.cover && settingsCache.cover.value) || '',
             navigation: (settingsCache.navigation && JSON.parse(settingsCache.navigation.value)) || [],
             postsPerPage: (settingsCache.postsPerPage && settingsCache.postsPerPage.value) || 5,
-            permalinks: (settingsCache.permalinks && settingsCache.permalinks.value) || '/:slug/'
+            permalinks: (settingsCache.permalinks && settingsCache.permalinks.value) || '/:slug/',
+            twitter: (settingsCache.twitter && settingsCache.twitter.value) || '',
+            facebook: (settingsCache.facebook && settingsCache.facebook.value) || '',
+            timezone: (settingsCache.activeTimezone && settingsCache.activeTimezone.value) || config.theme.timezone,
+            amp: (settingsCache.amp && settingsCache.amp.value === 'true')
         },
         labs: labsValue
     });
@@ -70,7 +75,8 @@ updateConfigCache = function () {
  * @param {Object} settings
  * @returns {Settings}
  */
-updateSettingsCache = function (settings) {
+updateSettingsCache = function (settings, options) {
+    options = options || {};
     settings = settings || {};
 
     if (!_.isEmpty(settings)) {
@@ -83,7 +89,7 @@ updateSettingsCache = function (settings) {
         return Promise.resolve(settingsCache);
     }
 
-    return dataProvider.Settings.findAll()
+    return dataProvider.Settings.findAll(options)
         .then(function (result) {
             settingsCache = readSettingsResult(result.models);
 
@@ -104,7 +110,7 @@ updateSettingsCache = function (settings) {
  * @returns {*}
  */
 settingsFilter = function (settings, filter) {
-    return _.object(_.filter(_.pairs(settings), function (setting) {
+    return _.fromPairs(_.filter(_.toPairs(settings), function (setting) {
         if (filter) {
             return _.some(filter.split(','), function (f) {
                 return setting[1].type === f;
@@ -245,7 +251,7 @@ populateDefaultSetting = function (key) {
         }
 
         // TODO: Different kind of error?
-        return Promise.reject(new errors.NotFoundError('Problem finding setting: ' + key));
+        return Promise.reject(new errors.NotFoundError(i18n.t('errors.api.settings.problemFindingSetting', {key: key})));
     });
 };
 
@@ -260,12 +266,12 @@ canEditAllSettings = function (settingsInfo, options) {
     var checkSettingPermissions = function (setting) {
             if (setting.type === 'core' && !(options.context && options.context.internal)) {
                 return Promise.reject(
-                    new errors.NoPermissionError('Attempted to access core setting from external request')
+                    new errors.NoPermissionError(i18n.t('errors.api.settings.accessCoreSettingFromExtReq'))
                 );
             }
 
             return canThis(options.context).edit.setting(setting.key).catch(function () {
-                return Promise.reject(new errors.NoPermissionError('You do not have permission to edit settings.'));
+                return Promise.reject(new errors.NoPermissionError(i18n.t('errors.api.settings.noPermissionToEditSettings')));
             });
         },
         checks = _.map(settingsInfo, function (settingInfo) {
@@ -344,7 +350,7 @@ settings = {
 
                 if (setting.type === 'core' && !(options.context && options.context.internal)) {
                     return Promise.reject(
-                        new errors.NoPermissionError('Attempted to access core setting from external request')
+                        new errors.NoPermissionError(i18n.t('errors.api.settings.accessCoreSettingFromExtReq'))
                     );
                 }
 
@@ -355,7 +361,7 @@ settings = {
                 return canThis(options.context).read.setting(options.key).then(function () {
                     return settingsResult(result);
                 }, function () {
-                    return Promise.reject(new errors.NoPermissionError('You do not have permission to read settings.'));
+                    return Promise.reject(new errors.NoPermissionError(i18n.t('errors.api.settings.noPermissionToReadSettings')));
                 });
             };
 

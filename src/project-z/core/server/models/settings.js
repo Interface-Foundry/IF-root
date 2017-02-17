@@ -1,12 +1,13 @@
 var Settings,
     ghostBookshelf = require('./base'),
-    uuid           = require('node-uuid'),
+    uuid           = require('uuid'),
     _              = require('lodash'),
     errors         = require('../errors'),
     Promise        = require('bluebird'),
     validation     = require('../data/validation'),
     events         = require('../events'),
-    internal       = {context: {internal: true}},
+    internalContext = {context: {internal: true}},
+    i18n           = require('../i18n'),
 
     defaultSettings;
 
@@ -14,7 +15,7 @@ var Settings,
 // It's much easier for us to work with it as a single level
 // instead of iterating those categories every time
 function parseDefaultSettings() {
-    var defaultSettingsInCategories = require('../data/default-settings.json'),
+    var defaultSettingsInCategories = require('../data/schema/').defaultSettings,
         defaultSettingsFlattened = {};
 
     _.each(defaultSettingsInCategories, function each(settings, categoryName) {
@@ -71,7 +72,7 @@ Settings = ghostBookshelf.Model.extend({
         });
     },
 
-    validate: function validate() {
+    validate: function validate(model, attributes, options) {
         var self = this,
             setting = this.toJSON();
 
@@ -80,31 +81,25 @@ Settings = ghostBookshelf.Model.extend({
         }).then(function () {
             var themeName = setting.value || '';
 
-            if (setting.key !== 'activeTheme') {
+            if (setting.key !== 'activeTheme' || options.importing) {
                 return;
             }
 
             return validation.validateActiveTheme(themeName);
         });
-    },
-
-    saving: function saving() {
-        // disabling sanitization until we can implement a better version
-        // All blog setting keys that need their values to be escaped.
-        // if (this.get('type') === 'blog' && _.contains(['title', 'description', 'email'], this.get('key'))) {
-        //    this.set('value', this.sanitize('value'));
-        // }
-
-        return ghostBookshelf.Model.prototype.saving.apply(this, arguments);
     }
-
 }, {
-    findOne: function (options) {
-        // Allow for just passing the key instead of attributes
-        if (!_.isObject(options)) {
-            options = {key: options};
+    findOne: function (data, options) {
+        if (_.isEmpty(data)) {
+            options = data;
         }
-        return Promise.resolve(ghostBookshelf.Model.findOne.call(this, options));
+
+        // Allow for just passing the key instead of attributes
+        if (!_.isObject(data)) {
+            data = {key: data};
+        }
+
+        return Promise.resolve(ghostBookshelf.Model.findOne.call(this, data, options));
     },
 
     edit: function (data, options) {
@@ -119,7 +114,7 @@ Settings = ghostBookshelf.Model.extend({
             // Accept an array of models as input
             if (item.toJSON) { item = item.toJSON(); }
             if (!(_.isString(item.key) && item.key.length > 0)) {
-                return Promise.reject(new errors.ValidationError('Value in [settings.key] cannot be blank.'));
+                return Promise.reject(new errors.ValidationError(i18n.t('errors.models.settings.valueCannotBeBlank')));
             }
 
             item = self.filterData(item);
@@ -132,20 +127,25 @@ Settings = ghostBookshelf.Model.extend({
                         saveData.value = item.value;
                     }
                     // Internal context can overwrite type (for fixture migrations)
-                    if (options.context.internal && item.hasOwnProperty('type')) {
+                    if (options.context && options.context.internal && item.hasOwnProperty('type')) {
                         saveData.type = item.type;
                     }
+                    // it's allowed to edit all attributes in case of importing/migrating
+                    if (options.importing) {
+                        saveData = item;
+                    }
+
                     return setting.save(saveData, options);
                 }
 
-                return Promise.reject(new errors.NotFoundError('Unable to find setting to update: ' + item.key));
+                return Promise.reject(new errors.NotFoundError(i18n.t('errors.models.settings.unableToFindSetting', {key: item.key})));
             }, errors.logAndThrowError);
         });
     },
 
     populateDefault: function (key) {
         if (!getDefaultSettings()[key]) {
-            return Promise.reject(new errors.NotFoundError('Unable to find default setting: ' + key));
+            return Promise.reject(new errors.NotFoundError(i18n.t('errors.models.settings.unableToFindDefaultSetting', {key: key})));
         }
 
         return this.findOne({key: key}).then(function then(foundSetting) {
@@ -156,12 +156,16 @@ Settings = ghostBookshelf.Model.extend({
             var defaultSetting = _.clone(getDefaultSettings()[key]);
             defaultSetting.value = defaultSetting.defaultValue;
 
-            return Settings.forge(defaultSetting).save(null, internal);
+            return Settings.forge(defaultSetting).save(null, internalContext);
         });
     },
 
-    populateDefaults: function populateDefaults() {
-        return this.findAll().then(function then(allSettings) {
+    populateDefaults: function populateDefaults(options) {
+        options = options || {};
+
+        options = _.merge({}, options, internalContext);
+
+        return this.findAll(options).then(function then(allSettings) {
             var usedKeys = allSettings.models.map(function mapper(setting) { return setting.get('key'); }),
                 insertOperations = [];
 
@@ -173,7 +177,7 @@ Settings = ghostBookshelf.Model.extend({
                 }
                 if (isMissingFromDB) {
                     defaultSetting.value = defaultSetting.defaultValue;
-                    insertOperations.push(Settings.forge(defaultSetting).save(null, internal));
+                    insertOperations.push(Settings.forge(defaultSetting).save(null, options));
                 }
             });
 

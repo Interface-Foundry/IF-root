@@ -11,7 +11,7 @@ config = {
     // When running Ghost in the wild, use the production environment.
     // Configure your URL and mail settings here
     production: {
-        url: 'http://findthingsnearby.com',
+        url: 'http://motorwaytoroswell.space',
         mail: {},
         database: {
             client: 'sqlite3',
@@ -71,7 +71,6 @@ config = {
             contentPath: path.join(__dirname, '/content/')
         }
     },
-
     // **Developers only need to edit below here**
 
     // ### Testing

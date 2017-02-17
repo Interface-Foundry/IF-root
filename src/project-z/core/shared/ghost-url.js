@@ -30,24 +30,28 @@
     url = {
         api: function () {
             var args = Array.prototype.slice.call(arguments),
-                queryOptions;
+                queryOptions,
+                requestUrl = apiUrl;
 
-            if (args.length && typeof args[args.length - 1] === 'object') {
-                queryOptions = args.pop();
-            } else {
+            queryOptions = args.pop();
+
+            if (queryOptions && typeof queryOptions !== 'object') {
+                args.push(queryOptions);
                 queryOptions = {};
             }
+
+            queryOptions = queryOptions || {};
 
             queryOptions.client_id = clientId;
             queryOptions.client_secret = clientSecret;
 
             if (args.length) {
                 args.forEach(function (el) {
-                    apiUrl += el.replace(/^\/|\/$/g, '') + '/';
+                    requestUrl += el.replace(/^\/|\/$/g, '') + '/';
                 });
             }
 
-            return apiUrl + generateQueryString(queryOptions);
+            return requestUrl + generateQueryString(queryOptions);
         }
     };
 

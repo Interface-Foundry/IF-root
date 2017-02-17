@@ -3,8 +3,9 @@ var Promise     = require('bluebird'),
     models      = require('../../models'),
     errors      = require('../../errors'),
     globalUtils = require('../../utils'),
+    i18n        = require('../../i18n'),
 
-    internal    = {context: {internal: true}},
+    internalContext    = {context: {internal: true}},
     utils,
     areEmpty,
     updatedSettingKeys,
@@ -17,7 +18,7 @@ updatedSettingKeys = {
 
 areEmpty = function (object) {
     var fields = _.toArray(arguments).slice(1),
-        areEmpty = _.all(fields, function (field) {
+        areEmpty = _.every(fields, function (field) {
             return _.isEmpty(object[field]);
         });
 
@@ -25,7 +26,7 @@ areEmpty = function (object) {
 };
 
 stripProperties = function stripProperties(properties, data) {
-    data = _.clone(data, true);
+    data = _.cloneDeep(data);
     _.each(data, function (obj) {
         _.each(properties, function (property) {
             delete obj[property];
@@ -35,7 +36,7 @@ stripProperties = function stripProperties(properties, data) {
 };
 
 utils = {
-    internal: internal,
+    internal: internalContext,
 
     processUsers: function preProcessUsers(tableData, owner, existingUsers, objs) {
         // We need to:
@@ -76,9 +77,12 @@ utils = {
                 // if we don't have user data and the id is 1, we assume this means the owner
                 existingUsers[owner.email].importId = userToMap;
                 userMap[userToMap] = existingUsers[owner.email].realId;
+            } else if (userToMap === 0) {
+                // CASE: external context
+                userMap[userToMap] = '0';
             } else {
                 throw new errors.DataImportError(
-                    'Attempting to import data linked to unknown user id ' + userToMap, 'user.id', userToMap
+                    i18n.t('errors.data.import.utils.dataLinkedToUnknownUser', {userToMap: userToMap}), 'user.id', userToMap
                 );
             }
         });
@@ -135,7 +139,7 @@ utils = {
     },
 
     preProcessRolesUsers: function preProcessRolesUsers(tableData, owner, roles) {
-        var validRoles = _.pluck(roles, 'name');
+        var validRoles = _.map(roles, 'name');
         if (!tableData.roles || !tableData.roles.length) {
             tableData.roles = roles;
         }
@@ -196,17 +200,17 @@ utils = {
 
             ops.push(models.Tag.findOne({name: tag.name}, {transacting: transaction}).then(function (_tag) {
                 if (!_tag) {
-                    return models.Tag.add(tag, _.extend({}, internal, {transacting: transaction}))
+                    return models.Tag.add(tag, _.extend({}, internalContext, {transacting: transaction}))
                         .catch(function (error) {
                             return Promise.reject({raw: error, model: 'tag', data: tag});
                         });
                 }
 
                 return _tag;
-            }));
+            }).reflect());
         });
 
-        return Promise.settle(ops);
+        return Promise.all(ops);
     },
 
     importPosts: function importPosts(tableData, transaction) {
@@ -228,14 +232,14 @@ utils = {
                 post.created_at = Date.now();
             }
 
-            ops.push(models.Post.add(post, _.extend({}, internal, {transacting: transaction, importing: true}))
+            ops.push(models.Post.add(post, _.extend({}, internalContext, {transacting: transaction, importing: true}))
                     .catch(function (error) {
                         return Promise.reject({raw: error, model: 'post', data: post});
-                    })
+                    }).reflect()
             );
         });
 
-        return Promise.settle(ops);
+        return Promise.all(ops);
     },
 
     importUsers: function importUsers(tableData, existingUsers, transaction) {
@@ -256,7 +260,7 @@ utils = {
             user.password = globalUtils.uid(50);
             user.status = 'locked';
 
-            ops.push(models.User.add(user, _.extend({}, internal, {transacting: transaction}))
+            ops.push(models.User.add(user, _.extend({}, internalContext, {transacting: transaction}))
                 .catch(function (error) {
                     return Promise.reject({raw: error, model: 'user', data: user});
                 }));
@@ -286,14 +290,39 @@ utils = {
             datum.key = updatedSettingKeys[datum.key] || datum.key;
         });
 
-        ops.push(models.Settings.edit(tableData, _.extend({}, internal, {transacting: transaction})).catch(function (error) {
+        ops.push(models.Settings.edit(tableData, _.extend({}, internalContext, {transacting: transaction})).catch(function (error) {
             // Ignore NotFound errors
             if (!(error instanceof errors.NotFoundError)) {
                 return Promise.reject({raw: error, model: 'setting', data: tableData});
             }
-        }));
+        }).reflect());
 
-        return Promise.settle(ops);
+        return Promise.all(ops);
+    },
+
+    importSubscribers: function importSubscribers(tableData, transaction) {
+        if (!tableData) {
+            return Promise.resolve();
+        }
+
+        var ops = [];
+        tableData = stripProperties(['id'], tableData);
+
+        _.each(tableData, function (subscriber) {
+            ops.push(models.Subscriber.add(subscriber, _.extend({}, internalContext, {transacting: transaction}))
+                .catch(function (error) {
+                    // ignore duplicates
+                    if (error.code && error.message.toLowerCase().indexOf('unique') === -1) {
+                        return Promise.reject({
+                            raw: error,
+                            model: 'subscriber',
+                            data: subscriber
+                        });
+                    }
+                }).reflect());
+        });
+
+        return Promise.all(ops);
     },
 
     /** For later **/
@@ -309,17 +338,17 @@ utils = {
             // Avoid duplicates
             ops.push(models.App.findOne({name: app.name}, {transacting: transaction}).then(function (_app) {
                 if (!_app) {
-                    return models.App.add(app, _.extend({}, internal, {transacting: transaction}))
+                    return models.App.add(app, _.extend({}, internalContext, {transacting: transaction}))
                         .catch(function (error) {
                             return Promise.reject({raw: error, model: 'app', data: app});
                         });
                 }
 
                 return _app;
-            }));
+            }).reflect());
         });
 
-        return Promise.settle(ops);
+        return Promise.all(ops);
     }
 };
 

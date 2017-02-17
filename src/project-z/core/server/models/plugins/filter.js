@@ -1,6 +1,7 @@
 var _      = require('lodash'),
     errors = require('../../errors'),
     gql    = require('ghost-gql'),
+    i18n   = require('../../i18n'),
     filter,
     filterUtils;
 
@@ -26,8 +27,8 @@ filterUtils = {
         } catch (error) {
             errors.logAndThrowError(
                 new errors.ValidationError(error.message, 'filter'),
-                'Error parsing filter',
-                'For more information on how to use filter, see http://api.ghost.org/docs/filter'
+                i18n.t('errors.models.plugins.filter.errorParsing'),
+                i18n.t('errors.models.plugins.filter.forInformationRead', {url: 'http://api.ghost.org/docs/filter'})
             );
         }
 
@@ -117,6 +118,7 @@ filter = function filter(Bookshelf) {
                     .query('join', 'users as author', 'author.id', '=', 'posts.author_id');
             }
         },
+
         /**
          * ## fetchAndCombineFilters
          * Helper method, uses the combineFilters util to apply filters to the current model instance
@@ -136,6 +138,7 @@ filter = function filter(Bookshelf) {
 
             return this;
         },
+
         /**
          * ## Apply Filters
          * Method which makes the necessary query builder calls (through knex) for the filters set
@@ -143,7 +146,7 @@ filter = function filter(Bookshelf) {
          * @param {Object} options
          * @returns {Bookshelf.Model}
          */
-        applyFilters: function applyFilters(options) {
+        applyDefaultAndCustomFilters: function applyDefaultAndCustomFilters(options) {
             var self = this;
 
             // @TODO figure out a better place/way to trigger loading filters

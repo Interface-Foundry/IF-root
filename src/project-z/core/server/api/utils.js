@@ -6,6 +6,7 @@ var Promise = require('bluebird'),
     errors  = require('../errors'),
     permissions = require('../permissions'),
     validation  = require('../data/validation'),
+    i18n    = require('../i18n'),
 
     utils;
 
@@ -42,6 +43,7 @@ utils = {
          */
         return function doValidate() {
             var object, options, permittedOptions;
+
             if (arguments.length === 2) {
                 object = arguments[0];
                 options = _.clone(arguments[1]) || {};
@@ -113,6 +115,8 @@ utils = {
                 slug: {isSlug: true},
                 page: {matches: /^\d+$/},
                 limit: {matches: /^\d+|all$/},
+                from: {isDate: true},
+                to: {isDate: true},
                 fields: {matches: /^[\w, ]+$/},
                 order: {matches: /^[a-z0-9_,\. ]+$/i},
                 name: {}
@@ -211,7 +215,7 @@ utils = {
                 return options;
             }).catch(errors.NoPermissionError, function handleNoPermissionError(error) {
                 // pimp error message
-                error.message = 'You do not have permission to ' + method + ' ' + docName;
+                error.message = i18n.t('errors.api.utils.noPermissionToCall', {method: method, docName: docName});
                 // forward error to next catch()
                 return Promise.reject(error);
             }).catch(function handleError(error) {
@@ -271,7 +275,7 @@ utils = {
      */
     checkObject: function (object, docName, editId) {
         if (_.isEmpty(object) || _.isEmpty(object[docName]) || _.isEmpty(object[docName][0])) {
-            return errors.logAndRejectError(new errors.BadRequestError('No root key (\'' + docName + '\') provided.'));
+            return errors.logAndRejectError(new errors.BadRequestError(i18n.t('errors.api.utils.noRootKeyProvided', {docName: docName})));
         }
 
         // convert author property to author_id to match the name in the database
@@ -282,20 +286,29 @@ utils = {
             }
         }
 
+        // will remove unwanted null values
+        _.each(object[docName], function (value, index) {
+            if (!_.isObject(object[docName][index])) {
+                return;
+            }
+
+            object[docName][index] = _.omitBy(object[docName][index], _.isNull);
+        });
+
         if (editId && object[docName][0].id && parseInt(editId, 10) !== parseInt(object[docName][0].id, 10)) {
-            return errors.logAndRejectError(new errors.BadRequestError('Invalid id provided.'));
+            return errors.logAndRejectError(new errors.BadRequestError(i18n.t('errors.api.utils.invalidIdProvided')));
         }
 
         return Promise.resolve(object);
     },
-    checkFileExists: function (options, filename) {
-        return !!(options[filename] && options[filename].type && options[filename].path);
+    checkFileExists: function (fileData) {
+        return !!(fileData.mimetype && fileData.path);
     },
-    checkFileIsValid: function (file, types, extensions) {
-        var type = file.type,
-            ext = path.extname(file.name).toLowerCase();
+    checkFileIsValid: function (fileData, types, extensions) {
+        var type = fileData.mimetype,
+            ext = path.extname(fileData.name).toLowerCase();
 
-        if (_.contains(types, type) && _.contains(extensions, ext)) {
+        if (_.includes(types, type) && _.includes(extensions, ext)) {
             return true;
         }
         return false;

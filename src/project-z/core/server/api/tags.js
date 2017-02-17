@@ -6,6 +6,7 @@ var Promise      = require('bluebird'),
     errors       = require('../errors'),
     utils        = require('./utils'),
     pipeline     = require('../utils/pipeline'),
+    i18n         = require('../i18n'),
 
     docName      = 'tags',
     allowedIncludes = ['count.posts'],
@@ -53,7 +54,7 @@ tags = {
      * @return {Promise<Tag>} Tag
      */
     read: function read(options) {
-        var attrs = ['id', 'slug'],
+        var attrs = ['id', 'slug', 'visibility'],
             tasks;
 
         /**
@@ -80,7 +81,7 @@ tags = {
                 return {tags: [result.toJSON(options)]};
             }
 
-            return Promise.reject(new errors.NotFoundError('Tag not found.'));
+            return Promise.reject(new errors.NotFoundError(i18n.t('errors.api.tags.tagNotFound')));
         });
     },
 
@@ -154,7 +155,7 @@ tags = {
                 return {tags: [tag]};
             }
 
-            return Promise.reject(new errors.NotFoundError('Tag not found.'));
+            return Promise.reject(new errors.NotFoundError(i18n.t('errors.api.tags.tagNotFound')));
         });
     },
 
@@ -163,23 +164,18 @@ tags = {
      *
      * @public
      * @param {{id, context}} options
-     * @return {Promise<Tag>} Deleted Tag
+     * @return {Promise}
      */
     destroy: function destroy(options) {
         var tasks;
 
         /**
-         * ### Model Query
+         * ### Delete Tag
          * Make the call to the Model layer
          * @param {Object} options
-         * @returns {Object} options
          */
-        function doQuery(options) {
-            return tags.read(options).then(function (result) {
-                return dataProvider.Tag.destroy(options).then(function () {
-                    return result;
-                });
-            });
+        function deleteTag(options) {
+            return dataProvider.Tag.destroy(options).return(null);
         }
 
         // Push all of our tasks into a `tasks` array in the correct order
@@ -187,7 +183,7 @@ tags = {
             utils.validate(docName, {opts: utils.idDefaultOptions}),
             utils.handlePermissions(docName, 'destroy'),
             utils.convertOptions(allowedIncludes),
-            doQuery
+            deleteTag
         ];
 
         // Pipeline calls each task passing the result of one to be the arguments for the next
