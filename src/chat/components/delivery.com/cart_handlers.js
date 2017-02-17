@@ -226,7 +226,8 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 
 handlers['food.cart.update_dashboards'] = function * (message) {
   console.log('you can have the whole world or be satisfied with the boulevard')
-  return;
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  return yield sendOrderProgressDashboards(foodSession, message)
 }
 
 //
