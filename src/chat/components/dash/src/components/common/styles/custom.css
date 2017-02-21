@@ -3,6 +3,12 @@
     min-width: 330px;
 }
 
+.sidebar-nav.navbar-collapse {
+	overflow-x: hidden!important;
+	overflow-y: scroll!important;
+	height: calc(100vh - 52px)!important;
+}
+
 .resizable {
 	min-height: 150px;
 	height: 200px;

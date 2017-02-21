@@ -1,29 +1,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import history from '../../core/history';
-import TeamSideBar from '../../components/TeamSideBar';
-
-const Teams = [
-  {name : 'Team A', url: '/slackteamstats'},
-  {name : 'Team B', url: '/slackteamstats'},
-  {name : 'Team C', url: '/slackteamstats'},
-  {name : 'Team D', url: '/slackteamstats'},
-  {name : 'Team E', url: '/slackteamstats'},
-  {name : 'Team F', url: '/slackteamstats'},
-  {name : 'Team G', url: '/slackteamstats'},
-  {name : 'Team H', url: '/slackteamstats'},
-  {name : 'Team I', url: '/slackteamstats'},
-  {name : 'Team J', url: '/slackteamstats'},
-  {name : 'Team K', url: '/slackteamstats'},
-  {name : 'Team L', url: '/slackteamstats'},
-  {name : 'Team M', url: '/slackteamstats'},
-  {name : 'Team N', url: '/slackteamstats'},
-  {name : 'Team O', url: '/slackteamstats'},
-  {name : 'Team P', url: '/slackteamstats'},
-  {name : 'Team Q', url: '/slackteamstats'},
-  {name : 'Team R', url: '/slackteamstats'},
-  {name : 'Team S', url: '/slackteamstats'}
-]
+import SubSidebar from '../../components/SubSidebar';
 
 class Sidebar extends Component {
 
@@ -106,7 +84,7 @@ class Sidebar extends Component {
           </ul>
         </div>
 
-        <TeamSideBar className="sidebar-nav navbar-collapse collapse" teams={Teams} />
+        <SubSidebar className="sidebar-nav navbar-collapse collapse" />
       </div>
     );
   }
