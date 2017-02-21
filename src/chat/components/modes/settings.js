@@ -12,7 +12,7 @@ function * handle(message) {
     'team_id': message.source.team
   }).exec();
   let isAdmin = yield utils.isAdmin(message.source.user, team);
-  if (!isAdmin) {
+  if (!isAdmin && team.meta.office_assistants.length > 0) {
     return yield handlers['not_admin'](message);
   }
   if (!message.data && message.text && message.text !== 'home') {
@@ -550,16 +550,16 @@ handlers['add_or_remove'] = function*(message) {
   msg.mode = 'settings';
   msg.action = 'home';
   msg.text = 'Ok, I have updated your settings!';
-  msg.execute = [{ 
+  msg.execute = [{
     "mode": "settings",
     "action": "home",
     "_id": message._id
   }];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  replies.push(msg) 
+  replies.push(msg)
   return yield handlers['start'](msg) // actually showing results instead of just saying you updated settings...should be both eventually
-}
+};
 
 handlers['not_admin'] = function*(message) {
   let attachments = [{

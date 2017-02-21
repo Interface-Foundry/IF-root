@@ -326,6 +326,8 @@ handlers['food.admin.order.checkout.delivery_instructions'] = function * (messag
 }
 
 handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * (message, foodSession) {
+  if (typeof foodSession === 'undefined')
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
 
