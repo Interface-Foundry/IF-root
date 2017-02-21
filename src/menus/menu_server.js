@@ -146,8 +146,7 @@ router.post('/order', function (req, res) {
           console.log(cart[cart.length-1])
           money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))        }
       }
-      console.log('CART', cart) //not  yet duplicate
-      console.log('added everything to the cart')
+      console.log('CART', cart) //not  yet duplicat
       console.log('cart length', cart.length)
 
       var user_budgets = foodSession.user_budgets
@@ -170,6 +169,7 @@ router.post('/order', function (req, res) {
       console.log('foodMessage', foodMessage)
 
       if (foodMessage && foodMessage.length) {
+        foodSession.save()
         foodMessage = foodMessage[0];
 
         logging.debug('foodMessage.source', foodMessage.source)
@@ -203,7 +203,6 @@ router.post('/order', function (req, res) {
 
         foodSession.confirmed_orders.push(user_id)
         foodSession.save() //I BET THIS IS WHAT IS DOING IT FUCK YOU
-        //hopefully please omg
 
         // var eu = yield db.email_users.findOne({id: user_id});
 
