@@ -654,7 +654,7 @@ handlers['food.admin_polling_options'] = function * (message) {
   }
 
   //onboarding stuff
-  if(foodSession.onboarding){
+  if (foodSession.onboarding) {
     attachments.push(
     // {
     //   'text': '',

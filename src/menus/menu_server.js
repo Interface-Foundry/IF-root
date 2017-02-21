@@ -204,8 +204,6 @@ router.post('/order', function (req, res) {
         foodSession.confirmed_orders.push(user_id)
         foodSession.save() //I BET THIS IS WHAT IS DOING IT FUCK YOU
 
-        // var eu = yield db.email_users.findOne({id: user_id});
-
         var alternateFoodMessage = yield db.Messages.find({
           'source.user': foodSession.convo_initiater.id,
           mode: 'food',

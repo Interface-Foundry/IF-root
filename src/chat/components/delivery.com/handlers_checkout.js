@@ -352,7 +352,6 @@ handlers['food.admin.order.checkout.email'] = function * (message) {
     }]
   }
 
-  //var response =
   yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.email.submit', {type: message.origin, data: msg})
 }
 
@@ -360,17 +359,27 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSe
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
-  var email = message.text.split('|')[1].split('>')[0]
+  logging.debug("MESSAGE.TEXT", message.text)
+  var email = (message.text ? message.text.split('|') : '')
+  if (email.length > 1) email = email[1].split('>')[0]
   var valid = validator.validate(email)
   if (!valid) {
     // not a valid email
-    $replyChannel.send(
+    yield $replyChannel.send(
       message,
       'food.admin.order.checkout.email',
       {
         type: message.origin,
-        data: {'text': `Unfortunately that email was invalid - try again?`}
-      })
+        data: {
+          'text': '',
+          'attachments': [{
+            text: `Unfortunately that email wasn't valid. Please try again!`,
+            mrkdwn_in: ['text'],
+            color: '#fc9600'
+          }]
+        }
+      }
+    )
     return yield handlers['food.admin.order.checkout.email'](message)
   }
 
