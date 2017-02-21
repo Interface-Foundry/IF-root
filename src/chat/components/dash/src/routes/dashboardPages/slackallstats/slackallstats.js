@@ -182,7 +182,7 @@ function displayFlotCharts(props, context) {
       <div className="row">
         <div className="col-lg-12">
 
-          <<Panel header={<span>Table of Waypoint Routes</span>}>
+          <Panel header={<span>Table of Waypoint Routes</span>}>
             <div className="table-responsive">
               <Table>
                 <thead>

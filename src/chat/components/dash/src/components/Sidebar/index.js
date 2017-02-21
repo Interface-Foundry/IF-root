@@ -4,25 +4,25 @@ import history from '../../core/history';
 import TeamSideBar from '../../components/TeamSideBar';
 
 const Teams = [
-  {name : 'Team A', url: '/'},
-  {name : 'Team B', url: '/'},
-  {name : 'Team C', url: '/'},
-  {name : 'Team D', url: '/'},
-  {name : 'Team E', url: '/'},
-  {name : 'Team F', url: '/'},
-  {name : 'Team G', url: '/'},
-  {name : 'Team H', url: '/'},
-  {name : 'Team I', url: '/'},
-  {name : 'Team J', url: '/'},
-  {name : 'Team K', url: '/'},
-  {name : 'Team L', url: '/'},
-  {name : 'Team M', url: '/'},
-  {name : 'Team N', url: '/'},
-  {name : 'Team O', url: '/'},
-  {name : 'Team P', url: '/'},
-  {name : 'Team Q', url: '/'},
-  {name : 'Team R', url: '/'},
-  {name : 'Team S', url: '/'}
+  {name : 'Team A', url: '/slackteamstats'},
+  {name : 'Team B', url: '/slackteamstats'},
+  {name : 'Team C', url: '/slackteamstats'},
+  {name : 'Team D', url: '/slackteamstats'},
+  {name : 'Team E', url: '/slackteamstats'},
+  {name : 'Team F', url: '/slackteamstats'},
+  {name : 'Team G', url: '/slackteamstats'},
+  {name : 'Team H', url: '/slackteamstats'},
+  {name : 'Team I', url: '/slackteamstats'},
+  {name : 'Team J', url: '/slackteamstats'},
+  {name : 'Team K', url: '/slackteamstats'},
+  {name : 'Team L', url: '/slackteamstats'},
+  {name : 'Team M', url: '/slackteamstats'},
+  {name : 'Team N', url: '/slackteamstats'},
+  {name : 'Team O', url: '/slackteamstats'},
+  {name : 'Team P', url: '/slackteamstats'},
+  {name : 'Team Q', url: '/slackteamstats'},
+  {name : 'Team R', url: '/slackteamstats'},
+  {name : 'Team S', url: '/slackteamstats'}
 ]
 
 class Sidebar extends Component {

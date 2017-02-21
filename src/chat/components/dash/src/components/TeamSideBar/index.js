@@ -32,7 +32,7 @@ class SubSidebar extends Component {
             </div>
           </li>
           <li>
-            <a href="" onClick={(e) => { e.preventDefault(); history.push('/'); }} >
+            <a href="" onClick={(e) => { e.preventDefault(); history.push('/slackallstats'); }} >
               <i className="fa fa-dashboard fa-fw" /> All Teams
             </a>
           </li>
