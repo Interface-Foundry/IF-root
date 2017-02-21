@@ -201,7 +201,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
       'attachment_type': 'default',
       'actions': [
         {
-          'name': (reorder ? 'food.admin.team.members.reorder' : 'food.admin.team.members'),
+          'name': (reorder ? 'food.admin.restaurant.reordering_confirmation' : 'food.poll.confirm_send'),
           'text': 'Finish',
           'style': 'primary',
           'type': 'button',

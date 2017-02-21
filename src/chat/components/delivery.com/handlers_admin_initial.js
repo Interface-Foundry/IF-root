@@ -784,15 +784,10 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
         'type': 'button',
         'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
       }, {
-        'name': 'food.admin.team.members.reorder',
+        'name': 'food.admin.select_channel_reorder',
         'value': mostRecentMerchant,
         'text': `Edit Members`,
         'type': 'button'
-      }, {
-        'name': 'passthrough',
-        'text': '< Back',
-        'type': 'button',
-        'value': 'food.admin_polling_options'
       }//,
       // {
       //   'name': 'passthrough',
@@ -809,6 +804,25 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       ]
     }]
   }
+
+  if (process.env.NODE_ENV == 'development_hannah') {
+    msg_json.attachments[0].actions.push({
+      'name': 'food.admin.team.email_members',
+      'text': 'Email Members',
+      'type': 'button',
+      'value':{
+        reorder: true
+      }
+    })
+  }
+
+  msg_json.attachments[0].actions.push({
+    'name': 'passthrough',
+    'text': '< Back',
+    'type': 'button',
+    'value': 'food.admin_polling_options'
+  })
+
   $replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
 }
 

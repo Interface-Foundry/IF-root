@@ -87,27 +87,11 @@ handlers['food.admin.team.members'] = function * (message) {
   })
 
   buttons.actions.push({
-    'name': 'passthrough',
-    'value': 'food.admin.restaurant.pick.list',
-    'text': '> Skip',
-    'type': 'button'
-  })
-
-  buttons.actions.push({
     'name': 'food.admin.display_channels',
     'text': 'Use a #channel',
     'type': 'button',
     'value': 'select_team_members'
   })
-
-  if (process.env.NODE_ENV == 'development_hannah') {
-    buttons.actions.push({
-      'name': 'passthrough',
-      'text': 'Email Members',
-      'type': 'button',
-      'value': 'food.admin.team.email_members'
-    })
-  }
 
   buttons.actions.push({
     name: 'passthrough',

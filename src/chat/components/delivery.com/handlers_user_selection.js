@@ -107,16 +107,10 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           },
           {
             'name': 'passthrough',
-            'value': 'food.admin.team.members',
+            'value': 'food.admin.display_channels',
             'text': 'Edit Poll Members',
             'type': 'button'
           },
-          {
-            'name': 'passthrough',
-            'value': 'food.admin.restaurant.pick.list',
-            'text': '> Skip',
-            'type': 'button'
-          }
         ]
       }, {
         'mrkdwn_in': [
@@ -130,6 +124,22 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
       }
     ]
   }
+
+  if (process.env.NODE_ENV == 'development_hannah') {
+    msg_json.attachments[0].actions.push({
+      'name': 'passthrough',
+      'text': 'Email Members',
+      'type': 'button',
+      'value': 'food.admin.team.email_members'
+    })
+  }
+
+  msg_json.attachments[0].actions.push( {
+    'name': 'passthrough',
+    'value': 'food.admin.restaurant.pick.list',
+    'text': '> Skip',
+    'type': 'button'
+  })
 
   if (foodSession.onboarding) {
     msg_json.attachments.unshift(
@@ -155,7 +165,6 @@ handlers['food.poll.confirm_send'] = function * (message) {
   db.waypoints.log(1102, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
-  var budget = foodSession.budget;
 
   if (_.get(foodSession, 'chosen_channel.id')) {
     if (foodSession.chosen_channel.id === 'everyone') {
@@ -164,7 +173,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
       textWithChannelMaybe = `Send poll for cuisine to _just me_ at \`${addr}\`?`
     } else {
       textWithChannelMaybe = `Send poll for cuisine to <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
-      if (foodSession.budget) textWithPrevChannel += ` with a budget of $${foodSession.budget}`
+      // if (foodSession.budget) textWithPrevChannel += ` with a budget of $${foodSession.budget}`
       textWithChannelMaybe += '?';
     }
   } else {
@@ -198,20 +207,30 @@ handlers['food.poll.confirm_send'] = function * (message) {
           },
           {
             'name': 'passthrough',
-            'value': 'food.admin.team.members',
+            'value': 'food.admin.display_channels',
             'text': 'Edit Poll Members',
-            'type': 'button'
-          },
-          {
-            'name': 'passthrough',
-            'value': 'food.admin.restaurant.pick.list',
-            'text': '> Skip',
             'type': 'button'
           }
         ]
       }
     ]
   }
+
+  if (process.env.NODE_ENV == 'development_hannah') {
+    msg_json.attachments[0].actions.push({
+      'name': 'passthrough',
+      'text': 'Email Members',
+      'type': 'button',
+      'value': 'food.admin.team.email_members'
+    })
+  }
+
+  msg_json.attachments[0].actions.push( {
+    'name': 'passthrough',
+    'value': 'food.admin.restaurant.pick.list',
+    'text': '> Skip',
+    'type': 'button'
+  })
 
   $replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
 }
@@ -288,12 +307,25 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
       'value': mostRecentMerchant,
       'text': `Edit Members`,
       'type': 'button'
-    }, {
-      'text': `< Back`,
-      'name': 'food.admin.restaurant.reordering_confirmation',
-      'value': message.data.value,
-      'type': 'button'
     }]
+  })
+
+  // if (process.env.NODE_ENV == 'development_hannah') {
+  //   msg_json.attachments[msg_json.attachments.length-1].actions.push({
+  //     'name': 'food.admin.team.email_members',
+  //     'text': 'Email Members',
+  //     'type': 'button',
+  //     'value': {
+  //       reorder: true
+  //     }
+  //   })
+  // }
+
+  msg_json.attachments[msg_json.attachments.length-1].actions.push({
+    'text': `< Back`,
+    'name': 'food.admin.restaurant.reordering_confirmation',
+    'value': message.data.value,
+    'type': 'button'
   })
 
   $replyChannel.sendReplace(message, 'food.admin.select_channel_reorder', {type: message.origin, data: msg_json})
@@ -358,23 +390,36 @@ handlers['food.admin.display_channels'] = function * (message) {
     'color':'#2ab27b',
     'callback_id': 'channel_select',
     'attachment_type': 'default',
-    'actions': [{
-      'text': `✓ Send to Members`,
-      'name': 'passthrough',
-      'value': 'food.user.poll',
-      'type': 'button',
-      'style': 'primary'
-    }, {
-      'name': 'passthrough',
-      'value': 'food.admin.team.members',
-      'text': `Edit Members`,
-      'type': 'button'
-    }, {
-      'text': `< Back`,
-      'name': 'food.poll.confirm_send',
-      'value': 'food.poll.confirm_send',
-      'type': 'button'
-    }]
+    'actions': [
+      {
+        'text': `✓ Send to Members`,
+        'name': 'passthrough',
+        'value': 'food.user.poll',
+        'type': 'button',
+        'style': 'primary'
+      }, {
+        'name': 'passthrough',
+        'value': 'food.admin.team.members',
+        'text': `Edit Members`,
+        'type': 'button'
+      }
+    ]
+  })
+
+  // if (process.env.NODE_ENV == 'development_hannah') {
+  //   msg_json.attachments[msg_json.attachments.length-1].actions.push({
+  //     'name': 'passthrough',
+  //     'text': 'Email Members',
+  //     'type': 'button',
+  //     'value': 'food.admin.team.email_members'
+  //   })
+  // }
+
+  msg_json.attachments[msg_json.attachments.length-1].actions.push({
+    'text': `< Back`,
+    'name': 'food.poll.confirm_send',
+    'value': 'food.poll.confirm_send',
+    'type': 'button'
   })
 
   $replyChannel.sendReplace(message, 'food.admin.select_channel', {type: message.origin, data: msg_json})
@@ -450,7 +495,7 @@ handlers['food.admin.select_channel'] = function * (message) {
 }
 
 handlers['food.admin.select_channel_reorder'] = function * (message) {
-  yield handlers['food.admin.restaurant.reordering_confirmation'](message)
+  yield handlers['food.admin.display_channels_reorder'](message)
 }
 
 module.exports = function (replyChannel, allHandlers) {
