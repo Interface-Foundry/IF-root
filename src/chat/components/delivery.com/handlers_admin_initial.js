@@ -35,22 +35,47 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'mrkdwn_in': ['text'],
-        'actions': [{
-          'name': 'food.admin.select_address',
-          'text': 'Start New Order',
-          'type': 'button',
-          'value': 'food.admin.select_address'
-        }, {
-          'name': 'passthrough',
-          'text': 'Wait',
-          'type': 'button',
-          'value': 'food.exit.confirm'
-        }]
-      }]
-    }
+        'actions': []
+      }
+    ]
+  }
+  if (process.env.NODE_ENV == 'development_hannah') {
+    msg_json.attachments[0].actions.push(
+    {
+        'name': 'passthrough',
+        'text': 'Return to Order',
+        'type': 'button',
+        'value': 'food.admin.retrieve_order_status'
+      }
+    )
+  }
+  msg_json.attachments[0].actions.push({
+      'name': 'food.admin.select_address',
+      'text': 'Start New Order',
+      'type': 'button',
+      'value': 'food.admin.select_address'
+    })
 
   $replyChannel.sendReplace(message, 'food.admin.confirm_new_session', {type: message.origin, data: msg_json})
+}
 
+handlers['food.admin.retrieve_order_status'] = function * (message) {
+  var prevMessages = yield db.Messages.find({user_id: message.user_id, action: {$exists: true, $not: /admin\.confirm_new_session/}}).sort('-ts').limit(15).exec()
+  prevMessage = prevMessages[0]
+  var actionSuite = prevMessages.filter(m => m.action == prevMessage.action)
+  prevMessage = actionSuite[actionSuite.length - 1]
+  var action = 'food.' + prevMessage.action
+  console.log(prevMessage)
+
+  if (prevMessage.data && prevMessage.data.value) {
+    prevMessage.data.value = JSON.parse(prevMessage.data.value)
+    console.log('prevMessage.data.value', prevMessage.data.value)
+  }
+  prevMessage.source = message.source
+  prevMessage.text = ''
+
+  if ($allHandlers[action]) yield $allHandlers[action](prevMessage)
+  else yield handlers[action](prevMessage)
 }
 
 handlers['food.admin.select_address'] = function * (message, banner) {
@@ -810,7 +835,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       'name': 'food.admin.team.email_members',
       'text': 'Email Members',
       'type': 'button',
-      'value':{
+      'value': {
         reorder: true
       }
     })

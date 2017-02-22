@@ -61,9 +61,19 @@ handlers['food.admin.team.delete_email'] = function * (message) {
 //~~~~~~~~~~//
 
 handlers['food.admin.team.email_members'] = function * (message) {
-  var reorder = _.get(message, 'data.value.reorder') | message.history[1]._doc.action === 'admin.team.members.reorder'
+  console.log('email handlers')
+  console.log(message.data.value.reorder)
+  console.log('lodash', _.get(message, 'data.value.reorder'))
+  var reorder = _.get(message, 'data.value.reorder') || message.history[1]._doc.action === 'admin.team.members.reorder'
   var previousRestaurant = _.get(message, 'data.value.resto')
-  if (reorder && !previousRestaurant) previousRestaurant = message.history[1]._doc.data.value
+  //fallback find the message with the last restaurant? where reorder is selected
+  if (reorder && !previousRestaurant && message.history) previousRestaurant = message.history[1]._doc.data.value
+  if (reorder && !previousRestaurant) {
+    var reorderMessage = yield db.Messages.find({action: 'ready_to_poll'}).sort('-ts').limit(1).exec()
+    reorderMessage = reorderMessage[0]
+    previousRestaurant = reorderMessage.source.original_message.attachments[1].actions[0].value
+  }
+
   console.log('REORDER', reorder)
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
