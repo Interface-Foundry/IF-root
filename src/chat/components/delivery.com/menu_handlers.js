@@ -8,6 +8,7 @@ var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
 var menu_utils = require('./menu_utils')
+var preferences = require('../../../preferences/preferences.js')
 
 // injected dependencies
 var $replyChannel
@@ -18,6 +19,9 @@ var handlers = {}
 
 handlers['food.menu.quickpicks'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  var menu = Menu(foodSession.menu)
+  var sortedMenu = menu.allItems()
 
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   var previouslyOrderedItemIds = []
@@ -34,8 +38,6 @@ handlers['food.menu.quickpicks'] = function * (message) {
   if (keyword) {
     // search for item if not presented but they type somethin
     logging.info('searching for', keyword.cyan)
-    var menu = Menu(foodSession.menu)
-    var sortedMenu = menu.allItems()
     var matchingItems = yield utils.matchText(keyword, sortedMenu, {
       shouldSort: true,
       location: 0,
@@ -82,14 +84,20 @@ handlers['food.menu.quickpicks'] = function * (message) {
     last: 1
   }
 
+  // create preferences via random suggestions
+
+  // var preferencesItems = []
+  // if (kip.config.preferences.suggestions) {
+  //   preferencesItems = preferences.createPreferences(user, menu.allItems(), 2)
+  // }
+
   /*
   not really any good way to order items atm so just going to throw
   everything in last til have some actual way to order things w/ sortOrder
   */
   var lastItems = ['beverage', 'beverages', 'desserts', 'dessert', 'cold appetizer', 'hot appetizer', 'appetizers', 'appetizers from the kitchen', 'soup', 'soups', 'drinks', 'salads', 'side salads', 'side menu', 'bagged snacks', 'snacks']
 
-  var menu = Menu(foodSession.menu)
-  var sortedMenu = menu.allItems().map(i => {
+  sortedMenu = menu.allItems().map(i => {
     // inject the sort order stuff
     if (matchingItems.includes(i.id)) {
       i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.id })
@@ -102,12 +110,15 @@ handlers['food.menu.quickpicks'] = function * (message) {
       // i.infoLine = 'Popular Item'
     } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
       i.sortOrder = sortOrder.last
+    // } else if (preferencesItems.includes(Number(i.unique_id))) {
+    //   i.sortOrder = sortOrder.preferences
     } else {
       i.sortOrder = sortOrder.none
     }
 
     return i
   }).sort((a, b) => b.sortOrder - a.sortOrder)
+
 
   // ~~~~~
   // move items that do not meet the user's current budget to after those that
