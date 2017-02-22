@@ -13,7 +13,7 @@ class CustomTable extends Component {
 
   render() {
     return (
-      <Table>
+      <Table className='table-hover'>
         <thead>
             {createTableHeaders(this.props.heads)}
         </thead>

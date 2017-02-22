@@ -17,6 +17,7 @@ import table from './dashboardPages/tables';
 import button from './dashboardPages/buttons';
 import slackteamstats from './dashboardPages/slackteamstats';
 import slackallstats from './dashboardPages/slackallstats';
+import stagnantcarts from './dashboardPages/stagnantcarts';
 import forms from './dashboardPages/forms';
 import grid from './dashboardPages/grid';
 import icons from './dashboardPages/icons';
@@ -66,7 +67,7 @@ export default [
       typography,
       // register,
       blank,
-
+      stagnantcarts,
       // place new routes before...
       // content,
       error,
