@@ -9,7 +9,7 @@ import s from './Home.css';
 import StatWidget from '../../components/Widget';
 import Donut from '../../components/Donut';
 import Table from '../../components/Table';
-import TeamSideBar from '../../components/TeamSideBar';
+import SubSidebar from '../../components/SubSidebar';
 
 import {
   Tooltip,

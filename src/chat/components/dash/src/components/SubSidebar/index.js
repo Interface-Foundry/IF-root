@@ -6,7 +6,25 @@ import history from '../../core/history';
 import fetch from '../../core/fetch';
 import co from 'co';
 
-var teams = [];
+var teams = [{name : 'Team A', url: '/slackteamstats'},
+   {name : 'Team B', url: '/slackteamstats'},
+   {name : 'Team C', url: '/slackteamstats'},
+   {name : 'Team D', url: '/slackteamstats'},
+   {name : 'Team E', url: '/slackteamstats'},
+   {name : 'Team F', url: '/slackteamstats'},
+   {name : 'Team G', url: '/slackteamstats'},
+   {name : 'Team H', url: '/slackteamstats'},
+   {name : 'Team I', url: '/slackteamstats'},
+   {name : 'Team J', url: '/slackteamstats'},
+   {name : 'Team K', url: '/slackteamstats'},
+   {name : 'Team L', url: '/slackteamstats'},
+   {name : 'Team M', url: '/slackteamstats'},
+   {name : 'Team N', url: '/slackteamstats'},
+   {name : 'Team O', url: '/slackteamstats'},
+   {name : 'Team P', url: '/slackteamstats'},
+   {name : 'Team Q', url: '/slackteamstats'},
+   {name : 'Team R', url: '/slackteamstats'},
+   {name : 'Team S', url: '/slackteamstats'}]
 
 
 
@@ -46,9 +64,9 @@ class SubSidebar extends Component {
   }
 
   render() {
-    const { teams } = this.state;
+    //const { teams } = this.state;
      const displayTeams = teams ? teams.map( function(team) { 
-      return <li key={team.team_id}> <a href="" onClick={(e) => { e.preventDefault(); history.push('/'); }} > <i className="fa fa-dashboard fa-fw" /> {team.team_name}</a></li>}) : []
+      return <li key={team.name}> <a href="" onClick={(e) => { e.preventDefault(); history.push('/slackteamstats'); }} > <i className="fa fa-dashboard fa-fw" /> {team.name}</a></li>}) : []
           
     return (
       <div className="sidebar-nav navbar-collapse collapse">
@@ -63,7 +81,9 @@ class SubSidebar extends Component {
               </span>
             </div>
           </li>
-
+          <li>
+            <a href="" onClick={(e) => { e.preventDefault(); history.push('/slackallstats'); }}> <i className="fa fa-dashboard fa-fw" /> All teams</a>
+          </li>
           {
             displayTeams
           }
