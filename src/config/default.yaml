@@ -1,6 +1,13 @@
 env: default
 isProduction: false
-
+preferences:
+  asking: true
+  suggestions: false
+  model: training
+  users:
+  - U02PN3T5R
+  - U1D5B9TQR
+  - U166949PD
 app:
   port: 2997
   publicAPI: http://pikachu.kipapp.co/api
@@ -84,3 +91,4 @@ slack:
   internal_host: http://localhost:8000
   verification_token: oOEhFUU59ocPm1LpEELeqDj7A
 menuURL: http://localhost:8001/menus
+queueVerificationToken: bgWFMdolAF1qvVq/tWcRSQ

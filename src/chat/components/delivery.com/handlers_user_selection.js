@@ -70,7 +70,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
         if (prevFoodSession.team_members.find(c => c.id !== message.user_id)) {
           // convo_init not in prevFoodSession.team_members, just adding them alongside
           var convoInit = yield db.Chatusers.findOne({id: message.user_id, is_bot: {$ne: true}}).exec()
-          foodSession.team_memebers.push(convoInit)
+          foodSession.team_members.push(convoInit)
         }
       }
     }

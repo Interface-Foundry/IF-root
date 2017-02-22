@@ -20,37 +20,53 @@ var processData = require('../process');
 *
 */
 
-
 /*
 * returns creates chat users for a team
 * @param {Object} slackbot object
 * @returns {Object} slackbot object
 *
 */
-function * initializeTeam(team, auth) {
- if (!auth.user_id) {
-    return kip.error('Could not find the user who added slackbot ' + team._id)
- }
- team.meta.addedBy = typeof team.meta.addedBy == 'string' ? team.meta.addedBy : auth.user_id;
- var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
- res_chan = JSON.parse(res_chan);
- debugger;
- if (!(team.meta.cart_channels && team.meta.cart_channels.length > 0)) {
-  var generalChannel = res_chan.channels.find( (c) => { return c.name == 'general' });
-  team.meta.cart_channels.push(generalChannel.id);
- }
- team.meta.office_assistants = _.uniq(team.meta.office_assistants);
- debugger;
- team.meta.all_channels = res_chan.channels.map(c => _.pick(c, 'id', 'name', 'is_channel'));
- team.markModified('meta.cart_channels');
- team.markModified('meta.all_channels');
- team.markModified('meta.office_assistants');
- yield team.save();
- yield getTeamMembers(team);
- return team;
+function * initializeTeam (team, auth) {
+  if (!auth.user_id) {
+    kip.error('Could not find the user who added slackbot ', auth)
+    throw new Error('Could not find the user who added slackbot')
+  }
+
+  if (!_.get(team, 'meta')) {
+    kip.error('team doesnt have proper meta field', team)
+    throw new Error('team object doesnt have meta object, important for init team')
+  }
+
+  team.meta.addedBy = (typeof team.meta.addedBy === 'string') ? team.meta.addedBy : auth.user_id
+
+  // lists all members in a channel
+  var slackbotWeb = new slack.WebClient(team.bot.bot_access_token)
+  var botChannelArray = yield slackbotWeb.channels.list()
+
+  // dont add archived channels to all channels since we arent tracking what is archived
+  botChannelArray = botChannelArray.channels.filter(channel => channel.is_archived === false)
+
+  if (_.get(team, 'meta.cart_channels').length <= 0) {
+    logging.info('no cart_channels adding #general for team: ', team.team_id)
+    var generalChannel = botChannelArray.find((c) => {
+      return c.name === 'general'
+    })
+    team.meta.cart_channels.push(generalChannel.id)
+  }
+
+  if (_.get(team, 'meta.office_assistants').length <= 0) {
+    logging.info('no office_assistants, using the person who authorized initially: ', auth.user_id)
+    team.meta.office_assistants = [auth.user_id]
+  }
+  team.meta.office_assistants = _.uniq(team.meta.office_assistants)
+  team.meta.all_channels = botChannelArray.map(c => _.pick(c, 'id', 'name', 'is_channel'))
+  team.markModified('meta.cart_channels')
+  team.markModified('meta.all_channels')
+  team.markModified('meta.office_assistants')
+  yield team.save()
+  yield getTeamMembers(team)
+  return team
 }
-
-
 
 /*
 * returns admins of a team. will appropriately update chatusers based on latest slackbot.meta.office_assistants field
@@ -59,30 +75,41 @@ function * initializeTeam(team, auth) {
 *
 */
 function * findAdmins(team) {
-  var admins = [];
-  var adminIds = team.meta.office_assistants;
-  var members = yield db.Chatusers.find({
-    team_id: team.team_id
-  }).exec();
-  return co(function * () {
-    yield eachSeries(members, function * (user) {
-      if (adminIds.indexOf(user.id) > -1) {
-        admins.push(user);
-        if (!user.is_admin) {
-          user.is_admin = true;
-          yield user.save();
-        }
-      } else if (adminIds.indexOf(user.id) === -1 && user.is_admin) {
-        user.is_admin = false;
-        yield user.save();
-      }
-    });
-  }).then(function() {
-    return admins;
-  });
+  if (!team) {
+    throw new Error('Cannot find admins of null team')
+  }
+
+  // I guess some teams don't have admins assigned?
+  if (!_.get(team, 'meta.office_assistants')) {
+    logging.warn('team', team.team_name, 'has no admins')
+    return []
+  }
+
+  // get the full chatuser for each admin id
+  return yield team.meta.office_assistants.map(function * (admin_id) {
+    var user = yield db.chatusers.findOne({id: admin_id}).exec()
+
+    // make double sure that the user is_admin for some reason (idk why)
+    if (!user.is_admin) {
+      user.is_admin = true
+      yield user.save()
+    }
+
+    return user
+  })
 }
 
 function * isAdmin(userId, team) {
+  if (!userId) {
+    logging.error('cannot determine if an undefined user is an admin')
+    return false
+  }
+
+  if (!team) {
+    logging.error('cannot determine if user', userId, 'is admin of an undefined team')
+    return false;
+  }
+
   let adminList = yield findAdmins(team);
   for (var i = 0; i < adminList.length; i++) {
     if (adminList[i].id === userId) {
@@ -152,46 +179,53 @@ function * getChannels(team) {
 * @returns {array} returns chatuser objects
 *
 */
-function * getTeamMembers(team) {
-  if (process.env.NODE_ENV === 'test') return;
-  var members = [];
-  var teamMembers = yield db.Chatusers.find({team_id: team.team_id, is_bot: false}).exec();
-  var res_dm = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token); // has direct message id
-  var res_prof = yield request('https://slack.com/api/users.list?token=' + team.bot.bot_access_token); // has all the profile info such as name, email, etc
-  res_dm = JSON.parse(res_dm);
-  res_prof = JSON.parse(res_prof);
-  var teamIds = teamMembers.map(function(u){ return u.id });
-  var bots = res_prof.members.filter( (e) => { return e.is_bot }).map((e) => { return e.id });
-  return co(function * (){
-    yield eachSeries(res_prof.members, function * (u) {
-      if (!u.deleted) {
-          if ( teamIds.indexOf(u.id) == -1 && u.id != 'USLACKBOT' && bots.indexOf(u.id) == -1) {
-            var user = new db.Chatuser();
-            user.platform = 'slack';
-            var dm = res_dm.ims.find( (d) => { return d.user == u.id })
-            if (dm) {
-              dm = dm.id
-            } else {
-             var res_dm2 = yield request('https://slack.com/api/im.open?token=' + team.bot.bot_access_token + '&&user='+u.id); // has direct message id
-             res_dm2 = JSON.parse(res_dm2);
-              if (_.get(res_dm2,'channel.id')) {
-                var dm = _.get(res_dm2,'channel.id')
-              }
-            }
-            user.dm = dm;
-            user.is_bot =  bots.indexOf(u.id) == -1 ? false : true;
-            user = _.merge(user, u);
-            yield user.save();
-            members.push(user);
-          } else if (teamIds.indexOf(u.id) > -1) {
-            var user = yield db.Chatusers.findOne({ id: u.id}).exec();
-            if (user != null && user != undefined) {
-              members.push(user)
-            }
-          }
+function * getTeamMembers (slackbot) {
+  try {
+    var slackbotWeb = new slack.WebClient(slackbot.bot.bot_access_token)
+    var userIMInfo = yield slackbotWeb.im.list()
+    var usersArray = yield slackbotWeb.users.list()
+  } catch (err) {
+    logging.error('error gettign im.list/users.list from slack for slackbot', slackbot.team_id, slackbot.team_name)
+    return []
+  }
+
+    var members = yield usersArray.members.map(function * (user) {
+      // don't DM bots
+      if (user.is_bot) {
+        return
       }
-    });
-  }).then( function() { return members });
+
+      var savedUser = yield db.Chatusers.findOne({id: user.id})
+      // check if user is in our database
+      if (!savedUser) {
+        // insert new user under slack platform if they dont exist
+        savedUser = new db.Chatuser(user)
+        savedUser.platform = 'slack'
+      } else {
+        _.merge(savedUser, {
+          // could add other features from slack api user object here to merge
+          deleted: user.deleted
+        })
+      }
+      // check if user has open dm
+      var userDM = userIMInfo.ims.find(i => i.user === user.id)
+      if (!userDM) {
+        // open new dm if user doesnt have one open w/ bot
+        try {
+          userDM = yield slackbotWeb.im.open(user.id)
+        } catch (e) {
+          logging.error('cannot open dm for user', user.id)
+          return savedUser
+        }
+        savedUser.dm = userDM.channel.id
+      } else if (_.get(savedUser, 'dm') !== userDM.id) {
+        // if their DM channel isnt equal to what we have saved, update it
+        savedUser.dm = userDM.id
+      }
+      yield savedUser.save()
+      return savedUser
+    })
+  return members
 }
 
 /*
@@ -232,7 +266,7 @@ function * refreshAllUserIMs (slackbot) {
   var slackbotWeb = new slack.WebClient(slackbot.bot.bot_access_token)
   var userIMInfo = yield slackbotWeb.im.list()
   // don't care about clippy, i mean slackbot (ugh)
-  userIMInfo = userIMInfo.ims.filter(u => u.user !== 'USLACKBOT' || u.is_user_deleted !== true)
+  userIMInfo = userIMInfo.ims.filter(u => u.user !== 'USLACKBOT' && u.is_user_deleted !== true)
 
   yield userIMInfo.map(function * (u) {
     var chatUser = yield db.Chatusers.findOne({id: u.user, type: {$ne: 'email'}, deleted: {$ne: true}})
@@ -430,6 +464,10 @@ function* hideLoading(message) {
 
 function* sendLastCalls(message) {
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
+  if (!team_id) {
+    logging.error('could not find team_id associated with message', message)
+    throw new Error('could not find team_id associated with message', message)
+  }
   var team = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
@@ -552,10 +590,14 @@ function * constructCart(message, text) {
 
 
 function * sendCartToAdmins(message,team) {
+  if (typeof team === 'undefined') {
+    logging.error('cannot send cart to admin of undefined team. message was', message)
+    return
+  }
+
    var cutoff = new Date("2016-12-14T23:07:00.417Z");
    var added = new Date(team.meta.dateAdded)
    var copy;
-   // kip.debug('EUREKA ',added, cutoff, (added < cutoff))
    if (added < cutoff) {
     copy =  'Hi, we added a new feature to get cart status updates from what your team is adding to the cart';
    } else {
@@ -792,7 +834,7 @@ function randomSearchTerm () {
 function randomEmoji (isCafe) {
   let messages = isCafe
     ? ['🍕', '🍩', '🍔', '🍰', '🍴', '🍣', '🍲', '🍪', '🍛']
-    : ['🛍', '🛒', '🎁', '📦', '📓', '✏️', '📚', '🖇', '💻'];
+    : ['🛍', '🎁', '📦', '📓', '✏️', '📚', '🖇', '💻'];
   let num = Math.floor(Math.random() * messages.length);
   return messages[num] + '\u00A0 ';
 }

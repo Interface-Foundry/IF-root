@@ -281,12 +281,29 @@ handlers['handoff'] = function(message, askedMembers) {
     mrkdwn_in: ['text']
   }];
   let msg = message;
-
+  msg.reply = [{
+    text: '',
+    callback_id: 'appendedHome',
+    actions: [{
+      name: 'passthrough',
+      text: 'Home',
+      style: 'default',
+      type: 'button',
+      value: 'home'
+    }]
+  }];
   msg.text = askedMembers ? 'Ok, I\'ve let them know  :tada:' : '';
   msg.action = 'switch.silent';
   msg.mode = 'shopping';
-  msg.reply = attachments;
-  msg.image_url = 'http://tidepools.co/kip/oregano/store.png';
+  let cartMsg = msg;
+  setTimeout(function() {
+    cartMsg.text = '';
+    cartMsg.reply = attachments;
+    cartMsg.image_url = 'http://tidepools.co/kip/oregano/store.png';
+    cartMsg = new db.Message(cartMsg);
+    cartMsg.save();
+    queue.publish('outgoing.' + cartMsg.origin, cartMsg, cartMsg._id + '.reply.update');
+  }, 1996);
   return [msg];
 };
 
@@ -300,7 +317,7 @@ handlers['text'] = function*(message) {
     thread_id: message.source.channel
   }).sort('-ts').limit(10);
   var lastMessage = history[1];
-  let choices;
+  let choices = [];
   if (lastMessage.reply) {
     choices = _.flatten(lastMessage.reply.map(m => {
       return m.actions;

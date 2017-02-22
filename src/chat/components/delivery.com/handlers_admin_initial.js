@@ -57,7 +57,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   logging.debug('doing slackutils stuff in here')
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  // yield [slackUtils.refreshAllUserIMs(team.bot.bot_access_token), slackUtils.getTeamMembers(team)]
+
   yield [
     slackUtils.refreshAllUserIMs(team),
     slackUtils.refreshAllChannels(team),
@@ -332,7 +332,13 @@ handlers['food.settings.address.new'] = function * (message) {
     'attachments': [{
       'fallback': "What's the address for the order?",
       'text': '✎ Type your address below (Example: _902 Broadway 10010_)',
-      'mrkdwn_in': ['text']
+      'mrkdwn_in': ['text'],
+      'actions': [{
+        'name': 'food.admin.select_address',
+        'text': '< Back',
+        'type': 'button',
+        'value': 'food.admin.select_address'
+      }]
     }]
   }
 

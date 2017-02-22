@@ -11,8 +11,9 @@ function * handle(message) {
   let team = yield db.Slackbots.findOne({
     'team_id': message.source.team
   }).exec();
+  logging.debug('checking if user is admin for settings')
   let isAdmin = yield utils.isAdmin(message.source.user, team);
-  if (!isAdmin) {
+  if (!isAdmin && team.meta.office_assistants.length > 0) {
     return yield handlers['not_admin'](message);
   }
   if (!message.data && message.text && message.text !== 'home') {
@@ -181,6 +182,10 @@ handlers['admins'] = function * (message, data) {
     let team = yield db.Slackbots.findOne({
       'team_id': message.source.team
     }).exec();
+    if (typeof team === 'undefined') {
+      logging.error('cannot find admins of undefined team. message was', message)
+      throw new Error('team undefined')
+    }
     let admins = yield utils.findAdmins(team);
     let adminButtons;
     if (team.meta.office_assistants.length > 1) {
@@ -546,16 +551,16 @@ handlers['add_or_remove'] = function*(message) {
   msg.mode = 'settings';
   msg.action = 'home';
   msg.text = 'Ok, I have updated your settings!';
-  msg.execute = [{ 
+  msg.execute = [{
     "mode": "settings",
     "action": "home",
     "_id": message._id
   }];
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  replies.push(msg) 
+  replies.push(msg)
   return yield handlers['start'](msg) // actually showing results instead of just saying you updated settings...should be both eventually
-}
+};
 
 handlers['not_admin'] = function*(message) {
   let attachments = [{

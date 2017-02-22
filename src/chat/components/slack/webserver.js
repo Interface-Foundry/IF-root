@@ -106,7 +106,8 @@ function buttonCommand (action) {
 app.post('/slackaction', next(function * (req, res) {
   if (!req.body || !req.body.payload) {
     // probably a health check message from slack
-    res.sendStatus(200)
+    logging.info('got slackaction without an action payload', req.body)
+    return res.sendStatus(200)
   }
 
   var message;
@@ -183,7 +184,7 @@ app.post('/slackaction', next(function * (req, res) {
         return;
       }
       else if (simple_command === 'collect_select') {
-        let selection = parsedIn.actions[0].value;
+        let selection = action.value;
         let json = parsedIn.original_message;
         json.attachments[0].actions = json.attachments[0].actions.map(button => {
           button.text = button.text.replace('◉', '○');
@@ -353,6 +354,7 @@ app.post('/slackaction', next(function * (req, res) {
         message.action = 'home';
       }
       else if (simple_command == 'exit') {
+        logging.log('checking if user is admin')
         let isAdmin = yield utils.isAdmin(message.source.user, team);
         let couponText = yield utils.couponText(message.source.team);
         let reply = cardTemplate.home_screen(isAdmin, message.source.user, couponText);
@@ -365,6 +367,7 @@ app.post('/slackaction', next(function * (req, res) {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       });
     }
+
     else if (buttonData) {
         kip.debug(' \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n  BUTTODATA:', buttonData,'  \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n')
       var message = new db.Message({
@@ -636,78 +639,127 @@ function * updateCartMsg(cart, parsedIn) {
     method: 'POST',
     uri: parsedIn.response_url,
     body: JSON.stringify(parsedIn.original_message)
-  });
+  })
 }
 
 app.get('/authorize', function (req, res) {
-  console.log('button click')
-  res.redirect('https://slack.com/oauth/authorize?scope=commands+bot+users:read&client_id=' + kip.config.slack.client_id)
+  logging.info('button click @ /authorize')
+  res.redirect(`https://slack.com/oauth/authorize?scope=commands+bot+users:read&client_id=${kip.config.slack.client_id}`)
 })
 
-app.get('/newslack', function (req, res) {
-  console.log('new slack integration request');
-    co(function * () {
+app.get('/newslack', (req, res) => co(function * () {
+  logging.info('new slack integration request')
 
   if (!req.query.code) {
-    console.error(new Date())
-    console.error('no code in the callback url, cannot proceed with new slack integration')
+    logging.warn('no code in the callback url, cannot proceed with new slack integration')
+    if (process.env.NODE_ENV === 'production') {
+      // res.status(200).send({'Error': 'not a valid route with no code'})
+      res.redirect('/add.html')
+    } else {
+      res.redirect('/test-button.html')
+    }
     return
   }
-  var body = {
-    code: req.query.code,
-    redirect_uri: kip.config.slack.redirect_uri
+
+  // request oauth tokens from slack if they are adding kip
+  try {
+    var body = {
+      client_id: kip.config.slack.client_id,
+      client_secret: kip.config.slack.client_secret,
+      code: req.query.code,
+      redirect_uri: kip.config.slack.redirect_uri
+    }
+
+    var res_auth = yield requestPromise({
+      url: 'https://slack.com/api/oauth.access',
+      method: 'POST',
+      form: body,
+      json: true
+    })
+  } catch (err) {
+    logging.error('error getting res_auth from Slack', err, body)
   }
-  var res_auth = yield requestPromise({ url: 'https://' + kip.config.slack.client_id + ':' + kip.config.slack.client_secret + '@slack.com/api/oauth.access',method: 'POST',form: body})
-  res_auth = JSON.parse(res_auth);
-  if (_.get(res_auth,'ok')) {
-     var existingTeam = yield db.Slackbots.findOne({'team_id': _.get(res_auth,'team_id'), 'deleted': { $ne:true } }).exec();
-     if ( _.get(existingTeam, 'team_id')) {
-        _.merge(existingTeam, res_auth);
-        existingTeam.meta.deleted = false;
-        yield existingTeam.save();
-        yield utils.initializeTeam(existingTeam, res_auth);
-        yield slackModule.loadTeam(existingTeam)
-     } else {
-      var bot = new db.Slackbot(res_auth);
-      yield bot.save();
-      yield utils.initializeTeam(bot, res_auth);
-      yield slackModule.loadTeam(bot)
-      var user = yield db.Chatuser.findOne({ id: _.get(res_auth,'user_id')}).exec()
-      var message= new db.Message({
-        incoming: false,
-        thread_id: user.dm,
-        resolved: true,
-        user_id: user.id,
-        origin: 'slack',
-        text: '',
-        source:  {
-          team: bot.team_id,
-          channel: user.dm,
-          thread_id: user.dm,
-          user: user.id,
-          type: 'message',
-        },
-        mode: 'onboarding',
-        action: 'home',
-        user: user.id
-      })
-     // queue it up for processing
-      message.save().then(() => {
-        queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
-      })
-     }
+
+  if (_.get(res_auth, 'ok') !== true) {
+    logging.error('res_auth not ok in /newslack', res_auth)
+    throw new Error('Response for oauth.access not ok')
+  }
+
+  var existingTeam = yield db.Slackbots.findOne({
+    'team_id': res_auth.team_id,
+    'deleted': {$ne: true}
+  })
+
+  if (_.get(existingTeam, 'team_id')) {
+    logging.info('team exists previously while using /newslack')
+    _.merge(existingTeam, res_auth)
+    existingTeam.meta.deleted = false
+    yield existingTeam.save()
+    yield [utils.initializeTeam(existingTeam, res_auth), utils.getTeamMembers(existingTeam)]
+    yield slackModule.loadTeam(existingTeam)
   } else {
-    kip.debug(res_auth)
-   }
-
+    logging.info('creating new slackbot for team: ', res_auth.team_id)
+    var slackbot = new db.Slackbot(res_auth)
+    yield slackbot.save()
+    yield [utils.initializeTeam(slackbot, res_auth), utils.getTeamMembers(slackbot)]
+    yield slackModule.loadTeam(slackbot)
+    var user = yield db.Chatuser.findOne({id: res_auth.user_id}).exec()
+    var message = new db.Message({
+      incoming: false,
+      thread_id: user.dm,
+      resolved: true,
+      user_id: user.id,
+      origin: 'slack',
+      text: '',
+      source: {
+        'team': slackbot.team_id,
+        'channel': user.dm,
+        'thread_id': user.dm,
+        'user': user.id,
+        'type': 'message'
+      },
+      mode: 'onboarding',
+      action: 'start'
+    })
+    // queue it up for processing
+    yield message.save()
+    queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
+  }
   res.redirect('/thanks.html')
-
-  }).catch(console.log.bind(console))
-})
+}))
 
 // k8s readiness ingress health check
 app.get('/health', function (req, res) {
   res.sendStatus(200)
+})
+
+//
+// allow messages to come in from external sources
+// you can use this with do_message.js
+//
+app.post('/incoming', function (req, res) {
+  logging.debug('incoming message')
+  logging.debug(req.body)
+  logging.debug(kip.config.queueVerificationToken)
+
+
+  // verify the request
+  if (_.get(req, 'body.verificationToken') !== kip.config.queueVerificationToken) {
+    logging.error('bad verification token in /incoming')
+    res.status(504)
+    return res.end()
+  }
+
+  if (!_.get(req, 'body.message')) {
+    logging.error('no body.message in /incoming')
+    res.status(500)
+    return res.end()
+  }
+
+  logging.debug('sending', req.body.message)
+  queue.publish('incoming', req.body.message)
+  res.status(200)
+  res.end()
 })
 
 // app.get('/*', function(req, res, next) {

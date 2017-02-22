@@ -201,7 +201,6 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
-
   var currentTime = Date.now()
   var itemArray = myItems.map(item => {
     var deliveryItem = menu.getItemById(item.item.item_id)
@@ -218,7 +217,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   foodSession.confirmed_orders.push(message.source.user)
   foodSession.save()
 
-  logging.warn('fuck it')
+  logging.warn('fuck it') //this is not being called when ordering from the popout
   yield sendOrderProgressDashboards(foodSession, message)
 }
 

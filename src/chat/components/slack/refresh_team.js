@@ -3,16 +3,25 @@ var utils = require("./utils")
 var co = require('co')
 
 
-var TEAM_ID = 'T02PN3B25'
-
 co(function * () {
-  var slackbot = yield db.slackbots.findOne({team_id: TEAM_ID}).exec()
-  if (!slackbot) {
-    return console.error('No slackbot found for team_id: ' + TEAM_ID)
+  var slackbots = yield db.slackbots.find({
+    'meta.dateAdded': {$gt: new Date('2017-02-01')}
+  }).exec()
+
+  console.log(`found ${slackbots.length} slackbots to update`)
+
+  var i = 0;
+
+  while (i < slackbots.length) {
+    console.log(`refreshing team ${slackbots[i].team_name}`)
+    var members = yield utils.getTeamMembers(slackbots[i])
+    console.log(`refreshed ${members.length} members`)
+    i++
   }
-  console.log(`found team ${TEAM_ID}, ${slackbot.team_name}`)
-  var members = yield utils.getTeamMembers(slackbot)
-  console.log(`refreshed ${members.length} team members`)
+
+  console.log('successfully refreshed team DMs')
+  process.exit(0)
+
 }).catch(e => {
   console.error('error refreshing team')
   console.error(e);

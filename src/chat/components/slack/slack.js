@@ -67,8 +67,11 @@ require('../reply_logic')
 
 function * loadTeam(slackbot) {
   if (slackConnections[slackbot.team_id]) {
-    logging.info('already loaded team', slackbot.team_name)
-    return
+    logging.info('team already loaded into slackConnections', slackbot.team_name)
+    if (slackConnections[slackbot.team_id].rtm.connected === true) {
+      logging.warn('team already connected', slackbot.team_name)
+      return
+    }
   }
 
   try {
@@ -205,11 +208,15 @@ function updateHomeButtonAppender(message, token) {
 }
 
 function startResponseUrlClearTimer(id) {
+  if (typeof id === 'undefined') {
+    logging.error("cannot start response url clear timer for a message without an id")
+    return;
+  }
   let now = new Date();
   let msInFuture = 1000 * 60 * 30;
   let reminderTime = new Date(msInFuture + now.getTime());
   agenda.schedule(reminderTime, 'clear response', {
-    msgId: id
+    msgId: id.toString()
   });
 }
 
@@ -239,8 +246,15 @@ function * start () {
   kip.log('found', slackbots.length, 'slackbots')
 
   // Just need the RTM client to listen for messages
-  yield slackbots.map(slackbot => {
-    return loadTeam(slackbot)
+
+  // chunk so we load in smaller groups
+  var chunkedSlackbots = _.chunk(slackbots, 10)
+
+  yield chunkedSlackbots.map(function * (groups) {
+    logging.info('loading chunked bots instead of at once: ', groups.length)
+    yield groups.map(slackbot => {
+      return loadTeam(slackbot)
+    })
   })
 }
 
@@ -249,7 +263,6 @@ function * start () {
 //
 logging.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
-  kip.debug(`😁  Outgoing is\n${JSON.stringify(outgoing, null, 2)}`)
   logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
   outgoing = {
     data: outgoing
@@ -269,7 +282,10 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       as_user: true
     }
     co(function * () {
-      startResponseUrlClearTimer(message._id);
+      if (message._id) {
+        startResponseUrlClearTimer(message._id);
+      }
+
       if (message.action === 'typing') {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
         })
