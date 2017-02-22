@@ -35,7 +35,7 @@ class Sidebar extends Component {
           
      
             <li>
-              <a href="" onClick={(e) => { e.preventDefault(); history.push('/forms'); }} >
+              <a href="" onClick={(e) => { e.preventDefault(); history.push('/sessions'); }} >
                 <i className="fa fa-table fa-fw" /> &nbsp;Sessions
               </a>
             </li>

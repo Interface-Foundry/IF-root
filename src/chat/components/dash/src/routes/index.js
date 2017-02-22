@@ -18,7 +18,7 @@ import button from './dashboardPages/buttons';
 import slackteamstats from './dashboardPages/slackteamstats';
 import slackallstats from './dashboardPages/slackallstats';
 import stagnantcarts from './dashboardPages/stagnantcarts';
-import forms from './dashboardPages/forms';
+import sessions from './dashboardPages/sessions';
 import grid from './dashboardPages/grid';
 import icons from './dashboardPages/icons';
 import morrisjscharts from './dashboardPages/morrisjsCharts';
@@ -58,7 +58,6 @@ export default [
       button,
       slackteamstats,
       slackallstats,
-      forms,
       grid,
       icons,
       morrisjscharts,
@@ -67,6 +66,7 @@ export default [
       typography,
       // register,
       blank,
+      sessions,
       stagnantcarts,
       // place new routes before...
       // content,
