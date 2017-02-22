@@ -106,6 +106,7 @@ button.base-btn:disabled:hover {
 }
 
 .right-panel {
+  min-width: 350px;
   position: fixed;
   right: 0;
   width: 30%;
@@ -686,7 +687,8 @@ nav .mobile-cart-indicator {
   border-radius: 4px;
   background-color: rgba(111,82,216,0.12);
   color: #3a2b71;
-  font-size: 12px;
+  font-size: 10px;
+  margin-left: 10px
 }
 
 .option-body {

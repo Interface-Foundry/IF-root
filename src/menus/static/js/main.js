@@ -437,6 +437,7 @@ var app = new Vue({
     food_session_id: null,
     notDesktop: screen.width <= 800,
     isCartVisibleOnMobile: false,
+    is_admin: false
   },
   methods: {
     toggleCartOnMobile: function() {
@@ -521,7 +522,7 @@ var app = new Vue({
     },
     exceedBudget: function() {
       if (this.budget) {
-        return this.cartItemsTotal > this.budget ? true : false
+        return this.cartItemsTotal > (this.budget * 1.25) ? true : false
       } else {
         return false
       }
@@ -563,6 +564,7 @@ var app = new Vue({
     }
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
+      this.is_admin = response.data.user.is_admin;
       this.admin_name = response.data.admin_name;
       this.team_name = response.data.team_name;
       this.food_session_id = response.data.foodSessionId;
@@ -602,9 +604,15 @@ var app = new Vue({
       }
       this.menu = menu;
       this.merchant = response.data.merchant;
-      this.budget = response.data.budget ? response.data.budget : false
+      
+      if (response.data.budget && !this.is_admin) {
+        this.budget = response.data.budget;
+      } else {
+        this.budget = false
+      }
+
       if (response.data.selected_items.length) {
-        var preSelectedId = response.data.selected_items[0]
+        var preSelectedId = response.data.selected_items[0];
         this.menu.forEach(function(category) {
           category.children.forEach(function (item) {
             if (item.id === preSelectedId) {

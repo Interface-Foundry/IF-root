@@ -33,7 +33,7 @@
           <li v-for="category in navCategories">
             <category-nav-item :category="category"></category-nav-item>
           </li>
-          <more-selector :categories="moreCategories"></more-selector>
+          <more-selector v-if="moreCategories.length" :categories="moreCategories"></more-selector>
         </ul>
       </div>
       <div class="container menu-content">
@@ -44,7 +44,7 @@
             <p class="category-description" v-if="category.description">{{category.description}}</p>
           </div>
           <ul>
-            <category-item v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
+            <category-item v-if="item.price" v-for="item in category.children" :item=item v-on:show="setSelectedItem(item)" ></category-item> 
           </ul>
         </div>
       </div>
@@ -99,7 +99,7 @@
   </script>
   <script type="text/x-template" id="cart-item">
     <li class="cart-item">
-      <div class="item-summary"><span class="remove-item-icon" @click="removeItem">X</span><span class="item-name"><span v-if="item.quantity > 1">({{item.quantity}})</span> <span v-else>{{item.quantity}}</span>{{item.name}}</span><img class="edit-item-icon" @click="editItem" src="images/edit-icon.svg"><span class="item-price">${{item.totalPrice.toFixed(2)}}</span></div>
+      <div class="item-summary"><span class="remove-item-icon" @click="removeItem">X</span><span class="item-name"><span v-if="item.quantity > 1">({{item.quantity}})</span> <span v-else></span>{{item.name}}</span><img class="edit-item-icon" @click="editItem" src="images/edit-icon.svg"><span class="item-price">${{item.totalPrice.toFixed(2)}}</span></div>
       <ul class="item-options">
         <li class="item-option-set" v-for="opt in item.options">
           <ul class="item-option-list"> 
