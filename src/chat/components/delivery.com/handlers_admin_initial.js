@@ -372,7 +372,6 @@ handlers['food.settings.address.new'] = function * (message) {
 
   db.waypoints.log(1012, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  foodSession.onboarding = true;
   if(foodSession.onboarding){
     msg_json.text = ''
     msg_json.attachments.unshift({
