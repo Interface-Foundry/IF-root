@@ -2,7 +2,7 @@ require('../../../kip')
 var co = require('co')
 var doMessage = require('../do_message')
 
-var ids = ['T1JTUM7RN']
+var ids = ['T403RB08H']
 
 co(function * () {
   // find the teams to send onboarding
