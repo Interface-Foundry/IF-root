@@ -6,25 +6,25 @@ import history from '../../core/history';
 import fetch from '../../core/fetch';
 import co from 'co';
 
-var teams = [{name : 'Team A', url: '/slackteamstats'},
-   {name : 'Team B', url: '/slackteamstats'},
-   {name : 'Team C', url: '/slackteamstats'},
-   {name : 'Team D', url: '/slackteamstats'},
-   {name : 'Team E', url: '/slackteamstats'},
-   {name : 'Team F', url: '/slackteamstats'},
-   {name : 'Team G', url: '/slackteamstats'},
-   {name : 'Team H', url: '/slackteamstats'},
-   {name : 'Team I', url: '/slackteamstats'},
-   {name : 'Team J', url: '/slackteamstats'},
-   {name : 'Team K', url: '/slackteamstats'},
-   {name : 'Team L', url: '/slackteamstats'},
-   {name : 'Team M', url: '/slackteamstats'},
-   {name : 'Team N', url: '/slackteamstats'},
-   {name : 'Team O', url: '/slackteamstats'},
-   {name : 'Team P', url: '/slackteamstats'},
-   {name : 'Team Q', url: '/slackteamstats'},
-   {name : 'Team R', url: '/slackteamstats'},
-   {name : 'Team S', url: '/slackteamstats'}]
+var teams = [{team_id: '0', team_name : 'Team A', url: '/slackteamstats'},
+   {team_id: '1', team_name : 'Team B', url: '/slackteamstats'},
+   {team_id: '2', team_name : 'Team C', url: '/slackteamstats'},
+   {team_id: '3', team_name : 'Team D', url: '/slackteamstats'},
+   {team_id: '4', team_name : 'Team E', url: '/slackteamstats'},
+   {team_id: '5', team_name : 'Team F', url: '/slackteamstats'},
+   {team_id: '6', team_name : 'Team G', url: '/slackteamstats'},
+   {team_id: '7', team_name : 'Team H', url: '/slackteamstats'},
+   {team_id: '8', team_name : 'Team I', url: '/slackteamstats'},
+   {team_id: '9', team_name : 'Team J', url: '/slackteamstats'},
+   {team_id: '10', team_name : 'Team K', url: '/slackteamstats'},
+   {team_id: '11', team_name : 'Team L', url: '/slackteamstats'},
+   {team_id: '12', team_name : 'Team M', url: '/slackteamstats'},
+   {team_id: '13', team_name : 'Team N', url: '/slackteamstats'},
+   {team_id: '14', team_name : 'Team O', url: '/slackteamstats'},
+   {team_id: '15', team_name : 'Team P', url: '/slackteamstats'},
+   {team_id: '16', team_name : 'Team Q', url: '/slackteamstats'},
+   {team_id: '17', team_name : 'Team R', url: '/slackteamstats'},
+   {team_id: '18', team_name : 'Team S', url: '/slackteamstats'}]
 
 
 
@@ -66,7 +66,7 @@ class SubSidebar extends Component {
   render() {
     //const { teams } = this.state;
      const displayTeams = teams ? teams.map( function(team) { 
-      return <li key={team.name}> <a href="" onClick={(e) => { e.preventDefault(); history.push('/slackteamstats'); }} > <i className="fa fa-dashboard fa-fw" /> {team.name}</a></li>}) : []
+      return <li key={team.team_id}> <a href="" onClick={(e) => { e.preventDefault(); history.push('/slackteamstats'); }} > <i className="fa fa-dashboard fa-fw" /> {team.team_name}</a></li>}) : []
           
     return (
       <div className="sidebar-nav navbar-collapse collapse">
