@@ -378,11 +378,8 @@ queue.topic('incoming').subscribe(incoming => {
     //MODE SWITCHER
     switch (message.mode) {
       case 'onboarding':
-        debugger;
-        logging.debug('onboarding mode switcher')
         if (message.origin === 'slack') {
           var replies = yield onboarding.handle(message);
-          logging.debug('got replies', replies.length)
         } else {
           // facebook
           //check for valid country
@@ -489,7 +486,6 @@ queue.topic('incoming').subscribe(incoming => {
         replies = [default_reply(message)]
       }
     }
-    logging.debug('got replies', replies.length)
     if (replies) logging.debug('num replies', replies.length)
     timer.tic('saving message', message)
     yield message.save(); // the incoming message has had some stuff added to it :)
