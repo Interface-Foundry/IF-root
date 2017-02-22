@@ -353,9 +353,9 @@ handlers['food.settings.address.new'] = function * (message) {
   kip.debug(' 🌆🏙 enter a new address')
 
   var msg_json = {
-    'text': "What's the address for the order?",
+    'text': "What's the delivery address? (we need this to find you the best food!)",
     'attachments': [{
-      'fallback': "What's the address for the order?",
+      'fallback': "What's the delivery address? (we need this to find you the best food!)",
       'text': '✎ Type your address below (Example: _902 Broadway 10010_)',
       'mrkdwn_in': ['text'],
       'actions': [{
@@ -372,6 +372,7 @@ handlers['food.settings.address.new'] = function * (message) {
 
   db.waypoints.log(1012, foodSession._id, message.user_id, {original_text: message.original_text})
 
+  foodSession.onboarding = true;
   if(foodSession.onboarding){
     msg_json.text = ''
     msg_json.attachments.unshift({
@@ -379,6 +380,7 @@ handlers['food.settings.address.new'] = function * (message) {
       'color':'#A368F0',
       'mrkdwn_in': ['text']
     })
+    msg_json.attachments[msg_json.attachments.length-1].actions = []
   }
 
   $replyChannel.send(message, 'food.settings.address.confirm', {type: message.origin, data: msg_json})
