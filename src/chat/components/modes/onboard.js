@@ -694,6 +694,7 @@ handlers['member'] = function*(message) {
   }
   channelMembers = _.uniqBy(channelMembers, a => a.id);
   yield channelMembers.map(function * (a) {
+    logging.debug('checking if user is admin', a.id)
     let isAdmin = yield utils.isAdmin(a.id, team);
     let isMemberOnboarded = a.member_shop_onboarded;
     if (isAdmin || isMemberOnboarded) return; // don't send this to admins

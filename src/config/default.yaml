@@ -84,3 +84,4 @@ slack:
   internal_host: http://localhost:8000
   verification_token: oOEhFUU59ocPm1LpEELeqDj7A
 menuURL: http://localhost:8001/menus
+queueVerificationToken: bgWFMdolAF1qvVq/tWcRSQ

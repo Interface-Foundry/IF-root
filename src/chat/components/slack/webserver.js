@@ -354,6 +354,7 @@ app.post('/slackaction', next(function * (req, res) {
         message.action = 'home';
       }
       else if (simple_command == 'exit') {
+        logging.log('checking if user is admin')
         let isAdmin = yield utils.isAdmin(message.source.user, team);
         let couponText = yield utils.couponText(message.source.team);
         let reply = cardTemplate.home_screen(isAdmin, message.source.user, couponText);
@@ -730,6 +731,35 @@ app.get('/newslack', (req, res) => co(function * () {
 // k8s readiness ingress health check
 app.get('/health', function (req, res) {
   res.sendStatus(200)
+})
+
+//
+// allow messages to come in from external sources
+// you can use this with do_message.js
+//
+app.post('/incoming', function (req, res) {
+  logging.debug('incoming message')
+  logging.debug(req.body)
+  logging.debug(kip.config.queueVerificationToken)
+
+
+  // verify the request
+  if (_.get(req, 'body.verificationToken') !== kip.config.queueVerificationToken) {
+    logging.error('bad verification token in /incoming')
+    res.status(504)
+    return res.end()
+  }
+
+  if (!_.get(req, 'body.message')) {
+    logging.error('no body.message in /incoming')
+    res.status(500)
+    return res.end()
+  }
+
+  logging.debug('sending', req.body.message)
+  queue.publish('incoming', req.body.message)
+  res.status(200)
+  res.end()
 })
 
 // app.get('/*', function(req, res, next) {
