@@ -5,8 +5,8 @@ var preferenceSchema = mongoose.Schema({
   user_id: {type: String, required: true},
   model_name: {type: String, required: true},
   training: {type: Boolean, default: false},
-  item: {type: String, required: true},
-  result: String,
+  item: {},
+  result: {},
   ts: {type: Date, default: Date.now}
 })
 

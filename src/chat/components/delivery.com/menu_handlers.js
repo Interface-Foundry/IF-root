@@ -86,13 +86,10 @@ handlers['food.menu.quickpicks'] = function * (message) {
 
   // create preferences via random suggestions
 
-  if (kip.config.preferences.suggestions) {
-    var prefItems = preferences.recommend(user, menu.allItems(), 2)
-
-    if (prefItems.length > 0) {
-      logging.debug('would reorder these items here')
-    }
-  }
+  // var preferencesItems = []
+  // if (kip.config.preferences.suggestions) {
+  //   preferencesItems = preferences.createPreferences(user, menu.allItems(), 2)
+  // }
 
   /*
   not really any good way to order items atm so just going to throw
@@ -113,6 +110,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
       // i.infoLine = 'Popular Item'
     } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
       i.sortOrder = sortOrder.last
+    // } else if (preferencesItems.includes(Number(i.unique_id))) {
+    //   i.sortOrder = sortOrder.preferences
     } else {
       i.sortOrder = sortOrder.none
     }
