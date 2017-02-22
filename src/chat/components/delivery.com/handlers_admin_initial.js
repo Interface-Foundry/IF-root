@@ -375,7 +375,7 @@ handlers['food.settings.address.new'] = function * (message) {
   if(foodSession.onboarding){
     msg_json.text = ''
     msg_json.attachments.unshift({
-      'text':'*Step 2.* What\'s the address for the order?',
+      'text':'*Step 2.* What\'s the delivery address? (we need this to find you the best food!)',
       'color':'#A368F0',
       'mrkdwn_in': ['text']
     })
