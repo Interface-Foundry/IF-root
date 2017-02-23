@@ -52,6 +52,7 @@
     "source-map-support": "0.4.2",
     "sqlite3": "3.1.4",
     "universal-router": "1.2.2",
+    "vague-time": "^2.4.0",
     "whatwg-fetch": "1.0.0"
   },
   "devDependencies": {
