@@ -9,8 +9,7 @@ var api = require('./api-wrapper.js')
 var utils = require('./utils')
 var cuisineClassifier = require('./cuisine_classifier.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
-var yelp = require('./yelp')
-var menu_utils = require('./menu_utils')
+// var menu_utils = require('./menu_utils')
 var email_utils = require('./email_utils')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
@@ -1041,7 +1040,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   for (var i = 0; i < foodSession.email_users.length; i++) {
 
     var m = foodSession.email_users[i];
-    var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
+    // var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
     var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m)
 
     var mailOptions = {

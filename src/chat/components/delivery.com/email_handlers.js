@@ -8,11 +8,24 @@ var $allHandlers // this is how you can access handlers from other files
 // exports
 var handlers = {}
 
+
 handlers['food.admin.team.add_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var e = message.source.callback_id;
   foodSession.email_users.push(e);
   yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
+  yield handlers['food.admin.team.email_members'](message);
+}
+
+//~~~~~~~~~~//
+
+handlers['food.admin.team.add_all_emails'] = function * (message) {
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
+  var et = yield db.email_users.find({team_id: message.source.team});
+  et.map(function (eu) {
+    foodSession.email_users.push(eu.email)
+  })
+  yield foodSession.save()
   yield handlers['food.admin.team.email_members'](message);
 }
 
@@ -48,12 +61,25 @@ handlers['food.admin.team.delete_email'] = function * (message) {
 //~~~~~~~~~~//
 
 handlers['food.admin.team.email_members'] = function * (message) {
+  console.log('email handlers')
+  console.log(message.data.value.reorder)
+  console.log('lodash', _.get(message, 'data.value.reorder'))
+  var reorder = _.get(message, 'data.value.reorder') || message.history[1]._doc.action === 'admin.team.members.reorder'
+  var previousRestaurant = _.get(message, 'data.value.resto')
+  //fallback find the message with the last restaurant? where reorder is selected
+  if (reorder && !previousRestaurant && message.history) previousRestaurant = message.history[1]._doc.data.value
+  if (reorder && !previousRestaurant) {
+    var reorderMessage = yield db.Messages.find({action: 'ready_to_poll'}).sort('-ts').limit(1).exec()
+    reorderMessage = reorderMessage[0]
+    previousRestaurant = reorderMessage.source.original_message.attachments[1].actions[0].value
+  }
+
+  console.log('REORDER', reorder)
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1112, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var et = yield db.email_users.find({team_id: message.source.team});
-
   var index = parseInt(_.get(message, 'data.value.index')) || 0
   var inc = 4;
 
@@ -65,7 +91,9 @@ handlers['food.admin.team.email_members'] = function * (message) {
       "text": "✓ Added",
       "type": "button",
       "value": {
-        index: index
+        index: index,
+        reorder: reorder,
+        resto: previousRestaurant
       }
     };
 
@@ -74,12 +102,13 @@ handlers['food.admin.team.email_members'] = function * (message) {
       "text": "○ Add",
       "type": "button",
       "value": {
-        index: index
+        index: index,
+        reorder: reorder,
+        resto: previousRestaurant
       }
     };
 
     // var emails = [];
-    //I don't even know what's going on anymore
     et.slice(index, index + 4).map(function (e) {
       msg_json.attachments.push({
         "text": e.email,
@@ -93,19 +122,22 @@ handlers['food.admin.team.email_members'] = function * (message) {
             "text": "× Delete",
             "type": "button",
             "value": {
-              index: index
+              index: index,
+              reorder: reorder,
+              resto: previousRestaurant
             }
           }
       ]});
     });
-
 
     var prev = {
       "name": "food.admin.team.email_members",
       "text": "< Previous",
       "type": "button",
       "value": {
-        index: index - inc
+        index: index - inc,
+        reorder: reorder,
+        resto: previousRestaurant
       }
     };
 
@@ -114,7 +146,9 @@ handlers['food.admin.team.email_members'] = function * (message) {
       "text": "Next >",
       "type": "button",
       "value": {
-        index: index + inc
+        index: index + inc,
+        reorder: reorder,
+        resto: previousRestaurant
       }
     };
 
@@ -146,11 +180,23 @@ handlers['food.admin.team.email_members'] = function * (message) {
     //  'color': '#3AA3E3',
      'attachment_type': 'default',
      'actions': [{
-         'name': 'passthrough',
+         'name': 'food.admin.team.add_email',
          'text': 'Add Email',
          'style': 'default',
          'type': 'button',
-         'value': 'food.admin.team.add_email'
+         'value': {
+           reorder: reorder,
+           resto: previousRestaurant
+         }
+       }, {
+         'name': 'food.admin.team.add_all_emails',
+         'text': 'Add All',
+         'style': 'default',
+         'type': 'button',
+         'value': {
+           reorder: reorder,
+           resto: previousRestaurant
+         }
        }]
    });
 
@@ -165,11 +211,11 @@ handlers['food.admin.team.email_members'] = function * (message) {
       'attachment_type': 'default',
       'actions': [
         {
-          'name': 'passthrough',
+          'name': (reorder ? 'food.admin.restaurant.reordering_confirmation' : 'food.poll.confirm_send'),
           'text': 'Finish',
           'style': 'primary',
           'type': 'button',
-          'value': 'food.admin.team.members' // but should sometimes be reorder confirmation
+          'value': (reorder ? previousRestaurant : '')//'food.admin.team.members' // but should sometimes be reorder confirmation
         }
         // {
         //   'name': 'passthrough',
@@ -185,6 +231,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
 }
 
 //~~~~~~~~~~//
+
 
 handlers['food.admin.team.add_email'] = function * (message) {
   // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();

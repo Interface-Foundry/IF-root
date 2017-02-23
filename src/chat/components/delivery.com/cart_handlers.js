@@ -35,17 +35,19 @@ restartButton.confirm = {
   dismiss_text: 'No'
 }
 
-
 //
 // Show the user their personal cart
 //
 handlers['food.cart.personal'] = function * (message, replace, over_budget) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  console.log("foodSession.cart.length", foodSession.cart.length) // already duplicated
 
   db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
-  var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
+  var myItems = foodSession.cart.filter(function (i) {
+    return i.user_id === message.user_id && i.added_to_cart
+  })
   var totalPrice = myItems.reduce((sum, i) => {
     return sum + menu.getCartItemPrice(i)
   }, 0)
@@ -199,6 +201,7 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message, over_bud
 //
 handlers['food.cart.personal.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  // logging.debug('foodSession.cart.length', foodSession.cart.length) //already duplicated
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
   var currentTime = Date.now()
@@ -217,8 +220,15 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   foodSession.confirmed_orders.push(message.source.user)
   foodSession.save()
 
-  logging.warn('fuck it') //this is not being called when ordering from the popout
+  logging.warn('fuck it')
   yield sendOrderProgressDashboards(foodSession, message)
+}
+
+handlers['food.cart.update_dashboards'] = function * (message) {
+  console.log('you can have the whole world or be satisfied with the boulevard')
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  logging.debug('duplicated?', foodSession.cart.length) //yes is duplicated here
+  return yield sendOrderProgressDashboards(foodSession, message)
 }
 
 //
@@ -229,7 +239,8 @@ function * sendOrderProgressDashboards (foodSession, message) {
 
   // we'll have to send the dashboard to the admin even if they are not hungry
   const adminIsNotHungry = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
-  const allOrdersIn = foodSession.confirmed_orders.length >= foodSession.team_members.length
+  const allOrdersIn = foodSession.confirmed_orders.length >= foodSession.team_members.length + foodSession.email_users.length
+  logging.debug('allOrdersIn:', allOrdersIn)
 
   // make the list of things that hungry team members have ordered
   var menu = Menu(foodSession.menu)
@@ -258,6 +269,14 @@ function * sendOrderProgressDashboards (foodSession, message) {
     full_email_members.push(full_eu);
   }
 
+  var emailers = []
+  full_email_members.map(function (eu) {
+    if (foodSession.confirmed_orders.indexOf(eu.id) < 0) {
+      emailers.push(eu.email)
+    }
+  })
+  emailers = emailers.join(', ')
+
   var slackers = _.difference(foodSession.team_members.map(m => m.id), _.difference(foodSession.confirmed_orders, full_email_members.map(m => m.id)))
     .map(id => `<@${id}>`)
 
@@ -267,15 +286,13 @@ function * sendOrderProgressDashboards (foodSession, message) {
     slackers = slackers.join(' ')
   }
 
-  var emailers = ''  // TODO
-
   if (slackers.length > 0 || emailers.length > 0) {
     logging.debug('slackers', slackers, 'emailers', emailers)
     var waitingText = 'Waiting for orders from '
     if (slackers && !emailers) waitingText += slackers
     else if (emailers && !slackers) waitingText += emailers
     else {
-      waitingText += `\nSlack: ${slackers}\nemail: ${emailers}`
+      waitingText += `\nSlack: ${slackers}\nEmail: ${emailers}`
     }
     dashboard.attachments.push({
       mrkdwn_in: ['text'],
@@ -299,7 +316,6 @@ function * sendOrderProgressDashboards (foodSession, message) {
   //
   // send the dashboards to all the users that are ready to get dashboards
   //
-
   yield dashboardUsers.map(function * (user) {
     var isAdmin = user.id === foodSession.convo_initiater.id
     logging.debug('sending dashboard to user', user.id, 'isAdmin?', isAdmin)
@@ -335,11 +351,14 @@ function * sendOrderProgressDashboards (foodSession, message) {
         }
       }
 
-      const items = foodSession.cart.filter(i => i.added_to_cart)
-      const totalPrice = items.reduce((sum, i) => {
+      var menu = Menu(foodSession.menu)
+
+      var items = foodSession.cart.filter(i => i.added_to_cart)
+      var totalPrice = items.reduce(function (sum, i) {
         return sum + menu.getCartItemPrice(i) * i.item.item_qty
       }, 0)
-      const minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum
+
+      var minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum
 
       thisDashboard.attachments.push({
         'color': minimumMet ? '#3AA3E3' : '#fc9600',
@@ -569,9 +588,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+  logging.debug('foodSession.cart.length', foodSession.cart.length) // duplication has happened OH GOD IT'S JOHN CARPENTER'S "Thing"
   teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
   lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
-  var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
+  // var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
 
   yield lateMembers.map(function * (userId) {
     var user = _.find(foodSession.team_members, {'id': userId})
@@ -609,7 +629,6 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     yield $replyChannel.sendReplace(msg, 'food.exit.confirm', {type: 'slack', data: json})
   })
 
-
   db.waypoints.log(1300, foodSession._id, message.source.user, {original_text: message.original_text})
 
   var menu = Menu(foodSession.menu)
@@ -623,7 +642,6 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     'text': `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     'fallback': `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     'callback_id': 'address_confirm'
-
   }
 
   var mainAttachment = {
@@ -633,11 +651,18 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
 
   // ------------------------------------
   // item attachment with items and prices
-  var itemAttachments = foodSession.cart.filter(i => i.added_to_cart).map((item) => {
+  var itemAttachments = yield foodSession.cart.filter(i => i.added_to_cart).map(function * (item) {
     var foodInfo = menu.getItemById(String(item.item.item_id))
     var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
     var textForItem = `*${foodInfo.name} - ${menu.getCartItemPrice(item).$}*\n`
-    textForItem += descriptionString.length > 0 ? `Options: ${descriptionString}\n` + `Added by: <@${item.user_id}>` : `Added by: <@${item.user_id}>`
+
+    var email_user = yield db.email_users.findOne({id: item.user_id}).exec()
+    if (email_user) {
+      var userText = email_user.email
+    }
+    else var userText = '<@' + item.user_id + '>'
+
+    textForItem += descriptionString.length > 0 ? `Options: ${descriptionString}\n` + `Added by: ${userText}` : `Added by: ${userText}`
     return {
       'text': textForItem,
       'fallback': textForItem,
@@ -663,7 +688,6 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
       }]
     }
   })
-
   if (foodSession.tip.percent === 'cash') foodSession.tip.amount = 0.00
 
   try {
@@ -672,7 +696,6 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     logging.error('error running createCartForSession', err)
     return
   }
-
   if (order !== null) {
     // order is successful
     foodSession.order = order

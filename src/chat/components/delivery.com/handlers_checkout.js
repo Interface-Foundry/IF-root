@@ -1,11 +1,10 @@
 var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
-var sleep = require('co-sleep')
 var validator = require('isemail')
+var co = require('co')
 
 var coupon = require('../../../coupon/couponUsing.js')
-var mailer_transport = require('../../../mail/IF_mail.js')
 var cardTemplates = require('../slack/card_templates.js')
 var utils = require('../slack/utils.js')
 var Menu = require('./Menu')
@@ -353,7 +352,6 @@ handlers['food.admin.order.checkout.email'] = function * (message) {
     }]
   }
 
-  //var response =
   yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.email.submit', {type: message.origin, data: msg})
 }
 
@@ -361,17 +359,27 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSe
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
-  var email = message.text.split('|')[1].split('>')[0]
+  logging.debug("MESSAGE.TEXT", message.text)
+  var email = (message.text ? message.text.split('|') : '')
+  if (email.length > 1) email = email[1].split('>')[0]
   var valid = validator.validate(email)
   if (!valid) {
     // not a valid email
-    $replyChannel.send(
+    yield $replyChannel.send(
       message,
       'food.admin.order.checkout.email',
       {
         type: message.origin,
-        data: {'text': `Unfortunately that email was invalid - try again?`}
-      })
+        data: {
+          'text': '',
+          'attachments': [{
+            text: `Unfortunately that email wasn't valid. Please try again!`,
+            mrkdwn_in: ['text'],
+            color: '#fc9600'
+          }]
+        }
+      }
+    )
     return yield handlers['food.admin.order.checkout.email'](message)
   }
 
@@ -676,19 +684,19 @@ handlers['food.admin.save_info'] = function * (message, foodSession) {
   yield user.save()
 
   // slackbot save info
-  logging.info('saving location... ')
-  try {
-    yield db.Slackbot.update({
-      'team_id': message.source.team,
-      'meta.locations.address_1': foodSession.chosen_location.address_1
-    }, {
-      $set: {'meta.locations.$': foodSession.chosen_location}
-    }, {
-      upsert: true
-    })
-  } catch (err) {
-    logging.error('error updating slackbot.meta.locations', err)
-  }
+  // logging.info('saving location... ')
+  // try {
+  //   yield db.Slackbot.update({
+  //     'team_id': message.source.team,
+  //     'meta.locations.address_1': foodSession.chosen_location.address_1
+  //   }, {
+  //     $set: {'meta.locations.$': foodSession.chosen_location}
+  //   }, {
+  //     upsert: true
+  //   })
+  // } catch (err) {
+  //   logging.error('error updating slackbot.meta.locations', err)
+  // }
 }
 
 handlers['food.done'] = function * (message) {
@@ -715,6 +723,14 @@ handlers['food.payments.done'] = function * (message, foodSession) {
     yield foodSession.save()
     yield handlers['food.payments.done.team'](message, foodSession)
 
+    logging.debug('foodSession.email_users', foodSession.email_users)
+    yield foodSession.email_users.map(function * (email) {
+      console.log('email:', email)
+      var full_eu = yield db.email_users.findOne({email: email})
+      if (foodSession.confirmed_orders.indexOf(full_eu.id) > -1) {
+        yield email_utils.sendEmailUserConfirmations(foodSession, email)
+      }
+    })
     logging.debug('about to send confirmation email')
     yield email_utils.sendConfirmationEmail(foodSession)
     // save coupon info but needed to wait for payments thing
@@ -742,41 +758,42 @@ handlers['food.payments.done.team'] = function * (message, foodSession) {
     var uniqOrders = _.uniq(foodSession.confirmed_orders)
     yield uniqOrders.map(function * (userId) {
       var user = _.find(foodSession.team_members, {'id': userId}) // find returns the first one
+      if (user) {
+        var itemNames = foodSession.cart
+          .filter(i => i.user_id === userId && i.added_to_cart)
+          .map(i => menu.getItemById(i.item.item_id).name)
+          .map(name => '*' + name + '*') // be bold
 
-      var itemNames = foodSession.cart
-        .filter(i => i.user_id === userId && i.added_to_cart)
-        .map(i => menu.getItemById(i.item.item_id).name)
-        .map(name => '*' + name + '*') // be bold
-
-      if (itemNames.length > 1) {
-        var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
-      } else {
-        foodString = itemNames[0]
-      }
-
-      var isAdmin = team.meta.office_assistants.includes(user.id)
-      var msg = _.merge({}, {
-        'incoming': false,
-        'mode': 'food',
-        'action': 'payment_info',
-        'thread_id': user.dm,
-        'source': {
-          'type': 'message',
-          'user': user.id,
-          'channel': user.dm,
-          'team': foodSession.team_id
+        if (itemNames.length > 1) {
+          var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
+        } else {
+          foodString = itemNames[0]
         }
-      })
-      var couponText = yield utils.couponText(message.source.team)
-      var json = {
-        'text': `Your order of ${foodString} is on the way 😊`,
-        'callback_id': 'food.charge_succeeded',
-        'fallback': `Your order is on the way`,
-        'attachment_type': 'default',
-        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
-      }
 
-      yield $replyChannel.send(msg, 'food.payments.done.team', {type: message.origin, data: json})
+        var isAdmin = team.meta.office_assistants.includes(userId)
+        var msg = _.merge({}, {
+          'incoming': false,
+          'mode': 'food',
+          'action': 'payment_info',
+          'thread_id': user.dm,
+          'source': {
+            'type': 'message',
+            'user': user.id,
+            'channel': user.dm,
+            'team': foodSession.team_id
+          }
+        })
+        var couponText = yield utils.couponText(message.source.team)
+        var json = {
+          'text': `Your order of ${foodString} is on the way 😊`,
+          'callback_id': 'food.charge_succeeded',
+          'fallback': `Your order is on the way`,
+          'attachment_type': 'default',
+          'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
+        }
+
+        yield $replyChannel.send(msg, 'food.payments.done.team', {type: message.origin, data: json})
+      }
     })
   } catch (err) {
     logging.error('on success messages broke', err)
@@ -792,7 +809,7 @@ handlers['food.new_credit_card.success'] = function * (guestToken) {
   }).sort({ts: -1}).limit(1).exec()
   lastMsg = lastMsg[0]
 
-  logging.debug('heres the lastMsg', lastMsg)
+  // logging.debug('heres the lastMsg', lastMsg)
   yield $replyChannel.sendReplace(lastMsg, 'food.new_credit_card.success', {
     type: 'slack',
     data: {'text': 'New card worked!'}

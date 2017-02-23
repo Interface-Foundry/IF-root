@@ -119,6 +119,7 @@ router.post('/order', function (req, res) {
   co(function * () {
     logging.debug('post to /order');
     if (_.get(req, 'body')) {
+      logging.info('req.body', req.body)
       var order = req.body.order;
       var user_id = req.body.user_id;
 
@@ -131,6 +132,7 @@ router.post('/order', function (req, res) {
       var menu = Menu(foodSession.menu)
       var money_spent = 0;
       console.log('got cart and menu')
+      console.log('ORDER', order) //not yet in duplicate
       for (var i = 0; i < order.length; i++) {
         // logging.debug(order[i]);
         cart.push({
@@ -138,37 +140,41 @@ router.post('/order', function (req, res) {
           item: order[i],
           user_id: user_id
         });
-        console.log('added everything to the cart')
-        if (foodSession.budget) {
-          money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))
-          console.log('calculated money spent')
-        }
-      }
 
-      console.log('added everything to team cart')
+        if (foodSession.budget) {
+          console.log('calculating money spent')
+          console.log(cart[cart.length-1])
+          money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))        }
+      }
+      console.log('CART', cart) //not  yet duplicat
+      console.log('cart length', cart.length)
 
       var user_budgets = foodSession.user_budgets
       user_budgets[user_id] -= money_spent
-
       console.log('calculated money spent')
 
-      yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
-
-      console.log('updated the delivery object')
+      // yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
+      // console.log('updated the delivery object')
 
       //----------Message Queue-----------//
 
-        logging.debug('updated delivery; looking for source message');
+      logging.debug('updated delivery; looking for source message');
+      logging.debug('user_id', user_id)
 
-        var foodMessage = yield db.Messages.find({
-          'source.user': user_id,
-          mode: 'food',
-          incoming: false
-        }).sort('-ts').limit(1);
+      var foodMessage = yield db.Messages.find({
+        'source.user': user_id,
+        mode: 'food',
+        incoming: false
+      }).sort('-ts').limit(1)
+      console.log('foodMessage', foodMessage)
 
-        logging.debug('found foodmessage')
-
+      if (foodMessage && foodMessage.length) {
+        foodSession.save()
         foodMessage = foodMessage[0];
+
+        logging.debug('foodMessage.source', foodMessage.source)
+        logging.debug('foodMessage.thread_id', foodMessage.thread_id)
+        logging.debug('foodMessage.source.user', foodMessage.source.user)
 
         var mess = new db.Messages({
           incoming: true,
@@ -190,8 +196,44 @@ router.post('/order', function (req, res) {
             verification_token: kip.config.slack.verification_token,
             message: mess
           }
-
         })
+      }
+      else {
+        logging.info('email user')
+
+        foodSession.confirmed_orders.push(user_id)
+        foodSession.save() //I BET THIS IS WHAT IS DOING IT FUCK YOU
+
+        var alternateFoodMessage = yield db.Messages.find({
+          'source.user': foodSession.convo_initiater.id,
+          mode: 'food',
+          incoming: false
+        }).sort('-ts').limit(1);
+        // console.log('alternateFoodMessage', alternateFoodMessage)
+        alternateFoodMessage = alternateFoodMessage[0]
+
+        var mess = new db.Messages({
+          incoming: true,
+          thread_id: alternateFoodMessage.thread_id,
+          action: 'cart.update_dashboards',
+          user_id: user_id,
+          mode: 'food',
+          origin: 'slack',
+          source: alternateFoodMessage.source,
+        })
+
+        yield mess.save();
+
+        request.post({
+          url: kip.config.slack.internal_host + '/menuorder',
+          json: true,
+          body: {
+            topic: 'incoming',
+            verification_token: kip.config.slack.verification_token,
+            message: mess
+          }
+        })
+      }
 
       logging.debug('ostensibly done');
       res.send();
