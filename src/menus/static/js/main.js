@@ -9,11 +9,16 @@ Vue.component('choice', {
       selected: false,
       maxSelection : this.option.max_selection,
       minSelection : this.option.min_selection,
+      optionId: this.option.id
     }
   },
   methods: {
     selectChoice: function() {
-
+      
+      if (this.$parent.required) {
+        choiceBus.$emit('required:choice:selected', this.optionId) 
+      }
+      
       if (this.$parent.isPriceGroup) {
         this.$parent.item.price = this.choice.price;
       }
@@ -25,7 +30,7 @@ Vue.component('choice', {
 
       // set selected on radio to true and all other radios to false
       if (this.type === "radio") {
-        choiceBus.$emit('radio-selected', this.choice)
+        choiceBus.$emit('radio-selected', this.choice, this.optionId, this.option)
       }
 
       var selectedOption;
@@ -45,18 +50,15 @@ Vue.component('choice', {
         }
 
       }
-      //add or subtract choice from option's cost
+
+
+      //add or subtract choice from option's cost for checkboxes
       if (this.choice.price && this.type == "checkbox") {
         if (this.$parent.cost) {
           this.selected ? this.$parent.cost += this.choice.price : this.$parent.cost -= this.choice.price
         } else {
           this.$parent.cost = this.choice.price
         }
-      }
-
-
-      if (this.choice.price && this.type == "radio") {
-        this.$parent.cost = this.choice.price
       }
 
       var options = this.$parent.$parent.options;
@@ -92,7 +94,7 @@ Vue.component('choice', {
           newOptions[option.id].choices.push(choice)
         }
       }
-      if (this.type === "checkbox"  && !this.selected) {
+      if (this.type === "checkbox" && !this.selected) {
         newOptions[option.id].choices.forEach(function(c) {
           if (c.id === choice.id) {
             var i = _.indexOf(newOptions[option.id].choices, choice)
@@ -122,14 +124,14 @@ Vue.component('choice', {
           }
         })
     })
-
-    choiceBus.$on('radio-selected', function(selectedChoice) {
-      if (that.type === "radio") {
-        if (that.choice.id == selectedChoice.id && !that.selected) {
-            that.selected = true;
-        } else {
-          that.selected = false;
-        }
+    
+    choiceBus.$on('radio-selected', function(selectedChoice, optionId, selectedOptionSet) {
+      if (that.choice.id == selectedChoice.id) {
+        that.selected = true;
+        that.$parent.cost = selectedChoice.price 
+      } else if (that.choice.optionId == optionId){
+        that.$parent.cost -= that.choice.price;                        
+        that.selected = false;
       }
     })
   }
@@ -143,21 +145,37 @@ Vue.component('option-set', {
       inputType: "",
       cost: this.option.cost || 0,
       isPriceGroup: this.option.type === "price group" ? true : false,
-      minSelection: this.option.min_selection
+      minSelection: this.option.min_selection,
+      required: false,
     }
   },
   methods: {
     updateOptions: function(options) {
-      this.$emit('setOptions', options)
+      this.$emit('setOptions', options);
     }
   },
   created: function() {
-    if (this.option.max_selection === 1 && this.option.type === "price group") {
+    var that = this;
+    if (this.option.min_selection === 1) {
+      this.required = true;
+    }
+    if (this.option.max_selection === 1) {
       this.inputType = "radio"
     }
     else {
       this.inputType = "checkbox"
     }
+
+    if (this.required) {
+      choiceBus.$emit('option-set-required', this.option.id)
+    }
+    
+    choiceBus.$on('required:choice:selected', function (optionId) {
+      if (that.option.id == optionId) {
+        choiceBus.$emit('required:selected', that.option.id);  
+      }
+    })      
+    
   }
 })
 
@@ -319,6 +337,7 @@ Vue.component('selected-item', {
       quantity: 0,
       selectedItem: {},
       optionsCost: 0,
+      requiredOptions: [],
     }
   },
   methods: {
@@ -352,20 +371,50 @@ Vue.component('selected-item', {
           that.optionsCost += val.option.cost
         }
       })
-    }
+    },
   },
   computed: {
     totalPrice: function() {
       var totalPrice = ((this.item.price + this.optionsCost)* this.quantity);
       return totalPrice
+    },
+    requiredDone: function() {
+      var arr  = []
+      this.requiredOptions.forEach(function(option, i) {
+        if (option.selected == true) {
+          arr.push(option)
+        }
+      })
+
+      if (arr.length == this.requiredOptions.length) {
+        return true;
+      } else {
+        return false;
+      }
     }
   },
   created: function() {
+    var that = this;
     if (this.item.min_qty) {
       this.quantity = this.item.min_qty
     } else {
       this.quantity = 1
     }
+
+    choiceBus.$on('option-set-required', function(optionId) {
+      var obj = {}
+      obj.id = optionId;
+      obj.selected = false;
+      that.requiredOptions.push(obj)
+    })
+
+    choiceBus.$on('required:selected', function(optionId) {
+      that.requiredOptions.forEach(function (option, i) {
+        if (option.id == optionId) {
+          that.requiredOptions[i]['selected'] = true
+        }      
+      })
+    })  
   }
 })
 
@@ -388,6 +437,7 @@ var app = new Vue({
     food_session_id: null,
     notDesktop: screen.width <= 800,
     isCartVisibleOnMobile: false,
+    is_admin: false
   },
   methods: {
     toggleCartOnMobile: function() {
@@ -472,7 +522,7 @@ var app = new Vue({
     },
     exceedBudget: function() {
       if (this.budget) {
-        return this.cartItemsTotal > this.budget ? true : false
+        return this.cartItemsTotal > (this.budget * 1.25) ? true : false
       } else {
         return false
       }
@@ -514,6 +564,7 @@ var app = new Vue({
     }
     axios.post('/menus/session', {session_token: key})
     .then((response) => {
+      this.is_admin = response.data.user.is_admin;
       this.admin_name = response.data.admin_name;
       this.team_name = response.data.team_name;
       this.food_session_id = response.data.foodSessionId;
@@ -553,9 +604,15 @@ var app = new Vue({
       }
       this.menu = menu;
       this.merchant = response.data.merchant;
-      this.budget = response.data.budget ? response.data.budget : false
+      
+      if (response.data.budget && !this.is_admin) {
+        this.budget = response.data.budget;
+      } else {
+        this.budget = false
+      }
+
       if (response.data.selected_items.length) {
-        var preSelectedId = response.data.selected_items[0]
+        var preSelectedId = response.data.selected_items[0];
         this.menu.forEach(function(category) {
           category.children.forEach(function (item) {
             if (item.id === preSelectedId) {
