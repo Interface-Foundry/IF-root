@@ -44,7 +44,7 @@ class SubSidebar extends Component {
   render() {
     const { teams } = this.state;
      const displayTeams = teams ? teams.map( function(team) { 
-      return <li key={team.team_id}> <a href="" onClick={(e) => { e.preventDefault(); history.push('/slackteamstats'); }} > <i className="fa fa-dashboard fa-fw" /> {team.team_name}</a></li>}) : []
+      return <li key={team.team_id}> <a href="" onClick={(e) => { e.preventDefault(); window.location.pathname=='/' ? history.push( window.location.pathname.split('/').slice(0,1).join('/') + team.team_name + '/') : history.push( window.location.pathname.split('/').slice(0,2).join('/') + '/' + team.team_name + '/'); }} > <i className="fa fa-dashboard fa-fw" /> {team.team_name}</a></li>}) : []
           
     return (
       <div className="sidebar-nav navbar-collapse collapse">
