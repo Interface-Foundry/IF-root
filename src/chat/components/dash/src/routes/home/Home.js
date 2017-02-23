@@ -8,8 +8,7 @@ import {
 import s from './Home.css';
 import StatWidget from '../../components/Widget';
 import Donut from '../../components/Donut';
-import Table from '../../components/Table';
-import SubSidebar from '../../components/SubSidebar';
+import CartTable from '../../components/CartTable';
 
 import {
   Tooltip,
@@ -36,39 +35,6 @@ const data = [
   { name: 'Page G', uv: 3490, pv: 4300, amt: 2100, value: 100 },
 ];
 
-const heads = [
-  'Date / Time',
-  'Team',
-  'User',
-  'Item',
-  'Price',
-  'Quantity',
-  'Total',
-  'Cart ID',
-  'Platform'
-];
-
-const tableData = [
-  ['01/15/17 3:15 pm',
-    'kipsearch',
-    'Alyx Baldwin',
-    'Shnozzleberries',
-    '$2,321.55',
-    '2',
-    '$5,643.10',
-    'slack_212344234',
-    'slack'
-  ], ['01/22/17 8:15 pm',
-    'kipsearch',
-    'Alyx Baldwin',
-    'Berryberries',
-    '$1,218.63',
-    '5',
-    '$6,093.15',
-    'slack_212344234',
-    'slack'
-  ]
-];
 /* *********************************************** */
 
 function Home(props, context) {
@@ -109,9 +75,20 @@ function Home(props, context) {
       <div className='row'>
         <div>
           <Panel>
-            <div className="table-responsive">
-            	<Table heads={heads} data={tableData}/>
-            </div>
+          	<CartTable 
+              query={'{carts(purchased: "true") {purchased_date,slack_id,items}}'}
+              heads={['Purchased Date', 'Slack ID', 'Number of Items']}
+              colorBy={1}
+              process={
+                cart => {
+                  cart.items = cart.items.split(',').length;
+                  let purchased_date = new Date(cart.purchased_date);
+                  cart.purchased_date = purchased_date.toLocaleString();
+                  return Object.keys(cart).map(k => cart[k])
+                }
+              }
+              sort={(a, b) => new Date(b.purchased_date) - new Date(a.purchased_date)}
+            />
           </Panel>
         </div>
       </div>

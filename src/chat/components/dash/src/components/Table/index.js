@@ -6,6 +6,10 @@ import {
   Table
 } from 'react-bootstrap';
 
+
+// creates a table based on an array of arrays
+// Additionally, if there is a 'colorBy' prop
+// tries to create unique colors
 class CustomTable extends Component {
   constructor(props) {
     super(props);
@@ -13,14 +17,16 @@ class CustomTable extends Component {
 
   render() {
     return (
-      <Table className='table-hover'>
-        <thead>
-            {createTableHeaders(this.props.heads)}
-        </thead>
-        <tbody>
-            {createTableRows(this.props.data)}
-        </tbody>
-    </Table>
+      <div className="table-responsive">
+        <Table className='table-hover'>
+          <thead>
+              {createTableHeaders(this.props.heads)}
+          </thead>
+          <tbody>
+              {createTableRows(this.props.data)}
+          </tbody>
+      </Table>
+    </div>
     )
   }
 }

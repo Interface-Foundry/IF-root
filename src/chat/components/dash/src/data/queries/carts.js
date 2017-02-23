@@ -6,8 +6,9 @@ import {
   GraphQLNonNull as NonNull,
 } from 'graphql';
 import Conn from '../sequelize';
-
+import Cart from '../models/Cart';
 const CartListType = new ListType(CartType);
+import {resolver} from 'graphql-sequelize';
 
 const carts = {  
   type: CartListType,
@@ -49,9 +50,10 @@ const carts = {
           type: StringType
         },
   },
-  resolve (root, args) {
-   return Conn.models.cart.findAll({ limit: 1000, order: [['created_date', 'DESC']]})
-  }
+  resolve: resolver(Cart)
+  // resolve (root, args) {
+  //  return Conn.models.cart.findAll({ limit: 1000, order: [['created_date', 'DESC']]})
+  // }
 }
 
 export default carts;

@@ -45,7 +45,6 @@ class SubSidebar extends Component {
   }
 
   handleSearchInput(event) {
-    console.log(event.target.value)
     this.setState({
       searchString: event.target.value
     });

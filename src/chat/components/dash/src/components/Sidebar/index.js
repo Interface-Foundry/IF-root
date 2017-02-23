@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import history from '../../core/history';
-import SubSidebar from '../../components/SubSidebar';
+import SubSidebar from '../SubSidebar';
 
 class Sidebar extends Component {
 
