@@ -96,12 +96,16 @@ function * loadTeam(slackbot) {
   // })
 
   rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
-    // kip.log('loaded slack team', slackbot.team_id, slackbot.team_name)
+    logging.debug('loaded slack team', slackbot.team_id)
   })
 
-  rtm.on(slack.CLIENT_EVENTS.DISCONNECT, (reason) => {
+  rtm.on(slack.CLIENT_EVENTS.RTM.DISCONNECT, (reason) => {
     logging.info('slack client disconnected', slackbot.team_id)
-    logging.info(reason); // is this even a thing?
+    logging.error('disconnection slackbot for team', slackbot.team_id, reason)
+  })
+
+  rtm.on(slack.CLIENT_EVENTS.RTM.UNABLE_TO_RTM_START, (reason) => {
+    logging.error('unable to rtm start for ', slackbot.team_id, reason)
   })
 
   //
