@@ -6,8 +6,8 @@ import {
 } from 'react-bootstrap';
 import StatWidget from '../../../components/Widget';
 import Donut from '../../../components/Donut';
-import Table from '../../../components/Table';
-
+import CartTable from '../../../components/CartTable';
+import vagueTime from 'vague-time'
 import {
   Tooltip,
   XAxis, YAxis, Area,
@@ -33,39 +33,6 @@ const data = [
   { name: 'Page G', uv: 3490, pv: 4300, amt: 2100, value: 100 },
 ];
 
-const heads = [
-  'Date / Time',
-  'Team',
-  'User',
-  'Item',
-  'Price',
-  'Quantity',
-  'Total',
-  'Cart ID',
-  'Platform'
-];
-
-const tableData = [
-  ['02/15/17 3:15 pm',
-    'kipfind',
-    'Alyx Baldwin',
-    'Shnozzleberries',
-    '$2,321.55',
-    '2',
-    '$5,643.10',
-    'slack_212344234',
-    'slack'
-  ], ['02/22/17 8:15 pm',
-    'kipfind',
-    'Alyx Baldwin',
-    'Berryberries',
-    '$1,218.63',
-    '5',
-    '$600,093.15',
-    'slack_212344234',
-    'slack'
-  ]
-];
 /* *********************************************** */
 
 function stagnantcarts(props, context) {
@@ -107,7 +74,21 @@ function stagnantcarts(props, context) {
         <div>
           <Panel>
             <div className="table-responsive">
-              <Table heads={heads} data={tableData}/>
+              <CartTable 
+              query={'{carts(purchased: "false") {created_date,slack_id,items}}'}
+              heads={['Delay', 'Created Date', 'Slack ID', 'Number of Items']}
+              colorBy={2}
+              process = {
+                cart => [
+                  vagueTime.get({
+                    from: Date.now(),
+                    to: Date.parse(cart.created_date)
+                  }),
+                  (new Date(cart.created_date)).toLocaleString(), cart.slack_id, cart.items.split(',').length
+                ]
+              }
+              sort={(a, b) => new Date(a.created_date) - new Date(b.created_date)}
+            />
             </div>
           </Panel>
         </div>
