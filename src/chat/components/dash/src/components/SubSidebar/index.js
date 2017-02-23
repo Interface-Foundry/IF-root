@@ -15,8 +15,11 @@ class SubSidebar extends Component {
       chartsElementsCollapsed: true,
       multiLevelDropdownCollapsed: true,
       thirdLevelDropdownCollapsed: true,
-      samplePagesCollapsed: true
+      samplePagesCollapsed: true,
+      searchTerm: ''
     };
+    this.handleSearchInput = this.handleSearchInput.bind(this)
+    this.filterData = this.filterData.bind(this)
   }
 
   componentDidMount() {
@@ -41,9 +44,28 @@ class SubSidebar extends Component {
     })
   }
 
+  handleSearchInput(event) {
+    console.log(event.target.value)
+    this.setState({
+      searchString: event.target.value
+    });
+  }
+
+  filterData(teams, filter) {
+    if (filter === "" || !filter) {
+      return teams
+    };
+    return (
+      teams.filter(function(team) {
+        return (team.team_name.toLowerCase().includes(filter.toLowerCase()))
+      })
+    );
+  }
+
   render() {
     const { teams } = this.state;
-     const displayTeams = teams ? teams.map( function(team) { 
+    let filteredData = this.filterData(teams, this.state.searchString);
+    const displayTeams = filteredData ? filteredData.map( function(team) { 
       return <li key={team.team_id}> <a href="" onClick={(e) => { e.preventDefault(); window.location.pathname=='/' ? history.push( window.location.pathname.split('/').slice(0,1).join('/') + team.team_name + '/') : history.push( window.location.pathname.split('/').slice(0,2).join('/') + '/' + team.team_name + '/'); }} > <i className="fa fa-dashboard fa-fw" /> {team.team_name}</a></li>}) : []
           
     return (
@@ -51,7 +73,7 @@ class SubSidebar extends Component {
         <ul className="nav in" id="side-menu">
           <li className="sidebar-search">
             <div className="input-group custom-search-form">
-              <input type="text" className="form-control" placeholder="Search..." />
+              <input type="text" className="form-control" onChange={this.handleSearchInput} placeholder="Search..." />
               <span className="input-group-btn">
                 <button className="btn btn-default" type="button">
                   <i className="fa fa-search" />

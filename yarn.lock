@@ -2107,6 +2107,10 @@ ee-first@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
 
+email-validator@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/email-validator/-/email-validator-1.0.7.tgz#4621ca32fc741eb833ac98d5fb55670b7e056c95"
+
 emoji-text@^0.2.6:
   version "0.2.6"
   resolved "https://registry.yarnpkg.com/emoji-text/-/emoji-text-0.2.6.tgz#931e833a98facc949f3d8057dc8a84363c8bb8f8"
