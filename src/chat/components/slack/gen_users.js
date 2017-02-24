@@ -4,12 +4,15 @@ var _ = require('lodash')
 
 
 db.Slackbots.find({
-  'meta.delted': {$ne: true}
+  'meta.deleted': {$ne: true},
+  'meta.mock': {$ne: true}
 }).exec(function (e, bots) {
   if (e) {
     console.error(e)
     process.exit(1)
   }
+
+  console.log('found ' + bots.length + ' bots')
 
   //
   // saves a json array of admin id's which we will ping onthe given day
@@ -17,7 +20,7 @@ db.Slackbots.find({
   function gen_day(day) {
     // get the nth admin of every bot
     const admins = bots
-      .map(b => _.get(b, 'meta.office_assistancts.' + (day - 1)))
+      .map(b => _.get(b, 'meta.office_assistants.' + (day - 1)))
       .filter(Boolean)
 
     // write the list of nth admins to a json file for use later

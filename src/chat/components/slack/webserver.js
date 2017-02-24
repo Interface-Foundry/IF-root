@@ -2,6 +2,7 @@
 // "Actions" are what slack calls buttons
 //
 var queue = require('../queue-direct');
+var agenda = require('../agendas')
 var refresh_team = require('../refresh_team');
 var express = require('express');
 var co = require('co');
@@ -17,6 +18,7 @@ var cookieParser = require('cookie-parser')
 var uuid = require('uuid');
 var processData = require('../process');
 var sleep = require('co-sleep');
+var snooze = require('./snooze');
 // var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
 // var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
 var request = require('request')
@@ -112,6 +114,35 @@ app.post('/slackaction', next(function * (req, res) {
 
   var message;
   var parsedIn = JSON.parse(req.body.payload);
+  
+  // snooze any message by setting action.value to "snooze"
+  if (_.get(parsedIn, 'actions[0].value') === 'snooze') {
+    var time_ms = new Date(24 * 60 * 60 * 1000 + Date.now())
+    var reminderMessage = {
+      mode: 'food',
+      action: 'begin',
+      origin: 'slack',
+      reply: {
+        attachments: parsedIn.original_message.attachments
+      },
+      source: {
+        user: parsedIn.user.id,
+        team: parsedIn.team.id,
+        channel: parsedIn.channel.id
+      }
+    }
+
+    agenda.schedule(time_ms, 'onboarding reminder', {
+      msg: JSON.stringify(reminderMessage),
+      user: parsedIn.user.id
+    })
+
+    var okay = {
+      text: 'Okay, I\'ll remind you tomorrow',
+      replace_original: false
+    }
+    return res.send(okay)
+  }
 
   // First reply to slack, then process the request
   if (!buttonData && simple_command !== 'collect_select'&& simple_command !== 'channel_btn'&& parsedIn.original_message) {

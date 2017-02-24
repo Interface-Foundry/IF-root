@@ -38,8 +38,8 @@ const message = {
       type: 'button'
     }, {
       color: '#45a5f4',
-      name: 'food.campaign.reminder',
-      value: 'food.campaign.reminder',
+      name: 'snooze',
+      value: 'snooze',
       text: 'Later',
       style: 'default',
       type: 'button'
@@ -51,7 +51,11 @@ const message = {
 // Sends a message to a specific user
 //
 function sendToUser (user) {
+  console.log('running for user', user)
   return co(function * () {
+    // get the full user obj
+    user = yield db.Chatusers.findOne({id: user}).exec()
+
     // Only send to users that have not initiated an order in 2017
     let deliveries = yield db.Delivery.find({
       'convo_initiater.id': user.id,
@@ -86,7 +90,9 @@ function * main () {
   console.log('(ctrl-c if that looks wrong)')
   yield sleep(5000)
   console.log('proceeding')
-  yield users.map(u => sendToUser)
+  yield users.map(function * (u) {
+   yield sendToUser(u)
+  })
   process.exit(0)
 }
 
