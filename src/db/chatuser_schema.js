@@ -83,6 +83,7 @@ var chatuserSchema = mongoose.Schema({
   phone_number: String,
   first_name: String,
   last_name: String,
+  vote_success: Number,
   food_preferences: {
     asked: {
       type: Boolean,

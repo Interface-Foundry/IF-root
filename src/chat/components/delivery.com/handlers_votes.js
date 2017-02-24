@@ -140,7 +140,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   merchants = merchants
     .map(m => {
-      m.score = scoreAlgorithms[sortOrder](m)
+      m.score = Number(!(!scoreAlgorithms[sortOrder](m))) //casting to bool and then to number again to avoid weighting in favor of terrible fusion places
       if (sortOrder == SORT.cuisine) {
 
         //score based on yelp reviews
@@ -785,7 +785,6 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-  console.log('picklistmessage', message);
   console.log('SORT.cuisine', SORT.cuisine)
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
@@ -951,6 +950,10 @@ handlers['food.admin.restaurant.search'] = function * (message) {
 handlers['food.admin.restaurant.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
+
+  // update chatusers with information about which users won / lost the polling
+  console.log('MERCHANT', merchant)
+  var votes = foodSession.votes
 
   if (!merchant) {
     merchant = yield api.getMerchant(message.data.value)
