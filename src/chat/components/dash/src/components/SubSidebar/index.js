@@ -65,7 +65,6 @@ class SubSidebar extends Component {
 
   render() {
     var { selectedTeam } = this.state;
-    console.log('Selected team is: ', selectedTeam);
     var self = this;
     const { teams } = this.state;
     let filteredData = this.filterData(teams, this.state.searchString);

@@ -8,6 +8,9 @@
 	overflow-y: scroll!important;
 	height: calc(100vh - 52px)!important;
 }
+.table-responsive {
+	max-height: 500px;
+}
 
 .resizable {
 	min-height: 150px;

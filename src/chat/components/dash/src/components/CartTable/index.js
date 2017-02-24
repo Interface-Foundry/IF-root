@@ -31,7 +31,7 @@ class CartTable extends Component {
         if (!data || !data.carts) throw new Error('Failed to load carts.')
         else  {
           data.carts.sort(self.props.sort);
-          data.carts = data.carts.map(self.props.process);
+          data.carts = yield data.carts.map(self.props.process);
           self.setState({carts: data.carts})
         }
     })

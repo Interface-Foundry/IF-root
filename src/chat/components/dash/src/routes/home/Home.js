@@ -81,6 +81,22 @@ function Home(props, context) {
               colorBy={1}
               process={
                 cart => {
+                  return fetch('/graphql', {
+                        method: 'post',
+                        headers: {
+                          Accept: 'application/json',
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          query: `{teams(team_id:"${cart.slack_id}"){team_name}}`,
+                        }),
+                        credentials: 'include',
+                      })
+                      .then((data) => data.json()).then(json=>
+                        [new Date(cart.purchased_date).toLocaleString(),
+                        json.data.teams && json.data.teams[0] ? json.data.teams[0].team_name : cart.slack_id,
+                        cart.items.split(',').length]
+                        )
                   cart.items = cart.items.split(',').length;
                   let purchased_date = new Date(cart.purchased_date);
                   cart.purchased_date = purchased_date.toLocaleString();
