@@ -189,42 +189,43 @@ function * getTeamMembers (slackbot) {
     return []
   }
 
-    var members = yield usersArray.members.map(function * (user) {
-      // don't DM bots
-      if (user.is_bot) {
-        return
-      }
+  var members = yield usersArray.members.map(function * (user) {
+    // don't DM bots
+    if (user.is_bot) {
+      return
+    }
 
-      var savedUser = yield db.Chatusers.findOne({id: user.id})
-      // check if user is in our database
-      if (!savedUser) {
-        // insert new user under slack platform if they dont exist
-        savedUser = new db.Chatuser(user)
-        savedUser.platform = 'slack'
-      } else {
-        _.merge(savedUser, {
-          // could add other features from slack api user object here to merge
-          deleted: user.deleted
-        })
+    var savedUser = yield db.Chatusers.findOne({id: user.id})
+    // check if user is in our database
+    if (!savedUser) {
+      // insert new user under slack platform if they dont exist
+      savedUser = new db.Chatuser(user)
+      savedUser.platform = 'slack'
+    } else {
+      _.merge(savedUser, {
+        // could add other features from slack api user object here to merge
+        deleted: user.deleted
+      })
+    }
+    yield savedUser.save()
+    // check if user has open dm
+    var userDM = userIMInfo.ims.find(i => i.user === user.id)
+    if (!userDM) {
+      // open new dm if user doesnt have one open w/ bot
+      try {
+        userDM = yield slackbotWeb.im.open(user.id)
+      } catch (err) {
+        logging.error('cannot open dm for user ', err)
+        return savedUser
       }
-      // check if user has open dm
-      var userDM = userIMInfo.ims.find(i => i.user === user.id)
-      if (!userDM) {
-        // open new dm if user doesnt have one open w/ bot
-        try {
-          userDM = yield slackbotWeb.im.open(user.id)
-        } catch (e) {
-          logging.error('cannot open dm for user', user.id)
-          return savedUser
-        }
-        savedUser.dm = userDM.channel.id
-      } else if (_.get(savedUser, 'dm') !== userDM.id) {
-        // if their DM channel isnt equal to what we have saved, update it
-        savedUser.dm = userDM.id
-      }
-      yield savedUser.save()
-      return savedUser
-    })
+      savedUser.dm = userDM.channel.id
+    } else if (_.get(savedUser, 'dm') !== userDM.id) {
+      // if their DM channel isnt equal to what we have saved, update it
+      savedUser.dm = userDM.id
+    }
+    yield savedUser.save()
+    return savedUser
+  })
   return members
 }
 
