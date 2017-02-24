@@ -4,8 +4,7 @@ var _ = require('lodash')
 
 
 db.Slackbots.find({
-  'meta.delted': {$ne: true},
-  'meta.dateAdded': {$lt: new Date('2017-01-01')}
+  'meta.delted': {$ne: true}
 }).exec(function (e, bots) {
   if (e) {
     console.error(e)
