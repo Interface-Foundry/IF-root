@@ -1,5 +1,6 @@
-import React, {
-  Component
+import React,{
+  Component,
+  PropTypes
 } from 'react';
 import classNames from 'classnames';
 import history from '../../core/history';
@@ -16,7 +17,8 @@ class SubSidebar extends Component {
       multiLevelDropdownCollapsed: true,
       thirdLevelDropdownCollapsed: true,
       samplePagesCollapsed: true,
-      searchTerm: ''
+      searchTerm: '',
+      selectedTeam: '',
     };
     this.handleSearchInput = this.handleSearchInput.bind(this)
     this.filterData = this.filterData.bind(this)
@@ -62,10 +64,14 @@ class SubSidebar extends Component {
   }
 
   render() {
+    var { selectedTeam } = this.state;
+    console.log('Selected team is: ', selectedTeam);
+    var self = this;
     const { teams } = this.state;
     let filteredData = this.filterData(teams, this.state.searchString);
     const displayTeams = filteredData ? filteredData.map( function(team) { 
-      return <li key={team.team_id}> <a href="" onClick={(e) => { e.preventDefault(); window.location.pathname=='/' ? history.push( window.location.pathname.split('/').slice(0,1).join('/') + team.team_name + '/') : history.push( window.location.pathname.split('/').slice(0,2).join('/') + '/' + team.team_name + '/'); }} > <i className="fa fa-dashboard fa-fw" /> {team.team_name}</a></li>}) : []
+      var teamName = team.team_name;
+      return <li key={team.team_id}> <a href="" onClick={(e) => { e.preventDefault(); self.setState({selectedTeam: teamName}); }}> <i className="fa fa-dashboard fa-fw" /> {teamName}</a></li>}) : []
           
     return (
       <div className="sidebar-nav navbar-collapse collapse">
@@ -81,7 +87,7 @@ class SubSidebar extends Component {
             </div>
           </li>
           <li>
-            <a href="" onClick={(e) => { e.preventDefault(); history.push(window.location.pathname.split('/').slice(0,2).join('/')); }}> <i className="fa fa-dashboard fa-fw" /> All teams</a>
+            <a href="" onClick={(e) => { e.preventDefault(); this.setState({selectedTeam: ''}); }}> <i className="fa fa-dashboard fa-fw" /> All teams</a>
           </li>
           {
             displayTeams
@@ -91,6 +97,10 @@ class SubSidebar extends Component {
       </div>
     );
   }
+}
+
+SubSidebar.propTypes = {
+  selectedTeam: PropTypes.string
 }
 
 export default SubSidebar;

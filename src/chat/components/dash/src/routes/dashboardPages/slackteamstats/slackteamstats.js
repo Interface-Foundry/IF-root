@@ -10,8 +10,10 @@ import {
 import {
   MenuItem,
   DropdownButton,
-  ListGroup, ListGroupItem, Alert, Table
+  ListGroup, ListGroupItem, Alert
 } from 'react-bootstrap';
+import Table from '../../../components/Table';
+import vagueTime from 'vague-time'
 
 const title = 'Attack as Smelts';
 
@@ -180,40 +182,20 @@ const tableData = [
     'slack'
   ]
 ];
+ 
+
 
 function displayFlotCharts(props, context) {
   context.setTitle(title);
   var rows = [];
   for (var i = 0; i < waypointPaths.length; i++) {
-    rows.push(<tr>
-      <td> 
-        {waypointPaths[i].user_id}
-      </td>
-      <td>
-      {waypointPaths[i].delivery_id}
-      </td>
-      <td>
-        {waypointPaths[i].waypoints.map((waypoint,j) => waypoint+'->')}
-      </td>
-    </tr>)
+    rows.push([waypointPaths[i].user_id, waypointPaths[i].delivery_id, waypointPaths[i].waypoints.map((waypoint,j) => waypoint+'\u27A1')])
   }
-
+  
   var cells = [];
   for (var i = 0; i < teamStats.length; i++){
     cells.push(<Cell fill={COLORS[i]} />)
   }
-  
-  var orderhead = [];
-  for (var i = 0; i < heads.length; i++){
-    orderhead.push(<th>{heads[i]}</th>)
-  }  
-  var orders = [];
-  for (var i = 0; i < tableData.length; i++){
-    orders.push(<tr>
-      {tableData[i].map((order) => (<td>{order}</td>))}
-    </tr>)
-  }
-
 
   return (
     <div>
@@ -224,21 +206,10 @@ function displayFlotCharts(props, context) {
       </div>
 
       <div className="row">
-        <div className="col-lg-12">
+        <div>
           <Panel header={<span>Table of Waypoint Routes</span>}>
             <div className="table-responsive">
-              <Table>
-                <thead>
-                    <tr>
-                        <th>User ID</th>
-                        <th>Delivery ID</th>
-                        <th>FoodSession Waypoint Route</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {rows}
-                </tbody>
-              </Table>
+              <Table heads={['User ID','Delivery ID','FoodSession Waypoint Route']} data={rows} />
             </div>
           </Panel>
         </div>
@@ -248,16 +219,7 @@ function displayFlotCharts(props, context) {
         <div className="col-lg-12">
           <Panel header={<span>Team Order Stats</span>}>
             <div className="table-responsive">
-              <Table>
-                <thead>
-                    <tr>
-                        {orderhead}
-                    </tr>
-                </thead>
-                <tbody>
-                  {orders}
-                </tbody>
-              </Table>
+              <Table heads={heads} data={tableData} />
             </div>
           </Panel>
         </div>
@@ -346,6 +308,10 @@ function displayFlotCharts(props, context) {
     </div>
   );
 }
+
+displayFlotCharts.propTypes = {
+  
+};
 
 displayFlotCharts.contextTypes = { setTitle: PropTypes.func.isRequired };
 

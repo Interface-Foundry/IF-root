@@ -15,7 +15,13 @@ class CustomTable extends Component {
     super(props);
   }
 
+  componentDidMount() {
+    var self = this;
+    
+  }
+
   render() {
+
     return (
       <div className="table-responsive">
         <Table className='table-hover'>
