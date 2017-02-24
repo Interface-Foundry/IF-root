@@ -98,7 +98,8 @@ var deliverySchema = mongoose.Schema({
   }],
   votes: [{
     user: String,
-    vote: String
+    vote: String,
+    weight: Number
   }], // members votes, like "Frozen Yogurt" (should also be stored in chatuser_schema)
   conversations: {},
 

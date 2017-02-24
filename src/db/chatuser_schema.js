@@ -16,12 +16,12 @@ var chatuserSchema = mongoose.Schema({
   },
   onboarded: Boolean,
   admin_shop_onboarded: {
-  	type: Boolean,
-  	default: false
+    type: Boolean,
+    default: false
   },
   member_shop_onboarded: {
-  	type: Boolean,
-  	default: false
+    type: Boolean,
+    default: false
   },
   ts: String,
   origin: String,
@@ -83,7 +83,10 @@ var chatuserSchema = mongoose.Schema({
   phone_number: String,
   first_name: String,
   last_name: String,
-  vote_success: Number,
+  vote_weight: {
+    type: Number,
+    default: 1
+  },
   food_preferences: {
     asked: {
       type: Boolean,

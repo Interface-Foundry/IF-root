@@ -9,8 +9,8 @@ var api = require('./api-wrapper.js')
 var utils = require('./utils')
 var cuisineClassifier = require('./cuisine_classifier.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
-// var menu_utils = require('./menu_utils')
 var email_utils = require('./email_utils')
+var score_utils = require('./score_utils')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -99,8 +99,11 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   //
   // Different ways to compute the score for a merchant. Higher scores show up first.
   //
+
+  return
   var scoreAlgorithms = {
-    [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
+    [SORT.keyword]: (m) => score_utils.cuisineSort(m, foodSession.votes),
+    // [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
     [SORT.keyword]: (m) => {
       if (!keyword) {
         throw new Error('Cannot sort based on keyword without a keyword')
@@ -365,11 +368,13 @@ handlers['food.user.preferences.done'] = function * (message) {
 //
 handlers['food.vote.submit'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var user = yield db.chatusers.findOne({id: message.source.user})
 
   function addVote (str) {
     var vote = {
       user: message.source.user,
-      vote: str
+      vote: str,
+      weight: user.vote_weight
     }
 
     foodSession.votes.push(vote)
@@ -954,6 +959,14 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   // update chatusers with information about which users won / lost the polling
   console.log('MERCHANT', merchant)
   var votes = foodSession.votes
+  var cuisines = merchant.summary.cuisines
+  yield votes.map(function * (v) {
+    // console.log('MAPPING VOTES')
+    var weight = (cuisines.indexOf(v.vote) > -1 ? 0.02 : -0.02)
+    var user = yield db.chatusers.findOne({id: v.user})
+    user.vote_weight += weight;
+    yield user.save()
+  })
 
   if (!merchant) {
     merchant = yield api.getMerchant(message.data.value)
