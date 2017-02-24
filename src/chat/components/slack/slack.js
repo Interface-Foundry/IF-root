@@ -282,7 +282,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       as_user: true
     }
     co(function * () {
-      debugger;
       if (message._id) {
         startResponseUrlClearTimer(message._id);
       }
@@ -302,7 +301,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
             db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
           })
         } else {
-          console.log('rpely', reply)
           return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply, (e, r) => {
             if (e) logging.error(e)
             // set the slack_ts from their server so we can update/delete specific messages

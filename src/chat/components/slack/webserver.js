@@ -18,7 +18,6 @@ var cookieParser = require('cookie-parser')
 var uuid = require('uuid');
 var processData = require('../process');
 var sleep = require('co-sleep');
-var snooze = require('./snooze');
 // var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
 // var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
 var request = require('request')
@@ -118,6 +117,7 @@ app.post('/slackaction', next(function * (req, res) {
   // snooze any message by setting action.value to "snooze"
   if (_.get(parsedIn, 'actions[0].value') === 'snooze') {
     var time_ms = new Date(24 * 60 * 60 * 1000 + Date.now())
+
     var reminderMessage = {
       mode: 'food',
       action: 'begin',
