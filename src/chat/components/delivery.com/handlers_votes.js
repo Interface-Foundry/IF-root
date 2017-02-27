@@ -374,6 +374,7 @@ handlers['food.user.preferences.done'] = function * (message) {
 // User just clicked "thai" or something
 //
 handlers['food.vote.submit'] = function * (message) {
+  debugger;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   function addVote (str) {
@@ -464,7 +465,7 @@ handlers['food.vote.submit'] = function * (message) {
     logging.info('have all the votes')
 
     // cancel any pending 
-    agendas.cancel({
+    agenda.cancel({
       name: 'mock user message',
       'data.user': message.user_id
     }, function (e, numRemoved) {
