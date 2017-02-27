@@ -10,7 +10,7 @@ var rankCuisines = function (votes) {
     else cuisineVotes[v.vote] = v.weight
   })
 
-  console.log('cuisineVotes', cuisineVotes)
+  // console.log('cuisineVotes', cuisineVotes)
 
   return Object.keys(cuisineVotes).sort(function (a, b) {
     return cuisineVotes[b] - cuisineVotes[a]
@@ -19,7 +19,9 @@ var rankCuisines = function (votes) {
 
 //we want all the scores to be three digits long
 var normalize = function (value, max) {
+  // console.log('value, max:', value, max)
   var normalized = parseFloat(value) / (parseFloat(max) + 0.001)
+  if (normalized > 0) console.log('normalized:', parseInt(Math.floor(1000 * normalized)))
   return parseInt(Math.floor(1000 * normalized))
 }
 
@@ -28,18 +30,17 @@ var normalize = function (value, max) {
 //add them together as strings and then convert back to Number
 //in order to preserve a strict hierarchy of scoring criteria
 
-//TODO: this needs to be tested, like, at all
-var cuisineScore = function (m, votes) {
-  var cuisines = rankCuisines(votes)
+var cuisineScore = function (m, cuisines) {
   var merchantCuisines = m.summary.cuisines
-  var bestCuisineScore = 0
+  var bestCuisineScore = cuisines.length
   for (var i = 0; i < merchantCuisines.length; i++) {
     var index = cuisines.indexOf(merchantCuisines[i])
-    if (index > -1 && cuisines.length - index > bestCuisineScore) {
-      bestCuisineScore = cuisines.length - index
+    if (index > -1 && index < bestCuisineScore) {
+      bestCuisineScore = index
     }
   }
-  console.log('bestCuisineScore', bestCuisineScore)
+  bestCuisineScore = cuisines.length - bestCuisineScore
+  if (bestCuisineScore > 0) console.log('bestCuisineScore', bestCuisineScore)
   return normalize(bestCuisineScore, cuisines.length)
 }
 
@@ -53,7 +54,8 @@ var yelpScore = function () {
 
 utils.cuisineSort = function (m, votes) {
   //score by cuisine
-  console.log(cuisineScore(m, votes))
+  var cuisines = rankCuisines(votes)
+  return cuisineScore(m, cuisines)
 
   //w/in cuisines rank by order-history
 

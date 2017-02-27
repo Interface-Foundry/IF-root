@@ -100,9 +100,8 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Different ways to compute the score for a merchant. Higher scores show up first.
   //
 
-  return
   var scoreAlgorithms = {
-    [SORT.keyword]: (m) => score_utils.cuisineSort(m, foodSession.votes),
+    [SORT.cuisine]: (m) => score_utils.cuisineSort(m, foodSession.votes),
     // [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
     [SORT.keyword]: (m) => {
       if (!keyword) {
@@ -121,6 +120,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   var merchants = foodSession.merchants.filter(m => {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
+
 
 
   // filter out restaurants that don't match the keyword if provided
@@ -143,34 +143,35 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   merchants = merchants
     .map(m => {
-      m.score = Number(!(!scoreAlgorithms[sortOrder](m))) //casting to bool and then to number again to avoid weighting in favor of terrible fusion places
-      if (sortOrder == SORT.cuisine) {
-
-        //score based on yelp reviews
-        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
-
-        if (m.stars > maxStars) maxStars = m.stars
-      }
+      m.score = scoreAlgorithms[sortOrder](m)
+      // if (sortOrder == SORT.cuisine) {
+      //
+      //   //score based on yelp reviews
+      //   m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
+      //
+      //   if (m.stars > maxStars) maxStars = m.stars
+      // }
       return m;
     })
 
-  //if we are sorting by cuisine type and want to incorporate yelp reviews into the order
-  if (sortOrder == SORT.cuisine) {
-    merchants = merchants
-      .map(m => {
-
-        //normalize yelp score to be in [0, 1]
-        m.stars = m.stars / maxStars;
-
-        //restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
-        m.score = m.score + m.stars;
-
-        return m;
-      })
-  }
+  // //if we are sorting by cuisine type and want to incorporate yelp reviews into the order
+  // if (sortOrder == SORT.cuisine) {
+  //   merchants = merchants
+  //     .map(m => {
+  //
+  //       //normalize yelp score to be in [0, 1]
+  //       m.stars = m.stars / maxStars;
+  //
+  //       //restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
+  //       m.score = m.score + m.stars;
+  //
+  //       return m;
+  //     })
+  // }
 
   merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
 
+  // this should really happen earlier
   // filter out restaurants whose delivery minimum is significantly above the team's total budget
   if (foodSession.budget) {
     var max = 1.25 * foodSession.team_members.length * foodSession.budget;
@@ -811,6 +812,8 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   var viableRestaurants = yield createSearchRanking(foodSession, sort, direction, keyword)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
+
+  return
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
