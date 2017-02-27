@@ -140,7 +140,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   merchants = merchants
     .map(m => {
-      m.score = scoreAlgorithms[sortOrder](m)
+      m.score = Number(!(!scoreAlgorithms[sortOrder](m))) //casting to bool and then to number again to avoid weighting in favor of terrible fusion places
       if (sortOrder == SORT.cuisine) {
 
         //score based on yelp reviews
