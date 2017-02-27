@@ -127,6 +127,12 @@ function * loadTeam(slackbot) {
       }
     }
 
+    // make sure it isn't kip talking to ourselves
+    if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message') {
+      logging.debug("message was from kip")
+      return;
+    }
+
     // Not sure if slack changed their api recently, but now we're getting a "source_team" prop
     // though we expected just "team" as the id
     data.team = data.team || data.source_team
@@ -142,12 +148,6 @@ function * loadTeam(slackbot) {
 
     // scheduled tasks
     updateHomeButtonAppender(message, slackbot.bot.bot_access_token);
-
-    // don't talk to yourself
-    if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-      logging.debug("don't talk to yourself: data: ", data);
-      return; // drop the message before saving.
-    }
 
     // other random things
     if ((data.type !== 'message') || (data.subtype === 'channel_join') || (data.subtype === 'channel_leave')) { // settings.name = kip's slack username
