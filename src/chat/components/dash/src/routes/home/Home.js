@@ -41,73 +41,57 @@ function Home(props, context) {
   context.setTitle(title);
   return (
     <div className="container-fluid data-display">
-      <div className='row'>
-        <div>
-          <Panel
-            header={<span>
-              <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
-              <div className="pull-right">
-                <DropdownButton title="Dropdown" bsSize="xs" pullRight id="dropdownButton1" >
-                  <MenuItem eventKey="1">Action</MenuItem>
-                  <MenuItem eventKey="2">Another action</MenuItem>
-                  <MenuItem eventKey="3">Something else here</MenuItem>
-                  <MenuItem divider />
-                  <MenuItem eventKey="4">Separated link</MenuItem>
-                </DropdownButton>
-              </div>
-            </span>}>
-              <div className="resizable">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <CartesianGrid stroke="#ccc" />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="uv" stackId="1" stroke="#8884d8" fill="#8884d8" />
-                    <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-                    <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-          </Panel>
-        </div>
-      </div>
-      <div className='row'>
-        <div>
-          <Panel>
-          	<CartTable 
-              query={'{carts(purchased: "true") {purchased_date,slack_id,items}}'}
-              heads={['Purchased Date', 'Slack ID', 'Number of Items']}
-              colorBy={1}
-              process={
-                cart => {
-                  return fetch('/graphql', {
-                        method: 'post',
-                        headers: {
-                          Accept: 'application/json',
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                          query: `{teams(team_id:"${cart.slack_id}"){team_name}}`,
-                        }),
-                        credentials: 'include',
-                      })
-                      .then((data) => data.json()).then(json=>
-                        [new Date(cart.purchased_date).toLocaleString(),
-                        json.data.teams && json.data.teams[0] ? json.data.teams[0].team_name : cart.slack_id,
-                        cart.items.split(',').length]
-                        )
-                  cart.items = cart.items.split(',').length;
-                  let purchased_date = new Date(cart.purchased_date);
-                  cart.purchased_date = purchased_date.toLocaleString();
-                  return Object.keys(cart).map(k => cart[k])
-                }
-              }
-              sort={(a, b) => new Date(b.purchased_date) - new Date(a.purchased_date)}
-            />
-          </Panel>
-        </div>
-      </div>
+      <Panel
+        header={<span>
+          <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
+        </span>}>
+          <div className="resizable">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
+                <XAxis dataKey="name" />
+                <YAxis />
+                <CartesianGrid stroke="#ccc" />
+                <Tooltip />
+                <Area type="monotone" dataKey="uv" stackId="1" stroke="#8884d8" fill="#8884d8" />
+                <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
+                <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+      </Panel>
+      <Panel className='fillSpace' header={<span>
+          <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts </span>}>
+      	<CartTable 
+          query={'{carts(purchased: "true") {purchased_date,slack_id,items}}'}
+          heads={['Purchased Date', 'Slack ID', 'Number of Items']}
+          colorBy={1}
+          process = {
+            cart => {
+              return fetch('/graphql', {
+                  method: 'post',
+                  headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    query: `{teams(team_id:"${cart.slack_id}"){team_name}}`,
+                  }),
+                  credentials: 'include',
+                })
+                .then((data) => data.json()).then(json=>
+                  [new Date(cart.purchased_date).toLocaleString(),
+                  json.data.teams && json.data.teams[0] ? json.data.teams[0].team_name : cart.slack_id,
+                  cart.items.split(',').length]
+                  )
+              cart.items = cart.items.split(',').length;
+              let purchased_date = new Date(cart.purchased_date);
+              cart.purchased_date = purchased_date.toLocaleString();
+              return Object.keys(cart).map(k => cart[k])
+            }
+          }
+          sort={(a, b) => new Date(b.purchased_date) - new Date(a.purchased_date)}
+        />
+      </Panel>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import {
 } from 'react-bootstrap';
 import StatWidget from '../../../components/Widget';
 import Donut from '../../../components/Donut';
-import Table from '../../../components/Table';
+import CartTable from '../../../components/CartTable';
 
 import {
   Tooltip,
@@ -32,86 +32,62 @@ const data = [
   { name: 'Page F', uv: 2390, pv: 6800, amt: 2500, value: 700 },
   { name: 'Page G', uv: 8090, pv: 4300, amt: 2100, value: 100 },
 ];
-
-const heads = [
-  'Date / Time',
-  'Team',
-  'User',
-  'Item',
-  'Price',
-  'Quantity',
-  'Total',
-  'Cart ID',
-  'Platform'
-];
-
-const tableData = [
-  ['02/15/17 3:15 pm',
-    'kipfind',
-    'Alyx Baldwin',
-    'Shnozzleberries',
-    '$2,321.55',
-    '2',
-    '$5,643.10',
-    'slack_212344234',
-    'slack'
-  ], ['02/22/17 8:15 pm',
-    'kipfind',
-    'Alyx Baldwin',
-    'Berryberries',
-    '$1,218.63',
-    '5',
-    '$600,093.15',
-    'slack_212344234',
-    'slack'
-  ]
-];
-/* *********************************************** */
+/******* */
 
 function sessions(props, context) {
   context.setTitle(title);
   return (
-    <div className="container-fluid">
-      <div className='row'>
-        <div>
-          <Panel
-            header={<span>
-              <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
-              <div className="pull-right">
-                <DropdownButton title="Dropdown" bsSize="xs" pullRight id="dropdownButton1" >
-                  <MenuItem eventKey="1">Action</MenuItem>
-                  <MenuItem eventKey="2">Another action</MenuItem>
-                  <MenuItem eventKey="3">Something else here</MenuItem>
-                  <MenuItem divider />
-                  <MenuItem eventKey="4">Separated link</MenuItem>
-                </DropdownButton>
-              </div>
-            </span>}>
-              <div className="resizable">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <CartesianGrid stroke="#ccc" />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="uv" stackId="1" stroke="#8804d8" fill="#8884d8" />
-                    <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-                    <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-          </Panel>
-        </div>
-      </div>
-      <div className='row'>
-        <div>
-          <Panel>
-            <div className="table-responsive">
-              <Table heads={heads} data={tableData}/>
-            </div>
-          </Panel>
-        </div>
-      </div>
+    <div className="container-fluid data-display">
+      <Panel
+        header={<span>
+          <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
+        </span>}>
+          <div className="resizable">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
+                <XAxis dataKey="name" />
+                <YAxis />
+                <CartesianGrid stroke="#ccc" />
+                <Tooltip />
+                <Area type="monotone" dataKey="uv" stackId="1" stroke="#8804d8" fill="#8884d8" />
+                <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
+                <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+      </Panel>
+      <Panel className='fillSpace' header={<span>
+          <i className="fa fa-bar-chart-o fa-fw" /> Open Carts </span>}>
+        <CartTable 
+          query={'{carts(purchased: "false") {created_date,slack_id,items}}'}
+          heads={['Open Since', 'Created Date', 'Slack ID', 'Number of Items']}
+          colorBy={2}
+          process = {
+            cart => {
+              return fetch('/graphql', {
+                  method: 'post',
+                  headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    query: `{teams(team_id:"${cart.slack_id}"){team_name}}`,
+                  }),
+                  credentials: 'include',
+                })
+                .then((data) => data.json())
+                .then(json => [
+                  vagueTime.get({
+                    from: Date.now(),
+                    to: Date.parse(cart.created_date)
+                  }),
+                  (new Date(cart.created_date)).toLocaleString(), json.data.teams && json.data.teams[0] ? json.data.teams[0].team_name : cart.slack_id, cart.items.split(',').length
+                ])
+            }
+          }
+          sort={(a, b) =>  new Date(b.created_date) - new Date(a.created_date)}
+        />
+      </Panel>
     </div>
   );
 }

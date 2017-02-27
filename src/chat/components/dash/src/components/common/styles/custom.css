@@ -5,6 +5,7 @@
 
 .data-display {
     display: flex;
+    padding: 10px;
     flex-direction: column;
     height: calc(100vh - 52px);
 }
@@ -16,10 +17,6 @@
 	height: calc(100vh - 52px) !important;
 }
 
-.table-responsive {
-	max-height: 500px;
-}
-
 .resizable {
 	min-height: 150px;
 	height: 200px;
@@ -27,6 +24,17 @@
 	overflow: auto;
 	margin: -15px;
 	padding: 15px;
+	max-height: 700px
+}
+
+.fillSpace {
+	flex: 1;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+
+.table-responsive {
+	overflow-y: none;
 }
 
 .panel-body {
@@ -38,7 +46,7 @@
 	#page-wrapper {
 		margin: 0 0 0 330px;
 		height: calc(100vh - 52px);
-		overflow: hidden;
+		overflow: auto;
 	}
 
 
