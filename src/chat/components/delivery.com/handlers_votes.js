@@ -8,9 +8,10 @@ var rp = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
 var cuisineClassifier = require('./cuisine_classifier.js')
-var mailer_transport = require('../../../mail/IF_mail.js')
+var mailerTransport = require('../../../mail/IF_mail.js')
 // var menu_utils = require('./menu_utils')
-var email_utils = require('./email_utils')
+var emailUtils = require('./email_utils')
+var agenda = require('../agendas')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -24,7 +25,6 @@ var $allHandlers
 
 // exports
 var handlers = {}
-
 
 /*
 * S5
@@ -51,17 +51,16 @@ function sampleCuisines (foodSession) {
     }
   })
   // add cancel button
-    sampleArray.push({
-      name: 'food.vote.abstain',
-      value: 'user_remove',
-      text: '× No Food for Me',
-      type: 'button',
-      style: 'danger'
-    })
+  sampleArray.push({
+    name: 'food.vote.abstain',
+    value: 'user_remove',
+    text: '× No Food for Me',
+    type: 'button',
+    style: 'danger'
+  })
 
   return sampleArray
 }
-
 
 //
 // enum for sort orders
@@ -109,7 +108,8 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     },
     [SORT.distance]: (m) => _.get(m, 'location.distance', 10000),
     [SORT.rating]: (m) => {
-      return _.get(m, 'summary.overall_rating', 0) },
+      return _.get(m, 'summary.overall_rating', 0)
+    },
     [SORT.price]: (m) => _.get(m, 'summary.price_rating', 10),
     [SORT.random]: (m) => Math.random()
   }
@@ -118,7 +118,6 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   var merchants = foodSession.merchants.filter(m => {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
-
 
   // filter out restaurants that don't match the keyword if provided
   if (keyword) {
@@ -135,47 +134,44 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   // now order the restaurants in terms of descending score
 
-  //keep track of the highest yelp review score in this particular batch of restaurants
-  var maxStars = 0;
+  // keep track of the highest yelp review score in this particular batch of restaurants
+  var maxStars = 0
 
   merchants = merchants
     .map(m => {
       m.score = Number(!(!scoreAlgorithms[sortOrder](m))) //casting to bool and then to number again to avoid weighting in favor of terrible fusion places
       if (sortOrder == SORT.cuisine) {
-
-        //score based on yelp reviews
-        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
+        // score based on yelp reviews
+        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating
 
         if (m.stars > maxStars) maxStars = m.stars
       }
-      return m;
+      return m
     })
 
-  //if we are sorting by cuisine type and want to incorporate yelp reviews into the order
+  // if we are sorting by cuisine type and want to incorporate yelp reviews into the order
   if (sortOrder == SORT.cuisine) {
     merchants = merchants
       .map(m => {
+        // normalize yelp score to be in [0, 1]
+        m.stars = m.stars / maxStars
 
-        //normalize yelp score to be in [0, 1]
-        m.stars = m.stars / maxStars;
+        // restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
+        m.score = m.score + m.stars
 
-        //restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
-        m.score = m.score + m.stars;
-
-        return m;
+        return m
       })
   }
 
-  merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
+  merchants.sort((a, b) => directionMultiplier * (a.score - b.score))
 
   // filter out restaurants whose delivery minimum is significantly above the team's total budget
   if (foodSession.budget) {
-    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
-    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
+    var max = 1.25 * foodSession.team_members.length * foodSession.budget
+    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max)
     if (cheap_merchants.length <= 0) {
       return merchants
-    }
-    else return cheap_merchants
+    } else return cheap_merchants
   }
 
   return merchants
@@ -193,7 +189,6 @@ function getVotesFromMembers (messages) {
   return _.map(messages, 'data.vote')
 }
 
-
 handlers['food.admin.vote'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
@@ -204,7 +199,7 @@ handlers['food.admin.vote'] = function * (message) {
   yield handlers['food.admin.restaurant.pick.list'](message)
 }
 
-//for when the admin "skip"s the poll
+// for when the admin "skip"s the poll
 handlers['food.admin.poll'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -227,6 +222,21 @@ handlers['food.user.poll'] = function * (message) {
     })
     return yield $allHandlers['food.admin.select_address'](message)
   }
+
+  // schedule reminder here to finish voting early in 20 minutes
+  var finishEarlyMessage = {
+    thread_id: message.thread_id,
+    incoming: true,
+    user_id: message.user_id,
+    origin: message.origin,
+    source: message.source,
+    mode: 'food',
+    action: 'admin.restaurant.pick.list'
+  }
+  agenda.schedule('20 minutes from now', 'mock user message', {
+    user: message.user_id,
+    msg: JSON.stringify(finishEarlyMessage)
+  })
 
   yield teamMembers.map(function * (member) {
     logging.debug('checking if we should do food_preferences')
@@ -364,6 +374,7 @@ handlers['food.user.preferences.done'] = function * (message) {
 // User just clicked "thai" or something
 //
 handlers['food.vote.submit'] = function * (message) {
+  debugger;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   function addVote (str) {
@@ -437,7 +448,6 @@ handlers['food.vote.submit'] = function * (message) {
     }
   }
 
-
   // update all the user's dashbaords
   yield foodSession.team_members.map(function (member) {
     return sendUserDashboard(foodSession, message, member)
@@ -453,6 +463,15 @@ handlers['food.vote.submit'] = function * (message) {
 
   if (numOfResponsesWaitingFor <= 0) {
     logging.info('have all the votes')
+
+    // cancel any pending 
+    agenda.cancel({
+      name: 'mock user message',
+      'data.user': message.user_id
+    }, function (e, numRemoved) {
+      if (e) logging.error(e)
+    })
+
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
     logging.info('waiting for more responses have, votes: ', votes.length, 'need ', numOfResponsesWaitingFor, ' more votes')
@@ -476,10 +495,8 @@ handlers['food.vote.abstain'] = function * (message) {
 
   // if user is not the admin, take them to shopping mode
   if (!isAdmin) {
-
     // This route takes them to the home menu and also removes them from the current foodSession
     yield $allHandlers['food.exit.confirm'](message)
-
   }
 
   // re-send all the dashbaords to all the remaining team members
@@ -501,10 +518,9 @@ handlers['food.vote.abstain'] = function * (message) {
   if (!isAdmin && adminIsOut) {
     sendUserDashboard(foodSession, message, foodSession.convo_initiater)
   }
-
 }
 
-function buildCuisineDashboard(foodSession) {
+function buildCuisineDashboard (foodSession) {
   // Build the votes tally
   var votes = foodSession.votes
     .map(v => v.vote) // get just the vote, not username
@@ -542,11 +558,11 @@ function buildCuisineDashboard(foodSession) {
       mrkdwn_in: ['text'],
       text: `*Votes from the group* 👋\n${votes}`,
       fallback: `*Votes from the group* 👋\n${votes}`,
-      callback_id: 'admin_restaurant_pick',
+      callback_id: 'admin_restaurant_pick'
     }]
   }
 
-  if (slackers.length > 0 ) {
+  if (slackers.length > 0) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
@@ -566,7 +582,7 @@ function buildCuisineDashboard(foodSession) {
 //
 // Sends new or updates the admin's cuisine vote dashboard
 //
-function * sendAdminDashboard(foodSession, message, user) {
+function * sendAdminDashboard (foodSession, message, user) {
   logging.debug('sending admin dashboard')
 
   // wait a little and refresh the foodSession to make sure we're using the most recent votes
@@ -587,7 +603,6 @@ function * sendAdminDashboard(foodSession, message, user) {
     value: 'food.admin.restaurant.pick.list'
   }]
 
-
   // add the buttons if they didn't respond already
   var adminHasVoted = foodSession.votes.map(v => v.user).includes(foodSession.convo_initiater.id)
   var adminInOrder = foodSession.team_members.map(u => u.id).includes(foodSession.convo_initiater.id)
@@ -595,7 +610,7 @@ function * sendAdminDashboard(foodSession, message, user) {
     var prevMessage = yield db.Message.find({
       'source.user': user.id
     }).sort('-ts').limit(1).exec()
-    prevMessage = prevMessage[0];
+    prevMessage = prevMessage[0]
     var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
 
     // make sure the message that we are stripping the buttons from is actually a dashboard message
@@ -623,7 +638,6 @@ function * sendAdminDashboard(foodSession, message, user) {
     basicDashboard.text = 'Thanks for your vote!'
   }
 
-
   var existingDashbaord = foodSession.cuisine_dashboards.filter(d => d.user === foodSession.convo_initiater.id)[0]
   if (existingDashbaord) {
     return co(function * () {
@@ -639,13 +653,12 @@ function * sendAdminDashboard(foodSession, message, user) {
       }}}).exec()
     }).catch(logging.error)
   }
-
 }
 
 //
 // Sends new or updates the user's cuisine vote dashbaord
 //
-function * sendUserDashboard(foodSession, message, user) {
+function * sendUserDashboard (foodSession, message, user) {
   console.log('send user dashboard to', user.id, 'initiated by', foodSession.convo_initiater.id)
   if (user.id === foodSession.convo_initiater.id) {
     return yield sendAdminDashboard(foodSession, message, user)
@@ -654,7 +667,7 @@ function * sendUserDashboard(foodSession, message, user) {
   var basicDashboard = buildCuisineDashboard(foodSession)
   if (!userHasVoted) {
     var prevMessage = yield db.Message.find({'source.user': user.id}).sort('-ts').limit(1).exec()
-    prevMessage = prevMessage[0];
+    prevMessage = prevMessage[0]
     var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
 
     // make sure the message that we are stripping the buttons from is actually a dashboard message
@@ -721,7 +734,6 @@ function * sendUserDashboard(foodSession, message, user) {
   }
 }
 
-
 /*
 * Confirm all users have voted for a cuisine
 */
@@ -737,8 +749,6 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   if (message.allow_text_matching && !userHasVoted) {
     return yield handlers['food.admin.restaurant.pick'](message)
   }
-
-
 
   if (_.get(foodSession.tracking, 'confirmed_votes_msg')) {
     // replace admins message
@@ -764,7 +774,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
             user: m.id,
             channel: m.dm
           }
-         }
+        }
          // if the admin has not yet voted, make sure to set the mode.action to the votable route
         if (foodSession.votes.map(u => u.user).includes(foodSession.convo_initiater.id)) {
           var route = 'food.admin.dashboard.cuisine'
@@ -785,11 +795,11 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-  console.log('picklistmessage', message);
+  console.log('picklistmessage', message)
   console.log('SORT.cuisine', SORT.cuisine)
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
-  console.log(sort);
+  console.log(sort)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
 
@@ -827,7 +837,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'value': {index: index - 3, sort: sort, direction: direction, keyword: keyword}
   }
 
-  var arrow = direction === SORT.descending ? '▾ ' : '▴ '
+  // var arrow = direction === SORT.descending ? '▾ ' : '▴ '
 
   // // default price sort direction is ascending
   // var sortPriceButton = {
@@ -890,11 +900,11 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     buttons.actions.push(moreButton)
   }
 
-  //buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
+  // buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
 
   responseForAdmin.attachments.push(buttons)
 
-  //adding writing prompt
+  // adding writing prompt
   responseForAdmin.attachments.push({
     'fallback': 'Search for a restaurant',
     'text': '✎ Type below to search for a restaurant by name (Example: _Azuki Japanese Restaurant_)',
@@ -930,9 +940,9 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
-  var attachments = []
+  // var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  // var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
+  // var attachments = []
   // TODO later
 }
 
@@ -1034,26 +1044,25 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     }
   }
 
-  var team_info = yield rp(options);
-  var slacklink = 'https://' + team_info.team.domain + '.slack.com'
+  var teamInfo = yield rp(options)
+  var slacklink = 'https://' + teamInfo.team.domain + '.slack.com'
 
   for (var i = 0; i < foodSession.email_users.length; i++) {
-
-    var m = foodSession.email_users[i];
+    var m = foodSession.email_users[i]
     // var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
-    var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m)
+    var html = yield emailUtils.quickpickHTML(foodSession, slackbot, slacklink, m)
 
     var mailOptions = {
       to: `<${m}>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${slackbot.team_name}!`,
       html: html
-    };
+    }
 
-    logging.info('mailOptions', mailOptions);
-     mailer_transport.sendMail(mailOptions, function (err) {
-      if (err) console.log(err);
-    });
+    logging.info('mailOptions', mailOptions)
+    mailerTransport.sendMail(mailOptions, function (err) {
+      if (err) console.log(err)
+    })
     logging.info('email sent')
   }
 
