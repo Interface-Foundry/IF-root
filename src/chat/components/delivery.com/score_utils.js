@@ -10,19 +10,11 @@ var rankCuisines = function (votes) {
     else cuisineVotes[v.vote] = v.weight
   })
 
-  // console.log('cuisineVotes', cuisineVotes)
+  console.log('cuisineVotes', cuisineVotes)
 
   return Object.keys(cuisineVotes).sort(function (a, b) {
     return cuisineVotes[b] - cuisineVotes[a]
   })
-}
-
-//we want all the scores to be three digits long
-var normalize = function (value, max) {
-  // console.log('value, max:', value, max)
-  var normalized = parseFloat(value) / (parseFloat(max) + 0.001)
-  if (normalized > 0) console.log('normalized:', parseInt(Math.floor(1000 * normalized)))
-  return parseInt(Math.floor(1000 * normalized))
 }
 
 //each of these functions will return an (independent) numeric score
@@ -40,24 +32,36 @@ var cuisineScore = function (m, cuisines) {
     }
   }
   bestCuisineScore = cuisines.length - bestCuisineScore
-  if (bestCuisineScore > 0) console.log('bestCuisineScore', bestCuisineScore)
-  return normalize(bestCuisineScore, cuisines.length)
+  var normalized = parseFloat(bestCuisineScore) / (parseFloat(cuisines.length) + 0.001)
+  if (normalized > 0) console.log('normalized:', parseInt(Math.floor(1000 * normalized)))
+
+  if (normalized > 0) return '' + Math.floor(1000 * normalized)
+  else return '000'
 }
 
-var historyScore = function () {
-
+var historyScore = function (m, sb) {
+  var team_history = sb.meta.order_frequency[m.id]
+  if (team_history) {
+    if (team_history.count > 10) return '' + team_history.count
+    else if (team_history.count > 2) return '0' + team_history.count
+  }
+  else return '00'
 }
 
 var yelpScore = function () {
 
 }
 
-utils.cuisineSort = function (m, votes) {
+utils.cuisineSort = function (m, votes, slackbot) {
   //score by cuisine
-  var cuisines = rankCuisines(votes)
-  return cuisineScore(m, cuisines)
-
   //w/in cuisines rank by order-history
+  var cuisines = rankCuisines(votes)
+  var cScore = cuisineScore(m, cuisines)
+  console.log('cuisine score:', cScore)
+  var hScore = historyScore(m, slackbot)
+  console.log('history score:', hScore)
+  console.log('entire score:', cScore + hScore)
+  return cScore + hScore
 
   //w/in history score by yelp
 }

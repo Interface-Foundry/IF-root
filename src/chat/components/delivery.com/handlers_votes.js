@@ -88,6 +88,7 @@ var SORT = {
 * @returns {} object that is ranked listing of places or whatever
 */
 function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
   // Set a default sort order
   sortOrder = sortOrder || SORT.cuisine
 
@@ -101,7 +102,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   //
 
   var scoreAlgorithms = {
-    [SORT.cuisine]: (m) => score_utils.cuisineSort(m, foodSession.votes),
+    [SORT.cuisine]: (m) => score_utils.cuisineSort(m, foodSession.votes, slackbot),
     // [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
     [SORT.keyword]: (m) => {
       if (!keyword) {
@@ -813,8 +814,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
 
-  return
-
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
@@ -971,12 +970,41 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     yield user.save()
   })
 
+  // stores the restaurant in the slackbot order history
+  var sb = yield db.Slackbot.findOne({team_id: foodSession.team_id})
+  if (!sb.meta.order_frequency) sb.meta.order_frequency = {}
+  if (sb.meta.order_frequency[merchant.id]) {
+    console.log('does exist in the history')
+    var oldestDate = sb.meta.order_frequency[merchant.id].dates[0]
+    monthDifference = foodSession.time_started.getMonth() - oldestDate.getMonths()
+    //cut the restaurant out of the history if it's been there for more than 2 months
+    if (monthDifference > 2 || monthDifference < 0 && monthDifference > -10) {
+      console.log('outdated history being removed')
+      db.meta.order_frequency[merchant.id].dates.shift()
+      db.meta.order_frequency[merchant.id].count--
+    }
+    db.meta.order_frequency[merchant.id].count++
+    db.meta.order_frequency[merchant.id].dates.push(foodSession.time_started)
+  }
+  else {
+    console.log('does not exist in the history')
+    console.log('this is the merchant id', merchant.id)
+    sb.meta.order_frequency[merchant.id] = {
+      count: 1,
+      dates: [foodSession.time_started]
+    }
+  }
+  console.log('sb.meta.order_frequency', sb.meta.order_frequency)
+
+  yield db.slackbots.update({team_id: foodSession.team_id}, {meta: sb.meta})
+
   if (!merchant) {
     merchant = yield api.getMerchant(message.data.value)
     foodSession.merchants = [merchant]
     foodSession.markModified('merchants')
     foodSession.save()
   }
+
   var url = yield googl.shorten(merchant.summary.url.complete)
 
   logging.data('using merchant for food service', merchant.id)

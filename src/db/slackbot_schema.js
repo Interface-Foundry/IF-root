@@ -114,6 +114,7 @@ var slackbotSchema = mongoose.Schema({
       }
     }],
     chosen_location: {},
+    order_frequency: {},
     fulfillment_method: String,
     payments: [{
       vendor: String,
