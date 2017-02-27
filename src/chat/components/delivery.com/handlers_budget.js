@@ -57,7 +57,17 @@ handlers['food.admin.team_budget'] = function * (message) {
   }
 
   var msg_json = {
-    'attachments': []
+    'attachments': [{
+        'name': 'food.admin.confirm_budget',
+        'text': 'No Limit',
+        'style': 'default',
+        'type': 'button',
+        'value': {
+          budget: 0,
+          new: false
+        }
+      }
+    ]
   }
 
   for (var i = 0; i < budget_options.length; i++) {
@@ -87,17 +97,6 @@ handlers['food.admin.team_budget'] = function * (message) {
       }
     })
   }
-
-  var noneButton = {
-    'name': 'food.admin.confirm_budget',
-    'text': 'Unlimited',
-    'style': 'default',
-    'type': 'button',
-    'value': {
-      budget: 0,
-      new: false
-    }
-  };
 
   if (budget_options.length % 5 == 0) {
     msg_json.attachments.push({
