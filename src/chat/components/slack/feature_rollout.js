@@ -1,18 +1,16 @@
 require('../../../kip')
-var utils = require('../slack/utils')
-var _ = require('lodash')
 var co = require('co')
 var sleep = require('co-sleep')
 var slack = require('@slack/client')
 const fs = require('fs')
 
 //
-// Grab the day's file of admin id's to spam
+// Grab the batch's file of admin id's to spam
 //
-const filename= fs.readdirSync(__dirname)
+const filename = fs.readdirSync(__dirname)
   .filter(f => f.match(/^user.*.json$/))[0]
 console.log(filename)
-const day = parseInt(filename.match(/[0-9]/)[0])
+const batch = parseInt(filename.match(/[0-9]+/)[0])
 const users = require('./' + filename)
 fs.renameSync(filename, filename + '.done')
 
@@ -50,11 +48,16 @@ const message = {
 //
 // Sends a message to a specific user
 //
-function sendToUser (user) {
-  console.log('running for user', user)
+function sendToUser (userId) {
+  console.log('running for user', userId)
   return co(function * () {
     // get the full user obj
-    user = yield db.Chatusers.findOne({id: user}).exec()
+    var user = yield db.Chatusers.findOne({id: userId}).exec()
+
+    if (!user) {
+      console.log('could not find user in db', userId)
+      return
+    }
 
     // Only send to users that have not initiated an order in 2017
     let deliveries = yield db.Delivery.find({
@@ -64,13 +67,14 @@ function sendToUser (user) {
     }).exec()
 
     if (deliveries.length > 0) {
+      console.log('user has deliveryies', userId)
       return // return early
     }
-    
+
     // Send a message to this user who has not started a cafe session
     let slackbot = yield db.Slackbots.findOne({team_id: user.team_id}).exec()
     let bot = new slack.WebClient(slackbot.bot.bot_access_token)
-    var res = yield bot.chat.postMessage(user.dm, '', message)
+    yield bot.chat.postMessage(user.dm, '', message)
 
     db.Metrics.log('feature.rollout.sent', {
       team: user.team_id,
@@ -82,22 +86,32 @@ function sendToUser (user) {
 
 //
 // Run it
-// 
+//
 function * main () {
   yield sleep(1000)
-  console.log(days[day - 1])
-  console.log('Sending message to users on day', day, 'in a few seconds...')
+  console.log('batch', batch)
+  console.log(days[batch / 10 | 0], days[batch % 10])
+  console.log('Sending message to users on batch', batch, 'in a few seconds...')
   console.log('(ctrl-c if that looks wrong)')
   yield sleep(5000)
   console.log('proceeding')
   yield users.map(function * (u) {
-   yield sendToUser(u)
+    yield sendToUser(u)
   })
   process.exit(0)
 }
 
 const days = [
-`  1111
+` 00000
+ 00   00
+ 00  000
+ 00 0 00
+ 000  00
+ 00   00
+  00000
+
+`,
+  `  1111
   11111
    1111
    1111
@@ -105,7 +119,7 @@ const days = [
    1111
   111111
 `,
-`  2222
+  `  2222
   222222
   2  22
     22
@@ -113,7 +127,7 @@ const days = [
   222222
   222222
 `,
-`3333333
+  `3333333
      33
     33
   33333
@@ -121,7 +135,7 @@ const days = [
     333
  3333
 `,
-`    44
+  `    44
     444
    4444
   44 44
@@ -129,7 +143,7 @@ const days = [
 44444444
      44
 `,
-`5555555
+  `5555555
  55
  5555555
      555
@@ -137,7 +151,7 @@ const days = [
     555
  55555
 `,
-`  66
+  `  66
   66
  66   
  66666
@@ -145,7 +159,7 @@ const days = [
  66  66
   6666
 `,
-`77777777
+  `77777777
        77
       77
    7777
@@ -153,7 +167,7 @@ const days = [
    77
   77
 `,
-` 888888
+  ` 888888
  88  88 
    888
   88 88
@@ -161,7 +175,7 @@ const days = [
  88   88
   88888
 `,
-`  9999
+  `  9999
   99  99
   99  99
    99999
@@ -171,9 +185,10 @@ const days = [
 `
 ].map(d => '\n ' + d)
 
+console.log(days)
+
 co(main).catch(e => {
   console.error(e)
   process.exit(1)
 })
-
 
