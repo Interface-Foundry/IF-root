@@ -181,7 +181,6 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
 
   logging.info(merchants.map(m => m.score))
-
   return merchants
 }
 
@@ -584,6 +583,13 @@ function * sendAdminDashboard(foodSession, message, user) {
 
   var basicDashboard = buildCuisineDashboard(foodSession)
 
+  if (process.env.NODE_ENV.includes('development')) {
+    basicDashboard.attachments.unshift({
+      text: `Your vote-weight is ${user.vote_weight}`,
+      fallback: 'vote-weight'
+    })
+  }
+
   // add the special button to end early
   basicDashboard.attachments[0].actions = [{
     name: 'food.admin.restaurant.pick.list',
@@ -658,6 +664,14 @@ function * sendUserDashboard(foodSession, message, user) {
   }
   var userHasVoted = foodSession.votes.map(v => v.user).includes(user.id)
   var basicDashboard = buildCuisineDashboard(foodSession)
+
+  if (process.env.NODE_ENV.includes('development')) {
+    basicDashboard.attachments.unshift({
+      text: `Your vote-weight is ${user.vote_weight}`,
+      fallback: 'vote-weight'
+    })
+  }
+
   if (!userHasVoted) {
     var prevMessage = yield db.Message.find({'source.user': user.id}).sort('-ts').limit(1).exec()
     prevMessage = prevMessage[0];
@@ -963,7 +977,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   var cuisines = merchant.summary.cuisines
   yield votes.map(function * (v) {
     // console.log('MAPPING VOTES')
-    var weight = (cuisines.indexOf(v.vote) > -1 ? 0.02 : -0.02)
+    var weight = (cuisines.indexOf(v.vote) > -1 ? -0.02 : 0.02)
     var user = yield db.chatusers.findOne({id: v.user})
     user.vote_weight += weight;
     yield user.save()
