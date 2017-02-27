@@ -5,6 +5,7 @@ var co = require('co')
 var Menu = require('./Menu')
 var api = require('./api-wrapper')
 var coupon = require('../../../coupon/couponUsing.js')
+var mailer_transport = require('../../../mail/IF_mail.js')
 
 var createAttachmentsForAdminCheckout = require('./generateAdminCheckout.js').createAttachmentsForAdminCheckout
 
@@ -782,14 +783,32 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   } else {
     // some sort of error
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
     var deliveryError = JSON.parse(foodSession.delivery_error)
     var errorMsg = `Looks like there are ${deliveryError.length} total errors including: ${deliveryError[0].user_msg}`
+
+    //send ourselves an email
+    var mailOptions = {
+      to: `<hello@kipthis.com>`,
+      from: `Kip Café <hello@kipthis.com>`,
+      subject: `Kip Café Order Error`,
+      html: `<html>Error(s) in order for team ${foodSession.team_id}:`
+        + `${deliveryError}</html>`
+    }
+
+    try {
+      mailer_transport.sendMail(mailOptions)
+    } catch (e) {
+      logging.error('error mailing kip after order failure', e)
+    }
+
     var finalAttachment = {
       text: errorMsg,
       fallback: errorMsg,
       callback_id: 'foodConfrimOrder_callbackID',
       attachment_type: 'default'
     }
+
     response.attachments = _.flatten([mainAttachment, itemAttachments, finalAttachment]).filter(Boolean)
     response.attachments.push({
       'text': 'Do you want to restart the order or end the order?',
