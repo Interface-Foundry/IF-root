@@ -57,18 +57,19 @@ handlers['food.admin.team_budget'] = function * (message) {
   }
 
   var msg_json = {
-    'attachments': [{
-        'name': 'food.admin.confirm_budget',
-        'text': 'No Limit',
-        'style': 'default',
-        'type': 'button',
-        'value': {
-          budget: 0,
-          new: false
-        }
-      }
-    ]
+    'attachments': []
   }
+
+  var noneButton = {
+      'name': 'food.admin.confirm_budget',
+      'text': 'No Limit',
+      'style': 'default',
+      'type': 'button',
+      'value': {
+        budget: 0,
+        new: false
+      }
+    }
 
   for (var i = 0; i < budget_options.length; i++) {
     if (i == 0 || i % 5 == 0) {
@@ -84,6 +85,9 @@ handlers['food.admin.team_budget'] = function * (message) {
         'attachment_type': 'default',
         'actions': []
       })
+      if (i == 0) {
+        msg_json.attachments[msg_json.attachments.length-1].actions.push(noneButton)
+      }
     }
     // console.log(i, budget_options[i])
     msg_json.attachments[Math.floor(i / 5)].actions.push({
@@ -110,9 +114,6 @@ handlers['food.admin.team_budget'] = function * (message) {
       'attachment_type': 'default',
       'actions': [noneButton]
     })
-  }
-  else {
-    msg_json.attachments[msg_json.attachments.length - 1].actions.push(noneButton)
   }
 
   if (!message.text || message.text[0] == "{") {

@@ -732,7 +732,7 @@ handlers['member'] = function*(message) {
       mode: 'member_onboard',
       fallback: 'Hey, it\'s me again! Ready to get started?',
       action: 'home',
-      reply: cardTemplate.member_onboard_attachments(message.source.user, 'tomorrow'),
+      reply: cardTemplate.member_onboard_attachments(message.source.user, a.id, 'tomorrow'),
       source: {
         team: team.team_id,
         channel: a.dm,
