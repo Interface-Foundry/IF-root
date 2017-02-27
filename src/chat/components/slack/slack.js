@@ -301,10 +301,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           // replace a specific message
           return bot.web.chat.update(message.replace_ts, message.source.channel, reply.label || message.text, reply, (e, r) => {
             // set the slack_ts from their server so we can update/delete specific messages
+            if (e) logging.error(e)
             db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
           })
         } else {
           return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply, (e, r) => {
+            if (e) logging.error(e)
             // set the slack_ts from their server so we can update/delete specific messages
             logging.debug('saving slack timestamp', r.ts, 'to messages.slack_ts')
             db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
