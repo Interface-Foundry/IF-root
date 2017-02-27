@@ -1,6 +1,5 @@
 import DataType from 'sequelize';
 import Conn from '../sequelize';
-import Team from './Slackbot';
 
 const Delivery = Conn.define('delivery', {
   id: {

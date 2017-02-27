@@ -1,66 +1,92 @@
 foundry:
-  delivery_cart:
+  waypoints:
     :columns:
     - id:
       :source: _id
       :type: TEXT
-    - slack_id:
-      :source: slack_id
+    - delivery_id:
+      :source: delivery_id
       :type: TEXT
-    - laundry_delivery_times:
-      :source: laundry_delivery_times
-      :type: TEXT ARRAY
-    - tax:
-      :source: tax
+    - user_id:
+      :source: user_id
       :type: TEXT
-    - delivery_fee:
-      :source: delivery_fee
+    - waypoint:
+      :source: waypoint
       :type: TEXT
-    - message:
-      :source: message
-      :type: TEXT ARRAY
-    - total:
-      :source: total
+    - data:
+      :source: data
       :type: TEXT
-    - delivery_points_multiplier:
-      :source: delivery_points_multiplier
-      :type: TEXT
-    - item_count:
-      :source: item_count
-      :type: TEXT
-    - asap:
-      :source: asap
-      :type: BOOLEAN
-    - convenience_fee:
-      :source: convenience_fee
-      :type: TEXT
-    - delivery_points:
-      :source: delivery_points
-      :type: TEXT
-    - cart:
-      :source: cart
-      :type: TEXT ARRAY
-    - purchased:
-      :source: purchased
-      :type: BOOLEAN
-    - deleted:
-      :source: deleted
-      :type: BOOLEAN
-    - created_date:
-      :source: created_date
+    - timestamp:
+      :source: timestamp
       :type: DATE
-    - purchased_date:
-      :source: purchased_date
-      :type: DATE
-    - type:
-      :source: type
-      :type: TEXT
-    - link:
-      :source: link
-      :type: TEXT
     :meta:
-      :table: delivery_cart
+      :table: waypoints
       :extra_props: true
+
+
+# foundry:
+#   delivery_cart:
+#     :columns:
+#     - id:
+#       :source: _id
+#       :type: TEXT
+#     - slack_id:
+#       :source: slack_id
+#       :type: TEXT
+#     - laundry_delivery_times:
+#       :source: laundry_delivery_times
+#       :type: TEXT ARRAY
+#     - tax:
+#       :source: tax
+#       :type: TEXT
+#     - delivery_fee:
+#       :source: delivery_fee
+#       :type: TEXT
+#     - message:
+#       :source: message
+#       :type: TEXT ARRAY
+#     - total:
+#       :source: total
+#       :type: TEXT
+#     - delivery_points_multiplier:
+#       :source: delivery_points_multiplier
+#       :type: TEXT
+#     - item_count:
+#       :source: item_count
+#       :type: TEXT
+#     - asap:
+#       :source: asap
+#       :type: BOOLEAN
+#     - convenience_fee:
+#       :source: convenience_fee
+#       :type: TEXT
+#     - delivery_points:
+#       :source: delivery_points
+#       :type: TEXT
+#     - cart:
+#       :source: cart
+#       :type: TEXT ARRAY
+#     - purchased:
+#       :source: purchased
+#       :type: BOOLEAN
+#     - deleted:
+#       :source: deleted
+#       :type: BOOLEAN
+#     - created_date:
+#       :source: created_date
+#       :type: DATE
+#     - purchased_date:
+#       :source: purchased_date
+#       :type: DATE
+#     - type:
+#       :source: type
+#       :type: TEXT
+#     - link:
+#       :source: link
+#       :type: TEXT
+#     :meta:
+#       :table: delivery_cart
+#       :extra_props: true
 # foundry:
 #   items:
 #     :columns:

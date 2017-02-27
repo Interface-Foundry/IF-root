@@ -129,6 +129,7 @@ const teams = {
         type:  StringType
       }
   },
+
   resolve: resolver(Slackbot)
 
   // resolve (root, args) {

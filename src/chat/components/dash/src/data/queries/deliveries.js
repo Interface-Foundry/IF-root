@@ -130,7 +130,7 @@ const deliveries = {
       },
   },
   resolve (root, args) {
-   return Conn.models.delivery.findAll({ where: args})
+   return Conn.models.delivery.findAll({ where: args })
    // limit: 1000, order: [['time_started', 'DESC']]
   }
 }

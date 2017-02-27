@@ -10,8 +10,9 @@ import {
 import Slackbot from '../models/Slackbot';
 import DeliveryType from './DeliveryType';
 import ChatuserType from './ChatuserType';
+import CartType from './CartType';
 
-import {resolver} from 'graphql-sequelize';
+import {resolver, defaultListArgs} from 'graphql-sequelize';
 
 const SlackbotType = new ObjectType({
   name: 'Slackbot',
@@ -238,6 +239,35 @@ const SlackbotType = new ObjectType({
       })
     },
 
+    carts: {
+        type: new ListType(CartType),
+        args: {
+          limit: {
+            type: GraphQLInt
+          },
+          offset: {
+            type: GraphQLInt
+          },
+          order: {
+            type: StringType
+          },
+          first: {
+            type: GraphQLInt
+          }
+      }, resolve: resolver(Slackbot.Carts, {
+        before: function (options, args) {
+          if (args.first) {
+            options.order = options.order || [];
+            options.order.push(['created_date', 'DESC']);
+            if (args.first !== 0) {
+              options.limit = args.first;
+            }
+          }
+          return options;
+        }
+      })
+    },
+
 
     food_sessions: {
         type: new ListType(DeliveryType),
@@ -258,13 +288,21 @@ const SlackbotType = new ObjectType({
         before: function (options, args) {
           if (args.first) {
             options.order = options.order || [];
-            options.order.push(['time_started', 'ASC']);
+            options.order.push(['food_sessions', 'DESC']);
             if (args.first !== 0) {
               options.limit = args.first;
             }
           }
+          // options.where = options.where || {};
+          // options.where.food_sessions = { $not: [] };
+         
           return options;
-        }
+        },
+        // after: async function (result) {
+        //   return result.filter(function (session) {
+        //      return ( session.id && session.time_started ) 
+        //   });
+        // }
       })
     }
   }

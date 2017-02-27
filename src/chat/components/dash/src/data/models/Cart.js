@@ -1,16 +1,15 @@
 import DataType from 'sequelize';
 import Conn from '../sequelize';
-import Item from './Item';
 
 const Cart = Conn.define('cart', {
   id: {
-    type: DataType.UUID,
-    defaultValue: DataType.UUIDV1,
-    primaryKey: true,
+    type: DataType.STRING(255)
   },
 
   slack_id: {
-    type: DataType.STRING(255)
+     type: DataType.UUID,
+    defaultValue: DataType.UUIDV1,
+    primaryKey: true,
   },
 
   items: {

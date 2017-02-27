@@ -11,6 +11,7 @@ import sequelize from '../sequelize';
 import Slackbot from './Slackbot';
 import Chatuser from './Chatuser';
 import Delivery from './Delivery';
+import Waypoint from './Waypoint';
 import Cart from './Cart';
 import Item from './Item';
 import Message from './Message';
@@ -47,4 +48,4 @@ function sync(...args) {
 }
 
 export default { sync };
-export { Slackbot, Chatuser, Delivery, Cart, Item, Message, Metric, User, UserLogin, UserClaim, UserProfile };
+export { Slackbot, Chatuser, Delivery, Waypoint, Cart, Item, Message, Metric, User, UserLogin, UserClaim, UserProfile };

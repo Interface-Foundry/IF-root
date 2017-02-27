@@ -2,6 +2,7 @@ import DataType from 'sequelize';
 import Conn from '../sequelize';
 import Delivery from './Delivery';
 import Chatuser from './Chatuser';
+import Cart from './Cart';
 
 
 const Slackbot = Conn.define('slackbot', {
@@ -10,7 +11,6 @@ const Slackbot = Conn.define('slackbot', {
   },
 
   team_id: {
-    // type: DataType.STRING(255)
     type: DataType.UUID,
     defaultValue: DataType.UUIDV1,
     primaryKey: true,
@@ -128,5 +128,7 @@ Slackbot.Deliveries = Slackbot.hasMany(Delivery, { as: 'food_sessions', foreignK
 Delivery.Team = Delivery.belongsTo(Slackbot, { as: 'team', foreignKey: 'team_id'});
 Slackbot.Members = Slackbot.hasMany(Chatuser, { as: 'members', foreignKey: 'team_id'});
 Chatuser.Team = Chatuser.belongsTo(Slackbot, { as: 'team', foreignKey: 'team_id'});
+Slackbot.Carts = Slackbot.hasMany(Cart, { as: 'carts', foreignKey: 'slack_id'});
+Cart.Team = Cart.belongsTo(Slackbot, { as: 'team', foreignKey: 'slack_id'});
 
 export default Slackbot;
