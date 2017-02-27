@@ -73,7 +73,6 @@ module.exports.unarchive = function (document) {
   }
 
   return co(function * () {
-    debugger
     var obj = document.original_object
     obj = new db[document.original_collection](obj)
     yield obj.save()

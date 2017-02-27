@@ -10,8 +10,11 @@ var co = require('co')
 
 co(function * () {
   var team = yield db.Slackbots.findOne({}).exec()
-  var archive = db.Archives.archive(team)
+  console.log(team.team_id)
+  var archive = yield db.Archives.archive(team)
   console.log(archive.toObject())
+  var unarchivedTeam = yield db.Archives.unarchive(archive)
+
 }).catch(e => {
   logging.error('error archiving team', e)
 })
