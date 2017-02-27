@@ -5,8 +5,8 @@ export default {
 
   path: '/slackteamstats',
 
-  action() {
-    return <FlotCharts />;
+  action(context) {
+    return <FlotCharts teamId={context.query.id}/>;
   },
 
 };

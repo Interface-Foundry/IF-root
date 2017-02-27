@@ -56,7 +56,13 @@ class SubSidebar extends Component {
 
   navToTeam(e, team_id) {
     e.preventDefault();
-    history.push(`/team?id=${team_id}`)
+    //history.push(`/team?id=${team_id}`)
+    var url = window.location.pathname
+    if(url.includes('?')){
+      url_pieces = url.split('?')
+      history.push(url_pieces[0]+`?id=${team_id}`)
+    }
+    history.push(url+`?id=${team_id}`)
   }
 
   filterData(teams, filter) {
@@ -88,7 +94,7 @@ class SubSidebar extends Component {
             </div>
           </li>
           <li>
-            <a href="" onClick={(e) => { e.preventDefault(); this.setState({selectedTeam: ''}); }}> <i className="fa fa-dashboard fa-fw" /> All teams</a>
+            <a href="" onClick={(e) => self.navToTeam(e, '')}> <i className="fa fa-dashboard fa-fw" /> All teams</a>
           </li>
           {
             displayTeams

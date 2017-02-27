@@ -13,6 +13,7 @@ import {
   ListGroup, ListGroupItem, Alert
 } from 'react-bootstrap';
 import Table from '../../../components/Table';
+import CartTable from '../../../components/CartTable';
 import vagueTime from 'vague-time'
 
 const title = 'Attack as Smelts';
@@ -187,6 +188,8 @@ const tableData = [
 
 function displayFlotCharts(props, context) {
   context.setTitle(title);
+  console.log('props', props);
+  console.log('context', context);
   var rows = [];
   for (var i = 0; i < waypointPaths.length; i++) {
     rows.push([waypointPaths[i].user_id, waypointPaths[i].delivery_id, waypointPaths[i].waypoints.map((waypoint,j) => waypoint+'\u27A1')])
@@ -201,7 +204,7 @@ function displayFlotCharts(props, context) {
     <div>
       <div className="row">
         <div className="col-lg-12">
-          <PageHeader>Tack Steam Slats</PageHeader>
+          <PageHeader>{props.teamId}</PageHeader>
         </div>
       </div>
 
@@ -219,7 +222,8 @@ function displayFlotCharts(props, context) {
         <div className="col-lg-12">
           <Panel header={<span>Team Order Stats</span>}>
             <div className="table-responsive">
-              <Table heads={heads} data={tableData} />
+              <CartTable heads={['Open Since', 'Created Date', 'Slack ID', 'Number of Items']} query={'{carts(purchased: "false") {created_date,slack_id,items}}'} 
+                />
             </div>
           </Panel>
         </div>
