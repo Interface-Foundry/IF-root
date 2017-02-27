@@ -114,6 +114,7 @@ function * loadTeam(slackbot) {
   rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
     logging.debug('got slack message sent from user', data.user, 'on channel', data.channel)
+    logging.debug(data)
     // For channels that are not DM's, only respond if kip is called out by name
     if ('CG'.includes(data.channel[0])) {
       if (data.text && data.text.includes(slackbot.bot.bot_user_id)) {
@@ -125,6 +126,10 @@ function * loadTeam(slackbot) {
         return;
       }
     }
+
+    // Not sure if slack changed their api recently, but now we're getting a "source_team" prop
+    // though we expected just "team" as the id
+    data.team = data.team || data.source_team
 
     var message = new db.Message({
       incoming: true,
