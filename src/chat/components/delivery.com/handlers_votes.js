@@ -140,35 +140,35 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // now order the restaurants in terms of descending score
 
   //keep track of the highest yelp review score in this particular batch of restaurants
-  var maxStars = 0;
+  var maxStars =
 
   merchants = merchants
     .map(m => {
       m.score = scoreAlgorithms[sortOrder](m)
-      // if (sortOrder == SORT.cuisine) {
-      //
-      //   //score based on yelp reviews
-      //   m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
-      //
-      //   if (m.stars > maxStars) maxStars = m.stars
-      // }
+      if (sortOrder == SORT.cuisine) {
+        console.log('YELP RATING VALUES', m.yelp_info.rating.rating)
+        //score based on yelp reviews
+        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
+
+        if (m.stars > maxStars) maxStars = m.stars
+      }
       return m;
     })
 
-  // //if we are sorting by cuisine type and want to incorporate yelp reviews into the order
-  // if (sortOrder == SORT.cuisine) {
-  //   merchants = merchants
-  //     .map(m => {
-  //
-  //       //normalize yelp score to be in [0, 1]
-  //       m.stars = m.stars / maxStars;
-  //
-  //       //restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
-  //       m.score = m.score + m.stars;
-  //
-  //       return m;
-  //     })
-  // }
+  //if we are sorting by cuisine type and want to incorporate yelp reviews into the order
+  if (sortOrder == SORT.cuisine) {
+    merchants = merchants
+      .map(m => {
+
+        //normalize yelp score to be in [0, 1]
+        m.stars = m.stars / maxStars;
+
+        //restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
+        m.score = m.score + m.stars;
+
+        return m;
+      })
+  }
 
   merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
 
