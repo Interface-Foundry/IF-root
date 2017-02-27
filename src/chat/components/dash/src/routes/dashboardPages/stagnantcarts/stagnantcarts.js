@@ -38,7 +38,7 @@ const data = [
 function stagnantcarts(props, context) {
   context.setTitle(title);
   return (
-    <div className="container-fluid">
+    <div className="container-fluid data-display">
       <div className='row'>
         <div>
           <Panel

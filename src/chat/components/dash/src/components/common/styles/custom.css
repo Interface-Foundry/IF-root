@@ -1,13 +1,21 @@
 .sidebar {
-    display: flex;
-    min-width: 330px;
+	display: flex;
+	min-width: 330px;
 }
 
-.sidebar-nav.navbar-collapse {
-	overflow-x: hidden!important;
-	overflow-y: scroll!important;
-	height: calc(100vh - 52px)!important;
+.data-display {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 52px);
 }
+
+
+.sidebar-nav.navbar-collapse {
+	overflow-x: hidden !important;
+	overflow-y: scroll !important;
+	height: calc(100vh - 52px) !important;
+}
+
 .table-responsive {
 	max-height: 500px;
 }
@@ -29,12 +37,16 @@
 @media(min-width:768px) {
 	#page-wrapper {
 		margin: 0 0 0 330px;
+		height: calc(100vh - 52px);
+		overflow: hidden;
 	}
+
+
 }
 
 .category-sidebar {
-    min-width: 170px;
-    border-right: 1px solid #e7e7e7;
+	min-width: 170px;
+	border-right: 1px solid #e7e7e7;
 }
 
 .sidebar-nav {

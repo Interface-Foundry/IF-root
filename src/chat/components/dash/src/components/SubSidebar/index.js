@@ -22,6 +22,7 @@ class SubSidebar extends Component {
     };
     this.handleSearchInput = this.handleSearchInput.bind(this)
     this.filterData = this.filterData.bind(this)
+    this.navToTeam = this.navToTeam.bind(this)
   }
 
   componentDidMount() {
@@ -41,6 +42,7 @@ class SubSidebar extends Component {
         const { data } = yield resp.json();
         if (!data || !data.teams) throw new Error('Failed to load the news feed.')
         else  {
+          console.log(data.teams);
           self.setState({teams: data.teams})
         }
     })
@@ -52,25 +54,25 @@ class SubSidebar extends Component {
     });
   }
 
+  navToTeam(e, team_id) {
+    e.preventDefault();
+    history.push(`/team?id=${team_id}`)
+  }
+
   filterData(teams, filter) {
     if (filter === "" || !filter) {
       return teams
     };
     return (
-      teams.filter(function(team) {
-        return (team.team_name.toLowerCase().includes(filter.toLowerCase()))
-      })
+      teams.filter(team => team.team_name.toLowerCase().includes(filter.toLowerCase()))
     );
   }
 
   render() {
-    var { selectedTeam } = this.state;
     var self = this;
     const { teams } = this.state;
     let filteredData = this.filterData(teams, this.state.searchString);
-    const displayTeams = filteredData ? filteredData.map( function(team) { 
-      var teamName = team.team_name;
-      return <li key={team.team_id}> <a href="" onClick={(e) => { e.preventDefault(); self.setState({selectedTeam: teamName}); }}> <i className="fa fa-dashboard fa-fw" /> {teamName}</a></li>}) : []
+    const displayTeams = filteredData ? filteredData.map(team => <li key={team.team_id}> <a href="" onClick={(e) => self.navToTeam(e, team.team_id)}> <i className="fa fa-dashboard fa-fw" /> {team.team_name}</a></li>) : [];
           
     return (
       <div className="sidebar-nav navbar-collapse collapse">

@@ -13,6 +13,7 @@ import App from '../components/App';
 // Child routes
 import home from './home';
 import login from './login';
+import team from './dashboardPages/team'
 import table from './dashboardPages/tables';
 import button from './dashboardPages/buttons';
 import slackteamstats from './dashboardPages/slackteamstats';
@@ -68,6 +69,7 @@ export default [
       blank,
       sessions,
       stagnantcarts,
+      team,
       // place new routes before...
       // content,
       error,

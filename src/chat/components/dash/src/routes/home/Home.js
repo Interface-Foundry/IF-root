@@ -40,7 +40,7 @@ const data = [
 function Home(props, context) {
   context.setTitle(title);
   return (
-    <div className="container-fluid">
+    <div className="container-fluid data-display">
       <div className='row'>
         <div>
           <Panel
