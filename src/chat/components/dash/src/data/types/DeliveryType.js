@@ -188,6 +188,7 @@ const DeliveryType = new ObjectType({
       payment_post: {
         type: StringType,
         resolve(delivery) {
+          let payment_post = JSON.parse(delivery.payment_post)
           return delivery.payment_post
         }
       },
