@@ -15,7 +15,7 @@ var wait = require('co-wait')
 
 /*
 Affiliate tag:
-motorwaytoros-20
+eileenog-20
 Access Key ID:
 AKIAIS2R5G6NPAMLEDNQ
 Secret Access Key:
@@ -28,14 +28,14 @@ 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
 
 var aws_clients = {
   AKIAJ7JWQNS2HH5UYNVQ: amazon.createClient({
-    awsId: 'AKIAIWNUHVOG5D4LX2BQ',
-    awsSecret: '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',
-    awsTag: 'motorwaytoros-20'
+    awsId: 'AKIAJ7JWQNS2HH5UYNVQ',
+    awsSecret: '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',
+    awsTag: 'eileenog-20'
   }),
   AKIAJWTPOWIOUPHJYG2Q: amazon.createClient({
-    awsId: 'AKIAIIHMV43CGJD3XQDA',
-    awsSecret: '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',
-    awsTag: 'motorwaytoros-20'
+    awsId: 'AKIAJWTPOWIOUPHJYG2Q',
+    awsSecret: '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',
+    awsTag: 'eileenog-20'
   })
 }
 
