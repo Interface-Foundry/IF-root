@@ -450,48 +450,43 @@ handlers['food.item.add_to_cart'] = function * (message) {
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
 
-  //~~~budget~~~//
-
-  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
-    var budgets = foodSession.user_budgets;
-    var menu = Menu(foodSession.menu);
-    var itemPrice = menu.getCartItemPrice(userItem);
-
-    console.log('itemPrice is:', itemPrice)
-
-    if (itemPrice > (budgets[userItem.user_id]) * 1.125) {
-      yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
-      return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
-        type: 'slack',
-        data: {
-        //   text: `Please choose something cheaper`,
-        //   mrkdwn_in: ['text'],
-        //   color: '#fc9600'
-          attachments: [{
-            color: '#fc9600',
-            fallback: 'the unfrugal are the devils\'s playthings',
-            text: 'Please choose something cheaper'
-          }]
-        },
-      })
-    }
-
-    budgets[userItem.user_id] -= itemPrice;
-
-    yield db.Delivery.update(
-      {team_id: message.source.team, active: true},
-      {$set: {
-        user_budgets: budgets
-      }}
-    );
-  }
-
-  //~~~budget~~~//
-
   var errJson = cart.menu.errors(userItem)
   if (errJson) {
     kip.debug('validation errors, user must fix some things')
     return $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: errJson})
+  }
+  else {
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
+      var budgets = foodSession.user_budgets;
+      var menu = Menu(foodSession.menu);
+      var itemPrice = menu.getCartItemPrice(userItem);
+
+      if (itemPrice > (budgets[userItem.user_id]) * 1.125) {
+        yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
+        return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
+          type: 'slack',
+          data: {
+          //   text: `Please choose something cheaper`,
+          //   mrkdwn_in: ['text'],
+          //   color: '#fc9600'
+            attachments: [{
+              color: '#fc9600',
+              fallback: 'the unfrugal are the devils\'s playthings',
+              text: 'Please choose something cheaper'
+            }]
+          },
+        })
+      }
+
+      budgets[userItem.user_id] -= itemPrice;
+
+      yield db.Delivery.update(
+        {team_id: message.source.team, active: true},
+        {$set: {
+          user_budgets: budgets
+        }}
+      );
+    }
   }
   console.log('userItem', userItem, '********')
   userItem.added_to_cart = true
