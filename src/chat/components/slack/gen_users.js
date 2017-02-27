@@ -22,6 +22,8 @@ db.Slackbots.find({
     const admins = bots
       .map(b => _.get(b, 'meta.office_assistants.' + (day - 1)))
       .filter(Boolean)
+      
+    admins = _.uniq(admins)
 
     // write the list of nth admins to a json file for use later
     fs.writeFileSync(`users_day_${day}.json`, JSON.stringify(admins))
