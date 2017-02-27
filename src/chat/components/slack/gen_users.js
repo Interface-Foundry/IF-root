@@ -19,7 +19,7 @@ db.Slackbots.find({
   //
   function gen_day(day) {
     // get the nth admin of every bot
-    const admins = bots
+    var admins = bots
       .map(b => _.get(b, 'meta.office_assistants.' + (day - 1)))
       .filter(Boolean)
       
