@@ -226,7 +226,13 @@ function * getTeamMembers (slackbot) {
     yield savedUser.save()
     return savedUser
   })
-  return members
+  // get rid of all the nulls
+  return members.reduce((members, member) => {
+    if (member) {
+      members.push(member);
+    }
+    return members
+  }, [])
 }
 
 /*
