@@ -30,9 +30,9 @@ var debug = true || process.env.NODE_ENV=='production' ? function(){} : console.
 // });
 
 var client = amazon.createClient({
-    awsId: "AKIAIWNUHVOG5D4LX2BQ",
-    awsSecret: "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",
-    awsTag: "motorwaytoros-20"
+    awsId: "AKIAJWTPOWIOUPHJYG2Q",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
 });
 
 var searchInitial = function(message) {

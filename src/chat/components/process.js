@@ -71,7 +71,7 @@ var urlShorten = function (data, callback2) {
     if (data.client_res) {
       // var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
       var url = data.client_res
-      url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dmotorwaytoros-20')
+      url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Deileenog-20')
 
       var escapeAmazon = querystring.escape(url)
 
@@ -85,9 +85,9 @@ var urlShorten = function (data, callback2) {
       // })
 
       if (data.source.origin == 'kik') {
-        callback2('http://motorwaytoroswell.space/product/' + escapeAmazon + '/id/' + data.source.id + '/pid/shoppingcart')
+        callback2('http://offgrideileen.com/product/' + escapeAmazon + '/id/' + data.source.id + '/pid/shoppingcart')
       }else {
-        googl.shorten('http://motorwaytoroswell.space/product/' + escapeAmazon + '/id/' + data.source.id + '/pid/shoppingcart')
+        googl.shorten('http://offgrideileen.com/product/' + escapeAmazon + '/id/' + data.source.id + '/pid/shoppingcart')
           .then(function (shortUrl) {
             callback2(shortUrl)
           })
@@ -109,15 +109,15 @@ var urlShorten = function (data, callback2) {
         // var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
         var url = data.amazon[i].DetailPageURL[0]
         logging.debug(url)
-        url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dmotorwaytoros-20')
+        url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Deileenog-20')
         logging.debug(url)
         var escapeAmazon = querystring.escape(url)
 
         if (data.source.origin == 'kik') {
-          urlArr.push('http://motorwaytoroswell.space/product/' + escapeAmazon + '/id/' + data.source.id + '/pid/' + data.amazon[i].ASIN[0])
+          urlArr.push('http://offgrideileen.com/product/' + escapeAmazon + '/id/' + data.source.id + '/pid/' + data.amazon[i].ASIN[0])
           callback()
         }else {
-          googl.shorten('http://motorwaytoroswell.space/product/' + escapeAmazon + '/id/' + data.source.id + '/pid/' + data.amazon[i].ASIN[0])
+          googl.shorten('http://offgrideileen.com/product/' + escapeAmazon + '/id/' + data.source.id + '/pid/' + data.amazon[i].ASIN[0])
             .then(function (shortUrl) {
               urlArr.push(shortUrl)
               callback()
@@ -207,27 +207,27 @@ var emoji = {
 
 }
 
-var aws_associate_id = 'motorwaytoros-20'
+var aws_associate_id = 'eileenog-20'
 
 //
 // Shortens a url for a cart object.  I'm not super sure about the id right now.
 //
 function getCartLink (url, cart_id) {
-  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dmotorwaytoros-20')
+  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Deileenog-20')
   logging.debug('CART IDDDDDDDDD ', url)
 
-  return googl.shorten('http://motorwaytoroswell.space/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart')
+  return googl.shorten('http://offgrideileen.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart')
 }
 
 //
 // Shortens a url for an item in the view cart thing.
 //
 function getItemLink (url, user_id, item_id) {
-  url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dmotorwaytoros-20')
+  url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Deileenog-20')
   logging.debug('ITEM IDDDDDDDDD ', url)
 
   var url_swapped = swapAmazonTLD(url, user_id)
-  return googl.shorten('http://motorwaytoroswell.space/product/' + querystring.escape(url_swapped) + '/id/' + user_id + '/pid/' + item_id)
+  return googl.shorten('http://offgrideileen.com/product/' + querystring.escape(url_swapped) + '/id/' + user_id + '/pid/' + item_id)
 }
 
 //
