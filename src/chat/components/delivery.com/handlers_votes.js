@@ -137,10 +137,12 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     merchants = merchants.filter(m => matchingRestaurants.includes(m.id))
   }
 
-  // now order the restaurants in terms of descending score
+  // filter out restaurants that aggregate below a 3 on yelp
+  merchants = merchants.filter(m => parseFloat(m.yelp_info.rating.rating) > 2)
 
-  //keep track of the highest yelp review score in this particular batch of restaurants
-  var maxStars =
+  // now order the restaurants in terms of descending score
+  // keep track of the highest yelp review score in this particular batch of restaurants
+  var maxStars = 0;
 
   merchants = merchants
     .map(m => {
