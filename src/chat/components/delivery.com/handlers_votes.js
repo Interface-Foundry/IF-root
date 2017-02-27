@@ -122,7 +122,14 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
 
-
+  // filter out restaurants whose delivery minimum is significantly above the team's total budget
+  if (foodSession.budget) {
+    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
+    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
+    if (cheap_merchants.length > 2) {
+      merchants = cheap_merchants
+    }
+  }
 
   // filter out restaurants that don't match the keyword if provided
   if (keyword) {
@@ -148,7 +155,6 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     .map(m => {
       m.score = scoreAlgorithms[sortOrder](m)
       if (sortOrder == SORT.cuisine) {
-        console.log('YELP RATING VALUES', m.yelp_info.rating.rating)
         //score based on yelp reviews
         m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
 
@@ -174,16 +180,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
 
-  // this should really happen earlier
-  // filter out restaurants whose delivery minimum is significantly above the team's total budget
-  if (foodSession.budget) {
-    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
-    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
-    if (cheap_merchants.length <= 0) {
-      return merchants
-    }
-    else return cheap_merchants
-  }
+  logging.info(merchants.map(m => m.score))
 
   return merchants
 }

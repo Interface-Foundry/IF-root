@@ -48,18 +48,12 @@ var historyScore = function (m, sb) {
   else return '00'
 }
 
-var yelpScore = function () {
-
-}
-
 utils.cuisineSort = function (m, votes, slackbot) {
   //score by cuisine
   //w/in cuisines rank by order-history
   var cuisines = rankCuisines(votes)
   var cScore = cuisineScore(m, cuisines)
-  console.log('cuisine score:', cScore)
   var hScore = historyScore(m, slackbot)
-  console.log('history score:', hScore)
   console.log('entire score:', cScore + hScore)
   return cScore + hScore
 
