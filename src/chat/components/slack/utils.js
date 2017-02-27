@@ -227,12 +227,7 @@ function * getTeamMembers (slackbot) {
     return savedUser
   })
   // get rid of all the nulls
-  return members.reduce((members, member) => {
-    if (member) {
-      members.push(member);
-    }
-    return members
-  }, [])
+  return members.filter(Boolean);
 }
 
 /*
