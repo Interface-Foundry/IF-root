@@ -31,9 +31,6 @@ utils.rankCuisines = function (votes) {
     if (cuisineVotes[v.vote]) cuisineVotes[v.vote] += v.weight
     else cuisineVotes[v.vote] = v.weight
   })
-
-  console.log('cuisineVotes', cuisineVotes)
-
   return Object.keys(cuisineVotes).sort(function (a, b) {
     return cuisineVotes[b] - cuisineVotes[a]
   })
@@ -55,8 +52,6 @@ var cuisineScore = function (m, cuisines) {
   }
   bestCuisineScore = cuisines.length - bestCuisineScore
   var normalized = parseFloat(bestCuisineScore) / (parseFloat(cuisines.length) + 0.001)
-  if (normalized > 0) console.log('normalized:', parseInt(Math.floor(1000 * normalized)))
-
   if (normalized > 0) return '' + Math.floor(1000 * normalized)
   else return '000'
 }
@@ -64,8 +59,10 @@ var cuisineScore = function (m, cuisines) {
 var historyScore = function (m, sb) {
   var team_history = sb.meta.order_frequency[m.id]
   if (team_history) {
+    console.log('team_history.count', team_history.count)
     if (team_history.count > 10) return '' + team_history.count
     else if (team_history.count > 2) return '0' + team_history.count
+    else return '00'
   }
   else return '00'
 }
@@ -76,7 +73,7 @@ utils.cuisineSort = function (m, votes, slackbot) {
   var cuisines = utils.rankCuisines(votes)
   var cScore = cuisineScore(m, cuisines)
   var hScore = historyScore(m, slackbot)
-  console.log('entire score:', cScore + hScore)
+  // console.log('entire score:', cScore + hScore)
   return cScore + hScore
 
   //w/in history score by yelp
