@@ -1,5 +1,4 @@
 /*eslint-env es6*/
-var db = require('../../db')
 var _ = require('lodash')
 var moment = require('moment')
 var co = require('co')
@@ -7,34 +6,20 @@ var sleep = require('co-sleep')
 var natural = require('natural')
 var amazon = require('../amazon-product-api_modified'); // npm amazon-product-api
 var async = require('async')
-// var client = amazon.createClient({
-//   awsId: "AKIAILD2WZTCJPBMK66A",
-//   awsSecret: "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",
-//   awsTag: "bubboorev-20"
-// })
 
 // could use multiple amazon ids to relieve the load on the carts
 var aws_clients = {
-  AKIAJ7JWQNS2HH5UYNVQ: amazon.createClient({
-    awsId: 'AKIAJ7JWQNS2HH5UYNVQ',
-    awsSecret: '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',
-    awsTag: 'eileenog-20'
-  }),
-  AKIAJWTPOWIOUPHJYG2Q: amazon.createClient({
-    awsId: 'AKIAJWTPOWIOUPHJYG2Q',
-    awsSecret: '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',
-    awsTag: 'eileenog-20'
-  })
+  [kip.config.amazon[0].awsId]: amazon.createClient(kip.config.amazon[0]),
+  [kip.config.amazon[1].awsId]: amazon.createClient(kip.config.amazon[1]),
 }
 
-var DEFAULT_CLIENT = 'AKIAJ7JWQNS2HH5UYNVQ'
+var DEFAULT_CLIENT = kip.config.amazon[0].awsId
 
 var aws_client_id_list = Object.keys(aws_clients)
 
 console.log('AWS LCIENTS ', aws_client_id_list)
 var processData = require('./process')
 var fs = require('fs')
-var kip = require('../../kip')
 
 module.exports = {}
 
