@@ -6,7 +6,6 @@ export default {
   path: '/slackteamstats',
 
     async action() {
-    return 
 
     const resp = await fetch('/graphql', {
       method: 'post',

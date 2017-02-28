@@ -12,12 +12,13 @@ import DeliveryType from './DeliveryType';
 import ChatuserType from './ChatuserType';
 import CartType from './CartType';
 
-import {resolver, defaultListArgs} from 'graphql-sequelize';
+import {resolver} from 'graphql-sequelize';
 
 const SlackbotType = new ObjectType({
   name: 'Slackbot',
   fields: () => {
     return {
+      
       id: { 
         type: StringType,
         resolve(slackbot) {

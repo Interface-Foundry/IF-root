@@ -1,3 +1,4 @@
+import Metric from '../models/Metric';
 import MetricType from '../types/MetricType';
 import {
   GraphQLObjectType as ObjectType,
@@ -6,22 +7,13 @@ import {
   GraphQLNonNull as NonNull,
 } from 'graphql';
 import Conn from '../sequelize';
+import {resolver, defaultArgs} from 'graphql-sequelize';
 
 const MetricListType = new ListType(MetricType);
 
 const metrics = {  
   type: MetricListType,
-  args: {
-    metric: {
-      type: StringType 
-    },
-    data: {
-      type: StringType
-    },
-    timestamp: {
-        type: StringType
-       }
-  },
+  args: defaultArgs(Metric),
   resolve (root, args) {
    return Conn.models.metric.findAll({ limit: 1000, order: [['timestamp', 'DESC']]})
   }
