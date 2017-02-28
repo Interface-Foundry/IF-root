@@ -123,13 +123,17 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   if (keyword) {
     var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, {
       shouldSort: true,
-      threshold: 0.8,
+      threshold: 0.35,
       tokenize: true,
       matchAllTokens: true,
+      findAllMatches: false,
       keys: ['summary.name']
     })
     matchingRestaurants = matchingRestaurants.map(r => r.id)
-    merchants = merchants.filter(m => matchingRestaurants.includes(m.id))
+    var merchantsMatched = merchants.filter(m => matchingRestaurants.includes(m.id))
+    // if including all other results as well, concat merchantsNotMatched)
+    // var merchantsNotMatched = merchants.filter(m => !matchingRestaurants.includes(m.id))
+    merchants = merchantsMatched
   }
 
   // now order the restaurants in terms of descending score
@@ -139,8 +143,9 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   merchants = merchants
     .map(m => {
-      m.score = Number(!(!scoreAlgorithms[sortOrder](m))) //casting to bool and then to number again to avoid weighting in favor of terrible fusion places
-      if (sortOrder == SORT.cuisine) {
+      // casting to bool and then to number again to avoid weighting in favor of terrible fusion places
+      m.score = Number(!(!scoreAlgorithms[sortOrder](m)))
+      if (sortOrder === SORT.cuisine) {
         // score based on yelp reviews
         m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating
 
@@ -150,7 +155,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     })
 
   // if we are sorting by cuisine type and want to incorporate yelp reviews into the order
-  if (sortOrder == SORT.cuisine) {
+  if (sortOrder === SORT.cuisine) {
     merchants = merchants
       .map(m => {
         // normalize yelp score to be in [0, 1]
@@ -167,7 +172,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   // filter out restaurants whose delivery minimum is significantly above the team's total budget
   if (foodSession.budget) {
-    var max = 1.25 * foodSession.team_members.length * foodSession.budget
+    var max = 1.50 * foodSession.team_members.length * foodSession.budget
     var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max)
     if (cheap_merchants.length <= 0) {
       return merchants
@@ -464,7 +469,7 @@ handlers['food.vote.submit'] = function * (message) {
   if (numOfResponsesWaitingFor <= 0) {
     logging.info('have all the votes')
 
-    // cancel any pending 
+    // cancel any pending
     agenda.cancel({
       name: 'mock user message',
       'data.user': message.user_id
