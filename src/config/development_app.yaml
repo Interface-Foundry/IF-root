@@ -1,6 +1,6 @@
 env: development-app
 mongodb:
-  url: mongodb://10.142.0.18/foundry
+  url: mongodb://localhost:27017/foundry
 picstitch: http://dev-picstitch.kipthis.com
 nlp: http://dev-parser.kipthis.com
 slack:
