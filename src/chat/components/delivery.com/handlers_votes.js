@@ -8,9 +8,10 @@ var rp = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
 var cuisineClassifier = require('./cuisine_classifier.js')
-var mailerTransport = require('../../../mail/IF_mail.js')
+var mailer_transport = require('../../../mail/IF_mail.js')
+var email_utils = require('./email_utils')
+var score_utils = require('./score_utils')
 // var menu_utils = require('./menu_utils')
-var emailUtils = require('./email_utils')
 var agenda = require('../agendas')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
@@ -31,7 +32,7 @@ var handlers = {}
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function sampleCuisines (foodSession) {
+function sampleCuisines (foodSession, slackbot) {
   // present top 2 local avail and then 2 random sample,
   // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
   var orderedCuisines = _.map(_.sortBy(foodSession.cuisines, ['count']), 'name')
@@ -40,7 +41,15 @@ function sampleCuisines (foodSession) {
   var top1 = cuisinesWithoutTop.pop()
   var top2 = cuisinesWithoutTop.pop()
   var randomCuisines = _.sampleSize(_.pull(orderedCuisines, top1, top2), 2)
-  var cuisineToUse = [top1, top2, randomCuisines[0], randomCuisines[1]]
+
+  if (slackbot.meta.cuisine_frequency) {
+    var teamCuisines = Object.keys(slackbot.meta.cuisine_frequency).sort(function (a, b) {
+      return slackbot.meta.cuisine_frequency[b] - slackbot.meta.cuisine_frequency[a]
+    })
+  }
+  else var teamCuisines = null;
+
+  var cuisineToUse = [top1, top2, (teamCuisines && orderedCuisines.indexOf(teamCuisines[0]) > -1 ? teamCuisines[0] : randomCuisines[0]), randomCuisines[1]]
 
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
     return {
@@ -87,6 +96,7 @@ var SORT = {
 * @returns {} object that is ranked listing of places or whatever
 */
 function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
   // Set a default sort order
   sortOrder = sortOrder || SORT.cuisine
 
@@ -98,8 +108,10 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   //
   // Different ways to compute the score for a merchant. Higher scores show up first.
   //
+
   var scoreAlgorithms = {
-    [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
+    [SORT.cuisine]: (m) => score_utils.cuisineSort(m, foodSession.votes, slackbot),
+    // [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
     [SORT.keyword]: (m) => {
       if (!keyword) {
         throw new Error('Cannot sort based on keyword without a keyword')
@@ -118,6 +130,15 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   var merchants = foodSession.merchants.filter(m => {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
+
+  // filter out restaurants whose delivery minimum is significantly above the team's total budget
+  if (foodSession.budget) {
+    var max = 1.25 * foodSession.team_members.length * foodSession.budget;
+    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
+    if (cheap_merchants.length > 2) {
+      merchants = cheap_merchants
+    }
+  }
 
   // filter out restaurants that don't match the keyword if provided
   if (keyword) {
@@ -140,19 +161,19 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     }
   }
 
-  // now order the restaurants in terms of descending score
+  // filter out restaurants that aggregate below a 3 on yelp
+  merchants = merchants.filter(m => parseFloat(m.yelp_info.rating.rating) > 2)
 
+  // now order the restaurants in terms of descending score
   // keep track of the highest yelp review score in this particular batch of restaurants
-  var maxStars = 0
+  var maxStars = 0;
 
   merchants = merchants
     .map(m => {
-      // casting to bool and then to number again to avoid weighting in favor of terrible fusion places
-      m.score = Number(!(!scoreAlgorithms[sortOrder](m)))
-      if (sortOrder === SORT.cuisine) {
-        // score based on yelp reviews
-        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating
-
+      m.score = scoreAlgorithms[sortOrder](m)
+      if (sortOrder == SORT.cuisine) {
+        //score based on yelp reviews
+        m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
         if (m.stars > maxStars) maxStars = m.stars
       }
       return m
@@ -174,14 +195,7 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   merchants.sort((a, b) => directionMultiplier * (a.score - b.score))
 
-  // filter out restaurants whose delivery minimum is significantly above the team's total budget
-  if (foodSession.budget) {
-    var max = 1.50 * foodSession.team_members.length * foodSession.budget
-    var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max)
-    if (cheap_merchants.length <= 0) {
-      return merchants
-    } else return cheap_merchants
-  }
+  logging.info(merchants.map(m => m.score))
 
   return merchants
 }
@@ -383,13 +397,15 @@ handlers['food.user.preferences.done'] = function * (message) {
 // User just clicked "thai" or something
 //
 handlers['food.vote.submit'] = function * (message) {
-  debugger;
+  // debugger;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var user = yield db.chatusers.findOne({id: message.source.user})
 
   function addVote (str) {
     var vote = {
       user: message.source.user,
-      vote: str
+      vote: str,
+      weight: user.vote_weight
     }
 
     foodSession.votes.push(vote)
@@ -593,6 +609,7 @@ function buildCuisineDashboard (foodSession) {
 //
 function * sendAdminDashboard (foodSession, message, user) {
   logging.debug('sending admin dashboard')
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
 
   // wait a little and refresh the foodSession to make sure we're using the most recent votes
   // but don't wait if the user is the admin because we want their own clicks to be responsive
@@ -602,6 +619,13 @@ function * sendAdminDashboard (foodSession, message, user) {
   }
 
   var basicDashboard = buildCuisineDashboard(foodSession)
+
+  if (process.env.NODE_ENV.includes('development')) {
+    basicDashboard.attachments.unshift({
+      text: `Your vote-weight is ${user.vote_weight.toFixed(2)}`,
+      fallback: 'vote-weight'
+    })
+  }
 
   // add the special button to end early
   basicDashboard.attachments[0].actions = [{
@@ -620,11 +644,11 @@ function * sendAdminDashboard (foodSession, message, user) {
       'source.user': user.id
     }).sort('-ts').limit(1).exec()
     prevMessage = prevMessage[0]
-    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
+    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession, slackbot))
 
     // make sure the message that we are stripping the buttons from is actually a dashboard message
     if (sampleArray.length !== 5 || !sampleArray[4].text.includes('No Food for Me')) {
-      sampleArray = sampleCuisines(foodSession)
+      sampleArray = sampleCuisines(foodSession, slackbot)
     }
 
     basicDashboard.attachments.push({
@@ -668,20 +692,29 @@ function * sendAdminDashboard (foodSession, message, user) {
 // Sends new or updates the user's cuisine vote dashbaord
 //
 function * sendUserDashboard (foodSession, message, user) {
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
   console.log('send user dashboard to', user.id, 'initiated by', foodSession.convo_initiater.id)
   if (user.id === foodSession.convo_initiater.id) {
     return yield sendAdminDashboard(foodSession, message, user)
   }
   var userHasVoted = foodSession.votes.map(v => v.user).includes(user.id)
   var basicDashboard = buildCuisineDashboard(foodSession)
+
+  if (process.env.NODE_ENV.includes('development')) {
+    basicDashboard.attachments.unshift({
+      text: `Your vote-weight is ${user.vote_weight.toFixed(2)}`,
+      fallback: 'vote-weight'
+    })
+  }
+
   if (!userHasVoted) {
     var prevMessage = yield db.Message.find({'source.user': user.id}).sort('-ts').limit(1).exec()
     prevMessage = prevMessage[0]
-    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
+    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession, slackbot))
 
     // make sure the message that we are stripping the buttons from is actually a dashboard message
     if (sampleArray.length !== 5 || !sampleArray[4].text.includes('No Food for Me')) {
-      sampleArray = sampleCuisines(foodSession)
+      sampleArray = sampleCuisines(foodSession, slackbot)
     }
 
     basicDashboard.attachments.push({
@@ -804,11 +837,10 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-  console.log('picklistmessage', message)
-  console.log('SORT.cuisine', SORT.cuisine)
+  // console.log('SORT.cuisine', SORT.cuisine)
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
-  console.log(sort)
+  // console.log(sort)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
 
@@ -827,8 +859,28 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
 
+  if (foodSession.votes.length && sort === SORT.cuisine) {
+    var countWinner = score_utils.voteWinner(foodSession.votes)
+    var realWinner = score_utils.rankCuisines(foodSession.votes)[0]
+    console.log('countWinner', countWinner, '; realWinner', realWinner)
+    if (countWinner && viableRestaurants[index].summary.cuisines.indexOf(countWinner) > -1) {
+      var explanationText = 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?'
+    }
+    else {
+      var votes = foodSession.votes.filter(v => v.vote == realWinner)
+      var vote = votes.reduce(function (acc, val) {
+        return (acc.weight > val.weight ? acc : val)
+      }, {weight: -100})
+      console.log('winning vote', vote)
+      console.log('winning user', vote.user)
+      // var winning_user = yield db.chatuser.findOne({id: vote.user})
+
+      var explanationText = `<@${vote.user}>ss hasn't had much of a say lately, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
+    }
+  }
+
   var responseForAdmin = {
-    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
+    'text': explanationText,
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
@@ -971,12 +1023,60 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
 
+  // update chatusers with information about which users won / lost the polling
+  // console.log('MERCHANT', merchant)
+  var votes = foodSession.votes
+  var cuisines = merchant.summary.cuisines
+  yield votes.map(function * (v) {
+    // console.log('MAPPING VOTES')
+    var weight = (cuisines.indexOf(v.vote) > -1 ? -0.02 : 0.02)
+    var user = yield db.chatusers.findOne({id: v.user})
+    user.vote_weight += weight;
+    yield user.save()
+  })
+
+  // stores the cuisines in the slackbot
+  var sb = yield db.Slackbot.findOne({team_id: foodSession.team_id})
+  if (! sb.meta.cuisine_frequency) sb.meta.cuisine_frequency = {}
+  cuisines.map(function (c) {
+    if (sb.meta.cuisine_frequency[c]) sb.meta.cuisine_frequency[c]++
+    else sb.meta.cuisine_frequency[c] = 1
+  })
+
+  // stores the restaurant in the slackbot order history
+  if (!sb.meta.order_frequency) sb.meta.order_frequency = {}
+  if (sb.meta.order_frequency[merchant.id]) {
+    console.log('does exist in the history')
+    var oldestDate = sb.meta.order_frequency[merchant.id].dates[0]
+    monthDifference = foodSession.time_started.getMonth() - oldestDate.getMonths()
+    //cut the restaurant out of the history if it's been there for more than 2 months
+    if (monthDifference > 2 || monthDifference < 0 && monthDifference > -10) {
+      console.log('outdated history being removed')
+      db.meta.order_frequency[merchant.id].dates.shift()
+      db.meta.order_frequency[merchant.id].count--
+    }
+    db.meta.order_frequency[merchant.id].count++
+    db.meta.order_frequency[merchant.id].dates.push(foodSession.time_started)
+  }
+  else {
+    console.log('does not exist in the history')
+    console.log('this is the merchant id', merchant.id)
+    sb.meta.order_frequency[merchant.id] = {
+      count: 1,
+      dates: [foodSession.time_started]
+    }
+  }
+  console.log('sb.meta.order_frequency', sb.meta.order_frequency)
+
+  yield db.slackbots.update({team_id: foodSession.team_id}, {meta: sb.meta})
+
   if (!merchant) {
     merchant = yield api.getMerchant(message.data.value)
     foodSession.merchants = [merchant]
     foodSession.markModified('merchants')
     foodSession.save()
   }
+
   var url = yield googl.shorten(merchant.summary.url.complete)
 
   logging.data('using merchant for food service', merchant.id)

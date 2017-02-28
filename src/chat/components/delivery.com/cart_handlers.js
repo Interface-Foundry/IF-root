@@ -805,7 +805,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     var finalAttachment = {
       text: errorMsg,
       fallback: errorMsg,
-      callback_id: 'foodConfrimOrder_callbackID',
+      callback_id: 'foodConfirmOrder_callbackID',
       attachment_type: 'default'
     }
 
