@@ -242,6 +242,33 @@ const SlackbotType = new ObjectType({
     carts: {
         type: new ListType(CartType),
         args: {
+          id: { 
+            type: StringType
+          },
+          slack_id: { 
+            type: StringType
+          },
+          items: { 
+            type: StringType
+          },
+          purchased: { 
+            type: StringType
+          },
+          deleted: { 
+            type: StringType
+          },
+          created_date: {
+            type: StringType
+          },
+          purchased_date: {
+            type: StringType
+          },
+          type: {
+            type: StringType
+          },
+          link: {
+            type: StringType
+          },
           limit: {
             type: GraphQLInt
           },
