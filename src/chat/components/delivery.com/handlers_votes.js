@@ -32,7 +32,7 @@ var handlers = {}
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function sampleCuisines (foodSession) {
+function sampleCuisines (foodSession, slackbot) {
   // present top 2 local avail and then 2 random sample,
   // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
   var orderedCuisines = _.map(_.sortBy(foodSession.cuisines, ['count']), 'name')
@@ -41,7 +41,15 @@ function sampleCuisines (foodSession) {
   var top1 = cuisinesWithoutTop.pop()
   var top2 = cuisinesWithoutTop.pop()
   var randomCuisines = _.sampleSize(_.pull(orderedCuisines, top1, top2), 2)
-  var cuisineToUse = [top1, top2, randomCuisines[0], randomCuisines[1]]
+
+  if (slackbot.meta.cuisine_frequency) {
+    var teamCuisines = Object.keys(slackbot.meta.cuisine_frequency).sort(function (a, b) {
+      return slackbot.meta.cuisine_frequency[b] - slackbot.meta.cuisine_frequency[a]
+    })
+  }
+  else var teamCuisines = null;
+
+  var cuisineToUse = [top1, top2, (teamCuisines && orderedCuisines.indexOf(teamCuisines[0]) > -1 ? teamCuisines[0] : randomCuisines[0]), randomCuisines[1]]
 
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
     return {
@@ -382,7 +390,7 @@ handlers['food.user.preferences.done'] = function * (message) {
 // User just clicked "thai" or something
 //
 handlers['food.vote.submit'] = function * (message) {
-  debugger;
+  // debugger;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var user = yield db.chatusers.findOne({id: message.source.user})
 
@@ -594,6 +602,7 @@ function buildCuisineDashboard (foodSession) {
 //
 function * sendAdminDashboard (foodSession, message, user) {
   logging.debug('sending admin dashboard')
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
 
   // wait a little and refresh the foodSession to make sure we're using the most recent votes
   // but don't wait if the user is the admin because we want their own clicks to be responsive
@@ -628,11 +637,11 @@ function * sendAdminDashboard (foodSession, message, user) {
       'source.user': user.id
     }).sort('-ts').limit(1).exec()
     prevMessage = prevMessage[0]
-    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
+    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession, slackbot))
 
     // make sure the message that we are stripping the buttons from is actually a dashboard message
     if (sampleArray.length !== 5 || !sampleArray[4].text.includes('No Food for Me')) {
-      sampleArray = sampleCuisines(foodSession)
+      sampleArray = sampleCuisines(foodSession, slackbot)
     }
 
     basicDashboard.attachments.push({
@@ -676,6 +685,7 @@ function * sendAdminDashboard (foodSession, message, user) {
 // Sends new or updates the user's cuisine vote dashbaord
 //
 function * sendUserDashboard (foodSession, message, user) {
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
   console.log('send user dashboard to', user.id, 'initiated by', foodSession.convo_initiater.id)
   if (user.id === foodSession.convo_initiater.id) {
     return yield sendAdminDashboard(foodSession, message, user)
@@ -685,7 +695,7 @@ function * sendUserDashboard (foodSession, message, user) {
 
   if (process.env.NODE_ENV.includes('development')) {
     basicDashboard.attachments.unshift({
-      text: `Your vote-weight is ${user.vote_weight}`,
+      text: `Your vote-weight is ${user.vote_weight.toFixed(2)}`,
       fallback: 'vote-weight'
     })
   }
@@ -693,11 +703,11 @@ function * sendUserDashboard (foodSession, message, user) {
   if (!userHasVoted) {
     var prevMessage = yield db.Message.find({'source.user': user.id}).sort('-ts').limit(1).exec()
     prevMessage = prevMessage[0]
-    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession))
+    var sampleArray = _.get(prevMessage, ['reply', 'data', 'attachments', '2', 'actions'], sampleCuisines(foodSession, slackbot))
 
     // make sure the message that we are stripping the buttons from is actually a dashboard message
     if (sampleArray.length !== 5 || !sampleArray[4].text.includes('No Food for Me')) {
-      sampleArray = sampleCuisines(foodSession)
+      sampleArray = sampleCuisines(foodSession, slackbot)
     }
 
     basicDashboard.attachments.push({
@@ -820,10 +830,10 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-  console.log('SORT.cuisine', SORT.cuisine)
+  // console.log('SORT.cuisine', SORT.cuisine)
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
-  console.log(sort)
+  // console.log(sort)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
 
@@ -1007,7 +1017,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
 
   // update chatusers with information about which users won / lost the polling
-  console.log('MERCHANT', merchant)
+  // console.log('MERCHANT', merchant)
   var votes = foodSession.votes
   var cuisines = merchant.summary.cuisines
   yield votes.map(function * (v) {
@@ -1018,8 +1028,15 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     yield user.save()
   })
 
-  // stores the restaurant in the slackbot order history
+  // stores the cuisines in the slackbot
   var sb = yield db.Slackbot.findOne({team_id: foodSession.team_id})
+  if (! sb.meta.cuisine_frequency) sb.meta.cuisine_frequency = {}
+  cuisines.map(function (c) {
+    if (sb.meta.cuisine_frequency[c]) sb.meta.cuisine_frequency[c]++
+    else sb.meta.cuisine_frequency[c] = 1
+  })
+
+  // stores the restaurant in the slackbot order history
   if (!sb.meta.order_frequency) sb.meta.order_frequency = {}
   if (sb.meta.order_frequency[merchant.id]) {
     console.log('does exist in the history')
