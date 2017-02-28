@@ -57,6 +57,7 @@ var cuisineScore = function (m, cuisines) {
 }
 
 var historyScore = function (m, sb) {
+  if (!sb.meta.order_frequency) return '000'
   var team_history = sb.meta.order_frequency[m.id]
   if (team_history) {
     console.log('team_history.count', team_history.count)
