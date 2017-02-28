@@ -5,8 +5,7 @@ export default {
 
   path: '/slackteamstats',
 
-    async action() {
-    return 
+    async action(context) {
 
     const resp = await fetch('/graphql', {
       method: 'post',
@@ -15,13 +14,13 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: '{waypoints{waypoint,data,food_session {id,active,mode,action,time_started,delivery_post}, user_id}}',
+        query: '{waypoints{user_id,delivery_id,waypoint,food_session{team_id}}}',
       }),
       credentials: 'include',
     });
     const { data } = await resp.json();
     if (!data || !data.waypoints) throw new Error('Failed to load waypoints.');
-    return <FlotCharts waypoints={data.waypoints}/>;
+    return <FlotCharts waypoints={data.waypoints} teamId={context.query.id} />;
   }
 
   // action(context) {

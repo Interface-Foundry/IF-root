@@ -16,7 +16,7 @@ import Table from '../../../components/Table';
 import CartTable from '../../../components/CartTable';
 import vagueTime from 'vague-time'
 
-const title = 'Attack as Smelts';
+const title = ' Team Stats';
 
 function plotData() {
   const data = [];
@@ -112,6 +112,7 @@ const dayOfWeekStats = [ { dayString: 'Sunday', dayNumber: 1, total: 7932 },
   { dayString: 'Saturday', dayNumber: 7, total: 7219 } 
 ];
 
+/*
 const waypointPaths = [ { user_id: 'U3620AA5T',
     delivery_id: '5893b7b089e0703570babd89',
     waypoints: [ 1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1320, 1330, 1332 ] },
@@ -149,8 +150,16 @@ const waypointPaths = [ { user_id: 'U3620AA5T',
     delivery_id: '58926618c5802e22c0aa41de',
     waypoints: [ 1010, 1020, 1100, 1102, 1110, 1102, 1001 ] }
 ];
+*/
 
-const heads = [
+/*
+function getWaypointPaths(waypoints){
+  return waypoints[0].user_id;
+}
+*/
+
+//{deliveries(completed_payment:true){team_id,time_started,calculated_amount}}
+const ordersHeads = [
   'Date / Time',
   'Team',
   'User',
@@ -161,8 +170,7 @@ const heads = [
   'Cart ID',
   'Platform'
 ];
-
-const tableData = [
+const ordersData = [
   ['01/15/17 3:15 pm',
     'kipsearch',
     'Alyx Baldwin',
@@ -187,12 +195,13 @@ const tableData = [
 
 
 function displayFlotCharts(props, context) {
-  context.setTitle(title);
-  console.log('props', props);
-  console.log('context', context);
+  context.setTitle(props.teamId + title);
+  //console.log('waypoints: ', getWaypointPaths(props.waypoints));
   var rows = [];
-  for (var i = 0; i < waypointPaths.length; i++) {
-    rows.push([waypointPaths[i].user_id, waypointPaths[i].delivery_id, waypointPaths[i].waypoints.map((waypoint,j) => waypoint+'\u27A1')])
+  var waypoints = props.waypoints;
+  for (var i = 0; i < waypoints.length; i++) {
+    //rows.push([waypointPaths[i].user_id, waypointPaths[i].delivery_id, waypointPaths[i].waypoints.map((waypoint,j) => waypoint+'\u27A1')])
+    rows.push([waypoints[i].user_id, waypoints[i].delivery_id, waypoints[i].waypoint])
   }
   
   var cells = [];
@@ -204,13 +213,13 @@ function displayFlotCharts(props, context) {
     <div>
       <div className="row">
         <div className="col-lg-12">
-          <PageHeader>{props.teamId}</PageHeader>
+          <PageHeader>{props.teamId} Team Stats</PageHeader>
         </div>
       </div>
 
       <div className="row">
         <div>
-          <Panel header={<span>Table of Waypoint Routes</span>}>
+          <Panel header={<span>{props.teamId} Table of Waypoint Routes</span>}>
             <div className="table-responsive">
               <Table heads={['User ID','Delivery ID','FoodSession Waypoint Route']} data={rows} />
             </div>
@@ -222,7 +231,7 @@ function displayFlotCharts(props, context) {
         <div className="col-lg-12">
           <Panel header={<span>Team Order Stats</span>}>
             <div className="table-responsive">
-              <CartTable heads={['Open Since', 'Created Date', 'Slack ID', 'Number of Items']} query={'{carts(purchased: "false") {created_date,slack_id,items}}'} 
+              <Table heads={ordersHeads} data={ordersData} 
                 />
             </div>
           </Panel>
