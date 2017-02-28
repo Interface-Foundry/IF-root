@@ -25,7 +25,7 @@ const message = {
     text: '*Big news!* I can order delicious food delivered for you and your team.\nTry now and get 10% off your first 5 orders',
     image_url: 'http://tidepools.co/kip/kip_fruit_twitter_sm.gif',
     mrkdwn_in: ['text'],
-    fallback: 'Welcome to Kip!',
+    fallback: 'Big news! I can order delicious food delivered for you and your team. Try now and get 10% off your first 5 orders',
     callback_id: 'none',
     color: '#f43440',
     actions: [{
@@ -57,6 +57,16 @@ function sendToUser (userId) {
 
     if (!user) {
       console.log('could not find user in db', userId)
+      return
+    }
+
+    // Don't re-send to someone who we have already sent this marketing message
+    var sentCount = yield db.Metrics.count({
+      'data.user': user.id
+    }).exec()
+
+    if (sentCount > 0) {
+      console.log('already sent to user', userId)
       return
     }
 

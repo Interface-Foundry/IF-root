@@ -144,13 +144,21 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   if (keyword) {
     var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, {
       shouldSort: true,
-      threshold: 0.8,
+      threshold: 0.35,
       tokenize: true,
       matchAllTokens: true,
+      findAllMatches: false,
       keys: ['summary.name']
     })
     matchingRestaurants = matchingRestaurants.map(r => r.id)
-    merchants = merchants.filter(m => matchingRestaurants.includes(m.id))
+    var merchantsMatched = merchants.filter(m => matchingRestaurants.includes(m.id))
+    // if including all other results as well, concat merchantsNotMatched)
+    // var merchantsNotMatched = merchants.filter(m => !matchingRestaurants.includes(m.id))
+    if (merchantsMatched.length < 1) {
+      logging.error('no matched results in createSearchRanking', {foodSession, sortOrder, direction, keyword})
+    } else {
+      merchants = merchantsMatched
+    }
   }
 
   // filter out restaurants that aggregate below a 3 on yelp
@@ -166,14 +174,13 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
       if (sortOrder == SORT.cuisine) {
         //score based on yelp reviews
         m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
-
         if (m.stars > maxStars) maxStars = m.stars
       }
       return m
     })
 
   // if we are sorting by cuisine type and want to incorporate yelp reviews into the order
-  if (sortOrder == SORT.cuisine) {
+  if (sortOrder === SORT.cuisine) {
     merchants = merchants
       .map(m => {
         // normalize yelp score to be in [0, 1]
