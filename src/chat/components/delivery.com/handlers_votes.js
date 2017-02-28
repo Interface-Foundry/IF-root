@@ -133,7 +133,11 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     var merchantsMatched = merchants.filter(m => matchingRestaurants.includes(m.id))
     // if including all other results as well, concat merchantsNotMatched)
     // var merchantsNotMatched = merchants.filter(m => !matchingRestaurants.includes(m.id))
-    merchants = merchantsMatched
+    if (merchantsMatched.length < 1) {
+      logging.error('no matched results in createSearchRanking', {foodSession, sortOrder, direction, keyword})
+    } else {
+      merchants = merchantsMatched
+    }
   }
 
   // now order the restaurants in terms of descending score
