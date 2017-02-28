@@ -1,9 +1,31 @@
 var utils = {}
 
+//returns the cuisine that would win a straight
+//vote-count, or null if there's a tie
+utils.voteWinner = function (votes) {
+  var cuisines = {}
+  votes.map(function (v) {
+    if (cuisines[v.vote]) cuisines[v.vote]++
+    else cuisines[v.vote] = 1
+  })
+  var max = 0
+  var winner = null;
+  for (var cuisine in cuisines) {
+    if (cuisines[cuisine] > max) {
+      winner = cuisine
+      max = cuisines[cuisine]
+    }
+    else if (cuisines[cuisine] == max) {
+      winner = null;
+    }
+  }
+  return winner
+}
+
 //takes the votes array from the foodSession
 //returns an array of cuisines ranked according to the result of the
 //weighted votes
-var rankCuisines = function (votes) {
+utils.rankCuisines = function (votes) {
   var cuisineVotes = {}
   votes.map(v => {
     if (cuisineVotes[v.vote]) cuisineVotes[v.vote] += v.weight
@@ -51,7 +73,7 @@ var historyScore = function (m, sb) {
 utils.cuisineSort = function (m, votes, slackbot) {
   //score by cuisine
   //w/in cuisines rank by order-history
-  var cuisines = rankCuisines(votes)
+  var cuisines = utils.rankCuisines(votes)
   var cScore = cuisineScore(m, cuisines)
   var hScore = historyScore(m, slackbot)
   console.log('entire score:', cScore + hScore)

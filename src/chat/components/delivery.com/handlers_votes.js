@@ -827,6 +827,12 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
 
+  if (foodSession.votes.length) {
+    var winner = score_utils.voteWinner(foodSession.votes)
+    console.log(viableRestaurants[0])
+    // if (viableRestaurants[index])
+  }
+
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
