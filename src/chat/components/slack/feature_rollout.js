@@ -22,11 +22,12 @@ const message = {
   username: 'Kip',
   as_user: true,
   attachments: [{
-    text: 'Big news! I can order delicious food delivered for you and your team. Try now and get 10% off your first 5 orders',
+    text: '*Big news!* I can order delicious food delivered for you and your team.\nTry now and get 10% off your first 5 orders',
     image_url: 'http://tidepools.co/kip/kip_fruit_twitter_sm.gif',
     mrkdwn_in: ['text'],
     fallback: 'Welcome to Kip!',
     callback_id: 'none',
+    color: '#f43440',
     actions: [{
       color: '#45a5f4',
       name: 'passthrough',
@@ -91,7 +92,8 @@ function * main () {
   yield sleep(1000)
   console.log('batch', batch)
   console.log(days[batch / 10 | 0], days[batch % 10])
-  console.log('Sending message to users on batch', batch, 'in a few seconds...')
+  console.log('Sending message to users in batch', batch)
+  console.log(`there are ${users.length} users in this batch`)
   console.log('(ctrl-c if that looks wrong)')
   yield sleep(5000)
   console.log('proceeding')
@@ -184,8 +186,6 @@ const days = [
     99
 `
 ].map(d => '\n ' + d)
-
-console.log(days)
 
 co(main).catch(e => {
   console.error(e)

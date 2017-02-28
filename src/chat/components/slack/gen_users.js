@@ -34,7 +34,7 @@ db.Slackbots.find({
       var batch = admins.splice(-n)
 
       // write the list of nth admins to a json file for use later
-      var filename = `users_batch_${day}${i}.json`
+      var filename = `users_batch_${day - 1}${i}.json`
       console.log('writing', filename)
       fs.writeFileSync(filename, JSON.stringify(batch))
       i++
