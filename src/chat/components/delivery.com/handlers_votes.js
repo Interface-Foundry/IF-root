@@ -875,7 +875,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       console.log('winning user', vote.user)
       // var winning_user = yield db.chatuser.findOne({id: vote.user})
 
-      var explanationText = `Here are 3 restaurant suggestions based on your team vote. <@${vote.user}>ss hasn't had a say for a while, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
+      var explanationText = `<@${vote.user}>ss hasn't had much of a say lately, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
     }
   }
 
