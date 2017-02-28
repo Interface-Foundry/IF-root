@@ -39,7 +39,8 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
       }
     ]
   }
-  if (process.env.NODE_ENV == 'development_hannah') {
+  // if (process.env.NODE_ENV == 'development_hannah') {
+  if (false) {
     msg_json.attachments[0].actions.push(
     {
         'name': 'passthrough',
