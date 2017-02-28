@@ -7,7 +7,7 @@ import {
 import StatWidget from '../../../components/Widget';
 import Donut from '../../../components/Donut';
 import CartTable from '../../../components/CartTable';
-
+import vagueTime from "vague-time";
 import {
   Tooltip,
   XAxis, YAxis, Area,
@@ -59,33 +59,23 @@ function sessions(props, context) {
       <Panel className='fillSpace' header={<span>
           <i className="fa fa-bar-chart-o fa-fw" /> Open Carts </span>}>
         <CartTable 
-          query={'{carts(purchased: "false") {created_date,slack_id,items}}'}
+          query={'{teams{ team_name, carts {created_date,slack_id, items, purchased}}}'}
           heads={['Open Since', 'Created Date', 'Slack ID', 'Number of Items']}
           colorBy={2}
           process = {
-            cart => {
-              return fetch('/graphql', {
-                  method: 'post',
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    query: `{teams(team_id:"${cart.slack_id}"){team_name}}`,
-                  }),
-                  credentials: 'include',
-                })
-                .then((data) => data.json())
-                .then(json => [
-                  vagueTime.get({
-                    from: Date.now(),
-                    to: Date.parse(cart.created_date)
-                  }),
-                  (new Date(cart.created_date)).toLocaleString(), json.data.teams && json.data.teams[0] ? json.data.teams[0].team_name : cart.slack_id, cart.items.split(',').length
-                ])
-            }
+            (teams, team) =>
+              teams.concat(
+                team.carts.reduce((carts, cart) => {
+                  if (cart.purchased.toLowerCase() == 'false') {
+                    carts.push(
+                        [vagueTime.get({from: Date.now(), to: new Date(cart.created_date)}), (new Date(cart.created_date)).toLocaleString(), team.team_name, cart.items.split(',').length]
+                      )
+                  }
+                  return carts;
+                }, [])
+              )
           }
-          sort={(a, b) =>  new Date(b.created_date) - new Date(a.created_date)}
+          sort={(a, b) =>  new Date(b[1]) - new Date(a[1])}
         />
       </Panel>
     </div>

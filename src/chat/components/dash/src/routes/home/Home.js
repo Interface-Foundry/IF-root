@@ -62,34 +62,21 @@ function Home(props, context) {
       <Panel className='fillSpace' header={<span>
           <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts </span>}>
       	<CartTable 
-          query={'{carts(purchased: "true") {purchased_date,slack_id,items}}'}
+          query={'{teams{team_name, carts {purchased_date,items,purchased}}}'}
           heads={['Purchased Date', 'Slack ID', 'Number of Items']}
           colorBy={1}
           process = {
-            cart => {
-              return fetch('/graphql', {
-                  method: 'post',
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    query: `{teams(team_id:"${cart.slack_id}"){team_name}}`,
-                  }),
-                  credentials: 'include',
-                })
-                .then((data) => data.json()).then(json=>
-                  [new Date(cart.purchased_date).toLocaleString(),
-                  json.data.teams && json.data.teams[0] ? json.data.teams[0].team_name : cart.slack_id,
-                  cart.items.split(',').length]
-                  )
-              cart.items = cart.items.split(',').length;
-              let purchased_date = new Date(cart.purchased_date);
-              cart.purchased_date = purchased_date.toLocaleString();
-              return Object.keys(cart).map(k => cart[k])
-            }
+            (teams, team) => 
+            teams.concat(
+              team.carts.reduce((carts, cart) => {
+                if (cart.purchased.toLowerCase() == 'true') {
+                  carts.push([(new Date(cart.purchased_date)).toLocaleString(), team.team_name, cart.items.split(',').length])
+                }
+                return carts;
+              }, [])
+            )
           }
-          sort={(a, b) => new Date(b.purchased_date) - new Date(a.purchased_date)}
+          sort={(a, b) => new Date(b[0]) - new Date(a[0])}
         />
       </Panel>
     </div>

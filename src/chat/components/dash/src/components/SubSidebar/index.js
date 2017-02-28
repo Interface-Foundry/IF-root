@@ -42,7 +42,6 @@ class SubSidebar extends Component {
         const { data } = yield resp.json();
         if (!data || !data.teams) throw new Error('Failed to load the news feed.')
         else  {
-          console.log(data.teams);
           self.setState({teams: data.teams})
         }
     })

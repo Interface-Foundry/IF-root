@@ -28,11 +28,11 @@ class CartTable extends Component {
           credentials: 'include',
         });
         const { data } = yield resp.json();
-        if (!data || !data.carts) throw new Error('Failed to load carts.')
+        if (!data || !data.teams) throw new Error('Failed to load teams.')
         else  {
-          data.carts.sort(self.props.sort);
-          data.carts = yield data.carts.map(self.props.process);
-          self.setState({carts: data.carts})
+          let carts = data.teams.reduce(self.props.process, []);
+          carts = carts.sort(self.props.sort);
+          self.setState({carts: carts})
         }
     })
   }
