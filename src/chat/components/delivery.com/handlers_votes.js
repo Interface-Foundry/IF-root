@@ -606,7 +606,7 @@ function * sendAdminDashboard (foodSession, message, user) {
 
   if (process.env.NODE_ENV.includes('development')) {
     basicDashboard.attachments.unshift({
-      text: `Your vote-weight is ${user.vote_weight}`,
+      text: `Your vote-weight is ${user.vote_weight.toFixed(2)}`,
       fallback: 'vote-weight'
     })
   }
@@ -842,14 +842,28 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
 
-  if (foodSession.votes.length) {
-    var winner = score_utils.voteWinner(foodSession.votes)
-    console.log(viableRestaurants[0])
-    // if (viableRestaurants[index])
+  if (foodSession.votes.length && sort === SORT.cuisine) {
+    var countWinner = score_utils.voteWinner(foodSession.votes)
+    var realWinner = score_utils.rankCuisines(foodSession.votes)[0]
+    console.log('countWinner', countWinner, '; realWinner', realWinner)
+    if (countWinner && viableRestaurants[index].summary.cuisines.indexOf(countWinner) > -1) {
+      var explanationText = 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?'
+    }
+    else {
+      var votes = foodSession.votes.filter(v => v.vote == realWinner)
+      var vote = votes.reduce(function (acc, val) {
+        return (acc.weight > val.weight ? acc : val)
+      }, {weight: -100})
+      console.log('winning vote', vote)
+      console.log('winning user', vote.user)
+      // var winning_user = yield db.chatuser.findOne({id: vote.user})
+
+      var explanationText = `Here are 3 restaurant suggestions based on your team vote. <@${vote.user}>ss hasn't had a say for a while, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
+    }
   }
 
   var responseForAdmin = {
-    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
+    'text': explanationText,
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
