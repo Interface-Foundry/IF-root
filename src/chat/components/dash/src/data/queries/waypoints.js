@@ -1,3 +1,5 @@
+import Waypoint from '../models/Waypoint';
+import WaypointType from '../types/WaypointType';
 import {
   GraphQLObjectType as ObjectType,
   GraphQLList as ListType,
@@ -5,40 +7,12 @@ import {
   GraphQLNonNull as NonNull,
 } from 'graphql'; 
 import Conn from '../sequelize';
-import WaypointType from '../types/WaypointType';
-import Waypoint from '../models/Waypoint';
-
 const WaypointListType = new ListType(WaypointType);
-import {resolver} from 'graphql-sequelize';
+import {resolver, defaultArgs} from 'graphql-sequelize';
 
 const waypoints = {  
   type: WaypointListType,
-  args: {
-
-    id: { 
-        type: StringType
-      },
-
-    delivery_id: { 
-        type: StringType
-       },
-
-    user_id: { 
-        type: StringType
-       },
-
-    waypoint: { 
-        type: StringType
-      },
-
-    data: { 
-        type: StringType
-      },
-
-    timestamp: {
-        type: StringType
-      },
-  },
+  args: defaultArgs(Waypoint),
   resolve: resolver(Waypoint)
   // resolve (root, args) {
   //  return Conn.models.cart.findAll({ limit: 1000, order: [['created_date', 'DESC']]})

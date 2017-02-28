@@ -1,3 +1,4 @@
+import Slackbot from '../models/Slackbot';
 import SlackbotType from '../types/SlackbotType';
 import {
   GraphQLObjectType as ObjectType,
@@ -6,135 +7,13 @@ import {
   GraphQLNonNull as NonNull,
 } from 'graphql';
 import Conn from '../sequelize';
-import Slackbot from '../models/Slackbot';
 const SlackbotListType = new ListType(SlackbotType);
-import {resolver} from 'graphql-sequelize';
+import {resolver, defaultArgs} from 'graphql-sequelize';
 
 const teams = {  
   type: SlackbotListType,
-
-  args: {
-    
-     id: { 
-        type: StringType
-      },
-
-      team_id: {
-        type:  StringType
-      },
-
-
-      access_token: {
-        type:  StringType
-      },
-
-      scope: {
-        type:  StringType
-      },
-
-      team_name: {
-        type:  StringType
-      },
-
-      incoming_webhook_url: {
-        type:  StringType
-      },
-
-      incoming_webhook_channel: {
-        type:  StringType
-      },
-
-      bot_user_id: {
-        type: StringType
-      },
-
-      bot_access_token: {
-        type: StringType
-      },
-
-      dateAdded: {
-        type: StringType
-      },
-
-      addedBy: {
-        type: StringType
-      },
-
-      initialized: {
-        type: StringType
-      },
-
-      // office_assistants: {
-      //   type: DataType.ARRAY(DataType.STRING(255))
-      // },
-
-      status_interval: {
-        type: StringType
-      },
-
-      weekly_status_enabled: {
-        type: StringType
-      },
-
-      weekly_status_day: {
-        type: StringType
-      },
-
-
-      weekly_status_date: {
-        type: StringType
-      },
-
-      weekly_status_time: {
-        type: StringType
-      },
-
-      weekly_status_timezone: {
-        type: StringType
-      },
-
-      city: {
-        type: StringType
-      },
-
-      // cart_channels: {
-      //   type: DataType.ARRAY(DataType.STRING(255))
-      // },
-
-      collect_from: {
-        type: StringType
-      },
-
-      deleted: {
-        type: StringType
-      },
-
-      chosen_location: {
-        type: StringType
-      },
-
-      fulfillment_method: {
-        type: StringType
-      },
-
-      mock: {
-        type:  StringType
-      },
-
-      p2p: {
-        type:  StringType
-      },
-
-      used_coupons: {
-        type:  StringType
-      }
-  },
-
+  args: defaultArgs(Slackbot),
   resolve: resolver(Slackbot)
-
-  // resolve (root, args) {
-  //  return Conn.models.slackbot.findAll({ limit: 100, order: [['dateAdded', 'DESC']]})
-  // }
 }
 
 export default teams;
