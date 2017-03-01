@@ -347,7 +347,7 @@ handlers['food.admin.order.checkout.email'] = function * (message) {
     text: `Edit Email Address`,
     attachments: [{
       text: '✎ Type your email address below (Example: _kipthepenguin@kipthis.com_)',
-      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
+      fallback: '✎ Type your email address below (Example: _kipthepenguin@kipthis.com_)',
       mrkdwn_in: ['text']
     }]
   }
@@ -355,11 +355,11 @@ handlers['food.admin.order.checkout.email'] = function * (message) {
   yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.email.submit', {type: message.origin, data: msg})
 }
 
-handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSession) {
+handlers['food.admin.order.checkout.email.submit'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
-  logging.debug("MESSAGE.TEXT", message.text)
+  logging.debug('MESSAGE.TEXT in email.submit', message.text)
   var email = (message.text ? message.text.split('|') : '')
   if (email.length > 1) email = email[1].split('>')[0]
   var valid = validator.validate(email)
@@ -383,8 +383,8 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSe
     return yield handlers['food.admin.order.checkout.email'](message)
   }
 
-  if (valid) foodSession.convo_initiater.email = email;
-  yield foodSession.save();
+  if (valid) foodSession.convo_initiater.email = email
+  yield foodSession.save()
   // yield db.Delivery.update({team_id: message.source.team, active: true}, {$set: {'convo_initiater.email': message.text || foodSession.convo_initiater.email}}).exec()
   var msg = _.merge({}, message, {
     text: ''
@@ -723,16 +723,17 @@ handlers['food.payments.done'] = function * (message, foodSession) {
     yield foodSession.save()
     yield handlers['food.payments.done.team'](message, foodSession)
 
+    logging.debug('about to send confirmation email to admin')
+    yield email_utils.sendConfirmationEmail(foodSession)
+
     logging.debug('foodSession.email_users', foodSession.email_users)
     yield foodSession.email_users.map(function * (email) {
-      console.log('email:', email)
+      logging.debug('email:', email)
       var full_eu = yield db.email_users.findOne({email: email})
       if (foodSession.confirmed_orders.indexOf(full_eu.id) > -1) {
         yield email_utils.sendEmailUserConfirmations(foodSession, email)
       }
     })
-    logging.debug('about to send confirmation email')
-    yield email_utils.sendConfirmationEmail(foodSession)
     // save coupon info but needed to wait for payments thing
     if (_.get(foodSession, 'coupon.code')) {
       logging.info('saving coupon code stuff')

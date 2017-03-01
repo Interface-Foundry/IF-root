@@ -23,15 +23,17 @@ spec:
         - containerPort: 8000
           protocol: TCP
         readinessProbe:
-          httpGet:
-            path: /health
-            port: 8000
+          exec:
+            command:
+              - cat
+              - /tmp/healthy
           initialDelaySeconds: 30
           timeoutSeconds: 3
         livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
+          exec:
+            command:
+              - cat
+              - /tmp/healthy
           initialDelaySeconds: 30
           timeoutSeconds: 2
       dnsPolicy: ClusterFirst

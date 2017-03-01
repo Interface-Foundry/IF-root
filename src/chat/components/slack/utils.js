@@ -204,7 +204,9 @@ function * getTeamMembers (slackbot) {
     } else {
       _.merge(savedUser, {
         // could add other features from slack api user object here to merge
-        deleted: user.deleted
+        deleted: user.deleted,
+        profile: user.profile,
+        is_admin: user.is_admin
       })
     }
     yield savedUser.save()
