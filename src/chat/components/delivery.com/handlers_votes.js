@@ -249,15 +249,21 @@ handlers['food.user.poll'] = function * (message) {
   // schedule reminder here to finish voting early in 20 minutes
   var finishEarlyMessage = {
     thread_id: message.thread_id,
-    incoming: true,
-    user_id: message.user_id,
+    incoming: false,
+    user_id: foodSession.convo_initiater.id,
     origin: message.origin,
     source: message.source,
     mode: 'food',
-    action: 'admin.restaurant.pick.list'
+    action: 'admin.restaurant.pick.list',
+    attachments: [{
+      color: '#fc9600',
+      text: `X, Y, and Z aren\'t responding. Do you want to continue on your order?`,
+      'mrkdwn_in': ['text'],
+      fallback: 'voting stalled'
+    }]
   }
-  agenda.schedule('20 minutes from now', 'mock user message', {
-    user: message.user_id,
+  agenda.schedule('5 seconds from now', 'voting stalled reminder', {
+    user: foodSession.convo_initiater.id,
     msg: JSON.stringify(finishEarlyMessage)
   })
 
