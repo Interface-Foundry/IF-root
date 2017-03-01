@@ -9,7 +9,7 @@ function preen () {
   return co(function * () {
     var enabledBots = yield db.slackbots
       .find({'meta.deleted': {$ne: true}})
-      .select(['team_name', 'team_id', 'bot'])
+      .select('team_name team_id bot')
       .exec()
     logging.info('found', enabledBots.length, 'bots in the system')
     for (var i = 0; i < enabledBots.length; i++) {
