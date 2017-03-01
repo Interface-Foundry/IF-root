@@ -8,7 +8,7 @@ spec:
   strategy:
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
@@ -27,16 +27,18 @@ spec:
             command:
               - cat
               - /tmp/healthy
-          initialDelaySeconds: 45
+          initialDelaySeconds: 120
           timeoutSeconds: 3
+          failureThreshold: 2
         livenessProbe:
           exec:
             command:
               - cat
               - /tmp/healthy
-          initialDelaySeconds: 45
-          timeoutSeconds: 2
-          periodSeconds: 30
+          initialDelaySeconds: 120
+          timeoutSeconds: 3
+          periodSeconds: 20
+          failureThreshold: 2
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       terminationGracePeriodSeconds: 10
