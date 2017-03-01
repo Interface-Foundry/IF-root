@@ -229,11 +229,57 @@ handlers['food.admin.poll'] = function * (message) {
   sendAdminDashboard(foodSession)
 }
 
+var setReminder = function (foodSession, message) {
+  // schedule reminder here to finish voting early in 20 minutes
+  logging.debug('set reminder called')
+
+  // cancel any pending
+  agenda.cancel({
+    name: 'voting stalled reminder',
+    'data.user': foodSession.convo_initiater.id
+  }, function (e, numRemoved) {
+    if (e) logging.error(e)
+  })
+
+  var late = _.difference(foodSession.team_members.map(m => m.id), foodSession.votes.map(v => v.user))
+  if (late.length) {
+    console.log('gonna set a new reminder')
+    late = late.map(m => `<@${m}>`)
+    if (late.length > 1) late[late.length-1] = 'and ' + late[late.length-1]
+    if (late.length > 2) late = late.join(', ')
+    else late = late.join(' ')
+    console.log('late', late)
+
+    var finishEarlyMessage = {
+      thread_id: message.thread_id,
+      incoming: false,
+      user_id: foodSession.convo_initiater.id,
+      origin: message.origin,
+      source: message.source,
+      mode: 'food',
+      action: 'admin.restaurant.pick.list',
+      attachments: [{
+        color: '#fc9600',
+        text: `${late} ${(late.length > 1 ? 'aren\'t' : 'isn\'t')} responding. Do you want to continue with your order?`,
+        'mrkdwn_in': ['text'],
+        fallback: 'voting stalled'
+      }]
+    }
+
+    agenda.schedule('5 seconds from now', 'voting stalled reminder', {
+      user: foodSession.convo_initiater.id,
+      msg: JSON.stringify(finishEarlyMessage)
+    })
+  }
+}
+
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
   logging.debug('in food.user.poll')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1120, foodSession._id, message.user_id, {original_text: message.original_text})
+
+  setReminder(foodSession, message)
 
   var teamMembers = foodSession.team_members
   console.log('found', teamMembers.length, 'team members')
@@ -245,27 +291,6 @@ handlers['food.user.poll'] = function * (message) {
     })
     return yield $allHandlers['food.admin.select_address'](message)
   }
-
-  // schedule reminder here to finish voting early in 20 minutes
-  var finishEarlyMessage = {
-    thread_id: message.thread_id,
-    incoming: false,
-    user_id: foodSession.convo_initiater.id,
-    origin: message.origin,
-    source: message.source,
-    mode: 'food',
-    action: 'admin.restaurant.pick.list',
-    attachments: [{
-      color: '#fc9600',
-      text: `X, Y, and Z aren\'t responding. Do you want to continue on your order?`,
-      'mrkdwn_in': ['text'],
-      fallback: 'voting stalled'
-    }]
-  }
-  agenda.schedule('5 seconds from now', 'voting stalled reminder', {
-    user: foodSession.convo_initiater.id,
-    msg: JSON.stringify(finishEarlyMessage)
-  })
 
   yield teamMembers.map(function * (member) {
     logging.debug('checking if we should do food_preferences')
@@ -415,6 +440,9 @@ handlers['food.vote.submit'] = function * (message) {
     }
 
     foodSession.votes.push(vote)
+
+    setReminder(foodSession, message)
+
     foodSession.markModified('votes')
     return foodSession.save()
   }
