@@ -17,10 +17,10 @@ function sendFeedbackRequestEmail(team_id) {
 
     // Loop through the ids until we find one that is legit
     var user
-    var i = userIdsToTry.length
-    while (!user && i > 0) {
+    var i = 0
+    while (!user && i < userIdsToTry.length) {
       user = yield getUser(userIdsToTry[i])
-      i--
+      i++
     }
 
     if (!user) {
@@ -38,6 +38,10 @@ function sendFeedbackRequestEmail(team_id) {
 // Helper function to get a user and make sure we have their email address
 //
 function * getUser (id) {
+  if (!id) {
+    return false
+  }
+
   var user = yield db.Chatusers.findOne({
     id: id
   }).exec()
