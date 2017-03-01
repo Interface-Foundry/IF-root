@@ -37,7 +37,7 @@ restartButton.confirm = {
   dismiss_text: 'No'
 }
 
-var promptCheckout = function (foodSession, message) {
+var promptCheckout = function (foodSession, message, waitingText) {
   // schedule reminder here to finish voting early in 20 minutes
   logging.debug('set reminder called')
 
@@ -58,34 +58,35 @@ var promptCheckout = function (foodSession, message) {
   //   if (late.length > 2) late = late.join(', ')
   //   else late = late.join(' ')
   //   console.log('late', late)
-
-    var finishEarlyMessage = {
-      thread_id: foodSession.convo_initiater.dm,
-      incoming: false,
-      user_id: foodSession.convo_initiater.id,
-      origin: message.origin,
-      source: message.source,
-      mode: 'food',
-      action: 'admin.restaurant.pick.list',
-      attachments: [{
-        color: '#fc9600',
-        text: 'This is filler text',
-        // text: `${late} ${(plural ? 'aren\'t' : 'isn\'t')} responding. Do you want to continue with your order?`,
-        mrkdwn_in: ['text'],
-        callback_id: 'admin.restaurant.pick.list',
-        fallback: 'Continue your order',
-        actions: [{
-          name: 'passthrough',
-          type: 'button',
-          text: 'Finish Voting',
-          value: 'food.admin.restaurant.pick.list'
-        }, {
-          name: 'passthrough',
-          type: 'button',
-          text: '↺ Restart Order',
-          value: 'food.begin'
+    if (waitingText) {
+      var finishEarlyMessage = {
+        thread_id: foodSession.convo_initiater.dm,
+        incoming: false,
+        user_id: foodSession.convo_initiater.id,
+        origin: message.origin,
+        source: message.source,
+        mode: 'food',
+        action: 'admin.restaurant.pick.list',
+        attachments: [{
+          color: '#fc9600',
+          text: `The following users aren\'t responding - do you want to check out? \n ${waitingText}`,
+          // text: `${late} ${(plural ? 'aren\'t' : 'isn\'t')} responding. Do you want to continue with your order?`,
+          mrkdwn_in: ['text'],
+          callback_id: 'admin.restaurant.pick.list',
+          fallback: 'Continue your order',
+          actions: [{
+            name: 'passthrough',
+            type: 'button',
+            text: 'Finish Voting',
+            value: 'food.admin.restaurant.pick.list'
+          }, {
+            name: 'passthrough',
+            type: 'button',
+            text: '↺ Restart Order',
+            value: 'food.begin'
+          }]
         }]
-      }]
+      }
     }
 
     agenda.schedule('10 seconds from now', 'checkout prompt', {
@@ -294,8 +295,6 @@ handlers['food.cart.update_dashboards'] = function * (message) {
 function * sendOrderProgressDashboards (foodSession, message) {
   logging.debug('sending order progress dashboards')
 
-  promptCheckout(foodSession, message)
-
   // we'll have to send the dashboard to the admin even if they are not hungry
   const adminIsNotHungry = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
   const allOrdersIn = foodSession.confirmed_orders.length >= foodSession.team_members.length + foodSession.email_users.length
@@ -345,9 +344,10 @@ function * sendOrderProgressDashboards (foodSession, message) {
     slackers = slackers.join(' ')
   }
 
+  var waitingText = ''
   if (slackers.length > 0 || emailers.length > 0) {
     logging.debug('slackers', slackers, 'emailers', emailers)
-    var waitingText = 'Waiting for orders from '
+    // var waitingText = 'Waiting for orders from '
     if (slackers && !emailers) waitingText += slackers
     else if (emailers && !slackers) waitingText += emailers
     else {
@@ -355,11 +355,15 @@ function * sendOrderProgressDashboards (foodSession, message) {
     }
     dashboard.attachments.push({
       mrkdwn_in: ['text'],
-      text: waitingText,
+      text: 'Waiting for orders from ' + waitingText,
       color: '#3AA3E3',
       fallback: `Waiting for orders from ${slackers} ${emailers}`
     })
   }
+
+  // set up the reminder
+  console.log('admin ready?', foodSession.confirmed_orders.indexOf(foodSession.convo_initiater.id) > -1)
+  if (adminIsNotHungry || foodSession.confirmed_orders.indexOf(foodSession.convo_initiater.id) > -1) promptCheckout(foodSession, message, waitingText)
 
   // get the list of users that we have to send a dashboard to
   var dashboardUsers = foodSession.team_members.filter(user => {
