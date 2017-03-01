@@ -5,8 +5,7 @@ export default {
 
   path: '/slackteamstats',
 
-    async action(context) {
-
+  async action(context) {
     const resp = await fetch('/graphql', {
       method: 'post',
       headers: {
@@ -18,7 +17,9 @@ export default {
       }),
       credentials: 'include',
     });
-    const { data } = await resp.json();
+    const {
+      data
+    } = await resp.json();
     if (!data || !data.waypoints) throw new Error('Failed to load waypoints.');
     return <FlotCharts waypoints={data.waypoints} teamId={context.query.id} />;
   }

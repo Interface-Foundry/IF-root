@@ -6,8 +6,8 @@ export default {
 
   path: '/sessions',
 
-  action() {
-    return <Sessions />;
+  action(context) {
+    return <Sessions context={context} />;
   },
 
 };

@@ -26,6 +26,7 @@ import morrisjscharts from './dashboardPages/morrisjsCharts';
 import notification from './dashboardPages/notification';
 import panelwells from './dashboardPages/panelWells';
 import typography from './dashboardPages/typography';
+import sendMessage from './dashboardPages/sendMessage';
 import blank from './dashboardPages/blank';
 import error from './error';
 
@@ -70,6 +71,7 @@ export default [
       sessions,
       stagnantcarts,
       team,
+      sendMessage,
       // place new routes before...
       // content,
       error,

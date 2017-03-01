@@ -44,6 +44,11 @@ class Sidebar extends Component {
                 <i className="fa fa fa-comments-o fa-fw" /> &nbsp; Slack Team Stats
               </a>
             </li>
+            <li>
+              <a href="" onClick={(e) => { e.preventDefault(); history.push('/sendmessage'); }} >
+                <i className="fa fa fa-comments-o fa-fw" /> &nbsp; Send Message
+              </a>
+            </li>
            
            
 
