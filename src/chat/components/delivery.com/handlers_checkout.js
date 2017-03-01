@@ -347,7 +347,7 @@ handlers['food.admin.order.checkout.email'] = function * (message) {
     text: `Edit Email Address`,
     attachments: [{
       text: '✎ Type your email address below (Example: _kipthepenguin@kipthis.com_)',
-      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
+      fallback: '✎ Type your email address below (Example: _kipthepenguin@kipthis.com_)',
       mrkdwn_in: ['text']
     }]
   }
@@ -355,11 +355,11 @@ handlers['food.admin.order.checkout.email'] = function * (message) {
   yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.email.submit', {type: message.origin, data: msg})
 }
 
-handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSession) {
+handlers['food.admin.order.checkout.email.submit'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
-  logging.debug("MESSAGE.TEXT", message.text)
+  logging.debug('MESSAGE.TEXT in email.submit', message.text)
   var email = (message.text ? message.text.split('|') : '')
   if (email.length > 1) email = email[1].split('>')[0]
   var valid = validator.validate(email)
@@ -383,8 +383,8 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSe
     return yield handlers['food.admin.order.checkout.email'](message)
   }
 
-  if (valid) foodSession.convo_initiater.email = email;
-  yield foodSession.save();
+  if (valid) foodSession.convo_initiater.email = email
+  yield foodSession.save()
   // yield db.Delivery.update({team_id: message.source.team, active: true}, {$set: {'convo_initiater.email': message.text || foodSession.convo_initiater.email}}).exec()
   var msg = _.merge({}, message, {
     text: ''
