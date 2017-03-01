@@ -49,15 +49,6 @@ var promptCheckout = function (foodSession, message, waitingText) {
     if (e) logging.error(e)
   })
 
-  // var late = _.difference(foodSession.team_members.map(m => m.id), foodSession.votes.map(v => v.user))
-  // if (late.length) {
-  //   console.log('gonna set a new reminder')
-  //   late = late.map(m => `<@${m}>`)
-  //   var plural = late.length > 1
-  //   if (plural) late[late.length-1] = 'and ' + late[late.length-1]
-  //   if (late.length > 2) late = late.join(', ')
-  //   else late = late.join(' ')
-  //   console.log('late', late)
     if (waitingText) {
       var finishEarlyMessage = {
         thread_id: foodSession.convo_initiater.dm,
@@ -69,22 +60,16 @@ var promptCheckout = function (foodSession, message, waitingText) {
         action: 'admin.restaurant.pick.list',
         attachments: [{
           color: '#fc9600',
-          text: `The following users aren\'t responding - do you want to check out? \n ${waitingText}`,
-          // text: `${late} ${(plural ? 'aren\'t' : 'isn\'t')} responding. Do you want to continue with your order?`,
+          text: `The following users aren\'t responding - do you want to check out? \n${waitingText}`,
           mrkdwn_in: ['text'],
           callback_id: 'admin.restaurant.pick.list',
           fallback: 'Continue your order',
           actions: [{
             name: 'passthrough',
             type: 'button',
-            text: 'Finish Voting',
-            value: 'food.admin.restaurant.pick.list'
-          }, {
-            name: 'passthrough',
-            type: 'button',
-            text: '↺ Restart Order',
-            value: 'food.begin'
-          }]
+            text: 'Finish Order Early',
+            value: 'food.admin.order.confirm'
+          }, restartButton]
         }]
       }
     }
@@ -351,11 +336,11 @@ function * sendOrderProgressDashboards (foodSession, message) {
     if (slackers && !emailers) waitingText += slackers
     else if (emailers && !slackers) waitingText += emailers
     else {
-      waitingText += `\nSlack: ${slackers}\nEmail: ${emailers}`
+      waitingText += `Slack: ${slackers}\nEmail: ${emailers}`
     }
     dashboard.attachments.push({
       mrkdwn_in: ['text'],
-      text: 'Waiting for orders from ' + waitingText,
+      text: 'Waiting for orders from \n' + waitingText,
       color: '#3AA3E3',
       fallback: `Waiting for orders from ${slackers} ${emailers}`
     })
