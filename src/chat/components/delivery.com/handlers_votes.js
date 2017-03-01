@@ -262,12 +262,24 @@ var setReminder = function (foodSession, message) {
       attachments: [{
         color: '#fc9600',
         text: `${late} ${(plural ? 'aren\'t' : 'isn\'t')} responding. Do you want to continue with your order?`,
-        'mrkdwn_in': ['text'],
-        fallback: 'voting stalled'
+        mrkdwn_in: ['text'],
+        callback_id: 'admin.restaurant.pick.list',
+        fallback: 'Continue your order',
+        actions: [{
+          name: 'passthrough',
+          type: 'button',
+          text: 'Finish Voting',
+          value: 'food.admin.restaurant.pick.list'
+        }, {
+          name: 'passthrough',
+          type: 'button',
+          text: '↺ Restart Order',
+          value: 'food.begin'
+        }]
       }]
     }
 
-    agenda.schedule('5 seconds from now', 'voting stalled reminder', {
+    agenda.schedule('2 minutes from now', 'voting stalled reminder', {
       user: foodSession.convo_initiater.id,
       msg: JSON.stringify(finishEarlyMessage)
     })
