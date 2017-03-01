@@ -14,7 +14,8 @@ import {
 } from 'react-bootstrap';
 import Table from '../../../components/Table';
 import CartTable from '../../../components/CartTable';
-import vagueTime from 'vague-time'
+import vagueTime from 'vague-time';
+import _ from 'lodash';
 
 const title = ' Team Stats';
 
@@ -152,11 +153,30 @@ const waypointPaths = [ { user_id: 'U3620AA5T',
 ];
 */
 
-/*
+
+
 function getWaypointPaths(waypoints){
-  return waypoints[0].user_id;
+
+  var userWaypoints = _.groupBy(waypoints,function(waypoint){
+     return waypoint.user_id+'#'+waypoint.delivery_id
+  });
+  
+  var data = _.map(userWaypoints, function(waypointArray){
+    waypointArray = _.sortBy(waypointArray, [function(o) { return o.timestamp; }]);
+
+
+    return {
+            user_id: waypointArray[0].user_id,
+            delivery_id: waypointArray[0].delivery_id,
+            waypoints: waypointArray.map((waypoint) => waypoint.waypoint)
+        }
+  });
+
+
+  console.log(data);
+  return data;
 }
-*/
+
 
 //{deliveries(completed_payment:true){team_id,time_started,calculated_amount}}
 const ordersHeads = [
@@ -196,14 +216,15 @@ const ordersData = [
 
 function displayFlotCharts(props, context) {
   context.setTitle(props.teamId + title);
-  //console.log('waypoints: ', getWaypointPaths(props.waypoints));
   var rows = [];
+
   var waypoints = props.waypoints;
-  for (var i = 0; i < waypoints.length; i++) {
-    //rows.push([waypointPaths[i].user_id, waypointPaths[i].delivery_id, waypointPaths[i].waypoints.map((waypoint,j) => waypoint+'\u27A1')])
-    rows.push([waypoints[i].user_id, waypoints[i].delivery_id, waypoints[i].waypoint])
+  var waypointPaths = getWaypointPaths(waypoints);
+  for (var i = 0; i < waypointPaths.length; i++) {
+    rows.push([waypointPaths[i].user_id, waypointPaths[i].delivery_id, waypointPaths[i].waypoints.join('\u27A1')])
+    //rows.push([waypoints[i].user_id, waypoints[i].delivery_id, waypoints[i].waypoint, waypoints[i].timestamp])
   }
-  
+
   var cells = [];
   for (var i = 0; i < teamStats.length; i++){
     cells.push(<Cell fill={COLORS[i]} />)
@@ -221,7 +242,7 @@ function displayFlotCharts(props, context) {
         <div>
           <Panel header={<span>{props.teamId} Table of Waypoint Routes</span>}>
             <div className="table-responsive">
-              <Table heads={['User ID','Delivery ID','FoodSession Waypoint Route']} data={rows} />
+              <Table heads={['User ID','Delivery ID','FoodSession Waypoint Route', 'Timestamp']} data={rows} />
             </div>
           </Panel>
         </div>
@@ -231,8 +252,7 @@ function displayFlotCharts(props, context) {
         <div className="col-lg-12">
           <Panel header={<span>Team Order Stats</span>}>
             <div className="table-responsive">
-              <Table heads={ordersHeads} data={ordersData} 
-                />
+              <Table heads={ordersHeads} data={ordersData} />
             </div>
           </Panel>
         </div>
