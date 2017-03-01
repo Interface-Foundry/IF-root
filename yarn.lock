@@ -2107,6 +2107,10 @@ ee-first@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
 
+email-validator@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/email-validator/-/email-validator-1.0.7.tgz#4621ca32fc741eb833ac98d5fb55670b7e056c95"
+
 emoji-text@^0.2.6:
   version "0.2.6"
   resolved "https://registry.yarnpkg.com/emoji-text/-/emoji-text-0.2.6.tgz#931e833a98facc949f3d8057dc8a84363c8bb8f8"
@@ -3295,6 +3299,10 @@ isbinaryfile@^3.0.0:
 isemail@1.x.x:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/isemail/-/isemail-1.2.0.tgz#be03df8cc3e29de4d2c5df6501263f1fa4595e9a"
+
+isemail@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/isemail/-/isemail-2.2.1.tgz#0353d3d9a62951080c262c2aa0a42b8ea8e9e2a6"
 
 isexe@^1.1.1:
   version "1.1.2"

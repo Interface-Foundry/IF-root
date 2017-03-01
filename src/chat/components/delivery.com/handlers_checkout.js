@@ -723,16 +723,17 @@ handlers['food.payments.done'] = function * (message, foodSession) {
     yield foodSession.save()
     yield handlers['food.payments.done.team'](message, foodSession)
 
+    logging.debug('about to send confirmation email to admin')
+    yield email_utils.sendConfirmationEmail(foodSession)
+
     logging.debug('foodSession.email_users', foodSession.email_users)
     yield foodSession.email_users.map(function * (email) {
-      console.log('email:', email)
+      logging.debug('email:', email)
       var full_eu = yield db.email_users.findOne({email: email})
       if (foodSession.confirmed_orders.indexOf(full_eu.id) > -1) {
         yield email_utils.sendEmailUserConfirmations(foodSession, email)
       }
     })
-    logging.debug('about to send confirmation email')
-    yield email_utils.sendConfirmationEmail(foodSession)
     // save coupon info but needed to wait for payments thing
     if (_.get(foodSession, 'coupon.code')) {
       logging.info('saving coupon code stuff')
