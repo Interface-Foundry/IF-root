@@ -29,7 +29,7 @@ function sendFeedbackRequestEmail(team_id) {
     }
 
     // Made it here, so we can send an email to the user now
-    console.log(user.toObject())
+    console.log(`ready to send an email to ${user.profile.email.cyan} from team ${team.team_name.cyan}`)
 
   })
 }
