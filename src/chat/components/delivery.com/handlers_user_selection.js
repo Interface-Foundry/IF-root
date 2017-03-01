@@ -42,38 +42,53 @@ function * infoForChannelOrGroup (slackbot, chosenChannel) {
 // start of actual handlers
 handlers['food.poll.confirm_send_initial'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-
+  var textWithPrevChannel
   db.waypoints.log(1102, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  var prevFoodSession = yield db.Delivery.find({team_id: message.source.team, active: false}).limit(1).sort({_id: -1}).exec()
-  var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
+  var prevFoodSession = yield db.Delivery.find({team_id: message.source.team, active: false})
+    .sort({_id: -1})
+    .limit(1)
+    .exec()
   prevFoodSession = prevFoodSession[0]
+
+  var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
   if (_.get(prevFoodSession, 'chosen_channel.name')) {
     // allow special cases for everyone, just me and channel specifics
 
+    // if no team members then start w/ admin at least
+    if (prevFoodSession.team_members.length < 1) {
+      foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
+    }
+
+    // setup team members/text per selection
+
+    // setup team_members for using everyone
     if (prevFoodSession.chosen_channel.id === 'everyone') {
-      var textWithPrevChannel = `Send poll for cuisine to _everyone_ at \`${addr}\`?`
+      textWithPrevChannel = `Send poll for cuisine to _everyone_ at \`${addr}\`?`
+      foodSession.team_members = yield db.Chatusers.find({
+        team_id: foodSession.team_id,
+        is_bot: {$ne: true},
+        deleted: {$ne: true},
+        type: {$ne: 'email'}, // the email db.chatusers is outdated
+        id: {$ne: 'USLACKBOT'}}).exec()
+
+    // if its just_me
     } else if (prevFoodSession.chosen_channel.id === 'just_me') {
       textWithPrevChannel = `Send poll for cuisine to _just me_ at \`${addr}\`?`
+      foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
+
+    // if its a specific channel
     } else {
       textWithPrevChannel = `Send poll for cuisine to <#${prevFoodSession.chosen_channel.id}|${prevFoodSession.chosen_channel.name}> at \`${addr}\``
       if (prevFoodSession.budget) textWithPrevChannel += ` with a budget of $${prevFoodSession.budget}`
       textWithPrevChannel += '?'
-    }
-    if (prevFoodSession.team_members.length < 1) {
-      foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
-    } else {
-      if (prevFoodSession.chosen_channel.id === 'just_me') {
-        foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
-      } else {
-        foodSession.team_members = prevFoodSession.team_members
-        if (prevFoodSession.team_members.find(c => c.id !== message.user_id)) {
-          // convo_init not in prevFoodSession.team_members, just adding them alongside
-          var convoInit = yield db.Chatusers.findOne({id: message.user_id, is_bot: {$ne: true}}).exec()
-          foodSession.team_members.push(convoInit)
-        }
+      foodSession.team_members = prevFoodSession.team_members
+      if (!prevFoodSession.team_members.find(c => c.id === foodSession.convo_initiater.id)) {
+        var convoInit = yield db.Chatusers.findOne({id: message.user_id, is_bot: {$ne: true}}).exec()
+        foodSession.team_members.push(convoInit)
       }
     }
+
     if (prevFoodSession.email_members) {
       foodSession.email_members = prevFoodSession.email_members
     }

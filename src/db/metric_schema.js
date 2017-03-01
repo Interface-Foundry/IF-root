@@ -28,5 +28,8 @@ module.exports.log = function (metric, data) {
     data: data
   };
 
-  (new module.exports(obj)).save()
+  var metric = new module.exports(obj)
+
+  // return a promise so that it works with async stuff
+  return metric.save()
 }
