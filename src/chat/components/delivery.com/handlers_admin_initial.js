@@ -87,6 +87,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   yield [
     slackUtils.refreshAllUserIMs(team),
     slackUtils.refreshAllChannels(team),
+    slackUtils.getTeamMembers(team),
     coupon.refreshTeamCoupons(team.team_id)
   ]
 
