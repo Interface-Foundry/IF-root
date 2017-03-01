@@ -245,13 +245,14 @@ var setReminder = function (foodSession, message) {
   if (late.length) {
     console.log('gonna set a new reminder')
     late = late.map(m => `<@${m}>`)
-    if (late.length > 1) late[late.length-1] = 'and ' + late[late.length-1]
+    var plural = late.length > 1
+    if (plural) late[late.length-1] = 'and ' + late[late.length-1]
     if (late.length > 2) late = late.join(', ')
     else late = late.join(' ')
     console.log('late', late)
 
     var finishEarlyMessage = {
-      thread_id: message.thread_id,
+      thread_id: foodSession.convo_initiater.dm,
       incoming: false,
       user_id: foodSession.convo_initiater.id,
       origin: message.origin,
@@ -260,7 +261,7 @@ var setReminder = function (foodSession, message) {
       action: 'admin.restaurant.pick.list',
       attachments: [{
         color: '#fc9600',
-        text: `${late} ${(late.length > 1 ? 'aren\'t' : 'isn\'t')} responding. Do you want to continue with your order?`,
+        text: `${late} ${(plural ? 'aren\'t' : 'isn\'t')} responding. Do you want to continue with your order?`,
         'mrkdwn_in': ['text'],
         fallback: 'voting stalled'
       }]

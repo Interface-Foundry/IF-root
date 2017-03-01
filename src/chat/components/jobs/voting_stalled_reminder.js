@@ -10,6 +10,7 @@ module.exports = function(agenda) {
         newMessage.reply = {}
         newMessage.reply.data = {}
         newMessage.reply.data.attachments = message.attachments
+        newMessage.source.channel = message.thread_id
         queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
       } else {
         kip.debug(`couldn't save reminder message ${JSON.stringify(err, null, 2)}\n${JSON.stringify(res, null, 2)}`)
