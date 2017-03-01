@@ -27,15 +27,16 @@ spec:
             command:
               - cat
               - /tmp/healthy
-          initialDelaySeconds: 60
+          initialDelaySeconds: 45
           timeoutSeconds: 3
         livenessProbe:
           exec:
             command:
               - cat
               - /tmp/healthy
-          initialDelaySeconds: 60
+          initialDelaySeconds: 45
           timeoutSeconds: 2
+          periodSeconds: 30
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       terminationGracePeriodSeconds: 10
