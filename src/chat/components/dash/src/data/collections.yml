@@ -1,27 +1,170 @@
-foundry:
-  waypoints:
+ foundry:
+  carts: 
     :columns:
     - id:
       :source: _id
       :type: TEXT
-    - delivery_id:
-      :source: delivery_id
+    - amazon:
+      :source: amazon
       :type: TEXT
-    - user_id:
-      :source: user_id
+    - slack_id: 
+      :source: slack_id
       :type: TEXT
-    - waypoint:
-      :source: waypoint
+    - items:
+      :source: items 
+      :type: TEXT ARRAY
+    - purchased:
+      :source: purchased
+      :type: BOOLEAN
+    - deleted:
+      :source: deleted
+      :type: BOOLEAN
+    - created_date: 
+      :source: created_date
       :type: TEXT
-    - data:
-      :source: data
+    - purchased_date: 
+      :source: purchased_date
       :type: TEXT
-    - timestamp:
-      :source: timestamp
+    - type: 
+      :source: type 
+      :type: TEXT
+    - link:
+      :source: link
       :type: TEXT
     :meta:
-      :table: waypoints
+      :table: carts
       :extra_props: true
+
+
+# foundry:
+#   chatusers:
+#     :columns:
+#     - id:
+#       :source: _id
+#       :type: TEXT
+#     - user_id:
+#       :source: id
+#       :type: TEXT
+#     - platform:
+#       :source: platform
+#       :type: TEXT
+#     - onboarded:
+#       :source: onboarded
+#       :type: BOOLEAN
+#     - admin_shop_onboarded:
+#       :source: admin_shop_onboarded
+#       :type: BOOLEAN
+#     - member_shop_onboarded:
+#       :source:  member_shop_onboarded
+#       :type: BOOLEAN
+#     - ts: 
+#       :source: ts
+#       :type: TEXT
+#     - origin:
+#       :source: origin
+#       :type: TEXT
+#     - type:
+#       :source: type
+#       :type: TEXT
+#     - dm:
+#       :source: dm
+#       :type: TEXT
+#     - team_id:
+#       :source: team_id
+#       :type: TEXT
+#     - name:
+#       :source: name
+#       :type: TEXT
+#     - deleted:
+#       :source: deleted
+#       :type: BOOLEAN
+#     - color:
+#       :source: color
+#       :type: TEXT
+#     - real_name:
+#       :source: real_name
+#       :type: TEXT
+#     - tz:
+#       :source: tz
+#       :type: TEXT
+#     - tz_label:
+#       :source: tz_label
+#       :type: TEXT
+#     - tz_offset:
+#       :source: tz_offset
+#       :type: TEXT
+#     - country:
+#       :source: country
+#       :type: TEXT
+#     - is_admin:
+#       :source: is_admin
+#       :type: BOOLEAN
+#     - is_owner: 
+#       :source: is_owner
+#       :type: BOOLEAN
+#     - is_primary_owner:
+#       :source: is_primary_owner
+#       :type: BOOLEAN
+#     - is_restricted:
+#       :source: is_restricted
+#       :type: BOOLEAN
+#     - is_ultra_restricted:
+#       :source: is_ultra_restricted
+#       :type: BOOLEAN
+#     - is_bot:
+#       :source: is_bot
+#       :type: BOOLEAN
+#     - has_2fa:
+#       :source: has_2fa
+#       :type: BOOLEAN
+#     - last_call_alerts:
+#       :source: settings.last_call_alerts
+#       :type: BOOLEAN
+#     - emailNotification:
+#       :source: settings.emailNotification
+#       :type: BOOLEAN
+#     - awaiting_email_response:
+#       :source: settings.awaiting_email_response
+#       :type: BOOLEAN
+#     - phone_number: 
+#       :source: phone_number
+#       :type: TEXT
+#     - first_name: 
+#       :source: first_name
+#       :type: TEXT
+#     - last_name: 
+#       :source: last_name
+#       :type: TEXT
+#     :meta:
+#       :table: chatusers
+#       :extra_props: true
+
+
+
+# foundry:
+#   waypoints:
+#     :columns:
+#     - id:
+#       :source: _id
+#       :type: TEXT
+#     - delivery_id:
+#       :source: delivery_id
+#       :type: TEXT
+#     - user_id:
+#       :source: user_id
+#       :type: TEXT
+#     - waypoint:
+#       :source: waypoint
+#       :type: TEXT
+#     - data:
+#       :source: data
+#       :type: TEXT
+#     - timestamp:
+#       :source: timestamp
+#       :type: TEXT
+#     :meta:
+#       :table: waypoints
+#       :extra_props: true
 
 
 # foundry:
@@ -156,105 +299,7 @@ foundry:
 
 
 
-# foundry:
-#   chatusers:
-#     :columns:
-#     - id:
-#       :source: _id
-#       :type: TEXT
-#     - platform:
-#       :source: platform
-#       :type: TEXT
-#     - onboarded:
-#       :source: onboarded
-#       :type: BOOLEAN
-#     - admin_shop_onboarded:
-#       :source: admin_shop_onboarded
-#       :type: BOOLEAN
-#     - member_shop_onboarded:
-#       :source:  member_shop_onboarded
-#       :type: BOOLEAN
-#     - ts: 
-#       :source: ts
-#       :type: TEXT
-#     - origin:
-#       :source: origin
-#       :type: TEXT
-#     - type:
-#       :source: type
-#       :type: TEXT
-#     - dm:
-#       :source: dm
-#       :type: TEXT
-#     - team_id:
-#       :source: team_id
-#       :type: TEXT
-#     - name:
-#       :source: name
-#       :type: TEXT
-#     - deleted:
-#       :source: deleted
-#       :type: BOOLEAN
-#     - color:
-#       :source: color
-#       :type: TEXT
-#     - real_name:
-#       :source: real_name
-#       :type: TEXT
-#     - tz:
-#       :source: tz
-#       :type: TEXT
-#     - tz_label:
-#       :source: tz_label
-#       :type: TEXT
-#     - tz_offset:
-#       :source: tz_offset
-#       :type: TEXT
-#     - country:
-#       :source: country
-#       :type: TEXT
-#     - is_admin:
-#       :source: is_admin
-#       :type: BOOLEAN
-#     - is_owner: 
-#       :source: is_owner
-#       :type: BOOLEAN
-#     - is_primary_owner:
-#       :source: is_primary_owner
-#       :type: BOOLEAN
-#     - is_restricted:
-#       :source: is_restricted
-#       :type: BOOLEAN
-#     - is_ultra_restricted:
-#       :source: is_ultra_restricted
-#       :type: BOOLEAN
-#     - is_bot:
-#       :source: is_bot
-#       :type: BOOLEAN
-#     - has_2fa:
-#       :source: has_2fa
-#       :type: BOOLEAN
-#     - last_call_alerts:
-#       :source: settings.last_call_alerts
-#       :type: BOOLEAN
-#     - emailNotification:
-#       :source: settings.emailNotification
-#       :type: BOOLEAN
-#     - awaiting_email_response:
-#       :source: settings.awaiting_email_response
-#       :type: BOOLEAN
-#     - phone_number: 
-#       :source: phone_number
-#       :type: TEXT
-#     - first_name: 
-#       :source: first_name
-#       :type: TEXT
-#     - last_name: 
-#       :source: last_name
-#       :type: TEXT
-#     :meta:
-#       :table: chatusers
-#       :extra_props: true
+
 
 
 # foundry:
@@ -493,41 +538,7 @@ foundry:
 #     :meta:
 #       :table: delivery
 #       :extra_props: true
- #  carts: 
- #    :columns:
- #    - id:
- #      :source: _id
- #      :type: TEXT
- #    - amazon:
- #      :source: amazon
- #      :type: TEXT
- #    - slack_id: 
- #      :source: slack_id
- #      :type: TEXT
- #    - items:
- #      :source: items 
- #      :type: TEXT ARRAY
- #    - purchased:
- #      :source: purchased
- #      :type: BOOLEAN
- #    - deleted:
- #      :source: deleted
- #      :type: BOOLEAN
- #    - created_date: 
- #      :source: created_date
- #      :type: TEXT
- #    - purchased_date: 
- #      :source: purchased_date
- #      :type: DATE
- #    - type: 
- #      :source: type 
- #      :type: TEXT
- #    - link:
- #      :source: link
- #      :type: TEXT
- #    :meta:
- #      :table: carts
- #      :extra_props: true
+ 
  # metrics:
  #    :columns:
  #    - id:

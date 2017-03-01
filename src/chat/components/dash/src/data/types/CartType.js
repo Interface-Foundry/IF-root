@@ -4,10 +4,15 @@ import {
   GraphQLString as StringType,
   GraphQLNonNull as NonNull,
   GraphQLScalarType as GraphQLScalarType,
-  GraphQLList as ListType
+  GraphQLList as ListType,
+  GraphQLInt as IntType
 } from 'graphql';
+import JSONType from './JSONType';
+import ItemType from './ItemType';
+import SlackbotType from './SlackbotType';
+import Cart from '../models/Cart';
+import {resolver} from 'graphql-sequelize';
 
-import ItemType from './ItemType'
 
 const CartType = new ObjectType({
   name: 'Cart',
@@ -62,13 +67,50 @@ const CartType = new ObjectType({
            return cart.type
           }
         },
-
         link: {
           type: StringType,
           resolve(cart) {
            return cart.link
           }
         },
+        amazon: {
+          type: JSONType,
+          resolve(cart) {
+           return cart.amazon
+          }
+        },
+        team: {
+          type: SlackbotType,
+          resolve: resolver(Cart.Team)
+        },
+        full_items: {
+          type: new ListType(ItemType),
+          args: {
+            limit: {
+              type: IntType
+            },
+            offset: {
+              type: IntType
+            },
+            order: {
+              type: StringType
+            },
+            first: {
+              type: IntType
+            }
+          }, resolve: resolver(Cart.Items, {
+            before: function (options, args) {
+              if (args.first) {
+                options.order = options.order || [];
+                options.order.push(['added_date', 'DESC']);
+                if (args.first !== 0) {
+                  options.limit = args.first;
+                }
+              }
+              return options;
+            }
+        })
+       },
     }
   },
 });

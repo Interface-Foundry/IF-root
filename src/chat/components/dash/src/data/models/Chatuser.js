@@ -8,6 +8,10 @@ const Chatuser = Conn.define('chatuser', {
     primaryKey: true,
   },
 
+  user_id: {
+    type: DataType.STRING(255)
+  },
+
   platform: {
     type: DataType.STRING(255)
   },

@@ -18,6 +18,13 @@ const ChatuserType = new ObjectType({
         }
       },
 
+      user_id: { 
+        type: StringType,
+        resolve(chatuser) {
+          return chatuser.user_id
+        }
+      },
+
       platform: {
         type: StringType,
         resolve(chatuser) {

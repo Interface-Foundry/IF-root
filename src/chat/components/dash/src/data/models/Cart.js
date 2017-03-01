@@ -1,13 +1,18 @@
 import DataType from 'sequelize';
 import Conn from '../sequelize';
+import Item from './Item';
+import Slackbot from './Slackbot';
+
 
 const Cart = Conn.define('cart', {
   id: {
-    type: DataType.STRING(255)
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV1,
+    primaryKey: true,
   },
 
   slack_id: {
-     type: DataType.UUID,
+    type: DataType.UUID,
     defaultValue: DataType.UUIDV1,
     primaryKey: true,
   },
@@ -29,7 +34,7 @@ const Cart = Conn.define('cart', {
   },
 
   purchased_date: {
-    type: DataType.DATE()
+    type: DataType.STRING(255)
   },
 
   type: {
@@ -39,12 +44,19 @@ const Cart = Conn.define('cart', {
   link: {
     type: DataType.STRING(255)
   },
-  
+
+  amazon: {
+    type: DataType.JSON()
+  }
+
 },{
     timestamps: false
 });
 
-// Cart.hasMany(Item);
-// Item.belongsTo(Cart);
+
+Cart.Items = Cart.hasMany(Item, { as: 'full_items', foreignKey: 'cart_id'});
+Item.Cart = Item.belongsTo(Cart, { as: 'item', foreignKey: 'cart_id'});
+
+
 
 export default Cart;
