@@ -8,7 +8,7 @@ require('./jobs/initial_reminder')(agenda);
 require('./jobs/home_button')(agenda);
 require('./jobs/clear_response_url')(agenda);
 require('./jobs/mockUserMessage')(agenda);
-require('./jobs/voting_stalled_reminder')(agenda);
+require('./jobs/checkout_prompt')(agenda);
 
 agenda.on('ready', function () {
 	agenda.cancel({name: 'send cart status email'}, function(err, numRemoved) {

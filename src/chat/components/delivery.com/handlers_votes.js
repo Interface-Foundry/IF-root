@@ -229,70 +229,11 @@ handlers['food.admin.poll'] = function * (message) {
   sendAdminDashboard(foodSession)
 }
 
-var setReminder = function (foodSession, message) {
-  // schedule reminder here to finish voting early in 20 minutes
-  logging.debug('set reminder called')
-
-  // cancel any pending
-  agenda.cancel({
-    name: 'voting stalled reminder',
-    'data.user': foodSession.convo_initiater.id
-  }, function (e, numRemoved) {
-    if (e) logging.error(e)
-  })
-
-  var late = _.difference(foodSession.team_members.map(m => m.id), foodSession.votes.map(v => v.user))
-  if (late.length) {
-    console.log('gonna set a new reminder')
-    late = late.map(m => `<@${m}>`)
-    var plural = late.length > 1
-    if (plural) late[late.length-1] = 'and ' + late[late.length-1]
-    if (late.length > 2) late = late.join(', ')
-    else late = late.join(' ')
-    console.log('late', late)
-
-    var finishEarlyMessage = {
-      thread_id: foodSession.convo_initiater.dm,
-      incoming: false,
-      user_id: foodSession.convo_initiater.id,
-      origin: message.origin,
-      source: message.source,
-      mode: 'food',
-      action: 'admin.restaurant.pick.list',
-      attachments: [{
-        color: '#fc9600',
-        text: `${late} ${(plural ? 'aren\'t' : 'isn\'t')} responding. Do you want to continue with your order?`,
-        mrkdwn_in: ['text'],
-        callback_id: 'admin.restaurant.pick.list',
-        fallback: 'Continue your order',
-        actions: [{
-          name: 'passthrough',
-          type: 'button',
-          text: 'Finish Voting',
-          value: 'food.admin.restaurant.pick.list'
-        }, {
-          name: 'passthrough',
-          type: 'button',
-          text: '↺ Restart Order',
-          value: 'food.begin'
-        }]
-      }]
-    }
-
-    agenda.schedule('2 minutes from now', 'voting stalled reminder', {
-      user: foodSession.convo_initiater.id,
-      msg: JSON.stringify(finishEarlyMessage)
-    })
-  }
-}
-
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
   logging.debug('in food.user.poll')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1120, foodSession._id, message.user_id, {original_text: message.original_text})
-
-  setReminder(foodSession, message)
 
   var teamMembers = foodSession.team_members
   console.log('found', teamMembers.length, 'team members')
@@ -453,8 +394,6 @@ handlers['food.vote.submit'] = function * (message) {
     }
 
     foodSession.votes.push(vote)
-
-    setReminder(foodSession, message)
 
     foodSession.markModified('votes')
     return foodSession.save()
@@ -922,7 +861,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       console.log('winning user', vote.user)
       // var winning_user = yield db.chatuser.findOne({id: vote.user})
 
-      var explanationText = `<@${vote.user}>ss hasn't had much of a say lately, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
+      var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
     }
   }
 

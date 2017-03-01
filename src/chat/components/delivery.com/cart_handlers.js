@@ -6,6 +6,7 @@ var Menu = require('./Menu')
 var api = require('./api-wrapper')
 var coupon = require('../../../coupon/couponUsing.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
+var agenda = require('../agendas')
 
 var createAttachmentsForAdminCheckout = require('./generateAdminCheckout.js').createAttachmentsForAdminCheckout
 
@@ -36,6 +37,62 @@ restartButton.confirm = {
   dismiss_text: 'No'
 }
 
+var promptCheckout = function (foodSession, message) {
+  // schedule reminder here to finish voting early in 20 minutes
+  logging.debug('set reminder called')
+
+  // cancel any pending
+  agenda.cancel({
+    name: 'checkout prompt',
+    'data.user': foodSession.convo_initiater.id
+  }, function (e, numRemoved) {
+    if (e) logging.error(e)
+  })
+
+  // var late = _.difference(foodSession.team_members.map(m => m.id), foodSession.votes.map(v => v.user))
+  // if (late.length) {
+  //   console.log('gonna set a new reminder')
+  //   late = late.map(m => `<@${m}>`)
+  //   var plural = late.length > 1
+  //   if (plural) late[late.length-1] = 'and ' + late[late.length-1]
+  //   if (late.length > 2) late = late.join(', ')
+  //   else late = late.join(' ')
+  //   console.log('late', late)
+
+    var finishEarlyMessage = {
+      thread_id: foodSession.convo_initiater.dm,
+      incoming: false,
+      user_id: foodSession.convo_initiater.id,
+      origin: message.origin,
+      source: message.source,
+      mode: 'food',
+      action: 'admin.restaurant.pick.list',
+      attachments: [{
+        color: '#fc9600',
+        text: 'This is filler text',
+        // text: `${late} ${(plural ? 'aren\'t' : 'isn\'t')} responding. Do you want to continue with your order?`,
+        mrkdwn_in: ['text'],
+        callback_id: 'admin.restaurant.pick.list',
+        fallback: 'Continue your order',
+        actions: [{
+          name: 'passthrough',
+          type: 'button',
+          text: 'Finish Voting',
+          value: 'food.admin.restaurant.pick.list'
+        }, {
+          name: 'passthrough',
+          type: 'button',
+          text: '↺ Restart Order',
+          value: 'food.begin'
+        }]
+      }]
+    }
+
+    agenda.schedule('10 seconds from now', 'checkout prompt', {
+      user: foodSession.convo_initiater.id,
+      msg: JSON.stringify(finishEarlyMessage)
+    })
+  }
 //
 // Show the user their personal cart
 //
@@ -226,7 +283,6 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 }
 
 handlers['food.cart.update_dashboards'] = function * (message) {
-  console.log('you can have the whole world or be satisfied with the boulevard')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   logging.debug('duplicated?', foodSession.cart.length) //yes is duplicated here
   return yield sendOrderProgressDashboards(foodSession, message)
@@ -237,6 +293,8 @@ handlers['food.cart.update_dashboards'] = function * (message) {
 //
 function * sendOrderProgressDashboards (foodSession, message) {
   logging.debug('sending order progress dashboards')
+
+  promptCheckout(foodSession, message)
 
   // we'll have to send the dashboard to the admin even if they are not hungry
   const adminIsNotHungry = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0

@@ -1,7 +1,7 @@
 var queue = require('../queue-direct');
 module.exports = function(agenda) {
-  agenda.define('voting stalled reminder', function(job, done) {
-    logging.debug('running onboarding reminder')
+  agenda.define('checkout prompt', function(job, done) {
+    logging.debug('running checkout prompt')
     let message = JSON.parse(job.attrs.data.msg);
     logging.debug(message)
     let newMessage = new db.Message(message);
