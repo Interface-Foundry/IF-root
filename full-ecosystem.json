@@ -1,0 +1,20 @@
+{
+  "apps": [{
+    "name": "picstitch-shopping",
+    "cwd": "src/image_processing",
+    "interpreter": "venv/bin/python",
+    "script": "server.py",
+    "combine_logs": true
+  }, {
+    "name": "picstitch-cafe",
+    "cwd": "src/image_processing",
+    "interpreter": "venv/bin/python",
+    "script": "server_delivery.py",
+    "combine_logs": true
+  }, {
+    "name": "slack",
+    "cwd": "src/chat/components/slack",
+    "script": "slack.js",
+    "combine_logs": true
+  }]
+}
