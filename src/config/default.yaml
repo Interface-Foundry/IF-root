@@ -2,7 +2,7 @@ env: default
 isProduction: false
 preferences:
   asking: true
-  suggestions: false
+  suggestions: true
   model: training
   users:
   - U02PN3T5R

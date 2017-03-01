@@ -26,6 +26,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   var previouslyOrderedItemIds = []
   var recommendedItemIds = []
+  var preferencesItems = []
+  var matchingItems = []
 
   // paging
   var index = parseInt(_.get(message, 'data.value.index')) || 0
@@ -38,7 +40,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   if (keyword) {
     // search for item if not presented but they type somethin
     logging.info('searching for', keyword.cyan)
-    var matchingItems = yield utils.matchText(keyword, sortedMenu, {
+    matchingItems = yield utils.matchText(keyword, sortedMenu, {
       shouldSort: true,
       location: 0,
       distance: 0,
@@ -53,12 +55,10 @@ handlers['food.menu.quickpicks'] = function * (message) {
       logging.info('todo send "couldnot find anything matching text" message to user')
       matchingItems = []
     }
-  } else {
-    matchingItems = []
+    matchingItems = matchingItems.map(i => i.id)
   }
-  matchingItems = matchingItems.map(i => i.id)
 
-  var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
+  previouslyOrderedItemIds = _.get(user, 'history.orders', [])
     .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
     .reduce((allIds, order) => {
       allIds.push(order.deliveryItem.id)
@@ -86,10 +86,12 @@ handlers['food.menu.quickpicks'] = function * (message) {
 
   // create preferences via random suggestions
 
-  // var preferencesItems = []
-  // if (kip.config.preferences.suggestions) {
-  //   preferencesItems = preferences.createPreferences(user, menu.allItems(), 2)
-  // }
+  if (kip.config.preferences.suggestions && (kip.config.preferences.users.includes(message.user_id))) {
+    // returns array of unique_ids to suggest to user
+    preferencesItems = yield preferences.createPreferences(user, sortedMenu, 1, 'cafe_suggestions', true)
+    preferencesItems = preferencesItems.map(i => i.unique_id)
+    logging.debug('random preferences.length~: ', preferencesItems)
+  }
 
   /*
   not really any good way to order items atm so just going to throw
@@ -110,15 +112,15 @@ handlers['food.menu.quickpicks'] = function * (message) {
       // i.infoLine = 'Popular Item'
     } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
       i.sortOrder = sortOrder.last
-    // } else if (preferencesItems.includes(Number(i.unique_id))) {
-    //   i.sortOrder = sortOrder.preferences
+    } else if (preferencesItems.includes(Number(i.unique_id))) {
+      i.sortOrder = sortOrder.preferences
+      i.infoLine = '*_This is a suggested item_*'
     } else {
       i.sortOrder = sortOrder.none
     }
 
     return i
   }).sort((a, b) => b.sortOrder - a.sortOrder)
-
 
   // ~~~~~
   // move items that do not meet the user's current budget to after those that
@@ -131,11 +133,10 @@ handlers['food.menu.quickpicks'] = function * (message) {
       if (a.price > current_ub && b.price < current_ub) return true
       else return false
       // but otherwise maintain already-sorted order
-    });
+    })
   }
 
   var menuItems = sortedMenu.slice(index, index + 3).reverse().map(i => {
-
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
