@@ -39,7 +39,7 @@ restartButton.confirm = {
 
 var promptCheckout = function (foodSession, message, waitingText) {
   // schedule reminder here to finish voting early in 20 minutes
-  logging.debug('set reminder called')
+  logging.debug('prompt checkout called')
 
   // cancel any pending
   agenda.cancel({
@@ -74,7 +74,7 @@ var promptCheckout = function (foodSession, message, waitingText) {
       }
     }
 
-    agenda.schedule('10 seconds from now', 'checkout prompt', {
+    agenda.schedule('20 minutes from now', 'checkout prompt', {
       user: foodSession.convo_initiater.id,
       msg: JSON.stringify(finishEarlyMessage)
     })
