@@ -634,8 +634,18 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.order.confirm'] = function * (message, foodSession) {
-  // show admin final confirm of thing
+
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+
+  // cancel any pending reminders
+  agenda.cancel({
+    name: 'checkout prompt',
+    'data.user': foodSession.convo_initiater.id
+  }, function (e, numRemoved) {
+    if (e) logging.error(e)
+  })
+
+  // show admin final confirm of thing
   logging.debug('foodSession.cart.length', foodSession.cart.length) // duplication has happened OH GOD IT'S JOHN CARPENTER'S "Thing"
   teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
   lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
