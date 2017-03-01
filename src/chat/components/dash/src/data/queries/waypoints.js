@@ -14,9 +14,6 @@ const waypoints = {
   type: WaypointListType,
   args: defaultArgs(Waypoint),
   resolve: resolver(Waypoint)
-  // resolve (root, args) {
-  //  return Conn.models.cart.findAll({ limit: 1000, order: [['created_date', 'DESC']]})
-  // }
 }
 
 export default waypoints;

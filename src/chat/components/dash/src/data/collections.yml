@@ -18,7 +18,7 @@ foundry:
       :type: TEXT
     - timestamp:
       :source: timestamp
-      :type: DATE
+      :type: TEXT
     :meta:
       :table: waypoints
       :extra_props: true

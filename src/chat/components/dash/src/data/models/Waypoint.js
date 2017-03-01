@@ -33,9 +33,11 @@ const Waypoint = Conn.define('waypoint', {
     type: DataType.STRING(255)
   }
 
-},{
+}
+,{
     timestamps: false
-});
+}
+);
 
 Waypoint.Delivery = Waypoint.hasOne(Delivery, { as: 'food_session', foreignKey: 'id'});
 Delivery.Waypoint = Delivery.belongsTo(Waypoint, { as: 'team', foreignKey: 'id'});

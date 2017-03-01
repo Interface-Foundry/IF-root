@@ -14,9 +14,7 @@ const MetricListType = new ListType(MetricType);
 const metrics = {  
   type: MetricListType,
   args: defaultArgs(Metric),
-  resolve (root, args) {
-   return Conn.models.metric.findAll({ limit: 1000, order: [['timestamp', 'DESC']]})
-  }
+  resolve: resolver(Metric)
 }
 
 export default metrics;

@@ -13,9 +13,7 @@ const ItemListType = new ListType(ItemType);
 const items = {  
   type: ItemListType,
   args: defaultArgs(Item),
-  resolve (root, args) {
-   return Conn.models.item.findAll({ limit: 10000, order: [['added_date', 'DESC']]})
-  }
+  resolve: resolver(Item)
 }
 
 export default items;

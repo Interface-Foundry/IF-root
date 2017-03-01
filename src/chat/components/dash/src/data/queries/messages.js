@@ -14,9 +14,7 @@ const MessageListType = new ListType(MessageType);
 const messages = {  
   type: MessageListType,
   args: defaultArgs(Message),
-  resolve (root, args) {
-   return Conn.models.message.findAll({ limit: 10000, order: [['ts', 'DESC']]})
-  }
+  resolve: resolver(Message)
 }
 
 export default messages;

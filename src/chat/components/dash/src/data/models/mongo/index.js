@@ -2,20 +2,20 @@ var promisify = require('promisify-node')
 var mongoose = promisify(require('mongoose'))
 mongoose.Promise = global.Promise
 var ensureIndexes = require('mongoose-hook-ensure-indexes')
+var config = require('../config')
 var natural = require('natural')
 var nounInflector = new natural.NounInflector()
 var fs = require('fs')
-import {getSchema} from '@risingstack/graffiti-mongoose';
-
+require('../logging')
 
 if (mongoose.connection.readyState == 0) {
-  mongoose.connect('mongodb://localhost:27017/foundry')
+  mongoose.connect(config.mongodb.url)
   var db_conn = mongoose.connection
   db_conn.on('error', function (err) {
     kip.error(err)
   })
   db_conn.on('open', function () {
-    console.log('connected to mongodb', 'mongodb://localhost:27017/foundry')
+    logging.info('connected to mongodb', config.mongodb.url)
   })
 }
 
@@ -37,7 +37,7 @@ module.exports = {
 files.map(function (f) {
   if (!f.match('_schema.js')) return
 
- console.log('loading'.gray, f.gray)
+  logging.info('loading'.gray, f.gray)
 
   try {
     var model = require('./' + f)

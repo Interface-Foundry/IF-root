@@ -7,6 +7,7 @@ import {
   GraphQLList as ListType,
   GraphQLInt
 } from 'graphql';
+import DateType from './DateType'
 import {resolver, defaultListArgs} from 'graphql-sequelize';
 import Waypoint from '../models/Waypoint';
 import DeliveryType from './DeliveryType';
@@ -52,7 +53,7 @@ const WaypointType = new ObjectType({
       },
 
       timestamp: {
-        type:  StringType,
+        type:  DateType,
         resolve(waypoint) {
           return waypoint.timestamp
         }
@@ -66,7 +67,9 @@ const WaypointType = new ObjectType({
       food_session: {
         type: DeliveryType,
         args: {}, resolve: resolver(Waypoint.Delivery)
-      }
+      },
+
+
 
   }
  },

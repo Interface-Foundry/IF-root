@@ -15,10 +15,7 @@ const DeliveryListType = new ListType(DeliveryType);
 const deliveries = {  
   type: DeliveryListType,
   args: defaultArgs(Delivery),
-  resolve (root, args) {
-   return Conn.models.delivery.findAll({ where: args })
-   // limit: 1000, order: [['time_started', 'DESC']]
-  }
+  resolve: resolver(Delivery)
 }
 
 export default deliveries;
