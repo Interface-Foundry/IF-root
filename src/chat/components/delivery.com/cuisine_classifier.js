@@ -1,5 +1,6 @@
 var Fuse = require('fuse.js')
 var cuisines = require('./cuisine_classifier.json')
+var _ = require('lodash')
 
 cuisines = Object.keys(cuisines).map(function (name) {
   return {
@@ -8,12 +9,21 @@ cuisines = Object.keys(cuisines).map(function (name) {
   }
 })
 
+// gets all possible values into an array, flatten and then just get the unique
+var cuisineTypes = _.uniq(_.flatten(_.values(
+  cuisines.map(c => c.possibleValues)).map(i => _.keys(i))
+))
+
 function cuisineClassifier (text, otherCuisines) {
   var baseOptions = {
     shouldSort: true,
     threshold: 0.3,
     distance: 3,
     keys: ['name']
+  }
+
+  if (cuisineTypes.map(c => c.toLowerCase()).includes(text.toLowerCase())) {
+    return cuisineTypes[cuisineTypes.map(c => c.toLowerCase()).findIndex(w => w === text.toLowerCase())]
   }
 
   var fuse = new Fuse(cuisines, baseOptions)

@@ -13,33 +13,13 @@ var amazonHTML = require('./amazonHTML')
 var async = require('async')
 var wait = require('co-wait')
 
-/*
-Affiliate tag:
-eileenog-20
-Access Key ID:
-AKIAIS2R5G6NPAMLEDNQ
-Secret Access Key:
-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
-Access Key ID:
-AKIAJWTPOWIOUPHJYG2Q
-Secret Access Key:
-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
-*/
-
 var aws_clients = {
-  AKIAJ7JWQNS2HH5UYNVQ: amazon.createClient({
-    awsId: 'AKIAJ7JWQNS2HH5UYNVQ',
-    awsSecret: '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',
-    awsTag: 'eileenog-20'
-  }),
-  AKIAJWTPOWIOUPHJYG2Q: amazon.createClient({
-    awsId: 'AKIAJWTPOWIOUPHJYG2Q',
-    awsSecret: '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',
-    awsTag: 'eileenog-20'
-  })
+    [kip.config.amazon[0].awsId]: amazon.createClient(kip.config.amazon[0]),
+    [kip.config.amazon[1].awsId]: amazon.createClient(kip.config.amazon[1]),
 }
 
-var DEFAULT_CLIENT = 'AKIAJ7JWQNS2HH5UYNVQ'
+var DEFAULT_CLIENT = kip.config.amazon[0].awsId
+
 
 var aws_client_id_list = Object.keys(aws_clients)
 
