@@ -63,20 +63,33 @@ function Home(props, context) {
           <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts </span>}>
       	<CartTable 
           query={'{teams{team_name, carts {purchased_date,items,purchased}}}'}
-          heads={['Purchased Date', 'Slack ID', 'Number of Items']}
-          colorBy={1}
+          heads = {
+            [{
+              field: 'purchased_date',
+              descrip: 'Purchased Date'
+            }, {
+              field: 'team_name',
+              descrip: 'Slack ID'
+            }, {
+              field: 'items',
+              descrip: 'Number of Items'
+            }]
+          }
           process = {
             (teams, team) => 
             teams.concat(
               team.carts.reduce((carts, cart) => {
                 if (cart.purchased.toLowerCase() == 'true') {
-                  carts.push([(new Date(cart.purchased_date)).toLocaleString(), team.team_name, cart.items.split(',').length])
+                  carts.push({
+                    team_name: team.team_name,
+                    purchased_date: (new Date(cart.purchased_date)).toLocaleString(),
+                    items: cart.items.split(',').length
+                  })
                 }
                 return carts;
               }, [])
             )
           }
-          sort={(a, b) => new Date(b[0]) - new Date(a[0])}
         />
       </Panel>
     </div>
