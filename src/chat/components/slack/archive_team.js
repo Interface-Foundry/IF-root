@@ -26,13 +26,18 @@ function * archiveTeam (team_id) {
     logging.debug('archiving all data...')
 
     // Archive all of them
+    try {
     yield [
       db.Archive.archive(team),
       Promise.all(users.map(u => db.Archive.archive(u))),
       Promise.all(deliveries.map(d => db.Archive.archive(d))),
       Promise.all(items.map(i => db.Archive.archive(i))),
-      Promise.all(carts.map(c => db.Archive.carts(c)))
+      Promise.all(carts.map(c => db.Archive.archive(c)))
     ]
+    } catch (e) {
+      logging.error('omfg wat the heck')
+      logging.error(e)
+    }
 
     logging.debug('done archiving all data')
   })
