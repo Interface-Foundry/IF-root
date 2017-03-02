@@ -1035,16 +1035,17 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   if (!sb.meta.order_frequency) sb.meta.order_frequency = {}
   if (sb.meta.order_frequency[merchant.id]) {
     console.log('does exist in the history')
-    var oldestDate = sb.meta.order_frequency[merchant.id].dates[0]
-    monthDifference = foodSession.time_started.getMonth() - oldestDate.getMonths()
+    var oldestDate = new Date(sb.meta.order_frequency[merchant.id].dates[0])
+    logging.info('oldest date:', oldestDate)
+    var monthDifference = foodSession.time_started.getMonth() - oldestDate.getMonth()
     //cut the restaurant out of the history if it's been there for more than 2 months
     if (monthDifference > 2 || monthDifference < 0 && monthDifference > -10) {
       console.log('outdated history being removed')
-      db.meta.order_frequency[merchant.id].dates.shift()
-      db.meta.order_frequency[merchant.id].count--
+      sb.meta.order_frequency[merchant.id].dates.shift()
+      sb.meta.order_frequency[merchant.id].count--
     }
-    db.meta.order_frequency[merchant.id].count++
-    db.meta.order_frequency[merchant.id].dates.push(foodSession.time_started)
+    sb.meta.order_frequency[merchant.id].count++
+    sb.meta.order_frequency[merchant.id].dates.push(foodSession.time_started)
   }
   else {
     console.log('does not exist in the history')

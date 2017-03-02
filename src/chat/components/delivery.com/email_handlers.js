@@ -62,7 +62,6 @@ handlers['food.admin.team.delete_email'] = function * (message) {
 
 handlers['food.admin.team.email_members'] = function * (message) {
   console.log('email handlers')
-  console.log(message.data.value.reorder)
   console.log('lodash', _.get(message, 'data.value.reorder'))
   var reorder = _.get(message, 'data.value.reorder') || message.history[1]._doc.action === 'admin.team.members.reorder'
   var previousRestaurant = _.get(message, 'data.value.resto')
