@@ -1015,10 +1015,12 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   var cuisines = merchant.summary.cuisines
   yield votes.map(function * (v) {
     var weight = (cuisines.indexOf(v.vote) > -1 ? -0.05 : 0.05)
-    // var user = yield db.chatusers.findOne({id: v.user})
+    var user = yield db.chatusers.findOne({id: v.user})
+    if (user.vote_weight + weight > 0) yield db.chatusers.update({id: v.user}, {$inc: {vote_weight: weight}}) // vote value cannot go to or below zero
+    else yield db.chatusers.updatae({id: v.user}, {$set: {vote_weight: 0.1}})
     // user.vote_weight += weight;
     // yield user.save()
-    yield db.chatusers.update({id: v.user}, {$inc: {vote_weight: weight}})
+    // yield db.chatusers.update({id: v.user}, {$inc: {vote_weight: weight}})
   })
 
   // stores the cuisines in the slackbot
