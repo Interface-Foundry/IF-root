@@ -820,21 +820,10 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
       foodSession.calculated_amount = 0.50 // stripe thing
     }
 
-    // // check for order over $510 (pre coupon) not processing over $510 (pre coupon)
-    // if (_.get(discountAvail, 'couponDiscount', 0) === 0.99 && foodSession.order.total > 510.00) {
-    //   $replyChannel.send(message, 'food.exit', {
-    //     type: message.origin,
-    //     data: {
-    //       'text': 'Eep this order size is too large for the 99% off coupon. Please contact hello@kipthis.com with questions'
-    //     }
-    //   })
-    //   return
-    // }
-
     yield foodSession.save()
 
     // THIS CREATES THE TIP, DELIVERY.COM COSTS, AND KIP ATTACHMENT
-    var attachmentsRelatedToMoney = createAttachmentsForAdminCheckout(foodSession, totalPrice)
+    var attachmentsRelatedToMoney = yield createAttachmentsForAdminCheckout(foodSession, totalPrice)
     response.attachments = [].concat(mainAttachment, itemAttachments, attachmentsRelatedToMoney)
 
   } else {

@@ -17,6 +17,7 @@ var utils = require('./utils');
 var cookieParser = require('cookie-parser')
 var uuid = require('uuid');
 var processData = require('../process');
+var archiveTeam = require('./archive_team')
 var sleep = require('co-sleep');
 // var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
 // var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
@@ -24,6 +25,7 @@ var request = require('request')
 var requestPromise = require('request-promise');
 // var init_team = require("../init_team.js");
 var app = express();
+
 
 app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded({extended:true}));
@@ -680,7 +682,7 @@ app.get('/authorize', function (req, res) {
 
 app.get('/newslack', (req, res) => co(function * () {
   logging.info('new slack integration request')
-
+  res.redirect('/thanks.html')
   if (!req.query.code) {
     logging.warn('no code in the callback url, cannot proceed with new slack integration')
     if (process.env.NODE_ENV === 'production') {
@@ -723,12 +725,20 @@ app.get('/newslack', (req, res) => co(function * () {
 
   if (_.get(existingTeam, 'team_id')) {
     logging.info('team exists previously while using /newslack')
-    _.merge(existingTeam, res_auth)
-    existingTeam.meta.deleted = false
-    yield existingTeam.save()
-    yield [utils.initializeTeam(existingTeam, res_auth), utils.getTeamMembers(existingTeam)]
-    yield slackModule.loadTeam(existingTeam)
-  } else {
+
+    // nuking team and strating over (see issue #820
+    try {
+      yield archiveTeam(existingTeam.team_id)
+      yield sleep(1000) // mongodb's index needs to clear the team_id, which apparently takes time
+    } catch (e) {
+      logging.error({
+        message: 'Error archiving team during Add to Slack button click',
+        error: e,
+      })
+    }
+  }
+
+    // create all the things
     logging.info('creating new slackbot for team: ', res_auth.team_id)
     var slackbot = new db.Slackbot(res_auth)
     yield slackbot.save()
@@ -755,8 +765,8 @@ app.get('/newslack', (req, res) => co(function * () {
     // queue it up for processing
     yield message.save()
     queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
-  }
-  res.redirect('/thanks.html')
+}).catch(e => {
+  logging.error(e)
 }))
 
 // k8s readiness ingress health check

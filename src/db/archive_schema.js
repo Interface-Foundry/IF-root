@@ -45,11 +45,12 @@ module.exports = mongoose.model('Archives', archivesSchema)
 // Archives a document in the database
 //
 module.exports.archive = function (document) {
-  if (!document._id || !document.collection || !document.toObject) {
-    throw new Error('cannot archive something that is not a database document')
-  }
-
   return co(function * () {
+    if (!document._id || !document.collection || !document.toObject) {
+      logging.error('cannot archive something that is not a database document')
+      return
+    }
+
     var obj = {
       original_collection: document.collection.name,
       original_id_str: document._id.toString(),
