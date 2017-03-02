@@ -23,8 +23,8 @@ function * getLabels (image) {
 
 /*
 *
-*
 */
+// NOTE - Doesnt seem to work atm, TypeError: formatMethodMap[type] is not a function
 function * getText (image) {
   var options = { verbose: true }
   var results = yield vision.detectText(image, options)
@@ -65,12 +65,5 @@ if (!module.parent) {
     // var i = yield visionImage(img, botToken)
     // var i = yield getText('./tmp_img/logos.png')
     // console.log(i)
-  })
-  var opts = {verbose: true}
-  vision.detectText('./tmp_img/wakeupcat.jpg', opts, function (err, detections) {
-    if (err) {
-      console.log('error')
-    }
-    console.log(detections)
   })
 }
