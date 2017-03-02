@@ -13,7 +13,6 @@ import {
   ListGroup, ListGroupItem, Alert
 } from 'react-bootstrap';
 import Table from '../../../components/Table';
-import CartTable from '../../../components/CartTable';
 import vagueTime from 'vague-time';
 import _ from 'lodash';
 import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
@@ -188,7 +187,7 @@ function displayFlotCharts(props, context) {
 
   var waypointPaths = getWaypointPaths(teamWaypoints);
   for (var i = 0; i < waypointPaths.length; i++) {
-    rows.push([waypointPaths[i].user_id, getWaypointActions(waypointPaths[i].waypoints), waypointPaths[i].waypoints.join('\u27A1')])
+    rows.push({user_id: waypointPaths[i].user_id, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
   }
 
   var cells = [];
@@ -207,9 +206,16 @@ function displayFlotCharts(props, context) {
       <div className="row">
         <div>
           <Panel header={<span>Table of Waypoint Routes</span>}>
-            <div className="table-responsive">
-              <Table heads={['User ID', 'Last Actions','FoodSession Waypoint Route']} data={rows} />
-            </div>
+            <Table heads={[{
+              field: 'user_id',
+              descrip: 'User ID'
+            }, {
+              field: 'actions',
+              descrip: 'Last Actions'
+            }, {
+              field: 'route',
+              descrip: 'FoodSession Waypoint Route'
+            }]} data={rows} />
           </Panel>
         </div>
       </div>

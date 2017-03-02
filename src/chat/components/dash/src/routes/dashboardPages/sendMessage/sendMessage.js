@@ -24,17 +24,23 @@ class SendMessage extends Component {
 
   async handleSubmit(e) {
     e.preventDefault();
-    this.setState({error:''})
-    const attachments = this.state.message ? encodeURIComponent(this.state.message): ''
+    this.setState({
+      error: ''
+    })
+    const attachments = this.state.message ? encodeURIComponent(this.state.message) : ''
     const res = await fetch(`https://slack.com/api/chat.postMessage?token=${this.props.token}&channel=${this.state.member}&attachments=${attachments}&text=${this.state.text}`, {
       method: 'post',
     })
     let json = await res.json();
     console.log(json);
-    if(!json.ok) {
-      this.setState({error: json.error});
+    if (!json.ok) {
+      this.setState({
+        error: json.error
+      });
     } else {
-      this.setState({sent: true})
+      this.setState({
+        sent: true
+      })
     }
   }
 
@@ -75,19 +81,16 @@ class SendMessage extends Component {
 
   render() {
     return (
-        <form onSubmit={this.handleSubmit}>
-        {
-        this.state.error ?
-        <div className="form-group">
-          <div className="alert alert-danger" role="alert">
-            Hmm looks like Slack didn't like that.
-            Error: {this.state.error}
-          </div> 
-        </div>:
-          ''
-      }
+      <form className="container-fluid data-display" onSubmit={this.handleSubmit}>
+        {this.state.error ? 
+          <div className="form-group"><div className="alert alert-danger" role="alert">
+              Hmm looks like Slack didn't like that.
+              Error: {this.state.error}
+          </div></div>
+        : ''}
           <div className="form-group">
             <label htmlFor="memberSelect">Select a member</label>
+            <span id="helpBlock" className="help-block">🤖=Bot, 😎=Admin, 🙂=Member, 🤠=Owner</span>
             <Select
               name="memberSelect"
               id="memberSelect"
@@ -97,7 +100,6 @@ class SendMessage extends Component {
               disabled={this.state.members.length===0}
               options={this.state.members}
             />
-            <span id="helpBlock" className="help-block">🤖=Bot, 😎=Admin, 🙂=Member, 🤠=Owner</span>
           </div>
           <div className="form-group">
             <label htmlFor="textInput">Text (optional)</label>
@@ -121,11 +123,12 @@ class SendMessage extends Component {
               onChange={e=>this.setState({message: e.target.value, sent: false})} 
               id="messageInput"/>
           </div>
-          {this.state.sent ?
-          <div className="form-group"><div className="alert alert-success" role="alert"><strong>Sent!</strong></div></div> : ''}
-          <button type="submit" className="btn btn-default">Submit</button>
-          
-      <link rel="stylesheet" href="https://unpkg.com/react-select/dist/react-select.css"/>
+        {this.state.sent ?
+        <div className="form-group">
+          <div className="alert alert-success" role="alert">
+            <strong>Sent!</strong>
+        </div></div> : ''}
+        <button type="submit" className="btn btn-default">Submit</button>
       </form>)
   }
 }
