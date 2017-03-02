@@ -16,6 +16,7 @@ import Table from '../../../components/Table';
 import CartTable from '../../../components/CartTable';
 import vagueTime from 'vague-time';
 import _ from 'lodash';
+import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
 
 const title = ' Team Stats';
 
@@ -113,48 +114,6 @@ const dayOfWeekStats = [ { dayString: 'Sunday', dayNumber: 1, total: 7932 },
   { dayString: 'Saturday', dayNumber: 7, total: 7219 } 
 ];
 
-/*
-const waypointPaths = [ { user_id: 'U3620AA5T',
-    delivery_id: '5893b7b089e0703570babd89',
-    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1320, 1330, 1332 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '5892659913ab2a227a1ea48a',
-    waypoints: [ 1010, 1020, 1100, 1102, 1110, 1102, 1001 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '5895047bb3074c3f909c96ce',
-    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '5894ee05bb800e3cb9503b73',
-    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1001 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '589399ab11fcfe31a66b05f9',
-    waypoints: [ 1010, 1020, 1100, 1102, 1120, 1001 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '58935f5e98bebb26266fa531',
-    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1210, 1210, 1001 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '58939c05d587703221ca6f03',
-    waypoints: [ 1010, 1020, 1100, 1102, 1120, 1001 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '5894e1f7f03d1a3ae913db08',
-    waypoints: [ 1010, 1020, 1100, 1101, 1210, 1220, 1230, 1300, 1001 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '58926f4d93284623848a4ddd',
-    waypoints: [ 1010, 1020, 1100, 1101, 1110, 1101, 1110, 1111, 1101, 1210, 1210, 1001 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '58811857501827a9cf0b8507',
-    waypoints: [ 1010, 1020, 1100, 1101, 1110, 1111, 1111, 1001 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '5887d7100e4f9e65a4a9002c',
-    waypoints: [ 1010, 1020, 1100, 1102, 1110, 1120, 1121, 1140, 1200, 1210, 1001 ] },
-  { user_id: 'U3620AA5T',
-    delivery_id: '58926618c5802e22c0aa41de',
-    waypoints: [ 1010, 1020, 1100, 1102, 1110, 1102, 1001 ] }
-];
-*/
-
-
-
 function getWaypointPaths(waypoints){
 
   var userWaypoints = _.groupBy(waypoints,function(waypoint){
@@ -208,7 +167,15 @@ const ordersData = [
   ]
 ];
  
+function getWaypointActions(waypoints){
+ 
+  var lastWaypoints = waypoints.slice(-3).map((waypoint) => Number(waypoint));
+  var lastActions = lastWaypoints.map((waypoint) => cafe_waypoints[waypoint]).join('\u27A1');
 
+  //console.log(cafe_waypoints);
+
+  return lastActions;
+}
 
 function displayFlotCharts(props, context) {
   context.setTitle(title);
@@ -222,7 +189,7 @@ function displayFlotCharts(props, context) {
 
   var waypointPaths = getWaypointPaths(teamWaypoints);
   for (var i = 0; i < waypointPaths.length; i++) {
-    rows.push([waypointPaths[i].user_id, waypointPaths[i].delivery_id, waypointPaths[i].waypoints.join('\u27A1')])
+    rows.push([waypointPaths[i].user_id, waypointPaths[i].delivery_id, waypointPaths[i].waypoints.join('\u27A1'), getWaypointActions(waypointPaths[i].waypoints)])
   }
 
   var cells = [];
@@ -242,7 +209,7 @@ function displayFlotCharts(props, context) {
         <div>
           <Panel header={<span>Table of Waypoint Routes</span>}>
             <div className="table-responsive">
-              <Table heads={['User ID','Delivery ID','FoodSession Waypoint Route']} data={rows} />
+              <Table heads={['User ID','Delivery ID','FoodSession Waypoint Route', 'Last Actions']} data={rows} />
             </div>
           </Panel>
         </div>
