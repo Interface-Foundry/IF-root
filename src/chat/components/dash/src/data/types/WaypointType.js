@@ -64,10 +64,10 @@ const WaypointType = new ObjectType({
         resolve: resolver(Waypoint.User)
       },
 
-      food_session: {
-        type: DeliveryType,
-        args: {}, resolve: resolver(Waypoint.Delivery)
-      },
+      // food_session: {
+      //   type: DeliveryType,
+      //   args: {}, resolve: resolver(Waypoint.Delivery)
+      // },
 
 
 

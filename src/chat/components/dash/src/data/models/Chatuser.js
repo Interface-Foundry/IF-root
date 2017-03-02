@@ -1,5 +1,6 @@
 import DataType from 'sequelize';
 import Conn from '../sequelize';
+// import Waypoint from './Waypoint';
 
 const Chatuser = Conn.define('chatuser', {
   id: {
@@ -9,7 +10,8 @@ const Chatuser = Conn.define('chatuser', {
   },
 
   user_id: {
-    type: DataType.STRING(255)
+    type: DataType.STRING(255),
+    primaryKey: true,
   },
 
   platform: {
@@ -135,5 +137,8 @@ const Chatuser = Conn.define('chatuser', {
 },{
     timestamps: false
 });
+
+// Chatuser.Waypoints = Chatuser.hasMany(Waypoint, { as: 'waypoints', foreignKey: 'user_id'});
+
 
 export default Chatuser;
