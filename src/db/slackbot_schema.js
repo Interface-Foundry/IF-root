@@ -7,6 +7,8 @@ var slackbotSchema = mongoose.Schema({
   //
   // stuff we get from slack
   //
+
+  /** access token NOT the same as the bot_access_token kip uses to talk */
   access_token: String,
   scope: String,
   team_name: String,
