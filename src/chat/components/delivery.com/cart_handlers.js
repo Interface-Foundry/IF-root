@@ -72,12 +72,12 @@ var promptCheckout = function (foodSession, message, waitingText) {
           }, restartButton]
         }]
       }
-    }
 
-    agenda.schedule('20 minutes from now', 'checkout prompt', {
-      user: foodSession.convo_initiater.id,
-      msg: JSON.stringify(finishEarlyMessage)
-    })
+      agenda.schedule('20 minutes from now', 'checkout prompt', {
+        user: foodSession.convo_initiater.id,
+        msg: JSON.stringify(finishEarlyMessage)
+      })
+    }
   }
 //
 // Show the user their personal cart
