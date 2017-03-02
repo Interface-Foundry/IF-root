@@ -693,6 +693,7 @@ function * sendAdminDashboard (foodSession, message, user) {
 //
 function * sendUserDashboard (foodSession, message, user) {
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
+  var user = yield db.chatusers.findOne({id: user.id})
   console.log('send user dashboard to', user.id, 'initiated by', foodSession.convo_initiater.id)
   if (user.id === foodSession.convo_initiater.id) {
     return yield sendAdminDashboard(foodSession, message, user)
@@ -860,22 +861,21 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.data('# of viable restaurants: ', viableRestaurants.length)
 
   if (foodSession.votes.length && sort === SORT.cuisine) {
-    var countWinner = score_utils.voteWinner(foodSession.votes)
-    var realWinner = score_utils.rankCuisines(foodSession.votes)[0]
+    var countWinner = score_utils.voteWinner(foodSession.votes) //the cuisine that would have won without vote-weighting
+    var realWinner = score_utils.rankCuisines(foodSession.votes)[0] //the cuisine that did win with vote-weighting
     console.log('countWinner', countWinner, '; realWinner', realWinner)
     if (countWinner && viableRestaurants[index].summary.cuisines.indexOf(countWinner) > -1) {
+      //kip chose the cuisine it would have chosen by simply counting votes, so no explanation is necessary
       var explanationText = 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?'
     }
     else {
-      var votes = foodSession.votes.filter(v => v.vote == realWinner)
+      var votes = foodSession.votes.filter(v => v.vote == realWinner) //votes for the winning cuisine
       var vote = votes.reduce(function (acc, val) {
         return (acc.weight > val.weight ? acc : val)
-      }, {weight: -100})
+      }, {weight: -100}) //user who voted for the winning cuisine the hardest
       console.log('winning vote', vote)
-      console.log('winning user', vote.user)
-      // var winning_user = yield db.chatuser.findOne({id: vote.user})
 
-      var explanationText = `<@${vote.user}>ss hasn't had much of a say lately, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
+      var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
     }
   }
 
@@ -1028,11 +1028,11 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   var votes = foodSession.votes
   var cuisines = merchant.summary.cuisines
   yield votes.map(function * (v) {
-    // console.log('MAPPING VOTES')
-    var weight = (cuisines.indexOf(v.vote) > -1 ? -0.02 : 0.02)
-    var user = yield db.chatusers.findOne({id: v.user})
-    user.vote_weight += weight;
-    yield user.save()
+    var weight = (cuisines.indexOf(v.vote) > -1 ? -0.05 : 0.05)
+    // var user = yield db.chatusers.findOne({id: v.user})
+    // user.vote_weight += weight;
+    // yield user.save()
+    yield db.chatusers.update({id: v.user}, {$inc: {vote_weight: weight}})
   })
 
   // stores the cuisines in the slackbot
