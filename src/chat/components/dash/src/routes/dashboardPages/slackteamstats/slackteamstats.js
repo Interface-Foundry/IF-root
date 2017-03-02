@@ -179,17 +179,16 @@ function getWaypointActions(waypoints){
 
 function displayFlotCharts(props, context) {
   context.setTitle(title);
+
   var rows = [];
-
   var waypoints = props.waypoints;
-
   var teamWaypoints = props.teamId ? waypoints.filter(function(waypoint){
       return waypoint.food_session ? waypoint.food_session.team_id == props.teamId : false;
   }) : waypoints;
 
   var waypointPaths = getWaypointPaths(teamWaypoints);
   for (var i = 0; i < waypointPaths.length; i++) {
-    rows.push([waypointPaths[i].user_id, waypointPaths[i].delivery_id, waypointPaths[i].waypoints.join('\u27A1'), getWaypointActions(waypointPaths[i].waypoints)])
+    rows.push([waypointPaths[i].user_id, getWaypointActions(waypointPaths[i].waypoints), waypointPaths[i].waypoints.join('\u27A1')])
   }
 
   var cells = [];
@@ -201,7 +200,7 @@ function displayFlotCharts(props, context) {
     <div>
       <div className="row">
         <div className="col-lg-12">
-          <PageHeader>Team Stats</PageHeader>
+          <PageHeader>{props.teamName} Stats</PageHeader>
         </div>
       </div>
 
@@ -209,7 +208,7 @@ function displayFlotCharts(props, context) {
         <div>
           <Panel header={<span>Table of Waypoint Routes</span>}>
             <div className="table-responsive">
-              <Table heads={['User ID','Delivery ID','FoodSession Waypoint Route', 'Last Actions']} data={rows} />
+              <Table heads={['User ID', 'Last Actions','FoodSession Waypoint Route']} data={rows} />
             </div>
           </Panel>
         </div>

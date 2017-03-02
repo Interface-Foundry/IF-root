@@ -53,15 +53,15 @@ class SubSidebar extends Component {
     });
   }
 
-  navToTeam(e, team_id) {
+  navToTeam(e, team) {
     e.preventDefault();
     //history.push(`/team?id=${team_id}`)
     var url = window.location.pathname
     if(url.includes('?')){
       url_pieces = url.split('?')
-      history.push(url_pieces[0]+`?id=${team_id}`)
+      history.push(url_pieces[0]+`?id=${team.team_id}`)
     }
-    history.push(url+`?id=${team_id}`)
+    history.push(url+`?id=${team.team_id}` + `&teamname=${team.team_name}`)
   }
 
   filterData(teams, filter) {
@@ -77,7 +77,7 @@ class SubSidebar extends Component {
     var self = this;
     const { teams } = this.state;
     let filteredData = this.filterData(teams, this.state.searchString);
-    const displayTeams = filteredData ? filteredData.map(team => <li key={team.team_id}> <a href="" onClick={(e) => self.navToTeam(e, team.team_id)}> <i className="fa fa-dashboard fa-fw" /> {team.team_name}</a></li>) : [];
+    const displayTeams = filteredData ? filteredData.map(team => <li key={team.team_id}> <a href="" onClick={(e) => self.navToTeam(e, team)}> <i className="fa fa-dashboard fa-fw" /> {team.team_name}</a></li>) : [];
           
     return (
       <div className="sidebar-nav navbar-collapse collapse">
