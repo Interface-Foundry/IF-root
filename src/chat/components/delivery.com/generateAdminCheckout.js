@@ -1,14 +1,14 @@
 var _ = require('lodash')
+require('../../../kip.js')
 
 /*
 * @params {Object} foodSession
 * @params {Number} totalPrice
 * @returns {Array} the attachments that are money related for admin to checkout
 */
-module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalPrice, feeDebug=false) {
+module.exports.createAttachmentsForAdminCheckout = function * (foodSession, totalPrice, feeDebug = false) {
   // change this to 0 to not print fees unless they exist
-  var feeDebuging = feeDebug ? -1.0: 0.00
-
+  var feeDebuging = feeDebug ? -1.0 : 0.00
 
   var tipText = (foodSession.tip.percent === 'cash') ? `$0.00 (Will tip in cash)` : `${foodSession.tip.amount.$}`
   var tipAttachment = {
@@ -29,17 +29,16 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     })
   }
 
-  var deliveryDiscount = (_.get(foodSession, 'order.discount_percent') > feeDebuging) ?
-    `_Included ${foodSession.order.discount_percent * 100}% discount from delivery.com_` : ``
+  var deliveryDiscount = (_.get(foodSession, 'order.discount_percent') > feeDebuging) ? `_Included ${foodSession.order.discount_percent * 100}% discount from delivery.com_` : ``
 
   // possible to have other fees, docs say this may include convenience and
   //  delivery fee and whatever else but from experience this seems to be false
   var orderFees = foodSession.order.fees.reduce((a, b) => a + b.value, 0)
-  var feeFromDeliveryLines = ``
-  feeFromDeliveryLines += foodSession.order.convenience_fee > feeDebuging ?
-    `Convenience Fee: ${foodSession.order.convenience_fee.$}\n` : ``
-  feeFromDeliveryLines += foodSession.order.delivery_fee > feeDebuging ?
-    `Delivery Fee: ${foodSession.order.delivery_fee.$}\n` : ``
+  // var feeFromDeliveryLines = ``
+  // feeFromDeliveryLines += foodSession.order.convenience_fee > feeDebuging ?
+  //   `Convenience Fee: ${foodSession.order.convenience_fee.$}\n` : ``
+  // feeFromDeliveryLines += foodSession.order.delivery_fee > feeDebuging ?
+  //   `Delivery Fee: ${foodSession.order.delivery_fee.$}\n` : ``
   //
   var extraFeesFromDelivery = orderFees > feeDebuging ? '' : ''
     // `Other Delivery.com Fees:  ${orderFees.$}\n` : ``
@@ -70,14 +69,23 @@ module.exports.createAttachmentsForAdminCheckout = function (foodSession, totalP
     mrkdwn_in: ['text']
   }
 
+  var usesLeft = ``
+
+  var couponObj = yield db.Coupons.findOne({
+    team_id: foodSession.team_id,
+    available: true,
+    coupon_code: foodSession.coupon.code
+  })
+
+  if (couponObj) usesLeft = `, ${couponObj.quantity_coupon.can_be_used - couponObj.quantity_coupon.used} left`
+
   var discountAttachment = {
-    fallback: "discount",
-    text: `🎉 Kip Coupon: -${foodSession.discount_amount.$}`,
+    fallback: 'discount',
+    text: `🎉 *Kip Coupon: -${foodSession.discount_amount.$}* (${foodSession.coupon.percent * 100}% off${usesLeft})`,
     mrkdwn_in: ['text']
   }
 
-  var instructionText = _.get(foodSession, 'instructions') ?
-        `\nDelivery Instructions: _${foodSession.instructions}_\n` : ``
+  var instructionText = _.get(foodSession, 'instructions') ? `\nDelivery Instructions: _${foodSession.instructions}_\n` : ``
 
   // ----- calculated amount is order.total + tip + service_fee - discount_amount
   var checkoutAttachment = {
