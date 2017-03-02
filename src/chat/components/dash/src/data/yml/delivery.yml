@@ -1,143 +1,281 @@
- foundry:
-  carts: 
+
+foundry:
+  chatusers:
     :columns:
     - id:
       :source: _id
       :type: TEXT
-    - amazon:
-      :source: amazon
+    - user_id:
+      :source: id
       :type: TEXT
-    - slack_id: 
-      :source: slack_id
+    - platform:
+      :source: platform
       :type: TEXT
-    - items:
-      :source: items 
-      :type: TEXT ARRAY
-    - purchased:
-      :source: purchased
+    - onboarded:
+      :source: onboarded
       :type: BOOLEAN
+    - admin_shop_onboarded:
+      :source: admin_shop_onboarded
+      :type: BOOLEAN
+    - member_shop_onboarded:
+      :source:  member_shop_onboarded
+      :type: BOOLEAN
+    - ts: 
+      :source: ts
+      :type: TEXT
+    - origin:
+      :source: origin
+      :type: TEXT
+    - type:
+      :source: type
+      :type: TEXT
+    - dm:
+      :source: dm
+      :type: TEXT
+    - team_id:
+      :source: team_id
+      :type: TEXT
+    - name:
+      :source: name
+      :type: TEXT
     - deleted:
       :source: deleted
       :type: BOOLEAN
-    - created_date: 
-      :source: created_date
+    - color:
+      :source: color
       :type: TEXT
-    - purchased_date: 
-      :source: purchased_date
+    - real_name:
+      :source: real_name
       :type: TEXT
-    - type: 
-      :source: type 
+    - tz:
+      :source: tz
       :type: TEXT
-    - link:
-      :source: link
+    - tz_label:
+      :source: tz_label
+      :type: TEXT
+    - tz_offset:
+      :source: tz_offset
+      :type: TEXT
+    - country:
+      :source: country
+      :type: TEXT
+    - is_admin:
+      :source: is_admin
+      :type: BOOLEAN
+    - is_owner: 
+      :source: is_owner
+      :type: BOOLEAN
+    - is_primary_owner:
+      :source: is_primary_owner
+      :type: BOOLEAN
+    - is_restricted:
+      :source: is_restricted
+      :type: BOOLEAN
+    - is_ultra_restricted:
+      :source: is_ultra_restricted
+      :type: BOOLEAN
+    - is_bot:
+      :source: is_bot
+      :type: BOOLEAN
+    - has_2fa:
+      :source: has_2fa
+      :type: BOOLEAN
+    - last_call_alerts:
+      :source: settings.last_call_alerts
+      :type: BOOLEAN
+    - emailNotification:
+      :source: settings.emailNotification
+      :type: BOOLEAN
+    - awaiting_email_response:
+      :source: settings.awaiting_email_response
+      :type: BOOLEAN
+    - phone_number: 
+      :source: phone_number
+      :type: TEXT
+    - first_name: 
+      :source: first_name
+      :type: TEXT
+    - last_name: 
+      :source: last_name
       :type: TEXT
     :meta:
-      :table: carts
+      :table: chatusers
       :extra_props: true
 
 
+
+
 # foundry:
-#   chatusers:
+#   delivery:
 #     :columns:
 #     - id:
 #       :source: _id
 #       :type: TEXT
-#     - user_id:
-#       :source: id
+#     - active: 
+#       :source: active
+#       :type: BOOLEAN 
+#     - session_id:
+#       :source: session_id
 #       :type: TEXT
-#     - platform:
-#       :source: platform
-#       :type: TEXT
-#     - onboarded:
-#       :source: onboarded
-#       :type: BOOLEAN
-#     - admin_shop_onboarded:
-#       :source: admin_shop_onboarded
-#       :type: BOOLEAN
-#     - member_shop_onboarded:
-#       :source:  member_shop_onboarded
-#       :type: BOOLEAN
-#     - ts: 
-#       :source: ts
-#       :type: TEXT
-#     - origin:
-#       :source: origin
-#       :type: TEXT
-#     - type:
-#       :source: type
-#       :type: TEXT
-#     - dm:
-#       :source: dm
-#       :type: TEXT
-#     - team_id:
+#     - team_id: 
 #       :source: team_id
 #       :type: TEXT
-#     - name:
-#       :source: name
+#     - onboarding:
+#       :source: onboarding 
+#       :type: BOOLEAN
+#     - chosen_restaurant: 
+#       :source: chosen_restaurant
 #       :type: TEXT
-#     - deleted:
-#       :source: deleted
-#       :type: BOOLEAN
-#     - color:
-#       :source: color
+#     - budget:
+#       :source: budget   
 #       :type: TEXT
-#     - real_name:
-#       :source: real_name
+#     - user_budgets: 
+#       :source: user_budgets
 #       :type: TEXT
-#     - tz:
-#       :source: tz
+#     - menu: 
+#       :source: menu
 #       :type: TEXT
-#     - tz_label:
-#       :source: tz_label
+#     - chosen_channel:
+#       :source: chosen_channel
+#       :type: TEXT 
+#     - fulfillment_method:
+#       :source: fulfillment_method
+#       :type: TEXT 
+#     - instructions:
+#       :source: instructions
 #       :type: TEXT
-#     - tz_offset:
-#       :source: tz_offset
+#     - time_started:
+#       :source: time_started
 #       :type: TEXT
-#     - country:
-#       :source: country
+#     - mode: 
+#       :source: mode
 #       :type: TEXT
-#     - is_admin:
-#       :source: is_admin
-#       :type: BOOLEAN
-#     - is_owner: 
-#       :source: is_owner
-#       :type: BOOLEAN
-#     - is_primary_owner:
-#       :source: is_primary_owner
-#       :type: BOOLEAN
-#     - is_restricted:
-#       :source: is_restricted
-#       :type: BOOLEAN
-#     - is_ultra_restricted:
-#       :source: is_ultra_restricted
-#       :type: BOOLEAN
-#     - is_bot:
-#       :source: is_bot
-#       :type: BOOLEAN
-#     - has_2fa:
-#       :source: has_2fa
-#       :type: BOOLEAN
-#     - last_call_alerts:
-#       :source: settings.last_call_alerts
-#       :type: BOOLEAN
-#     - emailNotification:
-#       :source: settings.emailNotification
-#       :type: BOOLEAN
-#     - awaiting_email_response:
-#       :source: settings.awaiting_email_response
-#       :type: BOOLEAN
-#     - phone_number: 
-#       :source: phone_number
+#     - action: 
+#       :source: action
 #       :type: TEXT
-#     - first_name: 
-#       :source: first_name
+#     - data: 
+#       :source: data
 #       :type: TEXT
-#     - last_name: 
-#       :source: last_name
+#     - delivery_post: 
+#       :source: delivery_post
 #       :type: TEXT
+#     - order: 
+#       :source: order
+#       :type: TEXT
+#     - tip: 
+#       :source: tip
+#       :type: TEXT
+#     - service_fee: 
+#       :source: service_fee
+#       :type: TEXT
+#     - coupon: 
+#       :source: coupon
+#       :type: TEXT
+#     - main_amount: 
+#       :source: main_amount
+#       :type: TEXT
+#     - calculated_amount: 
+#       :source: calculated_amount
+#       :type: TEXT
+#     - discount_amount: 
+#       :source: discount_amount
+#       :type: TEXT 
+#     - payment_post: 
+#       :source: payment_post
+#       :type: TEXT
+#     - payment: 
+#       :source: payment
+#       :type: TEXT
+#     - guest_token: 
+#       :source: guest_token
+#       :type: TEXT
+#     - completed_payment:
+#       :source: completed_payment 
+#       :type: TEXT
+#     - delivery_error:
+#       :source: delivery_error
+#       :type: TEXT
+
+#     - all_members:
+#       :source: all_members
+#       :type: TEXT
+#     - team_members:
+#       :source: team_members
+#       :type: TEXT
+#     - email_users:
+#       :source: email_users
+#       :type: TEXT
+#     - chosen_location: 
+#       :source: chosen_location
+#       :type: TEXT
+#     - merchants:
+#       :source: merchants
+#       :type: TEXT ARRAY
+#     - cuisines:
+#       :source: cuisines
+#       :type: TEXT ARRAY
+#     - cart:
+#       :source: carts
+#       :type: TEXT ARRAY
+#     - convo_initiater:
+#       :source: convo_initiater
+#       :type: TEXT
+#     - cuisine_dashboards:
+#       :source: cuisine_dashboards
+#       :type: TEXT ARRAY
+#     - order_dashboards:
+#       :source: order_dashboards
+#       :type: TEXT ARRAY
+#     - votes:
+#       :source: votes
+#       :type: TEXT ARRAY
+#     - conversations:
+#       :source: conversations
+#       :type: TEXT ARRAY
+#     - confirmed_orders: 
+#       :source: confirmed_orders
+#       :type: TEXT ARRAY
 #     :meta:
-#       :table: chatusers
+#       :table: delivery
 #       :extra_props: true
+
+
+ # foundry:
+ #  carts: 
+ #    :columns:
+ #    - id:
+ #      :source: _id
+ #      :type: TEXT
+ #    - amazon:
+ #      :source: amazon
+ #      :type: TEXT
+ #    - slack_id: 
+ #      :source: slack_id
+ #      :type: TEXT
+ #    - items:
+ #      :source: items 
+ #      :type: TEXT ARRAY
+ #    - purchased:
+ #      :source: purchased
+ #      :type: BOOLEAN
+ #    - deleted:
+ #      :source: deleted
+ #      :type: BOOLEAN
+ #    - created_date: 
+ #      :source: created_date
+ #      :type: TEXT
+ #    - purchased_date: 
+ #      :source: purchased_date
+ #      :type: TEXT
+ #    - type: 
+ #      :source: type 
+ #      :type: TEXT
+ #    - link:
+ #      :source: link
+ #      :type: TEXT
+ #    :meta:
+ #      :table: carts
+ #      :extra_props: true
 
 
 
@@ -406,138 +544,6 @@
 #       :extra_props: true
 
 
-# foundry:
-#   delivery:
-#     :columns:
-#     - id:
-#       :source: _id
-#       :type: TEXT
-#     - active: 
-#       :source: active
-#       :type: BOOLEAN 
-#     - session_id:
-#       :source: session_id
-#       :type: TEXT
-#     - team_id: 
-#       :source: team_id
-#       :type: TEXT
-#     - onboarding:
-#       :source: onboarding 
-#       :type: BOOLEAN
-#     # - all_members:
-#     #   :source: all_members
-#     #   :type: TEXT ARRAY
-#     # - team_members:
-#     #   :source: team_members
-#     #   :type: TEXT ARRAY
-#     # - email_users:
-#     #   :source: email_users
-#     #   :type: TEXT ARRAY
-#     # - chosen_location: 
-#     #   :source: chosen_location
-#     #   :type: TEXT ARRAY
-#     - chosen_restaurant: 
-#       :source: chosen_restaurant
-#       :type: TEXT
-#     - budget:
-#       :source: budget   
-#       :type: TEXT
-#     - user_budgets: 
-#       :source: user_budgets
-#       :type: TEXT
-#     - menu: 
-#       :source: menu
-#       :type: TEXT
-#     # - merchants:
-#     #   :source: merchants
-#     #   :type: TEXT ARRAY
-#     # - cuisines:
-#     #   :source: cuisines
-#     #   :type: TEXT ARRAY
-#     # - cart:
-#     #   :source: carts
-#     #   :type: TEXT ARRAY
-#     # - convo_initiater:
-#     #   :source: convo_initiater
-#     #   :type: JSON ARRAY
-#     - chosen_channel:
-#       :source: chosen_channel
-#       :type: TEXT 
-#     - fulfillment_method:
-#       :source: fulfillment_method
-#       :type: TEXT 
-#     - instructions:
-#       :source: instructions
-#       :type: TEXT
-#     - time_started:
-#       :source: time_started
-#       :type: DATE
-#     # - cuisine_dashboards:
-#     #   :source: cuisine_dashboards
-#     #   :type: JSON ARRAY
-#     # - order_dashboards:
-#     #   :source: order_dashboards
-#     #   :type: JSON ARRAY
-#     # - votes:
-#     #   :source: votes
-#     #   :type: JSON ARRAY
-#     # - conversations:
-#     #   :source: conversations
-#     #   :type: JSON ARRAY
-#     - mode: 
-#       :source: mode
-#       :type: TEXT
-#     - action: 
-#       :source: action
-#       :type: TEXT
-#     - data: 
-#       :source: data
-#       :type: TEXT
-#     - delivery_post: 
-#       :source: delivery_post
-#       :type: TEXT
-#     - order: 
-#       :source: order
-#       :type: TEXT
-#     - tip: 
-#       :source: tip
-#       :type: TEXT
-#     - service_fee: 
-#       :source: service_fee
-#       :type: TEXT
-#     - coupon: 
-#       :source: coupon
-#       :type: TEXT
-#     - main_amount: 
-#       :source: main_amount
-#       :type: TEXT
-#     - calculated_amount: 
-#       :source: calculated_amount
-#       :type: TEXT
-#     - discount_amount: 
-#       :source: discount_amount
-#       :type: TEXT 
-#     - payment_post: 
-#       :source: payment_post
-#       :type: TEXT
-#     - payment: 
-#       :source: payment
-#       :type: TEXT
-#     # - confirmed_orders: 
-#     #   :source: confirmed_orders
-#     #   :type: JSON ARRAY
-#     - guest_token: 
-#       :source: guest_token
-#       :type: TEXT
-#     - completed_payment:
-#       :source: completed_payment 
-#       :type: BOOLEAN
-#     - delivery_error:
-#       :source: delivery_error
-#       :type: TEXT
-#     :meta:
-#       :table: delivery
-#       :extra_props: true
  
  # metrics:
  #    :columns:

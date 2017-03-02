@@ -125,15 +125,4 @@ const Delivery = Conn.define('delivery', {
      freezeTableName: true
 });
 
-
-// // Defines "IS A" relationship: [Patient] IS A [User]
-// Patient.belongsTo(models.User, {
-//     foreignKey: {
-//       name: 'id',
-//       type: DataTypes.INTEGER,
-//       primaryKey: true
-//     },
-//     foreignKeyConstraint: true
-// })
-
 export default Delivery;

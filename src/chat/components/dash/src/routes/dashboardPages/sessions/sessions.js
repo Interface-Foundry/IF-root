@@ -58,24 +58,41 @@ function sessions(props, context) {
       </Panel>
       <Panel className='fillSpace' header={<span>
           <i className="fa fa-bar-chart-o fa-fw" /> Open Carts </span>}>
-        <CartTable 
-          query={'{teams{ team_name, carts {created_date,slack_id, items, purchased}}}'}
-          heads={['Open Since', 'Created Date', 'Slack ID', 'Number of Items']}
-          colorBy={2}
+       <CartTable
+          query = {'{teams{ team_name, carts {created_date,slack_id, items, purchased}}}'}
+          heads = {
+            [{
+              field: 'created_date_vague',
+              descrip: 'Since'
+            }, {
+              field: 'created_date',
+              descrip: 'Created Date'
+            }, {
+              field: 'team_name',
+              descrip: 'Slack ID'
+            }, {
+              field: 'items',
+              descrip: 'Number of Items'
+            }]
+          }
           process = {
             (teams, team) =>
-              teams.concat(
-                team.carts.reduce((carts, cart) => {
-                  if (cart.purchased.toLowerCase() == 'false') {
-                    carts.push(
-                        [vagueTime.get({from: Date.now(), to: new Date(cart.created_date)}), (new Date(cart.created_date)).toLocaleString(), team.team_name, cart.items.split(',').length]
-                      )
-                  }
-                  return carts;
-                }, [])
-              )
+            teams.concat(
+              team.carts.reduce((carts, cart) => {
+                if (cart.purchased.toLowerCase() == 'false') {
+                  carts.push({
+                    created_date_vague: vagueTime.get({
+                      from: Date.now(),
+                      to: new Date(cart.created_date)
+                    }),
+                    team_name: team.team_name,
+                    created_date: (new Date(cart.created_date)).toLocaleString(),
+                    items: cart.items.split(',').length
+                  })
+                }
+                return carts;
+            }, []))
           }
-          sort={(a, b) =>  new Date(b[1]) - new Date(a[1])}
         />
       </Panel>
     </div>

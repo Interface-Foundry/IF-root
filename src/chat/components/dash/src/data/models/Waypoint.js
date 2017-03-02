@@ -5,43 +5,39 @@ import Chatuser from './Chatuser';
 
 const Waypoint = Conn.define('waypoint', {
 
-  id: {
-    type: DataType.STRING(255)
-  },
+    id: {
+       type: DataType.STRING(255)
 
-  delivery_id: {
-    type: DataType.UUID,
-    defaultValue: DataType.UUIDV1,
-    primaryKey: true,
-  },
+    },
 
-  user_id: {
-    type: DataType.UUID,
-    defaultValue: DataType.UUIDV1,
-    primaryKey: true,
-  },
+    delivery_id: {
+          type: DataType.STRING(255)
+    },
 
-  waypoint: {
-    type: DataType.STRING(255)
-  },
+    user_id: {
+      type: DataType.UUID,
+      defaultValue: DataType.UUIDV1,
+      primaryKey: true,
+    },
 
-  data: {
-    type: DataType.STRING(255)
-  },
+    waypoint: {
+      type: DataType.STRING(255)
+    },
 
-  timestamp: {
-    type: DataType.STRING(255)
-  }
+    data: {
+      type: DataType.STRING(255)
+    },
 
-}
-,{
+    timestamp: {
+      type: DataType.STRING(255)
+    }
+
+  }, {
     timestamps: false
-}
+  }
 );
 
-Waypoint.Delivery = Waypoint.hasOne(Delivery, { as: 'food_session', foreignKey: 'id'});
-Delivery.Waypoint = Delivery.belongsTo(Waypoint, { as: 'team', foreignKey: 'id'});
-Waypoint.User = Waypoint.hasOne(Chatuser, { as: 'user', foreignKey: 'id'});
-Chatuser.Waypoint = Chatuser.belongsTo(Waypoint, { as: 'waypoint', foreignKey: 'id'});
+Waypoint.User = Waypoint.hasOne(Chatuser, { as: 'user', foreignKey: 'user_id'});
+Chatuser.Waypoint = Chatuser.belongsTo(Waypoint, { as: 'waypoint', foreignKey: 'user_id'});
 
 export default Waypoint;

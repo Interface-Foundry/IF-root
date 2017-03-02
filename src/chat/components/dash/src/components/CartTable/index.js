@@ -31,7 +31,6 @@ class CartTable extends Component {
         if (!data || !data.teams) throw new Error('Failed to load teams.')
         else  {
           let carts = data.teams.reduce(self.props.process, []);
-          carts = carts.sort(self.props.sort);
           self.setState({carts: carts})
         }
     })

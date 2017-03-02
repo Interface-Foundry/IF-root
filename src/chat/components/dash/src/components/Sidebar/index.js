@@ -28,13 +28,6 @@ class Sidebar extends Component {
               </a>
             </li>
             <li>
-              <a href="" onClick={(e) => { e.preventDefault(); history.push('/stagnantcarts'); }} >
-                <i className="fa fa-bar-chart-o fa-fw" /> &nbsp; Stagnant Carts
-              </a>
-            </li>
-          
-     
-            <li>
               <a href="" onClick={(e) => { e.preventDefault(); history.push('/sessions'); }} >
                 <i className="fa fa-table fa-fw" /> &nbsp;Sessions
               </a>

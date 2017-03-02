@@ -7,18 +7,18 @@ import Select from 'react-select';
 class SendMessage extends Component {
   constructor(props) {
     super(props);
+    console.log(props)
+    console.log('hi!')
     this.state = {
-      team: '',
-      user: '',
+      member: '',
       message: '',
-      teams: [],
-      users: [],
+      members: [],
       text: '',
       error: '',
       sent: false
     }
     this.handleSubmit = this.handleSubmit.bind(this)
-    this.teamSelected = this.teamSelected.bind(this)
+    this.processMembers = this.processMembers.bind(this)
     this.userSelected = this.userSelected.bind(this)
   }
 
@@ -26,67 +26,50 @@ class SendMessage extends Component {
     e.preventDefault();
     this.setState({error:''})
     const attachments = this.state.message ? encodeURIComponent(this.state.message): ''
-    const res = await fetch(`https://slack.com/api/chat.postMessage?token=${this.state.token}&channel=${this.state.user}&attachments=${attachments}&text=${this.state.text}`, {
+    const res = await fetch(`https://slack.com/api/chat.postMessage?token=${this.props.token}&channel=${this.state.member}&attachments=${attachments}&text=${this.state.text}`, {
       method: 'post',
     })
     let json = await res.json();
-    // console.log(json);
+    console.log(json);
     if(!json.ok) {
       this.setState({error: json.error});
     } else {
-      this.setState({sent:true})
+      this.setState({sent: true})
     }
   }
 
-  async componentDidMount() {
-    const res = await fetch('/graphql', {
-      method: 'post',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: '{teams {value:team_id,label:team_name, bot_access_token members{value:dm, label:name, is_bot, is_admin, is_owner, is_primary_owner}}}',
-      }),
-      credentials: 'include',
-    });
-    const {data} = await res.json();
+  async componentWillReceiveProps(newProps) {
+    let members = this.processMembers(newProps.members);
+    console.log(newProps);
     this.setState({
-      sent:false,
-      teams: data.teams
+      members: members,
+      sent: false
     })
   }
 
-  async teamSelected(val) {
-    let members = [];
-    if (val.members) {
-      members = val.members.map(member => {
-        if (member.is_bot.toLowerCase() == 'true') {
-          member.label = '(🤖) ' + member.label;
-        } else if (member.is_admin.toLowerCase() == 'true') {
-          member.label = '(😎) ' + member.label;
-        } else {
-          member.label = '(🙂) ' + member.label;
-        }
-        if (member.is_owner.toLowerCase() == 'true' || member.is_primary_owner.toLowerCase() == 'true') {
-          member.label = member.label.replace(') ', ', 🤠) ');
-        }
-        return member;
-      })
-    }
-
-    this.setState({
-      sent: false,
-      token: val ? val.bot_access_token : '',
-      team: val ? val.value : '',
-      users: val ? members : []
+  processMembers(members) {
+    members = members.map(member => {
+      let mem = Object.assign({}, member);
+      if (member.is_bot == 'true') {
+        mem.label = '(🤖) ' + member.label;
+      } else if (member.is_admin == 'true') {
+        mem.label = '(😎) ' + member.label;
+      } else {
+        mem.label = '(🙂) ' + member.label;
+      }
+      if (member.is_owner == 'true' || member.is_primary_owner == 'true') {
+        mem.label = mem.label.replace(') ', ', 🤠) ');
+      }
+      return mem;
     })
+    return members.filter(member => Boolean(member.value))
   }
 
   userSelected(val) {
+    console.log(val)
     this.setState({
       sent: false,
-      user: val ? val.value : ''
+      member: val ? val.value : ''
     });
   }
 
@@ -104,28 +87,17 @@ class SendMessage extends Component {
           ''
       }
           <div className="form-group">
-            <label htmlFor="teamSelect">Select a Team</label>
+            <label htmlFor="memberSelect">Select a member</label>
             <Select
-              name="teamSelect"
-              id="teamSelect"
+              name="memberSelect"
+              id="memberSelect"
               required
-              value={this.state.team}
-              onChange={this.teamSelected}
-              options={this.state.teams}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="userSelect">Select a user</label>
-            <Select
-              name="userSelect"
-              id="userSelect"
-              required
-              value={this.state.user}
+              value={this.state.member}
               onChange={this.userSelected}
-              disabled={this.state.users.length===0}
-              options={this.state.users}
+              disabled={this.state.members.length===0}
+              options={this.state.members}
             />
-            <span id="helpBlock" class="help-block">🤖=Bot, 😎=Admin, 🙂=Member, 🤠=Owner</span>
+            <span id="helpBlock" className="help-block">🤖=Bot, 😎=Admin, 🙂=Member, 🤠=Owner</span>
           </div>
           <div className="form-group">
             <label htmlFor="textInput">Text (optional)</label>

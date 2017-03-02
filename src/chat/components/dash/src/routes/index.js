@@ -18,7 +18,6 @@ import table from './dashboardPages/tables';
 import button from './dashboardPages/buttons';
 import slackteamstats from './dashboardPages/slackteamstats';
 import slackallstats from './dashboardPages/slackallstats';
-import stagnantcarts from './dashboardPages/stagnantcarts';
 import sessions from './dashboardPages/sessions';
 import grid from './dashboardPages/grid';
 import icons from './dashboardPages/icons';
@@ -69,7 +68,6 @@ export default [
       // register,
       blank,
       sessions,
-      stagnantcarts,
       team,
       sendMessage,
       // place new routes before...
