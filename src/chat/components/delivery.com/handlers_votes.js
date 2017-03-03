@@ -8,7 +8,7 @@ var rp = require('request-promise')
 var api = require('./api-wrapper.js')
 var utils = require('./utils')
 var cuisineClassifier = require('./cuisine_classifier.js')
-var mailer_transport = require('../../../mail/IF_mail.js')
+var mailerTransport = require('../../../mail/IF_mail.js')
 var email_utils = require('./email_utils')
 var score_utils = require('./score_utils')
 // var menu_utils = require('./menu_utils')
@@ -246,21 +246,6 @@ handlers['food.user.poll'] = function * (message) {
     return yield $allHandlers['food.admin.select_address'](message)
   }
 
-  // schedule reminder here to finish voting early in 20 minutes
-  var finishEarlyMessage = {
-    thread_id: message.thread_id,
-    incoming: true,
-    user_id: message.user_id,
-    origin: message.origin,
-    source: message.source,
-    mode: 'food',
-    action: 'admin.restaurant.pick.list'
-  }
-  agenda.schedule('20 minutes from now', 'mock user message', {
-    user: message.user_id,
-    msg: JSON.stringify(finishEarlyMessage)
-  })
-
   yield teamMembers.map(function * (member) {
     logging.debug('checking if we should do food_preferences')
     if (kip.config.preferences.asking &&
@@ -409,6 +394,7 @@ handlers['food.vote.submit'] = function * (message) {
     }
 
     foodSession.votes.push(vote)
+
     foodSession.markModified('votes')
     return foodSession.save()
   }
@@ -1029,10 +1015,12 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   var cuisines = merchant.summary.cuisines
   yield votes.map(function * (v) {
     var weight = (cuisines.indexOf(v.vote) > -1 ? -0.05 : 0.05)
-    // var user = yield db.chatusers.findOne({id: v.user})
+    var user = yield db.chatusers.findOne({id: v.user})
+    if (user.vote_weight + weight > 0) yield db.chatusers.update({id: v.user}, {$inc: {vote_weight: weight}}) // vote value cannot go to or below zero
+    else yield db.chatusers.updatae({id: v.user}, {$set: {vote_weight: 0.1}})
     // user.vote_weight += weight;
     // yield user.save()
-    yield db.chatusers.update({id: v.user}, {$inc: {vote_weight: weight}})
+    // yield db.chatusers.update({id: v.user}, {$inc: {vote_weight: weight}})
   })
 
   // stores the cuisines in the slackbot
@@ -1044,31 +1032,32 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   })
 
   // stores the restaurant in the slackbot order history
-  // if (!sb.meta.order_frequency) sb.meta.order_frequency = {}
-  // if (sb.meta.order_frequency[merchant.id]) {
-  //   console.log('does exist in the history')
-  //   var oldestDate = sb.meta.order_frequency[merchant.id].dates[0]
-  //   monthDifference = foodSession.time_started.getMonth() - oldestDate.getMonths()
-  //   //cut the restaurant out of the history if it's been there for more than 2 months
-  //   if (monthDifference > 2 || monthDifference < 0 && monthDifference > -10) {
-  //     console.log('outdated history being removed')
-  //     db.meta.order_frequency[merchant.id].dates.shift()
-  //     db.meta.order_frequency[merchant.id].count--
-  //   }
-  //   db.meta.order_frequency[merchant.id].count++
-  //   db.meta.order_frequency[merchant.id].dates.push(foodSession.time_started)
-  // }
-  // else {
-  //   console.log('does not exist in the history')
-  //   console.log('this is the merchant id', merchant.id)
-  //   sb.meta.order_frequency[merchant.id] = {
-  //     count: 1,
-  //     dates: [foodSession.time_started]
-  //   }
-  // }
-  // console.log('sb.meta.order_frequency', sb.meta.order_frequency)
-  //
-  // yield db.slackbots.update({team_id: foodSession.team_id}, {meta: sb.meta})
+  if (!sb.meta.order_frequency) sb.meta.order_frequency = {}
+  if (sb.meta.order_frequency[merchant.id]) {
+    console.log('does exist in the history')
+    var oldestDate = new Date(sb.meta.order_frequency[merchant.id].dates[0])
+    logging.info('oldest date:', oldestDate)
+    var monthDifference = foodSession.time_started.getMonth() - oldestDate.getMonth()
+    //cut the restaurant out of the history if it's been there for more than 2 months
+    if (monthDifference > 2 || monthDifference < 0 && monthDifference > -10) {
+      console.log('outdated history being removed')
+      sb.meta.order_frequency[merchant.id].dates.shift()
+      sb.meta.order_frequency[merchant.id].count--
+    }
+    sb.meta.order_frequency[merchant.id].count++
+    sb.meta.order_frequency[merchant.id].dates.push(foodSession.time_started)
+  }
+  else {
+    console.log('does not exist in the history')
+    console.log('this is the merchant id', merchant.id)
+    sb.meta.order_frequency[merchant.id] = {
+      count: 1,
+      dates: [foodSession.time_started]
+    }
+  }
+  console.log('sb.meta.order_frequency', sb.meta.order_frequency)
+
+  yield db.slackbots.update({team_id: foodSession.team_id}, {meta: sb.meta})
 
   if (!merchant) {
     merchant = yield api.getMerchant(message.data.value)
@@ -1159,7 +1148,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
   for (var i = 0; i < foodSession.email_users.length; i++) {
     var m = foodSession.email_users[i]
     // var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
-    var html = yield emailUtils.quickpickHTML(foodSession, slackbot, slacklink, m)
+    var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m)
 
     var mailOptions = {
       to: `<${m}>`,

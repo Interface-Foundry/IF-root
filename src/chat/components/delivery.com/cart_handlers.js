@@ -6,6 +6,7 @@ var Menu = require('./Menu')
 var api = require('./api-wrapper')
 var coupon = require('../../../coupon/couponUsing.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
+var agenda = require('../agendas')
 
 var createAttachmentsForAdminCheckout = require('./generateAdminCheckout.js').createAttachmentsForAdminCheckout
 
@@ -36,6 +37,48 @@ restartButton.confirm = {
   dismiss_text: 'No'
 }
 
+var promptCheckout = function (foodSession, message, waitingText) {
+  // schedule reminder here to finish voting early in 20 minutes
+  logging.debug('prompt checkout called')
+
+  // cancel any pending
+  agenda.cancel({
+    name: 'checkout prompt',
+    'data.user': foodSession.convo_initiater.id
+  }, function (e, numRemoved) {
+    if (e) logging.error(e)
+  })
+
+    if (waitingText) {
+      var finishEarlyMessage = {
+        thread_id: foodSession.convo_initiater.dm,
+        incoming: false,
+        user_id: foodSession.convo_initiater.id,
+        origin: message.origin,
+        source: message.source,
+        mode: 'food',
+        action: 'admin.restaurant.pick.list',
+        attachments: [{
+          color: '#fc9600',
+          text: `The following users aren\'t responding - do you want to check out? \n${waitingText}`,
+          mrkdwn_in: ['text'],
+          callback_id: 'admin.restaurant.pick.list',
+          fallback: 'Continue your order',
+          actions: [{
+            name: 'passthrough',
+            type: 'button',
+            text: 'Finish Order Early',
+            value: 'food.admin.order.confirm'
+          }, restartButton]
+        }]
+      }
+
+      agenda.schedule('20 minutes from now', 'checkout prompt', {
+        user: foodSession.convo_initiater.id,
+        msg: JSON.stringify(finishEarlyMessage)
+      })
+    }
+  }
 //
 // Show the user their personal cart
 //
@@ -226,7 +269,6 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 }
 
 handlers['food.cart.update_dashboards'] = function * (message) {
-  console.log('you can have the whole world or be satisfied with the boulevard')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   logging.debug('duplicated?', foodSession.cart.length) //yes is duplicated here
   return yield sendOrderProgressDashboards(foodSession, message)
@@ -287,21 +329,26 @@ function * sendOrderProgressDashboards (foodSession, message) {
     slackers = slackers.join(' ')
   }
 
+  var waitingText = ''
   if (slackers.length > 0 || emailers.length > 0) {
     logging.debug('slackers', slackers, 'emailers', emailers)
-    var waitingText = 'Waiting for orders from '
+    // var waitingText = 'Waiting for orders from '
     if (slackers && !emailers) waitingText += slackers
     else if (emailers && !slackers) waitingText += emailers
     else {
-      waitingText += `\nSlack: ${slackers}\nEmail: ${emailers}`
+      waitingText += `Slack: ${slackers}\nEmail: ${emailers}`
     }
     dashboard.attachments.push({
       mrkdwn_in: ['text'],
-      text: waitingText,
+      text: 'Waiting for orders from \n' + waitingText,
       color: '#3AA3E3',
       fallback: `Waiting for orders from ${slackers} ${emailers}`
     })
   }
+
+  // set up the reminder
+  console.log('admin ready?', foodSession.confirmed_orders.indexOf(foodSession.convo_initiater.id) > -1)
+  if (adminIsNotHungry || foodSession.confirmed_orders.indexOf(foodSession.convo_initiater.id) > -1) promptCheckout(foodSession, message, waitingText)
 
   // get the list of users that we have to send a dashboard to
   var dashboardUsers = foodSession.team_members.filter(user => {
@@ -587,8 +634,18 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 }
 
 handlers['food.admin.order.confirm'] = function * (message, foodSession) {
-  // show admin final confirm of thing
+
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+
+  // cancel any pending reminders
+  agenda.cancel({
+    name: 'checkout prompt',
+    'data.user': foodSession.convo_initiater.id
+  }, function (e, numRemoved) {
+    if (e) logging.error(e)
+  })
+
+  // show admin final confirm of thing
   logging.debug('foodSession.cart.length', foodSession.cart.length) // duplication has happened OH GOD IT'S JOHN CARPENTER'S "Thing"
   var teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
   var lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)

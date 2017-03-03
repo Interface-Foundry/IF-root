@@ -132,7 +132,7 @@ router.post('/order', function (req, res) {
       var menu = Menu(foodSession.menu)
       var money_spent = 0;
       console.log('got cart and menu')
-      console.log('ORDER', order) //not yet in duplicate
+      // console.log('ORDER', order) //not yet in duplicate
       for (var i = 0; i < order.length; i++) {
         // logging.debug(order[i]);
         cart.push({
@@ -140,7 +140,6 @@ router.post('/order', function (req, res) {
           item: order[i],
           user_id: user_id
         });
-
         if (foodSession.budget) {
           console.log('calculating money spent')
           console.log(cart[cart.length-1])
@@ -148,7 +147,6 @@ router.post('/order', function (req, res) {
         }
       }
       console.log('CART', cart) //not  yet duplicate
-      console.log('cart length', cart.length)
 
       var user_budgets = foodSession.user_budgets
       user_budgets[user_id] -= money_spent
