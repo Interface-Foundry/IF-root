@@ -2,27 +2,11 @@ require('../logging')
 var request = require('request-promise')
 var _ = require('lodash')
 
-var ObjectId = require('mongodb').ObjectID;
-
 var payConst = require('./pay_const.js')
-
-var cardTemplates = require('../chat/components/slack/card_templates');
-var slackUtils = require('../chat/components/slack/utils')
 
 // tracking for food into cafe-tracking
 var Professor = require('../monitoring/prof_oak.js')
 var profOak = new Professor.Professor('C33NU7FRC')
-
-// various utils
-// kip emailer
-var Menu = require('../chat/components/delivery.com/Menu')
-
-// VARIOUS STUFF TO POST BACK TO USER EASILY
-// --------------------------------------------
-var queue = require('../chat/components/queue-direct')
-var UserChannel = require('../chat/components/delivery.com/UserChannel')
-var replyChannel = new UserChannel(queue)
-// --------------------------------------------
 
 if (process.env.NODE_ENV === 'production') {
   var cc = require('./secrets/kip_cc.js')
@@ -30,10 +14,12 @@ if (process.env.NODE_ENV === 'production') {
   cc = payConst.cc
 }
 
-/* this would be for kip to pay for an order once the user has successfully paid stripe
-*
-*
-*/
+/**
+ * post request to pay for delivery.com with kip credit card
+ * @param {object} session - session info with address/names/etc
+ * @param {string} guestToken - guestToken associated with the delivery.com cart
+ * @returns {object} response - response from delivery.com with info about order. if it returns 'development', running in test mode
+ */
 function * payForItemFromKip (session, guestToken) {
   var opts = {
     'method': `POST`,
@@ -59,7 +45,11 @@ function * payForItemFromKip (session, guestToken) {
   }
 }
 
-// pay delivery.com
+/**
+ * pays for delivery.com using various smaller functionality, uses cc from kubernetes secrets in prod
+ * @param {object} pay - session info with address/names/etc
+ * @returns {object} response - response we get from payForItemFromKip function
+ */
 function * payDeliveryDotCom (pay) {
   // payment amounts should match
   // total already includes tip
@@ -140,6 +130,11 @@ function * payDeliveryDotCom (pay) {
   }
 }
 
+/**
+ * this will save a new card into the slackbot.meta.payments area with who used it and stripe details
+ * @param {object} pay - session info with address/names/etc
+ * @param {object} charge - charge object from stripe
+ */
 function * storeCard (pay, charge) {
   // save stripe card token and info to slack team
   try {
@@ -177,10 +172,11 @@ function * storeCard (pay, charge) {
   yield slackbot.save()
 }
 
-/*
-* communicate to slack to close up messages
-* @param {Object} payment object
-*/
+/**
+ * communicate to slack to close up messages after stripe charge and delivery.com payment
+ * @param {object} payment - object with guest_token related to the charge
+ * @param {boolean} newCard - whether new card was used
+ */
 function * onSuccess (payment, newCard) {
   var status = newCard ? 'new_credit_card' : 'previous_credit_card'
   try {
