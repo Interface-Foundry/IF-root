@@ -1,12 +1,13 @@
 var _ = require('lodash')
 require('../../../kip.js')
 
-/*
-* @params {Object} foodSession
-* @params {Number} totalPrice
-* @returns {Array} the attachments that are money related for admin to checkout
-*/
-module.exports.createAttachmentsForAdminCheckout = function * (foodSession, totalPrice, feeDebug = false) {
+/**
+ * create the attachments to display to admin after all orders are collected and admin is going to checkout
+ * @param {object} foodSession - foodSession with delivery.com cart that has fees/food/etc
+ * @param {boolean} [feeDebug] - if you want to display more info about fees related to delivery.com stuff
+ * @returns {array} the attachments that are money related for admin to checkout
+ */
+module.exports.createAttachmentsForAdminCheckout = function * (foodSession, feeDebug = false) {
   // change this to 0 to not print fees unless they exist
   var feeDebuging = feeDebug ? -1.0 : 0.00
 
@@ -112,24 +113,22 @@ module.exports.createAttachmentsForAdminCheckout = function * (foodSession, tota
     dismiss_text: 'No'
   }
 
-    checkoutAttachment.actions = [{
-      'name': `food.admin.order.checkout.confirm`,
-      'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
-      'type': `button`,
-      'style': `primary`,
-      'value': `checkout`
-    }, {
-      // instructions button
-      name: 'food.order.instructions',
-      text: (foodSession.instructions ? '✎ Edit Instructions' : '✎ Add Instructions'),
-      type: 'button',
-      value: '',
-      mrkdwn_in: ['text']
-    },
-    restartButton]
-    // }
+  checkoutAttachment.actions = [{
+    'name': `food.admin.order.checkout.confirm`,
+    'text': `✓ Checkout ${foodSession.calculated_amount.$}`,
+    'type': `button`,
+    'style': `primary`,
+    'value': `checkout`
+  }, {
+    // instructions button
+    name: 'food.order.instructions',
+    text: (foodSession.instructions ? '✎ Edit Instructions' : '✎ Add Instructions'),
+    type: 'button',
+    value: '',
+    mrkdwn_in: ['text']
+  }, restartButton]
 
-    var discount = (kipCoupon ? discountAttachment : []);
+  var discount = (kipCoupon ? discountAttachment : [])
 
-    return [].concat(deliveryCostsAttachment, kipCostsAttachment, discount , tipAttachment, checkoutAttachment)
+  return [].concat(deliveryCostsAttachment, kipCostsAttachment, discount, tipAttachment, checkoutAttachment)
 }
