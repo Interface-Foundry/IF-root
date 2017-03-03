@@ -175,10 +175,10 @@ function getWaypointActions(waypoints){
   return lastActions;
 }
 
-function getTeamName(delivery_id, foodSessions, teams){
-  var team = foodSessions.find(function(session){return session.id==delivery_id});
-  var teamId = team ? team.team_id : '';
-  team = teams.find(function(t){return t.team_id==teamId})
+function getTeamName(delivery_id, teams){
+  var team = teams.find(function(t){return t.food_sessions.length>0 ? t.food_sessions.find(function(foodSession){return foodSession.id==delivery_id}) : false});
+  //var teamId = team ? team.team_id : '';
+  //team = teams.find(function(t){return t.team_id==teamId})
   var teamName = team ? team.team_name : '';
   return teamName;
 }
@@ -188,17 +188,19 @@ function displayFlotCharts(props, context) {
 
   var rows = [];
   var waypoints = props.waypoints;
-  var food_sessions = props.food_sessions;
+  //var food_sessions = props.food_sessions;
   var teams = props.teams;
 
   var teamWaypoints = props.teamId ? waypoints.filter(function(waypoint){
-      return waypoint.food_session ? waypoint.food_session.team_id == props.teamId : false;
+      var team = teams.find(function(t){return t.food_sessions.length>0 ? t.food_sessions.find(function(foodSession){return foodSession.id==waypoint.delivery_id}) : false});
+      var teamId = team ? team.team_id : '';
+      return teamId == props.teamId;
   }) : waypoints;
 
   var waypointPaths = getWaypointPaths(teamWaypoints);
   for (var i = 0; i < waypointPaths.length; i++) {
 
-    var teamName = getTeamName(waypointPaths[i].delivery_id,food_sessions,teams);
+    var teamName = getTeamName(waypointPaths[i].delivery_id,teams);
     rows.push({user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
     //rows.push({user_id: waypointPaths[i].user_id, team_name: waypointPaths[i].team_name, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
   }
