@@ -128,7 +128,10 @@ var slackbotSchema = mongoose.Schema({
         last4: String,
         email: String,
         address_zip: String
-      }
+      },
+      added_by: String, // which user added this card
+      company_card: Boolean, // if office_assistant/admin adds card other
+      date_added: Date // date card was added
     }],
     mock: Boolean,
     p2p: Boolean,

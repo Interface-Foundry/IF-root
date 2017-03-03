@@ -395,6 +395,7 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message) {
 handlers['food.admin.order.pay'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  var user = yield db.Chatusers.findOne({team_id: message.source.team, id: foodSession.convo_initiater.id})
 
   db.waypoints.log(1330, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -424,14 +425,25 @@ handlers['food.admin.order.pay'] = function * (message) {
       }]
     }]
   }
-  // if (feedbackOn && response) {
-  //   response.attachments[0].actions.push({
-  //     name: 'food.feedback.new',
-  //     text: '⇲ Send feedback',
-  //     type: 'button',
-  //     value: 'food.feedback.new'
-  //   })
-  // }
+
+  // if the user is an office_assistant present all company_cards, if they arent
+  // only present the cards they have
+  var availableCards = []
+
+  if (slackbot.meta.office_assistants.find(u => u === foodSession.convo_initiater.id)) {
+    // user is office_assitant.  get all cards that are company card or not user_specific
+    availableCards = slackbot.meta.payments.filter(c => c.company_card !== false)
+  } else {
+    // user is regular
+    availableCards = slackbot.meta.payments.filter(c => c.added_by === foodSession.convo_initiater.id)
+  }
+
+  // if they previously added card before we did this feature, try to present
+  // the user with their card
+  if (availableCards.length === 0) {
+    // look if any email from the payment objects matches users
+    availableCards = slackbot.meta.payments.filter(u => u.card.email === user.profile.email)
+  }
 
   if (_.get(slackbot.meta, 'payments')) {
     // we already have a card source, present cards
@@ -441,7 +453,7 @@ handlers['food.admin.order.pay'] = function * (message) {
       mastercard: `https://storage.googleapis.com/kip-random/mastercard.png`
     }
 
-    var cardsAttachment = slackbot.meta.payments.map((c) => {
+    var cardsAttachment = availableCards.map((c) => {
       return {
         'title': `${c.card.brand}`,
         'text': `Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
@@ -482,7 +494,7 @@ handlers['food.admin.order.remove_card'] = function * (message) {
     return logging.error('could not remove card because card_id was undefined')
   }
 
-  var slackbot = yield db.Slackbots.update({team_id: message.source.team}, {
+  yield db.Slackbots.update({team_id: message.source.team}, {
     $pull: {'meta.payments': {'card.card_id': message.data.value}}
   }).exec()
 
