@@ -829,9 +829,8 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     yield foodSession.save()
 
     // THIS CREATES THE TIP, DELIVERY.COM COSTS, AND KIP ATTACHMENT
-    var attachmentsRelatedToMoney = yield createAttachmentsForAdminCheckout(foodSession, totalPrice)
+    var attachmentsRelatedToMoney = yield createAttachmentsForAdminCheckout(foodSession)
     response.attachments = [].concat(mainAttachment, itemAttachments, attachmentsRelatedToMoney)
-
   } else {
     // some sort of error
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()

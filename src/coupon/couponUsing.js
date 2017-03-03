@@ -1,14 +1,15 @@
 require('../kip.js')
 
-// functions that get used when using coupons or after they have been used
-
-
-/*
-* get
-* @param {string}
-*
+/**
+* @file functions that get used when using coupons or after they have been used
 */
-function * getLatestFoodCoupon(team_id) {
+
+/**
+ * get latest coupon for a team
+ * @param {string} team_id - team_id to look up coupon for
+ * @return {object} coupon - latest coupon object that is available
+ */
+function * getLatestFoodCoupon (team_id) {
   var coupon = yield db.Coupon.find({
     team_id: team_id,
     available: true
@@ -17,12 +18,11 @@ function * getLatestFoodCoupon(team_id) {
   return coupon
 }
 
-/*
-* used in food.done after coupon has been applied to order
-* @param {string}
-*
-*/
-function * updateCouponForCafe(foodSession) {
+/**
+ * update coupon object that is used in a foodSession order.  used in handlers['food.done'] after coupon has been applied to order
+ * @param {object} foodSession - foodSession to use that included a coupon
+ */
+function * updateCouponForCafe (foodSession) {
   try {
     var coupon = yield db.Coupon.findOne({
       team_id: foodSession.team_id,
@@ -49,7 +49,6 @@ function * updateCouponForCafe(foodSession) {
     return
   }
 }
-
 
 module.exports = {
   getLatestFoodCoupon: getLatestFoodCoupon,

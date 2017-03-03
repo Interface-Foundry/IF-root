@@ -8,6 +8,9 @@ var _ = require('lodash')
  * var menu = Menu(data)
  * console.log(menu.allItems())
  * console.log(menu.query("spring rolls"))
+ *
+ * @class
+ * @param {Object} data the menu document returnd by the delivery.com api
  */
 function Menu (data) {
   if (!(this instanceof Menu)) {
