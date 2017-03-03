@@ -183,7 +183,6 @@ function displayFlotCharts(props, context) {
   var teamWaypoints = props.teamId ? waypoints.filter(function(waypoint){
       return waypoint.food_session ? waypoint.food_session.team_id == props.teamId : false;
   }) : waypoints;
-debugger;
   var waypointPaths = getWaypointPaths(teamWaypoints);
   for (var i = 0; i < waypointPaths.length; i++) {
     rows.push({user_id: waypointPaths[i].user_id, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
@@ -203,24 +202,27 @@ debugger;
         </div>
       </div>
 
-      <div className="row">
-        <div>
+      <div className="panel panel-default fillSpace">
           <Panel header={<span>Table of Waypoint Routes</span>}>
             <Table heads={[{
               field: 'user_id',
-              descrip: 'User ID'
+              descrip: 'User ID',
+              allowSort: true
             }, {
               field: 'team_name',
-              descrip: 'Team Name'
+              descrip: 'Team Name',
+              allowSort: true,
+              sort: (a,b, desc) => {if(desc) new Date(a) - new Date(b)}
             }, {
               field: 'actions',
-              descrip: 'Last Actions'
+              descrip: 'Last Actions',
+              allowSort: true
             }, {
               field: 'route',
-              descrip: 'FoodSession Waypoint Route'
+              descrip: 'FoodSession Waypoint Route',
+              allowSort: true
             }]} data={rows} />
           </Panel>
-        </div>
       </div>
 
       <div className="row">

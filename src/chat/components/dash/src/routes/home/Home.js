@@ -66,7 +66,10 @@ function Home(props, context) {
           heads = {
             [{
               field: 'purchased_date',
-              descrip: 'Purchased Date'
+              descrip: 'Purchased Date',
+              sort: (a, b, order) => order == 'desc' ? 
+                  new Date(b.created_date) - new Date(a.created_date) 
+                  : new Date(a.created_date) - new Date(b.created_date)
             }, {
               field: 'team_name',
               descrip: 'Slack ID'

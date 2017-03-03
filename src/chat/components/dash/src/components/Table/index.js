@@ -18,12 +18,12 @@ class CustomTable extends Component {
   }
 
   createTableHeaders(heads) {
-    return heads.map((head, i) => <TableHeaderColumn isKey={i==1} dataSort={true} dataField={head.field} key={i}>{head.descrip}</TableHeaderColumn>)
+    return heads.map((head, i) => <TableHeaderColumn isKey={i==1} dataSort={(head.allowSort || head.allowSort === undefined)} sortFunc={ head.sort } dataField={head.field} key={i}>{head.descrip}</TableHeaderColumn>)
   }
 
   render() {
     return (
-      <BootstrapTable ref='table' scrollTop={ 'Bottom' } data={ this.props.data } hover>
+      <BootstrapTable ref='table' height='500px' scrollTop={ 'Top' } data={ this.props.data }  hover>
         {this.createTableHeaders(this.props.heads)}
       </BootstrapTable>
     )
