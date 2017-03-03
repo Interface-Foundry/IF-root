@@ -34,6 +34,7 @@ const data = [
 ];
 /******* */
 
+
 function sessions(props, context) {
   context.setTitle(title);
   return (
@@ -63,10 +64,14 @@ function sessions(props, context) {
           heads = {
             [{
               field: 'created_date_vague',
-              descrip: 'Since'
+              descrip: 'Since',
+              allowSort: false
             }, {
               field: 'created_date',
-              descrip: 'Created Date'
+              descrip: 'Created Date',
+              sort: (a, b, order) => order == 'desc' ? 
+                  new Date(b.created_date) - new Date(a.created_date) 
+                  : new Date(a.created_date) - new Date(b.created_date)
             }, {
               field: 'team_name',
               descrip: 'Slack ID'

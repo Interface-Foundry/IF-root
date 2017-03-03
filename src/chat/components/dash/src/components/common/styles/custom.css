@@ -1,63 +1,68 @@
 .sidebar {
-	display: flex;
-	min-width: 330px;
+  display: flex;
+  min-width: 330px;
+}
+
+.react-bs-table table td {
+  white-space: normal;
 }
 
 .sidebar-nav.navbar-collapse {
-	overflow-x: hidden !important;
-	overflow-y: scroll !important;
-	height: calc(100vh - 52px) !important;
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  height: calc(100vh - 52px) !important;
 }
 
 .category-sidebar {
-	min-width: 170px;
-	border-right: 1px solid #e7e7e7;
+  min-width: 170px;
+  border-right: 1px solid #e7e7e7;
 }
 
 .sidebar-nav {
-	width: 50%;
+  width: 50%;
 }
 
 .data-display {
-	display: flex;
-	padding: 10px;
-	flex-direction: column;
-	height: calc(100vh - 52px);
+  display: flex;
+  padding: 10px;
+  flex-direction: column;
+  height: calc(100vh - 52px);
 }
 
 .resizable {
-	min-height: 150px;
-	height: 200px;
-	resize: vertical;
-	overflow: auto;
-	margin: -15px;
-	padding: 15px;
-	max-height: 700px
+  min-height: 150px;
+  height: 200px;
+  resize: vertical;
+  overflow: auto;
+  margin: -15px;
+  padding: 15px;
+  max-height: 700px;
 }
 
 .panel-body {
-	padding: 0;
-	margin: 15px;
+  padding: 0;
+  margin: 15px;
 }
 
-@media(min-width:768px) {
-	#page-wrapper {
-		margin: 0 0 0 330px;
-		height: calc(100vh - 52px);
-		overflow: auto;
-	}
+@media (min-width: 768px) {
+  #page-wrapper {
+    margin: 0 0 0 330px;
+    height: calc(100vh - 52px);
+    overflow: auto;
+    min-height: 0;
+  }
 
-	.fillSpace {
-		flex: 1;
-		overflow-x: hidden;
-		overflow-y: scroll;
-	}
+  .fillSpace {
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
 
-	.table-responsive {
-		overflow-y: none;
-	}
+  .table-responsive {
+    overflow-y: none;
+  }
 
-	.table {
-		margin-bottom: 0;
-	}
+  .table {
+    margin-bottom: 0;
+  }
 }
