@@ -61,7 +61,7 @@ class SubSidebar extends Component {
       url_pieces = url.split('?')
       history.push(url_pieces[0]+`?id=${team.team_id}`)
     }
-    history.push(url+`?id=${team.team_id}` + `&teamname=${team.team_name}`)
+    team? history.push(url+`?id=${team.team_id}` + `&teamname=${team.team_name}`) : history.push(url);
   }
 
   filterData(teams, filter) {

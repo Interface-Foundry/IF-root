@@ -177,8 +177,6 @@ function getWaypointActions(waypoints){
 
 function getTeamName(delivery_id, teams){
   var team = teams.find(function(t){return t.food_sessions.length>0 ? t.food_sessions.find(function(foodSession){return foodSession.id==delivery_id}) : false});
-  //var teamId = team ? team.team_id : '';
-  //team = teams.find(function(t){return t.team_id==teamId})
   var teamName = team ? team.team_name : '';
   return teamName;
 }
@@ -188,9 +186,7 @@ function displayFlotCharts(props, context) {
 
   var rows = [];
   var waypoints = props.waypoints;
-  //var food_sessions = props.food_sessions;
   var teams = props.teams;
-
   var teamWaypoints = props.teamId ? waypoints.filter(function(waypoint){
       var team = teams.find(function(t){return t.food_sessions.length>0 ? t.food_sessions.find(function(foodSession){return foodSession.id==waypoint.delivery_id}) : false});
       var teamId = team ? team.team_id : '';
@@ -201,20 +197,19 @@ function displayFlotCharts(props, context) {
   for (var i = 0; i < waypointPaths.length; i++) {
 
     var teamName = getTeamName(waypointPaths[i].delivery_id,teams);
-    rows.push({user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
-    //rows.push({user_id: waypointPaths[i].user_id, team_name: waypointPaths[i].team_name, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
+    rows.push({user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join(' \u27A1')})
   }
 
   var cells = [];
   for (var i = 0; i < teamStats.length; i++){
     cells.push(<Cell fill={COLORS[i]} />)
   }
-
+  var currentTeam = props.teamName ? props.teamName : 'All Team';
   return (
     <div>
       <div className="row">
         <div className="col-lg-12">
-          <PageHeader>{props.teamName} Stats</PageHeader>
+          <PageHeader>{currentTeam} Stats</PageHeader>
         </div>
       </div>
 
