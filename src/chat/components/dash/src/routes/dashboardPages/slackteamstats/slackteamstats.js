@@ -122,9 +122,8 @@ function getWaypointPaths(waypoints){
   var data = _.map(userWaypoints, function(waypointArray){
     waypointArray = _.sortBy(waypointArray, [function(o) { return o.timestamp; }]);
 
-
     return {
-            user_id: waypointArray[0].user_id,
+            user_id: waypointArray[0].user.name,
             delivery_id: waypointArray[0].delivery_id,
             waypoints: waypointArray.map((waypoint) => waypoint.waypoint)
         }
@@ -184,10 +183,11 @@ function displayFlotCharts(props, context) {
   var teamWaypoints = props.teamId ? waypoints.filter(function(waypoint){
       return waypoint.food_session ? waypoint.food_session.team_id == props.teamId : false;
   }) : waypoints;
-
+debugger;
   var waypointPaths = getWaypointPaths(teamWaypoints);
   for (var i = 0; i < waypointPaths.length; i++) {
     rows.push({user_id: waypointPaths[i].user_id, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
+    //rows.push({user_id: waypointPaths[i].user_id, team_name: waypointPaths[i].team_name, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
   }
 
   var cells = [];
@@ -209,6 +209,9 @@ function displayFlotCharts(props, context) {
             <Table heads={[{
               field: 'user_id',
               descrip: 'User ID'
+            }, {
+              field: 'team_name',
+              descrip: 'Team Name'
             }, {
               field: 'actions',
               descrip: 'Last Actions'
