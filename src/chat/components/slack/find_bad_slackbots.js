@@ -4,6 +4,11 @@ var request = require('request-promise')
 var archiveTeam = require('./archive_team')
 var sendFeedbackRequstEmail = require('./feedback_request_email')
 
+/**
+ * Goes through the database of slackbots and tests the access token we have.
+ * If the access token doesnt work, the team is archived.
+ * @return {Promise}
+ */
 function preen () {
   logging.info('testing auth for all the bots in the database')
   return co(function * () {
@@ -18,6 +23,12 @@ function preen () {
   })
 }
 
+/**
+ * Checks whether or not a bot's access token is valid. Archives the team if the
+ * access token is not valid.
+ * @param  {Slackbot}    bot a db.Slackbot model
+ * @return {Generator}   
+ */
 function * checkBot (bot) {
   logging.debug('testing', bot.team_name.cyan)
   try {

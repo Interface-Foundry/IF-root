@@ -2,6 +2,11 @@ require('../../../kip')
 var fs = require('fs')
 var _ = require('lodash')
 
+/**
+ * Script for generating lists of users to send marketing messages to.
+ * See also feature_rollout.js
+ * @module slack/gen_users
+ */
 db.Slackbots.find({
   'meta.deleted': {$ne: true},
   'meta.mock': {$ne: true}
@@ -51,4 +56,3 @@ db.Slackbots.find({
   generateDay(4)
   process.exit(0)
 })
-
