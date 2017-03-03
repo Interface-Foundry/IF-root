@@ -8,7 +8,7 @@ var $allHandlers // this is how you can access handlers from other files
 // exports
 var handlers = {}
 
-
+/**Adds a single email from the email team to participate in this specific order*/
 handlers['food.admin.team.add_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var e = message.source.callback_id;
@@ -17,8 +17,7 @@ handlers['food.admin.team.add_order_email'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
-//~~~~~~~~~~//
-
+/**Adds all of the email team to participate in this specific order*/
 handlers['food.admin.team.add_all_emails'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var et = yield db.email_users.find({team_id: message.source.team});
@@ -29,8 +28,7 @@ handlers['food.admin.team.add_all_emails'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
-//~~~~~~~~~~//
-
+/**Removes a single email from the email team from participating in this specific order*/
 handlers['food.admin.team.remove_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
@@ -41,8 +39,7 @@ handlers['food.admin.team.remove_order_email'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
-//~~~~~~~~~~//
-
+/**Deletes an email / email user from the team*/
 handlers['food.admin.team.delete_email'] = function * (message) {
   // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
@@ -58,34 +55,38 @@ handlers['food.admin.team.delete_email'] = function * (message) {
   yield handlers['food.admin.team.remove_order_email'](message)
 }
 
-//~~~~~~~~~~//
-
+/**Displays the email members in the team*/
 handlers['food.admin.team.email_members'] = function * (message) {
-  console.log('email handlers')
-  console.log(message.data.value.reorder)
-  console.log('lodash', _.get(message, 'data.value.reorder'))
+  // console.log(message.data.value.reorder)
+  // console.log('lodash', _.get(message, 'data.value.reorder'))
+
+  // passed from the previous handler if this is a reorder, to avoid duplicating the email handlers
   var reorder = _.get(message, 'data.value.reorder') || message.history[1]._doc.action === 'admin.team.members.reorder'
   var previousRestaurant = _.get(message, 'data.value.resto')
-  //fallback find the message with the last restaurant? where reorder is selected
   if (reorder && !previousRestaurant && message.history) previousRestaurant = message.history[1]._doc.data.value
+
+  // if we can't pass the id of the restaurant we're reordering from, query the db for the most recent message that contains the reordered restaurant id
   if (reorder && !previousRestaurant) {
     var reorderMessage = yield db.Messages.find({action: 'ready_to_poll'}).sort('-ts').limit(1).exec()
     reorderMessage = reorderMessage[0]
     previousRestaurant = reorderMessage.source.original_message.attachments[1].actions[0].value
   }
 
-  console.log('REORDER', reorder)
+  console.log('REORDER', reorder) // bool
+
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1112, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  var et = yield db.email_users.find({team_id: message.source.team});
-  var index = parseInt(_.get(message, 'data.value.index')) || 0
+  var et = yield db.email_users.find({team_id: message.source.team}); // the list of email users associated with this team
+  var index = parseInt(_.get(message, 'data.value.index')) || 0 // the index in the list we're displaying from
   var inc = 4;
 
   var msg_json = {'attachments': []};
 
   if (et.length) {
+
+    // when clicked removes email from order
     var addedButton = {
       "name": "food.admin.team.remove_order_email",
       "text": "✓ Added",
@@ -97,6 +98,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
       }
     };
 
+    // when clicked adds email to order
     var addButton = {
       "name": "food.admin.team.add_order_email",
       "text": "○ Add",
@@ -108,11 +110,11 @@ handlers['food.admin.team.email_members'] = function * (message) {
       }
     };
 
-    // var emails = [];
+    // attachments for the four emails we are currently displaying
     et.slice(index, index + 4).map(function (e) {
       msg_json.attachments.push({
         "text": e.email,
-        "fallback": "A bridge to the over-man",
+        "fallback": "email address",
         "callback_id": e.email,
         "attachment_type": "default",
         "actions": [
@@ -130,6 +132,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
       ]});
     });
 
+    // displays previous four emails
     var prev = {
       "name": "food.admin.team.email_members",
       "text": "< Previous",
@@ -141,6 +144,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
       }
     };
 
+    // displays next four emails
     var next =  {
       "name": "food.admin.team.email_members",
       "text": "Next >",
@@ -160,8 +164,9 @@ handlers['food.admin.team.email_members'] = function * (message) {
       "actions": []
     };
 
-    if (index >= inc) scrollButtons.actions.push(prev);
-    if (index <= et.length-inc) scrollButtons.actions.push(next);
+    // don't display scroll buttons if there are no email users to display in the relevant direction
+    if (index >= inc && et.length > inc) scrollButtons.actions.push(prev);
+    if (index <= et.length-inc && et.length > inc) scrollButtons.actions.push(next);
 
     msg_json.attachments.push(scrollButtons);
 
