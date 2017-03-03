@@ -13,7 +13,7 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: '{waypoints{user_id,delivery_id, waypoint, timestamp, user{name}}}',
+        query: '{waypoints{user_id,delivery_id, waypoint, timestamp, user{name}}, deliveries{ id, team_id},teams{team_id, team_name}}',
       }),
       credentials: 'include',
     });
@@ -22,7 +22,7 @@ export default {
     } = await resp.json();
     if (!data || !data.waypoints) throw new Error('Failed to load waypoints.');
 
-    return <FlotCharts waypoints={data.waypoints} teamId={context.query.id} teamName={context.query.teamname} />;
+    return <FlotCharts waypoints={data.waypoints} food_sessions={data.deliveries} teams={data.teams} teamId={context.query.id} teamName={context.query.teamname} />;
   }
 
 };

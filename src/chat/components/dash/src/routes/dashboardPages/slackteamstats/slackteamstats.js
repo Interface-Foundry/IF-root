@@ -175,18 +175,32 @@ function getWaypointActions(waypoints){
   return lastActions;
 }
 
+function getTeamName(delivery_id, foodSessions, teams){
+  var team = foodSessions.find(function(session){return session.id==delivery_id});
+  var teamId = team ? team.team_id : '';
+  team = teams.find(function(t){return t.team_id==teamId})
+  var teamName = team ? team.team_name : '';
+  return teamName;
+}
+
 function displayFlotCharts(props, context) {
   context.setTitle(title);
 
   var rows = [];
   var waypoints = props.waypoints;
+  var food_sessions = props.food_sessions;
+  var teams = props.teams;
+
   var teamWaypoints = props.teamId ? waypoints.filter(function(waypoint){
       return waypoint.food_session ? waypoint.food_session.team_id == props.teamId : false;
   }) : waypoints;
-debugger;
+
+
   var waypointPaths = getWaypointPaths(teamWaypoints);
   for (var i = 0; i < waypointPaths.length; i++) {
-    rows.push({user_id: waypointPaths[i].user_id, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
+
+    var teamName = getTeamName(waypointPaths[i].delivery_id,food_sessions,teams);
+    rows.push({user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
     //rows.push({user_id: waypointPaths[i].user_id, team_name: waypointPaths[i].team_name, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join('\u27A1')})
   }
 
