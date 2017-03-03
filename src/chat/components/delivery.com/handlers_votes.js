@@ -847,11 +847,14 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
   }
 }
 
+/**
+* Displays list of restaurants for the admin to choose from
+* @param message
+* @param foodSession
+*/
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-  // console.log('SORT.cuisine', SORT.cuisine)
   var index = _.get(message, 'data.value.index', 0)
   var sort = _.get(message, 'data.value.sort', SORT.cuisine)
-  // console.log(sort)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   var keyword = _.get(message, 'data.value.keyword')
 
@@ -882,9 +885,9 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       var votes = foodSession.votes.filter(v => v.vote == realWinner) //votes for the winning cuisine
       var vote = votes.reduce(function (acc, val) {
         return (acc.weight > val.weight ? acc : val)
-      }, {weight: -100}) //user who voted for the winning cuisine the hardest
+      }, {weight: -100}) //user who voted for the winning cuisine the hardest / whose vote for the winning cuisine is prioritized the most
       console.log('winning vote', vote)
-
+      // explanation text explaining the choice when it is different / not obvious from the simple voting result
       var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
     }
   }
@@ -1017,6 +1020,10 @@ handlers['food.admin.restaurant.more_info'] = function * (message) {
   // TODO later
 }
 
+/**
+* User can search for restaurants by keywords
+* @param message
+*/
 handlers['food.admin.restaurant.search'] = function * (message) {
   message.data = {
     value: {
@@ -1029,12 +1036,14 @@ handlers['food.admin.restaurant.search'] = function * (message) {
   return yield handlers['food.admin.restaurant.pick.list'](message)
 }
 
+/**
+* Process the admin's selection of a restaurant
+*/
 handlers['food.admin.restaurant.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
 
-  // update chatusers with information about which users won / lost the polling
-  // console.log('MERCHANT', merchant)
+  // update chatusers with information about which users won / lost the pollin
   var votes = foodSession.votes
   var cuisines = merchant.summary.cuisines
   yield votes.map(function * (v) {
@@ -1042,9 +1051,6 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     var user = yield db.chatusers.findOne({id: v.user})
     if (user.vote_weight + weight > 0) yield db.chatusers.update({id: v.user}, {$inc: {vote_weight: weight}}) // vote value cannot go to or below zero
     else yield db.chatusers.updatae({id: v.user}, {$set: {vote_weight: 0.1}})
-    // user.vote_weight += weight;
-    // yield user.save()
-    // yield db.chatusers.update({id: v.user}, {$inc: {vote_weight: weight}})
   })
 
   // stores the cuisines in the slackbot
