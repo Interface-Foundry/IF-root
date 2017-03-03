@@ -491,7 +491,7 @@ handlers['food.item.add_to_cart'] = function * (message) {
       );
     }
   }
-  console.log('userItem', userItem, '********')
+  
   userItem.added_to_cart = true
   yield db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.added_to_cart': true}}).exec()
 
