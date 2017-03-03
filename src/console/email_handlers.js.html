@@ -1,4 +1,32 @@
-'use strict'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: email_handlers.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: email_handlers.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict'
 var _ = require('lodash')
 
 // injected dependencies
@@ -6,13 +34,9 @@ var $replyChannel
 var $allHandlers // this is how you can access handlers from other files
 
 // exports
-/**@namespace handlers*/
 var handlers = {}
 
-/**
-* Adds a single email from the email team to participate in this specific order
-* @param message
-*/
+/**Adds a single email from the email team to participate in this specific order*/
 handlers['food.admin.team.add_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var e = message.source.callback_id;
@@ -21,10 +45,7 @@ handlers['food.admin.team.add_order_email'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
-/**
-* Adds all of the email team to participate in this specific order
-* @param message
-*/
+/**Adds all of the email team to participate in this specific order*/
 handlers['food.admin.team.add_all_emails'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var et = yield db.email_users.find({team_id: message.source.team});
@@ -35,10 +56,7 @@ handlers['food.admin.team.add_all_emails'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
-/**
-* Removes a single email from the email team from participating in this specific order
-* @param message
-*/
+/**Removes a single email from the email team from participating in this specific order*/
 handlers['food.admin.team.remove_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
@@ -49,10 +67,7 @@ handlers['food.admin.team.remove_order_email'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
-/**
-* Deletes an email / email user from the team
-* @param message
-*/
+/**Deletes an email / email user from the team*/
 handlers['food.admin.team.delete_email'] = function * (message) {
   // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
@@ -68,10 +83,7 @@ handlers['food.admin.team.delete_email'] = function * (message) {
   yield handlers['food.admin.team.remove_order_email'](message)
 }
 
-/**
-* Displays the email members in the team
-* @param message
-*/
+/**Displays the email members in the team*/
 handlers['food.admin.team.email_members'] = function * (message) {
   // console.log(message.data.value.reorder)
   // console.log('lodash', _.get(message, 'data.value.reorder'))
@@ -79,16 +91,16 @@ handlers['food.admin.team.email_members'] = function * (message) {
   // passed from the previous handler if this is a reorder, to avoid duplicating the email handlers
   var reorder = _.get(message, 'data.value.reorder') || message.history[1]._doc.action === 'admin.team.members.reorder'
   var previousRestaurant = _.get(message, 'data.value.resto')
-  if (reorder && !previousRestaurant && message.history) previousRestaurant = message.history[1]._doc.data.value
+  if (reorder &amp;&amp; !previousRestaurant &amp;&amp; message.history) previousRestaurant = message.history[1]._doc.data.value
 
   // if we can't pass the id of the restaurant we're reordering from, query the db for the most recent message that contains the reordered restaurant id
-  if (reorder && !previousRestaurant) {
+  if (reorder &amp;&amp; !previousRestaurant) {
     var reorderMessage = yield db.Messages.find({action: 'ready_to_poll'}).sort('-ts').limit(1).exec()
     reorderMessage = reorderMessage[0]
     previousRestaurant = reorderMessage.source.original_message.attachments[1].actions[0].value
   }
 
-  console.log('REORDER', reorder)
+  console.log('REORDER', reorder) // bool
 
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
@@ -151,7 +163,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
     // displays previous four emails
     var prev = {
       "name": "food.admin.team.email_members",
-      "text": "< Previous",
+      "text": "&lt; Previous",
       "type": "button",
       "value": {
         index: index - inc,
@@ -181,8 +193,8 @@ handlers['food.admin.team.email_members'] = function * (message) {
     };
 
     // don't display scroll buttons if there are no email users to display in the relevant direction
-    if (index >= inc && et.length > inc) scrollButtons.actions.push(prev);
-    if (index <= et.length-inc && et.length > inc) scrollButtons.actions.push(next);
+    if (index >= inc &amp;&amp; et.length > inc) scrollButtons.actions.push(prev);
+    if (index &lt;= et.length-inc &amp;&amp; et.length > inc) scrollButtons.actions.push(next);
 
     msg_json.attachments.push(scrollButtons);
 
@@ -240,7 +252,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
         }
         // {
         //   'name': 'passthrough',
-        //   'text': '< Back',
+        //   'text': '&lt; Back',
         //   'style': 'default',
         //   'type': 'button',
         //   'value': 'food.admin.team.add_email'
@@ -251,29 +263,29 @@ handlers['food.admin.team.email_members'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.team.email_members', {type: message.origin, data: msg_json});
 }
 
-/**
-* Adds a (new) email the user types to the email team
-* @param message
-*/
+/**Adds a (new) email the user types to the email team*/
 handlers['food.admin.team.add_email'] = function * (message) {
   // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
 
   var msg_text = 'Please type an email address below';
   var confirm = false;
 
-  //validates that the email the user types in is formatted correctly to be an email
+  /**
+  validates that the email the user types in is formatted correctly to be an email
+  @param {string} str -- the ostensible email that needs to be validated
+  */
   function validateEmail (str) {
 
-    var email = str.match(/(\b[A-Za-z0-9!#\$%&'\*\+\/=\?^-][A-Za-z0-9!_\.#\$%&'\*\+\/=\?^-]*[A-Za-z0-9!#\$%&'\*\+\/=\?^-]@[a-z0-9-]+\.[a-z0-9-]+\b)/);
+    var email = str.match(/(\b[A-Za-z0-9!#\$%&amp;'\*\+\/=\?^-][A-Za-z0-9!_\.#\$%&amp;'\*\+\/=\?^-]*[A-Za-z0-9!#\$%&amp;'\*\+\/=\?^-]@[a-z0-9-]+\.[a-z0-9-]+\b)/);
 
     if (email) return email[1];
     else return null;
   }
 
-  if (message.text && message.text != "food.admin.team.add_email") {
+  if (message.text &amp;&amp; message.text != "food.admin.team.add_email") {
     var email = validateEmail(message.text);
     var alreadyInDb = yield db.email_users.findOne({email: email, team_id: message.source.team});
-    if (email && !alreadyInDb) {
+    if (email &amp;&amp; !alreadyInDb) {
       confirm = true;
       console.log('email up here:', email)
       msg_text = `Is ${email} the email you want to add?`;
@@ -313,10 +325,7 @@ handlers['food.admin.team.add_email'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.team.add_email', {type: message.origin, data: msg_json})
 }
 
-/**
-* Saves the new email the user has just added to the email team in the db
-* @param message
-*/
+/**Saves the new email the user has just added to the email team in the db*/
 handlers['food.admin.team.confirm_email'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -324,12 +333,14 @@ handlers['food.admin.team.confirm_email'] = function * (message) {
 
   var admin = yield db.Chatusers.findOne({id: message.source.user})
 
-
-  //Generates a new user id for the new email member
+  /**
+  * Generates a new user id for the new email member
+  * @param {number} n - the number of characters the new id should be
+  */
   function newId (n) {
     var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     var id = '';
-    for (var i = 0; i < n; i++) {
+    for (var i = 0; i &lt; n; i++) {
       id += chars.split('')[Math.floor(Math.random() * chars.length)];
     }
     return id;
@@ -366,3 +377,26 @@ module.exports = function (replyChannel, allHandlers) {
   // merge in our own handlers
   _.merge($allHandlers, handlers)
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Mar 03 2017 11:47:58 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
