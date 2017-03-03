@@ -149,6 +149,8 @@ function * storeCard (pay, charge) {
     return
   }
 
+  var companyCard = (slackbot.meta.office_assistants.find(u => u === pay.order.convo_initiater.id)) ? true : false
+
   // update stripe / push cards into array
   if (!slackbot.meta.payments) {
     slackbot.meta.payments = []
@@ -167,7 +169,10 @@ function * storeCard (pay, charge) {
       last4: charge.source.last4,
       address_zip: charge.source.address_zip,
       email: charge.source.name // this should work...
-    }
+    },
+    added_by: pay.order.convo_initiater.id,
+    company_card: companyCard,
+    date_added: Date.now()
   })
   yield slackbot.save()
 }

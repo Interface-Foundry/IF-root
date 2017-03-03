@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: cafe-menu
+  namespace: production
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "gce"
+spec:
+  tls:
+  - hosts:
+    - cafe.kipthis.com
+    secretName: cafe-tls
+  backend:
+    serviceName: cafe-menu
+    servicePort: 80
