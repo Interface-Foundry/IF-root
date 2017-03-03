@@ -6,9 +6,13 @@ var $replyChannel
 var $allHandlers // this is how you can access handlers from other files
 
 // exports
+/**@namespace handlers*/
 var handlers = {}
 
-/**Adds a single email from the email team to participate in this specific order*/
+/**
+* Adds a single email from the email team to participate in this specific order
+* @param message
+*/
 handlers['food.admin.team.add_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var e = message.source.callback_id;
@@ -17,7 +21,10 @@ handlers['food.admin.team.add_order_email'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
-/**Adds all of the email team to participate in this specific order*/
+/**
+* Adds all of the email team to participate in this specific order
+* @param message
+*/
 handlers['food.admin.team.add_all_emails'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var et = yield db.email_users.find({team_id: message.source.team});
@@ -28,7 +35,10 @@ handlers['food.admin.team.add_all_emails'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
-/**Removes a single email from the email team from participating in this specific order*/
+/**
+* Removes a single email from the email team from participating in this specific order
+* @param message
+*/
 handlers['food.admin.team.remove_order_email'] = function * (message) {
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
@@ -39,7 +49,10 @@ handlers['food.admin.team.remove_order_email'] = function * (message) {
   yield handlers['food.admin.team.email_members'](message);
 }
 
-/**Deletes an email / email user from the team*/
+/**
+* Deletes an email / email user from the team
+* @param message
+*/
 handlers['food.admin.team.delete_email'] = function * (message) {
   // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
@@ -55,7 +68,10 @@ handlers['food.admin.team.delete_email'] = function * (message) {
   yield handlers['food.admin.team.remove_order_email'](message)
 }
 
-/**Displays the email members in the team*/
+/**
+* Displays the email members in the team
+* @param message
+*/
 handlers['food.admin.team.email_members'] = function * (message) {
   // console.log(message.data.value.reorder)
   // console.log('lodash', _.get(message, 'data.value.reorder'))
@@ -72,7 +88,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
     previousRestaurant = reorderMessage.source.original_message.attachments[1].actions[0].value
   }
 
-  console.log('REORDER', reorder) // bool
+  console.log('REORDER', reorder)
 
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
@@ -235,15 +251,17 @@ handlers['food.admin.team.email_members'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.team.email_members', {type: message.origin, data: msg_json});
 }
 
-//~~~~~~~~~~//
-
-
+/**
+* Adds a (new) email the user types to the email team
+* @param message
+*/
 handlers['food.admin.team.add_email'] = function * (message) {
   // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
 
   var msg_text = 'Please type an email address below';
   var confirm = false;
 
+  //validates that the email the user types in is formatted correctly to be an email
   function validateEmail (str) {
 
     var email = str.match(/(\b[A-Za-z0-9!#\$%&'\*\+\/=\?^-][A-Za-z0-9!_\.#\$%&'\*\+\/=\?^-]*[A-Za-z0-9!#\$%&'\*\+\/=\?^-]@[a-z0-9-]+\.[a-z0-9-]+\b)/);
@@ -295,16 +313,19 @@ handlers['food.admin.team.add_email'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.team.add_email', {type: message.origin, data: msg_json})
 }
 
-//~~~~~~~~~~//
-
+/**
+* Saves the new email the user has just added to the email team in the db
+* @param message
+*/
 handlers['food.admin.team.confirm_email'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var email = foodSession.data.temp_email;
 
   var admin = yield db.Chatusers.findOne({id: message.source.user})
-  // console.log('admin:', admin)
 
+
+  //Generates a new user id for the new email member
   function newId (n) {
     var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     var id = '';
