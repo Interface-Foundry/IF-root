@@ -3,6 +3,13 @@ var _ = require('lodash')
 
 var co = require('co')
 
+/**
+ * Sends an email to the first available admin on a team asking why they deleted kip
+ * We don't have access to the user that actually did remove Kip.
+ * @module
+ * @param  {String} team_id team id of the team which was removed
+ * @return {Promise}
+ */
 function sendFeedbackRequestEmail(team_id) {
   logging.debug('sending feedback request email to team', team_id)
   return co(function * () {
@@ -63,7 +70,7 @@ if (!module.parent) {
     var team = yield db.Slackbots.findOne({
       team_name: 'Mars Vacation Condos'
     }).exec()
-    
+
     yield module.exports(team.team_id)
 
     process.exit(0)
@@ -71,4 +78,3 @@ if (!module.parent) {
     logging.error(e)
   })
 }
-
