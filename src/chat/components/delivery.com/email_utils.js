@@ -1,3 +1,5 @@
+/**@module email_utils*/
+
 var _ = require('lodash')
 var rp = require('request-promise')
 
@@ -10,11 +12,23 @@ var column_length = 4;
 var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">';
 var br = '<br/>'
 
+/**@constant {string} - kip blue color used accross slack, web, and email*/
 var kip_blue = '#47a2fc'
+
+/**@constant {string} - light grey color used accross web, and email*/
 var ryan_grey = '#F5F5F5'
 
+/**@exports email_utils*/
 var utils = {};
 
+/**
+* Generates HTML for quickpick emails that collect orders from email-only team members
+* @param foodSession
+* @param slackbot
+* @param slacklink {string} - slack url for the slack team the email is sent from
+* @param email {string} - the email address the order will be collected from
+* @returns {string} - html for the body of the order collection email
+*/
 utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
 
   var user = yield db.email_users.findOne({email: email, team_id: foodSession.team_id});
@@ -64,6 +78,13 @@ utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
   return html;
 }
 
+/**
+* formats the html for a single table cell / menu item
+* @param i {number} - the x coordinate of this table cell
+* @param j {number} - the y coordinate of this table cell
+* @param quickpicks {array} -
+* @returns {string} - html for a single table cell / menu item
+*/
 utils.formatItem = function (i, j, quickpicks) {
   return `<table border="0" style="position:absolute;">`
     + `<tr style="position:absolute;top:30px;"><td>` +
@@ -75,8 +96,13 @@ utils.formatItem = function (i, j, quickpicks) {
   `</td></tr></table>`;
 }
 
-utils.sendEmailUserConfirmations = function * (foodSession, email) {
 
+/**
+* creates and sends an email to email-only users confirming that their order has gone through
+* @param foodSession
+* @param email {string} - the email the order being confirmed is associated with
+*/
+utils.sendEmailUserConfirmations = function * (foodSession, email) {
   var menu = Menu(foodSession.menu)
   var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">'
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
@@ -162,8 +188,11 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
   }
 }
 
+/**
+* Sends a confirmation email / receipt to the team administrator once their order has gone through
+* @param foodSession
+*/
 utils.sendConfirmationEmail = function * (foodSession) {
-
   var menu = Menu(foodSession.menu)
   var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">'
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
