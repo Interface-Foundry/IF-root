@@ -93,6 +93,18 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
 handlers['food.admin.order.checkout.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  // after food ordered, tell members admin is finished ordering
+  var removeOrderDashboardMsg = {
+    'text': `All orders collected, <@${foodSession.convo_initiater.id}>  is checking out now!`,
+    'fallback': `All orders collected, <@${foodSession.convo_initiater.id}>  is checking out now!`,
+    'callback_id': 'food.admin.order.checkout.confirm'
+  }
+
+  yield foodSession.order_dashboards.map(function * (dashboard) {
+    var usersMessage = yield db.Messages.findOne(dashboard.message)
+    yield $replyChannel.sendReplace(usersMessage, 'food.users.end_order_dashboard', {type: usersMessage.origin, data: removeOrderDashboardMsg})
+  })
+
   db.waypoints.log(1320, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(1).exec()
