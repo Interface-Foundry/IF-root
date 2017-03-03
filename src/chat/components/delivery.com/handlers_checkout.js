@@ -15,6 +15,7 @@ var $replyChannel
 var $allHandlers
 
 // exports
+/**@namespace*/
 var handlers = {}
 
 /* S12B
@@ -338,11 +339,12 @@ handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * 
   return yield handlers['food.admin.order.checkout.confirm'](msg)
 }
 
+/**
+* Gives the admin the option to edit the email to which the confirmation email / receipt will be sent for this order only
+* @param message
+*/
 handlers['food.admin.order.checkout.email'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-
-  console.log(foodSession.convo_initiater.email)
-
   var msg = {
     text: `Edit Email Address`,
     attachments: [{
@@ -351,15 +353,16 @@ handlers['food.admin.order.checkout.email'] = function * (message) {
       mrkdwn_in: ['text']
     }]
   }
-
   yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.email.submit', {type: message.origin, data: msg})
 }
 
+/**
+* Saves the email the admin just typed in to the foodSession
+* @param message
+*/
 handlers['food.admin.order.checkout.email.submit'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-
   // db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
-  logging.debug('MESSAGE.TEXT in email.submit', message.text)
   var email = (message.text ? message.text.split('|') : '')
   if (email.length > 1) email = email[1].split('>')[0]
   var valid = validator.validate(email)

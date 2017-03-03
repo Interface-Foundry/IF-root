@@ -250,7 +250,6 @@ handlers['food.poll.confirm_send'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
 }
 
-
 handlers['food.admin.display_channels_reorder'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var mostRecentMerchant = message.data.value

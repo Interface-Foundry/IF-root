@@ -16,6 +16,7 @@ var $replyChannel
 var $allHandlers
 
 // exports
+/**@namespace handlers*/
 var handlers = {}
 
 handlers['food.admin.confirm_new_session'] = function * (message) {
@@ -39,17 +40,14 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
       }
     ]
   }
-  // if (process.env.NODE_ENV == 'development_hannah') {
-  if (false) {
-    msg_json.attachments[0].actions.push(
-    {
-        'name': 'passthrough',
-        'text': 'Return to Order',
-        'type': 'button',
-        'value': 'food.admin.retrieve_order_status'
-      }
-    )
-  }
+    // msg_json.attachments[0].actions.push(
+    // {
+    //     'name': 'passthrough',
+    //     'text': 'Return to Order',
+    //     'type': 'button',
+    //     'value': 'food.admin.retrieve_order_status'
+    //   }
+    // )
   msg_json.attachments[0].actions.push({
       'name': 'food.admin.select_address',
       'text': 'Start New Order',
@@ -614,6 +612,7 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   logging.debug('foodSession.budget', foodSession.budget)
 
+  // notifies admin about the order budget
   var budgetAttachment = {
     text: (foodSession.budget ? `*Budget*: $${foodSession.budget} / person` : '*Budget*: Unlimited'),
     mrkdwn_in: ['text'],

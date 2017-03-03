@@ -24,7 +24,7 @@ if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
 var $replyChannel
 var $allHandlers
 
-// exports
+/** @namespace handlers */ //exports
 var handlers = {}
 
 /*
@@ -32,18 +32,26 @@ var handlers = {}
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
+
+/**
+* Chooses four sample cuisines for the user to select from. The first two are the two most popular cuisines in the area.
+* The third is the cuisine most frequently ordered by the team. The fourth is randomly selected from the cuisines available at the location.
+* @param {object} foodSession
+* @param {object} slackbot
+* @returns {array} Array of four cuisines the voter will select from
+*/
 function sampleCuisines (foodSession, slackbot) {
   // present top 2 local avail and then 2 random sample,
   // if we want to later prime user with previous selected choice can do so with replacing one of the names in the array
   var orderedCuisines = _.map(_.sortBy(foodSession.cuisines, ['count']), 'name')
   var ignoredTopItems = ['Cafe', 'Kosher', 'Sandwiches', 'Italian', 'Pizza', 'Asian']
   var cuisinesWithoutTop = _.pullAll(orderedCuisines, ignoredTopItems)
-  var top1 = cuisinesWithoutTop.pop()
+  var top1 = cuisinesWithoutTop.pop() //two most locally popular cuisines
   var top2 = cuisinesWithoutTop.pop()
   var randomCuisines = _.sampleSize(_.pull(orderedCuisines, top1, top2), 2)
 
   if (slackbot.meta.cuisine_frequency) {
-    var teamCuisines = Object.keys(slackbot.meta.cuisine_frequency).sort(function (a, b) {
+    var teamCuisines = Object.keys(slackbot.meta.cuisine_frequency).sort(function (a, b) { //cuisines sorted in order of how frequently this team orders them
       return slackbot.meta.cuisine_frequency[b] - slackbot.meta.cuisine_frequency[a]
     })
   }
@@ -222,21 +230,25 @@ handlers['food.admin.vote'] = function * (message) {
   yield handlers['food.admin.restaurant.pick.list'](message)
 }
 
-// for when the admin "skip"s the poll
+/**
+* for when the admin "skip"s the poll
+* @param message
+*/
 handlers['food.admin.poll'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message.original_text})
   sendAdminDashboard(foodSession)
 }
 
-// poll for cuisines
+/**
+* poll user for cuisines
+* @param message
+*/
 handlers['food.user.poll'] = function * (message) {
-  logging.debug('in food.user.poll')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1120, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var teamMembers = foodSession.team_members
-  console.log('found', teamMembers.length, 'team members')
 
   if (teamMembers.length === 0) {
     $replyChannel.sendReplace(message, 'food.admin.select_address', {
@@ -378,9 +390,10 @@ handlers['food.user.preferences.done'] = function * (message) {
   yield sendUserDashboard(foodSession, message, member)
 }
 
-//
-// User just clicked "thai" or something
-//
+/**
+* User just clicked "thai" or something -- submitting the user's vote
+* @param message
+*/
 handlers['food.vote.submit'] = function * (message) {
   // debugger;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -531,6 +544,11 @@ handlers['food.vote.abstain'] = function * (message) {
   }
 }
 
+/**
+* Builds the initial voting dashboard
+* @param foodSession
+* @returns dashboard
+*/
 function buildCuisineDashboard (foodSession) {
   // Build the votes tally
   var votes = foodSession.votes
@@ -590,9 +608,12 @@ function buildCuisineDashboard (foodSession) {
   return dashboard
 }
 
-//
-// Sends new or updates the admin's cuisine vote dashboard
-//
+/**
+* Sends new or updates the admin's cuisine vote dashboard
+* @param foodSession
+* @param message
+* @param user {object} The user the dashboard is being sent to
+*/
 function * sendAdminDashboard (foodSession, message, user) {
   logging.debug('sending admin dashboard')
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
@@ -674,9 +695,12 @@ function * sendAdminDashboard (foodSession, message, user) {
   }
 }
 
-//
-// Sends new or updates the user's cuisine vote dashbaord
-//
+/**
+* Sends new or updates any user's cuisine vote dashboard
+* @param foodSession
+* @param message
+* @param user {object} The user the dashboard is being sent to
+*/
 function * sendUserDashboard (foodSession, message, user) {
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
   var user = yield db.chatusers.findOne({id: user.id})
