@@ -50,17 +50,12 @@ handlers['food.admin.team.remove_order_email'] = function * (message) {
 }
 
 /**
-* Deletes an email / email user from the team
+* Deletes an email / email user from the team, and if relevant removes that user from the current order
 * @param message
 */
 handlers['food.admin.team.delete_email'] = function * (message) {
   // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
-
-  // if (foodSession.email_users.indexOf(e)) {
-  //   foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
-  //   yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
-  // }
 
   yield db.email_users.remove({team_id: message.source.team, email: e})
 
