@@ -3,6 +3,10 @@
   min-width: 330px;
 }
 
+.react-bs-table table td {
+  white-space: normal;
+}
+
 .sidebar-nav.navbar-collapse {
   overflow-x: hidden !important;
   overflow-y: scroll !important;
