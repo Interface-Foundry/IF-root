@@ -3,23 +3,23 @@ import React, {
 } from 'react';
 import fetch from '../../../core/fetch';
 import Select from 'react-select';
+import TeamMemberSidebar from '../../../components/TeamMemberSidebar'
 
 class SendMessage extends Component {
   constructor(props) {
     super(props);
-    console.log(props)
-    console.log('hi!')
     this.state = {
-      member: '',
+      member: {},
       message: '',
       members: [],
       text: '',
       error: '',
       sent: false
     }
-    this.handleSubmit = this.handleSubmit.bind(this)
-    this.processMembers = this.processMembers.bind(this)
-    this.userSelected = this.userSelected.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.processMembers = this.processMembers.bind(this);
+    this.userSelected = this.userSelected.bind(this);
+    this.navToMember = this.navToMember.bind(this);
   }
 
   async handleSubmit(e) {
@@ -28,11 +28,10 @@ class SendMessage extends Component {
       error: ''
     })
     const attachments = this.state.message ? encodeURIComponent(this.state.message) : ''
-    const res = await fetch(`https://slack.com/api/chat.postMessage?token=${this.props.token}&channel=${this.state.member}&attachments=${attachments}&text=${this.state.text}`, {
+    const res = await fetch(`https://slack.com/api/chat.postMessage?token=${this.state.member.token}&channel=${this.state.member.value}&attachments=${attachments}&text=${this.state.text}`, {
       method: 'post',
     })
     let json = await res.json();
-    console.log(json);
     if (!json.ok) {
       this.setState({
         error: json.error
@@ -44,11 +43,18 @@ class SendMessage extends Component {
     }
   }
 
+  async componentDidMount() {
+    let members = this.processMembers(this.props.members);
+    this.setState({
+    	members: members
+    })
+  }
+
   async componentWillReceiveProps(newProps) {
     let members = this.processMembers(newProps.members);
-    console.log(newProps);
     this.setState({
       members: members,
+      member: newProps.member,
       sent: false
     })
   }
@@ -72,15 +78,22 @@ class SendMessage extends Component {
   }
 
   userSelected(val) {
-    console.log(val)
     this.setState({
       sent: false,
-      member: val ? val.value : ''
+      member: val ? val : {}
     });
+  }
+
+  navToMember(member){
+     this.setState({
+      member: member,
+    })
   }
 
   render() {
     return (
+    	<div>
+    	<TeamMemberSidebar members={this.state.members} navToMember={this.navToMember}/>
       <form className="container-fluid data-display" onSubmit={this.handleSubmit}>
         {this.state.error ? 
           <div className="form-group"><div className="alert alert-danger" role="alert">
@@ -89,17 +102,8 @@ class SendMessage extends Component {
           </div></div>
         : ''}
           <div className="form-group">
-            <label htmlFor="memberSelect">Select a member</label>
+            <label htmlFor="memberSelect">{this.state.member.label !== undefined ? `Sending to ${this.state.member.label}` :'Select a member'}</label>
             <span id="helpBlock" className="help-block">🤖=Bot, 😎=Admin, 🙂=Member, 🤠=Owner</span>
-            <Select
-              name="memberSelect"
-              id="memberSelect"
-              required
-              value={this.state.member}
-              onChange={this.userSelected}
-              disabled={this.state.members.length===0}
-              options={this.state.members}
-            />
           </div>
           <div className="form-group">
             <label htmlFor="textInput">Text (optional)</label>
@@ -128,8 +132,9 @@ class SendMessage extends Component {
           <div className="alert alert-success" role="alert">
             <strong>Sent!</strong>
         </div></div> : ''}
-        <button type="submit" className="btn btn-default">Submit</button>
-      </form>)
+        <button type="submit" className="btn btn-default">Send Message</button>
+      </form>
+      </div>)
   }
 }
 

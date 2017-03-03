@@ -5,9 +5,9 @@ export default {
 
   path: '/sendmessage',
 
- async action(context) {
- 	let res;
-    if (context.query.id) {
+  async action(context) {
+    let res;
+    if (context.query.id && context.query.id != 'undefined') {
       res = await fetch('/graphql', {
         method: 'post',
         headers: {
@@ -27,19 +27,22 @@ export default {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: `{teams{ {members: users{value:dm, label:name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
+          query: `{teams {bot_access_token, team_name, members {value: dm, label: name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
         }),
         credentials: 'include',
       });
     }
-
     const {data} = await res.json();
-    if (context.query.id) {
-      let team = data.teams[0];
-      return <SendMessage team_name={team.team_name} token={team.bot_access_token} members={team.members}/>;
-    } else {
-      return <SendMessage  />
-    }
+    let members = data.teams.reduce((mems, team) => {
+      let teamMems = team.members.map(member => {
+        member.token = team.bot_access_token
+        return member;
+      })
+      return mems.concat(teamMems);
+    }, [])
+    let member = context.query.member ? context.query.member : '';
+    let token = context.query.token ? context.query.token: '';
+    return <SendMessage members={members} member={member} token={token} />
   },
 
 };

@@ -3,6 +3,14 @@
   min-width: 330px;
 }
 
+.page-sidebar {
+  width: 165px;
+  min-width: 0;
+  position: relative;
+  float: left;
+  margin: 0 0 0 -35px;
+}
+
 .react-bs-table table td {
   white-space: normal;
 }
@@ -16,10 +24,6 @@
 .category-sidebar {
   min-width: 170px;
   border-right: 1px solid #e7e7e7;
-}
-
-.sidebar-nav {
-  width: 50%;
 }
 
 .data-display {
