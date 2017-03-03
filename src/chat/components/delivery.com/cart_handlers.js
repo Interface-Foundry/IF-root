@@ -590,8 +590,8 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   // show admin final confirm of thing
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   logging.debug('foodSession.cart.length', foodSession.cart.length) // duplication has happened OH GOD IT'S JOHN CARPENTER'S "Thing"
-  teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
-  lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
+  var teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
+  var lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
   // var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
 
   yield lateMembers.map(function * (userId) {
