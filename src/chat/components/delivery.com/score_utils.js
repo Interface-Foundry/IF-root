@@ -56,25 +56,26 @@ var cuisineScore = function (m, cuisines) {
   else return '000'
 }
 
-var historyScore = function (m, sb) {
-  if (!sb.meta.order_frequency) return '000'
-  var team_history = sb.meta.order_frequency[m.id]
-  if (team_history) {
-    console.log('team_history.count', team_history.count)
-    if (team_history.count > 10) return '' + team_history.count
-    else if (team_history.count > 2) return '0' + team_history.count
-    else return '00'
-  }
-  else return '00'
-}
+// var historyScore = function (m, sb) {
+//   if (!sb.meta.order_frequency) return '000'
+//   var team_history = sb.meta.order_frequency[m.id]
+//   if (team_history) {
+//     console.log('team_history.count', team_history.count)
+//     if (team_history.count > 10) return '' + team_history.count
+//     else if (team_history.count > 2) return '0' + team_history.count
+//     else return '00'
+//   }
+//   else return '00'
+// }
 
 utils.cuisineSort = function (m, votes, slackbot) {
   //score by cuisine
   //w/in cuisines rank by order-history
   var cuisines = utils.rankCuisines(votes)
   var cScore = cuisineScore(m, cuisines)
-  var hScore = historyScore(m, slackbot)
+  // var hScore = historyScore(m, slackbot)
   // console.log('entire score:', cScore + hScore)
+  return cScore
   return cScore + hScore
 
   //w/in history score by yelp

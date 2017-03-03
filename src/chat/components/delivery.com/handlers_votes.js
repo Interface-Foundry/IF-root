@@ -1044,31 +1044,31 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   })
 
   // stores the restaurant in the slackbot order history
-  if (!sb.meta.order_frequency) sb.meta.order_frequency = {}
-  if (sb.meta.order_frequency[merchant.id]) {
-    console.log('does exist in the history')
-    var oldestDate = sb.meta.order_frequency[merchant.id].dates[0]
-    monthDifference = foodSession.time_started.getMonth() - oldestDate.getMonths()
-    //cut the restaurant out of the history if it's been there for more than 2 months
-    if (monthDifference > 2 || monthDifference < 0 && monthDifference > -10) {
-      console.log('outdated history being removed')
-      db.meta.order_frequency[merchant.id].dates.shift()
-      db.meta.order_frequency[merchant.id].count--
-    }
-    db.meta.order_frequency[merchant.id].count++
-    db.meta.order_frequency[merchant.id].dates.push(foodSession.time_started)
-  }
-  else {
-    console.log('does not exist in the history')
-    console.log('this is the merchant id', merchant.id)
-    sb.meta.order_frequency[merchant.id] = {
-      count: 1,
-      dates: [foodSession.time_started]
-    }
-  }
-  console.log('sb.meta.order_frequency', sb.meta.order_frequency)
-
-  yield db.slackbots.update({team_id: foodSession.team_id}, {meta: sb.meta})
+  // if (!sb.meta.order_frequency) sb.meta.order_frequency = {}
+  // if (sb.meta.order_frequency[merchant.id]) {
+  //   console.log('does exist in the history')
+  //   var oldestDate = sb.meta.order_frequency[merchant.id].dates[0]
+  //   monthDifference = foodSession.time_started.getMonth() - oldestDate.getMonths()
+  //   //cut the restaurant out of the history if it's been there for more than 2 months
+  //   if (monthDifference > 2 || monthDifference < 0 && monthDifference > -10) {
+  //     console.log('outdated history being removed')
+  //     db.meta.order_frequency[merchant.id].dates.shift()
+  //     db.meta.order_frequency[merchant.id].count--
+  //   }
+  //   db.meta.order_frequency[merchant.id].count++
+  //   db.meta.order_frequency[merchant.id].dates.push(foodSession.time_started)
+  // }
+  // else {
+  //   console.log('does not exist in the history')
+  //   console.log('this is the merchant id', merchant.id)
+  //   sb.meta.order_frequency[merchant.id] = {
+  //     count: 1,
+  //     dates: [foodSession.time_started]
+  //   }
+  // }
+  // console.log('sb.meta.order_frequency', sb.meta.order_frequency)
+  //
+  // yield db.slackbots.update({team_id: foodSession.team_id}, {meta: sb.meta})
 
   if (!merchant) {
     merchant = yield api.getMerchant(message.data.value)
