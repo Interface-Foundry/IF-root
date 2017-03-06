@@ -517,11 +517,8 @@ handlers['food.vote.abstain'] = function * (message) {
   var isAdmin = message.source.user === foodSession.convo_initiater.id
   var adminIsOut = isAdmin || foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
 
-  console.log('some states: isAdmin', isAdmin, 'adminIsOut', adminIsOut)
-
   // if user is not the admin, take them to shopping mode
   if (!isAdmin) {
-    console.log('should not be called 1')
     // This route takes them to the home menu and also removes them from the current foodSession
     yield $allHandlers['food.exit.confirm'](message)
   }
@@ -1126,8 +1123,23 @@ handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = fu
 }
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
-  console.log('admin collect orders called')
   foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  // If the admin isn't part of the order, send them a message confirming that their click went through
+  var adminAbstained = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
+  if (adminAbstained) {
+    var confirmation = {
+      attachments: [{
+        mrkdwn_in: ['text'],
+        fallback: 'Collecting order from the rest of the team!',
+        'color': '#3AA3E3',
+        text: `Thank you for selecting a restaurant. \n Now I'm collecting orders from the rest of the team from ${foodSession.chosen_restaurant.name}, and I'll get back to you once they've chosen their food!`
+      }],
+      text: ''
+    }
+    $replyChannel.sendReplace(message, '', {type: 'slack', data: confirmation})
+  }
+
   var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
   var cuisines = _.get(foodSession, 'chosen_restaurant_full.summary.cuisines', []).join(', ')
   var msgJson = {
