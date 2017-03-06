@@ -192,11 +192,15 @@ class WaypointHover extends React.Component {
     return (
       <div>
         {this.props.waypoints.map(waypoint=>{
+          if(waypoint.input) {
           return (
-            <OverlayTrigger trigger={['hover', 'focus', 'click']} placement="top" overlay={createOverlay(waypoint.input)}>
+            <OverlayTrigger trigger="click" rootClose placement="top" overlay={createOverlay(waypoint.input)}>
               <a href='#'>{waypoint.action}</a> 
             </OverlayTrigger>
-            )
+            )}
+          else {
+            return waypoint.action;
+          }
         })}
       </div>
       
@@ -205,7 +209,7 @@ class WaypointHover extends React.Component {
 }
 
 function createOverlay(text) {
-  return (<Popover id={text} title="Input">
+  return (<Popover id={text}>
     {text}
   </Popover>)
 }
