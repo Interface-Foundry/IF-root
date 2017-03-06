@@ -130,7 +130,6 @@ function getWaypointPaths(waypoints){
             waypoints: waypointArray.map((waypoint) => waypoint.waypoint)
         }
   });
-console.log(data);
   return data;
 }
 

@@ -30,7 +30,7 @@ const getUserWaypointPath = (waypoints,user) =>
           //timestamp: waypoint._id.timestamp,
           user_id: waypoint._id.user_id,
           delivery_id: waypoint._id.delivery_id,
-          waypoints: waypoint.waypoints,
+          waypoints: waypoint.waypoints.join('\u27A1 '),
         };
       });
       resolve(waypoints);
