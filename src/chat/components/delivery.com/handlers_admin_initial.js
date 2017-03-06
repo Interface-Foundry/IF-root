@@ -610,8 +610,6 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  logging.debug('foodSession.budget', foodSession.budget)
-
   // notifies admin about the order budget
   var budgetAttachment = {
     text: (foodSession.budget ? `*Budget*: $${foodSession.budget} / person` : '*Budget*: Unlimited'),
@@ -700,17 +698,6 @@ handlers['food.admin_polling_options'] = function * (message) {
       'mrkdwn_in': ['text']
     })
   }
-
-  // attachments.push({
-  //   'mrkdwn_in': [
-  //     'text'
-  //   ],
-  //   'text': `*Budget*: $${foodSession.budget} / person`,
-  //   'fallback': 'Team budget',
-  //   'callback_id': 'indignata sub umbras',
-  //   'attachment_type': 'default',
-  //   'actions': []
-  // })
 
   attachments.push({
     'mrkdwn_in': [

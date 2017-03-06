@@ -517,16 +517,19 @@ handlers['food.vote.abstain'] = function * (message) {
   var isAdmin = message.source.user === foodSession.convo_initiater.id
   var adminIsOut = isAdmin || foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
 
+  console.log('some states: isAdmin', isAdmin, 'adminIsOut', adminIsOut)
+
   // if user is not the admin, take them to shopping mode
   if (!isAdmin) {
+    console.log('should not be called 1')
     // This route takes them to the home menu and also removes them from the current foodSession
     yield $allHandlers['food.exit.confirm'](message)
   }
 
   // re-send all the dashbaords to all the remaining team members
   foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.source.user)
-  foodSession.team_members.map(user => {
-    sendUserDashboard(foodSession, message, user)
+  yield foodSession.team_members.map(function * (user) {
+    yield sendUserDashboard(foodSession, message, user)
   })
 
   // oops well the above didn't send the admin the dashboard if they were the one that clicked "No Food"
@@ -535,12 +538,12 @@ handlers['food.vote.abstain'] = function * (message) {
     // manually remove the admin from foodSession.team_members
     foodSession.markModified('team_members')
     yield foodSession.save()
-    sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+    yield sendUserDashboard(foodSession, message, foodSession.convo_initiater)
   }
 
   // omg another case: when the admin has already clicked "No Food" and then another user clicks "No Food"
   if (!isAdmin && adminIsOut) {
-    sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+    yield sendUserDashboard(foodSession, message, foodSession.convo_initiater)
   }
 }
 
@@ -702,7 +705,9 @@ function * sendAdminDashboard (foodSession, message, user) {
 * @param user {object} The user the dashboard is being sent to
 */
 function * sendUserDashboard (foodSession, message, user) {
+  console.log('sendUserDash called')
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
+  console.log('found slackbot')
   var user = yield db.chatusers.findOne({id: user.id})
   console.log('send user dashboard to', user.id, 'initiated by', foodSession.convo_initiater.id)
   if (user.id === foodSession.convo_initiater.id) {
