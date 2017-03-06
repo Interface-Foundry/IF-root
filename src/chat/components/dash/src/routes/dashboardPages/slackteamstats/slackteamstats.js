@@ -124,11 +124,13 @@ function getWaypointPaths(waypoints){
 
     return {
             user_id: waypointArray[0].user.name,
+            time_stamp: waypointArray[0].timestamp,
             delivery_id: waypointArray[0].delivery_id,
+            inputs: waypointArray.map((waypoint) => waypoint.data),
             waypoints: waypointArray.map((waypoint) => waypoint.waypoint)
         }
   });
-
+console.log(data);
   return data;
 }
 
@@ -167,12 +169,17 @@ const ordersData = [
  
 function getWaypointActions(waypoints){
  
-  var lastWaypoints = waypoints.slice(-3).map((waypoint) => Number(waypoint));
-  var lastActions = lastWaypoints.map((waypoint) => cafe_waypoints[waypoint]).join('\u27A1');
+  var userWaypoints = waypoints.map((waypoint) => Number(waypoint));
+  var userActions = userWaypoints.map((waypoint) => cafe_waypoints[waypoint]).join('\u27A1 ');
 
   //console.log(cafe_waypoints);
 
-  return lastActions;
+  return userActions;
+}
+
+function getUserLastInputs(inputs){
+  var userInputs = inputs.map((input) => input ? input : 'button pressed').join('\u27A1 ');
+  return userInputs;
 }
 
 function getTeamName(delivery_id, teams){
@@ -197,7 +204,7 @@ function displayFlotCharts(props, context) {
   for (var i = 0; i < waypointPaths.length; i++) {
 
     var teamName = getTeamName(waypointPaths[i].delivery_id,teams);
-    rows.push({user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i].waypoints), route: waypointPaths[i].waypoints.join(' \u27A1')})
+    rows.push({time_stamp: waypointPaths[i].time_stamp, user_id: waypointPaths[i].user_id, team_name: teamName, inputs: getUserLastInputs(waypointPaths[i].inputs), actions: getWaypointActions(waypointPaths[i].waypoints)})
   }
 
   var cells = [];
@@ -216,6 +223,10 @@ function displayFlotCharts(props, context) {
       <div className="panel panel-default fillSpace">
           <Panel header={<span>Table of Waypoint Routes</span>}>
             <Table heads={[{
+              field: 'time_stamp',
+              descrip: 'Timestamp',
+              allowSort: true
+            }, {
               field: 'user_id',
               descrip: 'User ID',
               allowSort: true
@@ -226,12 +237,12 @@ function displayFlotCharts(props, context) {
               sort: (a,b, desc) => {if(desc) new Date(a) - new Date(b)}
             }, {
               field: 'actions',
-              descrip: 'Last Actions',
-              allowSort: true
+              descrip: 'User Actions',
+              allowSort: true,
             }, {
-              field: 'route',
-              descrip: 'FoodSession Waypoint Route',
-              allowSort: true
+              field: 'inputs',
+              descrip: 'User Last Inputs',
+              allowSort: true,
             }]} data={rows} />
           </Panel>
       </div>
