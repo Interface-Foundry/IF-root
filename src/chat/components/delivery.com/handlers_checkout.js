@@ -504,6 +504,26 @@ handlers['food.admin.order.pay'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.order.select_card', {type: message.origin, data: response})
 }
 
+handlers['food.admin.edit_card_alias'] = function * (message) {
+  // var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var response = {
+    'text': `Type a new card alias below:`,
+    'fallback': `Type a new card alias below:`,
+    'callback_id': 'food.admin.edit_card_alias',
+    'attachments': [{
+      'fallback': 'example',
+      'text': `✎ Example: _nyc office card_`,
+      'mrkdwn_in': ['text']
+    }]
+  }
+  $replyChannel.send(message, 'food.admin.card_alias_edited', {type: message.origin, data: response})
+}
+
+handlers['food.admin.card_alias_edited'] = function * (message) {
+  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  // update the card_alias
+}
+
 handlers['food.admin.order.remove_card'] = function * (message) {
   if (!message.data.value) {
     return logging.error('could not remove card because card_id was undefined')
