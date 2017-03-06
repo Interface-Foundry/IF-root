@@ -48,7 +48,6 @@
     "react-bootstrap-table": "^3.0.0",
     "react-chartjs": "^0.8.0",
     "react-dom": "15.3.1",
-    "react-select": "^1.0.0-rc.3",
     "recharts": "^0.15.1",
     "sequelize": "3.24.1",
     "source-map-support": "0.4.2",

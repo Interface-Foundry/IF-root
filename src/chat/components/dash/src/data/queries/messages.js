@@ -5,17 +5,31 @@ import {
   GraphQLList as ListType,
   GraphQLString as StringType,
   GraphQLNonNull as NonNull,
+  GraphQLInt
 } from 'graphql';
 import Conn from '../sequelize';
-import {resolver, defaultArgs} from 'graphql-sequelize';
+import {
+  resolver,
+  defaultArgs,
+  defaultListArgs
+} from 'graphql-sequelize';
 
 const MessageListType = new ListType(MessageType);
 
-const messages = {  
+const messages = {
   type: MessageListType,
-  args: defaultArgs(Message),
+  args: {
+    limit: {
+      type: GraphQLInt
+    },
+    order: {
+      type: StringType
+    },
+    team: {
+      type: StringType
+    }
+  },
   resolve: resolver(Message)
 }
 
 export default messages;
-

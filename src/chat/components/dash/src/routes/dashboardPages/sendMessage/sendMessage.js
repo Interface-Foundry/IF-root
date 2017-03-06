@@ -2,7 +2,6 @@ import React, {
   Component
 } from 'react';
 import fetch from '../../../core/fetch';
-import Select from 'react-select';
 import TeamMemberSidebar from '../../../components/TeamMemberSidebar'
 
 class SendMessage extends Component {
@@ -63,14 +62,14 @@ class SendMessage extends Component {
     members = members.map(member => {
       let mem = Object.assign({}, member);
       if (member.is_bot == 'true') {
-        mem.label = '(🤖) ' + member.label;
+        mem.label = `${member.label} (🤖)`;
       } else if (member.is_admin == 'true') {
-        mem.label = '(😎) ' + member.label;
+        mem.label = `${member.label} (😎)`;
       } else {
-        mem.label = '(🙂) ' + member.label;
+        mem.label = `${member.label} (🙂)`;
       }
       if (member.is_owner == 'true' || member.is_primary_owner == 'true') {
-        mem.label = mem.label.replace(') ', ', 🤠) ');
+        mem.label = mem.label.replace(')', ', 🤠)');
       }
       return mem;
     })
