@@ -56,18 +56,21 @@ class SubSidebar extends Component {
   navToTeam(e, team) {
     e.preventDefault();
     //history.push(`/team?id=${team_id}`)
-    var url = window.location.href
+    var url = window.location.href;
     let team_id = team.team_id ? team.team_id : '';
-    let team_name = team.team_name ? team.team_name : ''
-    if (url.includes('?id') || url.includes('&id')) {
+    let team_name = team.team_name ? team.team_name : '';
+    if (!team.team_id || team.team_id == 'undefined') {
+      url = url.replace(/(id=).*?(&|$)/, '')
+      url = url.replace(/(teamname=).*?(&|$)/, '')
+    } else if (url.includes('?id') || url.includes('&id')) {
       url = url.replace(/(id=).*?(&|$)/, `id=${team.team_id}$2`)
       url = url.replace(/(teamname=).*?(&|$)/, `teamname=${team.team_name}$2`)
-      history.push(url)
     } else if (url.includes('?')) {
-      history.push(url+`&id=${team.team_id}` + `&teamname=${team.team_name}`)
+      url = `&id=${team.team_id}` + `&teamname=${team.team_name}`
     } else {
-      history.push(url+`?id=${team.team_id}` + `&teamname=${team.team_name}`)
-    }  
+      url = url + `?id=${team.team_id}` + `&teamname=${team.team_name}`
+    }
+    history.push(url);
   }
 
   filterData(teams, filter) {
