@@ -9,10 +9,17 @@ class SlackPreivew extends Component {
 
   constructor(props) {
     super(props);
+    this.displayAttachments = this.displayAttachments.bind(this);
     this.state = {
-      text:'',
-      attachments:[]
+      text: '',
+      attachments: []
     }
+  }
+
+  displayAttachments(attachments) {
+    return attachments.reduce((html, attachment) => {
+      
+    })
   }
 
   componentDidMount() {
@@ -20,6 +27,11 @@ class SlackPreivew extends Component {
   }
 
   render() {
+    <div className='SlackPreivew'>
+      <p>{this.state.text}</p>
+      {this.displayAttachments(this.state.attachments)}
+    </div>
+  }
 }
 
 export default SlackPreivew;

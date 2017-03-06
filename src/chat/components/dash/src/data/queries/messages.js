@@ -27,6 +27,12 @@ const messages = {
     },
     team: {
       type: StringType
+    },
+    incoming: {
+      type: StringType
+    },
+    user: {
+      type: StringType
     }
   },
   resolve: resolver(Message)
