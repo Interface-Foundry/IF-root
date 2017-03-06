@@ -10,7 +10,7 @@ import {
 import {
   MenuItem,
   DropdownButton,
-  ListGroup, ListGroupItem, Alert
+  ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger
 } from 'react-bootstrap';
 import Table from '../../../components/Table';
 import vagueTime from 'vague-time';
@@ -166,25 +166,48 @@ const ordersData = [
   ]
 ];
  
-function getWaypointActions(waypoints){
- 
-  var userWaypoints = waypoints.map((waypoint) => Number(waypoint));
-  var userActions = userWaypoints.map((waypoint) => cafe_waypoints[waypoint]).join('\u27A1 ');
+function getWaypointActions(waypointPaths) {
 
-  //console.log(cafe_waypoints);
+  let inputs = waypointPaths.inputs;
+  let waypoints = waypointPaths.waypoints;
 
-  return userActions;
+  return waypoints.map((waypoint, index) => {
+    return {
+      action: cafe_waypoints[Number(waypoint)] + '\u27A1 ',
+      input: inputs[index] || ''
+    }
+  })
 }
 
-function getUserLastInputs(inputs){
-  var userInputs = inputs.map((input) => input ? input : 'button pressed').join('\u27A1 ');
-  return userInputs;
-}
+
 
 function getTeamName(delivery_id, teams){
   var team = teams.find(function(t){return t.food_sessions.length>0 ? t.food_sessions.find(function(foodSession){return foodSession.id==delivery_id}) : false});
   var teamName = team ? team.team_name : '';
   return teamName;
+}
+
+class WaypointHover extends React.Component {
+  render() {
+    return (
+      <div>
+        {this.props.waypoints.map(waypoint=>{
+          return (
+            <OverlayTrigger trigger={['hover', 'focus', 'click']} placement="top" overlay={createOverlay(waypoint.input)}>
+              <a href='#'>{waypoint.action}</a> 
+            </OverlayTrigger>
+            )
+        })}
+      </div>
+      
+    );
+  }
+}
+
+function createOverlay(text) {
+  return (<Popover id={text} title="Input">
+    {text}
+  </Popover>)
 }
 
 function displayFlotCharts(props, context) {
@@ -203,7 +226,7 @@ function displayFlotCharts(props, context) {
   for (var i = 0; i < waypointPaths.length; i++) {
 
     var teamName = getTeamName(waypointPaths[i].delivery_id,teams);
-    rows.push({time_stamp: waypointPaths[i].time_stamp, user_id: waypointPaths[i].user_id, team_name: teamName, inputs: getUserLastInputs(waypointPaths[i].inputs), actions: getWaypointActions(waypointPaths[i].waypoints)})
+    rows.push({time_stamp: waypointPaths[i].time_stamp, user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i])})
   }
 
   var cells = [];
@@ -238,10 +261,7 @@ function displayFlotCharts(props, context) {
               field: 'actions',
               descrip: 'User Actions',
               allowSort: true,
-            }, {
-              field: 'inputs',
-              descrip: 'User Last Inputs',
-              allowSort: true,
+              dataFormat: (cell, row)=> <WaypointHover waypoints={cell}/>
             }]} data={rows} />
           </Panel>
       </div>

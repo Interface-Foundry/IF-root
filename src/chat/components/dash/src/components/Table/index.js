@@ -18,7 +18,7 @@ class CustomTable extends Component {
   }
 
   createTableHeaders(heads) {
-    return heads.map((head, i) => <TableHeaderColumn isKey={i==1} trClassName='table-row' dataSort={(head.allowSort || head.allowSort === undefined)} sortFunc={ head.sort } dataField={head.field} key={i} search={ true } bordered={ false }>{head.descrip}</TableHeaderColumn>)
+    return heads.map((head, i) => <TableHeaderColumn isKey={i==1} trClassName='table-row' dataSort={(head.allowSort || head.allowSort === undefined)} dataFormat={head.dataFormat} sortFunc={ head.sort } dataField={head.field} key={i} search={ true } bordered={ false }>{head.descrip}</TableHeaderColumn>)
   }
 
   render() {
