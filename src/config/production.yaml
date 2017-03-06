@@ -45,4 +45,4 @@ slack:
   verification_token: P30EDlNgjsl9i15ZQBOElJls
   redirect_uri: https://slack.kipapp.co/newslack
   internal_host: http://slack:8000
-menuURL: http://cafe.kipthis.com/menus
+menuURL: https://cafe.kipthis.com/menus
