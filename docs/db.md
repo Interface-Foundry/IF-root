@@ -10,7 +10,7 @@ mint database structure
 
 # user session
 - ip
-- mobile/etc ? 
+- mobile/etc ?
 - UserAccount
 
 # User Account
@@ -40,6 +40,8 @@ mint database structure
 
 
 
+
+## invoices
 
 
 
