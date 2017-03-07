@@ -3,13 +3,14 @@ import React, {
 } from 'react';
 import fetch from '../../../core/fetch';
 import TeamMemberSidebar from '../../../components/TeamMemberSidebar'
+import SlackPreview from '../../../components/SlackPreview';
 
 class SendMessage extends Component {
   constructor(props) {
     super(props);
     this.state = {
       member: {},
-      message: '',
+      attachments: '',
       members: [],
       text: '',
       error: '',
@@ -26,7 +27,7 @@ class SendMessage extends Component {
     this.setState({
       error: ''
     })
-    const attachments = this.state.message ? encodeURIComponent(this.state.message) : ''
+    const attachments = this.state.attachments ? encodeURIComponent(this.state.attachments) : ''
     const res = await fetch(`https://slack.com/api/chat.postMessage?token=${this.state.member.token}&channel=${this.state.member.value}&attachments=${attachments}&text=${this.state.text}`, {
       method: 'post',
     })
@@ -45,7 +46,7 @@ class SendMessage extends Component {
   async componentDidMount() {
     let members = this.processMembers(this.props.members);
     this.setState({
-    	members: members
+      members: members
     })
   }
 
@@ -83,56 +84,65 @@ class SendMessage extends Component {
     });
   }
 
-  navToMember(member){
-     this.setState({
+  navToMember(member) {
+    this.setState({
       member: member,
     })
   }
 
   render() {
     return (
-    	<div>
+      <div>
     	<TeamMemberSidebar members={this.state.members} navToMember={this.navToMember}/>
-      <form className="container-fluid data-display" onSubmit={this.handleSubmit}>
-        {this.state.error ? 
-          <div className="form-group"><div className="alert alert-danger" role="alert">
-              Hmm looks like Slack didn't like that.
-              Error: {this.state.error}
-          </div></div>
-        : ''}
+        <form className="container-fluid data-display" onSubmit={this.handleSubmit}>
+          {this.state.error ? 
+            <div className="form-group"><div className="alert alert-danger" role="alert">
+                Hmm looks like Slack didn't like that.
+                Error: {this.state.error}
+            </div></div>
+            : ''}
+            <div className="form-group">
+              <label htmlFor="memberSelect">{this.state.member.label !== undefined ? `Sending to ${this.state.member.label}` :'Select a member'}</label>
+              <span id="helpBlock" className="help-block">🤖=Bot, 😎=Admin, 🙂=Member, 🤠=Owner</span>
+            </div>
+            <div className="form-group">
+              <label htmlFor="textInput">Text (optional)</label>
+              <input
+                name="textInput"
+                className="form-control"
+                id="textInput"
+                type="text"
+                placeholder='Text'
+                onBlur = {
+                  e => this.setState({
+                    text: e.target.value,
+                    sent: false
+                  })
+                }
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="attachmentInput">Attachments (optional)</label>
+              <textarea 
+                className="form-control"
+                rows="20" 
+                placeholder="Message Attachments"
+                onBlur = {
+                  e => this.setState({
+                    attachments: e.target.value,
+                    sent: false
+                  })
+                }
+                id="attachmentInput"/>
+            </div>
+          {this.state.sent ?
           <div className="form-group">
-            <label htmlFor="memberSelect">{this.state.member.label !== undefined ? `Sending to ${this.state.member.label}` :'Select a member'}</label>
-            <span id="helpBlock" className="help-block">🤖=Bot, 😎=Admin, 🙂=Member, 🤠=Owner</span>
-          </div>
-          <div className="form-group">
-            <label htmlFor="textInput">Text (optional)</label>
-            <input
-              name="textInput"
-              className="form-control"
-              id="textInput"
-              type="text"
-              placeholder='Text'
-              value={this.state.text}
-              onChange={e=>this.setState({text: e.target.value, sent:false})}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="messageInput">Attachments (optional)</label>
-            <textarea 
-              className="form-control"
-              rows="20" 
-              placeholder="Message Attachments"
-              value={this.state.message} 
-              onChange={e=>this.setState({message: e.target.value, sent: false})} 
-              id="messageInput"/>
-          </div>
-        {this.state.sent ?
-        <div className="form-group">
-          <div className="alert alert-success" role="alert">
-            <strong>Sent!</strong>
-        </div></div> : ''}
-        <button type="submit" className="btn btn-default">Send Message</button>
-      </form>
+            <div className="alert alert-success" role="alert">
+              <strong>Sent!</strong>
+          </div></div> : ''}
+          <button type="submit" className="btn btn-default">Send Message</button>
+          <SlackPreview text={this.state.text} attachments={this.state.attachments} username='Kip' photoUrl='http://lorempixel.com/50/50/cats/' />
+        </form>
       </div>)
   }
 }
