@@ -10,7 +10,7 @@ var handlers = {}
 
 handlers['food.admin.team.members'] = function * (message) {
   var index = _.get(message, 'data.value.index', 0)
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   db.waypoints.log(1110, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -112,7 +112,7 @@ handlers['food.admin.team.members'] = function * (message) {
 
 handlers['food.admin.team.members.reorder'] = function * (message) {
   var index = _.get(message, 'data.value.index', 0)
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   db.waypoints.log(1110, foodSession._id, message.user_id, {original_text: message.original_text})
 

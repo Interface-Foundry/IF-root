@@ -23,7 +23,7 @@ var handlers = {}
 *
 */
 handlers['food.admin.order.checkout.address2'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   db.waypoints.log(1310, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -58,7 +58,7 @@ handlers['food.admin.order.checkout.address2'] = function * (message) {
 }
 
 handlers['food.admin.order.checkout.name'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   db.waypoints.log(1311, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -73,7 +73,7 @@ handlers['food.admin.order.checkout.name'] = function * (message) {
 }
 
 handlers['food.admin.order.checkout.phone_number'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   // process user name from previous message
 
   db.waypoints.log(1313, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -92,7 +92,7 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
 }
 
 handlers['food.admin.order.checkout.confirm'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   // after food ordered, tell members admin is finished ordering
   var removeOrderDashboardMsg = {
@@ -321,7 +321,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
 }
 
 handlers['food.admin.order.checkout.delivery_instructions'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   console.log(foodSession.instructions)
 
@@ -356,7 +356,7 @@ handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * 
 * @param message
 */
 handlers['food.admin.order.checkout.email'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var msg = {
     text: `Edit Email Address`,
     attachments: [{
@@ -373,7 +373,7 @@ handlers['food.admin.order.checkout.email'] = function * (message) {
 * @param message
 */
 handlers['food.admin.order.checkout.email.submit'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   // db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
   var email = (message.text ? message.text.split('|') : '')
   if (email.length > 1) email = email[1].split('>')[0]
@@ -408,7 +408,7 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message) {
 }
 
 handlers['food.admin.order.pay'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var user = yield db.Chatusers.findOne({team_id: message.source.team, id: foodSession.convo_initiater.id})
 
@@ -504,6 +504,26 @@ handlers['food.admin.order.pay'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.order.select_card', {type: message.origin, data: response})
 }
 
+handlers['food.admin.edit_card_alias'] = function * (message) {
+  // var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var response = {
+    'text': `Type a new card alias below:`,
+    'fallback': `Type a new card alias below:`,
+    'callback_id': 'food.admin.edit_card_alias',
+    'attachments': [{
+      'fallback': 'example',
+      'text': `✎ Example: _nyc office card_`,
+      'mrkdwn_in': ['text']
+    }]
+  }
+  $replyChannel.send(message, 'food.admin.card_alias_edited', {type: message.origin, data: response})
+}
+
+handlers['food.admin.card_alias_edited'] = function * (message) {
+  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  // update the card_alias
+}
+
 handlers['food.admin.order.remove_card'] = function * (message) {
   if (!message.data.value) {
     return logging.error('could not remove card because card_id was undefined')
@@ -517,7 +537,7 @@ handlers['food.admin.order.remove_card'] = function * (message) {
 }
 
 handlers['food.admin.add_new_card'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   db.waypoints.log(1331, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -591,7 +611,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
 handlers['food.admin.order.select_card'] = function * (message) {
   // immediately remove payment options
   yield $replyChannel.sendReplace(message, 'food.admin.processing_card', {type: message.origin, data: {text: 'processing...'}})
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var card = _.find(slackbot.meta.payments, {
     'card': {'card_id': message.source.actions[0].value}
@@ -667,7 +687,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
 }
 
 handlers['food.admin.order.pay.confirm'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var c = _.find(slackbot.meta.payments, {'card': {'card_id': message.source.actions[0].value}})
   var response = {
@@ -728,7 +748,7 @@ handlers['food.admin.save_info'] = function * (message, foodSession) {
 
 handlers['food.done'] = function * (message) {
   logging.info('saving users info to slackbots and peripheral cleanup')
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.source})
   yield handlers['food.admin.save_info'](message, foodSession)
   yield handlers['food.payments.done'](message, foodSession)
