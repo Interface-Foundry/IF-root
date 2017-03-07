@@ -878,7 +878,8 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   if (foodSession.votes.length && sort === SORT.cuisine) {
     var countWinner = score_utils.voteWinner(foodSession.votes) //the cuisine that would have won without vote-weighting
     var realWinner = viableRestaurants[0].summary.cuisines[0] //the cuisine that did win with vote-weighting
-    if (countWinner && countWinner != realWinner && viableRestaurants[index].summary.cuisines.indexOf(countWinner) > -1) {
+    console.log('countWinner, realWinner, firstRestoCuisines', countWinner, realWinner, viableRestaurants[0].summary.cuisines)
+    if (countWinner && (countWinner != realWinner || viableRestaurants[0].summary.cuisines.indexOf(countWinner) > -1)) {
       //kip chose the cuisine it would have chosen by simply counting votes, so no explanation is necessary
       var explanationText = 'Here are 3 restaurant suggestions based on your team vote.'
     }
@@ -894,13 +895,20 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       //send explanation message to the non-admin users
       yield foodSession.team_members.map(function * (user) {
         if (user.id != foodSession.convo_initiater.id) {
+          console.log('sending victory message to', user.name)
           yield $replyChannel.send({
             mode: 'food',
             origin: message.origin,
             channel: user.dm,
             thread_id: user.dm,
             user_id: user.id,
-            source: message.source
+            source: {
+              team: foodSession.team_id,
+              channel: user.dm,
+              user: user.id,
+              origin: 'slack',
+              callback_id: 'callback'
+            }
           }, 'food.admin.restaurant.pick.list', {
               type: 'slack',
               data: {
@@ -999,8 +1007,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     buttons.actions.push(moreButton)
   }
 
-  // buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
-
   responseForAdmin.attachments.push(buttons)
 
   // adding writing prompt
@@ -1014,6 +1020,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   var admin = foodSession.convo_initiater
 
   if (message.source.user === admin.id) {
+    console.log('this message comes from the admin') // true
     var msg = message
   } else if (_.find(foodSession.cuisine_dashboards, {user: admin.id})) {
     var dashboard = _.find(foodSession.cuisine_dashboards, {user: admin.id})
@@ -1035,7 +1042,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   }
 
   logging.debug('sending message to admin: ', message, responseForAdmin)
-  $replyChannel.sendReplace(msg, 'food.admin.restaurant.search', {'type': message.origin, 'data': responseForAdmin})
+  $replyChannel.send(msg, 'food.admin.restaurant.search', {'type': message.origin, 'data': responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
