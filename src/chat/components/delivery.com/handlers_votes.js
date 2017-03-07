@@ -396,7 +396,7 @@ handlers['food.user.preferences.done'] = function * (message) {
 */
 handlers['food.vote.submit'] = function * (message) {
   // debugger;
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var user = yield db.chatusers.findOne({id: message.source.user})
 
   function addVote (str) {
@@ -826,7 +826,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
           origin: message.origin,
           source: {
             team: foodSession.team_id,
-            user: m.id,
+            user: convo_initiater.id,
             channel: m.dm
           }
         }
@@ -877,14 +877,14 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   if (foodSession.votes.length && sort === SORT.cuisine) {
     var countWinner = score_utils.voteWinner(foodSession.votes) //the cuisine that would have won without vote-weighting
-    var realWinner = score_utils.rankCuisines(foodSession.votes)[0] //the cuisine that did win with vote-weighting
-    console.log('countWinner', countWinner, '; realWinner', realWinner)
-    if (countWinner && viableRestaurants[index].summary.cuisines.indexOf(countWinner) > -1) {
+    var realWinner = viableRestaurants[0].summary.cuisines[0] //the cuisine that did win with vote-weighting
+    if (countWinner && countWinner != realWinner && viableRestaurants[index].summary.cuisines.indexOf(countWinner) > -1) {
       //kip chose the cuisine it would have chosen by simply counting votes, so no explanation is necessary
       var explanationText = 'Here are 3 restaurant suggestions based on your team vote.'
     }
     else {
       var votes = foodSession.votes.filter(v => v.vote == realWinner) //votes for the winning cuisine
+      console.log('these should all be votes for the winning cuisine', votes)
       var vote = votes.reduce(function (acc, val) {
         return (acc.weight > val.weight ? acc : val)
       }, {weight: -100}) //user who voted for the winning cuisine the hardest / whose vote for the winning cuisine is prioritized the most
@@ -900,11 +900,8 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
             channel: user.dm,
             thread_id: user.dm,
             user_id: user.id,
-            source: {
-              team: foodSession.team_id,
-              user: user.dm,
-              channel: user.dm
-            }}, 'food.admin.restaurant.pick.list', {
+            source: message.source
+          }, 'food.admin.restaurant.pick.list', {
               type: 'slack',
               data: {
                 text: ' ',
