@@ -881,7 +881,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     console.log('countWinner, realWinner, firstRestoCuisines', countWinner, realWinner, viableRestaurants[0].summary.cuisines)
     if (countWinner && (countWinner != realWinner || viableRestaurants[0].summary.cuisines.indexOf(countWinner) > -1)) {
       //kip chose the cuisine it would have chosen by simply counting votes, so no explanation is necessary
-      var explanationText = 'Here are 3 restaurant suggestions based on your team vote.'
+      var explanationText = `${viableRestaurants[0].summary.cuisines[0]}`
     }
     else {
       var votes = foodSession.votes.filter(v => v.vote == realWinner) //votes for the winning cuisine
@@ -891,42 +891,43 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       }, {weight: -100}) //user who voted for the winning cuisine the hardest / whose vote for the winning cuisine is prioritized the most
       console.log('winning vote', vote)
       // explanation text explaining the choice when it is different / not obvious from the simple voting result
-      var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with the cuisine they wanted!`
+      var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with ${vote.vote} 🎉`
       //send explanation message to the non-admin users
-      yield foodSession.team_members.map(function * (user) {
-        if (user.id != foodSession.convo_initiater.id) {
-          console.log('sending victory message to', user.name)
-          yield $replyChannel.send({
-            mode: 'food',
-            origin: message.origin,
-            channel: user.dm,
-            thread_id: user.dm,
-            user_id: user.id,
-            source: {
-              team: foodSession.team_id,
-              channel: user.dm,
-              user: user.id,
-              origin: 'slack',
-              callback_id: 'callback'
-            }
-          }, 'food.admin.restaurant.pick.list', {
-              type: 'slack',
-              data: {
-                text: ' ',
-                attachments: [{
-                  color: '#3AA3E3',
-                  fallback: "votes submitted",
-                  text: explanationText
-                }]
-              }
-          })
-        }
-      })
     }
+
+    yield foodSession.team_members.map(function * (user) {
+      if (user.id != foodSession.convo_initiater.id) {
+        console.log('sending victory message to', user.name)
+        yield $replyChannel.send({
+          mode: 'food',
+          origin: message.origin,
+          channel: user.dm,
+          thread_id: user.dm,
+          user_id: user.id,
+          source: {
+            team: foodSession.team_id,
+            channel: user.dm,
+            user: user.id,
+            origin: 'slack',
+            callback_id: 'callback'
+          }
+        }, 'food.admin.restaurant.pick.list', {
+            type: 'slack',
+            data: {
+              text: '*Vote Result:*',
+              attachments: [{
+                color: '#3AA3E3',
+                fallback: "votes submitted",
+                text: explanationText
+              }]
+            }
+        })
+      }
+    })
   }
 
   var responseForAdmin = {
-    'text': explanationText + '\n Which restaurant do you want today?',
+    'text': '*Vote Result:* ' + explanationText + '\n Here are 3 restaurant suggestions based on the team vote.'+ '\n Which restaurant do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
