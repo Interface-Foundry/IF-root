@@ -209,8 +209,8 @@ class WaypointHover extends React.Component {
 }
 
 function createOverlay(text) {
-  return (<Popover id={text}>
-    {text}
+  return (<Popover id={JSON.parse(text).original_text}>
+    {JSON.parse(text).original_text}
   </Popover>)
 }
 
