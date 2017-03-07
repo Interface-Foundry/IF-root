@@ -60,19 +60,33 @@ const waypointsCount = [
   { waypoint: 1330, users: [ 'U3620AA5T' ], total: 19 },
   { waypoint: 1332, users: [ 'U3620AA5T' ], total: 19 } ];
 
-const teamStats = [ 16, 11, 80, 64 ];
 const COLORS = ['#FF0000', '#FF8888', '#0000FF', '#8888FF'];
 
-function getPieChartTeamStatsData(teamStats){ // [store item count, store order count, cafe item count, cafe order count]
+function sumTeamStats(teams){
+  	var total = 0;
+  	for(var i = 0; i<teams.length; i++){
+  		total += teams[i].food_sessions.length;
+  	}
+  	return total;
+  }
+
+function getPieChartTeamStatsData(teams, team){ // [store item count, store order count, cafe item count, cafe order count]
   const data = [];
-  data.push({name: '# Store Items', value: teamStats[0]})
-  data.push({name: '# Store Orders', value: teamStats[1]})
-  data.push({name: '# Cafe Items', value: teamStats[2]})
-  data.push({name: '# Cafe Orders', value: teamStats[3]})
+  console.log(teams);
+  console.log(team);
+  var teamStats = team ? teams.find(function(t){return t.team_id==team}).food_sessions.length : sumTeamStats(teams);
+  console.log(teamStats);
+  
+  const sampleData = [ 16, 11, 80, 64 ];
+  data.push({name: '# Store Items', value: sampleData[0]})
+  data.push({name: '# Store Orders', value: sampleData[1]})
+  data.push({name: '# Cafe Items', value: sampleData[2]})
+
+  data.push({name: '# Cafe Orders', value: teamStats})
   return data;
 }
 
-const pieChartTeamStatsData = getPieChartTeamStatsData(teamStats)
+//const pieChartTeamStatsData = getPieChartTeamStatsData(teamStats)
 
 const orderTimePlaceFrequencies = [ { hour: 10, location: [ '122 W 27th St' ], total: 1 },
   { hour: 11,
@@ -121,10 +135,11 @@ function getWaypointPaths(waypoints){
   
   var data = _.map(userWaypoints, function(waypointArray){
     waypointArray = _.sortBy(waypointArray, [function(o) { return o.timestamp; }]);
-
+    var pathLength = waypointArray.length;
     return {
             user_id: waypointArray[0].user.name,
             time_stamp: waypointArray[0].timestamp,
+            time_stamp_end: waypointArray[pathLength-1].timestamp,
             delivery_id: waypointArray[0].delivery_id,
             inputs: waypointArray.map((waypoint) => waypoint.data),
             waypoints: waypointArray.map((waypoint) => waypoint.waypoint)
@@ -234,11 +249,11 @@ function displayFlotCharts(props, context) {
   for (var i = 0; i < waypointPaths.length; i++) {
 
     var teamName = getTeamName(waypointPaths[i].delivery_id,teams);
-    rows.push({time_stamp: new Date(waypointPaths[i].time_stamp.split('.')[0]).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i])})
+    rows.push({time_stamp: new Date(waypointPaths[i].time_stamp.split('.')[0]).toLocaleString(), time_stamp_end: new Date(waypointPaths[i].time_stamp_end.split('.')[0]).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i])})
   }
 
   var cells = [];
-  for (var i = 0; i < teamStats.length; i++){
+  for (var i = 0; i < 4; i++){
     cells.push(<Cell fill={COLORS[i]} />)
   }
   var currentTeam = props.teamName ? props.teamName : 'All Team';
@@ -254,12 +269,19 @@ function displayFlotCharts(props, context) {
           <Panel header={<span>Table of Waypoint Routes</span>}>
             <Table heads={[{
               field: 'time_stamp',
-              descrip: 'Timestamp',
+              descrip: 'Session Time Started',
               allowSort: true,
               sort: (a, b, order) => order == 'desc' ? 
                   new Date(b.time_stamp) - new Date(a.time_stamp) 
                   : new Date(a.time_stamp) - new Date(b.time_stamp)
             }, {
+              field: 'time_stamp_end',
+              descrip: 'Session Time of Last Activity',
+              allowSort: true,
+              sort: (a, b, order) => order == 'desc' ? 
+                  new Date(b.time_stamp_end) - new Date(a.time_stamp_end) 
+                  : new Date(a.time_stamp_end) - new Date(b.time_stamp_end)
+            },{
               field: 'user_id',
               descrip: 'User ID',
               allowSort: true
@@ -282,7 +304,7 @@ function displayFlotCharts(props, context) {
             <div>
               <ResponsiveContainer width="100%" aspect={2}>
                 <PieChart >
-                  <Pie isAnimationActive={false} data={pieChartTeamStatsData}  label>
+                  <Pie isAnimationActive={false} data={getPieChartTeamStatsData(teams,props.teamId)}  label>
                     {cells}
                   </Pie>
                   <Tooltip />
