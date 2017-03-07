@@ -234,7 +234,7 @@ function displayFlotCharts(props, context) {
   for (var i = 0; i < waypointPaths.length; i++) {
 
     var teamName = getTeamName(waypointPaths[i].delivery_id,teams);
-    rows.push({time_stamp: (new Date(waypointPaths[i].time_stamp)).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i])})
+    rows.push({time_stamp: new Date(waypointPaths[i].time_stamp.split('.')[0]).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i])})
   }
 
   var cells = [];
@@ -257,8 +257,8 @@ function displayFlotCharts(props, context) {
               descrip: 'Timestamp',
               allowSort: true,
               sort: (a, b, order) => order == 'desc' ? 
-                  new Date(b) - new Date(a) 
-                  : new Date(a) - new Date(b)
+                  new Date(b.time_stamp) - new Date(a.time_stamp) 
+                  : new Date(a.time_stamp) - new Date(b.time_stamp)
             }, {
               field: 'user_id',
               descrip: 'User ID',
