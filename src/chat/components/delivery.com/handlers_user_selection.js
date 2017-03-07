@@ -41,7 +41,7 @@ function * infoForChannelOrGroup (slackbot, chosenChannel) {
 
 // start of actual handlers
 handlers['food.poll.confirm_send_initial'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var textWithPrevChannel
   db.waypoints.log(1102, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -175,7 +175,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
 }
 
 handlers['food.poll.confirm_send'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   db.waypoints.log(1102, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -251,7 +251,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
 }
 
 handlers['food.admin.display_channels_reorder'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var mostRecentMerchant = message.data.value
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
@@ -348,7 +348,7 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
 
 // allow specific channel to be used
 handlers['food.admin.display_channels'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
   var checkbox
@@ -441,7 +441,7 @@ handlers['food.admin.display_channels'] = function * (message) {
 
 handlers['food.admin.toggle_channel_reorder'] = function * (message) {
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   if (message.data.value.toLowerCase() === 'everyone') {
     foodSession.team_members = foodSession.all_members
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'everyone'
@@ -473,7 +473,7 @@ handlers['food.admin.toggle_channel_reorder'] = function * (message) {
 
 handlers['food.admin.toggle_channel'] = function * (message) {
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   if (message.data.value.toLowerCase() === 'everyone') {
     foodSession.team_members = foodSession.all_members
     foodSession.chosen_channel.name = foodSession.chosen_channel.id = 'everyone'

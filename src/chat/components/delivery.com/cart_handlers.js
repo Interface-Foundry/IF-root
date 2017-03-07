@@ -90,7 +90,7 @@ function promptCheckout (foodSession, message, waitingText) {
 // Show the user their personal cart
 //
 handlers['food.cart.personal'] = function * (message, replace, over_budget) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   console.log("foodSession.cart.length", foodSession.cart.length) // already duplicated
 
   db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -205,7 +205,7 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
 
 // Handles editing the quantity by using the supplied array index, the nth item in the user's personal cart
 handlers['food.cart.personal.quantity.add'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var index = message.source.actions[0].value
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
@@ -226,7 +226,7 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
 
 // Handles editing the quantity by using the supplied array index
 handlers['food.cart.personal.quantity.subtract'] = function * (message, over_budget) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var index = message.source.actions[0].value
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
@@ -251,7 +251,7 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message, over_bud
 // The user has just clicked the confirm button on their personal cart
 //
 handlers['food.cart.personal.confirm'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   // logging.debug('foodSession.cart.length', foodSession.cart.length) //already duplicated
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
@@ -276,7 +276,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 }
 
 handlers['food.cart.update_dashboards'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   return yield sendOrderProgressDashboards(foodSession, message)
 }
 
@@ -879,7 +879,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
 }
 
 handlers['food.order.instructions'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -896,7 +896,7 @@ handlers['food.order.instructions'] = function * (message) {
 }
 
 handlers['food.order.instructions.submit'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
 
   yield db.Delivery.update({_id: foodSession._id}, {$set: {'instructions': message.text || ''}}).exec()
   var msg = _.merge({}, message, {
@@ -910,7 +910,7 @@ handlers['food.member.order.view'] = function * (message) {
 }
 
 handlers['food.admin.cart.tip'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   foodSession.tip.percent = message.source.actions[0].value
   yield foodSession.save()
   yield handlers['food.admin.order.confirm'](message)
@@ -918,7 +918,7 @@ handlers['food.admin.cart.tip'] = function * (message) {
 
 handlers['food.admin.cart.quantity.add'] = function * (message) {
   logging.info('attempting to increase quantity of item')
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
   var itemObjectID = message.source.actions[0].value
   yield db.Delivery.update({_id: foodSession._id, 'cart._id': itemObjectID.toObjectId()}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
   yield handlers['food.admin.order.confirm'](message)
