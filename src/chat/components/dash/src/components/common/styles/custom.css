@@ -11,8 +11,9 @@
   margin: 0 0 0 -35px;
 }
 
-.react-bs-table table td {
+.react-bs-table table td, .popover-content {
   white-space: normal;
+  word-wrap: break-word;
 }
 
 .sidebar-nav.navbar-collapse {
