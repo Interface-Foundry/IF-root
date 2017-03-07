@@ -173,7 +173,7 @@ function getWaypointActions(waypointPaths) {
 
   return waypoints.map((waypoint, index) => {
     return {
-      action: cafe_waypoints[Number(waypoint)] + '\u27A1 ',
+      action: cafe_waypoints[Number(waypoint)],
       input: inputs[index] || ''
     }
   })
@@ -201,7 +201,11 @@ class WaypointHover extends React.Component {
           else {
             return waypoint.action;
           }
-        })}
+        }).reduce((accu, elem) => {
+            return accu === null ? [elem] : [...accu, ' \u27A1 ', elem]
+        }, null)
+
+      }
       </div>
       
     );
@@ -230,7 +234,7 @@ function displayFlotCharts(props, context) {
   for (var i = 0; i < waypointPaths.length; i++) {
 
     var teamName = getTeamName(waypointPaths[i].delivery_id,teams);
-    rows.push({time_stamp: waypointPaths[i].time_stamp, user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i])})
+    rows.push({time_stamp: (new Date(waypointPaths[i].time_stamp)).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i])})
   }
 
   var cells = [];
@@ -251,7 +255,10 @@ function displayFlotCharts(props, context) {
             <Table heads={[{
               field: 'time_stamp',
               descrip: 'Timestamp',
-              allowSort: true
+              allowSort: true,
+              sort: (a, b, order) => order == 'desc' ? 
+                  new Date(b) - new Date(a) 
+                  : new Date(a) - new Date(b)
             }, {
               field: 'user_id',
               descrip: 'User ID',
@@ -260,7 +267,6 @@ function displayFlotCharts(props, context) {
               field: 'team_name',
               descrip: 'Team Name',
               allowSort: true,
-              sort: (a,b, desc) => {if(desc) new Date(a) - new Date(b)}
             }, {
               field: 'actions',
               descrip: 'User Actions',
