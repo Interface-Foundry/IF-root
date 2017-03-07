@@ -881,7 +881,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     console.log('countWinner', countWinner, '; realWinner', realWinner)
     if (countWinner && viableRestaurants[index].summary.cuisines.indexOf(countWinner) > -1) {
       //kip chose the cuisine it would have chosen by simply counting votes, so no explanation is necessary
-      var explanationText = 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?'
+      var explanationText = 'Here are 3 restaurant suggestions based on your team vote.'
     }
     else {
       var votes = foodSession.votes.filter(v => v.vote == realWinner) //votes for the winning cuisine
@@ -890,12 +890,38 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       }, {weight: -100}) //user who voted for the winning cuisine the hardest / whose vote for the winning cuisine is prioritized the most
       console.log('winning vote', vote)
       // explanation text explaining the choice when it is different / not obvious from the simple voting result
-      var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
+      var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with the cuisine they wanted!`
+      //send explanation message to the non-admin users
+      yield foodSession.team_members.map(function * (user) {
+        if (user.id != foodSession.convo_initiater.id) {
+          yield $replyChannel.send({
+            mode: 'food',
+            origin: message.origin,
+            channel: user.dm,
+            thread_id: user.dm,
+            user_id: user.id,
+            source: {
+              team: foodSession.team_id,
+              user: user.dm,
+              channel: user.dm
+            }}, 'food.admin.restaurant.pick.list', {
+              type: 'slack',
+              data: {
+                text: ' ',
+                attachments: [{
+                  color: '#3AA3E3',
+                  fallback: "votes submitted",
+                  text: explanationText
+                }]
+              }
+          })
+        }
+      })
     }
   }
 
   var responseForAdmin = {
-    'text': explanationText,
+    'text': explanationText + '\n Which restaurant do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
