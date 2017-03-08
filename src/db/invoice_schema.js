@@ -19,10 +19,15 @@ var invoiceSchema = mongoose.Schema({
     enum: ['paid', 'failed', 'other'],
     required: true
   },
-  payment: {},
-  delivery_post: {},
-  delivery_raw_response: {}, //this is the full json response from delivery.com (inc order id and points)
-  delivery_response: {}
+  payments: [{
+    sender: mongoose.Schema.ObjectId,
+    amount: Number,
+    confirmed: { // if user says they gave money but creator needs to confirm
+      type: Boolean,
+      default: true
+    }
+  }],
+  collection_emails: [{type: mongoose.Schema.ObjectId, ref: 'Email'}]
 })
 
-module.exports = mongoose.model('Payment', paymentSchema)
+module.exports = mongoose.model('Invoice', invoiceSchema)
