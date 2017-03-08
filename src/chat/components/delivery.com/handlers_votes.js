@@ -221,7 +221,7 @@ function getVotesFromMembers (messages) {
 }
 
 handlers['food.admin.vote'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   var admin = foodSession.team_members[0]
 
@@ -235,7 +235,7 @@ handlers['food.admin.vote'] = function * (message) {
 * @param message
 */
 handlers['food.admin.poll'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1121, foodSession._id, message.user_id, {original_text: message.original_text})
   sendAdminDashboard(foodSession)
 }
@@ -245,7 +245,7 @@ handlers['food.admin.poll'] = function * (message) {
 * @param message
 */
 handlers['food.user.poll'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1120, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var teamMembers = foodSession.team_members
@@ -396,7 +396,7 @@ handlers['food.user.preferences.done'] = function * (message) {
 */
 handlers['food.vote.submit'] = function * (message) {
   // debugger;
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var user = yield db.chatusers.findOne({id: message.source.user})
 
   function addVote (str) {
@@ -511,7 +511,7 @@ handlers['food.vote.submit'] = function * (message) {
 handlers['food.vote.abstain'] = function * (message) {
   // TODO add metric for "No food for me" click
 
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // some states
   var isAdmin = message.source.user === foodSession.convo_initiater.id
@@ -1047,7 +1047,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
-  // var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  // var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   // var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
   // var attachments = []
   // TODO later
@@ -1073,7 +1073,7 @@ handlers['food.admin.restaurant.search'] = function * (message) {
 * Process the admin's selection of a restaurant
 */
 handlers['food.admin.restaurant.confirm'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
 
   // update chatusers with information about which users won / lost the pollin
@@ -1147,7 +1147,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
 }
 
 handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   foodSession.menu = yield api.getMenu(foodSession.chosen_restaurant.id)
   yield foodSession.save()
   yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)

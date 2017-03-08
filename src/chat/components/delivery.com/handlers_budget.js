@@ -12,7 +12,7 @@ var handlers = {}
 * @param message
 */
 handlers['food.admin.team_budget'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   //waypoint logging
   db.waypoints.log(1020, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -161,7 +161,7 @@ function updateBudget (n, location) {
 */
 handlers['food.admin.confirm_budget'] = function * (message) {
   budget = message.data.value.budget;
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   if (message.data.value.new) {
     var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations
@@ -172,7 +172,7 @@ handlers['food.admin.confirm_budget'] = function * (message) {
         locations[i].budget_history = updated[1];
       }
     }
-
+    
     yield db.slackbots.update({team_id: message.source.team}, {$set: {'meta.locations': locations}})
   }
 

@@ -23,7 +23,7 @@ var handlers = {}
 * @param message
 */
 handlers['food.menu.quickpicks'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   var menu = Menu(foodSession.menu)
   var sortedMenu = menu.allItems()
@@ -297,7 +297,7 @@ handlers['food.menu.search'] = function * (message) {
 */
 handlers['food.item.submenu'] = function * (message) {
 
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1220, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var cart = Cart(message.source.team)
@@ -412,7 +412,7 @@ handlers['food.item.quantity.subtract'] = function * (message) {
 */
 handlers['food.item.instructions'] = function * (message) {
 
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1221, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var cart = Cart(message.source.team)
@@ -448,7 +448,7 @@ handlers['food.item.instructions.submit'] = function * (message) {
 }
 
 handlers['food.item.add_to_cart'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
@@ -491,7 +491,7 @@ handlers['food.item.add_to_cart'] = function * (message) {
       );
     }
   }
-
+  
   userItem.added_to_cart = true
   yield db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.added_to_cart': true}}).exec()
 
