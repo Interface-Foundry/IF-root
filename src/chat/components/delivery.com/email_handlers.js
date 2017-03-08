@@ -14,7 +14,7 @@ var handlers = {}
 * @param message
 */
 handlers['food.admin.team.add_order_email'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec();
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var e = message.source.callback_id;
   foodSession.email_users.push(e);
   yield db.delivery.update({team_id: message.source.team, active: true}, {$set: {email_users: foodSession.email_users}});
@@ -26,7 +26,7 @@ handlers['food.admin.team.add_order_email'] = function * (message) {
 * @param message
 */
 handlers['food.admin.team.add_all_emails'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec();
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
   var et = yield db.email_users.find({team_id: message.source.team});
   et.map(function (eu) {
     foodSession.email_users.push(eu.email)
@@ -40,7 +40,7 @@ handlers['food.admin.team.add_all_emails'] = function * (message) {
 * @param message
 */
 handlers['food.admin.team.remove_order_email'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
   if (foodSession.email_users.indexOf(e) > -1) {
     foodSession.email_users.splice(foodSession.email_users.indexOf(e), 1);
@@ -54,7 +54,7 @@ handlers['food.admin.team.remove_order_email'] = function * (message) {
 * @param message
 */
 handlers['food.admin.team.delete_email'] = function * (message) {
-  // var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
   var e = message.source.callback_id;
 
   yield db.email_users.remove({team_id: message.source.team, email: e})
@@ -85,7 +85,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
 
   console.log('REORDER', reorder)
 
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1112, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -251,7 +251,7 @@ handlers['food.admin.team.email_members'] = function * (message) {
 * @param message
 */
 handlers['food.admin.team.add_email'] = function * (message) {
-  // var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec();
+  // var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
 
   var msg_text = 'Please type an email address below';
   var confirm = false;
@@ -314,7 +314,7 @@ handlers['food.admin.team.add_email'] = function * (message) {
 */
 handlers['food.admin.team.confirm_email'] = function * (message) {
 
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var email = foodSession.data.temp_email;
 
   var admin = yield db.Chatusers.findOne({id: message.source.user})

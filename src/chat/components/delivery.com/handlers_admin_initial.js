@@ -20,7 +20,7 @@ var $allHandlers
 var handlers = {}
 
 handlers['food.admin.confirm_new_session'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -305,7 +305,7 @@ handlers['food.choose_address'] = function * (message) {
     // TODO handle the case where they type a new address without clicking the "new" button
     }
 
-    var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+    var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     foodSession.chosen_location = location
 
     // keep the banner
@@ -368,7 +368,7 @@ handlers['food.settings.address.new'] = function * (message) {
   }
 
   //onboarding view
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1012, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -463,7 +463,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
   }
 
   //onboarding view
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1013, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -492,7 +492,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
 
 // Save the address to the db after the user confirms it
 handlers['food.settings.address.save'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var location = message.data.value
 
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
@@ -572,7 +572,7 @@ handlers['food.feedback.save'] = function * (message) {
 }
 
 handlers['food.delivery_or_pickup'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   // Sometimes we have to wait a ilttle bit for the merchants to finish populating from an earlier step
   // i ended up just sending the reply back in that earlier step w/o waiting for delivery.com, because
@@ -606,7 +606,7 @@ handlers['food.delivery_or_pickup'] = function * (message) {
 // Or, the user just picked a budget and is now ready to start ordering
 //
 handlers['food.admin_polling_options'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -752,7 +752,7 @@ handlers['food.admin_polling_options'] = function * (message) {
 }
 
 handlers['food.admin.restaurant.reordering_confirmation'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1101, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -991,7 +991,7 @@ handlers['food.restaurants.list.recent'] = function * (message) {
   var index = parseInt(_.get(message, 'data.value')) || 0
   var msg_json = { text: 'Looking up your order history for this location...' }
   $replyChannel.sendReplace(message, 'food.waiting', {type: message.origin, data: msg_json})
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, 'convo_initiater.id': message.source.user, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var availableMerchantIds = foodSession.merchants.map(m => m.id)
   var recentDeliveries = yield db.Delivery.aggregate([
     {
