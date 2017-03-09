@@ -1,7 +1,7 @@
 'use strict'
 // Just make sure we have some logging
 if (!global.logging) {
-  logging = {
+  var logging = {
     info: console.log.bind(console)
   }
 }
