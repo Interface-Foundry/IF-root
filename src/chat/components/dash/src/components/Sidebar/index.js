@@ -68,6 +68,11 @@ class Sidebar extends Component {
                   })}
               >
                 <li>
+                  <a href="" onClick={(e) => { e.preventDefault(); history.push('/amazoncsv'); }} >
+                    Amazon CSV
+                  </a>
+                </li>
+                <li>
                   <a href="" onClick={(e) => { e.preventDefault(); history.push('/blank'); }} >
                     Blank
                   </a>

@@ -26,6 +26,7 @@ import panelwells from './dashboardPages/panelWells';
 import typography from './dashboardPages/typography';
 import sendMessage from './dashboardPages/sendMessage';
 import blank from './dashboardPages/blank';
+import amazoncsv from './dashboardPages/amazoncsv'
 import error from './error';
 
 import Header from '../components/Header';
@@ -64,6 +65,7 @@ export default [
       panelwells,
       typography,
       // register,
+      amazoncsv,
       blank,
       sessions,
       team,
