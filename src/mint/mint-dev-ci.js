@@ -5,6 +5,7 @@ var exec = require('child_process').execSync
 var createHandler = require('github-webhook-handler')
 var handler = createHandler({ path: '/', secret: 'lnrL3Cfq4xnbW6S7' })
 var _ = require('lodash')
+require('colors')
 
 if (process.env.NODE_ENV !== 'development' || os.hostname() !== 'mint-dev') {
   console.error('Run this with NODE_ENV=development on the mint-dev vm')
