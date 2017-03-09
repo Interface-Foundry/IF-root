@@ -1,4 +1,9 @@
-mint database structure
+Mint database structure
+
+- Mongodb today -> Postgres tmrw (yay waterline)
+- Design consideration: 
+  * All collections must be flat
+    - no embedded documents, like cart.meta.userinitatorid BAD, instead cart.userid GOOD. 
 
 # cart
 - has many UserSessions that are non-leaders
