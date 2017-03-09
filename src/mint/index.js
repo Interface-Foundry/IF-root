@@ -16,6 +16,9 @@ var db
 const dbReady = require('./db')
 dbReady.then(models => db = models)
 
+/**
+ * BORING STUFF (TODO move this to a file name boilerplate.js)
+ */
 app.set('view engine', 'js');
 app.engine('js', reactViews.createEngine());
 app.use(express.static(__dirname + '/public'));
@@ -23,45 +26,6 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
-
-/**
- * Mock the user_account collection
- * @type {Array}
- */
-const users = [{
-  id: 1,
-  email: 'me@chrisb.me',
-  password: uuid.v4()
-}, {
-  id: 2,
-  email: 'me@chrisb.xyz',
-  password: uuid.v4()
-}];
-
-/**
- * Mock the session collection
- */
-const mock_sessions = [{
-  session_id: Math.random().toString(36).slice(2),
-}]
-
-/**
- * Mock the tracking data
- */
-const mock_tracking_data = [{
-  session_id: 'asdfg',
-  user_agent: 'Chrome [like Gecko] Version 100....]',
-  ip_address: '127.0.0.1'
-}]
-
-/**
- * Mock the user_account_session collection
- */
-const mock_user_account_sessions = [{
-  user_id: 1,
-  session_id: 'asdfghrwedfg'
-}]
-
 
 /**
  * Creates a cookie-based session for the client
@@ -110,40 +74,29 @@ app.get('/identify/:email', function(req, res) {
   // Associate the session with the user account in user_to_session table
 })
 
-app.get('/login', function(req, res) {
-  // display a form to post to /createaccount or /login for adding emails
-});
-
 /**
- * Home
- * Redirects to login without a token
- * should check for cookies too
- *
- * Notes for Chris:
- *  - get rid of JWT here and elsewhere for now
- *  - Send the landing page here, the one with just one button [Start Group Shopping]
+ * Home, landing page, like kipthis.com
  */
 app.get('/', function(req, res, next) {
   res.render('home');
 });
 
 /**
- * view cart/forwarding url - cart should be like 10 letters or something small
+ * View Cart page, a sharable url
  * @param {cart_id}
  */
 app.get('/cart/:cart_id', (req, res) => co(function*() {
-  // check if we are in a session
-
-  // if not check for cart
+  // get the cart
   // var cart = yield utils.getCart(req.params.cart_id);
-
-  // no cart exists
+  
+  // if no cart exists typo, for now redirect to /newcart but could instead redirect to a "Sorry can't find that cart, want to create a new one?" page
   // if (cart === undefined) {
   //   res.redirect('/newcart');
   // }
-  res.render('cart')
 
-  // ask user for email to tie to session
+  // maybe render something special if req.session.session_id === cart.creator
+
+  res.render('cart')
 }));
 
 /**
