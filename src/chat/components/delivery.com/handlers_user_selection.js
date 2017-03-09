@@ -64,7 +64,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
 
     // setup team_members for using everyone
     if (prevFoodSession.chosen_channel.id === 'everyone') {
-      textWithPrevChannel = `Send poll for cuisine to _everyone_ at \`${addr}\`?`
+      textWithPrevChannel = `Start Vote for cuisine for _everyone_ at \`${addr}\`?`
       foodSession.team_members = yield db.Chatusers.find({
         team_id: foodSession.team_id,
         is_bot: {$ne: true},
@@ -74,12 +74,12 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
 
     // if its just_me
     } else if (prevFoodSession.chosen_channel.id === 'just_me') {
-      textWithPrevChannel = `Send poll for cuisine to _just me_ at \`${addr}\`?`
+      textWithPrevChannel = `Start Vote for cuisine for _just me_ at \`${addr}\`?`
       foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
 
     // if its a specific channel
     } else {
-      textWithPrevChannel = `Send poll for cuisine to <#${prevFoodSession.chosen_channel.id}|${prevFoodSession.chosen_channel.name}> at \`${addr}\``
+      textWithPrevChannel = `Start Vote for cuisine for <#${prevFoodSession.chosen_channel.id}|${prevFoodSession.chosen_channel.name}> at \`${addr}\``
       if (prevFoodSession.budget) textWithPrevChannel += ` with a budget of $${prevFoodSession.budget}`
       textWithPrevChannel += '?'
       foodSession.team_members = prevFoodSession.team_members
@@ -99,7 +99,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     }
     yield foodSession.save()
   } else {
-    textWithPrevChannel = `Send poll for cuisine to team members at \`${addr}\`?`
+    textWithPrevChannel = `Start Vote for cuisine for _all_ team members at \`${addr}\`?`
   }
   var msg_json = {
     'attachments': [
@@ -115,7 +115,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': '✓ Start Voting',
+            'text': '✓ Start Vote',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
@@ -123,7 +123,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           {
             'name': 'passthrough',
             'value': 'food.admin.display_channels',
-            'text': 'Edit Voters',
+            'text': 'Manage Voters',
             'type': 'button'
           },
         ]}
@@ -167,7 +167,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
       {
-        'text': `*Step 5.* I'll let your team vote for the cuisine they want, so everyone gets a choice`,
+        'text': `*Step 4.* Let your team vote for the cuisine they want, so everyone gets a choice`,
         'color': `#A368F0`,
         'mrkdwn_in': ['text']
       })
@@ -185,16 +185,16 @@ handlers['food.poll.confirm_send'] = function * (message) {
 
   if (_.get(foodSession, 'chosen_channel.id')) {
     if (foodSession.chosen_channel.id === 'everyone') {
-      var textWithChannelMaybe = `Send poll for cuisine to _everyone_ at \`${addr}\`?`
+      var textWithChannelMaybe = `Start Vote for cuisine with _everyone_ at \`${addr}\`?`
     } else if (foodSession.chosen_channel.id === 'just_me') {
-      textWithChannelMaybe = `Send poll for cuisine to _just me_ at \`${addr}\`?`
+      textWithChannelMaybe = `Start Vote for cuisine with _just me_ at \`${addr}\`?`
     } else {
-      textWithChannelMaybe = `Send poll for cuisine to <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
+      textWithChannelMaybe = `Start Vote for cuisine with <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
       // if (foodSession.budget) textWithPrevChannel += ` with a budget of $${foodSession.budget}`
       textWithChannelMaybe += '?';
     }
   } else {
-    textWithChannelMaybe = `Send poll for cuisine to the team members at \`${addr}\``
+    textWithChannelMaybe = `Start Vote for cuisine with the team members at \`${addr}\``
   }
 
 
@@ -210,24 +210,24 @@ handlers['food.poll.confirm_send'] = function * (message) {
           'text'
         ],
         'text': textWithChannelMaybe,
-        'fallback': 'Send poll for cuisine to the team members',
+        'fallback': 'Start Vote for cuisine with the team members',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'actions': [
           {
             'name': 'passthrough',
-            'text': '✓ Send Poll',
+            'text': '✓ Start Vote',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
-          },
-          {
-            'name': 'passthrough',
-            'value': 'food.admin.display_channels',
-            'text': 'Edit Poll Members',
-            'type': 'button'
-          }
+          } //,
+          // {
+          //   'name': 'passthrough',
+          //   'value': 'food.admin.display_channels',
+          //   'text': 'Edit Poll Members',
+          //   'type': 'button'
+          // }
         ]
       }
     ]
@@ -302,8 +302,6 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
       }
     })
   }
-
-  msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
 
   // final attachment with send, edit members, < back
   msg_json.attachments.push({
@@ -397,28 +395,35 @@ handlers['food.admin.display_channels'] = function * (message) {
     })
   }
 
-  msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
+  msg_json.attachments.unshift({
+    text: `Messages from Kip will be sent in direct messages to each of the users in the selected channel:`,
+    fallback: `Messages from Kip will be sent in direct messages to each of the users in the selected channel:`,
+    color: (foodSession.onboarding ? '#A368F0' : '#3AA3E3')
+  })
+
+  // msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
 
   // final attachment with send, edit members, < back
   msg_json.attachments.push({
     'text': ``,
-    'fallback': '✓ Send to Members',
+    'fallback': '✓ Start Vote',
     'color':'#2ab27b',
     'callback_id': 'channel_select',
     'attachment_type': 'default',
     'actions': [
       {
-        'text': `✓ Send to Members`,
+        'text': `✓ Start Vote`,
         'name': 'passthrough',
         'value': 'food.user.poll',
         'type': 'button',
         'style': 'primary'
-      }, {
-        'name': 'passthrough',
-        'value': 'food.admin.team.members',
-        'text': `Edit Members`,
-        'type': 'button'
       }
+      // }, {
+      //   'name': 'passthrough',
+      //   'value': 'food.admin.team.members',
+      //   'text': `Edit Members`,
+      //   'type': 'button'
+      // }
     ]
   })
 

@@ -142,7 +142,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     //add onboard sticker #1
     msg_json.attachments.unshift({
       'text':'',
-      'image_url':'http://tidepools.co/kip/welcome_cafe.png',
+      'image_url':'https://storage.googleapis.com/kip-random/cafe.png',
       'color': '#A368F0',
       'mrkdwn_in': ['text']
     })
