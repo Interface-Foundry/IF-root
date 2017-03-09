@@ -322,7 +322,7 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
     }, {
       'name': 'food.admin.team.members.reorder',
       'value': mostRecentMerchant,
-      'text': `Edit Members`,
+      'text': `Manage Channels`,
       'type': 'button'
     }]
   })

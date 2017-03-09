@@ -799,7 +799,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       }, {
         'name': 'food.admin.select_channel_reorder',
         'value': mostRecentMerchant,
-        'text': `Edit Members`,
+        'text': `Manage Channels`,
         'type': 'button'
       }//,
       // {
