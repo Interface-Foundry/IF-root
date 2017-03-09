@@ -4,9 +4,12 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@slack/client": "^3.8.1",
     "body-parser": "^1.17.1",
     "client-sessions": "^0.7.0",
+    "colors": "^1.1.2",
     "express": "^4.15.2",
+    "github-webhook-handler": "^0.6.0",
     "jsonwebtoken": "^7.3.0",
     "lodash": "^4.17.4",
     "passport": "^0.3.2",

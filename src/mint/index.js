@@ -139,5 +139,5 @@ app.get('/cart/:cart_id', (req, res) => co(function*() {
 app.get('/newcart', (req, res) => co(function*() {}));
 
 app.listen(3000, function() {
-  console.log('Express running');
+  console.log('Express running at http://localhost:3000');
 });

@@ -1,5 +1,10 @@
 'use strict'
-require('../logging')
+// Just make sure we have some logging
+if (!global.logging) {
+  logging = {
+    info: console.log.bind(console)
+  }
+}
 require('colors')
 var slack = require('@slack/client')
 var token = 'xoxb-50573012182-9gJAJ1IBPDRjM3xrfcIFdTO1'
