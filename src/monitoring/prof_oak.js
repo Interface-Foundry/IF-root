@@ -5,7 +5,6 @@ if (!global.logging) {
     info: console.log.bind(console)
   }
 }
-require('colors')
 var slack = require('@slack/client')
 var token = 'xoxb-50573012182-9gJAJ1IBPDRjM3xrfcIFdTO1'
 var web = new slack.WebClient(token)
@@ -31,7 +30,7 @@ class Professor {
     }
   }
   say (text) {
-    logging.info(`Professor: ${text} in ${this.channel}`.magenta)
+    logging.info(`Professor: ${text} in ${this.channel}`)
     web.chat.postMessage(this.channel, text, this.data)
   }
 }
