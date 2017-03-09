@@ -13,6 +13,9 @@ const passportJWT = require('passport-jwt'),
 
 const app = express();
 
+const co = require('co');
+const utils = require('./helpers.js');
+
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromUrlQueryParameter('token'),
   secretOrKey: uuid.v4()
@@ -108,7 +111,7 @@ app.post('/login', function(req, res) {
 
 app.get('/login', function(req, res) {
   // display a form to post to /createaccount or /login for adding emails
-})
+});
 
 /**
  * Home
@@ -120,8 +123,35 @@ app.get('/', passport.authenticate('jwt', {
   successRedirect: '/',
   failureRedirect: '/login'
 }), function(req, res) {
-  res.json("Success! You can not see this without a token");
+  res.json('Success! You can not see this without a token');
 });
+
+/**
+ * view cart/forwarding url - cart should be like 10 letters or something small
+ * @param {cart_id}
+ */
+app.get('/cart/:cart_id', (req, res) => co(function * () {
+  // check if we are in a session
+
+  // if not check for cart
+  var cart = yield utils.getCart(req.params.cart_id);
+
+  // no cart exists
+  if (cart === undefined) {
+    res.redirect('/newcart');
+  }
+
+  // ask user for email to tie to session
+}));
+
+/**
+ * create new cart for user, redirect them to /cart/:cart_id
+ *
+ * @param {[type]}
+ * @yield {[type]} [description]
+ */
+app.get('/newcart', (req, res) => co(function * () {
+}));
 
 app.listen(3000, function() {
   console.log('Express running');
