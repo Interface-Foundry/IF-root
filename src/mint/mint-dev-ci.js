@@ -3,7 +3,7 @@ var os = require('os')
 var path = require('path')
 var exec = require('child_process').execSync
 var createHandler = require('github-webhook-handler')
-var handler = createHandler({ path: '/', secret: 'lnrL3Cfq4xnbW6S7' })
+var handler = createHandler({ path: '/', secret: 'Hvjw1Oa2lA4GpJPu' })
 var _ = require('lodash')
 require('colors')
 
