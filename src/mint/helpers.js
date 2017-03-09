@@ -15,7 +15,7 @@ exports.createNewCart = function * methodName(cart, creator) {
  * @param {string} cart - unique identifier for cart we can look up, would be from /cart/:id
  * @yield {object} cart - returns cart object if it exists else undefined or create new cart
  */
-exprots.checkForCart = function * (cart) {
+exports.checkForCart = function * (cart) {
   var cart = yield db.Cart.findOne({cart_id: cart});
   if (!cart) {
     // cart doesnt exist
@@ -31,5 +31,5 @@ exprots.checkForCart = function * (cart) {
 exports.checkIfUserIsInCart = function * (user, cart) {
   var cart = yield db.Cart.findOne({cart_id: cart});
 
-  if
+  if (true) {}
 };
