@@ -927,7 +927,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   }
 
   var responseForAdmin = {
-    'text': '*Vote Result:* ' + explanationText + '\n Here are 3 restaurant suggestions based on the team vote.'+ '\n Which restaurant do you want today?',
+    'text': '*Vote Result:* ' + explanationText + '\n Here are 3 restaurant suggestions based on the team vote. Which do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 

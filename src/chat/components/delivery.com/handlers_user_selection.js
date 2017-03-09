@@ -64,7 +64,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
 
     // setup team_members for using everyone
     if (prevFoodSession.chosen_channel.id === 'everyone') {
-      textWithPrevChannel = `Start Vote for cuisine for _everyone_ at \`${addr}\`?`
+      textWithPrevChannel = `Start vote for cuisine for _everyone_ at \`${addr}\`?`
       foodSession.team_members = yield db.Chatusers.find({
         team_id: foodSession.team_id,
         is_bot: {$ne: true},
@@ -74,12 +74,12 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
 
     // if its just_me
     } else if (prevFoodSession.chosen_channel.id === 'just_me') {
-      textWithPrevChannel = `Start Vote for cuisine for _just me_ at \`${addr}\`?`
+      textWithPrevChannel = `Start vote for cuisine for _just me_ at \`${addr}\`?`
       foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
 
     // if its a specific channel
     } else {
-      textWithPrevChannel = `Start Vote for cuisine for <#${prevFoodSession.chosen_channel.id}|${prevFoodSession.chosen_channel.name}> at \`${addr}\``
+      textWithPrevChannel = `Start vote for cuisine for <#${prevFoodSession.chosen_channel.id}|${prevFoodSession.chosen_channel.name}> at \`${addr}\``
       if (prevFoodSession.budget) textWithPrevChannel += ` with a budget of $${prevFoodSession.budget}`
       textWithPrevChannel += '?'
       foodSession.team_members = prevFoodSession.team_members
@@ -99,7 +99,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     }
     yield foodSession.save()
   } else {
-    textWithPrevChannel = `Start Vote for cuisine for _all_ team members at \`${addr}\`?`
+    textWithPrevChannel = `Start vote for cuisine for _all_ team members at \`${addr}\`?`
   }
   var msg_json = {
     'attachments': [
@@ -185,16 +185,16 @@ handlers['food.poll.confirm_send'] = function * (message) {
 
   if (_.get(foodSession, 'chosen_channel.id')) {
     if (foodSession.chosen_channel.id === 'everyone') {
-      var textWithChannelMaybe = `Start Vote for cuisine with _everyone_ at \`${addr}\`?`
+      var textWithChannelMaybe = `Start vote for cuisine with _everyone_ at \`${addr}\`?`
     } else if (foodSession.chosen_channel.id === 'just_me') {
-      textWithChannelMaybe = `Start Vote for cuisine with _just me_ at \`${addr}\`?`
+      textWithChannelMaybe = `Start vote for cuisine with _just me_ at \`${addr}\`?`
     } else {
-      textWithChannelMaybe = `Start Vote for cuisine with <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
+      textWithChannelMaybe = `Start vote for cuisine with <#${foodSession.chosen_channel.id}|${foodSession.chosen_channel.name}> at \`${addr}\``
       // if (foodSession.budget) textWithPrevChannel += ` with a budget of $${foodSession.budget}`
       textWithChannelMaybe += '?';
     }
   } else {
-    textWithChannelMaybe = `Start Vote for cuisine with the team members at \`${addr}\``
+    textWithChannelMaybe = `Start vote for cuisine with the team members at \`${addr}\``
   }
 
 
@@ -210,7 +210,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
           'text'
         ],
         'text': textWithChannelMaybe,
-        'fallback': 'Start Vote for cuisine with the team members',
+        'fallback': 'Start vote for cuisine with the team members',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
         'attachment_type': 'default',
@@ -259,7 +259,10 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
 
   db.waypoints.log(1111, foodSession._id, message.user_id, {original_text: message.original_text})
 
+  if (!foodSession.chosen_channel.id) foodSession.chosen_channel.id = 'everyone'
+
   var checkbox
+
   // basic buttons
   var genericButtons = [{
     name: `Everyone`,
@@ -350,6 +353,8 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
 handlers['food.admin.display_channels'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+
+  if (!foodSession.chosen_channel.id) foodSession.chosen_channel.id = 'everyone'
 
   var checkbox
   // basic buttons
