@@ -17,7 +17,6 @@ import team from './dashboardPages/team'
 import table from './dashboardPages/tables';
 import button from './dashboardPages/buttons';
 import slackteamstats from './dashboardPages/slackteamstats';
-import slackallstats from './dashboardPages/slackallstats';
 import sessions from './dashboardPages/sessions';
 import grid from './dashboardPages/grid';
 import icons from './dashboardPages/icons';
@@ -58,7 +57,6 @@ export default [
       table,
       button,
       slackteamstats,
-      slackallstats,
       grid,
       icons,
       morrisjscharts,

@@ -19,21 +19,6 @@ import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
 
 const title = ' Team Stats';
 
-function plotData() {
-  const data = [];
-  const offset = 0;
-  let sineValue;
-  let cosValue;
-  for (let i = 0; i < 12; i += 0.8) {
-    sineValue = Math.sin(i + offset);
-    cosValue = Math.cos(i + offset);
-    data.push({ name: i, sine: sineValue, cosine: cosValue });
-    // data.push({ name: i, cosine: cosValue });
-  }
-  return data;
-}
-const lineChartData = plotData();
-
 const waypointsCount = [ 
   { waypoint: 1001, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 111 },
   { waypoint: 1010,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 129 },
@@ -72,21 +57,16 @@ function sumTeamStats(teams){
 
 function getPieChartTeamStatsData(teams, team){ // [store item count, store order count, cafe item count, cafe order count]
   const data = [];
-  console.log(teams);
-  console.log(team);
-  var teamStats = team ? teams.find(function(t){return t.team_id==team}).food_sessions.length : sumTeamStats(teams);
-  console.log(teamStats);
-  
+  var numCafeOrders = team ? teams.find(function(t){return t.team_id==team}).food_sessions.length : sumTeamStats(teams);
+ 
   const sampleData = [ 16, 11, 80, 64 ];
   data.push({name: '# Store Items', value: sampleData[0]})
   data.push({name: '# Store Orders', value: sampleData[1]})
   data.push({name: '# Cafe Items', value: sampleData[2]})
 
-  data.push({name: '# Cafe Orders', value: teamStats})
+  data.push({name: '# Cafe Orders', value: numCafeOrders})
   return data;
 }
-
-//const pieChartTeamStatsData = getPieChartTeamStatsData(teamStats)
 
 const orderTimePlaceFrequencies = [ { hour: 10, location: [ '122 W 27th St' ], total: 1 },
   { hour: 11,
@@ -111,13 +91,6 @@ const orderTimePlaceFrequencies = [ { hour: 10, location: [ '122 W 27th St' ], t
   { hour: 18, location: [ '122 W 27th St' ], total: 6 } ];
 
 
-
-const pieChartData = [
-  { name: 'Group A', value: 400 }, { name: 'Group B', value: 300 },
-  { name: 'Group C', value: 300 }, { name: 'Group D', value: 200 },
-  { name: 'Group E', value: 278 }, { name: 'Group F', value: 189 },
-];
-
 const dayOfWeekStats = [ { dayString: 'Sunday', dayNumber: 1, total: 7932 },
   { dayString: 'Monday', dayNumber: 2, total: 21892 },
   { dayString: 'Tuesday', dayNumber: 3, total: 42004 },
@@ -137,7 +110,7 @@ function getWaypointPaths(waypoints){
     waypointArray = _.sortBy(waypointArray, [function(o) { return o.timestamp; }]);
     var pathLength = waypointArray.length;
     return {
-            user_id: waypointArray[0].user.name,
+    	    user_id: waypointArray[0].user ? waypointArray[0].user.name : '',
             time_stamp: waypointArray[0].timestamp,
             time_stamp_end: waypointArray[pathLength-1].timestamp,
             delivery_id: waypointArray[0].delivery_id,
@@ -148,39 +121,6 @@ function getWaypointPaths(waypoints){
   return data;
 }
 
-const ordersHeads = [
-  'Date / Time',
-  'Team',
-  'User',
-  'Item',
-  'Price',
-  'Quantity',
-  'Total',
-  'Cart ID',
-  'Platform'
-];
-const ordersData = [
-  ['01/15/17 3:15 pm',
-    'kipsearch',
-    'Alyx Baldwin',
-    'Shnozzleberries',
-    '$2,321.55',
-    '2',
-    '$5,643.10',
-    'slack_212344234',
-    'slack'
-  ], ['01/22/17 8:15 pm',
-    'kipsearch',
-    'Alyx Baldwin',
-    'Berryberries',
-    '$1,218.63',
-    '5',
-    '$6,093.15',
-    'slack_212344234',
-    'slack'
-  ]
-];
- 
 function getWaypointActions(waypointPaths) {
 
   let inputs = waypointPaths.inputs;
