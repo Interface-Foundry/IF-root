@@ -12,6 +12,7 @@ In order to get started, you'll need the following images available:
 ```
 docker pull mongo:3.2.4
 docker pull postgres
+docker pull ubuntu
 ```
 
 ## Steps
@@ -51,26 +52,42 @@ $ docker run --rm -i -p 5432:5432 --name kip-postgres -e POSTGRES_PASSWORD=postg
 ### Copy the data from mongo to postgres
 
 ```
-$ docker run --rm -it -v /home/me/code/IF-root/src/chat/components/dash:/src/chat/components/dash ubuntu /bin/bash
+$ docker run --rm -it -v /code/kip/IF-root/src/chat/components/dash:/src/chat/components/dash ubuntu /bin/bash
 ```
 
 Within this docker container, run the following commands:
 ```
 $ apt-get update
-$ apt-get install ruby-dev emacs mongodb-clients curl build-essential libpq-dev
-$ curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh -o install_nvm.sh
+$ apt-get install -y ruby-dev emacs mongodb-clients curl build-essential libpq-dev
 $ gem install mosql
+$ curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh -o install_nvm.sh
 $ bash install_nvm.sh
+$ source ~/.profile
 $ nvm install v6.10.0
 $ emacs /etc/hosts --> change localhost to docker host IP (for some reason it ignores the mongo url in run.js)
 $ cd /src/chat/components/dash
 $ emacs ./src/data/run.js 
   change psql url to postgres://postgres:postgres@172.17.0.1:5432/postgres
   change mongo url to mongodb://172.17.0.1:27017/foundry
+$ emacs ./src/data/yml/delivery.yml - comment out the delivery table, it has rows that are too big for mosql to translate.
 $ ./node_modules/.bin/babel-node ./src/data/run.js src/data/yml/delivery.yml
 ```
 
-# NOTE: 
+### Dumping the database to a file
+
+Write a compressed file.
+```
+docker run --rm -it -v /tmp:/tmp postgres /bin/bash
+$ pg_dump -h 172.17.0.1 -p 5432 -Fc -U postgres -W postgres > /tmp/postgres.sql
+```
+
+### Restoring the database from the file
+```
+docker run --rm -it -v /tmp:/tmp postgres /bin/bash
+$ pg_restore -h 172.17.0.1 -p 5432 -Fc -U postgres -W -d postgres /tmp/postgres.sql
+```
+
+# NOTES:
 
 ## Known issues
 
@@ -78,5 +95,19 @@ After about 35 minutes of loading, I got the following error.
 ```
 `serialize': Document too large: This BSON document is limited to 4194304 bytes. (BSON::InvalidDocument)
 ```
+
+Update: it was the issue described [here](https://github.com/stripe/mosql/issues/101). Modifying the schema.rb in the way suggested seems to fix the problem.
+
+---
+
+Most of the TEXT ARRAY fields for the delivery table need to be commented out of the delivery.yml file in order to get the copy to work.
+
+The bug [here](https://github.com/brainspec/enumerize/issues/245) is the error we were seeing during the copy for each of those fields, but I never got to the bottom of why those fields were mis-typed.
+
+---
+
+Even if you specify a mongo url (e.g. mongodb://172.17.0.1:27017) it still tries to connect to localhost. Unclear if that means we're going to need to hack etc/hosts on production machines?
+
+---
 
 Mosql is no longer being actively maintained. We'd be flying without ground support, which is risky to put into a critical production path.
