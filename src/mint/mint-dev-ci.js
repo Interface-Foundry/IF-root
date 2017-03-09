@@ -37,7 +37,7 @@ http.createServer(function (req, res) {
 }).listen(PORT)
 
 handler.on('error', function (err) {
-  logging.error('Error:', err.message)
+  console.error('Error:', err.message)
 })
 
 handler.on('push', function (event) {
@@ -60,4 +60,4 @@ handler.on('push', function (event) {
 
 })
 
-logging.info('listening for incoming git webhooks on lucky port number ' + PORT.toString().green)
+console.log('listening for incoming git webhooks on lucky port number ' + PORT.toString().green)
