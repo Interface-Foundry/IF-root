@@ -17,40 +17,67 @@ class SlackPreivew extends Component {
     }
   }
 
-  displayActions(actions) {
-     return actions.reduce((html, actions) => {
-      html.push(
-        <li className='slackAction'>
+  displayActions(attachment) {
+    console.log(attachment)
+    if (attachment.actions) {
+      return attachment.actions.map(action =>
+        <li className='slackAction slackList'>
           <p>{action.text}</p>
-        </li>
-      )
-      return html;
-    }, [])
+        </li>)
+    }
   }
 
   displayAttachments(attachments) {
-    return attachments.reduce((html, attachment) => {
-      html.push(
-        <li className='slackAttachment'>
+    return attachments.map(attachment =>
+      <li className='slackAttachment slackList'>
           <p>{attachment.text}</p>
-          {this.displayActions(attachment.actions)}
+          <ul>
+            {this.displayActions(attachment)}
+          </ul>
         </li>
-      )
-      return html;
-    }, [])
+    )
+  }
+  getAttachments(attachmentString) {
+    console.log(attachmentString)
+    attachmentString = attachmentString ? attachmentString : '[]'
+    let attachments;
+    try {
+      attachments = JSON.parse(attachmentString)
+    } catch (e) {
+      attachments = [];
+    }
+    return attachments;
+  }
+  componentDidMount() {
+    this.setState({
+      text: this.props.text,
+      attachments: this.getAttachments(this.props.attachments),
+      photoUrl: this.props.photoUrl,
+      username: this.props.username
+    })
   }
 
-  componentDidMount() {
-    var self = this;
+  componentWillReceiveProps(newProps) {
+    this.setState({
+      text: newProps.text,
+      attachments: this.getAttachments(newProps.attachments),
+      photoUrl: newProps.photoUrl,
+      username: newProps.username
+    })
   }
 
   render() {
-    <div className='SlackPreivew'>
-      <p>{this.state.text}</p>
-      <ul>
-        {this.displayAttachments(this.state.attachments)}
-      </ul>
-    </div>
+    return (
+      <div className='slackPreivew'>
+        <img src={this.state.photoUrl}/>
+        <div className='slackMessage'>
+          <p className='slackUsername'><strong>{this.state.username}</strong></p>
+          <p className='slackText'>{this.state.text}</p>
+          <ul className='slackAttachments'>
+            {this.displayAttachments(this.state.attachments)}
+          </ul>
+        </div>
+      </div>)
   }
 }
 
