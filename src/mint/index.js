@@ -6,9 +6,15 @@ const sessions = require('client-sessions');
 const uuid = require('uuid');
 const co = require('co');
 const reactViews = require('express-react-views');
-
 const utils = require('./helpers.js');
 const mintLogger = require('./mint_logging.js');
+
+/**
+ * Models loaded from the waterline ORM
+ */
+var db
+const dbReady = require('./db')
+dbReady.then(models => db = models)
 
 app.set('view engine', 'js');
 app.engine('js', reactViews.createEngine());

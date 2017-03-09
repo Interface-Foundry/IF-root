@@ -22,6 +22,8 @@
     "passport-local": "^1.0.0",
     "react": "^15.0.0",
     "react-dom": "^15.0.0",
-    "uuid": "^3.0.1"
+    "sails-mongo": "^0.12.2",
+    "uuid": "^3.0.1",
+    "waterline": "^0.11.11"
   }
 }
