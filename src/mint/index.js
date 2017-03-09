@@ -5,8 +5,10 @@ const bodyParser = require('body-parser');
 const sessions = require('client-sessions');
 const uuid = require('uuid');
 const co = require('co');
-const utils = require('./helpers.js');
 const reactViews = require('express-react-views');
+
+const utils = require('./helpers.js');
+const mintLogger = require('./mint_logging.js');
 
 app.set('view engine', 'js');
 app.engine('js', reactViews.createEngine());
@@ -74,16 +76,16 @@ app.use(function(req, res, next) {
 
   // Check to make sure we have stored this user's session in the database
   if (!req.session.user_session_id) {
-    // 
+    //
     // Create a user_session record in the database
     // - generate a new user_session_id wih Math.random().toString(36).slice(2)
   }
 
   // Now that the session_id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12
-})
+});
 
-
+app.use(new mintLogger.NormalLogger());
 /**
  * Identify a user, associating a session with a user_account
  * Multiple user_accounts can be associated with one session, personal email and work email on same computer
@@ -133,6 +135,13 @@ app.get('/cart/:cart_id', (req, res) => co(function*() {
 }));
 
 /**
+ * example of how the error logger works for time being
+ */
+app.get('/fail', function(req, res, next) {
+  return next(new Error('This is an error and it should be logged to the console'));
+});
+
+/**
  * create new cart for user, redirect them to /cart/:cart_id
  *
  * @param {[type]}
@@ -140,6 +149,7 @@ app.get('/cart/:cart_id', (req, res) => co(function*() {
  */
 app.get('/newcart', (req, res) => co(function*() {}));
 
+app.use(new mintLogger.ErrorLogger());
 app.listen(3000, function() {
   console.log('Express running at http://localhost:3000');
 });
