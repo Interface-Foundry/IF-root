@@ -1,0 +1,14 @@
+{
+  "apps": [{
+    "name": "mint",
+    "cwd": ".",
+    "script": "index.js",
+    "combine_logs": true,
+    "watch": true
+  }, {
+    "name": "ci",
+    "cwd": ".",
+    "script": "mint-dev-ci.js",
+    "combine_logs": true
+  }]
+}
