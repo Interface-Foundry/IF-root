@@ -5,9 +5,10 @@ Mint database structure
   * All collections must be flat
     - no embedded documents, like cart.meta.userinitatorid BAD, instead cart.userid GOOD. 
 
-# cart
-- has many UserSessions that are non-leaders
-- has one UserSession that is the leader
+# carts
+- `cart_id`: the cart's id visible in the url
+- participants: UserSessions
+- creator: UserSession
 - has many Items
 - payment status [paid, reimbursed, etc?]
 - has many Invoices

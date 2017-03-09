@@ -76,22 +76,28 @@ app.use(sessions({
  * Save user sessions to the database
  */
 app.use(function(req, res, next) {
-  next();
   // req.session will always exist, thanks to the above client-sessions middleware
-  console.log('session is', req.session)
-
   // Check to make sure we have stored this user's session in the database
-  if (!req.session.user_session_id) {
-    //
-    // Create a user_session record in the database
-    // - generate a new user_session_id wih Math.random().toString(36).slice(2)
+  if (!req.session.session_id) {
+    var sessionId = Math.random().toString(36).slice(2)
+    req.session.session_id = sessionId;
+    db.Sessions.create({
+      session_id: sessionId
+    })
   }
 
   // Now that the session_id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12
+  
+  console.log('session is', req.session)
+  next();
 });
 
+/**
+ * Add in logging after sessions have been created
+ */
 app.use(new mintLogger.NormalLogger());
+
 /**
  * Identify a user, associating a session with a user_account
  * Multiple user_accounts can be associated with one session, personal email and work email on same computer
@@ -149,11 +155,11 @@ app.get('/fail', function(req, res, next) {
 
 /**
  * create new cart for user, redirect them to /cart/:cart_id
- *
- * @param {[type]}
- * @yield {[type]} [description]
  */
-app.get('/newcart', (req, res) => co(function*() {}));
+app.get('/newcart', (req, res) => co(function*() {
+  // create a new cart for the user
+  // redirect to /carts/cart.cart_id
+}));
 
 app.use(new mintLogger.ErrorLogger());
 app.listen(3000, function() {

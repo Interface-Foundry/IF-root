@@ -7,7 +7,8 @@ var userAccountCollection = Waterline.Collection.extend({
     email_address: 'string',
     sessions: {
       collection: 'sessions',
-      via: 'user_accounts'
+      via: 'user_accounts',
+      dominant: true
     }
   }
 })
