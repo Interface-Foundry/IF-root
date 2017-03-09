@@ -14,7 +14,7 @@ const mintLogger = require('./mint_logging.js');
  */
 var db
 const dbReady = require('./db')
-dbReady.then(models => db = models)
+dbReady.then(models => db = models).catch(e => console.error(e))
 
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
