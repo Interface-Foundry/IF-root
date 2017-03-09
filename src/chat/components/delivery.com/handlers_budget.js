@@ -136,7 +136,7 @@ handlers['food.admin.team_budget'] = function * (message) {
       'mrkdwn_in': ['text']
     })
   }
-  
+
   $replyChannel.sendReplace(message, 'food.admin.team_budget', {type: message.origin, data: msg_json})
 }
 
@@ -195,7 +195,14 @@ handlers['food.admin.confirm_budget'] = function * (message) {
     }
   });
 
-  yield $allHandlers['food.admin_polling_options'](message)
+  if (foodSession.onboarding) {
+    // console.log('we are onboarding -- ', foodSession.onboarding)
+    yield $allHandlers['food.poll.confirm_send_initial'](message)
+  }
+  else {
+    // console.log('we are not onboarding -- ', foodSession.onboarding)
+    yield $allHandlers['food.admin_polling_options'](message)
+  }
 }
 
 module.exports = function (replyChannel, allHandlers) {

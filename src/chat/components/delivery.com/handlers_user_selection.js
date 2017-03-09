@@ -108,14 +108,14 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           'text'
         ],
         'text': textWithPrevChannel,
-        'fallback': 'Send poll for cuisine to the team members',
+        'fallback': 'Collect cuisine votes from team members?',
         'callback_id': 'food.poll.confirm_send_initial',
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'actions': [
           {
             'name': 'passthrough',
-            'text': '✓ Send Poll',
+            'text': '✓ Start Voting',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
@@ -123,20 +123,20 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
           {
             'name': 'passthrough',
             'value': 'food.admin.display_channels',
-            'text': 'Edit Poll Members',
+            'text': 'Edit Voters',
             'type': 'button'
           },
-        ]
-      }, {
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': '_Tip:_ `✓ Send Poll` polls your team on what type of food they want',
-        'fallback': 'Send poll for cuisine to the team members',
-        'callback_id': 'food.poll.confirm_send_initial',
-        'attachment_type': 'default',
-        'actions': []
-      }
+        ]}
+      // }, {
+      //   'mrkdwn_in': [
+      //     'text'
+      //   ],
+      //   'text': '_Tip:_ `✓ Send Poll` polls your team on what type of food they want',
+      //   'fallback': 'Send poll for cuisine to the team members',
+      //   'callback_id': 'food.poll.confirm_send_initial',
+      //   'attachment_type': 'default',
+      //   'actions': []
+      // }
     ]
   }
 
@@ -149,12 +149,14 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     })
   }
 
-  msg_json.attachments[0].actions.push( {
-    'name': 'passthrough',
-    'value': 'food.admin.restaurant.pick.list',
-    'text': '> Skip',
-    'type': 'button'
-  })
+  if (!foodSession.onboarding) {
+    msg_json.attachments[0].actions.push( {
+      'name': 'passthrough',
+      'value': 'food.admin.restaurant.pick.list',
+      'text': '> Skip',
+      'type': 'button'
+    })
+  }
 
   if (foodSession.onboarding) {
     msg_json.attachments.unshift(
@@ -165,7 +167,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
       {
-        'text': `*Step 5.* Choose who you want to be part of your food order`,
+        'text': `*Step 5.* I'll let your team vote for the cuisine they want, so everyone gets a choice`,
         'color': `#A368F0`,
         'mrkdwn_in': ['text']
       })

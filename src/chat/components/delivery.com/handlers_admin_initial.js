@@ -135,13 +135,13 @@ handlers['food.admin.select_address'] = function * (message, banner) {
 
   //modify message for onboarding
   if (foodSession.onboarding) {
-    msg_json.attachments[0].text = '*Step 1.* Add an address for delivery by tapping the `New Location +` button'
+    msg_json.attachments[0].text = 'Hi there, I\'m going to walk you through your first Kip Café order! \n*Step 1:* Add a delivery address'
     msg_json.attachments[0].mrkdwn_in = ["text"]
     msg_json.attachments[0].color = '#A368F0'
 
     //add onboard sticker #1
     msg_json.attachments.unshift({
-      'text':'Hi there, I\'m going to walk you through your first Kip Café order! \n _By using Kip you agree to our <https://kipthis.com/legal.html|Terms of Use>_',
+      'text':'',
       'image_url':'http://tidepools.co/kip/welcome_cafe.png',
       'color': '#A368F0',
       'mrkdwn_in': ['text']
@@ -173,7 +173,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   //toggle floor buttons for onboarding
   var floorButtons = [{
     'name': 'passthrough',
-    'text': 'New Location +',
+    'text': 'New Address +',
     'type': 'button',
     'value': 'food.settings.address.new'
   }]
