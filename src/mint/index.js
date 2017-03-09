@@ -44,8 +44,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 /**
- * This should be replaced by a db of users
- * Just an example for now
+ * Mock the user_account collection
  * @type {Array}
  */
 const users = [{
@@ -59,17 +58,60 @@ const users = [{
 }];
 
 /**
- * Defines a cookie
+ * Mock the session collection
+ */
+const mock_sessions = [{
+  session_id: Math.random().toString(36).slice(2),
+}]
+
+/**
+ * Mock the tracking data
+ */
+const mock_tracking_data = [{
+  session_id: 'asdfg',
+  user_agent: 'Chrome [like Gecko] Version 100....]',
+  ip_address: '127.0.0.1'
+}]
+
+/**
+ * Mock the user_account_session collection
+ */
+const mock_user_account_sessions = [{
+  user_id: 1,
+  session_id: 'asdfghrwedfg'
+}]
+
+
+/**
+ * Creates a cookie-based session for the client
  */
 app.use(sessions({
   cookieName: 'session',
-  secret: uuid.v4(),
-  duration: 24 * 60 * 60 * 1000,
-  activeDuration: 1000 * 60 * 5
+  secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw', // `openssl rand -base64 24`
+  duration: 0, // never expire
 }));
 
 /**
+ * Save user sessions to the database
+ */
+app.use(function (req, res, next) {
+  // req.session will always exist, thanks to the above client-sessions middleware
+  console.log('session is', req.session)
+
+  // Check to make sure we have stored this user's session in the database
+  if (!req.session.user_session_id) {
+    // 
+    // Create a user_session record in the database
+    // - generate a new user_session_id wih Math.random().toString(36).slice(2)
+  }
+
+  // Now that the session_id exists, save the tracking information, like IP, user-agent, etc
+  // TODO week of March 12
+})
+
+/**
  * Setting cookies after load
+ * Note to Chris: we can delete this :)
  */
 app.use((req, res, next) => {
   if (req.session.seenyou) {
@@ -85,10 +127,25 @@ app.use((req, res, next) => {
 });
 
 /**
+ * Identify a user, associating a session with a user_account
+ * Multiple user_accounts can be associated with one session, personal email and work email on same computer
+ * Though this is a GET route, it should be used with XHR/ajax, not as a renderable page
+ */
+app.get('/identify/:email', function (req, res) {
+  console.log('identify with email', req.params.email)
+  // Find user_account with email in the db
+  // If not exists, create a new user_account
+  // Associate the session with the user account in user_to_session table
+})
+
+/**
  * Login Page
  * Used for getting emails
  * Generates a url for authentication
  * Eventually this should trigger an email to send instead of displaying url
+ * 
+ * Notes for Chris:
+ *  - we can get rid of this
  */
 app.post('/login', function(req, res) {
   let email = req.body.email;
@@ -117,6 +174,10 @@ app.get('/login', function(req, res) {
  * Home
  * Redirects to login without a token
  * should check for cookies too
+ *
+ * Notes for Chris:
+ *  - get rid of JWT here and elsewhere for now
+ *  - Send the landing page here, the one with just one button [Start Group Shopping]
  */
 app.get('/', passport.authenticate('jwt', {
   session: false,
