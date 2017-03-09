@@ -27,6 +27,7 @@ handlers['food.admin.team_budget'] = function * (message) {
   }
 
   var msg_text = 'How much would you like each person on your team to spend on food?';
+  if (foodSession.onboarding) msg_text = '*Step 3:* ' + msg_text
 
   // extract numerals from user input
   var parseNumber = function (str) {
@@ -63,7 +64,12 @@ handlers['food.admin.team_budget'] = function * (message) {
   }
 
   var msg_json = {
-    'attachments': []
+    'attachments': [{
+      'text': msg_text,
+      'mrkdwn_in': ['text'],
+      'fallback': 'Please choose a budget',
+      'color': (foodSession.onboarding ? '#A368F0' : '#3AA3E3')
+    }]
   }
 
   var noneButton = {
@@ -84,7 +90,8 @@ handlers['food.admin.team_budget'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ],
-        'text': (i == 0 ? msg_text : ''),
+        'text': '',
+        // 'text': (i == 0 ? msg_text : ''),
         'fallback': 'I am fallback hear me fall back!',
         'callback_id': 'food.admin.team_budget',
         'color': '#3AA3E3',
@@ -96,7 +103,7 @@ handlers['food.admin.team_budget'] = function * (message) {
       }
     }
 
-    msg_json.attachments[Math.floor(i / 5)].actions.push({
+    msg_json.attachments[1 + Math.floor(i / 5)].actions.push({
       'name': 'food.admin.confirm_budget',
       'text': `$${budget_options[i]}`,
       'style': 'default',
@@ -129,7 +136,7 @@ handlers['food.admin.team_budget'] = function * (message) {
       'mrkdwn_in': ['text']
     })
   }
-
+  
   $replyChannel.sendReplace(message, 'food.admin.team_budget', {type: message.origin, data: msg_json})
 }
 
@@ -172,7 +179,7 @@ handlers['food.admin.confirm_budget'] = function * (message) {
         locations[i].budget_history = updated[1];
       }
     }
-    
+
     yield db.slackbots.update({team_id: message.source.team}, {$set: {'meta.locations': locations}})
   }
 

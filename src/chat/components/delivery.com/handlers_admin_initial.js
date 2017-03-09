@@ -467,15 +467,14 @@ handlers['food.settings.address.confirm'] = function * (message) {
 
   db.waypoints.log(1013, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  if(foodSession.onboarding){
-    msg_json.text = ''
-    msg_json.attachments.unshift({
-      'text':'*Step 3.* Is this your address?',
-      'color':'#A368F0',
-      'mrkdwn_in': ['text']
-    })
-  }
-
+  // if(foodSession.onboarding){
+  //   msg_json.text = ''
+  //   msg_json.attachments.unshift({
+  //     'text':'*Step 3.* Is this your address?',
+  //     'color':'#A368F0',
+  //     'mrkdwn_in': ['text']
+  //   })
+  // }
 
   // collect feedback on this feature
   // if (feedbackOn && msg_json) {
