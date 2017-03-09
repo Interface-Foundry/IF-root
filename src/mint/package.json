@@ -6,15 +6,21 @@
   "dependencies": {
     "@slack/client": "^3.8.1",
     "body-parser": "^1.17.1",
+    "classnames": "^2.2.5",
     "client-sessions": "^0.7.0",
     "colors": "^1.1.2",
     "express": "^4.15.2",
+    "express-react-views": "^0.10.2",
     "github-webhook-handler": "^0.6.0",
     "jsonwebtoken": "^7.3.0",
     "lodash": "^4.17.4",
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1",
     "passport-local": "^1.0.0",
-    "uuid": "^3.0.1"
+    "uuid": "^3.0.1",
+    "babelify": "^6.3.0",
+    "browserify": "^8.0.3",
+    "react": "^15.0.0",
+    "react-dom": "^15.0.0"
   }
 }

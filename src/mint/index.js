@@ -1,11 +1,16 @@
 // file: index.js
-const express = require('express');
+const express = require('express'),
+  app = express();
 const bodyParser = require('body-parser');
 const sessions = require('client-sessions');
 const uuid = require('uuid');
-const app = express();
 const co = require('co');
 const utils = require('./helpers.js');
+const reactViews = require('express-react-views');
+
+app.set('view engine', 'js');
+app.engine('js', reactViews.createEngine());
+app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({
   extended: true
 }));
@@ -86,9 +91,9 @@ app.use(function(req, res, next) {
  */
 app.get('/identify/:email', function(req, res) {
   console.log('identify with email', req.params.email);
-    // Find user_account with email in the db
-    // If not exists, create a new user_account
-    // Associate the session with the user account in user_to_session table
+  // Find user_account with email in the db
+  // If not exists, create a new user_account
+  // Associate the session with the user account in user_to_session table
 })
 
 app.get('/login', function(req, res) {
@@ -105,10 +110,7 @@ app.get('/login', function(req, res) {
  *  - Send the landing page here, the one with just one button [Start Group Shopping]
  */
 app.get('/', function(req, res, next) {
-
-  res.sendFile('home.html', {
-    root: __dirname + '/public/'
-  })
+  res.render('home');
 });
 
 /**
@@ -125,7 +127,7 @@ app.get('/cart/:cart_id', (req, res) => co(function*() {
   // if (cart === undefined) {
   //   res.redirect('/newcart');
   // }
-  res.sendFile('cart.html', {root: __dirname + '/public/'})
+  res.render('cart')
 
   // ask user for email to tie to session
 }));
