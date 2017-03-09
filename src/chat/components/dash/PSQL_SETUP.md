@@ -84,7 +84,7 @@ $ pg_dump -h 172.17.0.1 -p 5432 -Fc -U postgres -W postgres > /tmp/postgres.sql
 ### Restoring the database from the file
 ```
 docker run --rm -it -v /tmp:/tmp postgres /bin/bash
-$ pg_restore -h 172.17.0.1 -p 5432 -Fc -U postgres -W -d postgres /tmp/postgres.sql
+$ time pg_restore -j 4 -h 172.17.0.1 -p 5432 -U postgres -W -c -d postgres /tmp/mosql_import_03_07_2017.sql.c
 ```
 
 # NOTES:
