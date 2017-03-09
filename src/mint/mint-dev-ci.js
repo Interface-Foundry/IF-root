@@ -15,8 +15,8 @@ const branch = 'refs/heads/mint'
 const channel = 'D1GGV0CMU'
 const PORT = 7777
 const server = 'mint-dev'
-var Professor = require('../monitoring/prof_oak').Professor
-var prof = new Professor(channel)
+//var Professor = require('../monitoring/prof_oak').Professor
+//var prof = new Professor(channel)
 
 function deploy() {
   return new Promise((resolve, reject) => {
@@ -51,10 +51,10 @@ handler.on('push', function (event) {
 
   deploy('HEAD').then(() => {
     var successChat = `Deployed to ${server} - "${message}"`
-    prof.say(successChat)
+    //prof.say(successChat)
   }).catch((e) => {
     var errorChat = `Error deploying to ${server}- "${message}"\n${e}`
-    prof.say(errorChat)
+    //prof.say(errorChat)
   })
 
 
