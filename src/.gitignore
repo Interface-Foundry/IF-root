@@ -76,5 +76,6 @@ app/phonegap/platforms/ios/Bubbl.li.xcodeproj/project.xcworkspace/xcuserdata/jrb
 TrainingCorpus
 components/cinna-slack/node_modules/*
 src/db/db
+mint/public/build/*
 
 yarn.lock

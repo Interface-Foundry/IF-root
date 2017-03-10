@@ -1,6 +1,6 @@
 // move this to logging.js ideally, just keeping here for now
 const expressWinston = require('express-winston');
-const logging = require('../logging.js');
+const logging = require('../../logging.js');
 const winston = require('winston');
 
 var ExpressLogger = {

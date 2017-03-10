@@ -3,26 +3,25 @@ const express = require('express'),
   app = express();
 const bodyParser = require('body-parser');
 const sessions = require('client-sessions');
-const uuid = require('uuid');
+const path = require('path');
 const co = require('co');
 const reactViews = require('express-react-views');
 const utils = require('./utils.js');
 const mintLogger = require('./mint_logging.js');
-const Email = require('./email')
+const Email = require('../email')
 
 /**
  * Models loaded from the waterline ORM
  */
 var db
-const dbReady = require('./db')
+const dbReady = require('../db')
 dbReady.then(models => db = models).catch(e => console.error(e))
 
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
  */
-app.set('view engine', 'js');
-app.engine('js', reactViews.createEngine());
-app.use(express.static(__dirname + '/public'));
+app.set('view engine', 'ejs');
+app.use(express.static(path.resolve(__dirname, '..', 'public')));
 app.use(bodyParser.urlencoded({
   extended: true
 }));
@@ -34,7 +33,7 @@ app.use(bodyParser.json());
 app.use(sessions({
   cookieName: 'session',
   secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw', // `openssl rand -base64 24`
-  duration: 0, // never expire
+  duration: 0 // never expire
 }));
 
 /**
@@ -104,12 +103,6 @@ app.get('/createAccount', (req, res) => co(function * () {
   // Associate the session with the user account in user_to_session table
 }))
 
-/**
- * Home, landing page, like kipthis.com
- */
-app.get('/', function(req, res, next) {
-  res.render('home');
-});
 
 /**
  * View Cart page, a sharable url
@@ -162,7 +155,23 @@ app.get('/fail', function(req, res, next) {
   return next(new Error('This is an error and it should be logged to the console'));
 });
 
+// Always return the main index.html, so react-router render the route in the client
+// Basically, anything that's not an api gets handled by react-router
+// we can pass arrays to react by embedding their strings in javascript
+// or we could handle session data through fetching data with react
+app.get('*', (req, res) => {
+  res.render('pages/index', {
+    nodeData: {
+      sample: 'data',
+      user: 'abc'
+    }
+  });
+});
+
 app.use(new mintLogger.ErrorLogger());
-app.listen(3000, function() {
-  console.log('Express running at http://localhost:3000');
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}!`);
 });

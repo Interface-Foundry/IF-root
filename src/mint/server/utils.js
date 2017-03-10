@@ -4,7 +4,7 @@ const uuid = require('uuid');
  * Models loaded from the waterline ORM
  */
 var db;
-const dbReady = require('./db');
+const dbReady = require('../db');
 dbReady.then(models => db = models).catch(e => console.error(e));
 
 // length of cart id, not sure what compromise between looking fine and getting scraped
