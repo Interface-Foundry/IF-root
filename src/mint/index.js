@@ -47,6 +47,8 @@ app.use(function(req, res, next) {
     req.session.session_id = sessionId;
     db.Sessions.create({
       session_id: sessionId
+    }).catch(e => {
+      console.error(e)
     })
   }
 

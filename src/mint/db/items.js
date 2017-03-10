@@ -8,7 +8,9 @@ var itemsCollection = Waterline.Collection.extend({
   connection: 'default',
   attributes: {
     /** Generated when a cart is created for the first time */
-    cart: {model: 'string'},
+    cart: {
+      collection: 'carts'
+    },
     item_name: 'string'
     // added_by: {}
   }
