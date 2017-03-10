@@ -43,7 +43,8 @@
     "webpack-hot-middleware": "^2.17.1"
   },
   "scripts": {
-    "start": "NODE_PATH=$NODE_PATH:./react node ./server",
+    "start": "npm run build & NODE_PATH=$NODE_PATH:./react node ./server",
+    "build": "webpack",
     "dev": "npm run start & webpack --progress --color -d --watch"
   }
 }
