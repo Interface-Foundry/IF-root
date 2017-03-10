@@ -12,8 +12,8 @@ export default class Home extends Component {
     return (
       <div>
         <p>Kip!</p>
-        <form action='/cart/abcXXX' method='get' accept-charset='utf-8'>
-          <button type='submit'>Create A Cart</button>
+        <form action='/newcart' method='get' accept-charset='utf-8'>
+          <button type='submit'>new cart</button>
         </form>
       </div>
     );

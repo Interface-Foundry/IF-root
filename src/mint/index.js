@@ -53,7 +53,7 @@ app.use(function(req, res, next) {
   // Now that the session_id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12
 
-  console.log('session is', req.session)
+  console.log('session is', req.session.session_id)
   next();
 });
 
@@ -100,19 +100,37 @@ app.get('/cart/:cart_id', (req, res) => co(function*() {
 }));
 
 /**
- * example of how the error logger works for time being
+ * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
+ * @param {[cart_id]} )             {}) [description]
+ * @param {string} magic_id - the magic id for the cart
+ * @yield {[type]} [description]
  */
-app.get('/fail', function(req, res, next) {
-  return next(new Error('This is an error and it should be logged to the console'));
-});
+app.get('/magi/:magic_id', (req, res) => co(function * () {
+  // find if magic_id exists
+  var cart = db.carts.findOne({magic_link: req.params.magic_link});
+  if (cart) {
+    // redirect and log user in
+    res.redirect(`/cart/${cart.cart_id}`);
+  } else {
+    return new Error('magic_id doesnt exist, probably return user to some error page where they can create new cart');
+  }
+}));
 
 /**
  * create new cart for user, redirect them to /cart/:cart_id
  */
 app.get('/newcart', (req, res) => co(function * () {
-  var cart = yield utils.createNewCart(req.session);
-  res.redirect(`/cart/${cart.cart_id}`);
+  var session_id = req.session.session_id;
+  var cart_id = yield utils.createNewCart(req, session_id);
+  res.redirect(`/cart/${cart_id}`);
 }));
+
+/**
+ * example of how the error logger works for time being
+ */
+app.get('/fail', function(req, res, next) {
+  return next(new Error('This is an error and it should be logged to the console'));
+});
 
 app.use(new mintLogger.ErrorLogger());
 app.listen(3000, function() {

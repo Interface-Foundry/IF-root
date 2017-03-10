@@ -5,6 +5,7 @@ var mongoAdapter = require('sails-mongo')
  * Set up the database connections
  */
 var waterline = new Waterline()
+waterline.loadCollection(require('./carts'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./sessions'))
 
@@ -31,6 +32,7 @@ waterline.initialize(config, (err, ontology) => {
   }
 
   const models = {
+    Carts: ontology.collections.carts,
     UserAccounts: ontology.collections.user_accounts,
     Sessions: ontology.collections.sessions
   }
