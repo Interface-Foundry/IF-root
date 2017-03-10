@@ -3,19 +3,74 @@
 <head>
     <meta charset="utf-8">
     <title>Add Item to Cart</title>
+    <style type="text/css">
+    * [lang~="gmail-hide"] {display: none !important;}
+    * [lang~="gmail-show"] {display: inline !important;}
+    </style>
 </head>
 <body>
     <h1>Add Item to Cart</h1>
-
-    <form id="form1" action="https://www.kipthis.com" method="get">
+    
+    <form id="form1" target="_blank" action="https://www.kipthis.com" method="get">
         <div style="margin-bottom:10px">
-            <label for="text"><b>Click a Popular Item:</b> <br> Red Bull, Peanut Butter</label><br><br>
-            <input required type="text" id="text" name="text" placeholder="Paste Amazon URL" value="">
+            <label style="margin:0;" for="text"><b>Click a Popular Item:</b> <br> Red Bull, Peanut Butter</label><br><br>
+            <input style="margin:0;" type="text" id="text" name="text" placeholder="Paste Amazon URL" value="">
         </div>
 
         <div>
-            <button type="submit" name="Add to Cart">Add to Cart</button>
+            <button id="addcart" style="margin:0;" type="submit" name="addcart">Add to Cart</button>
         </div>
     </form>
+
+    <div lang="gmail-hide" style="color:red; display:inline;">
+        GMAIL HIDE!<br><br>
+    </div>
+    
+    <div lang="gmail-show" style="color:green; display:none;">
+        GMAIL SHOW!<br><br>
+    </div>
+    
+    <div class="msux" style="color:blueviolet; display:none;">
+        OUTLOOK OR OFFICE 365 DETECTED!!!!!
+    </div>
+    
+<label> <input type="checkbox" style="display:none !important;"> <span> <div class="button show" style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Show more</div> <div class="button hide" style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Show less</div> <label class="content hide">Here is some more content</label> </span> </label>
+    
 </body>
 </html>
+
+<style type="text/css">
+    
+/* HOW TO DETECT GMAIL PHONE: GMAIL HIDE + MAX width CSS */
+    
+.button{ padding:1em; width:100px; text-align:center; border:1px solid black; } .show{ display:block !important; max-height:none !important; } .hide{ display:none; } input:checked + span .hide{ display:block !important; max-height:none !important; } input:checked + span .show{ display:none !important; }
+
+#addcart {
+    background-color: #cecece;
+}
+#addcart:hover {
+    transform: rotateX(50deg);
+}
+
+#form1 {
+    /* display:none; */
+    background-color:green;
+}
+
+/* excludes AOL mail (explorer), yahoo*/
+@media screen and (-webkit-min-device-pixel-ratio: 0){
+    #form1 {
+        /* display: inline !important; */
+        background-color: blue;
+    }
+}
+    
+/* if outlook.com  */ 
+[owa] .msux {
+    display: inline !important;
+}
+
+
+
+/* need to kill android, outlook 2013 */
+</style>
