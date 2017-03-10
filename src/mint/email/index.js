@@ -5,7 +5,20 @@ var db
 const dbReady = require('../db')
 dbReady.then(models => db = models)
 
-
+/**
+ * Creates a new email object with the basic email options
+ * The other files in this directory specify specific emails to send
+ * 
+ * Basic usage:
+ * // Create it
+ * var email = new Email({to: ...})
+ *
+ * // Specify the template and the data
+ * email.newCart({cart_id: ...})
+ *
+ * // Send it
+ * yield email.send()
+ */
 function Email(emailOptions) {
   // TODO type check emailOptions
   
@@ -16,28 +29,11 @@ function Email(emailOptions) {
   this.ready = this._email
 }
 
-Email.prototype.testingEmail = function (options) {
-  console.log('testing email')
-  var me = this
-
-  // Save the old ready promise so we can wait for it
-  var ready = this.ready
-
-  // Create a new ready promise that waits for our stuff, too
-  this.ready = co(function * () {
-    yield ready
-
-    // Add html and text to an object on the Email instance
-    me.email = yield me._email
-    me.email.subject = 'Your Kip Shopping Cart'
-    me.email.message_html = `<h1>Kip Cart</h1><a href="http://localhost:3000/cart/${options.cart_id}">View Cart</a>`
-    me.email.message_text_fallback = 'Kip Cart\n\nView your cart at http://localhost:3000/cart/' + options.cart_id
-  })
-
-  // Make this function chainable
-  return this
-}
-
+/**
+ * Sends an email, returns a promise. Usually looks like this:
+ * var email = new Email({to: ...}).newCart({cart_id})
+ * yield email.send()
+ */
 Email.prototype.send = function() {
   var me = this
   return co(function *() {
