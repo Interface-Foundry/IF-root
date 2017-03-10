@@ -52,6 +52,9 @@ exports.checkIfUserIsInCart = function * (user, cart_id) {
   return false
 };
 
+/**
+ * "Forgot Password" link basically. Not really magic.
+ */
 exports.generateMagicLink = function * (user, cart) {
 
 }

@@ -1,4 +1,5 @@
-var Waterline = require('waterline');
+var Waterline = require('waterline')
+var uuid = require('uuid')
 
 /**
  * User Account Collection
@@ -8,8 +9,20 @@ var userAccountCollection = Waterline.Collection.extend({
   identity: 'user_accounts',
   connection: 'default',
   attributes: {
+    user_id: {
+      type: 'text',
+      primaryKey: true,
+      unique: true,
+      defaultsTo: function () {
+        return uuid.v4()
+      }
+    },
+
     /** the user's submitted email address */
-    email_address: 'string',
+    email_address: {
+      type: 'string',
+      unique: true
+    },
 
     /** Many-to-many relation with user session, which is the brower cookie session thing */
     sessions: {
@@ -32,6 +45,6 @@ var userAccountCollection = Waterline.Collection.extend({
       dominant: true
     }
   }
-});
+})
 
-module.exports = userAccountCollection;
+module.exports = userAccountCollection

@@ -8,6 +8,7 @@ const co = require('co');
 const reactViews = require('express-react-views');
 const utils = require('./utils.js');
 const mintLogger = require('./mint_logging.js');
+const Email = require('./email')
 
 /**
  * Models loaded from the waterline ORM
@@ -69,12 +70,39 @@ app.use(new mintLogger.NormalLogger());
  * Multiple user_accounts can be associated with one session, personal email and work email on same computer
  * Though this is a GET route, it should be used with XHR/ajax, not as a renderable page
  */
-app.get('/identify/:email', function(req, res) {
-  console.log('identify with email', req.params.email);
+app.get('/createAccount', (req, res) => co(function * () {
+  console.log('identify with email', req.query.email);
+
+  // clean up the email TODO
+  var email_address = req.query.email.toLowerCase()
+
+  // Find an existing user or create a new one
+  var user = yield db.UserAccounts.findOne()
+    .where({email_address: email_address})
+
+  // Create new one if didn't find it
+  if (!user) {
+  var user = yield db.UserAccounts.create({
+    email_address: email_address,
+    sessions: [req.session.session_id]
+  })
+  }
+
+  res.send('ok')
+    
+  // then also send an email
+  var email = new Email({
+    to: [user.user_id]
+  }).testingEmail({
+    cart_id: req.query.cart_id
+  })
+
+  yield email.send()
+
   // Find user_account with email in the db
   // If not exists, create a new user_account
   // Associate the session with the user account in user_to_session table
-})
+}))
 
 /**
  * Home, landing page, like kipthis.com

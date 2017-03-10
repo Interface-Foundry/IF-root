@@ -9,6 +9,7 @@ waterline.loadCollection(require('./carts'))
 waterline.loadCollection(require('./items'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./sessions'))
+waterline.loadCollection(require('./emails'))
 
 var config = {
   adapters: {
@@ -26,20 +27,21 @@ var config = {
 }
 
 var initialize = new Promise((resolve, reject) => {
-waterline.initialize(config, (err, ontology) => {
-  if (err) {
-    console.error(err)
-    return reject(err)
-  }
+  waterline.initialize(config, (err, ontology) => {
+    if (err) {
+      console.error(err)
+      return reject(err)
+    }
 
-  const models = {
-    Carts: ontology.collections.carts,
-    Items: ontology.collections.items,
-    UserAccounts: ontology.collections.user_accounts,
-    Sessions: ontology.collections.sessions
-  }
-  resolve(models)
-})
+    const models = {
+      Carts: ontology.collections.carts,
+      Items: ontology.collections.items,
+      UserAccounts: ontology.collections.user_accounts,
+      Sessions: ontology.collections.sessions,
+      Emails: ontology.collections.emails
+    }
+    resolve(models)
+  })
 })
 
 module.exports = initialize
