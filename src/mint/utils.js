@@ -1,13 +1,16 @@
+const uuid = require('uuid');
+
 /**
- * @param {string}
- * @param {string}
+ * @param {string} - session or something? idk really
  * @yield {object} cart object
  */
-exports.createNewCart = function * methodName(cart, creator) {
-  var cart = new db.Cart({
-    cart_leader: creator,
+exports.createNewCart = function * methodName(creator) {
+  let cart = yield Cart.create({
+    cart_id: uuid.v4().replace(/-/g, '').slice(0, 16),
+    cart_leader: creator
+  });
 
-  })
+  return cart;
 }
 
 

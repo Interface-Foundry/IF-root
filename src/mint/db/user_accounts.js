@@ -1,4 +1,4 @@
-var Waterline = require('waterline')
+var Waterline = require('waterline');
 
 /**
  * User Account Collection
@@ -16,9 +16,22 @@ var userAccountCollection = Waterline.Collection.extend({
       collection: 'sessions',
       via: 'user_accounts',
       dominant: true
+    },
+
+    /** @type {cart_leader} many-to-many relationship with many different carts, can have multiple leaders */
+    cart_leader: {
+      collection: 'carts',
+      via: 'cart_leader',
+      dominant: true
+    },
+
+    /** @type {cart_member} many-to-many relationship with a carts members */
+    cart_member: {
+      collection: 'carts',
+      via: 'cart_members',
+      dominant: true
     }
   }
-})
+});
 
-module.exports = userAccountCollection
-
+module.exports = userAccountCollection;

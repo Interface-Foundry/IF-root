@@ -6,7 +6,7 @@ const sessions = require('client-sessions');
 const uuid = require('uuid');
 const co = require('co');
 const reactViews = require('express-react-views');
-const utils = require('./helpers.js');
+const utils = require('./utils.js');
 const mintLogger = require('./mint_logging.js');
 
 /**
@@ -52,7 +52,7 @@ app.use(function(req, res, next) {
 
   // Now that the session_id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12
-  
+
   console.log('session is', req.session)
   next();
 });
@@ -88,7 +88,7 @@ app.get('/', function(req, res, next) {
 app.get('/cart/:cart_id', (req, res) => co(function*() {
   // get the cart
   // var cart = yield utils.getCart(req.params.cart_id);
-  
+
   // if no cart exists typo, for now redirect to /newcart but could instead redirect to a "Sorry can't find that cart, want to create a new one?" page
   // if (cart === undefined) {
   //   res.redirect('/newcart');
@@ -109,9 +109,9 @@ app.get('/fail', function(req, res, next) {
 /**
  * create new cart for user, redirect them to /cart/:cart_id
  */
-app.get('/newcart', (req, res) => co(function*() {
-  // create a new cart for the user
-  // redirect to /carts/cart.cart_id
+app.get('/newcart', (req, res) => co(function * () {
+  var cart = yield utils.createNewCart(req.session);
+  res.redirect(`/cart/${cart.cart_id}`);
 }));
 
 app.use(new mintLogger.ErrorLogger());
