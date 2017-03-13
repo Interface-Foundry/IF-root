@@ -13,7 +13,7 @@ class App extends Component {
 
   render() {
     const { className, ...props } = this.props;
-    console.log(this.props);
+    const {params} = props.match;
     return (
       <div className={classnames('App', className)}>
         <div className="App-header">
@@ -21,7 +21,7 @@ class App extends Component {
           <h2>Welcome to React</h2>
         </div>
         <p className="App-intro">
-          You're using Cart {this.props.params.cart_id}
+          You're using Cart {params.cart_id}!
         </p>
       </div>
     );

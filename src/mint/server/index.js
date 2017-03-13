@@ -6,7 +6,6 @@ const bodyParser = require('body-parser');
 const sessions = require('client-sessions');
 const path = require('path');
 const co = require('co');
-const reactViews = require('express-react-views');
 const utils = require('./utils.js');
 const mintLogger = require('./mint_logging.js');
 const Email = require('../email');
