@@ -104,6 +104,16 @@ app.get('/createAccount', (req, res) => co(function * () {
   // Associate the session with the user account in user_to_session table
 }))
 
+
+/**
+ * Add a url to a cart from an email, redirect user to the react app
+ */
+app.get('/addcart', (req, res) => co(function * () {
+  var cartId = req.query.cart_id
+  // todo add the url specified to the amazon cart // TODO
+  res.redirect('/cart/' + cartId)
+}))
+
 /**
  * Landing page serves static html
  */
