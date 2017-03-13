@@ -1188,7 +1188,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         'actions': [
           {
             'name': 'food.menu.quickpicks',
-            'text': '✓ Yes, let me Order',
+            'text': '✓ Yes, let me order',
             'type': 'button',
             'style': 'primary',
             'value': {}

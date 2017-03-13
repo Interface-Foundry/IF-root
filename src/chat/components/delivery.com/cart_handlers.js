@@ -653,7 +653,6 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   })
 
   // show admin final confirm of thing
-  logging.debug('foodSession.cart.length', foodSession.cart.length) // duplication has happened OH GOD IT'S JOHN CARPENTER'S "Thing"
   var teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
   var lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
   // var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
@@ -672,10 +671,23 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
           'team': foodSession.team_id
         }
       })
+
+    // var messagesToDelete = yield db.Messages.remove({thread_id: user.dm, incoming: true}).sort('-ts').limit(5)
+    // console.log('MESSAGES TO DELETE:', messagesToDelete)
+    // yield messagesToDelete.map(function * (m) {
+    //   if (m.reply && m.reply.data && m.reply.data.attachments) {
+    //     m.reply.data.attachments.map(function (a) {
+    //       a.actions = []
+    //     })
+    //     yield db.update({_id: m._id}, {'reply.data.attachments': m.reply.data.attachments})
+    //   }
+    // })
+    // console.log('MESSAGES TO DELETE:', messagesToDelete)
+
     var json = {
-        'text': `The collection of orders has ended. Sorry.`,
+        'text': `Order collection has ended, sorry.`,
         'callback_id': 'food.end_order',
-        'fallback': `The collection of orders has ended. Sorry.`,
+        'fallback': `Order collection has ended, sorry.`,
         'attachment_type': 'default',
         'attachments': [{
           'fallback': 'Home',
