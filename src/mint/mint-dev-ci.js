@@ -26,6 +26,14 @@ function deploy() {
       cwd: path.join(__dirname, '../../')
     })
     console.log(stdout)
+    stdout = exec('yarn install', {
+      cwd: __dirname
+    })
+    console.log(stdout)
+    stdout = exec('webpack', {
+      cwd: __dirname
+    })
+    console.log(stdout)
     resolve()
   })
 }

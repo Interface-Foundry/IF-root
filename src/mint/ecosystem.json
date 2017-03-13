@@ -1,8 +1,8 @@
 {
   "apps": [{
     "name": "mint",
-    "cwd": "./server",
-    "script": "index.js",
+    "cwd": ".",
+    "script": "./server/index.js",
     "combine_logs": true,
     "watch": true
   }, {
