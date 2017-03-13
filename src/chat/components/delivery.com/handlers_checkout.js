@@ -45,15 +45,6 @@ handlers['food.admin.order.checkout.address2'] = function * (message) {
     }]
   }
 
-  // if (feedbackOn && response) {
-  //   response.attachments[0].actions.push({
-  //     name: 'food.feedback.new',
-  //     text: '⇲ Send feedback',
-  //     type: 'button',
-  //     value: 'food.feedback.new'
-  //   })
-  // }
-
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address2', type: message.origin, data: response})
 }
 
@@ -108,10 +99,10 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
 
   db.waypoints.log(1320, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(1).exec()
-  prevMessage = prevMessage[0]
+  var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(2).exec()
+  prevMessage = prevMessage[1]
   if (_.get(prevMessage, 'reply')) {
-    logging.info('heerrr', prevMessage.reply)
+    logging.info('prevMessage.reply', prevMessage.reply)
   }
 
   var editInfo = {}
@@ -177,6 +168,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   if (!foodSession.chosen_location.address_2) {
+    console.log('NO ADDRESS DETAILS :(')
     return yield handlers['food.admin.order.checkout.address2'](message)
   }
   if (!foodSession.convo_initiater.last_name) {

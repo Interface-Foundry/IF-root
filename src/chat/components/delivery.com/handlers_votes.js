@@ -525,8 +525,8 @@ handlers['food.vote.abstain'] = function * (message) {
 
   // re-send all the dashbaords to all the remaining team members
   foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.source.user)
-  foodSession.team_members.map(user => {
-    sendUserDashboard(foodSession, message, user)
+  yield foodSession.team_members.map(function * (user) {
+    yield sendUserDashboard(foodSession, message, user)
   })
 
   // oops well the above didn't send the admin the dashboard if they were the one that clicked "No Food"
@@ -535,12 +535,12 @@ handlers['food.vote.abstain'] = function * (message) {
     // manually remove the admin from foodSession.team_members
     foodSession.markModified('team_members')
     yield foodSession.save()
-    sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+    yield sendUserDashboard(foodSession, message, foodSession.convo_initiater)
   }
 
   // omg another case: when the admin has already clicked "No Food" and then another user clicks "No Food"
   if (!isAdmin && adminIsOut) {
-    sendUserDashboard(foodSession, message, foodSession.convo_initiater)
+    yield sendUserDashboard(foodSession, message, foodSession.convo_initiater)
   }
 }
 
@@ -702,7 +702,9 @@ function * sendAdminDashboard (foodSession, message, user) {
 * @param user {object} The user the dashboard is being sent to
 */
 function * sendUserDashboard (foodSession, message, user) {
+  console.log('sendUserDash called')
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
+  console.log('found slackbot')
   var user = yield db.chatusers.findOne({id: user.id})
   console.log('send user dashboard to', user.id, 'initiated by', foodSession.convo_initiater.id)
   if (user.id === foodSession.convo_initiater.id) {
@@ -824,7 +826,7 @@ handlers['food.admin.dashboard.cuisine'] = function * (message, foodSession) {
           origin: message.origin,
           source: {
             team: foodSession.team_id,
-            user: m.id,
+            user: convo_initiater.id,
             channel: m.dm
           }
         }
@@ -875,25 +877,57 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   if (foodSession.votes.length && sort === SORT.cuisine) {
     var countWinner = score_utils.voteWinner(foodSession.votes) //the cuisine that would have won without vote-weighting
-    var realWinner = score_utils.rankCuisines(foodSession.votes)[0] //the cuisine that did win with vote-weighting
-    console.log('countWinner', countWinner, '; realWinner', realWinner)
-    if (countWinner && viableRestaurants[index].summary.cuisines.indexOf(countWinner) > -1) {
+    var realWinner = viableRestaurants[0].summary.cuisines[0] //the cuisine that did win with vote-weighting
+    console.log('countWinner, realWinner, firstRestoCuisines', countWinner, realWinner, viableRestaurants[0].summary.cuisines)
+    if (countWinner && (countWinner != realWinner || viableRestaurants[0].summary.cuisines.indexOf(countWinner) > -1)) {
       //kip chose the cuisine it would have chosen by simply counting votes, so no explanation is necessary
-      var explanationText = 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?'
+      var explanationText = `${viableRestaurants[0].summary.cuisines[0]}`
     }
     else {
       var votes = foodSession.votes.filter(v => v.vote == realWinner) //votes for the winning cuisine
+      console.log('these should all be votes for the winning cuisine', votes)
       var vote = votes.reduce(function (acc, val) {
         return (acc.weight > val.weight ? acc : val)
       }, {weight: -100}) //user who voted for the winning cuisine the hardest / whose vote for the winning cuisine is prioritized the most
       console.log('winning vote', vote)
       // explanation text explaining the choice when it is different / not obvious from the simple voting result
-      var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with the cuisine they wanted! \n Which restaurant do you want today?`
+      var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with ${vote.vote} 🎉`
+      //send explanation message to the non-admin users
     }
+
+    yield foodSession.team_members.map(function * (user) {
+      if (user.id != foodSession.convo_initiater.id) {
+        console.log('sending victory message to', user.name)
+        yield $replyChannel.send({
+          mode: 'food',
+          origin: message.origin,
+          channel: user.dm,
+          thread_id: user.dm,
+          user_id: user.id,
+          source: {
+            team: foodSession.team_id,
+            channel: user.dm,
+            user: user.id,
+            origin: 'slack',
+            callback_id: 'callback'
+          }
+        }, 'food.admin.restaurant.pick.list', {
+            type: 'slack',
+            data: {
+              text: '*Vote Result:*',
+              attachments: [{
+                color: '#3AA3E3',
+                fallback: "votes submitted",
+                text: explanationText
+              }]
+            }
+        })
+      }
+    })
   }
 
   var responseForAdmin = {
-    'text': explanationText,
+    'text': '*Vote Result:* ' + explanationText + '\n Here are 3 restaurant suggestions based on the team vote. Which do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
@@ -974,8 +1008,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     buttons.actions.push(moreButton)
   }
 
-  // buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
-
   responseForAdmin.attachments.push(buttons)
 
   // adding writing prompt
@@ -989,6 +1021,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   var admin = foodSession.convo_initiater
 
   if (message.source.user === admin.id) {
+    console.log('this message comes from the admin') // true
     var msg = message
   } else if (_.find(foodSession.cuisine_dashboards, {user: admin.id})) {
     var dashboard = _.find(foodSession.cuisine_dashboards, {user: admin.id})
@@ -1010,7 +1043,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   }
 
   logging.debug('sending message to admin: ', message, responseForAdmin)
-  $replyChannel.sendReplace(msg, 'food.admin.restaurant.search', {'type': message.origin, 'data': responseForAdmin})
+  $replyChannel.send(msg, 'food.admin.restaurant.search', {'type': message.origin, 'data': responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
@@ -1121,8 +1154,23 @@ handlers['food.admin.restaurant.confirm_reordering_of_previous_restaurant'] = fu
 }
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
-  console.log('admin collect orders called')
   foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  // If the admin isn't part of the order, send them a message confirming that their click went through
+  var adminAbstained = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
+  if (adminAbstained) {
+    var confirmation = {
+      attachments: [{
+        mrkdwn_in: ['text'],
+        fallback: 'Collecting order from the rest of the team!',
+        'color': '#3AA3E3',
+        text: `Thank you for selecting a restaurant. \n Now I'm collecting orders from the rest of the team from ${foodSession.chosen_restaurant.name}, and I'll get back to you once they've chosen their food!`
+      }],
+      text: ''
+    }
+    $replyChannel.sendReplace(message, '', {type: 'slack', data: confirmation})
+  }
+
   var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
   var cuisines = _.get(foodSession, 'chosen_restaurant_full.summary.cuisines', []).join(', ')
   var msgJson = {
@@ -1140,14 +1188,14 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         'actions': [
           {
             'name': 'food.menu.quickpicks',
-            'text': '✓ Yes',
+            'text': '✓ Yes, let me order',
             'type': 'button',
             'style': 'primary',
             'value': {}
           },
           {
             'name': 'food.admin.waiting_for_orders',
-            'text': 'No',
+            'text': '× No Food for Me',
             'type': 'button',
             'value': 'no thanks',
             'confirm': {

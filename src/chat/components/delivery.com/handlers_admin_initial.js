@@ -135,14 +135,14 @@ handlers['food.admin.select_address'] = function * (message, banner) {
 
   //modify message for onboarding
   if (foodSession.onboarding) {
-    msg_json.attachments[0].text = '*Step 1.* Add an address for delivery by tapping the `New Location +` button'
+    msg_json.attachments[0].text = 'Hi there, I\'m going to walk you through your first Kip Café order! \n*Step 1:* Add a delivery address'
     msg_json.attachments[0].mrkdwn_in = ["text"]
     msg_json.attachments[0].color = '#A368F0'
 
     //add onboard sticker #1
     msg_json.attachments.unshift({
-      'text':'Hi there, I\'m going to walk you through your first Kip Café order! \n _By using Kip you agree to our <https://kipthis.com/legal.html|Terms of Use>_',
-      'image_url':'http://tidepools.co/kip/welcome_cafe.png',
+      'text':'',
+      'image_url':'https://storage.googleapis.com/kip-random/cafe.png',
       'color': '#A368F0',
       'mrkdwn_in': ['text']
     })
@@ -173,7 +173,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   //toggle floor buttons for onboarding
   var floorButtons = [{
     'name': 'passthrough',
-    'text': 'New Location +',
+    'text': 'New Address +',
     'type': 'button',
     'value': 'food.settings.address.new'
   }]
@@ -467,15 +467,14 @@ handlers['food.settings.address.confirm'] = function * (message) {
 
   db.waypoints.log(1013, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  if(foodSession.onboarding){
-    msg_json.text = ''
-    msg_json.attachments.unshift({
-      'text':'*Step 3.* Is this your address?',
-      'color':'#A368F0',
-      'mrkdwn_in': ['text']
-    })
-  }
-
+  // if(foodSession.onboarding){
+  //   msg_json.text = ''
+  //   msg_json.attachments.unshift({
+  //     'text':'*Step 3.* Is this your address?',
+  //     'color':'#A368F0',
+  //     'mrkdwn_in': ['text']
+  //   })
+  // }
 
   // collect feedback on this feature
   // if (feedbackOn && msg_json) {
@@ -610,8 +609,6 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  logging.debug('foodSession.budget', foodSession.budget)
-
   // notifies admin about the order budget
   var budgetAttachment = {
     text: (foodSession.budget ? `*Budget*: $${foodSession.budget} / person` : '*Budget*: Unlimited'),
@@ -700,17 +697,6 @@ handlers['food.admin_polling_options'] = function * (message) {
       'mrkdwn_in': ['text']
     })
   }
-
-  // attachments.push({
-  //   'mrkdwn_in': [
-  //     'text'
-  //   ],
-  //   'text': `*Budget*: $${foodSession.budget} / person`,
-  //   'fallback': 'Team budget',
-  //   'callback_id': 'indignata sub umbras',
-  //   'attachment_type': 'default',
-  //   'actions': []
-  // })
 
   attachments.push({
     'mrkdwn_in': [
@@ -813,7 +799,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       }, {
         'name': 'food.admin.select_channel_reorder',
         'value': mostRecentMerchant,
-        'text': `Edit Members`,
+        'text': `Manage Channels`,
         'type': 'button'
       }//,
       // {

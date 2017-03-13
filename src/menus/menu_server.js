@@ -73,9 +73,7 @@ router.post('/cafe', (req, res) => co(function * () {
 
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
-
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
-
   ms.selected_items = req.body.selected_items;
 
   var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
@@ -132,7 +130,6 @@ router.post('/order', function (req, res) {
       var menu = Menu(foodSession.menu)
       var money_spent = 0;
       console.log('got cart and menu')
-      // console.log('ORDER', order) //not yet in duplicate
       for (var i = 0; i < order.length; i++) {
         // logging.debug(order[i]);
         cart.push({

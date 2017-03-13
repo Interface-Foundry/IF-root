@@ -98,7 +98,6 @@ utils.cuisineSort = function (m, votes, slackbot) {
   var cuisines = utils.rankCuisines(votes)
   var cScore = cuisineScore(m, cuisines)
   var hScore = historyScore(m, slackbot)
-  // console.log('entire score:', cScore + hScore)
   return cScore + hScore
 }
 
