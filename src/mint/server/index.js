@@ -1,4 +1,5 @@
 // file: index.js
+const fs = require('fs')
 const express = require('express'),
   app = express();
 const bodyParser = require('body-parser');
@@ -103,12 +104,20 @@ app.get('/createAccount', (req, res) => co(function * () {
   // Associate the session with the user account in user_to_session table
 }))
 
+/**
+ * Landing page serves static html
+ */
+
+app.get('/', (req, res) => {
+  res.render('pages/index')
+})
+
 
 /**
  * View Cart page, a sharable url
  * @param {cart_id}
  */
-app.get('/cart/:cart_id', (req, res) => co(function*() {
+//app.get('/cart/:cart_id', (req, res) => co(function*() {
   // get the cart
   // var cart = yield utils.getCart(req.params.cart_id);
 
@@ -119,8 +128,8 @@ app.get('/cart/:cart_id', (req, res) => co(function*() {
 
   // maybe render something special if req.session.session_id === cart.creator
 
-  res.render('cart')
-}));
+//  res.render('cart')
+//}));
 
 /**
  * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
@@ -160,7 +169,7 @@ app.get('/fail', function(req, res, next) {
 // we can pass arrays to react by embedding their strings in javascript
 // or we could handle session data through fetching data with react
 app.get('*', (req, res) => {
-  res.render('pages/index', {
+  res.render('pages/cart', {
     nodeData: {
       sample: 'data',
       user: 'abc'
