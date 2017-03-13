@@ -1,4 +1,5 @@
-// src/index.js
+// react/index.js
+// renders react, using react router
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { browserHistory } from 'react-router';

@@ -1,4 +1,5 @@
-// src/components/NotFound/index.js
+// react/components/NotFound/index.js
+// our shiny 404 page
 import React, { PropTypes, Component } from 'react';
 import classnames from 'classnames';
 

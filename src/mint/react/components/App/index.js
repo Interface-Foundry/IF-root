@@ -1,4 +1,5 @@
-// src/components/App/index.js
+// react/components/App/index.js
+// the source page
 import React, { PropTypes, Component } from 'react';
 import classnames from 'classnames';
 
@@ -12,16 +13,15 @@ class App extends Component {
 
   render() {
     const { className, ...props } = this.props;
+    console.log(this.props);
     return (
       <div className={classnames('App', className)}>
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Welcome to React</h2>
-          <h1>Sup</h1>
         </div>
         <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-          <code> SUUUUUUUUP </code>
+          You're using Cart {this.props.params.cart_id}
         </p>
       </div>
     );

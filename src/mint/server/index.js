@@ -112,7 +112,6 @@ app.get('/', (req, res) => {
   res.render('pages/index')
 })
 
-
 /**
  * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
  * @param {[cart_id]} )             {}) [description]
@@ -150,16 +149,11 @@ app.get('/fail', function(req, res, next) {
 // Basically, anything that's not an api gets handled by react-router
 // we can pass arrays to react by embedding their strings in javascript
 // or we could handle session data through fetching data with react
-app.get('*', (req, res) => co(function *(){
+app.get('*', (req, res) =>
   // Get the user_accont info, if exists (might not if they are clicking a shared link)
   // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
-  res.render('pages/cart', {
-    nodeData: {
-      sample: 'data',
-      user: 'abc'
-    }
-  });
-}));
+  res.render('pages/cart')
+);
 
 app.use(new mintLogger.ErrorLogger());
 
