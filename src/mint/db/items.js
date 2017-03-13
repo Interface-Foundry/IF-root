@@ -7,12 +7,27 @@ var itemsCollection = Waterline.Collection.extend({
   identity: 'items',
   connection: 'default',
   attributes: {
-    /** Generated when a cart is created for the first time */
+    /** Generated when an item is added for the first time */
+
+    /** @type {reference} cart which item belongs to */
     cart: {
-      collection: 'carts'
+      model: 'carts'
     },
-    item_name: 'string'
-    // added_by: {}
+
+    /** @type {string} original link posted */
+    original_link: 'string',
+
+    /** @type {string} item name or whatever we present maybe */
+    item_name: 'string',
+
+    /** @type {string} amazon specific asin */
+    asin: 'string',
+
+    /** @type {boolean} if item has been added or removed */
+    added: 'boolean'
+    // added_by: {
+    //   model: 'user_accounts'
+    // }
   }
 });
 

@@ -29,7 +29,6 @@ var cartsCollection = Waterline.Collection.extend({
       collection: 'items',
       via: 'cart'
     }
-
   }
 });
 
