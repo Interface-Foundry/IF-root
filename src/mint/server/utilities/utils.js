@@ -1,15 +1,16 @@
 const uuid = require('uuid');
 
-/**
- * Models loaded from the waterline ORM
- */
-var db;
-const dbReady = require('../db');
-dbReady.then(models => db = models).catch(e => console.error(e));
-
 // length of cart id, not sure what compromise between looking fine and getting scraped
 const CART_ID_LENGTH = 12; // based on lichess game length lol
 const MAGIC_URL_LENGTH = 32;
+
+/**
+ * Models loaded from the waterline ORM
+ */
+var db
+const dbReady = require('../../db')
+dbReady.then(models => db = models).catch(e => console.error(e))
+
 
 /**
  * @param {string} - session or something? idk really
