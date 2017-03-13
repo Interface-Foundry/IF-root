@@ -15,9 +15,9 @@ const sgRouter = require('./sendgrid-webhook.js');
 /**
  * Models loaded from the waterline ORM
  */
-var db
-const dbReady = require('../db')
-dbReady.then(models => db = models).catch(e => console.error(e))
+var db;
+const dbReady = require('../db');
+dbReady.then(models => db = models).catch(e => console.error(e));
 
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
@@ -45,19 +45,19 @@ app.use(function(req, res, next) {
   // req.session will always exist, thanks to the above client-sessions middleware
   // Check to make sure we have stored this user's session in the database
   if (!req.session.session_id) {
-    var sessionId = Math.random().toString(36).slice(2)
+    var sessionId = Math.random().toString(36).slice(2);
     req.session.session_id = sessionId;
     db.Sessions.create({
       session_id: sessionId
     }).catch(e => {
-      console.error(e)
-    })
+      console.error(e);
+    });
   }
 
   // Now that the session_id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12
 
-  console.log('session is', req.session.session_id)
+  console.log('session is', req.session.session_id);
   next();
 });
 
@@ -65,6 +65,11 @@ app.use(function(req, res, next) {
  * Add in logging after sessions have been created
  */
 app.use(new mintLogger.NormalLogger());
+
+/**
+ * Adds routes for accessing the sendgrid webhooks
+ */
+app.use('/sg', sgRouter);
 
 /**
  * Identify a user, associating a session with a user_account
@@ -75,30 +80,30 @@ app.get('/createAccount', (req, res) => co(function * () {
   console.log('identify with email', req.query.email);
 
   // clean up the email TODO
-  var email_address = req.query.email.toLowerCase()
+  var email_address = req.query.email.toLowerCase();
 
   // Find an existing user or create a new one
   var user = yield db.UserAccounts.findOne()
-    .where({email_address: email_address})
+    .where({email_address: email_address});
 
   // Create new one if didn't find it
   if (!user) {
-  var user = yield db.UserAccounts.create({
-    email_address: email_address,
-    sessions: [req.session.session_id]
-  })
+    var user = yield db.UserAccounts.create({
+      email_address: email_address,
+      sessions: [req.session.session_id]
+    });
   }
 
-  res.send('ok')
+  res.send('ok');
 
   // then also send an email
   var email = new Email({
     to: [user.user_id]
   }).testingEmail({
     cart_id: req.query.cart_id
-  })
+  });
 
-  yield email.send()
+  yield email.send();
 
   // Find user_account with email in the db
   // If not exists, create a new user_account

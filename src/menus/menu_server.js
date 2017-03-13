@@ -124,9 +124,9 @@ router.post('/order', function (req, res) {
       var foodSession = yield Delivery.findOne({active: true, _id: new ObjectId(deliv_id)});
       logging.debug('found the delivery object');
       var cart = foodSession.cart;
-      var menu = Menu(foodSession.menu)
+      var menu = Menu(foodSession.menu);
       var money_spent = 0;
-      console.log('got cart and menu')
+      console.log('got cart and menu');
       // console.log('ORDER', order) //not yet in duplicate
       for (var i = 0; i < order.length; i++) {
         // logging.debug(order[i]);
@@ -136,16 +136,16 @@ router.post('/order', function (req, res) {
           user_id: user_id
         });
         if (foodSession.budget) {
-          console.log('calculating money spent')
-          console.log(cart[cart.length-1])
-          money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))
+          console.log('calculating money spent');
+          console.log(cart[cart.length-1]);
+          money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]));
         }
       }
-      console.log('CART', cart) //not  yet duplicate
+      console.log('CART', cart);
 
-      var user_budgets = foodSession.user_budgets
-      user_budgets[user_id] -= money_spent
-      console.log('calculated money spent')
+      var user_budgets = foodSession.user_budgets;
+      user_budgets[user_id] -= money_spent;
+      console.log('calculated money spent');
 
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
       // console.log('updated the delivery object')
@@ -153,7 +153,7 @@ router.post('/order', function (req, res) {
       //----------Message Queue-----------//
 
       logging.debug('updated delivery; looking for source message');
-      logging.debug('user_id', user_id)
+      logging.debug('user_id', user_id);
 
       var foodMessage = yield db.Messages.find({
         'source.user': user_id,
@@ -166,9 +166,9 @@ router.post('/order', function (req, res) {
         // foodSession.save()
         foodMessage = foodMessage[0];
 
-        logging.debug('foodMessage.source', foodMessage.source)
-        logging.debug('foodMessage.thread_id', foodMessage.thread_id)
-        logging.debug('foodMessage.source.user', foodMessage.source.user)
+        logging.debug('foodMessage.source', foodMessage.source);
+        logging.debug('foodMessage.thread_id', foodMessage.thread_id);
+        logging.debug('foodMessage.source.user', foodMessage.source.user);
 
         var mess = new db.Messages({
           incoming: true,
