@@ -114,24 +114,6 @@ app.get('/', (req, res) => {
 
 
 /**
- * View Cart page, a sharable url
- * @param {cart_id}
- */
-//app.get('/cart/:cart_id', (req, res) => co(function*() {
-  // get the cart
-  // var cart = yield utils.getCart(req.params.cart_id);
-
-  // if no cart exists typo, for now redirect to /newcart but could instead redirect to a "Sorry can't find that cart, want to create a new one?" page
-  // if (cart === undefined) {
-  //   res.redirect('/newcart');
-  // }
-
-  // maybe render something special if req.session.session_id === cart.creator
-
-//  res.render('cart')
-//}));
-
-/**
  * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
  * @param {[cart_id]} )             {}) [description]
  * @param {string} magic_id - the magic id for the cart
@@ -168,14 +150,16 @@ app.get('/fail', function(req, res, next) {
 // Basically, anything that's not an api gets handled by react-router
 // we can pass arrays to react by embedding their strings in javascript
 // or we could handle session data through fetching data with react
-app.get('*', (req, res) => {
+app.get('*', (req, res) => co(function *(){
+  // Get the user_accont info, if exists (might not if they are clicking a shared link)
+  // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
   res.render('pages/cart', {
     nodeData: {
       sample: 'data',
       user: 'abc'
     }
   });
-});
+}));
 
 app.use(new mintLogger.ErrorLogger());
 
