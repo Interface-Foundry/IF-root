@@ -36,13 +36,17 @@ var options = {
     group_unsubscribe: 1,
     group_resubscribe: 1,
     spamreport: 1,
-    url: "https://14f4343f.ngrok.io/sg"
+    url: "https://533179ca.ngrok.io/sg"
   }
 };
 
 rp(options)
   .then(function (result) {
-    console.log('result', result);
+    console.log('successfully connected to sendgrid webhook');
+    console.log(result);
+  })
+  .catch(function (error) {
+    console.log('error with sendgrid webhook', error);
   });
 
 //~~~~~~~~~~//

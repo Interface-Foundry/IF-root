@@ -1,40 +1,40 @@
-var utils = {}
+var utils = {};
 
 //returns the cuisine that would win a straight
 //vote-count, or null if there's a tie
 utils.voteWinner = function (votes) {
-  var cuisines = {}
+  var cuisines = {};
   votes.map(function (v) {
-    if (cuisines[v.vote]) cuisines[v.vote]++
-    else cuisines[v.vote] = 1
-  })
-  var max = 0
+    if (cuisines[v.vote]) cuisines[v.vote]++;
+    else cuisines[v.vote] = 1;
+  });
+  var max = 0;
   var winner = null;
   for (var cuisine in cuisines) {
     if (cuisines[cuisine] > max) {
-      winner = cuisine
-      max = cuisines[cuisine]
+      winner = cuisine;
+      max = cuisines[cuisine];
     }
     else if (cuisines[cuisine] == max) {
       winner = null;
     }
   }
-  return winner
-}
+  return winner;
+};
 
 //takes the votes array from the foodSession
 //returns an array of cuisines ranked according to the result of the
 //weighted votes
 utils.rankCuisines = function (votes) {
-  var cuisineVotes = {}
+  var cuisineVotes = {};
   votes.map(v => {
-    if (cuisineVotes[v.vote]) cuisineVotes[v.vote] += v.weight
-    else cuisineVotes[v.vote] = v.weight
-  })
+    if (cuisineVotes[v.vote]) cuisineVotes[v.vote] += v.weight;
+    else cuisineVotes[v.vote] = v.weight;
+  });
   return Object.keys(cuisineVotes).sort(function (a, b) {
-    return cuisineVotes[b] - cuisineVotes[a]
-  })
-}
+    return cuisineVotes[b] - cuisineVotes[a];
+  });
+};
 
 //each of these functions will return an (independent) numeric score
 //with a fixed number of digits
@@ -42,19 +42,19 @@ utils.rankCuisines = function (votes) {
 //in order to preserve a strict hierarchy of scoring criteria
 
 var cuisineScore = function (m, cuisines) {
-  var merchantCuisines = m.summary.cuisines
-  var bestCuisineScore = cuisines.length
+  var merchantCuisines = m.summary.cuisines;
+  var bestCuisineScore = cuisines.length;
   for (var i = 0; i < merchantCuisines.length; i++) {
-    var index = cuisines.indexOf(merchantCuisines[i])
+    var index = cuisines.indexOf(merchantCuisines[i]);
     if (index > -1 && index < bestCuisineScore) {
-      bestCuisineScore = index
+      bestCuisineScore = index;
     }
   }
-  bestCuisineScore = cuisines.length - bestCuisineScore
-  var normalized = parseFloat(bestCuisineScore) / (parseFloat(cuisines.length) + 0.001)
-  if (normalized > 0) return '' + Math.floor(1000 * normalized)
-  else return '000'
-}
+  bestCuisineScore = cuisines.length - bestCuisineScore;
+  var normalized = parseFloat(bestCuisineScore) / (parseFloat(cuisines.length) + 0.001);
+  if (normalized > 0) return '' + Math.floor(1000 * normalized);
+  else return '000';
+};
 
 // var historyScore = function (m, sb) {
 //   if (!sb.meta.order_frequency) return '000'
@@ -71,14 +71,14 @@ var cuisineScore = function (m, cuisines) {
 utils.cuisineSort = function (m, votes, slackbot) {
   //score by cuisine
   //w/in cuisines rank by order-history
-  var cuisines = utils.rankCuisines(votes)
-  var cScore = cuisineScore(m, cuisines)
+  var cuisines = utils.rankCuisines(votes);
+  var cScore = cuisineScore(m, cuisines);
   // var hScore = historyScore(m, slackbot)
   // console.log('entire score:', cScore + hScore)
-  return cScore
-  return cScore + hScore
+  return cScore;
+  return cScore + hScore;
 
   //w/in history score by yelp
-}
+};
 
 module.exports = utils;

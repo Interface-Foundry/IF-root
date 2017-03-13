@@ -18,4 +18,4 @@ slack:
   verification_token: PyeQ1gjE81cbAWFshg24to0U
   redirect_uri: https://0582f004.ngrok.io/newslack
 kipPayURL: https://pay.kipthis.com
-menuURL: http://854a1c3b.ngrok.io/menus
+menuURL: https://50ed5a9f.ngrok.io/menus

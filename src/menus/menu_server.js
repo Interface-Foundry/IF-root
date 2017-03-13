@@ -97,15 +97,15 @@ router.post('/cafe', (req, res) => co(function * () {
 
 router.post('/session', (req, res) => co(function * () {
   if (_.get(req, 'body') && _.get(req, 'body.session_token')) {
-    var t = req.body.session_token.replace(/[^\w\s]/gi, '') // clean special char
+    var t = req.body.session_token.replace(/[^\w\s]/gi, ''); // clean special char
     try {
       var ms = yield MenuSession.findOne({session_token: t});
-      res.send(JSON.stringify(ms))
+      res.send(JSON.stringify(ms));
     } catch (err) {
-      logging.error('catching error in session ', err)
+      logging.error('catching error in session ', err);
     }
   }
-}))
+}));
 
 //updates the correct delivery object in the db
 //with the delivery object id saved on the menu session
@@ -114,7 +114,7 @@ router.post('/order', function (req, res) {
   co(function * () {
     logging.debug('post to /order');
     if (_.get(req, 'body')) {
-      logging.info('req.body', req.body)
+      logging.info('req.body', req.body);
       var order = req.body.order;
       var user_id = req.body.user_id;
 
@@ -159,8 +159,8 @@ router.post('/order', function (req, res) {
         'source.user': user_id,
         mode: 'food',
         incoming: false
-      }).sort('-ts').limit(1)
-      console.log('foodMessage', foodMessage)
+      }).sort('-ts').limit(1);
+      console.log('foodMessage', foodMessage);
 
       if (foodMessage && foodMessage.length) {
         // foodSession.save()
@@ -178,7 +178,7 @@ router.post('/order', function (req, res) {
           mode: 'food',
           origin: 'slack',
           source: foodMessage.source,
-        })
+        });
 
         yield mess.save();
 
@@ -190,12 +190,12 @@ router.post('/order', function (req, res) {
             verification_token: kip.config.slack.verification_token,
             message: mess
           }
-        })
+        });
       }
       else {
-        logging.info('email user')
+        logging.info('email user');
 
-        foodSession.confirmed_orders.push(user_id)
+        foodSession.confirmed_orders.push(user_id);
         // foodSession.save() //I BET THIS IS WHAT IS DOING IT FUCK YOU
         yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {confirmed_orders: foodSession.confirmed_orders}});
 
@@ -205,7 +205,7 @@ router.post('/order', function (req, res) {
           incoming: false
         }).sort('-ts').limit(1);
         // console.log('alternateFoodMessage', alternateFoodMessage)
-        alternateFoodMessage = alternateFoodMessage[0]
+        alternateFoodMessage = alternateFoodMessage[0];
 
         var mess = new db.Messages({
           incoming: true,
