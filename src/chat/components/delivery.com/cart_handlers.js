@@ -508,10 +508,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
 
   emailers = emailers.map(e => /(.+)@/.exec(e)[1]);
 
-  var slackText = (emailers.length ? '\nSlack: ' : '\n') + slackers.join(', ')
+  var slackText = (emailers.length ? '\nSlack: ' : '\n') + slackers.join(', ');
 
   // console.log('emailers', emailers)
-  var waitingText = (slackers ? slackText : '') + (emailers.length ? '\nEmail: ' + emailers.join(', ') : '')
+  var waitingText = (slackers ? slackText : '') + (emailers.length ? '\nEmail: ' + emailers.join(', ') : '');
 
   var dashboard = {
     text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
@@ -522,15 +522,15 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       'fallback': `*Collected so far* 👋\n_${allItems}_`,
       actions: []
     }]
-  }
+  };
 
-  if ((slackers || emailers.length) && message.source.user == foodSession.convo_initiater.id) {
+  if ((slackers || emailers.length) && message.source.user === foodSession.convo_initiater.id) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
       text: `*Waiting for order(s) from:*${waitingText}`,
       actions: []
-    })
+    });
   }
 
   var items = foodSession.cart.filter(i => i.added_to_cart)
