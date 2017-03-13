@@ -23,6 +23,18 @@ import graffiti from '@risingstack/graffiti';
 import { getSchema } from '@risingstack/graffiti-mongoose';
 import MetricSchema from './data/models/mongo/metric_schema';
 
+var multer = require('multer');
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './client/csvfiles')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  }
+})
+var upload = multer({ storage: storage })
+
 const app = express();
 
 //
@@ -132,6 +144,12 @@ app.get('*', async (req, res, next) => {
     next(err);
   }
 });
+
+
+app.post('/upload', upload.single('csv_file'), function(req, res, next){
+  res.end(req.file[0]);
+});
+
 
 //
 // Error handling

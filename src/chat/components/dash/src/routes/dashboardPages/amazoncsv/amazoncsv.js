@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { PageHeader } from 'react-bootstrap';
+import CSVDrop from '../../../components/CSVDrop';
 
 const title = 'Amazon CSV';
 
@@ -10,6 +11,7 @@ function displayAmazonCSV(props, context) {
       <div className="row">
         <div className="col-lg-12">
           <PageHeader>Amazon CSV</PageHeader>
+          <CSVDrop />
         </div>
       </div>
     </div>
