@@ -91,8 +91,8 @@ app.get('/createAccount', (req, res) => co(function * () {
     
   // then also send an email
   var email = new Email({
-    to: [user.user_id]
-  }).testingEmail({
+    to: [user]
+  }).newCart({
     cart_id: req.query.cart_id
   })
 
@@ -170,4 +170,9 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.log('Unhandled Promise Rejection')
+  console.log('Reason: ' + reason)
 });

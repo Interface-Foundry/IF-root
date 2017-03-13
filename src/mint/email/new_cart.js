@@ -1,6 +1,7 @@
 var fs = require('fs')
 var path = require('path')
 var Email = require('.')
+var co = require('co')
 
 // Bring in the html template
 var html = fs.readFileSync(path.join(__dirname, '../email_templates/new_cart.html'))
@@ -26,6 +27,7 @@ Email.prototype.newCart = function (options) {
     me.email.message_html = `<h1>Kip Cart</h1><a href="http://localhost:3000/cart/${options.cart_id}">View Cart</a>`
     me.email.message_text_fallback = 'Kip Cart\n\nView your cart at http://localhost:3000/cart/' + options.cart_id
   })
+
 
   // Make this function chainable
   return this
