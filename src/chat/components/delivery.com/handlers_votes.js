@@ -1130,9 +1130,9 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         ]
       }
     ]
-  }
+  };
 
-  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec();
 
   var options = {
     uri: 'https://slack.com/api/team.info',
@@ -1140,24 +1140,32 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     qs: {
       token: slackbot.bot.bot_access_token
     }
-  }
+  };
 
-  var teamInfo = yield rp(options)
-  var slacklink = 'https://' + teamInfo.team.domain + '.slack.com'
+  var teamInfo = yield rp(options);
+  var slacklink = 'https://' + teamInfo.team.domain + '.slack.com';
 
   for (var i = 0; i < foodSession.email_users.length; i++) {
-    var m = foodSession.email_users[i]
+    var m = foodSession.email_users[i];
     // var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
-    var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m)
+    var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m);
 
     var mailOptions = {
       to: `<${m}>`,
-      from: `Kip Café <hello@kipthis.com>`,
+      from: 'Kip Café <hello@kipthis.com>',
       subject: `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${slackbot.team_name}!`,
-      html: html
-    }
+      html: html,
+      tracking_settings: {
+        click_tracking: {
+          enable: true
+        },
+        open_tracking: {
+          enable: true
+        }
+      }
+    };
 
-    logging.info('mailOptions', mailOptions)
+    logging.info('mailOptions', mailOptions);
     mailerTransport.sendMail(mailOptions, function (err) {
       if (err) console.log(err)
     })

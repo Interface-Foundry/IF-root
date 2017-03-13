@@ -152,7 +152,15 @@ utils.sendEmailUserConfirmations = function * (foodSession, email) {
     to: `<${email}>`,
     from: 'Kip Café <hello@kipthis.com>',
     subject: `Your order for ${foodSession.chosen_restaurant.name} has been submitted!`,
-    html: `<html>${html}</html>`
+    html: `<html>${html}</html>`,
+    tracking_settings: {
+      click_tracking: {
+        enable: true
+      },
+      open_tracking: {
+        enable: true
+      }
+    }
   };
 
   try {
@@ -231,23 +239,23 @@ utils.sendConfirmationEmail = function * (foodSession) {
 
   var line_item_style = 'padding:0 0 0 8px;margin:2px;';
 
-  html += `<table border="0"><tr><td style="width:300px;">`;
+  html += '<table border="0"><tr><td style="width:300px;">';
 
-  html += `<div style="border-left:4px solid ${kip_blue};">`
-  html += `<p style="${line_item_style}">Cart Subtotal: ${foodSession.order.subtotal.$}</p>`
-  html += `<p style="${line_item_style}">Tax: ${foodSession.order.tax.$}</p>`
-  html += `<p style="${line_item_style}">Delivery Fee: ${foodSession.order.delivery_fee.$}</p>`
-  html += `<p style="${line_item_style}">Service Fee: ${foodSession.service_fee.$}</p>`
-  if (foodSession.discount_amount) html += `🎉 Kip Coupon: -${foodSession.discount_amount.$}`
-  html += `<p style="${line_item_style}">Tip: ${(foodSession.tip.percent === 'cash') ? '$0.00 (Will tip in cash)' : foodSession.tip.amount.$}</p>`
-  html += `<p style="${line_item_style}"><b>Order Total: ${foodSession.calculated_amount.$}</b></p></div>`
+  html += `<div style="border-left:4px solid ${kip_blue};">`;
+  html += `<p style="${line_item_style}">Cart Subtotal: ${foodSession.order.subtotal.$}</p>`;
+  html += `<p style="${line_item_style}">Tax: ${foodSession.order.tax.$}</p>`;
+  html += `<p style="${line_item_style}">Delivery Fee: ${foodSession.order.delivery_fee.$}</p>`;
+  html += `<p style="${line_item_style}">Service Fee: ${foodSession.service_fee.$}</p>`;
+  if (foodSession.discount_amount) html += `🎉 Kip Coupon: -${foodSession.discount_amount.$}`;
+  html += `<p style="${line_item_style}">Tip: ${(foodSession.tip.percent === 'cash') ? '$0.00 (Will tip in cash)' : foodSession.tip.amount.$}</p>`;
+  html += `<p style="${line_item_style}"><b>Order Total: ${foodSession.calculated_amount.$}</b></p></div>`;
 
   //misc Information
-  html += `</td style="width=300px;"><td>`
-  html += `<p style="${line_item_style}"><b>Delivery Address:</b></p><br/><p style="${line_item_style}">${foodSession.chosen_location.address_1}</p>`
-  if (foodSession.chosen_location.address_2) html += `<p style="${line_item_style}">${foodSession.chosen_location.address_2}</p>`
-  html += `<p style="${line_item_style}">${foodSession.chosen_location.city}, ${foodSession.chosen_location.state} </p>`
-  html += `<p style="${line_item_style}">${foodSession.chosen_location.zip_code}</p>` + br
+  html += '</td style="width=300px;"><td>';
+  html += `<p style="${line_item_style}"><b>Delivery Address:</b></p><br/><p style="${line_item_style}">${foodSession.chosen_location.address_1}</p>`;
+  if (foodSession.chosen_location.address_2) html += `<p style="${line_item_style}">${foodSession.chosen_location.address_2}</p>`;
+  html += `<p style="${line_item_style}">${foodSession.chosen_location.city}, ${foodSession.chosen_location.state} </p>`;
+  html += `<p style="${line_item_style}">${foodSession.chosen_location.zip_code}</p>` + br;
   if (foodSession.instructions) html += `<p style="${line_item_style}"><i>${foodSession.instructions}</i></p>`;
   html += '</td></tr></table>';
 

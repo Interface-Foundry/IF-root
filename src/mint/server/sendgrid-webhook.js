@@ -25,7 +25,7 @@ var options = {
     api_user: sg_const.api_user,
     api_key: sg_const.api_key,
     name: "eventnotify",
-    processed: 0,
+    processed: 1,
     dropped: 1,
     deferred: 1,
     delivered: 1,

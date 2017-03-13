@@ -839,7 +839,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
       from: `Kip Café <hello@kipthis.com>`,
       subject: `Kip Café Order Error`,
       html: `<html>Error(s) in order for team ${foodSession.team_id}:`
-        + `${deliveryError}</html>`
+        + `${deliveryError}</html>`,
     }
 
     try {
