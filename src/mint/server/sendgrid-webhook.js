@@ -1,12 +1,8 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const rp = require('request-promise');
+const sg_const = require('../sg_const');
 
 var router = express.Router();
-
-router.use(bodyParser.urlencoded({
-  extended: true
-}));
-router.use(bodyParser.json());
 
 //test route
 router.get('/test', function (req, res) {
@@ -16,9 +12,39 @@ router.get('/test', function (req, res) {
 
 //route sg will post to
 router.post('/', function (req, res) {
-  console.log('POST to sg router');
   console.log('req.body', req.body);
-  res.send('POST to sg router');
+  res.send('my name is cupid valentino');
 });
+
+//~~~~~post request to send-grid api setting up the webhook~~~~~//
+
+var options = {
+  method: 'POST',
+  uri: 'https://api.sendgrid.com/api/filter.setup.json',
+  form: {
+    api_user: sg_const.api_user,
+    api_key: sg_const.api_key,
+    name: "eventnotify",
+    processed: 0,
+    dropped: 1,
+    deferred: 1,
+    delivered: 1,
+    bounce: 1,
+    click: 1,
+    open: 1,
+    unsubscribe: 1,
+    group_unsubscribe: 1,
+    group_resubscribe: 1,
+    spamreport: 1,
+    url: "https://14f4343f.ngrok.io/sg"
+  }
+};
+
+rp(options)
+  .then(function (result) {
+    console.log('result', result);
+  });
+
+//~~~~~~~~~~//
 
 module.exports = router;
