@@ -1,5 +1,5 @@
 // file: index.js
-const fs = require('fs')
+const fs = require('fs');
 const express = require('express'),
   app = express();
 const bodyParser = require('body-parser');
@@ -9,7 +9,8 @@ const co = require('co');
 const reactViews = require('express-react-views');
 const utils = require('./utils.js');
 const mintLogger = require('./mint_logging.js');
-const Email = require('../email')
+const Email = require('../email');
+const sgRouter = require('./sendgrid-webhook.js');
 
 /**
  * Models loaded from the waterline ORM
@@ -89,7 +90,7 @@ app.get('/createAccount', (req, res) => co(function * () {
   }
 
   res.send('ok')
-    
+
   // then also send an email
   var email = new Email({
     to: [user.user_id]

@@ -1,5 +1,5 @@
 module.exports = {
-    "extends": "standard",
+   //"extends": "standard",
     "env": {
         "es6": true,
         "node": true

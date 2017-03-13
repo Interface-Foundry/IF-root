@@ -1,5 +1,5 @@
 require('../kip');
-const config = kip.config
+const config = kip.config;
 
 //loads basic server structure
 var bodyParser = require('body-parser');
@@ -11,17 +11,17 @@ var volleyball = require('volleyball');
 var crypto = require('crypto');
 var co = require('co');
 var _ = require('lodash');
-var path = require('path')
-var request = require('request-promise')
+var path = require('path');
+var request = require('request-promise');
 
 
-var Menu = require('../chat/components/delivery.com/Menu.js')
-var menuURL = config.menuURL
+var Menu = require('../chat/components/delivery.com/Menu.js');
+var menuURL = config.menuURL;
 
 // k8s readiness ingress health check
 app.get('/health', function (req, res) {
-  res.sendStatus(200)
-})
+  res.sendStatus(200);
+});
 
 app.use(volleyball);
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -31,9 +31,9 @@ app.use('/menus', express.static(path.join(__dirname, 'static')));
 app.use('/test', express.static(path.join(__dirname, 'test')));
 app.use('/ang', express.static(path.join(__dirname, 'ang')));
 
-var router = express.Router()
+var router = express.Router();
 
-app.use('/menus', router)
+app.use('/menus', router);
 
 var MenuSession = db.Menu_session;
 // var Menu = db.Menus;
@@ -46,12 +46,12 @@ var ObjectId = require('mongodb').ObjectID;
 
 //handle post request with a binder full of data
 router.post('/cafe', (req, res) => co(function * () {
-  logging.debug('post to cafe')
+  logging.debug('post to cafe');
   var ms = new MenuSession({
     session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
   });
 
-  logging.debug('new menusession created')
+  logging.debug('new menusession created');
 
   // logging.debug('req.body', req.body)
 
@@ -59,7 +59,7 @@ router.post('/cafe', (req, res) => co(function * () {
   var result = yield db.Menus.findOne({merchant_id: rest_id});
 
   if (!result) {
-    ms.menu.data = yield db.Delivery.findOne({team_id: req.body.team_id, active: true}).select('menu').exec()
+    ms.menu.data = yield db.Delivery.findOne({team_id: req.body.team_id, active: true}).select('menu').exec();
   } else {
     ms.menu.data = result.raw_menu.menu;
   }
@@ -71,25 +71,20 @@ router.post('/cafe', (req, res) => co(function * () {
 
   var merchant = yield Merchants.findOne({id: rest_id});
 
-  ms.merchant.logo = merchant.data.summary.merchant_logo
+  ms.merchant.logo = merchant.data.summary.merchant_logo;
   ms.merchant.name = merchant.data.summary.name;
-
-  ms.merchant.minimum = merchant.data.ordering.minimum + "";
+  ms.merchant.minimum = merchant.data.ordering.minimum + '';
 
   ms.selected_items = req.body.selected_items;
 
-  var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
+  var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec();
+  ms.admin_name = foodSession.convo_initiater.name;
 
-  ms.admin_name = foodSession.convo_initiater.name //initiatOr
-
-  var user = yield db.Chatusers.findOne({id: ms.user.id})
-  if (!user) user = yield db.email_users.findOne({id: ms.user.id}).exec()
-
-  ms.user.is_admin = user.is_admin
-
-  var sb = yield db.Slackbots.findOne({team_id: foodSession.team_id})
-
-  ms.team_name = sb.team_name
+  var user = yield db.Chatusers.findOne({id: ms.user.id});
+  if (!user) user = yield db.email_users.findOne({id: ms.user.id}).exec();
+  ms.user.is_admin = user.is_admin;
+  var sb = yield db.Slackbots.findOne({team_id: foodSession.team_id});
+  ms.team_name = sb.team_name;
 
   // logging.debug('ms', ms);
   yield ms.save();
@@ -220,7 +215,7 @@ router.post('/order', function (req, res) {
           mode: 'food',
           origin: 'slack',
           source: alternateFoodMessage.source,
-        })
+        });
 
         yield mess.save();
 
@@ -232,7 +227,7 @@ router.post('/order', function (req, res) {
             verification_token: kip.config.slack.verification_token,
             message: mess
           }
-        })
+        });
       }
 
       logging.debug('ostensibly done');
@@ -244,7 +239,7 @@ router.post('/order', function (req, res) {
   });
 });
 
-var port = 8001
+var port = 8001;
 app.listen(port, function () {
-  logging.info('Listening enthusiastically on ' + port)
-})
+  logging.info('Listening enthusiastically on ' + port);
+});
