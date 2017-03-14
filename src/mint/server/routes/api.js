@@ -1,9 +1,10 @@
 var express = require('express');
-var router = express.Router();
 var co = require('co');
+var _ = require('lodash');
 
 var utils = require('../utilities/utils.js');
 
+var router = express.Router();
 /**
  * if they goto api/cart maybe redirect or something, possibly could use this elsewhere
  * @param {cart_id} ) cart_id to redirect to or whatever
@@ -14,6 +15,11 @@ router.get('/cart/:cart_id', (req, res) => co(function * () {
   return cart;
 }));
 
+/**
+ * gets items in cart
+ * @param {[type]} )             {  var cart [description]
+ * @yield {[type]} [description]
+ */
 router.get('/cart/:cart_id/items', (req, res) => co(function * () {
   var cart = yield db.Carts.findOne({cart_id: req.params.cart_id});
   return cart.items;
@@ -23,7 +29,7 @@ router.get('/cart/:cart_id/items', (req, res) => co(function * () {
  * adds item to cart based on url or possibly other ways
  * @param {cart_id} cart_id to add item to
  * @param {item_url} item url from amazon
- * @returns redirects to cart with item added
+ * @returns 200
  */
 router.post('/cart/:cart_id/items', (req, res) => co(function * () {
   var original_url = req.body.url;
@@ -41,12 +47,21 @@ router.post('/cart/:cart_id/items', (req, res) => co(function * () {
   res.send(200);
 }));
 
+/**
+ * delete or subtract item from cart
+ * @param {string} item identifier
+ * @param {cart_id} cart_id to remove item from
+ * @param {quantity} [number to subtract]
+ * @yield {[type]} [description]
+ */
 router.delete('/cart/:cart_id/items', (req, res) => co(function * () {
   var item = req.body.itemId;
   var cartId = req.params.cart_id;
+  var quantity = _.get(req, 'body.quantity') ? req.body.quantity : -1;
 
   // just get the amazon lookup results and title from that currently
-  yield db.Items.findOneAndUpdate({item: item, cart_id: cartId});
+  yield db.Items.findOneAndUpdate({item: item, cart_id: cartId}, {$inc: {'quantity': quantity}});
+  res.send(200);
 }));
 
 module.exports = router;
