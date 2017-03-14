@@ -152,8 +152,8 @@ app.get('*', async (req, res, next) => {
 //
 app.post('/upload', upload.single('csv_file'), function(req, res, next){
   //console.log('AAAAA', req.file.path);
-  csvparse(req.file.path);
-  res.end(req.file.originalname);
+  var csvData = csvparse(req.file.path);
+  res.end('Finished parsing');
 });
 
 

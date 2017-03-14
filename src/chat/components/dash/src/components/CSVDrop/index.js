@@ -37,6 +37,7 @@ class CSVDrop extends Component {
     .send(file)
     .end(function(err, resp) {
       if (err) { console.error(err); }
+      console.log(resp)
       return resp;
     });
 
