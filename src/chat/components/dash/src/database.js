@@ -1,3 +1,7 @@
+/**
+* @file - connecting to mongo and gathering the database collections into variables to be exported
+*/
+
 import {MongoClient, ObjectId} from 'mongodb';
 
 const MONGO_URL = 'mongodb://localhost:27017/foundry'

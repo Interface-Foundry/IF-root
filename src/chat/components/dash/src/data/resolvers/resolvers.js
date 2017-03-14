@@ -1,3 +1,8 @@
+/**
+* @file Defines the resolvers for the different schemas being used.
+*/
+
+
 import { ObjectId } from 'mongodb';
 import GraphQLToolsTypes from "graphql-tools-types"
 
@@ -12,6 +17,13 @@ import {
 	Waypoints,
 } from '../../database';
 
+/**
+* Setting a limit to the number of results per page to 1000
+*
+* @param coll - a collection from the database
+* @param args - query arguments 
+* @param sort - sort option for results
+*/
 async function pagination(coll, args, sort) {
 	let limit = args.limit || 1000;
 	delete args.limit;

@@ -1,3 +1,7 @@
+/**
+* @file - Setting up the server file to perform various actions upon receiving certain requests
+*/
+
 import 'babel-polyfill';
 import path from 'path';
 import express from 'express';
@@ -8,15 +12,12 @@ import expressJwt from 'express-jwt';
 import expressGraphQL from 'express-graphql';
 import { makeExecutableSchema } from 'graphql-tools';
 import jwt from 'jsonwebtoken';
-import morgan from 'morgan';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import UniversalRouter from 'universal-router';
 import PrettyError from 'pretty-error';
 import Html from './components/Html';
 import graffiti from '@risingstack/graffiti';
-import graffiti from '@risingstack/graffiti';
-import { getSchema } from '@risingstack/graffiti-mongoose';
 import { getSchema } from '@risingstack/graffiti-mongoose';
 
 import { connect } from './database';

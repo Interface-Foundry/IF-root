@@ -1,3 +1,7 @@
+/**
+* @file - defines the schemas, their attributes, and the attribute types
+*/
+
 export default `
 # these scalars are defined in the resolver.
 scalar JSON
