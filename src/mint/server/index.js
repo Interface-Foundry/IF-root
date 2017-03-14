@@ -11,6 +11,8 @@ const fs = require('fs'),
   mintLogger = require('./mint_logging.js'),
   Email = require('../email');
 
+require('colors')
+
 /**
  * Models loaded from the waterline ORM
  */
@@ -57,14 +59,23 @@ app.use(function(req, res, next) {
   // Now that the session_id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12
 
-  console.log('session is', req.session.session_id);
   next();
 });
 
 /**
  * Add in logging after sessions have been created
  */
-app.use(new mintLogger.NormalLogger());
+if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
+  app.use(function(req, res, next) {
+    var methods = {GET: 'get'.cyan, HEAD: 'head'.gray, POST: 'post'.green, DELETE: 'delete'.red}
+    var str = [ '>'.yellow, methods[req.method] || req.method, req.originalUrl ].join(' ')
+    console.log(str)
+
+    next()
+  })
+} else {
+  app.use(new mintLogger.NormalLogger())
+}
 
 /**
  * Identify a user, associating a session with a user_account
@@ -170,10 +181,9 @@ app.use(new mintLogger.ErrorLogger());
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}!`);
+  console.log(`App listening at http://127.0.0.1:${PORT}`);
 });
 
 process.on('unhandledRejection', (err) => {
-  console.error(err)
   console.error(err.stack)
 });
