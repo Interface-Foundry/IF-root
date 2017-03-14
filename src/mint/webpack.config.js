@@ -5,7 +5,7 @@ var BUILD_DIR = path.resolve(__dirname, 'public/build');
 var APP_DIR = path.resolve(__dirname, 'react');
 
 module.exports = {
-  entry: APP_DIR + '/index.js',
+  entry: ['babel-polyfill', APP_DIR + '/index.js'],
   output: {
     path: BUILD_DIR,
     filename: 'bundle.js'

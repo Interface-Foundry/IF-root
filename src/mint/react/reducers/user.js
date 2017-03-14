@@ -1,7 +1,8 @@
 const initialState = {
-  user_id: '',
-  user_email: '',
-  carts: []
+  email_address: '',
+  sessions: [],
+  cart_leader: [],
+  cart_member: []
 };
 
 function user(state = initialState, action) {
