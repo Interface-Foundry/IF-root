@@ -1,6 +1,6 @@
 /**
-* @file - defines the schemas, their attributes, and the attribute types
-*/
+ * @file - defines the schemas, their attributes, and the attribute types
+ */
 
 export default `
 # these scalars are defined in the resolver.
@@ -147,16 +147,6 @@ type Metric {
   data: String
 }
 
-# TODO(Cameron): Not yet sure what news is yet, holding off uncommenting until 
-# I have a better handle.
-#type News {
-#  title: String
-#  link: String
-#  author: String
-#  published_date: String
-#  content: String
-#}
-
 type Slackbot {
   _id: String!
   team_id: String
@@ -246,7 +236,7 @@ type Query {
   teams(
     limit: Int
     offset: Int
-    _id: String
+    team_id: String
   ): [Slackbot]
 
   users(

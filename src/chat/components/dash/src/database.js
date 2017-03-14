@@ -1,6 +1,6 @@
 /**
-* @file - connecting to mongo and gathering the database collections into variables to be exported
-*/
+ * @file - connecting to mongo and gathering the database collections into variables to be exported
+ */
 
 import {MongoClient, ObjectId} from 'mongodb';
 
