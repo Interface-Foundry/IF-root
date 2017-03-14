@@ -10,7 +10,13 @@ var utils = require('../utilities/utils.js');
  * redirects to cart/:cart_id
  */
 router.get('/cart/:cart_id', (req, res) => co(function * () {
-  res.redirect(`/cart/${req.params.cart_id}`);
+  var cart = yield db.Carts.findOne({cart_id: req.params.cart_id});
+  return cart;
+}));
+
+router.get('/cart/:cart_id/items', (req, res) => co(function * () {
+  var cart = yield db.Carts.findOne({cart_id: req.params.cart_id});
+  return cart.items;
 }));
 
 /**
@@ -19,8 +25,8 @@ router.get('/cart/:cart_id', (req, res) => co(function * () {
  * @param {item_url} item url from amazon
  * @returns redirects to cart with item added
  */
-router.get('/cart/:cart_id/addcart/:item_url', (req, res) => co(function * () {
-  var original_url = req.params.item_url;
+router.post('/cart/:cart_id/items', (req, res) => co(function * () {
+  var original_url = req.body.url;
   var cartId = req.params.cart_id;
 
   // just get the amazon lookup results and title from that currently
@@ -33,6 +39,14 @@ router.get('/cart/:cart_id/addcart/:item_url', (req, res) => co(function * () {
   });
 
   res.send(200);
+}));
+
+router.delete('/cart/:cart_id/items', (req, res) => co(function * () {
+  var item = req.body.itemId;
+  var cartId = req.params.cart_id;
+
+  // just get the amazon lookup results and title from that currently
+  yield db.Items.findOneAndUpdate({item: item, cart_id: cartId});
 }));
 
 module.exports = router;
