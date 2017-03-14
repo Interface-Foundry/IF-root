@@ -14,7 +14,7 @@ import App from './containers/App';
 import NotFound from './pages/NotFound';
 
 // actions
-import { fetchUser } from './actions'
+import { fetchUser } from './actions';
 
 // reducers
 import UserReducer from './reducers/user';
@@ -35,7 +35,7 @@ const store = createStore(
   applyMiddleware(historyMiddleware, thunkMiddleware)
 );
 
-store.dispatch(fetchUser('abc124')).then(() =>
+store.dispatch(fetchUser()).then(() =>
   console.log(store.getState())
 );
 

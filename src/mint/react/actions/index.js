@@ -1,4 +1,5 @@
 import * as types from '../constants/ActionTypes';
+import userReducer from '../reducers/user';
 import fetch from 'isomorphic-fetch';
 
 const receiveCart = (cart, newInfo) => ({
@@ -20,6 +21,10 @@ const requestCartItems = (cart) => ({
   type: types.REQUEST_CART_ITEMS,
   cart
 });
+
+export function fetchUser(user_id = null) {
+  return userReducer(user_id);
+}
 
 export function fetchCart(cart_id) {
   return function (dispatch) {
@@ -66,6 +71,7 @@ export function fetchCartItems(cart_id) {
     // catch any error in the network call.
   };
 }
+
 
 export function checkout(items){
   //who knows right now

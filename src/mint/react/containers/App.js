@@ -8,7 +8,7 @@ const App = () => (
     <hr/>
     <InputContainer />
     <hr/>
-    <CartContainer />
+    
   </div>
 );
 
