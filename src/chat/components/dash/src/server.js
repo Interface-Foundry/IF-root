@@ -22,6 +22,7 @@ import { port, auth } from './config';
 import graffiti from '@risingstack/graffiti';
 import { getSchema } from '@risingstack/graffiti-mongoose';
 import MetricSchema from './data/models/mongo/metric_schema';
+import csvparse from './components/CSVDrop/csvparse';
 
 var multer = require('multer');
 
@@ -146,8 +147,13 @@ app.get('*', async (req, res, next) => {
 });
 
 
+//
+// Getting the file from the dropzone, parsing its contents
+//
 app.post('/upload', upload.single('csv_file'), function(req, res, next){
-  res.end(req.file[0]);
+  //console.log('AAAAA', req.file.path);
+  csvparse(req.file.path);
+  res.end(req.file.originalname);
 });
 
 

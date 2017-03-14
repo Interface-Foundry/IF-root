@@ -2,7 +2,7 @@ var csv = require("fast-csv");
 
 function csvparse(file){
 csv
- .fromPath(file.name, {headers: true, strictColumnHandling:true})
+ .fromPath(file, {headers: true, strictColumnHandling:true})
  .on("error", function(data){
    return false;                         
  })

@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Dropzone from 'react-dropzone';
-import csvparse from './csvparse'
+
 //import csv from 'csvtojson';
 import _ from 'lodash';
 //import { Metrics } from '../api/metrics.js';
@@ -40,7 +40,7 @@ class CSVDrop extends Component {
       return resp;
     });
 
-    //try{csvparse(acceptedFiles[0]);}catch(e){console.log(e)}
+   //try{csvparse(acceptedFiles[0]);}catch(e){console.log(e)}
 
     this.setState({
         files: acceptedFiles
