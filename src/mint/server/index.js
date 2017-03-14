@@ -1,5 +1,6 @@
 // file: index.js
 const fs = require('fs'),
+  os = require('os'),
   express = require('express'),
   app = express(),
   bodyParser = require('body-parser'),
@@ -33,7 +34,7 @@ app.use(bodyParser.json());
  */
 app.use(sessions({
   cookieName: 'session',
-  secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw', // `openssl rand -base64 24`
+  secret:'H68ccVhbqS5VgdB47/PdtByL983ERorw' + os.hostname(), // `openssl rand -base64 24
   duration: 0 // never expire
 }));
 
@@ -172,7 +173,7 @@ app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
 });
 
-process.on('unhandledRejection', (reason) => {
-  console.log('Unhandled Promise Rejection')
-  console.log('Reason: ' + reason)
+process.on('unhandledRejection', (err) => {
+  console.error(err)
+  console.error(err.stack)
 });
