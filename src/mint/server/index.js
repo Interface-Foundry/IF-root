@@ -6,10 +6,11 @@ const fs = require('fs'),
   bodyParser = require('body-parser'),
   sessions = require('client-sessions'),
   path = require('path'),
-  co = require('co'),
-  utils = require('./utilities/utils.js'),
-  mintLogger = require('./mint_logging.js'),
-  Email = require('../email');
+  mintLogger = require('./mint_logging.js');
+
+// idk
+var regularRoutes = require('./routes/regular.js');
+var apiRoutes = require('./routes/api.js');
 
 require('colors')
 
@@ -24,7 +25,7 @@ dbReady.then((models) => { db = models; }).catch(e => console.error(e));
  * BORING STUFF (TODO move this to a file name boilerplate.js)
  */
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'))
+app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.resolve(__dirname, '..', 'public')));
 app.use(bodyParser.urlencoded({
   extended: true
@@ -77,99 +78,16 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
   app.use(new mintLogger.NormalLogger())
 }
 
-/**
- * Identify a user, associating a session with a user_account
- * Multiple user_accounts can be associated with one session, personal email and work email on same computer
- * Though this is a GET route, it should be used with XHR/ajax, not as a renderable page
- */
-app.get('/createAccount', (req, res) => co(function * () {
-  console.log('identify with email', req.query.email);
-
-  // clean up the email TODO
-  var email_address = req.query.email.toLowerCase();
-
-  // Find an existing user or create a new one
-  var user = yield db.UserAccounts.findOne()
-    .where({email_address: email_address});
-
-  // Create new one if didn't find it
-  if (!user) {
-    var user = yield db.UserAccounts.create({
-      email_address: email_address,
-      sessions: [req.session.session_id]
-    });
-  }
-
-  res.send('ok');
-
-  // then also send an email
-  var email = new Email({
-    to: [user]
-  }).newCart({
-    cart_id: req.query.cart_id
-  });
-
-  yield email.send();
-
-  // Find user_account with email in the db
-  // If not exists, create a new user_account
-  // Associate the session with the user account in user_to_session table
-}));
+// ROUTES
+app.use('/', regularRoutes);
+app.use('/api', apiRoutes);
 
 /**
- * Add a url to a cart from an email, redirect user to the react app
+ *  Always return the main index.html, so react-router render the route in the client
+ *  Basically, anything that's not an api gets handled by react-router
+ *  we can pass arrays to react by embedding their strings in javascript
+ *  we could handle session data through fetching data with react
  */
-app.get('/addcart', (req, res) => co(function * () {
-  var cartId = req.query.cart_id;
-  // todo add the url specified to the amazon cart // TODO
-  res.redirect('/cart/' + cartId);
-}));
-
-/**
- * Landing page serves static html
- */
-
-app.get('/', (req, res) => {
-  res.render('pages/index');
-});
-
-/**
- * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
- * @param {[cart_id]} )             {}) [description]
- * @param {string} magic_id - the magic id for the cart
- * @yield {[type]} [description]
- */
-app.get('/magi/:magic_id', (req, res) => co(function * () {
-  // find if magic_id exists
-  var cart = db.carts.findOne({magic_link: req.params.magic_link});
-  if (cart) {
-    // redirect and log user in
-    res.redirect(`/cart/${cart.cart_id}`);
-  } else {
-    return new Error('magic_id doesnt exist, probably return user to some error page where they can create new cart');
-  }
-}));
-
-/**
- * create new cart for user, redirect them to /cart/:cart_id
- */
-app.get('/newcart', (req, res) => co(function * () {
-  var session_id = req.session.session_id;
-  var cart_id = yield utils.createNewCart(req, session_id);
-  res.redirect(`/cart/${cart_id}`);
-}));
-
-/**
- * example of how the error logger works for time being
- */
-app.get('/fail', function(req, res, next) {
-  return next(new Error('This is an error and it should be logged to the console'));
-});
-
-// Always return the main index.html, so react-router render the route in the client
-// Basically, anything that's not an api gets handled by react-router
-// we can pass arrays to react by embedding their strings in javascript
-// or we could handle session data through fetching data with react
 app.get('*', (req, res) =>
   // Get the user_accont info, if exists (might not if they are clicking a shared link)
   // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
@@ -184,6 +102,7 @@ app.listen(PORT, () => {
   console.log(`App listening at http://127.0.0.1:${PORT}`);
 });
 
-process.on('unhandledRejection', (err) => {
-  console.error(err.stack)
+process.on('unhandledRejection', (reason) => {
+  console.log('Unhandled Promise Rejection');
+  console.log('Reason: ' + reason);
 });
