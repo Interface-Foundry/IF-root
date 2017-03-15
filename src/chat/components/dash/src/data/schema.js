@@ -147,30 +147,34 @@ type Metric {
   data: String
 }
 
-type Slackbot {
-  _id: String!
-  team_id: String
-  access_token: String
-  scope: String
-  team_name: String
-  incoming_webhook_url: String
-  incoming_webhook_channel: String
-  bot_user_id: String
-  bot_access_token: String
-  dateAdded: String
+type SlackbotMeta {
   addedBy: String
+  dateAdded: String
+  deleted: Boolean
+  cart_channels: [String]
+  collect_from: String
   initialized: Boolean
   office_assistants: [String]
-  status_interval: String
   weekly_status_enabled: Boolean
   weekly_status_day: String
   weekly_status_date: String
   weekly_status_time: String
   weekly_status_timezone: String
+}
+
+type Slackbot {
+  _id: String!
+  team_id: String
+  team_name: String
+  access_token: String
+  scope: String
+  meta: SlackbotMeta
+  incoming_webhook_url: String
+  incoming_webhook_channel: String
+  bot_user_id: String
+  bot_access_token: String
+  status_interval: String
   city: String
-  cart_channels: [String]
-  collect_from: String
-  deleted: Boolean
   chosen_location: String
   fulfillment_method: String
   mock: Boolean
