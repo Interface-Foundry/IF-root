@@ -174,9 +174,18 @@ router.get('/auth/:id', (req, res) => co(function * () {
     return res.status(404).end()
   }
 
-  if (req.UserSession.user_accounts.contains(link.user.id)) {
-    console.log('already logged in as this email in user session')
-    return res.redirect('/cart/' + link.cart.id)
+  var user
+  // check if the user is already identified as this email
+  req.UserSession.user_accounts.map(u => {
+    if (u.email_address === link.user.email_address) {
+      user = u
+    }
+  })
+  if (user) {
+    console.log('user was logged in as that email already')
+    cart.leader = user.id
+    yield cart.save()
+    return res.redirect('/cart/' + cart.id)
   }
 
   req.UserSession.user_accounts.add(link.user.id)
