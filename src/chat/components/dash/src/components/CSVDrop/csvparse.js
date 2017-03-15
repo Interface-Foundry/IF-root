@@ -7,7 +7,7 @@ function csvparse(file){
         return 'Error parsing csv';                         
       })
       .on("data", function(data){
-        //console.log(data);
+        console.log(data);
       })
       .on("end", function(){
         console.log("done");

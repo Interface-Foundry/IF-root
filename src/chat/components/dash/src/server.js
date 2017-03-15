@@ -28,10 +28,6 @@ import Resolvers from './data/resolvers';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
 import { port, auth } from './config';
-import graffiti from '@risingstack/graffiti';
-import { getSchema } from '@risingstack/graffiti-mongoose';
-import MetricSchema from './data/models/mongo/metric_schema';
-import csvparse from './components/CSVDrop/csvparse';
 import multer from 'multer';
 
 const storage = multer.diskStorage({
@@ -147,16 +143,6 @@ app.post('/upload', upload.single('csv_file'), function(req, res, next){
   csvData.on("end", function () {
     res.end(JSON.stringify(chunks));
   });
-});
-
-
-//
-// Getting the file from the dropzone, parsing its contents
-//
-app.post('/upload', upload.single('csv_file'), function(req, res, next){
-  //console.log('AAAAA', req.file.path);
-  var csvData = csvparse(req.file.path);
-  res.end('Finished parsing');
 });
 
 //

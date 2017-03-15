@@ -17,6 +17,7 @@ class CSVDrop extends Component {
       super(props)
       propz = props;
       this.state = {files: ''};
+      this.onDrop = this.onDrop.bind(this);
     }
      
   // 0:"Sports & Outdoors"
@@ -32,6 +33,7 @@ class CSVDrop extends Component {
 
     onDrop (acceptedFiles, rejectedFiles) {
       var file = new FormData();
+      var self = this;
       file.append('csv_file', acceptedFiles[0]);
       request.post('/upload')
         .send(file)
@@ -39,25 +41,31 @@ class CSVDrop extends Component {
           if (err) { 
             console.error(err); 
           }
-          console.log('AAAAA', resp);
-          return resp;
-        });
-      //console.log('lala', resp);
-        this.setState({
-          files: acceptedFiles
+          self.setState({
+            files: acceptedFiles,
+            data: resp.text
+          });
         });
     }
 
     render() {
-      const {files} = this.state;
+      var self = this;
+      const {files} = self.state;
       const fname = files ? files[0].name : 'None';
+      const {data} = self.state;
+      const dataText = data ? data : 'None'
       return (
+        <div>
           <div>
-            <Dropzone multiple={false} accept='text/csv' onDrop={this.onDrop.bind(this)}>
+            <Dropzone multiple={false} accept='text/csv' onDrop={this.onDrop}>
               <div>Try dropping some files here, or click to select files to upload. </div>
             </Dropzone>
             {fname} uploaded.
           </div>
+          <div>
+            {dataText}
+          </div>
+        </div>
       );
      }
 
