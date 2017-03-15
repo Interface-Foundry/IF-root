@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 var co = require('co');
 
-var Email = require('../../email');
 var utils = require('../utilities/utils.js');
 
 /**
@@ -56,7 +55,6 @@ router.get('/magi/:magic_id', (req, res) => co(function * () {
  * Though this is a GET route, it should be used with XHR/ajax, not as a renderable page
  */
 router.get('/createAccount', (req, res) => co(function * () {
-  console.log('identify with email', req.query.email);
 
   // clean up the email TODO
   var email_address = req.query.email.toLowerCase();
@@ -67,6 +65,7 @@ router.get('/createAccount', (req, res) => co(function * () {
 
   // Create new one if didn't find it
   if (!user) {
+    console.log('creating new user')
     user = yield db.UserAccounts.create({
       email_address: email_address,
       sessions: [req.session.session_id]
@@ -76,17 +75,18 @@ router.get('/createAccount', (req, res) => co(function * () {
   res.send('ok');
 
   // then also send an email
-  var email = new Email({
-    to: [user]
-  }).newCart({
+  var email = yield db.Emails.create({
+    recipients: user.email_address,
+    subject: 'Your New Cart from Kip'
+  })
+
+  // use the new_cart email template
+  email.template('new_cart', {
     cart_id: req.query.cart_id
-  });
+  })
 
+  // remember to actually send it
   yield email.send();
-
-  // Find user_account with email in the db
-  // If not exists, create a new user_account
-  // Associate the session with the user account in user_to_session table
 }));
 
 module.exports = router;

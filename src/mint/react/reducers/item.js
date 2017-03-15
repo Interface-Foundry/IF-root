@@ -1,6 +1,9 @@
 const initialState = {
-  added_by: '',
-  item_info: {}
+  original_link: '',
+  item_name: '',
+  asin: '',
+  cart: '',
+  added: true
 };
 
 function item(state = initialState, action) {

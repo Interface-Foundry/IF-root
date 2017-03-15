@@ -1,17 +1,11 @@
-const uuid = require('uuid');
-const amazonLookup = require('../../../chat/components/amazon_search.js').lookup
-
-// length of cart id, not sure what compromise between looking fine and getting scraped
-const CART_ID_LENGTH = 12; // based on lichess game length lol
-const MAGIC_URL_LENGTH = 32;
+const amazonLookup = require('../../../chat/components/amazon_search.js').lookup;
 
 /**
  * Models loaded from the waterline ORM
  */
-var db
-const dbReady = require('../../db')
-dbReady.then(models => db = models).catch(e => console.error(e))
-
+var db;
+const dbReady = require('../../db');
+dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 /**
  * @param {string} - session or something? idk really
@@ -19,8 +13,6 @@ dbReady.then(models => db = models).catch(e => console.error(e))
  */
 exports.createNewCart = function * methodName(req, session_id) {
   var cart = yield db.Carts.create({
-    cart_id: uuid.v4().replace(/-/g, '').slice(0, CART_ID_LENGTH),
-    magic_link: uuid.v4().replace(/-/g, '').slice(0, MAGIC_URL_LENGTH),
     cart_leader: req.session.session_id
   });
 

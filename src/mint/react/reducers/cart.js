@@ -1,8 +1,9 @@
 const initialState = {
-  members: [],
-  items: [],
-  checkout_type: '',
-  checked_out: false
+  cart_id: '',
+  magic_link: '',
+  cart_leader: '',
+  cart_members: [],
+  items: []
 };
 
 function cart(state = initialState, action) {

@@ -6,7 +6,8 @@ const fs = require('fs'),
   bodyParser = require('body-parser'),
   sessions = require('client-sessions'),
   path = require('path'),
-  mintLogger = require('./mint_logging.js');
+  mintLogger = require('./mint_logging.js'),
+  _ = require('lodash')
 
 // idk
 var regularRoutes = require('./routes/regular.js');
@@ -37,7 +38,7 @@ app.use(bodyParser.json());
  */
 app.use(sessions({
   cookieName: 'session',
-  secret:'H68ccVhbqS5VgdB47/PdtByL983ERorw' + os.hostname(), // `openssl rand -base64 24
+  secret:'H68ccVhbqS5VgdB47/PdtByL983ERorw' + os.hostname(), // `openssl rand -base64 24 `
   duration: 0 // never expire
 }));
 
@@ -102,7 +103,23 @@ app.listen(PORT, () => {
   console.log(`App listening at http://127.0.0.1:${PORT}`);
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', (err) => {
   console.log('Unhandled Promise Rejection');
-  console.log('Reason: ' + reason);
+  console.log('Reason: ' + err);
+
+  /** Nicely print waterline errors */
+  if (err.failedTransactions) {
+    err.failedTransactions.map(e => {
+      console.log('error:', e.type, e.collection, e.values)
+      if (_.get(e, 'err.originalError.message')) {
+        console.log(e.err.originalError.message)
+      } else {
+        console.log(e.err)
+      }
+    })
+  }
+
+  /** help the user know where to look */
+  console.log(err.stack)
+
 });

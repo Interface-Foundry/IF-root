@@ -17,6 +17,12 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {string} original link posted */
     original_link: 'string',
 
+    /** @type {number} amount of this product in cart */
+    quantity: {
+      type: 'integer',
+      defaultsTo: 1
+    },
+
     /** @type {string} item name or whatever we present maybe */
     item_name: 'string',
 
@@ -24,7 +30,10 @@ var itemsCollection = Waterline.Collection.extend({
     asin: 'string',
 
     /** @type {boolean} if item has been added or removed */
-    added: 'boolean'
+    added: function() {
+      return (this.quantity >= 1);
+    }
+
     // added_by: {
     //   model: 'user_accounts'
     // }
