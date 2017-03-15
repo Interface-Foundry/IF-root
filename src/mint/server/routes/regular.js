@@ -3,7 +3,7 @@ var router = express.Router();
 var co = require('co');
 
 var utils = require('../utilities/utils.js');
-var prototype = false
+var prototype = process.env.PROTOTYPE
 
 /**
  * Models loaded from the waterline ORM
@@ -46,7 +46,7 @@ if (prototype) {
     // TODO
     if (user && cart.leader.id !== user.id) {
       console.log('should render cart non-leader view')
-      return res.render('pages/prototype/cart_anon_view', {
+      return res.render('pages/prototype/cart_member_view', {
         cart: cart
       })
     }

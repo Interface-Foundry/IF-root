@@ -5,6 +5,14 @@ var _ = require('lodash');
 var utils = require('../utilities/utils.js');
 
 var router = express.Router();
+
+/**
+ * GET /api/session
+ */
+router.get('/session', (req, res) => {
+  res.send(req.UserSession)
+})
+
 /**
  * if they goto api/cart maybe redirect or something, possibly could use this elsewhere
  * @param {cart_id} ) cart_id to redirect to or whatever
