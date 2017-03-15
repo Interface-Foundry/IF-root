@@ -34,7 +34,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
   console.log('ITEM ZZZZ ', JSON.stringify(item, null, 2))
   // fixing bug to convert string to to int
   if (item.reviews && item.reviews.reviewCount) {
-    item.reviews.reviewCount = parseInt(item.reviews.reviewCount)
+    item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
   }
   // Handle the case where the search api returns items that we can't add to cart
   var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0')
@@ -43,30 +43,30 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
     // api can and will return items that you cannot buy.  So we have to just
     // ignore these things.
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
-    return Promise.reject('Item not available')
+    return Promise.reject('Item not available');
   }
   return co(function * () {
-    console.log('type: ', type)
+    console.log('type: ', type);
     // please do not remove changes below. it is required for fb to work.
     if (type == 'personal') {
-      cart = yield getCart(slack_id, type)
+      cart = yield getCart(slack_id, type);
     } else {
       var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec()
       if (team_carts.length === 1) {
-        var cart = team_carts[0]
+        var cart = team_carts[0];
       } else {
-        cart = yield getCart(slack_id)
+        cart = yield getCart(slack_id);
       }
     }
-    console.log(cart)
+    console.log(cart);
     // make sure we can add this item to the cart
     // know it's ok if the item already exists in the cart
-    var ok = false
+    var ok = false;
     cart.aggregate_items.map(i => {
       if (i.ASIN === item.ASIN[0] && i.quantity > 1) {
-        ok = true
+        ok = true;
       }
-    })
+    });
 
     // TODO can't check if an item is okay to add if it's their first item in the cart...
     if (!ok && _.get(cart, 'amazon.CartId[0]')) {
@@ -243,7 +243,7 @@ module.exports.removeFromCart = function (slack_id, user_id, number, type) {
     }
 
     // first just try to remove one item that this user added
-    
+
     var matching_items = cart.items.filter(function (i) {
       return i.ASIN === ASIN_to_remove && (i.added_by === user_id || userIsAdmin)
     });

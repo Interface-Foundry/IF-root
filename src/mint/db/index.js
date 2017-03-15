@@ -10,6 +10,7 @@ waterline.loadCollection(require('./items'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./emails'))
+waterline.loadCollection(require('./camel_items'))
 
 var config = {
   adapters: {
@@ -45,4 +46,3 @@ var initialize = new Promise((resolve, reject) => {
 })
 
 module.exports = initialize
-

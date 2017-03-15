@@ -12,7 +12,7 @@ const fs = require('fs'),
 var regularRoutes = require('./routes/regular.js');
 var apiRoutes = require('./routes/api.js');
 
-require('colors')
+require('colors');
 
 /**
  * Models loaded from the waterline ORM
