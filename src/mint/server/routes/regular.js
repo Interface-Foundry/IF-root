@@ -55,7 +55,6 @@ router.get('/magi/:magic_id', (req, res) => co(function * () {
  * Though this is a GET route, it should be used with XHR/ajax, not as a renderable page
  */
 router.get('/createAccount', (req, res) => co(function * () {
-  console.log('identify with email', req.query.email);
 
   // clean up the email TODO
   var email_address = req.query.email.toLowerCase();
@@ -63,8 +62,6 @@ router.get('/createAccount', (req, res) => co(function * () {
   // Find an existing user or create a new one
   var user = yield db.UserAccounts.findOne()
     .where({email_address: email_address});
-
-  console.log('user', user)
 
   // Create new one if didn't find it
   if (!user) {
@@ -83,14 +80,10 @@ router.get('/createAccount', (req, res) => co(function * () {
     subject: 'Your New Cart from Kip'
   })
 
-  console.log('created email', email)
-
   // use the new_cart email template
   email.template('new_cart', {
     cart_id: req.query.cart_id
   })
-
-  console.log('built email template', email.message_html)
 
   // remember to actually send it
   yield email.send();
