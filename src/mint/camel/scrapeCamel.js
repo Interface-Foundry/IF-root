@@ -36,8 +36,6 @@ var camelScrape = function * () {
     asins.push(qs[0])
   });
 
-  console.log('got names')
-
   //gets new and old prices
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
     $('div.compare_price', e).each(function (i, e) {
@@ -47,8 +45,6 @@ var camelScrape = function * () {
       else prices[prices.length-1].old = price;
     });
   });
-
-  console.log('got first half of prices')
 
   var originalPricesLength = prices.length;
 
@@ -74,12 +70,14 @@ var camelScrape = function * () {
 
   for (var i = 0; i < names.length; i++) {
     console.log('about to create model')
-    db.camel_items.create({
+    db.CamelItems.create({
       name: names[i],
       asin: asins[i],
       price: prices[i].new,
       previousPrice: prices[i].old
-    }).exec()
+    }).exec(function (err, result) {
+      if (err) console.log('error:', err)
+    })
     console.log('created one record maybe');
   }
 

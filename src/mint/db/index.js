@@ -39,7 +39,8 @@ var initialize = new Promise((resolve, reject) => {
       Items: ontology.collections.items,
       UserAccounts: ontology.collections.user_accounts,
       Sessions: ontology.collections.sessions,
-      Emails: ontology.collections.emails
+      Emails: ontology.collections.emails,
+      CamelItems: ontology.collections.camel_items
     }
     resolve(models)
   })
