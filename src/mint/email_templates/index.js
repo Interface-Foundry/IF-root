@@ -1,5 +1,6 @@
 var fs = require('fs')
 var ejs = require('ejs')
+var baseUrl = process.env.BASEURL || 'https://mint-dev.kipthis.com'
 
 console.log('compiling ejs email templates')
 
@@ -14,6 +15,7 @@ const templates = fs.readdirSync(__dirname).reduce((templates, name) => {
 
 /** function to compile an email template with given data */
 module.exports = function (template, data) {
+  data.baseUrl = data.baseUrl || baseUrl
   if (templates[template]) {
     return templates[template](data)
   } else {

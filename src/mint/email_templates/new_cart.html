@@ -7,7 +7,7 @@
 <body>
     <h1>Add Item to Cart</h1>
 
-    <form id="form1" action="http://localhost:3000/api/addItem" method="get">
+    <form id="form1" action="<%=baseUrl%>/api/addItem" method="get">
         <div style="margin-bottom:10px">
             <label for="text"><b>Click a Popular Item:</b> <br> Red Bull, Peanut Butter</label><br><br>
             <input required type="text" id="url" name="url" placeholder="Paste Amazon URL" value="">
@@ -19,7 +19,7 @@
         </div>
 
         <div>
-          Cart link: <a href="http://localhost:3000/cart/<%=id%>">http://localhost:3000/cart/<%=id%></a>
+          Cart link: <a href="<%=baseUrl%>/cart/<%=id%>"><%=baseUrl%>/cart/<%=id%></a>
         </div>
     </form>
 </body>
