@@ -1,0 +1,23 @@
+<!-- views/pages/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <title>Cart | Kip Store</title>
+  <link href="/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <h1>Your Cart</h1>
+  <form method="get" action="/api/identify">
+    <label for="email">Enter your Email</label>
+    <input type="email" id="email" name="email" />
+    <input type="hidden" name="cart_id" value="<%=cart.id%>" />
+    <input type="submit" />
+  </form>
+</body>
+
+</html>

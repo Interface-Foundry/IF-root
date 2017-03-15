@@ -1,0 +1,23 @@
+<!-- views/pages/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <title>Cart | Kip Store</title>
+  <link href="/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <h1>Someone Else's Cart</h1>
+  <ul>
+    <li>You are <%=session.user_accounts[0].email_address%></li>
+    <li>Cart leader is <%=cart.leader.email_address%></li>
+  </ul>
+  <h2>Cart Items</h2>
+  coming soon
+</body>
+
+</html>

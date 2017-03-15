@@ -12,7 +12,7 @@ var cartsCollection = Waterline.Collection.extend({
     /** Generated when a cart is created for the first time */
 
     /** @type {string} unique uuid */
-    cart_id: {
+    id: {
       type: 'string',
       primaryKey: true,
       unique: true,
@@ -31,23 +31,13 @@ var cartsCollection = Waterline.Collection.extend({
     },
 
     /** @type {cart_leader} cart may have multiple leaders  */
-    cart_leader: 'string', // incorrect but using for now since idk how the session stuff works
-    // cart_leader: {
-    //   collection: 'user_accounts',
-    //   via: 'cart_leader'
-    // },
+    leader: Waterline.isA('user_accounts'),
 
     /** @type {cart_member} carts may have multiple members */
-    cart_members: {
-      collection: 'user_accounts',
-      via: 'cart_member'
-    },
+    members: Waterline.isMany('user_accounts'),
 
     /** @type {reference} items in the cart */
-    items: {
-      collection: 'items',
-      via: 'cart'
-    }
+    items: Waterline.isMany('items')
   }
 });
 

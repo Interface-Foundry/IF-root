@@ -3,6 +3,7 @@ var router = express.Router();
 var co = require('co');
 
 var utils = require('../utilities/utils.js');
+var prototype = process.env.PROTOTYPE
 
 /**
  * Models loaded from the waterline ORM
@@ -15,6 +16,94 @@ router.get('/', (req, res) => {
   res.render('pages/index');
 });
 
+/**
+ * Non-react prototype views
+ */
+if (prototype) {
+  router.get('/cart/:id', (req, res) => co(function * () {
+    console.log('cart/id')
+    const cart = yield db.Carts.findOne({id: req.params.id}).populate('leader')
+    const session = req.UserSession; //db.Sessions.findOne({id: req.session.id}).populate('user_accounts')
+    const user = session.user_accounts[0]
+
+    // If there's no leader for this cart, respond with the page that asks for an email
+    if (!cart.leader) {
+      console.log('rendering new cart no leader')
+      return res.render('pages/prototype/new_cart_no_leader', {
+        cart,
+        session
+      })
+    }
+
+    // If there is a user for the cart, and the user is the leader, show the leader view
+    if (user && cart.leader.id === user.id) {
+      console.log('rendering cart leader view')
+      return res.render('pages/prototype/cart_leader_view', {
+        cart,
+        session
+      })
+    }
+
+    // If there is a user, but user is not a leader, make sure they're in the cart members/participants
+    if (user && cart.leader.id !== user.id) {
+      console.log('should render cart non-leader view')
+      return res.render('pages/prototype/cart_member_view', {
+        cart,
+        session
+      })
+    }
+
+    // Otherwise, show the anon view
+    console.log('rendering cart anon view')
+    res.render('pages/prototype/cart_anon_view', {
+      cart,
+      session
+    })
+  }))
+
+  /**
+   * /api/identify?email=peter.m.brandt%40gmail.com&cart_id=7877da92b35f
+   */
+  router.get('/api/identify', (req, res) => co(function * () {
+    console.log('identify')
+
+    // Check the cart to see if there's already a leader
+    var cart = yield db.Carts.findOne({id: req.query.cart_id}).populate('leader')
+    if (cart.leader) {
+      // TODO allow multiple leaders
+      return res.redirect('/cart/' + cart.id)
+    }
+
+    // Find the user associated with this email, if any
+    var email = req.query.email.trim().toLowerCase()
+    var user
+
+    // check if the user is already identified as this email
+    req.UserSession.user_accounts.map(u => {
+      if (u.email_address === email) {
+        user = u
+      }
+    })
+
+    if (user) {
+      cart.leader = user.id
+      yield cart.save()
+      return res.redirect('/cart/' + cart.id)
+    }
+
+    // WAIT. if finding an existing one, need to ask them to click magic link sent to email
+    var user = yield db.UserAccounts.findOrCreate({
+      email_address: email
+    })
+
+    cart.leader = user.id
+    req.UserSession.user_accounts.add(user.id)
+    yield [cart.save(), req.UserSession.save()]
+
+    return res.redirect('/cart/' + cart.id)
+  }))
+}
+
 
 /**
  * example of how the error logger works for time being
@@ -24,17 +113,29 @@ router.get('/fail', function(req, res, next) {
 });
 
 /**
- * create new cart for user, redirect them to /cart/:cart_id which will be handled by redux
+ * create new cart for user, redirect them to /cart/:id which will be handled by redux
  */
 router.get('/newcart', (req, res) => co(function * () {
-  var session_id = req.session.session_id;
-  var cart_id = yield utils.createNewCart(req, session_id);
-  res.redirect(`/cart/${cart_id}`);
+  // create a blank cart
+  const cart = yield db.Carts.create({})
+  console.log('new cart', cart)
+
+  // find the user for this session
+  const session = req.UserSession; // yield db.Sessions.findOne({id: req.session.id}).populate('user_accounts')
+
+  if (session.user_accounts.length > 0) {
+    // make the first user the leader
+    console.log('saving leader as', cart.leader)
+    cart.leader = session.user_accounts[0]
+    yield cart.save()
+  }
+
+  res.redirect(`/cart/${cart.id}`);
 }));
 
 /**
  * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
- * @param {[cart_id]} )             {}) [description]
+ * @param {[id]} )             {}) [description]
  * @param {string} magic_id - the magic id for the cart
  * @yield {[type]} [description]
  */
@@ -43,7 +144,7 @@ router.get('/magi/:magic_id', (req, res) => co(function * () {
   var cart = db.carts.findOne({magic_link: req.params.magic_link});
   if (cart) {
     // redirect and log user in
-    res.redirect(`/cart/${cart.cart_id}`);
+    res.redirect(`/cart/${cart.id}`);
   } else {
     return new Error('magic_id doesnt exist, probably return user to some error page where they can create new cart');
   }
@@ -68,7 +169,7 @@ router.get('/createAccount', (req, res) => co(function * () {
     console.log('creating new user')
     user = yield db.UserAccounts.create({
       email_address: email_address,
-      sessions: [req.session.session_id]
+      sessions: [req.session.id]
     });
   }
 
@@ -82,7 +183,7 @@ router.get('/createAccount', (req, res) => co(function * () {
 
   // use the new_cart email template
   email.template('new_cart', {
-    cart_id: req.query.cart_id
+    id: req.query.id
   })
 
   // remember to actually send it

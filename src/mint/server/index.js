@@ -8,6 +8,7 @@ const fs = require('fs'),
   path = require('path'),
   mintLogger = require('./mint_logging.js'),
   _ = require('lodash')
+  co = require('co')
 
 // idk
 var regularRoutes = require('./routes/regular.js');
@@ -45,24 +46,23 @@ app.use(sessions({
 /**
  * Save user sessions to the database
  */
-app.use(function(req, res, next) {
+app.use((req, res, next) => co(function * () {
   // req.session will always exist, thanks to the above client-sessions middleware
   // Check to make sure we have stored this user's session in the database
-  if (!req.session.session_id) {
-    var sessionId = Math.random().toString(36).slice(2);
-    req.session.session_id = sessionId;
-    db.Sessions.create({
-      session_id: sessionId
-    }).catch(e => {
-      console.error(e);
-    });
+  if (!req.session.id) {
+    console.log('creating new sessionin the database')
+    var session = yield db.Sessions.create({})
+    req.session.id = session.id
   }
 
-  // Now that the session_id exists, save the tracking information, like IP, user-agent, etc
+  req.UserSession = yield db.Sessions.findOne({id: req.session.id}).populate('user_accounts')
+  console.log(req.UserSession)
+
+  // Now that the id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12
 
   next();
-});
+}));
 
 /**
  * Add in logging after sessions have been created

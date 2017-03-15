@@ -1,6 +1,19 @@
 var Waterline = require('waterline')
 var mongoAdapter = require('sails-mongo')
 
+Waterline.isA = function (collection) {
+  return {
+    model: collection
+  }
+}
+
+Waterline.isMany = function (collection) {
+  return {
+    collection: collection,
+    via: 'id'
+  }
+}
+
 /**
  * Set up the database connections
  */
