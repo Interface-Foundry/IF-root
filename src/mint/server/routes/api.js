@@ -92,13 +92,26 @@ router.delete('/cart/:cart_id/items', (req, res) => co(function * () {
   res.send(200);
 }));
 
+/**
+ * get user from api based on id or email
+ * @param {string} either id or email param in query
+ * @yield {object} user object
+ */
 router.get('/user', (req, res) => co(function * () {
-  var user_id = req.body.user_id;
-  var user = yield db.UserAccounts.findOne({
-    id: user_id
-  });
-}))
-
+  var user;
+  if (_.get(req, 'body.email')) {
+    user = yield db.UserAccounts.findOne({
+      email_address: req.body.email.toLowerCase()
+    });
+  } else if (_.get(req, 'body.id')) {
+    user = yield db.UserAccounts.findOne({
+      id: req.body.id
+    });
+  } else {
+    return new Error('magic_id doesnt exist, probably return user to some error page where they can create new cart');
+  }
+  res.send(user);
+}));
 
 /**
  * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
