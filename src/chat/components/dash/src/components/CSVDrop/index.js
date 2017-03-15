@@ -31,22 +31,21 @@ class CSVDrop extends Component {
   // 9:"DESKTOP"
 
     onDrop (acceptedFiles, rejectedFiles) {
-    var file = new FormData();
-    file.append('csv_file', acceptedFiles[0]);
-  request.post('/upload')
-    .send(file)
-    .end(function(err, resp) {
-      if (err) { console.error(err); }
-      console.log(resp)
-      return resp;
-    });
-
-   //try{csvparse(acceptedFiles[0]);}catch(e){console.log(e)}
-
-    this.setState({
-        files: acceptedFiles
-    });
-
+      var file = new FormData();
+      file.append('csv_file', acceptedFiles[0]);
+      request.post('/upload')
+        .send(file)
+        .end(function(err, resp) {
+          if (err) { 
+            console.error(err); 
+          }
+          console.log('AAAAA', resp);
+          return resp;
+        });
+      //console.log('lala', resp);
+        this.setState({
+          files: acceptedFiles
+        });
     }
 
     render() {

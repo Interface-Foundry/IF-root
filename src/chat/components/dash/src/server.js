@@ -23,10 +23,10 @@ import graffiti from '@risingstack/graffiti';
 import { getSchema } from '@risingstack/graffiti-mongoose';
 import MetricSchema from './data/models/mongo/metric_schema';
 import csvparse from './components/CSVDrop/csvparse';
+import multer from 'multer';
 
-var multer = require('multer');
 
-var storage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './client/csvfiles')
   },
@@ -34,8 +34,7 @@ var storage = multer.diskStorage({
     cb(null, file.originalname)
   }
 })
-var upload = multer({ storage: storage })
-
+const upload = multer({ storage: storage })
 const app = express();
 
 //
@@ -151,9 +150,16 @@ app.get('*', async (req, res, next) => {
 // Getting the file from the dropzone, parsing its contents
 //
 app.post('/upload', upload.single('csv_file'), function(req, res, next){
-  //console.log('AAAAA', req.file.path);
+
   var csvData = csvparse(req.file.path);
-  res.end('Finished parsing');
+
+  var chunks = [];
+  csvData.on("data", function (chunk) {
+    chunks.push(chunk);
+  });
+  csvData.on("end", function () {
+    res.end(JSON.stringify(chunks));
+  });
 });
 
 
