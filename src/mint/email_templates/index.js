@@ -1,6 +1,6 @@
 var fs = require('fs')
 var ejs = require('ejs')
-var baseUrl = process.env.BASEURL || 'https://mint-dev.kipthis.com'
+var baseUrl = process.env.BASEURL || 'http://mint-dev.kipthis.com'
 
 console.log('compiling ejs email templates')
 
