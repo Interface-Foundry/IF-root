@@ -9,10 +9,12 @@ var camelItemsCollection = Waterline.Collection.extend({
     price: 'float',
     previousPrice: 'float',
     savePercent: {
-      type: float,
+      type: 'float',
       defaultsTo: function () {
         return this.price / this.previousPrice;
       }
     }
   }
 });
+
+module.exports = camelItemsCollection;
