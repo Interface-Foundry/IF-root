@@ -92,4 +92,30 @@ router.delete('/cart/:cart_id/items', (req, res) => co(function * () {
   res.send(200);
 }));
 
+router.get('/user', (req, res) => co(function * () {
+  var user_id = req.body.user_id;
+  var user = yield db.UserAccounts.findOne({
+    id: user_id
+  });
+}))
+
+
+/**
+ * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
+ * @param {[cart_id]} )             {}) [description]
+ * @param {string} magic_id - the magic id for the cart
+ * @yield {[type]} [description]
+ */
+router.get('/magiclink/:magic_id', (req, res) => co(function * () {
+  // find if magic_id exists
+  var magicLink = db.magiclinks.findOne({id: req.params.magic_id});
+  if (magicLink) {
+    // redirect and log user in
+    res.send(magicLink);
+    // res.redirect(`/cart/${cart.cart_id}`);
+  } else {
+    return new Error('magic_id doesnt exist, probably return user to some error page where they can create new cart');
+  }
+}));
+
 module.exports = router;

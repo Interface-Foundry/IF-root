@@ -226,23 +226,6 @@ router.get('/newcart', (req, res) => co(function * () {
 }));
 
 /**
- * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
- * @param {[id]} )             {}) [description]
- * @param {string} magic_id - the magic id for the cart
- * @yield {[type]} [description]
- */
-router.get('/magi/:magic_id', (req, res) => co(function * () {
-  // find if magic_id exists
-  var cart = db.carts.findOne({magic_link: req.params.magic_link});
-  if (cart) {
-    // redirect and log user in
-    res.redirect(`/cart/${cart.id}`);
-  } else {
-    return new Error('magic_id doesnt exist, probably return user to some error page where they can create new cart');
-  }
-}));
-
-/**
  * Identify a user, associating a session with a user_account
  * Multiple user_accounts can be associated with one session, personal email and work email on same computer
  * Though this is a GET route, it should be used with XHR/ajax, not as a renderable page
