@@ -11,11 +11,15 @@
         <div style="margin-bottom:10px">
             <label for="text"><b>Click a Popular Item:</b> <br> Red Bull, Peanut Butter</label><br><br>
             <input required type="text" id="text" name="text" placeholder="Paste Amazon URL" value="">
-            <input type="hidden" id="cart_id" name="cart_id" value="$CART_ID">
+            <input type="hidden" id="cart_id" name="cart_id" value="<%=cart_id%>">
         </div>
 
         <div>
             <button type="submit" name="Add to Cart">Add to Cart</button>
+        </div>
+
+        <div>
+          Cart Id <%=cart_id%>
         </div>
     </form>
 </body>

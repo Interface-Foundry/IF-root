@@ -20,6 +20,8 @@ var cartsCollection = Waterline.Collection.extend({
         return uuid.v4().replace(/-/g, '').slice(0, constants.CART_ID_LENGTH);
       }
     },
+
+    /** "Forgot" link for re-authenticating */
     magic_link: {
       type: 'string',
       unique: true,

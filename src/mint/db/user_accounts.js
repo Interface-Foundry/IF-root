@@ -9,6 +9,7 @@ var userAccountCollection = Waterline.Collection.extend({
   identity: 'user_accounts',
   connection: 'default',
   attributes: {
+    /** uniqu uuid v4 for the user, automatically generated */
     user_id: {
       type: 'text',
       primaryKey: true,

@@ -45,4 +45,3 @@ var initialize = new Promise((resolve, reject) => {
 })
 
 module.exports = initialize
-
