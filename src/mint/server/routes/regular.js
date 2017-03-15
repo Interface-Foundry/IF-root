@@ -21,6 +21,7 @@ router.get('/', (req, res) => {
  */
 if (prototype) {
   router.get('/cart/:id', (req, res) => co(function * () {
+    console.log('cart/id')
     const cart = yield db.Carts.findOne({id: req.params.id}).populate('leader')
     const session = req.UserSession; //db.Sessions.findOne({id: req.session.id}).populate('user_accounts')
     const user = session.user_accounts[0]
@@ -29,7 +30,8 @@ if (prototype) {
     if (!cart.leader) {
       console.log('rendering new cart no leader')
       return res.render('pages/prototype/new_cart_no_leader', {
-        cart
+        cart,
+        session
       })
     }
 
@@ -38,24 +40,67 @@ if (prototype) {
       console.log('rendering cart leader view')
       return res.render('pages/prototype/cart_leader_view', {
         cart,
-        user
+        session
       })
     }
 
     // If there is a user, but user is not a leader, make sure they're in the cart members/participants
-    // TODO
     if (user && cart.leader.id !== user.id) {
       console.log('should render cart non-leader view')
       return res.render('pages/prototype/cart_member_view', {
-        cart: cart
+        cart,
+        session
       })
     }
 
     // Otherwise, show the anon view
     console.log('rendering cart anon view')
     res.render('pages/prototype/cart_anon_view', {
-      cart: cart
+      cart,
+      session
     })
+  }))
+
+  /**
+   * /api/identify?email=peter.m.brandt%40gmail.com&cart_id=7877da92b35f
+   */
+  router.get('/api/identify', (req, res) => co(function * () {
+    console.log('identify')
+
+    // Check the cart to see if there's already a leader
+    var cart = yield db.Carts.findOne({id: req.query.cart_id}).populate('leader')
+    if (cart.leader) {
+      // TODO allow multiple leaders
+      return res.redirect('/cart/' + cart.id)
+    }
+
+    // Find the user associated with this email, if any
+    var email = req.query.email.trim().toLowerCase()
+    var user
+
+    // check if the user is already identified as this email
+    req.UserSession.user_accounts.map(u => {
+      if (u.email_address === email) {
+        user = u
+      }
+    })
+
+    if (user) {
+      cart.leader = user.id
+      yield cart.save()
+      return res.redirect('/cart/' + cart.id)
+    }
+
+    // WAIT. if finding an existing one, need to ask them to click magic link sent to email
+    var user = yield db.UserAccounts.findOrCreate({
+      email_address: email
+    })
+
+    cart.leader = user.id
+    req.UserSession.user_accounts.add(user.id)
+    yield [cart.save(), req.UserSession.save()]
+
+    return res.redirect('/cart/' + cart.id)
   }))
 }
 

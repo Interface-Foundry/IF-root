@@ -1,6 +1,6 @@
 var Waterline = require('waterline')
 
-var animals = ['octopus', 'beaver', 'ninetailed cat', 'pine tree']
+var animals = ['quasar', 'black hole', 'habitable planet', 'galaxy cluster', 'background radiation', 'artificial satellite', 'icy moon', 'neil tyson']
 
 /**
  * Session collection is the database side of the node-client-session cookie
@@ -21,7 +21,7 @@ var sessionsCollection = Waterline.Collection.extend({
     animal: {
       type: 'string',
       defaultsTo: function () {
-        animals[Math.random()*animals.length|0]
+        return animals[Math.random()*animals.length|0]
       }
     },
 

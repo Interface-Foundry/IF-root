@@ -1,5 +1,6 @@
 var Waterline = require('waterline')
 var uuid = require('uuid')
+var co = require('co')
 
 /**
  * User Account Collection
@@ -43,5 +44,24 @@ var userAccountCollection = Waterline.Collection.extend({
     // }
   }
 })
+
+/**
+ * Finds or creates a new UserAccounts for doc.email_address
+ * @param  {Object} doc {email_address: <an email address>}
+ * @return {Promise}    promise for the user_account object
+ */
+userAccountCollection.findOrCreate = function (doc) {
+  return co(function * () {
+    if (!doc.email) {
+      throw new Error('no email address supplied in findOrCreate')
+    }
+
+    var user = yield userAccountCollection.findOne(doc)
+
+    if (!user) {
+      user = yield userAccountCollection.create(doc)
+    }
+  })
+}
 
 module.exports = userAccountCollection
