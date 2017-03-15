@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { PropTypes } from 'react'
 import InputContainer from './InputContainer';
 import CartContainer from './CartContainer';
+import { connect } from 'react-redux'
 
-const App = () => (
+const App = ({ cart_id }) => (
   <div>
-    <h2>Cart ID #</h2>
+    <h2>Cart ID #{cart_id}</h2>
     <hr/>
-    <InputContainer />
+    <InputContainer cart_id={cart_id} />
     <hr/>
-    
   </div>
 );
 
-export default App;
+App.propTypes = {
+  cart_id: PropTypes.string
+};
+
+const mapStateToProps = (state, ownProps) => ({
+  cart_id: ownProps.match.params.cart_id
+});
+
+export default connect(mapStateToProps)(App);

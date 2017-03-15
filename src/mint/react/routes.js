@@ -14,10 +14,12 @@ import App from './containers/App';
 import NotFound from './pages/NotFound';
 
 // actions
-import { fetchUser } from './actions';
+import { createUser } from './actions';
 
 // reducers
 import UserReducer from './reducers/user';
+import CartReducer from './reducers/cart';
+import ItemReducer from './reducers/item';
 
 // Create a history of your choosing (we're using a browser history in this case)
 const history = createHistory();
@@ -29,19 +31,19 @@ const historyMiddleware = routerMiddleware(history);
 // Also apply our middleware for navigating
 const store = createStore(
   combineReducers({
-    UserReducer,
+    user: UserReducer,
+    carts: CartReducer,
+    items: ItemReducer,
     router: routerReducer
   }),
   applyMiddleware(historyMiddleware, thunkMiddleware)
 );
 
-store.dispatch(fetchUser()).then(() =>
-  console.log(store.getState())
-);
+// store.dispatch(createUser());
+console.log(store.getState());
 
 const Routes = () => (
   <Provider store={store}>
-    { /* ConnectedRouter will use the store from Provider automatically */ }
     <ConnectedRouter history={history}>
       <Switch>
         <Route path="/cart/:cart_id" component={ App }/>

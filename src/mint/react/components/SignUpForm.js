@@ -1,15 +1,15 @@
-import React, { PropTypes } from 'react'
+import React, { PropTypes } from 'react';
 
 const SignUpForm = ({ cart_id, onSubmit }) => {
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={e => onSubmit(e, {cart_id: cart_id, email: e.target.querySelector('input').value})}>
 		<input placeholder='Enter your email' name='email' type='text'/>
-		<input type='hidden' name='cart_id'>{cart_id}</input>
+		<input type='hidden' name='cart_id' value={cart_id} />
       	<button type='Submit'>
         	Sign Up
       	</button>
     </form>
-  )
-}
+  );
+};
 
-export default SignUpForm
+export default SignUpForm;

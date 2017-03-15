@@ -24,6 +24,16 @@ const requestCartItems = (cart) => ({
   cart
 });
 
+const receiveUser = (user, newInfo) => ({
+  type: types.RECEIVE_USER,
+  newInfo
+});
+
+const requestUser = (user) => ({
+  type: types.REQUEST_USER,
+  user
+});
+
 const requestRemoveCartItem = (cart, item) => ({
   type: types.REMOVE_FROM_CART,
   item,
@@ -35,8 +45,20 @@ const receiveRemoveCartItem = (cart) => ({
   cart
 });
 
-export function fetchUser(user_id = null) {
-  return userReducer(user_id);
+export function fetchUser(user_id) {
+  return function (dispatch) {
+    dispatch(requestUser(user_id));
+    return fetch(`/api/user/${user_id}`)
+      .then(response => response.json())
+      .then(json => dispatch(receiveUser(user_id, json)));
+  };
+}
+
+export function createUser() {
+  let newUser = userReducer();
+  newUser.email = `${Math.random() * 1e7 | 0}@kipthis.com`;
+  console.log(newUser);
+  return newUser;
 }
 
 export function fetchCart(cart_id) {
@@ -89,18 +111,27 @@ export function removeCartItem(cart_id, item) {
   return function (dispatch) {
     dispatch(requestRemoveCartItem(cart_id, item));
     return fetch(`${baseUrl}/api/cart/${cart_id}/items`, {
-      'method': 'DELETE',
-      'body': JSON.stringify({
-        itemId: item,
-        quantity: -1
+        'method': 'DELETE',
+        'body': JSON.stringify({
+          itemId: item,
+          quantity: -1
+        })
       })
-    })
-    .then(response =>
-      dispatch(receiveCart(cart_id))
-    );
+      .then(response =>
+        dispatch(receiveCart(cart_id))
+      );
   };
 }
 
-export function checkout(items){
-  //who knows right now
+export function signUp(e, state) {
+  const { cart_id, email } = state;
+  console.log(cart_id, email);
+  e.preventDefault();
+  return function (dispatch) {
+    // dispatch(requestCreateEmail(cart_id, item));
+    return fetch(`${baseUrl}/createaccount?cart_id=${cart_id}&email=${email}`)
+      .then(response =>
+        console.log(response)
+      );
+  };
 }
