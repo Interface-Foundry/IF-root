@@ -84,7 +84,6 @@ if (prototype) {
         user = u
       }
     })
-
     if (user) {
       console.log('user was logged in as that email already')
       cart.leader = user.id

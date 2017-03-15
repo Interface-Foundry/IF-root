@@ -16,6 +16,17 @@
     <li>You are an anonymous <%=session.animal%>.</li>
     <li>Cart leader is <%=cart.leader.email_address%></li>
   </ul>
+  <form id="form1" action="/api/addItem" method="get">
+      <div style="margin-bottom:10px">
+          <label for="text"><b>Click a Popular Item:</b> <br> Red Bull, Peanut Butter</label><br><br>
+          <input required type="text" id="url" name="url" placeholder="Paste Amazon URL" value="">
+          <input type="hidden" id="cart_id" name="cart_id" value="<%=cart.id%>">
+      </div>
+
+      <div>
+          <button type="submit" name="Add to Cart">Add to Cart</button>
+      </div>
+  </form>
 
   <h2>Cart Items</h2>
   <ul>
