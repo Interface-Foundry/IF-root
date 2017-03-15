@@ -23,6 +23,7 @@ waterline.loadCollection(require('./items'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./emails'))
+waterline.loadCollection(require('./authentication_links'))
 
 var config = {
   adapters: {
@@ -51,7 +52,8 @@ var initialize = new Promise((resolve, reject) => {
       Items: ontology.collections.items,
       UserAccounts: ontology.collections.user_accounts,
       Sessions: ontology.collections.sessions,
-      Emails: ontology.collections.emails
+      Emails: ontology.collections.emails,
+      AuthenticationLinks: ontology.collections.authentication_links
     }
     resolve(models)
   })

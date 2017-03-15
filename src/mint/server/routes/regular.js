@@ -69,10 +69,10 @@ if (prototype) {
 
     // Check the cart to see if there's already a leader
     var cart = yield db.Carts.findOne({id: req.query.cart_id}).populate('leader')
-    if (cart.leader) {
-      console.log('cart already has leader')
-      return res.redirect('/cart/' + cart.id)
-    }
+    // if (cart.leader) {
+    //   console.log('cart already has leader')
+    //   return res.redirect('/cart/' + cart.id)
+    // }
 
     // Find the user associated with this email, if any
     var email = req.query.email.trim().toLowerCase()
@@ -98,10 +98,32 @@ if (prototype) {
 
     if (user) {
       console.log('email already exists in db')
-      return res.render('pages/prototype/check_your_email_magic', {
+      res.render('pages/prototype/check_your_email_magic', {
         user,
         cart
       })
+
+      // generate magic link here
+      var link = yield db.AuthenticationLinks.create({
+        user: user.id,
+        cart: cart.id
+      })
+
+      link = yield db.AuthenticationLinks.findOne({
+        id: link.id
+      }).populate('user').populate('cart')
+
+      var lostEmail = yield db.Emails.create({
+        recipients: email,
+        subject: 'Log in to Kip'
+      })
+
+      lostEmail.template('authentication_link', {
+        link
+      })
+
+      yield lostEmail.send()
+      return
     }
 
     // No user was found with the email address, so this is a new user, party!
@@ -142,6 +164,26 @@ if (prototype) {
     return res.redirect('/cart/' + cart.id)
   }))
 }
+
+/**
+ * Logs someone in from a maaaagic link, like forgot password style
+ */
+router.get('/auth/:id', (req, res) => co(function * () {
+  var link = yield db.AuthenticationLinks.findOne({id: req.params.id}).populate('user').populate('cart')
+  if (!link || !link.user) {
+    return res.status(404).end()
+  }
+
+  if (req.UserSession.user_accounts.contains(link.user.id)) {
+    console.log('already logged in as this email in user session')
+    return res.redirect('/cart/' + link.cart.id)
+  }
+
+  req.UserSession.user_accounts.add(link.user.id)
+  yield req.UserSession.save()
+
+  return res.redirect('/cart/' + link.cart.id)
+}))
 
 
 /**
