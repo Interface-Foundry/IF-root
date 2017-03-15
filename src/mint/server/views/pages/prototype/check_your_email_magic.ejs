@@ -11,24 +11,15 @@
 </head>
 
 <body>
-  <h1>Someone Else's Cart</h1>
-  <ul>
-    <li>You are an anonymous <%=session.animal%>.</li>
-    <li>Cart leader is <%=cart.leader.email_address%></li>
-  </ul>
+  <h1>Check your email</h1>
+  <p>Someone has already used "<%=user.email_address%>", so you'll need to check your email and click the magic link we just sent you to authenticate.</p>
 
-  <h2>Cart Items</h2>
-  <ul>
-  <% for(var i=0; i<cart.items.length; i++) {%>
-     <li><%= cart.items[i].original_link %></li>
-  <% } %>
-  </ul>
-  <!-- <p>Would you like to become non-anonymous?</p>
+  <p>Wrong email address? Go ahead and type the right one here:</p>
   <form method="get" action="identify">
     <label for="email">Enter your Email</label>
     <input type="email" id="email" name="email" />
     <input type="hidden" value="<%=cart.id%>" />
-  </form> -->
+  </form>
 </body>
 
 </html>

@@ -21,8 +21,8 @@ router.get('/', (req, res) => {
  */
 if (prototype) {
   router.get('/cart/:id', (req, res) => co(function * () {
-    console.log('cart/id')
-    const cart = yield db.Carts.findOne({id: req.params.id}).populate('leader')
+    const cart = yield db.Carts.findOne({id: req.params.id}).populate('leader').populate('items')
+    console.log('cart', cart)
     const session = req.UserSession; //db.Sessions.findOne({id: req.session.id}).populate('user_accounts')
     const user = session.user_accounts[0]
 
@@ -70,7 +70,7 @@ if (prototype) {
     // Check the cart to see if there's already a leader
     var cart = yield db.Carts.findOne({id: req.query.cart_id}).populate('leader')
     if (cart.leader) {
-      // TODO allow multiple leaders
+      console.log('cart already has leader')
       return res.redirect('/cart/' + cart.id)
     }
 
@@ -86,20 +86,60 @@ if (prototype) {
     })
 
     if (user) {
+      console.log('user was logged in as that email already')
       cart.leader = user.id
       yield cart.save()
       return res.redirect('/cart/' + cart.id)
     }
 
-    // WAIT. if finding an existing one, need to ask them to click magic link sent to email
-    var user = yield db.UserAccounts.findOrCreate({
+    // If a user exists in the db, send them a magic link to prove it's them
+    user = yield db.UserAccounts.findOne({
       email_address: email
     })
 
+    if (user) {
+      console.log('email already exists in db')
+      return res.render('pages/prototype/check_your_email_magic', {
+        user,
+        cart
+      })
+    }
+
+    // No user was found with the email address, so this is a new user, party!
+    console.log('creating new user')
+    user = yield db.UserAccounts.create({
+      email_address: email
+    })
     cart.leader = user.id
     req.UserSession.user_accounts.add(user.id)
     yield [cart.save(), req.UserSession.save()]
+    res.redirect('/cart/' + cart.id)
 
+    // Send an email to the user with the cart link
+    email = yield db.Emails.create({
+      recipients: user.email_address,
+      subject: 'Your New Cart from Kip'
+    })
+
+    // use the new_cart email template
+    email.template('new_cart', {
+      id: cart.id
+    })
+
+    // remember to actually send it
+    yield email.send();
+  }))
+
+  /**
+   * For when a user adds something via email or whatever. just add the string to the list
+   */
+  router.get('/api/addItem', (req, res) => co(function * () {
+    const cart = yield db.Carts.findOne({id: req.query.cart_id})
+    const item = yield db.Items.create({
+      original_link: req.query.url
+    })
+    cart.items.add(item.id)
+    yield cart.save()
     return res.redirect('/cart/' + cart.id)
   }))
 }

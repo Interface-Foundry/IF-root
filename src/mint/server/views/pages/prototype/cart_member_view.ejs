@@ -16,8 +16,13 @@
     <li>You are <%=session.user_accounts[0].email_address%></li>
     <li>Cart leader is <%=cart.leader.email_address%></li>
   </ul>
+
   <h2>Cart Items</h2>
-  coming soon
+  <ul>
+  <% for(var i=0; i<cart.items.length; i++) {%>
+     <li><%= cart.items[i].original_link %></li>
+  <% } %>
+  </ul>
 </body>
 
 </html>
