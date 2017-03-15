@@ -24,9 +24,14 @@ const requestCartItems = (cart) => ({
   cart
 });
 
-const removeCartItem = (cart, item) => ({
+const requestRemoveCartItem = (cart, item) => ({
   type: types.REMOVE_FROM_CART,
   item,
+  cart
+});
+
+const receiveRemoveCartItem = (cart) => ({
+  type: types.REMOVE_FROM_CART,
   cart
 });
 
@@ -82,7 +87,7 @@ export function fetchCartItems(cart_id) {
 
 export function removeCartItem(cart_id, item) {
   return function (dispatch) {
-    dispatch(removeCartItem(cart_id));
+    dispatch(requestRemoveCartItem(cart_id, item));
     return fetch(`${baseUrl}/api/cart/${cart_id}/items`, {
       'method': 'DELETE',
       'body': JSON.stringify({
@@ -90,7 +95,10 @@ export function removeCartItem(cart_id, item) {
         quantity: -1
       })
     })
-  }
+    .then(response =>
+      dispatch(receiveCart(cart_id))
+    );
+  };
 }
 
 export function checkout(items){
