@@ -11,8 +11,15 @@ var router = express.Router();
  * redirects to cart/:cart_id
  */
 router.get('/cart/:cart_id', (req, res) => co(function * () {
+  console.log('GETTING CART', req.params.cart_id);
   var cart = yield db.Carts.findOne({cart_id: req.params.cart_id});
-  return cart;
+
+  if (cart) {
+    res.send(cart);
+  } else {
+    console.log('cart doesnt exist');
+    res.send(400);
+  }
 }));
 
 /**
@@ -22,7 +29,12 @@ router.get('/cart/:cart_id', (req, res) => co(function * () {
  */
 router.get('/cart/:cart_id/items', (req, res) => co(function * () {
   var cart = yield db.Carts.findOne({cart_id: req.params.cart_id});
-  return cart.items;
+  if (cart) {
+    res.send(cart.items);
+  } else {
+    console.log('cart doesnt exist');
+    res.send(400);
+  }
 }));
 
 /**
@@ -38,11 +50,19 @@ router.post('/cart/:cart_id/items', (req, res) => co(function * () {
   // just get the amazon lookup results and title from that currently
   var itemTitle = yield utils.getItemByUrl(original_url);
 
-  yield db.Items.create({
+  var itemObj = {
     cart: cartId,
     original_link: original_url,
     item_name: itemTitle
-  });
+  };
+
+  var item = yield db.Items.findOne(itemObj);
+
+  if (item) {
+    item.quantity++;
+  } else {
+    yield db.Items.create(itemObj);
+  }
 
   res.send(200);
 }));

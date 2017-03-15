@@ -18,7 +18,10 @@ var itemsCollection = Waterline.Collection.extend({
     original_link: 'string',
 
     /** @type {number} amount of this product in cart */
-    quantity: 'number',
+    quantity: {
+      type: 'integer',
+      defaultsTo: 1
+    },
 
     /** @type {string} item name or whatever we present maybe */
     item_name: 'string',

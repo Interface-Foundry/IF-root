@@ -2,6 +2,8 @@ import * as types from '../constants/ActionTypes';
 import userReducer from '../reducers/user';
 import fetch from 'isomorphic-fetch';
 
+const baseUrl = 'http://127.0.0.1:3000';
+
 const receiveCart = (cart, newInfo) => ({
   type: types.RECEIVE_CART,
   newInfo
@@ -22,6 +24,12 @@ const requestCartItems = (cart) => ({
   cart
 });
 
+const removeCartItem = (cart, item) => ({
+  type: types.REMOVE_FROM_CART,
+  item,
+  cart
+});
+
 export function fetchUser(user_id = null) {
   return userReducer(user_id);
 }
@@ -35,7 +43,7 @@ export function fetchCart(cart_id) {
     // that is passed on as the return value of the dispatch method.
     // In this case, we return a promise to wait for.
     // This is not required by thunk middleware, but it is convenient for us.
-    return fetch(`/api/cart/${cart_id}`)
+    return fetch(`${baseUrl}/api/cart/${cart_id}`)
       .then(response =>
         response.json()
       )
@@ -58,7 +66,7 @@ export function fetchCartItems(cart_id) {
     // that is passed on as the return value of the dispatch method.
     // In this case, we return a promise to wait for.
     // This is not required by thunk middleware, but it is convenient for us.
-    return fetch(`/api/cart/${cart_id}/items`)
+    return fetch(`${baseUrl}/api/cart/${cart_id}/items`)
       .then(response =>
         response.json()
       )
@@ -72,6 +80,18 @@ export function fetchCartItems(cart_id) {
   };
 }
 
+export function removeCartItem(cart_id, item) {
+  return function (dispatch) {
+    dispatch(removeCartItem(cart_id));
+    return fetch(`${baseUrl}/api/cart/${cart_id}/items`, {
+      'method': 'DELETE',
+      'body': JSON.stringify({
+        itemId: item,
+        quantity: -1
+      })
+    })
+  }
+}
 
 export function checkout(items){
   //who knows right now
