@@ -10,7 +10,7 @@ var userAccountCollection = Waterline.Collection.extend({
   connection: 'default',
   attributes: {
     /** uniqu uuid v4 for the user, automatically generated */
-    user_id: {
+    id: {
       type: 'text',
       primaryKey: true,
       unique: true,
@@ -26,25 +26,21 @@ var userAccountCollection = Waterline.Collection.extend({
     },
 
     /** Many-to-many relation with user session, which is the brower cookie session thing */
-    sessions: {
-      collection: 'sessions',
-      via: 'user_accounts',
-      dominant: true
-    },
+    sessions: Waterline.isMany('sessions'),
 
-    /** @type {cart_leader} many-to-many relationship with many different carts, can have multiple leaders */
-    cart_leader: {
-      collection: 'carts',
-      via: 'cart_leader',
-      dominant: true
-    },
-
-    /** @type {cart_member} many-to-many relationship with a carts members */
-    cart_member: {
-      collection: 'carts',
-      via: 'cart_members',
-      dominant: true
-    }
+    // /** @type {cart_leader} many-to-many relationship with many different carts, can have multiple leaders */
+    // my_carts: {
+    //   collection: 'carts',
+    //   via: 'leader',
+    //   dominant: true
+    // },
+    //
+    // /** @type {cart_member} many-to-many relationship with a carts members */
+    // others_carts: {
+    //   collection: 'carts',
+    //   via: 'members',
+    //   dominant: true
+    // }
   }
 })
 
