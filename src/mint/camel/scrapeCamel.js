@@ -1,13 +1,13 @@
 var rp = require('request-promise');
 var cheerio = require('cheerio');
+var co = require('co');
 
 /**
  * Models loaded from the waterline ORM
  */
-// var db;
-// const dbReady = require('../db');
-// dbReady.then((models) => { db = models; }).catch(e => console.error(e));
-var dbReady = new Promise(function (fulfill, reject) {fulfill(true)});
+var db;
+const dbReady = require('../db');
+dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 const url = 'https://camelcamelcamel.com';
 
@@ -20,7 +20,6 @@ var scrape = function * () {
 };
 
 var camelScrape = function * () {
-  yield dbReady
   var camel = yield scrape()
 
   $ = cheerio.load(camel);
@@ -37,55 +36,54 @@ var camelScrape = function * () {
     asins.push(qs[0])
   });
 
-  //gets new and old prices$('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
-  $('div.compare_price', e).each(function (i, e) {
-    // console.log($(e).text());
-    var price = $(e).text().split('\n')[2].trim().slice(1);
-    price = Number(price.split(',').join(''));
-    if (i % 2 === 0) prices.push({new: price});
-    else prices[prices.length-1].old = price;
-  })
+  console.log('got names')
+
+  //gets new and old prices
+  $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
+    $('div.compare_price', e).each(function (i, e) {
+      var price = $(e).text().split('\n')[2].trim().slice(1);
+      price = Number(price.split(',').join(''));
+      if (i % 2 === 0) prices.push({new: price});
+      else prices[prices.length-1].old = price;
+    });
+  });
+
+  console.log('got first half of prices')
 
   var originalPricesLength = prices.length;
 
   $('table.product_grid').last().find('div.deal_bottom_inner').each(function (i, e) {
     $('div.compare_price', e).each(function (j, e) {
-      // console.log('this is a price')
       var price = $(e).text().split('\n')[2].trim();
       if (j % 2 == 1) {
         price = price.split(' ')[1];
         price = price.slice(1, price.length-1);
       }
-      // console.log(price)
       price = Number(price.slice(1).split(',').join(''));
 
       if (j % 2 === 0) {
         prices.push({old: price});
-        // console.log(prices)
       }
       else {
         prices[i + j + originalPricesLength - 1].new = Number((prices[i + j + originalPricesLength - 1].old - price).toFixed(2));
-        // console.log(prices)
       }
     })
   });
-}
-//
-// var createNewCamelItem = function * (name, asin, oldPrice, discountPrice) {
-//
-//   console.log('created', item)
-// }
-//
-// //////////
-//
+
+  console.log('got prices')
+
   for (var i = 0; i < names.length; i++) {
-    yield db.camel_items.create({
+    console.log('about to create model')
+    db.camel_items.create({
       name: names[i],
       asin: asins[i],
       price: prices[i].new,
       previousPrice: prices[i].old
     }).exec()
+    console.log('created one record maybe');
   }
-// })
 
-camelScrape()
+  console.log('saved models')
+}
+
+co(camelScrape)
