@@ -35,7 +35,7 @@ class SubSidebar extends Component {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            query: '{teams {team_id,team_name,dateAdded}}',
+            query: '{teams {team_id,team_name,meta{dateAdded}}}',
           }),
           credentials: 'include',
         });

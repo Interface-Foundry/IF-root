@@ -1,21 +1,30 @@
+/**
+ * @file - Setting up the server file to perform various actions upon receiving certain requests
+ */
+
 import 'babel-polyfill';
 import path from 'path';
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import csvparse from './components/CSVDrop/csvparse';
 import bodyParser from 'body-parser';
 import expressJwt from 'express-jwt';
 import expressGraphQL from 'express-graphql';
+import { makeExecutableSchema } from 'graphql-tools';
 import jwt from 'jsonwebtoken';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import UniversalRouter from 'universal-router';
 import PrettyError from 'pretty-error';
 import Html from './components/Html';
+import graffiti from '@risingstack/graffiti';
+import { getSchema } from '@risingstack/graffiti-mongoose';
+
+import { connect } from './database';
 import { ErrorPageWithoutStyle } from './routes/error/ErrorPage';
 import errorPageStyle from './routes/error/ErrorPage.css';
-import passport from './core/passport';
-import models from './data/models';
-import schema from './data/schema';
+import Schema from './data/schema';
+import Resolvers from './data/resolvers';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
 import { port, auth } from './config';
@@ -24,7 +33,6 @@ import { getSchema } from '@risingstack/graffiti-mongoose';
 import MetricSchema from './data/models/mongo/metric_schema';
 import csvparse from './components/CSVDrop/csvparse';
 import multer from 'multer';
-
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -60,26 +68,18 @@ app.use(expressJwt({
   credentialsRequired: false,
   getToken: req => req.cookies.id_token,
 }));
-app.use(passport.initialize());
 
-app.get('/login/facebook',
-  passport.authenticate('facebook', { scope: ['email', 'user_location'], session: false })
-);
-app.get('/login/facebook/return',
-  passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
-  (req, res) => {
-    const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user, auth.jwt.secret, { expiresIn });
-    res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
-    res.redirect('/');
-  }
-);
 
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
+const executableSchema = makeExecutableSchema({
+  typeDefs: Schema,
+  resolvers: Resolvers,
+});
+
 app.use('/graphql', expressGraphQL(req => ({
-  schema: schema,
+  schema: executableSchema,
   pretty: true,
   graphiql: true,
   // rootValue: { request: req },
@@ -87,25 +87,12 @@ app.use('/graphql', expressGraphQL(req => ({
 })));
 
 
-models.sync().catch(err => console.error(err.stack)).then(() => {
+connect().catch(err => console.error(err.stack)).then(() => {
   app.listen(port, () => {
     console.log(`The server is running at http://localhost:${port}/`);
   });
 });
 
-// const options = {
-//   mutation: false, // mutation fields can be disabled
-//   allowMongoIDMutation: false // mutation of mongo _id can be enabled
-// };
-
-// app.use(graffiti.express({
-//   schema: getSchema([MetricSchema], options),
-//   context: {} // custom context
-// }));
-// app.use(graffiti.express({
-//   schema
-// }));
-//
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------
 app.get('*', async (req, res, next) => {
@@ -164,6 +151,15 @@ app.post('/upload', upload.single('csv_file'), function(req, res, next){
 
 
 //
+// Getting the file from the dropzone, parsing its contents
+//
+app.post('/upload', upload.single('csv_file'), function(req, res, next){
+  //console.log('AAAAA', req.file.path);
+  var csvData = csvparse(req.file.path);
+  res.end('Finished parsing');
+});
+
+//
 // Error handling
 // -----------------------------------------------------------------------------
 const pe = new PrettyError();
@@ -185,12 +181,3 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   res.status(statusCode);
   res.send(`<!doctype html>${html}`);
 });
-
-// app.listen(port, () => {
-//   console.log(`The server is running at http://localhost:${port}/`);
-// });
-
-//
-// Launch the server
-// -----------------------------------------------------------------------------
-

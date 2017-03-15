@@ -13,7 +13,7 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: '{waypoints{user_id,delivery_id, waypoint, timestamp, data, user{name}}, teams{team_name, team_id, food_sessions {id}}}', 
+        query: '{waypoints { user_id, delivery_id, waypoint, timestamp, data, user { name, team { team_name, team_id }}, delivery { _id }}}',
       }),
       credentials: 'include',
     });
