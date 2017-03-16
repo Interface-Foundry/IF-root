@@ -60,19 +60,6 @@ if (prototype) {
       session
     })
   }))
-
-  /**
-   * For when a user adds something via email or whatever. just add the string to the list
-   */
-  router.get('/api/addItem', (req, res) => co(function * () {
-    const cart = yield db.Carts.findOne({id: req.query.cart_id})
-    const item = yield db.Items.create({
-      original_link: req.query.url
-    })
-    cart.items.add(item.id)
-    yield cart.save()
-    return res.redirect('/cart/' + cart.id)
-  }))
 }
 
 /**

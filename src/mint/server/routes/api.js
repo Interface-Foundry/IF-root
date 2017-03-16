@@ -135,6 +135,26 @@ router.get('/identify', (req, res) => co(function * () {
 }))
 
 /**
+ * For when a user adds something via email or whatever. just add the string to the list
+ */
+router.get('/addItem', (req, res) => co(function * () {
+  const cart = yield db.Carts.findOne({id: req.query.cart_id})
+  const item = yield db.Items.create({
+    original_link: req.query.url
+  })
+  cart.items.add(item.id)
+  yield cart.save()
+  if (prototype) {
+    return res.redirect('/cart/' + cart.id)
+  } else {
+    return res.send({
+      ok: true,
+      item: item
+    })
+  }
+}))
+
+/**
  * if they goto api/cart maybe redirect or something, possibly could use this elsewhere
  * @param {cart_id} ) cart_id to redirect to or whatever
  * redirects to cart/:cart_id
