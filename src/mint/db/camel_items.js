@@ -8,6 +8,7 @@ var camelItemsCollection = Waterline.Collection.extend({
     asin: 'string',
     price: 'float',
     previousPrice: 'float',
+    category: 'string',
     savePercent: {
       type: 'float',
       defaultsTo: function () {

@@ -1,6 +1,11 @@
 var rp = require('request-promise');
 var cheerio = require('cheerio');
 var co = require('co');
+var fs = require('fs');
+
+var amazon = require('../../chat/components/amazon_search').lookup;
+//takes (params, origin)
+//params: {IdType, ASIN}
 
 /**
  * Models loaded from the waterline ORM
@@ -10,8 +15,14 @@ const dbReady = require('../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 const url = 'https://camelcamelcamel.com';
+var count = 10;
+var position = 0;
 
-var scrape = function * () {
+/**
+ * Scrapes camelcamelcamel
+ * @returns full site HTML
+ */
+var scrape = function * (previousId) {
   return rp(url)
     .then(function (result) {
       // console.log('result', result);
@@ -19,7 +30,16 @@ var scrape = function * () {
     });
 };
 
-var camelScrape = function * () {
+var getCategory = function * (asin) {
+  console.log('querying amazon')
+  var amazon_test = yield amazon({ASIN: asin})
+  return amazon_test[0].ItemAttributes[0].ProductGroup[0]
+};
+
+/**
+ * Scrapes camelcamelcamel and saves today's deals to mongo as camel_items
+ */
+var scrapeCamel = function * () {
   var camel = yield scrape()
 
   $ = cheerio.load(camel);
@@ -27,16 +47,20 @@ var camelScrape = function * () {
   var asins = [];
   var prices = [];
 
-  //gets names and asins
+  console.log('loaded cheerio')
+
+  //gets names, asins, and urls to scrape categories from
   $('div.deal_top_inner').each(function (i, e) {
     names.push($('a', e).eq(1).text());
-    var url = $('a', e).eq(0).attr('href')
+    var url = $('a', e).eq(0).attr('href');
     url = url.split('/')
     var qs = url[url.length-1].split('?')
     asins.push(qs[0])
   });
 
-  //gets new and old prices
+  console.log('got names and asins')
+
+  //gets new and old prices from the most popular section
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
     $('div.compare_price', e).each(function (i, e) {
       var price = $(e).text().split('\n')[2].trim().slice(1);
@@ -48,6 +72,7 @@ var camelScrape = function * () {
 
   var originalPricesLength = prices.length;
 
+  //get new and old prices from the best deals section, which is formatted differently
   $('table.product_grid').last().find('div.deal_bottom_inner').each(function (i, e) {
     $('div.compare_price', e).each(function (j, e) {
       var price = $(e).text().split('\n')[2].trim();
@@ -66,22 +91,53 @@ var camelScrape = function * () {
     })
   });
 
-  console.log('got prices')
-
   for (var i = 0; i < names.length; i++) {
-    console.log('about to create model')
+    var cat = yield getCategory(asins[i]) //would be cleaner to do this elsewhere
+    //if an item with that ASIN is already in the db, delete it
+    yield db.CamelItems.destroy({asin: asins[i]});
+
+    //saves items to the db
     db.CamelItems.create({
       name: names[i],
       asin: asins[i],
       price: prices[i].new,
-      previousPrice: prices[i].old
+      previousPrice: prices[i].old,
+      category: cat
     }).exec(function (err, result) {
       if (err) console.log('error:', err)
     })
-    console.log('created one record maybe');
   }
 
   console.log('saved models')
 }
 
-co(camelScrape)
+/**
+ * Returns COUNT of the most recent deals in the database
+ */
+var todaysDeals = function * (latest_id) {
+  console.log('incipimus')
+  yield scrapeCamel();
+  console.log('camels scraped')
+
+  var query = {
+    limit: count,
+    sort: 'createdAt DESC',
+  }
+
+  if (latest_id) {
+    var lastCamel = yield db.camel_items.findOne({_id: latest_id}).exec();
+    query.where = {
+      createdAt : {
+        '<=' : lastCamel.createdAt
+      }
+    }
+  }
+
+  console.log('no latest id / done with latest id')
+  var camels = yield db.CamelItems.find(query);
+  console.log(camels)
+}
+
+module.exports = todaysDeals;
+
+co(todaysDeals());
