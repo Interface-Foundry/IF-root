@@ -265,7 +265,7 @@ router.get('/createAccount', (req, res) => co(function * () {
     });
   }
 
-  res.send('ok');
+  res.send(user);
 
   // then also send an email
   var email = yield db.Emails.create({

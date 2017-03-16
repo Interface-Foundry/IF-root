@@ -9,7 +9,10 @@ import {
   syncHistoryWithStore
 } from 'react-router-redux';
 import Routes from './routes';
-import './index.css';
+
+if (module.hot) {
+  module.hot.accept();
+}
 
 ReactDOM.render(
   <Routes history={browserHistory} />,

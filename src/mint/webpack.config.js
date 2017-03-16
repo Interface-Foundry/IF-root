@@ -5,9 +5,10 @@ var BUILD_DIR = path.resolve(__dirname, 'public/build');
 var APP_DIR = path.resolve(__dirname, 'react');
 
 module.exports = {
-  entry: ['babel-polyfill', APP_DIR + '/index.js'],
+  entry: ['babel-polyfill', 'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000', APP_DIR + '/index.js'],
   output: {
     path: BUILD_DIR,
+    publicPath: '/public/',
     filename: 'bundle.js'
   },
 
@@ -32,7 +33,16 @@ module.exports = {
       loader: 'json'
     }, {
       test: /\.css$/,
-      loader: 'css-loader'
+      use: ['style-loader', 'css-loader']
+    }, {
+      test: /\.scss$/,
+      use: [{
+        loader: "style-loader" // creates style nodes from JS strings
+      }, {
+        loader: "css-loader" // translates CSS into CommonJS
+      }, {
+        loader: "sass-loader" // compiles Sass to CSS
+      }]
     }, {
       test: /\.svg$/,
       loader: "url-loader?limit=10000&mimetype=image/svg+xml"

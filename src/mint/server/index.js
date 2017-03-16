@@ -7,8 +7,30 @@ const fs = require('fs'),
   sessions = require('client-sessions'),
   path = require('path'),
   mintLogger = require('./mint_logging.js'),
-  _ = require('lodash')
-  co = require('co')
+  _ = require('lodash'),
+  co = require('co'),
+  webpackDevMiddleware = require("webpack-dev-middleware"),
+  webpackHotMiddleware = require("webpack-hot-middleware"),
+  webpack = require('webpack'),
+  webpackConfig = require('../webpack.config.js');
+
+// live reloading
+const compiler = webpack(webpackConfig);
+app.use(webpackDevMiddleware(compiler, {
+  hot: true,
+  filename: 'bundle.js',
+  publicPath: '/public/',
+  stats: {
+    colors: true
+  },
+  historyApiFallback: true
+}));
+
+app.use(webpackHotMiddleware(compiler, {
+  log: console.log,
+  path: '/__webpack_hmr',
+  heartbeat: 10 * 1000
+}));
 
 // idk
 var regularRoutes = require('./routes/regular.js');
@@ -39,7 +61,7 @@ app.use(bodyParser.json());
  */
 app.use(sessions({
   cookieName: 'session',
-  secret:'H68ccVhbqS5VgdB47/PdtByL983ERorw' + os.hostname(), // `openssl rand -base64 24 `
+  secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw' + os.hostname(), // `openssl rand -base64 24 `
   duration: 0 // never expire
 }));
 

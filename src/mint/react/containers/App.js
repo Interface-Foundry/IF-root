@@ -1,7 +1,8 @@
-import React, { PropTypes } from 'react'
+import React, { PropTypes } from 'react';
 import InputContainer from './InputContainer';
 import CartContainer from './CartContainer';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
+import '../styles/App.scss';
 
 const App = ({ cart_id }) => (
   <div>

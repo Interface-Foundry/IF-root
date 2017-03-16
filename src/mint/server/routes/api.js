@@ -10,8 +10,8 @@ var router = express.Router();
  * GET /api/session
  */
 router.get('/session', (req, res) => {
-  res.send(req.UserSession)
-})
+  res.send(req.UserSession);
+});
 
 /**
  * if they goto api/cart maybe redirect or something, possibly could use this elsewhere
@@ -26,7 +26,7 @@ router.get('/cart/:cart_id', (req, res) => co(function * () {
     res.send(cart);
   } else {
     console.log('cart doesnt exist');
-    res.send(400);
+    res.sendStatus(400);
   }
 }));
 
