@@ -9,10 +9,10 @@ var itemsCollection = Waterline.Collection.extend({
   attributes: {
     /** Generated when an item is added for the first time */
 
-    /** @type {reference} cart which item belongs to */
-    cart: {
-      model: 'carts'
-    },
+    // /** @type {reference} cart which item belongs to */
+    // cart: {
+    //   model: 'carts'
+    // },
 
     /** @type {string} original link posted */
     original_link: 'string',

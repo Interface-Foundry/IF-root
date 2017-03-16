@@ -1,16 +1,20 @@
+import { NEW_TYPE, RECIEVE_ITEM, REQUEST_ITEM } from '../constants/ActionTypes';
+
 const initialState = {
   original_link: '',
   item_name: '',
   asin: '',
   cart: '',
-  added: true
+  added: true,
+  type: NEW_TYPE
 };
 
-function item(state = initialState, action) {
-  // For now, don't handle any actions
-  // and just return the state given to us.
-  state.type = state.type ? state.type : 'TEST_TYPE';
-  return state;
+export default function item(state = initialState, action) {
+  switch (action.type) {
+    case RECIEVE_ITEM:
+      return Object.assign({}, state, action);
+    case REQUEST_ITEM:
+    default:
+      return state;
+  }
 }
-
-export default item;

@@ -7,11 +7,11 @@
 <body>
     <h1>Add Item to Cart</h1>
 
-    <form id="form1" action="https://www.kipthis.com" method="get">
+    <form id="form1" action="<%=baseUrl%>/api/addItem" method="get">
         <div style="margin-bottom:10px">
             <label for="text"><b>Click a Popular Item:</b> <br> Red Bull, Peanut Butter</label><br><br>
-            <input required type="text" id="text" name="text" placeholder="Paste Amazon URL" value="">
-            <input type="hidden" id="cart_id" name="cart_id" value="<%=cart_id%>">
+            <input required type="text" id="url" name="url" placeholder="Paste Amazon URL" value="">
+            <input type="hidden" id="cart_id" name="cart_id" value="<%=id%>">
         </div>
 
         <div>
@@ -19,7 +19,7 @@
         </div>
 
         <div>
-          Cart Id <%=cart_id%>
+          Cart link: <a href="<%=baseUrl%>/cart/<%=id%>"><%=baseUrl%>/cart/<%=id%></a>
         </div>
     </form>
 </body>

@@ -11,15 +11,15 @@ import { ConnectedRouter, routerReducer, routerMiddleware, push } from 'react-ro
 
 // pages
 import App from './containers/App';
-import NotFound from './pages/NotFound';
+
 
 // actions
-import { createUser } from './actions';
+import {session} from './actions';
 
 // reducers
-import UserReducer from './reducers/user';
 import CartReducer from './reducers/cart';
 import ItemReducer from './reducers/item';
+import SessionReducer from './reducers/session';
 
 // Create a history of your choosing (we're using a browser history in this case)
 const history = createHistory();
@@ -31,23 +31,20 @@ const historyMiddleware = routerMiddleware(history);
 // Also apply our middleware for navigating
 const store = createStore(
   combineReducers({
-    user: UserReducer,
     carts: CartReducer,
     items: ItemReducer,
+    session: SessionReducer,
     router: routerReducer
   }),
   applyMiddleware(historyMiddleware, thunkMiddleware)
 );
-
-// store.dispatch(createUser());
-console.log(store.getState());
+store.dispatch(session.update()).then(() => console.log(store.getState()));
 
 const Routes = () => (
   <Provider store={store}>
     <ConnectedRouter history={history}>
       <Switch>
         <Route path="/cart/:cart_id" component={ App }/>
-        <Route path="*" component={NotFound} />
       </Switch>
     </ConnectedRouter>
   </Provider>

@@ -1,6 +1,19 @@
 var Waterline = require('waterline')
 var mongoAdapter = require('sails-mongo')
 
+Waterline.isA = function (collection) {
+  return {
+    model: collection
+  }
+}
+
+Waterline.isMany = function (collection) {
+  return {
+    collection: collection,
+    via: 'id'
+  }
+}
+
 /**
  * Set up the database connections
  */
@@ -11,6 +24,7 @@ waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./emails'))
 waterline.loadCollection(require('./camel_items'))
+waterline.loadCollection(require('./authentication_links'))
 
 var config = {
   adapters: {
@@ -40,7 +54,8 @@ var initialize = new Promise((resolve, reject) => {
       UserAccounts: ontology.collections.user_accounts,
       Sessions: ontology.collections.sessions,
       Emails: ontology.collections.emails,
-      CamelItems: ontology.collections.camel_items
+      CamelItems: ontology.collections.camel_items,
+      AuthenticationLinks: ontology.collections.authentication_links
     }
     resolve(models)
   })
