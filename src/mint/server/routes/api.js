@@ -8,6 +8,10 @@ var router = express.Router();
 
 var prototype = !!process.env.PROTOTYPE
 
+var db;
+const dbReady = require('../../db');
+dbReady.then((models) => { db = models; }).catch(e => console.error(e));
+
 /**
  * GET /api/session
  */
@@ -193,6 +197,21 @@ router.get('/cart/:cart_id/items', (req, res) => co(function * () {
  * @returns 200
  */
 router.post('/cart/:cart_id/items', (req, res) => co(function * () {
+
+  // const cart = yield db.Carts.findOne({id: req.query.cart_id})
+  // const item = yield db.Items.create({
+  //   original_link: req.query.url
+  // })
+  // cart.items.add(item.id)
+  // yield cart.save()
+  // if (prototype) {
+  //   return res.redirect('/cart/' + cart.id)
+  // } else {
+  //   return res.send({
+  //     ok: true,
+  //     item: item
+  //   })
+  // }
   var original_url = req.body.url;
   var cartId = req.params.cart_id;
 
