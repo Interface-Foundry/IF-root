@@ -69,10 +69,6 @@ if (prototype) {
 
     // Check the cart to see if there's already a leader
     var cart = yield db.Carts.findOne({id: req.query.cart_id}).populate('leader')
-    // if (cart.leader) {
-    //   console.log('cart already has leader')
-    //   return res.redirect('/cart/' + cart.id)
-    // }
 
     // Find the user associated with this email, if any
     var email = req.query.email.trim().toLowerCase()
@@ -131,7 +127,13 @@ if (prototype) {
     user = yield db.UserAccounts.create({
       email_address: email
     })
-    cart.leader = user.id
+
+    // if there is already a leader, add the user to the members list
+    if (cart.leader && cart.leader.email_address !== user.email) {
+      cart.members.add(user.id)
+    } else {
+      cart.leader = user.id
+    }
     req.UserSession.user_accounts.add(user.id)
     yield [cart.save(), req.UserSession.save()]
     res.redirect('/cart/' + cart.id)
