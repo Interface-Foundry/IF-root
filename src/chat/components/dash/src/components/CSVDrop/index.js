@@ -47,13 +47,43 @@ class CSVDrop extends Component {
           });
         });
     }
+    /*
+    displayRows(data){
+      if(data){
+        var dataJson = JSON.parse(data);
+        var divRow = '';
+        for(var i = 0; i < dataJson.length; i++){
+          divRow += <div>JSON.stringify(dataJson[i])</div>;
+        }
+        return divRow;
+      }
+      return '';
+    }
+    */
+    /*
+{this.props.waypoints.map(waypoint=>{
+          if(waypoint.input) {
+          return (
+            <OverlayTrigger trigger="click" rootClose placement="top" overlay={createOverlay(waypoint.input)}>
+              <a href='#'>{waypoint.action}</a> 
+            </OverlayTrigger>
+            )}
+          else {
+            return waypoint.action;
+          }
+        }).reduce((accu, elem) => {
+            return accu === null ? [elem] : [...accu, ' \u27A1 ', elem]
+        }, null)
+
+      }
+    */
 
     render() {
       var self = this;
       const {files} = self.state;
       const fname = files ? files[0].name : 'None';
       const {data} = self.state;
-      const dataText = data ? data : 'None'
+      const dataText = data ? data : ''
       return (
         <div>
           <div>
@@ -63,7 +93,9 @@ class CSVDrop extends Component {
             {fname} uploaded.
           </div>
           <div>
-            {dataText}
+            {dataText ? JSON.parse(dataText).map(row=>{
+              return <div>{JSON.stringify(row)}</div>;
+            }) : ''}
           </div>
         </div>
       );
