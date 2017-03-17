@@ -18,8 +18,8 @@ const fs = require('fs'),
 const compiler = webpack(webpackConfig);
 app.use(webpackDevMiddleware(compiler, {
   hot: true,
-  filename: 'bundle.js',
-  publicPath: '/public/',
+  filename: '[name].js',
+  publicPath: '/build/',
   stats: {
     colors: true
   },
