@@ -1,16 +1,27 @@
-import React, { PropTypes } from 'react'
-import { connect } from 'react-redux'
-import { session } from '../actions'
-import SignUpForm from '../components/SignUpForm'
-const signUp = session.signUp;
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { session } from '../actions';
+import SignInForm from '../components/SignInForm';
+import { push } from 'react-router-redux';
 
-const InputContainer = ({ cart_id, signUp }) => (
-  <SignUpForm cart_id={cart_id} onSubmit={signUp} />
-);
+// const mapStateToProps = ({ session }, ownProps) => ({
+//   session: session,
+//   cart_id: ownProps.cart_id
+// });
+const mapStateToProps = (state, ownProps) => {
+  return {
+    cart_id: ownProps.cart_id
+  };
+};
+class InputContainer extends Component {
+  signIn(e, sessionInfo) {
+  	console.log('singing in')
+  	e.preventDefault();
+    return session.signIn(sessionInfo);
+  }
+  render() {
+    return <SignInForm cart_id={this.props.cart_id} onSubmit={this.signIn} />;
+  }
+}
 
-const mapStateToProps = ({session}, ownProps) => ({
-  session: session,
-  cart_id: ownProps.cart_id
-});
-
-export default connect(mapStateToProps, { signUp })(InputContainer);
+export default connect(mapStateToProps)(InputContainer);

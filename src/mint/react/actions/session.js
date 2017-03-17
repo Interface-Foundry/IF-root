@@ -1,5 +1,4 @@
 import { REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
-import fetch from 'isomorphic-fetch';
 
 const receive = (newInfo) => ({
   type: RECEIVE_SESSION,
@@ -28,13 +27,15 @@ export function update() {
   };
 }
 
-export function signUp(e, session) {
+export function signIn(session) {
   const { cart_id, email } = session;
-  e.preventDefault();
+  console.log(`fetching http://localhost:3000/api/identify?cart_id=${cart_id}&email=${email}`)
   return dispatch => {
     dispatch(requestUpdate());
-    return fetch(`/createaccount?cart_id=${cart_id}&email=${email}`)
+    return fetch(`/api/identify?cart_id=${cart_id}&email=${email}`)
       .then(response => response.json())
-      .then(json => dispatch(receiveUpdate(json)));
+      .then(json => {
+        if (json.ok) return dispatch(receiveUpdate(json));
+      });
   };
 }

@@ -19,15 +19,14 @@ router.get('/session', (req, res) => {
   res.send(req.UserSession);
 });
 
-
 /**
  * GET /api/identify?email=peter.m.brandt%40gmail.com&cart_id=7877da92b35f
  */
-router.get('/identify', (req, res) => co(function * () {
-  console.log('identify')
+router.get('/identify', (req, res) => co(function* () {
+  console.log('identify');
 
   // Check the cart to see if there's already a leader
-  var cart = yield db.Carts.findOne({id: req.query.cart_id}).populate('leader')
+  var cart = yield db.Carts.findOne({ id: req.query.cart_id }).populate('leader')
 
   // Find the user associated with this email, if any
   var email = req.query.email.trim().toLowerCase()
@@ -50,8 +49,10 @@ router.get('/identify', (req, res) => co(function * () {
       return res.send({
         ok: true,
         status: 'USER_LOGGED_IN',
-        message: 'You are already logged in with that email address on this device'
-      })
+        message: 'You are already logged in with that email address on this device',
+        user: user,
+        cart: cart
+      });
     }
   }
 
@@ -59,7 +60,7 @@ router.get('/identify', (req, res) => co(function * () {
   user = yield db.UserAccounts.findOne({
     email_address: email
   })
-
+  debugger;
   if (user) {
     console.log('email already exists in db')
     if (prototype) {
@@ -71,8 +72,8 @@ router.get('/identify', (req, res) => co(function * () {
       res.send({
         ok: false,
         status: 'CHECK_EMAIL',
-        message: 'Someone has already claimed that emails. Please check your email and use the link we sent you to verify your identity.'
-      })
+        message: 'Someone has already claimed that emails. Please check your email and use the link we sent you to verify your identity.',
+      });
     }
 
     // generate magic link here
@@ -103,6 +104,7 @@ router.get('/identify', (req, res) => co(function * () {
   user = yield db.UserAccounts.create({
     email_address: email
   })
+  debugger;
 
   // if there is already a leader, add the user to the members list
   if (cart.leader && cart.leader.email_address !== user.email) {
@@ -119,8 +121,10 @@ router.get('/identify', (req, res) => co(function * () {
     res.send({
       ok: true,
       status: 'NEW_USER',
-      message: 'Thanks for registering for Kip! An email was sent to you with a link for this cart.'
-    })
+      message: 'Thanks for registering for Kip! An email was sent to you with a link for this cart.',
+      user: user,
+      cart: cart
+    });
   }
 
   // Send an email to the user with the cart link
@@ -141,8 +145,8 @@ router.get('/identify', (req, res) => co(function * () {
 /**
  * For when a user adds something via email or whatever. just add the string to the list
  */
-router.get('/addItem', (req, res) => co(function * () {
-  const cart = yield db.Carts.findOne({id: req.query.cart_id})
+router.get('/addItem', (req, res) => co(function* () {
+  const cart = yield db.Carts.findOne({ id: req.query.cart_id })
   const item = yield db.Items.create({
     original_link: req.query.url
   })
@@ -163,9 +167,9 @@ router.get('/addItem', (req, res) => co(function * () {
  * @param {cart_id} ) cart_id to redirect to or whatever
  * redirects to cart/:cart_id
  */
-router.get('/cart/:cart_id', (req, res) => co(function * () {
+router.get('/cart/:cart_id', (req, res) => co(function* () {
   console.log('GETTING CART', req.params.cart_id);
-  var cart = yield db.Carts.findOne({cart_id: req.params.cart_id});
+  var cart = yield db.Carts.findOne({ cart_id: req.params.cart_id });
 
   if (cart) {
     res.send(cart);
@@ -180,8 +184,8 @@ router.get('/cart/:cart_id', (req, res) => co(function * () {
  * @param {[type]} )             {  var cart [description]
  * @yield {[type]} [description]
  */
-router.get('/cart/:cart_id/items', (req, res) => co(function * () {
-  var cart = yield db.Carts.findOne({cart_id: req.params.cart_id});
+router.get('/cart/:cart_id/items', (req, res) => co(function* () {
+  var cart = yield db.Carts.findOne({ cart_id: req.params.cart_id });
   if (cart) {
     res.send(cart.items);
   } else {
@@ -196,7 +200,7 @@ router.get('/cart/:cart_id/items', (req, res) => co(function * () {
  * @param {item_url} item url from amazon
  * @returns 200
  */
-router.post('/cart/:cart_id/items', (req, res) => co(function * () {
+router.post('/cart/:cart_id/items', (req, res) => co(function* () {
 
   // const cart = yield db.Carts.findOne({id: req.query.cart_id})
   // const item = yield db.Items.create({
@@ -242,13 +246,13 @@ router.post('/cart/:cart_id/items', (req, res) => co(function * () {
  * @param {quantity} [number to subtract]
  * @yield {[type]} [description]
  */
-router.delete('/cart/:cart_id/items', (req, res) => co(function * () {
+router.delete('/cart/:cart_id/items', (req, res) => co(function* () {
   var item = req.body.itemId;
   var cartId = req.params.cart_id;
   var quantity = _.get(req, 'body.quantity') ? req.body.quantity : -1;
 
   // just get the amazon lookup results and title from that currently
-  yield db.Items.findOneAndUpdate({item: item, cart_id: cartId}, {$inc: {'quantity': quantity}});
+  yield db.Items.findOneAndUpdate({ item: item, cart_id: cartId }, { $inc: { 'quantity': quantity } });
   res.send(200);
 }));
 
@@ -257,7 +261,7 @@ router.delete('/cart/:cart_id/items', (req, res) => co(function * () {
  * @param {string} either id or email param in query
  * @yield {object} user object
  */
-router.get('/user', (req, res) => co(function * () {
+router.get('/user', (req, res) => co(function* () {
   var user;
   if (_.get(req, 'body.email')) {
     user = yield db.UserAccounts.findOne({
@@ -279,9 +283,9 @@ router.get('/user', (req, res) => co(function * () {
  * @param {string} magic_id - the magic id for the cart
  * @yield {[type]} [description]
  */
-router.get('/magiclink/:magic_id', (req, res) => co(function * () {
+router.get('/magiclink/:magic_id', (req, res) => co(function* () {
   // find if magic_id exists
-  var magicLink = db.magiclinks.findOne({id: req.params.magic_id});
+  var magicLink = db.magiclinks.findOne({ id: req.params.magic_id });
   if (magicLink) {
     // redirect and log user in
     res.send(magicLink);
