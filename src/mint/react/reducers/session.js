@@ -9,12 +9,10 @@ const initialState = {
 };
 
 export default function session(state = initialState, action) {
-  console.log('got\n state', state, '\n action', action);
   switch (action.type) {
     case RECEIVE_SESSION:
       return Object.assign({}, state, action);
     case RECEIVE_UPDATE_SESSION:
-      console.log('updating session');
       return state.ok ? Object.assign({}, state, {
         user_accounts: [...state.user_accounts, action.user]
       }) : state;

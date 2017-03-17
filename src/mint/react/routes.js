@@ -11,7 +11,7 @@ import { ConnectedRouter, routerReducer, routerMiddleware, push } from 'react-ro
 
 import App from './containers/App';
 import * as reducers from './reducers';
-import { session } from './actions';
+import {session} from './actions';
 
 const history = createHistory();
 const historyMiddleware = routerMiddleware(history);

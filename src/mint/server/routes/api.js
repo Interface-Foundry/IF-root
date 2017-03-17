@@ -60,7 +60,6 @@ router.get('/identify', (req, res) => co(function* () {
   user = yield db.UserAccounts.findOne({
     email_address: email
   })
-  debugger;
   if (user) {
     console.log('email already exists in db')
     if (prototype) {
@@ -104,7 +103,6 @@ router.get('/identify', (req, res) => co(function* () {
   user = yield db.UserAccounts.create({
     email_address: email
   })
-  debugger;
 
   // if there is already a leader, add the user to the members list
   if (cart.leader && cart.leader.email_address !== user.email) {

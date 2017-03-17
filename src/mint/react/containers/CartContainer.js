@@ -5,23 +5,24 @@ import { cart } from '../actions';
 
 class CartContainer extends Component {
   constructor(props) {
-    super(props)
+    super(props);
+    this.state = { cart: {items:{}} };
   }
   componentDidMount() {
     const { dispatch } = this.props;
     console.log('context', this.context);
-    // this.props.cart = dispatch(cart.fetchItems(this.props.cart_id));
+    console.log(this.state)
+    this.state.cart = dispatch(cart.fetchItems(this.props.cart_id));
+    console.log(this.state)
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.cart !== this.props.cart) {
-      const { dispatch } = nextProps;
-      this.state.cart = dispatch(cart.fetchItems(nextProps.cart_id));
-    }
+    const { dispatch } = nextProps;
+    this.state.cart = dispatch(cart.fetchItems(nextProps.cart_id));
   }
 
   render() {
-    return <Cart items={this.props.cart.items} cart_id={this.props.cart_id} />;
+    return <Cart items={this.state.cart.items} cart_id={this.props.cart_id} />;
   }
 }
 
