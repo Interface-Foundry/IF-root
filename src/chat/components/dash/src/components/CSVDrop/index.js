@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Dropzone from 'react-dropzone';
+import {ButtonGroup, Button, Checkbox, Panel} from 'react-bootstrap';
 
 //import csv from 'csvtojson';
 import _ from 'lodash';
@@ -16,7 +17,7 @@ class CSVDrop extends Component {
     constructor(props) {
       super(props)
       propz = props;
-      this.state = {files: ''};
+      this.state = {files: '', checkedRows:[]};
       this.onDrop = this.onDrop.bind(this);
     }
      
@@ -47,36 +48,29 @@ class CSVDrop extends Component {
           });
         });
     }
-    /*
-    displayRows(data){
-      if(data){
-        var dataJson = JSON.parse(data);
-        var divRow = '';
-        for(var i = 0; i < dataJson.length; i++){
-          divRow += <div>JSON.stringify(dataJson[i])</div>;
-        }
-        return divRow;
-      }
-      return '';
-    }
-    */
-    /*
-{this.props.waypoints.map(waypoint=>{
-          if(waypoint.input) {
-          return (
-            <OverlayTrigger trigger="click" rootClose placement="top" overlay={createOverlay(waypoint.input)}>
-              <a href='#'>{waypoint.action}</a> 
-            </OverlayTrigger>
-            )}
-          else {
-            return waypoint.action;
-          }
-        }).reduce((accu, elem) => {
-            return accu === null ? [elem] : [...accu, ' \u27A1 ', elem]
-        }, null)
 
+    addToCheckedRows(checkedRow){
+      var self = this;
+      var {checkedRows} = self.state
+      
+      if(checkedRows){
+        var rowIndex = checkedRows.findIndex(function(row){
+          return (row.ASIN == checkedRow.ASIN && row.Date == checkedRow.Date)
+        });
+        console.log(rowIndex);
+        if(rowIndex!=-1){
+          checkedRows.splice(rowIndex,1);
+          self.setState({checkedRows: checkedRows});
+          console.log('Removing:', checkedRow.Name);
+        } else {
+          checkedRows.push(checkedRow);
+          self.setState({checkedRows: checkedRows});
+          console.log('Adding:', checkedRow.Name);
+        }
+      } else {
+        console.log('None found.');
       }
-    */
+    }
 
     render() {
       var self = this;
@@ -92,10 +86,21 @@ class CSVDrop extends Component {
             </Dropzone>
             {fname} uploaded.
           </div>
-          <div>
-            {dataText ? JSON.parse(dataText).map(row=>{
-              return <div>{JSON.stringify(row)}</div>;
-            }) : ''}
+          <div className="col-lg-6">
+            <Panel>
+              <div>
+                {dataText ? JSON.parse(dataText).map(row=>{
+                  return <Checkbox key={row.ASIN+row.Date} onChange={() => self.addToCheckedRows(row)}>
+                    <div>Item Name: {row.Name}</div>
+                    <div>ASIN: {row.ASIN}</div>
+                    <div>Date: {row.Date}</div>
+                    </Checkbox>;
+                }) : ''}
+              </div>
+              <div className="col-lg-6">
+                <Button>Confirm</Button>
+              </div>
+            </Panel>
           </div>
         </div>
       );
