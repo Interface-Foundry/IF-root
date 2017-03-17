@@ -11,12 +11,15 @@ var amazon = require('../../chat/components/amazon_search').lookup;
 /**
  * Models loaded from the waterline ORM
  */
-var db;
-const dbReady = require('../db');
-dbReady.then((models) => { db = models; }).catch(e => console.error(e));
+// var db;
+// const dbReady = require('../db');
+// dbReady.then((models) => { db = models; }).catch(e => console.error(e));
+co(function * () {
+  yield db = require('../db');
+})
 
 const url = 'https://camelcamelcamel.com';
-var count = 10;
+var count = 5;
 var position = 0;
 
 /**
@@ -31,7 +34,11 @@ var scrape = function * (previousId) {
     });
 };
 
-//ugh this is a nightmare
+/**
+ * Queries the amazon API after a 1.5 second delay
+ * @param ASIN of the item we're querying
+ * @returns the product category of the item
+ */
 var getCategory = function * (asin) {
   console.log('take a deep breath');
   yield wait(1500);
@@ -119,9 +126,7 @@ var scrapeCamel = function * () {
  * Returns COUNT of the most recent deals in the database
  */
 var todaysDeals = function * (latest_id) {
-  console.log('incipimus');
-  yield scrapeCamel();
-  console.log('camels scraped');
+  // yield scrapeCamel();
 
   var query = {
     limit: count,
@@ -129,7 +134,9 @@ var todaysDeals = function * (latest_id) {
   };
 
   if (latest_id) {
-    var lastCamel = yield db.camel_items.findOne({_id: latest_id}).exec();
+    console.log('latest id')
+    var lastCamel = yield db.CamelItems.findOne({where: {asin: latest_id}});
+    console.log('found the last camel')
     query.where = {
       createdAt : {
         '<=' : lastCamel.createdAt
@@ -139,9 +146,9 @@ var todaysDeals = function * (latest_id) {
 
   console.log('no latest id / done with latest id');
   var camels = yield db.CamelItems.find(query);
-  console.log(camels);
+  camels.map(c => console.log(c.name));
 };
 
 module.exports = todaysDeals;
 
-co(todaysDeals());
+co(todaysDeals('B00MEZF2S4'));
