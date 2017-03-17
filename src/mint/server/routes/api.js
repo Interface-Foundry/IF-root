@@ -6,7 +6,7 @@ var utils = require('../utilities/utils.js');
 
 var router = express.Router();
 
-var prototype = !!process.env.PROTOTYPE
+var prototype = !!process.env.PROTOTYPE;
 
 var db;
 const dbReady = require('../../db');
