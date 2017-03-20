@@ -11,7 +11,7 @@ const dbReady = require('../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 const url = 'https://camelcamelcamel.com';
-var count = 15;
+const count = 15;
 
 /**
  * Scrapes camelcamelcamel
@@ -193,16 +193,22 @@ var spreadCategories = function * (camels, categoryCounts) {
   else return semiUniqueCamels.concat(yield todaysDeals(camels.length - semiUniqueCamels.length, camels[camels.length-1].id, categoryCounts))
 }
 
-
 // co(todaysDeals).catch(e => console.error(e));
-co(function * () {
-  // yield scrapeCamel();
-  var deals = yield todaysDeals(count);
-  console.log('FINAL DEALS')
-  deals.map(d => {
-    console.log(d.name);
-    console.log(d.category);
-  })
-})
 
-module.exports = todaysDeals;
+// co(function * () {
+//   // yield scrapeCamel();
+//   var deals = yield todaysDeals(count, '58d0465e1685643221b3f625');
+//   console.log('FINAL DEALS')
+//   deals.map(d => {
+//     console.log(d.name);
+//     console.log(d.category);
+//   })
+//   console.log(deals[deals.length-1].id);
+// })
+
+module.exports = {
+  scrape = scrapeCamel,
+  getDeals = function * (id) {
+    return getDeals(count, id);
+  }
+};
