@@ -14,17 +14,17 @@ export default function session(state = initialState, action) {
     case RECEIVE_SESSION:
       return Object.assign({}, state, action);
     case RECEIVE_UPDATE_SESSION:
-      console.log('returning', state.ok ? Object.assign({}, state, {
+      console.log('returning', action.ok ? Object.assign({}, state, {
         user_accounts: [...state.user_accounts, action.user],
-        has_account: !state.ok
+        newAccount: action.ok
       }) : Object.assign({}, state, {
-        has_account: !state.ok
+        newAccount: state.ok
       }));
-      return state.ok ? Object.assign({}, state, {
+      return action.ok ? Object.assign({}, state, {
         user_accounts: [...state.user_accounts, action.user],
-        has_account: !state.ok
+        newAccount: action.ok
       }) : Object.assign({}, state, {
-        has_account: !state.ok
+        newAccount: action.ok
       });
     case REQUEST_SESSION:
     case REQUEST_UPDATE_SESSION:

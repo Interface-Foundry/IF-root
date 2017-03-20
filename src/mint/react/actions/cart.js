@@ -1,4 +1,4 @@
-import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECIEVE_REMOVE_ITEM_FROM_CART } from '../constants/ActionTypes';
+import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART } from '../constants/ActionTypes';
 
 const receive = (cart, newInfo) => ({
   type: RECEIVE_CART,
@@ -27,7 +27,18 @@ const requestRemoveItem = (cart, item) => ({
 });
 
 const receiveRemoveItem = (cart) => ({
-  type: RECIEVE_REMOVE_ITEM_FROM_CART,
+  type: RECEIVE_REMOVE_ITEM_FROM_CART,
+  ...cart
+});
+
+const requestAddItem = (cart, item) => ({
+  type: REQUEST_ADD_ITEM_TO_CART,
+  item,
+  cart
+});
+
+const receiveAddItem = (cart) => ({
+  type: RECEIVE_ADD_ITEM_TO_CART,
   ...cart
 });
 
@@ -60,5 +71,16 @@ export function removeItem(cart_id, item) {
       .then(response =>
         dispatch(receiveRemoveItem(cart_id, response))
       );
+  };
+}
+
+export function addToCart(e, cart_id, url) {
+  console.log('adding', cart_id, url)
+  e.preventDefault();
+  return dispatch => {
+    dispatch(requestAddItem());
+    return fetch(`/api/addItem?cart_id=${cart_id}&url=${url}`)
+      .then(res => res.json())
+      .then(json => dispatch(receiveAddItem(json)));
   };
 }
