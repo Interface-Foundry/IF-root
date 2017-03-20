@@ -11,7 +11,7 @@ const dbReady = require('../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 const url = 'https://camelcamelcamel.com';
-const count = 15;
+const count = 5;
 
 /**
  * Scrapes camelcamelcamel
@@ -102,7 +102,7 @@ var scrapeCamel = function * () {
 
     //saves items to the db
     yield db.CamelItems.create({
-      name: names[i],
+      name: trimName(names[i]),
       asin: asins[i],
       price: prices[i].new,
       previousPrice: prices[i].old,
@@ -113,6 +113,22 @@ var scrapeCamel = function * () {
 
   console.log('saved models');
 };
+
+var trimName = function (name) {
+  console.log('original name', name);
+
+  name = name.split('- ');
+  name = name[0];
+  console.log('ab dash souls removed', name);
+
+  name = name.replace(/\([^\)]*\)/g, '')
+  console.log('parenthetical text removed', name)
+
+  name = name.replace(/\[[^\]]*\]/g, '')
+  console.log('bracketed text removed', name)
+
+  return name;
+}
 
 /**
  * Returns COUNT of the most recent deals in the database
@@ -195,20 +211,20 @@ var spreadCategories = function * (camels, categoryCounts) {
 
 // co(todaysDeals).catch(e => console.error(e));
 
-// co(function * () {
-//   // yield scrapeCamel();
-//   var deals = yield todaysDeals(count, '58d0465e1685643221b3f625');
-//   console.log('FINAL DEALS')
-//   deals.map(d => {
-//     console.log(d.name);
-//     console.log(d.category);
-//   })
-//   console.log(deals[deals.length-1].id);
-// })
+co(function * () {
+  yield scrapeCamel();
+  var deals = yield todaysDeals(count);
+  console.log('FINAL DEALS')
+  deals.map(d => {
+    console.log(d.name);
+    // console.log(d.category);
+  })
+  console.log(deals[deals.length-1].id);
+})
 
 module.exports = {
-  scrape = scrapeCamel,
-  getDeals = function * (id) {
+  scrape : scrapeCamel,
+  getDeals : function * (id) {
     return getDeals(count, id);
   }
 };
