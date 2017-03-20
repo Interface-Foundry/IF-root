@@ -1,36 +1,24 @@
 import React, { PropTypes } from 'react'
-import Item from './Item'
 
-const Cart  = ({ products, onCheckoutClicked }) => {
-  const hasProducts = products.length > 0
-  const nodes = hasProducts ? (
-    products.map(item =>
-      <Item
-        title={item.title}
-        quantity={item.quantity}
-        key={item.id}
-      />
+const Cart = ({ items, cart_id }) => {
+  const hasItems = items.length > 0;
+  const nodes = hasItems ? (
+    items.map(item =>
+      <div>{JSON.stringify(item, null, 2)}</div>
     )
   ) : (
     <em>Please add some products to the cart.</em>
-  )
+  );
 
   return (
     <div>
       <h3>Cart</h3>
       <div>{nodes}</div>
-      <button onClick={onCheckoutClicked}
-        disabled={hasItems ? '' : 'disabled'}>
+      <button disabled={hasItems ? '' : 'disabled'}>
         Checkout
       </button>
     </div>
-  )
-}
+  );
+};
 
-Cart.propTypes = {
-  products: PropTypes.array,
-  total: PropTypes.string,
-  onCheckoutClicked: PropTypes.func
-}
-
-export default Cart
+export default Cart;

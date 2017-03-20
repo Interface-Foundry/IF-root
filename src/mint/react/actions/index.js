@@ -1,6 +1,2 @@
-import * as cart from './cart';
-import * as session from './session';
-
-export {
-  cart, session
-};
+export * as cart from './cart';
+export * as session from './session';
