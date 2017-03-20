@@ -2,11 +2,6 @@ env: development_hannah
 mongodb:
   url: mongodb://localhost:27017/foundry
   backuphost: localhost
-  options:
-    server:
-      poolSize: 5
-      socketOptions:
-        keepAlive: 1
 elasticsearch:
   url: http://localhost:9200
 picstitch: http://dev-picstitch.kipthis.com
