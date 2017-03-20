@@ -2,8 +2,6 @@ import React, { PropTypes } from 'react'
 
 const Cart = ({ items, cart_id }) => {
   const hasItems = items.length > 0;
-  console.log(items);
-  console.log(hasItems)
   const nodes = hasItems ? (
     items.map(item =>
       <div>{JSON.stringify(item, null, 2)}</div>

@@ -34,7 +34,9 @@ const receiveRemoveItem = (cart) => ({
 export function fetchItems(cart_id) {
   return function (dispatch) {
     dispatch(request(cart_id));
-    return fetch(`/api/cart/${cart_id}`)
+    return fetch(`/api/cart/${cart_id}`, {
+        credentials: 'same-origin'
+      })
       .then(response =>
         response.json()
       )
@@ -49,6 +51,7 @@ export function removeItem(cart_id, item) {
     dispatch(requestRemoveItem(cart_id, item));
     return fetch(`/api/cart/${cart_id}/items`, {
         'method': 'DELETE',
+        credentials: 'same-origin',
         'body': JSON.stringify({
           itemId: item,
           quantity: -1

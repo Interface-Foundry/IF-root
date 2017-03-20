@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { session } from '../actions';
 import SignInForm from '../components/SignInForm';
 import { push } from 'react-router-redux';
+import { bindActionCreators } from 'redux'
 
 // const mapStateToProps = ({ session }, ownProps) => ({
 //   session: session,
@@ -14,13 +15,10 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 class InputContainer extends Component {
-  signIn(e, sessionInfo) {
-  	console.log('singing in')
-  	e.preventDefault();
-    return session.signIn(sessionInfo);
-  }
   render() {
-    return <SignInForm cart_id={this.props.cart_id} onSubmit={this.signIn} />;
+    const { dispatch } = this.props;
+    let boundActionCreators = bindActionCreators(session, dispatch);
+    return <SignInForm cart_id={this.props.cart_id} {...boundActionCreators} />;
   }
 }
 

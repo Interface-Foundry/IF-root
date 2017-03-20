@@ -10,10 +10,7 @@ class CartContainer extends Component {
   }
   componentDidMount() {
     const { dispatch } = this.props;
-    console.log('context', this.context);
-    console.log(this.state)
     this.state.cart = dispatch(cart.fetchItems(this.props.cart_id));
-    console.log(this.state)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -27,7 +24,6 @@ class CartContainer extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  console.log('state', state)
   return {
     cart_id: ownProps.cart_id
   };

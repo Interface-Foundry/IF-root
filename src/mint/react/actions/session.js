@@ -30,15 +30,14 @@ export function update() {
   };
 }
 
-export function signIn(session) {
+export function signIn(e, session) {
+  e.preventDefault();
   const { cart_id, email } = session;
   console.log(`fetching http://localhost:3000/api/identify?cart_id=${cart_id}&email=${email}`);
   return dispatch => {
     dispatch(requestUpdate());
-    return fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
-        credentials: 'same-origin'
-      })
-      .then(response => response.json())
-      .then(json => json.ok ? dispatch(receiveUpdate(json)) : null);
+    return fetch(`/api/identify?cart_id=${cart_id}&email=${email}`)
+    .then(response => response.json())
+    .then(json => dispatch(receiveUpdate(json)));
   };
 }
