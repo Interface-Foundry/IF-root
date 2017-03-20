@@ -5,7 +5,7 @@ const getSlackHistogram = (messages) =>
         $match: {
           ts: {
             $gte: new Date(new Date().setDate(new Date().getDate()-1))
-          }
+          },
           incoming: {$ne: false}
         }
       },

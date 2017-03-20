@@ -67,17 +67,16 @@ class CSVDrop extends Component {
           self.setState({checkedRows: checkedRows});
           console.log('Adding:', checkedRow.Name);
         }
-      } else {
-        console.log('None found.');
       }
     }
 
     render() {
       var self = this;
       const {files} = self.state;
-      const fname = files ? files[0].name : 'None';
+      const fname = files ? files[0].name : 'No CSV file';
       const {data} = self.state;
       const dataText = data ? data : ''
+      const {checkedRows} = self.state;
       return (
         <div>
           <div>
@@ -97,8 +96,8 @@ class CSVDrop extends Component {
                     </Checkbox>;
                 }) : ''}
               </div>
-              <div className="col-lg-6">
-                <Button>Confirm</Button>
+              <div>
+                { dataText ? <Button onClick={() => console.log(checkedRows)}>Confirm</Button> : ''}
               </div>
             </Panel>
           </div>
