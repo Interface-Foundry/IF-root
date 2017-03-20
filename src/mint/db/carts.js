@@ -21,15 +21,6 @@ var cartsCollection = Waterline.Collection.extend({
       }
     },
 
-    /** "Forgot" link for re-authenticating */
-    magic_link: {
-      type: 'string',
-      unique: true,
-      defaultsTo: function () {
-        return uuid.v4().replace(/-/g, '').slice(0, constants.MAGIC_URL_LENGTH);
-      }
-    },
-
     /** @type {cart_leader} cart may have multiple leaders  */
     leader: Waterline.isA('user_accounts'),
 

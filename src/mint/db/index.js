@@ -20,6 +20,8 @@ Waterline.isMany = function (collection) {
 var waterline = new Waterline()
 waterline.loadCollection(require('./carts'))
 waterline.loadCollection(require('./items'))
+waterline.loadCollection(require('./item_options'))
+waterline.loadCollection(require('./amazon_items'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./emails'))
@@ -50,6 +52,8 @@ var initialize = new Promise((resolve, reject) => {
     const models = {
       Carts: ontology.collections.carts,
       Items: ontology.collections.items,
+      ItemOptions: ontology.collections.item_options,
+      AmazonItems: ontology.collections.amazon_items,
       UserAccounts: ontology.collections.user_accounts,
       Sessions: ontology.collections.sessions,
       Emails: ontology.collections.emails,
