@@ -5,22 +5,13 @@ var fs = require('fs');
 var wait = require('co-wait');
 
 var amazon = require('../../chat/components/amazon_search').lookup;
-//takes (params, origin)
-//params: {IdType, ASIN}
 
-/**
- * Models loaded from the waterline ORM
- */
-// var db;
-// const dbReady = require('../db');
-// dbReady.then((models) => { db = models; }).catch(e => console.error(e));
-co(function * () {
-  yield db = require('../db');
-})
+var db;
+const dbReady = require('../db');
+dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 const url = 'https://camelcamelcamel.com';
 var count = 5;
-var position = 0;
 
 /**
  * Scrapes camelcamelcamel
@@ -71,6 +62,8 @@ var scrapeCamel = function * () {
 
   console.log('got names and asins');
 
+  // console.log('db', db)
+
   //gets new and old prices from the most popular section
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
     $('div.compare_price', e).each(function (i, e) {
@@ -108,15 +101,14 @@ var scrapeCamel = function * () {
     yield db.CamelItems.destroy({asin: asins[i]});
 
     //saves items to the db
-    db.CamelItems.create({
+    yield db.CamelItems.create({
       name: names[i],
       asin: asins[i],
       price: prices[i].new,
       previousPrice: prices[i].old,
       category: cat
-    }).exec(function (err, result) {
-      if (err) console.log('error:', err);
-    });
+    })
+    console.log('saved a model')
   }
 
   console.log('saved models');
@@ -125,30 +117,72 @@ var scrapeCamel = function * () {
 /**
  * Returns COUNT of the most recent deals in the database
  */
-var todaysDeals = function * (latest_id) {
-  // yield scrapeCamel();
+var todaysDeals = function * (count, id) {
+  yield dbReady;
+
+  if (id) {
+    var lastCamel = yield db.CamelItems.findOne({id: id});
+    var where = {
+      or: [
+        {
+          skipped: true
+        },
+        {
+          createdAt:  {
+            '<' : lastCamel.createdAt
+          }
+        }
+      ]
+    }
+  }
+  else {
+    where = {}
+  }
 
   var query = {
     limit: count,
     sort: 'createdAt DESC',
+    where: where
   };
 
-  if (latest_id) {
-    console.log('latest id')
-    var lastCamel = yield db.CamelItems.findOne({where: {asin: latest_id}});
-    console.log('found the last camel')
-    query.where = {
-      createdAt : {
-        '<=' : lastCamel.createdAt
-      }
-    };
-  }
-
-  console.log('no latest id / done with latest id');
+  console.log('about to query for camels');
   var camels = yield db.CamelItems.find(query);
+  console.log('got the camels');
+  console.log('this many', camels.length) // 0
   camels.map(c => console.log(c.name));
+  return camels;
 };
 
-module.exports = todaysDeals;
+var spreadCategories = function * (camels) {
+  //goes through camels and keeps track of category counts
+  var originalLength = camels.length;
+  var categoryCounts = {};
+  var semiUniqueCamels = [];
+  camels.map(function (c) {
+    if (!categoryCounts[c.category]) {
+      categoryCounts[c.category] = 1;
+      semiUniqueCamels.push(c);
+    }
+    else if (categoryCounts[c.category] === 1) {
+      categoryCounts[c.category]++;
+      semiUniqueCamels.push(c);
+    }
+    else {
+      //oh, no, we've already shown as many deals of this category as we want to
+      yield db.CamelItems.update({id: c.id}, {skipped: true});
+    }
+  });
 
-co(todaysDeals('B00MEZF2S4'));
+  
+  //if the length has changed, call today's deals with updated count and id
+    //which should then call this, etc, recursively, until we either run out of items or have the distribution we want
+}
+
+
+// co(todaysDeals).catch(e => console.error(e));
+co(function * () {
+  // yield scrapeCamel();
+  return yield todaysDeals(count, '58cc05486186f7635f1cbcf2');
+})
+
+module.exports = todaysDeals;

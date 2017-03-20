@@ -14,6 +14,10 @@ var camelItemsCollection = Waterline.Collection.extend({
       defaultsTo: function () {
         return this.price / this.previousPrice;
       }
+    },
+    skipped: {
+      type: 'boolean',
+      defaultsTo: false
     }
   }
 });
