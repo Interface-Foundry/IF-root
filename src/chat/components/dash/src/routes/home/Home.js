@@ -62,7 +62,7 @@ function Home(props, context) {
       <Panel className='fillSpace' header={<span>
           <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts </span>}>
       	<CartTable 
-          query={'{teams{team_name, carts {purchased_date,items,purchased}}}'}
+          query={'{teams{team_name, carts {purchased_date,items {_id,cart_id,title,image,description,price,ASIN,rating,review_count,added_by,slack_id,source_json,purchased,purchased_date,deleted,added_date,bundle,available,asins,config,},purchased},}}'}
           heads = {
             [{
               field: 'purchased_date',
@@ -82,15 +82,18 @@ function Home(props, context) {
             (teams, team) => 
             teams.concat(
               team.carts.reduce((carts, cart) => {
-                if (cart.purchased.toLowerCase() == 'true') {
-                  carts.push({
-                    team_name: team.team_name,
-                    purchased_date: (new Date(cart.purchased_date)).toLocaleString(),
-                    items: cart.items.split(',').length
-                  })
+                if(cart.purchased){
+                  if (cart.purchased == true) {
+                      carts.push({
+                      team_name: team.team_name,
+                      purchased_date: (new Date(cart.purchased_date)).toLocaleString(),
+                      items: cart.items.length
+                    })
+                  }
                 }
                 return carts;
               }, [])
+
             )
           }
         />
