@@ -1,26 +1,28 @@
 import React, { PropTypes, Component } from 'react';
+import {Button, FormGroup} from 'react-bootstrap';
 import AddItem from './AddItem';
 
 export default class Cart extends Component {
 
   listItems(hasItems, items) {
     return hasItems ? items.map(item =>
-      <div>{JSON.stringify(item, null, 2)}</div>
+      <li><a href={item.original_link}>{item.descrip}</a></li>
     ) : <em>Please add some products to the cart.</em>;
   }
 
   render() {
-    console.log('rops', this.props)
     const { cart_id, addItem, items } = this.props;
     const hasItems = items.length > 0;
     return (
       <div>
       <h3>Cart</h3>
-      <div>{this.listItems(hasItems, items)}</div>
+      <ul>{this.listItems(hasItems, items)}</ul>
+      <FormGroup>
       <AddItem cart_id={cart_id} addItem={addItem} />
-      <button disabled={hasItems ? '' : 'disabled'}>
+      <Button disabled={hasItems ? '' : 'disabled'}>
         Checkout
-      </button>
+      </Button>
+      </FormGroup>
     </div>
     );
   }

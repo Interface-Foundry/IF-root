@@ -10,15 +10,14 @@ const request = (cart) => ({
   ...cart
 });
 
-const receiveItems = (cart, newInfo) => ({
+const receiveItems = (items) => ({
   type: RECEIVE_ITEMS,
-  ...newInfo
+  items
 });
 
 const requestItems = () => ({
   type: REQUEST_ITEMS
 });
-
 
 const requestRemoveItem = (cart, item) => ({
   type: REQUEST_REMOVE_ITEM_FROM_CART,
@@ -55,13 +54,13 @@ export function update(cart_id) {
 
 export function fetchItems(cart_id) {
   return function (dispatch) {
-    dispatch(request(cart_id));
+    dispatch(requestItems(cart_id));
     console.log(`getting localhost:3000/api/cart/${cart_id}/items`)
     return fetch(`/api/cart/${cart_id}/items`, {
         credentials: 'same-origin'
       })
       .then(response => response.json())
-      .then(json => dispatch(receive(json)));
+      .then(json => dispatch(receiveItems(json)));
   };
 }
 

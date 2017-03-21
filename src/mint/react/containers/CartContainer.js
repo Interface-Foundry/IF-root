@@ -11,31 +11,20 @@ class CartContainer extends Component {
   }
 
   componentDidMount() {
-    const { dispatch } = this.props;
-    const updateCart = dispatch(cart.update(this.props.cart_id));
-    const newItems = dispatch(cart.fetchItems(this.props.cart_id));
-    this.setState({ cart: newItems });
-    console.log('state', this.state);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { dispatch } = nextProps;
-    const newCart = dispatch(cart.fetchItems(nextProps.cart_id));
-    this.setState({ cart: newCart });
-    console.log('state', this.state);
+    const { dispatch, cart_id } = this.props;
+    dispatch(cart.fetchItems(cart_id));
   }
 
   render() {
-    const { dispatch } = this.props;
+    const { dispatch, items, cart_id } = this.props;
     let boundActionCreators = bindActionCreators(cart, dispatch);
-    return <Cart items={this.state.cart.items} cart_id={this.props.cart_id} {...boundActionCreators} />;
+    return <Cart items={items} cart_id={cart_id} {...boundActionCreators} />;
   }
 }
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    cart_id: ownProps.cart_id
-  };
-};
+const mapStateToProps = (state, ownProps) => ({
+  cart_id: ownProps.cart_id,
+  items: state.cart.items
+});
 
 export default connect(mapStateToProps)(CartContainer);
