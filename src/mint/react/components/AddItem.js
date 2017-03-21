@@ -12,9 +12,9 @@ export default class SignInForm extends Component {
   }
 
   render() {
-    const { cart_id, addToCart } = this.props;
+    const { cart_id, addItem } = this.props;
     return (
-      <form onSubmit={e => addToCart(e, cart_id, this.state.url)}>
+      <form onSubmit={e => addItem(e, cart_id, this.state.url)}>
         <input required placeholder='Enter the link to an amazon product' name='email' type='url' onChange={this.handleUrl}/>
         <br/>
         <button type='Submit'>

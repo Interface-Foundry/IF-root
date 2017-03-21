@@ -10,13 +10,14 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart_id, addToCart, items } = this.props;
+    console.log('rops', this.props)
+    const { cart_id, addItem, items } = this.props;
     const hasItems = items.length > 0;
     return (
       <div>
       <h3>Cart</h3>
       <div>{this.listItems(hasItems, items)}</div>
-      <AddItem cart_id={cart_id} addToCart={addToCart} />
+      <AddItem cart_id={cart_id} addItem={addItem} />
       <button disabled={hasItems ? '' : 'disabled'}>
         Checkout
       </button>

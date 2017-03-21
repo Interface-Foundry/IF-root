@@ -167,7 +167,7 @@ router.get('/addItem', (req, res) => co(function* () {
  */
 router.get('/cart/:cart_id', (req, res) => co(function* () {
   console.log('GETTING CART', req.params.cart_id);
-  var cart = yield db.Carts.findOne({ cart_id: req.params.cart_id });
+  var cart = yield db.Carts.findOne({ id: req.params.cart_id });
 
   if (cart) {
     res.send(cart);
@@ -183,12 +183,12 @@ router.get('/cart/:cart_id', (req, res) => co(function* () {
  * @yield {[type]} [description]
  */
 router.get('/cart/:cart_id/items', (req, res) => co(function* () {
-  var cart = yield db.Carts.findOne({ cart_id: req.params.cart_id });
+  var cart = yield db.Carts.findOne({ id: req.params.cart_id });
   if (cart) {
     res.send(cart.items);
   } else {
-    console.log('cart doesnt exist');
-    res.send(400);
+    console.log(`cart ${req.params.cart_id} doesnt exist`);
+    res.sendStatus(400);
   }
 }));
 
