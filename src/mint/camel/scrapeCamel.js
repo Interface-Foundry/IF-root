@@ -31,12 +31,23 @@ var scrape = function * (previousId) {
  * @param ASIN of the item we're querying
  * @returns the product category of the item
  */
-var getCategory = function * (asin) {
+var getAmazon = function * (asin) {
   console.log('take a deep breath');
   yield wait(1500);
   console.log('querying amazon');
   var amazon_test = yield amazon({ASIN: asin});
-  return amazon_test[0].ItemAttributes[0].ProductGroup[0];
+  var item = {};
+  // console.log('AMAZON RAW', amazon_test[0].BrowseNodes[0].BrowseNode);
+  item.cat = amazon_test[0].ItemAttributes[0].ProductGroup[0];
+  item.info = amazon_test[0].ItemAttributes[0].Feature;
+  item.images = {};
+  // console.log(amazon_test[0])
+  if (amazon_test[0].SmallImage) item.images.small = amazon_test[0].SmallImage[0];
+  if (amazon_test[0].MediumImage) item.images.medium = amazon_test[0].MediumImage[0];
+  if (amazon_test[0].LargeImage) item.images.large = amazon_test[0].LargeImage[0];
+  if (amazon_test[0].shortened_url) item.url = amazon_test[0].shortened_url;
+  if (amazon_test[0].reviews) item.reviews = amazon_test[0].reviews;
+  return item;
 };
 
 /**
@@ -97,7 +108,8 @@ var scrapeCamel = function * () {
   });
 
   for (var i = 0; i < names.length; i++) {
-    var cat = yield getCategory(asins[i]); //would be cleaner to do this elsewhere
+    var cat = yield getAmazon(asins[i]); //would be cleaner to do this elsewhere
+    cat = cat.category;
     //if an item with that ASIN is already in the db, delete it
     yield db.CamelItems.destroy({asin: asins[i]});
 

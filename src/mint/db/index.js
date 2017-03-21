@@ -17,15 +17,15 @@ Waterline.isMany = function (collection) {
 /**
  * Set up the database connections
  */
-var waterline = new Waterline()
-waterline.loadCollection(require('./carts'))
-waterline.loadCollection(require('./items'))
-waterline.loadCollection(require('./item_options'))
-waterline.loadCollection(require('./amazon_items'))
-waterline.loadCollection(require('./user_accounts'))
-waterline.loadCollection(require('./sessions'))
-waterline.loadCollection(require('./emails'))
-waterline.loadCollection(require('./authentication_links'))
+var waterline = new Waterline();
+waterline.loadCollection(require('./carts'));
+waterline.loadCollection(require('./items'));
+waterline.loadCollection(require('./item_options'));
+waterline.loadCollection(require('./amazon_items'));
+waterline.loadCollection(require('./user_accounts'));
+waterline.loadCollection(require('./sessions'));
+waterline.loadCollection(require('./emails'));
+waterline.loadCollection(require('./authentication_links'));
 waterline.loadCollection(require('./camel_items'));
 
 var config = {
