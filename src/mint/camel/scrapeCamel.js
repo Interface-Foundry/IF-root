@@ -119,27 +119,33 @@ var trimName = function (name) {
 
   name = name.split('- ');
   name = name[0];
-  console.log('ab dash souls removed', name);
+  // console.log('ab dash souls removed', name);
 
   name = name.replace(/\([^\)]*\)/g, '');
-  console.log('parenthetical text removed', name);
+  // console.log('parenthetical text removed', name);
 
   name = name.replace(/\[[^\]]*\]/g, '');
-  console.log('bracketed text removed', name);
+  // console.log('bracketed text removed', name);
 
-  name = name.split('...');
+  name = name.split(' ... ');
   if (name.length <= 1) name = name[0];
   else {
     var firstHalf = name[0].split('');
     var lastHalf = name[1].split('');
-    // console.log('first, second:', firstHalf, lastHalf, lastHalf.slice(2))
     if (firstHalf[firstHalf.length-1] === lastHalf[0]) {
       console.log('single word split up!');
-      name = firstHalf.slice(0, firstHalf.length-1).concat(lastHalf.slice(1)).join('');
+      name = firstHalf.slice(0, firstHalf.length).concat(lastHalf.slice(1)).join('');
     }
-    console.log('ellipses removed', name)
+    else {
+      console.log('multiple words truncated');
+      firstWords = firstHalf.join('').split(' ');
+      lastWords = lastHalf.join('').split(' ');
+      // console.log('first words, last words:', firstWords, lastWords);
+      name = firstWords.slice(0, firstWords.length-1).concat(lastWords.slice(1)).join(' ');
+    }
+    // console.log('ellipses removed', name)
   }
-
+  console.log('final name', name);
   return name;
 };
 
