@@ -17,14 +17,16 @@ Waterline.isMany = function (collection) {
 /**
  * Set up the database connections
  */
-var waterline = new Waterline();
-waterline.loadCollection(require('./carts'));
-waterline.loadCollection(require('./items'));
-waterline.loadCollection(require('./user_accounts'));
-waterline.loadCollection(require('./sessions'));
-waterline.loadCollection(require('./emails'));
+var waterline = new Waterline()
+waterline.loadCollection(require('./carts'))
+waterline.loadCollection(require('./items'))
+waterline.loadCollection(require('./item_options'))
+waterline.loadCollection(require('./amazon_items'))
+waterline.loadCollection(require('./user_accounts'))
+waterline.loadCollection(require('./sessions'))
+waterline.loadCollection(require('./emails'))
+waterline.loadCollection(require('./authentication_links'))
 waterline.loadCollection(require('./camel_items'));
-waterline.loadCollection(require('./authentication_links'));
 
 var config = {
   adapters: {
@@ -51,6 +53,8 @@ var initialize = new Promise((resolve, reject) => {
     const models = {
       Carts: ontology.collections.carts,
       Items: ontology.collections.items,
+      ItemOptions: ontology.collections.item_options,
+      AmazonItems: ontology.collections.amazon_items,
       UserAccounts: ontology.collections.user_accounts,
       Sessions: ontology.collections.sessions,
       Emails: ontology.collections.emails,
