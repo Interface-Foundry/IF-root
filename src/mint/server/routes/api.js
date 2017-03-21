@@ -184,8 +184,10 @@ router.get('/cart/:cart_id', (req, res) => co(function* () {
  */
 router.get('/cart/:cart_id/items', (req, res) => co(function* () {
   var cart = yield db.Carts.findOne({ id: req.params.cart_id });
+  console.log(JSON.stringify(cart, null, 2))
   if (cart) {
     res.send(cart.items);
+
   } else {
     console.log(`cart ${req.params.cart_id} doesnt exist`);
     res.sendStatus(400);
