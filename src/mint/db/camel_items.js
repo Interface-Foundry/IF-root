@@ -18,7 +18,14 @@ var camelItemsCollection = Waterline.Collection.extend({
     skipped: {
       type: 'boolean',
       defaultsTo: false
-    }
+    },
+    url: 'string',
+    // info: ['text'],
+    small_image: 'string',
+    medium_image: 'string',
+    large_image: 'string',
+    /** @type {reference} descriptive blurbs associated with this item */
+    info: Waterline.isMany('amazon_blurbs')
   }
 });
 

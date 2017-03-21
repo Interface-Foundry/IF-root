@@ -27,6 +27,7 @@ waterline.loadCollection(require('./sessions'));
 waterline.loadCollection(require('./emails'));
 waterline.loadCollection(require('./authentication_links'));
 waterline.loadCollection(require('./camel_items'));
+waterline.loadCollection(require('./amazon_blurbs'));
 
 var config = {
   adapters: {
@@ -59,6 +60,7 @@ var initialize = new Promise((resolve, reject) => {
       Sessions: ontology.collections.sessions,
       Emails: ontology.collections.emails,
       CamelItems: ontology.collections.camel_items,
+      AmazonBlurbs: ontology.collections.amazon_blurbs,
       AuthenticationLinks: ontology.collections.authentication_links
     };
     resolve(models);

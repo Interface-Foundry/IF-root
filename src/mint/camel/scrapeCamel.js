@@ -42,9 +42,10 @@ var getAmazon = function * (asin) {
   item.info = amazon_test[0].ItemAttributes[0].Feature;
   item.images = {};
   // console.log(amazon_test[0])
-  if (amazon_test[0].SmallImage) item.images.small = amazon_test[0].SmallImage[0];
-  if (amazon_test[0].MediumImage) item.images.medium = amazon_test[0].MediumImage[0];
-  if (amazon_test[0].LargeImage) item.images.large = amazon_test[0].LargeImage[0];
+  if (amazon_test[0].SmallImage) item.images.small = amazon_test[0].SmallImage[0].URL[0];
+  // console.log('SMALL IMAGE', amazon_test[0].SmallImage[0].URL[0])
+  if (amazon_test[0].MediumImage) item.images.medium = amazon_test[0].MediumImage[0].URL[0];
+  if (amazon_test[0].LargeImage) item.images.large = amazon_test[0].LargeImage[0].URL[0];
   if (amazon_test[0].shortened_url) item.url = amazon_test[0].shortened_url;
   if (amazon_test[0].reviews) item.reviews = amazon_test[0].reviews;
   return item;
@@ -108,19 +109,39 @@ var scrapeCamel = function * () {
   });
 
   for (var i = 0; i < names.length; i++) {
-    var cat = yield getAmazon(asins[i]); //would be cleaner to do this elsewhere
-    cat = cat.category;
+    var amazon = yield getAmazon(asins[i]); //would be cleaner to do this elsewhere
     //if an item with that ASIN is already in the db, delete it
     yield db.CamelItems.destroy({asin: asins[i]});
 
+    console.log('INFO', amazon.info)
+    if (amazon.info) {
+      var blurbs = [];
+      //TODO create blurbs in db
+      yield amazon.info.map(function * (b) {
+        blurbs.push(
+          yield db.AmazonBlurbs.findOrCreate({
+            text: b
+          })
+        );
+      });
+    }
+
     //saves items to the db
-    yield db.CamelItems.create({
+    var camel = yield db.CamelItems.create({
       name: trimName(names[i]),
       asin: asins[i],
       price: prices[i].new,
       previousPrice: prices[i].old,
-      category: cat
+      category: amazon.category,
+      small: (amazon.images.small || null),
+      medium: (amazon.images.medium || null),
+      large: (amazon.images.large || null),
+      url: amazon.url
+      // info: amazon.info
     });
+
+    //TODO add the new blurbs to camel with camel.add(blurb.id);
+
     console.log('saved a model');
   }
 
