@@ -1,11 +1,3 @@
-const amazonLookup = require('../../../chat/components/amazon_search.js').lookup;
-
-/**
- * Models loaded from the waterline ORM
- */
-var db;
-const dbReady = require('../../db');
-dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 /**
  * @param {string} - session or something? idk really
@@ -49,23 +41,11 @@ exports.checkIfUserIsInCart = function * (user, cart_id) {
 /**
  * "Forgot Password" link basically. Not really magic.
  */
-exports.generateMagicLink = function * (user, cart) {
-
-};
-
-/**
- * get item by url to amazon
- * @param {string} original_url entered into box or whatever
- * @y just return item title for now
- */
-exports.getItemByUrl = function * (original_url) {
-  var asin = original_url.split('dp')[1].split('/')[1];
-
-  var res = yield amazonLookup({
-    ASIN: asin,
-    IdType: 'ASIN'
+exports.generateAuthenticationLink = function * (user, cart) {
+  var link = yield db.AuthenticationLinks.create({
+    user: user.id,
+    cart: cart.id
   });
-  var item = res[0];
-  var title = item.ItemAttributes[0].Title[0];
-  return title;
+
+  return link;
 };
