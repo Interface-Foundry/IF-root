@@ -1,24 +1,27 @@
-import React, { PropTypes } from 'react'
+import React, { PropTypes, Component } from 'react';
+import AddItem from './AddItem';
 
-const Cart = ({ items, cart_id }) => {
-  const hasItems = items.length > 0;
-  const nodes = hasItems ? (
-    items.map(item =>
+export default class Cart extends Component {
+
+  listItems(hasItems, items) {
+    return hasItems ? items.map(item =>
       <div>{JSON.stringify(item, null, 2)}</div>
-    )
-  ) : (
-    <em>Please add some products to the cart.</em>
-  );
+    ) : <em>Please add some products to the cart.</em>;
+  }
 
-  return (
-    <div>
+  render() {
+    console.log('rops', this.props)
+    const { cart_id, addItem, items } = this.props;
+    const hasItems = items.length > 0;
+    return (
+      <div>
       <h3>Cart</h3>
-      <div>{nodes}</div>
+      <div>{this.listItems(hasItems, items)}</div>
+      <AddItem cart_id={cart_id} addItem={addItem} />
       <button disabled={hasItems ? '' : 'disabled'}>
         Checkout
       </button>
     </div>
-  );
-};
-
-export default Cart;
+    );
+  }
+}
