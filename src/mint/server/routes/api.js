@@ -184,7 +184,143 @@ router.get('/cart/:cart_id', (req, res) => co(function* () {
  */
 router.get('/cart/:cart_id/items', (req, res) => co(function* () {
   var cart = yield db.Carts.findOne({ id: req.params.cart_id });
-  console.log(JSON.stringify(cart, null, 2))
+  cart.items = [{
+    "id": 1,
+    "email": "cweaver0@wikia.com",
+    "descrip": "Polarised regional algorithm",
+    "quantity": 4,
+    "price": 89.96,
+    "paid": false,
+    "total": 359.84,
+    "original_link": "https://www.amazon.com/gp/product/Z5S94JBWD2/"
+  }, {
+    "id": 2,
+    "email": "mmendoza1@washington.edu",
+    "descrip": "Right-sized grid-enabled portal",
+    "quantity": 3,
+    "price": 53.94,
+    "paid": false,
+    "total": 161.82,
+    "original_link": "https://www.amazon.com/gp/product/4010I90T12/"
+  }, {
+    "id": 3,
+    "email": "jmccoy2@thetimes.co.uk",
+    "descrip": "Future-proofed radical parallelism",
+    "quantity": 3,
+    "price": 48.92,
+    "paid": false,
+    "total": 146.76,
+    "original_link": "https://www.amazon.com/gp/product/QH2P45Q3EP/"
+  }, {
+    "id": 4,
+    "email": "avasquez3@list-manage.com",
+    "descrip": "Profound mission-critical architecture",
+    "quantity": 2,
+    "price": 11.48,
+    "paid": false,
+    "total": 22.96,
+    "original_link": "https://www.amazon.com/gp/product/83ATLWOG7W/"
+  }, {
+    "id": 5,
+    "email": "tedwards4@pcworld.com",
+    "descrip": "Realigned zero tolerance product",
+    "quantity": 4,
+    "price": 36.67,
+    "paid": true,
+    "total": 146.68,
+    "original_link": "https://www.amazon.com/gp/product/MM1H353J80/"
+  }, {
+    "id": 6,
+    "email": "mmyers5@smh.com.au",
+    "descrip": "Assimilated 24/7 architecture",
+    "quantity": 5,
+    "price": 43.95,
+    "paid": false,
+    "total": 219.75,
+    "original_link": "https://www.amazon.com/gp/product/SLFA2UC982/"
+  }, {
+    "id": 7,
+    "email": "sgutierrez6@taobao.com",
+    "descrip": "Profit-focused client-driven ability",
+    "quantity": 2,
+    "price": 24.37,
+    "paid": false,
+    "total": 48.74,
+    "original_link": "https://www.amazon.com/gp/product/EN99O551MD/"
+  }, {
+    "id": 8,
+    "email": "aalexander7@networkadvertising.org",
+    "descrip": "Reverse-engineered modular ability",
+    "quantity": 1,
+    "price": 59.08,
+    "paid": true,
+    "total": 59.08,
+    "original_link": "https://www.amazon.com/gp/product/1UPD411M61/"
+  }, {
+    "id": 9,
+    "email": "rmiller8@chron.com",
+    "descrip": "Secured bifurcated challenge",
+    "quantity": 2,
+    "price": 7.49,
+    "paid": true,
+    "total": 14.98,
+    "original_link": "https://www.amazon.com/gp/product/06RFPA9IG0/"
+  }, {
+    "id": 10,
+    "email": "arogers9@washingtonpost.com",
+    "descrip": "Virtual client-driven flexibility",
+    "quantity": 3,
+    "price": 75.38,
+    "paid": true,
+    "total": 226.14,
+    "original_link": "https://www.amazon.com/gp/product/2W72A4T0X9/"
+  }, {
+    "id": 11,
+    "email": "spiercea@zimbio.com",
+    "descrip": "Innovative analyzing installation",
+    "quantity": 1,
+    "price": 92.14,
+    "paid": false,
+    "total": 92.14,
+    "original_link": "https://www.amazon.com/gp/product/32I0LCEEXI/"
+  }, {
+    "id": 12,
+    "email": "marmstrongb@netvibes.com",
+    "descrip": "Configurable system-worthy internet solution",
+    "quantity": 5,
+    "price": 67.0,
+    "paid": false,
+    "total": 335.0,
+    "original_link": "https://www.amazon.com/gp/product/T2X9530B5H/"
+  }, {
+    "id": 13,
+    "email": "grobertsonc@bloglines.com",
+    "descrip": "Profit-focused composite Graphic Interface",
+    "quantity": 3,
+    "price": 91.36,
+    "paid": true,
+    "total": 274.08,
+    "original_link": "https://www.amazon.com/gp/product/9O9NIH32Z1/"
+  }, {
+    "id": 14,
+    "email": "ehowardd@dot.gov",
+    "descrip": "Persistent leading edge access",
+    "quantity": 4,
+    "price": 37.66,
+    "paid": false,
+    "total": 150.64,
+    "original_link": "https://www.amazon.com/gp/product/0C7S587PX4/"
+  }, {
+    "id": 15,
+    "email": "aharte@unc.edu",
+    "descrip": "Networked uniform middleware",
+    "quantity": 3,
+    "price": 20.5,
+    "paid": true,
+    "total": 61.5,
+    "original_link": "https://www.amazon.com/gp/product/6P950PDXA7/"
+  }];
+
   if (cart) {
     res.send(cart.items);
 
