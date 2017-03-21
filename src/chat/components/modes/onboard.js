@@ -584,7 +584,7 @@ handlers['team'] = function * (message) {
   let attachments = [{
     text: '*Step 3/3:* Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include:',
     mrkdwn_in: ['text'],
-    color: '#45a5f4',
+    color: '#A368F0',
     actions: [{
       name: 'collect_select',
       text: (team.meta.collect_from === 'all' ? '◉' : '○') + ' Everyone',
@@ -611,7 +611,7 @@ handlers['team'] = function * (message) {
       callback_id: 'channel_buttons_idk',
       actions: [{
         name: 'channel_btn',
-        text: 'Choose which channels you want',
+        text: 'Pick Channel',
         type: 'select',
         data_source: 'channels'
       }]

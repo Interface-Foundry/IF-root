@@ -62,7 +62,7 @@ handlers['start'] = function * (message) {
       callback_id: 'channel_buttons_idk',
       actions: [{
         name: 'channel_btn',
-        text: 'Choose which channels you want',
+        text: 'Pick Channel',
         type: 'select',
         data_source: 'channels'
       }]

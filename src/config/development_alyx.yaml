@@ -17,10 +17,10 @@ picstitch: http://localhost:5000
 nlp: http://dev-parser.kipthis.com
 nlp_rnn: http://dev-rnn.kipthis.com
 slack:
-  client_id: "99011697575.99013885607"
+  client_id: "2804113073.157642363365"
    # "17713782326.83486971505"
-  client_secret: 9b2165732056891b7e357b56103571fe
-  verification_token: mtqOe7U3SUlxdTcmRThY84sX
-  redirect_uri: https://ea670b5c.ngrok.io/newslack
+  client_secret: f3fcd31fd4796952efa04b27f40674ac
+  verification_token: K0R3t3LUQSxCwGZAcJBiZK5V
+  redirect_uri: https://794a0162.ngrok.io/newslack
 kipPayURL: https://7ad44111.ngrok.io
 picstitchDelivery: http://localhost:5000

@@ -346,7 +346,7 @@ handlers['food.admin.display_channels'] = function * (message) {
     let actions = [];
     actions.push({
       name: 'food.admin.toggle_channel',
-      text: 'Choose which channels you want',
+      text: 'Pick Channel',
       type: 'select',
       data_source: 'channels'
     });
