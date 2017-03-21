@@ -107,8 +107,8 @@ var scrapeCamel = function * () {
       price: prices[i].new,
       previousPrice: prices[i].old,
       category: cat
-    })
-    console.log('saved a model')
+    });
+    console.log('saved a model');
   }
 
   console.log('saved models');
@@ -121,14 +121,27 @@ var trimName = function (name) {
   name = name[0];
   console.log('ab dash souls removed', name);
 
-  name = name.replace(/\([^\)]*\)/g, '')
-  console.log('parenthetical text removed', name)
+  name = name.replace(/\([^\)]*\)/g, '');
+  console.log('parenthetical text removed', name);
 
-  name = name.replace(/\[[^\]]*\]/g, '')
-  console.log('bracketed text removed', name)
+  name = name.replace(/\[[^\]]*\]/g, '');
+  console.log('bracketed text removed', name);
+
+  name = name.split('...');
+  if (name.length <= 1) name = name[0];
+  else {
+    var firstHalf = name[0].split('');
+    var lastHalf = name[1].split('');
+    // console.log('first, second:', firstHalf, lastHalf, lastHalf.slice(2))
+    if (firstHalf[firstHalf.length-1] === lastHalf[0]) {
+      console.log('single word split up!');
+      name = firstHalf.slice(0, firstHalf.length-1).concat(lastHalf.slice(1)).join('');
+    }
+    console.log('ellipses removed', name)
+  }
 
   return name;
-}
+};
 
 /**
  * Returns COUNT of the most recent deals in the database
@@ -149,10 +162,10 @@ var todaysDeals = function * (count, id, categoryCounts) {
           }
         }
       ]
-    }
+    };
   }
   else {
-    where = {}
+    where = {};
   }
 
   var query = {
@@ -164,19 +177,19 @@ var todaysDeals = function * (count, id, categoryCounts) {
   console.log('about to query for camels');
   var camels = yield db.CamelItems.find(query);
   console.log('got the camels');
-  console.log('this many', camels.length) // 0
+  console.log('this many', camels.length);
   camels.map(c => console.log(c.name));
 
   //set skipped to false, because we're at least provisionally including them in the next batch
   camels.map(function * (c) {
     if (c.skipped) yield db.CamelItems.update({id: c.id}, {skipped: false});
-  })
+  });
   return yield spreadCategories(camels, categoryCounts);
 };
 
 var spreadCategories = function * (camels, categoryCounts) {
   //goes through camels and keeps track of category counts
-  console.log('these are our camel categories:', camels.map(c => c.category))
+  console.log('these are our camel categories:', camels.map(c => c.category));
   var skipped = [];
   yield dbReady;
   if (!categoryCounts) categoryCounts = {};
@@ -199,28 +212,28 @@ var spreadCategories = function * (camels, categoryCounts) {
   // console.log('semi unique camels', semiUniqueCamels)
   //if the length has changed, call today's deals with updated count and id
     //which should then call this, etc, recursively, until we either run out of items or have the distribution we want
-  console.log('semiUniqueCamels.length', semiUniqueCamels.length)
+  console.log('semiUniqueCamels.length', semiUniqueCamels.length);
   if (camels.length === semiUniqueCamels.length) {
     yield skipped.map(function * (c) {
-      yield db.CamelItems.update({id: c.id}, {skipped: true})
-    })
+      yield db.CamelItems.update({id: c.id}, {skipped: true});
+    });
     return semiUniqueCamels;
   }
-  else return semiUniqueCamels.concat(yield todaysDeals(camels.length - semiUniqueCamels.length, camels[camels.length-1].id, categoryCounts))
-}
+  else return semiUniqueCamels.concat(yield todaysDeals(camels.length - semiUniqueCamels.length, camels[camels.length-1].id, categoryCounts));
+};
 
 // co(todaysDeals).catch(e => console.error(e));
 
 co(function * () {
   yield scrapeCamel();
   var deals = yield todaysDeals(count);
-  console.log('FINAL DEALS')
+  console.log('FINAL DEALS');
   deals.map(d => {
     console.log(d.name);
     // console.log(d.category);
-  })
+  });
   console.log(deals[deals.length-1].id);
-})
+});
 
 module.exports = {
   scrape : scrapeCamel,
