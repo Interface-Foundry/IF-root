@@ -1,7 +1,11 @@
 var Waterline = require('waterline');
 
 /**
- * Session collection is the database side of the node-client-session cookie
+ * Items collection holds all the COMMON FIELDS for any item
+ * Fields which are specific to a certain provider are held in their respective tables
+ * Examples
+ *   - "description" is in this schema because you can describe any item
+ *   - "ASIN" is in the amazon_item schema because it's specific to amazon.com
  */
 var itemsCollection = Waterline.Collection.extend({
   identity: 'items',
@@ -9,13 +13,16 @@ var itemsCollection = Waterline.Collection.extend({
   attributes: {
     /** Generated when an item is added for the first time */
 
-    // /** @type {reference} cart which item belongs to */
-    // cart: {
-    //   model: 'carts'
-    // },
-
     /** @type {string} original link posted */
     original_link: 'string',
+
+    /** @type {string} the online retailer */
+    store: {
+      type: 'string',
+      enum: [
+        'amazon'
+      ]
+    },
 
     /** @type {number} amount of this product in cart */
     quantity: {
@@ -23,20 +30,51 @@ var itemsCollection = Waterline.Collection.extend({
       defaultsTo: 1
     },
 
+    /** could be any type of option, size, color, style */
+    options: Waterline.isMany('item_options'),
+
     /** @type {string} item name or whatever we present maybe */
-    item_name: 'string',
+    name: 'string',
 
-    /** @type {string} amazon specific asin */
-    asin: 'string',
+    /** @type {string} item description */
+    description: 'string',
 
-    /** @type {boolean} if item has been added or removed */
-    added: function() {
-      return (this.quantity >= 1);
+    /** @type {number} item price per unit */
+    price: 'number',
+
+    /** @type {string} small image */
+    thumbnail_url: 'string',
+
+    /** @type {string} larger image */
+    main_image_url: 'string',
+
+    /** @type {number} stars out of five */
+    rating: 'number',
+
+    /** @type {number} number of reviews */
+    number_reviews: 'integer',
+
+    /** the user that addded the item */
+    added_by: Waterline.isA('user_accounts'),
+
+    /** @type {string} current status of the item's payment process */
+    payment_status: {
+      type: 'string',
+      enum: [
+        'not paid',
+        'payment pending',
+        'paid',
+      ]
+    },
+
+    /**TODO reference payment schema here and get rid of payment status */
+    // payment: Waterline.isA('payment'),
+
+    /** @type {boolean} whether the user can modify the item */
+    locked: {
+      type: 'boolean',
+      defaultsTo: false
     }
-
-    // added_by: {
-    //   model: 'user_accounts'
-    // }
   }
 });
 
