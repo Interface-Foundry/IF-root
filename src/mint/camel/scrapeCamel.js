@@ -5,6 +5,7 @@ var fs = require('fs');
 var wait = require('co-wait');
 
 var amazon = require('../../chat/components/amazon_search').lookup;
+var string_utils = require('./string_utils');
 
 var db;
 const dbReady = require('../db');
@@ -117,35 +118,16 @@ var scrapeCamel = function * () {
 var trimName = function (name) {
   console.log('original name', name);
 
-  name = name.split('- ');
-  name = name[0];
-  // console.log('ab dash souls removed', name);
+  name = string_utils.dashes(name);
+  name = string_utils.parens(name);
+  name = string_utils.brackets(name);
+  name = string_utils.ellipses(name);
+  name = string_utils.commas(name);
+  name = string_utils.periods(name);
+  name = string_utils.spaces(name);
 
-  name = name.replace(/\([^\)]*\)/g, '');
-  // console.log('parenthetical text removed', name);
-
-  name = name.replace(/\[[^\]]*\]/g, '');
-  // console.log('bracketed text removed', name);
-
-  name = name.split(' ... ');
-  if (name.length <= 1) name = name[0];
-  else {
-    var firstHalf = name[0].split('');
-    var lastHalf = name[1].split('');
-    if (firstHalf[firstHalf.length-1] === lastHalf[0]) {
-      console.log('single word split up!');
-      name = firstHalf.slice(0, firstHalf.length).concat(lastHalf.slice(1)).join('');
-    }
-    else {
-      console.log('multiple words truncated');
-      firstWords = firstHalf.join('').split(' ');
-      lastWords = lastHalf.join('').split(' ');
-      // console.log('first words, last words:', firstWords, lastWords);
-      name = firstWords.slice(0, firstWords.length-1).concat(lastWords.slice(1)).join(' ');
-    }
-    // console.log('ellipses removed', name)
-  }
   console.log('final name', name);
+
   return name;
 };
 
