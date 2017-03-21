@@ -64,11 +64,11 @@ handlers['food.admin.retrieve_order_status'] = function * (message) {
   var actionSuite = prevMessages.filter(m => m.action == prevMessage.action)
   prevMessage = actionSuite[actionSuite.length - 1]
   var action = 'food.' + prevMessage.action
-  console.log(prevMessage)
+  logging.debug('prevMessage', prevMessage)
 
   if (prevMessage.data && prevMessage.data.value) {
     prevMessage.data.value = JSON.parse(prevMessage.data.value)
-    console.log('prevMessage.data.value', prevMessage.data.value)
+    logging.debug('prevMessage.data.value %s', prevMessage.data.value)
   }
   prevMessage.source = message.source
   prevMessage.text = ''
@@ -417,8 +417,6 @@ handlers['food.settings.address.confirm'] = function * (message) {
     yield handlers['food.settings.address.new'](message)
     return
   }
-
-  // console.log(location)
 
   var addr = [
     [location.address_1, location.address_2].filter(Boolean).join(' '),

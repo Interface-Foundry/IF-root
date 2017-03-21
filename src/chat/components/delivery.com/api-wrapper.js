@@ -109,13 +109,13 @@ function saveMerchants (merchants) {
         id: merchants[i].id
       }).select('id').exec()
       if (!m) {
-        console.log('saving new merchant', merchants[i].summary.name)
+        logging.debug('saving new merchant %s', merchants[i].summary.name)
         m = new db.Merchant({
           id: merchants[i].id,
           data: merchants[i]
         })
         yield m.save()
-        console.log('saved')
+        logging.debug('saved')
         definitelyExistingMerchants.push(m.id)
       }
     }
@@ -155,7 +155,7 @@ module.exports.getMerchant = function * (merchant_id) {
 function unfuck_menu (menu) {
   return menu
   // first flatten out all the menus so lunch just becomes part of the lunch category not a separate menu
-  console.log(menu)
+  logging.debug('menu', menu)
   var categories = menu.reduce((categories, m) => {
     return categories.concat(m.children.map(i => i.name))
   }, [])
@@ -190,7 +190,6 @@ function unfuck_menu (menu) {
 function get_options (item) {
   var children = item.children || []
   return children.map(c => {
-    // console.log(JSON.stringify(c, null, 2))
     return {
       name: c.name,
       required: c.min_selection > 0,

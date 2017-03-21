@@ -90,7 +90,7 @@ utils.getUrl = function * (foodSession, user_id, selected_items) {
 * @returns {string} cuisine-specific emoji
 */
 utils.cuisineEmoji = function (cuisine) {
-    console.log('CUISINE', cuisine);
+    logging.debug('CUISINE', cuisine);
     var e
     switch(cuisine){
         case "Afghan":
