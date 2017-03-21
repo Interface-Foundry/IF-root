@@ -1,0 +1,12 @@
+env: development_rob
+mongodb:
+  # url: localhost/foundry
+  url: mongodb://localhost:27017/mint
+elasticsearch:
+  url: http://localhost:9200
+app:
+  publicAPI: http://localhost:2997/api
+picstitch: http://dev-picstitch.kipthis.com
+nlp: http://dev-parser.kipthis.com
+nlp_rnn: http://dev-rnn.kipthis.com
+kipPayURL: https://pay.kipthis.com
