@@ -1,6 +1,6 @@
-import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECIEVE_REMOVE_ITEM_FROM_CART } from '../constants/ActionTypes';
+import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
 
-const receive = (cart, newInfo) => ({
+const receive = (newInfo) => ({
   type: RECEIVE_CART,
   ...newInfo
 });
@@ -11,14 +11,14 @@ const request = (cart) => ({
 });
 
 const receiveItems = (cart, newInfo) => ({
-  type: RECEIVE_CART,
+  type: RECEIVE_ITEMS,
   ...newInfo
 });
 
-const requestItems = (cart) => ({
-  type: REQUEST_CART,
-  ...cart
+const requestItems = () => ({
+  type: REQUEST_ITEMS
 });
+
 
 const requestRemoveItem = (cart, item) => ({
   type: REQUEST_REMOVE_ITEM_FROM_CART,
@@ -27,22 +27,41 @@ const requestRemoveItem = (cart, item) => ({
 });
 
 const receiveRemoveItem = (cart) => ({
-  type: RECIEVE_REMOVE_ITEM_FROM_CART,
+  type: RECEIVE_REMOVE_ITEM_FROM_CART,
   ...cart
 });
 
-export function fetchItems(cart_id) {
+const requestAddItem = (cart, item) => ({
+  type: REQUEST_ADD_ITEM_TO_CART,
+  item,
+  cart
+});
+
+const receiveAddItem = (cart) => ({
+  type: RECEIVE_ADD_ITEM_TO_CART,
+  ...cart
+});
+
+export function update(cart_id) {
   return function (dispatch) {
     dispatch(request(cart_id));
     return fetch(`/api/cart/${cart_id}`, {
         credentials: 'same-origin'
       })
-      .then(response =>
-        response.json()
-      )
-      .then(json =>
-        dispatch(receive(cart_id, json))
-      );
+      .then(response => response.json())
+      .then(json => dispatch(receive(json)));
+  };
+}
+
+export function fetchItems(cart_id) {
+  return function (dispatch) {
+    dispatch(request(cart_id));
+    console.log(`getting localhost:3000/api/cart/${cart_id}/items`)
+    return fetch(`/api/cart/${cart_id}/items`, {
+        credentials: 'same-origin'
+      })
+      .then(response => response.json())
+      .then(json => dispatch(receive(json)));
   };
 }
 
@@ -56,9 +75,18 @@ export function removeItem(cart_id, item) {
           itemId: item,
           quantity: -1
         })
-      }).then(response => response.json())
-      .then(response =>
-        dispatch(receiveRemoveItem(cart_id, response))
-      );
+      })
+      .then(response => response.json())
+      .then(response => dispatch(receiveRemoveItem(cart_id, response)));
+  };
+}
+
+export function addItem(e, cart_id, url) {
+  e.preventDefault();
+  return dispatch => {
+    dispatch(requestAddItem());
+    return fetch(`/api/addItem?cart_id=${cart_id}&url=${url}`)
+      .then(res => res.json())
+      .then(json => dispatch(receiveAddItem(json)));
   };
 }
