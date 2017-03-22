@@ -117,7 +117,30 @@ app.get('*', (req, res) =>
   res.render('pages/cart')
 );
 
-app.use(new mintLogger.ErrorLogger());
+// Log errors to the database in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(new mintLogger.ErrorLogger());
+}
+
+// Show an error page for non-json request, and the error for json requests
+app.use(function errorHandler (err, req, res, next) {
+  if (res.headersSent) {
+    return next(err)
+  }
+
+  res.status(200)
+
+  if (req.accept === 'application/json') {
+    printNiceError(err)
+    res.send({
+      ok: false,
+      error: err
+    })
+  } else {
+    // TODO render nice error pages here for dev and production
+    next(err)
+  }
+})
 
 const PORT = process.env.PORT || 3000;
 
@@ -125,9 +148,11 @@ app.listen(PORT, () => {
   console.log(`App listening at http://127.0.0.1:${PORT}`);
 });
 
-process.on('unhandledRejection', (err) => {
-  console.log('Unhandled Promise Rejection');
-  console.log('Reason: ' + err);
+function printNiceError(err) {
+  console.log('printing nice error')
+  if (!err) {
+    return console.log('No error :P')
+  }
 
   /** Nicely print waterline errors */
   if (err.failedTransactions) {
@@ -142,6 +167,14 @@ process.on('unhandledRejection', (err) => {
   }
 
   /** help the user know where to look */
-  console.log(err.stack)
+  if (err.stack) {
+    console.log(err.stack)
+  } else {
+    console.log(err)
+  }
+}
 
+process.on('unhandledRejection', (err) => {
+  console.log('Unhandled Promise Rejection');
+  printNiceError(err)
 });

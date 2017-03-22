@@ -13,6 +13,35 @@ const dbReady = require('../../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 /**
+ * Hack the router for error handling
+ */
+['get', 'post', 'delete'].map(method => {
+  var _originalHandler = router[method]
+  router[method] = function (path, fn) {
+    if (typeof path !== 'string' || typeof fn !== 'function') {
+      return _originalHandler.apply(router, arguments)
+    }
+
+    _originalHandler.call(router, path, function (req, res, next) {
+      var ret = fn(req, res, next)
+      if (ret instanceof Promise) {
+        ret.catch(e => {
+          next(e)
+        })
+      }
+    })
+  }
+})
+
+/**
+ * Testing
+ */
+router.get('/error', (req, res) => co(function * () {
+  console.log('gonna throw an error now')
+  throw new Error('omg error')
+}))
+
+/**
  * GET /api/session
  */
 router.get('/session', (req, res) => {
