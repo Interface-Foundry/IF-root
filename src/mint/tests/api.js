@@ -25,13 +25,14 @@ const mcTesty = {
  * @param  {string}    url the path, like /api/session
  * @return {Generator}     yields with the body
  */
-const get = function * (url) {
+const get = function * (url, extended) {
   url = 'http://localhost:3000' + url
   var body = yield request({
     uri: url,
     method: 'GET',
     jar: true,
-    json: true
+    json: true,
+    resolveWithFullResponse: extended
   })
   return body
 }
@@ -99,8 +100,6 @@ describe('api', () => {
       err = e
     }
 
-    console.log(res)
-
     assert(err)
     assert.equal(err.statusCode, 404)
 
@@ -126,5 +125,20 @@ describe('api', () => {
     assert(session2.user_accounts instanceof Array)
     assert(session2.user_accounts.length === 1)
     assert(session2.user_accounts[0].email_address === mcTesty.email)
+  }))
+
+  it('should create a new cart for /newcart and redirect to /cart/:Cart_id', () => co(function * () {
+    var res = yield get('/newcart', true)
+
+    // make sure it's redirect to /cart/123456
+    assert.equal(res.request.uri.path.split('/')[1], 'cart')
+
+    // make sure the cart is in the db
+    var cartId = res.request.uri.path.split('/')[2]
+    var cart = yield db.Carts.findOne({id: cartId}).populate('leader')
+    assert(cart)
+
+    // make sure McTesty is the leader
+    assert.equal(cart.leader.email_address, mcTesty.email)
   }))
 })
