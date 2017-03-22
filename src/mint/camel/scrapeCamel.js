@@ -38,12 +38,12 @@ var getAmazon = function * (asin) {
   var amazon_test = yield amazon({ASIN: asin});
   var item = {};
   // console.log('AMAZON RAW', amazon_test[0].BrowseNodes[0].BrowseNode);
-  item.cat = amazon_test[0].ItemAttributes[0].ProductGroup[0];
+  item.category = amazon_test[0].ItemAttributes[0].ProductGroup[0];
+  console.log('is this a real category?', item.cat);
   item.info = amazon_test[0].ItemAttributes[0].Feature;
   item.images = {};
   // console.log(amazon_test[0])
   if (amazon_test[0].SmallImage) item.images.small = amazon_test[0].SmallImage[0].URL[0];
-  // console.log('SMALL IMAGE', amazon_test[0].SmallImage[0].URL[0])
   if (amazon_test[0].MediumImage) item.images.medium = amazon_test[0].MediumImage[0].URL[0];
   if (amazon_test[0].LargeImage) item.images.large = amazon_test[0].LargeImage[0].URL[0];
   if (amazon_test[0].shortened_url) item.url = amazon_test[0].shortened_url;
@@ -144,42 +144,22 @@ var scrapeCamel = function * () {
       });
 
       console.log('created blurbs');
-      console.log('blurbs', blurbs);
-
-      // yield camel.populate('blurbs')//.exec(function (err, camel) {
-    //   if (err) console.log('err', err);
-    //   else console.log('no err')
-    // });
-      // console.log('camel populated');
-      // yield camel.save();
+      // console.log('blurbs', blurbs);
     };
     try {
-      //TODO add the new blurbs to camel with camel.add(blurb.id);
       yield blurbs.map(function * (b) {
-        console.log('whatever, here is a blurb', b.text)
         camel.blurbs.add(b.id);
         yield camel.save()
-        console.log('blurb added');
+        console.log('whatever, here is a blurb', b.text)
       });
 
-      console.log('camel.blurbs', camel.blurbs);
+      // console.log('camel.blurbs', camel.blurbs);
       console.log('saved a model');
     }
     catch (err) {
       console.log('ERROR:', err)
     }
   }
-
-  // console.log('about to call populate fml');
-  // yield db.CamelItems.find().populate('blurbs');
-  // console.log('populate called');
-
-  var test = yield db.CamelItems.find({asin: 'B00K5LLR6K'});
-
-  console.log('did that work?');
-
-  console.log(test);
-
   console.log('saved models');
 };
 
