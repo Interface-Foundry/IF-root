@@ -12,6 +12,11 @@ export default class AddItemField extends Component {
     this.setState({ url: e.target.value });
   }
 
+  static propTypes = {
+    addItem: PropTypes.func.isRequired,
+    cart_id: PropTypes.string.isRequired
+  }
+
   render() {
     const { cart_id, addItem } = this.props;
     return (

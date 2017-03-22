@@ -1,18 +1,26 @@
 {
-  "extends": "standard",
+  "parser": "babel-eslint",
+  "extends": ["standard", "plugin:react/recommended"],
   "env": {
+    "browser": true,
     "node": true,
     "mocha": true
+  },
+  "ecmaFeatures": {
+    "classes": true,
+    "jsx": true
   },
   "parserOptions": {
     "ecmaVersion": 8
   },
   "plugins": [
-    "standard"
+    "standard",
+    "react"
   ],
   "globals": {
     "kip": true,
-    "db": true
+    "db": true,
+    "React": true
   },
   "rules": {
     "camelcase": 0,

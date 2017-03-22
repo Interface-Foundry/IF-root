@@ -1,13 +1,16 @@
 import React, { PropTypes, Component } from 'react';
 import AddItemField from './AddItemField';
-import Item from './Item'
+import Item from './Item';
 
 export default class Cart extends Component {
+  static propTypes = {
+    addItem: PropTypes.func.isRequired,
+    cart_id: PropTypes.string.isRequired,
+    items: PropTypes.arrayOf(PropTypes.object).isRequired
+  }
 
   listItems(hasItems, items) {
-    return hasItems 
-     ? items.map((item, i) => <Item key={i} item={item} />) 
-     : <em>Please add some products to the cart.</em>;
+    return hasItems ? items.map((item, i) => <Item key={i} item={item} />) : <em>Please add some products to the cart.</em>;
   }
 
   render() {

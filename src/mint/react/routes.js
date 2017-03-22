@@ -1,13 +1,12 @@
 // react/routes.js
 // handles choosing which route to render
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import createHistory from 'history/createBrowserHistory';
 import { Route, Switch } from 'react-router';
 import thunkMiddleware from 'redux-thunk';
-import { ConnectedRouter, routerReducer, routerMiddleware, push } from 'react-router-redux';
+import { ConnectedRouter, routerReducer, routerMiddleware } from 'react-router-redux';
 
 import App from './containers/App';
 import * as reducers from './reducers';

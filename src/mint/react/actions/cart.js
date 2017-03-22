@@ -45,8 +45,8 @@ export function update(cart_id) {
   return function (dispatch) {
     dispatch(request(cart_id));
     return fetch(`/api/cart/${cart_id}`, {
-        credentials: 'same-origin'
-      })
+      credentials: 'same-origin'
+    })
       .then(response => response.json())
       .then(json => dispatch(receive(json)));
   };
@@ -56,10 +56,10 @@ export function fetchItems(cart_id) {
   return function (dispatch) {
     dispatch(requestItems(cart_id));
     return fetch(`/api/cart/${cart_id}/items`, {
-        credentials: 'same-origin'
-      })
-      .then(response => response.json())
-      .then(json => dispatch(receiveItems(json)));
+      credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(json => dispatch(receiveItems(json)));
   };
 }
 
@@ -67,15 +67,15 @@ export function removeItem(cart_id, item) {
   return function (dispatch) {
     dispatch(requestRemoveItem(cart_id, item));
     return fetch(`/api/cart/${cart_id}/items`, {
-        'method': 'DELETE',
-        credentials: 'same-origin',
-        'body': JSON.stringify({
-          itemId: item,
-          quantity: -1
-        })
+      method: 'DELETE',
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        itemId: item,
+        quantity: -1
       })
-      .then(response => response.json())
-      .then(response => dispatch(receiveRemoveItem(cart_id, response)));
+    })
+    .then(response => response.json())
+    .then(response => dispatch(receiveRemoveItem(cart_id, response)));
   };
 }
 

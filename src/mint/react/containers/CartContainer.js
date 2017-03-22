@@ -2,12 +2,13 @@ import React, { PropTypes, Component } from 'react';
 import { connect } from 'react-redux';
 import Cart from '../components/Cart';
 import { cart } from '../actions';
-import { bindActionCreators } from 'redux'
+import { bindActionCreators } from 'redux';
 
 class CartContainer extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { cart: { items: [] } };
+  static propTypes = {
+    dispatch: PropTypes.func.isRequired,
+    cart_id: PropTypes.string.isRequired,
+    items: PropTypes.array.isRequired
   }
 
   componentDidMount() {
