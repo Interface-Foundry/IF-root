@@ -12,6 +12,7 @@ var handlers = {}
 * @param message
 */
 handlers['food.admin.team_budget'] = function * (message) {
+  logging.debug('food.admin.team_budget, team_id: %s', message.source.team)
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   //waypoint logging
@@ -167,6 +168,7 @@ function updateBudget (n, location) {
 * @param message
 */
 handlers['food.admin.confirm_budget'] = function * (message) {
+  logging.debug('food.admin.confirm_budget, team_id: %s', message.source.team)
   budget = message.data.value.budget;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
