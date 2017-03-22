@@ -4,10 +4,11 @@ import CartContainer from './CartContainer';
 import { connect } from 'react-redux';
 import '../styles/App.scss';
 
-const App = ({ cart_id, loggedIn, newAccount, state }) => (
+const App = ({ cart_id, loggedIn, newAccount, accounts }) => (
   <div>
     <h2>Cart ID #{cart_id}</h2>
-    <hr/>
+    <div>Accounts: <ul>{accounts.map((account, i) => <li key={i}>{account.email_address}</li>)}</ul></div>
+ <hr/>
     {loggedIn
       ? <CartContainer cart_id={cart_id}/>
       : ((newAccount || newAccount === undefined)
@@ -22,7 +23,7 @@ const mapStateToProps = (state, ownProps) => {
     cart_id: ownProps.match.params.cart_id,
     loggedIn: state.session.user_accounts.length > 0,
     newAccount: state.session.newAccount,
-    state: state
+    accounts: state.session.user_accounts
   }
 };
 
