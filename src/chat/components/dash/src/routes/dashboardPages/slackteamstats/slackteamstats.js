@@ -50,14 +50,14 @@ const COLORS = ['#FF0000', '#FF8888', '#0000FF', '#8888FF'];
 function sumTeamStats(teams){
   	var total = 0;
   	for(var i = 0; i<teams.length; i++){
-  		total += teams[i].food_sessions.length;
+  		total += teams[i].carts.length;
   	}
   	return total;
   }
 
 function getPieChartTeamStatsData(teams, team){ // [store item count, store order count, cafe item count, cafe order count]
   const data = [];
-  var numCafeOrders = team ? teams.find(function(t){return t.team_id==team}).food_sessions.length : sumTeamStats(teams);
+  var numCafeOrders = team ? teams.find(function(t){return t.team_id==team}).carts.length : sumTeamStats(teams);
  
   const sampleData = [ 16, 11, 80, 64 ];
   data.push({name: '# Store Items', value: sampleData[0]})
@@ -105,19 +105,21 @@ function getWaypointPaths(waypoints){
   var userWaypoints = _.groupBy(waypoints,function(waypoint){
      return waypoint.user_id+'#'+waypoint.delivery_id
   });
-  
+
   var data = _.map(userWaypoints, function(waypointArray){
     waypointArray = _.sortBy(waypointArray, [function(o) { return o.timestamp; }]);
     var pathLength = waypointArray.length;
     return {
     	    user_id: waypointArray[0].user ? waypointArray[0].user.name : '',
-            time_stamp: waypointArray[0].timestamp,
-            time_stamp_end: waypointArray[pathLength-1].timestamp,
-            delivery_id: waypointArray[0].delivery_id,
-            inputs: waypointArray.map((waypoint) => waypoint.data),
-            waypoints: waypointArray.map((waypoint) => waypoint.waypoint)
+          time_stamp: waypointArray[0].timestamp,
+          time_stamp_end: waypointArray[pathLength-1].timestamp,
+          delivery_id: waypointArray[0].delivery_id,
+          team_name: waypointArray[0].user ? waypointArray[0].user.team.team_name : '',
+          inputs: waypointArray.map((waypoint) => waypoint.data),
+          waypoints: waypointArray.map((waypoint) => waypoint.waypoint)
         }
   });
+
   return data;
 }
 
@@ -136,11 +138,12 @@ function getWaypointActions(waypointPaths) {
 
 
 
-function getTeamName(delivery_id, teams){
-  var team = teams.find(function(t){return t.food_sessions.length>0 ? t.food_sessions.find(function(foodSession){return foodSession.id==delivery_id}) : false});
-  var teamName = team ? team.team_name : '';
-  return teamName;
-}
+// function getTeamName(delivery_id, teams){
+//   return delivery_id
+//   var team = teams.find(function(t){return t.carts.length>0 ? t.carts.find(function(foodSession){return foodSession.id==delivery_id}) : false});
+//   var teamName = team ? team.team_name : '';
+//   return teamName;
+// }
 
 class WaypointHover extends React.Component {
   render() {
@@ -168,30 +171,33 @@ class WaypointHover extends React.Component {
 }
 
 function createOverlay(text) {
-  return (<Popover id={JSON.parse(text).original_text}>
-    {JSON.parse(text).original_text}
-  </Popover>)
+    return (<Popover id={text.original_text}>
+    {text.original_text}
+    </Popover>)
 }
 
 function displayFlotCharts(props, context) {
   context.setTitle(title);
-
   var rows = [];
   var waypoints = props.waypoints;
   var teams = props.teams;
+
+
   var teamWaypoints = props.teamId ? waypoints.filter(function(waypoint){
-      var team = teams.find(function(t){return t.food_sessions.length>0 ? t.food_sessions.find(function(foodSession){return foodSession.id==waypoint.delivery_id}) : false});
-      var teamId = team ? team.team_id : '';
-      return teamId == props.teamId;
+
+      return waypoint.user ? waypoint.user.team.team_id == props.teamId : false;
+      
+      // var team = teams.find(function(t){return t.carts.length>0 ? t.carts.find(function(cart){return cart._id==waypoint._id}) : false});
+      // var teamId = team ? team.team_id : '';
+      // return teamId == props.teamId;
   }) : waypoints;
 
   var waypointPaths = getWaypointPaths(teamWaypoints);
   for (var i = 0; i < waypointPaths.length; i++) {
 
-    var teamName = getTeamName(waypointPaths[i].delivery_id,teams);
+    var teamName = waypointPaths[i].team_name;
     rows.push({time_stamp: new Date(waypointPaths[i].time_stamp.split('.')[0]).toLocaleString(), time_stamp_end: new Date(waypointPaths[i].time_stamp_end.split('.')[0]).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i])})
   }
-
   var cells = [];
   for (var i = 0; i < 4; i++){
     cells.push(<Cell fill={COLORS[i]} />)
