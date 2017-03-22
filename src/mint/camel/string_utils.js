@@ -4,6 +4,24 @@
  */
 var utils = {};
 
+utils.getSpecs = function (str) {
+
+  var patterns = [
+    /\b(px|pixels?)\b/gi,
+    /\b(wi[-\s]?fi)\b/gi,
+    /\b(hd|high[-\s]definition)\b/gi
+  ];
+
+  var specs = [];
+
+  patterns.map(function (p) {
+    var matches = p.exec(str);
+    if (matches) specs.concat(matches.slice(1));
+  });
+
+  return specs;
+};
+
 /**
  * truncates a string before the first dash
  */

@@ -166,6 +166,9 @@ var scrapeCamel = function * () {
 var trimName = function (name) {
   console.log('original name', name);
 
+  var specs = string_utils.getSpecs(name);
+  console.log('specs', specs);
+
   name = string_utils.dashes(name);
   name = string_utils.parens(name);
   name = string_utils.brackets(name);
