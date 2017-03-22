@@ -21,8 +21,6 @@ export default function cart(state = initialState, action) {
     case RECEIVE_CART:
       return Object.assign({}, state, action);
     case RECEIVE_ITEMS:
-    console.log('state',state)
-    console.log('action',action)
       return Object.assign({}, state, {
         items: action.items
       });

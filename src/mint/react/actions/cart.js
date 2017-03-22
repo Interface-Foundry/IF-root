@@ -55,7 +55,6 @@ export function update(cart_id) {
 export function fetchItems(cart_id) {
   return function (dispatch) {
     dispatch(requestItems(cart_id));
-    console.log(`getting localhost:3000/api/cart/${cart_id}/items`)
     return fetch(`/api/cart/${cart_id}/items`, {
         credentials: 'same-origin'
       })
