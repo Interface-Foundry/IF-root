@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const {OperationHelper} = require('apac');
 
 // amazon creds -> move to constants later
@@ -13,6 +14,8 @@ const amazonCreds = [{
   'maxRequestsPerSecond': 1
 }];
 
+const associateTag = 'motorwaytoros-20';
+
 const opHelper = new OperationHelper(amazonCreds[0]);
 
 /**
@@ -20,12 +23,33 @@ const opHelper = new OperationHelper(amazonCreds[0]);
  * @param  {string} item_identifier is url/asin/etc that is given
  * @return {string} asin to lookup
  */
-function getAsin(item_identifier) {
+exports.getAsin = function (item_identifier) {
   if (item_identifier.includes('amazon.com')) {
     var asin = item_identifier.split('dp')[1].split('/')[1];
   }
   return asin;
-}
+};
+
+/**
+ * for a cart, given amazon functionality you need to use modify for cart
+ * @param  {[type]} item [description]
+ * @param  {[type]} cart [description]
+ * @return {[type]}      [description]
+ */
+function checkAmazonItemInCart (item, cart) {
+  // item can be array or single object
+  if (!(cart.CartItems.CartItem instanceof Array)) {
+    // coerce object into array so we dont have complicated logic
+    var cartItems = [cart.CartItems.CartItem];
+  } else {
+    cartItems = cart.CartItems;
+  }
+  var cartItem = cartItems.find(i => i.ASIN === item.ASIN);
+  if (cartItem) {
+    return cartItem;
+  }
+  return false;
+};
 
 /**
  * from whatever item type is given, get corresponding item from amazon
@@ -33,11 +57,9 @@ function getAsin(item_identifier) {
  * @y just return item title for now
  */
 exports.getAmazonItem = function * (item_identifier) {
-  var asin = getAsin(item_identifier);
+  var asin = exports.getAsin(item_identifier);
   var res = yield exports.lookupAmazonItem(asin);
-  var item = res[0];
-  var title = item.ItemAttributes[0].Title[0];
-  return title;
+  return res;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,29 +80,41 @@ exports.lookupAmazonItem = function * (asin) {
     ItemId: asin,
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
   };
-
   try {
     var results = yield opHelper.execute('ItemLookup', amazonParams);
-    return results;
+    return results.result.ItemLookupResponse.Items;
   } catch (err) {
     throw new Error('Error on lookup');
   }
 };
 
 /**
+ * should create a cart with some associatetag with either offer listing ID or asin
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CartCreate.html
  * @param {[type]} items         [description]
- * @yield {[type]} [description]
+ * @return {Object} cart object from amazon that has
+      - CartId
+      - HMAC
+      - URLEncodedHMAC
+      - PurchaseURL
+      - SubTotal
+      - CartItems
  */
-exports.createAmazonCart = function * (items) {
-  if (!(items instanceof Array)) {
-    items = [items];
+exports.createAmazonCart = function * (item) {
+  if (item instanceof Array) {
+    throw new Error('Only create cart for single item at a time');
+  }
+
+  if (_.get(item, 'OfferListingId')) {
+    throw new Error('Need ASIN, not using OfferListingId for time being');
   }
   var amazonParams = {
-    items: items
+    'AssociateTag': associateTag,
+    'Item.1.ASIN': item.ASIN,
+    'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
   };
   var cart = yield opHelper.execute('CartCreate', amazonParams);
-  return cart;
+  return cart.result.CartCreateResponse.Cart;
 };
 
 /**
@@ -88,13 +122,15 @@ exports.createAmazonCart = function * (items) {
  * @param {[type]} cart          [description]
  * @yield {[type]} [description]
  */
-exports.getAmazonCart = function * (cart_id) {
+exports.getAmazonCart = function * (cart) {
   var amazonParams = {
-    'cart_id': cart_id
+    'AssociateTag': associateTag,
+    'CartId': cart.CartId,
+    'HMAC': cart.HMAC
   };
 
-  var cart = yield opHelper.execute('CartGet', amazonParams);
-  return cart;
+  cart = yield opHelper.execute('CartGet', amazonParams);
+  return cart.result.CartGetResponse.Cart;
 };
 
 /**
@@ -103,13 +139,27 @@ exports.getAmazonCart = function * (cart_id) {
  * @param {[type]} cart_id       [description]
  * @yield {[type]} [description]
  */
-exports.addAmazonItemToCart = function * (item, cart_id) {
+exports.addAmazonItemToCart = function * (item, cart) {
+  if (item instanceof Array) {
+    throw new Error('Only add one Item to a cart at a time');
+  }
+
+  var itemAlreadyAdded = checkAmazonItemInCart(item, cart)
+  if (itemAlreadyAdded) {
+    // need to use modify
+    // var cart = yield exports.
+  }
+
   var amazonParams = {
-    'cart_id': cart_id
+    'AssociateTag': associateTag,
+    'CartId': cart.CartId,
+    'HMAC': cart.HMAC,
+    'Item.1.ASIN': item.ASIN,
+    'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
   };
 
-  var cart = yield opHelper.execute('CartAdd', amazonParams);
-  return cart;
+  cart = yield opHelper.execute('CartAdd', amazonParams);
+  return cart.result.CartAddResponse.Cart;
 };
 
 /**
@@ -120,9 +170,25 @@ exports.addAmazonItemToCart = function * (item, cart_id) {
  */
 exports.removeAmazonItemFromCart = function * (item, cart_id) {
   var amazonParams = {
-    'cart_id': cart_id
+    'CartId': cart_id
   };
 
   var cart = yield opHelper.execute('CartModify', amazonParams);
+  return cart;
+};
+
+/**
+ * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CartClear.html
+ * @param {[type]} item          [description]
+ * @yield {[type]} [description]
+ */
+exports.cleaAmazonCart = function * (cart) {
+  var amazonParams = {
+    'AssociateTag': associateTag,
+    'CartId': cart.CartId,
+    'HMAC': cart.HMAC
+  };
+
+  cart = yield opHelper.execute('CartClear', amazonParams);
   return cart;
 };
