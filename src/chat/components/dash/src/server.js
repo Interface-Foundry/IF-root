@@ -24,7 +24,7 @@ import { connect } from './database';
 import { ErrorPageWithoutStyle } from './routes/error/ErrorPage';
 import errorPageStyle from './routes/error/ErrorPage.css';
 import Schema from './data/schema';
-import Resolvers from './data/resolvers';
+import { Resolvers, GetLoaders } from './data/resolvers';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
 import { port, auth } from './config';
@@ -78,6 +78,9 @@ app.use('/graphql', expressGraphQL(req => ({
   schema: executableSchema,
   pretty: true,
   graphiql: true,
+  context: {
+    loaders: GetLoaders(),
+  }
   // rootValue: { request: req },
   // pretty: process.env.NODE_ENV !== 'production',
 })));

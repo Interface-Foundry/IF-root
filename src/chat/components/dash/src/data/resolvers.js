@@ -2,9 +2,9 @@
  * @file Defines the resolvers for the different schemas being used.
  */
 
-
 import { ObjectId } from 'mongodb';
 import GraphQLToolsTypes from "graphql-tools-types"
+import DataLoader from 'dataloader';
 
 import {
   Carts,
@@ -17,8 +17,51 @@ import {
   Waypoints,
 } from '../database';
 
+// Data Loaders make it possible to batch load certain queries from mongodb,
+// which can drastically reduce the number of db queries made per graphql query
+// See: https://github.com/facebook/dataloader
+//
+// If additional queries need to be tuned for performance reasons, follow the
+// example of the Waypoint resolver below and add additional loaders.
+
+function GetLoaders() {
+  return {
+    DeliveriesById: new DataLoader(keys => loadDeliveriesById(keys)),
+    UsersByUserId: new DataLoader(keys => loadUsersByUserId(keys)),
+  }
+}
+
 /**
- * Setting a limit to the number of results per page to 1000
+ * batch queries the delivery collection by the '_id' field.
+ */
+async function loadDeliveriesById(ids) {
+  var deliveries = await Deliveries.find({'_id': {'$in': ids.map(i => ObjectId(i))}}).toArray();
+
+  var byID = {};
+  deliveries.map(d => { byID[d._id.toHexString()] = d; console.log(d._id.toHexString()); });
+
+  return ids.map(i => byID[i] || null);
+}
+
+/**
+ * batch queries the chatusers collection by the 'id' field (NOTE: not the _id
+ * field)
+ *
+ * @param userIds - an array of user ids (e.g. ['U0PRBNLNS', 'U0PQN0T63'])
+ */
+async function loadUsersByUserId(userIds) {
+  var users = await Chatusers.find({id: {'$in' : userIds }}).toArray();
+
+  var usersByUserId = {}
+  users.map(u => { usersByUserId[u.id] = u });
+
+  return userIds.map(uid => usersByUserId[uid] || null);
+}
+
+
+/**
+ * sets pagination parameters on the collection query if provided, or uses
+ * defaults if not.
  *
  * @param coll - a collection from the database
  * @param args - query arguments 
@@ -41,7 +84,7 @@ async function pagination(coll, args, sort) {
   return await q.skip(skip).limit(limit).toArray();
 }
 
-const resolvers = {
+const Resolvers = {
 
   // Business objects
 
@@ -79,8 +122,11 @@ const resolvers = {
   },
 
   Waypoint: {
-    delivery: async ({delivery_id}) => {
-      return (await Deliveries.findOne(ObjectId(delivery_id)));
+    user: async ({user_id}, _, context) => {
+      return context.loaders.UsersByUserId.load(user_id);
+    },
+    delivery: async ({delivery_id}, _, context) => {
+      return context.loaders.DeliveriesById.load(delivery_id);
     },
   },
 
@@ -129,4 +175,7 @@ const resolvers = {
 };
 
 
-export default resolvers;
+export {
+  GetLoaders,
+  Resolvers,
+}
