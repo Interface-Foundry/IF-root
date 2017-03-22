@@ -113,20 +113,8 @@ var scrapeCamel = function * () {
     //if an item with that ASIN is already in the db, delete it
     yield db.CamelItems.destroy({asin: asins[i]});
 
-    console.log('INFO', amazon.info)
-    if (amazon.info) {
-      var blurbs = [];
-      //TODO create blurbs in db
-      yield amazon.info.map(function * (b) {
-        blurbs.push(
-          yield db.AmazonBlurbs.findOrCreate({
-            text: b
-          })
-        );
-      });
-    }
-
     //saves items to the db
+
     var camel = yield db.CamelItems.create({
       name: trimName(names[i]),
       asin: asins[i],
@@ -140,10 +128,57 @@ var scrapeCamel = function * () {
       // info: amazon.info
     });
 
-    //TODO add the new blurbs to camel with camel.add(blurb.id);
+    console.log('created camel');
+    console.log('camel', camel);
 
-    console.log('saved a model');
+    // console.log('INFO', amazon.info)
+    if (amazon.info) {
+      var blurbs = [];
+      yield amazon.info.map(function * (b) {
+        yield db.AmazonBlurbs.destroy({text: b});
+        blurb = yield db.AmazonBlurbs.create({
+            text: b//,
+            // item: camel.id
+          })
+        blurbs.push(blurb);
+      });
+
+      console.log('created blurbs');
+      console.log('blurbs', blurbs);
+
+      // yield camel.populate('blurbs')//.exec(function (err, camel) {
+    //   if (err) console.log('err', err);
+    //   else console.log('no err')
+    // });
+      // console.log('camel populated');
+      // yield camel.save();
+    };
+    try {
+      //TODO add the new blurbs to camel with camel.add(blurb.id);
+      yield blurbs.map(function * (b) {
+        console.log('whatever, here is a blurb', b.text)
+        camel.blurbs.add(b.id);
+        yield camel.save()
+        console.log('blurb added');
+      });
+
+      console.log('camel.blurbs', camel.blurbs);
+      console.log('saved a model');
+    }
+    catch (err) {
+      console.log('ERROR:', err)
+    }
   }
+
+  // console.log('about to call populate fml');
+  // yield db.CamelItems.find().populate('blurbs');
+  // console.log('populate called');
+
+  var test = yield db.CamelItems.find({asin: 'B00K5LLR6K'});
+
+  console.log('did that work?');
+
+  console.log(test);
 
   console.log('saved models');
 };

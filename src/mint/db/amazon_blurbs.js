@@ -5,7 +5,10 @@ var AmazonBlurbsCollection = Waterline.Collection.extend({
   connection: 'default',
   attributes: {
     /** @type {text} informational text about an amazon item*/
-    text: 'text'
+    text: 'text',
+    item: {
+      model: 'camel_items'
+    }
   }
 });
 

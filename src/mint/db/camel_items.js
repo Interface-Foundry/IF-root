@@ -25,7 +25,7 @@ var camelItemsCollection = Waterline.Collection.extend({
     medium_image: 'string',
     large_image: 'string',
     /** @type {reference} descriptive blurbs associated with this item */
-    info: Waterline.isMany('amazon_blurbs')
+    blurbs: Waterline.isMany('amazon_blurbs')
   }
 });
 
