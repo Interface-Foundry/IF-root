@@ -12,7 +12,7 @@ var camelItemsCollection = Waterline.Collection.extend({
     savePercent: {
       type: 'float',
       defaultsTo: function () {
-        return this.price / this.previousPrice;
+        return (1.00 - this.price / this.previousPrice).toFixed(2);
       }
     },
     skipped: {
