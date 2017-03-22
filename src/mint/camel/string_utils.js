@@ -4,19 +4,24 @@
  */
 var utils = {};
 
+/**
+ *
+ */
 utils.getSpecs = function (str) {
 
   var patterns = [
-    /\b(px|pixels?)\b/gi,
-    /\b(wi[-\s]?fi)\b/gi,
-    /\b(hd|high[-\s]definition)\b/gi
+    /\s(\d+\s?px?|\d+\spixels?)\b/gi,
+    /\s(wi[-\s]?fi)\b/gi,
+    /\s(size\s\d\d?|(?:(?:size\s)?|(?:(?:x-?|extra[-\s])?[sml])small|medium|large))\b/gi,
+    /\s(hd|high[-\s]definition)\b/gi
   ];
 
   var specs = [];
 
   patterns.map(function (p) {
     var matches = p.exec(str);
-    if (matches) specs.concat(matches.slice(1));
+    console.log('MATCHES:', matches);
+    if (matches) specs = specs.concat(matches.slice(1));
   });
 
   return specs;
@@ -26,7 +31,7 @@ utils.getSpecs = function (str) {
  * truncates a string before the first dash
  */
 utils.dashes = function (str) {
-  // console.log('abdashsoul');
+  console.log('abdashsoul');
   return str.split(' -')[0];
 };
 
@@ -42,7 +47,7 @@ utils.parens = function (str) {
  * removes brackets and any text within them
  */
 utils.brackets = function (str) {
-  // console.log('brackets');
+  console.log('brackets');
   return str.replace(/\[[^\]]*\]/g, '');
 };
 
@@ -50,7 +55,7 @@ utils.brackets = function (str) {
  *
  */
 utils.ellipses = function (str) {
-  // console.log('ellipses');
+  console.log('ellipses');
   str = str.split(' ... ');
   if (str.length <= 1) str = str[0];
   else {
@@ -75,13 +80,18 @@ utils.ellipses = function (str) {
  *
  */
 utils.periods = function (str) {
-  return str.split('. ')[0];
+  console.log('moon hut');
+  // return str.split('. ')[0];
+  var period = /\w\w\w+(\.)\s/.exec(str);
+  if (period) return str.slice(0, period.index);
+  else return str;
 };
 
 /**
  *
  */
 utils.commas = function (str) {
+  console.log('commas')
   return str.split(',')[0];
 };
 
@@ -89,7 +99,7 @@ utils.commas = function (str) {
  * replaces any double spaces the previous methods have left with a single space
  */
 utils.spaces = function (str) {
-  // console.log('spaces');
+  console.log('spaces');
   return str.replace('  ', ' ');
 };
 

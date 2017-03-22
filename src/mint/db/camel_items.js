@@ -5,6 +5,7 @@ var camelItemsCollection = Waterline.Collection.extend({
   connection: 'default',
   attributes: {
     name: 'string',
+    original_name: 'string',
     asin: 'string',
     price: 'float',
     previousPrice: 'float',

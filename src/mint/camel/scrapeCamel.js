@@ -3,6 +3,7 @@ var cheerio = require('cheerio');
 var co = require('co');
 var fs = require('fs');
 var wait = require('co-wait');
+var _ = require('lodash');
 
 var amazon = require('../../chat/components/amazon_search').lookup;
 var string_utils = require('./string_utils');
@@ -116,6 +117,7 @@ var scrapeCamel = function * () {
     //saves items to the db
 
     var camel = yield db.CamelItems.create({
+      original_name: names[i],
       name: trimName(names[i]),
       asin: asins[i],
       price: prices[i].new,
@@ -150,7 +152,7 @@ var scrapeCamel = function * () {
       yield blurbs.map(function * (b) {
         camel.blurbs.add(b.id);
         yield camel.save()
-        console.log('whatever, here is a blurb', b.text)
+        // console.log('whatever, here is a blurb', b.text)
       });
 
       // console.log('camel.blurbs', camel.blurbs);
@@ -166,20 +168,23 @@ var scrapeCamel = function * () {
 var trimName = function (name) {
   console.log('original name', name);
 
-  var specs = string_utils.getSpecs(name);
-  console.log('specs', specs);
+  name = string_utils.ellipses(name);
+
+  var all_specs = string_utils.getSpecs(name);
+  console.log('specs', all_specs);
 
   name = string_utils.dashes(name);
   name = string_utils.parens(name);
   name = string_utils.brackets(name);
-  name = string_utils.ellipses(name);
   name = string_utils.commas(name);
   name = string_utils.periods(name);
   name = string_utils.spaces(name);
 
-  console.log('final name', name);
+  var redundant_specs = string_utils.getSpecs(name);
 
-  return name;
+  var specs = _.difference(all_specs, redundant_specs);
+
+  return name + ' ' + specs.join(' ');
 };
 
 /**
