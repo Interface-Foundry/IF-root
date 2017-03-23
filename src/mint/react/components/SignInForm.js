@@ -4,11 +4,18 @@ export default class SignInForm extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.handleEmail = this.handleEmail.bind(this);
+    this.handleEmail = ::this.handleEmail;
   }
+
   handleEmail(e) {
     this.setState({ email: e.target.value });
   }
+
+  static propTypes = {
+    signIn: PropTypes.func.isRequired,
+    cart_id: PropTypes.string.isRequired
+  }
+
   render() {
     const { cart_id, signIn } = this.props;
     return (

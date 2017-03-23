@@ -17,6 +17,10 @@ module.exports = function amazon_scraper (uri) {
       throw new Error('Can only handle uris from "www.amazon.com" but got"' + uri.host + '"')
     }
 
-    // the rest is TODO
+    var item = yield db.Items.create({
+      original_link: uri.href
+    })
+
+    return item
   })
 }

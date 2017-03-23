@@ -1,6 +1,10 @@
 import React, { PropTypes, Component } from 'react';
 
 export default class Item extends Component {
+  static propTypes = {
+    item: PropTypes.object.isRequired
+  }
+
   render() {
     const { item } = this.props;
     return (
