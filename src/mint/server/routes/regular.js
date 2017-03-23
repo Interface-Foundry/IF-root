@@ -12,9 +12,16 @@ var db;
 const dbReady = require('../../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
-router.get('/', (req, res) => {
-  res.render('pages/index');
-});
+router.get('/', (req, res) => co(function * () {
+  const userIds = req.UserSession.user_accounts.map(a => a.id)
+  const carts = yield db.Carts.find({
+    or: [
+      { leader: userIds },
+      { members: userIds }
+    ]
+  }).populate('items').populate('leader').populate('members');
+  res.render('pages/index', {carts: carts});
+}));
 
 /**
  * Non-react prototype views
