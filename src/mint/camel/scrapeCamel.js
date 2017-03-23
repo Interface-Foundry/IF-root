@@ -28,7 +28,44 @@ const count = 5;
  * @returns full site HTML
  */
 var scrape = function * (previousId) {
-  return rp(url)
+
+  /**
+ * returns a random integer between 0 and the specified exclusive maximum.
+ */
+function randomInt(exclusiveMax) {
+  return Math.floor(Math.random() * Math.floor(exclusiveMax));
+}
+
+/**
+ * returns a fake user agent to be used in request headers.
+ */
+function fakeUserAgent() {
+  var osxVer = Math.floor(Math.random() * 9) + 1;
+  var webkitMajVer = randomInt(999) + 111;
+  var webkitMinVer = randomInt(99) + 11;
+  var chromeMajVer = randomInt(99) + 11;
+  var chromeMinVer = randomInt(9999) + 1001;
+  var safariMajVer = randomInt(999) + 111;
+  return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+ osxVer +
+  ') AppleWebKit/' + webkitMajVer + '.' + webkitMinVer +
+  ' (KHTML, like Gecko) Chrome/' + chromeMajVer + '.0.' + chromeMinVer +
+  '2623.110 Safari/' + safariMajVer +'.36';
+}
+
+ var options = {
+    uri: url,
+    headers: {
+      'User-Agent': fakeUserAgent(),
+      'Accept': 'text/html,application/xhtml+xml',
+      'Accept-Language':'en-US,en;q=0.8',
+      'Cache-Control':'max-age=0',
+      'Connection':'keep-alive'
+    }
+  };
+
+  console.log('about to scrape', options);
+
+  return rp(options)
     .then(function (result) {
       console.log('result', result);
       return result;
@@ -77,7 +114,9 @@ var getAmazon = function * (asin) {
  * Scrapes camelcamelcamel and saves today's deals to mongo as camel_items
  */
 var scrapeCamel = function * () {
+  console.log('scrape camel called');
   var camel = yield scrape();
+  console.log('scraped');
 
   $ = cheerio.load(camel);
   var names = [];
@@ -289,14 +328,14 @@ var spreadCategories = function * (camels, categoryCounts) {
 // co(todaysDeals).catch(e => console.error(e));
 
 co(function * () {
-  yield scrapeCamel();
-  var deals = yield todaysDeals(count);
-  console.log('FINAL DEALS');
-  deals.map(d => {
-    console.log(d.name);
-    // console.log(d.category);
-  });
-  console.log(deals[deals.length-1].id);
+  return yield scrapeCamel();
+  // var deals = yield todaysDeals(count);
+  // console.log('FINAL DEALS');
+  // deals.map(d => {
+  //   console.log(d.name);
+  //   // console.log(d.category);
+  // });
+  // console.log(deals[deals.length-1].id);
 });
 
 module.exports = {
