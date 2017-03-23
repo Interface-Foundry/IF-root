@@ -195,7 +195,7 @@ type Waypoint {
   delivery_id: String
   user_id: String
   waypoint: String
-  data: String
+  data: JSON
   timestamp: String
   # Foreign refs
   user: Chatuser
