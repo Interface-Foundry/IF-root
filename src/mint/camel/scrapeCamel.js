@@ -66,6 +66,7 @@ var getAmazon = function * (asin) {
   if (amazon_item.LargeImage) item.images.large = amazon_item.LargeImage.URL[0];
   if (amazon_item.DetailPageUrl) item.url = amazon_item.DetailPageUrl;
   // if (amazon_test[0].reviews) item.reviews = amazon_test[0].reviews;
+  console.log('got this:', item);
   return item;
 };
 
@@ -92,8 +93,7 @@ var scrapeCamel = function * () {
   });
 
   console.log('got names and asins');
-
-  // console.log('db', db)
+  console.log('asins', asins);
 
   //gets new and old prices from the most popular section
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
@@ -147,7 +147,7 @@ var scrapeCamel = function * () {
       // info: amazon.info
     });
 
-    console.log('created camel');
+    console.log('created camel'); //never prints
     console.log('camel', camel);
 
     var blurbs = [];
