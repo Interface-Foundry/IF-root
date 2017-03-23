@@ -32,6 +32,9 @@ var scrape = function * (previousId) {
     .then(function (result) {
       // console.log('result', result);
       return result;
+    })
+    .catch(function (err) {
+      console.log('err');
     });
 };
 
