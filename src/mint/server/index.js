@@ -15,22 +15,24 @@ const fs = require('fs'),
   webpackConfig = require('../webpack.config.js');
 
 // live reloading
-const compiler = webpack(webpackConfig);
-app.use(webpackDevMiddleware(compiler, {
-  hot: true,
-  filename: '[name].js',
-  publicPath: '/build/',
-  stats: {
-    colors: true
-  },
-  historyApiFallback: true
-}));
+if (!process.env.NO_LIVE_RELOAD) {
+  const compiler = webpack(webpackConfig);
+  app.use(webpackDevMiddleware(compiler, {
+    hot: true,
+    filename: '[name].js',
+    publicPath: '/build/',
+    stats: {
+      colors: true
+    },
+    historyApiFallback: true
+  }));
 
-app.use(webpackHotMiddleware(compiler, {
-  log: console.log,
-  path: '/__webpack_hmr',
-  heartbeat: 10 * 1000
-}));
+  app.use(webpackHotMiddleware(compiler, {
+    log: console.log,
+    path: '/__webpack_hmr',
+    heartbeat: 10 * 1000
+  }));
+}
 
 // idk
 var regularRoutes = require('./routes/regular.js');
@@ -78,7 +80,7 @@ app.use((req, res, next) => co(function * () {
   }
 
   req.UserSession = yield db.Sessions.findOne({id: req.session.id}).populate('user_accounts')
-  console.log(req.UserSession)
+  // console.log(req.UserSession)
 
   // Now that the id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12
@@ -117,7 +119,46 @@ app.get('*', (req, res) =>
   res.render('pages/cart')
 );
 
-app.use(new mintLogger.ErrorLogger());
+// Log errors to the database in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(new mintLogger.ErrorLogger());
+}
+
+// Show an error page for non-json request, and the error for json requests
+app.use(function errorHandler (err, req, res, next) {
+  if (res.headersSent) {
+    return next(err)
+  }
+
+  if (req.headers.accept === 'application/json') {
+    printNiceError(err)
+    res.status(500)
+
+    if (process.env.NODE_ENV !== 'production') {
+      var body = ''
+      if (err.message) body += err.message
+      if (err.stack) {
+        var lines = err.stack.split('\n')
+        var i = 0
+        var line
+        while (!line && i < lines.length) {
+          if (lines[i].includes('src/mint/')) {
+            line = ` (${lines[i].replace(/.*src\/mint/, 'mint').trim()})`
+          }
+          i++
+        }
+
+        if (line) body += line
+      }
+      res.send(body)
+    } else {
+      res.send('Internal Server Error - email hello@kipthis.com if you would like to help :)')
+    }
+  } else {
+    // TODO render nice error pages res.render('error', err)
+    next(err)
+  }
+})
 
 const PORT = process.env.PORT || 3000;
 
@@ -125,9 +166,10 @@ app.listen(PORT, () => {
   console.log(`App listening at http://127.0.0.1:${PORT}`);
 });
 
-process.on('unhandledRejection', (err) => {
-  console.log('Unhandled Promise Rejection');
-  console.log('Reason: ' + err);
+function printNiceError(err) {
+  if (!err) {
+    return console.log('No error :P')
+  }
 
   /** Nicely print waterline errors */
   if (err.failedTransactions) {
@@ -142,6 +184,14 @@ process.on('unhandledRejection', (err) => {
   }
 
   /** help the user know where to look */
-  console.log(err.stack)
+  if (err.stack) {
+    console.log(err.stack)
+  } else {
+    console.log(err)
+  }
+}
 
+process.on('unhandledRejection', (err) => {
+  console.log('Unhandled Promise Rejection');
+  printNiceError(err)
 });

@@ -3,6 +3,7 @@ var co = require('co');
 var _ = require('lodash');
 
 var utils = require('../utilities/utils.js');
+var scrape = require('../cart/scrape_url')
 
 var router = express.Router();
 
@@ -11,6 +12,35 @@ var prototype = !!process.env.PROTOTYPE;
 var db;
 const dbReady = require('../../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
+
+/**
+ * Hack the router for error handling
+ */
+['get', 'post', 'delete'].map(method => {
+  var _originalHandler = router[method]
+  router[method] = function (path, fn) {
+    if (typeof path !== 'string' || typeof fn !== 'function') {
+      return _originalHandler.apply(router, arguments)
+    }
+
+    _originalHandler.call(router, path, function (req, res, next) {
+      var ret = fn(req, res, next)
+      if (ret instanceof Promise) {
+        ret.catch(e => {
+          next(e)
+        })
+      }
+    })
+  }
+})
+
+/**
+ * Testing
+ */
+router.get('/error', (req, res) => co(function * () {
+  console.log('gonna throw an error now')
+  throw new Error('omg error')
+}))
 
 /**
  * GET /api/session
@@ -161,233 +191,121 @@ router.get('/addItem', (req, res) => co(function* () {
 }))
 
 /**
+ * Returns all the carts that the user is a member or leader of
+ */
+router.get('/carts', (req, res) => co(function * () {
+  if (!_.get(req, 'UserSession.user_accounts[0]')) {
+    return res.send([])
+  }
+
+  // get the list of their user ids
+  const userIds = req.UserSession.user_accounts.map(a => a.id)
+
+  // find all the carts where their user id appears in the leader or member field
+  const carts = yield db.Carts.find({
+    or: [
+      { leader: userIds },
+      { members: userIds }
+    ]
+  }).populate('items').populate('leader').populate('members')
+
+  res.send(carts)
+}))
+
+/**
  * if they goto api/cart maybe redirect or something, possibly could use this elsewhere
  * @param {cart_id} ) cart_id to redirect to or whatever
  * redirects to cart/:cart_id
  */
 router.get('/cart/:cart_id', (req, res) => co(function* () {
-  console.log('GETTING CART', req.params.cart_id);
-  var cart = yield db.Carts.findOne({ id: req.params.cart_id });
+  var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    .populate('leader')
+    .populate('members')
+    .populate('items')
 
   if (cart) {
     res.send(cart);
   } else {
-    console.log('cart doesnt exist');
-    res.sendStatus(400);
+    throw new Error('Cart not found')
   }
 }));
 
 /**
  * gets items in cart
- * @param {[type]} )             {  var cart [description]
+ * @param {String}  cart_id
  * @yield {[type]} [description]
  */
 router.get('/cart/:cart_id/items', (req, res) => co(function* () {
-  var cart = yield db.Carts.findOne({ id: req.params.cart_id });
-  cart.items = [{
-    "id": 1,
-    "email": "mcarr0@ox.ac.uk",
-    "name": "Zoolab",
-    "descrip": "Multi-tiered intermediate alliance",
-    "quantity": 8,
-    "price": 37.15,
-    "paid": false,
-    "total": 297.2,
-    "original_link": "https://www.amazon.com/gp/product/LEY6C35ULO/"
-  }, {
-    "id": 2,
-    "email": "tryan1@google.pl",
-    "name": "Viva",
-    "descrip": "Stand-alone upward-trending initiative",
-    "quantity": 6,
-    "price": 55.32,
-    "paid": true,
-    "total": 331.92,
-    "original_link": "https://www.amazon.com/gp/product/KC0ZU0V7L0/"
-  }, {
-    "id": 3,
-    "email": "kjordan2@histats.com",
-    "name": "Ronstring",
-    "descrip": "Multi-lateral explicit functionalities",
-    "quantity": 6,
-    "price": 95.85,
-    "paid": true,
-    "total": 575.1,
-    "original_link": "https://www.amazon.com/gp/product/VT3SK6356X/"
-  }, {
-    "id": 4,
-    "email": "drussell3@tmall.com",
-    "name": "Daltfresh",
-    "descrip": "Re-engineered leading edge conglomeration",
-    "quantity": 7,
-    "price": 48.82,
-    "paid": true,
-    "total": 341.74,
-    "original_link": "https://www.amazon.com/gp/product/VU0U3A5R8T/"
-  }, {
-    "id": 5,
-    "email": "rallen4@eventbrite.com",
-    "name": "Asoka",
-    "descrip": "Virtual heuristic implementation",
-    "quantity": 5,
-    "price": 16.23,
-    "paid": true,
-    "total": 81.15,
-    "original_link": "https://www.amazon.com/gp/product/JX44JB6DHB/"
-  }, {
-    "id": 6,
-    "email": "ngilbert5@mapy.cz",
-    "name": "Domainer",
-    "descrip": "Persistent modular portal",
-    "quantity": 2,
-    "price": 28.54,
-    "paid": false,
-    "total": 57.08,
-    "original_link": "https://www.amazon.com/gp/product/IEIPESB180/"
-  }, {
-    "id": 7,
-    "email": "jhenderson6@go.com",
-    "name": "Y-find",
-    "descrip": "Configurable mobile instruction set",
-    "quantity": 10,
-    "price": 84.6,
-    "paid": false,
-    "total": 846.0,
-    "original_link": "https://www.amazon.com/gp/product/GSLUQ7YE8Q/"
-  }, {
-    "id": 8,
-    "email": "cmiller7@hexun.com",
-    "name": "Viva",
-    "descrip": "Synchronised coherent matrices",
-    "quantity": 3,
-    "price": 46.74,
-    "paid": true,
-    "total": 140.22,
-    "original_link": "https://www.amazon.com/gp/product/FUWF3GD18A/"
-  }, {
-    "id": 9,
-    "email": "hhanson8@go.com",
-    "name": "Wrapsafe",
-    "descrip": "Devolved tertiary attitude",
-    "quantity": 6,
-    "price": 2.96,
-    "paid": true,
-    "total": 17.76,
-    "original_link": "https://www.amazon.com/gp/product/QRUWM0F4M9/"
-  }, {
-    "id": 10,
-    "email": "trussell9@harvard.edu",
-    "name": "Subin",
-    "descrip": "Centralized global task-force",
-    "quantity": 2,
-    "price": 49.38,
-    "paid": true,
-    "total": 98.76,
-    "original_link": "https://www.amazon.com/gp/product/JS3QM8ODX9/"
-  }, {
-    "id": 11,
-    "email": "cgarretta@imdb.com",
-    "name": "Bitwolf",
-    "descrip": "User-friendly national customer loyalty",
-    "quantity": 2,
-    "price": 86.02,
-    "paid": false,
-    "total": 172.04,
-    "original_link": "https://www.amazon.com/gp/product/BK9V01FAXM/"
-  }, {
-    "id": 12,
-    "email": "lyoungb@i2i.jp",
-    "name": "Matsoft",
-    "descrip": "Seamless radical instruction set",
-    "quantity": 8,
-    "price": 84.02,
-    "paid": false,
-    "total": 672.16,
-    "original_link": "https://www.amazon.com/gp/product/DZ3QM958GB/"
-  }, {
-    "id": 13,
-    "email": "tphillipsc@webnode.com",
-    "name": "Bamity",
-    "descrip": "Secured high-level migration",
-    "quantity": 10,
-    "price": 94.3,
-    "paid": true,
-    "total": 943.0,
-    "original_link": "https://www.amazon.com/gp/product/OR05AA312F/"
-  }, {
-    "id": 14,
-    "email": "ebakerd@independent.co.uk",
-    "name": "Bamity",
-    "descrip": "Public-key didactic methodology",
-    "quantity": 3,
-    "price": 25.17,
-    "paid": false,
-    "total": 75.51,
-    "original_link": "https://www.amazon.com/gp/product/AP5412S972/"
-  }, {
-    "id": 15,
-    "email": "jwrighte@independent.co.uk",
-    "name": "Quo Lux",
-    "descrip": "Virtual multimedia process improvement",
-    "quantity": 10,
-    "price": 19.92,
-    "paid": true,
-    "total": 199.2,
-    "original_link": "https://www.amazon.com/gp/product/TM323I7E31/"
-  }];
-
-  if (cart) {
-    res.send(cart.items);
-
-  } else {
-    console.log(`cart ${req.params.cart_id} doesnt exist`);
-    res.sendStatus(400);
+  var cart = yield db.Carts.findOne({ id: req.params.cart_id }).populate('items')
+  if (!cart) {
+    throw new Error('Cart not found')
   }
+
+  res.send(cart.items)
 }));
 
 /**
- * adds item to cart based on url or possibly other ways
+ * adds item to cart. request body should contain the url
+ * {
+ *   url: 'some.url', // required
+ *   user_id: '1234', // the user id if they have more than one account
+ * }
  * @param {cart_id} cart_id to add item to
- * @param {item_url} item url from amazon
- * @returns 200
+ * @returns {Item}
  */
-router.post('/cart/:cart_id/items', (req, res) => co(function* () {
-
-  // const cart = yield db.Carts.findOne({id: req.query.cart_id})
-  // const item = yield db.Items.create({
-  //   original_link: req.query.url
-  // })
-  // cart.items.add(item.id)
-  // yield cart.save()
-  // if (prototype) {
-  //   return res.redirect('/cart/' + cart.id)
-  // } else {
-  //   return res.send({
-  //     ok: true,
-  //     item: item
-  //   })
-  // }
-  var original_url = req.body.url;
-  var cartId = req.params.cart_id;
-
-  // just get the amazon lookup results and title from that currently
-  var itemTitle = yield utils.getItemByUrl(original_url);
-
-  var itemObj = {
-    cart: cartId,
-    original_link: original_url,
-    item_name: itemTitle
-  };
-
-  var item = yield db.Items.findOne(itemObj);
-
-  if (item) {
-    item.quantity++;
-  } else {
-    yield db.Items.create(itemObj);
+router.post('/cart/:cart_id/item', (req, res) => co(function* () {
+  // only available for logged-in Users
+  if (!_.get(req, 'UserSession.user_accounts[0]')) {
+    throw new Error('Unauthorized')
   }
 
-  res.send(200);
+  // if they specified the user id, verify it is them
+  var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
+  if (req.body.user_id && !userIds.has(req.body.user_id)) {
+    throw new Error('Unauthorized')
+  }
+
+  // Make sure the cart exists
+  const cart = yield db.Carts.findOne({id: req.params.cart_id})
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+
+  // Create an item from the url
+  const item = yield scrape(req.body.url)
+  cart.items.add(item.id)
+
+  // specify who added it
+  if (req.body.user_id) {
+    item.added_by = req.body.user_id
+  } else {
+    item.added_by = req.UserSession.user_accounts[0].id
+  }
+  yield item.save()
+
+  // Add the user to the members group of the cart if they are not part of it already
+  // IF they specified a specific user_account id that they want to add the cart as,
+  // use that one, otherwise use the first user id in their list
+  if (req.body.user_id) {
+    var isLeader = cart.leader === req.body.user_id
+    var isMember = cart.members.has(req.body.user_id)
+    if (!isLeader && !isMember) {
+      cart.members.add(req.body.user_id)
+    }
+  } else {
+    var isLeader = userIds.has(cart.leader)
+    var isMember = cart.members.reduce((isMember, id) => isMember || userIds.has(id), false)
+    if (!isLeader && !isMember) {
+      cart.members.add(req.UserSession.user_acconts[0].id)
+    }
+  }
+  yield cart.save()
+
+  if (prototype) {
+    return res.redirect('/cart/' + cart.id)
+  } else {
+    return res.send(item)
+  }
 }));
 
 /**
@@ -397,14 +315,44 @@ router.post('/cart/:cart_id/items', (req, res) => co(function* () {
  * @param {quantity} [number to subtract]
  * @yield {[type]} [description]
  */
-router.delete('/cart/:cart_id/items', (req, res) => co(function* () {
-  var item = req.body.itemId;
-  var cartId = req.params.cart_id;
-  var quantity = _.get(req, 'body.quantity') ? req.body.quantity : -1;
+router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
+  // only available for logged-in Users
+  if (!_.get(req, 'UserSession.user_accounts[0]')) {
+    throw new Error('Unauthorized')
+  }
 
-  // just get the amazon lookup results and title from that currently
-  yield db.Items.findOneAndUpdate({ item: item, cart_id: cartId }, { $inc: { 'quantity': quantity } });
-  res.send(200);
+  // Make sure the cart exists
+  const cart = yield db.Carts.findOne({id: req.params.cart_id})
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+
+  // Make sure they specified an item id
+  if (!req.body.item_id) {
+    throw new Error('Must specify item_id')
+  }
+
+  // find the item they want to delete
+  var item = yield db.Items.findOne({
+    id: req.body.item_id
+  })
+  if (!item) {
+    throw new Error('Item not found')
+  }
+
+  // Make sure user has permission to delete it
+  var isLeader = req.UserSession.user_accounts.map(a => a.id).includes(cart.leader)
+  var isAdder = req.UserSession.user_accounts.map(a => a.id).includes(item.added_by)
+  if (!isLeader && !isAdder) {
+    throw new Error('Unauthorized')
+  }
+
+  // Remove the cart-item association
+  cart.items.remove(item.id)
+  yield cart.save()
+
+  // Just say ok
+  res.status(200).end()
 }));
 
 /**

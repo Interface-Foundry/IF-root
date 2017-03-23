@@ -66,13 +66,12 @@ export function fetchItems(cart_id) {
 export function removeItem(cart_id, item) {
   return function (dispatch) {
     dispatch(requestRemoveItem(cart_id, item));
-    return fetch(`/api/cart/${cart_id}/items`, {
-      method: 'DELETE',
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        itemId: item,
-        quantity: -1
-      })
+    return fetch(`/api/cart/${cart_id}/item`, {
+        'method': 'DELETE',
+        credentials: 'same-origin',
+        'body': JSON.stringify({
+          item_id: item,
+        })
     })
     .then(response => response.json())
     .then(response => dispatch(receiveRemoveItem(cart_id, response)));
@@ -83,7 +82,13 @@ export function addItem(e, cart_id, url) {
   e.preventDefault();
   return dispatch => {
     dispatch(requestAddItem());
-    return fetch(`/api/addItem?cart_id=${cart_id}&url=${url}`)
+    return fetch(`/api/cart/${cart_id}/item`, {
+        'method': 'POST',
+        credentials: 'same-origin',
+        'body': JSON.stringify({
+          url: url
+        })
+      })
       .then(res => res.json())
       .then(json => dispatch(receiveAddItem(json)));
   };
