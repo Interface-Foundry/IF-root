@@ -85,38 +85,32 @@ describe('api', () => {
     assert(session.createdAt)
   }))
 
-  it('POST /api/carts/:cart_id/items should return Unauthorized for anyone that tries to push an item to a cart without being signed in', () => co(function * () {
+  it('POST /api/cart/:cart_id/item should return Unauthorized for anyone that tries to push an item to a cart without being signed in', () => co(function * () {
     var err
     try {
-      yield post('/api/carts/12345/items', {
+      yield post('/api/cart/12345/item', {
         url: 'https://www.amazon.com/Onitsuka-Tiger-Mexico-Classic-Running/dp/B00L8IXMN0/ref=sr_1_11?s=apparel&ie=UTF8&qid=1490047374&sr=1-11&nodeID=679312011&psd=1&keywords=asics%2Bshoes&th=1&psc=1'
       })
     } catch (e) {
       err = e
     }
     assert(err)
-    assert.equal(err.statusCode, 401, 'Should be Unauthorized 401')
-
-    // make sure it's json
-    aseert(err.body)
-    assert.strictEqual(err.body.ok, false)
+    assert.equal(err.statusCode, 500, 'Should be 500 Unauthorized')
+    assert.equal(err.response.body, 'Unauthorized')
   }))
 
-  it('GET /api/carts/[Bad Id] should return 404 for a DNE cart', () => co(function * () {
+  it('GET /api/cart/[Bad Id] should return 500 for a DNE cart', () => co(function * () {
     var err
     var res
     try {
-      res = yield get('/api/carts/12345')
+      res = yield get('/api/cart/12345')
     } catch (e) {
       err = e
     }
 
     assert(err)
-    assert.equal(err.statusCode, 404)
-
-    // make sure it's json
-    aseert(err.body)
-    assert.strictEqual(err.body.ok, false)
+    assert.equal(err.statusCode, 500)
+    assert.equal(err.response.body, 'Cart not found')
   }))
 
   it('GET /api/session should return the user_account if signed in', () => co(function * () {

@@ -130,13 +130,10 @@ app.use(function errorHandler (err, req, res, next) {
     return next(err)
   }
 
-  if (req.accept === 'application/json') {
+  if (req.headers.accept === 'application/json') {
     printNiceError(err)
     res.status(500)
-    res.send({
-      ok: false,
-      error: err
-    })
+    res.send(err.message)
   } else {
     // TODO render nice error pages here for dev and production
     next(err)
@@ -150,7 +147,6 @@ app.listen(PORT, () => {
 });
 
 function printNiceError(err) {
-  console.log('printing nice error')
   if (!err) {
     return console.log('No error :P')
   }

@@ -224,8 +224,7 @@ router.get('/cart/:cart_id', (req, res) => co(function* () {
   if (cart) {
     res.send(cart);
   } else {
-    console.log('cart doesnt exist');
-    res.sendStatus(400);
+    throw new Error('Cart not found')
   }
 }));
 
