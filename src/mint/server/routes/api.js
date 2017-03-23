@@ -301,7 +301,7 @@ router.post('/cart/:cart_id/item', (req, res) => co(function* () {
     var isLeader = userIds.has(cart.leader)
     var isMember = cart.members.reduce((isMember, id) => isMember || userIds.has(id), false)
     if (!isLeader && !isMember) {
-      cart.members.add(req.UserSession.user_acconts[0].id)
+      cart.members.add(req.UserSession.user_accounts[0].id)
     }
   }
   yield cart.save()

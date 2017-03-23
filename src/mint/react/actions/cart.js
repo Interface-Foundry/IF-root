@@ -68,6 +68,10 @@ export function removeItem(cart_id, item) {
     dispatch(requestRemoveItem(cart_id, item));
     return fetch(`/api/cart/${cart_id}/item`, {
         'method': 'DELETE',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
         credentials: 'same-origin',
         'body': JSON.stringify({
           item_id: item,
@@ -84,6 +88,10 @@ export function addItem(e, cart_id, url) {
     dispatch(requestAddItem());
     return fetch(`/api/cart/${cart_id}/item`, {
         'method': 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
         credentials: 'same-origin',
         'body': JSON.stringify({
           url: url
