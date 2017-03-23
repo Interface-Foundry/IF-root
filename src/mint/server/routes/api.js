@@ -218,8 +218,10 @@ router.get('/carts', (req, res) => co(function * () {
  * redirects to cart/:cart_id
  */
 router.get('/cart/:cart_id', (req, res) => co(function* () {
-  console.log('GETTING CART', req.params.cart_id);
-  var cart = yield db.Carts.findOne({ id: req.params.cart_id });
+  var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    .populate('leader')
+    .populate('members')
+    .populate('items')
 
   if (cart) {
     res.send(cart);
@@ -259,12 +261,12 @@ router.post('/cart/:cart_id/item', (req, res) => co(function* () {
 
   // if they specified the user id, verify it is them
   var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
-  if (!userIds.has(req.body.user_id)) {
+  if (req.body.user_id && !userIds.has(req.body.user_id)) {
     throw new Error('Unauthorized')
   }
 
   // Make sure the cart exists
-  const cart = yield db.Carts.findOne({id: req.query.cart_id})
+  const cart = yield db.Carts.findOne({id: req.params.cart_id})
   if (!cart) {
     throw new Error('Cart not found')
   }
@@ -323,7 +325,7 @@ router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
   }
 
   // Make sure the cart exists
-  const cart = yield db.Carts.findOne({id: req.query.cart_id})
+  const cart = yield db.Carts.findOne({id: req.params.cart_id})
   if (!cart) {
     throw new Error('Cart not found')
   }

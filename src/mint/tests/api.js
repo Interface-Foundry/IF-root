@@ -187,7 +187,7 @@ describe('api', () => {
 
   it('DELETE /api/cart/:cart_id/item should delete a specific item', () => co(function * () {
     var cart = yield del('/api/cart/' + mcTesty.cart_id + '/item', {
-      id: mcTesty.item_id
+      item_id: mcTesty.item_id
     })
 
     assert(cart)
