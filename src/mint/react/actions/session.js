@@ -19,22 +19,20 @@ const receiveUpdate = (newInfo) => ({
 });
 
 export function update() {
-  return dispatch => {
+  return async dispatch => {
     dispatch(request());
-    return fetch('/api/session', {
-        credentials: 'same-origin'
-      })
-      .then(response => response.json())
-      .then(json => dispatch(receive(json)));
+    const response = await fetch('/api/session', {
+      credentials: 'same-origin'
+    });
+    if (response.ok) dispatch(receive(await response.json()));
   };
 }
 
 export function signIn(e, cart_id, email) {
   e.preventDefault();
-  return dispatch => {
+  return async dispatch => {
     dispatch(requestUpdate());
-    return fetch(`/api/identify?cart_id=${cart_id}&email=${email}`)
-    .then(response => response.json())
-    .then(json => dispatch(receiveUpdate(json)));
+    const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`)
+    if (response.ok) dispatch(receiveUpdate(await response.json()));
   };
 }
