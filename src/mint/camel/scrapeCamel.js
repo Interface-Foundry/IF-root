@@ -30,7 +30,7 @@ const count = 5;
 var scrape = function * (previousId) {
   return rp(url)
     .then(function (result) {
-      // console.log('result', result);
+      console.log('result', result);
       return result;
     })
     .catch(function (err) {
