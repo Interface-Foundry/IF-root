@@ -38,15 +38,17 @@ const get = function * (url, extended) {
   return body
 }
 
-const post = function * (url, data) {
+const post = function * (url, data, extended) {
   url = 'http://localhost:3000' + url
   var body = yield request({
     uri: url,
     method: 'POST',
     jar: true,
     json: true,
-    body: data
+    body: data,
+    resolveWithFullResponse: extended
   })
+  return body
 }
 
 const del = function * (url, data) {
@@ -58,6 +60,7 @@ const del = function * (url, data) {
     json: true,
     body: data
   })
+  return body
 }
 
 describe('api', () => {
@@ -165,17 +168,15 @@ describe('api', () => {
 
   it('POST /api/carts/cart_id/item should let McTesty add an item to the cart, returning the cart', () => co(function * () {
     var url = 'https://www.amazon.com/HiLetgo-Version-NodeMCU-Internet-Development/dp/B010O1G1ES/ref=sr_1_3?ie=UTF8&qid=1490217410&sr=8-3&keywords=nodemcu'
-    var cart = yield post('/api/cart/' + mcTesty.cart_id + '/item', {
+    var item = yield post('/api/cart/' + mcTesty.cart_id + '/item', {
       url: url
     })
 
-    assert(cart)
-    assert(cart.items instanceof Array)
-    assert.equal(cart.items.length, 1, 'should only be one item in the cart')
-    assert.equal(cart.items[0].original_link, url)
+    assert(item)
+    assert.equal(item.original_link, url)
 
     // save item id for later
-    mcTesty.item_id = cart.items[0].id
+    mcTesty.item_id = item.id
   }))
 
   it('GET /api/cart/:cart_id should return all the info for a specific cart', () => co(function * () {
@@ -186,10 +187,12 @@ describe('api', () => {
   }))
 
   it('DELETE /api/cart/:cart_id/item should delete a specific item', () => co(function * () {
-    var cart = yield del('/api/cart/' + mcTesty.cart_id + '/item', {
+    var ok = yield del('/api/cart/' + mcTesty.cart_id + '/item', {
       item_id: mcTesty.item_id
     })
 
+    // Check to make sure there are no more items in the cart
+    var cart = yield get('/api/cart/' + mcTesty.cart_id)
     assert(cart)
     assert.equal(cart.leader.email_address, mcTesty.email)
     assert.equal(cart.items.length, 0, 'should not be any items in the cart now')

@@ -80,7 +80,7 @@ app.use((req, res, next) => co(function * () {
   }
 
   req.UserSession = yield db.Sessions.findOne({id: req.session.id}).populate('user_accounts')
-  console.log(req.UserSession)
+  // console.log(req.UserSession)
 
   // Now that the id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12

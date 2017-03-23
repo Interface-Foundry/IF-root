@@ -304,10 +304,7 @@ router.post('/cart/:cart_id/item', (req, res) => co(function* () {
   if (prototype) {
     return res.redirect('/cart/' + cart.id)
   } else {
-    return res.send({
-      ok: true,
-      item: item
-    })
+    return res.send(item)
   }
 }));
 
@@ -344,8 +341,8 @@ router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
   }
 
   // Make sure user has permission to delete it
-  var isLeader = req.UserSession.user_accounts.map(a => a.id).contains(cart.leader)
-  var isAdder = req.UserSession.user_accounts.map(a => a.id).contains(item.added_by)
+  var isLeader = req.UserSession.user_accounts.map(a => a.id).includes(cart.leader)
+  var isAdder = req.UserSession.user_accounts.map(a => a.id).includes(item.added_by)
   if (!isLeader && !isAdder) {
     throw new Error('Unauthorized')
   }
@@ -353,6 +350,9 @@ router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
   // Remove the cart-item association
   cart.items.remove(item.id)
   yield cart.save()
+
+  // Just say ok
+  res.status(200).end()
 }));
 
 /**
