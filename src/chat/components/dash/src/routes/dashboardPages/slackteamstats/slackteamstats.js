@@ -47,7 +47,7 @@ const waypointsCount = [
 
 const COLORS = ['#FF0000', '#FF8888', '#0000FF', '#8888FF'];
 
-function sumTeamStats(teams){
+function sumStoreTeamStats(teams){
   	var total = 0;
   	for(var i = 0; i<teams.length; i++){
   		total += teams[i].carts.length;
@@ -55,16 +55,27 @@ function sumTeamStats(teams){
   	return total;
   }
 
-function getPieChartTeamStatsData(teams, team){ // [store item count, store order count, cafe item count, cafe order count]
+/*
+function sumCafeTeamStats(teams){
+  var total = 0;
+  for(var i = 0; i<teams.length; i++){
+    total += teams[i].carts.length;
+  }
+  return total;
+}
+*/
+
+function getPieChartTeamStatsData(teams, waypoints, team){ // [store item count, store order count, cafe item count, cafe order count]
   const data = [];
-  var numCafeOrders = team ? teams.find(function(t){return t.team_id==team}).carts.length : sumTeamStats(teams);
+  //var numCafeOrders = team ? teams.find(function(t){return t.team_id==team}).foodSessions.length : sumCafeTeamStats(teams);
+  var numStoreOrders = team ? teams.find(function(t){return t.team_id==team}).carts.length : sumStoreTeamStats(teams);
  
   const sampleData = [ 16, 11, 80, 64 ];
   data.push({name: '# Store Items', value: sampleData[0]})
-  data.push({name: '# Store Orders', value: sampleData[1]})
+  data.push({name: '# Store Orders', value: numStoreOrders})
   data.push({name: '# Cafe Items', value: sampleData[2]})
 
-  data.push({name: '# Cafe Orders', value: numCafeOrders})
+  data.push({name: '# Cafe Orders', value: sampleData[3]})
   return data;
 }
 
@@ -250,7 +261,7 @@ function displayFlotCharts(props, context) {
             <div>
               <ResponsiveContainer width="100%" aspect={2}>
                 <PieChart >
-                  <Pie isAnimationActive={false} data={getPieChartTeamStatsData(teams,props.teamId)}  label>
+                  <Pie isAnimationActive={false} data={getPieChartTeamStatsData(teams, waypoints, props.teamId)}  label>
                     {cells}
                   </Pie>
                   <Tooltip />
