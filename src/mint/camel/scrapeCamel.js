@@ -4,7 +4,6 @@ var co = require('co');
 var fs = require('fs');
 var wait = require('co-wait');
 var _ = require('lodash');
-var {Apac} = require('apac');
 
 // amazon = new Apac({
 //   awsId: 'AKIAIQWK3QCI5BOJTT5Q',
