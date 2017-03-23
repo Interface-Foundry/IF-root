@@ -128,10 +128,9 @@ app.use(function errorHandler (err, req, res, next) {
     return next(err)
   }
 
-  res.status(200)
-
   if (req.accept === 'application/json') {
     printNiceError(err)
+    res.status(500)
     res.send({
       ok: false,
       error: err

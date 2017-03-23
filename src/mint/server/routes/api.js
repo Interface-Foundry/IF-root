@@ -3,6 +3,7 @@ var co = require('co');
 var _ = require('lodash');
 
 var utils = require('../utilities/utils.js');
+var scrape = require('../cart/scrape_url')
 
 var router = express.Router();
 
@@ -190,6 +191,28 @@ router.get('/addItem', (req, res) => co(function* () {
 }))
 
 /**
+ * Returns all the carts that the user is a member or leader of
+ */
+router.get('/carts', (req, res) => co(function * () {
+  if (!_.get(req, 'UserSession.user_accounts[0]')) {
+    return res.send([])
+  }
+
+  // get the list of their user ids
+  const userIds = req.UserSession.user_accounts.map(a => a.id)
+
+  // find all the carts where their user id appears in the leader or member field
+  const carts = yield db.Carts.find({
+    or: [
+      { leader: userIds },
+      { members: userIds }
+    ]
+  }).populate('items').populate('leader').populate('members')
+
+  res.send(carts)
+}))
+
+/**
  * if they goto api/cart maybe redirect or something, possibly could use this elsewhere
  * @param {cart_id} ) cart_id to redirect to or whatever
  * redirects to cart/:cart_id
@@ -208,62 +231,83 @@ router.get('/cart/:cart_id', (req, res) => co(function* () {
 
 /**
  * gets items in cart
- * @param {[type]} )             {  var cart [description]
+ * @param {String}  cart_id
  * @yield {[type]} [description]
  */
 router.get('/cart/:cart_id/items', (req, res) => co(function* () {
-  var cart = yield db.Carts.findOne({ id: req.params.cart_id });
-  if (cart) {
-    res.send(cart.items);
-  } else {
-    console.log(`cart ${req.params.cart_id} doesnt exist`);
-    res.sendStatus(400);
+  var cart = yield db.Carts.findOne({ id: req.params.cart_id }).populate('items')
+  if (!cart) {
+    throw new Error('Cart not found')
   }
+
+  res.send(cart.items)
 }));
 
 /**
- * adds item to cart based on url or possibly other ways
+ * adds item to cart. request body should contain the url
+ * {
+ *   url: 'some.url', // required
+ *   user_id: '1234', // the user id if they have more than one account
+ * }
  * @param {cart_id} cart_id to add item to
- * @param {item_url} item url from amazon
- * @returns 200
+ * @returns {Item}
  */
-router.post('/cart/:cart_id/items', (req, res) => co(function* () {
-
-  // const cart = yield db.Carts.findOne({id: req.query.cart_id})
-  // const item = yield db.Items.create({
-  //   original_link: req.query.url
-  // })
-  // cart.items.add(item.id)
-  // yield cart.save()
-  // if (prototype) {
-  //   return res.redirect('/cart/' + cart.id)
-  // } else {
-  //   return res.send({
-  //     ok: true,
-  //     item: item
-  //   })
-  // }
-  var original_url = req.body.url;
-  var cartId = req.params.cart_id;
-
-  // just get the amazon lookup results and title from that currently
-  var itemTitle = yield utils.getItemByUrl(original_url);
-
-  var itemObj = {
-    cart: cartId,
-    original_link: original_url,
-    item_name: itemTitle
-  };
-
-  var item = yield db.Items.findOne(itemObj);
-
-  if (item) {
-    item.quantity++;
-  } else {
-    yield db.Items.create(itemObj);
+router.post('/cart/:cart_id/item', (req, res) => co(function* () {
+  // only available for logged-in Users
+  if (!_.get(req, 'UserSession.user_accounts[0]')) {
+    throw new Error('Unauthorized')
   }
 
-  res.send(200);
+  // if they specified the user id, verify it is them
+  var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
+  if (!userIds.has(req.body.user_id)) {
+    throw new Error('Unauthorized')
+  }
+
+  // Make sure the cart exists
+  const cart = yield db.Carts.findOne({id: req.query.cart_id})
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+
+  // Create an item from the url
+  const item = yield scrape(req.body.url)
+  cart.items.add(item.id)
+
+  // specify who added it
+  if (req.body.user_id) {
+    item.added_by = req.body.user_id
+  } else {
+    item.added_by = req.UserSession.user_accounts[0].id
+  }
+  yield item.save()
+
+  // Add the user to the members group of the cart if they are not part of it already
+  // IF they specified a specific user_account id that they want to add the cart as,
+  // use that one, otherwise use the first user id in their list
+  if (req.body.user_id) {
+    var isLeader = cart.leader === req.body.user_id
+    var isMember = cart.members.has(req.body.user_id)
+    if (!isLeader && !isMember) {
+      cart.members.add(req.body.user_id)
+    }
+  } else {
+    var isLeader = userIds.has(cart.leader)
+    var isMember = cart.members.reduce((isMember, id) => isMember || userIds.has(id), false)
+    if (!isLeader && !isMember) {
+      cart.members.add(req.UserSession.user_acconts[0].id)
+    }
+  }
+  yield cart.save()
+
+  if (prototype) {
+    return res.redirect('/cart/' + cart.id)
+  } else {
+    return res.send({
+      ok: true,
+      item: item
+    })
+  }
 }));
 
 /**
@@ -274,13 +318,40 @@ router.post('/cart/:cart_id/items', (req, res) => co(function* () {
  * @yield {[type]} [description]
  */
 router.delete('/cart/:cart_id/items', (req, res) => co(function* () {
-  var item = req.body.itemId;
-  var cartId = req.params.cart_id;
-  var quantity = _.get(req, 'body.quantity') ? req.body.quantity : -1;
+  // only available for logged-in Users
+  if (!_.get(req, 'UserSession.user_accounts[0]')) {
+    throw new Error('Unauthorized')
+  }
 
-  // just get the amazon lookup results and title from that currently
-  yield db.Items.findOneAndUpdate({ item: item, cart_id: cartId }, { $inc: { 'quantity': quantity } });
-  res.send(200);
+  // Make sure the cart exists
+  const cart = yield db.Carts.findOne({id: req.query.cart_id})
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+
+  // Make sure they specified an item id
+  if (!req.body.item_id) {
+    throw new Error('Must specify item_id')
+  }
+
+  // find the item they want to delete
+  var item = yield db.Items.findOne({
+    id: req.body.item_id
+  })
+  if (!item) {
+    throw new Error('Item not found')
+  }
+
+  // Make sure user has permission to delete it
+  var isLeader = req.UserSession.user_accounts.map(a => a.id).contains(cart.leader)
+  var isAdder = req.UserSession.user_accounts.map(a => a.id).contains(item.added_by)
+  if (!isLeader && !isAdder) {
+    throw new Error('Unauthorized')
+  }
+
+  // Remove the cart-item association
+  cart.items.remove(item.id)
+  yield cart.save()
 }));
 
 /**

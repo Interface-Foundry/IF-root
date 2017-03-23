@@ -177,7 +177,7 @@ describe('api', () => {
     assert(cart)
     assert(cart.items instanceof Array)
     assert.equal(cart.items.length, 1, 'should only be one item in the cart')
-    assert.equal(cart.items[0].original_url, url)
+    assert.equal(cart.items[0].original_link, url)
 
     // save item id for later
     mcTesty.item_id = cart.items[0].id
