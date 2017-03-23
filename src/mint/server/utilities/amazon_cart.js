@@ -49,7 +49,7 @@ function checkAmazonItemInCart (item, cart) {
     return cartItem;
   }
   return false;
-};
+}
 
 /**
  * from whatever item type is given, get corresponding item from amazon

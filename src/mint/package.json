@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@slack/client": "^3.8.1",
+    "apac": "^3.0.2",
     "body-parser": "^1.17.1",
     "classnames": "^2.2.5",
     "client-sessions": "^0.7.0",

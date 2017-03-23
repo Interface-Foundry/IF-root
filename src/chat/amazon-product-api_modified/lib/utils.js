@@ -12,9 +12,9 @@ var sort = function (object) {
   var keys = Object.keys(object).sort();
   for (var i = 0; i < keys.length; i++) {
     sortedObject[keys[i]] = object[keys[i]];
-  };
+  }
   return sortedObject;
-}
+};
 
 var capitalize = function (string) {
   return string[0].toUpperCase() + string.slice(1)
@@ -80,7 +80,7 @@ var formatQueryParams = function (query, method, credentials) {
     });
   }
 
-  // Common params  
+  // Common params
   params['AWSAccessKeyId'] = credentials.awsId;
   params['AssociateTag'] = credentials.awsTag;
   params['Timestamp'] = new Date().toISOString();
