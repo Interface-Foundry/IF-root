@@ -91,7 +91,7 @@ utils.periods = function (str) {
  *
  */
 utils.commas = function (str) {
-  console.log('commas')
+  console.log('commas');
   return str.split(',')[0];
 };
 

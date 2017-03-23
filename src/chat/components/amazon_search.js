@@ -428,6 +428,7 @@ var getPrices = function (item, callback) {
 
   amazonHTML.basic(url, function (err, product) {
     kip.err(err) // print error
+    console.
 
     verbose('& & & & & & & & & & & &PRODUCT OBJ ', product)
 
@@ -454,7 +455,7 @@ var getPrices = function (item, callback) {
   })
 }
 
-// //////////// lol //////////////////
+////////////// lol //////////////////
 var getPricesPromise = function (item) {
   return new Promise((resolve, reject) => {
     getPrices(item, (price, altImage, reviews) => {

@@ -141,17 +141,17 @@ var scrapeCamel = function * () {
         blurb = yield db.AmazonBlurbs.create({
             text: b//,
             // item: camel.id
-          })
+          });
         blurbs.push(blurb);
       });
 
       console.log('created blurbs');
       // console.log('blurbs', blurbs);
-    };
+    }
     try {
       yield blurbs.map(function * (b) {
         camel.blurbs.add(b.id);
-        yield camel.save()
+        yield camel.save();
         // console.log('whatever, here is a blurb', b.text)
       });
 
@@ -159,7 +159,7 @@ var scrapeCamel = function * () {
       console.log('saved a model');
     }
     catch (err) {
-      console.log('ERROR:', err)
+      console.log('ERROR:', err);
     }
   }
   console.log('saved models');
