@@ -133,9 +133,29 @@ app.use(function errorHandler (err, req, res, next) {
   if (req.headers.accept === 'application/json') {
     printNiceError(err)
     res.status(500)
-    res.send(err.message)
+
+    if (process.env.NODE_ENV !== 'production') {
+      var body = ''
+      if (err.message) body += err.message
+      if (err.stack) {
+        var lines = err.stack.split('\n')
+        var i = 0
+        var line
+        while (!line && i < lines.length) {
+          if (lines[i].includes('src/mint/')) {
+            line = ` (${lines[i].replace(/.*src\/mint/, 'mint').trim()})`
+          }
+          i++
+        }
+
+        if (line) body += line
+      }
+      res.send(body)
+    } else {
+      res.send('Internal Server Error - email hello@kipthis.com if you would like to help :)')
+    }
   } else {
-    // TODO render nice error pages here for dev and production
+    // TODO render nice error pages res.render('error', err)
     next(err)
   }
 })
