@@ -4,8 +4,17 @@ var co = require('co');
 var fs = require('fs');
 var wait = require('co-wait');
 var _ = require('lodash');
+var {Apac} = require('apac');
 
-var amazon = require('../../chat/components/amazon_search').lookup;
+// amazon = new Apac({
+//   awsId: 'AKIAIQWK3QCI5BOJTT5Q',
+//   awsSecret: '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',
+//   assocId: 'motorwaytoros-20'
+// });
+
+var lookupAmazonItem = require('../server/utilities/amazon_cart').lookupAmazonItem;
+
+// var amazon = require('../../chat/components/amazon_search').lookup
 var string_utils = require('./string_utils');
 
 var db;
@@ -36,19 +45,28 @@ var getAmazon = function * (asin) {
   console.log('take a deep breath');
   yield wait(1500);
   console.log('querying amazon');
-  var amazon_test = yield amazon({ASIN: asin});
+  var amazon_item = yield lookupAmazonItem(asin);
+  console.log('amazon queried');
+  // var amazonParams = {
+  //   Availability: 'Available',
+  //   Condition: 'New',
+  //   IdType: 'ASIN',
+  //   ItemId: asin,
+  //   ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
+  // };
+  // var amazon_test = amazon.execute('ItemLookup', amazonParams);
+  amazon_item = amazon_item.Item;
   var item = {};
-  // console.log('AMAZON RAW', amazon_test[0].BrowseNodes[0].BrowseNode);
-  item.category = amazon_test[0].ItemAttributes[0].ProductGroup[0];
+  item.category = amazon_item.ProductGroup;
   console.log('is this a real category?', item.cat);
-  item.info = amazon_test[0].ItemAttributes[0].Feature;
+  item.info = amazon_item.Feature;
   item.images = {};
   // console.log(amazon_test[0])
-  if (amazon_test[0].SmallImage) item.images.small = amazon_test[0].SmallImage[0].URL[0];
-  if (amazon_test[0].MediumImage) item.images.medium = amazon_test[0].MediumImage[0].URL[0];
-  if (amazon_test[0].LargeImage) item.images.large = amazon_test[0].LargeImage[0].URL[0];
-  if (amazon_test[0].shortened_url) item.url = amazon_test[0].shortened_url;
-  if (amazon_test[0].reviews) item.reviews = amazon_test[0].reviews;
+  if (amazon_item.SmallImage) item.images.small = amazon_item.SmallImage.URL[0];
+  if (amazon_item.MediumImage) item.images.medium = amazon_item.MediumImage.URL[0];
+  if (amazon_item.LargeImage) item.images.large = amazon_item.LargeImage.URL[0];
+  if (amazon_item.DetailPageUrl) item.url = amazon_item.DetailPageUrl;
+  // if (amazon_test[0].reviews) item.reviews = amazon_test[0].reviews;
   return item;
 };
 
@@ -133,9 +151,9 @@ var scrapeCamel = function * () {
     console.log('created camel');
     console.log('camel', camel);
 
+    var blurbs = [];
     // console.log('INFO', amazon.info)
-    if (amazon.info) {
-      var blurbs = [];
+    if (amazon.info && amazon.info.length) {
       yield amazon.info.map(function * (b) {
         yield db.AmazonBlurbs.destroy({text: b});
         blurb = yield db.AmazonBlurbs.create({
