@@ -15,22 +15,24 @@ const fs = require('fs'),
   webpackConfig = require('../webpack.config.js');
 
 // live reloading
-const compiler = webpack(webpackConfig);
-app.use(webpackDevMiddleware(compiler, {
-  hot: true,
-  filename: '[name].js',
-  publicPath: '/build/',
-  stats: {
-    colors: true
-  },
-  historyApiFallback: true
-}));
+if (!process.env.NO_LIVE_RELOAD) {
+  const compiler = webpack(webpackConfig);
+  app.use(webpackDevMiddleware(compiler, {
+    hot: true,
+    filename: '[name].js',
+    publicPath: '/build/',
+    stats: {
+      colors: true
+    },
+    historyApiFallback: true
+  }));
 
-app.use(webpackHotMiddleware(compiler, {
-  log: console.log,
-  path: '/__webpack_hmr',
-  heartbeat: 10 * 1000
-}));
+  app.use(webpackHotMiddleware(compiler, {
+    log: console.log,
+    path: '/__webpack_hmr',
+    heartbeat: 10 * 1000
+  }));
+}
 
 // idk
 var regularRoutes = require('./routes/regular.js');
