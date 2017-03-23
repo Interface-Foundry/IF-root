@@ -1,6 +1,7 @@
 const request = require('request-promise')
 const co = require('co')
 const assert = require('assert')
+require('should')
 
 /**
  * We will use the db to circumvent the whole email checking process
@@ -96,7 +97,7 @@ describe('api', () => {
     }
     assert(err)
     assert.equal(err.statusCode, 500, 'Should be 500 Unauthorized')
-    assert.equal(err.response.body, 'Unauthorized')
+    err.response.body.should.startWith('Unauthorized')
   }))
 
   it('GET /api/cart/[Bad Id] should return 500 for a DNE cart', () => co(function * () {
@@ -110,7 +111,7 @@ describe('api', () => {
 
     assert(err)
     assert.equal(err.statusCode, 500)
-    assert.equal(err.response.body, 'Cart not found')
+    err.response.body.should.startWith('Cart not found')
   }))
 
   it('GET /api/session should return the user_account if signed in', () => co(function * () {
