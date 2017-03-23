@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@slack/client": "^3.8.1",
+    "apac": "^3.0.2",
     "body-parser": "^1.17.1",
     "classnames": "^2.2.5",
     "client-sessions": "^0.7.0",
@@ -15,6 +16,7 @@
     "github-webhook-handler": "^0.6.0",
     "lodash": "^4.17.4",
     "mocha": "^3.2.0",
+    "open": "^0.0.5",
     "react": "^15.4.2",
     "react-bootstrap": "^0.30.8",
     "react-dom": "^15.4.2",

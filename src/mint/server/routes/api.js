@@ -1,6 +1,7 @@
 var express = require('express');
 var co = require('co');
 var _ = require('lodash');
+var open = require('open')
 
 var utils = require('../utilities/utils.js');
 var scrape = require('../cart/scrape_url')
@@ -114,6 +115,10 @@ router.get('/identify', (req, res) => co(function* () {
     link = yield db.AuthenticationLinks.findOne({
       id: link.id
     }).populate('user').populate('cart')
+
+    if (process.env.NODE_ENV !== 'production') {
+      open('http://localhost:3000/auth/' + link.id)
+    }
 
     var lostEmail = yield db.Emails.create({
       recipients: email,
