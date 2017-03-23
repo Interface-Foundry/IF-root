@@ -317,7 +317,7 @@ router.post('/cart/:cart_id/item', (req, res) => co(function* () {
  * @param {quantity} [number to subtract]
  * @yield {[type]} [description]
  */
-router.delete('/cart/:cart_id/items', (req, res) => co(function* () {
+router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
   // only available for logged-in Users
   if (!_.get(req, 'UserSession.user_accounts[0]')) {
     throw new Error('Unauthorized')
