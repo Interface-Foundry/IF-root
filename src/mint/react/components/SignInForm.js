@@ -4,7 +4,7 @@ export default class SignInForm extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.handleEmail = this.handleEmail.bind(this);
+    this.handleEmail = ::this.handleEmail;
   }
 
   handleEmail(e) {

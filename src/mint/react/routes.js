@@ -9,8 +9,9 @@ import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerReducer, routerMiddleware } from 'react-router-redux';
 
 import App from './containers/App';
+import Onboard from './containers/Onboard';
 import * as reducers from './reducers';
-import {session} from './actions';
+import { session } from './actions';
 
 const history = createHistory();
 const historyMiddleware = routerMiddleware(history);
@@ -26,13 +27,15 @@ const store = createStore(
 );
 
 // update session
-store.dispatch(session.update()).then(() => console.log('set session', store.getState()));
+store.dispatch(session.update())
+  .then(() => console.log('set session', store.getState()));
 
 const Routes = () => (
   <Provider store={store}>
     <ConnectedRouter history={history}>
       <Switch>
         <Route path="/cart/:cart_id" component={ App }/>
+        <Route path='/onboarding' component={ Onboard } />
         <Route path="*" status={404}/>
       </Switch>
     </ConnectedRouter>

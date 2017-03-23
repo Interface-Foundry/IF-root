@@ -1,20 +1,20 @@
 import React, { PropTypes, Component } from 'react';
 import { Button, Form, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 
-export default class AddItemField extends Component {
+export default class AddAmazonItem extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.handleUrl = this.handleUrl.bind(this);
-  }
-
-  handleUrl(e) {
-    this.setState({ url: e.target.value });
+    this.handleUrl = ::this.handleUrl;
   }
 
   static propTypes = {
     addItem: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired
+  }
+
+  handleUrl(e) {
+    this.setState({ url: e.target.value });
   }
 
   render() {

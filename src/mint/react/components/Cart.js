@@ -1,5 +1,5 @@
 import React, { PropTypes, Component } from 'react';
-import AddItemField from './AddItemField';
+import AddAmazonItem from './AddAmazonItem';
 import Item from './Item';
 
 export default class Cart extends Component {
@@ -20,7 +20,7 @@ export default class Cart extends Component {
       <div>
       <h3>Cart</h3>
       <ul>{this.listItems(hasItems, items)}</ul>
-      <AddItemField cart_id={cart_id} addItem={addItem} />
+      <AddAmazonItem cart_id={cart_id} addItem={addItem} />
     </div>
     );
   }
