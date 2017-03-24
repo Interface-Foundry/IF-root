@@ -1,14 +1,25 @@
 import React, { PropTypes, Component } from 'react';
+import { Form, FormGroup, InputGroup, FormControl, Button } from 'react-bootstrap';
 
 export default class SignInForm extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { email: '' };
     this.handleEmail = ::this.handleEmail;
+    this.handleSubmit = ::this.handleSubmit;
   }
 
   handleEmail(e) {
     this.setState({ email: e.target.value });
+  }
+
+  handleSubmit(e) {
+    const { props, state } = this;
+    const { cart_id, signIn } = props;
+    const { email } = state;
+    e.preventDefault();
+    signIn(cart_id, email);
+    this.setState({ email: '' });
   }
 
   static propTypes = {
@@ -17,15 +28,19 @@ export default class SignInForm extends Component {
   }
 
   render() {
-    const { cart_id, signIn } = this.props;
+    const { handleSubmit, handleEmail, state } = this;
+    const { email } = state;
     return (
-      <form onSubmit={e => signIn(e, cart_id, this.state.email)}>
-        <input required placeholder='Enter your email' name='email' type='email' onChange={this.handleEmail}/>
-        <hr/>
-        <button type='Submit'>
-          Sign Up
-        </button>
-      </form>
+      <Form onSubmit={handleSubmit}>
+        <FormGroup>
+            <InputGroup>
+                <FormControl type="email" name='email' value={email} required placeholder='Enter your email' onChange={handleEmail}/>
+                <InputGroup.Button >
+                    <Button type="submit" bsStyle="primary">Sign Up</Button>
+                </InputGroup.Button>
+            </InputGroup>
+        </FormGroup>
+    </Form>
     );
   }
 }

@@ -6,6 +6,7 @@
   "dependencies": {
     "@slack/client": "^3.8.1",
     "apac": "^3.0.2",
+    "apidoc": "^0.17.5",
     "body-parser": "^1.17.1",
     "classnames": "^2.2.5",
     "client-sessions": "^0.7.0",
@@ -15,6 +16,7 @@
     "express": "^4.15.2",
     "express-winston": "^2.3.0",
     "github-webhook-handler": "^0.6.0",
+    "http-server": "^0.9.0",
     "lodash": "^4.17.4",
     "mocha": "^3.2.0",
     "open": "^0.0.5",
@@ -57,6 +59,8 @@
     "build": "NODE_PATH=$NODE_PATH:./react webpack",
     "dev": "npm run build && nodemon --ignore react/ --ignore public/ ./server/index.js & webpack --progress --color -d --watch --hot",
     "test": "mocha tests",
-    "react-test": "jest"
+    "react-test": "jest",
+    "apidoc": "npm run apidocs",
+    "apidocs": "apidoc -i server/routes/ -o ../../docs/api/ && http-server ../../docs/api -o"
   }
 }

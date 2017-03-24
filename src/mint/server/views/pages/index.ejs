@@ -15,7 +15,15 @@
   <p>Group shopping is easier than ever! Create and share a group shopping cart by clicking below.</p>
   <h1>
   <a href="/newcart">Start Shopping</a>
-  </h1>
+  <% if(carts.length) { %> 
+    </h1>
+    Your Carts: 
+    <ul>
+      <% for(var i=0; i < carts.length; i++) { %>
+        <li><a href='/cart/<%- carts[i].id %>'><%- carts[i].id %></a></li>
+      <% } %>
+    </ul>
+  <% } %>
 </body>
 
 </html>

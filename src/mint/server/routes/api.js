@@ -36,7 +36,9 @@ dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 })
 
 /**
- * Testing
+ * @api {get} /api/error Error
+ * @apiDescription Trigger an error for testing
+ * @apiGroup Testing
  */
 router.get('/error', (req, res) => co(function * () {
   console.log('gonna throw an error now')
@@ -44,14 +46,21 @@ router.get('/error', (req, res) => co(function * () {
 }))
 
 /**
- * GET /api/session
+ * @api {get} /api/session Session
+ * @apiDescription Gets the user's current session
+ * @apiGroup Users
+ * @apiSuccess {[UserAccount]} user_accounts list of user accounts
+ * @apiSuccess {String} animal the session's randomized animal
  */
 router.get('/session', (req, res) => {
   res.send(req.UserSession);
 });
 
 /**
- * GET /api/identify?email=peter.m.brandt%40gmail.com&cart_id=7877da92b35f
+ * @api {get} /api/identify?email=:email&cart_id=:cart_id Identify
+ * @apiGroup Users
+ * @apiParam {string} email the user's email
+ * @apiParam {string} cart_id the cart id
  */
 router.get('/identify', (req, res) => co(function* () {
   console.log('identify');
@@ -196,7 +205,16 @@ router.get('/addItem', (req, res) => co(function* () {
 }))
 
 /**
- * Returns all the carts that the user is a member or leader of
+ * @api {get} /api/carts User Carts
+ * @apiDescription Returns all the carts that the user is a member or leader of
+ * @apiGroup Carts
+ *
+ * @apiSuccess {[Item]} items list of items
+ * @apiSuccess {UserAccount} leader the cart leader
+ * @apiSuccess {[UserAccount]} members users who have added something to the cart
+ *
+ * @apiSuccessExample Success-Response
+ * [{"members":[{"email_address":"peter@interfacefoundry.com","createdAt":"2017-03-16T16:19:10.812Z","updatedAt":"2017-03-16T16:19:10.812Z","id":"bc694263-cf19-46ea-b3f1-bd463f82ce55"}],"items":[{"original_link":"watches","quantity":1,"createdAt":"2017-03-16T16:18:32.047Z","updatedAt":"2017-03-16T16:18:32.047Z","id":"58cabad83a5cd90e34b29610"}],"leader":{"email_address":"peter.m.brandt@gmail.com","createdAt":"2017-03-16T16:18:27.607Z","updatedAt":"2017-03-16T16:18:27.607Z","id":"257cd470-f19f-46cb-9201-79b8b4a95fe2"},"createdAt":"2017-03-16T16:18:23.433Z","updatedAt":"2017-03-16T16:19:10.833Z","id":"3b10fc45616e"}]
  */
 router.get('/carts', (req, res) => co(function * () {
   if (!_.get(req, 'UserSession.user_accounts[0]')) {
@@ -218,9 +236,16 @@ router.get('/carts', (req, res) => co(function * () {
 }))
 
 /**
- * if they goto api/cart maybe redirect or something, possibly could use this elsewhere
- * @param {cart_id} ) cart_id to redirect to or whatever
- * redirects to cart/:cart_id
+ * @api {get} /api/cart/:cart_id Cart
+ * @apiDescription Gets a single cart, does not have to be logged in
+ * @apiGroup Carts
+ * @apiParam {string} cart_id the cart id
+ *
+ * @apiSuccess {[Item]} items list of items
+ * @apiSuccess {UserAccount} leader the cart leader
+ * @apiSuccess {[UserAccount]} members users who have added something to the cart
+ * @apiSuccessExample Success-Response
+ * {"members":[{"email_address":"peter@interfacefoundry.com","createdAt":"2017-03-16T16:19:10.812Z","updatedAt":"2017-03-16T16:19:10.812Z","id":"bc694263-cf19-46ea-b3f1-bd463f82ce55"}],"items":[{"original_link":"watches","quantity":1,"createdAt":"2017-03-16T16:18:32.047Z","updatedAt":"2017-03-16T16:18:32.047Z","id":"58cabad83a5cd90e34b29610"}],"leader":{"email_address":"peter.m.brandt@gmail.com","createdAt":"2017-03-16T16:18:27.607Z","updatedAt":"2017-03-16T16:18:27.607Z","id":"257cd470-f19f-46cb-9201-79b8b4a95fe2"},"createdAt":"2017-03-16T16:18:23.433Z","updatedAt":"2017-03-16T16:19:10.833Z","id":"3b10fc45616e"}
  */
 router.get('/cart/:cart_id', (req, res) => co(function* () {
   var cart = yield db.Carts.findOne({ id: req.params.cart_id })
@@ -236,9 +261,10 @@ router.get('/cart/:cart_id', (req, res) => co(function* () {
 }));
 
 /**
- * gets items in cart
- * @param {String}  cart_id
- * @yield {[type]} [description]
+ * @api {get} /api/cart/:cart_id/items Items
+ * @apiDescription Gets all items in cart
+ * @apiGroup Carts
+ * @apiParam {String} cart_id
  */
 router.get('/cart/:cart_id/items', (req, res) => co(function* () {
   var cart = yield db.Carts.findOne({ id: req.params.cart_id }).populate('items')
@@ -250,13 +276,12 @@ router.get('/cart/:cart_id/items', (req, res) => co(function* () {
 }));
 
 /**
- * adds item to cart. request body should contain the url
- * {
- *   url: 'some.url', // required
- *   user_id: '1234', // the user id if they have more than one account
- * }
- * @param {cart_id} cart_id to add item to
- * @returns {Item}
+ * @api {post} /api/cart/:cart_id/item Add Item
+ * @apiDescription Adds an item to a cart
+ * @apiGroup Carts
+ * @apiParam {string} :cart_id cart id
+ * @apiParam {string} url of the item from amazon or office depot or whatever
+ * @apiParam {string} user_id specify the identity which is adding the item (otherwise server picks the first authenticated identity)
  */
 router.post('/cart/:cart_id/item', (req, res) => co(function* () {
   // only available for logged-in Users
@@ -314,11 +339,11 @@ router.post('/cart/:cart_id/item', (req, res) => co(function* () {
 }));
 
 /**
- * delete or subtract item from cart
- * @param {string} item identifier
- * @param {cart_id} cart_id to remove item from
- * @param {quantity} [number to subtract]
- * @yield {[type]} [description]
+ * @api {delete} /api/cart/:cart_id/item Delete Item
+ * @apiDescription Delete or subtract item from cart. The user must be a leader or a member to do this (does not have to be the person that added the item)
+ * @apiGroup Carts
+ * @apiParam {string} :cart_id cart to remove item from
+ * @apiParam {string} item_id the item's identifier
  */
 router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
   // only available for logged-in Users
@@ -361,22 +386,33 @@ router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
 }));
 
 /**
- * get user from api based on id or email
- * @param {string} either id or email param in query
- * @yield {object} user object
+ * @api {get} /api/user User
+ * @apiDescription Get user from db based on id or email
+ * @apiGroup Users
+ * @apiParam {string} email [optional query parameter] email addresss for the user
+ * @apiParam {string} id [optional query parameter] id of the user
+ *
+ * @apiParamExample Request email
+ * get /api/user?email=mctesty%40example.com
+ *
+ * @apiParamExample Request id
+ * get /api/user?id=04b36891-f5ab-492b-859a-8ca3acbf856b
+ *
+ * @apiSuccessExample Response
+ * {"email_address":"mctesty@example.com","createdAt":"2017-03-24T16:51:47.162Z","updatedAt":"2017-03-24T16:51:47.162Z","id":"04b36891-f5ab-492b-859a-8ca3acbf856b"}
  */
 router.get('/user', (req, res) => co(function* () {
-  var user;
-  if (_.get(req, 'body.email')) {
+  var user
+  if (_.get(req, 'query.email')) {
     user = yield db.UserAccounts.findOne({
-      email_address: req.body.email.toLowerCase()
+      email_address: req.query.email.toLowerCase()
     });
-  } else if (_.get(req, 'body.id')) {
+  } else if (_.get(req, 'query.id')) {
     user = yield db.UserAccounts.findOne({
-      id: req.body.id
+      id: req.query.id
     });
   } else {
-    return new Error('magic_id doesnt exist, probably return user to some error page where they can create new cart');
+    throw new Error('Cannot find user');
   }
   res.send(user);
 }));

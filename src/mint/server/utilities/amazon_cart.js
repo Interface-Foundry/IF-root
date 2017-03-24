@@ -67,6 +67,7 @@ exports.getAmazonItem = function * (item_identifier) {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /**
+ * lookup item by asin
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemLookup.html
  * lookup item by asin
  * @param {string} asin of item
@@ -113,8 +114,12 @@ exports.createAmazonCart = function * (item) {
     'Item.1.ASIN': item.ASIN,
     'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
   };
-  var cart = yield opHelper.execute('CartCreate', amazonParams);
-  return cart.result.CartCreateResponse.Cart;
+  try {
+    var cart = yield opHelper.execute('CartCreate', amazonParams);
+    return cart.result.CartCreateResponse.Cart;
+  } catch (err) {
+    throw new Error('Error on creating cart')
+  }
 };
 
 /**
@@ -143,37 +148,37 @@ exports.addAmazonItemToCart = function * (item, cart) {
   if (item instanceof Array) {
     throw new Error('Only add one Item to a cart at a time');
   }
+  var cart
 
   var itemAlreadyAdded = checkAmazonItemInCart(item, cart)
   if (itemAlreadyAdded) {
-    // need to use modify
-    // var cart = yield exports.
+    var newQuantity = parseInt(itemAlreadyAdded.Quantity)
+    newQuantity++
+    cart = yield exports.changeQuantityAmazonItemFromCart(itemAlreadyAdded.cartItemId, newQuantity, cart)
+  } else {
+
+    var amazonParams = {
+      'AssociateTag': associateTag,
+      'CartId': cart.CartId,
+      'HMAC': cart.HMAC,
+      'Item.1.ASIN': item.ASIN,
+      'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
+    };
+
+    cart = yield opHelper.execute('CartAdd', amazonParams);
   }
-
-  var amazonParams = {
-    'AssociateTag': associateTag,
-    'CartId': cart.CartId,
-    'HMAC': cart.HMAC,
-    'Item.1.ASIN': item.ASIN,
-    'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
-  };
-
-  cart = yield opHelper.execute('CartAdd', amazonParams);
   return cart.result.CartAddResponse.Cart;
 };
 
 /**
+ * remove an item specifically from amazon cart
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CartModify.html
- * @param {[type]} item          [description]
- * @param {[type]} cart_id       [description]
+ * @param {objecvt} item object
+ * @param {object} cart object
  * @yield {[type]} [description]
  */
-exports.removeAmazonItemFromCart = function * (item, cart_id) {
-  var amazonParams = {
-    'CartId': cart_id
-  };
-
-  var cart = yield opHelper.execute('CartModify', amazonParams);
+exports.removeAmazonItemFromCart = function * (item, cart) {
+  var cart = yield exports.changeQuantityAmazonItemFromCart(item, 0, cart)
   return cart;
 };
 
