@@ -18,12 +18,10 @@ export default class TypeFormField extends Component {
   }
 
   handleChange(e) {
-    console.log(e.target.value);
     this.setState({ value: e.target.value });
   }
 
   render() {
-    console.log('prosp', this.props);
     const { tfStyle: style, placeholder, name, type, enabled = true, required = true } = this.props;
     const { value } = this.state;
     return (

@@ -26,17 +26,16 @@ const store = createStore(
   applyMiddleware(historyMiddleware)
 );
 
-// update session
-store.dispatch(session.update())
-  .then(() => console.log('set session', store.getState()));
+// update login status
+store.dispatch(session.update());
 
 const Routes = () => (
   <Provider store={store}>
     <ConnectedRouter history={history}>
       <Switch>
-        <Route path="/cart/:cart_id" component={ App }/>
-        <Route path='/onboarding' component={ Onboard } />
-        <Route path="*" status={404}/>
+        <Route path="/cart/:cart_id" component={App} />
+        <Route path='/onboarding' component={Onboard} />
+        <Route path="*" status={404} />
       </Switch>
     </ConnectedRouter>
   </Provider>

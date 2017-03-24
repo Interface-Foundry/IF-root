@@ -36,9 +36,9 @@ const requestAddItem = (cart, item) => ({
   cart
 });
 
-const receiveAddItem = (cart) => ({
+const receiveAddItem = (item) => ({
   type: RECEIVE_ADD_ITEM_TO_CART,
-  ...cart
+  item
 });
 
 export function update(cart_id) {
@@ -72,7 +72,7 @@ export function removeItem(cart_id, item) {
       },
       credentials: 'same-origin',
       'body': JSON.stringify({
-        item_id: item,
+        item_id: item
       })
     });
     if (response.ok) dispatch(receiveRemoveItem(await response.json()));
@@ -94,6 +94,8 @@ export function addItem(e, cart_id, url) {
         url: url
       })
     });
-    if (response.ok) dispatch(receiveAddItem(await response.json()));
+    var res = await response.json();
+    console.log(res)
+    if (response.ok) dispatch(receiveAddItem(res));
   };
 }
