@@ -63,7 +63,7 @@ const del = function * (url, data) {
   return body
 }
 
-describe('api', () => {
+describe.only('api', () => {
   before(() => co(function * () {
     // clean up the db
     yield dbReady
@@ -186,6 +186,12 @@ describe('api', () => {
     assert.equal(cart.items.length, 1, 'should only be one item in the cart')
   }))
 
+  it('GET /api/cart/:cart_id/items should return all the items for a specific cart', () => co(function * () {
+    var items = yield get('/api/cart/' + mcTesty.cart_id + '/items')
+    assert(items)
+    assert.equal(items.length, 1, 'should only be one item in the cart')
+  }))
+
   it('DELETE /api/cart/:cart_id/item should delete a specific item', () => co(function * () {
     var ok = yield del('/api/cart/' + mcTesty.cart_id + '/item', {
       item_id: mcTesty.item_id
@@ -196,5 +202,19 @@ describe('api', () => {
     assert(cart)
     assert.equal(cart.leader.email_address, mcTesty.email)
     assert.equal(cart.items.length, 0, 'should not be any items in the cart now')
+  }))
+
+  it('GET /api/user should return a user for an email address', () => co(function * () {
+    var user = yield get('/api/user?email=' + encodeURIComponent(mcTesty.email))
+    assert(user)
+    assert.equal(user.email_address, mcTesty.email)
+    mcTesty.id = user.id
+  }))
+
+  it('GET /api/user should return a user for an id', () => co(function * () {
+    var user = yield get('/api/user?id=' + encodeURIComponent(mcTesty.id))
+    assert(user)
+    assert.equal(user.email_address, mcTesty.email)
+    assert.equal(user.id, mcTesty.id)
   }))
 })

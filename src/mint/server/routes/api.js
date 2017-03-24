@@ -389,21 +389,30 @@ router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
  * @api {get} /api/user User
  * @apiDescription Get user from db based on id or email
  * @apiGroup Users
- * @apiParam {string} email [optional] email addresss for the user
- * @apiParam {string} id [optional] id of the user
+ * @apiParam {string} email [optional query parameter] email addresss for the user
+ * @apiParam {string} id [optional query parameter] id of the user
+ *
+ * @apiParamExample Request email
+ * get /api/user?email=mctesty%40example.com
+ *
+ * @apiParamExample Request id
+ * get /api/user?id=04b36891-f5ab-492b-859a-8ca3acbf856b
+ *
+ * @apiSuccessExample Response
+ * {"email_address":"mctesty@example.com","createdAt":"2017-03-24T16:51:47.162Z","updatedAt":"2017-03-24T16:51:47.162Z","id":"04b36891-f5ab-492b-859a-8ca3acbf856b"}
  */
 router.get('/user', (req, res) => co(function* () {
-  var user;
-  if (_.get(req, 'body.email')) {
+  var user
+  if (_.get(req, 'query.email')) {
     user = yield db.UserAccounts.findOne({
-      email_address: req.body.email.toLowerCase()
+      email_address: req.query.email.toLowerCase()
     });
-  } else if (_.get(req, 'body.id')) {
+  } else if (_.get(req, 'query.id')) {
     user = yield db.UserAccounts.findOne({
-      id: req.body.id
+      id: req.query.id
     });
   } else {
-    return new Error('magic_id doesnt exist, probably return user to some error page where they can create new cart');
+    throw new Error('Cannot find user');
   }
   res.send(user);
 }));
