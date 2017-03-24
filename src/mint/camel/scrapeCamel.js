@@ -353,7 +353,7 @@ var spreadCategories = function * (camels, categoryCounts) {
 // co(todaysDeals).catch(e => console.error(e));
 
 co(function * () {
-  return yield scrapeCamel();
+  yield scrapeCamel();
   console.log('done w/ scraping');
   var deals = yield todaysDeals(count);
   console.log('FINAL DEALS');
