@@ -179,6 +179,10 @@ var scrapeCamel = function * () {
     });
   });
 
+  //set last batch of camelItems to inactive
+  yield db.CamelItems.update({active: true}, {active: false});
+
+  //save new camel items to the db
   for (var i = 0; i < names.length; i++) {
     var amazon = yield getAmazon(asins[i]); //would be cleaner to do this elsewhere
     //if an item with that ASIN is already in the db, delete it
@@ -197,14 +201,12 @@ var scrapeCamel = function * () {
       medium: (amazon.images.medium || null),
       large: (amazon.images.large || null),
       url: amazon.url
-      // info: amazon.info
     });
 
     console.log('created camel'); //never prints
     console.log('camel', camel);
 
     var blurbs = [];
-    // console.log('INFO', amazon.info)
     if (amazon.info && amazon.info.length) {
       yield amazon.info.map(function * (b) {
         yield db.AmazonBlurbs.destroy({text: b});
@@ -222,7 +224,6 @@ var scrapeCamel = function * () {
         yield camel.save();
       });
 
-      // console.log('camel.blurbs', camel.blurbs);
       console.log('saved a model');
     }
     catch (err) {
@@ -230,6 +231,68 @@ var scrapeCamel = function * () {
     }
   }
   console.log('saved models');
+};
+
+/**
+ * TODO
+ */
+var rankDeals = function * () {
+  var deals = yield db.CamelItems.find({active: true});
+  var rankedDeals = [];
+  var deferred = [];
+  var dealSet = [];
+  var categoryCounts = {};
+  while (deals.length || deferred.length) {
+    console.log('rankedDeals', rankedDeals);
+    console.log('deferred', deferred);
+    console.log('dealSet', dealSet);
+    console.log('categoryCounts', categoryCounts);
+    //if we have completed a set, we don't have to worry about repeating those categories
+    if (!deals.length) {
+      return rankedDeals.concat(dealSet).concat(deferred);
+    }
+    if (dealSet.length === count) {
+      rankedDeals = rankedDeals.concat(dealSet);
+      deals = deals.concat(deferred); //deals deferred from last batch are up next for this one
+      dealSet = [];
+      categoryCounts = {};
+      deferred = [];
+    }
+    else {
+      var nextDeal = deals.pop();
+      if (categoryCounts[nextDeal.category] > 1) {
+        //we want to defer this to the next batch
+        deferred.push(nextDeal);
+      }
+      else {
+        dealSet.push(nextDeal);
+        if (categoryCounts[nextDeal.category]) categoryCounts[nextDeal.category] = 1;
+        else categoryCounts[nextDeal.category]++;
+      }
+    }
+  }
+
+  return rankedDeals;
+  // var skipped = [];
+  //   yield dbReady;
+  //   if (!categoryCounts) categoryCounts = {};
+  //   var semiUniqueCamels = [];
+  //   yield camels.map(function * (c) {
+  //     if (!categoryCounts[c.category]) {
+  //       categoryCounts[c.category] = 1;
+  //       semiUniqueCamels.push(c);
+  //     }
+  //     else if (categoryCounts[c.category] === 1) {
+  //       categoryCounts[c.category]++;
+  //       semiUniqueCamels.push(c);
+  //     }
+  //     else {
+  //       //oh, no, we've already shown as many deals of this category as we want to
+  //       skipped.push(c);
+  //     }
+  //   });
+  //
+
 };
 
 /**
@@ -267,17 +330,10 @@ var todaysDeals = function * (count, id, categoryCounts) {
   if (id) {
     var lastCamel = yield db.CamelItems.findOne({id: id});
     var where = {
-      or: [
-        {
-          skipped: true
-        },
-        {
           createdAt:  {
             '<' : lastCamel.createdAt
           }
-        }
-      ]
-    };
+      };
   }
   else {
     where = {};
@@ -291,54 +347,52 @@ var todaysDeals = function * (count, id, categoryCounts) {
 
   console.log('about to query for camels');
   var camels = yield db.CamelItems.find(query);
+  camels = yield rankDeals(camels);
   console.log('got the camels');
   console.log('this many', camels.length);
-  camels.map(c => console.log(c.name));
+  camels.map(c => console.log(c.category));
 
-  //set skipped to false, because we're at least provisionally including them in the next batch
-  camels.map(function * (c) {
-    if (c.skipped) yield db.CamelItems.update({id: c.id}, {skipped: false});
-  });
-  return yield spreadCategories(camels, categoryCounts);
+  return yield camels;
+  // return yield spreadCategories(camels, categoryCounts);
 };
-
-/**
- * TODO --comment throughout
- */
-var spreadCategories = function * (camels, categoryCounts) {
-  //goes through camels and keeps track of category counts
-  console.log('these are our camel categories:', camels.map(c => c.category));
-  var skipped = [];
-  yield dbReady;
-  if (!categoryCounts) categoryCounts = {};
-  var semiUniqueCamels = [];
-  yield camels.map(function * (c) {
-    if (!categoryCounts[c.category]) {
-      categoryCounts[c.category] = 1;
-      semiUniqueCamels.push(c);
-    }
-    else if (categoryCounts[c.category] === 1) {
-      categoryCounts[c.category]++;
-      semiUniqueCamels.push(c);
-    }
-    else {
-      //oh, no, we've already shown as many deals of this category as we want to
-      skipped.push(c);
-    }
-  });
-
-  // console.log('semi unique camels', semiUniqueCamels)
-  //if the length has changed, call today's deals with updated count and id
-    //which should then call this, etc, recursively, until we either run out of items or have the distribution we want
-  console.log('semiUniqueCamels.length', semiUniqueCamels.length);
-  if (camels.length === semiUniqueCamels.length) {
-    yield skipped.map(function * (c) {
-      yield db.CamelItems.update({id: c.id}, {skipped: true});
-    });
-    return semiUniqueCamels;
-  }
-  else return semiUniqueCamels.concat(yield todaysDeals(camels.length - semiUniqueCamels.length, camels[camels.length-1].id, categoryCounts));
-};
+//
+// /**
+//  * TODO --comment throughout
+//  */
+// var spreadCategories = function * (camels, categoryCounts) {
+//   //goes through camels and keeps track of category counts
+//   console.log('these are our camel categories:', camels.map(c => c.category));
+//   // var skipped = [];
+//   yield dbReady;
+//   if (!categoryCounts) categoryCounts = {};
+//   var semiUniqueCamels = [];
+//   yield camels.map(function * (c) {
+//     if (!categoryCounts[c.category]) {
+//       categoryCounts[c.category] = 1;
+//       semiUniqueCamels.push(c);
+//     }
+//     else if (categoryCounts[c.category] === 1) {
+//       categoryCounts[c.category]++;
+//       semiUniqueCamels.push(c);
+//     }
+//     else {
+//       //oh, no, we've already shown as many deals of this category as we want to
+//       skipped.push(c);
+//     }
+//   });
+//
+//   // console.log('semi unique camels', semiUniqueCamels)
+//   //if the length has changed, call today's deals with updated count and id
+//     //which should then call this, etc, recursively, until we either run out of items or have the distribution we want
+//   console.log('semiUniqueCamels.length', semiUniqueCamels.length);
+//   if (camels.length === semiUniqueCamels.length) {
+//     yield skipped.map(function * (c) {
+//       yield db.CamelItems.update({id: c.id}, {skipped: true});
+//     });
+//     return semiUniqueCamels;
+//   }
+//   else return semiUniqueCamels.concat(yield todaysDeals(camels.length - semiUniqueCamels.length, camels[camels.length-1].id, categoryCounts));
+// };
 
 // co(todaysDeals).catch(e => console.error(e));
 
