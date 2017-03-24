@@ -186,7 +186,6 @@ var scrapeCamel = function * () {
   for (var i = 0; i < names.length; i++) {
     var amazon = yield getAmazon(asins[i]); //would be cleaner to do this elsewhere
     //if an item with that ASIN is already in the db, delete it
-    yield db.CamelItems.destroy({asin: asins[i]});
 
     //saves items to the db
 
@@ -203,13 +202,11 @@ var scrapeCamel = function * () {
       url: amazon.url
     });
 
-    console.log('created camel'); //never prints
     console.log('camel', camel);
 
     var blurbs = [];
     if (amazon.info && amazon.info.length) {
       yield amazon.info.map(function * (b) {
-        yield db.AmazonBlurbs.destroy({text: b});
         blurb = yield db.AmazonBlurbs.create({
             text: b
           });
