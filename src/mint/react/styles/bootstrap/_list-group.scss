@@ -35,6 +35,11 @@
     margin-bottom: 0;
     @include border-bottom-radius($list-group-border-radius);
   }
+  // Test image
+  .image-list-group-item-img {
+      position: absolute;
+      left: 0;
+  }
 }
 
 
