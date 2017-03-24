@@ -30,36 +30,59 @@ const count = 5;
 var scrape = function * (previousId) {
 
   /**
- * returns a random integer between 0 and the specified exclusive maximum.
- */
-function randomInt(exclusiveMax) {
-  return Math.floor(Math.random() * Math.floor(exclusiveMax));
-}
+   * returns a random integer between 0 and the specified exclusive maximum.
+   */
+  function randomInt(exclusiveMax) {
+    return Math.floor(Math.random() * Math.floor(exclusiveMax));
+  }
 
-/**
- * returns a fake user agent to be used in request headers.
- */
-function fakeUserAgent() {
-  var osxVer = Math.floor(Math.random() * 9) + 1;
-  var webkitMajVer = randomInt(999) + 111;
-  var webkitMinVer = randomInt(99) + 11;
-  var chromeMajVer = randomInt(99) + 11;
-  var chromeMinVer = randomInt(9999) + 1001;
-  var safariMajVer = randomInt(999) + 111;
-  return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+ osxVer +
-  ') AppleWebKit/' + webkitMajVer + '.' + webkitMinVer +
-  ' (KHTML, like Gecko) Chrome/' + chromeMajVer + '.0.' + chromeMinVer +
-  '2623.110 Safari/' + safariMajVer +'.36';
-}
+  /**
+   * returns a fake user agent to be used in request headers.
+   */
+  function fakeUserAgent() {
+    var osxVer = Math.floor(Math.random() * 9) + 1;
+    var webkitMajVer = randomInt(999) + 111;
+    var webkitMinVer = randomInt(99) + 11;
+    var chromeMajVer = randomInt(99) + 11;
+    var chromeMinVer = randomInt(9999) + 1001;
+    var safariMajVer = randomInt(999) + 111;
+    return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+ osxVer +
+    ') AppleWebKit/' + webkitMajVer + '.' + webkitMinVer +
+    ' (KHTML, like Gecko) Chrome/' + chromeMajVer + '.0.' + chromeMinVer +
+    '2623.110 Safari/' + safariMajVer +'.36';
+  }
 
- var options = {
+  // l🐪o🐪l🐪
+  var crypto = require('crypto');
+  var camelSession = crypto.randomBytes(32).toString('hex');
+  var camelNoneMatch = crypto.randomBytes(32).toString('hex');
+  var ALNI = crypto.randomBytes(29).toString('hex');
+  var gadsA = crypto.randomBytes(16).toString('hex');
+  var gadsB = randomInt(99999999) + 11111111;
+  var gcaA = randomInt(99999999) + 11111111;
+  var gcaB = randomInt(9999999999999) + 1111111111111;
+  var gaA = randomInt(9) + 1;
+  var gaB = randomInt(9) + 1;
+  var gaC = randomInt(999999999) + 111111111;
+  var gaD = randomInt(9999999999) + 1111111111;
+
+  var options = {
     uri: url,
+    //PROXY to be added later ??
+    //proxy: 'http://127.0.0.1:24000', 
+    gzip: true,
     headers: {
+      'Host': 'camelcamelcamel.com',
+      'Connection': 'keep-alive',
+      'Pragma': 'no-cache',
+      'Cache-Control': 'no-cache',
+      'Upgrade-Insecure-Requests': '1',
       'User-Agent': fakeUserAgent(),
-      'Accept': 'text/html,application/xhtml+xml',
-      'Accept-Language':'en-US,en;q=0.8',
-      'Cache-Control':'max-age=0',
-      'Connection':'keep-alive'
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+      'Accept-Encoding': 'gzip, deflate, sdch, br',
+      'Accept-Language': 'en-US,en;q=0.8',
+      'Cookie': 'tz=America/New_York; __qca=P0-'+gcaA+'-'+gcaB+'; __gads=ID='+gadsA+':T='+gadsB+':S=ALNI_'+ALNI+'; OX_plg=pm; camel_session='+camelSession+'; _ga=GA'+gaA+'.'+gaB+'.'+gaC+'.'+gaD+'',
+      'If-None-Match':'W/"'+camelNoneMatch+'"'
     }
   };
 
@@ -71,7 +94,7 @@ function fakeUserAgent() {
       return result;
     })
     .catch(function (err) {
-      console.log('err');
+      console.log('err ',err);
     });
 };
 
@@ -119,6 +142,7 @@ var scrapeCamel = function * () {
   console.log('scraped');
 
   $ = cheerio.load(camel);
+
   var names = [];
   var asins = [];
   var prices = [];
