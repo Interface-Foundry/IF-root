@@ -231,6 +231,7 @@ var scrapeCamel = function * () {
     }
   }
   console.log('saved models');
+  yield rankDeals();
 };
 
 /**
@@ -339,17 +340,16 @@ var getDeals = function * (lastPosition) {
   return yield camels;
 };
 
-co(function * () {
-  yield scrapeCamel();
-  yield rankDeals();
-  // console.log('done w/ scraping and ordering');
-  var deals = yield getDeals();
-  console.log('FINAL DEALS');
-  deals.map(d => {
-    console.log(d.name, d.category);
-  });
-  console.log(deals[deals.length-1].id);
-});
+// co(function * () {
+//   yield scrapeCamel();
+//   // console.log('done w/ scraping and ordering');
+//   var deals = yield getDeals();
+//   console.log('FINAL DEALS');
+//   deals.map(d => {
+//     console.log(d.name, d.category);
+//   });
+//   console.log(deals[deals.length-1].id);
+// });
 
 module.exports = {
   scrape : scrapeCamel,
