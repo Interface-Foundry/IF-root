@@ -5,15 +5,8 @@ var fs = require('fs');
 var wait = require('co-wait');
 var _ = require('lodash');
 
-// amazon = new Apac({
-//   awsId: 'AKIAIQWK3QCI5BOJTT5Q',
-//   awsSecret: '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',
-//   assocId: 'motorwaytoros-20'
-// });
-
 var lookupAmazonItem = require('../server/utilities/amazon_cart').lookupAmazonItem;
 
-// var amazon = require('../../chat/components/amazon_search').lookup
 var string_utils = require('./string_utils');
 
 var db;
@@ -21,11 +14,12 @@ const dbReady = require('../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 const url = 'https://camelcamelcamel.com';
-const count = 5;
+const count = 5; //The number of deals / camel items that should be returned
 
 /**
  * Scrapes camelcamelcamel
  * @returns full site HTML
+ * @param the mongoId (as a string) of the last camel item we've shown the user
  */
 var scrape = function * (previousId) {
 
@@ -106,23 +100,15 @@ var scrape = function * (previousId) {
 var getAmazon = function * (asin) {
   console.log('take a deep breath');
   yield wait(1500);
-  console.log('querying amazon');
+  // console.log('querying amazon');
   var amazon_item = yield lookupAmazonItem(asin);
   console.log('amazon queried');
-  // var amazonParams = {
-  //   Availability: 'Available',
-  //   Condition: 'New',
-  //   IdType: 'ASIN',
-  //   ItemId: asin,
-  //   ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
-  // };
-  // var amazon_test = amazon.execute('ItemLookup', amazonParams);
   amazon_item = amazon_item.Item;
-    // console.log('AMAZON OBJECT:', amazon_item);
+  // console.log('AMAZON OBJECT:', amazon_item);
   var item = {};
   item.url = amazon_item.DetailPageURL;
   item.category = amazon_item.ItemAttributes.ProductGroup;
-  console.log('is this a real category?', item.cat);
+  // console.log('is this a real category?', item.cat);
   item.info = amazon_item.ItemAttributes.Feature;
   item.images = {};
   if (amazon_item.SmallImage) item.images.small = amazon_item.SmallImage.URL;
@@ -138,7 +124,7 @@ var getAmazon = function * (asin) {
  * Scrapes camelcamelcamel and saves today's deals to mongo as camel_items
  */
 var scrapeCamel = function * () {
-  console.log('scrape camel called');
+  // console.log('scrape camel called');
   var camel = yield scrape();
   console.log('scraped');
 
@@ -160,7 +146,7 @@ var scrapeCamel = function * () {
   });
 
   console.log('got names and asins');
-  console.log('asins', asins);
+  // console.log('asins', asins);
 
   //gets new and old prices from the most popular section
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
@@ -223,20 +209,17 @@ var scrapeCamel = function * () {
       yield amazon.info.map(function * (b) {
         yield db.AmazonBlurbs.destroy({text: b});
         blurb = yield db.AmazonBlurbs.create({
-            text: b//,
-            // item: camel.id
+            text: b
           });
         blurbs.push(blurb);
       });
 
       console.log('created blurbs');
-      // console.log('blurbs', blurbs);
     }
     try {
       yield blurbs.map(function * (b) {
         camel.blurbs.add(b.id);
         yield camel.save();
-        // console.log('whatever, here is a blurb', b.text)
       });
 
       // console.log('camel.blurbs', camel.blurbs);
@@ -249,6 +232,9 @@ var scrapeCamel = function * () {
   console.log('saved models');
 };
 
+/**
+ * TODO
+ */
 var trimName = function (name) {
   console.log('original name', name);
 
@@ -316,6 +302,9 @@ var todaysDeals = function * (count, id, categoryCounts) {
   return yield spreadCategories(camels, categoryCounts);
 };
 
+/**
+ * TODO --comment throughout
+ */
 var spreadCategories = function * (camels, categoryCounts) {
   //goes through camels and keeps track of category counts
   console.log('these are our camel categories:', camels.map(c => c.category));
@@ -355,7 +344,6 @@ var spreadCategories = function * (camels, categoryCounts) {
 
 co(function * () {
   yield scrapeCamel();
-  // return; //DELENDUM
   console.log('done w/ scraping');
   var deals = yield todaysDeals(count);
   console.log('FINAL DEALS');

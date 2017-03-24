@@ -5,7 +5,9 @@
 var utils = {};
 
 /**
- *
+ * Captures and returns important product information -- specifically, sizing, "wifi", "hd", or pixel counts -- that we don't want to lose when we clean the product name
+ * @param the product name
+ * @returns an array of strings pulled from the product-name
  */
 utils.getSpecs = function (str) {
 
@@ -52,7 +54,9 @@ utils.brackets = function (str) {
 };
 
 /**
- *
+ * When ellipses indicate that some portion of the text has been removed, this function removes the ellipses as well as the two
+ * truncated words on either end of them. When ellipses indicate that a word has been split accross a line-break on
+ * camelcamelcamel, this function removes the repeated letter that indicates that as well as the ellipses themselves.
  */
 utils.ellipses = function (str) {
   // console.log('ellipses');
@@ -77,7 +81,7 @@ utils.ellipses = function (str) {
 };
 
 /**
- *
+ * Truncates the string after the first period that indicates a sentence-end rather than an abbreviation
  */
 utils.periods = function (str) {
   // console.log('moon hut');
@@ -88,7 +92,7 @@ utils.periods = function (str) {
 };
 
 /**
- *
+ * Truncates the string after the first comma
  */
 utils.commas = function (str) {
   // console.log('commas');
@@ -96,7 +100,7 @@ utils.commas = function (str) {
 };
 
 /**
- * replaces any double spaces the previous methods have left with a single space
+ * Replaces any double spaces the previous methods have left with a single space
  */
 utils.spaces = function (str) {
   // console.log('spaces');
