@@ -31,7 +31,7 @@ utils.getSpecs = function (str) {
  * truncates a string before the first dash
  */
 utils.dashes = function (str) {
-  console.log('abdashsoul');
+  // console.log('abdashsoul');
   return str.split(' -')[0];
 };
 
@@ -47,7 +47,7 @@ utils.parens = function (str) {
  * removes brackets and any text within them
  */
 utils.brackets = function (str) {
-  console.log('brackets');
+  // console.log('brackets');
   return str.replace(/\[[^\]]*\]/g, '');
 };
 
@@ -55,7 +55,7 @@ utils.brackets = function (str) {
  *
  */
 utils.ellipses = function (str) {
-  console.log('ellipses');
+  // console.log('ellipses');
   str = str.split(' ... ');
   if (str.length <= 1) str = str[0];
   else {
@@ -80,7 +80,7 @@ utils.ellipses = function (str) {
  *
  */
 utils.periods = function (str) {
-  console.log('moon hut');
+  // console.log('moon hut');
   // return str.split('. ')[0];
   var period = /\w\w\w+(\.)\s/.exec(str);
   if (period) return str.slice(0, period.index);
@@ -91,7 +91,7 @@ utils.periods = function (str) {
  *
  */
 utils.commas = function (str) {
-  console.log('commas');
+  // console.log('commas');
   return str.split(',')[0];
 };
 
@@ -99,7 +99,7 @@ utils.commas = function (str) {
  * replaces any double spaces the previous methods have left with a single space
  */
 utils.spaces = function (str) {
-  console.log('spaces');
+  // console.log('spaces');
   return str.replace('  ', ' ');
 };
 

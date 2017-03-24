@@ -118,15 +118,16 @@ var getAmazon = function * (asin) {
   // };
   // var amazon_test = amazon.execute('ItemLookup', amazonParams);
   amazon_item = amazon_item.Item;
+    // console.log('AMAZON OBJECT:', amazon_item);
   var item = {};
-  item.category = amazon_item.ProductGroup;
+  item.url = amazon_item.DetailPageURL;
+  item.category = amazon_item.ItemAttributes.ProductGroup;
   console.log('is this a real category?', item.cat);
-  item.info = amazon_item.Feature;
+  item.info = amazon_item.ItemAttributes.Feature;
   item.images = {};
-  // console.log(amazon_test[0])
-  if (amazon_item.SmallImage) item.images.small = amazon_item.SmallImage.URL[0];
-  if (amazon_item.MediumImage) item.images.medium = amazon_item.MediumImage.URL[0];
-  if (amazon_item.LargeImage) item.images.large = amazon_item.LargeImage.URL[0];
+  if (amazon_item.SmallImage) item.images.small = amazon_item.SmallImage.URL;
+  if (amazon_item.MediumImage) item.images.medium = amazon_item.MediumImage.URL;
+  if (amazon_item.LargeImage) item.images.large = amazon_item.LargeImage.URL;
   if (amazon_item.DetailPageUrl) item.url = amazon_item.DetailPageUrl;
   // if (amazon_test[0].reviews) item.reviews = amazon_test[0].reviews;
   console.log('got this:', item);
@@ -274,7 +275,7 @@ var trimName = function (name) {
  * Returns COUNT of the most recent deals in the database
  */
 var todaysDeals = function * (count, id, categoryCounts) {
-  console.log('todays deals called')
+  console.log('todays deals called');
   yield dbReady;
 
   if (id) {
@@ -354,6 +355,7 @@ var spreadCategories = function * (camels, categoryCounts) {
 
 co(function * () {
   yield scrapeCamel();
+  // return; //DELENDUM
   console.log('done w/ scraping');
   var deals = yield todaysDeals(count);
   console.log('FINAL DEALS');
