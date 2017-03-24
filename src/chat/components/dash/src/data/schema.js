@@ -203,7 +203,6 @@ type Waypoint {
 }
 
 
-
 type Query {
   carts(
     limit: Int
@@ -257,7 +256,12 @@ type Query {
   ): [Waypoint]
 }
 
+type Mutation{
+  setItemAsPurchased(itemId: String!): Item
+}
+
 type schema {
   query: Query
+  mutation: Mutation
 }
 `

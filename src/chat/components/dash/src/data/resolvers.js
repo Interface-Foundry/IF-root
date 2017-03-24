@@ -5,6 +5,7 @@
 import { ObjectId } from 'mongodb';
 import GraphQLToolsTypes from "graphql-tools-types"
 import DataLoader from 'dataloader';
+import {find} from 'lodash';
 
 import {
   Carts,
@@ -170,6 +171,24 @@ const Resolvers = {
       return await pagination(Waypoints, args);
     },
 
+  },
+
+  Mutation: {
+    setItemAsPurchased: async(_,{ itemId }) => {
+      const item = Items.findOne(ObjectId(itemId));
+      return await item.then(function(selectedItem){
+        if (!selectedItem) {
+          throw new Error(`Couldn't find item with id ${itemId}`);
+        } else {
+          Items.findOneAndUpdate({_id: ObjectId(itemId)}, {$set:{purchased:true}}, {new: true},function(err, doc){
+            if(err){
+              console.log("Something wrong when updating data!");
+            }
+          });
+          return selectedItem;
+        }
+      });
+    },
   },
 
 };
