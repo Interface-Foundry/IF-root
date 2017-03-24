@@ -42,6 +42,7 @@ function * infoForChannelOrGroup (slackbot, chosenChannel) {
 // start of actual handlers
 handlers['food.poll.confirm_send_initial'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
   var textWithPrevChannel
   db.waypoints.log(1102, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -64,7 +65,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
 
     // setup team_members for using everyone
     if (prevFoodSession.chosen_channel.id === 'everyone') {
-      textWithPrevChannel = `Start vote for cuisine for _everyone_ at \`${addr}\`?`
+      textWithPrevChannel = `Should I start a cuisine vote for _everyone_ at \`${addr}\`? \n I'll send a Direct Message to each person`
       foodSession.team_members = yield db.Chatusers.find({
         team_id: foodSession.team_id,
         is_bot: {$ne: true},
@@ -115,7 +116,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': '✓ Start Vote',
+            'text': '✔ Start Vote',
             'style': 'primary',
             'type': 'button',
             'value': 'food.user.poll'
@@ -153,7 +154,7 @@ handlers['food.poll.confirm_send_initial'] = function * (message) {
     msg_json.attachments[0].actions.push( {
       'name': 'passthrough',
       'value': 'food.admin.restaurant.pick.list',
-      'text': '> Skip',
+      'text': '> Skip Voting',
       'type': 'button'
     })
   }
@@ -366,15 +367,15 @@ handlers['food.admin.display_channels'] = function * (message) {
     'name': 'food.admin.toggle_channel',
     'type': 'button'
   }, {
-    'text': `${chosenId === 'just_me' ? '◉' : '○'} Just Me`,
-    'value': 'just_me',
-    'name': 'food.admin.toggle_channel',
-    'type': 'button'
-  }, {
     name: 'food.admin.toggle_channel',
     text: `${(chosenId !== 'just_me' && chosenId !== 'everyone') ? '◉' : '○'} By Channel`,
     type: 'button',
     value: 'channel'
+  },{
+    'text': `${chosenId === 'just_me' ? '◉' : '○'} Just Me`,
+    'value': 'just_me',
+    'name': 'food.admin.toggle_channel',
+    'type': 'button'
   }];
 
   var groupedButtons = _.chunk(genericButtons, 5);
@@ -394,14 +395,18 @@ handlers['food.admin.display_channels'] = function * (message) {
   }
 
   msg_json.attachments.unshift({
-    text: `Messages from Kip will be sent in direct messages to each of the users in the selected channel:`,
-    fallback: `Messages from Kip will be sent in direct messages to each of the users in the selected channel:`,
+    text: `*Send Cuisine Vote to Team* \n Select team members to include in the order:`,
+    fallback: `Send Cuisine Vote to Team`,
+    mrkdwn_in: ['text'],
     color: (foodSession.onboarding ? '#A368F0' : '#3AA3E3')
   })
 
   // msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
 
   if (chosenId !== 'just_me' && chosenId !== 'everyone') {
+
+    if( msg_json.attachments[0]) msg_json.attachments[0].text = '*Send Cuisine Vote to Team* \n I\'ll send Direct Messages to each user in the selected channel:' 
+
     let actions = [];
     actions.push({
       name: 'food.admin.toggle_channel',
@@ -420,13 +425,13 @@ handlers['food.admin.display_channels'] = function * (message) {
   // final attachment with send, edit members, < back
   msg_json.attachments.push({
     'text': ``,
-    'fallback': '✓ Start Vote',
+    'fallback': '✔ Start Vote',
     'color':'#2ab27b',
     'callback_id': 'channel_select',
     'attachment_type': 'default',
     'actions': [
       {
-        'text': `✓ Start Vote`,
+        'text': `✔ Start Vote`,
         'name': 'passthrough',
         'value': 'food.user.poll',
         'type': 'button',

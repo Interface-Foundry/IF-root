@@ -393,7 +393,7 @@ handlers['lunch'] = function * (message) {
       {
         'fallback': 'Kip Cafe',
         'title': '',
-        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
+        'image_url': 'http://tidepools.co/kip/oregano/cafe.png'
       })
   }
 
@@ -582,7 +582,7 @@ handlers['team'] = function * (message) {
   team.markModified('meta.collect_from');
   yield team.save();
   let attachments = [{
-    text: '*Step 3/3:* Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include:',
+    text: '*Step 3/3:* Pass the word! I’ll show your team how to add items to the cart\n I\'ll send Direct Messages to each user in the selected channel:',
     mrkdwn_in: ['text'],
     color: '#A368F0',
     actions: [{

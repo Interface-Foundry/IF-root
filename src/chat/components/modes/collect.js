@@ -46,10 +46,15 @@ handlers['initial'] = function*(message) {
   yield utils.getTeamMembers(team);
 
   let attachments = [{
-    text: 'Which group members would you like to collect orders from?',
+    text: '*Collect Supply Orders from Team* \n I\'ll send Direct Messages to each user in the selected channel:',
     mrkdwn_in: ['text'],
     color: '#45a5f4',
     actions: [{
+      name: 'collect_select',
+      text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
+      type: 'button',
+      value: 'channel'
+    },{
       name: 'collect_select',
       text: (team.meta.collect_from === 'all' ? '◉' : '○') + ' Everyone',
       type: 'button',
@@ -59,20 +64,15 @@ handlers['initial'] = function*(message) {
       text: (team.meta.collect_from === 'me' ? '◉' : '○') + ' Just Me',
       type: 'button',
       value: 'justme'
-    }, {
-      name: 'collect_select',
-      text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
-      type: 'button',
-      value: 'channel'
-    }],
+    }], 
     fallback: 'Which group members would you like to collect orders from?',
     callback_id: 'none'
   }];
   let okButtonText = '';
   if (team.meta.collect_from === 'me') {
-    okButtonText = 'Start Shopping';
+    okButtonText = '✔ Start Shopping';
   } else {
-    okButtonText = 'Collect Order';
+    okButtonText = '✔ Collect Orders';
   }
 
   if (team.meta.collect_from === 'channel') {
@@ -81,7 +81,7 @@ handlers['initial'] = function*(message) {
       callback_id: 'channel_buttons_idk',
       actions: [{
         name: 'channel_btn',
-        text: 'Pick Channel',
+        text: 'Pick a Channel',
         type: 'select',
         data_source: 'channels'
       }]
@@ -93,7 +93,7 @@ handlers['initial'] = function*(message) {
     text: '',
     color: '#49d63a',
     mrkdwn_in: ['text'],
-    fallback: 'Which group members would you like to collect orders from?',
+    fallback: 'I\'ll send Direct Messages to each user in the selected channel:',
     actions: [{
       name: 'collect.home.reminder',
       text: okButtonText,
@@ -108,7 +108,7 @@ handlers['initial'] = function*(message) {
       value: 'start'
     }, {
       'name': 'passthrough',
-      'text': 'Home',
+      'text': '< Home',
       'type': 'button',
       'value': 'home'
     }],
