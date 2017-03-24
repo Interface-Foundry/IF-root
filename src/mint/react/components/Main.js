@@ -1,6 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import InputContainer from '../containers/InputContainer';
 import CartContainer from '../containers/CartContainer';
+import { Button, Grid, Row, Col, PageHeader } from 'react-bootstrap';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -14,15 +15,30 @@ export default class Cart extends Component {
     const loggedIn = accounts.length > 0;
     return (
       <div>
-        <h2>Cart ID #{cart_id}</h2>
-        <div>Accounts: <ul>{accounts.map((account, i) => <li key={i}>{account.email_address}</li>)}</ul></div>
-        <hr/>
-        {loggedIn
-          ? <CartContainer cart_id={cart_id}/>
-          : ((newAccount || newAccount === undefined)
-            ? <InputContainer cart_id={cart_id} />
-            : <div>Looks like you've been here before. We just sent you an email, use that to log in! </div>)}
-        <hr/>
+        <Grid>
+            <Row>
+                <Col xs={12}>
+                    <PageHeader>
+                        Cart ID #{cart_id}
+                    </PageHeader>
+                </Col>
+            </Row>
+            <Row>
+                <Col xs={12}>
+                    <strong>Accounts:</strong>
+                    {accounts.map((account, i) => <span key={i}>{account.email_address}</span>)}
+                </Col>
+            </Row>
+            <Row>
+                <Col xs={12}>
+                    {loggedIn
+                      ? <CartContainer cart_id={cart_id}/>
+                      : ((newAccount || newAccount === undefined)
+                        ? <InputContainer cart_id={cart_id} />
+                        : <p>Looks like you've been here before. We just sent you an email, use that to log in! </p>)}
+                </Col>
+            </Row>
+        </Grid>
       </div>
     );
   }
