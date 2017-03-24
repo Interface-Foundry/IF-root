@@ -37,9 +37,16 @@ describe('testing amazon to our cart system', () => {
   it('add another of item already added to cart', function * () {
     var cart = yield amazon.createAmazonCart({ASIN: 'B010S9N6OO'});
     cart = yield amazon.addAmazonItemToCart({ASIN: 'B01BYO79UE'}, cart);
+    expect(cart.CartItems.CartItem.length).to.equal(2);
+  })
+
+  it('increase quantity of item', function * () {
+    var cart = yield amazon.createAmazonCart({ASIN: 'B010S9N6OO'});
+    cart = yield amazon.addAmazonItemToCart({ASIN: 'B01BYO79UE'}, cart);
     console.log(cart.CartItems)
     expect(cart).to.exist;
   })
+
   // describe('test if coupon use changes', function () {
   //   before('use coupon', function * () {
   //     var c = yield db.coupons.findOne({team_id: TEAM_ID, coupon_code: SINGLE_USE_CODE})
