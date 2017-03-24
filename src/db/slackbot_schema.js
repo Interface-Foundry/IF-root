@@ -7,6 +7,8 @@ var slackbotSchema = mongoose.Schema({
   //
   // stuff we get from slack
   //
+
+  /** access token NOT the same as the bot_access_token kip uses to talk */
   access_token: String,
   scope: String,
   team_name: String,
@@ -114,6 +116,8 @@ var slackbotSchema = mongoose.Schema({
       }
     }],
     chosen_location: {},
+    order_frequency: {},
+    cuisine_frequency: {},
     fulfillment_method: String,
     payments: [{
       vendor: String,
@@ -126,7 +130,11 @@ var slackbotSchema = mongoose.Schema({
         last4: String,
         email: String,
         address_zip: String
-      }
+      },
+      added_by: String, // which user added this card
+      company_card: Boolean, // if office_assistant/admin adds card other
+      date_added: Date, // date card was added
+      card_alias: String
     }],
     mock: Boolean,
     p2p: Boolean,

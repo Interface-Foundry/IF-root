@@ -267,7 +267,7 @@ queue.topic('incoming').subscribe(incoming => {
       logging.debug('raw_results: ', results)
 
       var history = yield db.Messages.find({thread_id: incoming.data.postback.dataId}).sort('-ts').limit(20);
-      var message = history[0];
+      var message = history[0] || incoming.data
       message.history = history.slice(1);
 
       var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team
@@ -289,9 +289,6 @@ queue.topic('incoming').subscribe(incoming => {
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
-      ts: {
-        $lte: incoming.data.ts
-      }
     }).sort('-ts').limit(20)
 
     var message = history[0]
@@ -327,6 +324,7 @@ queue.topic('incoming').subscribe(incoming => {
       let team = yield db.Slackbots.findOne({
         'team_id': message.source.team
       }).exec();
+      logging.debug('checking if user is admin for cancel intent')
       let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
       let couponText = yield slackUtils.couponText(message.source.team);
       simplehome(message, isAdmin, couponText);
@@ -350,6 +348,7 @@ queue.topic('incoming').subscribe(incoming => {
         let team = yield db.Slackbots.findOne({
           'team_id': message.source.team
         }).exec();
+        logging.debug('checking if user is admin for mode switching')
         let isAdmin = yield slackUtils.isAdmin(message.source.user, team);
         let allow = isAdmin || team.meta.office_assistants == 0;
         if (!allow) {
@@ -373,6 +372,8 @@ queue.topic('incoming').subscribe(incoming => {
     let teamInfo = yield db.Slackbots.findOne({
       'team_id': message.source.team
     }).exec();
+    logging.debug('checking if user is admin yet again')
+
     let isAdmin = yield slackUtils.isAdmin(message.source.user, teamInfo);
     //MODE SWITCHER
     switch (message.mode) {

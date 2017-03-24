@@ -2,6 +2,7 @@
 // "Actions" are what slack calls buttons
 //
 var queue = require('../queue-direct');
+var agenda = require('../agendas')
 var refresh_team = require('../refresh_team');
 var express = require('express');
 var co = require('co');
@@ -16,6 +17,7 @@ var utils = require('./utils');
 var cookieParser = require('cookie-parser')
 var uuid = require('uuid');
 var processData = require('../process');
+var archiveTeam = require('./archive_team')
 var sleep = require('co-sleep');
 // var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist'
 // var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html'
@@ -23,6 +25,7 @@ var request = require('request')
 var requestPromise = require('request-promise');
 // var init_team = require("../init_team.js");
 var app = express();
+
 
 app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded({extended:true}));
@@ -112,6 +115,36 @@ app.post('/slackaction', next(function * (req, res) {
 
   var message;
   var parsedIn = JSON.parse(req.body.payload);
+
+  // snooze any message by setting action.value to "snooze"
+  if (_.get(parsedIn, 'actions[0].value') === 'snooze') {
+    var time_ms = new Date(24 * 60 * 60 * 1000 + Date.now())
+
+    var reminderMessage = {
+      mode: 'food',
+      action: 'begin',
+      origin: 'slack',
+      reply: {
+        attachments: parsedIn.original_message.attachments
+      },
+      source: {
+        user: parsedIn.user.id,
+        team: parsedIn.team.id,
+        channel: parsedIn.channel.id
+      }
+    }
+
+    agenda.schedule(time_ms, 'onboarding reminder', {
+      msg: JSON.stringify(reminderMessage),
+      user: parsedIn.user.id
+    })
+
+    var okay = {
+      text: 'Okay, I\'ll remind you tomorrow',
+      replace_original: false
+    }
+    return res.send(okay)
+  }
 
   // First reply to slack, then process the request
   if (!buttonData && simple_command !== 'collect_select' && simple_command !== 'channel_btn'&& parsedIn.original_message) {
@@ -290,6 +323,7 @@ app.post('/slackaction', next(function * (req, res) {
         message.action = 'home';
       }
       else if (simple_command == 'exit') {
+        logging.log('checking if user is admin')
         let isAdmin = yield utils.isAdmin(message.source.user, team);
         let couponText = yield utils.couponText(message.source.team);
         let reply = cardTemplate.home_screen(isAdmin, message.source.user, couponText);
@@ -577,14 +611,26 @@ function * updateCartMsg(cart, parsedIn) {
   })
 }
 
+/**
+ * Authorize route, log data to database
+ * @type {Any}
+ */
 app.get('/authorize', function (req, res) {
   logging.info('button click @ /authorize')
+  db.Metrics.log('add_to_slack', {
+    ip: req.ip,
+    headers: req.headers
+  })
   res.redirect(`https://slack.com/oauth/authorize?scope=commands+bot+users:read&client_id=${kip.config.slack.client_id}`)
 })
 
+/**
+ * Route which is hit after a user selects which team they want to authorize through slack. Oauth.
+ * @type {Any}
+ */
 app.get('/newslack', (req, res) => co(function * () {
   logging.info('new slack integration request')
-
+  res.redirect('/thanks.html')
   if (!req.query.code) {
     logging.warn('no code in the callback url, cannot proceed with new slack integration')
     if (process.env.NODE_ENV === 'production') {
@@ -627,12 +673,20 @@ app.get('/newslack', (req, res) => co(function * () {
 
   if (_.get(existingTeam, 'team_id')) {
     logging.info('team exists previously while using /newslack')
-    _.merge(existingTeam, res_auth)
-    existingTeam.meta.deleted = false
-    yield existingTeam.save()
-    yield [utils.initializeTeam(existingTeam, res_auth), utils.getTeamMembers(existingTeam)]
-    yield slackModule.loadTeam(existingTeam)
-  } else {
+
+    // nuking team and strating over (see issue #820
+    try {
+      yield archiveTeam(existingTeam.team_id)
+      yield sleep(1000) // mongodb's index needs to clear the team_id, which apparently takes time
+    } catch (e) {
+      logging.error({
+        message: 'Error archiving team during Add to Slack button click',
+        error: e,
+      })
+    }
+  }
+
+    // create all the things
     logging.info('creating new slackbot for team: ', res_auth.team_id)
     var slackbot = new db.Slackbot(res_auth)
     yield slackbot.save()
@@ -659,18 +713,45 @@ app.get('/newslack', (req, res) => co(function * () {
     // queue it up for processing
     yield message.save()
     queue.publish('incoming', message, ['slack', user.dm, Date.now()].join('.'))
-  }
-  res.redirect('/thanks.html')
+}).catch(e => {
+  logging.error(e)
 }))
 
-// k8s readiness ingress health check
+/**
+ * Health check to see if the server is accepting connections
+ */
 app.get('/health', function (req, res) {
   res.sendStatus(200)
 })
 
-// app.get('/*', function(req, res, next) {
-//     res.sendfile(defaultPage)
-// })
+/**
+ * allow messages to come in from external sources
+ * you can use this with do_message.js
+ */
+app.post('/incoming', function (req, res) {
+  logging.debug('incoming message')
+  logging.debug(req.body)
+  logging.debug(kip.config.queueVerificationToken)
+
+
+  // verify the request
+  if (_.get(req, 'body.verificationToken') !== kip.config.queueVerificationToken) {
+    logging.error('bad verification token in /incoming')
+    res.status(504)
+    return res.end()
+  }
+
+  if (!_.get(req, 'body.message')) {
+    logging.error('no body.message in /incoming')
+    res.status(500)
+    return res.end()
+  }
+
+  logging.debug('sending', req.body.message)
+  queue.publish('incoming', req.body.message)
+  res.status(200)
+  res.end()
+})
 
 var listener
 function listen (callback) {

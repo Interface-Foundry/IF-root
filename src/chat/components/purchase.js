@@ -1,15 +1,6 @@
 var async = require('async');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
-// var client = amazon.createClient({
-//   awsId: "AKIAILD2WZTCJPBMK66A",
-//   awsSecret: "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",
-//   awsTag: "bubboorev-20"
-// });
-var client = amazon.createClient({
-awsId: "AKIAJWTPOWIOUPHJYG2Q",
-awsSecret: "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",
-awsTag: "eileenog-20"
-});
+var client = amazon.createClient(kip.config.amazon[0])
 
 //pass in data, user chat history
 //cartHistory = user cart items list

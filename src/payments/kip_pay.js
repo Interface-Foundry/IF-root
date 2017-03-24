@@ -47,7 +47,6 @@ var bodyParser = require('body-parser')
 var express = require('express')
 var app = express()
 
-
 // import kip cc
 var payUtils = require('./pay_utils.js')
 
@@ -67,11 +66,9 @@ app.use('/', express.static(path.join(__dirname, 'web')))
 logging.info('running kip pay from: ', __dirname)
 logging.info('running in NODE_ENV', process.env.NODE_ENV)
 
-
 app.get('/test', (req, res) => co(function * () {
   res.status(200).send({'test': 'passed'})
 }))
-
 
 // post a new charge for kip user
 app.post('/charge', (req, res) => co(function * () {
@@ -272,6 +269,10 @@ app.post('/process', (req, res) => co(function * () {
   }
 }))
 
+/**
+ * create a stripe charge and then pay delivery.com for a cafe order
+ * @param {object} payment - payment object that contains order/costs/delivery.com info
+ */
 function * chargeById (payment) {
   // make a charge by saved card ID
   try {

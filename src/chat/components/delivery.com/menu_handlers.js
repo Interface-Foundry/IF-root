@@ -8,20 +8,31 @@ var Menu = require('./Menu')
 var Cart = require('./Cart')
 var utils = require('./utils.js')
 var menu_utils = require('./menu_utils')
+var preferences = require('../../../preferences/preferences.js')
 
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other files
 
 // exports
+/**@namespace*/
 var handlers = {}
 
+/**
+* Displays most popular menu items for the user to order
+* @param message
+*/
 handlers['food.menu.quickpicks'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  var menu = Menu(foodSession.menu)
+  var sortedMenu = menu.allItems()
 
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   var previouslyOrderedItemIds = []
   var recommendedItemIds = []
+  var preferencesItems = []
+  var matchingItems = []
 
   // paging
   var index = parseInt(_.get(message, 'data.value.index')) || 0
@@ -34,9 +45,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   if (keyword) {
     // search for item if not presented but they type somethin
     logging.info('searching for', keyword.cyan)
-    var menu = Menu(foodSession.menu)
-    var sortedMenu = menu.allItems()
-    var matchingItems = yield utils.matchText(keyword, sortedMenu, {
+    matchingItems = yield utils.matchText(keyword, sortedMenu, {
       shouldSort: true,
       location: 0,
       distance: 0,
@@ -51,12 +60,10 @@ handlers['food.menu.quickpicks'] = function * (message) {
       logging.info('todo send "couldnot find anything matching text" message to user')
       matchingItems = []
     }
-  } else {
-    matchingItems = []
+    matchingItems = matchingItems.map(i => i.id)
   }
-  matchingItems = matchingItems.map(i => i.id)
 
-  var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
+  previouslyOrderedItemIds = _.get(user, 'history.orders', [])
     .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
     .reduce((allIds, order) => {
       allIds.push(order.deliveryItem.id)
@@ -67,7 +74,7 @@ handlers['food.menu.quickpicks'] = function * (message) {
   recommendedItemIds = recommendedItemIds.map(i => Number(i))
   //
   // adding the thing where you show 3 at a time
-  // nned to show a few different kinds of itesm.
+  // need to show a few different kinds of items.
   // Items that you have ordered before appear first, and should say something like "Last ordered Oct 5"
   // Items that are in the recommended items array should appear next, say "Recommended"
   // THen the rest of the menu in any order i think
@@ -82,26 +89,37 @@ handlers['food.menu.quickpicks'] = function * (message) {
     last: 1
   }
 
+  // create preferences via random suggestions
+
+  if (kip.config.preferences.suggestions && (kip.config.preferences.users.includes(message.user_id))) {
+    // returns array of unique_ids to suggest to user
+    preferencesItems = yield preferences.createPreferences(user, sortedMenu, 1, 'cafe_suggestions', true)
+    preferencesItems = preferencesItems.map(i => i.unique_id)
+    logging.debug('random preferences.length~: ', preferencesItems)
+  }
+
   /*
   not really any good way to order items atm so just going to throw
   everything in last til have some actual way to order things w/ sortOrder
   */
   var lastItems = ['beverage', 'beverages', 'desserts', 'dessert', 'cold appetizer', 'hot appetizer', 'appetizers', 'appetizers from the kitchen', 'soup', 'soups', 'drinks', 'salads', 'side salads', 'side menu', 'bagged snacks', 'snacks']
 
-  var menu = Menu(foodSession.menu)
-  var sortedMenu = menu.allItems().map(i => {
+  sortedMenu = menu.allItems().map(i => {
     // inject the sort order stuff
     if (matchingItems.includes(i.id)) {
       i.sortOrder = sortOrder.searched + matchingItems.length - matchingItems.findIndex(x => { return x === i.id })
       // i.infoLine = 'Returned from search term'
     } else if (previouslyOrderedItemIds.includes(i.id)) {
       i.sortOrder = sortOrder.orderedBefore
-      i.infoLine = '_You ordered this before_'
+      i.infoLine = '_You\'ve ordered this before_'
     } else if (recommendedItemIds.includes(Number(i.unique_id))) {
       i.sortOrder = sortOrder.recommended
       // i.infoLine = 'Popular Item'
     } else if (_.includes(lastItems, menu.flattenedMenu[String(i.parentId)].name.toLowerCase())) {
       i.sortOrder = sortOrder.last
+    } else if (preferencesItems.includes(Number(i.unique_id))) {
+      i.sortOrder = sortOrder.preferences
+      i.infoLine = '*_This is a suggested item_*'
     } else {
       i.sortOrder = sortOrder.none
     }
@@ -120,11 +138,10 @@ handlers['food.menu.quickpicks'] = function * (message) {
       if (a.price > current_ub && b.price < current_ub) return true
       else return false
       // but otherwise maintain already-sorted order
-    });
+    })
   }
 
   var menuItems = sortedMenu.slice(index, index + 3).reverse().map(i => {
-
     var parentName = _.get(menu, `flattenedMenu.${i.parentId}.name`)
     var parentDescription = _.get(menu, `flattenedMenu.${i.parentId}.description`)
     var desc = [parentName, i.description].filter(Boolean).join(' - ')
@@ -152,24 +169,11 @@ handlers['food.menu.quickpicks'] = function * (message) {
     parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
 
     //clean out html from descriptions
-
     desc = striptags(desc)
     parentDescription = striptags(parentDescription)
-
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
   })
-
-  // delendum --> since <more and more> will be in bottommost item
-
-  // if (feedbackOn && msg_json) {
-  //   msg_json.attachments[0].actions.push({
-  //     name: 'food.feedback.new',
-  //     text: '⇲ Send feedback',
-  //     type: 'button',
-  //     value: 'food.feedback.new'
-  //   })
-  // }
 
   var backButton = {
     name: 'food.menu.quickpicks',
@@ -231,6 +235,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
       msg_json.attachments[msg_json.attachments.length - 1].actions.push(moreButton)
     }
   }
+
+  // if the popout system isn't working, use the delivery.com url instead of (failing to) generate our own
   if (config.menuURL) var url = yield menu_utils.getUrl(foodSession, message.source.user)
   else var url = foodSession.chosen_restaurant.url
 
@@ -286,9 +292,9 @@ handlers['food.menu.search'] = function * (message) {
   return yield handlers['food.menu.quickpicks'](message)
 }
 
-//
-// After a user clicks on a menu item, this shows the options, like beef or tofu
-//
+/**
+* After a user clicks on a menu item, this shows the options, like beef or tofu
+*/
 handlers['food.item.submenu'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -369,7 +375,9 @@ function deleteChildren(node, cartItem, deliveryId) {
   })
 }
 
-// Handles only the current item the user is editing
+/**
+*  Increments the quantity of ~only~ the item the user is currently in the process of editing.
+*/
 handlers['food.item.quantity.add'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
@@ -380,7 +388,9 @@ handlers['food.item.quantity.add'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
-// Handles only the current item the user is editing
+/**
+*  Decrements the quantity of ~only~ the item the user is currently in the process of editing.
+*/
 handlers['food.item.quantity.subtract'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
@@ -396,6 +406,10 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
+/**
+* Allow the user to add instructions for a specific food item
+* @param message
+*/
 handlers['food.item.instructions'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -439,49 +453,46 @@ handlers['food.item.add_to_cart'] = function * (message) {
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
 
-  //~~~budget~~~//
-
-  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
-    var budgets = foodSession.user_budgets;
-    var menu = Menu(foodSession.menu);
-    var itemPrice = menu.getCartItemPrice(userItem);
-
-    console.log('itemPrice is:', itemPrice)
-
-    if (itemPrice > (budgets[userItem.user_id]) * 1.125) {
-      yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
-      return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
-        type: 'slack',
-        data: {
-        //   text: `Please choose something cheaper`,
-        //   mrkdwn_in: ['text'],
-        //   color: '#fc9600'
-          attachments: [{
-            color: '#fc9600',
-            fallback: 'the unfrugal are the devils\'s playthings',
-            text: 'Please choose something cheaper'
-          }]
-        },
-      })
-    }
-
-    budgets[userItem.user_id] -= itemPrice;
-
-    yield db.Delivery.update(
-      {team_id: message.source.team, active: true},
-      {$set: {
-        user_budgets: budgets
-      }}
-    );
-  }
-
-  //~~~budget~~~//
-
   var errJson = cart.menu.errors(userItem)
   if (errJson) {
     kip.debug('validation errors, user must fix some things')
     return $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: errJson})
   }
+  else {
+    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
+      var budgets = foodSession.user_budgets;
+      var menu = Menu(foodSession.menu);
+      var itemPrice = menu.getCartItemPrice(userItem);
+
+      if (itemPrice > (budgets[userItem.user_id]) * 1.125) {
+        yield db.Delivery.update({team_id: message.source.team, active: true}, {$unset: {}});
+        return $replyChannel.sendReplace(message, 'food.menu.quickpicks', {
+          type: 'slack',
+          data: {
+          //   text: `Please choose something cheaper`,
+          //   mrkdwn_in: ['text'],
+          //   color: '#fc9600'
+            attachments: [{
+              color: '#fc9600',
+              fallback: 'the unfrugal are the devils\'s playthings',
+              text: 'Please choose something cheaper'
+            }]
+          },
+        })
+      }
+
+      budgets[userItem.user_id] -= itemPrice;
+
+      yield db.Delivery.update(
+        {team_id: message.source.team, active: true},
+        {$set: {
+          user_budgets: budgets
+        }}
+      );
+    }
+  }
+  
+  logging.debug('userItem', userItem)
   userItem.added_to_cart = true
   yield db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.added_to_cart': true}}).exec()
 

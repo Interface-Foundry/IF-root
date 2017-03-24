@@ -93,15 +93,6 @@ handlers['food.admin.team.members'] = function * (message) {
     'value': 'select_team_members'
   })
 
-  if (process.env.NODE_ENV == 'development_hannah') {
-    buttons.actions.push({
-      'name': 'passthrough',
-      'text': 'View Email Members',
-      'type': 'button',
-      'value': 'food.admin.team.email_members'
-    })
-  }
-
   buttons.actions.push({
     name: 'passthrough',
     value: 'food.poll.confirm_send',
@@ -204,15 +195,6 @@ handlers['food.admin.team.members.reorder'] = function * (message) {
     'type': 'button',
     'value': message.data.value
   })
-
-  if (process.env.NODE_ENV == 'development_hannah') {
-    buttons.actions.push({
-      'name': 'passthrough',
-      'text': 'View Email Members',
-      'type': 'button',
-      'value': 'food.admin.team.email_members'
-    })
-  }
 
   buttons.actions.push({
     name: 'food.admin.restaurant.reordering_confirmation',

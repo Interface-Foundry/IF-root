@@ -1,11 +1,10 @@
 var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
-var sleep = require('co-sleep')
 var validator = require('isemail')
+var co = require('co')
 
 var coupon = require('../../../coupon/couponUsing.js')
-var mailer_transport = require('../../../mail/IF_mail.js')
 var cardTemplates = require('../slack/card_templates.js')
 var utils = require('../slack/utils.js')
 var Menu = require('./Menu')
@@ -16,6 +15,7 @@ var $replyChannel
 var $allHandlers
 
 // exports
+/**@namespace*/
 var handlers = {}
 
 /* S12B
@@ -23,6 +23,7 @@ var handlers = {}
 *
 */
 handlers['food.admin.order.checkout.address2'] = function * (message) {
+  logging.debug('food.admin.order.checkout.address2, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1310, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -45,19 +46,11 @@ handlers['food.admin.order.checkout.address2'] = function * (message) {
     }]
   }
 
-  // if (feedbackOn && response) {
-  //   response.attachments[0].actions.push({
-  //     name: 'food.feedback.new',
-  //     text: '⇲ Send feedback',
-  //     type: 'button',
-  //     value: 'food.feedback.new'
-  //   })
-  // }
-
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {textFor: 'admin.order.checkout.address2', type: message.origin, data: response})
 }
 
 handlers['food.admin.order.checkout.name'] = function * (message) {
+  logging.debug('food.admin.order.checkout.name, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1311, foodSession._id, message.user_id, {original_text: message.original_text})
@@ -73,6 +66,7 @@ handlers['food.admin.order.checkout.name'] = function * (message) {
 }
 
 handlers['food.admin.order.checkout.phone_number'] = function * (message) {
+  logging.debug('food.admin.order.checkout.phone_number, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   // process user name from previous message
 
@@ -92,14 +86,27 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
 }
 
 handlers['food.admin.order.checkout.confirm'] = function * (message) {
+  logging.debug('food.admin.order.checkout.confirm, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  // after food ordered, tell members admin is finished ordering
+  var removeOrderDashboardMsg = {
+    'text': `All orders collected, <@${foodSession.convo_initiater.id}>  is checking out now!`,
+    'fallback': `All orders collected, <@${foodSession.convo_initiater.id}>  is checking out now!`,
+    'callback_id': 'food.admin.order.checkout.confirm'
+  }
+
+  yield foodSession.order_dashboards.map(function * (dashboard) {
+    var usersMessage = yield db.Messages.findOne(dashboard.message)
+    yield $replyChannel.sendReplace(usersMessage, 'food.users.end_order_dashboard', {type: usersMessage.origin, data: removeOrderDashboardMsg})
+  })
 
   db.waypoints.log(1320, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(1).exec()
-  prevMessage = prevMessage[0]
+  var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(2).exec()
+  prevMessage = prevMessage[1]
   if (_.get(prevMessage, 'reply')) {
-    logging.info('heerrr', prevMessage.reply)
+    logging.info('prevMessage.reply', prevMessage.reply)
   }
 
   var editInfo = {}
@@ -165,6 +172,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   if (!foodSession.chosen_location.address_2) {
+    console.log('NO ADDRESS DETAILS :(')
     return yield handlers['food.admin.order.checkout.address2'](message)
   }
   if (!foodSession.convo_initiater.last_name) {
@@ -309,9 +317,10 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
 }
 
 handlers['food.admin.order.checkout.delivery_instructions'] = function * (message) {
+  logging.debug('food.admin.order.checkout.delivery_instructions, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
-  console.log(foodSession.instructions)
+  logging.debug('instructions', foodSession.instructions)
 
   var msg = {
     text: (foodSession.instructions ? `Edit Instructions` : `Add Special Instructions`),
@@ -327,6 +336,7 @@ handlers['food.admin.order.checkout.delivery_instructions'] = function * (messag
 }
 
 handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * (message, foodSession) {
+  logging.debug('food.admin.order.checkout.delivery_instructions.submit, team_id: %s', message.source.team)
   if (typeof foodSession === 'undefined')
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
@@ -339,44 +349,58 @@ handlers['food.admin.order.checkout.delivery_instructions.submit'] = function * 
   return yield handlers['food.admin.order.checkout.confirm'](msg)
 }
 
+/**
+* Gives the admin the option to edit the email to which the confirmation email / receipt will be sent for this order only
+* @param message
+*/
 handlers['food.admin.order.checkout.email'] = function * (message) {
+  logging.debug('food.admin.order.checkout.email, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-
-  console.log(foodSession.convo_initiater.email)
-
+  logging.debug('email %s', foodSession.convo_initiater.email)
   var msg = {
     text: `Edit Email Address`,
     attachments: [{
       text: '✎ Type your email address below (Example: _kipthepenguin@kipthis.com_)',
-      fallback: '✎ Type your instructions below (Example: _The door is next to the electric vehicle charging stations behind helipad 6A_)',
+      fallback: '✎ Type your email address below (Example: _kipthepenguin@kipthis.com_)',
       mrkdwn_in: ['text']
     }]
   }
-
-  //var response =
   yield $replyChannel.sendReplace(message, 'food.admin.order.checkout.email.submit', {type: message.origin, data: msg})
 }
 
-handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSession) {
+/**
+* Saves the email the admin just typed in to the foodSession
+* @param message
+*/
+handlers['food.admin.order.checkout.email.submit'] = function * (message) {
+  logging.debug('food.admin.order.checkout.email.submit, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-
   // db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
-  var email = message.text.split('|')[1].split('>')[0]
+  var email = (message.text ? message.text.split('|') : '')
+  if (email.length > 1) email = email[1].split('>')[0]
   var valid = validator.validate(email)
   if (!valid) {
     // not a valid email
-    $replyChannel.send(
+    yield $replyChannel.send(
       message,
       'food.admin.order.checkout.email',
       {
         type: message.origin,
-        data: {'text': `Unfortunately that email was invalid - try again?`}
-      })
+        data: {
+          'text': '',
+          'attachments': [{
+            text: `Unfortunately that email wasn't valid. Please try again!`,
+            mrkdwn_in: ['text'],
+            color: '#fc9600'
+          }]
+        }
+      }
+    )
     return yield handlers['food.admin.order.checkout.email'](message)
   }
 
-  if (valid) foodSession.convo_initiater.email = email;
-  yield foodSession.save();
+  if (valid) foodSession.convo_initiater.email = email
+  yield foodSession.save()
   // yield db.Delivery.update({team_id: message.source.team, active: true}, {$set: {'convo_initiater.email': message.text || foodSession.convo_initiater.email}}).exec()
   var msg = _.merge({}, message, {
     text: ''
@@ -385,8 +409,10 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message, foodSe
 }
 
 handlers['food.admin.order.pay'] = function * (message) {
+  logging.debug('food.admin.order.pay, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  var user = yield db.Chatusers.findOne({team_id: message.source.team, id: foodSession.convo_initiater.id})
 
   db.waypoints.log(1330, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -416,14 +442,25 @@ handlers['food.admin.order.pay'] = function * (message) {
       }]
     }]
   }
-  // if (feedbackOn && response) {
-  //   response.attachments[0].actions.push({
-  //     name: 'food.feedback.new',
-  //     text: '⇲ Send feedback',
-  //     type: 'button',
-  //     value: 'food.feedback.new'
-  //   })
-  // }
+
+  // if the user is an office_assistant present all company_cards, if they arent
+  // only present the cards they have
+  var availableCards = []
+
+  if (slackbot.meta.office_assistants.find(u => u === foodSession.convo_initiater.id)) {
+    // user is office_assitant.  get all cards that are company card or not user_specific
+    availableCards = slackbot.meta.payments.filter(c => c.company_card !== false)
+  } else {
+    // user is regular
+    availableCards = slackbot.meta.payments.filter(c => c.added_by === foodSession.convo_initiater.id)
+  }
+
+  // if they previously added card before we did this feature, try to present
+  // the user with their card
+  if (availableCards.length === 0) {
+    // look if any email from the payment objects matches users
+    availableCards = slackbot.meta.payments.filter(u => u.card.email === user.profile.email)
+  }
 
   if (_.get(slackbot.meta, 'payments')) {
     // we already have a card source, present cards
@@ -433,7 +470,7 @@ handlers['food.admin.order.pay'] = function * (message) {
       mastercard: `https://storage.googleapis.com/kip-random/mastercard.png`
     }
 
-    var cardsAttachment = slackbot.meta.payments.map((c) => {
+    var cardsAttachment = availableCards.map((c) => {
       return {
         'title': `${c.card.brand}`,
         'text': `Ending in ${c.card.last4}, exp ${c.card.exp_month}/${c.card.exp_year.slice(2)}`,
@@ -469,12 +506,34 @@ handlers['food.admin.order.pay'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.order.select_card', {type: message.origin, data: response})
 }
 
+handlers['food.admin.edit_card_alias'] = function * (message) {
+  // var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var response = {
+    'text': `Type a new card alias below:`,
+    'fallback': `Type a new card alias below:`,
+    'callback_id': 'food.admin.edit_card_alias',
+    'attachments': [{
+      'fallback': 'example',
+      'text': `✎ Example: _nyc office card_`,
+      'mrkdwn_in': ['text']
+    }]
+  }
+  $replyChannel.send(message, 'food.admin.card_alias_edited', {type: message.origin, data: response})
+}
+
+handlers['food.admin.card_alias_edited'] = function * (message) {
+  var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  // update the card_alias
+}
+
 handlers['food.admin.order.remove_card'] = function * (message) {
+  logging.debug('food.admin.order.remove_card, team_id: %s', message.source.team)
+
   if (!message.data.value) {
     return logging.error('could not remove card because card_id was undefined')
   }
 
-  var slackbot = yield db.Slackbots.update({team_id: message.source.team}, {
+  yield db.Slackbots.update({team_id: message.source.team}, {
     $pull: {'meta.payments': {'card.card_id': message.data.value}}
   }).exec()
 
@@ -482,8 +541,9 @@ handlers['food.admin.order.remove_card'] = function * (message) {
 }
 
 handlers['food.admin.add_new_card'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  logging.debug('food.admin.add_new_card, team_id: %s', message.source.team)
 
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1331, foodSession._id, message.user_id, {original_text: message.original_text})
 
   // add various shit to the foodSession
@@ -554,6 +614,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
 }
 
 handlers['food.admin.order.select_card'] = function * (message) {
+  logging.debug('food.admin.order.select_card, team_id: %s', message.source.team)
   // immediately remove payment options
   yield $replyChannel.sendReplace(message, 'food.admin.processing_card', {type: message.origin, data: {text: 'processing...'}})
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -632,6 +693,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
 }
 
 handlers['food.admin.order.pay.confirm'] = function * (message) {
+  logging.debug('food.admin.order.pay.confirm, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var c = _.find(slackbot.meta.payments, {'card': {'card_id': message.source.actions[0].value}})
@@ -666,33 +728,33 @@ handlers['food.admin.order.pay.confirm'] = function * (message) {
 }
 
 handlers['food.admin.save_info'] = function * (message, foodSession) {
+  logging.debug('food.admin.save_info, user_id: %s', message.user_id)
   // final area to save and reset stuff
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false})
 
-  logging.info('saving phone_number... ')
   user.phone_number = foodSession.chosen_location.phone_number
   user.first_name = foodSession.convo_initiater.first_name
   user.last_name = foodSession.convo_initiater.last_name
   yield user.save()
 
   // slackbot save info
-  logging.info('saving location... ')
-  try {
-    yield db.Slackbot.update({
-      'team_id': message.source.team,
-      'meta.locations.address_1': foodSession.chosen_location.address_1
-    }, {
-      $set: {'meta.locations.$': foodSession.chosen_location}
-    }, {
-      upsert: true
-    })
-  } catch (err) {
-    logging.error('error updating slackbot.meta.locations', err)
-  }
+  // logging.info('saving location... ')
+  // try {
+  //   yield db.Slackbot.update({
+  //     'team_id': message.source.team,
+  //     'meta.locations.address_1': foodSession.chosen_location.address_1
+  //   }, {
+  //     $set: {'meta.locations.$': foodSession.chosen_location}
+  //   }, {
+  //     upsert: true
+  //   })
+  // } catch (err) {
+  //   logging.error('error updating slackbot.meta.locations', err)
+  // }
 }
 
 handlers['food.done'] = function * (message) {
-  logging.info('saving users info to slackbots and peripheral cleanup')
+  logging.debug('food.done, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   db.waypoints.log(1332, foodSession._id, message.user_id, {original_text: message.source})
   yield handlers['food.admin.save_info'](message, foodSession)
@@ -700,6 +762,7 @@ handlers['food.done'] = function * (message) {
 }
 
 handlers['food.payments.done'] = function * (message, foodSession) {
+  logging.debug('food.payments.done, team_id: %s', message.source.team)
   if (foodSession === undefined) {
     logging.warn('foodSession wasnt passed into food.done')
     foodSession = yield db.Delivery.findOne({'team_id': message.source.team, 'active': true}).exec()
@@ -715,8 +778,17 @@ handlers['food.payments.done'] = function * (message, foodSession) {
     yield foodSession.save()
     yield handlers['food.payments.done.team'](message, foodSession)
 
-    logging.debug('about to send confirmation email')
+    logging.debug('about to send confirmation email to admin')
     yield email_utils.sendConfirmationEmail(foodSession)
+
+    logging.debug('foodSession.email_users', foodSession.email_users)
+    yield foodSession.email_users.map(function * (email) {
+      logging.debug('email:', email)
+      var full_eu = yield db.email_users.findOne({email: email})
+      if (foodSession.confirmed_orders.indexOf(full_eu.id) > -1) {
+        yield email_utils.sendEmailUserConfirmations(foodSession, email)
+      }
+    })
     // save coupon info but needed to wait for payments thing
     if (_.get(foodSession, 'coupon.code')) {
       logging.info('saving coupon code stuff')
@@ -728,6 +800,7 @@ handlers['food.payments.done'] = function * (message, foodSession) {
 }
 
 handlers['food.payments.done.team'] = function * (message, foodSession) {
+  logging.debug('food.payments.done.team, team_id: %s', message.source.team)
   // send message to everyone in team with their order and home buttons here
 
   var banner = {
@@ -742,41 +815,42 @@ handlers['food.payments.done.team'] = function * (message, foodSession) {
     var uniqOrders = _.uniq(foodSession.confirmed_orders)
     yield uniqOrders.map(function * (userId) {
       var user = _.find(foodSession.team_members, {'id': userId}) // find returns the first one
+      if (user) {
+        var itemNames = foodSession.cart
+          .filter(i => i.user_id === userId && i.added_to_cart)
+          .map(i => menu.getItemById(i.item.item_id).name)
+          .map(name => '*' + name + '*') // be bold
 
-      var itemNames = foodSession.cart
-        .filter(i => i.user_id === userId && i.added_to_cart)
-        .map(i => menu.getItemById(i.item.item_id).name)
-        .map(name => '*' + name + '*') // be bold
-
-      if (itemNames.length > 1) {
-        var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
-      } else {
-        foodString = itemNames[0]
-      }
-
-      var isAdmin = team.meta.office_assistants.includes(user.id)
-      var msg = _.merge({}, {
-        'incoming': false,
-        'mode': 'food',
-        'action': 'payment_info',
-        'thread_id': user.dm,
-        'source': {
-          'type': 'message',
-          'user': user.id,
-          'channel': user.dm,
-          'team': foodSession.team_id
+        if (itemNames.length > 1) {
+          var foodString = itemNames.slice(0, -1).join(', ') + ', and ' + itemNames.slice(-1)
+        } else {
+          foodString = itemNames[0]
         }
-      })
-      var couponText = yield utils.couponText(message.source.team)
-      var json = {
-        'text': `Your order of ${foodString} is on the way 😊`,
-        'callback_id': 'food.charge_succeeded',
-        'fallback': `Your order is on the way`,
-        'attachment_type': 'default',
-        'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
-      }
 
-      yield $replyChannel.send(msg, 'food.payments.done.team', {type: message.origin, data: json})
+        var isAdmin = team.meta.office_assistants.includes(userId)
+        var msg = _.merge({}, {
+          'incoming': false,
+          'mode': 'food',
+          'action': 'payment_info',
+          'thread_id': user.dm,
+          'source': {
+            'type': 'message',
+            'user': user.id,
+            'channel': user.dm,
+            'team': foodSession.team_id
+          }
+        })
+        var couponText = yield utils.couponText(message.source.team)
+        var json = {
+          'text': `Your order of ${foodString} is on the way 😊`,
+          'callback_id': 'food.charge_succeeded',
+          'fallback': `Your order is on the way`,
+          'attachment_type': 'default',
+          'attachments': [banner].concat(cardTemplates.home_screen(isAdmin, user.id, couponText).attachments)
+        }
+
+        yield $replyChannel.send(msg, 'food.payments.done.team', {type: message.origin, data: json})
+      }
     })
   } catch (err) {
     logging.error('on success messages broke', err)
@@ -784,6 +858,7 @@ handlers['food.payments.done.team'] = function * (message, foodSession) {
 }
 
 handlers['food.new_credit_card.success'] = function * (guestToken) {
+  logging.debug('food.new_credit_card.success, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({'guest_token': guestToken}).exec()
   var lastMsg = yield db.Messages.find({
     'mode': 'food',
@@ -792,7 +867,7 @@ handlers['food.new_credit_card.success'] = function * (guestToken) {
   }).sort({ts: -1}).limit(1).exec()
   lastMsg = lastMsg[0]
 
-  logging.debug('heres the lastMsg', lastMsg)
+  // logging.debug('heres the lastMsg', lastMsg)
   yield $replyChannel.sendReplace(lastMsg, 'food.new_credit_card.success', {
     type: 'slack',
     data: {'text': 'New card worked!'}
@@ -801,7 +876,7 @@ handlers['food.new_credit_card.success'] = function * (guestToken) {
 }
 
 handlers['food.previous_credit_card.success'] = function * (guestToken) {
-  logging.debug('replacing admins message of selecting card here')
+  logging.debug('food.previous_credit_card.success, guest_token: %s', guestToken)
   var foodSession = yield db.Delivery.findOne({'guest_token': guestToken}).exec()
   var lastMsg = yield db.Messages.find({
     mode: 'food',

@@ -22,18 +22,7 @@ var kip = require('../../kip')
 
 var debug = true || process.env.NODE_ENV=='production' ? function(){} : console.log.bind(console);
 
-
-// var client = amazon.createClient({
-//   awsId: "AKIAILD2WZTCJPBMK66A",
-//   awsSecret: "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",
-//   awsTag: "bubboorev-20"
-// });
-
-var client = amazon.createClient({
-    awsId: "AKIAJWTPOWIOUPHJYG2Q",
-    awsSecret: "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",
-    awsTag: "eileenog-20"
-});
+var client = amazon.createClient(kip.config.amazon[0]);
 
 var searchInitial = function(message) {
   return Promise.resolve(new db.Message({

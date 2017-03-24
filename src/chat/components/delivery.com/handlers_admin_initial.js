@@ -16,6 +16,7 @@ var $replyChannel
 var $allHandlers
 
 // exports
+/**@namespace handlers*/
 var handlers = {}
 
 handlers['food.admin.confirm_new_session'] = function * (message) {
@@ -35,34 +36,58 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'mrkdwn_in': ['text'],
-        'actions': [{
-          'name': 'food.admin.select_address',
-          'text': 'Start New Order',
-          'type': 'button',
-          'value': 'food.admin.select_address'
-        }, {
-          'name': 'passthrough',
-          'text': 'Wait',
-          'type': 'button',
-          'value': 'food.exit.confirm'
-        }]
-      }]
-    }
+        'actions': []
+      }
+    ]
+  }
+    // msg_json.attachments[0].actions.push(
+    // {
+    //     'name': 'passthrough',
+    //     'text': 'Return to Order',
+    //     'type': 'button',
+    //     'value': 'food.admin.retrieve_order_status'
+    //   }
+    // )
+  msg_json.attachments[0].actions.push({
+      'name': 'food.admin.select_address',
+      'text': 'Start New Order',
+      'type': 'button',
+      'value': 'food.admin.select_address'
+    })
 
   $replyChannel.sendReplace(message, 'food.admin.confirm_new_session', {type: message.origin, data: msg_json})
+}
 
+handlers['food.admin.retrieve_order_status'] = function * (message) {
+  var prevMessages = yield db.Messages.find({user_id: message.user_id, action: {$exists: true, $not: /admin\.confirm_new_session/}}).sort('-ts').limit(15).exec()
+  prevMessage = prevMessages[0]
+  var actionSuite = prevMessages.filter(m => m.action == prevMessage.action)
+  prevMessage = actionSuite[actionSuite.length - 1]
+  var action = 'food.' + prevMessage.action
+  logging.debug('prevMessage', prevMessage)
+
+  if (prevMessage.data && prevMessage.data.value) {
+    prevMessage.data.value = JSON.parse(prevMessage.data.value)
+    logging.debug('prevMessage.data.value %s', prevMessage.data.value)
+  }
+  prevMessage.source = message.source
+  prevMessage.text = ''
+
+  if ($allHandlers[action]) yield $allHandlers[action](prevMessage)
+  else yield handlers[action](prevMessage)
 }
 
 handlers['food.admin.select_address'] = function * (message, banner) {
-  // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
+  // loading chat users here for now, can remove once init_team is fully implemented to create chat user objects
   logging.debug('doing slackutils stuff in here')
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
   yield [
     slackUtils.refreshAllUserIMs(team),
     slackUtils.refreshAllChannels(team),
+    slackUtils.getTeamMembers(team),
     coupon.refreshTeamCoupons(team.team_id)
-    ]
+  ]
 
   message.state = {}
   var foodSession = yield utils.initiateDeliverySession(message)
@@ -90,7 +115,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     foodSession.onboarding = true
     banner = false
   }
-  //dont use onboarding for this session
+  //don't use onboarding for this session
   else {
     foodSession.onboarding = false
   }
@@ -110,14 +135,14 @@ handlers['food.admin.select_address'] = function * (message, banner) {
 
   //modify message for onboarding
   if (foodSession.onboarding) {
-    msg_json.attachments[0].text = '*Step 1.* Add an address for delivery by tapping the `New Location +` button'
+    msg_json.attachments[0].text = 'Hi there, I\'m going to walk you through your first Kip Café order! \n*Step 1:* Add a delivery address'
     msg_json.attachments[0].mrkdwn_in = ["text"]
     msg_json.attachments[0].color = '#A368F0'
 
     //add onboard sticker #1
     msg_json.attachments.unshift({
-      'text':'Hi there, I\'m going to walk you through your first Kip Café order! \n _By using Kip you agree to our <https://kipthis.com/legal.html|Terms of Use>_',
-      'image_url':'http://tidepools.co/kip/welcome_cafe.png',
+      'text':'',
+      'image_url':'https://storage.googleapis.com/kip-random/cafe.png',
       'color': '#A368F0',
       'mrkdwn_in': ['text']
     })
@@ -148,7 +173,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   //toggle floor buttons for onboarding
   var floorButtons = [{
     'name': 'passthrough',
-    'text': 'New Location +',
+    'text': 'New Address +',
     'type': 'button',
     'value': 'food.settings.address.new'
   }]
@@ -328,9 +353,9 @@ handlers['food.settings.address.new'] = function * (message) {
   kip.debug(' 🌆🏙 enter a new address')
 
   var msg_json = {
-    'text': "What's the address for the order?",
+    'text': "What's the delivery address? (we need this to find you the best food!)",
     'attachments': [{
-      'fallback': "What's the address for the order?",
+      'fallback': "What's the delivery address? (we need this to find you the best food!)",
       'text': '✎ Type your address below (Example: _902 Broadway 10010_)',
       'mrkdwn_in': ['text'],
       'actions': [{
@@ -350,10 +375,11 @@ handlers['food.settings.address.new'] = function * (message) {
   if(foodSession.onboarding){
     msg_json.text = ''
     msg_json.attachments.unshift({
-      'text':'*Step 2.* What\'s the address for the order?',
+      'text':'*Step 2.* What\'s the delivery address? (we need this to find you the best food!)',
       'color':'#A368F0',
       'mrkdwn_in': ['text']
     })
+    msg_json.attachments[msg_json.attachments.length-1].actions = []
   }
 
   $replyChannel.send(message, 'food.settings.address.confirm', {type: message.origin, data: msg_json})
@@ -391,8 +417,6 @@ handlers['food.settings.address.confirm'] = function * (message) {
     yield handlers['food.settings.address.new'](message)
     return
   }
-
-  // console.log(location)
 
   var addr = [
     [location.address_1, location.address_2].filter(Boolean).join(' '),
@@ -441,15 +465,14 @@ handlers['food.settings.address.confirm'] = function * (message) {
 
   db.waypoints.log(1013, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  if(foodSession.onboarding){
-    msg_json.text = ''
-    msg_json.attachments.unshift({
-      'text':'*Step 3.* Is this your address?',
-      'color':'#A368F0',
-      'mrkdwn_in': ['text']
-    })
-  }
-
+  // if(foodSession.onboarding){
+  //   msg_json.text = ''
+  //   msg_json.attachments.unshift({
+  //     'text':'*Step 3.* Is this your address?',
+  //     'color':'#A368F0',
+  //     'mrkdwn_in': ['text']
+  //   })
+  // }
 
   // collect feedback on this feature
   // if (feedbackOn && msg_json) {
@@ -584,8 +607,7 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  logging.debug('foodSession.budget', foodSession.budget)
-
+  // notifies admin about the order budget
   var budgetAttachment = {
     text: (foodSession.budget ? `*Budget*: $${foodSession.budget} / person` : '*Budget*: Unlimited'),
     mrkdwn_in: ['text'],
@@ -654,7 +676,7 @@ handlers['food.admin_polling_options'] = function * (message) {
   }
 
   //onboarding stuff
-  if(foodSession.onboarding){
+  if (foodSession.onboarding) {
     attachments.push(
     // {
     //   'text': '',
@@ -673,17 +695,6 @@ handlers['food.admin_polling_options'] = function * (message) {
       'mrkdwn_in': ['text']
     })
   }
-
-  // attachments.push({
-  //   'mrkdwn_in': [
-  //     'text'
-  //   ],
-  //   'text': `*Budget*: $${foodSession.budget} / person`,
-  //   'fallback': 'Team budget',
-  //   'callback_id': 'indignata sub umbras',
-  //   'attachment_type': 'default',
-  //   'actions': []
-  // })
 
   attachments.push({
     'mrkdwn_in': [
@@ -784,15 +795,10 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
         'type': 'button',
         'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
       }, {
-        'name': 'food.admin.team.members.reorder',
+        'name': 'food.admin.select_channel_reorder',
         'value': mostRecentMerchant,
-        'text': `Edit Members`,
+        'text': `Manage Channels`,
         'type': 'button'
-      }, {
-        'name': 'passthrough',
-        'text': '< Back',
-        'type': 'button',
-        'value': 'food.admin_polling_options'
       }//,
       // {
       //   'name': 'passthrough',
@@ -809,6 +815,25 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       ]
     }]
   }
+
+  if (process.env.NODE_ENV == 'development_hannah') {
+    msg_json.attachments[0].actions.push({
+      'name': 'food.admin.team.email_members',
+      'text': 'Email Members',
+      'type': 'button',
+      'value': {
+        reorder: true
+      }
+    })
+  }
+
+  msg_json.attachments[0].actions.push({
+    'name': 'passthrough',
+    'text': '< Back',
+    'type': 'button',
+    'value': 'food.admin_polling_options'
+  })
+
   $replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
 }
 

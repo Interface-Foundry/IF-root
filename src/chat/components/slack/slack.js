@@ -68,10 +68,12 @@ require('../reply_logic')
 function * loadTeam(slackbot) {
   if (slackConnections[slackbot.team_id]) {
     logging.info('team already loaded into slackConnections', slackbot.team_name)
+
     if (slackConnections[slackbot.team_id].rtm.connected === true) {
       logging.warn('team already connected', slackbot.team_name)
-      return
     }
+
+    delete slackConnections[slackbot.team_id]
   }
 
   try {
@@ -96,12 +98,16 @@ function * loadTeam(slackbot) {
   // })
 
   rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
-    // kip.log('loaded slack team', slackbot.team_id, slackbot.team_name)
+    logging.debug('loaded slack team', slackbot.team_id)
   })
 
-  rtm.on(slack.CLIENT_EVENTS.DISCONNECT, (reason) => {
+  rtm.on(slack.CLIENT_EVENTS.RTM.DISCONNECT, (reason) => {
     logging.info('slack client disconnected', slackbot.team_id)
-    logging.info(reason); // is this even a thing?
+    logging.error('disconnection slackbot for team', slackbot.team_id, reason)
+  })
+
+  rtm.on(slack.CLIENT_EVENTS.RTM.UNABLE_TO_RTM_START, (reason) => {
+    logging.error('unable to rtm start for ', slackbot.team_id, reason)
   })
 
   //
@@ -122,6 +128,16 @@ function * loadTeam(slackbot) {
       }
     }
 
+    // make sure it isn't kip talking to ourselves
+    if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message') {
+      logging.debug("message was from kip")
+      return;
+    }
+
+    // Not sure if slack changed their api recently, but now we're getting a "source_team" prop
+    // though we expected just "team" as the id
+    data.team = data.team || data.source_team
+
     var message = new db.Message({
       incoming: true,
       thread_id: data.channel,
@@ -133,12 +149,6 @@ function * loadTeam(slackbot) {
 
     // scheduled tasks
     updateHomeButtonAppender(message, slackbot.bot.bot_access_token);
-
-    // don't talk to yourself
-    if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-      logging.debug("don't talk to yourself: data: ", data);
-      return; // drop the message before saving.
-    }
 
     // other random things
     if ((data.type !== 'message') || (data.subtype === 'channel_join') || (data.subtype === 'channel_leave')) { // settings.name = kip's slack username
@@ -297,10 +307,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           // replace a specific message
           return bot.web.chat.update(message.replace_ts, message.source.channel, reply.label || message.text, reply, (e, r) => {
             // set the slack_ts from their server so we can update/delete specific messages
+            if (e) logging.error(e)
             db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
           })
         } else {
           return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply, (e, r) => {
+            if (e) logging.error(e)
             // set the slack_ts from their server so we can update/delete specific messages
             logging.debug('saving slack timestamp', r.ts, 'to messages.slack_ts')
             db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()

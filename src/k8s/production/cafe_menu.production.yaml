@@ -11,9 +11,9 @@ spec:
         app: cafe-menu
     spec:
       containers:
-      - image: gcr.io/kip-styles/cafe_menu:latest
+      - name: cafe
+        image: gcr.io/kip-styles/cafe_menu:latest
         imagePullPolicy: Always
-        name: delivery-picstitch
         ports:
         - containerPort: 8001
           protocol: TCP

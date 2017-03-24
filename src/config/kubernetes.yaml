@@ -5,7 +5,7 @@ elasticsearch:
 kipPayURL: https://pay.kipthis.com
 logging:
   console:
-    level: info
+    level: debug
     json: true
     stringify: true
     colorize: false
@@ -38,5 +38,6 @@ slack:
   verification_token: P30EDlNgjsl9i15ZQBOElJls
   redirect_uri: https://slack.kipthis.com/newslack
   internal_host: https://slack.kipthis.com
-menuURL: http://cafe.kipthis.com/menus
+menuURL: https://cafe.kipthis.com/menus
 picstitchDelivery: http://delivery-picstitch.kipthis.com
+queueVerificationToken: JyyLKDi5WrUB7KnTP0GQm8yNMgBo

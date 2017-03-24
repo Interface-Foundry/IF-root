@@ -666,6 +666,7 @@ handlers['member'] = function*(message) {
   }
   channelMembers = _.uniqBy(channelMembers, a => a.id);
   yield channelMembers.map(function * (a) {
+    logging.debug('checking if user is admin', a.id)
     let isAdmin = yield utils.isAdmin(a.id, team);
     let isMemberOnboarded = a.member_shop_onboarded;
     if (isAdmin || isMemberOnboarded) return; // don't send this to admins
@@ -703,7 +704,7 @@ handlers['member'] = function*(message) {
       mode: 'member_onboard',
       fallback: 'Hey, it\'s me again! Ready to get started?',
       action: 'home',
-      reply: cardTemplate.member_onboard_attachments(message.source.user, 'tomorrow'),
+      reply: cardTemplate.member_onboard_attachments(message.source.user, a.id, 'tomorrow'),
       source: {
         team: team.team_id,
         channel: a.dm,

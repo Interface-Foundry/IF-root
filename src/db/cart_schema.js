@@ -48,6 +48,8 @@ var cart = mongoose.Schema({
 //
 cart.virtual('aggregate_items').get(function () {
   var hash = this.items.reduce(function (hash, i) {
+    if (!i || !i.ASIN) return hash
+
     if (!hash[i.ASIN]) {
       hash[i.ASIN] = i.toObject()
       hash[i.ASIN].added_by = []
@@ -76,8 +78,8 @@ cart.virtual('total').get(function () {
   }, 0))
 })
 
-cart.set('toObject', { getters: true, virtuals: true })
-cart.set('toJSON', { getters: true, virtuals: true })
+cart.set('toObject', { getters: true, virtuals: true})
+cart.set('toJSON', { getters: true, virtuals: true})
 
 var Cart = mongoose.model('Cart', cart)
 

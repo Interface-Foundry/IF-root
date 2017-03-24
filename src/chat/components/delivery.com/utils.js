@@ -151,6 +151,7 @@ function * initiateDeliverySession (session) {
     teamMembers = teamMembers.filter(u => WHITELISTS[session.source.team].includes(u.name))
   }
 
+  
   var admin = yield db.Chatuser.findOne({id: session.source.user}).exec()
   var newSession = new db.Delivery({
     active: true,
@@ -346,7 +347,7 @@ function createCuisineOptionForUser (user, cuisines) {
 *
 *
 */
-function getMerchatsWithCuisine (merchants, cuisineType) {
+function getMerchantsWithCuisine (merchants, cuisineType) {
   // cuisine is one type
   logging.debug('getting all merchants that use cuisine_type: ', cuisineType)
   return _.filter(merchants, function (m) {

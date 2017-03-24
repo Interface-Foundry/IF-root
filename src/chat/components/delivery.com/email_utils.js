@@ -1,3 +1,5 @@
+/**@module email_utils*/
+
 var _ = require('lodash')
 var rp = require('request-promise')
 
@@ -10,11 +12,23 @@ var column_length = 4;
 var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">';
 var br = '<br/>'
 
+/**@constant {string} - kip blue color used accross slack, web, and email*/
 var kip_blue = '#47a2fc'
+
+/**@constant {string} - light grey color used accross web, and email*/
 var ryan_grey = '#F5F5F5'
 
+/**@exports email_utils*/
 var utils = {};
 
+/**
+* Generates HTML for quickpick emails that collect orders from email-only team members
+* @param foodSession
+* @param slackbot
+* @param slacklink {string} - slack url for the slack team the email is sent from
+* @param email {string} - the email address the order will be collected from
+* @returns {string} - html for the body of the order collection email
+*/
 utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
 
   var user = yield db.email_users.findOne({email: email, team_id: foodSession.team_id});
@@ -64,6 +78,13 @@ utils.quickpickHTML = function * (foodSession, slackbot, slacklink, email) {
   return html;
 }
 
+/**
+* formats the html for a single table cell / menu item
+* @param i {number} - the x coordinate of this table cell
+* @param j {number} - the y coordinate of this table cell
+* @param quickpicks {array} -
+* @returns {string} - html for a single table cell / menu item
+*/
 utils.formatItem = function (i, j, quickpicks) {
   return `<table border="0" style="position:absolute;">`
     + `<tr style="position:absolute;top:30px;"><td>` +
@@ -75,16 +96,19 @@ utils.formatItem = function (i, j, quickpicks) {
   `</td></tr></table>`;
 }
 
-utils.sendConfirmationEmail = function * (foodSession) {
 
-  console.log('pay_utils send confirmation email called')
-
+/**
+* creates and sends an email to email-only users confirming that their order has gone through
+* @param foodSession
+* @param email {string} - the email the order being confirmed is associated with
+*/
+utils.sendEmailUserConfirmations = function * (foodSession, email) {
   var menu = Menu(foodSession.menu)
   var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">'
   var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
-  // var date = new Date()
   var date = foodSession.order.order_time;
-  console.log('this is the new date format', date);
+  var user = yield db.email_users.findOne({email: email})
+  var user_id = user.id
 
   var options = {
     uri: 'https://slack.com/api/team.info',
@@ -99,12 +123,93 @@ utils.sendConfirmationEmail = function * (foodSession) {
 
   // var slacklink = 'https://' + team_info.team.domain + '.slack.com'
 
-  // var formatTime = function (date) {
-  //   return "^^I am a time^^"
-  //   // var minutes = date.getMinutes()
-  //   // var hours = date.getHours()
-  //   // return (hours > 9 ? '' + hours : '0' + hours) + ':' + (minutes > 9 ? '' + minutes : '0' + minutes)
-  // }
+  var formatDate = function (date) {
+    var year = date.slice(0, 4)
+    var month = date.slice(5, 7)
+    var day = date.slice(8, 10)
+    return month + '/' + day + '/' + year;
+  }
+
+  var merchant = yield db.merchants.findOne({id: foodSession.chosen_restaurant.id})
+  var phone_number = merchant.data.summary.phone;
+
+  //header
+  var html = `<html>${header}` + br;
+  html += `<h1>Your order from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a> has been successfully submitted!</h1>`
+  // html += `<p style="color:black;text-decoration:none;">${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} from ${slackbot.team_name} ordered from <a href="${foodSession.chosen_restaurant.url}" style="text-decoration:none;color:${kip_blue}">${foodSession.chosen_restaurant.name}</a>${(phone_number ? ' (' + phone_number + ')' : '')} on ${formatDate(date)}</p>`
+  // html += `\nHere is a list of items:\n`
+
+  //column headings
+  html += `<table border="0" style="margin-top:4px;width:600px;border-spacing:5.5px;"><thead style="color:white;background-color:${kip_blue}"><tr><th>Menu Item</th>`
+  html += `<th>Item Options</th>`
+  html += `<th>Price</th></tr></thead>`
+
+  //items ordered
+  foodSession.cart.filter(i => i.added_to_cart).filter(i => i.user_id == user_id).map((item) => {
+    var foodInfo = menu.getItemById(String(item.item.item_id))
+    var descriptionString = _.keys(item.item.option_qty).map((opt) => menu.getItemById(String(opt)).name).join(', ')
+    // var user = foodSession.team_members.filter(j => j.id === item.user_id)
+    var td_style = 'style="background-color:' + ryan_grey + ';padding:8px;"'
+
+    var price_expansion = ( item.item.item_qty > 1 ? `<p style="text-align:center;">$${(menu.getCartItemPrice(item).toFixed(2) / item.item.item_qty).toFixed(2)} (x${item.item.item_qty})</p><hr>` : '')
+
+    html += `<tr><td ${td_style};"><b>${foodInfo.name}</b></td>`
+    html += `<td ${td_style}"><p>${descriptionString}</p>`
+    html += `${(item.item.instructions ? '<p><i>' + item.item.instructions + '</i></p>': '')}</td>`
+    html += `<td ${td_style}>` + price_expansion + `<p style="text-align:center;"><b>$${menu.getCartItemPrice(item).toFixed(2)}</b></p></td>`
+    html +=`</tr>`
+    // html += `<p><a href="https://${team_url}.slack.com/messages/@${user[0]}" style="text-decoration:none;color:${kip_blue}">@${user[0].name}</a></p></td></tr>`
+  })
+  html += `</thead></table>` + br + br
+
+  //footer
+  html += `<p>Please email ${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} at ${foodSession.convo_initiater.email} from ${slackbot.team_name} with any issues.</p>` + br
+  html += `<p style="font-size:90%;position:absolute;text-decoration:none;color:grey;"><img style="display:inline-block;position:relative;top:12px" height="22" width="22" alt="kip head" src="http://tidepools.co/kip/head_squared.png"> Powered by Kip + delivery.<span>com</p>` + br
+
+  html += `<table border="0" style="padding:10px;width:100%;background-color:${kip_blue};"><tr style="width:100%;"><td style="width:100%;"><table style="border-spacing:0 20px;border-radius:4px;width:100%">`
+  html += `<tr style="width:100%"><td><div style="position:absolute;width:100%;height:100%;text-align:center;"><img height="26" width="26" src="http://tidepools.co/kip/oregano/Slack_Icon.png">`
+  // html += `<b style="color:white;text-decoration:none;font-weight:normal;font-size:160%;text-align:center;">&nbsp; Enjoy your food!</b></div></td></tr></table>`
+  html += `<b><a href="https://${team_url}.slack.com/" style="color:white;text-decoration:none;font-size:160%;text-align:center;">&nbsp;Join your team on Slack!</a></b></td></tr></table>`
+  html += `<table style="width:100%;"><tr><td style="width:300px;"><p style="padding:0 20px 0 20px;font-size:85%;color:white;text-align:right;">Kip © 2017</p></td>`
+  html += `<td style="width:300px;"><a style="padding:0 20px 0 20px;color:white;text-decoration:none;font-size:85%" href="https://kipthis.com/legal.html">Terms of Use</a></td></tr>`
+  html += `</table></td></tr></table>` + br
+
+  var mailOptions = {
+    to: `<${email}>`,
+    from: `Kip Café <hello@kipthis.com>`,
+    subject: `Your order for ${foodSession.chosen_restaurant.name} has been submitted!`,
+    html: `<html>${html}</html>`
+  }
+
+  try {
+    mailer_transport.sendMail(mailOptions)
+  } catch (e) {
+    logging.error('error mailing after payment submitted', e)
+  }
+}
+
+/**
+* Sends a confirmation email / receipt to the team administrator once their order has gone through
+* @param foodSession
+*/
+utils.sendConfirmationEmail = function * (foodSession) {
+  var menu = Menu(foodSession.menu)
+  var header = '<img src="http://tidepools.co/kip/oregano/cafe.png">'
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
+  var date = foodSession.order.order_time;
+
+  var options = {
+    uri: 'https://slack.com/api/team.info',
+    json: true,
+    qs: {
+      token: slackbot.bot.bot_access_token
+    }
+  }
+
+  var team_info = yield rp(options);
+  var team_url = team_info.team.domain;
+
+  // var slacklink = 'https://' + team_info.team.domain + '.slack.com'
 
   var formatDate = function (date) {
     var year = date.slice(0, 4)
@@ -176,7 +281,8 @@ utils.sendConfirmationEmail = function * (foodSession) {
   html += `</td></tr></table>`
 
   //footer
-  html += `<p style="text-decoration:none;color:grey;"><img height="14" width="14" alt="delivery.com" src="http://tidepools.co/kip/dcom_footer.png"> Powered by delivery.<span>com</p>` + br
+  // html += `<p style="text-decoration:none;color:grey;"><img height="14" width="14" alt="delivery.com" src="http://tidepools.co/kip/dcom_footer.png"> Powered by delivery.<span>com</p>` + br
+  html += `<p style="font-size:90%;position:absolute;text-decoration:none;color:grey;"><img style="display:inline-block;position:relative;top:12px" height="22" width="22" alt="kip head" src="http://tidepools.co/kip/head_squared.png"> Powered by Kip + delivery.<span>com</p>` + br
 
   order_users = '@' + foodSession.all_members.map(function (member) {
     return member.name

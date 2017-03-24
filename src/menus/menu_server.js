@@ -51,9 +51,7 @@ router.post('/cafe', (req, res) => co(function * () {
     session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
   });
 
-  logging.debug('new menusession created')
-
-  // logging.debug('req.body', req.body)
+  logging.debug('new menusession created', ms)
 
   var rest_id = req.body.rest_id;
   var result = yield db.Menus.findOne({merchant_id: rest_id});
@@ -73,9 +71,7 @@ router.post('/cafe', (req, res) => co(function * () {
 
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
-
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
-
   ms.selected_items = req.body.selected_items;
 
   var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
@@ -119,6 +115,7 @@ router.post('/order', function (req, res) {
   co(function * () {
     logging.debug('post to /order');
     if (_.get(req, 'body')) {
+      logging.info('req.body', req.body)
       var order = req.body.order;
       var user_id = req.body.user_id;
 
@@ -130,44 +127,39 @@ router.post('/order', function (req, res) {
       var cart = foodSession.cart;
       var menu = Menu(foodSession.menu)
       var money_spent = 0;
-      console.log('got cart and menu')
+      logging.debug('got cart and menu', {order: order}) //not yet in duplicate
       for (var i = 0; i < order.length; i++) {
-        // logging.debug(order[i]);
         cart.push({
           added_to_cart: true,
           item: order[i],
           user_id: user_id
         });
-        console.log('added everything to the cart')
         if (foodSession.budget) {
+          logging.debug('calculating money spent', cart[cart.length-1])
           money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))
-          console.log('calculated money spent')
         }
       }
-
-      console.log('added everything to team cart')
+      logging.debug('CART', cart) //not  yet duplicate
 
       var user_budgets = foodSession.user_budgets
       user_budgets[user_id] -= money_spent
-
-      console.log('calculated money spent')
+      logging.debug('calculated money spent')
 
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
 
-      console.log('updated the delivery object')
-
       //----------Message Queue-----------//
 
-        logging.debug('updated delivery; looking for source message');
+      logging.debug('updated delivery; looking for source message');
+      logging.debug('user_id', user_id)
 
-        var foodMessage = yield db.Messages.find({
-          'source.user': user_id,
-          mode: 'food',
-          incoming: false
-        }).sort('-ts').limit(1);
+      var foodMessage = yield db.Messages.find({
+        'source.user': user_id,
+        mode: 'food',
+        incoming: false
+      }).sort('-ts').limit(1)
+      logging.debug('foodMessage', foodMessage)
 
-        logging.debug('found foodmessage')
-
+      if (foodMessage && foodMessage.length) {
         foodMessage = foodMessage[0];
 
         var mess = new db.Messages({
@@ -190,8 +182,44 @@ router.post('/order', function (req, res) {
             verification_token: kip.config.slack.verification_token,
             message: mess
           }
-
         })
+      }
+      else {
+        logging.info('email user')
+
+        foodSession.confirmed_orders.push(user_id)
+        // foodSession.save() //I BET THIS IS WHAT IS DOING IT FUCK YOU
+        yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {confirmed_orders: foodSession.confirmed_orders}});
+
+        var alternateFoodMessage = yield db.Messages.find({
+          'source.user': foodSession.convo_initiater.id,
+          mode: 'food',
+          incoming: false
+        }).sort('-ts').limit(1);
+        alternateFoodMessage = alternateFoodMessage[0]
+
+        var mess = new db.Messages({
+          incoming: true,
+          thread_id: alternateFoodMessage.thread_id,
+          action: 'cart.update_dashboards',
+          user_id: user_id,
+          mode: 'food',
+          origin: 'slack',
+          source: alternateFoodMessage.source,
+        })
+
+        yield mess.save();
+
+        request.post({
+          url: kip.config.slack.internal_host + '/menuorder',
+          json: true,
+          body: {
+            topic: 'incoming',
+            verification_token: kip.config.slack.verification_token,
+            message: mess
+          }
+        })
+      }
 
       logging.debug('ostensibly done');
       res.send();

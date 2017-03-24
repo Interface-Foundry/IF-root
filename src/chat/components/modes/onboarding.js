@@ -27,11 +27,11 @@ function * handle (message) {
     let [action, data] = message.action.split('.');
     kip.debug(`forwarding to onboarding[${action}](message, [${data}])`);
     try {
-      yield handlers[action](message, [data])
+      var replies = yield handlers[action](message, [data])
     } catch (err) {
       logging.error('error trying to use handler for this message in onboarding handlers', message)
     }
-    return
+    return replies
   } else {
     return yield handlers['response'](message);
   }
@@ -54,7 +54,20 @@ handlers['start'] = function * (message) {
   welcome_message.reply = card_templates.onboard_admin_attachments('initial', team.team_name);
   welcome_message.action = 'get-admins.ask';
 
+<<<<<<< HEAD
   let msInFuture = 60 * 60 * 1000; // if in dev, 20 seconds
+=======
+  console.log(+team.meta.dateAdded, Date.now() - 60 * 60 * 1000)
+
+  if (+team.meta.dateAdded < Date.now() - 60 * 60 * 1000) {
+    console.log('not asetting up an reminder for a team that didnt add kip today')
+    return [welcome_message]
+  }
+
+  console.log('seting reminder for team that added kip like right now')
+
+  let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+>>>>>>> dev
   let now = new Date();
   let cronMsg = {
     mode: welcome_message.mode,

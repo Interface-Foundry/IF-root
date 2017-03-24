@@ -10,52 +10,19 @@ var yelp = Yelp.createClient({
   }
 });
 
-function tokenize (str) {
-  return str.split(' ').join('+');
-}
-
-function matchLocation (restaurants, location) {
-
-  var closest = -1;
-  var smallest = 40000
-  for (var i = 0; i < restaurants.length; i++) {
-    var distance = Math.sqrt(
-      Math.pow(location.latitude - restaurants[i].location.coordinate.latitude, 2)
-    + Math.pow(location.longitude - restaurants[i].location.coordinate.longitude, 2));
-
-    if (distance < smallest) {
-      smallest = distance;
-      closest = i;
-    }
+/**
+* Calls the yelp api
+* @param merch the merchant we're looking up on yelp
+* @returns the url of that merchant's yelp page
+*/
+function * yelpRestaurant (merch) {
+  console.log('calling yelpRestaurant')
+  if (!merch.yelp_info.rating.business_id) return merch.summary.url.complete;
+  else {
+    var resto = yield yelp.business(String(merch.yelp_info.rating.business_id))
+    console.log('resto.businesses.length', resto)
+    return resto.url
   }
-
-  //console.log(location.latitude, location.longitude, '//', restaurants[closest].location.coordinate.latitude, restaurants[closest].location.coordinate.longitude);
-  //console.log(restaurants[closest].name);
-  return restaurants[closest];
-}
-
-function yelpRestaurant (merch) {
-  return yelp.search({
-    term: tokenize(merch.summary.name),
-    radius_filter: 40000,
-    location: merch.location.city
-  })
-  .then(function (data) {
-    return matchLocation (
-      data.businesses,
-      {
-        latitude: merch.location.latitude,
-        longitude: merch.location.longitude
-      }
-    )
-  })
-  .then (function (correctMerchant) {
-    if (correctMerchant) return correctMerchant.url;
-    else return merch.summary.url.complete
-  })
-  .catch(function (err) {
-    console.log('ERROR:', err);
-  })
 }
 
 module.exports = yelpRestaurant;

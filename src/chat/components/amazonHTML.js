@@ -34,6 +34,8 @@ module.exports.basic = function (url, callback) {
   url = url.replace('%26tag%3Dkrista03-20', '')
   url = url.replace('%26tag%3Dquic0b-20', '')
   url = url.replace('%26tag%3Deileenog-20', '')
+  url = url.replace('%26tag%3Dmotorwaytoros-20', '')
+  
   // check cache
   cache.get(url, function (err, product) {
     if (err) kip.debug('46: ', err)
