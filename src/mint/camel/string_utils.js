@@ -20,7 +20,7 @@ utils.getSpecs = function (str) {
 
   patterns.map(function (p) {
     var matches = p.exec(str);
-    console.log('MATCHES:', matches);
+    // console.log('MATCHES:', matches);
     if (matches) specs = specs.concat(matches.slice(1));
   });
 

@@ -274,6 +274,7 @@ var trimName = function (name) {
  * Returns COUNT of the most recent deals in the database
  */
 var todaysDeals = function * (count, id, categoryCounts) {
+  console.log('todays deals called')
   yield dbReady;
 
   if (id) {
@@ -353,6 +354,7 @@ var spreadCategories = function * (camels, categoryCounts) {
 
 co(function * () {
   return yield scrapeCamel();
+  console.log('done w/ scraping');
   var deals = yield todaysDeals(count);
   console.log('FINAL DEALS');
   deals.map(d => {
