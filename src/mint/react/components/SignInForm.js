@@ -20,10 +20,10 @@ export default class SignInForm extends Component {
     const { cart_id, signIn } = this.props;
     return (
       <form onSubmit={e => signIn(e, cart_id, this.state.email)}>
-        <input required placeholder='Enter your email' name='email' type='email' onChange={this.handleEmail}/>
-        <hr/>
-        <button type='Submit'>
-          Sign Up
+        <input required placeholder='Enter your email' name='email' type='email' onChange={this.handleEmail} className="form-control"/>
+        <br/>
+        <button type='Submit' className="btn btn-primary">
+            Sign Up
         </button>
       </form>
     );
