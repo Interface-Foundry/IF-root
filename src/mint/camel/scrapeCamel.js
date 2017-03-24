@@ -24,7 +24,6 @@ const count = 10; //The number of deals / camel items that should be returned
  * @param the mongoId (as a string) of the last camel item we've shown the user
  */
 var scrape = function * (previousId) {
-
   /**
    * returns a random integer between 0 and the specified exclusive maximum.
    */
@@ -83,7 +82,6 @@ var scrape = function * (previousId) {
   };
 
   console.log('about to scrape', options);
-
   return rp(options)
     .then(function (result) {
       console.log('result', result);
@@ -309,51 +307,8 @@ var trimName = function (name) {
   return name + ' ' + specs.join(' ');
 };
 
-/**
- * Returns some number (global variable 'count') of the most recent deals in the database
- * @param lastPosition {string} rank of the last deal we've shown the viewer (and therefore don't want to show again)
- */
-var getDeals = function * (lastPosition) {
-  console.log('todays deals called');
-  yield dbReady;
-
-  if (!lastPosition) lastPosition = -1;
-
-  var query = {
-    limit: count,
-    sort: 'position',
-    where: {
-      active: true,
-      position: {
-        '>': lastPosition
-      }
-    }
-  };
-
-  console.log('about to query for camels');
-  var camels = yield db.CamelItems.find(query);
-
-  //if there's something wrong with the value passed in, just start from the beginning
-  if (!camels.length && lastPosition > -1) return yield getDeals();
-
-  console.log('got the camels');
-  // console.log('this many', camels.length);
-  // camels.map(c => console.log(c.category));
-  return yield camels;
-};
-
 co(function * () {
   yield scrapeCamel();
-  // console.log('done w/ scraping and ordering');
-  var deals = yield getDeals();
-  console.log('FINAL DEALS');
-  deals.map(d => {
-    console.log(d.name, d.category);
-  });
-  console.log(deals[deals.length-1].id);
+  // var deals = require('./deals');
+  // yield deals.getDeals(count);
 });
-
-module.exports = {
-  scrape : scrapeCamel,
-  getDeals : getDeals
-};
