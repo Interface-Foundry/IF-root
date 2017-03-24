@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import { Form, FormGroup, InputGroup, FormControl, Button } from 'react-bootstrap';
 
 export default class SignInForm extends Component {
   constructor(props) {
@@ -19,13 +20,16 @@ export default class SignInForm extends Component {
   render() {
     const { cart_id, signIn } = this.props;
     return (
-      <form onSubmit={e => signIn(e, cart_id, this.state.email)}>
-        <input required placeholder='Enter your email' name='email' type='email' onChange={this.handleEmail}/>
-        <hr/>
-        <button type='Submit'>
-          Sign Up
-        </button>
-      </form>
+      <Form onSubmit={e => signIn(e, cart_id, this.state.email)}>
+        <FormGroup>
+            <InputGroup>
+                <FormControl type="email" name='email' required placeholder='Enter your email' onChange={this.handleEmail}/>
+                <InputGroup.Button >
+                    <Button type="submit" bsStyle="primary">Sign Up</Button>
+                </InputGroup.Button>
+            </InputGroup>
+        </FormGroup>
+    </Form>
     );
   }
 }
