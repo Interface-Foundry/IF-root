@@ -354,12 +354,10 @@ handlers['food.admin.display_channels'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
-<<<<<<< HEAD
-=======
   if (!foodSession.chosen_channel.id) foodSession.chosen_channel.id = 'everyone'
 
+
   var checkbox
->>>>>>> dev
   // basic buttons
   let chosenId = _.get(foodSession, 'chosen_channel.id');
   var genericButtons = [{

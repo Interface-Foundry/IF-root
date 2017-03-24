@@ -54,9 +54,6 @@ handlers['start'] = function * (message) {
   welcome_message.reply = card_templates.onboard_admin_attachments('initial', team.team_name);
   welcome_message.action = 'get-admins.ask';
 
-<<<<<<< HEAD
-  let msInFuture = 60 * 60 * 1000; // if in dev, 20 seconds
-=======
   console.log(+team.meta.dateAdded, Date.now() - 60 * 60 * 1000)
 
   if (+team.meta.dateAdded < Date.now() - 60 * 60 * 1000) {
@@ -67,7 +64,7 @@ handlers['start'] = function * (message) {
   console.log('seting reminder for team that added kip like right now')
 
   let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
->>>>>>> dev
+
   let now = new Date();
   let cronMsg = {
     mode: welcome_message.mode,
