@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import { Form, FormGroup, InputGroup, FormControl, Button } from 'react-bootstrap';
 
 export default class SignInForm extends Component {
   constructor(props) {
@@ -30,13 +31,16 @@ export default class SignInForm extends Component {
     const { handleSubmit, handleEmail, state } = this;
     const { email } = state;
     return (
-      <form onSubmit={handleSubmit}>
-        <input required placeholder='Enter your email' name='email' type='email' value={email} onChange={handleEmail}/>
-        <hr/>
-        <button type='Submit'>
-          Sign Up
-        </button>
-      </form>
+      <Form onSubmit={handleSubmit}>
+        <FormGroup>
+            <InputGroup>
+                <FormControl type="email" name='email' value={email} required placeholder='Enter your email' onChange={handleEmail}/>
+                <InputGroup.Button >
+                    <Button type="submit" bsStyle="primary">Sign Up</Button>
+                </InputGroup.Button>
+            </InputGroup>
+        </FormGroup>
+    </Form>
     );
   }
 }

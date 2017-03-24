@@ -1,6 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import AddAmazonItem from './AddAmazonItem';
 import Item from './Item';
+import { Row, Col, ListGroup, ListGroupItem, Panel} from 'react-bootstrap';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -15,12 +16,30 @@ export default class Cart extends Component {
 
   render() {
     const { cart_id, addItem, items } = this.props;
+
     const hasItems = items.length > 0;
     return (
       <div>
-      <h3>Cart</h3>
-      <ul>{this.listItems(hasItems, items)}</ul>
-      <AddAmazonItem cart_id={cart_id} addItem={addItem} />
+          <Row>
+              <Col xs={12}>
+                  <AddAmazonItem cart_id={cart_id} addItem={addItem} />
+              </Col>
+          </Row>
+          <Row>
+              <Col xs={12} className="text-center">
+                  <h4>Group Shopping Cart</h4>
+              </Col>
+          </Row>
+          <Row>
+              <Col xs={12}>
+                  <Panel header="Email@email.com">
+                      <ListGroup fill>
+                          {this.listItems(hasItems, items)}
+                      </ListGroup>
+                  </Panel>
+
+              </Col>
+          </Row>
     </div>
     );
   }
