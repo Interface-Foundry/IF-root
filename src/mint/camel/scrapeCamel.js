@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var rp = require('request-promise');
 var cheerio = require('cheerio');
 var co = require('co');
@@ -340,16 +342,16 @@ var getDeals = function * (lastPosition) {
   return yield camels;
 };
 
-// co(function * () {
-//   yield scrapeCamel();
-//   // console.log('done w/ scraping and ordering');
-//   var deals = yield getDeals();
-//   console.log('FINAL DEALS');
-//   deals.map(d => {
-//     console.log(d.name, d.category);
-//   });
-//   console.log(deals[deals.length-1].id);
-// });
+co(function * () {
+  yield scrapeCamel();
+  // console.log('done w/ scraping and ordering');
+  var deals = yield getDeals();
+  console.log('FINAL DEALS');
+  deals.map(d => {
+    console.log(d.name, d.category);
+  });
+  console.log(deals[deals.length-1].id);
+});
 
 module.exports = {
   scrape : scrapeCamel,
