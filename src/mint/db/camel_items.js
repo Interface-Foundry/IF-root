@@ -10,15 +10,16 @@ var camelItemsCollection = Waterline.Collection.extend({
     price: 'float',
     previousPrice: 'float',
     category: 'string',
+    position: 'integer',
     savePercent: {
       type: 'float',
       defaultsTo: function () {
         return (1.00 - this.price / this.previousPrice).toFixed(2);
       }
     },
-    skipped: {
+    active: {
       type: 'boolean',
-      defaultsTo: false
+      defaultsTo: true
     },
     url: 'string',
     // info: ['text'],
