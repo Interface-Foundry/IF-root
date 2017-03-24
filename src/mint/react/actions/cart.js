@@ -79,8 +79,7 @@ export function removeItem(cart_id, item) {
   };
 }
 
-export function addItem(e, cart_id, url) {
-  e.preventDefault();
+export function addItem(cart_id, url) {
   return async dispatch => {
     dispatch(requestAddItem());
     const response = await fetch(`/api/cart/${cart_id}/item`, {
@@ -94,8 +93,6 @@ export function addItem(e, cart_id, url) {
         url: url
       })
     });
-    var res = await response.json();
-    console.log(res)
-    if (response.ok) dispatch(receiveAddItem(res));
+    if (response.ok) dispatch(receiveAddItem(await response.json()));
   };
 }

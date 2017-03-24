@@ -34,7 +34,6 @@ const Routes = () => (
     <ConnectedRouter history={history}>
       <Switch>
         <Route path="/cart/:cart_id" component={App} />
-        <Route path='/onboarding' component={Onboard} />
         <Route path="*" status={404} />
       </Switch>
     </ConnectedRouter>

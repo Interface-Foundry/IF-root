@@ -28,8 +28,7 @@ export function update() {
   };
 }
 
-export function signIn(e, cart_id, email) {
-  e.preventDefault();
+export function signIn(cart_id, email) {
   return async dispatch => {
     dispatch(requestUpdate());
     const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
