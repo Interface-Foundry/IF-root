@@ -69,7 +69,7 @@ var scrape = function * (previousId) {
   var options = {
     uri: url,
     //PROXY to be added later ??
-    //proxy: 'http://127.0.0.1:24000', 
+    //proxy: 'http://127.0.0.1:24000',
     gzip: true,
     headers: {
       'Host': 'camelcamelcamel.com',
@@ -353,13 +353,13 @@ var spreadCategories = function * (camels, categoryCounts) {
 
 co(function * () {
   return yield scrapeCamel();
-  // var deals = yield todaysDeals(count);
-  // console.log('FINAL DEALS');
-  // deals.map(d => {
-  //   console.log(d.name);
-  //   // console.log(d.category);
-  // });
-  // console.log(deals[deals.length-1].id);
+  var deals = yield todaysDeals(count);
+  console.log('FINAL DEALS');
+  deals.map(d => {
+    console.log(d.name);
+    // console.log(d.category);
+  });
+  console.log(deals[deals.length-1].id);
 });
 
 module.exports = {
