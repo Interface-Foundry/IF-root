@@ -12,9 +12,10 @@ export default class TypeFormField extends Component {
     placeholder: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
-    tfStyle: PropTypes.object,
+    key: PropTypes.number,
     enabled: PropTypes.bool,
-    required: PropTypes.bool
+    required: PropTypes.bool,
+    action: PropTypes.func
   }
 
   handleChange(e) {
@@ -22,10 +23,10 @@ export default class TypeFormField extends Component {
   }
 
   render() {
-    const { tfStyle: style, placeholder, name, type, enabled = true, required = true } = this.props;
+    const { key, placeholder, name, type, enabled = true, required = true, action } = this.props;
     const { value } = this.state;
     return (
-      <FormControl style={style} required={required} value={value} onChange={this.handleChange} disabled={!enabled} placeholder={placeholder} name={name} type={type} />
+      <FormControl key={key} required={required} value={value} onChange={this.handleChange} disabled={!enabled} placeholder={placeholder} name={name} type={type} action={action} />
     );
   }
 }

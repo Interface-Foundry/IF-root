@@ -9,7 +9,6 @@ import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerReducer, routerMiddleware } from 'react-router-redux';
 
 import App from './containers/App';
-import Onboard from './containers/Onboard';
 import * as reducers from './reducers';
 import { session } from './actions';
 

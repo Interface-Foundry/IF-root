@@ -35,7 +35,7 @@ export default class AddAmazonItem extends Component {
         <FormGroup>
             <ControlLabel>Paste URL from Amazon</ControlLabel>
             <InputGroup>
-                <FormControl required placeholder='Enter the link to an amazon product' name='email' type='url' onChange={this.handleUrl} />
+                <FormControl required placeholder='Enter the link to an amazon product' name='email' value={url} type='url' onChange={this.handleUrl} />
                 <InputGroup.Button>
                     <Button type='submit' bsStyle="primary">
                       Add To Cart

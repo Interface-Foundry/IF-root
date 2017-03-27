@@ -54,7 +54,7 @@
   "scripts": {
     "start": "npm run build && node ./server",
     "build": "NODE_PATH=$NODE_PATH:./react webpack",
-    "dev": "npm run build && nodemon --ignore react/ --ignore public/ ./server/index.js & webpack --progress --color -d --watch --hot",
+    "dev": "nodemon --ignore react/ --ignore public/ ./server/index.js & webpack --progress --color -d --watch --hot",
     "test": "mocha tests",
     "react-test": "jest",
     "apidoc": "npm run apidocs",

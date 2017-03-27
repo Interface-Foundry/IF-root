@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import {Button} from 'react-bootstrap';
+import { Button, Form, InputGroup } from 'react-bootstrap';
 
 /**
  * Typeform component that renders each component of a form
@@ -34,7 +34,7 @@ class typeForm extends React.Component {
         opacity: 1
       },
       tfHide: {
-        opacity: 0.3,
+        opacity: 0.2,
         'pointerEvents': 'none'
       }
     };
@@ -49,47 +49,45 @@ class typeForm extends React.Component {
   /**
    * Set className for component to show/hide
    */
-  setClass(element, tfStyle, enabled) {
+  setClass(element, enabled, key) {
     return React.cloneElement(element, {
-      tfStyle,
-      enabled
+      enabled,
+      key
     });
+  }
+
+  getButton(disabled, lastComponent, action) {
+    let button = lastComponent ? <Button disabled={disabled} key={this.state.current} bsStyle='primary' onClick={this.props.onSubmit} className={this.props.submitBtnClass} type='submit'>
+          Finish
+        </Button> : <Button disabled={disabled} key={this.state.current} type='submit' onClick={this.incState} className={this.props.nextBtnClass}>
+          {this.props.nextBtnText}
+        </Button>
+    return <InputGroup.Button>{button}</InputGroup.Button>
   }
 
   /**
    * Get the current component to show on screen
    */
   getCurrentView(children) {
-    let allChildren;
-    allChildren = React.Children.map(children, (child, index) => {
-      let currentChild = this.setClass(child, this.styles.tfHide, false);
-      if (index === this.state.current) {
-        currentChild = this.setClass(child, this.styles.tfShow, true);
-      }
-      return currentChild;
+    const { tfHide, tfShow } = this.styles;
+    return React.Children.map(children, (child, index) => {
+      const enabled = index === this.state.current
+      let currentChild = this.setClass(child, enabled, index);
+      return <InputGroup style={enabled ? tfShow : tfHide}>{currentChild}{this.getButton(!enabled, index === this.props.children.length-1, currentChild.action)}</InputGroup>;
     });
-    allChildren.splice(this.state.current + 1, 0,
-      this.isLastComponent()
-        ? <Button key={this.state.current} type="submit" onClick={this.props.onSubmit} className={this.props.submitBtnClass}>
-            {this.props.submitBtnText}
-          </Button>
-        : <Button key={this.state.current} onClick={this.incState} className={this.props.nextBtnClass}>
-            {this.props.nextBtnText}
-          </Button>);
-    return allChildren;
   }
 
   /**
    * Increment State counter
    */
-  incState() {
+  incState(e) {
     if (this.props.children.length > this.state.current) {
       const current = this.state.current + 1;
       this.setState({
         current
       });
     }
-    this.props.nextBtnOnClick();
+    this.props.nextBtnOnClick(e);
   }
 
   /**
@@ -104,9 +102,9 @@ class typeForm extends React.Component {
    */
   render() {
     return (
-      <div className="form-container">
+      <Form className="form-container">
         {this.getCurrentView(this.props.children)}
-      </div>
+      </Form>
     );
   }
 }

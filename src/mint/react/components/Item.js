@@ -21,7 +21,7 @@ export default class Item extends Component {
                 {/* {item.paid ? 'Paid' : 'Unpaid'}, Total: ${item.total} */}
             </Col>
             <Col sm={4} xs={3}>
-                <Button bsStyle="default pull-right" disabled>Edit</Button>
+                <Button bsStyle="default" className='pull-right' disabled>Edit</Button>
             </Col>
         </Row>
     </ListGroupItem>);
