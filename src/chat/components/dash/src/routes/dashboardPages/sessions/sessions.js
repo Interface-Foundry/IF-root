@@ -1,117 +1,158 @@
 import React, { PropTypes } from 'react';
+import Button from 'react-bootstrap/lib/Button';
+import Panel from 'react-bootstrap/lib/Panel';
+import PageHeader from 'react-bootstrap/lib/PageHeader';
+import {
+  LineChart, Sector, Cell, Tooltip, PieChart, Pie,
+  Line, XAxis, YAxis, Legend,
+  CartesianGrid, Bar, BarChart,
+  ResponsiveContainer, AreaChart, Area } from '../../../vendor/recharts';
 import {
   MenuItem,
   DropdownButton,
-  Panel, PageHeader, ListGroup, ListGroupItem, Button, Alert
+  ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger
 } from 'react-bootstrap';
-import StatWidget from '../../../components/Widget';
-import Donut from '../../../components/Donut';
-import CartTable from '../../../components/CartTable';
-import vagueTime from "vague-time";
-import {
-  Tooltip,
-  XAxis, YAxis, Area,
-  CartesianGrid, AreaChart, Bar, BarChart,
-  ResponsiveContainer } from '../../../vendor/recharts';
+import Table from '../../../components/Table';
+import vagueTime from 'vague-time';
+import _ from 'lodash';
+import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
 
-const title = 'Pokemon Gym - Escape Velocity - Sessions';
+const title = ' Team Stats';
+''
+function getWaypointPaths(waypoints){
 
+  var userWaypoints = _.groupBy(waypoints,function(waypoint){
+     return waypoint.user_id+'#'+waypoint.delivery_id
+  });
 
-/************************************************
-    ┏━┳━┳┓┏┳━┳┓┏━┓┏━┳━┳━━┳━┓
-    ┃━┫╻┃ ┗┛┃┃┃┃┃━┫┃┃┃╻┣ ┓┏┫╻┃
-    ┣━┃╻┃ ┃┃┃┏┫┗┫━┫┃┃┃╻┃ ┃┃┃╻┃
-    ┗━┻┻┻┻┻┻┛┗━┻━┛┗━┻┻┛┗┛┗┻┛
-************************************************/
-const data = [
-  { name: 'Page A', uv: 2000, pv: 240, amt: 20, value: 600 },
-  { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, value: 3000 },
-  { name: 'Page C', uv: 2000, pv: 9800, amt: 2290, value: 500 },
-  { name: 'Page D', uv: 2780, pv: 208, amt: 1000, value: 400 },
-  { name: 'Page E', uv: 10, pv: 4800, amt: 2181, value: 200 },
-  { name: 'Page F', uv: 2390, pv: 6800, amt: 2500, value: 700 },
-  { name: 'Page G', uv: 8090, pv: 4300, amt: 2100, value: 100 },
-];
-/******* */
+  var data = _.map(userWaypoints, function(waypointArray){
+    waypointArray = _.sortBy(waypointArray, [function(o) { return o.timestamp; }]);
+    var pathLength = waypointArray.length;
+    return {
+          user_id: waypointArray[0].user ? waypointArray[0].user.name : '',
+          time_stamp: waypointArray[0].timestamp,
+          time_stamp_end: waypointArray[pathLength-1].timestamp,
+          delivery_id: waypointArray[0].delivery_id,
+          team_name: waypointArray[0].user ? waypointArray[0].user.team.team_name : '',
+          inputs: waypointArray.map((waypoint) => waypoint.data),
+          waypoints: waypointArray.map((waypoint) => waypoint.waypoint)
+        }
+  });
 
+  return data;
+}
 
-function sessions(props, context) {
+function getWaypointActions(waypointPaths) {
+
+  let inputs = waypointPaths.inputs;
+  let waypoints = waypointPaths.waypoints;
+
+  return waypoints.map((waypoint, index) => {
+    return {
+      action: cafe_waypoints[Number(waypoint)],
+      input: inputs[index] || ''
+    }
+  })
+}
+
+class WaypointHover extends React.Component {
+  render() {
+    return (
+      <div>
+        {this.props.waypoints.map(waypoint=>{
+          if(waypoint.input) {
+          return (
+            <OverlayTrigger trigger="click" rootClose placement="top" overlay={createOverlay(waypoint.input)}>
+              <a href='#'>{waypoint.action}</a> 
+            </OverlayTrigger>
+            )}
+          else {
+            return waypoint.action;
+          }
+        }).reduce((accu, elem) => {
+            return accu === null ? [elem] : [...accu, ' \u27A1 ', elem]
+        }, null)
+
+      }
+      </div>
+      
+    );
+  }
+}
+
+function createOverlay(text) {
+    return (<Popover id={text.original_text}>
+    {text.original_text}
+    </Popover>)
+}
+
+function Session(props, context) {
   context.setTitle(title);
+  var rows = [];
+  var waypoints = props.waypoints;
+  var teams = props.teams;
+
+
+  var teamWaypoints = props.teamId ? waypoints.filter(function(waypoint){
+      return waypoint.user ? waypoint.user.team.team_id == props.teamId : false;
+  }) : waypoints;
+
+  var waypointPaths = getWaypointPaths(teamWaypoints);
+  for (var i = 0; i < waypointPaths.length; i++) {
+    var teamName = waypointPaths[i].team_name;
+    rows.push({time_stamp: new Date(waypointPaths[i].time_stamp.split('.')[0]).toLocaleString(), time_stamp_end: new Date(waypointPaths[i].time_stamp_end.split('.')[0]).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: getWaypointActions(waypointPaths[i])})
+  }
+
+  var currentTeam = props.teamName ? props.teamName : 'All Team';
   return (
-    <div className="container-fluid data-display">
-      <Panel
-        header={<span>
-          <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
-        </span>}>
-          <div className="resizable">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
-                <XAxis dataKey="name" />
-                <YAxis />
-                <CartesianGrid stroke="#ccc" />
-                <Tooltip />
-                <Area type="monotone" dataKey="uv" stackId="1" stroke="#8804d8" fill="#8884d8" />
-                <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-                <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-      </Panel>
-      <Panel className='fillSpace' header={<span>
-          <i className="fa fa-bar-chart-o fa-fw" /> Open Carts </span>}>
-       <CartTable
-          query = {'{teams{ team_name, carts {created_date,slack_id, items, purchased}}}'}
-          heads = {
-            [{
-              field: 'created_date_vague',
-              descrip: 'Since',
-              allowSort: false
-            }, {
-              field: 'created_date',
-              descrip: 'Created Date',
+    <div>
+      <div className="row">
+        <div className="col-lg-12">
+          <PageHeader>{currentTeam} Sessions</PageHeader>
+        </div>
+      </div>
+
+      <div className="panel panel-default fillSpace">
+          <Panel header={<span>Table of Waypoint Routes</span>}>
+            <Table heads={[{
+              field: 'time_stamp',
+              descrip: 'Session Time Started',
+              allowSort: true,
               sort: (a, b, order) => order == 'desc' ? 
-                  new Date(b.created_date) - new Date(a.created_date) 
-                  : new Date(a.created_date) - new Date(b.created_date)
+                  new Date(b.time_stamp) - new Date(a.time_stamp) 
+                  : new Date(a.time_stamp) - new Date(b.time_stamp)
+            }, {
+              field: 'time_stamp_end',
+              descrip: 'Session Time of Last Activity',
+              allowSort: true,
+              sort: (a, b, order) => order == 'desc' ? 
+                  new Date(b.time_stamp_end) - new Date(a.time_stamp_end) 
+                  : new Date(a.time_stamp_end) - new Date(b.time_stamp_end)
+            },{
+              field: 'user_id',
+              descrip: 'User ID',
+              allowSort: true
             }, {
               field: 'team_name',
-              descrip: 'Slack ID'
+              descrip: 'Team Name',
+              allowSort: true,
             }, {
-              field: 'items',
-              descrip: 'Number of Items'
-            }]
-          }
-          process = {
-            (teams, team) =>
-            teams.concat(
-              team.carts.reduce((carts, cart) => {
-                if (cart.purchased.toLowerCase() == 'false') {
-                  carts.push({
-                    created_date_vague: vagueTime.get({
-                      from: Date.now(),
-                      to: new Date(cart.created_date)
-                    }),
-                    team_name: team.team_name,
-                    created_date: (new Date(cart.created_date)).toLocaleString(),
-                    items: cart.items.split(',').length
-                  })
-                }
-                return carts;
-            }, []))
-          }
-        />
-      </Panel>
+              field: 'actions',
+              descrip: 'User Actions',
+              allowSort: true,
+              dataFormat: (cell, row)=> <WaypointHover waypoints={cell}/>
+            }]} data={rows} />
+          </Panel>
+      </div>
+
     </div>
   );
 }
 
-sessions.propTypes = {
-  // news: PropTypes.arrayOf(PropTypes.shape({
-  //   title: PropTypes.string.isRequired,
-  //   link: PropTypes.string.isRequired,
-  //   contentSnippet: PropTypes.string,
-  // })).isRequired,
+Session.propTypes = {
+  
 };
 
-sessions.contextTypes = { setTitle: PropTypes.func.isRequired };
+Session.contextTypes = { setTitle: PropTypes.func.isRequired };
 
-export default sessions;
+export default Session;

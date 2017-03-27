@@ -183,6 +183,7 @@ type Slackbot {
   # Foreign refs
   members: [Chatuser]
   carts: [Cart]
+  deliveries: [Delivery]
 }
 
 type User {

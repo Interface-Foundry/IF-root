@@ -1,11 +1,12 @@
 import React from 'react';
-import FlotCharts from './slackteamstats';
+import Slackteamstats from './slackteamstats';
 
 export default {
 
   path: '/slackteamstats',
 
   async action(context) {
+
     const resp = await fetch('/graphql', {
       method: 'post',
       headers: {
@@ -13,17 +14,19 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: '{waypoints(limit:5000){ user_id, delivery_id, waypoint, timestamp, data, user { name, team { team_name, team_id }}, delivery { _id, team { team_name } }}, teams(limit:5000){team_name, team_id, carts {_id}}}',
+        query: '{teams(limit:5000){team_name, team_id, carts {_id}, deliveries{_id}}}',
       }),
       credentials: 'include',
     });
     const {
       data
     } = await resp.json();
-    if (!data || !data.waypoints) throw new Error('Failed to load waypoints.');
+    if (!data || !data.teams) throw new Error('Failed to load teams.');
+
 
     //return <FlotCharts waypoints={data.waypoints} />;
-    return <FlotCharts waypoints={data.waypoints} teams={data.teams} teamId={context.query.id} teamName={context.query.teamname} />;
+    return <Slackteamstats teams={data.teams} teamId={context.query.id} teamName={context.query.teamname} />
+    //return <Slackteamstats waypoints={data.waypoints} teams={data.teams} teamId={context.query.id} teamName={context.query.teamname} />;
   }
 
 };

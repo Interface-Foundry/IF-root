@@ -120,6 +120,9 @@ const Resolvers = {
     carts: async ({team_id}) => {
       return (await Carts.find({ slack_id: team_id }).toArray());
     },
+    deliveries: async({team_id}) => {
+      return (await Deliveries.find({team_id: team_id}).toArray());
+    }
   },
 
   Waypoint: {
