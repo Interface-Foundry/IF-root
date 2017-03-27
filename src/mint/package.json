@@ -66,7 +66,7 @@
     "build": "NODE_PATH=$NODE_PATH:./react webpack",
     "dev": "nodemon --ignore react/ --ignore public/ ./server/index.js & webpack --progress --color -d --watch --hot",
     "test": "mocha tests",
-    "react-test": "jest",
+    "react-test": "karma start",
     "apidoc": "npm run apidocs",
     "apidocs": "apidoc -i server/routes/ -o ../../docs/api/ && http-server ../../docs/api -o"
   }
