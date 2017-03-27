@@ -878,7 +878,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   if (foodSession.votes.length && sort === SORT.cuisine) {
     var countWinner = score_utils.voteWinner(foodSession.votes) //the cuisine that would have won without vote-weighting
     var realWinner = viableRestaurants[0].summary.cuisines[0] //the cuisine that did win with vote-weighting
-    console.log('/ / / / / / / / / / \n countWinner, realWinner, firstRestoCuisines', countWinner, realWinner, viableRestaurants[0].summary.cuisines)
+    console.log('countWinner, realWinner, firstRestoCuisines', countWinner, realWinner, viableRestaurants[0].summary.cuisines)
     if (countWinner && (countWinner != realWinner || viableRestaurants[0].summary.cuisines.indexOf(countWinner) > -1)) {
       //kip chose the cuisine it would have chosen by simply counting votes, so no explanation is necessary
       var explanationText = `${viableRestaurants[0].summary.cuisines[0]}`
@@ -889,7 +889,10 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       var vote = votes.reduce(function (acc, val) {
         return (acc.weight > val.weight ? acc : val)
       }, {weight: -100}) //user who voted for the winning cuisine the hardest / whose vote for the winning cuisine is prioritized the most
-      console.log('/ / / / / / / / / / / / / / / / / \n winning vote', vote)
+      console.log('winning vote', vote)
+      // explanation text explaining the choice when it is different / not obvious from the simple voting result
+      var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with ${vote.vote} 🎉`
+
       // explanation text explaining the choice when it is different / not obvious from the simple voting result
       if (vote.user && vote.vote){
         var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with ${vote.vote} 🎉`
@@ -919,7 +922,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
         }, 'food.admin.restaurant.pick.list', {
             type: 'slack',
             data: {
-              text: '*Vote Result: *',
+              text: '*Vote Result:*',
               attachments: [{
                 color: '#3AA3E3',
                 fallback: "votes submitted",
@@ -932,7 +935,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   }
 
   var responseForAdmin = {
-    'text': explanationText + '\n Here are 3 restaurant suggestions based on the team vote. Which do you want today?',
+    'text': '*Vote Result:* ' + explanationText + '\n Here are 3 restaurant suggestions based on the team vote. Which do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
