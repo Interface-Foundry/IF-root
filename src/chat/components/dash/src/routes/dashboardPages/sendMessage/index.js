@@ -15,7 +15,7 @@ export default {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: `{teams(limit:2000)(team_id:"${context.query.id}") {bot_access_token, team_name members{value:dm, label:name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
+          query: `{teams(limit:2000)(team_id:"${context.query.id}") {bot, team_name members{value:dm, label:name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
         }),
         credentials: 'include',
       });
@@ -27,7 +27,7 @@ export default {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: `{teams(limit:2000){bot_access_token, team_name, members {value: dm, label: name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
+          query: `{teams(limit:2000){bot, team_name, members {value: dm, label: name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
         }),
         credentials: 'include',
       });
@@ -35,7 +35,7 @@ export default {
     const {data} = await res.json();
     let members = data.teams.reduce((mems, team) => {
       let teamMems = team.members.map(member => {
-        member.token = team.bot_access_token
+        member.token = team.bot.bot_access_token
         return member;
       })
       return mems.concat(teamMems);
