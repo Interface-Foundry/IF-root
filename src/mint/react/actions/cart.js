@@ -30,10 +30,8 @@ const receiveRemoveItem = (cart) => ({
   ...cart
 });
 
-const requestAddItem = (cart, item) => ({
-  type: REQUEST_ADD_ITEM_TO_CART,
-  item,
-  cart
+const requestAddItem = () => ({
+  type: REQUEST_ADD_ITEM_TO_CART
 });
 
 const receiveAddItem = (item) => ({
