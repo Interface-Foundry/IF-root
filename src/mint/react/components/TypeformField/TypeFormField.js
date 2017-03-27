@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { FormControl } from 'react-bootstrap';
 
-export default class TypeFormField extends Component {
+export default class TypeformField extends Component {
   constructor(props) {
     super(props);
     this.state = { value: '' };

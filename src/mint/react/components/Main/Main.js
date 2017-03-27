@@ -1,7 +1,6 @@
 import React, { PropTypes, Component } from 'react';
-import InputContainer from '../containers/InputContainer';
-import CartContainer from '../containers/CartContainer';
-import Onboard from '../components/Onboard';
+import {InputContainer, CartContainer} from '../../containers';
+import { Onboard } from '..';
 import { Button, Grid, Row, Col, PageHeader } from 'react-bootstrap';
 
 export default class Cart extends Component {

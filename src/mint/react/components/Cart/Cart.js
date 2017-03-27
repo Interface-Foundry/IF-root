@@ -1,6 +1,5 @@
 import React, { PropTypes, Component } from 'react';
-import AddAmazonItem from './AddAmazonItem';
-import Item from './Item';
+import {Item, AddAmazonItem} from '..';
 import { Row, Col, ListGroup, ListGroupItem, Panel} from 'react-bootstrap';
 
 export default class Cart extends Component {

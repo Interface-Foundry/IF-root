@@ -1,7 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import { connect } from 'react-redux';
 import { session } from '../actions';
-import SignInForm from '../components/SignInForm';
+import { SignInForm } from '../components';
 import { bindActionCreators } from 'redux';
 
 class InputContainer extends Component {

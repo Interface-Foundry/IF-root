@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Main from '../components/Main';
-import '../styles/App.scss';
+import { Main } from '../components';
 
 const App = (props) => (
   <Main {...props} />
