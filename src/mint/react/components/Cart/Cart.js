@@ -5,8 +5,14 @@ import { Row, Col, ListGroup, ListGroupItem, Panel} from 'react-bootstrap';
 export default class Cart extends Component {
   static propTypes = {
     addItem: PropTypes.func.isRequired,
+    fetchItems: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
     items: PropTypes.arrayOf(PropTypes.object).isRequired
+  }
+
+  componentDidMount() {
+    const { fetchItems, cart_id } = this.props;
+    fetchItems(cart_id);
   }
 
   listItems(hasItems, items) {

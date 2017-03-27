@@ -1,5 +1,5 @@
 import React, { PropTypes, Component } from 'react';
-import {InputContainer, CartContainer} from '../../containers';
+import {SignInContainer, CartContainer} from '../../containers';
 import { Onboard } from '..';
 import { Button, Grid, Row, Col, PageHeader } from 'react-bootstrap';
 

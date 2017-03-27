@@ -1,17 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Main } from '../components';
+import { App } from '../components';
 
-const App = (props) => (
-  <Main {...props} />
-);
-
-const mapStateToProps = (state, ownProps) => {
-  return {
+const mapStateToProps = (state, ownProps) => ({
     cart_id: ownProps.match.params.cart_id,
     newAccount: state.session.newAccount,
     accounts: state.session.user_accounts
-  };
-};
+})
 
 export default connect(mapStateToProps)(App);

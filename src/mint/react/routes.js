@@ -2,11 +2,11 @@
 // handles choosing which route to render
 import React from 'react';
 import { Route, Switch } from 'react-router';
-import { App } from './containers';
+import { AppContainer } from './containers';
 
 const Routes = () => (
   <Switch>
-    <Route path="/cart/:cart_id" component={App} />
+    <Route path="/cart/:cart_id" component={AppContainer} />
     <Route path="*" status={404} />
   </Switch>
 );

@@ -1,3 +1,3 @@
-export App from './App';
+export AppContainer from './AppContainer';
 export CartContainer from './CartContainer';
-export InputContainer from './InputContainer';
+export SignInContainer from './SignInContainer';
