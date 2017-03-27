@@ -210,6 +210,10 @@ const clientConfig = extend(true, {}, config, {
 
   target: 'web',
 
+  node: {
+    fs: "empty",
+  },
+
   plugins: [
 
     // Define free variables

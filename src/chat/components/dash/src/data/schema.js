@@ -171,8 +171,7 @@ type Slackbot {
   meta: SlackbotMeta
   incoming_webhook_url: String
   incoming_webhook_channel: String
-  bot_user_id: String
-  bot_access_token: String
+  bot: JSON
   status_interval: String
   city: String
   chosen_location: String

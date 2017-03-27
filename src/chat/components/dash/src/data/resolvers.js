@@ -39,7 +39,7 @@ async function loadDeliveriesById(ids) {
   var deliveries = await Deliveries.find({'_id': {'$in': ids.map(i => ObjectId(i))}}).toArray();
 
   var byID = {};
-  deliveries.map(d => { byID[d._id.toHexString()] = d; console.log(d._id.toHexString()); });
+  deliveries.map(d => { byID[d._id.toHexString()] = d; });
 
   return ids.map(i => byID[i] || null);
 }
