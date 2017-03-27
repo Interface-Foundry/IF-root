@@ -317,20 +317,19 @@ handlers['food.choose_address'] = function * (message) {
     var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     foodSession.chosen_location = location
 
-    // keep the banner
-    var msg_json = [{
-      'text':'',
-      'fallback':'Kip Cafe',
-      'attachments':[{
-        'fallback': 'Kip Cafe',
-        'title': '',
-        'color':'#F03745',
-        'image_url': 'https://storage.googleapis.com/kip-random/cafe.png'
-      }]
-    },{
+    var msg_json = {
       fallback: 'Kip Cafe',
-      text: 'Preparing ingredients...'
-    }]
+      text: 'Preparing ingredients...',
+      attachments: [
+        {
+          'fallback': 'Kip Cafe',
+          'title': '',
+          'image_url': 'https://storage.googleapis.com/kip-random/cafe.png',
+          'color': '#F03745'
+        }
+      ]
+    }
+
     $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
 
     foodSession.fulfillment_method = 'delivery'

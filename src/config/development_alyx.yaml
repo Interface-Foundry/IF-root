@@ -21,6 +21,6 @@ slack:
    # "17713782326.83486971505"
   client_secret: f3fcd31fd4796952efa04b27f40674ac
   verification_token: K0R3t3LUQSxCwGZAcJBiZK5V
-  redirect_uri: https://794a0162.ngrok.io/newslack
+  redirect_uri: https://274e7bfa.ngrok.io/newslack
 kipPayURL: https://7ad44111.ngrok.io
 picstitchDelivery: http://localhost:5000
