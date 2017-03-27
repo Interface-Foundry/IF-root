@@ -8,23 +8,46 @@ const initialState = {
   cart_leader: '',
   cart_members: [],
   items: [],
-  type: NEW_TYPE
 };
 
 describe('cart reducer', () => {
+  const firstState = initialState
 
-	const firstState = initialState
+  it('should return the initial state', () => {
+    expect(reducer(firstState, {}))
+      .toEqual(firstState)
+  })
 
-	it('should return the initial state', () => {
-		expect(reducer(firstState, {})).toEqual(firstState)
-	})
+  it('should add 1 single item to the items array', () => {
+    const item = { item: 'omg im an item', id: 123 }
 
-	it('should add 1 single item to the items array', () => {
-		const item = {item: 'omg im an item', id: 123}
+    expect(reducer(firstState, {
+        type: RECEIVE_ADD_ITEM_TO_CART,
+        item
+      }))
+      .toEqual({...firstState, items: [item] })
+  })
 
-		expect(reducer(firstState, {
-		  	type: RECEIVE_ADD_ITEM_TO_CART,
-		  	item
-		})).toEqual({...firstState, items: [item]})
-	})
+  it('should add items to the array', () => {
+    const items = [{ item: 'omg im an item', id: 123 }, { item: 'omg im an item too', id: 321 }];
+    expect(reducer(firstState, {
+        type: RECEIVE_ITEMS,
+        items
+      }))
+      .toEqual({...firstState, items: items })
+  })
+
+  it('should update the cart with new contents', () => {
+    const items = [{ item: 'omg im an item', id: 123 }, { item: 'omg im an item too', id: 321 }];
+    const id = 'abc123'
+    const newCart = {
+      items,
+      id
+    }
+    expect(reducer(firstState, {
+        type: RECEIVE_CART,
+        newCart
+      }))
+      .toEqual({...firstState, items: items, id: id })
+  })
 })

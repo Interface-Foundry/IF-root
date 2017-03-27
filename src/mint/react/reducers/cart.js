@@ -5,7 +5,6 @@ const initialState = {
   cart_leader: '',
   cart_members: [],
   items: [],
-  type: NEW_TYPE
 };
 
 export default function cart(state = initialState, action) {
@@ -19,7 +18,7 @@ export default function cart(state = initialState, action) {
         cart_members: [...state.cart_members, action]
       });
     case RECEIVE_CART:
-      return Object.assign({}, state, action);
+      return Object.assign({}, state, action.newCart);
     case RECEIVE_ITEMS:
       return Object.assign({}, state, {
         items: action.items

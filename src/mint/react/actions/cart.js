@@ -1,8 +1,8 @@
 import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
 
-const receive = (newInfo) => ({
+const receive = (newCart) => ({
   type: RECEIVE_CART,
-  ...newInfo
+  newCart
 });
 
 const request = (cart) => ({

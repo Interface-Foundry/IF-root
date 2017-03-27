@@ -43,7 +43,7 @@
   &[disabled],
   fieldset[disabled] & {
     &:hover,
-    &:focus,
+    &:focus,a
     &.focus {
       background-color: $background;
           border-color: $border;
