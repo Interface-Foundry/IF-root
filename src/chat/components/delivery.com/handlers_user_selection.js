@@ -310,20 +310,20 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
   // final attachment with send, edit members, < back
   msg_json.attachments.push({
     'text': ``,
-    'fallback': '✓ Send to Members',
+    'fallback': 'Collect Orders?',
     'color':'#2ab27b',
     'callback_id': 'channel_select',
     'attachment_type': 'default',
     'actions': [{
       'name': 'passthrough',
-      'text': '✓ Collect Orders',
+      'text': '✓ Collect Food Orders',
       'style': 'primary',
       'type': 'button',
       'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
     }, {
       'name': 'food.admin.team.members.reorder',
       'value': mostRecentMerchant,
-      'text': `Manage Channels`,
+      'text': `Manage Order Members`,
       'type': 'button'
     }]
   })
@@ -457,8 +457,8 @@ handlers['food.admin.display_channels'] = function * (message) {
 
   msg_json.attachments[msg_json.attachments.length-1].actions.push({
     'text': `< Back`,
-    'name': 'food.poll.confirm_send',
-    'value': 'food.poll.confirm_send',
+    'name': 'food.poll.confirm_send_initial',
+    'value': 'food.poll.confirm_send_initial',
     'type': 'button'
   })
   $replyChannel.sendReplace(message, 'food.admin.select_channel', {type: message.origin, data: msg_json})
@@ -541,7 +541,7 @@ handlers['food.admin.toggle_channel'] = function * (message) {
 }
 
 handlers['food.admin.select_channel'] = function * (message) {
-  yield handlers['food.poll.confirm_send'](message)
+  yield handlers['food.poll.confirm_send_initial'](message)
 }
 
 handlers['food.admin.select_channel_reorder'] = function * (message) {

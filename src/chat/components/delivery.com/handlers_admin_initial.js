@@ -696,7 +696,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
     {
-      'text': '*Step 4.* Kip lets your team vote on the type of food they want to eat \n Tap `✔ Start New Order` to select team members to include in vote',
+      'text': '*Step 4.* Kip lets your team vote on the type of food they want to eat \n Tap `✔ Start New Vote` to select team members to include in vote',
       'fallback': 'Team voting',
       'callback_id': 'wopr_game',
       'color': '#A368F0',
@@ -717,7 +717,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     'actions': [
       {
         'name': 'passthrough',
-        'text': '✔ Start New Order',
+        'text': '✔ Start New Vote',
         'style': 'primary',
         'type': 'button',
         'value': 'food.poll.confirm_send_initial'
@@ -1015,15 +1015,15 @@ handlers['food.restaurants.list.recent'] = function * (message) {
     'mrkdwn_in': [
       'text'
     ],
-    'text': '*Tip:* `✔ Start New Order` polls your team on what type of food they want.',
-    'fallback': '*Tip:* `✔ Start New Order` polls your team on what type of food they want.',
+    'text': '*Tip:* `✔ Start New Vote` polls your team on what type of food they want',
+    'fallback': '*Tip:* `✔ Start New Vote` polls your team on what type of food they want',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
       {
         'name': 'passthrough',
-        'text': '✔ Start New Order',
+        'text': '✔ Start New Vote',
         'style': 'primary',
         'type': 'button',
         'value': 'food.poll.confirm_send'

@@ -899,7 +899,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       }else {
         var explanationText = `Voting finished, <@${foodSession.convo_initiater.id}|${foodSession.convo_initiater.name}> is choosing a restaurant`
       }
-      
+
       //send explanation message to the non-admin users
     }
 
@@ -934,8 +934,15 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     })
   }
 
+  //clean up message
+  if (!explanationText){
+    explanationText = ''
+  } else {
+    explanationText = '*Vote Result:* ' + explanationText
+  }
+
   var responseForAdmin = {
-    'text': '*Vote Result:* ' + explanationText + '\n Here are 3 restaurant suggestions based on the team vote. Which do you want today?',
+    'text': explanationText + '\n Here are 3 restaurant suggestions based on the team vote. Which do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 
