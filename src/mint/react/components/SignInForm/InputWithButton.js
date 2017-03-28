@@ -6,7 +6,7 @@ export default class InputWithButton extends Component {
     return (
       <div className="custom__input">
         <input className="custom__input__field" onChange={onChange} value={value} type="email" placeholder='Enter your email'/>
-        <button className="custom__input__button" type="submit">Submit</button>
+        <button className="custom__input__button" type="Submit">Submit</button>
       </div>
     )
   }
