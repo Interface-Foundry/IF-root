@@ -40,9 +40,7 @@ const asyncValidate = (values, dispatch, state) =>
     return session.newAccount
   });
 
-const shouldAsyncValidate = (params) => {
-  return params.trigger === 'blur'
-}
+const shouldAsyncValidate = (params) => params.trigger === 'blur';
 
 const SignInFormContainer = reduxForm({
   form: 'SignInForm',
