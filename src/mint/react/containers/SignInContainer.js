@@ -28,20 +28,17 @@ const validateEmail = values => {
   return errors;
 }
 
-const asyncValidate = async(values, dispatch, state) => {
-  const { cart_id } = state;
-  const { email, url } = values;
-
-  if(!url) {
-    const session = await dispatch(signIn(cart_id, email));
-    if (!session.newAccount)
-      throw { email: 'You\'ve already logged in' }
-  }
-}
+const asyncValidate = (values, dispatch, state) =>
+  dispatch(signIn(state.cart_id, values.email))
+  .then(session => {
+    if (!session.newAccount) {
+      throw { email: 'You\'ve logged in already' }
+    }
+    return session.newAccount
+  });
 
 const SignInFormContainer = reduxForm({
   form: 'SignInForm',
-  fields: ['email', 'url'],
   validateEmail,
   asyncValidate,
   asyncBlurFields: ['email']

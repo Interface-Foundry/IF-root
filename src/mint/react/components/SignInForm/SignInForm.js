@@ -12,9 +12,8 @@ export default class SignIn extends Component {
     this.setState({center: target})
   }
 
-  finalSubmit = (e, p, state) => {
+  finalSubmit = e => {
     const { handleSubmit, values } = this.props;
-
     handleSubmit(e)
   }
 

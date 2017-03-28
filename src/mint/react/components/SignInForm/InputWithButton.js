@@ -3,10 +3,11 @@ import React, { Component, PropTypes } from 'react';
 export default class InputWithButton extends Component {
 
 	componentWillReceiveProps(nextProps) {
-		const { meta: { error }, changeCenter } = nextProps
+		const { meta: { error, active }, changeCenter } = nextProps
 
-		if(error)
-			changeCenter('two')
+    if (!active) {
+      changeCenter('two')
+    }
 	}
 
   render() {

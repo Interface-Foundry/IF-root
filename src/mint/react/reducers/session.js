@@ -14,12 +14,6 @@ export default function session(state = initialState, action) {
     return Object.assign({}, state, action);
   case RECEIVE_UPDATE_SESSION:
     const newAccount = action.ok && action.status !== "USER_LOGGED_IN";
-    console.log('newAccount', newAccount)
-    console.log('returning', Object.assign({}, state, {
-      newAccount: newAccount,
-      user_accounts: newAccount ? [...state.user_accounts, action.user] : state.user_accounts,
-      ...action
-    }))
     return Object.assign({}, state, {
       newAccount: newAccount,
       user_accounts: newAccount ? [...state.user_accounts, action.user] : state.user_accounts,
