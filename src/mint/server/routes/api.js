@@ -88,10 +88,11 @@ router.get('/identify', (req, res) => co(function* () {
     } else {
       return res.send({
         ok: true,
+        newAccount: false,
         status: 'USER_LOGGED_IN',
         message: 'You are already logged in with that email address on this device',
         user: user,
-        cart: cart
+        cart: cart,
       });
     }
   }
@@ -110,8 +111,9 @@ router.get('/identify', (req, res) => co(function* () {
     } else {
       res.send({
         ok: false,
+        newAccount: false,
         status: 'CHECK_EMAIL',
-        message: 'Someone has already claimed that emails. Please check your email and use the link we sent you to verify your identity.',
+        message: 'Someone has already claimed that email. Please check your email and use the link we sent you to verify your identity.',
       });
     }
 
@@ -162,6 +164,7 @@ router.get('/identify', (req, res) => co(function* () {
   } else {
     res.send({
       ok: true,
+      newAccount: true,
       status: 'NEW_USER',
       message: 'Thanks for registering for Kip! An email was sent to you with a link for this cart.',
       user: user,
