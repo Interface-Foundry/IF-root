@@ -1,0 +1,9 @@
+@mixin carousel-animation($frames, $static, $name: 'carousel') {
+    $animating: (100% - $frames * $static) / ($frames - 1);
+
+    @at-root {
+        @keyframes #{$name} {
+            // Animation logic here
+        }
+    }
+}

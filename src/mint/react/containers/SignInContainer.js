@@ -14,7 +14,7 @@ const mapDispatchToProps = dispatch => ({
 		const { email } = values;
 		const { cart_id } = state;
 
-		dispatch(signIn(cart_id, email))
+		// dispatch(signIn(cart_id, email))
 		dispatch(reset('SignInForm'))
 	}
 })

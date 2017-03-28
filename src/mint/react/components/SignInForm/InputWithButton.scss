@@ -1,15 +1,16 @@
-.custom__input
+.custom__input {
 	border: 1px solid #e1e1e1;
-	width: 75%;
+	width: 100%;
 	margin: 20px auto;
 
-	.custom__input__field
+	.custom__input__field {
 		width: 75%;
 		border: 0;
 		padding: 10px;
 		height: 50px;
+	}
 
-	.custom__input__button
+	.custom__input__button {
 		cursor: pointer;
 		width: 25%;
 		border: 0;
@@ -17,3 +18,5 @@
 		height: 50px;
 		background: white;
 		border-left: 1px solid #e3e3e3;
+	}
+}

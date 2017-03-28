@@ -1,5 +1,5 @@
 import SignInForm from './SignInForm';
-import './SignInForm.sass';
-import './InputWithButton.sass';
+import './SignInForm.scss';
+import './InputWithButton.scss';
 
 export default SignInForm;
