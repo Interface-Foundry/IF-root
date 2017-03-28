@@ -63,7 +63,7 @@ const del = function * (url, data) {
   return body
 }
 
-describe.only('api', () => {
+describe('api', () => {
   before(() => co(function * () {
     // clean up the db
     yield dbReady
@@ -216,5 +216,38 @@ describe.only('api', () => {
     assert(user)
     assert.equal(user.email_address, mcTesty.email)
     assert.equal(user.id, mcTesty.id)
+  }))
+
+  it('POST /api/user/:user_id should update user properties if the user is logged in', () => co(function * () {
+    var settings = {
+      venmo_accepted: true,
+      venmo_id: "MoMcTesty"
+    }
+    var user = yield post('/api/user/' + encodeURIComponent(mcTesty.id), settings)
+    assert(user)
+    assert.equal(user.email_address, mcTesty.email)
+    assert.equal(user.id, mcTesty.id)
+    assert.equal(user.venmo_id, settings.venmo_id)
+
+    // and double check that when we get it again, the settings persist
+    user = yield get('/api/user?id=' + encodeURIComponent(mcTesty.id))
+    assert(user)
+    assert.equal(user.email_address, mcTesty.email)
+    assert.equal(user.id, mcTesty.id)
+    assert.equal(user.venmo_id, settings.venmo_id)
+  }))
+
+  it('POST /api/user/:user_id should not allow a user to update a different user', () => co(function * () {
+    var settings = {
+      venmo_accepted: true,
+      venmo_id: "MoMcTesty"
+    }
+    var err
+    try {
+      var user = yield post('/api/user/123456', settings)
+    } catch (e) {
+      err = e;
+    }
+    assert(err)
   }))
 })

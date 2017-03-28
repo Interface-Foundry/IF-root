@@ -386,7 +386,7 @@ router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
 }));
 
 /**
- * @api {get} /api/user User
+ * @api {get} /api/user Get
  * @apiDescription Get user from db based on id or email
  * @apiGroup Users
  * @apiParam {string} email [optional query parameter] email addresss for the user
@@ -415,7 +415,45 @@ router.get('/user', (req, res) => co(function* () {
     throw new Error('Cannot find user');
   }
   res.send(user);
-}));
+}))
+
+/**
+ * @api {post} /api/user/:user_id Update
+ * @apiDescription Updates a user's information
+ * @apiGroup Users
+ * @apiParam {string} :user_id id of the user to update
+ *
+ * @apiParamExample Request
+ * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b
+ * {"accepts_venmo": true, "venmo_id": "MoMcTesty"}
+ *
+ * @apiSuccessExample Response
+ */
+router.post('/user/:user_id', (req, res) => co(function * () {
+  // check permissions
+  var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
+  if (!userIds.has(req.params.user_id)) {
+    throw new Error('Unauthorized')
+  }
+
+  // Find the user in the database
+  var user = yield db.UserAccounts.findOne({id: req.params.user_id})
+  if (!user) {
+    throw new Error('Could not find user ' + req.params.user_id)
+  }
+
+  // Can't update some fields
+  delete req.body.id
+  delete req.body.email_address
+  delete req.body.sessions
+
+  // update the properties that they set
+  _.merge(user, req.body)
+
+  yield user.save()
+
+  res.send(user)
+}))
 
 /**
  * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members
