@@ -1,7 +1,11 @@
-.custom__input {
+div[class^='custom__input'] {
 	border: 1px solid #e1e1e1;
 	width: 100%;
 	margin: 20px auto;
+
+	&[class*='-error'] {
+		border: 1px solid red;
+	}
 
 	.custom__input__field {
 		width: 75%;

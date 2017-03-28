@@ -6,7 +6,8 @@ import { signIn, loggedIn } from '../actions/session';
 import { reduxForm, reset } from 'redux-form';
 
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: state.cart.cart_id
+  cart_id: state.cart.cart_id,
+  newAccount: state.session.newAccount
 })
 
 const mapDispatchToProps = dispatch => ({

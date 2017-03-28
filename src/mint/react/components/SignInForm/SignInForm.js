@@ -18,7 +18,7 @@ export default class SignIn extends Component {
   }
 
   render() {
-    const { handleSubmit } = this.props;
+    const { handleSubmit, newAccount } = this.props;
     const { center } = this.state;
     const { changeCenter, finalSubmit } = this;
 
@@ -31,7 +31,7 @@ export default class SignIn extends Component {
               <h1>Start New Group Cart</h1>
               <div className="signIn__container__page__input">
                 <label htmlFor="email">1. Whats your Email Address</label>
-                <Field name="email" component={InputWithButton} changeCenter={changeCenter} type="email" required placeholder="Enter your email"/>
+                <Field name="email" component={InputWithButton} changeCenter={changeCenter} type="email" required placeholder="Enter your email" newAccount={newAccount}/>
               </div>
             </section>
             <section className='signIn__container__page' id="two">
