@@ -19,6 +19,14 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     callback_id: 'cart_head',
     actions: []
   }];
+  
+  cartObj[0].actions.push({
+    'name': 'passthrough',
+    'text': 'Home',
+    'type': 'button',
+    'value': 'home'
+  })
+
   if (isAdmin) {
     // cartObj[0].actions.push({
     //   'name': 'bundles.home',
@@ -41,12 +49,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
       });
     }
   }
-  cartObj[0].actions.push({
-    'name': 'passthrough',
-    'text': 'Home',
-    'type': 'button',
-    'value': 'home'
-  })
+
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];
     var addedByUser = item.added_by.includes(message.source.user);

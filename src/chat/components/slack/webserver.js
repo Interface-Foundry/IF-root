@@ -575,12 +575,12 @@ function * updateCartMsg(cart, parsedIn) {
         }]
       };
       if (showEverything) {
-        buttons.actions.push({
-          'name': 'bundles.home',
-          'text': '+ Add Bundles',
-          'type': 'button',
-          'value': 'home'
-        });
+        // buttons.actions.push({
+        //   'name': 'bundles.home',
+        //   'text': '+ Add Bundles',
+        //   'type': 'button',
+        //   'value': 'home'
+        // });
         if (cart.aggregate_items.length > 0) {
           buttons.actions.push({
             'name': 'emptycart',

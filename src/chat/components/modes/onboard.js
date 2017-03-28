@@ -214,39 +214,43 @@ handlers['supplies'] = function * (message) {
   user.admin_shop_onboarded = true;
   user.markModified('admin_shop_onboarded');
   yield user.save();
-  var attachments = [];
-  attachments.push({
-    text: '*Step 1/3:* Choose a pre-packaged bundle:',
-    mrkdwn_in: ['text'],
-    color: '#A368F0',
-    fallback: 'Step 1/3: Choose a pre-packaged bundle',
-    callback_id: 'none'
-  });
+  // var attachments = [];
+  // attachments.push({
+  //   text: '*Step 1/3:* Choose a pre-packaged bundle:',
+  //   mrkdwn_in: ['text'],
+  //   color: '#A368F0',
+  //   fallback: 'Step 1/3: Choose a pre-packaged bundle',
+  //   callback_id: 'none'
+  // });
 
   return yield handlers['shopping_search'](message, ['kind bars'])
 
-  attachments = attachments.concat(rez);
+  // attachments = attachments.concat(rez);
 
   
-
-  console.log('SEARCH RESULTS !!!!!!!!!!!! ', rez)
-
-  attachments.push({
-    'text': '✎ *Hint:* You can also search what you want below (Example: _MacBook Pro Power Cord_)',
-    mrkdwn_in: ['text']
-  });
-  var msg = message;
-  msg.mode = 'onboard'
-  msg.action = 'home'
-  msg.text = ''
-  msg.source.team = team_id;
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  msg.reply = attachments;
-  msg.fallback = 'Step 1/3: Choose a bundle'
-  return [msg];
+  // attachments.push({
+  //   'text': '✎ *Hint:* You can also search what you want below (Example: _MacBook Pro Power Cord_)',
+  //   mrkdwn_in: ['text']
+  // });
+  // var msg = message;
+  // msg.mode = 'onboard'
+  // msg.action = 'home'
+  // msg.text = ''
+  // msg.source.team = team_id;
+  // msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  // msg.reply = attachments;
+  // msg.fallback = 'Step 1/3: Choose a bundle'
+  // return [msg];
 };
 
 handlers['shopping_search'] = function*(message, data) {
+
+  //h4xor 👺
+  var h4x = false
+  if (message.text){
+    h4x = true
+  } 
+
   let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null),
     query = data[0],
     json = message.source.original_message ? message.source.original_message : {
@@ -314,11 +318,20 @@ handlers['shopping_search'] = function*(message, data) {
   msg.amazon = JSON.stringify(results);
   msg.original_query = results.original_query;
   msg.reply = [{
-    text: 'Here are some results, try adding one to your cart!',
+    text: '*Step 1/3:* Try adding an item to your cart',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Here are some results, try adding one to your cart!'
+    fallback: 'Step 1/3: Try adding an item to your cart'
   }];
+
+  //lol h4xor prevent prompt on second search in onboard cause otherwise search breaks due to unknown text input variables D:
+  if(!h4x){
+    msg.reply.push({
+      'text': '✎ *Hint:* You can also search what you want below (Example: _MacBook Pro Power Cord_)',
+      mrkdwn_in: ['text']
+    })
+  }
+
   if (message.source.response_url) {
     request({
       method: 'POST',
@@ -587,7 +600,7 @@ handlers['team'] = function * (message) {
     return kip.debug('incorrect team id : ', message);
   }
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  team.meta.collect_from = 'channel';
+  team.meta.collect_from = 'all';
   team.markModified('meta.collect_from');
   yield team.save();
   let attachments = [{
