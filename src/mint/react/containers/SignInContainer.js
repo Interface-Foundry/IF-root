@@ -31,7 +31,7 @@ const validateEmail = values => {
   return errors;
 }
 
-const asyncValidate = (values, dispatch, state) =>
+const asyncValidate = (values, dispatch, state) => 
   dispatch(signIn(state.cart_id, values.email))
   .then(session => {
     if (!session.newAccount) {
@@ -40,10 +40,15 @@ const asyncValidate = (values, dispatch, state) =>
     return session.newAccount
   });
 
+const shouldAsyncValidate = (params) => {
+  return params.trigger === 'blur'
+}
+
 const SignInFormContainer = reduxForm({
   form: 'SignInForm',
   validateEmail,
   asyncValidate,
+  shouldAsyncValidate,
   asyncBlurFields: ['email']
 })(SignInForm)
 
