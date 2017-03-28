@@ -40,11 +40,14 @@ const asyncValidate = (values, dispatch, state) =>
     return session.newAccount
   });
 
+const shouldAsyncValidate = (params) => params.trigger === 'blur';
+
 const SignInFormContainer = reduxForm({
   form: 'SignInForm',
   validateEmail,
   asyncValidate,
-  asyncBlurFields: ['email']
+  asyncBlurFields: ['email'],
+  shouldAsyncValidate
 })(SignInForm)
 
 export default connect(mapStateToProps, mapDispatchToProps)(SignInFormContainer)
