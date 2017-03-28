@@ -18,7 +18,7 @@ export default class Cart extends Component {
 
   render() {
     const { cart_id, accounts, newAccount } = this.props;
-    const loggedIn = accounts.length > 0;
+    const loggedIn = false //accounts.length > 0;
     return (
       <section>
         <Header cart_id={cart_id}/>

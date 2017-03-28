@@ -24,7 +24,7 @@ export function update() {
     const response = await fetch('/api/session', {
       credentials: 'same-origin'
     });
-    if (response.ok) dispatch(receive(await response.json()));
+    if (response.ok) return dispatch(receive(await response.json()));
   };
 }
 
@@ -34,6 +34,6 @@ export function signIn(cart_id, email) {
     const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
       credentials: 'same-origin'
     });
-    if (response.ok) dispatch(receiveUpdate(await response.json()));
+    if (response.ok) return dispatch(receiveUpdate(await response.json()));
   };
 }

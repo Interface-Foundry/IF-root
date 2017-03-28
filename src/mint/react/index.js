@@ -9,7 +9,7 @@ import { ConnectedRouter, routerReducer, routerMiddleware } from 'react-router-r
 
 import Reducers from './reducers';
 import { session } from './actions';
-import getRoutes from './routes';
+import Routes from './routes';
 
 if (module.hot) {
   module.hot.accept();
@@ -31,7 +31,7 @@ store.dispatch(session.update());
 ReactDOM.render(
   <Provider store={store}>
    <ConnectedRouter history={history}>
-       {getRoutes()}
+       <Routes />
    </ConnectedRouter>
  </Provider>,
   document.getElementById('root')
