@@ -88,6 +88,7 @@ type Delivery {
   guest_token: String
   completed_payment: Boolean
   delivery_error: String
+  cart: JSON
   # Foreign refs
   team: Slackbot
 }

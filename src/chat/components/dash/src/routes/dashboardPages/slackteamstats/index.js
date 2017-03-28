@@ -15,7 +15,7 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: '{teams(limit:5000){team_name, team_id, carts {_id}, deliveries{_id}}}',
+        query: '{teams(limit:5000){team_name, team_id, carts {_id, items{_id}}, deliveries{_id,cart}}}',
       }),
       credentials: 'include',
     });

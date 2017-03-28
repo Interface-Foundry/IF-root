@@ -19,33 +19,6 @@ import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
 
 const title = ' Team Stats';
 
-/*
-const waypointsCount = [ 
-  { waypoint: 1001, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 111 },
-  { waypoint: 1010,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 129 },
-  { waypoint: 1020,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 118 },
-  { waypoint: 1100,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 124 },
-  { waypoint: 1101, users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 109 },
-  { waypoint: 1102,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 62 },
-  { waypoint: 1110,users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 93 },
-  { waypoint: 1111,users: [ 'U3H5E1ANN', 'U3620AA5T' ], total: 32 },
-  { waypoint: 1112, users: [ 'U3620AA5T' ], total: 2 },
-  { waypoint: 1120, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 32 },
-  { waypoint: 1140, users: [ 'U3620AA5T' ], total: 14 },
-  { waypoint: 1210, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 153 },
-  { waypoint: 1211, users: [ 'U3620AA5T' ], total: 1 },
-  { waypoint: 1220, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 56 },
-  { waypoint: 1230, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 42 },
-  { waypoint: 1240, users: [ 'U3620AA5T', 'U3H5E1ANN' ], total: 4 },
-  { waypoint: 1300, users: [ 'U3620AA5T' ], total: 38 },
-  { waypoint: 1310, users: [ 'U3620AA5T' ], total: 2 },
-  { waypoint: 1313, users: [ 'U3620AA5T' ], total: 2 },
-  { waypoint: 1320, users: [ 'U3620AA5T' ], total: 24 },
-  { waypoint: 1321, users: [ 'U3620AA5T' ], total: 2 },
-  { waypoint: 1323, users: [ 'U3620AA5T' ], total: 2 },
-  { waypoint: 1330, users: [ 'U3620AA5T' ], total: 19 },
-  { waypoint: 1332, users: [ 'U3620AA5T' ], total: 19 } ];
-*/
 
 const COLORS = ['#FF0000', '#FF8888', '#0000FF', '#8888FF'];
 
@@ -58,16 +31,17 @@ function sumStoreTeamOrders(teams){
   	}
   	return total;
   }
-/*
+
 function sumStoreTeamItems(teams){
   var totalItems = 0;
   for(var i = 0; i<teams.length; i++){
       for (var j = 0; j<teams[i].carts.length; j++){
-        totalItems += teams[i].carts[j].items.length;
+        totalItems += teams[i].carts[j].items ? teams[i].carts[j].items.length : 0;
       }
-    }
+  }
+  return totalItems;
 }
-*/
+
 function sumCafeTeamOrders(teams){
   var total = 0;
   for(var i = 0; i<teams.length; i++){
@@ -76,26 +50,28 @@ function sumCafeTeamOrders(teams){
   return total;
 }
 
-/*
+
 function sumCafeTeamItems(teams){
-
+  var totalItems = 0;
+  for(var i = 0; i<teams.length; i++){
+      for (var j = 0; j<teams[i].deliveries.length; j++){
+        totalItems += teams[i].deliveries[j].cart ? teams[i].deliveries[j].cart.length : 0;
+      }
+  }
+  return totalItems;
 }
-*/
 
-function getPieChartTeamStatsData(teams, team){ // [store item count, store order count, cafe item count, cafe order count]
+
+function getPieChartTeamStatsData(teams, teamId){ // [store item count, store order count, cafe item count, cafe order count]
   const data = [];
-  //var numCafeOrders = team ? teams.find(function(t){return t.team_id==team}).foodSessions.length : sumCafeTeamStats(teams);
-  var foundTeam = teams.find(function(t){return t.team_id==team});
-
-  //var numStoreItems = team ? foundTeam : sumStoreTeamItems(teams);
-  var numStoreOrders = team ? foundTeam.carts.length : sumStoreTeamOrders(teams);
-  //var numCafeItems = team ? foundTeam : sumCafeTeamItems(teams);
-  var numCafeOrders = team ? foundTeam.deliveries.length : sumCafeTeamOrders(teams);
- 
-  const sampleData = [ 0, 0, 0, 0 ];
-  data.push({name: '# Store Items', value: sampleData[0]})
+  var foundTeam = teamId ? teams.filter(function(t){return t.team_id==teamId}) : null;
+  var numStoreItems = teamId ? sumStoreTeamItems(foundTeam) : sumStoreTeamItems(teams);
+  var numStoreOrders = teamId ? foundTeam[0].carts.length : sumStoreTeamOrders(teams);
+  var numCafeItems = teamId ? sumCafeTeamItems(foundTeam) : sumCafeTeamItems(teams);
+  var numCafeOrders = teamId ? foundTeam[0].deliveries.length : sumCafeTeamOrders(teams);
+  data.push({name: '# Store Items', value: numStoreItems})
   data.push({name: '# Store Orders', value: numStoreOrders})
-  data.push({name: '# Cafe Items', value: sampleData[2]})
+  data.push({name: '# Cafe Items', value: numCafeItems})
 
   data.push({name: '# Cafe Orders', value: numCafeOrders})
   return data;
@@ -145,7 +121,7 @@ function displayTeamStats(props, context) {
 
   var cells = [];
   for (var i = 0; i < 4; i++){
-    cells.push(<Cell fill={COLORS[i]} />);
+    cells.push(<Cell key={i} fill={COLORS[i]} />);
   }
   var currentTeam = props.teamName ? props.teamName : 'All Team';
 
