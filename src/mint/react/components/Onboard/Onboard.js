@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Typeform, TypeformField } from '..';
-// import '../styles/App.scss';
 
 export default class Onboard extends Component {
   render() {

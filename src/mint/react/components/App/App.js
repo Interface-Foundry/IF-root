@@ -1,43 +1,46 @@
 import React, { PropTypes, Component } from 'react';
 import {SignInContainer, CartContainer} from '../../containers';
 import { Onboard } from '..';
-import { Button, Grid, Row, Col, PageHeader } from 'react-bootstrap';
 
 export default class Cart extends Component {
   static propTypes = {
     cart_id: PropTypes.string.isRequired,
     accounts: PropTypes.array.isRequired,
-    newAccount: PropTypes.bool
+    newAccount: PropTypes.bool,
+    setCartId: PropTypes.func.isRequired,
+  }
+
+  componentWillMount() {
+    const {setCartId, cart_id} = this.props;
+    setCartId(cart_id);
   }
 
   render() {
     const { cart_id, accounts, newAccount } = this.props;
     const loggedIn = accounts.length > 0;
     return (
-      <Grid>
-        <Row>
-          <Col xs={12}>
-              <PageHeader>
-                Cart ID #{cart_id}
-              </PageHeader>
-          </Col>
-        </Row>
-        <Row>
+      <section>
+        <nav>
+          <h1>
+            Cart ID #{cart_id}
+          </h1>
+        </nav>
+        <div>
           {loggedIn ? 
-            <Col xs={12}>
+            <p>
               <strong>Accounts:</strong>
               {accounts.map((account, i) => <span key={i}>{account.email_address}</span>)}
-            </Col>
+            </p>
             : null}
-        </Row>
-        <Row>
-          <Col xs={12}>
-            {/* This should be an overlay on top of the CartContainer at some point */}
-            {/* !loggedIn ? null : <Onboard /> */}
-            <CartContainer cart_id={cart_id}/>
-          </Col>
-        </Row>
-      </Grid>
+        </div>
+        <div>
+          {/* This should be an overlay on top of the CartContainer at some point */}
+          {loggedIn ? 
+            null
+            : <SignInContainer/>}
+          <CartContainer/>
+        </div>
+      </section>
     );
   }
 }

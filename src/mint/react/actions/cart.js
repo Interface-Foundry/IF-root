@@ -1,4 +1,4 @@
-import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
+import { SET_CART_ID, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
 
 const receive = (newCart) => ({
   type: RECEIVE_CART,
@@ -38,6 +38,11 @@ const receiveAddItem = (item) => ({
   type: RECEIVE_ADD_ITEM_TO_CART,
   item
 });
+
+export const setCartId = (cartId) => ({
+  type: SET_CART_ID,
+  cartId
+})
 
 export function update(cart_id) {
   return async function (dispatch) {

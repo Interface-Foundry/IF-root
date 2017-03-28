@@ -4,8 +4,7 @@ const initialState = {
   animal: '',
   createdAt: '',
   updatedAt: '',
-  id: '',
-  type: NEW_TYPE
+  id: ''
 };
 
 export default function session(state = initialState, action) {

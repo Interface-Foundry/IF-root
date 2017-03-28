@@ -1,14 +1,26 @@
-
 import { connect } from 'react-redux';
-import { signIn } from '../actions/session';
 import { SignInForm } from '../components';
 
+import { signIn } from '../actions/session';
+
+import { reduxForm, reset } from 'redux-form';
+
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: ownProps.cart_id
+	cart_id: state.cart.cart_id,
 })
 
 const mapDispatchToProps = dispatch => ({
-  signIn: (cart_id, email) => dispatch(signIn(cart_id, email)) 
+	onSubmit: (values, e, state) => {
+		const { email } = values;
+		const { cart_id } = state;
+
+		dispatch(signIn(cart_id, email))
+		dispatch(reset('SignInForm'))
+	}
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(SignInForm);
+const SignInFormContainer = reduxForm({
+    form: 'SignInForm'
+})(SignInForm)
+
+export default connect(mapStateToProps, mapDispatchToProps)(SignInFormContainer)

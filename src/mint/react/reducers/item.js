@@ -5,8 +5,7 @@ const initialState = {
   item_name: '',
   asin: '',
   cart: '',
-  added: true,
-  type: NEW_TYPE
+  added: true
 };
 
 export default function item(state = initialState, action) {

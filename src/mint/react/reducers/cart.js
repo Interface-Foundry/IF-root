@@ -1,14 +1,19 @@
-import { NEW_TYPE, RECEIVE_ADD_ITEM_TO_CART, ADD_MEMBER_TO_CART, RECEIVE_CART, REQUEST_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
+import { SET_CART_ID, RECEIVE_ADD_ITEM_TO_CART, ADD_MEMBER_TO_CART, RECEIVE_CART, REQUEST_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
+
 const initialState = {
   cart_id: '',
   magic_link: '',
   cart_leader: '',
   cart_members: [],
-  items: [],
+  items: []
 };
 
 export default function cart(state = initialState, action) {
   switch (action.type) {
+    case SET_CART_ID:
+      return Object.assign({}, state, {
+        cart_id: action.cartId
+      });
     case RECEIVE_ADD_ITEM_TO_CART:
       return Object.assign({}, state, {
         items: [...state.items, action.item]

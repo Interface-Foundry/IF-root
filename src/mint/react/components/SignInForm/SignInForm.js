@@ -1,46 +1,18 @@
-import React, { PropTypes, Component } from 'react';
-import { Form, FormGroup, InputGroup, FormControl, Button } from 'react-bootstrap';
+import React, { Component, PropTypes } from 'react';
+import { Field } from 'redux-form';
 
-export default class SignInForm extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { email: '' };
-    this.handleEmail = ::this.handleEmail;
-    this.handleSubmit = ::this.handleSubmit;
-  }
-
-  handleEmail(e) {
-    this.setState({ email: e.target.value });
-  }
-
-  handleSubmit(e) {
-    const { props, state } = this;
-    const { cart_id, signIn } = props;
-    const { email } = state;
-    e.preventDefault();
-    signIn(cart_id, email);
-    this.setState({ email: '' });
-  }
-
-  static propTypes = {
-    signIn: PropTypes.func.isRequired,
-    cart_id: PropTypes.string.isRequired
-  }
-
+export default class SignIn extends Component {
   render() {
-    const { handleSubmit, handleEmail, state } = this;
-    const { email } = state;
+    const { handleSubmit } = this.props;
     return (
-      <Form onSubmit={handleSubmit}>
-        <FormGroup>
-            <InputGroup>
-                <FormControl type="email" name='email' value={email} required placeholder='Enter your email' onChange={handleEmail}/>
-                <InputGroup.Button >
-                    <Button type="submit" bsStyle="primary">Sign Up</Button>
-                </InputGroup.Button>
-            </InputGroup>
-        </FormGroup>
-    </Form>
+      <form className="signIn" onSubmit={handleSubmit}> 
+        <div className="input">
+          <label htmlFor="email">Paste URL from Amazon</label>
+          <Field name="email" component="input" type="email" placeholder='Enter your email'/>
+        </div>
+        <button className="submit" type="submit">Submit</button>
+      </form>
     );
   }
 }
+

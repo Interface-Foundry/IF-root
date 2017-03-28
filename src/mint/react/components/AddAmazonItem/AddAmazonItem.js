@@ -1,49 +1,18 @@
-import React, { PropTypes, Component } from 'react';
-import { Button, Form, FormGroup, FormControl, ControlLabel, InputGroup } from 'react-bootstrap';
+import React, { Component, PropTypes } from 'react';
+import { Field } from 'redux-form';
 
 export default class AddAmazonItem extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { url: '' };
-    this.handleUrl = ::this.handleUrl;
-    this.handleSubmit = ::this.handleSubmit;
-  }
-
-  static propTypes = {
-    addItem: PropTypes.func.isRequired,
-    cart_id: PropTypes.string.isRequired
-  }
-
-  handleUrl(e) {
-    this.setState({ url: e.target.value });
-  }
-
-  handleSubmit(e) {
-    const { props, state } = this;
-    const { cart_id, addItem } = props;
-    const { url } = state;
-    e.preventDefault();
-    addItem(cart_id, url);
-    this.setState({ url: '' });
-  }
-
   render() {
-    const { handleSubmit, handleUrl, state } = this;
-    const { url } = state;
+    const { handleSubmit } = this.props;
     return (
-      <Form onSubmit={handleSubmit}>
-        <FormGroup>
-            <ControlLabel>Paste URL from Amazon</ControlLabel>
-            <InputGroup>
-                <FormControl required placeholder='Enter the link to an amazon product' name='email' value={url} type='url' onChange={this.handleUrl} />
-                <InputGroup.Button>
-                    <Button type='submit' bsStyle="primary">
-                      Add To Cart
-                    </Button>
-                </InputGroup.Button>
-            </InputGroup>
-        </FormGroup>
-      </Form>
+      <form className="item" onSubmit={handleSubmit}> 
+        <div className="input">
+          <label htmlFor="url">Paste URL from Amazon</label>
+          <Field name="url" component="input" type="text" placeholder='Enter the link to an amazon product'/>
+        </div>
+        <button className="submit" type="submit">Submit</button>
+      </form>
     );
   }
 }
+
