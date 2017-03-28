@@ -1,12 +1,26 @@
 import React, { Component, PropTypes } from 'react';
 
 export default class InputWithButton extends Component {
+
+	componentWillReceiveProps(nextProps) {
+		const { meta: { error }, changeCenter } = nextProps
+
+		if(error)
+			changeCenter('two')
+	}
+
   render() {
-    const { input: { value, onChange, placeholder, type }, changeCenter, to } = this.props
+    const { input, meta: { error }, changeCenter, submit } = this.props
+
     return (
       <div className="custom__input row">
-        <input className="custom__input__field" onChange={onChange} value={value} type={type} placeholder={placeholder}/>
-        <button className="custom__input__button" onClick={() => changeCenter(to)}>Submit</button>
+        <input {...input} className="custom__input__field" />
+        {submit?
+        	<button className="custom__input__button" onClick={submit}>Submit</button>:
+        	<button className="custom__input__button" onClick={(e) => {
+        		e.preventDefault()
+        		e.target.blur()
+        	}}>Submit</button>}
       </div>
     )
   }

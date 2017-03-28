@@ -17,13 +17,13 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart_id, accounts, newAccount } = this.props;
-    const loggedIn = false
+    const { cart_id, accounts, newAccount, onborded } = this.props;
+
     return (
       <section>
         <Header cart_id={cart_id}/>
         <div>
-          {loggedIn ? 
+          {onborded ? 
             <p>
               <strong>Accounts:</strong>
               {accounts.map((account, i) => <span key={i}>{account.email_address}</span>)}
@@ -32,7 +32,7 @@ export default class Cart extends Component {
         </div>
         <div>
           {/* This should be an overlay on top of the CartContainer at some point */}
-          {loggedIn ? 
+          {onborded ? 
             null
             : <SignInContainer/>}
           <CartContainer/>

@@ -12,10 +12,16 @@ export default class SignIn extends Component {
     this.setState({center: target})
   }
 
+  finalSubmit = (e, p, state) => {
+    const { handleSubmit, values } = this.props;
+
+    handleSubmit(e)
+  }
+
   render() {
     const { handleSubmit } = this.props;
     const { center } = this.state;
-    const { changeCenter } = this;
+    const { changeCenter, finalSubmit } = this;
 
     return (
       <div className="modal">
@@ -26,14 +32,14 @@ export default class SignIn extends Component {
               <h1>Start New Group Cart</h1>
               <div className="signIn__container__page__input">
                 <label htmlFor="email">1. Whats your Email Address</label>
-                <Field name="email" component={InputWithButton} changeCenter={changeCenter} type="email" placeholder="Enter your email" to="two"/>
+                <Field name="email" component={InputWithButton} changeCenter={changeCenter} type="email" required placeholder="Enter your email"/>
               </div>
             </section>
             <section className='signIn__container__page' id="two">
               <h1>Get Started by adding an item from Amazon</h1>
               <div className="signIn__container__page__input">
                 <label htmlFor="url">2. Paste URL from Amazon</label>
-                <Field name="url" component={InputWithButton} changeCenter={() => {}} type="text" placeholder="Enter the link to an amazon product" to="one"/>
+                <Field name="url" component={InputWithButton} changeCenter={changeCenter} submit={finalSubmit} type="text" placeholder="Enter the link to an amazon product"/>
               </div>
             </section>
           </div>

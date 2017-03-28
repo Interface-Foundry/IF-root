@@ -50,7 +50,7 @@ export function update(cart_id) {
     const response = await fetch(`/api/cart/${cart_id}`, {
       credentials: 'same-origin'
     });
-    dispatch(receive(await response.json()));
+    return dispatch(receive(await response.json()));
   };
 }
 
@@ -60,7 +60,7 @@ export function fetchItems(cart_id) {
     const response = await fetch(`/api/cart/${cart_id}/items`, {
       credentials: 'same-origin'
     });
-    if (response.ok) dispatch(receiveItems(await response.json()));
+    if (response.ok) return dispatch(receiveItems(await response.json()));
   };
 }
 
@@ -78,7 +78,7 @@ export function removeItem(cart_id, item) {
         item_id: item
       })
     });
-    if (response.ok) dispatch(receiveRemoveItem(await response.json()));
+    if (response.ok) return dispatch(receiveRemoveItem(await response.json()));
   };
 }
 
@@ -96,6 +96,6 @@ export function addItem(cart_id, url) {
         url: url
       })
     });
-    if (response.ok) dispatch(receiveAddItem(await response.json()));
+    if (response.ok) return dispatch(receiveAddItem(await response.json()));
   };
 }

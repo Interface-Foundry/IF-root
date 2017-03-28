@@ -16,6 +16,7 @@ export const RECEIVE_REMOVE_ITEM_FROM_CART = 'RECEIVE_REMOVE_ITEM_FROM_CART';
 export const REQUEST_ITEMS = 'REQUEST_ITEMS';
 export const RECEIVE_ITEMS = 'RECEIVE_ITEMS';
 export const SET_CART_ID = 'SET_CART_ID';
+export const LOGGED_IN = 'LOGGED_IN';
 
 // Item
 export const RECEIVE_ITEM_INFO = 'RECEIVE_ITEM_INFO';
