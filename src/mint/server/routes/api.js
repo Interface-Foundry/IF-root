@@ -422,12 +422,16 @@ router.get('/user', (req, res) => co(function* () {
  * @apiDescription Updates a user's information
  * @apiGroup Users
  * @apiParam {string} :user_id id of the user to update
+ * @apiParam {json} body the properties you want to set on the user
  *
  * @apiParamExample Request
- * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b
- * {"accepts_venmo": true, "venmo_id": "MoMcTesty"}
+ * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b {
+ *   "venmo_accepted": true,
+ *   "venmo_id": "MoMcTesty"
+ * }
  *
  * @apiSuccessExample Response
+ * {"email_address":"mctesty@example.com","createdAt":"2017-03-28T18:39:31.458Z","updatedAt":"2017-03-28T18:39:32.299Z","venmo_accepted":true,"venmo_id":"MoMcTesty","id":"0f30e352-f975-400a-b7bb-e46bc38e7649"}
  */
 router.post('/user/:user_id', (req, res) => co(function * () {
   // check permissions
