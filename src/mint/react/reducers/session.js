@@ -1,6 +1,5 @@
 import { LOGGED_IN, RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
 const initialState = {
-  onborded: false,
   user_accounts: [],
   animal: '',
   createdAt: '',
@@ -18,8 +17,7 @@ export default function session(state = initialState, action) {
     });
   case LOGGED_IN:
     return {
-      ...state,
-      onborded: true
+      ...state
     }
   case REQUEST_SESSION:
   case REQUEST_UPDATE_SESSION:

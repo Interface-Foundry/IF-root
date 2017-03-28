@@ -3,6 +3,8 @@ import { SignInForm } from '../components';
 
 import { signIn, loggedIn } from '../actions/session';
 
+import { addItem } from '../actions/cart';
+
 import { reduxForm, reset } from 'redux-form';
 
 const mapStateToProps = (state, ownProps) => ({

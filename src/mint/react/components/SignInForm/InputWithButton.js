@@ -15,7 +15,7 @@ export default class InputWithButton extends Component {
 
     return (
       <div className={`custom__input${error?'-error':''}`}>
-      {error? <em>{error}</em>:null}
+        {error?<em>{error}</em>:null}
         <input {...input} required className='custom__input__field' />
         {submit?
         	<button className="custom__input__button" onClick={submit}>Submit</button>:

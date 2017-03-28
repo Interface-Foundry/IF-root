@@ -7,7 +7,7 @@ import { setCartId } from '../actions/cart';
 const mapStateToProps = (state, ownProps) => ({
     cart_id: ownProps.match.params.cart_id,
     newAccount: state.session.newAccount,
-    onborded: state.session.onborded,
+    onborded: state.session.user_accounts.length,
     accounts: state.session.user_accounts
 })
 
