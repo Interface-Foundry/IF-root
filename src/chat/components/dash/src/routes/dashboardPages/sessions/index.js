@@ -7,17 +7,33 @@ export default {
   path: '/sessions',
 
   async action(context) {
-    const resp = await fetch('/graphql', {
-      method: 'post',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: '{waypoints(limit:5000){ user_id, delivery_id, waypoint, timestamp, data, user { name, team { team_name, team_id }}, delivery { _id, team { team_name } }}, teams(limit:5000){team_name, team_id, carts {_id}}}',
-      }),
-      credentials: 'include',
-    });
+    let resp;
+    if (context.query.id && context.query.id != 'undefined') {
+      resp = await fetch('/graphql', {
+	      method: 'post',
+	      headers: {
+	        Accept: 'application/json',
+	        'Content-Type': 'application/json',
+	      },
+	      body: JSON.stringify({
+	        query: '{waypoints(limit:5000){ user_id, delivery_id, waypoint, timestamp, data, user { name, team { team_name, team_id }}, delivery { _id, team { team_name } }}}',
+	      }),
+	      credentials: 'include',
+      });
+    } else {
+      resp = await fetch('/graphql', {
+	      method: 'post',
+	      headers: {
+	        Accept: 'application/json',
+	        'Content-Type': 'application/json',
+	      },
+	      body: JSON.stringify({
+	        query: '{waypoints(limit:5000){ user_id, delivery_id, waypoint, timestamp, data, user { name, team { team_name, team_id }}, delivery { _id, team { team_name } }}}',
+	      }),
+	      credentials: 'include',
+      });
+    }
+
     const {
       data
     } = await resp.json();

@@ -6,8 +6,9 @@ export default {
   path: '/slackteamstats',
 
   async action(context) {
+    let resp;
 
-    const resp = await fetch('/graphql', {
+      resp = await fetch('/graphql', {
       method: 'post',
       headers: {
         Accept: 'application/json',
@@ -18,6 +19,7 @@ export default {
       }),
       credentials: 'include',
     });
+
     const {
       data
     } = await resp.json();

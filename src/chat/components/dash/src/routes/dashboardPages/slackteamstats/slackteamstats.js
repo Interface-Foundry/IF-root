@@ -58,7 +58,7 @@ function sumStoreTeamOrders(teams){
   	}
   	return total;
   }
-
+/*
 function sumStoreTeamItems(teams){
   var totalItems = 0;
   for(var i = 0; i<teams.length; i++){
@@ -67,7 +67,7 @@ function sumStoreTeamItems(teams){
       }
     }
 }
-
+*/
 function sumCafeTeamOrders(teams){
   var total = 0;
   for(var i = 0; i<teams.length; i++){
@@ -76,14 +76,20 @@ function sumCafeTeamOrders(teams){
   return total;
 }
 
+/*
+function sumCafeTeamItems(teams){
+
+}
+*/
 
 function getPieChartTeamStatsData(teams, team){ // [store item count, store order count, cafe item count, cafe order count]
   const data = [];
   //var numCafeOrders = team ? teams.find(function(t){return t.team_id==team}).foodSessions.length : sumCafeTeamStats(teams);
   var foundTeam = teams.find(function(t){return t.team_id==team});
 
-  //var numStoreItems = team ? foundTeam. : sumStoreTeamItems(teams);
+  //var numStoreItems = team ? foundTeam : sumStoreTeamItems(teams);
   var numStoreOrders = team ? foundTeam.carts.length : sumStoreTeamOrders(teams);
+  //var numCafeItems = team ? foundTeam : sumCafeTeamItems(teams);
   var numCafeOrders = team ? foundTeam.deliveries.length : sumCafeTeamOrders(teams);
  
   const sampleData = [ 0, 0, 0, 0 ];
@@ -129,88 +135,7 @@ const dayOfWeekStats = [ { dayString: 'Sunday', dayNumber: 1, total: 7932 },
   { dayString: 'Saturday', dayNumber: 7, total: 7219 } 
 ];
 */
-/*
-function getWaypointPaths(waypoints){
 
-  var userWaypoints = _.groupBy(waypoints,function(waypoint){
-     return waypoint.user_id+'#'+waypoint.delivery_id
-  });
-
-  var data = _.map(userWaypoints, function(waypointArray){
-    waypointArray = _.sortBy(waypointArray, [function(o) { return o.timestamp; }]);
-    var pathLength = waypointArray.length;
-    return {
-    	    user_id: waypointArray[0].user ? waypointArray[0].user.name : '',
-          time_stamp: waypointArray[0].timestamp,
-          time_stamp_end: waypointArray[pathLength-1].timestamp,
-          delivery_id: waypointArray[0].delivery_id,
-          team_name: waypointArray[0].user ? waypointArray[0].user.team.team_name : '',
-          inputs: waypointArray.map((waypoint) => waypoint.data),
-          waypoints: waypointArray.map((waypoint) => waypoint.waypoint)
-        }
-  });
-
-  return data;
-}
-*/
-
-/*
-function getWaypointActions(waypointPaths) {
-
-  let inputs = waypointPaths.inputs;
-  let waypoints = waypointPaths.waypoints;
-
-  return waypoints.map((waypoint, index) => {
-    return {
-      action: cafe_waypoints[Number(waypoint)],
-      input: inputs[index] || ''
-    }
-  })
-}
-*/
-
-
-// function getTeamName(delivery_id, teams){
-//   return delivery_id
-//   var team = teams.find(function(t){return t.carts.length>0 ? t.carts.find(function(foodSession){return foodSession.id==delivery_id}) : false});
-//   var teamName = team ? team.team_name : '';
-//   return teamName;
-// }
-
-/*
-class WaypointHover extends React.Component {
-  render() {
-    return (
-      <div>
-        {this.props.waypoints.map(waypoint=>{
-          if(waypoint.input) {
-          return (
-            <OverlayTrigger trigger="click" rootClose placement="top" overlay={createOverlay(waypoint.input)}>
-              <a href='#'>{waypoint.action}</a> 
-            </OverlayTrigger>
-            )}
-          else {
-            return waypoint.action;
-          }
-        }).reduce((accu, elem) => {
-            return accu === null ? [elem] : [...accu, ' \u27A1 ', elem]
-        }, null)
-
-      }
-      </div>
-      
-    );
-  }
-}
-*/
-
-/*
-function createOverlay(text) {
-    return (<Popover id={text.original_text}>
-    {text.original_text}
-    </Popover>)
-}
-*/
 
 function displayTeamStats(props, context) {
   context.setTitle(title);

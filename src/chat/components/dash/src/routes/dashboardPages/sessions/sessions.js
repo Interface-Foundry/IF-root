@@ -90,7 +90,6 @@ function Session(props, context) {
   context.setTitle(title);
   var rows = [];
   var waypoints = props.waypoints;
-  var teams = props.teams;
 
 
   var teamWaypoints = props.teamId ? waypoints.filter(function(waypoint){

@@ -15,7 +15,7 @@ export default {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: `{teams(limit:2000)(team_id:"${context.query.id}") {bot, team_name members{value:dm, label:name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
+          query: `{teams(limit:5000, team_id:"${context.query.id}") {bot, team_name members{value:dm, label:name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
         }),
         credentials: 'include',
       });
@@ -27,7 +27,7 @@ export default {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: `{teams(limit:2000){bot, team_name, members {value: dm, label: name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
+          query: `{teams(limit:5000){bot, team_name, members {value: dm, label: name, is_bot, is_admin, is_owner, is_primary_owner}}}`,
         }),
         credentials: 'include',
       });
