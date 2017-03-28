@@ -763,11 +763,12 @@ function randomStoreHint() {
  */
 function randomSearching() {
   let messages = [
-    'Searching…',
+    // 'Searching…',
     'Foraging…',
-    'Looking…',
-    'Exploring…',
-    'Seeking…'
+    'Preparing…'
+    // 'Looking…',
+    // 'Exploring…',
+    // 'Seeking…'
   ];
   let num = Math.floor(Math.random() * messages.length);
   return messages[num];

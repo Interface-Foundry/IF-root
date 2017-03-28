@@ -58,7 +58,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
         cart = yield getCart(slack_id)
       }
     }
-    logging.debug('cart', cart)
+    //logging.debug('cart', cart)
     // make sure we can add this item to the cart
     // know it's ok if the item already exists in the cart
     var ok = false

@@ -447,7 +447,7 @@ handlers['food.settings.address.confirm'] = function * (message) {
         'actions': [
           {
             name: 'food.settings.address.save',
-            text: '✔ Confirm Address',
+            text: '✓ Confirm Address',
             type: 'button',
             style: 'primary',
             value: JSON.stringify(location)
@@ -662,7 +662,7 @@ handlers['food.admin_polling_options'] = function * (message) {
       // allow confirmation
       listing.actions = [{
         'name': 'food.admin.restaurant.reordering_confirmation',
-        'text': '✔ Reorder From Here',
+        'text': '✓ Reorder From Here',
         'type': 'button',
         'value': mostRecentMerchant.id
       }]
@@ -696,7 +696,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
     {
-      'text': '*Step 4.* Kip lets your team vote on the type of food they want to eat \n Tap `✔ Start New Vote` to select team members to include in vote',
+      'text': '*Step 4.* Kip lets your team vote on the type of food they want to eat \n Tap `✓ Start New Vote` to select team members to include in vote',
       'fallback': 'Team voting',
       'callback_id': 'wopr_game',
       'color': '#A368F0',
@@ -709,7 +709,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     'mrkdwn_in': [
       'text'
     ],
-    'text': '', // '*Tip:* `✔ Start New Order` polls your team on what type of food they want',
+    'text': '', // '*Tip:* `✓ Start New Order` polls your team on what type of food they want',
     'fallback': 'Poll your team on what type of food they want',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
@@ -717,7 +717,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     'actions': [
       {
         'name': 'passthrough',
-        'text': '✔ Start New Vote',
+        'text': '✓ Start New Vote',
         'style': 'primary',
         'type': 'button',
         'value': 'food.poll.confirm_send_initial'
@@ -799,14 +799,14 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       'attachment_type': 'default',
       'actions': [{
         'name': 'passthrough',
-        'text': '✔ Collect Orders',
+        'text': '✓ Collect Orders',
         'style': 'primary',
         'type': 'button',
         'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
       }, {
         'name': 'food.admin.select_channel_reorder',
         'value': mostRecentMerchant,
-        'text': `Manage Channels`,
+        'text': `Manage Members`,
         'type': 'button'
       }//,
       // {
@@ -864,7 +864,7 @@ handlers['food.restaurants.list'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': '✔ Choose',
+            'text': '✓ Choose',
             'style': 'primary',
             'type': 'button',
             'value': 'food.poll.confirm_send'
@@ -891,7 +891,7 @@ handlers['food.restaurants.list'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': '✔ Choose',
+            'text': '✓ Choose',
             'style': 'primary',
             'type': 'button',
             'value': 'food.poll.confirm_send'
@@ -918,7 +918,7 @@ handlers['food.restaurants.list'] = function * (message) {
         'actions': [
           {
             'name': 'passthrough',
-            'text': '✔  Choose',
+            'text': '✓  Choose',
             'style': 'primary',
             'type': 'button',
             'value': 'food.poll.confirm_send'
@@ -1015,15 +1015,15 @@ handlers['food.restaurants.list.recent'] = function * (message) {
     'mrkdwn_in': [
       'text'
     ],
-    'text': '*Tip:* `✔ Start New Vote` polls your team on what type of food they want',
-    'fallback': '*Tip:* `✔ Start New Vote` polls your team on what type of food they want',
+    'text': '*Tip:* `✓ Start New Vote` polls your team on what type of food they want',
+    'fallback': '*Tip:* `✓ Start New Vote` polls your team on what type of food they want',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
       {
         'name': 'passthrough',
-        'text': '✔ Start New Vote',
+        'text': '✓ Start New Vote',
         'style': 'primary',
         'type': 'button',
         'value': 'food.poll.confirm_send'

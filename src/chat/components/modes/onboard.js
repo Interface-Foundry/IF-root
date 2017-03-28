@@ -222,9 +222,17 @@ handlers['supplies'] = function * (message) {
     fallback: 'Step 1/3: Choose a pre-packaged bundle',
     callback_id: 'none'
   });
-  attachments = attachments.concat(cardTemplate.slack_bundles(true));
+
+  return yield handlers['shopping_search'](message, ['kind bars'])
+
+  attachments = attachments.concat(rez);
+
+  
+
+  console.log('SEARCH RESULTS !!!!!!!!!!!! ', rez)
+
   attachments.push({
-    'text': '✎ Hint: You can also search what you want below (Example: _MacBook Pro Power Cord_)',
+    'text': '✎ *Hint:* You can also search what you want below (Example: _MacBook Pro Power Cord_)',
     mrkdwn_in: ['text']
   });
   var msg = message;
@@ -318,6 +326,7 @@ handlers['shopping_search'] = function*(message, data) {
       body: JSON.stringify(message.source.original_message)
     });
   }
+
   return [msg];
 };
 

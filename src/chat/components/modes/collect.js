@@ -51,11 +51,6 @@ handlers['initial'] = function*(message) {
     color: '#45a5f4',
     actions: [{
       name: 'collect_select',
-      text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
-      type: 'button',
-      value: 'channel'
-    },{
-      name: 'collect_select',
       text: (team.meta.collect_from === 'all' ? '◉' : '○') + ' Everyone',
       type: 'button',
       value: 'everyone'
@@ -64,7 +59,12 @@ handlers['initial'] = function*(message) {
       text: (team.meta.collect_from === 'me' ? '◉' : '○') + ' Just Me',
       type: 'button',
       value: 'justme'
-    }], 
+    }, {
+      name: 'collect_select',
+      text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
+      type: 'button',
+      value: 'channel'
+    }],
     fallback: 'Which group members would you like to collect orders from?',
     callback_id: 'none'
   }];
@@ -262,14 +262,14 @@ handlers['handoff'] = function(message, askedMembers) {
   let msg = message;
   msg.reply = [{
     text: '',
-    callback_id: 'appendedHome',
-    actions: [{
-      name: 'passthrough',
-      text: 'Home',
-      style: 'default',
-      type: 'button',
-      value: 'home'
-    }]
+    callback_id: 'appendedHome'
+    // actions: [{
+    //   name: 'passthrough',
+    //   text: 'Home',
+    //   style: 'default',
+    //   type: 'button',
+    //   value: 'home'
+    // }]
   }];
   msg.text = askedMembers ? 'Ok, I\'ve let them know  :tada:' : '';
   msg.action = 'switch.silent';

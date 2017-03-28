@@ -56,7 +56,7 @@ var cardTemplate = require('./card_templates');
 var slackConnections = {}
 var webserver = require('./webserver')
 var bundles = require('../bundles');
-bundles.updater(); //caches bundle items to mongo everyday at midnight
+//bundles.updater(); //caches bundle items to mongo everyday at midnight
 
 var slackUtils = require('./utils.js')
 var coupon = require('../../../coupon/coupon.js')
@@ -291,6 +291,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       // username: 'Kip',
       as_user: true
     }
+
     co(function * () {
       if (message._id) {
         startResponseUrlClearTimer(message._id);

@@ -20,12 +20,12 @@ module.exports = function*(message, slackbot, highlight_added_item) {
     actions: []
   }];
   if (isAdmin) {
-    cartObj[0].actions.push({
-      'name': 'bundles.home',
-      'text': '+ Add Bundles',
-      'type': 'button',
-      'value': 'home'
-    });
+    // cartObj[0].actions.push({
+    //   'name': 'bundles.home',
+    //   'text': '+ Add Bundles',
+    //   'type': 'button',
+    //   'value': 'home'
+    // });
     if (cart.aggregate_items.length > 0) {
       cartObj[0].actions.push({
         'name': 'emptycart',

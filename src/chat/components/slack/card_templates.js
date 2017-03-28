@@ -284,7 +284,7 @@ var slack_onboard_basic = module.exports.slack_onboard_basic = [{
 
 var slack_onboard_team = module.exports.slack_onboard_team = [{
   name: "onboard.team.send",
-  text: "✔︎ Update Members",
+  text: "✓︎ Update Members",
   style: "primary",
   type: "button",
   value: "member"
