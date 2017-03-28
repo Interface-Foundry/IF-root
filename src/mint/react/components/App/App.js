@@ -1,6 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import {SignInContainer, CartContainer} from '../../containers';
 import { Onboard } from '..';
+import Header from './Header';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -20,11 +21,7 @@ export default class Cart extends Component {
     const loggedIn = accounts.length > 0;
     return (
       <section>
-        <nav>
-          <h1>
-            Cart ID #{cart_id}
-          </h1>
-        </nav>
+        <Header cart_id={cart_id}/>
         <div>
           {loggedIn ? 
             <p>
