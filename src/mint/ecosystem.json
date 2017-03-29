@@ -6,7 +6,7 @@
     "combine_logs": true,
     "watch": true,
     "env": {
-      "SEND_EMAILS": true
+      "SEND_EMAILS": false
     }
   }, {
     "name": "ci",
