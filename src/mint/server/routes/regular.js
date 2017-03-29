@@ -122,7 +122,6 @@ router.get('/newcart', (req, res) => co(function * () {
 
   if (session.user_accounts.length > 0) {
     // make the first user the leader
-    console.log('saving leader as', cart.leader)
     cart.leader = session.user_accounts[0]
     yield cart.save()
   }

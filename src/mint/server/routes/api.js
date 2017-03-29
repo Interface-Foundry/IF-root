@@ -304,6 +304,7 @@ router.post('/cart/:cart_id/item', (req, res) => co(function* () {
   // Create an item from the url
   const item = yield scrape(req.body.url)
   cart.items.add(item.id)
+  item.cart = cart.id
 
   // specify who added it
   if (req.body.user_id) {
@@ -384,6 +385,94 @@ router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
   // Just say ok
   res.status(200).end()
 }));
+
+/**
+ * @api {post} /api/cart/:cart_id Update Cart
+ * @apiDescription Update cart settings, except for id, leader, members, and items.
+ * @apiGroup Carts
+ * @apiParam {string} :cart_id id of the cart to update
+ * @apiParam {json} body the properties you want to set on the cart
+ *
+ * @apiParamExample Request
+ * post /api/cart/cd08ca774445 {
+ *   "name": "Office Party",
+ * }
+ *
+ * @apiSuccessExample Response
+ * {"leader":"02a20ec6-edec-46b7-9c7c-a6f36370177e","createdAt":"2017-03-28T22:59:39.134Z","updatedAt":"2017-03-28T22:59:39.662Z","id":"289e5e60a855","name":"Office Party"}
+ */
+router.post('/cart/:cart_id', (req, res) => co(function * () {
+  // get the cart
+  var cart = yield db.Carts.findOne({id: req.params.cart_id})
+
+  // check permissions
+  var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
+  if (!userIds.has(cart.leader)) {
+    throw new Error('Unauthorized')
+  }
+
+  // Can't update some fields with this route
+  delete req.body.id
+  delete req.body.leader
+  delete req.body.members
+  delete req.body.items
+
+  _.merge(cart, req.body)
+  yield cart.save()
+  res.send(cart)
+}))
+
+/**
+ * @api {post} /api/item/:item_id Update Item
+ * @apiDescription Update item settings, except for id, leader, members, and items.
+ * @apiGroup Carts
+ * @apiParam {string} :item_id id of the item to update
+ * @apiParam {json} body the properties you want to set on the item
+ *
+ * @apiParamExample Request
+ * post /api/item/cd08ca774445 {
+ *   "locked": true,
+ * }
+ *
+ * @apiSuccessExample Response
+ * {"leader":"02a20ec6-edec-46b7-9c7c-a6f36370177e","createdAt":"2017-03-28T22:59:39.134Z","updatedAt":"2017-03-28T22:59:39.662Z","id":"289e5e60a855","name":"Office Party"}
+ */
+router.post('/item/:item_id', (req, res) => co(function * () {
+  // get the item
+  var item = yield db.Items.findOne({id: req.params.item_id}).populate('cart')
+
+  // get the cart, too
+  var cart = item.cart
+
+  // check permissions
+  var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
+  if (!userIds.has(cart.leader) && !userIds.has(item.added_by)) {
+    throw new Error('Unauthorized')
+  }
+
+  // Can't update some fields with this route
+  delete req.body.id
+  delete req.body.added_bys
+  // TODO what should not be allowed?
+
+  _.merge(item, req.body)
+  yield item.save()
+  res.send(item)
+}))
+
+/**
+ * @api {get} /api/item/:item_id Item
+ * @apiDescription Gets an item by id, populating the options and added_by fields
+ * @apiGroup Carts
+ * @apiParam {String} :item_id
+ * @type {[type]}
+ */
+router.get('/item/:item_id', (req, res) => co(function * () {
+  var item = yield db.Items.findOne({id: req.params.item_id})
+    .populate('options')
+    .populate('added_by')
+  res.send(item)
+}))
 
 /**
  * @api {get} /api/user Get
