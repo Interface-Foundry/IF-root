@@ -9,7 +9,9 @@ export default class App extends Component {
     accounts: PropTypes.array.isRequired,
     newAccount: PropTypes.bool,
     setCartId: PropTypes.func.isRequired,
-    loggedIn: PropTypes.func.isRequired
+    loggedIn: PropTypes.func.isRequired,
+    registerEmail: PropTypes.func.isRequired,
+    registered: PropTypes.bool
   }
 
   componentWillMount() {
@@ -19,23 +21,46 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {onborded, accounts, loggedIn} = this.props
-    
-    if (!onborded && accounts.length !== nextProps.accounts.length && nextProps.accounts.length > 0) {
+    const { accounts, loggedIn, registerEmail, onboardNewUser } = this.props
+    const { loggedin, registered, onboarding } = nextProps
+
+    if ( 
+        onboarding &&
+        !registered && 
+        !loggedin &&
+        accounts.length !== nextProps.accounts.length && 
+        nextProps.accounts.length > 0
+    ) {
+      registerEmail();
+    } else if (
+        onboarding &&
+        registered &&
+        loggedin &&
+        nextProps.accounts.length > 0
+    ) {
       loggedIn(nextProps.accounts);
-    } else if(nextProps.onborded && nextProps.accounts.length > 0) {
+    } else if (
+      !onboarding &&
+      !registered && 
+      !loggedin &&
+      accounts.length !== nextProps.accounts.length && 
+      nextProps.accounts.length > 0
+    ) {
+      registerEmail();
       loggedIn(nextProps.accounts);
+    } else if (!onboarding) {
+      onboardNewUser();
     }
   }
 
   render() {
-    const { cart_id, accounts, newAccount, onborded } = this.props;
+    const { cart_id, accounts, newAccount, loggedin } = this.props;
 
     return (
       <section>
         <Header cart_id={cart_id}/>
         <div>
-          {onborded ? 
+          {loggedin ? 
             <p>
               <strong>Accounts:</strong>
               {accounts.map((account, i) => <span key={i}>{account.email_address}</span>)}
@@ -44,7 +69,7 @@ export default class App extends Component {
         </div>
         <div>
           {/* This should be an overlay on top of the CartContainer at some point */}
-          {onborded ? 
+          {loggedin ? 
             null
             : <SignInContainer/>}
           <CartContainer/>

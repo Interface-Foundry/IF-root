@@ -1,4 +1,4 @@
-import { LOGGED_IN, RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
+import { LOGGED_IN, ONBOARD_NEW_USER, REGISTER_EMAIL, RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
 const initialState = {
   user_accounts: [],
   animal: '',
@@ -15,9 +15,20 @@ export default function session(state = initialState, action) {
     return Object.assign({}, state, action, {
       'user_accounts': action.newAccount ? [...state.user_accounts, action.user] : state.user_accounts,
     });
+  case ONBOARD_NEW_USER:
+    return {
+      ...state,
+      onboarding: true,
+    }
+  case REGISTER_EMAIL:
+    return {
+      ...state,
+      registered: true,
+      onboarding: true
+    }
   case LOGGED_IN:
     return {
-      onborded: action.accounts.length > 0,
+      loggedin: action.accounts.length > 0,
       ...state
     }
   case REQUEST_SESSION:
