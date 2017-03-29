@@ -37,45 +37,65 @@ const data = [
 
 /* *********************************************** */
 
+/*
+<Panel
+  header={<span>
+    <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
+  </span>}>
+    <div className="resizable">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
+          <XAxis dataKey="name" />
+          <YAxis />
+          <CartesianGrid stroke="#ccc" />
+          <Tooltip />
+          <Area type="monotone" dataKey="uv" stackId="1" stroke="#8884d8" fill="#8884d8" />
+          <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
+          <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+</Panel>
+*/
+
 function Home(props, context) {
   context.setTitle(title);
   return (
     <div className="container-fluid data-display">
-      <Panel
-        header={<span>
-          <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
-        </span>}>
-          <div className="resizable">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
-                <XAxis dataKey="name" />
-                <YAxis />
-                <CartesianGrid stroke="#ccc" />
-                <Tooltip />
-                <Area type="monotone" dataKey="uv" stackId="1" stroke="#8884d8" fill="#8884d8" />
-                <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-                <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-      </Panel>
       <Panel className='fillSpace' header={<span>
           <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts </span>}>
       	<CartTable 
-          query={'{teams{team_name, carts {purchased_date,items {_id,cart_id,title,image,description,price,ASIN,rating,review_count,added_by,slack_id,source_json,purchased,purchased_date,deleted,added_date,bundle,available,asins,config,},purchased},}}'}
+          query={'{teams{team_name, carts {created_date, purchased_date,items {_id,cart_id,title,image,description,price,ASIN,rating,review_count,added_by,slack_id,source_json,purchased,purchased_date,deleted,added_date,bundle,available,asins,config,},purchased},}}'}
           heads = {
-            [{
-              field: 'purchased_date',
-              descrip: 'Purchased Date',
-              sort: (a, b, order) => order == 'desc' ? 
+            [{ field: 'created_date',
+               descrip: 'Created Date',
+               sort: (a, b, order) => order == 'desc' ? 
                   new Date(b.created_date) - new Date(a.created_date) 
                   : new Date(a.created_date) - new Date(b.created_date)
-            }, {
+            },
+            {
+              field: 'purchased_date',
+              descrip: 'Purchased Date',
+            }, 
+            {
               field: 'team_name',
               descrip: 'Slack ID'
-            }, {
+            }, 
+            {
+              field:'cart_total',
+              descrip: 'Cart Total'
+            }, 
+            {
               field: 'items',
               descrip: 'Number of Items'
+            },
+            {
+              field: 'price',
+              descrip: 'Item Price'
+            },
+            {
+              field: 'title',
+              descrip: 'Product Name'
             }]
           }
           process = {
@@ -87,8 +107,18 @@ function Home(props, context) {
                       carts.push({
                       team_name: team.team_name,
                       purchased_date: (new Date(cart.purchased_date)).toLocaleString(),
-                      items: cart.items.length
-                    })
+                      created_date: (new Date(cart.created_date)).toLocaleString(),
+                      items: cart.items.length,
+                      cart_total: '$'+cart.items.reduce(function(a,b){
+                        return (a+Number(b.price.replace(/[^0-9\.]+/g,"")));
+                      },0).toFixed(2),
+                      });
+                      cart.items.map(function(item){
+                        carts.push({
+                          price: item.price,
+                          title: item.title
+                        })
+                      })
                   }
                 }
                 return carts;
@@ -103,11 +133,7 @@ function Home(props, context) {
 }
 
 Home.propTypes = {
-  // news: PropTypes.arrayOf(PropTypes.shape({
-  //   title: PropTypes.string.isRequired,
-  //   link: PropTypes.string.isRequired,
-  //   contentSnippet: PropTypes.string,
-  // })).isRequired,
+
 };
 
 Home.contextTypes = { setTitle: PropTypes.func.isRequired };

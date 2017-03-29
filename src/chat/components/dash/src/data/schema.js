@@ -12,8 +12,8 @@ type Cart {
   slack_id: String
   purchased: Boolean
   deleted: Boolean
-  created_date: String
-  purchased_date: String
+  created_date: Date
+  purchased_date: Date
   type: String
   link: String
   amazon: JSON
@@ -107,9 +107,9 @@ type Item {
   slack_id: String
   source_json: String
   purchased: Boolean
-  purchased_date: Boolean
+  purchased_date: Date
   deleted: Boolean
-  added_date: String
+  added_date: Date
   bundle: String
   available: Boolean
   asins: String
@@ -150,7 +150,7 @@ type Metric {
 
 type SlackbotMeta {
   addedBy: String
-  dateAdded: String
+  dateAdded: Date
   deleted: Boolean
   cart_channels: [String]
   collect_from: String
