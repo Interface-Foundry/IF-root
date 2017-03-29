@@ -1,8 +1,8 @@
 import { LOGGED_IN, ONBOARD_NEW_USER, REGISTER_EMAIL, REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
 
-const receive = (newInfo) => ({
+const receive = (newSession) => ({
   type: RECEIVE_SESSION,
-  ...newInfo
+  newSession
 });
 
 const request = () => ({
@@ -13,9 +13,9 @@ const requestUpdate = () => ({
   type: REQUEST_UPDATE_SESSION
 });
 
-const receiveUpdate = (newInfo) => ({
+const receiveUpdate = (newSession) => ({
   type: RECEIVE_UPDATE_SESSION,
-  ...newInfo
+  newSession
 });
 
 export const onboardNewUser = () => ({
