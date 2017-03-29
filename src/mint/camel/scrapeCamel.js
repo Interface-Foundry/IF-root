@@ -304,8 +304,10 @@ var trimName = function (name) {
   return name + ' ' + specs.join(' ');
 };
 
-co(function * () {
-  yield scrapeCamel();
-  // var deals = require('./deals');
-  // yield deals.getDeals(count);
-});
+// co(function * () {
+//   yield scrapeCamel();
+//   // var deals = require('./deals');
+//   // yield deals.getDeals(count);
+// });
+
+module.exports = scrapeCamel;

@@ -1,6 +1,6 @@
 env: development_hannah
 mongodb:
-  url: mongodb://localhost:27017/foundry
+  url: mongodb://localhost:27017/mint
   backuphost: localhost
 elasticsearch:
   url: http://localhost:9200
