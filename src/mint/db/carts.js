@@ -28,7 +28,13 @@ var cartsCollection = Waterline.Collection.extend({
     members: Waterline.isMany('user_accounts'),
 
     /** @type {reference} items in the cart */
-    items: Waterline.isMany('items')
+    items: Waterline.isMany('items'),
+
+    /**
+     * THe name of the cart, if one exists
+     * @type {String}
+     */
+    name: 'string'
   }
 });
 

@@ -192,6 +192,20 @@ describe.only('api', () => {
     assert.equal(items.length, 1, 'should only be one item in the cart')
   }))
 
+  it('POST /api/item/:item_id should update settings for an item', () => co(function * () {
+    var settings = {
+      locked: true
+    }
+    var item = yield post('/api/item/' + mcTesty.item_id, settings)
+    assert(item)
+    assert.equal(item.locked, settings.locked)
+
+    // make sure settings were persisted
+    item = yield get('/api/item/' + mcTesty.item_id)
+    assert(item)
+    assert.equal(item.locked, settings.locked)
+  }))
+
   it('DELETE /api/cart/:cart_id/item should delete a specific item', () => co(function * () {
     var ok = yield del('/api/cart/' + mcTesty.cart_id + '/item', {
       item_id: mcTesty.item_id
@@ -202,6 +216,24 @@ describe.only('api', () => {
     assert(cart)
     assert.equal(cart.leader.email_address, mcTesty.email)
     assert.equal(cart.items.length, 0, 'should not be any items in the cart now')
+  }))
+
+  it('POST /api/cart/:cart_id should update cart properties', () => co(function * () {
+    var settings = {
+      name: 'Office Party'
+    }
+
+    // test settings changes
+    var cart = yield post('/api/cart/' + mcTesty.cart_id, settings)
+    assert(cart)
+    assert.equal(cart.name, settings.name)
+    assert.equal(cart.id, mcTesty.cart_id)
+
+    // ensure settings are persisted across requests
+    cart = yield get('/api/cart/' + mcTesty.cart_id)
+    assert(cart)
+    assert.equal(cart.name, settings.name)
+    assert.equal(cart.id, mcTesty.cart_id)
   }))
 
   it('GET /api/user should return a user for an email address', () => co(function * () {
@@ -216,5 +248,38 @@ describe.only('api', () => {
     assert(user)
     assert.equal(user.email_address, mcTesty.email)
     assert.equal(user.id, mcTesty.id)
+  }))
+
+  it('POST /api/user/:user_id should update user properties if the user is logged in', () => co(function * () {
+    var settings = {
+      venmo_accepted: true,
+      venmo_id: "MoMcTesty"
+    }
+    var user = yield post('/api/user/' + encodeURIComponent(mcTesty.id), settings)
+    assert(user)
+    assert.equal(user.email_address, mcTesty.email)
+    assert.equal(user.id, mcTesty.id)
+    assert.equal(user.venmo_id, settings.venmo_id)
+
+    // and double check that when we get it again, the settings persist
+    user = yield get('/api/user?id=' + encodeURIComponent(mcTesty.id))
+    assert(user)
+    assert.equal(user.email_address, mcTesty.email)
+    assert.equal(user.id, mcTesty.id)
+    assert.equal(user.venmo_id, settings.venmo_id)
+  }))
+
+  it('POST /api/user/:user_id should not allow a user to update a different user', () => co(function * () {
+    var settings = {
+      venmo_accepted: true,
+      venmo_id: "MoMcTesty"
+    }
+    var err
+    try {
+      var user = yield post('/api/user/123456', settings)
+    } catch (e) {
+      err = e;
+    }
+    assert(err)
   }))
 })

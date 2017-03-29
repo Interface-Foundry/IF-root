@@ -1,4 +1,5 @@
 var Waterline = require('waterline');
+var uuid = require('uuid');
 
 /**
  * Items collection holds all the COMMON FIELDS for any item
@@ -12,6 +13,14 @@ var itemsCollection = Waterline.Collection.extend({
   connection: 'default',
   attributes: {
     /** Generated when an item is added for the first time */
+    id: {
+      type: 'string',
+      primaryKey: true,
+      unique: true,
+      index: true,
+      uuidv4: true,
+      defaultsTo: () => uuid.v4()
+    },
 
     /** @type {string} original link posted */
     original_link: 'string',
@@ -74,7 +83,9 @@ var itemsCollection = Waterline.Collection.extend({
     locked: {
       type: 'boolean',
       defaultsTo: false
-    }
+    },
+
+    cart: Waterline.isA('carts')
   }
 });
 
