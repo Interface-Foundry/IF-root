@@ -36,10 +36,11 @@ var cartsCollection = Waterline.Collection.extend({
      */
     name: 'string',
 
-    /** @type {String} string that is a hmac which is necessary for amazon */
-    HMAC: 'string',
-    /** @type {String} CartId is needed for amazon cart stuff */
-    CartId: 'string'
+    // properties necessary for amazon cart
+    /** @type {String} equivalent to CartId from amazon */
+    amazon_cartid: 'string',
+    /** @type {String} equivalent to HMAC for amazon */
+    amazon_hmac: 'string'
 
   }
 });
