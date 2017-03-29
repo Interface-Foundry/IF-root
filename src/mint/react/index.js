@@ -11,6 +11,8 @@ import Reducers from './reducers';
 import { session } from './actions';
 import Routes from './routes';
 
+import 'isomorphic-fetch'
+
 if (module.hot) {
   module.hot.accept();
 }
