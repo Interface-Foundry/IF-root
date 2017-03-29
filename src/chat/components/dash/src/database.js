@@ -4,18 +4,20 @@
 
 import {MongoClient, ObjectId} from 'mongodb';
 
-const MONGO_URL = 'mongodb://localhost:27017/foundry'
+import config from '../../../../config/index';
+import logging from '../../../../logging'
 
 var Carts, Deliveries, Items, Messages, Metrics, Slackbots, Chatusers, Waypoints;
 
 function connect() {
 	return new Promise((resolve, reject) => {
-		MongoClient.connect(MONGO_URL, function(err, db) {
+		logging.debug('connecting to mongo at %s', config.mongodb.url)
+		MongoClient.connect(config.mongodb.url, function(err, db) {
 			if (db == null || err != null) {
 				reject(err);
 			}
 			
-			console.log('mongo connected');
+			logging.debug('connected to mongo');
 			Carts = db.collection('carts');
 			Deliveries = db.collection('delivery');
 			Items = db.collection('items');
