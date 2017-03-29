@@ -30,7 +30,7 @@ module.exports = (config) => {
 			      	}
 			    }, {
 			      	test: /\.json?$/,
-			      	loader: 'json'
+			      	loader: 'json-loader'
 			    }, {
 			      	test: /\.css$/,
 			      	use: ['style-loader', 'css-loader']
@@ -53,6 +53,12 @@ module.exports = (config) => {
 			      	test: /\.(ttf|eot)$/,
 			      	loader: 'file-loader'
 			    }]
+			},
+			externals: {
+			  	'cheerio': 'window',
+			  	'react/addons': true,
+			  	'react/lib/ExecutionEnvironment': true,
+			  	'react/lib/ReactContext': true
 			}
 	    },
 
