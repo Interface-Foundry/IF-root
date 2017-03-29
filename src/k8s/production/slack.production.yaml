@@ -16,7 +16,12 @@ spec:
         app: slack
     spec:
       containers:
-      - image: gcr.io/kip-styles/slack:latest
+      - env:
+        - name: NODE_ENV
+          value: kubernetes
+        - name: CONFIG_ENV
+          value: kubernetes
+        image: gcr.io/kip-styles/slack:latest
         imagePullPolicy: Always
         name: slack
         ports:

@@ -16,7 +16,12 @@ spec:
         app: slack
     spec:
       containers:
-      - image: gcr.io/kip-styles/slack:CANARYIMAGE
+      - env:
+        - name: NODE_ENV
+          value: canary
+        - name: CONFIG_ENV
+          value: canary
+        image: gcr.io/kip-styles/slack:CANARYIMAGE
         imagePullPolicy: Always
         name: slack
         ports:
