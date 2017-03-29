@@ -1,5 +1,3 @@
-export const NEW_TYPE = 'NEW_TYPE';
-
 // Session
 export const RECEIVE_SESSION = 'RECEIVE_SESSION';
 export const REQUEST_SESSION = 'REQUEST_SESSION';
@@ -17,6 +15,9 @@ export const REQUEST_REMOVE_ITEM_FROM_CART = 'REQUEST_REMOVE_ITEM_FROM_CART';
 export const RECEIVE_REMOVE_ITEM_FROM_CART = 'RECEIVE_REMOVE_ITEM_FROM_CART';
 export const REQUEST_ITEMS = 'REQUEST_ITEMS';
 export const RECEIVE_ITEMS = 'RECEIVE_ITEMS';
+export const SET_CART_ID = 'SET_CART_ID';
+export const LOGGED_IN = 'LOGGED_IN';
+export const LOG_IN = 'LOG_IN';
 
 // Item
 export const RECEIVE_ITEM_INFO = 'RECEIVE_ITEM_INFO';

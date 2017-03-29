@@ -1,8 +1,8 @@
-import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
+import { SET_CART_ID, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
 
-const receive = (newInfo) => ({
+const receive = (newCart) => ({
   type: RECEIVE_CART,
-  ...newInfo
+  newCart
 });
 
 const request = (cart) => ({
@@ -30,10 +30,8 @@ const receiveRemoveItem = (cart) => ({
   ...cart
 });
 
-const requestAddItem = (cart, item) => ({
-  type: REQUEST_ADD_ITEM_TO_CART,
-  item,
-  cart
+const requestAddItem = () => ({
+  type: REQUEST_ADD_ITEM_TO_CART
 });
 
 const receiveAddItem = (item) => ({
@@ -41,13 +39,18 @@ const receiveAddItem = (item) => ({
   item
 });
 
+export const setCartId = (cartId) => ({
+  type: SET_CART_ID,
+  cartId
+})
+
 export function update(cart_id) {
   return async function (dispatch) {
     dispatch(request(cart_id));
     const response = await fetch(`/api/cart/${cart_id}`, {
       credentials: 'same-origin'
     });
-    dispatch(receive(await response.json()));
+    return dispatch(receive(await response.json()));
   };
 }
 
@@ -57,7 +60,7 @@ export function fetchItems(cart_id) {
     const response = await fetch(`/api/cart/${cart_id}/items`, {
       credentials: 'same-origin'
     });
-    if (response.ok) dispatch(receiveItems(await response.json()));
+    if (response.ok) return dispatch(receiveItems(await response.json()));
   };
 }
 
@@ -75,7 +78,7 @@ export function removeItem(cart_id, item) {
         item_id: item
       })
     });
-    if (response.ok) dispatch(receiveRemoveItem(await response.json()));
+    if (response.ok) return dispatch(receiveRemoveItem(await response.json()));
   };
 }
 
@@ -93,6 +96,6 @@ export function addItem(cart_id, url) {
         url: url
       })
     });
-    if (response.ok) dispatch(receiveAddItem(await response.json()));
+    if (response.ok) return dispatch(receiveAddItem(await response.json()));
   };
 }

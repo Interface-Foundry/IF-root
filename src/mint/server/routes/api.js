@@ -88,10 +88,11 @@ router.get('/identify', (req, res) => co(function* () {
     } else {
       return res.send({
         ok: true,
+        newAccount: false,
         status: 'USER_LOGGED_IN',
         message: 'You are already logged in with that email address on this device',
         user: user,
-        cart: cart
+        cart: cart,
       });
     }
   }
@@ -110,8 +111,9 @@ router.get('/identify', (req, res) => co(function* () {
     } else {
       res.send({
         ok: false,
+        newAccount: false,
         status: 'CHECK_EMAIL',
-        message: 'Someone has already claimed that emails. Please check your email and use the link we sent you to verify your identity.',
+        message: 'Someone has already claimed that email. Please check your email and use the link we sent you to verify your identity.',
       });
     }
 
@@ -162,6 +164,7 @@ router.get('/identify', (req, res) => co(function* () {
   } else {
     res.send({
       ok: true,
+      newAccount: true,
       status: 'NEW_USER',
       message: 'Thanks for registering for Kip! An email was sent to you with a link for this cart.',
       user: user,
@@ -304,6 +307,7 @@ router.post('/cart/:cart_id/item', (req, res) => co(function* () {
   // Create an item from the url
   const item = yield scrape(req.body.url)
   cart.items.add(item.id)
+  item.cart = cart.id
 
   // specify who added it
   if (req.body.user_id) {
@@ -386,7 +390,95 @@ router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
 }));
 
 /**
- * @api {get} /api/user User
+ * @api {post} /api/cart/:cart_id Update Cart
+ * @apiDescription Update cart settings, except for id, leader, members, and items.
+ * @apiGroup Carts
+ * @apiParam {string} :cart_id id of the cart to update
+ * @apiParam {json} body the properties you want to set on the cart
+ *
+ * @apiParamExample Request
+ * post /api/cart/cd08ca774445 {
+ *   "name": "Office Party",
+ * }
+ *
+ * @apiSuccessExample Response
+ * {"leader":"02a20ec6-edec-46b7-9c7c-a6f36370177e","createdAt":"2017-03-28T22:59:39.134Z","updatedAt":"2017-03-28T22:59:39.662Z","id":"289e5e60a855","name":"Office Party"}
+ */
+router.post('/cart/:cart_id', (req, res) => co(function * () {
+  // get the cart
+  var cart = yield db.Carts.findOne({id: req.params.cart_id})
+
+  // check permissions
+  var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
+  if (!userIds.has(cart.leader)) {
+    throw new Error('Unauthorized')
+  }
+
+  // Can't update some fields with this route
+  delete req.body.id
+  delete req.body.leader
+  delete req.body.members
+  delete req.body.items
+
+  _.merge(cart, req.body)
+  yield cart.save()
+  res.send(cart)
+}))
+
+/**
+ * @api {post} /api/item/:item_id Update Item
+ * @apiDescription Update item settings, except for id, leader, members, and items.
+ * @apiGroup Carts
+ * @apiParam {string} :item_id id of the item to update
+ * @apiParam {json} body the properties you want to set on the item
+ *
+ * @apiParamExample Request
+ * post /api/item/cd08ca774445 {
+ *   "locked": true,
+ * }
+ *
+ * @apiSuccessExample Response
+ * {"leader":"02a20ec6-edec-46b7-9c7c-a6f36370177e","createdAt":"2017-03-28T22:59:39.134Z","updatedAt":"2017-03-28T22:59:39.662Z","id":"289e5e60a855","name":"Office Party"}
+ */
+router.post('/item/:item_id', (req, res) => co(function * () {
+  // get the item
+  var item = yield db.Items.findOne({id: req.params.item_id}).populate('cart')
+
+  // get the cart, too
+  var cart = item.cart
+
+  // check permissions
+  var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
+  if (!userIds.has(cart.leader) && !userIds.has(item.added_by)) {
+    throw new Error('Unauthorized')
+  }
+
+  // Can't update some fields with this route
+  delete req.body.id
+  delete req.body.added_bys
+  // TODO what should not be allowed?
+
+  _.merge(item, req.body)
+  yield item.save()
+  res.send(item)
+}))
+
+/**
+ * @api {get} /api/item/:item_id Item
+ * @apiDescription Gets an item by id, populating the options and added_by fields
+ * @apiGroup Carts
+ * @apiParam {String} :item_id
+ * @type {[type]}
+ */
+router.get('/item/:item_id', (req, res) => co(function * () {
+  var item = yield db.Items.findOne({id: req.params.item_id})
+    .populate('options')
+    .populate('added_by')
+  res.send(item)
+}))
+
+/**
+ * @api {get} /api/user Get
  * @apiDescription Get user from db based on id or email
  * @apiGroup Users
  * @apiParam {string} email [optional query parameter] email addresss for the user
@@ -415,7 +507,49 @@ router.get('/user', (req, res) => co(function* () {
     throw new Error('Cannot find user');
   }
   res.send(user);
-}));
+}))
+
+/**
+ * @api {post} /api/user/:user_id Update
+ * @apiDescription Updates a user's information
+ * @apiGroup Users
+ * @apiParam {string} :user_id id of the user to update
+ * @apiParam {json} body the properties you want to set on the user
+ *
+ * @apiParamExample Request
+ * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b {
+ *   "venmo_accepted": true,
+ *   "venmo_id": "MoMcTesty"
+ * }
+ *
+ * @apiSuccessExample Response
+ * {"email_address":"mctesty@example.com","createdAt":"2017-03-28T18:39:31.458Z","updatedAt":"2017-03-28T18:39:32.299Z","venmo_accepted":true,"venmo_id":"MoMcTesty","id":"0f30e352-f975-400a-b7bb-e46bc38e7649"}
+ */
+router.post('/user/:user_id', (req, res) => co(function * () {
+  // check permissions
+  var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
+  if (!userIds.has(req.params.user_id)) {
+    throw new Error('Unauthorized')
+  }
+
+  // Find the user in the database
+  var user = yield db.UserAccounts.findOne({id: req.params.user_id})
+  if (!user) {
+    throw new Error('Could not find user ' + req.params.user_id)
+  }
+
+  // Can't update some fields
+  delete req.body.id
+  delete req.body.email_address
+  delete req.body.sessions
+
+  // update the properties that they set
+  _.merge(user, req.body)
+
+  yield user.save()
+
+  res.send(user)
+}))
 
 /**
  * magic links for creator to be auto signed in, this would be specific to the admin versus a url for new members

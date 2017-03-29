@@ -45,7 +45,8 @@ require('colors');
  */
 var db;
 const dbReady = require('../db');
-dbReady.then((models) => { db = models; }).catch(e => console.error(e));
+dbReady.then((models) => { db = models; })
+  .catch(e => console.error(e));
 
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
@@ -70,7 +71,7 @@ app.use(sessions({
 /**
  * Save user sessions to the database
  */
-app.use((req, res, next) => co(function * () {
+app.use((req, res, next) => co(function* () {
   // req.session will always exist, thanks to the above client-sessions middleware
   // Check to make sure we have stored this user's session in the database
   if (!req.session.id) {
@@ -79,8 +80,9 @@ app.use((req, res, next) => co(function * () {
     req.session.id = session.id
   }
 
-  req.UserSession = yield db.Sessions.findOne({id: req.session.id}).populate('user_accounts')
-  // console.log(req.UserSession)
+  req.UserSession = yield db.Sessions.findOne({ id: req.session.id })
+    .populate('user_accounts')
+    // console.log(req.UserSession)
 
   // Now that the id exists, save the tracking information, like IP, user-agent, etc
   // TODO week of March 12
@@ -92,9 +94,9 @@ app.use((req, res, next) => co(function * () {
  * Add in logging after sessions have been created
  */
 if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
-  app.use(function(req, res, next) {
-    var methods = {GET: 'get'.cyan, HEAD: 'head'.gray, POST: 'post'.green, DELETE: 'delete'.red}
-    var str = [ '>'.yellow, methods[req.method] || req.method, req.originalUrl ].join(' ')
+  app.use(function (req, res, next) {
+    var methods = { GET: 'get'.cyan, HEAD: 'head'.gray, POST: 'post'.green, DELETE: 'delete'.red }
+    var str = ['>'.yellow, methods[req.method] || req.method, req.originalUrl].join(' ')
     console.log(str)
 
     next()
@@ -125,7 +127,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Show an error page for non-json request, and the error for json requests
-app.use(function errorHandler (err, req, res, next) {
+app.use(function errorHandler(err, req, res, next) {
   if (res.headersSent) {
     return next(err)
   }

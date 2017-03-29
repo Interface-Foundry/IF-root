@@ -10,7 +10,10 @@ var userAccountCollection = Waterline.Collection.extend({
   identity: 'user_accounts',
   connection: 'default',
   attributes: {
-    /** uniqu uuid v4 for the user, automatically generated */
+    /**
+     * Randomly-generated unique UUID
+     * @type {Object}
+     */
     id: {
       type: 'text',
       primaryKey: true,
@@ -20,28 +23,57 @@ var userAccountCollection = Waterline.Collection.extend({
       }
     },
 
-    /** the user's submitted email address */
+    /**
+     * User's email address, should be unique
+     * @type {Object}
+     */
     email_address: {
       type: 'string',
-      unique: true
+      unique: true,
+      email: true
     },
 
-    /** Many-to-many relation with user session, which is the brower cookie session thing */
+    /**
+     * List of user browser sessions
+     * @type {Session}
+     */
     sessions: Waterline.isMany('sessions'),
 
-    // /** @type {cart_leader} many-to-many relationship with many different carts, can have multiple leaders */
-    // my_carts: {
-    //   collection: 'carts',
-    //   via: 'leader',
-    //   dominant: true
-    // },
-    //
-    // /** @type {cart_member} many-to-many relationship with a carts members */
-    // others_carts: {
-    //   collection: 'carts',
-    //   via: 'members',
-    //   dominant: true
-    // }
+    /**
+     * Whether the user accepts a cash or not
+     * @type {Boolean}
+     */
+    cash_accepted: 'boolean',
+
+    /**
+     * Whether the user accepts checks or not
+     * @type {Boolean}
+     */
+    check_accepted: 'boolean',
+
+    /**
+     * Whether the user accpepts Venmo payments or not
+     * @type {Boolean}
+     */
+    venmo_accepted: 'boolean',
+
+    /**
+     * The user's Venmo id
+     * @type {String}
+     */
+    venmo_id: 'string',
+
+    /**
+     * Whether the user accpepts PayPal payments or not
+     * @type {Boolean}
+     */
+    paypal_accepted: 'boolean',
+
+    /**
+     * The user's PayPal id
+     * @type {String}
+     */
+    paypal_id: 'string'
   }
 })
 
