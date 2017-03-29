@@ -19,10 +19,12 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {onborded, accounts, loggedIn} = nextProps
+    const {onborded, accounts, loggedIn} = this.props
     
-    if(onborded && accounts.length > 0) {
-      loggedIn(accounts);
+    if (!onborded && accounts.length !== nextProps.accounts.length && nextProps.accounts.length > 0) {
+      loggedIn(nextProps.accounts);
+    } else if(nextProps.onborded && nextProps.accounts.length > 0) {
+      loggedIn(nextProps.accounts);
     }
   }
 

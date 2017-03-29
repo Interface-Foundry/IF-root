@@ -31,13 +31,18 @@ const mapDispatchToProps = dispatch => ({
 })
 
 const validate = (values, state) => {
+  const { anyTouched } = state
   const errors = {};
-  if (!values.email) {
+
+  if(!anyTouched)
+    return errors
+
+  if (!values.email){
     errors.email = 'Required';
-  }
-  if (!isValidEmail(values.email)) {
+  } else if (!isValidEmail(values.email)) {
     errors.email = 'Invalid email address';
   }
+
   return errors;
 }
 
