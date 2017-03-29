@@ -1,6 +1,6 @@
 import App from './App';
-import './App.sass';
-import './Header.sass';
+import './App.scss';
+import './Header.scss';
 import '../../styles/Grid.scss';
 import '../../styles/Animations.scss';
 
