@@ -38,11 +38,10 @@ const validate = (values, state) => {
   if (!isValidEmail(values.email)) {
     errors.email = 'Invalid email address';
   }
-
   return errors;
 }
 
-const asyncValidate = (values, dispatch, state) => 
+const asyncValidate = (values, dispatch, state) =>
   dispatch(signIn(state.cart_id, values.email))
   .then(session => {
     if (!session.newAccount) {
@@ -52,7 +51,7 @@ const asyncValidate = (values, dispatch, state) =>
     return session.newAccount
   });
 
-const shouldAsyncValidate = (params) => params.trigger === 'blur';
+const shouldAsyncValidate = (params) => params.trigger === 'blur' && params.syncValidationPasses;
 
 const SignInFormContainer = reduxForm({
   form: 'SignInForm',
