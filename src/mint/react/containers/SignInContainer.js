@@ -49,7 +49,7 @@ const validate = (values, state) => {
 const asyncValidate = (values, dispatch, state) =>
   dispatch(signIn(state.cart_id, values.email))
   .then(session => {
-    if (!session.newAccount) {
+    if (!session.newSession.newAccount) {
       dispatch(loggedIn(state.accounts))
       throw { email: 'You\'ve logged in already' }
     }

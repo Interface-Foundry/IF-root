@@ -11,11 +11,11 @@ export default class Cart extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { fetchItems } = this.props;
-    const { cart_id } = nextProps;
+    const { cart_id, items } = nextProps;
 
-    if(cart_id) {
-      fetchItems(cart_id);
-    }
+    // if(cart_id && items.length === 0) {
+    //   fetchItems(cart_id);
+    // }
   }
 
   render() {

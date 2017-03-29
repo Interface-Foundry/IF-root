@@ -55,6 +55,7 @@ export function fetchItems(cart_id) {
     const response = await fetch(`/api/cart/${cart_id}/items`, {
       credentials: 'same-origin'
     });
+    
     if (response.ok) return dispatch(receiveItems(await response.json()));
   };
 }
