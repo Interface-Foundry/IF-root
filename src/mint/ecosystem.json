@@ -4,7 +4,10 @@
     "cwd": ".",
     "script": "./server/index.js",
     "combine_logs": true,
-    "watch": true
+    "watch": true,
+    "env": {
+      "SEND_EMAILS": true
+    }
   }, {
     "name": "ci",
     "cwd": ".",
