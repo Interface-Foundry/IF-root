@@ -12,9 +12,14 @@ spec:
         tier: frontend
     spec:
       containers:
-      - name: payments
+      - env:
+        - name: NODE_ENV
+          value: kubernetes
+        - name: CONFIG_ENV
+          value: kubernetes
         image: gcr.io/kip-styles/payments:latest
         imagePullPolicy: Always
+        name: payments
         ports:
         - containerPort: 8080
         volumeMounts:

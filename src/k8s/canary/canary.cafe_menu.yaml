@@ -11,9 +11,14 @@ spec:
         app: cafe-menu
     spec:
       containers:
-      - name: cafe
+      - env:
+        - name: NODE_ENV
+          value: canary
+        - name: CONFIG_ENV
+          value: canary
         image: gcr.io/kip-styles/cafe_menu:CANARYIMAGE
         imagePullPolicy: Always
+        name: cafe
         ports:
         - containerPort: 8001
           protocol: TCP
