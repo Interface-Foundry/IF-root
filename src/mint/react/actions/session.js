@@ -45,8 +45,13 @@ export function signIn(cart_id, email) {
     dispatch(requestUpdate());
     const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
       credentials: 'same-origin'
-    });
+      }).catch(error => {
+        //error
+      })
+      
     if (response.ok) return dispatch(receiveUpdate(await response.json()));
+
+    throw new Error(`Error in signIn`);
   };
 }
 

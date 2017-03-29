@@ -23,7 +23,8 @@ export default function cart(state = initialState, action) {
   case RECEIVE_CART:
     return {
       ...state,
-      ...action.newCart
+      ...action.newCart,
+      cart_id: action.newCart.id
     };
   case RECEIVE_ITEMS:
     return {

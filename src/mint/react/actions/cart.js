@@ -93,5 +93,7 @@ export function addItem(cart_id, url) {
       })
     });
     if (response.ok) return dispatch(receiveAddItem(await response.json()));
+
+    throw 'Error in addItem';
   };
 }

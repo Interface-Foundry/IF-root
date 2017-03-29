@@ -41,7 +41,7 @@ describe('session actions', () => {
       }
     });
 
-    return store.dispatch(signIn())
+    return store.dispatch(signIn('testId', 'fakeEmail'))
       .then(() => { 
         expect(store.getActions()).toEqual(expectedActions)
       })
