@@ -59,6 +59,9 @@ module.exports = (config) => {
         'react/addons': true,
         'react/lib/ExecutionEnvironment': true,
         'react/lib/ReactContext': true
+      },
+      node: {
+        fs: "empty"
       }
     },
 

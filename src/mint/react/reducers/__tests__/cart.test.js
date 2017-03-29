@@ -22,19 +22,19 @@ describe('cart reducer', () => {
     const item = { item: 'omg im an item', id: 123 }
 
     expect(reducer(firstState, {
-        type: RECEIVE_ADD_ITEM_TO_CART,
-        item
-      }))
-      .toEqual({...firstState, items: [item] })
+      type: RECEIVE_ADD_ITEM_TO_CART,
+      item
+    }))
+    .toEqual({...firstState, items: [item] })
   })
 
   it('should add items to the array', () => {
     const items = [{ item: 'omg im an item', id: 123 }, { item: 'omg im an item too', id: 321 }];
     expect(reducer(firstState, {
-        type: RECEIVE_ITEMS,
-        items
-      }))
-      .toEqual({...firstState, items: items })
+      type: RECEIVE_ITEMS,
+      items
+    }))
+    .toEqual({...firstState, items: items })
   })
 
   it('should update the cart with new contents', () => {
@@ -48,6 +48,6 @@ describe('cart reducer', () => {
         type: RECEIVE_CART,
         newCart
       }))
-      .toEqual({...firstState, items: items, id: id })
+      .toEqual({...firstState, ...newCart, cart_id: id})
   })
 })
