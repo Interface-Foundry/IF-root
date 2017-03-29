@@ -585,8 +585,8 @@ function buildCuisineDashboard (foodSession) {
     attachments: [{
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
-      text: `*Votes from the group* 👋\n${votes}`,
-      fallback: `*Votes from the group* 👋\n${votes}`,
+      text: `*Votes from the group* 👋🏽\n${votes}`,
+      fallback: `*Votes from the group* 👋🏽\n${votes}`,
       callback_id: 'admin_restaurant_pick'
     }]
   }

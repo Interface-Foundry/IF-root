@@ -304,8 +304,8 @@ function * sendOrderProgressDashboards (foodSession, message) {
     attachments: [{
       'color': '#3AA3E3',
       'mrkdwn_in': ['text'],
-      'text': `*Collected so far* 👋\n_${itemList}_`,
-      'fallback': `*Collected so far* 👋\n_${itemList}_`,
+      'text': `*Collected so far* 👋🏽\n_${itemList}_`,
+      'fallback': `*Collected so far* 👋🏽\n_${itemList}_`,
       'actions': []
     }]
   }
