@@ -18,8 +18,9 @@ const receiveUpdate = (newInfo) => ({
   ...newInfo
 });
 
-export const loggedIn = () => ({
-  type: LOGGED_IN
+export const loggedIn = (accounts) => ({
+  type: LOGGED_IN,
+  accounts
 })
 
 export function update() {

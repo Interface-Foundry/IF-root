@@ -17,6 +17,7 @@ export default function session(state = initialState, action) {
     });
   case LOGGED_IN:
     return {
+      onborded: action.accounts > 0,
       ...state
     }
   case REQUEST_SESSION:

@@ -17,6 +17,7 @@ export const REQUEST_ITEMS = 'REQUEST_ITEMS';
 export const RECEIVE_ITEMS = 'RECEIVE_ITEMS';
 export const SET_CART_ID = 'SET_CART_ID';
 export const LOGGED_IN = 'LOGGED_IN';
+export const LOG_IN = 'LOG_IN';
 
 // Item
 export const RECEIVE_ITEM_INFO = 'RECEIVE_ITEM_INFO';

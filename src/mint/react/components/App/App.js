@@ -3,16 +3,19 @@ import {SignInContainer, CartContainer} from '../../containers';
 import { Onboard } from '..';
 import Header from './Header';
 
-export default class Cart extends Component {
+export default class App extends Component {
   static propTypes = {
     cart_id: PropTypes.string.isRequired,
     accounts: PropTypes.array.isRequired,
     newAccount: PropTypes.bool,
     setCartId: PropTypes.func.isRequired,
+    loggedIn: PropTypes.func.isRequired
   }
 
   componentWillMount() {
-    const {setCartId, cart_id} = this.props;
+    const {setCartId, cart_id, loggedIn, accounts} = this.props;
+
+    loggedIn(accounts);
     setCartId(cart_id);
   }
 
