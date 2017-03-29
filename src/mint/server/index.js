@@ -13,8 +13,16 @@ const fs = require('fs'),
   webpackHotMiddleware = require("webpack-hot-middleware"),
   webpack = require('webpack'),
   webpackConfig = require('../webpack.config.js');
+require('colors')
 
-// live reloading
+// lets show the config here just so it's easy to not hate everything about configuration 
+console.log('Configuration:');
+['NODE_ENV', 'SEND_EMAILS', 'NO_LIVE_RELOAD'].map(v => {
+    var val = process.env[v]
+    var color = !!val ? 'green' : 'yellow'
+    console.log(('  ' + v + ': ' + val)[color])
+  })
+  // live reloading
 if (!process.env.NO_LIVE_RELOAD) {
   const compiler = webpack(webpackConfig);
   app.use(webpackDevMiddleware(compiler, {

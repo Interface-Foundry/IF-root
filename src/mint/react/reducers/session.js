@@ -10,11 +10,17 @@ const initialState = {
 export default function session(state = initialState, action) {
   switch (action.type) {
   case RECEIVE_SESSION:
-    return Object.assign({}, state, action.newSession);
+    return {
+      ...state,
+      ...action.newSession
+    };
   case RECEIVE_UPDATE_SESSION:
-    return Object.assign({}, state, action.newSession, {
-      'user_accounts': action.newSession.newAccount ? [...state.user_accounts, action.newSession.user] : state.user_accounts,
-    });
+    const { user, ...newSession } = action.newSession;
+    return {
+      ...state,
+      ...newSession,
+      'user_accounts': newSession.newAccount ? [...state.user_accounts, user] : state.user_accounts
+    };
   case ONBOARD_NEW_USER:
     return {
       ...state,
