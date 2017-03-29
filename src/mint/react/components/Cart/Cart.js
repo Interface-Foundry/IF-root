@@ -9,10 +9,13 @@ export default class Cart extends Component {
     items: PropTypes.arrayOf(PropTypes.object).isRequired
   }
 
-  componentDidMount() {
-    const { fetchItems, cart_id } = this.props;
+  componentWillReceiveProps(nextProps) {
+    const { fetchItems } = this.props;
+    const { cart_id } = nextProps;
 
-    fetchItems(cart_id);
+    if(cart_id) {
+      fetchItems(cart_id);
+    }
   }
 
   render() {
