@@ -15,8 +15,14 @@ export default class App extends Component {
   componentWillMount() {
     const {setCartId, cart_id, loggedIn, accounts} = this.props;
 
-    loggedIn(accounts);
     setCartId(cart_id);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const {onborded, accounts, loggedIn} = nextProps
+    
+    if(!onborded && accounts.length > 0)
+      loggedIn(accounts);
   }
 
   render() {

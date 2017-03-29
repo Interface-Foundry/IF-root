@@ -35,9 +35,9 @@ const validate = (values, state) => {
   if (!values.email) {
     errors.email = 'Required';
   }
-  // if (!isValidEmail(values.email)) {
-  //   errors.email = 'Invalid email address';
-  // }
+  if (!isValidEmail(values.email)) {
+    errors.email = 'Invalid email address';
+  }
 
   return errors;
 }
@@ -46,6 +46,7 @@ const asyncValidate = (values, dispatch, state) =>
   dispatch(signIn(state.cart_id, values.email))
   .then(session => {
     if (!session.newAccount) {
+      dispatch(loggedIn(state.accounts))
       throw { email: 'You\'ve logged in already' }
     }
     return session.newAccount
