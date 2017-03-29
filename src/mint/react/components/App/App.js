@@ -8,16 +8,16 @@ export default class App extends Component {
     cart_id: PropTypes.string.isRequired,
     accounts: PropTypes.array.isRequired,
     newAccount: PropTypes.bool,
-    setCartId: PropTypes.func.isRequired,
+    fetchCart: PropTypes.func.isRequired,
     loggedIn: PropTypes.func.isRequired,
     registerEmail: PropTypes.func.isRequired,
     registered: PropTypes.bool
   }
 
   componentWillMount() {
-    const {setCartId, cart_id, loggedIn, accounts} = this.props;
+    const {fetchCart, cart_id, loggedIn, accounts} = this.props;
 
-    setCartId(cart_id);
+    fetchCart(cart_id);
   }
 
   componentWillReceiveProps(nextProps) {

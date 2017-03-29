@@ -39,12 +39,7 @@ const receiveAddItem = (item) => ({
   item
 });
 
-export const setCartId = (cartId) => ({
-  type: SET_CART_ID,
-  cartId
-})
-
-export function update(cart_id) {
+export function fetchCart(cart_id) {
   return async function (dispatch) {
     dispatch(request(cart_id));
     const response = await fetch(`/api/cart/${cart_id}`, {
