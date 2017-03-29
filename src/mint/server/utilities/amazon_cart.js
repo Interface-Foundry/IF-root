@@ -130,8 +130,8 @@ exports.createAmazonCart = function * (item) {
 exports.getAmazonCart = function * (cart) {
   var amazonParams = {
     'AssociateTag': associateTag,
-    'CartId': cart.CartId,
-    'HMAC': cart.HMAC
+    'CartId': cart.amazon_cartid,
+    'HMAC': cart.amazon_hmac
   };
 
   cart = yield opHelper.execute('CartGet', amazonParams);
@@ -159,8 +159,8 @@ exports.addAmazonItemToCart = function * (item, cart) {
 
     var amazonParams = {
       'AssociateTag': associateTag,
-      'CartId': cart.CartId,
-      'HMAC': cart.HMAC,
+      'CartId': cart.amazon_cartid,
+      'HMAC': cart.amazon_hmac,
       'Item.1.ASIN': item.ASIN,
       'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
     };
@@ -190,8 +190,8 @@ exports.removeAmazonItemFromCart = function * (item, cart) {
 exports.cleaAmazonCart = function * (cart) {
   var amazonParams = {
     'AssociateTag': associateTag,
-    'CartId': cart.CartId,
-    'HMAC': cart.HMAC
+    'CartId': cart.amazon_cartid,
+    'HMAC': cart.amazon_hmac
   };
 
   cart = yield opHelper.execute('CartClear', amazonParams);
