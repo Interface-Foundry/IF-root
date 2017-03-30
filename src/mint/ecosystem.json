@@ -1,0 +1,17 @@
+{
+  "apps": [{
+    "name": "mint",
+    "cwd": ".",
+    "script": "./server/index.js",
+    "combine_logs": true,
+    "watch": true,
+    "env": {
+      "SEND_EMAILS": false
+    }
+  }, {
+    "name": "ci",
+    "cwd": ".",
+    "script": "mint-dev-ci.js",
+    "combine_logs": true
+  }]
+}

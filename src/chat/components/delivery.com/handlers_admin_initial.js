@@ -1,28 +1,28 @@
-var sleep = require('co-sleep')
-var _ = require('lodash')
+var sleep = require('co-sleep');
+var _ = require('lodash');
 
-var utils = require('./utils')
-var api = require('./api-wrapper')
-var slackUtils = require('../slack/utils.js')
-var coupon = require('../../../coupon/coupon.js')
-var mailer_transport = require('../../../mail/IF_mail.js')
+var utils = require('./utils');
+var api = require('./api-wrapper');
+var slackUtils = require('../slack/utils.js');
+var coupon = require('../../../coupon/coupon.js');
+var mailer_transport = require('../../../mail/IF_mail.js');
 
 // turn feedback buttons on/off
-var feedbackOn = false
-var feedbackTracker = {}
+var feedbackOn = false;
+var feedbackTracker = {};
 
 // injected dependencies
-var $replyChannel
-var $allHandlers
+var $replyChannel;
+var $allHandlers;
 
 // exports
 /**@namespace handlers*/
-var handlers = {}
+var handlers = {};
 
 handlers['food.admin.confirm_new_session'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();
 
-  db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text})
+  db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text});
 
   var restartText = (foodSession.convo_initiater.id == message.source.user ? `Looks like you already have an order started.`: `Looks like <@${foodSession.convo_initiater.id}> is ordering food right now.`)
 
@@ -589,15 +589,15 @@ handlers['food.delivery_or_pickup'] = function * (message) {
 
   if (fulfillmentMethod === 'pickup') {
     var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession, 'data.input')
-    var res = yield api.searchNearby({addr: addr, pickup: true})
-    foodSession.merchants = _.get(res, 'merchants')
-    foodSession.cuisines = _.get(res, 'cuisines')
-    foodSession.markModified('merchants')
-    foodSession.markModified('cuisines')
+    var res = yield api.searchNearby({addr: addr, pickup: true});
+    foodSession.merchants = _.get(res, 'merchants');
+    foodSession.cuisines = _.get(res, 'cuisines');
+    foodSession.markModified('merchants');
+    foodSession.markModified('cuisines');
   }
-  yield foodSession.save()
-  yield handlers['food.admin_polling_options'](message)
-}
+  yield foodSession.save();
+  yield handlers['food.admin_polling_options'](message);
+};
 //
 // The user just clicked pickup or delivery and is now ready to start ordering
 // Or, the user just picked a budget and is now ready to start ordering

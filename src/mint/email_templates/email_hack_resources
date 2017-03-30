@@ -1,0 +1,39 @@
+Email resources:
+
+
+// - - - - - - - - - - - - - -//
+Media Queries in HTML emails:
+https://litmus.com/blog/understanding-media-queries-in-html-email
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) { }
+
+“This media query targets all WebKit rendering engines which allows easy progressive enhancement for email designers and developers. It’s my favorite email hack because it’s allowed us to push the boundaries of what’s possible in email at Litmus – this simple hack has been the foundation for us to include HTML5 video background, live Twitter feeds, interactive product tours, and live tracking counters in our emails.”
+// - - - - - - - - - - - - - -//
+
+7 Hacks to know:
+https://www.campaignmonitor.com/blog/email-marketing/2016/09/7-email-hacks-every-developer-should-know/
+
+
+style="Margin:0;"
+
+“Don’t be fooled by its simplicity, this hack is powerful. When it’s applied to opening headline, heading and paragraph tags (e.g. <p style=”Margin:0;”>), it removes all the excessive spacing usually applied to such ‘semantic’ tags by the email and webmail clients.
+
+
+[owa] .foo
+
+“Outlook.com and Office365 don’t support attribute selectors in CSS. Both webmail apps remove the attribute from the selector, changing its meaning and initial intention.
+
+For example, [owa] .foo selector has no effect on other email clients. It will, however, be transformed to .foo, which Outlook.com and Office365 will be able to recognize, and so you’ll be able to target elements in your HTML code with the class “foo”.
+
+I love this hack because it’s really explicit and straightforward. You could use any keyword that is not an HTML attribute (instead of “owa”), but using “owa” makes it clear in my code that selector is specifically for Outlook Web Apps.
+
+It’s also a great illustration of a parsing bug from a webmail. Microsoft changes your code, and this can create a terrible mess if you use attribute selectors, and you’re not aware of this bug.”
+
+
+* [lang=”half”]
+
+“Gmail has a nasty habit of keeping your embedded styles, but removing your classes or IDs. Essentially making your CSS redundant.
+
+Luckily for us, attributes like lang aren’t stripped, so put it together with an attribute selector and we can support media queries and all manner of fancy CSS.
+
+I love this hack because of the huge audience we can reach with it. Billions of people, able to see rollovers, transitions, the sky’s the limit!”

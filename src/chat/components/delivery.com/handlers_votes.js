@@ -1,12 +1,12 @@
-'use strict'
-var _ = require('lodash')
-var co = require('co')
-var sleep = require('co-sleep')
-var googl = require('goo.gl')
-var rp = require('request-promise')
+'use strict';
+var _ = require('lodash');
+var co = require('co');
+var sleep = require('co-sleep');
+var googl = require('goo.gl');
+var rp = require('request-promise');
 
-var api = require('./api-wrapper.js')
-var utils = require('./utils')
+var api = require('./api-wrapper.js');
+var utils = require('./utils');
 var cuisineClassifier = require('./cuisine_classifier.js')
 var mailerTransport = require('../../../mail/IF_mail.js')
 var email_utils = require('./email_utils')

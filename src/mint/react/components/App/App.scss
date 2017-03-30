@@ -1,0 +1,52 @@
+body, html {
+	margin: 0;
+	overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
+	height: 100%;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+
+	* {
+		outline: none;
+		box-sizing: border-box;
+		vertical-align: top;
+	}
+}
+.image {
+	background-repeat: no-repeat;
+	background-position: middle;
+	background-size: contain;
+}
+
+ul {
+	margin: 0;
+	padding: 0;
+}
+li {
+	list-style: none;
+}
+h1,h2,h3,h4,p {
+	margin: 0;
+	letter-spacing: 0.75px;
+}
+h1 {
+	font-size: 18px;
+}
+h2 {
+	font-size: 16px;
+}
+h3 {
+	font-size: 14px;
+}
+h4 {
+	font-size: 12px;
+}
+p {
+	font-size: 10px;
+}
+
+input,
+select:focus,
+textarea {
+  font-size: 16px !important;
+}

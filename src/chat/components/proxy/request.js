@@ -2,8 +2,13 @@ var async = require('async');
 var request = require('request');
 
 var config = require('../../../config');
-var db = require('../../../db');
 var status = require('./status');
+
+// It is sometimes useful to use this library to proxy requests without wanting
+// to write the results to the mongo Metrics collection (e.g. the scraping
+// project Hannah is working on right now). Because this require is quite
+// expensive, we skip it if no metrics are going to be saved.
+var db = (config.proxy.skip_metrics) ? undefined : require('../../../db');
 
 /**
  * returns a random integer between 0 and the specified exclusive maximum.
@@ -22,37 +27,24 @@ function fakeUserAgent() {
   var chromeMajVer = randomInt(99) + 11;
   var chromeMinVer = randomInt(9999) + 1001;
   var safariMajVer = randomInt(999) + 111;
-  return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+ osxVer + 
-  ') AppleWebKit/' + webkitMajVer + '.' + webkitMinVer + 
-  ' (KHTML, like Gecko) Chrome/' + chromeMajVer + '.0.' + chromeMinVer + 
+  return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+ osxVer +
+  ') AppleWebKit/' + webkitMajVer + '.' + webkitMinVer +
+  ' (KHTML, like Gecko) Chrome/' + chromeMajVer + '.0.' + chromeMinVer +
   '2623.110 Safari/' + safariMajVer +'.36';
 }
 
 /**
  * proxyRequest makes a request for the specified url up to numRetries times,
  * using the (optional) preferred proxy method.
- * 
+ *
  * this function is the public API of this module, and is the only exported
  * function.
  */
-function proxyRequest(url, numRetries, proxyPref) {
-  if (proxyPref == 'luminati' || (!proxyPref && status.get().ready)) {
-    return luminatiRequest(url, numRetries);
-  } else {
-    return meshRequest(url, numRetries);
+function proxyRequest(url, numRetries) {
+  if (!status.get().ready) {
+    throw new Error('luminati proxy not ready');
   }
-};
-
-/**
- * meshRequest uses the mesh proxy to request the specified url up to the
- * specified number of times (until success or 30 seconds has elapsed).
- */
-function meshRequest(url, numRetries) {
-  // choose a host at random
-  var meshConfig = config.proxy.mesh;
-  var host = meshConfig.hosts[Math.floor(Math.random()*meshConfig.hosts.length)];
-  var proxyUrl = "http://" + meshConfig.user + ":" + meshConfig.password + "@" + host + ":" + meshConfig.port;
-  return attemptRequest(url, proxyUrl, 'mesh', numRetries || 1);
+  return luminatiRequest(url, numRetries);
 }
 
 /**
@@ -67,7 +59,7 @@ function luminatiRequest(url, numRetries) {
 
 /**
  * attemptRequest makes a request to the specified url via the specified proxy
- * url as many times as allowed (up to numRetries times) until it either 
+ * url as many times as allowed (up to numRetries times) until it either
  * succeeds or 30 seconds has elapsed.
  */
 function attemptRequest(url, proxyUrl, proxyName, numRetries) {
@@ -120,7 +112,7 @@ function makeRequest(url, proxyUrl, proxyName, timeoutMs) {
       'Connection':'keep-alive'
     },
     timeout: timeoutMs,
-  }
+  };
 
   return new Promise((resolve, reject) => {
     var begin = Date.now();
@@ -145,11 +137,12 @@ function makeRequest(url, proxyUrl, proxyName, timeoutMs) {
         resolve(body);
       }
 
-      db.Metrics.log('proxy', status);
+      if (!config.proxy.skip_metrics) db.Metrics.log('proxy', status);
     });
   });
 }
 
 module.exports = {
   proxyRequest: proxyRequest,
+  luminatiRequest: luminatiRequest,
 };
