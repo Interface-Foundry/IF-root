@@ -22,19 +22,19 @@ describe('cart reducer', () => {
     const item = { item: 'omg im an item', id: 123 }
 
     expect(reducer(firstState, {
-      type: RECEIVE_ADD_ITEM_TO_CART,
-      item
-    }))
-    .toEqual({...firstState, items: [item] })
+        type: RECEIVE_ADD_ITEM_TO_CART,
+        item
+      }))
+      .toEqual({...firstState, items: [item] })
   })
 
   it('should add items to the array', () => {
     const items = [{ item: 'omg im an item', id: 123 }, { item: 'omg im an item too', id: 321 }];
     expect(reducer(firstState, {
-      type: RECEIVE_ITEMS,
-      items
-    }))
-    .toEqual({...firstState, items: items })
+        type: RECEIVE_ITEMS,
+        items
+      }))
+      .toEqual({...firstState, items: items })
   })
 
   it('should update the cart with new contents', () => {
@@ -48,6 +48,19 @@ describe('cart reducer', () => {
         type: RECEIVE_CART,
         newCart
       }))
-      .toEqual({...firstState, ...newCart, cart_id: id})
+      .toEqual({...firstState, ...newCart, cart_id: id })
+  })
+
+  it('should add a member to the cart', () => {
+    const cart_members = [{ name: 'Riley', id: 123 }, { name: 'Sam', id: 321 }];
+    const newMember = { name: 'Taylor', id: 246 }
+    expect(reducer({...firstState, cart_members }, {
+        type: ADD_MEMBER_TO_CART,
+        newMember
+      }))
+      .toEqual({
+        ...firstState,
+        cart_members: [...cart_members, newMember]
+      })
   })
 })

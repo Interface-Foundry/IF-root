@@ -18,7 +18,7 @@ export default function cart(state = initialState, action) {
   case ADD_MEMBER_TO_CART:
     return {
       ...state,
-      cart_members: [...state.cart_members, action]
+      cart_members: [...state.cart_members, action.newMember]
     }
   case RECEIVE_CART:
     return {
