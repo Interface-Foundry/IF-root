@@ -2,24 +2,22 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { App } from '../components';
 
-import { loggedIn, registerEmail, onboardNewUser } from '../actions/session';
+import { changeKipFormView } from '../actions/kipForm';
 
 import { fetchCart } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: ownProps.match.params.cart_id,
+  memebers: state.cart.memebers,
+  leader: state.cart.leader,
   newAccount: state.session.newAccount,
-  loggedIn: state.session.loggedIn,
-  onboarding: state.session.onboarding,
-  registered: state.session.registered,
+  currentView: state.kipForm.currentView,
   accounts: state.session.user_accounts
 })
 
 const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
-  loggedIn: (accounts) => dispatch(loggedIn(accounts)),
-  onboardNewUser: () => dispatch(onboardNewUser()),
-  registerEmail: () => dispatch(registerEmail())
+  changeKipFormView: (viewInt) => dispatch(changeKipFormView(viewInt))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -1,8 +1,10 @@
 import { connect } from 'react-redux';
 import { SignIn } from '../components';
 
-import { signIn, loggedIn } from '../actions/session';
+import { changeKipFormView } from '../actions/kipForm';
 
+import { signIn } from '../actions/session';
+ 
 import { isValidEmail } from '../utils';
 
 import { addItem } from '../actions/cart';
@@ -11,8 +13,10 @@ import { reduxForm, reset } from 'redux-form';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.cart.cart_id,
-  newAccount: state.session.newAccount,
   accounts: state.session.user_accounts,
+  animation: state.kipForm.animation,
+  showSiblings: state.kipForm.showSiblings,
+  currentView: state.kipForm.currentView,
   initialValues: {
     email: '',
     url: ''
@@ -26,8 +30,8 @@ const mapDispatchToProps = dispatch => ({
 
     dispatch(addItem(cart_id, url))
     dispatch(reset('SignIn'))
-    dispatch(loggedIn(accounts))
-  }
+  },
+  changeKipFormView: (viewInt) => changeKipFormView(viewInt)
 })
 
 const validate = (values, state) => {
@@ -50,7 +54,6 @@ const asyncValidate = (values, dispatch, state) =>
   dispatch(signIn(state.cart_id, values.email))
   .then(session => {
     if (!session.newSession.newAccount) {
-      dispatch(loggedIn(state.accounts))
       throw { email: 'You\'ve logged in already' }
     }
     return session.newAccount

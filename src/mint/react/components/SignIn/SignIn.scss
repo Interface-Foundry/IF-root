@@ -42,12 +42,12 @@
 			-webkit-backface-visibility: hidden;
 			backface-visibility: hidden;
 
-			&[class*='-one'] {
+			&[class*='-1'] {
 				-webkit-transform: translateY( 0%);
 				transform: translateY( 0% );
 			}
 
-			&[class*='-two'] {
+			&[class*='-2'] {
 				-webkit-transform: translateY( -100%);
 				transform: translateY( -100% );
 			}
