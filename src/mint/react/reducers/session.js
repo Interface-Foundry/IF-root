@@ -34,7 +34,7 @@ export default function session(state = initialState, action) {
     }
   case LOGGED_IN:
     return {
-      loggedin: action.accounts.length > 0,
+      loggedIn: action.user_accounts.length > 0,
       ...state
     }
   case REQUEST_SESSION:
