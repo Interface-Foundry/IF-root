@@ -36,4 +36,6 @@ var getDeals = function * (count, lastPosition) {
   return yield camels;
 };
 
-module.exports = {getDeals: getDeals};
+module.exports = {
+  getDeals: getDeals
+};
