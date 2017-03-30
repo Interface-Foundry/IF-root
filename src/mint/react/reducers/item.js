@@ -10,10 +10,13 @@ const initialState = {
 
 export default function item(state = initialState, action) {
   switch (action.type) {
-    case RECEIVE_ITEM:
-      return Object.assign({}, state, action);
-    case REQUEST_ITEM:
-    default:
-      return state;
+  case RECEIVE_ITEM:
+    return {
+      ...state,
+      ...action
+    };
+  case REQUEST_ITEM:
+  default:
+    return state;
   }
 }

@@ -5,9 +5,8 @@ const receive = (newCart) => ({
   newCart
 });
 
-const request = (cart) => ({
+const request = () => ({
   type: REQUEST_CART,
-  ...cart
 });
 
 const receiveItems = (items) => ({
@@ -19,10 +18,8 @@ const requestItems = () => ({
   type: REQUEST_ITEMS
 });
 
-const requestRemoveItem = (cart, item) => ({
-  type: REQUEST_REMOVE_ITEM_FROM_CART,
-  item,
-  cart
+const requestRemoveItem = () => ({
+  type: REQUEST_REMOVE_ITEM_FROM_CART
 });
 
 const receiveRemoveItem = (cart) => ({
@@ -39,14 +36,9 @@ const receiveAddItem = (item) => ({
   item
 });
 
-export const setCartId = (cartId) => ({
-  type: SET_CART_ID,
-  cartId
-})
-
-export function update(cart_id) {
+export function fetchCart(cart_id) {
   return async function (dispatch) {
-    dispatch(request(cart_id));
+    dispatch(request());
     const response = await fetch(`/api/cart/${cart_id}`, {
       credentials: 'same-origin'
     });
@@ -60,13 +52,14 @@ export function fetchItems(cart_id) {
     const response = await fetch(`/api/cart/${cart_id}/items`, {
       credentials: 'same-origin'
     });
+    
     if (response.ok) return dispatch(receiveItems(await response.json()));
   };
 }
 
 export function removeItem(cart_id, item) {
   return async dispatch => {
-    dispatch(requestRemoveItem(cart_id, item));
+    dispatch(requestRemoveItem());
     const response = await fetch(`/api/cart/${cart_id}/item`, {
       'method': 'DELETE',
       headers: {
@@ -97,5 +90,7 @@ export function addItem(cart_id, url) {
       })
     });
     if (response.ok) return dispatch(receiveAddItem(await response.json()));
+
+    throw 'Error in addItem';
   };
 }

@@ -61,6 +61,12 @@ var emailsCollection = Waterline.Collection.extend({
           html: me.message_html,
           text: me.message_text_fallback
         }
+
+        // There is an env variable to control sending emails or nah
+        if (!process.env.SEND_EMAILS) {
+          console.log('Not sending email (use SEND_EMAILS=1 to actually send an email)')
+          return
+        }
         yield sendMail(options)
       })
 

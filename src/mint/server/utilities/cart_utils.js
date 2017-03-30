@@ -61,14 +61,19 @@ exports.getItem = function * (item) {
 };
 
 exports.createCart = function * (item) {
+  var retailer = exports.getRetailer(item)
   var cart = yield createCartHandlers[retailer](item)
   return cart
 }
 
-exports.getCartHandlers = function * (cart, retailer) {
+exports.getCart = function * (cart, retailer) {
   var cart = yield getCartHandlers[retailer](cart)
   return cart
-}
+};
+
+exports.clearCart = function * (cart, retailer) {
+  var cart = yield clearCartHandlers[retailer](cart)
+};
 
 exports.addItemToCart = function * (item, cart) {
   var cart = yield addItemHandlers[retailer](item, cart)
@@ -77,3 +82,4 @@ exports.addItemToCart = function * (item, cart) {
 exports.removeItemFromCart = function * (item, cart) {
   var cart = yield removeItemHandlers[retailer](item, cart)
 };
+

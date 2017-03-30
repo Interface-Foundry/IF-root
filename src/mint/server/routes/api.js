@@ -98,9 +98,9 @@ router.get('/identify', (req, res) => co(function* () {
   }
 
   // If a user exists in the db, send them a magic link to prove it's them
-  user = yield db.UserAccounts.findOne({
-    email_address: email
-  })
+  // user = yield db.UserAccounts.findOne({
+  //   email_address: email
+  // })
   if (user) {
     console.log('email already exists in db')
     if (prototype) {
@@ -128,7 +128,7 @@ router.get('/identify', (req, res) => co(function* () {
     }).populate('user').populate('cart')
 
     if (process.env.NODE_ENV !== 'production') {
-      open('http://localhost:3000/auth/' + link.id)
+      console.log('http://localhost:3000/auth/' + link.id)
     }
 
     var lostEmail = yield db.Emails.create({

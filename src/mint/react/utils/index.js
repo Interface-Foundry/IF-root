@@ -18,3 +18,7 @@ export {
 export {
 	commaSeparateNumber
 } from './formating'
+
+export {
+	fakeStore
+} from './testUtils'

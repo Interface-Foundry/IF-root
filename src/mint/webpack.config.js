@@ -32,10 +32,10 @@ module.exports = {
       }
     }, {
       test: /\.json?$/,
-      loader: 'json'
+      loader: 'json-loader'
     }, {
       test: /\.css$/,
-      use: ['style-loader', 'css-loader']
+      use: ['style-loader', 'css-loader', 'postcss-loader']
     }, {
       test: /\.scss$|\.sass$/,
       use: [{

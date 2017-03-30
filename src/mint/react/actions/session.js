@@ -1,8 +1,8 @@
-import { LOGGED_IN, REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
+import { LOGGED_IN, ONBOARD_NEW_USER, REGISTER_EMAIL, REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
 
-const receive = (newInfo) => ({
+const receive = (newSession) => ({
   type: RECEIVE_SESSION,
-  ...newInfo
+  newSession
 });
 
 const request = () => ({
@@ -13,10 +13,17 @@ const requestUpdate = () => ({
   type: REQUEST_UPDATE_SESSION
 });
 
-const receiveUpdate = (newInfo) => ({
+const receiveUpdate = (newSession) => ({
   type: RECEIVE_UPDATE_SESSION,
-  ...newInfo
+  newSession
 });
+
+export const onboardNewUser = () => ({
+  type: ONBOARD_NEW_USER
+})
+export const registerEmail = () => ({
+  type: REGISTER_EMAIL
+})
 
 export const loggedIn = (accounts) => ({
   type: LOGGED_IN,
@@ -38,8 +45,13 @@ export function signIn(cart_id, email) {
     dispatch(requestUpdate());
     const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
       credentials: 'same-origin'
-    });
+      }).catch(error => {
+        //error
+      })
+      
     if (response.ok) return dispatch(receiveUpdate(await response.json()));
+
+    throw new Error(`Error in signIn`);
   };
 }
 

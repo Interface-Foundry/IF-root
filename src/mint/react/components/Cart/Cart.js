@@ -9,12 +9,6 @@ export default class Cart extends Component {
     items: PropTypes.arrayOf(PropTypes.object).isRequired
   }
 
-  componentDidMount() {
-    const { fetchItems, cart_id } = this.props;
-
-    fetchItems(cart_id);
-  }
-
   render() {
     const { cart_id, addItem, items } = this.props;
 

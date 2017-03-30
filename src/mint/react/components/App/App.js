@@ -8,31 +8,59 @@ export default class App extends Component {
     cart_id: PropTypes.string.isRequired,
     accounts: PropTypes.array.isRequired,
     newAccount: PropTypes.bool,
-    setCartId: PropTypes.func.isRequired,
-    loggedIn: PropTypes.func.isRequired
+    fetchCart: PropTypes.func.isRequired,
+    loggedIn: PropTypes.func.isRequired,
+    registerEmail: PropTypes.func.isRequired,
+    registered: PropTypes.bool
   }
 
   componentWillMount() {
-    const {setCartId, cart_id, loggedIn, accounts} = this.props;
+    const {fetchCart, cart_id, loggedIn, accounts} = this.props;
 
-    setCartId(cart_id);
+    fetchCart(cart_id);
   }
 
   componentWillReceiveProps(nextProps) {
-    const {onborded, accounts, loggedIn} = nextProps
-    
-    if(!onborded && accounts.length > 0)
-      loggedIn(accounts);
+    const { accounts, loggedIn, registerEmail, onboardNewUser } = this.props
+    const { loggedin, registered, onboarding } = nextProps
+
+    if ( 
+        onboarding &&
+        !registered && 
+        !loggedin &&
+        accounts.length !== nextProps.accounts.length && 
+        nextProps.accounts.length > 0
+    ) {
+      registerEmail();
+    } else if (
+        onboarding &&
+        registered &&
+        loggedin &&
+        nextProps.accounts.length > 0
+    ) {
+      loggedIn(nextProps.accounts);
+    } else if (
+      !onboarding &&
+      !registered && 
+      !loggedin &&
+      accounts.length !== nextProps.accounts.length && 
+      nextProps.accounts.length > 0
+    ) {
+      registerEmail();
+      loggedIn(nextProps.accounts);
+    } else if (!onboarding) {
+      onboardNewUser();
+    }
   }
 
   render() {
-    const { cart_id, accounts, newAccount, onborded } = this.props;
+    const { cart_id, accounts, newAccount, loggedin } = this.props;
 
     return (
       <section>
         <Header cart_id={cart_id}/>
         <div>
-          {onborded ? 
+          {loggedin ? 
             <p>
               <strong>Accounts:</strong>
               {accounts.map((account, i) => <span key={i}>{account.email_address}</span>)}
@@ -41,7 +69,7 @@ export default class App extends Component {
         </div>
         <div>
           {/* This should be an overlay on top of the CartContainer at some point */}
-          {onborded ? 
+          {loggedin ? 
             null
             : <SignInContainer/>}
           <CartContainer/>
