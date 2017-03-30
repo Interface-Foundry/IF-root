@@ -15,8 +15,13 @@ var $replyChannel
 var $allHandlers // this is how you can access handlers from other files
 
 // exports
+/**@namespace*/
 var handlers = {}
 
+/**
+* Displays most popular menu items for the user to order
+* @param message
+*/
 handlers['food.menu.quickpicks'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
@@ -164,24 +169,11 @@ handlers['food.menu.quickpicks'] = function * (message) {
     parentDescription = (parentDescription.split(' ').length > 26 ? parentDescription.split(' ').slice(0,26).join(' ')+"…" : parentDescription)
 
     //clean out html from descriptions
-
     desc = striptags(desc)
     parentDescription = striptags(parentDescription)
-
     attachment.text = [desc, parentDescription, i.infoLine].filter(Boolean).join('\n')
     return attachment
   })
-
-  // delendum --> since <more and more> will be in bottommost item
-
-  // if (feedbackOn && msg_json) {
-  //   msg_json.attachments[0].actions.push({
-  //     name: 'food.feedback.new',
-  //     text: '⇲ Send feedback',
-  //     type: 'button',
-  //     value: 'food.feedback.new'
-  //   })
-  // }
 
   var backButton = {
     name: 'food.menu.quickpicks',
@@ -243,6 +235,8 @@ handlers['food.menu.quickpicks'] = function * (message) {
       msg_json.attachments[msg_json.attachments.length - 1].actions.push(moreButton)
     }
   }
+
+  // if the popout system isn't working, use the delivery.com url instead of (failing to) generate our own
   if (config.menuURL) var url = yield menu_utils.getUrl(foodSession, message.source.user)
   else var url = foodSession.chosen_restaurant.url
 
@@ -298,9 +292,9 @@ handlers['food.menu.search'] = function * (message) {
   return yield handlers['food.menu.quickpicks'](message)
 }
 
-//
-// After a user clicks on a menu item, this shows the options, like beef or tofu
-//
+/**
+* After a user clicks on a menu item, this shows the options, like beef or tofu
+*/
 handlers['food.item.submenu'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -381,7 +375,9 @@ function deleteChildren(node, cartItem, deliveryId) {
   })
 }
 
-// Handles only the current item the user is editing
+/**
+*  Increments the quantity of ~only~ the item the user is currently in the process of editing.
+*/
 handlers['food.item.quantity.add'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
@@ -392,7 +388,9 @@ handlers['food.item.quantity.add'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
-// Handles only the current item the user is editing
+/**
+*  Decrements the quantity of ~only~ the item the user is currently in the process of editing.
+*/
 handlers['food.item.quantity.subtract'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
@@ -408,6 +406,10 @@ handlers['food.item.quantity.subtract'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
+/**
+* Allow the user to add instructions for a specific food item
+* @param message
+*/
 handlers['food.item.instructions'] = function * (message) {
 
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -489,7 +491,8 @@ handlers['food.item.add_to_cart'] = function * (message) {
       );
     }
   }
-  console.log('userItem', userItem, '********')
+  
+  logging.debug('userItem', userItem)
   userItem.added_to_cart = true
   yield db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.added_to_cart': true}}).exec()
 

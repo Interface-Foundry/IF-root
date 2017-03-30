@@ -51,9 +51,7 @@ router.post('/cafe', (req, res) => co(function * () {
     session_token: crypto.randomBytes(256).toString('hex') // gen key inside object
   });
 
-  logging.debug('new menusession created')
-
-  // logging.debug('req.body', req.body)
+  logging.debug('new menusession created', ms)
 
   var rest_id = req.body.rest_id;
   var result = yield db.Menus.findOne({merchant_id: rest_id});
@@ -73,9 +71,7 @@ router.post('/cafe', (req, res) => co(function * () {
 
   ms.merchant.logo = merchant.data.summary.merchant_logo
   ms.merchant.name = merchant.data.summary.name;
-
   ms.merchant.minimum = merchant.data.ordering.minimum + "";
-
   ms.selected_items = req.body.selected_items;
 
   var foodSession = yield Delivery.findOne({_id: ObjectId(req.body.delivery_ObjectId)}).exec()
@@ -131,29 +127,25 @@ router.post('/order', function (req, res) {
       var cart = foodSession.cart;
       var menu = Menu(foodSession.menu)
       var money_spent = 0;
-      console.log('got cart and menu')
-      // console.log('ORDER', order) //not yet in duplicate
+      logging.debug('got cart and menu', {order: order}) //not yet in duplicate
       for (var i = 0; i < order.length; i++) {
-        // logging.debug(order[i]);
         cart.push({
           added_to_cart: true,
           item: order[i],
           user_id: user_id
         });
         if (foodSession.budget) {
-          console.log('calculating money spent')
-          console.log(cart[cart.length-1])
+          logging.debug('calculating money spent', cart[cart.length-1])
           money_spent += Number(menu.getCartItemPrice(cart[cart.length-1]))
         }
       }
-      console.log('CART', cart) //not  yet duplicate
+      logging.debug('CART', cart) //not  yet duplicate
 
       var user_budgets = foodSession.user_budgets
       user_budgets[user_id] -= money_spent
-      console.log('calculated money spent')
+      logging.debug('calculated money spent')
 
       yield Delivery.update({active: true, _id: ObjectId(deliv_id)}, {$set: {cart: cart, user_budgets: user_budgets}});
-      // console.log('updated the delivery object')
 
       //----------Message Queue-----------//
 
@@ -165,15 +157,10 @@ router.post('/order', function (req, res) {
         mode: 'food',
         incoming: false
       }).sort('-ts').limit(1)
-      console.log('foodMessage', foodMessage)
+      logging.debug('foodMessage', foodMessage)
 
       if (foodMessage && foodMessage.length) {
-        // foodSession.save()
         foodMessage = foodMessage[0];
-
-        logging.debug('foodMessage.source', foodMessage.source)
-        logging.debug('foodMessage.thread_id', foodMessage.thread_id)
-        logging.debug('foodMessage.source.user', foodMessage.source.user)
 
         var mess = new db.Messages({
           incoming: true,
@@ -209,7 +196,6 @@ router.post('/order', function (req, res) {
           mode: 'food',
           incoming: false
         }).sort('-ts').limit(1);
-        // console.log('alternateFoodMessage', alternateFoodMessage)
         alternateFoodMessage = alternateFoodMessage[0]
 
         var mess = new db.Messages({

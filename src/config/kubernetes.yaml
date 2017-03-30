@@ -5,7 +5,7 @@ elasticsearch:
 kipPayURL: https://pay.kipthis.com
 logging:
   console:
-    level: info
+    level: debug
     json: true
     stringify: true
     colorize: false
@@ -27,8 +27,6 @@ proxy:
     addr: http://luminati-proxy.default.svc.cluster.local:22225
     enabled: true
     password: e49d4ega1696
-  mesh:
-    password: 9fSvNH@aB4Hs2s>qcatsoupkanyecandle
 redis:
   port: 6379
   url: redis-thunder.internal.kipapp.co

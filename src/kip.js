@@ -1,4 +1,12 @@
+/**
+ * Convenience functions and process bootstrapping
+ * @module kip
+ */
+
+
+
 require('colors')
+
 
 var path = require('path')
 var config = require('./config')
@@ -11,6 +19,7 @@ global.logging = require('./logging.js')
  * function(e, item) {
  *  if (kip.err(e)) return
  *  }
+ * @member
  */
 function error (e, message, data) {
   // only do stuff when there is an error`
@@ -90,7 +99,9 @@ function debug () {
 }
 
 /**
- * Timer
+ * Creates a timer which can be used for performance monitoring
+ * @param  {String} name name of the timer, like 'amazon search'
+ * @return {Function} returns a function which can be used to print the time to the screen
  */
 function timer (name) {
   name = name || ''
@@ -133,6 +144,12 @@ function icanhazinternet () {
   })
 }
 
+/**
+ * Allows you to save timestamps to the database for performance monitoring
+ * @class SavedTimer
+ * @param {String} name name of the timer, like "nlp"
+ * @param {Object} meta any meta data that yo uwant to be saved, for monitoring and analysis
+ */
 var SavedTimer = function (name, meta) {
   if (!(this instanceof SavedTimer)) {
     return new SavedTimer(name, meta)
@@ -147,12 +164,19 @@ var SavedTimer = function (name, meta) {
   this.last = 0
   this.tic('start')
 }
-
+/**
+ * Finishes and saves all the timer data
+ * @return {db.Metric}
+ */
 SavedTimer.prototype.stop = function () {
   this.tic('stop')
   return this.metric.save()
 }
 
+/**
+ * Save the current timestamp with a label
+ * @param  {String} label
+ */
 SavedTimer.prototype.tic = function (label) {
   var t = +new Date() - this.start
   var interval = t - this.last
