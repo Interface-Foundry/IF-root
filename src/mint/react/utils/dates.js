@@ -1,6 +1,6 @@
 import moment from 'moment'
 
-export const timeFromDate = date => {
+export const timeFromDate = (date) => {
 	if(moment().diff(date, 'days') === 0) {
 		if(moment().diff(date, 'hours') === 0) {
 			if(moment().diff(date, 'minutes') === 0)

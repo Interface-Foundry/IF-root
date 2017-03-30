@@ -21,13 +21,13 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { accounts, loggedIn, registerEmail, onboardNewUser } = this.props
-    const { loggedin, registered, onboarding } = nextProps
+    const { accounts, registerEmail, onboardNewUser } = this.props
+    const { loggedIn, registered, onboarding } = nextProps
 
     if ( 
         onboarding &&
         !registered && 
-        !loggedin &&
+        !loggedIn &&
         accounts.length !== nextProps.accounts.length && 
         nextProps.accounts.length > 0
     ) {
@@ -35,14 +35,14 @@ export default class App extends Component {
     } else if (
         onboarding &&
         registered &&
-        loggedin &&
+        loggedIn &&
         nextProps.accounts.length > 0
     ) {
       loggedIn(nextProps.accounts);
     } else if (
       !onboarding &&
       !registered && 
-      !loggedin &&
+      !loggedIn &&
       accounts.length !== nextProps.accounts.length && 
       nextProps.accounts.length > 0
     ) {
@@ -54,13 +54,13 @@ export default class App extends Component {
   }
 
   render() {
-    const { cart_id, accounts, newAccount, loggedin } = this.props;
+    const { cart_id, accounts, newAccount, loggedIn } = this.props;
 
     return (
       <section>
         <Header cart_id={cart_id}/>
         <div>
-          {loggedin ? 
+          {loggedIn ? 
             <p>
               <strong>Accounts:</strong>
               {accounts.map((account, i) => <span key={i}>{account.email_address}</span>)}
@@ -69,7 +69,7 @@ export default class App extends Component {
         </div>
         <div>
           {/* This should be an overlay on top of the CartContainer at some point */}
-          {loggedin ? 
+          {loggedIn ? 
             null
             : <SignInContainer/>}
           <CartContainer/>

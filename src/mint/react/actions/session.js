@@ -25,9 +25,9 @@ export const registerEmail = () => ({
   type: REGISTER_EMAIL
 })
 
-export const loggedIn = (accounts) => ({
+export const loggedIn = (user_accounts) => ({
   type: LOGGED_IN,
-  accounts
+  user_accounts
 })
 
 export function update() {
