@@ -159,7 +159,11 @@ describe.only('api', () => {
     // check that an email sent and is associated with this cart
     var email = yield db.Emails.findOne({cart: cartId})
     assert(email)
-    console.log(email)
+    assert.equal(email.cart, cart.id)
+    assert.equal(email.recipients, mcTesty.email)
+    assert(email.message_html)
+    assert.equal(email.template_name, 'new_cart')
+    assert(email.id)
   }))
 
   it('GET /api/carts should return all the users carts', () => co(function * () {
