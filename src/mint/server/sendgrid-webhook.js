@@ -4,16 +4,16 @@ const sg_const = require('../sg_const');
 
 var router = express.Router();
 
-//test route
-router.get('/test', function (req, res) {
-  console.log('my name is cupid valentino');
-  res.send('my name is cupid valentino');
-});
+// //test route
+// router.get('/test', function (req, res) {
+//   console.log('this is a test');
+//   res.send('this is a test');
+// });
 
 //route sg will post to
 router.post('/', function (req, res) {
   console.log('req.body', req.body);
-  res.send('my name is cupid valentino');
+  res.send('posted at by sendgrid');
 });
 
 //~~~~~post request to send-grid api setting up the webhook~~~~~//
