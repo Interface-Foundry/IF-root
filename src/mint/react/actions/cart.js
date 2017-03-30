@@ -47,7 +47,7 @@ export function fetchCart(cart_id) {
         });
         return dispatch(receive(await response.json()));
       } catch (e) {
-        console.log('error in cart fetchCart')
+        throw 'error in cart fetchCart'
       }
     })();
   };
@@ -64,7 +64,7 @@ export function fetchItems(cart_id) {
         });
         return dispatch(receiveItems(await response.json()));
       } catch (e) {
-        console.log('error in cart fetchItems')
+        throw 'error in cart fetchItems'
       }
     })();
   };
@@ -88,7 +88,7 @@ export function removeItem(cart_id, item) {
         });
         return dispatch(receiveRemoveItem(await response.json()));
       } catch (e) {
-        console.log('error in cart removeItem')
+        throw 'error in cart removeItem'
       }
     })();
   };
@@ -113,7 +113,7 @@ export function addItem(cart_id, url) {
         });
         return dispatch(receiveAddItem(await response.json()));
       } catch (e) {
-        console.log('error in cart addItem')
+        throw 'error in cart addItem'
       }
     })();
   };

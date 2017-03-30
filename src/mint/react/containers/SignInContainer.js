@@ -39,9 +39,6 @@ const validate = (values, state) => {
   const { anyTouched } = state
   const errors = {};
 
-  if(!anyTouched)
-    return errors
-
   if (!values.email){
     errors.email = 'Required';
   } else if (!isValidEmail(values.email)) {
