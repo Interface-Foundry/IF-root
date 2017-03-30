@@ -27,16 +27,16 @@ function fakeUserAgent() {
   var chromeMajVer = randomInt(99) + 11;
   var chromeMinVer = randomInt(9999) + 1001;
   var safariMajVer = randomInt(999) + 111;
-  return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+ osxVer + 
-  ') AppleWebKit/' + webkitMajVer + '.' + webkitMinVer + 
-  ' (KHTML, like Gecko) Chrome/' + chromeMajVer + '.0.' + chromeMinVer + 
+  return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+ osxVer +
+  ') AppleWebKit/' + webkitMajVer + '.' + webkitMinVer +
+  ' (KHTML, like Gecko) Chrome/' + chromeMajVer + '.0.' + chromeMinVer +
   '2623.110 Safari/' + safariMajVer +'.36';
 }
 
 /**
  * proxyRequest makes a request for the specified url up to numRetries times,
  * using the (optional) preferred proxy method.
- * 
+ *
  * this function is the public API of this module, and is the only exported
  * function.
  */
@@ -45,7 +45,7 @@ function proxyRequest(url, numRetries) {
     throw new Error('luminati proxy not ready');
   }
   return luminatiRequest(url, numRetries);
-};
+}
 
 /**
  * luminatiRequest uses the luminati proxy to request the specified url up to
@@ -59,7 +59,7 @@ function luminatiRequest(url, numRetries) {
 
 /**
  * attemptRequest makes a request to the specified url via the specified proxy
- * url as many times as allowed (up to numRetries times) until it either 
+ * url as many times as allowed (up to numRetries times) until it either
  * succeeds or 30 seconds has elapsed.
  */
 function attemptRequest(url, proxyUrl, proxyName, numRetries) {
@@ -112,7 +112,7 @@ function makeRequest(url, proxyUrl, proxyName, timeoutMs) {
       'Connection':'keep-alive'
     },
     timeout: timeoutMs,
-  }
+  };
 
   return new Promise((resolve, reject) => {
     var begin = Date.now();

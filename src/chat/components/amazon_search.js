@@ -161,162 +161,162 @@ var search = function * (params, origin) {
   }
   timer.tic('requesting amazon ItermSearch api');
   try {
-    logging.debug('👺1: as is...', amazonParams)
+    logging.debug('👺1: as is...', amazonParams);
     var results = yield get_client().itemSearch(amazonParams);
   } catch (e) {
     // If more than one modifier
     if (all_modifiers_array) {
-      logging.debug('👺2: remove each keyword one-by-one, and try both with node-traversal and without...')
-      amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query
+      logging.debug('👺2: remove each keyword one-by-one, and try both with node-traversal and without...');
+      amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
       for (var i = 0; i < all_modifiers_array.length - 1; i++) {
         try {
-          var modifier = all_modifiers_array[i]
+          var modifier = all_modifiers_array[i];
           if (!amazonParams.BrowseNode) {
-            amazonParams.BrowseNode = browseNodeBackup
+            amazonParams.BrowseNode = browseNodeBackup;
           }
-          amazonParams.Keywords = amazonParams.Keywords.replace(modifier.trim(), '').trim()
-          logging.debug('trying : ', amazonParams)
-          var res1 = yield get_client().itemSearch(amazonParams)
-          yield wait(1500)
+          amazonParams.Keywords = amazonParams.Keywords.replace(modifier.trim(), '').trim();
+          logging.debug('trying : ', amazonParams);
+          var res1 = yield get_client().itemSearch(amazonParams);
+          yield wait(1500);
           if (res1 && res1.length >= 1) {
-            var results = res1
-            logging.debug('breaking out...')
-            break
+            var results = res1;
+            logging.debug('breaking out...');
+            break;
           } else {
             if (amazonParams.BrowseNode) {
-              delete amazonParams.BrowseNode
+              delete amazonParams.BrowseNode;
             }
-            logging.debug('trying : ', amazonParams)
+            logging.debug('trying : ', amazonParams);
             try {
-              var res1 = yield get_client().itemSearch(amazonParams)
-              yield wait(1500)
+              var res1 = yield get_client().itemSearch(amazonParams);
+              yield wait(1500);
               if (res1 && res1.length >= 1) {
-                var results = res1
-                logging.debug('breaking out...')
-                break
+                var results = res1;
+                logging.debug('breaking out...');
+                break;
               }
             } catch(err) {}
           }
         } catch (e) {
           if (res1 && res1.length >= 1) {
-            var results = res1
-            logging.debug('breaking out...')
-            break
+            var results = res1;
+            logging.debug('breaking out...');
+            break;
           }  else {
             if (amazonParams.BrowseNode) {
-              delete amazonParams.BrowseNode
+              delete amazonParams.BrowseNode;
             }
-            logging.debug('trying : ', amazonParams)
+            logging.debug('trying : ', amazonParams);
             try {
-              yield wait(1500)
-              var res1 = yield get_client().itemSearch(amazonParams)
+              yield wait(1500);
+              var res1 = yield get_client().itemSearch(amazonParams);
             } catch(err) {}
             if (res1 && res1.length >= 1) {
-              var results = res1
-              logging.debug('breaking out...')
-              break
+              var results = res1;
+              logging.debug('breaking out...');
+              break;
             }
           }
         }
       } // end of for loop
       if (!results || (results && results.length < 1)) {
         logging.debug('👺3: cutting modifiers failed, search just the original query in a node-traversal search, then try a non-node-traversal search... ')
-        amazonParams.Keywords = params.query
-        amazonParams.BrowseNode = browseNodeBackup
-        logging.debug('trying : ', amazonParams)
+        amazonParams.Keywords = params.query;
+        amazonParams.BrowseNode = browseNodeBackup;
+        logging.debug('trying : ', amazonParams);
         try {
-          yield wait(1500)
-          logging.debug('trying : ', amazonParams)
-          var results = yield get_client().itemSearch(amazonParams)
+          yield wait(1500);
+          logging.debug('trying : ', amazonParams);
+          var results = yield get_client().itemSearch(amazonParams);
         } catch(err) {
           if (amazonParams.BrowseNode) {
-            delete amazonParams.BrowseNode
+            delete amazonParams.BrowseNode;
           }
           try {
-            yield wait(1500)
-            logging.debug('trying : ', amazonParams)
-            var results = yield get_client().itemSearch(amazonParams)
+            yield wait(1500);
+            logging.debug('trying : ', amazonParams);
+            var results = yield get_client().itemSearch(amazonParams);
           } catch(err) {}
         }
       }
     // Only one modifier
     } else {
-      logging.debug('👺4 One modifier, as is did not work... ')
+      logging.debug('👺4 One modifier, as is did not work... ');
       try {
         if (amazonParams.BrowseNode) {
-          delete amazonParams.BrowseNode
+          delete amazonParams.BrowseNode;
         }
-        yield wait(1500)
+        yield wait(1500);
         // amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query
-        logging.debug('trying : ', amazonParams)
-        var results = yield get_client().itemSearch(originalParams)
+        logging.debug('trying : ', amazonParams);
+        var results = yield get_client().itemSearch(originalParams);
       } catch(err) {
-        logging.debug('👺5', amazonParams)
+        logging.debug('👺5', amazonParams);
         try {
-          amazonParams.Keywords = params.query
-          yield wait(1500)
-          logging.debug('trying : ', amazonParams)
-          var results = yield get_client().itemSearch(originalParams)
+          amazonParams.Keywords = params.query;
+          yield wait(1500);
+          logging.debug('trying : ', amazonParams);
+          var results = yield get_client().itemSearch(originalParams);
         } catch(err) {}
 
         if (!results || (results && results.length < 1)) {
           try {
-            amazonParams.Keywords = params.query
-            yield wait(1500)
-            logging.debug('trying : ', amazonParams)
-            var results = yield get_client().itemSearch(originalParams)
+            amazonParams.Keywords = params.query;
+            yield wait(1500);
+            logging.debug('trying : ', amazonParams);
+            var results = yield get_client().itemSearch(originalParams);
           } catch(err) {}
         }
       }
       if (!results || (results && results.length < 1)) {
         if (amazonParams.BrowseNode) {
-          delete amazonParams.BrowseNode
+          delete amazonParams.BrowseNode;
         }
-        logging.debug('👺6: ', amazonParams)
+        logging.debug('👺6: ', amazonParams);
         if (amazonParams.Keywords && amazonParams.Keywords.split(' ').length > 2) {
-          kip.debug('someone probably sent a really long string: ', amazonParams.Keywords)
+          kip.debug('someone probably sent a really long string: ', amazonParams.Keywords);
           // like if someone sends a paragraph.. patch fix for now todo fix later
-          return null
+          return null;
         }
         try {
-          yield wait(1500)
-          logging.debug('trying : ', amazonParams.Keywords)
-          var results = yield get_client().itemSearch(amazonParams)
+          yield wait(1500);
+          logging.debug('trying : ', amazonParams.Keywords);
+          var results = yield get_client().itemSearch(amazonParams);
         } catch(err) {
           try {
-            amazonParams.Keywords = params.query
-            yield wait(1500)
-            logging.debug('trying : ', amazonParams)
-            var results = yield get_client().itemSearch(originalParams)
+            amazonParams.Keywords = params.query;
+            yield wait(1500);
+            logging.debug('trying : ', amazonParams);
+            var results = yield get_client().itemSearch(originalParams);
           } catch(err) {}
         }
         if (!results || (results && results.length < 1)) {
           try {
-            amazonParams.Keywords = params.query
-            yield wait(1500)
-            logging.debug('trying : ', amazonParams)
-            var results = yield get_client().itemSearch(originalParams)
+            amazonParams.Keywords = params.query;
+            yield wait(1500);
+            logging.debug('trying : ', amazonParams);
+            var results = yield get_client().itemSearch(originalParams);
           } catch(err) {}
         }
       }
     }
   }
-  timer.tic('got results from ItermSearch api')
+  timer.tic('got results from ItermSearch api');
 
   if (results && results.length > 1) {
-    kip.debug(`Found ${results.length} results (before paging)`.green)
+    kip.debug(`Found ${results.length} results (before paging)`.green);
   }else {
-    kip.debug(`Found ${results.length} results (before paging)`.red)
-    return null
+    kip.debug(`Found ${results.length} results (before paging)`.red);
+    return null;
   }
-  results = results.slice(skip, skip + 3)
-  results.original_query = params.query
-  timer.tic('enhancing results')
-  var enhanced_results = yield enhance_results(results, origin, timer)
-  timer.tic('done enhancing results')
-  timer.stop()
-  return enhanced_results
-}
+  results = results.slice(skip, skip + 3);
+  results.original_query = params.query;
+  timer.tic('enhancing results');
+  var enhanced_results = yield enhance_results(results, origin, timer);
+  timer.tic('done enhancing results');
+  timer.stop();
+  return enhanced_results;
+};
 
 /*
 params:
@@ -324,19 +324,19 @@ asin
 skip
 */
 var similar = function * (params, origin) {
-  var timer = new kip.SavedTimer('similar.timer', {params: params, origin: origin})
+  var timer = new kip.SavedTimer('similar.timer', {params: params, origin: origin});
 
   params.asin = params.asin || params.ASIN; // because freedom.
   if (!params.asin) {
-    throw new Error('no ASIN specified')
+    throw new Error('no ASIN specified');
   }
 
   if (!params.skip) {
-    params.skip = 0
+    params.skip = 0;
   }
 
   if (params.skip > 6) {
-    throw new Error('similar items page stops at 10 total by default')
+    throw new Error('similar items page stops at 10 total by default');
   // TODO make a similar search querystring and get more results that way.
   // like function similarQuery(item, params)
   }
@@ -344,116 +344,116 @@ var similar = function * (params, origin) {
   amazonParams = {
     responseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank',
     ItemId: params.asin
-  }
+  };
 
-  debug('🔍 do the amazon search! 🔎 ')
-  debug('input params', params)
-  debug('amazon params', amazonParams)
+  debug('🔍 do the amazon search! 🔎 ');
+  debug('input params', params);
+  debug('amazon params', amazonParams);
 
-  timer.tic('hitting amazon SililarityLookip api')
-  var results = yield get_client().similarityLookup(amazonParams)
-  timer.tic('got results from amazon SimilarityLookup api')
-  results = results.slice(params.skip, params.skip + 3)
-  results.original_query = params.query
+  timer.tic('hitting amazon SililarityLookip api');
+  var results = yield get_client().similarityLookup(amazonParams);
+  timer.tic('got results from amazon SimilarityLookup api');
+  results = results.slice(params.skip, params.skip + 3);
+  results.original_query = params.query;
 
   // if there aren't enough results... do a weaker search
   if (results.length < 1) {
     // TODO do the weak search thing.  looks like the weak search thing
     // just removes some words from the search query.
-    throw new Error('no results found')
+    throw new Error('no results found');
   // results = yield weakSearch(params); TODO
   // results = results.slice(skip, 3) // yeah whatevers
   }
 
-  var er = yield enhance_results(results, origin, timer)
-  timer.stop()
-  return er
-}
+  var er = yield enhance_results(results, origin, timer);
+  timer.stop();
+  return er;
+};
 
 // Decorates the results for a party 🎉
 function * enhance_results (results, origin, timer) {
   // enhance the results, naturally.
-  timer.tic('getting all prices')
+  timer.tic('getting all prices');
   yield results.map((r, i) => {
     if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {
-      r.mustSelectSize = true
+      r.mustSelectSize = true;
     }
     return co(function * () {
-      var data = yield getPricesPromise(r)
-      r.realPrice = data.price
-      r.altImage = data.altImage
-      r.reviews = data.reviews
-      return r
-    })
-  })
-  timer.tic('got prices')
+      var data = yield getPricesPromise(r);
+      r.realPrice = data.price;
+      r.altImage = data.altImage;
+      r.reviews = data.reviews;
+      return r;
+    });
+  });
+  timer.tic('got prices');
 
   var urls = yield picstitch.stitchResultsPromise(results, origin); // no way i'm refactoring this right now
-  timer.tic('stitched results')
+  timer.tic('stitched results');
   for (var i = 0; i < urls.length; i++) {
-    results[i].picstitch_url = urls[i]
+    results[i].picstitch_url = urls[i];
     // getItemLink should include user_id to do user_id lookup for link shortening
-    results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0])
+    results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
   }
-  timer.tic('shortened urls')
+  timer.tic('shortened urls');
   // cool i've got the results now...
 
-  return results
+  return results;
 }
 
 var getPrices = function (item, callback) {
-  var url = item.DetailPageURL[0]
-  var price // get price from API
-  var altImage
-  var reviews
+  var url = item.DetailPageURL[0];
+  var price; // get price from API
+  var altImage;
+  var reviews;
 
-  var formattedPrice = _.get(item, 'Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice')
+  var formattedPrice = _.get(item, 'Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice');
   if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice) {
     // && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
-    verbose('/!/!!! warning: no webscrape price found for amazon item, using Offer array')
+    verbose('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
 
-    price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0]
+    price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
   } else if (item.ItemAttributes[0].ListPrice) {
-    verbose('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array')
+    verbose('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
 
     if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0') {
-      price = ''
+      price = '';
     } else {
       // add price
-      price = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0]
+      price = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
     }
   }
 
-  verbose('price PRE PROCESS ', price)
+  verbose('price PRE PROCESS ', price);
 
   amazonHTML.basic(url, function (err, product) {
-    kip.err(err) // print error
+    kip.err(err); // print error
     console.
 
-    verbose('& & & & & & & & & & & &PRODUCT OBJ ', product)
+    verbose('& & & & & & & & & & & &PRODUCT OBJ ', product);
 
     if (product && product.reviews) {
-      reviews = product.reviews
+      reviews = product.reviews;
     }
 
     if (product && product.price) {
-      verbose('returning early with price: ' + product.price)
-      verbose('returning early with rice ' + product.altImage)
+      verbose('returning early with price: ' + product.price);
+      verbose('returning early with rice ' + product.altImage);
       // if(product.altImage){
       //   altImage = product.altImage
       // }
-      return callback(product.price, product.altImage, reviews)
+      return callback(product.price, product.altImage, reviews);
     }
 
-    price = product.price || price || ''
-    verbose('final price: ' + price)
+    price = product.price || price || '';
+    verbose('final price: ' + price);
     if (product.altImage) {
-      altImage = product.altImage
+      altImage = product.altImage;
     }
 
-    callback(price, altImage, reviews)
-  })
-}
+    callback(price, altImage, reviews);
+  });
+};
 
 ////////////// lol //////////////////
 var getPricesPromise = function (item) {
@@ -464,10 +464,10 @@ var getPricesPromise = function (item) {
         altImage: altImage,
         reviews: reviews,
         satellite_emoji: '🛰'
-      })
-    })
-  })
-}
+      });
+    });
+  });
+};
 
 module.exports.lookup = lookup
 module.exports.similar = similar
@@ -483,14 +483,14 @@ module.exports.search = search
   /_/_/     \/_____/\____\/   /_/_/    \/_/  \_\/ \/_/  \_\____/
 */
 if (!module.parent) {
-  console.log('testing'.yellow)
+  console.log('testing'.yellow);
   co(function * () {
     var result = yield search({
       query: process.argv[2]
-    })
+    });
 
-    console.log(result)
+    console.log(result);
   }).catch(e => {
-    console.log(e.stack)
+    console.log(e.stack);
   })
 }

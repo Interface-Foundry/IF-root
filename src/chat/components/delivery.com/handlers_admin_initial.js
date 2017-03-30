@@ -17,7 +17,7 @@ var $allHandlers;
 
 // exports
 /**@namespace handlers*/
-var handlers = {}
+var handlers = {};
 
 handlers['food.admin.confirm_new_session'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();

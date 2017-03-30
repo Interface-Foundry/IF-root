@@ -117,7 +117,7 @@ function process_data (body, product, url, callback) {
   }
   // we found an image alternate for missing item images
   if ($('#imgTagWrapperId').children('img').attr('data-old-hires')) {
-    product.altImage = $('#imgTagWrapperId').children('img').attr('data-old-hires')
+    product.altImage = $('#imgTagWrapperId').children('img').attr('data-old-hires');
   }else if ($('#imgTagWrapperId').children('img').attr('src') && checkURL($('#imgTagWrapperId').children('img').attr('src'))) {
     debug('wow we found an image url um ok, proceed....proceed...');
     product.altImage = $('#imgTagWrapperId').children('img').attr('src');
@@ -224,7 +224,7 @@ module.exports.qa = function (asin, callback) {
 };
 
 function checkURL (url) {
-  return (url.match(/\.(jpeg|jpg|gif|png)$/) != null)
+  return (url.match(/\.(jpeg|jpg|gif|png)$/) != null);
 }
 
 // module.exports = {
