@@ -51,6 +51,7 @@
     "jest": "^19.0.2",
     "karma": "^1.5.0",
     "karma-chrome-launcher": "^2.0.0",
+    "karma-cli": "^1.0.1",
     "karma-jasmine": "^1.1.0",
     "karma-jasmine-diff-reporter": "^1.0.0",
     "karma-phantomjs-launcher": "^1.0.2",
