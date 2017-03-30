@@ -28,7 +28,6 @@ export default class App extends Component {
     } else if (leader) {
       changeKipFormView(0)
     }
-
   }
 
   render() {
