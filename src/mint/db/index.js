@@ -25,6 +25,7 @@ waterline.loadCollection(require('./amazon_items'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./emails'))
+waterline.loadCollection(require('./email_opens'))
 waterline.loadCollection(require('./authentication_links'))
 
 var config = {
@@ -57,6 +58,7 @@ var initialize = new Promise((resolve, reject) => {
       UserAccounts: ontology.collections.user_accounts,
       Sessions: ontology.collections.sessions,
       Emails: ontology.collections.emails,
+      EmailOpens: ontology.collections.email_opens,
       AuthenticationLinks: ontology.collections.authentication_links
     }
     resolve(models)

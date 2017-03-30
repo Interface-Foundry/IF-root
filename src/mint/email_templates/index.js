@@ -2,8 +2,6 @@ var fs = require('fs')
 var ejs = require('ejs')
 var baseUrl = process.env.BASEURL || 'http://mint-dev.kipthis.com'
 
-console.log('compiling ejs email templates')
-
 /** Compile all the .html files found in email_templates folder */
 const templates = fs.readdirSync(__dirname).reduce((templates, name) => {
   if (name.endsWith('.html')) {
