@@ -31,7 +31,10 @@ function deploy() {
     })
     console.log(stdout)
     stdout = exec('webpack', {
-      cwd: __dirname
+      cwd: __dirname,
+      env: {
+        NODE_PATH: './react'
+      }
     })
     console.log(stdout)
     resolve()

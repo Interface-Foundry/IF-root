@@ -1,0 +1,46 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["standard", "plugin:react/recommended"],
+  "env": {
+    "browser": true,
+    "node": true,
+    "mocha": true
+  },
+  "ecmaFeatures": {
+    "classes": true,
+    "jsx": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 8
+  },
+  "plugins": [
+    "standard",
+    "react"
+  ],
+  "globals": {
+    "kip": true,
+    "db": true,
+    "React": true
+  },
+  "rules": {
+    "camelcase": 0,
+    "eqeqeq": 1,
+    "space-before-function-paren": 0,
+    "one-var": 0,
+    "quotes": [
+      1,
+      "single"
+    ],
+    "semi": [
+      1,
+      "always"
+    ],
+    "no-extra-semi": 2,
+    "semi-spacing": [
+      2, {
+        "before": false,
+        "after": true
+      }
+    ]
+  }
+}

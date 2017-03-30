@@ -8,6 +8,13 @@ var nounInflector = new natural.NounInflector()
 var fs = require('fs')
 require('../logging')
 
+console.log('hmmm who is loading this?')
+var m = module
+while (m.parent) {
+  console.log(m.filename)
+  m = m.parent
+}
+
 if (mongoose.connection.readyState == 0) {
   mongoose.connect(config.mongodb.url)
   var db_conn = mongoose.connection

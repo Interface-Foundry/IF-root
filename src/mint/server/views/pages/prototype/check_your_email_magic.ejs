@@ -1,0 +1,25 @@
+<!-- views/pages/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <title>Cart | Kip Store</title>
+  <link href="/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <h1>Check your email</h1>
+  <p>Someone has already used "<%=user.email_address%>", so you'll need to check your email and click the magic link we just sent you to authenticate.</p>
+
+  <p>Wrong email address? Go ahead and type the right one here:</p>
+  <form method="get" action="identify">
+    <label for="email">Enter your Email</label>
+    <input type="email" id="email" name="email" />
+    <input type="hidden" value="<%=cart.id%>" />
+  </form>
+</body>
+
+</html>
