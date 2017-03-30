@@ -1,17 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 
 export default class InputWithButton extends Component {
-
-  componentWillReceiveProps(nextProps) {
-    const { meta: { error, active, asyncValidating }, changeCenter, newAccount } = nextProps
-
-    if (!active && !error && !asyncValidating && newAccount) {
-      changeCenter('two')
-    }
-  }
-
   render() {
-    const { input, meta: { error }, changeCenter, submit } = this.props
+    const { input, meta: { error }, submit } = this.props
 
     return (
       <div className={`custom__input${error?'-error':''}`}>
