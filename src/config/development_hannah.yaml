@@ -1,21 +1,20 @@
 env: development_hannah
 mongodb:
-  url: mongodb://localhost:27017/foundry
+  url: mongodb://localhost:27017/mint
   backuphost: localhost
-  options:
-    server:
-      poolSize: 5
-      socketOptions:
-        keepAlive: 1
 elasticsearch:
   url: http://localhost:9200
-picstitch: http://dev-picstitch.kipthis.com
+kipPayURL: https://50ad31f7.ngrok.io
+menuURL: http://854a1c3b.ngrok.io/menus
 nlp: http://dev-parser.kipthis.com
 nlp_rnn: http://dev-rnn.kipthis.com
+picstitch: http://dev-picstitch.kipthis.com
+proxy:
+  skip_metrics: true
+  luminati:
+    addr: http://lum-customer-kipthis-zone-static:e49d4ega1696@zproxy.luminati.io:22225
 slack:
   client_id: "110519934743.109767556243"
   client_secret: 4b3e730b1162664f10f4f23865e0964c
   verification_token: PyeQ1gjE81cbAWFshg24to0U
   redirect_uri: https://0582f004.ngrok.io/newslack
-kipPayURL: https://pay.kipthis.com
-menuURL: https://50ed5a9f.ngrok.io/menus

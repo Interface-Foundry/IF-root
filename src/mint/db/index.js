@@ -1,18 +1,18 @@
-var Waterline = require('waterline')
-var mongoAdapter = require('sails-mongo')
+var Waterline = require('waterline');
+var mongoAdapter = require('sails-mongo');
 
 Waterline.isA = function (collection) {
   return {
     model: collection
-  }
-}
+  };
+};
 
 Waterline.isMany = function (collection) {
   return {
     collection: collection,
     via: 'id'
-  }
-}
+  };
+};
 
 /**
  * Set up the database connections
@@ -25,7 +25,10 @@ waterline.loadCollection(require('./amazon_items'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./emails'))
+waterline.loadCollection(require('./email_opens'))
 waterline.loadCollection(require('./authentication_links'))
+waterline.loadCollection(require('./camel_items'))
+waterline.loadCollection(require('./amazon_blurbs'))
 
 var config = {
   adapters: {
@@ -40,13 +43,13 @@ var config = {
       database: 'mint'
     }
   }
-}
+};
 
 var initialize = new Promise((resolve, reject) => {
   waterline.initialize(config, (err, ontology) => {
     if (err) {
-      console.error(err)
-      return reject(err)
+      console.error(err);
+      return reject(err);
     }
 
     const models = {
@@ -57,10 +60,13 @@ var initialize = new Promise((resolve, reject) => {
       UserAccounts: ontology.collections.user_accounts,
       Sessions: ontology.collections.sessions,
       Emails: ontology.collections.emails,
+      CamelItems: ontology.collections.camel_items,
+      AmazonBlurbs: ontology.collections.amazon_blurbs,
+      EmailOpens: ontology.collections.email_opens,
       AuthenticationLinks: ontology.collections.authentication_links
-    }
-    resolve(models)
-  })
-})
+    };
+    resolve(models);
+  });
+});
 
-module.exports = initialize
+module.exports = initialize;

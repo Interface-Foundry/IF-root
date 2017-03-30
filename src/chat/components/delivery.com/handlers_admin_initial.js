@@ -1,27 +1,28 @@
-var sleep = require('co-sleep')
-var _ = require('lodash')
+var sleep = require('co-sleep');
+var _ = require('lodash');
 
-var utils = require('./utils')
-var api = require('./api-wrapper')
-var slackUtils = require('../slack/utils.js')
-var coupon = require('../../../coupon/coupon.js')
-var mailer_transport = require('../../../mail/IF_mail.js')
+var utils = require('./utils');
+var api = require('./api-wrapper');
+var slackUtils = require('../slack/utils.js');
+var coupon = require('../../../coupon/coupon.js');
+var mailer_transport = require('../../../mail/IF_mail.js');
 
 // turn feedback buttons on/off
-var feedbackOn = false
-var feedbackTracker = {}
+var feedbackOn = false;
+var feedbackTracker = {};
 
 // injected dependencies
-var $replyChannel
-var $allHandlers
+var $replyChannel;
+var $allHandlers;
 
 // exports
-var handlers = {}
+/**@namespace handlers*/
+var handlers = {};
 
 handlers['food.admin.confirm_new_session'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();
 
-  db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text})
+  db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text});
 
   var restartText = (foodSession.convo_initiater.id == message.source.user ? `Looks like you already have an order started.`: `Looks like <@${foodSession.convo_initiater.id}> is ordering food right now.`)
 
@@ -39,17 +40,14 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
       }
     ]
   }
-  // if (process.env.NODE_ENV == 'development_hannah') {
-  if (false) {
-    msg_json.attachments[0].actions.push(
-    {
-        'name': 'passthrough',
-        'text': 'Return to Order',
-        'type': 'button',
-        'value': 'food.admin.retrieve_order_status'
-      }
-    )
-  }
+    // msg_json.attachments[0].actions.push(
+    // {
+    //     'name': 'passthrough',
+    //     'text': 'Return to Order',
+    //     'type': 'button',
+    //     'value': 'food.admin.retrieve_order_status'
+    //   }
+    // )
   msg_json.attachments[0].actions.push({
       'name': 'food.admin.select_address',
       'text': 'Start New Order',
@@ -66,11 +64,11 @@ handlers['food.admin.retrieve_order_status'] = function * (message) {
   var actionSuite = prevMessages.filter(m => m.action == prevMessage.action)
   prevMessage = actionSuite[actionSuite.length - 1]
   var action = 'food.' + prevMessage.action
-  console.log(prevMessage)
+  logging.debug('prevMessage', prevMessage)
 
   if (prevMessage.data && prevMessage.data.value) {
     prevMessage.data.value = JSON.parse(prevMessage.data.value)
-    console.log('prevMessage.data.value', prevMessage.data.value)
+    logging.debug('prevMessage.data.value %s', prevMessage.data.value)
   }
   prevMessage.source = message.source
   prevMessage.text = ''
@@ -137,14 +135,14 @@ handlers['food.admin.select_address'] = function * (message, banner) {
 
   //modify message for onboarding
   if (foodSession.onboarding) {
-    msg_json.attachments[0].text = '*Step 1.* Add an address for delivery by tapping the `New Location +` button'
+    msg_json.attachments[0].text = 'Hi there, I\'m going to walk you through your first Kip Café order! \n*Step 1:* Add a delivery address'
     msg_json.attachments[0].mrkdwn_in = ["text"]
     msg_json.attachments[0].color = '#A368F0'
 
     //add onboard sticker #1
     msg_json.attachments.unshift({
-      'text':'Hi there, I\'m going to walk you through your first Kip Café order! \n _By using Kip you agree to our <https://kipthis.com/legal.html|Terms of Use>_',
-      'image_url':'http://tidepools.co/kip/welcome_cafe.png',
+      'text':'',
+      'image_url':'https://storage.googleapis.com/kip-random/cafe.png',
       'color': '#A368F0',
       'mrkdwn_in': ['text']
     })
@@ -175,7 +173,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   //toggle floor buttons for onboarding
   var floorButtons = [{
     'name': 'passthrough',
-    'text': 'New Location +',
+    'text': 'New Address +',
     'type': 'button',
     'value': 'food.settings.address.new'
   }]
@@ -420,8 +418,6 @@ handlers['food.settings.address.confirm'] = function * (message) {
     return
   }
 
-  // console.log(location)
-
   var addr = [
     [location.address_1, location.address_2].filter(Boolean).join(' '),
     location.neighborhood,
@@ -469,15 +465,14 @@ handlers['food.settings.address.confirm'] = function * (message) {
 
   db.waypoints.log(1013, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  if(foodSession.onboarding){
-    msg_json.text = ''
-    msg_json.attachments.unshift({
-      'text':'*Step 3.* Is this your address?',
-      'color':'#A368F0',
-      'mrkdwn_in': ['text']
-    })
-  }
-
+  // if(foodSession.onboarding){
+  //   msg_json.text = ''
+  //   msg_json.attachments.unshift({
+  //     'text':'*Step 3.* Is this your address?',
+  //     'color':'#A368F0',
+  //     'mrkdwn_in': ['text']
+  //   })
+  // }
 
   // collect feedback on this feature
   // if (feedbackOn && msg_json) {
@@ -594,15 +589,15 @@ handlers['food.delivery_or_pickup'] = function * (message) {
 
   if (fulfillmentMethod === 'pickup') {
     var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession, 'data.input')
-    var res = yield api.searchNearby({addr: addr, pickup: true})
-    foodSession.merchants = _.get(res, 'merchants')
-    foodSession.cuisines = _.get(res, 'cuisines')
-    foodSession.markModified('merchants')
-    foodSession.markModified('cuisines')
+    var res = yield api.searchNearby({addr: addr, pickup: true});
+    foodSession.merchants = _.get(res, 'merchants');
+    foodSession.cuisines = _.get(res, 'cuisines');
+    foodSession.markModified('merchants');
+    foodSession.markModified('cuisines');
   }
-  yield foodSession.save()
-  yield handlers['food.admin_polling_options'](message)
-}
+  yield foodSession.save();
+  yield handlers['food.admin_polling_options'](message);
+};
 //
 // The user just clicked pickup or delivery and is now ready to start ordering
 // Or, the user just picked a budget and is now ready to start ordering
@@ -612,8 +607,7 @@ handlers['food.admin_polling_options'] = function * (message) {
 
   db.waypoints.log(1100, foodSession._id, message.user_id, {original_text: message.original_text})
 
-  logging.debug('foodSession.budget', foodSession.budget)
-
+  // notifies admin about the order budget
   var budgetAttachment = {
     text: (foodSession.budget ? `*Budget*: $${foodSession.budget} / person` : '*Budget*: Unlimited'),
     mrkdwn_in: ['text'],
@@ -701,17 +695,6 @@ handlers['food.admin_polling_options'] = function * (message) {
       'mrkdwn_in': ['text']
     })
   }
-
-  // attachments.push({
-  //   'mrkdwn_in': [
-  //     'text'
-  //   ],
-  //   'text': `*Budget*: $${foodSession.budget} / person`,
-  //   'fallback': 'Team budget',
-  //   'callback_id': 'indignata sub umbras',
-  //   'attachment_type': 'default',
-  //   'actions': []
-  // })
 
   attachments.push({
     'mrkdwn_in': [
@@ -814,7 +797,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       }, {
         'name': 'food.admin.select_channel_reorder',
         'value': mostRecentMerchant,
-        'text': `Edit Members`,
+        'text': `Manage Channels`,
         'type': 'button'
       }//,
       // {

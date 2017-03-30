@@ -37,7 +37,13 @@ restartButton.confirm = {
   dismiss_text: 'No'
 };
 
-var promptCheckout = function (foodSession, message, waitingText) {
+/**
+Clears any existing checkout reminders and, unless all orders are in, sets a new one to go off in 20 minutes
+@param foodSession
+@param message
+@param waitingText {string} - formatted names of members who haven't ordered; an empty string if all orders are in
+*/
+function promptCheckout (foodSession, message, waitingText) {
   // schedule reminder here to finish voting early in 20 minutes
   logging.debug('prompt checkout called');
 
@@ -49,7 +55,7 @@ var promptCheckout = function (foodSession, message, waitingText) {
     if (e) logging.error(e);
   });
 
-    if (waitingText) {
+    if (waitingText) { // if there are no members who haven't ordered, don't schedule a new reminder
       var finishEarlyMessage = {
         thread_id: foodSession.convo_initiater.dm,
         incoming: false,
@@ -79,6 +85,7 @@ var promptCheckout = function (foodSession, message, waitingText) {
       });
     }
   };
+
 //
 // Show the user their personal cart
 //
@@ -269,10 +276,9 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 };
 
 handlers['food.cart.update_dashboards'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();
-  logging.debug('duplicated?', foodSession.cart.length);
-  return yield sendOrderProgressDashboards(foodSession, message);
-};
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  return yield sendOrderProgressDashboards(foodSession, message)
+}
 
 //
 // Sends ALL the order progress dashboards
@@ -329,12 +335,12 @@ function * sendOrderProgressDashboards (foodSession, message) {
     slackers = slackers.join(' ');
   }
 
-  var waitingText = '';
+  // text that will be displayed listing the users who haven't ordered
+  var waitingText = ''
   if (slackers.length > 0 || emailers.length > 0) {
-    logging.debug('slackers', slackers, 'emailers', emailers);
-    // var waitingText = 'Waiting for orders from '
-    if (slackers && !emailers) waitingText += slackers;
-    else if (emailers && !slackers) waitingText += emailers;
+    logging.debug('slackers', slackers, 'emailers', emailers)
+    if (slackers && !emailers) waitingText += slackers
+    else if (emailers && !slackers) waitingText += emailers
     else {
       waitingText += `Slack: ${slackers}\nEmail: ${emailers}`;
     }
@@ -467,9 +473,10 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   // Reply to the user who either submitted their personal cart or said "no thanks"
   //
   if (message.data.value === 'no thanks') {
-    yield foodSession.update({$pull: {team_members: {id: message.user_id}}}).exec();
-    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();
-    $replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'Ok, maybe next time :blush:'}});
+    yield foodSession.update({$pull: {team_members: {id: message.user_id}}}).exec()
+    foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+    // console.log('FOODSESSION', foodSession)
+    $replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: `Ok, maybe next time :blush:`}})
   } else {
     foodSession.confirmed_orders.push(message.source.user);
     $replyChannel.sendReplace(message, '.', {type: message.origin, data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
@@ -646,7 +653,6 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   })
 
   // show admin final confirm of thing
-  logging.debug('foodSession.cart.length', foodSession.cart.length) // duplication has happened OH GOD IT'S JOHN CARPENTER'S "Thing"
   var teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
   var lateMembers = _.difference(teamMembers, foodSession.confirmed_orders)
   // var team = yield db.Slackbots.findOne({'team_id': message.source.team}).exec()
@@ -665,10 +671,23 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
           'team': foodSession.team_id
         }
       })
+
+    // var messagesToDelete = yield db.Messages.remove({thread_id: user.dm, incoming: true}).sort('-ts').limit(5)
+    // console.log('MESSAGES TO DELETE:', messagesToDelete)
+    // yield messagesToDelete.map(function * (m) {
+    //   if (m.reply && m.reply.data && m.reply.data.attachments) {
+    //     m.reply.data.attachments.map(function (a) {
+    //       a.actions = []
+    //     })
+    //     yield db.update({_id: m._id}, {'reply.data.attachments': m.reply.data.attachments})
+    //   }
+    // })
+    // console.log('MESSAGES TO DELETE:', messagesToDelete)
+
     var json = {
-        'text': `The collection of orders has ended. Sorry.`,
+        'text': `Order collection has ended, sorry.`,
         'callback_id': 'food.end_order',
-        'fallback': `The collection of orders has ended. Sorry.`,
+        'fallback': `Order collection has ended, sorry.`,
         'attachment_type': 'default',
         'attachments': [{
           'fallback': 'Home',
@@ -823,9 +842,8 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     yield foodSession.save()
 
     // THIS CREATES THE TIP, DELIVERY.COM COSTS, AND KIP ATTACHMENT
-    var attachmentsRelatedToMoney = yield createAttachmentsForAdminCheckout(foodSession, totalPrice)
+    var attachmentsRelatedToMoney = yield createAttachmentsForAdminCheckout(foodSession)
     response.attachments = [].concat(mainAttachment, itemAttachments, attachmentsRelatedToMoney)
-
   } else {
     // some sort of error
     foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -833,13 +851,13 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     var deliveryError = JSON.parse(foodSession.delivery_error)
     var errorMsg = `Looks like there are ${deliveryError.length} total errors including: ${deliveryError[0].user_msg}`
 
-    //send ourselves an email
+    //send ourselves an email with the error if there is one
     var mailOptions = {
       to: `<hello@kipthis.com>`,
       from: `Kip Café <hello@kipthis.com>`,
       subject: `Kip Café Order Error`,
       html: `<html>Error(s) in order for team ${foodSession.team_id}:`
-        + `${deliveryError}</html>`,
+        + `${JSON.stringify(deliveryError)}</html>`
     }
 
     try {

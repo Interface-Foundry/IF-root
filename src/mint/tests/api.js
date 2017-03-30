@@ -139,7 +139,7 @@ describe.only('api', () => {
     assert(session2.user_accounts[0].email_address === mcTesty.email)
   }))
 
-  it('GET /newcart should create a new cart and redirect to /cart/:Cart_id', () => co(function * () {
+  it('GET /newcart should create a new cart, redirect to /cart/:Cart_id, and send an email', () => co(function * () {
     var res = yield get('/newcart', true)
 
     // make sure it's redirect to /cart/123456
@@ -155,6 +155,15 @@ describe.only('api', () => {
 
     // lets save this cart id for later
     mcTesty.cart_id = cart.id
+
+    // check that an email sent and is associated with this cart
+    var email = yield db.Emails.findOne({cart: cartId})
+    assert(email)
+    assert.equal(email.cart, cart.id)
+    assert.equal(email.recipients, mcTesty.email)
+    assert(email.message_html)
+    assert.equal(email.template_name, 'new_cart')
+    assert(email.id)
   }))
 
   it('GET /api/carts should return all the users carts', () => co(function * () {

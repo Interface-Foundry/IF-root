@@ -19,7 +19,7 @@ var userAccountCollection = Waterline.Collection.extend({
       primaryKey: true,
       unique: true,
       defaultsTo: function () {
-        return uuid.v4()
+        return uuid.v4();
       }
     },
 

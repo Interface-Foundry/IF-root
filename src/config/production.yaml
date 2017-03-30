@@ -34,8 +34,6 @@ proxy:
   luminati:
     enabled: true
     password: e49d4ega1696
-  mesh:
-    password: 9fSvNH@aB4Hs2s>qcatsoupkanyecandle
 redis:
   port: 6379
   url: redis-thunder.internal.kipapp.co
@@ -45,4 +43,4 @@ slack:
   verification_token: P30EDlNgjsl9i15ZQBOElJls
   redirect_uri: https://slack.kipapp.co/newslack
   internal_host: http://slack:8000
-menuURL: http://cafe.kipthis.com/menus
+menuURL: https://cafe.kipthis.com/menus

@@ -64,6 +64,7 @@
     "mongoose-hook-ensure-indexes": "^0.1.4",
     "natural": "^0.4.0",
     "node-cloud-vision-api": "^0.2.0",
+    "node-wget": "^0.4.2",
     "node-yelp": "^0.0.3",
     "nodemailer": "^2.4.1",
     "nodemailer-sendgrid-transport": "^0.2.0",

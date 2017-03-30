@@ -4,6 +4,13 @@ var sleep = require('co-sleep')
 var slack = require('@slack/client')
 const fs = require('fs')
 
+/**
+ * File which was used to send marketing messages
+ * See also gen_users.js for the code which was used to generate the lists of users
+ * @module slack/feature_rollout
+ */
+
+
 //
 // Grab the batch's file of admin id's to spam
 //
@@ -165,7 +172,7 @@ const days = [
 `,
   `  66
   66
- 66   
+ 66
  66666
  66  66
  66  66
@@ -180,7 +187,7 @@ const days = [
   77
 `,
   ` 888888
- 88  88 
+ 88  88
    888
   88 88
  88   88
@@ -201,4 +208,3 @@ co(main).catch(e => {
   console.error(e)
   process.exit(1)
 })
-

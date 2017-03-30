@@ -38,7 +38,8 @@ if (!process.env.NO_LIVE_RELOAD) {
 var regularRoutes = require('./routes/regular.js');
 var apiRoutes = require('./routes/api.js');
 
-require('colors')
+require('colors');
+// require('../camel'); //uncomment to populate camel_items
 
 /**
  * Models loaded from the waterline ORM

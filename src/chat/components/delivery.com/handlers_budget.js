@@ -4,15 +4,21 @@ var _ = require('lodash');
 var $replyChannel;
 var $allHandlers;
 
-// exports
-var handlers = {};
+/**@namespace handlers*/
+var handlers = {}
 
+/**
+* Displays the budgets this team has used in the past
+* @param message
+*/
 handlers['food.admin.team_budget'] = function * (message) {
-  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec();
+  logging.debug('food.admin.team_budget, team_id: %s', message.source.team)
+  var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   //waypoint logging
   db.waypoints.log(1020, foodSession._id, message.user_id, {original_text: message.original_text});
 
+  //the budgets are stored by location
   var budget_options;
   var locations = (yield db.slackbots.findOne({team_id: message.source.team})).meta.locations;
   for (var i = 0; i < locations.length; i++) {
@@ -22,15 +28,17 @@ handlers['food.admin.team_budget'] = function * (message) {
   }
 
   var msg_text = 'How much would you like each person on your team to spend on food?';
+  if (foodSession.onboarding) msg_text = '*Step 3:* ' + msg_text
 
+  // extract numerals from user input
   var parseNumber = function (str) {
     var num = str.match(/([\d]+(?:\.\d\d)?)/);
     if (num) return num[1];
     else return null;
   };
 
-  if (message.text && message.text[0] !== '{') {
-    var num = parseNumber(message.text);
+  if (message.text && message.text[0] != '{') { //ie if the user has just typed something in
+    var num = parseNumber(message.text)
 
     if (num) {
       message.data = {};
@@ -57,8 +65,13 @@ handlers['food.admin.team_budget'] = function * (message) {
   }
 
   var msg_json = {
-    'attachments': []
-  };
+    'attachments': [{
+      'text': msg_text,
+      'mrkdwn_in': ['text'],
+      'fallback': 'Please choose a budget',
+      'color': (foodSession.onboarding ? '#A368F0' : '#3AA3E3')
+    }]
+  }
 
   var noneButton = {
       'name': 'food.admin.confirm_budget',
@@ -71,14 +84,15 @@ handlers['food.admin.team_budget'] = function * (message) {
       }
     };
 
+  // display the available budgets
   for (var i = 0; i < budget_options.length; i++) {
-    if (i === 0 || i % 5 === 0) {
-      // console.log('new attachment', i)
+    if (i == 0 || i % 5 == 0) {
       msg_json.attachments.push({
         'mrkdwn_in': [
           'text'
         ],
-        'text': (i === 0 ? msg_text : ''),
+        'text': '',
+        // 'text': (i == 0 ? msg_text : ''),
         'fallback': 'I am fallback hear me fall back!',
         'callback_id': 'food.admin.team_budget',
         'color': '#3AA3E3',
@@ -89,8 +103,8 @@ handlers['food.admin.team_budget'] = function * (message) {
         msg_json.attachments[msg_json.attachments.length-1].actions.push(noneButton);
       }
     }
-    // console.log(i, budget_options[i])
-    msg_json.attachments[Math.floor(i / 5)].actions.push({
+
+    msg_json.attachments[1 + Math.floor(i / 5)].actions.push({
       'name': 'food.admin.confirm_budget',
       'text': `$${budget_options[i]}`,
       'style': 'default',
@@ -127,6 +141,12 @@ handlers['food.admin.team_budget'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.admin.team_budget', {type: message.origin, data: msg_json});
 };
 
+/**
+* updates available budgets and the budget history with the most recently used budget
+* @param n {number} the new budget
+* @param location {object} data stored on the slackbot relating to the order location, which contains both the available budgets and budget history
+* @returns {array} array containing the new budgets array at index 0 and the new budget-history array at index 1
+*/
 function updateBudget (n, location) {
   var n = Number(n);
   var history = location.budget_history;
@@ -143,8 +163,12 @@ function updateBudget (n, location) {
   return [budgets, history];
 }
 
+/**
+* Save the newly chosen budget to the database
+* @param message
+*/
 handlers['food.admin.confirm_budget'] = function * (message) {
-
+  logging.debug('food.admin.confirm_budget, team_id: %s', message.source.team)
   budget = message.data.value.budget;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();
 
@@ -173,8 +197,15 @@ handlers['food.admin.confirm_budget'] = function * (message) {
     }
   });
 
-  yield $allHandlers['food.admin_polling_options'](message);
-};
+  if (foodSession.onboarding) {
+    // console.log('we are onboarding -- ', foodSession.onboarding)
+    yield $allHandlers['food.poll.confirm_send_initial'](message)
+  }
+  else {
+    // console.log('we are not onboarding -- ', foodSession.onboarding)
+    yield $allHandlers['food.admin_polling_options'](message)
+  }
+}
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel;
