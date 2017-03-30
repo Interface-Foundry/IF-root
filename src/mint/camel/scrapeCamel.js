@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+logging.info('camelcamelcamel');
+
 var rp = require('request-promise');
 var cheerio = require('cheerio');
 var co = require('co');
@@ -81,14 +83,14 @@ var scrape = function * (previousId) {
     }
   };
 
-  console.log('about to scrape', options);
+  logging.info('about to scrape');
   return rp(options)
     .then(function (result) {
-      console.log('result', result);
+      // logging.info('result', result);
       return result;
     })
     .catch(function (err) {
-      console.log('err ',err);
+      logging.info('err ',err);
     });
 };
 
@@ -98,17 +100,17 @@ var scrape = function * (previousId) {
  * @returns the product category of the item
  */
 var getAmazon = function * (asin) {
-  console.log('take a deep breath');
+  logging.info('take a deep breath');
   yield wait(1500);
 
   var amazon_item = yield lookupAmazonItem(asin);
-  console.log('amazon queried');
+  logging.info('amazon queried');
   amazon_item = amazon_item.Item;
-  // console.log('AMAZON OBJECT:', amazon_item);
+  // logging.info('AMAZON OBJECT:', amazon_item);
   var item = {};
   item.url = amazon_item.DetailPageURL;
   item.category = amazon_item.ItemAttributes.ProductGroup;
-  // console.log('is this a real category?', item.cat);
+  // logging.info('is this a real category?', item.cat);
   item.info = amazon_item.ItemAttributes.Feature;
   item.images = {};
   if (amazon_item.SmallImage) item.images.small = amazon_item.SmallImage.URL;
@@ -116,7 +118,7 @@ var getAmazon = function * (asin) {
   if (amazon_item.LargeImage) item.images.large = amazon_item.LargeImage.URL;
   if (amazon_item.DetailPageUrl) item.url = amazon_item.DetailPageUrl;
   // if (amazon_test[0].reviews) item.reviews = amazon_test[0].reviews;
-  console.log('got this:', item);
+  // logging.info('got this:', item);
   return item;
 };
 
@@ -124,9 +126,9 @@ var getAmazon = function * (asin) {
  * Scrapes camelcamelcamel and saves today's deals to mongo as camel_items
  */
 var scrapeCamel = function * () {
-  // console.log('scrape camel called');
+  logging.info('scrape camel called');
   var camel = yield scrape();
-  console.log('scraped');
+  logging.info('scraped');
 
   $ = cheerio.load(camel);
 
@@ -134,7 +136,7 @@ var scrapeCamel = function * () {
   var asins = [];
   var prices = [];
 
-  console.log('loaded cheerio');
+  logging.info('loaded cheerio');
 
   //gets names, asins, and urls to scrape categories from
   $('div.deal_top_inner').each(function (i, e) {
@@ -145,8 +147,7 @@ var scrapeCamel = function * () {
     asins.push(qs[0]);
   });
 
-  console.log('got names and asins');
-  // console.log('asins', asins);
+  logging.info('got names and asins');
 
   //gets new and old prices from the most popular section
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
@@ -202,7 +203,9 @@ var scrapeCamel = function * () {
       url: amazon.url
     });
 
-    console.log('camel', camel);
+    // logging.info('camel', camel);
+    // logging.info('amazon', amazon.info);
+    if (!Array.isArray(amazon.info)) amazon.info = [amazon.info];
 
     var blurbs = [];
     if (amazon.info && amazon.info.length) {
@@ -213,7 +216,7 @@ var scrapeCamel = function * () {
         blurbs.push(blurb);
       });
 
-      console.log('created blurbs');
+      logging.info('created blurbs');
     }
     try {
       yield blurbs.map(function * (b) {
@@ -221,33 +224,41 @@ var scrapeCamel = function * () {
         yield camel.save();
       });
 
-      console.log('saved a model');
+      logging.info('saved a model');
     }
     catch (err) {
-      console.log('ERROR:', err);
+      logging.info('ERROR:', err);
     }
   }
-  console.log('saved models');
-  yield rankDeals();
+  logging.info('saved models');
+  return yield rankDeals();
 };
 
 /**
  * orders the deals to prevent clumps of the same category; saves the ranking to the db
  */
 var rankDeals = function * () {
+  // console.log('rankDeals called');
   var deals = yield db.CamelItems.find({active: true});
   var rankedDeals = [];
   var deferred = [];
   var dealSet = [];
   var categoryCounts = {};
   while (deals.length || deferred.length) {
-    // console.log('rankedDeals', rankedDeals.map(c => c.category));
-    // console.log('deferred', deferred.map(c => c.category));
-    // console.log('dealSet', dealSet.map(c => c.category));
-    // console.log('categoryCounts', categoryCounts);
+    // logging.info('rankedDeals', rankedDeals.map(c => c.category));
+    // logging.info('deferred', deferred.map(c => c.category));
+    // logging.info('dealSet', dealSet.map(c => c.category));
+    // logging.info('categoryCounts', categoryCounts);
     //if we have completed a set, we don't have to worry about repeating those categories
+    logging.info('in the loop');
+    logging.info('rankedDeals.length', rankedDeals.length);
+    logging.info('deferred.length', deferred.length);
     if (!deals.length) {
-      return rankedDeals.concat(dealSet).concat(deferred);
+      console.log('early break');
+      rankedDeals = rankedDeals.concat(dealSet).concat(deferred);
+      // deals = [];
+      // deferred = [];
+      break;
     }
     if (dealSet.length === count) {
       rankedDeals = rankedDeals.concat(dealSet);
@@ -268,12 +279,16 @@ var rankDeals = function * () {
         else categoryCounts[nextDeal.category] = 1;
       }
     }
+    logging.info('done with iteration');
   }
+
+  console.log('done iterating -- some say atlanta, some say new york');
 
   for (var i = 0; i < rankedDeals.length; i++) {
+    console.log('gonna update a record now');
     yield db.CamelItems.update({id: rankedDeals[i].id}, {position: i});
   }
-
+  console.log('ranked deals done');
   return rankedDeals;
 };
 
@@ -283,13 +298,10 @@ var rankDeals = function * () {
  * @returns shortened cleaner version of name
  */
 var trimName = function (name) {
-  console.log('original name', name);
-
+  // logging.info('original name', name);
   name = string_utils.ellipses(name);
-
   var all_specs = string_utils.getSpecs(name);
-  console.log('specs', all_specs);
-
+  // logging.info('specs', all_specs);
   name = string_utils.dashes(name);
   name = string_utils.parens(name);
   name = string_utils.brackets(name);
@@ -298,16 +310,14 @@ var trimName = function (name) {
   name = string_utils.spaces(name);
 
   var redundant_specs = string_utils.getSpecs(name);
-
   var specs = _.difference(all_specs, redundant_specs);
-
   return name + ' ' + specs.join(' ');
 };
 
-// co(function * () {
-//   yield scrapeCamel();
-//   // var deals = require('./deals');
-//   // yield deals.getDeals(count);
-// });
-
-module.exports = scrapeCamel;
+module.exports = function () {
+  co(function * () {
+    yield scrapeCamel();
+    // var deals = require('./deals');
+    // yield deals.getDeals(count);
+  });
+};

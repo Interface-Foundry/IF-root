@@ -39,7 +39,6 @@ var regularRoutes = require('./routes/regular.js');
 var apiRoutes = require('./routes/api.js');
 
 require('colors');
-require('../agendas');
 
 /**
  * Models loaded from the waterline ORM
