@@ -41,7 +41,7 @@ export function update() {
         });
         return dispatch(receive(await response.json()));
       } catch (e) {
-        console.log('error in session update')
+        throw 'error in session update'
       }
     })();
   };
@@ -58,7 +58,7 @@ export function signIn(cart_id, email) {
         })
         return dispatch(receiveUpdate(await response.json()));
       } catch (e) {
-        console.log('error in session signIn')
+        throw 'error in session signIn'
       }
     })();
   };
