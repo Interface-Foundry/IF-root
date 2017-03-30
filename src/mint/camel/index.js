@@ -8,6 +8,9 @@ var scrape = require('./scrapeCamel');
 agenda.define('scrape camel', function (job, done) {
   scrape()
     .then(function (result) {
+    })
+    .catch(function (err) {
+      logging.debug('error scraping camel', err);
     });
   done();
 });
