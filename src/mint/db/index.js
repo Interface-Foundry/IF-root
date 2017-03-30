@@ -17,17 +17,18 @@ Waterline.isMany = function (collection) {
 /**
  * Set up the database connections
  */
-var waterline = new Waterline();
-waterline.loadCollection(require('./carts'));
-waterline.loadCollection(require('./items'));
-waterline.loadCollection(require('./item_options'));
-waterline.loadCollection(require('./amazon_items'));
-waterline.loadCollection(require('./user_accounts'));
-waterline.loadCollection(require('./sessions'));
-waterline.loadCollection(require('./emails'));
-waterline.loadCollection(require('./authentication_links'));
-waterline.loadCollection(require('./camel_items'));
-waterline.loadCollection(require('./amazon_blurbs'));
+var waterline = new Waterline()
+waterline.loadCollection(require('./carts'))
+waterline.loadCollection(require('./items'))
+waterline.loadCollection(require('./item_options'))
+waterline.loadCollection(require('./amazon_items'))
+waterline.loadCollection(require('./user_accounts'))
+waterline.loadCollection(require('./sessions'))
+waterline.loadCollection(require('./emails'))
+waterline.loadCollection(require('./email_opens'))
+waterline.loadCollection(require('./authentication_links'))
+waterline.loadCollection(require('./camel_items'))
+waterline.loadCollection(require('./amazon_blurbs'))
 
 var config = {
   adapters: {
@@ -61,6 +62,7 @@ var initialize = new Promise((resolve, reject) => {
       Emails: ontology.collections.emails,
       CamelItems: ontology.collections.camel_items,
       AmazonBlurbs: ontology.collections.amazon_blurbs,
+      EmailOpens: ontology.collections.email_opens,
       AuthenticationLinks: ontology.collections.authentication_links
     };
     resolve(models);

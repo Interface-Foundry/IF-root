@@ -115,15 +115,30 @@ router.get('/fail', function(req, res, next) {
 router.get('/newcart', (req, res) => co(function * () {
   // create a blank cart
   const cart = yield db.Carts.create({})
-  console.log('new cart', cart)
 
   // find the user for this session
-  const session = req.UserSession; // yield db.Sessions.findOne({id: req.session.id}).populate('user_accounts')
+  const session = req.UserSession;
 
   if (session.user_accounts.length > 0) {
     // make the first user the leader
-    cart.leader = session.user_accounts[0]
+    const user = session.user_accounts[0]
+    cart.leader = user.id
     yield cart.save()
+
+    // Send an email to the user with the cart link
+    var email = yield db.Emails.create({
+      recipients: user.email_address,
+      subject: 'Your New Cart from Kip',
+      cart: cart.id
+    })
+
+    // use the new_cart email template
+    email.template('new_cart', {
+      id: cart.id
+    })
+
+    // remember to actually send it
+    yield email.send();
   }
 
   res.redirect(`/cart/${cart.id}`);

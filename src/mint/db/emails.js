@@ -12,6 +12,15 @@ var emailsCollection = Waterline.Collection.extend({
   identity: 'emails',
   connection: 'default',
   attributes: {
+    /** Generated when an email is created */
+    id: {
+      type: 'string',
+      primaryKey: true,
+      unique: true,
+      index: true,
+      uuidv4: true,
+      defaultsTo: () => uuid.v4()
+    },
 
     /** User accounts which have email addresses */
     recipients: 'string',
@@ -29,14 +38,23 @@ var emailsCollection = Waterline.Collection.extend({
     message_text_fallback: 'string',
 
     /** The date on our servers when we sent the message */
-    date_sent: 'date',
+    sent_at: 'date',
 
-    /** The type of email */
-    email_type: 'string',
+    /** The template for the email */
+    template_name: {
+      type: 'string'
+    },
+
+    /**
+     * The cart associated with this email
+     * @type {Cart}
+     */
+    cart: Waterline.isA('carts'),
 
     /** Use a template for the email */
     template: function(name, data) {
       this.message_html = templates(name, data)
+      this.template_name = name
       return this.save()
     },
 
@@ -65,13 +83,14 @@ var emailsCollection = Waterline.Collection.extend({
         // There is an env variable to control sending emails or nah
         if (!process.env.SEND_EMAILS) {
           console.log('Not sending email (use SEND_EMAILS=1 to actually send an email)')
-          return
+        } else {
+          yield sendMail(options)
         }
-        yield sendMail(options)
+
+        me.sent_at = new Date()
+        yield me.save()
       })
-
     }
-
   }
 })
 

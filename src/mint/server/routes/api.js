@@ -133,7 +133,8 @@ router.get('/identify', (req, res) => co(function* () {
 
     var lostEmail = yield db.Emails.create({
       recipients: email,
-      subject: 'Log in to Kip'
+      subject: 'Log in to Kip',
+      cart: cart.id
     })
 
     lostEmail.template('authentication_link', {
@@ -175,7 +176,8 @@ router.get('/identify', (req, res) => co(function* () {
   // Send an email to the user with the cart link
   email = yield db.Emails.create({
     recipients: user.email_address,
-    subject: 'Your New Cart from Kip'
+    subject: 'Your New Cart from Kip',
+    cart: cart.id
   })
 
   // use the new_cart email template
@@ -568,5 +570,27 @@ router.get('/magiclink/:magic_id', (req, res) => co(function* () {
     return new Error('magic_id doesnt exist, probably return user to some error page where they can create new cart');
   }
 }));
+
+/**
+ * @api {get} /api/email/:email_id.png Email Tracker
+ * @apiDescription Sends a 1x1 pixel image back to track when a user opens an email.
+ * @apiGroup Testing
+ * @apiParam {string} :email_id the id of the user (remember to add .png to it)
+ * @apiParamExample Request
+ * get https://mint.kipthis.com/api/email/53b5e701-5282-4efd-953c-082bc29a329c.png
+ *
+ * @type {Image}
+ */
+router.get('/email/:email_id', (req, res) => co(function * () {
+  res.sendfile(__dirname + '/one-pixel.png')
+
+  const email_id = req.params.email_id.replace(/.png$/, '')
+  var open = db.EmailOpens.create({
+    email: email_id
+  })
+
+  yield open.save()
+}))
+
 
 module.exports = router;
