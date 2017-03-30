@@ -3,7 +3,7 @@ import { RECEIVE_ADD_ITEM_TO_CART, SET_ADDING_ITEM, ADD_MEMBER_TO_CART, RECEIVE_
 const initialState = {
   cart_id: '',
   magic_link: '',
-  memebers: [],
+  members: [],
   leader: null,
   SetAddingItem: false,
   items: []
@@ -24,7 +24,7 @@ export default function cart(state = initialState, action) {
     case ADD_MEMBER_TO_CART:
       return {
         ...state,
-        memebers: [...state.cart_members, action.newMember]
+        members: [...state.members, action.newMember]
       }
     case RECEIVE_CART:
       return {

@@ -8,7 +8,7 @@ import { fetchCart } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: ownProps.match.params.cart_id,
-  memebers: state.cart.memebers,
+  members: state.cart.members,
   leader: state.cart.leader,
   newAccount: state.session.newAccount,
   currentView: state.kipForm.currentView,

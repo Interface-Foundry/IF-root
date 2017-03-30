@@ -5,9 +5,10 @@ import { NEW_TYPE, RECEIVE_ADD_ITEM_TO_CART, ADD_MEMBER_TO_CART, RECEIVE_CART, R
 const initialState = {
   cart_id: '',
   magic_link: '',
-  cart_leader: '',
-  cart_members: [],
-  items: [],
+  members: [],
+  leader: null,
+  SetAddingItem: false,
+  items: []
 };
 
 describe('cart reducer', () => {
@@ -52,15 +53,15 @@ describe('cart reducer', () => {
   })
 
   it('should add a member to the cart', () => {
-    const cart_members = [{ name: 'Riley', id: 123 }, { name: 'Sam', id: 321 }];
-    const newMember = { name: 'Taylor', id: 246 }
-    expect(reducer({...firstState, cart_members }, {
+    const members = [{ name: 'Riley', id: 123 }, { name: 'Sam', id: 321 }];
+    const newMember = { name: 'Taylor', id: 246 };
+    expect(reducer({...firstState, members}, {
         type: ADD_MEMBER_TO_CART,
         newMember
       }))
       .toEqual({
         ...firstState,
-        cart_members: [...cart_members, newMember]
+        members: [...members, newMember]
       })
   })
 })
