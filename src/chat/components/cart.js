@@ -17,7 +17,7 @@ var DEFAULT_CLIENT = kip.config.amazon[0].awsId
 
 var aws_client_id_list = Object.keys(aws_clients)
 
-console.log('AWS LCIENTS ', aws_client_id_list)
+logging.info('AWS CLIENTS ', aws_client_id_list)
 var processData = require('./process')
 var fs = require('fs')
 
@@ -30,11 +30,11 @@ module.exports = {}
 // item: the item from amazon result i guess
 //
 module.exports.addToCart = function (slack_id, user_id, item, type) {
-  console.log('adding item to cart for ' + slack_id + ' by user ' + user_id)
-  console.log('ITEM ZZZZ ', JSON.stringify(item, null, 2))
+  logging.info('adding item to cart for %s by user %s', slack_id, user_id)
+  logging.debug('item', item);
   // fixing bug to convert string to to int
   if (item.reviews && item.reviews.reviewCount) {
-    item.reviews.reviewCount = parseInt(item.reviews.reviewCount)
+    item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
   }
   // Handle the case where the search api returns items that we can't add to cart
   var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0')
@@ -43,35 +43,35 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
     // api can and will return items that you cannot buy.  So we have to just
     // ignore these things.
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
-    return Promise.reject('Item not available')
+    return Promise.reject('Item not available');
   }
   return co(function * () {
-    console.log('type: ', type)
+    logging.debug('type', type);
     // please do not remove changes below. it is required for fb to work.
     if (type == 'personal') {
-      cart = yield getCart(slack_id, type)
+      cart = yield getCart(slack_id, type);
     } else {
       var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec()
       if (team_carts.length === 1) {
-        var cart = team_carts[0]
+        var cart = team_carts[0];
       } else {
-        cart = yield getCart(slack_id)
+        cart = yield getCart(slack_id);
       }
     }
-    console.log(cart)
+    logging.debug('cart', cart);
     // make sure we can add this item to the cart
     // know it's ok if the item already exists in the cart
-    var ok = false
+    var ok = false;
     cart.aggregate_items.map(i => {
       if (i.ASIN === item.ASIN[0] && i.quantity > 1) {
-        ok = true
+        ok = true;
       }
-    })
+    });
 
     // TODO can't check if an item is okay to add if it's their first item in the cart...
     if (!ok && _.get(cart, 'amazon.CartId[0]')) {
-      var client = aws_clients[cart.aws_client || DEFAULT_CLIENT]
-      if (typeof client === 'undefined') client = aws_clients[DEFAULT_CLIENT]
+      var client = aws_clients[cart.aws_client || DEFAULT_CLIENT];
+      if (typeof client === 'undefined') client = aws_clients[DEFAULT_CLIENT];
 
       // attempt to add the item to the cart for the first time, check for errors
       var res = yield client.addCart({
@@ -79,7 +79,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
         HMAC: cart.amazon.HMAC[0],
         'Item.0.ASIN': item.ASIN[0],
         'Item.0.Quantity': 1
-      })
+      });
     // if (_.get(res, 'Request[0].Errors')) {
     //   console.error(JSON.stringify(_.get(res, 'Request[0].Errors'), null, 2))
     //   throw new Error('Cannot add this item to cart', JSON.stringify(_.get(res, 'Request[0].Errors')))
@@ -97,7 +97,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
     // if (smallImage.indexOf('images-na.ssl-images-amazon.com') > -1 || mediumImage.indexOf('images-na.ssl-images-amazon.com') > -1) {
     //   image = 'http://kipthis.com/images/kip_head.png'
     // }
-    console.log('creating item in database')
+    logging.debug('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
       ASIN: _.get(item, 'ASIN[0]'),
@@ -111,17 +111,17 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
       slack_id: slack_id,
       source_json: JSON.stringify(item)
     })).save()
-    console.log('adding item ' + i._id + ' to cart ' + cart._id)
+    logging.debug('adding item %s to cart %s', i._id, cart._id)
     cart.items.push(i._id)
     yield cart.save()
-    console.log('calling getCart again to rebuild amazon cart')
+    logging.debug('calling getCart again to rebuild amazon cart')
     try {
       yield getCart(slack_id)
     } catch (e) {
       // didn't work, so remove the item and say sorry
       cart.items = cart.items.filter(item => {
-        console.log(item)
-        console.log(i._id)
+        logging.debug(item)
+        logging.debug(i._id)
         return item !== i._id
       })
       cart.save()
@@ -150,9 +150,9 @@ module.exports.emptyCart = function (cart_id) {
         }
       })
     }, function done (err) {
-      if (err) console.log(err)
+      if (err) logging.error(err)
     })
-    console.log('ids: ', cart.slack_id, cart_id)
+    logging.debug('slack_id:%s, cart_id:%s', cart.slack_id, cart_id);
     cart.items = []
     yield cart.save()
     // rebuild the cart
@@ -166,10 +166,10 @@ module.exports.emptyCart = function (cart_id) {
 // item: the item from getCart aggregate item
 //
 module.exports.addExtraToCart = function (cart, slack_id, user_id, item) {
-  console.log('firing addextratocart')
-  console.log('adding item to cart for ' + slack_id + ' by user ' + user_id)
-  console.log('ITEM ZZZZ ', item)
-  console.log('CART ZZZZ ', cart)
+  logging.debug('firing addextratocart')
+  logging.debug('adding item to cart for %s by user %s', slack_id, user_id)
+  logging.debug('ITEM ZZZZ ', item)
+  logging.debug('CART ZZZZ ', cart)
 
   // fixing bug to convert string to to int
   // if (item.reviews && item.reviews.reviewCount){
@@ -188,9 +188,8 @@ module.exports.addExtraToCart = function (cart, slack_id, user_id, item) {
 
   return co(function * () {
     // var cart = yield getCart(slack_id)
-    // console.log(cart)
 
-    console.log('creating item in database')
+    logging.debug('creating item in database')
 
     var i = yield (new db.Item({
       cart_id: cart._id,
@@ -206,11 +205,11 @@ module.exports.addExtraToCart = function (cart, slack_id, user_id, item) {
     // source_json: JSON.stringify(item)
     })).save()
 
-    console.log('adding item ' + i._id + ' to cart ' + cart._id)
+    logging.debug('adding item %s to cart %s', i._id, cart._id)
     cart.items.push(i._id)
     yield cart.save()
 
-    console.log('calling getCart again to rebuild amazon cart')
+    logging.debug('calling getCart again to rebuild amazon cart')
     return getCart(slack_id)
   })
 }
@@ -223,7 +222,7 @@ module.exports.addExtraToCart = function (cart, slack_id, user_id, item) {
 // number: the item to remove in cart array, as listed in View Carts
 //
 module.exports.removeFromCart = function (slack_id, user_id, number, type) {
-  console.log(`removing item #${number} from cart`)
+  logging.debug(`removing item #${number} from cart`)
 
   return co(function * () {
     var cart = yield getCart(slack_id)
@@ -243,7 +242,7 @@ module.exports.removeFromCart = function (slack_id, user_id, number, type) {
     }
 
     // first just try to remove one item that this user added
-    
+
     var matching_items = cart.items.filter(function (i) {
       return i.ASIN === ASIN_to_remove && (i.added_by === user_id || userIsAdmin)
     });
@@ -257,11 +256,11 @@ module.exports.removeFromCart = function (slack_id, user_id, number, type) {
 // number: the item to remove in cart array, as listed in View Carts
 //
 module.exports.removeAllOfItem = function (slack_id, number) {
-  console.log(`removing all of item #${number} from cart`)
+  logging.debug(`removing all of item #${number} from cart`)
 
   return co(function * () {
     var cart = yield getCart(slack_id)
-    console.log('got cart')
+    logging.debug('got cart')
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
 
@@ -269,7 +268,7 @@ module.exports.removeAllOfItem = function (slack_id, number) {
     var ASIN_to_remove = _.get(unique_items, `${number - 1}.ASIN`)
     var item_to_remove = _.get(unique_items, `${number - 1}.title`)
 
-    console.log('item to remove is', item_to_remove)
+    logging.debug('item to remove is %s', item_to_remove)
 
     if (!ASIN_to_remove) {
       kip.err('no asin found')
@@ -292,7 +291,7 @@ module.exports.removeAllOfItem = function (slack_id, number) {
 module.exports.removeFromCartByItem = function (item) {
   return co(function * () {
     if (!(item instanceof db.Item)) {
-      console.error('can only remove mongoose models of type db.Item')
+      logging.error('can only remove mongoose models of type db.Item')
       throw new Error('Cannot remove item - must be a db.Item model')
     }
     var cart = yield db.Carts.findById(item.cart_id).exec()
@@ -380,7 +379,6 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
     })
     timer('got cart from amazon')
 
-    // console.log(JSON.stringify(amazonCart, null, 2))
     // kip.debug(amazonCart))
 
     // If the amazon cart is empty but
@@ -407,17 +405,12 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
       kip.debug('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
 
-      // console.log(amazonCart.Request[0].Errors[0].Message[0])
-
-      // console.log(JSON.stringify(amazonCart.Request[0]))
-
       // ERROR TEMP FIX: can't save item to cart, example item: "VELCANS® Fashion Transparent and Flat Ladies Rain Boots" to cart
       if (amazonCart.Request[0].Errors && amazonCart.Request[0].Errors[0] && amazonCart.Request[0].Errors[0].Error && amazonCart.Request[0].Errors[0].Error[0].Message && amazonCart.Request[0].Errors[0].Error[0].Message[0].indexOf('not eligible to be added to the cart') > -1) {
         kip.err('ERR: Amazon item is not eligible to be added to the cart')
         // cart.amazon = amazonCart
 
         kip.debug('# cart ', cart);
-        // console.log('# amz ',cart.amazon)
 
         // cart.link =
         // cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
@@ -464,7 +457,7 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
 
     var needs_rebuild = amazon_items.length !== cart.aggregate_items.length
     amazon_items = amazon_items.map(i => {
-      console.log(cart_items_hash[i.ASIN[0]], parseInt(i.Quantity[0]))
+      logging.debug(cart_items_hash[i.ASIN[0]], parseInt(i.Quantity[0]))
       if (cart_items_hash[i.ASIN[0]] !== parseInt(i.Quantity[0])) {
         needs_rebuild = true
       }
@@ -485,7 +478,7 @@ var getCart = module.exports.getCart = function (slack_id, force_rebuild) {
 
 
       timer('rebuilding cart ' + cart.amazon.CartId)
-      console.log('rebuilding cart')
+      logging.debug('rebuilding cart')
       var items_to_add = _.merge({}, cart_items, {
         CartId: cart.amazon.CartId[0],
         HMAC: cart.amazon.HMAC[0]
@@ -541,7 +534,7 @@ db.Messages.find({
   ts: {$gt: moment().subtract(7, 'day')}
 }).exec(function (e, messages) {
   if (e) {
-    console.error('Could not get search terms for report generation statistics')
+    logging.error('Could not get search terms for report generation statistics')
   }
   var all_terms_doc = messages.map((m) => {
     return m.tokens[0]
@@ -619,20 +612,20 @@ var report = module.exports.report = function (slack_id, days) {
       ts: {$gt: report.begin_date}
     }).select('tokens').exec()
 
-    console.log(messages)
+    logging.debug(messages)
     var search_terms = messages
       .map((m) => {
         return m.tokens[0]})
       .filter((t) => {
         return !t.match(/(collect|report|wait|stop|no|yes)/)
       })
-    console.log(search_terms)
+    logging.debug(search_terms)
     word_counts = {}
     for (var i = 0; i < search_terms.length; i++) {
       word_counts['_' + search_terms[i]] = (word_counts['_' + search_terms[i]] || 0) + 1
     }
     top_count = 0
-    console.log(word_counts)
+    logging.debug(word_counts)
     Object.keys(word_counts).map(function (word) {
       if (word_counts[word] > top_count) {
         top_count = word_counts[word]
@@ -647,7 +640,7 @@ var report = module.exports.report = function (slack_id, days) {
     Object.keys(word_counts).map(function (word) {
       word = word.substr(1)
       term_freq.tfidfs(word, function (i, measure) {
-        console.log(word, i, measure, word_counts['_' + word], measure / word_counts['_' + word])
+        logging.debug(word, i, measure, word_counts['_' + word], measure / word_counts['_' + word])
         measure = measure / word_counts['_' + word]
         if (measure < lowest_score) {
           lowest_score = measure
@@ -666,9 +659,9 @@ var report = module.exports.report = function (slack_id, days) {
 if (!module.parent) {
   co(function * () {
     var cart = yield getCart('T0R6J00JW')
-    console.log(cart)
+    logging.debug('cart', cart)
     var cart = yield module.exports.removeAllOfItem('T0R6J00JW', 5)
-    console.log(cart)
+    logging.debug('cart', cart)
   }).catch(e => {
     kip.err(e)
   })

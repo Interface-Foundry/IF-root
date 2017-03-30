@@ -4,8 +4,10 @@ var _ = require('lodash');
 var config = require('../../../config')
 var Menu = require('./Menu')
 
+/**@constant {string} url for pop-out menu*/
 var popoutUrl = config.menuURL + '/cafe';
 
+/**@exports menu_utils*/
 var utils = {};
 
 utils.sortMenu = function (foodSession, user, matchingItems) {
@@ -54,6 +56,13 @@ utils.sortMenu = function (foodSession, user, matchingItems) {
   return sortedMenu
 }
 
+/**
+* Calls the menu server to get a url for the kip popout menu
+* @param foodSession
+* @param user_id {string} the id of the user who will "own" the popout
+* @param selected_items {array} array of any items the user has already selected (although not added to their cart)
+* @returns {string} menu popout url
+*/
 utils.getUrl = function * (foodSession, user_id, selected_items) {
   if (!selected_items) selected_items = [];
   try {
@@ -75,8 +84,13 @@ utils.getUrl = function * (foodSession, user_id, selected_items) {
   }
 }
 
+/**
+* Maps the cuisine-name to an emoji specific(ish) to it
+* @param cuisine {string} cuisine name
+* @returns {string} cuisine-specific emoji
+*/
 utils.cuisineEmoji = function (cuisine) {
-    console.log('CUISINE', cuisine);
+    logging.debug('CUISINE', cuisine);
     var e
     switch(cuisine){
         case "Afghan":

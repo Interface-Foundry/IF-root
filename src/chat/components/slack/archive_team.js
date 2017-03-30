@@ -1,12 +1,13 @@
 require('../../../kip')
 var co = require('co')
 
-//
-//
-// This archives all of a team's stuff when they remove their chatbot
-//
-//
-function * archiveTeam (team_id) {
+/**
+ * Archive all of a team's stuff to the archive collection
+ * @module
+ * @param  {}    team_id team id string for the team to archive
+ * @return {Promise}         Promise retuning nothing after operation completes
+ */
+function archiveTeam (team_id) {
   return co(function * () {
     var team = yield db.Slackbots.findOne({team_id: team_id}).exec()
 

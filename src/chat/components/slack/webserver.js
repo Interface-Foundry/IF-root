@@ -115,7 +115,7 @@ app.post('/slackaction', next(function * (req, res) {
 
   var message;
   var parsedIn = JSON.parse(req.body.payload);
-  
+
   // snooze any message by setting action.value to "snooze"
   if (_.get(parsedIn, 'actions[0].value') === 'snooze') {
     var time_ms = new Date(24 * 60 * 60 * 1000 + Date.now())
@@ -675,11 +675,23 @@ function * updateCartMsg(cart, parsedIn) {
   })
 }
 
+/**
+ * Authorize route, log data to database
+ * @type {Any}
+ */
 app.get('/authorize', function (req, res) {
   logging.info('button click @ /authorize')
+  db.Metrics.log('add_to_slack', {
+    ip: req.ip,
+    headers: req.headers
+  })
   res.redirect(`https://slack.com/oauth/authorize?scope=commands+bot+users:read&client_id=${kip.config.slack.client_id}`)
 })
 
+/**
+ * Route which is hit after a user selects which team they want to authorize through slack. Oauth.
+ * @type {Any}
+ */
 app.get('/newslack', (req, res) => co(function * () {
   logging.info('new slack integration request')
   res.redirect('/thanks.html')
@@ -769,15 +781,17 @@ app.get('/newslack', (req, res) => co(function * () {
   logging.error(e)
 }))
 
-// k8s readiness ingress health check
+/**
+ * Health check to see if the server is accepting connections
+ */
 app.get('/health', function (req, res) {
   res.sendStatus(200)
 })
 
-//
-// allow messages to come in from external sources
-// you can use this with do_message.js
-//
+/**
+ * allow messages to come in from external sources
+ * you can use this with do_message.js
+ */
 app.post('/incoming', function (req, res) {
   logging.debug('incoming message')
   logging.debug(req.body)
@@ -802,10 +816,6 @@ app.post('/incoming', function (req, res) {
   res.status(200)
   res.end()
 })
-
-// app.get('/*', function(req, res, next) {
-//     res.sendfile(defaultPage)
-// })
 
 var listener
 function listen (callback) {
