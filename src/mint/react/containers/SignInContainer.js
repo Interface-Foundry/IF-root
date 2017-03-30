@@ -7,7 +7,7 @@ import { signIn } from '../actions/session';
  
 import { isValidEmail } from '../utils';
 
-import { addItem } from '../actions/cart';
+import { addItem, fetchCart } from '../actions/cart';
 
 import { reduxForm, reset } from 'redux-form';
 
@@ -29,6 +29,7 @@ const mapDispatchToProps = dispatch => ({
     const { cart_id, accounts } = state;
 
     dispatch(addItem(cart_id, url))
+    dispatch(fetchCart(cart_id))
     dispatch(reset('SignIn'))
   },
   changeKipFormView: (viewInt) => changeKipFormView(viewInt)

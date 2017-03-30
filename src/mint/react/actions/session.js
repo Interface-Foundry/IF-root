@@ -33,25 +33,34 @@ export const loggedIn = (user_accounts) => ({
 export function update() {
   return async dispatch => {
     dispatch(request());
-    const response = await fetch('/api/session', {
-      credentials: 'same-origin'
-    });
-    if (response.ok) return dispatch(receive(await response.json()));
+
+    (async() => {
+      try {
+        const response = await fetch('/api/session', {
+          credentials: 'same-origin'
+        });
+        return dispatch(receive(await response.json()));
+      } catch (e) {
+        console.log('error in session update')
+      }
+    })();
   };
 }
 
 export function signIn(cart_id, email) {
   return async dispatch => {
     dispatch(requestUpdate());
-    const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
-      credentials: 'same-origin'
-      }).catch(error => {
-        //error
-      })
-      
-    if (response.ok) return dispatch(receiveUpdate(await response.json()));
 
-    throw new Error(`Error in signIn`);
+    (async() => {
+      try {
+        const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
+          credentials: 'same-origin'
+        })
+        return dispatch(receiveUpdate(await response.json()));
+      } catch (e) {
+        console.log('error in session signIn')
+      }
+    })();
   };
 }
 

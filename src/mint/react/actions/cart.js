@@ -39,58 +39,82 @@ const receiveAddItem = (item) => ({
 export function fetchCart(cart_id) {
   return async function (dispatch) {
     dispatch(request());
-    const response = await fetch(`/api/cart/${cart_id}`, {
-      credentials: 'same-origin'
-    });
-    return dispatch(receive(await response.json()));
+
+    (async() => {
+      try {
+        const response = await fetch(`/api/cart/${cart_id}`, {
+          credentials: 'same-origin'
+        });
+        return dispatch(receive(await response.json()));
+      } catch (e) {
+        console.log('error in cart fetchCart')
+      }
+    })();
   };
 }
 
 export function fetchItems(cart_id) {
   return async dispatch => {
     dispatch(requestItems(cart_id));
-    const response = await fetch(`/api/cart/${cart_id}/items`, {
-      credentials: 'same-origin'
-    });
-    
-    if (response.ok) return dispatch(receiveItems(await response.json()));
+
+    (async() => {
+      try {
+        const response = await fetch(`/api/cart/${cart_id}/items`, {
+          credentials: 'same-origin'
+        });
+        return dispatch(receiveItems(await response.json()));
+      } catch (e) {
+        console.log('error in cart fetchItems')
+      }
+    })();
   };
 }
 
 export function removeItem(cart_id, item) {
   return async dispatch => {
     dispatch(requestRemoveItem());
-    const response = await fetch(`/api/cart/${cart_id}/item`, {
-      'method': 'DELETE',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      credentials: 'same-origin',
-      'body': JSON.stringify({
-        item_id: item
-      })
-    });
-    if (response.ok) return dispatch(receiveRemoveItem(await response.json()));
+    (async() => {
+      try {
+        const response = await fetch(`/api/cart/${cart_id}/item`, {
+          'method': 'DELETE',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin',
+          'body': JSON.stringify({
+            item_id: item
+          })
+        });
+        return dispatch(receiveRemoveItem(await response.json()));
+      } catch (e) {
+        console.log('error in cart removeItem')
+      }
+    })();
   };
 }
 
 export function addItem(cart_id, url) {
   return async dispatch => {
     dispatch(requestAddItem());
-    const response = await fetch(`/api/cart/${cart_id}/item`, {
-      'method': 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      credentials: 'same-origin',
-      'body': JSON.stringify({
-        url: url
-      })
-    });
-    if (response.ok) return dispatch(receiveAddItem(await response.json()));
 
-    throw 'Error in addItem';
+    (async() => {
+      try {
+        const response = await fetch(`/api/cart/${cart_id}/item`, {
+          'method': 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin',
+          'body': JSON.stringify({
+            url: url
+          })
+        });
+        return dispatch(receiveAddItem(await response.json()));
+      } catch (e) {
+        console.log('error in cart addItem')
+      }
+    })();
   };
 }
