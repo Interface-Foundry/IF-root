@@ -20,6 +20,11 @@ describe('AppContainer', () => {
   			cart: {  
 				cart_id: 'testId',
   				items: [{id: 1}]
+  			},
+  			kipForm: {
+				currentView: 0,
+				animation: true,
+				showSiblings: true
   			}
   		});
 

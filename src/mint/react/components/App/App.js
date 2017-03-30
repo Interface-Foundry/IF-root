@@ -17,11 +17,11 @@ export default class App extends Component {
 
   componentWillReceiveProps(nextProps) {
     const {changeKipFormView} = this.props
-    const {memebers, leader, currentView} = nextProps
+    const {members, leader, currentView} = nextProps
 
     if(
       currentView === 0 &&
-      memebers.length === 0 && 
+      members.length === 0 && 
       !leader
     ) {
       changeKipFormView(1)
@@ -31,7 +31,7 @@ export default class App extends Component {
   }
 
   render() {
-    const { cart_id, memebers, leader, newAccount, accounts, currentView } = this.props,
+    const { cart_id, newAccount, accounts, currentView } = this.props,
           showForm = currentView !== 0,
           accountPresent = accounts.length > 0;
 
