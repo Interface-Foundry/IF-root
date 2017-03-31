@@ -154,8 +154,8 @@ router.post('/order', function (req, res) {
         'source.user': user_id,
         mode: 'food',
         incoming: false
-      }).sort('-ts').limit(1)
-      logging.debug('foodMessage', foodMessage)
+      }).sort('-ts').limit(1);
+      logging.debug('foodMessage', foodMessage);
 
       if (foodMessage && foodMessage.length) {
         foodMessage = foodMessage[0];

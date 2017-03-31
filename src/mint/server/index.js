@@ -12,7 +12,8 @@ const fs = require('fs'),
   webpackDevMiddleware = require("webpack-dev-middleware"),
   webpackHotMiddleware = require("webpack-hot-middleware"),
   webpack = require('webpack'),
-  webpackConfig = require('../webpack.config.js');
+  webpackConfig = require('../webpack.config.js'),
+  mailer_transport = require('../../mail/IF_mail');
 
 // live reloading
 if (!process.env.NO_LIVE_RELOAD) {
@@ -100,13 +101,50 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
   app.use(function (req, res, next) {
     var methods = { GET: 'get'.cyan, HEAD: 'head'.gray, POST: 'post'.green, DELETE: 'delete'.red }
     var str = ['>'.yellow, methods[req.method] || req.method, req.originalUrl].join(' ')
-    console.log(str)
+    console.log(str);
 
-    next()
-  })
+    next();
+  });
 } else {
-  app.use(new mintLogger.NormalLogger())
+  app.use(new mintLogger.NormalLogger());
 }
+
+
+
+//~~~~~for unsubscribe group testing~~~~~//
+
+// sendgrid incoming parse webhook
+
+var mailOptions = {
+to: '<hannah.katznelson@kipthis.com>',
+from: 'Kip Test <hello@kipthis.com>',
+subject: 'The Love Below',
+html: '<html><body><p>This is a test. Speakerboxxx.</p></body></html>',
+headers: {
+  'x-smtpapi': '{"asm_group_id":2321,"asm_groups_to_display":[2321,2273,2275],"filters":{"footer":{"settings":{"enable":1,"text/plain":"Excalibur"}}}}'//{
+    // ,
+    // ,
+    // "filters": {
+    //   "footer": {
+    //     "settings": {
+    //       "enable": 1,
+    //       "text/plain": "This is a footer"
+    //     }
+    //   }
+    // }
+  // }
+}
+};
+
+try {
+mailer_transport.sendMail(mailOptions);
+console.log('email sent');
+} catch (e) {
+logging.error('error sending test email', e);
+}
+
+//~~~~~for unsubscribe group testing~~~~~//
+
 
 // ROUTES
 app.use('/', regularRoutes);
