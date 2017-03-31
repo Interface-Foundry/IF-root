@@ -21,23 +21,23 @@ const mapStateToProps = (state, ownProps) => ({
     email: '',
     url: ''
   }
-})
+});
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => {
-    const { email, url } = values;
-    const { cart_id, accounts } = state;
+    const { url } = values;
+    const { cart_id } = state;
 
-    dispatch(addItem(cart_id, url))
-    dispatch(fetchCart(cart_id))
-    dispatch(toggleAddingToCart())
-    dispatch(reset('SignIn'))
+    dispatch(addItem(cart_id, url));
+    dispatch(fetchCart(cart_id));
+    dispatch(toggleAddingToCart());
+    dispatch(reset('SignIn'));
   },
   changeKipFormView: (viewInt) => {
-    dispatch(toggleAddingToCart())
-    dispatch(changeKipFormView(viewInt))
+    dispatch(toggleAddingToCart());
+    dispatch(changeKipFormView(viewInt));
   }
-})
+});
 
 const validate = (values, state) => {
   const errors = {};
@@ -48,15 +48,15 @@ const validate = (values, state) => {
   }
 
   return errors;
-}
+};
 
 const asyncValidate = (values, dispatch, state) =>
   dispatch(signIn(state.cart_id, values.email))
   .then(session => {
     if (!session.newSession.newAccount) {
-      throw { email: 'You\'ve logged in already' }
+      throw { email: 'You\'ve logged in already' };
     }
-    return session.newAccount
+    return session.newAccount;
   })
   .catch(error => {
     // currently this reroutes you to the email overlay, but kept this in case we want to do some error handling
@@ -70,6 +70,6 @@ const SignInContainer = reduxForm({
   asyncValidate,
   shouldAsyncValidate,
   asyncBlurFields: ['email']
-})(SignIn)
+})(SignIn);
 
-export default connect(mapStateToProps, mapDispatchToProps)(SignInContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(SignInContainer);

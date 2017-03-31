@@ -35,4 +35,12 @@ require('./other-api')(router)
 require('./carts-api')(router)
 require('./users-api')(router)
 
+//temporary for camel testing
+//TODO: delete
+var deals = require('../deals_sample.json');
+router.get('/sampledeals', (req, res)=>{
+  res.json(deals);
+})
+// DELETE THIS LATER 
+
 module.exports = router;

@@ -20,7 +20,7 @@ const receiveUpdate = (newSession) => ({
 
 export const toggleAddingToCart = () => ({
   type: TOGGLE_ADDING
-})
+});
 
 export function update() {
   return async dispatch => {
@@ -32,7 +32,7 @@ export function update() {
       });
       return dispatch(receive(await response.json()));
     } catch (e) {
-      throw 'error in session update'
+      throw 'error in session update';
     }
   };
 }
@@ -44,10 +44,10 @@ export function signIn(cart_id, email) {
     try {
       const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
         credentials: 'same-origin'
-      })
+      });
       return dispatch(receiveUpdate(await response.json()));
     } catch (e) {
-      throw 'error in session signIn'
+      throw 'error in session signIn';
     }
   };
 }

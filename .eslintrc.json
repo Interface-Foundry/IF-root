@@ -1,5 +1,6 @@
 {
   "parser": "babel-eslint",
+  "sourceType": "module",
   "extends": ["standard", "plugin:react/recommended"],
   "env": {
     "browser": true,

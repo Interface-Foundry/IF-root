@@ -7,11 +7,11 @@ import { AddAmazonItem } from '../components';
 
 const mapStateToProps = (state, ownProps) => ({
   user_accounts: state.session.user_accounts
-})
+});
 
 const mapDispatchToProps = dispatch => ({
   changeKipFormView: (viewInt) => dispatch(changeKipFormView(viewInt)),
   toggleAddingToCart: () => dispatch(toggleAddingToCart())
-})
+});
 
-export default connect(mapStateToProps, mapDispatchToProps)(AddAmazonItem)
+export default connect(mapStateToProps, mapDispatchToProps)(AddAmazonItem);
