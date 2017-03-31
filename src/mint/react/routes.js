@@ -6,7 +6,9 @@ import { AppContainer } from './containers';
 
 const Routes = () => (
   <Switch>
-    <Route path="/cart/:cart_id" component={AppContainer} />
+    <Route path="/cart/:cart_id" component={AppContainer} >
+      <Route path="*" />
+    </Route>
     <Route path="*" status={404} />
   </Switch>
 );
