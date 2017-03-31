@@ -38,24 +38,25 @@ export default class App extends Component {
       return <Overlay/>
 
     return (
-      <section>
+      <section className='app'>
         <Header cart_id={cart_id} leader={leader}/>
-        <div>
-          {accountPresent ? 
-            <p>
-              <strong>Accounts:</strong>
-              {accounts.map((account, i) => <span key={i}>{account.email_address}</span>)}
-            </p>
-            : null}
-        </div>
-        <div>
-          {/* This should be an overlay on top of the CartContainer at some point */}
-          {showForm ? 
-            <SignInContainer/>
-            : null}
-          <CartContainer/>
-        </div>
+        {/* This should be an overlay on top of the CartContainer at some point */}
+        {showForm ? 
+          <SignInContainer/>
+          : null}
+        <CartContainer/>
       </section>
     );
   }
 }
+
+
+// Temp removed, can add back in later
+// <div>
+//   {accountPresent ? 
+//     <p>
+//       <strong>Accounts:</strong>
+//       {accounts.map((account, i) => <span key={i}>{account.email_address}</span>)}
+//     </p>
+//     : null}
+// </div>
