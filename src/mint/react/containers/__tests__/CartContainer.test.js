@@ -12,6 +12,11 @@ describe('CartContainer', () => {
 
   beforeEach(() => {
     const store = fakeStore({
+      session: {
+        newAccount: false,
+        onborded: false,
+        user_accounts: [{ id: 1 }]
+      },
       cart: {
         cart_id: 'testId',
         items: [{ id: 1 }]

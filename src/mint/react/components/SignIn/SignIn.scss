@@ -1,62 +1,74 @@
+@import '../../styles/Constants';
+
 .modal {
-  position: absolute;
-  background: rgba(69, 165, 244, 1);
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  text-align: center;
-  overflow: hidden;
-  .signIn {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    padding: 100px 50px 0;
-    .overlay {
-      position: absolute;
-      height: 150px;
-      width: 100%;
-      z-index: 100;
-      left: 0;
-      &.top {
-        top: 0;
-        background: linear-gradient(rgba(69, 165, 244, 1), rgba(69, 165, 244, 0));
-      }
-      &.bottom {
-        bottom: 0;
-        background: linear-gradient(rgba(69, 165, 244, 0), rgba(69, 165, 244, 1));
-      }
-    }
-    div[class^='signIn__container'] {
-      height: calc(100% - 200px);
-      -webkit-transform: translateZ( 0);
-      transform: translateZ( 0);
-      -webkit-transition: -webkit-transform 0.6s ease-in-out;
-      transition: transform 0.6s ease-in-out;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-      &[class*='-1'] {
-        -webkit-transform: translateY( 0%);
-        transform: translateY( 0%);
-      }
-      &[class*='-2'] {
-        -webkit-transform: translateY( -100%);
-        transform: translateY( -100%);
-      }
-      .signIn__container__page {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        .signIn__container__page__input {
-          label {
-            display: block;
-          }
-        }
-      }
-    }
-  }
+	position: absolute;
+	background: $kip-primary-color;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	text-align: center;
+	overflow: hidden;
+
+	.signIn {
+		position: relative;
+		height: 100%;
+		width: 100%;
+		padding: 100px 50px 0;
+
+		.overlay {
+			position: absolute;
+			height: 150px;
+			width: 100%;
+			z-index: 100;
+			left: 0;
+
+			&.top {
+				top: 0;
+				background: linear-gradient($kip-primary-color, rgba($kip-primary-color, 0));
+			}
+
+			&.bottom {
+				bottom: 0;
+				background: linear-gradient(rgba($kip-primary-color, 0), $kip-primary-color);
+			}
+		}
+
+		div[class^='signIn__container'] {
+			height: calc(100% - 200px);
+			-webkit-transform: translateZ( 0 );
+			transform: translateZ( 0 );
+			-webkit-transition: -webkit-transform 0.6s ease-in-out;
+			transition: transform 0.6s ease-in-out;
+			-webkit-backface-visibility: hidden;
+			backface-visibility: hidden;
+
+			&[class*='-1'] {
+				-webkit-transform: translateY( 0%);
+				transform: translateY( 0% );
+			}
+
+			&[class*='-2'] {
+				-webkit-transform: translateY( -100%);
+				transform: translateY( -100% );
+			}
+
+			.signIn__container__page {
+				display: flex; 
+				flex-direction: column; 
+				justify-content: center; 
+				align-items: center;
+				height: 100%;
+
+				.signIn__container__page__input {
+
+					label {
+						display: block;
+					}
+				}
+			}
+		}
+	}
 }
 
 // Needs latest Compass, add '@import "compass"' to your scss
