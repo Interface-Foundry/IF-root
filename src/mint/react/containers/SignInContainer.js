@@ -17,10 +17,8 @@ const mapStateToProps = (state, ownProps) => ({
   animation: state.kipForm.animation,
   showSiblings: state.kipForm.showSiblings,
   currentView: state.kipForm.currentView,
-  initialValues: state.kipForm.currentView ? {
+  initialValues: {
     email: '',
-    url: ''
-  } : {
     url: ''
   }
 })

@@ -1,6 +1,6 @@
 import reducer from '../session'
 
-import { LOGGED_IN, ONBOARD_NEW_USER, REGISTER_EMAIL, RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../../constants/ActionTypes';
+import { LOGGED_IN, REGISTER_EMAIL, RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../../constants/ActionTypes';
 
 const initialState = {
   user_accounts: [],
@@ -105,58 +105,6 @@ describe('session reducer', () => {
       .toEqual({
         ...firstState,
         newAccount
-      })
-  })
-
-  it('should mark user as onboarding', () => {
-    expect(reducer(firstState, {
-        type: ONBOARD_NEW_USER,
-        ...firstState
-      }))
-      .toEqual({
-        ...firstState,
-        onboarding: true
-      })
-  })
-
-  it('should mark user as onboarding and registered', () => {
-    expect(reducer(firstState, {
-        type: REGISTER_EMAIL,
-        ...firstState
-      }))
-      .toEqual({
-        ...firstState,
-        onboarding: true,
-        registered: true
-      })
-  })
-
-  it('should mark user as logged out', () => {
-    expect(reducer({
-        ...firstState,
-      }, {
-        ...firstState,
-        type: LOGGED_IN,
-      }))
-      .toEqual({
-        ...firstState,
-        loggedIn: false
-      })
-  })
-
-  it('should mark user as logged in', () => {
-    expect(reducer({
-        ...firstState,
-        user_accounts: ['a', 'b', 'c']
-      }, {
-        ...firstState,
-        type: LOGGED_IN,
-        user_accounts: ['a', 'b', 'c']
-      }))
-      .toEqual({
-        ...firstState,
-        user_accounts: ['a', 'b', 'c'],
-        loggedIn: true
       })
   })
 })

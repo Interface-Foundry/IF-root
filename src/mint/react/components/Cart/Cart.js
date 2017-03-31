@@ -14,7 +14,7 @@ export default class Cart extends Component {
 
     const hasItems = items.length > 0;
     return (
-      <div>
+      <div className='cart'>
           <div className='row'>
             <AddAmazonItemContainer />
           </div>

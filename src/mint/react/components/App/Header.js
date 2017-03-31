@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import { getNameFromEmail } from '../../utils'
 
 export default class Header extends Component {
   static propTypes = {
@@ -6,12 +7,14 @@ export default class Header extends Component {
   }
 
   render() {
-    const { cart_id } = this.props;
+    const { cart_id, leader } = this.props;
 
+    const leaderName = getNameFromEmail();
+    
     return (
       <nav className='navbar'>
         <h1>
-          Cart ID #{cart_id}
+          {leaderName}'s Group Cart
         </h1>
       </nav>
     );

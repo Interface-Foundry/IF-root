@@ -20,7 +20,7 @@ export default function session(state = initialState, action) {
     return {
       ...state,
       ...newSession,
-      'user_accounts': newSession.newAccount ? [...state.user_accounts, user] : state.user_accounts
+      user_accounts: newSession.newAccount ? [...state.user_accounts, user] : state.user_accounts
     };
   case TOGGLE_ADDING:
     return {
