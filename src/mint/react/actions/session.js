@@ -25,17 +25,15 @@ export const toggleAddingToCart = () => ({
 export function update() {
   return async dispatch => {
     dispatch(request());
-
-    (async() => {
-      try {
-        const response = await fetch('/api/session', {
-          credentials: 'same-origin'
-        });
-        return dispatch(receive(await response.json()));
-      } catch (e) {
-        throw 'error in session update'
-      }
-    })();
+    
+    try {
+      const response = await fetch('/api/session', {
+        credentials: 'same-origin'
+      });
+      return dispatch(receive(await response.json()));
+    } catch (e) {
+      throw 'error in session update'
+    }
   };
 }
 
@@ -43,15 +41,13 @@ export function signIn(cart_id, email) {
   return async dispatch => {
     dispatch(requestUpdate());
 
-    (async() => {
-      try {
-        const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
-          credentials: 'same-origin'
-        })
-        return dispatch(receiveUpdate(await response.json()));
-      } catch (e) {
-        throw 'error in session signIn'
-      }
-    })();
+    try {
+      const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
+        credentials: 'same-origin'
+      })
+      return dispatch(receiveUpdate(await response.json()));
+    } catch (e) {
+      throw 'error in session signIn'
+    }
   };
 }
