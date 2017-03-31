@@ -6,10 +6,11 @@ import InputWithButton from './InputWithButton';
 export default class SignIn extends Component {
   static propTypes = {
     handleSubmit: PropTypes.func.isRequired,
-    values: PropTypes.array.isRequired,
-    newAccount: PropTypes.bool.isRequired,
     currentView: PropTypes.number.isRequired,
-    changeKipFormView: PropTypes.func.isRequired
+    changeKipFormView: PropTypes.func.isRequired,
+    cart_id: PropTypes.string.isRequired,
+    animation: PropTypes.bool.isRequired,
+    showSiblings: PropTypes.bool.isRequired
   }
 
   finalSubmit = e => {
@@ -19,7 +20,7 @@ export default class SignIn extends Component {
   }
 
   render() {
-    const { handleSubmit, newAccount, currentView, changeKipFormView } = this.props;
+    const { handleSubmit, currentView, changeKipFormView } = this.props;
     const { finalSubmit } = this;
 
     return (
@@ -31,7 +32,7 @@ export default class SignIn extends Component {
               <h1>Start New Group Cart</h1>
               <div className="signIn__container__page__input">
                 <label htmlFor="email">1. Whats your Email Address</label>
-                <Field name="email" component={InputWithButton} type="email" placeholder="Enter your email" newAccount={newAccount}/>
+                <Field name="email" component={InputWithButton} type="email" placeholder="Enter your email"/>
               </div>
             </section>
             <section className='signIn__container__page' id="two">
