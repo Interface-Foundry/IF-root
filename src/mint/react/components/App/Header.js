@@ -1,5 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import { getNameFromEmail } from '../../utils'
+import { Icon } from '..'
 
 export default class Header extends Component {
   static propTypes = {
@@ -13,9 +14,10 @@ export default class Header extends Component {
     
     return (
       <nav className='navbar'>
-        <h1>
+        <h3>
           {leaderName}'s Group Cart
-        </h1>
+        </h3>
+        <Icon icon='Hamburger'/>
       </nav>
     );
   }

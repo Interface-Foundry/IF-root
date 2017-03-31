@@ -1,0 +1,17 @@
+@import '../../styles/Constants';
+
+.navbar {
+	height: $nav-height;
+	line-height: $nav-height - $padding*2;
+	padding: $padding $padding*2;
+
+	h3 {
+		display: inline-block;
+	}
+
+	svg {
+		float: right;
+		height: 100%;
+		line-height: $nav-height - $padding*2;
+	}
+}

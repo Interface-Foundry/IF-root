@@ -14,3 +14,8 @@ export default combineReducers({
   form,
   routing: routerReducer
 })
+
+// export selectors
+export {
+	getAccountById
+} from './session';

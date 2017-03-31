@@ -1,6 +1,8 @@
-.addToCartBtn {
-  width: 100px;
-  height: 30px;
-  background: #49D63A;
-  border: 1px solid black;
+@import '../../styles/Constants';
+
+.amazon__button {
+	height: $nav-height;
+  width: 100%;
+  background: white;
+  border: 2px dashed #e3e3e3;
 }

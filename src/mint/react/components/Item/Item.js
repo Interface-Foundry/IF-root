@@ -1,4 +1,6 @@
 import React, { PropTypes, Component } from 'react';
+import { getAccountById } from '../../reducers';
+import { getNameFromEmail } from '../../utils'
 
 export default class Item extends Component {
   static propTypes = {
@@ -6,22 +8,25 @@ export default class Item extends Component {
   }
 
   render() {
-    const { item } = this.props;
+    const { item, accounts, itemNumber } = this.props,
+          linkedAccount = getAccountById({user_accounts: accounts}, {id: item.added_by}),
+          leaderName = _.capitalize(getNameFromEmail(linkedAccount ? linkedAccount.email_address : null));
 
     return (
       <a href={item.original_link}>
-        <div>
-          <h4>{`Item #${item.id} Name: ${item.descrip}`}</h4>
-          <div className='image' style={
+        <li className='item'>
+          <h4 className='item__title'>{leaderName}</h4>
+          <div className='item__image image col-3 ' style={
             {
               backgroundImage: `url(//placehold.it/100x100)`,
               height: 100,
-              width: 100
             }}/>
-            <p>Qty: {item.quantity}</p>
+          <div className='item__props col-9'>
+            <p>Item #{itemNumber}</p>
             <p>Price: ${item.price}</p>
-            <button disabled>Edit</button>
-        </div>
+            <p>Qty: {item.quantity}</p>
+          </div>
+        </li>
       </a>
     );
   }
