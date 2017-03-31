@@ -12,18 +12,19 @@ type Cart {
   slack_id: String
   purchased: Boolean
   deleted: Boolean
-  created_date: Date
-  purchased_date: Date
+  created_date: String
+  purchased_date: String
   type: String
   link: String
   amazon: JSON
   # Foreign refs
   items: [Item]
+  team: Slackbot
 }
 
 type Chatuser {
   _id: String!
-  user_id: String
+  id: String
   platform: String
   onboarded: Boolean
   admin_shop_onboarded: Boolean
@@ -75,16 +76,16 @@ type Delivery {
   mode: String
   action: String
   data: String
-  delivery_post: String
-  order: String
+  delivery_post: JSON
+  order: JSON
   tip: String
   service_fee: String
   coupon: String
   main_amount: String
   calculated_amount: String
   discount_amount: String
-  payment_post: String
-  payment: String
+  payment_post: JSON
+  payment: JSON
   guest_token: String
   completed_payment: Boolean
   delivery_error: String
@@ -107,9 +108,9 @@ type Item {
   slack_id: String
   source_json: String
   purchased: Boolean
-  purchased_date: Date
+  purchased_date: String
   deleted: Boolean
-  added_date: Date
+  added_date: String
   bundle: String
   available: Boolean
   asins: String
@@ -150,7 +151,7 @@ type Metric {
 
 type SlackbotMeta {
   addedBy: String
-  dateAdded: Date
+  dateAdded: String
   deleted: Boolean
   cart_channels: [String]
   collect_from: String

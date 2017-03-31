@@ -93,6 +93,9 @@ const Resolvers = {
     items: async ({_id}) => {
       return (await Items.find({ cart_id: _id }).sort({added_date: -1}).toArray());
     },
+    team: async ({slack_id}) => {
+      return (await Slackbots.findOne({team_id: slack_id}));
+    }
   },
 
   Chatuser: {

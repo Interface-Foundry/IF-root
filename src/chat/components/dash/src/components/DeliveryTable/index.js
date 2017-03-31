@@ -6,7 +6,7 @@ import Table from '../Table';
 import fetch from '../../core/fetch';
 import co from 'co';
 
-class CartTable extends Component {
+class DeliveryTable extends Component {
 
   constructor(props) {
     super(props);
@@ -29,17 +29,17 @@ class CartTable extends Component {
         });
         const { data } = yield resp.json();
         if (data && data.teams){
-          let carts = data.teams.reduce(self.props.process, []);
-          self.setState({carts: carts})
+          let deliveries = data.teams.reduce(self.props.process, []);
+          self.setState({deliveries: deliveries})
         } else  {
-          throw new Error('Failed to load carts.')
+          throw new Error('Failed to load deliveries.')
         }
     })
   }
 
   render() {
-    const {carts} = this.state;
-    const data = carts ? carts : [[]];
+    const {deliveries} = this.state;
+    const data = deliveries ? deliveries : [[]];
     return (
       <Table heads={this.props.heads} data={data} colorBy={this.props.colorBy} />
     )
@@ -47,4 +47,4 @@ class CartTable extends Component {
 }
 
 
-export default CartTable;
+export default DeliveryTable;
