@@ -7,41 +7,39 @@ import { AppContainer } from '..';
 import { App } from '../../components';
 
 describe('AppContainer', () => {
-	let Container;
-	let AppComponent;
+  let Container;
+  let AppComponent;
 
-	beforeEach(() => {
-		const store = fakeStore({
-			session: {  
-				newAccount: false,
-  				user_accounts: [{id: 1}]
-  			},
-  			cart: {  
-				cart_id: 'testId',
-  				items: [{id: 1}]
-  			},
-  			kipForm: {
-				currentView: 0,
-				animation: true,
-				showSiblings: true
-  			}
-  		});
+  beforeEach(() => {
+    const store = fakeStore({
+      session: {
+        newAccount: false,
+        onborded: false,
+        user_accounts: [{ id: 1 }]
+      },
+      cart: {
+        cart_id: 'testId',
+        items: [{ id: 1 }]
+      }
+    });
 
-		const wrapper = mount(
-			<Provider store={store}>
+    const wrapper = mount(
+      <Provider store={store}>
 				<AppContainer match={{params: {cart_id: 'testId'}}}/>
 			</Provider>
-		);
+    );
 
-		Container = wrapper.find(AppContainer);
-		AppComponent = Container.find(App);
-	});
+    Container = wrapper.find(AppContainer);
+    AppComponent = Container.find(App);
+  });
 
-	it('should render container', () => {
-		expect(Container.length).toBeTruthy();
-	});
+  it('should render container', () => {
+    expect(Container.length)
+      .toBeTruthy();
+  });
 
-	it('should render component', () => {
-		expect(AppComponent.length).toBeTruthy();
-	});
+  it('should render component', () => {
+    expect(AppComponent.length)
+      .toBeTruthy();
+  });
 });

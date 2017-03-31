@@ -1,4 +1,4 @@
-import { commaSeparateNumber, getNameFromEmail } from '..'
+import { commaSeparateNumber } from '..'
 
 describe('formating util', () => {
 
@@ -17,35 +17,6 @@ describe('formating util', () => {
         .toEqual('1,000')
       expect(commaSeparateNumber(thirdNumber))
         .toEqual('1,000,000')
-    })
-
-  })
-
-  describe('getNameFromEmail', () => {
-
-    const errorMessage = 'No valid email';
-
-    it(`should return "${errorMessage}" if email undefined || null || ''`, () => {
-      expect(getNameFromEmail())
-        .toEqual(errorMessage)
-      expect(getNameFromEmail(null))
-        .toEqual(errorMessage)
-      expect(getNameFromEmail(''))
-        .toEqual(errorMessage)
-    })
-
-    it(`should return "${errorMessage}" if email is invalid'`, () => {
-      expect(getNameFromEmail('peanuts'))
-        .toEqual(errorMessage)
-      expect(getNameFromEmail('peanuts@'))
-        .toEqual(errorMessage)
-      expect(getNameFromEmail('peanuts@mail'))
-        .toEqual(errorMessage)
-    })
-
-    it("should return name before @ from email is valid", () => {
-      expect(getNameFromEmail('peanuts@mail.com'))
-        .toEqual('peanuts')
     })
 
   })

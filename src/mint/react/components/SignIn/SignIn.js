@@ -7,7 +7,7 @@ export default class SignIn extends Component {
 
   finalSubmit = e => {
     const { handleSubmit, values } = this.props;
-    
+
     handleSubmit(e)
   }
 
@@ -41,4 +41,3 @@ export default class SignIn extends Component {
     );
   }
 }
-

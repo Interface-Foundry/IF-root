@@ -57,7 +57,8 @@ const asyncValidate = (values, dispatch, state) =>
       throw { email: 'You\'ve logged in already' }
     }
     return session.newAccount
-  }).catch(error => {
+  })
+  .catch(error => {
     // currently this reroutes you to the email overlay, but kept this in case we want to do some error handling
   });
 
