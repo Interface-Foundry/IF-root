@@ -25,7 +25,7 @@ export const toggleAddingToCart = () => ({
 export function update() {
   return async dispatch => {
     dispatch(request());
-    
+
     try {
       const response = await fetch('/api/session', {
         credentials: 'same-origin'

@@ -7,10 +7,10 @@ import { routerReducer } from 'react-router-redux';
 import { reducer as form } from 'redux-form';
 
 export default combineReducers({
-   kipForm,
-   cart,
-   item,
-   session,
-   form,
-   routing: routerReducer
- })
+  kipForm,
+  cart,
+  item,
+  session,
+  form,
+  routing: routerReducer
+})

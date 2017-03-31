@@ -34,7 +34,7 @@ export default class App extends Component {
       showForm = currentView !== 0,
       accountPresent = accounts.length > 0;
 
-    if(newAccount === false)
+    if (newAccount === false)
       return <Overlay/>
 
     return (

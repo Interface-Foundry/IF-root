@@ -1,12 +1,13 @@
 import React, { PropTypes, Component } from 'react';
-import {Item} from '..';
+import { Item } from '..';
 import { AddAmazonItemContainer } from '../../containers';
 
 export default class Cart extends Component {
   static propTypes = {
     fetchItems: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
-    items: PropTypes.arrayOf(PropTypes.object).isRequired
+    items: PropTypes.arrayOf(PropTypes.object)
+      .isRequired
   }
 
   render() {

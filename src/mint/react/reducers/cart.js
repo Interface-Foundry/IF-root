@@ -11,35 +11,35 @@ const initialState = {
 
 export default function cart(state = initialState, action) {
   switch (action.type) {
-    case SET_ADDING_ITEM:
-      return {
-        ...state,
-        SetAddingItem: action.SetAddingItem
-      };
-    case RECEIVE_ADD_ITEM_TO_CART:
-      return {
-        ...state,
-        items: [...state.items, action.item]
-      };
-    case ADD_MEMBER_TO_CART:
-      return {
-        ...state,
-        members: [...state.members, action.newMember]
-      }
-    case RECEIVE_CART:
-      return {
-        ...state,
-        ...action.newCart,
-        cart_id: action.newCart.id
-      };
-    case RECEIVE_ITEMS:
-      return {
-        ...state,
-        items: action.items
-      };
-    case REQUEST_CART:
-    case REQUEST_ITEMS:
-    default:
-      return state;
+  case SET_ADDING_ITEM:
+    return {
+      ...state,
+      SetAddingItem: action.SetAddingItem
+    };
+  case RECEIVE_ADD_ITEM_TO_CART:
+    return {
+      ...state,
+      items: [...state.items, action.item]
+    };
+  case ADD_MEMBER_TO_CART:
+    return {
+      ...state,
+      members: [...state.members, action.newMember]
+    }
+  case RECEIVE_CART:
+    return {
+      ...state,
+      ...action.newCart,
+      cart_id: action.newCart.id
+    };
+  case RECEIVE_ITEMS:
+    return {
+      ...state,
+      items: action.items
+    };
+  case REQUEST_CART:
+  case REQUEST_ITEMS:
+  default:
+    return state;
   }
 }

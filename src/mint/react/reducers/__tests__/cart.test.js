@@ -55,7 +55,7 @@ describe('cart reducer', () => {
   it('should add a member to the cart', () => {
     const members = [{ name: 'Riley', id: 123 }, { name: 'Sam', id: 321 }];
     const newMember = { name: 'Taylor', id: 246 };
-    expect(reducer({...firstState, members}, {
+    expect(reducer({...firstState, members }, {
         type: ADD_MEMBER_TO_CART,
         newMember
       }))

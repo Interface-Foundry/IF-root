@@ -69,7 +69,7 @@ export function fetchItems(cart_id) {
 export function removeItem(cart_id, item) {
   return async dispatch => {
     dispatch(requestRemoveItem());
-    
+
     try {
       const response = await fetch(`/api/cart/${cart_id}/item`, {
         'method': 'DELETE',
