@@ -1,6 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import { SignInContainer, CartContainer } from '../../containers';
-import { Onboard } from '..';
+import { Onboard, Overlay } from '..';
 import Header from './Header';
 
 export default class App extends Component {
@@ -33,6 +33,9 @@ export default class App extends Component {
     const { cart_id, newAccount, accounts, currentView } = this.props,
       showForm = currentView !== 0,
       accountPresent = accounts.length > 0;
+
+    if(newAccount === false)
+      return <Overlay/>
 
     return (
       <section>
