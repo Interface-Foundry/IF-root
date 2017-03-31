@@ -26,6 +26,7 @@ const title = 'Pokemon Gym - Escape Velocity';
     ┣━┃╻┃ ┃┃┃┏┫┗┫━┫┃┃┃╻┃ ┃┃┃╻┃
     ┗━┻┻┻┻┻┻┛┗━┻━┛┗━┻┻┛┗┛┗┻┛
 ************************************************/
+/*
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400, value: 600 },
   { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, value: 300 },
@@ -35,6 +36,7 @@ const data = [
   { name: 'Page F', uv: 2390, pv: 3800, amt: 2500, value: 700 },
   { name: 'Page G', uv: 3490, pv: 4300, amt: 2100, value: 100 },
 ];
+*/
 
 /* *********************************************** */
 
@@ -164,6 +166,10 @@ function Home(props, context) {
               descrip: 'Cart Total'
             }, 
             {
+              field:'restaurant',
+              descrip: 'Restaurant'
+            },
+            {
               field: 'items',
               descrip: 'Number of Items'
             },
@@ -185,8 +191,9 @@ function Home(props, context) {
                       team_name: team.team_name,
                       purchased_date: (new Date(delivery.order.order_time)).toLocaleString(),
                       created_date: (new Date(delivery.payment_post.time_started)).toLocaleString(),
+                      restaurant: delivery.order.merchant_info.name,
                       items: delivery.cart.length,
-                      cart_total: delivery.order.total,
+                      cart_total: '$'+delivery.order.total.toFixed(2),
                       });
                       delivery.cart.map(function(item){
                         if(item.added_to_cart==true){
