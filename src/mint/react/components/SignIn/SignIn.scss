@@ -1,7 +1,7 @@
 
 .modal {
 	position: absolute;
-	background: rgba(255,255,255,0.8);
+	background: rgba(69, 165, 244, 1);
 	top: 0;
 	bottom: 0;
 	left: 0;
@@ -24,12 +24,12 @@
 
 			&.top {
 				top: 0;
-				background: linear-gradient(rgba(255,255,255,1), rgba(255,255,255,0));
+				background: linear-gradient(rgba(69, 165, 244, 1), rgba(69, 165, 244, 0));
 			}
 
 			&.bottom {
 				bottom: 0;
-				background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255, 1));
+				background: linear-gradient(rgba(69, 165, 244, 0), rgba(69, 165, 244, 1));
 			}
 		}
 

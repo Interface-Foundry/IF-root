@@ -1,10 +1,11 @@
-import { LOGGED_IN, ONBOARD_NEW_USER, REGISTER_EMAIL, RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
+import { TOGGLE_ADDING, RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
 const initialState = {
   user_accounts: [],
   animal: '',
   createdAt: '',
   updatedAt: '',
-  id: ''
+  id: '',
+  addingItem: false
 };
 
 export default function session(state = initialState, action) {
@@ -21,22 +22,11 @@ export default function session(state = initialState, action) {
       ...newSession,
       'user_accounts': newSession.newAccount ? [...state.user_accounts, user] : state.user_accounts
     };
-  case ONBOARD_NEW_USER:
+  case TOGGLE_ADDING:
     return {
       ...state,
-      onboarding: true,
-    }
-  case REGISTER_EMAIL:
-    return {
-      ...state,
-      registered: true,
-      onboarding: true
-    }
-  case LOGGED_IN:
-    return {
-      loggedIn: action.user_accounts.length > 0,
-      ...state
-    }
+      addingItem: !state.addingItem
+    };
   case REQUEST_SESSION:
   case REQUEST_UPDATE_SESSION:
   default:

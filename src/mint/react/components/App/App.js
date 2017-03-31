@@ -1,5 +1,5 @@
 import React, { PropTypes, Component } from 'react';
-import {SignInContainer, CartContainer} from '../../containers';
+import { SignInContainer, CartContainer } from '../../containers';
 import { Onboard } from '..';
 import Header from './Header';
 
@@ -16,12 +16,11 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {changeKipFormView} = this.props
-    const {members, leader, currentView} = nextProps
-
-    if(
+    const { changeKipFormView } = this.props
+    const { members, leader, currentView, addingItem } = nextProps
+    if (addingItem) {} else if (
       currentView === 0 &&
-      members.length === 0 && 
+      members.length === 0 &&
       !leader
     ) {
       changeKipFormView(1)
@@ -32,8 +31,8 @@ export default class App extends Component {
 
   render() {
     const { cart_id, newAccount, accounts, currentView } = this.props,
-          showForm = currentView !== 0,
-          accountPresent = accounts.length > 0;
+      showForm = currentView !== 0,
+      accountPresent = accounts.length > 0;
 
     return (
       <section>

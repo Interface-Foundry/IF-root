@@ -97,7 +97,6 @@ export function removeItem(cart_id, item) {
 export function addItem(cart_id, url) {
   return async dispatch => {
     dispatch(requestAddItem());
-
     (async() => {
       try {
         const response = await fetch(`/api/cart/${cart_id}/item`, {
