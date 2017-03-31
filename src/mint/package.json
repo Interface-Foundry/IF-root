@@ -80,6 +80,7 @@
     "test": "mocha tests",
     "react-test": "karma start",
     "apidoc": "npm run apidocs",
-    "apidocs": "apidoc -i server/routes/ -o ../../docs/api/ && http-server ../../docs/api -o"
+    "apidocs": "apidoc -i server/routes/ -o ../../docs/api/ && http-server ../../docs/api -o",
+    "camel": "node ./camel"
   }
 }
