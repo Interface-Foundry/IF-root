@@ -26,7 +26,7 @@ const count = 10; //The number of deals / camel items that should be returned
  */
 var scrape = function * (previousId) {
   function makeRequest(url) {
-    var res = process.env.FUCK_LUMINATI ? request(url) : proxy.luminatiRequest(url)
+    var res = process.env.NO_LUMINATI ? request(url) : proxy.luminatiRequest(url)
     return res.then(body => {
 	      // console.log('success', body);
         console.log('success');
