@@ -9,7 +9,7 @@ export default class Header extends Component {
     const { cart_id } = this.props;
 
     return (
-      <nav class='navbar'>
+      <nav className='navbar'>
         <h1>
           Cart ID #{cart_id}
         </h1>

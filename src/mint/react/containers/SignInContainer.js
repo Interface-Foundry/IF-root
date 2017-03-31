@@ -60,7 +60,7 @@ const asyncValidate = (values, dispatch, state) =>
     }
     return session.newAccount
   }).catch(error => {
-    debugger
+    // currently this reroutes you to the email overlay, but kept this in case we want to do some error handling
   });
 
 const shouldAsyncValidate = (params) => params.trigger === 'blur' && params.syncValidationPasses;
