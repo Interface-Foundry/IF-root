@@ -59,6 +59,8 @@ const asyncValidate = (values, dispatch, state) =>
       throw { email: 'You\'ve logged in already' }
     }
     return session.newAccount
+  }).catch(error => {
+    debugger
   });
 
 const shouldAsyncValidate = (params) => params.trigger === 'blur' && params.syncValidationPasses;
