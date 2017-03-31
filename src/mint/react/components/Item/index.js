@@ -1,4 +1,4 @@
 import Item from './Item';
-import './Item.sass';
+import './Item.scss';
 
 export default Item;

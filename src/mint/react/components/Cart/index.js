@@ -1,4 +1,4 @@
 import Cart from './Cart';
-import './Cart.sass';
+import './Cart.scss';
 
 export default Cart;
