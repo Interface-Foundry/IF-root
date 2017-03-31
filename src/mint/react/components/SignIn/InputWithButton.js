@@ -5,7 +5,7 @@ export default class InputWithButton extends Component {
   static propTypes = {
     input: PropTypes.object.isRequired,
     meta: PropTypes.object.isRequired,
-    submit: PropTypes.func.isRequired,
+    submit: PropTypes.func,
     type: PropTypes.string.isRequired
   }
 
