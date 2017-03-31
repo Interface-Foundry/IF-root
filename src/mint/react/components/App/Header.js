@@ -9,7 +9,7 @@ export default class Header extends Component {
   render() {
     const { cart_id, leader } = this.props;
 
-    const leaderName = getNameFromEmail();
+    const leaderName = _.capitalize(getNameFromEmail(leader ? leader.email_address : null));
     
     return (
       <nav className='navbar'>

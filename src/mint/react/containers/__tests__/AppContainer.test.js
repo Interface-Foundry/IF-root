@@ -14,12 +14,15 @@ describe('AppContainer', () => {
     const store = fakeStore({
       session: {
         newAccount: false,
-        onborded: false,
         user_accounts: [{ id: 1 }]
       },
       cart: {
         cart_id: 'testId',
         items: [{ id: 1 }]
+      },
+      kipForm: {
+        currentView: 0,
+        animation: true,
       }
     });
 

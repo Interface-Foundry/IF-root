@@ -16,7 +16,8 @@ export {
 from './dates'
 
 export {
-  commaSeparateNumber
+  commaSeparateNumber,
+  getNameFromEmail
 }
 from './formating'
 
