@@ -3,8 +3,8 @@ import { SignIn } from '../components';
 
 import { changeKipFormView } from '../actions/kipForm';
 
-import { signIn } from '../actions/session';
- 
+import { signIn, toggleAddingToCart } from '../actions/session';
+
 import { isValidEmail } from '../utils';
 
 import { addItem, fetchCart } from '../actions/cart';
@@ -17,8 +17,10 @@ const mapStateToProps = (state, ownProps) => ({
   animation: state.kipForm.animation,
   showSiblings: state.kipForm.showSiblings,
   currentView: state.kipForm.currentView,
-  initialValues: {
+  initialValues: state.kipForm.currentView ? {
     email: '',
+    url: ''
+  } : {
     url: ''
   }
 })
@@ -30,18 +32,20 @@ const mapDispatchToProps = dispatch => ({
 
     dispatch(addItem(cart_id, url))
     dispatch(fetchCart(cart_id))
+    dispatch(toggleAddingToCart())
     dispatch(reset('SignIn'))
   },
-  changeKipFormView: (viewInt) => changeKipFormView(viewInt)
+  changeKipFormView: (viewInt) => {
+    dispatch(toggleAddingToCart())
+    dispatch(changeKipFormView(viewInt))
+  }
 })
 
 const validate = (values, state) => {
-  const { anyTouched } = state
   const errors = {};
-
-  if (!values.email){
+  if (!values.email && state.currentView < 2) {
     errors.email = 'Required';
-  } else if (!isValidEmail(values.email)) {
+  } else if (!isValidEmail(values.email) && state.currentView < 2) {
     errors.email = 'Invalid email address';
   }
 

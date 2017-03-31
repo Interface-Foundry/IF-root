@@ -12,7 +12,8 @@ const mapStateToProps = (state, ownProps) => ({
   leader: state.cart.leader,
   newAccount: state.session.newAccount,
   currentView: state.kipForm.currentView,
-  accounts: state.session.user_accounts
+  accounts: state.session.user_accounts,
+  addingItem: state.session.addingItem
 })
 
 const mapDispatchToProps = dispatch => ({

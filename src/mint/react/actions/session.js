@@ -1,4 +1,4 @@
-import { LOGGED_IN, ONBOARD_NEW_USER, REGISTER_EMAIL, REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
+import { REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION, TOGGLE_ADDING } from '../constants/ActionTypes';
 
 const receive = (newSession) => ({
   type: RECEIVE_SESSION,
@@ -18,16 +18,8 @@ const receiveUpdate = (newSession) => ({
   newSession
 });
 
-export const onboardNewUser = () => ({
-  type: ONBOARD_NEW_USER
-})
-export const registerEmail = () => ({
-  type: REGISTER_EMAIL
-})
-
-export const loggedIn = (user_accounts) => ({
-  type: LOGGED_IN,
-  user_accounts
+export const toggleAddingToCart = () => ({
+  type: TOGGLE_ADDING
 })
 
 export function update() {
@@ -63,6 +55,3 @@ export function signIn(cart_id, email) {
     })();
   };
 }
-
-
-

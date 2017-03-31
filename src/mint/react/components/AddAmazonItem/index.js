@@ -1,4 +1,4 @@
 import AddAmazonItem from './AddAmazonItem';
-import './AddAmazonItem.sass';
+import './AddAmazonItem.scss';
 
 export default AddAmazonItem;
