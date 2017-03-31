@@ -30,7 +30,7 @@ export default class App extends Component {
   }
 
   render() {
-    const { cart_id, newAccount, accounts, currentView } = this.props,
+    const { cart_id, newAccount, accounts, leader, currentView } = this.props,
       showForm = currentView !== 0,
       accountPresent = accounts.length > 0;
 
@@ -39,7 +39,7 @@ export default class App extends Component {
 
     return (
       <section>
-        <Header cart_id={cart_id}/>
+        <Header cart_id={cart_id} leader={leader}/>
         <div>
           {accountPresent ? 
             <p>

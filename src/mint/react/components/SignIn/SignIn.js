@@ -24,7 +24,7 @@ export default class SignIn extends Component {
               <h1>Start New Group Cart</h1>
               <div className="signIn__container__page__input">
                 <label htmlFor="email">1. Whats your Email Address</label>
-                <Field name="email" component={InputWithButton} type="email" required placeholder="Enter your email" newAccount={newAccount}/>
+                <Field name="email" component={InputWithButton} type="email" placeholder="Enter your email" newAccount={newAccount}/>
               </div>
             </section>
             <section className='signIn__container__page' id="two">
