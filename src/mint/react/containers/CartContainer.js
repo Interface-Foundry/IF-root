@@ -10,6 +10,6 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   fetchItems: cart_id => dispatch(fetchItems(cart_id))
-})
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);

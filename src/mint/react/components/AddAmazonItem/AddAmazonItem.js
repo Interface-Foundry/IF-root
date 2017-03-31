@@ -6,6 +6,12 @@ export default class AddAmazonItem extends Component {
     this.addItemToCart = ::this.addItemToCart;
   }
 
+  static propTypes = {
+    changeKipFormView: PropTypes.func.isRequired,
+    toggleAddingToCart: PropTypes.func.isRequired,
+    user_accounts: PropTypes.array.isRequired
+  }
+
   addItemToCart() {
     const { changeKipFormView, toggleAddingToCart, user_accounts } = this.props;
     toggleAddingToCart();
@@ -13,7 +19,6 @@ export default class AddAmazonItem extends Component {
   }
 
   render() {
-    const { changeKipFormView } = this.props;
     const { addItemToCart } = this;
     return (
       <button className='addToCartBtn' onClick={addItemToCart}>+ Add Item</button>

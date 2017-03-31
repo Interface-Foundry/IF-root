@@ -8,32 +8,32 @@ const initialState = {
 
 export default function kipForm(state = initialState, action) {
   switch (action.type) {
-  case CHANGE_KIPFORM_VIEW:
-    return {
-      ...state,
-      currentView: action.view
-    };
-  case TOGGLE_ANIMATION:
-    return {
-      ...state,
-      animation: !state.animation
-    };
-  case TOGGLE_SHOW_SIBLINGS:
-    return {
-      ...state,
-      showSiblings: !state.showSiblings
-    };
-  case RECEIVE_UPDATE_SESSION:
-    return {
-      ...state,
-      currentView: 2
-    };
-  case RECEIVE_ADD_ITEM_TO_CART:
-    return {
-      ...state,
-      currentView: 0
-    };
-  default:
-    return state;
+    case CHANGE_KIPFORM_VIEW:
+      return {
+        ...state,
+        currentView: action.view
+      };
+    case TOGGLE_ANIMATION:
+      return {
+        ...state,
+        animation: !state.animation
+      };
+    case TOGGLE_SHOW_SIBLINGS:
+      return {
+        ...state,
+        showSiblings: !state.showSiblings
+      };
+    case RECEIVE_UPDATE_SESSION:
+      return {
+        ...state,
+        currentView: 2
+      };
+    case RECEIVE_ADD_ITEM_TO_CART:
+      return {
+        ...state,
+        currentView: 0
+      };
+    default:
+      return state;
   }
 }

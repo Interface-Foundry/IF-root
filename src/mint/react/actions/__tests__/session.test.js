@@ -6,7 +6,7 @@ import { fakeStore } from '../../utils';
 import { signIn, update } from '../session'
 import { REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION, REQUEST_SESSION, RECEIVE_SESSION } from '../../constants/ActionTypes'
 
-const middlewares = [ thunk ]
+const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
 describe('session actions', () => {
@@ -21,7 +21,7 @@ describe('session actions', () => {
   it('creates REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION when signIn has been done', () => {
     nock('http://localhost:3000/api')
       .get('/identify')
-      .query({cart_id: 'fakeId', email: 'fakeEmail'})
+      .query({ cart_id: 'fakeId', email: 'fakeEmail' })
       .reply(200, { body })
 
     const expectedActions = [
@@ -30,20 +30,21 @@ describe('session actions', () => {
     ]
 
     const store = mockStore({
-      session: {  
+      session: {
         newAccount: false,
         onborded: false,
-        user_accounts: [{id: 1}]
+        user_accounts: [{ id: 1 }]
       },
-      cart: {  
+      cart: {
         cart_id: 'testId',
-        items: [{id: 1}]
+        items: [{ id: 1 }]
       }
     });
 
     return store.dispatch(signIn('testId', 'fakeEmail'))
-      .then(() => { 
-        expect(store.getActions()).toEqual(expectedActions)
+      .then(() => {
+        expect(store.getActions())
+          .toEqual(expectedActions)
       })
       .catch((error) => {
         // error handler
@@ -61,20 +62,21 @@ describe('session actions', () => {
     ]
 
     const store = mockStore({
-      session: {  
+      session: {
         newAccount: false,
         onborded: false,
-        user_accounts: [{id: 1}]
+        user_accounts: [{ id: 1 }]
       },
-      cart: {  
+      cart: {
         cart_id: 'testId',
-        items: [{id: 1}]
+        items: [{ id: 1 }]
       }
     });
 
     return store.dispatch(update())
-      .then(() => { 
-        expect(store.getActions()).toEqual(expectedActions)
+      .then(() => {
+        expect(store.getActions())
+          .toEqual(expectedActions)
       })
       .catch((error) => {
         // error handler

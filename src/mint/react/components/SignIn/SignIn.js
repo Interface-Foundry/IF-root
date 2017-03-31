@@ -1,12 +1,19 @@
 import React, { Component, PropTypes } from 'react';
 import { Field } from 'redux-form';
 
-import InputWithButton from './InputWithButton'
+import InputWithButton from './InputWithButton';
 
 export default class SignIn extends Component {
+  static propTypes = {
+    handleSubmit: PropTypes.func.isRequired,
+    values: PropTypes.array.isRequired,
+    newAccount: PropTypes.bool.isRequired,
+    currentView: PropTypes.number.isRequired,
+    changeKipFormView: PropTypes.func.isRequired
+  }
 
   finalSubmit = e => {
-    const { handleSubmit, values } = this.props;
+    const { handleSubmit } = this.props;
 
     handleSubmit(e)
   }
@@ -17,7 +24,7 @@ export default class SignIn extends Component {
 
     return (
       <div className="modal">
-        <form className='signIn' onSubmit={handleSubmit}> 
+        <form className='signIn' onSubmit={handleSubmit}>
           <div className='overlay top' onClick={() => changeKipFormView(1)}/>
           <div className={`signIn__container-${currentView}`}>
             <section className='signIn__container__page' id="one">

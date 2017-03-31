@@ -14,11 +14,11 @@ const mapStateToProps = (state, ownProps) => ({
   currentView: state.kipForm.currentView,
   accounts: state.session.user_accounts,
   addingItem: state.session.addingItem
-})
+});
 
 const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
   changeKipFormView: (viewInt) => dispatch(changeKipFormView(viewInt))
-})
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

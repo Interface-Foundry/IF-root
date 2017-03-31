@@ -6,7 +6,7 @@ import { fakeStore } from '../../utils';
 import { fetchCart, fetchItems, removeItem, addItem } from '../cart'
 import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../../constants/ActionTypes'
 
-const middlewares = [ thunk ]
+const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
 describe('cart actions', () => {
@@ -29,20 +29,21 @@ describe('cart actions', () => {
     ]
 
     const store = mockStore({
-      session: {  
+      session: {
         newAccount: false,
         onborded: false,
-        user_accounts: [{id: 1}]
+        user_accounts: [{ id: 1 }]
       },
-      cart: {  
+      cart: {
         cart_id: 'testId',
-        items: [{id: 1}]
+        items: [{ id: 1 }]
       }
     });
 
     return store.dispatch(fetchCart('testId'))
-      .then(() => { 
-        expect(store.getActions()).toEqual(expectedActions)
+      .then(() => {
+        expect(store.getActions())
+          .toEqual(expectedActions)
       })
       .catch((error) => {
         // error handler
@@ -60,20 +61,21 @@ describe('cart actions', () => {
     ]
 
     const store = mockStore({
-      session: {  
+      session: {
         newAccount: false,
         onborded: false,
-        user_accounts: [{id: 1}]
+        user_accounts: [{ id: 1 }]
       },
-      cart: {  
+      cart: {
         cart_id: 'testId',
-        items: [{id: 1}]
+        items: [{ id: 1 }]
       }
     });
 
     return store.dispatch(fetchItems('testId'))
-      .then(() => { 
-        expect(store.getActions()).toEqual(expectedActions)
+      .then(() => {
+        expect(store.getActions())
+          .toEqual(expectedActions)
       })
       .catch((error) => {
         // error handler
@@ -91,20 +93,21 @@ describe('cart actions', () => {
     ]
 
     const store = mockStore({
-      session: {  
+      session: {
         newAccount: false,
         onborded: false,
-        user_accounts: [{id: 1}]
+        user_accounts: [{ id: 1 }]
       },
-      cart: {  
+      cart: {
         cart_id: 'testId',
-        items: [{id: 1}]
+        items: [{ id: 1 }]
       }
     });
 
     return store.dispatch(removeItem('testId'))
-      .then(() => { 
-        expect(store.getActions()).toEqual(expectedActions)
+      .then(() => {
+        expect(store.getActions())
+          .toEqual(expectedActions)
       })
       .catch((error) => {
         // error handler
@@ -122,20 +125,21 @@ describe('cart actions', () => {
     ]
 
     const store = mockStore({
-      session: {  
+      session: {
         newAccount: false,
         onborded: false,
-        user_accounts: [{id: 1}]
+        user_accounts: [{ id: 1 }]
       },
-      cart: {  
+      cart: {
         cart_id: 'testId',
-        items: [{id: 1}]
+        items: [{ id: 1 }]
       }
     });
 
     return store.dispatch(addItem('testId'))
-      .then(() => { 
-        expect(store.getActions()).toEqual(expectedActions)
+      .then(() => {
+        expect(store.getActions())
+          .toEqual(expectedActions)
       })
       .catch((error) => {
         // error handler
