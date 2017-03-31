@@ -1,7 +1,3 @@
-#!/usr/bin/env node
-
-logging.info('camelcamelcamel');
-
 var rp = require('request-promise');
 var cheerio = require('cheerio');
 var co = require('co');
@@ -9,12 +5,15 @@ var fs = require('fs');
 var wait = require('co-wait');
 var _ = require('lodash');
 
-var lookupAmazonItem = require('../server/utilities/amazon_cart').lookupAmazonItem;
-var request = require('../../chat/components/proxy/request');
+var lookupAmazonItem = require('../utilities/amazon_cart').lookupAmazonItem;
+var proxy = require('../../../chat/components/proxy/request');
+var request = require('request-promise')
 var string_utils = require('./string_utils');
+var kip = require('../../../kip')
+var logging = require('../../../logging')
 
 var db;
-const dbReady = require('../db');
+const dbReady = require('../../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 const url = 'https://camelcamelcamel.com';
@@ -26,17 +25,15 @@ const count = 10; //The number of deals / camel items that should be returned
  * @param the mongoId (as a string) of the last camel item we've shown the user
  */
 var scrape = function * (previousId) {
-
   function makeRequest(url) {
-	   return request.luminatiRequest(url, 3)
-		   .then(body => {
-			      // console.log('success', body);
-          console.log('success');
-          return body;
-		    })
-		   .catch(err => {
-			    console.log('bad');
-		    });
+    var res = process.env.NO_LUMINATI ? request(url) : proxy.luminatiRequest(url)
+    return res.then(body => {
+	      // console.log('success', body);
+        console.log('success');
+        return body;
+      }).catch(err => {
+  	    console.log('bad', err);
+      });
   }
 
   logging.info('about to scrape');
@@ -276,9 +273,16 @@ var trimName = function (name) {
 };
 
 module.exports = function () {
-  co(function * () {
-    yield scrapeCamel();
-    // var deals = require('./deals');
-    // yield deals.getDeals(count);
+  return co(function * () {
+    var result = yield scrapeCamel();
+    return result
   });
 };
+
+if (!module.parent) {
+  co(function * () {
+    var r = yield scrapeCamel()
+    console.log('r', r)
+  }).catch(console.error.bind(console))
+
+}
