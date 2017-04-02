@@ -19,10 +19,8 @@ describe('AddAmazonItemContainer', () => {
       cart: {
         cart_id: 'testId'
       },
-      kipForm: {
-        currentView: 0,
-        animation: true,
-        showSiblings: true
+      modal: {
+        component: null
       }
     });
 

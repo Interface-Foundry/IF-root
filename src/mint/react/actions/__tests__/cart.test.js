@@ -10,13 +10,11 @@ const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
 describe('cart actions', () => {
-  let body;
+  let body = { fakeResponse: ['do something'] };
 
   afterEach(() => {
     nock.cleanAll()
   })
-
-  body = { fakeResponse: ['do something'] }
 
   it('creates REQUEST_CART, RECEIVE_CART when fetchCart has been done', () => {
     nock('http://localhost:3000/api')
@@ -36,7 +34,9 @@ describe('cart actions', () => {
       },
       cart: {
         cart_id: 'testId',
-        items: [{ id: 1 }]
+        items: [{ id: 1 }],
+        members: [{ id: 1 }],
+        leader: {id: 2}
       }
     });
 
