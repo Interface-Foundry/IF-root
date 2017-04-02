@@ -19,7 +19,9 @@ describe('CartContainer', () => {
       },
       cart: {
         cart_id: 'testId',
-        items: [{ id: 1 }]
+        items: [{ id: 1 }],
+        members: [{ id: 1 }],
+        leader: {id: 2}
       }
     });
 
