@@ -1,11 +1,10 @@
-import { TOGGLE_ADDING, RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
+import { RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
 const initialState = {
   user_accounts: [],
   animal: '',
   createdAt: '',
   updatedAt: '',
-  id: '',
-  addingItem: false
+  id: ''
 };
 
 export default function session(state = initialState, action) {
@@ -21,11 +20,6 @@ export default function session(state = initialState, action) {
         ...state,
         ...newSession,
         user_accounts: newSession.newAccount ? [...state.user_accounts, user] : state.user_accounts
-      };
-    case TOGGLE_ADDING:
-      return {
-        ...state,
-        addingItem: !state.addingItem
       };
     case REQUEST_SESSION:
     case REQUEST_UPDATE_SESSION:

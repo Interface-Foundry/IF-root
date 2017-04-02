@@ -5,7 +5,8 @@ import { fetchItems } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.cart.cart_id,
-  accounts: state.session.user_accounts,
+  leader: state.cart.leader,
+  members: state.cart.members,
   items: state.cart.items
 });
 

@@ -1,8 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { changeKipFormView } from '../actions/kipForm';
-import { toggleAddingToCart } from '../actions/session';
+import { changeModalComponent } from '../actions/modal';
 import { AddAmazonItem } from '../components';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -10,8 +9,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  changeKipFormView: (viewInt) => dispatch(changeKipFormView(viewInt)),
-  toggleAddingToCart: () => dispatch(toggleAddingToCart())
+	changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddAmazonItem);

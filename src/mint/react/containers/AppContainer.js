@@ -2,8 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { App } from '../components';
 
-import { changeKipFormView } from '../actions/kipForm';
-
+import { changeModalComponent } from '../actions/modal';
 import { fetchCart } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -11,14 +10,13 @@ const mapStateToProps = (state, ownProps) => ({
   members: state.cart.members,
   leader: state.cart.leader,
   newAccount: state.session.newAccount,
-  currentView: state.kipForm.currentView,
   accounts: state.session.user_accounts,
-  addingItem: state.session.addingItem
+  modal: state.modal.component,
 });
 
 const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
-  changeKipFormView: (viewInt) => dispatch(changeKipFormView(viewInt))
+  changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

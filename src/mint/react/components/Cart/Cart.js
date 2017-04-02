@@ -6,13 +6,14 @@ export default class Cart extends Component {
   static propTypes = {
     fetchItems: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
-    accounts: PropTypes.arrayOf(PropTypes.object).isRequired,
+    members: PropTypes.arrayOf(PropTypes.object).isRequired,
+    leader: PropTypes.object,
     items: PropTypes.arrayOf(PropTypes.object)
       .isRequired
   }
 
   render() {
-    const { cart_id, addItem, items, accounts } = this.props;
+    const { cart_id, addItem, items, members, leader } = this.props;
 
     const hasItems = items.length > 0;
     return (
@@ -27,7 +28,7 @@ export default class Cart extends Component {
             <ul>
               { 
                 hasItems ? 
-                  items.map((item, i) => <Item key={i} item={item} itemNumber={i+1} accounts={accounts}/>) 
+                  items.map((item, i) => <Item key={i} item={item} itemNumber={i+1} members={members} leader={leader}/>) 
                   : <em>Please add some products to the cart.</em>
               } 
             </ul>

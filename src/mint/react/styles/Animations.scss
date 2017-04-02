@@ -1,0 +1,31 @@
+// Fade in and animate up
+@-webkit-keyframes fadeInDown {
+  0%   { opacity: 0; transform: translate3d(0, -30px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0px, 0)}
+}
+@-moz-keyframes fadeInDown {
+  0%   { opacity: 0; transform: translate3d(0, -30px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0px, 0)}
+}
+@-o-keyframes fadeInDown {
+  0%   { opacity: 0; transform: translate3d(0, -30px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0px, 0)}
+}
+@keyframes fadeInDown {
+  0%   { opacity: 0; transform: translate3d(0, -30px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0px, 0)}
+}
+
+@mixin animation($args) {
+  -webkit-animation: $args;
+  -moz-animation: $args;
+  -o-animation: $args;
+  animation: $args;
+}
+ 
+@mixin transition($transition) {
+  -webkit-transition: $transition;
+  -moz-transition: $transition;
+  -o-transition: $transition;
+  transition: $transition; 
+}
