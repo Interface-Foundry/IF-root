@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import {
 	IoEmail,
-	IoNaviconRound
+	IoNaviconRound,
+	IoClose,
+	IoChevronUp
 } from 'react-icons/lib/io'
 
 export default class Icon extends Component {
@@ -11,6 +13,10 @@ export default class Icon extends Component {
 	          	return <IoNaviconRound/>
 	        case 'Email':
 	        	return <IoEmail/>
+	        case 'Clear':
+	        	return <IoClose/>
+	        case 'Up':
+	        	return <IoChevronUp/>
       	}
     }
 }

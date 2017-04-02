@@ -43,3 +43,6 @@ export default function cart(state = initialState, action) {
       return state;
   }
 }
+
+//Selector
+export const getMemberById = (state, props) => [...state.members, state.leader].find(member => member.id === props.id)

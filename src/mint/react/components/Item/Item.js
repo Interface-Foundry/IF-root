@@ -1,5 +1,5 @@
 import React, { PropTypes, Component } from 'react';
-import { getAccountById } from '../../reducers';
+import { getMemberById } from '../../reducers';
 import { getNameFromEmail } from '../../utils'
 
 export default class Item extends Component {
@@ -8,14 +8,14 @@ export default class Item extends Component {
   }
 
   render() {
-    const { item, accounts, itemNumber } = this.props,
-          linkedAccount = getAccountById({user_accounts: accounts}, {id: item.added_by}),
-          leaderName = _.capitalize(getNameFromEmail(linkedAccount ? linkedAccount.email_address : null));
+    const { item, members, itemNumber, leader } = this.props,
+          linkedMember = getMemberById({members: members, leader: leader}, {id: item.added_by}),
+          memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
 
     return (
       <a href={item.original_link}>
         <li className='item'>
-          <h4 className='item__title'>{leaderName}</h4>
+          <h4 className='item__title'>{memberName}</h4>
           <div className='item__image image col-3 ' style={
             {
               backgroundImage: `url(//placehold.it/100x100)`,

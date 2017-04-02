@@ -4,8 +4,7 @@ const initialState = {
   original_link: '',
   item_name: '',
   asin: '',
-  cart: '',
-  added: true
+  cart: ''
 };
 
 export default function item(state = initialState, action) {

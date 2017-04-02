@@ -7,15 +7,14 @@ export default class AddAmazonItem extends Component {
   }
 
   static propTypes = {
-    changeKipFormView: PropTypes.func.isRequired,
-    toggleAddingToCart: PropTypes.func.isRequired,
+    changeModalComponent: PropTypes.func.isRequired,
     user_accounts: PropTypes.array.isRequired
   }
 
   addItemToCart() {
-    const { changeKipFormView, toggleAddingToCart, user_accounts } = this.props;
-    toggleAddingToCart();
-    changeKipFormView(user_accounts.length ? 2 : 1);
+    const { changeModalComponent, user_accounts } = this.props;
+
+    changeModalComponent(user_accounts.length ? 'AmazonFormContainer' : 'EmailFormContainer');
   }
 
   render() {

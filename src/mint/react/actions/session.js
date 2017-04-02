@@ -1,4 +1,7 @@
 import { REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION, TOGGLE_ADDING } from '../constants/ActionTypes';
+import { SubmissionError, reset } from 'redux-form'
+import { changeModalComponent } from './modal'
+import { fetchCart } from './cart'
 
 const receive = (newSession) => ({
   type: RECEIVE_SESSION,
@@ -45,9 +48,13 @@ export function signIn(cart_id, email) {
       const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
         credentials: 'same-origin'
       });
+
+      dispatch(fetchCart(cart_id));
+      dispatch(reset('SignIn'));
+      dispatch(changeModalComponent(null));
       return dispatch(receiveUpdate(await response.json()));
     } catch (e) {
-      throw 'error in session signIn';
+      return new SubmissionError({email: 'You are already signed in, check your email!'});
     }
   };
 }

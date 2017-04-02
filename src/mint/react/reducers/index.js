@@ -1,14 +1,14 @@
 import cart from './cart';
+import modal from './modal';
 import item from './item';
 import session from './session';
-import kipForm from './kipForm';
 import { combineReducers } from 'redux';
 import { routerReducer } from 'react-router-redux';
 import { reducer as form } from 'redux-form';
 
 export default combineReducers({
-  kipForm,
   cart,
+  modal,
   item,
   session,
   form,
@@ -19,3 +19,7 @@ export default combineReducers({
 export {
 	getAccountById
 } from './session';
+
+export {
+	getMemberById
+} from './cart';
