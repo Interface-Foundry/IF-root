@@ -2,6 +2,7 @@ import React, {
   Component,
   PropTypes
 } from 'react';
+import {Panel} from 'react-bootstrap';
 import Table from '../Table';
 import fetch from '../../core/fetch';
 import co from 'co';
@@ -41,7 +42,9 @@ class DeliveryTable extends Component {
     const {deliveries} = this.state;
     const data = deliveries ? deliveries : [[]];
     return (
-      <Table heads={this.props.heads} data={data} colorBy={this.props.colorBy} />
+      <Panel className='fillSpace' header={<span><i className="fa fa-bar-chart-o fa-fw" /> Purchased Cafe Carts </span>}>
+        <Table heads={this.props.heads} data={data} colorBy={this.props.colorBy} />
+      </Panel>
     )
   }
 }

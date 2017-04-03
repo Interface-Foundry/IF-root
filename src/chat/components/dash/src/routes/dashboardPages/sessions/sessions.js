@@ -17,8 +17,8 @@ import vagueTime from 'vague-time';
 import _ from 'lodash';
 import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
 
-const title = ' Team Stats';
-''
+const title = 'Team Stats';
+
 function getWaypointPaths(waypoints){
 
   var userWaypoints = _.groupBy(waypoints,function(waypoint){

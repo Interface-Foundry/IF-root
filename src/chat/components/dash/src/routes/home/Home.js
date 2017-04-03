@@ -1,9 +1,9 @@
-import React, { PropTypes } from 'react';
+import React, { PropTypes, Component } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import {
   MenuItem,
   DropdownButton,
-  Panel, PageHeader, ListGroup, ListGroupItem, Button, Alert
+  Panel, PageHeader, ListGroup, ListGroupItem, Button, ButtonToolbar, Alert
 } from 'react-bootstrap';
 import s from './Home.css';
 import StatWidget from '../../components/Widget';
@@ -61,170 +61,186 @@ const data = [
 </Panel>
 */
 
-function Home(props, context) {
-  context.setTitle(title);
-  return (
-    <div className="container-fluid data-display">
-      <Panel className='fillSpace' header={<span>
-          <i className="fa fa-bar-chart-o fa-fw" /> Purchased Store Carts </span>}>
-      	<CartTable 
-          query={'{teams(limit:5000){team_name, carts {created_date, purchased_date,items {_id,title,image,price,ASIN,added_by,source_json},purchased}}}'}
-          heads = {
-            [{ field: 'created_date',
-               descrip: 'Created Date',
-               allowSort: true,
-               sort: (a, b, order) => order == 'desc' ? 
-                  new Date(b.created_date) - new Date(a.created_date) 
-                  : new Date(a.created_date) - new Date(b.created_date)
-            },
-            {
-              field: 'purchased_date',
-              descrip: 'Purchased Date',
-              allowSort: true,
-              sort: (a, b, order) => order == 'desc' ? 
-                  new Date(b.purchased_date) - new Date(a.purchased_date) 
-                  : new Date(a.purchased_date) - new Date(b.purchased_date)
-            }, 
-            {
-              field: 'team_name',
-              descrip: 'Slack ID'
-            }, 
-            {
-              field:'cart_total',
-              descrip: 'Cart Total'
-            }, 
-            {
-              field: 'items',
-              descrip: 'Number of Items'
-            },
-            {
-              field: 'price',
-              descrip: 'Item Price'
-            },
-            {
-              field: 'title',
-              descrip: 'Product Name'
-            }]
-          }
-          process = {
-            (teams, team) => 
-            teams.concat(
-              team.carts.reduce((carts, cart) => {
-                if(cart.purchased){
-                  if (cart.purchased == true) {
-                      carts.push({
-                      team_name: team.team_name,
-                      purchased_date: (new Date(cart.purchased_date)).toLocaleString(),
-                      created_date: (new Date(cart.created_date)).toLocaleString(),
-                      items: cart.items.length,
-                      cart_total: '$'+cart.items.reduce(function(a,b){
-                        return (a+Number(b.price.replace(/[^0-9\.]+/g,"")));
-                      },0).toFixed(2),
-                      });
-                      cart.items.map(function(item){
-                        carts.push({
-                          price: item.price,
-                          title: item.title
-                        })
-                      })
-                  }
+class Home extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      view: 'Store'
+    };
+  }
+  
+  componentDidMount() {
+    var self = this;
+    co(function * () {
+      self.setState({view: 'Store'}) 
+    })
+  }
+
+  render(){
+    return (
+      <div>
+        <div className="container-fluid data-display">
+          <ButtonToolbar>
+            <Button onClick={ ()=> this.setState({ view: 'Store' })}>
+              Store
+            </Button>
+            <Button onClick={ ()=> this.setState({ view: 'Cafe' })}>
+              Cafe
+            </Button>
+          </ButtonToolbar>
+            { this.state.view=='Store' ? 
+              <CartTable 
+                query={'{teams(limit:5000){team_name, carts {created_date, purchased_date,items {_id,title,image,price,ASIN,added_by,source_json},purchased}}}'}
+                heads = {
+                  [{ field: 'created_date',
+                     descrip: 'Created Date',
+                     allowSort: true,
+                     sort: (a, b, order) => order == 'desc' ? 
+                        new Date(b.created_date) - new Date(a.created_date) 
+                        : new Date(a.created_date) - new Date(b.created_date)
+                  },
+                  {
+                    field: 'purchased_date',
+                    descrip: 'Purchased Date',
+                    allowSort: true,
+                    sort: (a, b, order) => order == 'desc' ? 
+                        new Date(b.purchased_date) - new Date(a.purchased_date) 
+                        : new Date(a.purchased_date) - new Date(b.purchased_date)
+                  }, 
+                  {
+                    field: 'team_name',
+                    descrip: 'Slack ID'
+                  }, 
+                  {
+                    field:'cart_total',
+                    descrip: 'Cart Total'
+                  }, 
+                  {
+                    field: 'items',
+                    descrip: 'Number of Items'
+                  },
+                  {
+                    field: 'price',
+                    descrip: 'Item Price'
+                  },
+                  {
+                    field: 'title',
+                    descrip: 'Product Name'
+                  }]
                 }
-                return carts;
-              }, [])
-
-            )
-          }
-        />
-      </Panel>
-
-      <Panel className='fillSpace' header={<span>
-          <i className="fa fa-bar-chart-o fa-fw" /> Purchased Cafe Carts </span>}>
-        <DeliveryTable 
-          query={'{teams(limit:5000){members{id,name},team_name, deliveries{order, cart, payment_post}}}'}
-          heads = {
-            [{ field: 'created_date',
-               descrip: 'Created Date',
-               allowSort: true,
-               sort: (a, b, order) => order == 'desc' ? 
-                  new Date(b.created_date) - new Date(a.created_date) 
-                  : new Date(a.created_date) - new Date(b.created_date)
-            },
-            {
-              field: 'purchased_date',
-              descrip: 'Purchased Date',
-              allowSort: true,
-              sort: (a, b, order) => order == 'desc' ? 
-                  new Date(b.purchased_date) - new Date(a.purchased_date) 
-                  : new Date(a.purchased_date) - new Date(b.purchased_date)
-            }, 
-            {
-              field: 'team_name',
-              descrip: 'Slack ID'
-            }, 
-            {
-              field:'cart_total',
-              descrip: 'Cart Total'
-            }, 
-            {
-              field:'restaurant',
-              descrip: 'Restaurant'
-            },
-            {
-              field: 'items',
-              descrip: 'Number of Items'
-            },
-            {
-              field: 'user',
-              descrip: 'User ID'
-            },
-            {
-              field: 'order',
-              descrip: 'Order'
-            }]
-          }
-          process = {
-            (teams, team) => 
-            teams.concat(
-              team.deliveries.reduce((deliveries, delivery) => {
-                if(delivery.payment_post){
-                      deliveries.push({
-                      team_name: team.team_name,
-                      purchased_date: (new Date(delivery.order.order_time)).toLocaleString(),
-                      created_date: (new Date(delivery.payment_post.time_started)).toLocaleString(),
-                      restaurant: delivery.order.merchant_info.name,
-                      items: delivery.cart.length,
-                      cart_total: '$'+delivery.order.total.toFixed(2),
-                      });
-                      delivery.cart.map(function(item){
-                        if(item.added_to_cart==true){
-                          deliveries.push({
-                          user: team.members.find(function(m){
-                            return m.id == item.user_id
-                          }).name,
-                          order: delivery.order.cart.find(function(i){
-                            return i.id == item.item.item_id || i.id.split('-').pop() == item.item.item_id
-                          }).name
-                        })
+                process = {
+                  (teams, team) => 
+                  teams.concat(
+                    team.carts.reduce((carts, cart) => {
+                      if(cart.purchased){
+                        if (cart.purchased == true) {
+                            carts.push({
+                            team_name: team.team_name,
+                            purchased_date: (new Date(cart.purchased_date)).toLocaleString(),
+                            created_date: (new Date(cart.created_date)).toLocaleString(),
+                            items: cart.items.length,
+                            cart_total: '$'+cart.items.reduce(function(a,b){
+                              return (a+Number(b.price.replace(/[^0-9\.]+/g,"")));
+                            },0).toFixed(2),
+                            });
+                            cart.items.map(function(item){
+                              carts.push({
+                                price: item.price,
+                                title: item.title
+                              })
+                            })
                         }
-                        
-                      })
+                      }
+                      return carts;
+                    }, [])
+
+                  )
                 }
-                return deliveries;
-              }, [])
+              />
+            : 
+              <DeliveryTable 
+                query={'{teams(limit:5000){members{id,name},team_name, deliveries{order, cart, payment_post}}}'}
+                heads = {
+                  [{ field: 'created_date',
+                     descrip: 'Created Date',
+                     allowSort: true,
+                     sort: (a, b, order) => order == 'desc' ? 
+                        new Date(b.created_date) - new Date(a.created_date) 
+                        : new Date(a.created_date) - new Date(b.created_date)
+                  },
+                  {
+                    field: 'purchased_date',
+                    descrip: 'Purchased Date',
+                    allowSort: true,
+                    sort: (a, b, order) => order == 'desc' ? 
+                        new Date(b.purchased_date) - new Date(a.purchased_date) 
+                        : new Date(a.purchased_date) - new Date(b.purchased_date)
+                  }, 
+                  {
+                    field: 'team_name',
+                    descrip: 'Slack ID'
+                  }, 
+                  {
+                    field:'cart_total',
+                    descrip: 'Cart Total'
+                  }, 
+                  {
+                    field:'restaurant',
+                    descrip: 'Restaurant'
+                  },
+                  {
+                    field: 'items',
+                    descrip: 'Number of Items'
+                  },
+                  {
+                    field: 'user',
+                    descrip: 'User ID'
+                  },
+                  {
+                    field: 'order',
+                    descrip: 'Order'
+                  }]
+                }
+                process = {
+                  (teams, team) => 
+                  teams.concat(
+                    team.deliveries.reduce((deliveries, delivery) => {
+                      if(delivery.payment_post){
+                            deliveries.push({
+                            team_name: team.team_name,
+                            purchased_date: (new Date(delivery.order.order_time)).toLocaleString(),
+                            created_date: (new Date(delivery.payment_post.time_started)).toLocaleString(),
+                            restaurant: delivery.order.merchant_info.name,
+                            items: delivery.cart.length,
+                            cart_total: '$'+delivery.order.total.toFixed(2),
+                            });
+                            delivery.cart.map(function(item){
+                              if(item.added_to_cart==true){
+                                deliveries.push({
+                                user: team.members.find(function(m){
+                                  return m.id == item.user_id
+                                }).name,
+                                order: delivery.order.cart.find(function(i){
+                                  return i.id == item.item.item_id || i.id.split('-').pop() == item.item.item_id
+                                }).name
+                              })
+                              }
+                              
+                            })
+                      }
+                      return deliveries;
+                    }, [])
 
-            )
+                  )
+                }
+              /> 
           }
-        />
-      </Panel>
 
-    </div>
-  );
+        </div>
+      </div>
+    )
+  }
+  
 }
 
-Home.propTypes = {
-
-};
-
-Home.contextTypes = { setTitle: PropTypes.func.isRequired };
-
-export default withStyles(s)(Home);
+export default Home;
