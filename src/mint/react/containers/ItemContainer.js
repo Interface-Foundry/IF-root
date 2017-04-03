@@ -1,13 +1,13 @@
 import { connect } from 'react-redux';
 import { Item } from '../components';
 
+import { getMemberById } from '../reducers';
 import { changeModalComponent } from '../actions/modal';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.cart.cart_id,
   leader: state.cart.leader,
-  members: state.cart.members,
-  items: state.cart.items,
+  member: getMemberById(state.cart, {id: state.cart.item.added_by}),
   addingItem: state.cart.addingItem,
   item: state.cart.item
 });

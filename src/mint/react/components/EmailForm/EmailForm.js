@@ -17,7 +17,7 @@ const renderField = ({ input, label, placeholder, handleSubmit, type, meta: { to
 )
 
 export default (props) => {
-  const { handleSubmit} = props
+  const { handleSubmit, changeModalComponent} = props
   return (
     <form onSubmit={handleSubmit} className="form">
       <div>
@@ -28,6 +28,9 @@ export default (props) => {
           placeholder="Enter Email"
           handleSubmit={handleSubmit}
           component={renderField}/>
+      </div>
+      <div className="modal__drag" onClick={() => changeModalComponent(null)}>
+        <Icon icon="Up"/>
       </div>
     </form>
   )

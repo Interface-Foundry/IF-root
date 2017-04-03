@@ -1,0 +1,17 @@
+@import '../../styles/Constants';
+
+.item__footer {
+	height: $nav-height;
+	line-height: $nav-height;
+	padding: $padding;
+	border-top: 1px solid darken($kip-primary-color, 5);
+
+	button {
+		height: calc(#{$nav-height} - #{$padding*2});
+		line-height: calc(#{$nav-height} - #{$padding*2});
+		width: 50%;
+		padding: 0 $padding;
+		border: 1px solid darken($kip-primary-color, 5);
+		background: transparent;
+	}
+}
