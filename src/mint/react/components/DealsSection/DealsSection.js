@@ -29,7 +29,7 @@ export default class DealsSection extends Component {
   renderCards() {
     const { isDropDown } = this.props;
     var { deals } = this.state;
-    return deals.map((deal, i) => <li key={i}><DealCard deal={deal} small={isDropDown} /></li>);
+    return deals.map((deal, i) => <li key={i}><DealCard {...deal} small={isDropDown} /></li>);
   }
 
   render() {

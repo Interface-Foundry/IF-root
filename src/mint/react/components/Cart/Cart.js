@@ -1,12 +1,13 @@
 import React, { PropTypes, Component } from 'react';
-import Item  from './CartItem';
+import Item from './CartItem';
 import { AddAmazonItemContainer } from '../../containers';
 
 export default class Cart extends Component {
   static propTypes = {
     selectItem: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
-    members: PropTypes.arrayOf(PropTypes.object).isRequired,
+    members: PropTypes.arrayOf(PropTypes.object)
+      .isRequired,
     leader: PropTypes.object,
     items: PropTypes.arrayOf(PropTypes.object)
       .isRequired
@@ -14,7 +15,7 @@ export default class Cart extends Component {
 
   render() {
     const { cart_id, addItem, items, members, leader, selectItem, changeModalComponent } = this.props;
-    
+
     const hasItems = items.length > 0;
     return (
       <div className='cart'>
