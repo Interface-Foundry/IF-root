@@ -1,10 +1,10 @@
 import React, { PropTypes, Component } from 'react';
-import { Item } from '..';
+import Item  from './CartItem';
 import { AddAmazonItemContainer } from '../../containers';
 
 export default class Cart extends Component {
   static propTypes = {
-    fetchItems: PropTypes.func.isRequired,
+    selectItem: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
     members: PropTypes.arrayOf(PropTypes.object).isRequired,
     leader: PropTypes.object,
@@ -13,8 +13,8 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, members, leader } = this.props;
-
+    const { cart_id, addItem, items, members, leader, selectItem, changeModalComponent } = this.props;
+    
     const hasItems = items.length > 0;
     return (
       <div className='cart'>
@@ -26,11 +26,17 @@ export default class Cart extends Component {
           </div>
           <div className='cart__items'>
             <ul>
-              {
-                hasItems
-                ? items.map((item, i) => <Item key={i} item={item} itemNumber={i + 1} members={members} leader={leader}/>)
-                : <em>Please add some products to the cart.</em>
-              }
+              { 
+                hasItems ? 
+                  items.map((item, i) => <Item key={i} 
+                                              item={item} 
+                                              itemNumber={i+1} 
+                                              members={members} 
+                                              leader={leader} 
+                                              selectItem={selectItem}
+                                              changeModalComponent={changeModalComponent}/>) 
+                  : <em>Please add some products to the cart.</em>
+              } 
             </ul>
           </div>
     </div>

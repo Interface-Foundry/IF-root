@@ -1,15 +1,15 @@
 import cart from './cart';
 import modal from './modal';
-import item from './item';
 import session from './session';
+import deals from './deals';
 import { combineReducers } from 'redux';
 import { routerReducer } from 'react-router-redux';
 import { reducer as form } from 'redux-form';
 
 export default combineReducers({
   cart,
+  deals,
   modal,
-  item,
   session,
   form,
   routing: routerReducer
@@ -18,10 +18,9 @@ export default combineReducers({
 // export selectors
 export {
   getAccountById
-}
-from './session';
+} from './session';
 
 export {
-  getMemberById
-}
-from './cart';
+	getMemberById,
+	getItemById
+} from './cart';

@@ -1,4 +1,10 @@
-import { RECEIVE_SESSION, REQUEST_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION } from '../constants/ActionTypes';
+import { 
+  RECEIVE_SESSION, 
+  REQUEST_SESSION, 
+  REQUEST_UPDATE_SESSION, 
+  RECEIVE_UPDATE_SESSION 
+} from '../constants/ActionTypes';
+
 const initialState = {
   user_accounts: [],
   animal: '',
