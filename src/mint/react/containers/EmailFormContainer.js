@@ -14,7 +14,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => {
-    dispatch(signIn(state.cart_id, values.email, state.addingItem))
+    dispatch(signIn(state.cart_id, values.email, state.addingItem));
   }
 });
 
@@ -31,12 +31,10 @@ const validate = (values, state) => {
 
 const EmailFormContainer = reduxForm({
   form: 'SignIn',
-  validate,
+  validate
 })(EmailForm);
 
 export default connect(mapStateToProps, mapDispatchToProps)(EmailFormContainer);
-
-
 
 // In case we want asyncValidation
 // const asyncValidate = (values, dispatch, state) =>

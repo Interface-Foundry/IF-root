@@ -1,6 +1,6 @@
-import { ADDING_ITEM, SET_CART_ID, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
-import { SubmissionError, reset } from 'redux-form'
-import { changeModalComponent } from './modal'
+import { ADDING_ITEM, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
+import { SubmissionError, reset } from 'redux-form';
+import { changeModalComponent } from './modal';
 
 const receive = (newCart) => ({
   type: RECEIVE_CART,
@@ -8,7 +8,7 @@ const receive = (newCart) => ({
 });
 
 const request = () => ({
-  type: REQUEST_CART,
+  type: REQUEST_CART
 });
 
 const receiveItems = (items) => ({
@@ -41,7 +41,7 @@ const receiveAddItem = (item) => ({
 export const addingItem = (addingItem) => ({
   type: ADDING_ITEM,
   addingItem
-})
+});
 
 export function fetchCart(cart_id) {
   return async function (dispatch) {
@@ -54,7 +54,7 @@ export function fetchCart(cart_id) {
 
       return dispatch(receive(await response.json()));
     } catch (e) {
-      throw 'error in cart fetchCart'
+      throw 'error in cart fetchCart';
     }
   };
 }
@@ -69,7 +69,7 @@ export function fetchItems(cart_id) {
       });
       return dispatch(receiveItems(await response.json()));
     } catch (e) {
-      throw 'error in cart fetchItems'
+      throw 'error in cart fetchItems';
     }
   };
 }
@@ -92,7 +92,7 @@ export function removeItem(cart_id, item) {
       });
       return dispatch(receiveRemoveItem(await response.json()));
     } catch (e) {
-      throw 'error in cart removeItem'
+      throw 'error in cart removeItem';
     }
   };
 }
@@ -119,7 +119,7 @@ export function addItem(cart_id, url) {
       dispatch(changeModalComponent(null));
       return dispatch(receiveAddItem(await response.json()));
     } catch (e) {
-      throw new SubmissionError({url: 'Looks like you entered an invalid URL!'});
+      throw new SubmissionError({ url: 'Looks like you entered an invalid URL!' });
     }
   };
 }

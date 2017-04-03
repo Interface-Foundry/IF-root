@@ -1,7 +1,6 @@
-import React from 'react';
 import { connect } from 'react-redux';
 
-import { addingItem } from '../actions/cart'; 
+import { addingItem } from '../actions/cart';
 import { changeModalComponent } from '../actions/modal';
 import { AddAmazonItem } from '../components';
 
@@ -10,8 +9,8 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-	addingItem: (bool) => dispatch(addingItem(bool)),
-	changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
+  addingItem: (bool) => dispatch(addingItem(bool)),
+  changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddAmazonItem);

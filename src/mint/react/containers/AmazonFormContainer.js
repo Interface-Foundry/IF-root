@@ -25,7 +25,7 @@ const validate = (values, state) => {
 
 const AmazonFormContainer = reduxForm({
   form: 'AddItem',
-  validate,
+  validate
 })(AmazonForm);
 
 export default connect(mapStateToProps, mapDispatchToProps)(AmazonFormContainer);

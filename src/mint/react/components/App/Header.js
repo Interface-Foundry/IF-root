@@ -1,17 +1,17 @@
 import React, { PropTypes, Component } from 'react';
-import { getNameFromEmail } from '../../utils'
-import { Icon } from '..'
+import { getNameFromEmail } from '../../utils';
+import { Icon } from '..';
 
 export default class Header extends Component {
   static propTypes = {
-    cart_id: PropTypes.string.isRequired
+    leader: PropTypes.object.isRequired
   }
 
   render() {
-    const { cart_id, leader } = this.props;
+    const { leader } = this.props;
 
     const leaderName = _.capitalize(getNameFromEmail(leader ? leader.email_address : null));
-    
+
     return (
       <nav className='navbar'>
         <h3>

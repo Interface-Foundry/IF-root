@@ -13,13 +13,15 @@ export default combineReducers({
   session,
   form,
   routing: routerReducer
-})
+});
 
 // export selectors
 export {
-	getAccountById
-} from './session';
+  getAccountById
+}
+from './session';
 
 export {
-	getMemberById
-} from './cart';
+  getMemberById
+}
+from './cart';
