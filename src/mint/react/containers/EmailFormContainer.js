@@ -8,12 +8,13 @@ import { isValidEmail } from '../utils';
 import { reduxForm } from 'redux-form';
 
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: state.cart.cart_id
+  cart_id: state.cart.cart_id,
+  addingItem: state.cart.addingItem
 });
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => {
-    dispatch(signIn(state.cart_id, values.email))
+    dispatch(signIn(state.cart_id, values.email, state.addingItem))
   }
 });
 

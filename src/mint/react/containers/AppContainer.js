@@ -12,6 +12,7 @@ const mapStateToProps = (state, ownProps) => ({
   newAccount: state.session.newAccount,
   accounts: state.session.user_accounts,
   modal: state.modal.component,
+  addingItem: state.cart.addingItem
 });
 
 const mapDispatchToProps = dispatch => ({

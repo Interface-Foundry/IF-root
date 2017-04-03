@@ -25,7 +25,7 @@ export default class App extends Component {
       !leader
     ) {
       changeModalComponent('EmailFormContainer')
-    } else if (leader && this.props.modal === modal) {
+    } else if (leader && this.props.modal === modal && !addingItem) {
       changeModalComponent(null)
     }
   }

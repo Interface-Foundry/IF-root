@@ -22,7 +22,7 @@ export default class Cart extends Component {
             <AddAmazonItemContainer />
           </div>
           <div className='cart__title'>
-            <h4>Group Shopping Cart</h4>
+            <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>
           </div>
           <div className='cart__items'>
             <ul>
