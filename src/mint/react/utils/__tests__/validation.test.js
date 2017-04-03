@@ -127,7 +127,7 @@ describe('validation util', () => {
 
   describe('oneOf', () => {
     const enumeration = ['pies', 'apples', 'cherries'];
-    const expectedReturn = `Must be one of: ${enumeration.join(',')}`;
+    const expectedReturn = `Must be one of: ${enumeration.join(', ')}`;
 
     it(`should return '${expectedReturn}' if value is undefined || null || ''`, () => {
       expect(oneOf(enumeration)())
