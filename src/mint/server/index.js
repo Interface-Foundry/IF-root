@@ -113,10 +113,6 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
 
 //~~~~~for unsubscribe group testing~~~~~//
 
-var testFunction = function (url) {
-  return url;
-}
-
 var mailOptions = {
 to: '<hannah.katznelson@kipthis.com>',
 from: 'Kip Test <hello@kipthis.com>',
