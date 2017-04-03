@@ -1,6 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import Item from './CartItem';
-import { AddAmazonItemContainer } from '../../containers';
+import { AddAmazonItemContainer, DealsContainer } from '../../containers';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -22,6 +22,7 @@ export default class Cart extends Component {
           <div className='cart__add'>
             <AddAmazonItemContainer />
           </div>
+          <DealsContainer />
           <div className='cart__title'>
             <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>
           </div>
