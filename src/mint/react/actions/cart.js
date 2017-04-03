@@ -41,7 +41,7 @@ const receiveAddItem = (item) => ({
 export const selectItem = (item) => ({
   type: SELECT_ITEM,
   item
-})
+});
 
 export const addingItem = (addingItem) => ({
   type: ADDING_ITEM,

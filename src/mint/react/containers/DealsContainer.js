@@ -4,7 +4,8 @@ import { DealsSection } from '../components';
 import { fetchDeals } from '../actions/deals';
 
 const mapStateToProps = (state, ownProps) => ({
-  isDropDown: false // TODO: figure out where the form tap in is
+  isDropDown: false, // TODO: figure out where the form tap in is
+  deals: state.deals
 });
 
 const mapDispatchToProps = dispatch => ({
