@@ -10,11 +10,10 @@ export default class App extends Component {
     fetchCart: PropTypes.func.isRequired,
     changeModalComponent: PropTypes.func.isRequired,
     members: PropTypes.array.isRequired,
-    leader: PropTypes.object.isRequired,
-    modal: PropTypes.object.isRequired,
-    addingItem: PropTypes.func.isRequired,
-    newAccount: PropTypes.bool.isRequired,
-    currentView: PropTypes.object.isRequired
+    leader: PropTypes.object,
+    modal: PropTypes.string,
+    addingItem: PropTypes.bool.isRequired,
+    newAccount: PropTypes.bool
   }
 
   componentWillMount() {

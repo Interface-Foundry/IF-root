@@ -4,7 +4,7 @@ import { Icon } from '..';
 
 export default class Header extends Component {
   static propTypes = {
-    leader: PropTypes.object.isRequired
+    leader: PropTypes.object
   }
 
   render() {
