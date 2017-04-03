@@ -17,8 +17,6 @@ import {
   CartesianGrid, AreaChart, Bar, BarChart,
   ResponsiveContainer } from '../../vendor/recharts';
 
-const title = 'Pokemon Gym - Escape Velocity';
-
 
 /************************************************
     ┏━┳━┳┓┏┳━┳┓┏━┓┏━┳━┳━━┳━┓
@@ -71,9 +69,7 @@ class Home extends Component {
   
   componentDidMount() {
     var self = this;
-    co(function * () {
-      self.setState({view: 'Store'}) 
-    })
+    self.setState({view: 'Store'}) 
   }
 
   render(){
