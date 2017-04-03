@@ -25,7 +25,7 @@ export default function cart(state = initialState, action) {
       return {
         ...state,
         members: [...state.members, action.newMember]
-      }
+      };
     case RECEIVE_CART:
       return {
         ...state,
@@ -44,5 +44,5 @@ export default function cart(state = initialState, action) {
   }
 }
 
-//Selector
+// Selector
 export const getMemberById = (state, props) => [...state.members, state.leader].find(member => member.id === props.id)

@@ -8,12 +8,12 @@ export default class AddAmazonItem extends Component {
 
   static propTypes = {
     changeModalComponent: PropTypes.func.isRequired,
-    user_accounts: PropTypes.array.isRequired
+    user_accounts: PropTypes.array.isRequired,
+    addingItem: PropTypes.func.isRequired
   }
 
   addItemToCart() {
     const { changeModalComponent, user_accounts, addingItem } = this.props;
-
     addingItem(true);
     changeModalComponent(user_accounts.length ? 'AmazonFormContainer' : 'EmailFormContainer');
   }

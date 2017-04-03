@@ -1,12 +1,20 @@
 import React, { PropTypes, Component } from 'react';
-import { SignInContainer, CartContainer } from '../../containers';
-import { Onboard, Overlay, Modal } from '..';
+import { CartContainer } from '../../containers';
+import { Overlay, Modal } from '..';
 import Header from './Header';
 
 export default class App extends Component {
   static propTypes = {
     cart_id: PropTypes.string.isRequired,
-    accounts: PropTypes.array.isRequired
+    accounts: PropTypes.array.isRequired,
+    fetchCart: PropTypes.func.isRequired,
+    changeModalComponent: PropTypes.func.isRequired,
+    members: PropTypes.array.isRequired,
+    leader: PropTypes.object.isRequired,
+    modal: PropTypes.object.isRequired,
+    addingItem: PropTypes.func.isRequired,
+    newAccount: PropTypes.bool.isRequired,
+    currentView: PropTypes.object.isRequired
   }
 
   componentWillMount() {
@@ -16,36 +24,35 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { changeModalComponent } = this.props
-    const { members, leader, modal, addingItem } = nextProps
+    const { changeModalComponent } = this.props;
+    const { members, leader, modal, addingItem } = nextProps;
 
-    if (
-      !modal &&
+    if (!modal &&
       members.length === 0 &&
       !leader
     ) {
-      changeModalComponent('EmailFormContainer')
+      changeModalComponent('EmailFormContainer');
     } else if (leader && this.props.modal === modal && !addingItem) {
-      changeModalComponent(null)
+      changeModalComponent(null);
     }
   }
 
   render() {
-    const { cart_id, newAccount, accounts, leader, currentView, modal, changeModalComponent } = this.props
+    const { cart_id, newAccount, leader, modal, changeModalComponent } = this.props;
 
-    if (newAccount === false)
-      return <Overlay/>
+    if (newAccount === false) {
+      return <Overlay/>;
+    }
 
     return (
       <section className='app'>
         <Header cart_id={cart_id} leader={leader}/>
         {/* This should be an overlay on top of the CartContainer at some point */}
-        {modal ? 
-          <Modal component={modal} changeModalComponent={changeModalComponent}/>
+        {modal
+          ? <Modal component={modal} changeModalComponent={changeModalComponent}/>
           : null}
         <CartContainer/>
       </section>
     );
   }
 }
-

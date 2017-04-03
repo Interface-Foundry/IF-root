@@ -8,20 +8,20 @@ export {
   match,
   createValidator
 }
-from './validation'
+from './validation';
 
 export {
   timeFromDate
 }
-from './dates'
+from './dates';
 
 export {
   commaSeparateNumber,
   getNameFromEmail
 }
-from './formating'
+from './formating';
 
 export {
   fakeStore
 }
-from './testUtils'
+from './testUtils';

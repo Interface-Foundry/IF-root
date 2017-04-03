@@ -13,7 +13,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart_id, addItem, items, members, leader } = this.props;
+    const { items, members, leader } = this.props;
 
     const hasItems = items.length > 0;
     return (
@@ -26,11 +26,11 @@ export default class Cart extends Component {
           </div>
           <div className='cart__items'>
             <ul>
-              { 
-                hasItems ? 
-                  items.map((item, i) => <Item key={i} item={item} itemNumber={i+1} members={members} leader={leader}/>) 
-                  : <em>Please add some products to the cart.</em>
-              } 
+              {
+                hasItems
+                ? items.map((item, i) => <Item key={i} item={item} itemNumber={i + 1} members={members} leader={leader}/>)
+                : <em>Please add some products to the cart.</em>
+              }
             </ul>
           </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import { getMemberById } from '../../reducers';
-import { getNameFromEmail } from '../../utils'
+import { getNameFromEmail } from '../../utils';
 
 export default class Item extends Component {
   static propTypes = {
@@ -9,8 +9,8 @@ export default class Item extends Component {
 
   render() {
     const { item, members, itemNumber, leader } = this.props,
-          linkedMember = getMemberById({members: members, leader: leader}, {id: item.added_by}),
-          memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
+      linkedMember = getMemberById({ members: members, leader: leader }, { id: item.added_by }),
+      memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
 
     return (
       <a href={item.original_link}>

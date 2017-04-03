@@ -3,11 +3,11 @@ import React, { Component, PropTypes } from 'react';
 import { Icon } from '..';
 import { EmailFormContainer, AmazonFormContainer } from '../../containers';
 
-
 export default class SignIn extends Component {
 
   static propTypes = {
-    component: PropTypes.string.isRequired
+    component: PropTypes.string.isRequired,
+    changeModalComponent: PropTypes.func.isRequired
   }
 
   render() {
@@ -15,8 +15,8 @@ export default class SignIn extends Component {
 
     return (
       <div className="modal">
-        { component ?
-          this.renderComponent()
+        { component
+          ? this.renderComponent()
           : null}
         <div className="modal__drag" onClick={() => changeModalComponent(null)}>
           <Icon icon="Up"/>
@@ -31,9 +31,9 @@ export default class SignIn extends Component {
     const Components = {
       AmazonFormContainer,
       EmailFormContainer
-    }
-    const Component = Components[component]
+    };
+    const Component = Components[component];
 
-    return <Component />
+    return <Component />;
   }
 }

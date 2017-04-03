@@ -33,7 +33,7 @@ describe('deals actions', () => {
     return store.dispatch(fetchDeals())
       .then(() => {
         expect(store.getDeals())
-          .toEqual(expectedActions)
+          .toEqual(expectedActions);
       })
       .catch((error) => {
         // error handler

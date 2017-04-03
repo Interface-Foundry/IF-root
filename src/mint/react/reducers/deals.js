@@ -5,9 +5,9 @@ const initialState = [];
 export default function kipForm(state = initialState, action) {
   switch (action.type) {
     case RECEIVE_DEALS:
-      return [
-        ...action.deals
-      ];
+      return {
+        deals: action.deals
+      };
     default:
       return state;
   }

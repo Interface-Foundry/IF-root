@@ -1,4 +1,4 @@
-import { NEW_TYPE, RECEIVE_ITEM, REQUEST_ITEM } from '../constants/ActionTypes';
+import { RECEIVE_ITEM, REQUEST_ITEM } from '../constants/ActionTypes';
 
 const initialState = {
   original_link: '',

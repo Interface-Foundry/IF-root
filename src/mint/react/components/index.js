@@ -7,3 +7,4 @@ export Overlay from './Overlay';
 export Modal from './Modal';
 export EmailForm from './EmailForm';
 export AmazonForm from './AmazonForm';
+export DealsSection from './DealsSection';
