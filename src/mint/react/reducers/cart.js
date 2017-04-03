@@ -1,4 +1,13 @@
-import { RECEIVE_ADD_ITEM_TO_CART, ADDING_ITEM, ADD_MEMBER_TO_CART, RECEIVE_CART, REQUEST_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
+import { 
+  SELECT_ITEM, 
+  RECEIVE_ADD_ITEM_TO_CART, 
+  ADDING_ITEM, 
+  ADD_MEMBER_TO_CART, 
+  RECEIVE_CART, 
+  REQUEST_CART, 
+  RECEIVE_ITEMS, 
+  REQUEST_ITEMS 
+} from '../constants/ActionTypes';
 
 const initialState = {
   cart_id: '',
@@ -36,6 +45,11 @@ export default function cart(state = initialState, action) {
       return {
         ...state,
         items: action.items
+      };
+    case SELECT_ITEM:
+      return {
+        ...state,
+        item: action.item
       };
     case REQUEST_CART:
     case REQUEST_ITEMS:

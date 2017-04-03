@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 
 import { Icon } from '..';
-import { EmailFormContainer, AmazonFormContainer } from '../../containers';
+import { EmailFormContainer, AmazonFormContainer, ItemContainer } from '../../containers';
 
 export default class SignIn extends Component {
 
@@ -30,9 +30,10 @@ export default class SignIn extends Component {
 
     const Components = {
       AmazonFormContainer,
-      EmailFormContainer
-    };
-    const Component = Components[component];
+      EmailFormContainer,
+      ItemContainer
+    }
+    const Component = Components[component]
 
     return <Component />;
   }

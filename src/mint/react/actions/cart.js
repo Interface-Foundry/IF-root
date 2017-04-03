@@ -1,6 +1,6 @@
-import { ADDING_ITEM, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
-import { SubmissionError, reset } from 'redux-form';
-import { changeModalComponent } from './modal';
+import { SELECT_ITEM, ADDING_ITEM, SET_CART_ID, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
+import { SubmissionError, reset } from 'redux-form'
+import { changeModalComponent } from './modal'
 
 const receive = (newCart) => ({
   type: RECEIVE_CART,
@@ -37,6 +37,11 @@ const receiveAddItem = (item) => ({
   type: RECEIVE_ADD_ITEM_TO_CART,
   item
 });
+
+export const selectItem = (item) => ({
+  type: SELECT_ITEM,
+  item
+})
 
 export const addingItem = (addingItem) => ({
   type: ADDING_ITEM,

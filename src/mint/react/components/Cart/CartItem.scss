@@ -1,0 +1,21 @@
+@import '../../styles/Constants';
+
+.cartItem {
+	padding: 0 $padding*2 $padding*2;
+	border-bottom: 1px solid $border-color-light;
+
+	.cartItem__title {
+		height: $nav-height;
+		line-height: $nav-height;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.cartItem__image {
+		display: inline-block;
+	}
+	.cartItem__props {
+		display: inline-block;
+		padding: 0 $padding*2;
+	}
+}
