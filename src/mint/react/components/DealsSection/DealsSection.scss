@@ -9,10 +9,12 @@
   justify-content: flex-start;
   align-items: stretch;
   -webkit-overflow-scrolling: touch;
+  margin: 0 10px 0 10px;
 }
 
 .signIn__container__page__deals > li {
   border: 2px grey solid;
+  background: white;
   padding: 10px;
   margin: 10px;
   width: 200px;
@@ -22,7 +24,7 @@
 
 .signIn__container__page__deals-small {
   position: relative;
-  top:-12px;
+  top: -12px;
   display: flex;
   flex-direction: column;
   overflow: scroll;
@@ -35,13 +37,14 @@
 
 .signIn__container__page__deals-small > li {
   border-bottom: 1px grey solid;
+  background: white;
   padding: 5px;
   margin: 1px;
   width: 100%;
-  text-align: justify;
+  text-align: left;
   font-size: 14px;
 }
 
 .signIn__container__page__deals-small > li:last-child {
-  border:none;
+  border: none;
 }
