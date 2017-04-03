@@ -11,22 +11,19 @@ export default class SignIn extends Component {
   }
 
   render() {
-    const { component, changeModalComponent } = this.props;
+    const { component } = this.props;
 
     return (
       <div className="modal">
         { component
           ? this.renderComponent()
           : null}
-        <div className="modal__drag" onClick={() => changeModalComponent(null)}>
-          <Icon icon="Up"/>
-        </div>
       </div>
     );
   }
 
   renderComponent() {
-    const { component } = this.props;
+    const { component, changeModalComponent } = this.props;
 
     const Components = {
       AmazonFormContainer,
@@ -35,6 +32,6 @@ export default class SignIn extends Component {
     }
     const Component = Components[component]
 
-    return <Component />;
+        return <Component changeModalComponent={changeModalComponent} />;
   }
 }
