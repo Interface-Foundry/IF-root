@@ -11,6 +11,7 @@ export default combineReducers({
   modal,
   session,
   form,
+  deals,
   routing: routerReducer
 });
 

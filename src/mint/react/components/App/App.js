@@ -46,7 +46,6 @@ export default class App extends Component {
     return (
       <section className='app'>
         <Header cart_id={cart_id} leader={leader}/>
-        {/* This should be an overlay on top of the CartContainer at some point */}
         {modal
           ? <Modal component={modal} changeModalComponent={changeModalComponent}/>
           : null}

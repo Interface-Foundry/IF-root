@@ -5,36 +5,39 @@ export default class DealsSection extends Component {
   constructor(props) {
     super(props);
     this.renderCards = ::this.renderCards;
-    this.state = {};
+    this.state = { deals: [] };
   }
 
   static propTypes = {
     isDropDown: PropTypes.bool.isRequired,
-    fetchDeals: PropTypes.func.isRequired
+    fetchDeals: PropTypes.func.isRequired,
+    deals: PropTypes.object.isRequired
   }
 
   componentWillMount() {
     const { fetchDeals } = this.props;
-    const deals = fetchDeals();
+    fetchDeals();
+  }
 
+  componentWillReceiveProps(nextProps) {
+    const { deals } = nextProps.deals;
     this.setState({
-      deals: deals
+      deals
     });
   }
 
   renderCards() {
     const { isDropDown } = this.props;
-    const { deals } = this.state;
-
-    return deals.map(deal => <DealCard deal={deal} small={isDropDown} />);
+    var { deals } = this.state;
+    return deals.map((deal, i) => <li key={i}><DealCard deal={deal} small={isDropDown} /></li>);
   }
 
   render() {
     const { renderCards } = this;
     return (
-      <div className="signIn__container__page__deals">
+      <ul className="signIn__container__page__deals">
         { renderCards() }
-      </div>
+      </ul>
     );
   }
 }

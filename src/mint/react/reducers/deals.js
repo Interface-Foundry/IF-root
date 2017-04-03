@@ -1,6 +1,6 @@
 import { RECEIVE_DEALS } from '../constants/ActionTypes';
 
-const initialState = [];
+const initialState = { deals: [] };
 
 export default function kipForm(state = initialState, action) {
   switch (action.type) {

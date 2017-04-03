@@ -14,13 +14,12 @@ export function fetchDeals() {
     dispatch(request());
 
     try {
-      // TODO: change sample deals to real endpoint
       const response = await fetch('/api/sampledeals', {
         credentials: 'same-origin'
       });
       return dispatch(receive(await response.json()));
     } catch (e) {
-      throw 'error in cart fetchCart';
+      throw 'error in cart fetchDeals';
     }
   };
 }
