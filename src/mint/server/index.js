@@ -113,27 +113,18 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
 
 //~~~~~for unsubscribe group testing~~~~~//
 
-// sendgrid incoming parse webhook
+var testFunction = function (url) {
+  return url;
+}
 
 var mailOptions = {
 to: '<hannah.katznelson@kipthis.com>',
 from: 'Kip Test <hello@kipthis.com>',
 subject: 'The Love Below',
-html: '<html><body><p>This is a test. Speakerboxxx.</p></body></html>',
+html: '<html><body><p>This is a test. Speakerboxxx.</p><a href="<%asm_preferences_raw_url%>">Which email do ya wanna get?</a></body></html>',
 headers: {
-  'x-smtpapi': '{"asm_group_id":2321,"asm_groups_to_display":[2321,2273,2275],"filters":{"footer":{"settings":{"enable":1,"text/plain":"Excalibur"}}}}'//{
-    // ,
-    // ,
-    // "filters": {
-    //   "footer": {
-    //     "settings": {
-    //       "enable": 1,
-    //       "text/plain": "This is a footer"
-    //     }
-    //   }
-    // }
-  // }
-}
+  'x-smtpapi': '{"asm_group_id":2321,"asm_groups_to_display":[2321,2273,2275]}'
+  }
 };
 
 try {
