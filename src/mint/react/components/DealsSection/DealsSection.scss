@@ -1,3 +1,19 @@
 .dealcard__prevPrice {
   text-decoration: line-through;
 }
+
+.signIn__container__page__deals {
+  display: flex;
+  flex-direction: row;
+  overflow: scroll;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.signIn__container__page__deals > li {
+  border: 2px grey solid;
+  padding: 10px;
+  margin: 10px;
+  width: 200px;
+  border-radius: 10px;
+}

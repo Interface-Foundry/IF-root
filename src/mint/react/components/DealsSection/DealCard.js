@@ -20,7 +20,7 @@ export default class DealCart extends Component {
   generateDropdown() {
     const { name, savePercent, asin } = this.props;
     return (<div className='dealcard__smallview'>
-      <p className='dealcard__name'>{name} ({asin}) ({(savePercent * -100) | 2}%)</p>
+      <p className='dealcard__name'>{name} ({(savePercent * 100) | 2}% off) ({asin})</p>
     </div>);
   }
 
@@ -29,11 +29,10 @@ export default class DealCart extends Component {
     const imageSrc = small || medium || large;
     return (<div className='dealcard__largeview'>
       <img src={imageSrc}></img>
-      <p>asin: {asin}</p>
-      <p className='dealcard__name'>{name}</p>
+      <p className='dealcard__name'>{name} ({asin})</p> { /* ASIN is just for adding to the cart later */ }
       <p className='dealcard__price'>${price}</p>
       <p className='dealcard__prevPrice'>${previousPrice}</p>
-      <p className='dealcard__percentOff'>{(savePercent * 100) | 2}%</p>
+      <p className='dealcard__percentOff'>{(savePercent * 100) | 2}% off</p>
     </div>);
   }
 
