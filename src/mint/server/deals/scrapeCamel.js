@@ -7,10 +7,10 @@ var _ = require('lodash');
 
 var lookupAmazonItem = require('../utilities/amazon_cart').lookupAmazonItem;
 var proxy = require('../../../chat/components/proxy/request');
-var request = require('request-promise')
+var request = require('request-promise');
 var string_utils = require('./string_utils');
-var kip = require('../../../kip')
-var logging = require('../../../logging')
+var kip = require('../../../kip');
+var logging = require('../../../logging');
 
 var db;
 const dbReady = require('../../db');
@@ -26,7 +26,7 @@ const count = 10; //The number of deals / camel items that should be returned
  */
 var scrape = function * (previousId) {
   function makeRequest(url) {
-    var res = process.env.NO_LUMINATI ? request(url) : proxy.luminatiRequest(url)
+    var res = process.env.NO_LUMINATI ? request(url) : proxy.luminatiRequest(url);
     return res.then(body => {
 	      // console.log('success', body);
         console.log('success');
@@ -107,33 +107,51 @@ var scrapeCamel = function * () {
 
   //gets new and old prices from the most popular section
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
-    $('div.compare_price', e).each(function (i, e) {
-      var price = $(e).text().split('\n')[2].trim().slice(1);
-      price = Number(price.split(',').join(''));
-      if (i % 2 === 0) prices.push({new: price});
-      else prices[prices.length-1].old = price;
-    });
+    var current = $('div.current_price', e).text().split('$')[1];
+    if (current) current = Number(current.split(',').join(''));
+    console.log('CURRENT', current);
+    prices.push({new: current});
+    
+    var old_price = $('div.compare_price', e).first().text().split('\n')[2].trim().split('$')[1];
+    console.log('old', old_price);
+    if (old_price) old_price = Number(old_price.split(',').join(''));
+    prices[prices.length-1].old = old_price;
+    // $('div.compare_price', e).each(function (i, e) {
+    //   var price = $(e).text().split('\n')[2].trim().slice(1);
+    //   price = Number(price.split(',').join(''));
+    //   if (i % 2 === 0) prices.push({new: price});
+    //   else prices[prices.length-1].old = price;
+    // });
   });
 
   var originalPricesLength = prices.length;
 
   //get new and old prices from the best deals section, which is formatted differently
   $('table.product_grid').last().find('div.deal_bottom_inner').each(function (i, e) {
-    $('div.compare_price', e).each(function (j, e) {
-      var price = $(e).text().split('\n')[2].trim();
-      if (j % 2 === 1) {
-        price = price.split(' ')[1];
-        price = price.slice(1, price.length-1);
-      }
-      price = Number(price.slice(1).split(',').join(''));
-
-      if (j % 2 === 0) {
-        prices.push({old: price});
-      }
-      else {
-        prices[i + j + originalPricesLength - 1].new = Number((prices[i + j + originalPricesLength - 1].old - price).toFixed(2));
-      }
-    });
+    var current = $('div.current_price', e).text().split('$')[1];
+    if (current) current = Number(current.split(',').join(''));
+    console.log('CURRENT', current);
+    prices.push({new: current});
+    //save to prices
+    var old_price = $('div.compare_price', e).first().text().split('\n')[2].trim().split('$')[1];
+    console.log('old', old_price);
+    if (old_price) old_price = Number(old_price.split(',').join(''));
+    prices[prices.length-1].old = old_price;
+    // $('div.compare_price', e).each(function (j, e) {
+      // var price = $(e).text().split('\n')[2].trim();
+      // if (j % 2 === 1) {
+      //   price = price.split(' ')[1];
+      //   price = price.slice(1, price.length-1);
+      // }
+      // price = Number(price.slice(1).split(',').join(''));
+      //
+      // if (j % 2 === 0) {
+      //   prices.push({old: price});
+      // }
+      // else {
+      //   prices[i + j + originalPricesLength - 1].new = Number((prices[i + j + originalPricesLength - 1].old - price).toFixed(2));
+      // }
+    // });
   });
 
   //set last batch of camelItems to inactive
@@ -144,9 +162,10 @@ var scrapeCamel = function * () {
     var amazon = yield getAmazon(asins[i]); //would be cleaner to do this elsewhere
     //if an item with that ASIN is already in the db, delete it
 
-    if (!amazon) continue;
+    if (!amazon || !prices[i].new) continue;
 
     //saves items to the db
+    console.log('Values:', names[i], asins[i], prices[i]);
 
     var camel = yield db.CamelItems.create({
       original_name: names[i],
@@ -275,14 +294,13 @@ var trimName = function (name) {
 module.exports = function () {
   return co(function * () {
     var result = yield scrapeCamel();
-    return result
+    return result;
   });
 };
 
 if (!module.parent) {
   co(function * () {
-    var r = yield scrapeCamel()
-    console.log('r', r)
-  }).catch(console.error.bind(console))
-
+    var r = yield scrapeCamel();
+    console.log('r', r);
+  }).catch(console.error.bind(console));
 }
