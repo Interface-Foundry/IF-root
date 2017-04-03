@@ -14,10 +14,11 @@ app.use('/humble', function (req, res) {
 // app.use('/landing', express.static(path.join(__dirname, 'public/landing.html')));
 
 app.use('/landing', function (req, res) {
-  console.log('url:', req.query.url);
-  // var url = encodeURIComponent(req.query.url);
-  //TODO decodeURIComponent here
-  console.log('url', url)
+  // console.log('url:', req.query.url);
+  var url = req.query.url;
+  var data = req.query.data;
+  url = url + '&data=' + data;
+  console.log('url', url);
   res.send(landing(url));
 });
 

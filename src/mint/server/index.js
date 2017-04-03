@@ -117,7 +117,7 @@ var mailOptions = {
 to: '<hannah.katznelson@kipthis.com>',
 from: 'Kip Test <hello@kipthis.com>',
 subject: 'The Love Below',
-html: '<html><body><p>This is a test. Speakerboxxx.</p><a href="<%asm_preferences_raw_url%>">Which email do ya wanna get?</a></body></html>',
+html: '<html><body><p>This is a test. Speakerboxxx.</p><a href="http://localhost:5000/landing?url=<%asm_preferences_raw_url%>">Which email do ya wanna get?</a></body></html>',
 headers: {
   'x-smtpapi': '{"asm_group_id":2321,"asm_groups_to_display":[2321,2273,2275]}'
   }
