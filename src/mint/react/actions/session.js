@@ -40,7 +40,7 @@ export function update() {
   };
 }
 
-export function signIn(cart_id, email) {
+export function signIn(cart_id, email, addingItem) {
   return async dispatch => {
     dispatch(requestUpdate());
 
@@ -51,7 +51,12 @@ export function signIn(cart_id, email) {
 
       dispatch(fetchCart(cart_id));
       dispatch(reset('SignIn'));
-      dispatch(changeModalComponent(null));
+
+      debugger
+      addingItem ? 
+        dispatch(changeModalComponent('AmazonFormContainer')):
+        dispatch(changeModalComponent(null));
+
       return dispatch(receiveUpdate(await response.json()));
     } catch (e) {
       return new SubmissionError({email: 'You are already signed in, check your email!'});

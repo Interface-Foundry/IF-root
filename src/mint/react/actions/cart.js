@@ -1,4 +1,4 @@
-import { SET_CART_ID, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
+import { ADDING_ITEM, SET_CART_ID, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
 import { SubmissionError, reset } from 'redux-form'
 import { changeModalComponent } from './modal'
 
@@ -37,6 +37,11 @@ const receiveAddItem = (item) => ({
   type: RECEIVE_ADD_ITEM_TO_CART,
   item
 });
+
+export const addingItem = (addingItem) => ({
+  type: ADDING_ITEM,
+  addingItem
+})
 
 export function fetchCart(cart_id) {
   return async function (dispatch) {
@@ -110,6 +115,7 @@ export function addItem(cart_id, url) {
       });
 
       dispatch(reset('AddItem'));
+      dispatch(addingItem(false));
       dispatch(changeModalComponent(null));
       return dispatch(receiveAddItem(await response.json()));
     } catch (e) {
