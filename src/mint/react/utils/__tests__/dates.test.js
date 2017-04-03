@@ -12,7 +12,7 @@ describe('dates util', () => {
       fourthDate = moment()
       .add(2, 'days');
 
-    it('should return 'Just now' if diff is less then 1 minute', () => {
+    it('should return "Just now" if diff is less then 1 minute', () => {
       expect(timeFromDate(firstDate))
         .toEqual('Just now')
     })
