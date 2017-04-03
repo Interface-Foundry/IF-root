@@ -13,6 +13,7 @@ export default class AmazonForm extends Component {
     return (
       <div>
           <label>{label}</label>
+          {touched && ((error && <span>{error}</span>) || (warning && <span>{warning}</span>))}
           <div className='form__input'>
             <input {...input} placeholder={placeholder} type={type}/>
             <button
@@ -20,7 +21,6 @@ export default class AmazonForm extends Component {
               type="submit"
               onClick={handleSubmit}><p>Submit</p></button>
           </div>
-          {touched && ((error && <span>{error}</span>) || (warning && <span>{warning}</span>))}
           <DealsContainer isDropDown={active}/>
         </div>
     );

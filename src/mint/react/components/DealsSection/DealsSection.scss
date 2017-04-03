@@ -17,4 +17,31 @@
   margin: 10px;
   width: 200px;
   border-radius: 10px;
+  font-size: 14px;
+}
+
+.signIn__container__page__deals-small {
+  position: relative;
+  top:-12px;
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+  justify-content: flex-start;
+  align-items: left;
+  -webkit-overflow-scrolling: touch;
+  border: 1px grey solid;
+  overflow: hidden;
+}
+
+.signIn__container__page__deals-small > li {
+  border-bottom: 1px grey solid;
+  padding: 5px;
+  margin: 1px;
+  width: 100%;
+  text-align: justify;
+  font-size: 14px;
+}
+
+.signIn__container__page__deals-small > li:last-child {
+  border:none;
 }
