@@ -3,6 +3,7 @@ import { App } from '../components';
 
 import { changeModalComponent } from '../actions/modal';
 import { fetchCart } from '../actions/cart';
+import { fetchDeals } from '../actions/deals';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: ownProps.match.params.cart_id,
@@ -16,6 +17,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
+  fetchDeals: () => dispatch(fetchDeals()),
   changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
 });
 

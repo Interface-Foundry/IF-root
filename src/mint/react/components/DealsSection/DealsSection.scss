@@ -8,6 +8,7 @@
   overflow: scroll;
   justify-content: flex-start;
   align-items: stretch;
+  -webkit-overflow-scrolling: touch;
 }
 
 .signIn__container__page__deals > li {

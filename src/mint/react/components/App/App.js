@@ -13,12 +13,13 @@ export default class App extends Component {
     leader: PropTypes.object,
     modal: PropTypes.string,
     addingItem: PropTypes.bool.isRequired,
-    newAccount: PropTypes.bool
+    newAccount: PropTypes.bool,
+    fetchDeals: PropTypes.func.isRequired
   }
 
   componentWillMount() {
-    const { fetchCart, cart_id } = this.props;
-
+    const { fetchCart, cart_id, fetchDeals } = this.props;
+    fetchDeals();
     fetchCart(cart_id);
   }
 
@@ -49,7 +50,7 @@ export default class App extends Component {
         {modal
           ? <Modal component={modal} changeModalComponent={changeModalComponent}/>
           : null}
-        <CartContainer/>
+        <CartContainer />
       </section>
     );
   }

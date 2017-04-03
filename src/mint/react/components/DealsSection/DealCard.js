@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 
-export default class DealCart extends Component {
+export default class DealCard extends Component {
   constructor(props) {
     super(props);
     this.generateCard = ::this.generateCard;
@@ -19,7 +19,7 @@ export default class DealCart extends Component {
 
   generateDropdown() {
     const { name, savePercent, asin } = this.props;
-    return (<div className='dealcard__smallview'>
+    return (<div className='dealcard'>
       <p className='dealcard__name'>{name} ({(savePercent * 100) | 2}% off) ({asin})</p>
     </div>);
   }
@@ -27,7 +27,7 @@ export default class DealCart extends Component {
   generateCard() {
     const { small, medium, large, name, price, previousPrice, savePercent, asin } = this.props;
     const imageSrc = small || medium || large;
-    return (<div className='dealcard__largeview'>
+    return (<div className='dealcard'>
       <img src={imageSrc}></img>
       <p className='dealcard__name'>{name} ({asin})</p> { /* ASIN is just for adding to the cart later */ }
       <p className='dealcard__price'>${price}</p>

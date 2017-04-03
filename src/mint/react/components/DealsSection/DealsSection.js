@@ -10,26 +10,12 @@ export default class DealsSection extends Component {
 
   static propTypes = {
     isDropDown: PropTypes.bool.isRequired,
-    fetchDeals: PropTypes.func.isRequired,
     deals: PropTypes.object.isRequired
   }
 
-  componentWillMount() {
-    const { fetchDeals } = this.props;
-    fetchDeals();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { deals } = nextProps.deals;
-    this.setState({
-      deals
-    });
-  }
-
   renderCards() {
-    const { isDropDown } = this.props;
-    var { deals } = this.state;
-    return deals.map((deal, i) => <li key={i}><DealCard {...deal} small={isDropDown} /></li>);
+    const { isDropDown, deals } = this.props;
+    return deals.deals.map((deal, i) => <li key={i}><DealCard {...deal} small={isDropDown} /></li>);
   }
 
   render() {
