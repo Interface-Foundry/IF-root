@@ -8,6 +8,7 @@ import { fetchItem, selectItem } from '../actions/item';
 
 import { reduxForm } from 'redux-form';
 
+// N.B = Look into routing, Look into the correct api endpoint.
 const mapStateToProps = (state, ownProps) => ({
 	cart_id: state.cart.cart_id,
 	user_accounts: state.session.user_accounts,
