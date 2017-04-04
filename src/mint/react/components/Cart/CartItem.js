@@ -14,8 +14,8 @@ export default class Item extends Component {
 
     return (
       <li className='cartItem' onClick={e => {
-        selectItem(item)
-        push(`${url}/m/item/${item.id}`)
+        // selectItem(item)
+        // push(`${url}/m/item/${item.id}`)
       }}>
         <h4 className='cartItem__title'>{memberName}</h4>
         <div className='cartItem__image image col-3 ' style={
