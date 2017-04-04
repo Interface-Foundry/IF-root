@@ -1,6 +1,5 @@
 import { SELECT_ITEM, ADDING_ITEM, SET_CART_ID, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../constants/ActionTypes';
-import { SubmissionError, reset } from 'redux-form'
-import { changeModalComponent } from './modal'
+import { SubmissionError } from 'redux-form'
 
 const receive = (newCart) => ({
   type: RECEIVE_CART,
@@ -119,9 +118,6 @@ export function addItem(cart_id, url) {
         })
       });
 
-      dispatch(reset('AddItem'));
-      dispatch(addingItem(false));
-      dispatch(changeModalComponent(null));
       return dispatch(receiveAddItem(await response.json()));
     } catch (e) {
       throw new SubmissionError({ url: 'Looks like you entered an invalid URL!' });

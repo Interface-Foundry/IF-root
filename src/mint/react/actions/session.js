@@ -1,7 +1,5 @@
 import { REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION, TOGGLE_ADDING } from '../constants/ActionTypes';
-import { SubmissionError, reset } from 'redux-form';
-import { changeModalComponent } from './modal';
-import { fetchCart } from './cart';
+import { SubmissionError } from 'redux-form';
 
 const receive = (newSession) => ({
   type: RECEIVE_SESSION,
@@ -40,7 +38,7 @@ export function update() {
   };
 }
 
-export function signIn(cart_id, email, addingItem) {
+export function signIn(cart_id, email) {
   return async dispatch => {
     dispatch(requestUpdate());
 
@@ -48,13 +46,6 @@ export function signIn(cart_id, email, addingItem) {
       const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
         credentials: 'same-origin'
       });
-
-      dispatch(fetchCart(cart_id));
-      dispatch(reset('SignIn'));
-
-      addingItem
-        ? dispatch(changeModalComponent('AmazonFormContainer'))
-        : dispatch(changeModalComponent(null));
 
       return dispatch(receiveUpdate(await response.json()));
     } catch (e) {
