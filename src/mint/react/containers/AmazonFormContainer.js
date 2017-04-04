@@ -15,6 +15,7 @@ const mapStateToProps = (state, ownProps) => ({
 	item: state.item,
 });
 
+// remove
 const mapDispatchToProps = dispatch => ({
 	onSubmit: (values, e, state) => dispatch(fetchItem(state.cart_id, values.url)).then((returnItem) => { 
 			const { history: { replace }, cart_id, user_accounts } = state,
