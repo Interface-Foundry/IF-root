@@ -8,14 +8,14 @@ export default class Item extends Component {
   }
 
   render() {
-    const { item, members, itemNumber, leader, selectItem, changeModalComponent } = this.props,
+    const { item, members, itemNumber, leader, selectItem, push, url } = this.props,
           linkedMember = getMemberById({members: members, leader: leader}, {id: item.added_by}),
           memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
 
     return (
       <li className='cartItem' onClick={e => {
         selectItem(item)
-        changeModalComponent('ItemContainer')
+        push(`${url}/m/item/${item.id}`)
       }}>
         <h4 className='cartItem__title'>{memberName}</h4>
         <div className='cartItem__image image col-3 ' style={

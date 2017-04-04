@@ -1,19 +1,23 @@
 import { connect } from 'react-redux';
 import { Cart } from '../components';
 
+import { fetchCart } from '../actions/cart';
+import { fetchDeals } from '../actions/deals';
+
 import { selectItem } from '../actions/cart';
-import { changeModalComponent } from '../actions/modal';
 
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: state.cart.cart_id,
+	cart_id: ownProps.match.params.cart_id,
   leader: state.cart.leader,
   members: state.cart.members,
-  items: state.cart.items
+  items: state.cart.items,
+  addingItem: state.cart.addingItem
 });
 
 const mapDispatchToProps = dispatch => ({
-  selectItem: item => dispatch(selectItem(item)),
-  changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
+	fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
+  fetchDeals: () => dispatch(fetchDeals()),
+  selectItem: item => dispatch(selectItem(item))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);

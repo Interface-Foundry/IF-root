@@ -26,5 +26,3 @@ export const SELECT_ITEM = 'SELECT_ITEM';
 export const REQUEST_DEALS = 'REQUEST_DEALS';
 export const RECEIVE_DEALS = 'RECEIVE_DEALS';
 
-// Modal
-export const CHANGE_MODAL_COMPONENT = 'CHANGE_MODAL_COMPONENT';
