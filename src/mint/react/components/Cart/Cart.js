@@ -34,7 +34,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart_id, addItem, items, members, leader, selectItem, history: { push }, match: { url } } = this.props;
+    const { cart_id, addItem, items, members, leader, selectItem, history: { push, replace }, match: { url } } = this.props;
 
     const hasItems = items.length > 0;
 
@@ -43,7 +43,7 @@ export default class Cart extends Component {
           <div className='cart__add'>
             <AddAmazonItemContainer push={push}/>
           </div>
-          <DealsContainer />
+          <DealsContainer replace={replace}/>
           <div className='cart__title'>
             <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>
           </div>

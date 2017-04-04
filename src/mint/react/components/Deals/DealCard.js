@@ -6,6 +6,7 @@ export default class DealCard extends Component {
     this.generateCard = ::this.generateCard;
     this.generateDropdown = ::this.generateDropdown;
   }
+
   static propTypes = {
     small: PropTypes.string,
     medium: PropTypes.string.isRequired,
@@ -17,25 +18,25 @@ export default class DealCard extends Component {
     asin: PropTypes.string.isRequired
   }
 
+  // Lots of throwaway code in here, need to wait until we actually have enpoint that returns member id with item.
   generateDropdown() {
-    const { name, savePercent, asin } = this.props;
-    return (<section className='dealcard'>
-      <a href={`/m/item/${asin}`} className='dealcard__name'>{name} ({(savePercent * 100) | 2}% off) ({asin})</a>
+    const { name, savePercent, asin, cart_id, fetchItem, replace, user_accounts } = this.props;
+    return (<section className='dealcard' onClick={() => fetchItem(cart_id, asin, replace, user_accounts)}>
+      <p className='dealcard__name'>{name} ({(savePercent * 100) | 2}% off) ({asin})</p>
     </section>);
   }
 
+  // Lots of throwaway code in here, need to wait until we actually have enpoint that returns member id with item.
   generateCard() {
-    const { small, medium, large, name, price, previousPrice, savePercent, asin } = this.props;
+    const { small, medium, large, name, price, previousPrice, savePercent, asin, cart_id, fetchItem, replace, user_accounts } = this.props;
     const imageSrc = small || medium || large;
     return (
-      <a href={`m/item/${asin}`}>
-        <section className='dealcard'>
-          <div className='dealcard__price'>${price}</div>
-          <div className='dealcard__discount'><strike>${previousPrice}</strike> ({(savePercent * 100) | 2}% off)</div>
-          <img src={imageSrc}></img>
-          <div className='dealcard__name'>{name}</div>
-        </section>
-      </a>);
+      <section className='dealcard' onClick={() => fetchItem(cart_id, asin, replace, user_accounts)}>
+        <div className='dealcard__price'>${price}</div>
+        <div className='dealcard__discount'><strike>${previousPrice}</strike> ({(savePercent * 100) | 2}% off)</div>
+        <img src={imageSrc}></img>
+        <div className='dealcard__name'>{name}</div>
+      </section>);
   }
 
   render() {

@@ -13,9 +13,11 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  addItem: (cart_id, url, replace) => dispatch(addItem(cart_id, url)).then(e => {
+  addItem: (cart_id, url, replace) => {
+  	dispatch(addItem(cart_id, url)).then(e => {
   		replace(`/cart/${cart_id}`);
   	})
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Item);
