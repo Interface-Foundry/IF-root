@@ -7,7 +7,7 @@ export default class DealCard extends Component {
     this.generateDropdown = ::this.generateDropdown;
   }
   static propTypes = {
-    small: PropTypes.string,
+    small: PropTypes.bool,
     medium: PropTypes.string.isRequired,
     large: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
@@ -39,6 +39,7 @@ export default class DealCard extends Component {
   render() {
     const { generateCard, generateDropdown, props } = this;
     const { small } = props;
+
     return (small ? generateDropdown() : generateCard());
   }
 }
