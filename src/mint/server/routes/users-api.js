@@ -43,39 +43,28 @@ module.exports = function (router) {
       cart.leader = user.id
       yield cart.save()
 
-      if (prototype) {
-        return res.redirect('/cart/' + cart.id);
-      } else {
-        return res.send({
-          ok: true,
-          newAccount: false,
-          status: 'USER_LOGGED_IN',
-          message: 'You are already logged in with that email address on this device',
-          user: user,
-          cart: cart,
-        });
-      }
+      return res.send({
+        ok: true,
+        newAccount: false,
+        status: 'USER_LOGGED_IN',
+        message: 'You are already logged in with that email address on this device',
+        user: user,
+        cart: cart,
+      });
     }
 
     // If a user exists in the db, send them a magic link to prove it's them
-    // user = yield db.UserAccounts.findOne({
-    //   email_address: email
-    // })
+    user = yield db.UserAccounts.findOne({
+      email_address: email
+    })
     if (user) {
-      console.log('email already exists in db');
-      if (prototype) {
-        res.render('pages/prototype/check_your_email_magic', {
-          user,
-          cart
-        });
-      } else {
-        res.send({
-          ok: false,
-          newAccount: false,
-          status: 'CHECK_EMAIL',
-          message: 'Someone has already claimed that email. Please check your email and use the link we sent you to verify your identity.',
-        });
-      }
+      console.log('email already exists in db')
+      res.send({
+        ok: false,
+        newAccount: false,
+        status: 'CHECK_EMAIL',
+        message: 'Someone has already claimed that email. Please check your email and use the link we sent you to verify your identity.',
+      });
 
       // generate magic link here
       var link = yield db.AuthenticationLinks.create({
@@ -120,18 +109,14 @@ module.exports = function (router) {
     req.UserSession.user_accounts.add(user.id)
     yield [cart.save(), req.UserSession.save()]
 
-    if (prototype) {
-      res.redirect('/cart/' + cart.id)
-    } else {
-      res.send({
-        ok: true,
-        newAccount: true,
-        status: 'NEW_USER',
-        message: 'Thanks for registering for Kip! An email was sent to you with a link for this cart.',
-        user: user,
-        cart: cart
-      });
-    }
+    res.send({
+      ok: true,
+      newAccount: true,
+      status: 'NEW_USER',
+      message: 'Thanks for registering for Kip! An email was sent to you with a link for this cart.',
+      user: user,
+      cart: cart
+    });
 
     // Send an email to the user with the cart link
     email = yield db.Emails.create({

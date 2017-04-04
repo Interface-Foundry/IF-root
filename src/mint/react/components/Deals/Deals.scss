@@ -1,0 +1,77 @@
+.dealcard__prevPrice {
+  text-decoration: line-through;
+}
+
+.signIn__container__page__deals {
+  display: flex;
+  flex-direction: row;
+  overflow: scroll;
+  justify-content: flex-start;
+  align-items: stretch;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 10px 0 10px;
+}
+
+.signIn__container__page__deals > li {
+  border: 2px grey solid;
+  background: white;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.signIn__container__page__deals-small {
+  position: relative;
+  top: -12px;
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+  justify-content: flex-start;
+  align-items: left;
+  -webkit-overflow-scrolling: touch;
+  border: 1px grey solid;
+  overflow: hidden;
+}
+
+.signIn__container__page__deals-small > li {
+  display: flex;
+  border-bottom: 1px grey solid;
+  background: white;
+  padding: 5px;
+  margin: 1px;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+}
+
+.signIn__container__page__deals-small > li:last-child {
+  border: none;
+}
+
+.dealcard__name {
+  font-size: 12px;
+}
+
+.dealcard__asin {
+  font-size: 8px;
+  color: grey;
+}
+
+.dealcard__price {
+  font-size: 24px;
+  text-align: center;
+  color: #D15003;
+}
+
+.dealcard__discount {
+  font-size: 14px;
+  text-align: center;
+}
+
+.dealcard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 100%;
+}

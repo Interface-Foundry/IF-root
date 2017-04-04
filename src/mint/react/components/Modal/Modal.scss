@@ -1,0 +1,84 @@
+@import '../../styles/Constants';
+@import '../../styles/Animations';
+
+.modal {
+	position: absolute;
+	background: $kip-primary-color;
+	z-index: 100;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	text-align: center;
+	overflow: hidden;
+
+	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+	.form {
+		padding: $padding*2;
+
+		label {
+			display: block;
+			text-align: left;
+			margin-bottom: $padding;
+		}
+		span {
+			color: rgba(black, 0.4);
+		}
+		.form__input {
+			height: $nav-height;
+			width: 100%;
+			background: rgba(white, 0.6);
+			border: 2px solid darken($kip-primary-color, 5);
+			margin-bottom: $padding;
+			text-align: left;
+
+			* {
+				padding: 0;
+				margin: 0;
+			}
+
+			button,
+			input {
+				height: $nav-height - 4px;
+				line-height: $nav-height - 4px;
+				background: transparent;
+				border: 0;
+			}
+
+			.form__input__submit {
+				width: $nav-height*1.5;
+				padding: $padding;
+				@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+				p {
+					background: $kip-primary-color;
+					height: $nav-height - 4px - $padding*2;
+					line-height: $nav-height - 4px - $padding*2;
+					border: 1px solid darken($kip-primary-color, 5);
+				}
+
+				&:disabled {
+					opacity: 0;
+				}
+			}
+
+			input {
+				overflow: hidden;
+				text-overflow: ellipsis;
+				width: calc(100% - #{$nav-height*1.5});
+				padding: $padding;
+			}
+		}
+	}
+
+	.modal__drag {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		cursor: move;
+		height: $nav-height/1.5;
+	}
+}

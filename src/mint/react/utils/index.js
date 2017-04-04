@@ -1,22 +1,27 @@
 export {
-	isValidEmail,
-	isRequired,
-	minLength,
-	maxLength,
-	isInteger,
-	oneOf,
-	match,
-	createValidator
-} from './validation'
+  isValidEmail,
+  isRequired,
+  minLength,
+  maxLength,
+  isInteger,
+  oneOf,
+  match,
+  createValidator
+}
+from './validation';
 
 export {
-	timeFromDate
-} from './dates'
+  timeFromDate
+}
+from './dates';
 
 export {
-	commaSeparateNumber
-} from './formating'
+  commaSeparateNumber,
+  getNameFromEmail
+}
+from './formating';
 
 export {
-	fakeStore
-} from './testUtils'
+  fakeStore
+}
+from './testUtils';

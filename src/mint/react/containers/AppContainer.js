@@ -1,25 +1,24 @@
-import React from 'react';
 import { connect } from 'react-redux';
 import { App } from '../components';
 
-import { loggedIn, registerEmail, onboardNewUser } from '../actions/session';
-
+import { changeModalComponent } from '../actions/modal';
 import { fetchCart } from '../actions/cart';
+import { fetchDeals } from '../actions/deals';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: ownProps.match.params.cart_id,
+  members: state.cart.members,
+  leader: state.cart.leader,
   newAccount: state.session.newAccount,
-  loggedIn: state.session.loggedIn,
-  onboarding: state.session.onboarding,
-  registered: state.session.registered,
-  accounts: state.session.user_accounts
-})
+  accounts: state.session.user_accounts,
+  modal: state.modal.component,
+  addingItem: state.cart.addingItem
+});
 
 const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
-  loggedIn: (accounts) => dispatch(loggedIn(accounts)),
-  onboardNewUser: () => dispatch(onboardNewUser()),
-  registerEmail: () => dispatch(registerEmail())
-})
+  fetchDeals: () => dispatch(fetchDeals()),
+  changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

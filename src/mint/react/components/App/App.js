@@ -1,79 +1,56 @@
 import React, { PropTypes, Component } from 'react';
-import {SignInContainer, CartContainer} from '../../containers';
-import { Onboard } from '..';
+import { CartContainer } from '../../containers';
+import { Overlay, Modal } from '..';
 import Header from './Header';
 
 export default class App extends Component {
   static propTypes = {
     cart_id: PropTypes.string.isRequired,
     accounts: PropTypes.array.isRequired,
-    newAccount: PropTypes.bool,
     fetchCart: PropTypes.func.isRequired,
-    loggedIn: PropTypes.func.isRequired,
-    registerEmail: PropTypes.func.isRequired,
-    registered: PropTypes.bool
+    changeModalComponent: PropTypes.func.isRequired,
+    members: PropTypes.array.isRequired,
+    leader: PropTypes.object,
+    modal: PropTypes.string,
+    addingItem: PropTypes.bool.isRequired,
+    newAccount: PropTypes.bool,
+    fetchDeals: PropTypes.func.isRequired
   }
 
   componentWillMount() {
-    const {fetchCart, cart_id, loggedIn, accounts} = this.props;
-
+    const { fetchCart, cart_id, fetchDeals } = this.props;
+    fetchDeals();
     fetchCart(cart_id);
   }
 
   componentWillReceiveProps(nextProps) {
-    const { accounts, registerEmail, onboardNewUser } = this.props
-    const { loggedIn, registered, onboarding } = nextProps
+    const { changeModalComponent } = this.props;
+    const { members, leader, modal, addingItem } = nextProps;
 
-    if ( 
-        onboarding &&
-        !registered && 
-        !loggedIn &&
-        accounts.length !== nextProps.accounts.length && 
-        nextProps.accounts.length > 0
+    if (!modal &&
+      members.length === 0 &&
+      !leader
     ) {
-      registerEmail();
-    } else if (
-        onboarding &&
-        registered &&
-        loggedIn &&
-        nextProps.accounts.length > 0
-    ) {
-      loggedIn(nextProps.accounts);
-    } else if (
-      !onboarding &&
-      !registered && 
-      !loggedIn &&
-      accounts.length !== nextProps.accounts.length && 
-      nextProps.accounts.length > 0
-    ) {
-      registerEmail();
-      loggedIn(nextProps.accounts);
-    } else if (!onboarding) {
-      onboardNewUser();
+      changeModalComponent('EmailFormContainer');
+    } else if (leader && this.props.modal === modal && !addingItem) {
+      changeModalComponent(null);
     }
   }
 
   render() {
-    const { cart_id, accounts, newAccount, loggedIn } = this.props;
+    const { cart_id, newAccount, leader, modal, changeModalComponent } = this.props;
+
+    if (newAccount === false) {
+      return <Overlay/>;
+    }
 
     return (
-      <section>
-        <Header cart_id={cart_id}/>
-        <div>
-          {loggedIn ? 
-            <p>
-              <strong>Accounts:</strong>
-              {accounts.map((account, i) => <span key={i}>{account.email_address}</span>)}
-            </p>
-            : null}
-        </div>
-        <div>
-          {/* This should be an overlay on top of the CartContainer at some point */}
-          {loggedIn ? 
-            null
-            : <SignInContainer/>}
-          <CartContainer/>
-        </div>
+      <section className='app'>
+        <Header cart_id={cart_id} leader={leader}/>
+        {modal
+          ? <Modal component={modal} changeModalComponent={changeModalComponent}/>
+          : null}
+        <CartContainer />
       </section>
     );
   }

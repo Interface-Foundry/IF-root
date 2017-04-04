@@ -1,0 +1,29 @@
+@import '../../styles/Constants';
+
+$cart__add-height: $nav-height+$padding;
+
+.cart {
+	height: calc(100% - #{$nav-height});
+	position: relative;
+
+	.cart__add {
+		height: $cart__add-height;
+		line-height: $cart__add-height;
+		padding: 0 $padding*2 $padding*2;
+		border-bottom: 1px solid darken($border-color-light, 10);
+	}
+
+	.cart__title {
+		height: $nav-height - $padding;
+		line-height: $nav-height  - $padding;
+		background: $border-color-light;
+		text-align: center;
+		border-bottom: 1px solid darken($border-color-light, 10);
+	}
+
+	.cart__items {
+		height: calc(100% - #{$cart__add-height + $nav-height - $padding});
+		overflow-y: scroll; /* has to be scroll, not auto */
+		-webkit-overflow-scrolling: touch;
+	}
+}

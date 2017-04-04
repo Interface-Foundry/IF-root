@@ -1,48 +1,74 @@
-body, html {
-	margin: 0;
-	overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
-	height: 100%;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+@import '../../styles/Constants';
 
-	* {
-		outline: none;
-		box-sizing: border-box;
-		vertical-align: top;
-	}
+body,
+html {
+  margin: 0;
+  overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+  font-family: $main-font;
+  * {
+    outline: none;
+    box-sizing: border-box;
+    vertical-align: top;
+  }
 }
+
+.app,
+#root {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: auto;
+}
+
 .image {
-	background-repeat: no-repeat;
-	background-position: middle;
-	background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 
 ul {
-	margin: 0;
-	padding: 0;
+  margin: 0;
+  padding: 0;
 }
+
 li {
-	list-style: none;
+  list-style: none;
 }
-h1,h2,h3,h4,p {
-	margin: 0;
-	letter-spacing: 0.75px;
-}
-h1 {
-	font-size: 18px;
-}
-h2 {
-	font-size: 16px;
-}
-h3 {
-	font-size: 14px;
-}
-h4 {
-	font-size: 12px;
-}
+
+h1,
+h2,
+h3,
+h4,
 p {
-	font-size: 10px;
+  margin: 0;
+  letter-spacing: 0.75px;
+}
+
+h1 {
+  font-size: 18px;
+}
+
+h2 {
+  font-size: 16px;
+}
+
+h3 {
+  font-size: 14px;
+}
+
+h4 {
+  font-size: 12px;
+}
+
+a,
+p {
+  font-size: 10px;
 }
 
 input,
@@ -50,3 +76,8 @@ select:focus,
 textarea {
   font-size: 16px !important;
 }
+
+body::-webkit-scrollbar {
+  display: none;
+}
+ 

@@ -1,18 +1,27 @@
 import React, { Component, PropTypes } from 'react';
-import { Field } from 'redux-form';
 
 export default class AddAmazonItem extends Component {
+  constructor(props) {
+    super(props);
+    this.addItemToCart = ::this.addItemToCart;
+  }
+
+  static propTypes = {
+    changeModalComponent: PropTypes.func.isRequired,
+    user_accounts: PropTypes.array.isRequired,
+    addingItem: PropTypes.func.isRequired
+  }
+
+  addItemToCart() {
+    const { changeModalComponent, user_accounts, addingItem } = this.props;
+    addingItem(true);
+    changeModalComponent(user_accounts.length ? 'AmazonFormContainer' : 'EmailFormContainer');
+  }
+
   render() {
-    const { handleSubmit } = this.props;
+    const { addItemToCart } = this;
     return (
-      <form className="item" onSubmit={handleSubmit}> 
-        <div className="input">
-          <label htmlFor="url">Paste URL from Amazon</label>
-          <Field name="url" component="input" type="text" placeholder='Enter the link to an amazon product'/>
-        </div>
-        <button className="submit" type="submit">Submit</button>
-      </form>
+      <button className='amazon__button' onClick={addItemToCart}>+ Add Amazon Items to Cart</button>
     );
   }
 }
-

@@ -51,5 +51,33 @@ Eventally Should work on mobile, tablet, and desktop.
 
 1. Mint-react --> refactoring mint front, streamlining onboarding process, building memebers onboarding.
 
+## Posible Optimizations/Refactors for future (in order of priority-ish).
+
+# For Redux: (https://github.com/reactjs/redux/issues/1171)
+1. Use selectors everywhere (e.g in containers, do this myValueSelector NOT state.myValue)
+	Why: 
+		1. Easier to tests, lets you write ducks (e.g test action, containers, and reducers )
+		2. More reusablity for accessing attributes
+
+2. Do MORE in action-creators and LESS in reducers
+	why:
+		1. according to the interwebs community "Business logic belongs in action-creators. Reducers should be stupid and simple."
+		2. So we should do most of our logic in the action-creators, and secondly in the containers
+
+3. Implement Immutable.js, but can do this last as its just an optimization thing for react. React is built to deal with immutable objects as thats how they do their virtual dom tree diffs (I think its done similar to google closure, should double check me here) so this really speeds up load time and lowers CPU usage ( goes from O(n^3) --> O(n) I think, or thats what reacts special diff algorith does). 
+
+## Some cool videos cause cool.
+
+# How react virtual dom-dif works
+https://www.youtube.com/watch?v=mLMfx8BEt8g
+
+# Figwheel (amazing work tool, though closurescript which compiles to react which compiles to javascript. Just had to add a closurescript link :D)
+https://www.youtube.com/watch?v=j-kj2qwJa_E
+
+# Netflix RxJS + Redux + React
+https://www.youtube.com/watch?v=AslncyG8whg
+
+
+
 
 

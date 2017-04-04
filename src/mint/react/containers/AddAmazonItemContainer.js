@@ -1,26 +1,16 @@
 import { connect } from 'react-redux';
+
+import { addingItem } from '../actions/cart';
+import { changeModalComponent } from '../actions/modal';
 import { AddAmazonItem } from '../components';
 
-import { addItem } from '../actions/cart';
-
-import { reduxForm, reset } from 'redux-form';
-
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: state.cart.cart_id
-})
+  user_accounts: state.session.user_accounts
+});
 
 const mapDispatchToProps = dispatch => ({
-  onSubmit: (values, e, state) => {
-    const { url } = values;
-    const { cart_id } = state;
+  addingItem: (bool) => dispatch(addingItem(bool)),
+  changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
+});
 
-    dispatch(addItem(cart_id, url))
-    dispatch(reset('AddAmazonItem'))
-  }
-})
-
-const AddAmazonItemContainer = reduxForm({
-  form: 'AddAmazonItem'
-})(AddAmazonItem)
-
-export default connect(mapStateToProps, mapDispatchToProps)(AddAmazonItemContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(AddAmazonItem);

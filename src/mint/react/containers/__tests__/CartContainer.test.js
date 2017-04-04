@@ -7,32 +7,41 @@ import { CartContainer } from '..';
 import { Cart } from '../../components';
 
 describe('CartContainer', () => {
-	let Container;
-	let CartComponent;
+  let Container;
+  let CartComponent;
 
-	beforeEach(() => {
-		const store = fakeStore({
-			cart: {  
-				cart_id: 'testId',
-  				items: [{id: 1}]
-  			}
-  		});
+  beforeEach(() => {
+    const store = fakeStore({
+      session: {
+        newAccount: false,
+        onborded: false,
+        user_accounts: [{ id: 1 }]
+      },
+      cart: {
+        cart_id: 'testId',
+        items: [{ id: 1 }],
+        members: [{ id: 1 }],
+        leader: { id: 2 }
+      }
+    });
 
-		const wrapper = mount(
-			<Provider store={store}>
+    const wrapper = mount(
+      <Provider store={store}>
 				<CartContainer />
 			</Provider>
-		);
+    );
 
-		Container = wrapper.find(CartContainer);
-		CartComponent = Container.find(Cart);
-	});
+    Container = wrapper.find(CartContainer);
+    CartComponent = Container.find(Cart);
+  });
 
-	it('should render container', () => {
-		expect(Container.length).toBeTruthy();
-	});
+  it('should render container', () => {
+    expect(Container.length)
+      .toBeTruthy();
+  });
 
-	it('should render component', () => {
-		expect(CartComponent.length).toBeTruthy();
-	});
+  it('should render component', () => {
+    expect(CartComponent.length)
+      .toBeTruthy();
+  });
 });

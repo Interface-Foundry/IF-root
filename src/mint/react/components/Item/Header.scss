@@ -1,0 +1,23 @@
+@import '../../styles/Constants';
+
+.item__header {
+	height: $nav-height;
+	line-height: $nav-height;
+	padding: 0 $padding;
+	border-bottom: 1px solid darken($kip-primary-color, 5);
+
+	* {
+		display: inline-block;
+	}
+
+	p {
+		width: 100%;
+	}
+
+	button {
+		position: absolute;
+		padding: 0 $padding/2;
+		width: $nav-height/2;
+		height: $nav-height;
+	}
+}
