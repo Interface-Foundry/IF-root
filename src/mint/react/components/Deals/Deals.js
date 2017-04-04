@@ -15,7 +15,7 @@ export default class Deals extends Component {
 
   renderCards() {
     const { isDropDown, deals } = this.props;
-    return deals.deals.map((deal, i) => <li key={i}><DealCard {...deal} small={isDropDown} /></li>);
+    return deals.deals.map((deal, i) => <section key={i}><DealCard {...deal} small={isDropDown} /></section>);
   }
 
   render() {
@@ -23,10 +23,10 @@ export default class Deals extends Component {
     const { isDropDown } = props;
     return (
       <div>
-      {(isDropDown ? '' : 'Today\'s Deals')}
-      <ul className={'signIn__container__page__deals' + (isDropDown ? '-small' : '')}>
-        { renderCards() }
-      </ul>
+        {(isDropDown ? '' : 'Today\'s Deals')}
+        <section className={'signIn__container__page__deals' + (isDropDown ? '-small' : '')}>
+          { renderCards() }
+        </section>
       </div>
     );
   }
