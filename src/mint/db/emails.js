@@ -45,6 +45,9 @@ var emailsCollection = Waterline.Collection.extend({
       type: 'string'
     },
 
+    /** id of the unsubscribe group the email is associated with */
+    unsubscribe_group_id: 'integer',
+
     /**
      * The cart associated with this email
      * @type {Cart}
@@ -53,14 +56,14 @@ var emailsCollection = Waterline.Collection.extend({
 
     /** Use a template for the email */
     template: function(name, data) {
-      this.message_html = templates(name, data)
-      this.template_name = name
-      return this.save()
+      this.message_html = templates(name, data);
+      this.template_name = name;
+      return this.save();
     },
 
     /** send an email */
     send: function () {
-      var me = this
+      var me = this;
       return co(function *() {
     		/**
     			Example from https://nodemailer.com/about/
@@ -77,21 +80,27 @@ var emailsCollection = Waterline.Collection.extend({
           to: me.recipients,
           subject: me.subject,
           html: me.message_html,
-          text: me.message_text_fallback
-        }
+          text: me.message_text_fallback,
+          headers: {
+            'x-smtpapi': `{
+              "asm_group_id": ${me.unsubscribe_group_id || 2341},
+              "asm_groups_to_display": [2273,2275]
+            }`
+          }
+        };
 
         // There is an env variable to control sending emails or nah
         if (!process.env.SEND_EMAILS) {
-          console.log('Not sending email (use SEND_EMAILS=1 to actually send an email)')
+          console.log('Not sending email (use SEND_EMAILS=1 to actually send an email)');
         } else {
-          yield sendMail(options)
+          yield sendMail(options);
         }
 
-        me.sent_at = new Date()
-        yield me.save()
-      })
+        me.sent_at = new Date();
+        yield me.save();
+      });
     }
   }
-})
+});
 
-module.exports = emailsCollection
+module.exports = emailsCollection;

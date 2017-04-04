@@ -109,30 +109,6 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
   app.use(new mintLogger.NormalLogger());
 }
 
-
-
-//~~~~~for unsubscribe group testing~~~~~//
-
-var mailOptions = {
-to: '<hannah.katznelson@kipthis.com>',
-from: 'Kip Test <hello@kipthis.com>',
-subject: 'The Love Below',
-html: '<html><body><p>This is a test. Speakerboxxx.</p><a href="http://localhost:5000/landing?url=<%asm_preferences_raw_url%>">Which email do ya wanna get?</a></body></html>',
-headers: {
-  'x-smtpapi': '{"asm_group_id":2321,"asm_groups_to_display":[2321,2273,2275]}'
-  }
-};
-
-try {
-mailer_transport.sendMail(mailOptions);
-console.log('email sent');
-} catch (e) {
-logging.error('error sending test email', e);
-}
-
-//~~~~~for unsubscribe group testing~~~~~//
-
-
 // ROUTES
 app.use('/', regularRoutes);
 app.use('/api', apiRoutes);

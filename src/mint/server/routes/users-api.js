@@ -44,7 +44,7 @@ module.exports = function (router) {
       yield cart.save()
 
       if (prototype) {
-        return res.redirect('/cart/' + cart.id)
+        return res.redirect('/cart/' + cart.id);
       } else {
         return res.send({
           ok: true,
@@ -62,12 +62,12 @@ module.exports = function (router) {
     //   email_address: email
     // })
     if (user) {
-      console.log('email already exists in db')
+      console.log('email already exists in db');
       if (prototype) {
         res.render('pages/prototype/check_your_email_magic', {
           user,
           cart
-        })
+        });
       } else {
         res.send({
           ok: false,
