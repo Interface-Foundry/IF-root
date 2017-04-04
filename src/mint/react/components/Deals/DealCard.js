@@ -8,7 +8,7 @@ export default class DealCard extends Component {
   }
 
   static propTypes = {
-    small: PropTypes.string,
+    small: PropTypes.bool,
     medium: PropTypes.string.isRequired,
     large: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,

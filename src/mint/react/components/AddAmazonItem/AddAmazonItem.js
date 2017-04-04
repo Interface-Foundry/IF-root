@@ -9,13 +9,13 @@ export default class AddAmazonItem extends Component {
   static propTypes = {
     user_accounts: PropTypes.array.isRequired,
     addingItem: PropTypes.func.isRequired,
-    push: PropTypes.func.isRequired
+    replace: PropTypes.func.isRequired
   }
 
   addItemToCart() {
-    const { user_accounts, addingItem, push } = this.props;
+    const { user_accounts, addingItem, cart_id, replace } = this.props;
     addingItem(true);
-    push(user_accounts.length ? 'm/item/add' : 'm/signin');
+    replace(user_accounts.length ? `/cart/${cart_id}/m/item/add` : `/cart/${cart_id}/m/signin`);
   }
 
   render() {
