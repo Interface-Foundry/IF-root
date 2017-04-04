@@ -28,7 +28,7 @@ export default class DealCard extends Component {
     const { small, medium, large, name, price, previousPrice, savePercent, asin } = this.props;
     const imageSrc = small || medium || large;
     return (
-      <a href={`/m/item/${asin}`}>
+      <a href={`m/item/${asin}`}>
         <section className='dealcard'>
           <div className='dealcard__price'>${price}</div>
           <div className='dealcard__discount'><strike>${previousPrice}</strike> ({(savePercent * 100) | 2}% off)</div>
