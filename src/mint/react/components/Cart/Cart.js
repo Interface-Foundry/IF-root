@@ -27,7 +27,7 @@ export default class Cart extends Component {
     if (members.length === 0 &&
       !leader
     ) {
-      push(`${url}/m/signin`);
+      push('m/signin');
     } else if (leader && !addingItem && this.props.addingItem !== addingItem && members.length !== 0) {
       replace(`/cart/${cart_id}`);
     }
