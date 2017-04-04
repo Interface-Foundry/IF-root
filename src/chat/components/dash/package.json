@@ -51,6 +51,7 @@
     "react-bootstrap": "^0.30.3",
     "react-bootstrap-table": "^3.0.0",
     "react-chartjs": "^0.8.0",
+    "react-datepicker": "^0.44.0",
     "react-dom": "15.3.1",
     "react-dropzone": "^3.12.2",
     "recharts": "^0.15.1",

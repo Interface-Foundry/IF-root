@@ -10,6 +10,8 @@ import StatWidget from '../../components/Widget';
 import Donut from '../../components/Donut';
 import CartTable from '../../components/CartTable';
 import DeliveryTable from '../../components/DeliveryTable';
+import DatePicker from 'react-datepicker';
+import moment from 'moment';
 
 import {
   Tooltip,
@@ -63,13 +65,17 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      view: 'Store'
+      view: 'Store',
+      startDate: moment()
     };
   }
   
   componentDidMount() {
     var self = this;
-    self.setState({view: 'Store'}) 
+    self.setState({
+      view: 'Store',
+      startDate: moment()
+    }) 
   }
 
   render(){
@@ -113,11 +119,15 @@ class Home extends Component {
                   }, 
                   {
                     field: 'items',
-                    descrip: 'Number of Items'
+                    descrip: 'Cart Size'
                   }, 
                   {
                     field: 'category',
                     descrip: 'Category'
+                  },
+                  {
+                    field: 'quantity',
+                    descrip: 'Quantity'
                   },
                   {
                     field: 'price',
@@ -135,13 +145,13 @@ class Home extends Component {
 
                         if(cart.amazon && cart.amazon.CartItems){
                             carts.push({
-                            team_name: team.team_name,
-                            purchased_date: (new Date(cart.purchased_date)).toLocaleString(),
-                            created_date: (new Date(cart.created_date)).toLocaleString(),
-                            items: cart.amazon.CartItems[0].CartItem.length,
-                            cart_total: '$'+cart.amazon.CartItems[0].CartItem.reduce(function(a,b){
-                              return (a+Number(b.Price[0].FormattedPrice[0].replace(/[^0-9\.]+/g,"")));
-                            },0).toFixed(2),
+                              team_name: team.team_name,
+                              purchased_date: cart.purchased_date ? (new Date(cart.purchased_date)).toLocaleString() : 'Not Available',
+                              created_date: (new Date(cart.created_date)).toLocaleString(),
+                              items: cart.amazon.CartItems[0].CartItem.reduce(function(a,b){
+                                  return a+Number(b.Quantity);
+                                },0),
+                              cart_total: cart.amazon.SubTotal[0].FormattedPrice,
                             });
                             cart.amazon.CartItems[0].CartItem.map(function(item){
                               var cartItem = cart.amazon.CartItems ? cart.amazon.CartItems[0].CartItem.find(function(i){
@@ -149,6 +159,7 @@ class Home extends Component {
                                 }) : '';
                               carts.push({
                                 category: cartItem ? cartItem.ProductGroup : '',
+                                quantity: item.Quantity,
                                 price: item.Price[0].FormattedPrice,
                                 title: item.Title
                               })
@@ -194,11 +205,11 @@ class Home extends Component {
                   },
                   {
                     field:'cart_size',
-                    descrip: 'Total Cart Size'
+                    descrip: 'Cart Size'
                   },
                   {
                     field: 'items',
-                    descrip: 'Number of Items'
+                    descrip: 'Quantity'
                   },
                   {
                     field: 'user',
@@ -245,6 +256,7 @@ class Home extends Component {
                 }
               /> 
           }
+
 
         </div>
       </div>
