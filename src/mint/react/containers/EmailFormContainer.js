@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { reset } from 'redux-form'
+import { reset, reduxForm } from 'redux-form';
 
 import { EmailForm } from '../components';
 
@@ -8,22 +8,20 @@ import { fetchCart } from '../actions/cart';
 
 import { isValidEmail } from '../utils';
 
-import { reduxForm } from 'redux-form';
-
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.cart.cart_id,
   addingItem: state.cart.addingItem
 });
 
 const mapDispatchToProps = dispatch => ({
-  onSubmit: (values, e, state) => dispatch(signIn(state.cart_id, values.email)).then(() => {
-      const { history: { replace }, cart_id, addingItem } = state;   
+  onSubmit: (values, e, state) => dispatch(signIn(state.cart_id, values.email))
+    .then(() => {
+      const { history: { replace }, cart_id, addingItem } = state;
       dispatch(fetchCart(cart_id));
       dispatch(reset('SignIn'));
 
       addingItem
-        ? replace(`/cart/${cart_id}/m/item/add`)
-        : replace(`/cart/${cart_id}`);
+        ? replace('item/add') : replace('/cart/${cart_id}');
     })
 });
 
