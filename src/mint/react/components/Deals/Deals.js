@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import DealCard from './DealCard';
 
-export default class DealsSection extends Component {
+export default class Deals extends Component {
   constructor(props) {
     super(props);
     this.renderCards = ::this.renderCards;
@@ -9,7 +9,7 @@ export default class DealsSection extends Component {
   }
 
   static propTypes = {
-    isDropDown: PropTypes.bool.isRequired,
+    isDropDown: PropTypes.bool,
     deals: PropTypes.object.isRequired
   }
 
