@@ -40,29 +40,29 @@ export default class Cart extends Component {
 
     return (
       <div className='cart'>
-          <div className='cart__add'>
-            <AddAmazonItemContainer push={push}/>
-          </div>
-          <DealsContainer replace={replace}/>
-          <div className='cart__title'>
-            <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>
-          </div>
-          <div className='cart__items'>
-            <ul>
-              { 
-                hasItems ? 
-                  items.map((item, i) => <CartItem key={i} 
-                                              item={item} 
-                                              itemNumber={i+1} 
-                                              members={members} 
-                                              leader={leader} 
-                                              selectItem={selectItem}
-                                              url={url}
-                                              push={push}/>) 
-                  : <em>Please add some products to the cart.</em>
-              } 
-            </ul>
-          </div>
+        <div className='cart__add'>
+          <AddAmazonItemContainer replace={replace}/>
+        </div>
+        <DealsContainer replace={replace}/>
+        <div className='cart__title'>
+          <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>
+        </div>
+        <div className='cart__items'>
+          <ul>
+            { 
+              hasItems ? 
+                items.map((item, i) => <CartItem key={i} 
+                                            item={item} 
+                                            itemNumber={i+1} 
+                                            members={members} 
+                                            leader={leader} 
+                                            selectItem={selectItem}
+                                            url={url}
+                                            push={push}/>) 
+                : <em>Please add some products to the cart.</em>
+            } 
+          </ul>
+        </div>
     </div>
     );
   }
