@@ -2,7 +2,6 @@ import { connect } from 'react-redux';
 import { Item } from '../components';
 
 import { getMemberById } from '../reducers';
-import { changeModalComponent } from '../actions/modal';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.cart.cart_id,
@@ -12,8 +11,4 @@ const mapStateToProps = (state, ownProps) => ({
   item: state.cart.item
 });
 
-const mapDispatchToProps = dispatch => ({
-  changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Item);
+export default connect(mapStateToProps)(Item);

@@ -1,5 +1,4 @@
 import cart from './cart';
-import modal from './modal';
 import session from './session';
 import deals from './deals';
 import { combineReducers } from 'redux';
@@ -8,7 +7,6 @@ import { reducer as form } from 'redux-form';
 
 export default combineReducers({
   cart,
-  modal,
   session,
   form,
   deals,

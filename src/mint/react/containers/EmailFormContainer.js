@@ -1,7 +1,10 @@
 import { connect } from 'react-redux';
+import { reset } from 'redux-form'
+
 import { EmailForm } from '../components';
 
 import { signIn } from '../actions/session';
+import { fetchCart } from '../actions/cart';
 
 import { isValidEmail } from '../utils';
 
@@ -13,9 +16,15 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onSubmit: (values, e, state) => {
-    dispatch(signIn(state.cart_id, values.email, state.addingItem));
-  }
+  onSubmit: (values, e, state) => dispatch(signIn(state.cart_id, values.email)).then(() => {
+      const { history: { replace }, cart_id, addingItem } = state;   
+      dispatch(fetchCart(cart_id));
+      dispatch(reset('SignIn'));
+
+      addingItem
+        ? replace(`/cart/${cart_id}/m/item/add`)
+        : replace(`/cart/${cart_id}`);
+    })
 });
 
 const validate = (values, state) => {

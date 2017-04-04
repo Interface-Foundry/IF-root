@@ -14,12 +14,12 @@ export default class Item extends Component {
   }
 
   render() {
-    const { item: { original_link, quantity, updatedAt }, member: { email_address }, changeModalComponent } = this.props,
+    const { item: { original_link, quantity, updatedAt }, member: { email_address }, history: { replace }, cart_id } = this.props,
           memberName = getNameFromEmail(email_address);
 
     return (
       <div className='item'>
-        <Header changeModalComponent={changeModalComponent}/>
+        <Header replace={replace} cart_id={cart_id}/>
         <section className='item__view'>
           <div className='item__view__image image row' style={
             {
