@@ -86,7 +86,7 @@ class Home extends Component {
           </ButtonToolbar>
             { this.state.view=='Store' ? 
               <CartTable 
-                query={'{teams(limit:5000){team_name, carts {created_date, purchased_date,items {_id,title,image,price,ASIN,added_by,source_json},purchased}}}'}
+                query={'{teams(limit:5000){team_name, carts {created_date, purchased_date, amazon, items {_id,title,image,price,ASIN,added_by}}}}'}
                 heads = {
                   [{ field: 'created_date',
                      descrip: 'Created Date',
@@ -114,6 +114,10 @@ class Home extends Component {
                   {
                     field: 'items',
                     descrip: 'Number of Items'
+                  }, 
+                  {
+                    field: 'category',
+                    descrip: 'Category'
                   },
                   {
                     field: 'price',
@@ -128,25 +132,29 @@ class Home extends Component {
                   (teams, team) => 
                   teams.concat(
                     team.carts.reduce((carts, cart) => {
-                      if(cart.purchased){
-                        if (cart.purchased == true) {
+
+                        if(cart.amazon && cart.amazon.CartItems){
                             carts.push({
                             team_name: team.team_name,
                             purchased_date: (new Date(cart.purchased_date)).toLocaleString(),
                             created_date: (new Date(cart.created_date)).toLocaleString(),
-                            items: cart.items.length,
-                            cart_total: '$'+cart.items.reduce(function(a,b){
-                              return (a+Number(b.price.replace(/[^0-9\.]+/g,"")));
+                            items: cart.amazon.CartItems[0].CartItem.length,
+                            cart_total: '$'+cart.amazon.CartItems[0].CartItem.reduce(function(a,b){
+                              return (a+Number(b.Price[0].FormattedPrice[0].replace(/[^0-9\.]+/g,"")));
                             },0).toFixed(2),
                             });
-                            cart.items.map(function(item){
+                            cart.amazon.CartItems[0].CartItem.map(function(item){
+                              var cartItem = cart.amazon.CartItems ? cart.amazon.CartItems[0].CartItem.find(function(i){
+                                  return i.ASIN==item.ASIN
+                                }) : '';
                               carts.push({
-                                price: item.price,
-                                title: item.title
+                                category: cartItem ? cartItem.ProductGroup : '',
+                                price: item.Price[0].FormattedPrice,
+                                title: item.Title
                               })
                             })
                         }
-                      }
+                      
                       return carts;
                     }, [])
 
@@ -185,6 +193,10 @@ class Home extends Component {
                     descrip: 'Restaurant'
                   },
                   {
+                    field:'cart_size',
+                    descrip: 'Total Cart Size'
+                  },
+                  {
                     field: 'items',
                     descrip: 'Number of Items'
                   },
@@ -202,27 +214,29 @@ class Home extends Component {
                   teams.concat(
                     team.deliveries.reduce((deliveries, delivery) => {
                       if(delivery.payment_post){
-                            deliveries.push({
-                            team_name: team.team_name,
-                            purchased_date: (new Date(delivery.order.order_time)).toLocaleString(),
-                            created_date: (new Date(delivery.payment_post.time_started)).toLocaleString(),
-                            restaurant: delivery.order.merchant_info.name,
-                            items: delivery.cart.length,
-                            cart_total: '$'+delivery.order.total.toFixed(2),
-                            });
-                            delivery.cart.map(function(item){
-                              if(item.added_to_cart==true){
-                                deliveries.push({
-                                user: team.members.find(function(m){
-                                  return m.id == item.user_id
-                                }).name,
-                                order: delivery.order.cart.find(function(i){
-                                  return i.id == item.item.item_id || i.id.split('-').pop() == item.item.item_id
-                                }).name
-                              })
-                              }
-                              
+                        var addedItems = delivery.cart.filter(function(item){
+                              return item.added_to_cart==true
                             })
+                        deliveries.push({
+                          team_name: team.team_name,
+                          purchased_date: (new Date(delivery.order.order_time)).toLocaleString(),
+                          created_date: (new Date(delivery.payment_post.time_started)).toLocaleString(),
+                          restaurant: delivery.order.merchant_info.name,
+                          cart_size: delivery.order.item_count,
+                          cart_total: '$'+delivery.order.total.toFixed(2),
+                          });
+                          addedItems.map(function(item){
+                              let addedItem = delivery.order.cart.find(function(i){
+                                return i.id == item.item.item_id || i.id.split('-').pop() == item.item.item_id
+                              })
+                              deliveries.push({
+                              items: addedItem.quantity,
+                              user: team.members.find(function(m){
+                                return m.id == item.user_id
+                              }).name,
+                              order: addedItem.name
+                            })
+                        })
                       }
                       return deliveries;
                     }, [])
