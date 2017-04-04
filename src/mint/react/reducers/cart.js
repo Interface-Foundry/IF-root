@@ -46,11 +46,6 @@ export default function cart(state = initialState, action) {
         ...state,
         items: action.items
       };
-    case SELECT_ITEM:
-      return {
-        ...state,
-        item: action.item
-      };
     case REQUEST_CART:
     case REQUEST_ITEMS:
     default:

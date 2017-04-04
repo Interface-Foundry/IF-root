@@ -41,6 +41,11 @@ var deals = require('../deals_sample.json');
 router.get('/test/deals', (req, res)=>{
   res.json(deals);
 })
+
+var item = require('../amazon_sample_item.json');
+router.get('/test/item', (req, res)=>{
+  res.json(item);
+})
 // DELETE THIS LATER 
 
 module.exports = router;
