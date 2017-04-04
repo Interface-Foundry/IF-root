@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { DealsSection } from '../components';
+import { Deals } from '../components';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -8,4 +8,4 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-export default connect(mapStateToProps)(DealsSection);
+export default connect(mapStateToProps)(Deals);
