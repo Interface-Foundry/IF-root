@@ -22,9 +22,12 @@ export default class Deals extends Component {
     const { renderCards, props } = this;
     const { isDropDown } = props;
     return (
+      <div>
+      {(isDropDown ? '' : 'Today\'s Deals')}
       <ul className={'signIn__container__page__deals' + (isDropDown ? '-small' : '')}>
         { renderCards() }
       </ul>
+      </div>
     );
   }
 }
