@@ -10,13 +10,14 @@ export default class Deals extends Component {
   static propTypes = {
     isDropdown: PropTypes.bool,
     deals: PropTypes.arrayOf(PropTypes.object)
-      .isRequired
+      .isRequired,
+    cart_id: PropTypes.string.isRequired
   }
 
   renderCards() {
-    let { isDropdown, deals } = this.props;
+    let { isDropdown, deals, cart_id } = this.props;
     if (isDropdown) deals = deals.slice(0, 5);
-    return deals.map((deal, i) => <section key={i}><DealCard {...deal} isDropdown={isDropdown}/></section>);
+    return deals.map((deal, i) => <section key={i}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown}/></section>);
   }
 
   render() {

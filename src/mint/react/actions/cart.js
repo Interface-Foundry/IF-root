@@ -96,10 +96,10 @@ export function removeItem(cart_id, item) {
   };
 }
 
-export function addItem(cart_id, url) {
+export function addItem(cart_id, item_id) {
   return async dispatch => {
     dispatch(requestAddItem());
-
+    console.log('1', cart_id, item_id);
     try {
       const response = await fetch(`/api/cart/${cart_id}/item`, {
         'method': 'POST',
@@ -109,7 +109,7 @@ export function addItem(cart_id, url) {
         },
         credentials: 'same-origin',
         'body': JSON.stringify({
-          url: url
+          item_id
         })
       });
 

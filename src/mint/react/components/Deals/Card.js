@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { Link } from 'react-router-dom';
 
 export default class Card extends Component {
 
@@ -18,12 +19,12 @@ export default class Card extends Component {
     const { small, medium, large, asin, name, price, previousPrice, savePercent, cart_id } = this.props;
     const imageSrc = small || medium || large;
     return (
-      <a href={`/cart/${cart_id}/m/item/${asin}`} className='dealcard'>
+      <Link to={`/cart/${cart_id}/m/item/${asin}`} className='dealcard'>
         <div className='dealcard__price'>${price}</div>
         <div className='dealcard__discount'><strike>${previousPrice}</strike> ({(savePercent * 100) | 2}% off)</div>
         <img src={imageSrc}></img>
         <div className='dealcard__name'>{name}</div>
-      </a>
+      </Link>
     );
   }
 }

@@ -8,9 +8,11 @@ export default class Cart extends Component {
     fetchDeals: PropTypes.func.isRequired,
     fetchCart: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
-    members: PropTypes.arrayOf(PropTypes.object).isRequired,
+    members: PropTypes.arrayOf(PropTypes.object)
+      .isRequired,
     leader: PropTypes.object,
-    items: PropTypes.arrayOf(PropTypes.object).isRequired,
+    items: PropTypes.arrayOf(PropTypes.object)
+      .isRequired,
     addingItem: PropTypes.bool.isRequired
   }
 
@@ -43,7 +45,7 @@ export default class Cart extends Component {
         <div className='cart__add'>
           <AddAmazonItemContainer replace={replace}/>
         </div>
-        <DealsContainer />
+        <DealsContainer isDropdown={false}/>
         <div className='cart__title'>
           <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>
         </div>
