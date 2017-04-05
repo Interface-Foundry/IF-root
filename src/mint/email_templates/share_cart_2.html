@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Salted | A Responsive Email Template</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<style type="text/css">
+    /* CLIENT-SPECIFIC STYLES */
+    #outlook a{padding:0;} /* Force Outlook to provide a "view in browser" message */
+    .ReadMsgBody{width:100%;} .ExternalClass{width:100%;} /* Force Hotmail to display emails at full width */
+    .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height: 100%;} /* Force Hotmail to display normal line spacing */
+    body, table, td, a{-webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;} /* Prevent WebKit and Windows mobile changing default text sizes */
+    table, td{mso-table-lspace:0pt; mso-table-rspace:0pt;} /* Remove spacing between tables in Outlook 2007 and up */
+    img{-ms-interpolation-mode:bicubic;} /* Allow smoother rendering of resized image in Internet Explorer */
+
+    /* RESET STYLES */
+    body{margin:0; padding:0;}
+    img{border:0; height:auto; line-height:100%; outline:none; text-decoration:none;}
+    table{border-collapse:collapse !important;}
+    body{height:100% !important; margin:0; padding:0; width:100% !important;}
+
+    /* iOS BLUE LINKS */
+    .appleBody a {color:#68440a; text-decoration: none;}
+    .appleFooter a {color:#999999; text-decoration: none;}
+
+    input{
+        display: none;
+    }
+    @media screen and (max-width:9999px){
+        .cboxcheck:checked + * .thumb-carousel,
+        * [summary=cboxcheck]:checked + * [summary^=thumb-carousel] {
+            height: auto !important;
+            max-height: none !important;
+            line-height:0;
+        }
+        .thumb-carousel span,
+        * [summary^=thumb-carousel] span {
+            font-size:0;
+            line-height:0;
+        }
+      
+        .cboxcheck:checked + * .thumb-carousel .car-content, 
+        * [summary=cboxcheck]:checked + * [summary^=thumb-carousel] [summary^=content]{
+            display:none;
+            max-height:0px;
+            overflow:hidden;
+        }
+        .thumb-carousel .cbox1:checked + span .content-1,
+        .thumb-carousel .cbox2:checked + span .content-2,
+        .thumb-carousel .cbox3:checked + span .content-3,
+        .thumb-carousel .cbox4:checked + span .content-4,
+        .thumb-carousel .cbox5:checked + span .content-5,
+        * [summary^=thumb-carousel] [summary=cbox1]:checked + span [summary=content-1], 
+        * [summary^=thumb-carousel] [summary=cbox2]:checked + span [summary=content-2],
+        * [summary^=thumb-carousel] [summary=cbox3]:checked + span [summary=content-3], 
+        * [summary^=thumb-carousel] [summary=cbox4]:checked + span [summary=content-4], 
+        * [summary^=thumb-carousel] [summary=cbox5]:checked + span [summary=content-5] 
+        {
+            display:block !important;
+            max-height:none !important;
+            overflow:visible !important;
+        }
+      
+
+        .thumb-carousel .thumb,
+        * [summary^=thumb-carousel] [summary=thumb]{
+            cursor:pointer;
+            display:inline-block !important;
+            width:17.5%;
+            margin:1% 0.61%;
+            border:2px solid #bbbbbb;
+        }
+        /* hide for thunderbird as it doesn't support checkboxes */
+        .moz-text-html .thumb {
+            display:none !important;
+        }
+        .thumb-carousel .thumb:hover,
+        * [summary^=thumb-carousel] [summary=thumb]:hover{
+            border:2px solid #444444;
+        }
+        .thumb-carousel input:checked + span > span,
+        * [summary^=thumb-carousel] [summary^=cbox]:checked + span > span{
+            border-color: #444444;
+        }   
+        .thumb-carousel .thumb img,
+        * [summary^=thumb-carousel] [summary=thumb] img{
+            width:100%;
+            height: auto;
+        }
+        .thumb-carousel img,
+        * [summary^=thumb-carousel] img{
+            max-height: none !important;
+        }      
+        .cboxcheck:checked + * .fallback{
+            display:none !important;
+            display:none;
+            max-height: 0px;
+            height: 0px;
+            overflow: hidden;
+        }
+        * [summary="cboxcheck"]:checked + * [summary="fallback"]
+        {
+            max-height: 0px;
+            height: 0px;
+            overflow: hidden;
+        }  
+    }
+
+    @media screen and (max-width:600px){
+        .car-table.responsive,
+        .car-table.responsive .thumb-carousel,
+        .car-table.responsive .thumb-carousel .car-content img,
+        .car-table.responsive .fallback .car-content img
+        {
+            width:100% !important;
+            height:auto;
+        }
+    }    
+    
+</style>
+</head>
+<body style="margin: 0; padding: 0;">
+    <table class="car-table  responsive" cellpadding=0 cellspacing=0 border=0 width="450">
+        <tr>
+            <td>
+                <!--[if !mso]><!-- -->
+                <input type=radio class="cboxcheck" summary="cboxcheck" style="display:none !important;" checked>
+                <!--<![endif]-->
+                <div>
+                    <!--[if !mso]><!-- -->
+                    <div class="thumb-carousel " summary="thumb-carousel" style="width:450px;height:0px;max-height:0px;overflow:hidden;text-align:center">
+                        <label>
+                            <input type="radio" name="car-rd1" class="cbox3" summary="cbox3" style="display:none !important;"  >
+                            <span>
+                                <label>
+                                    <input type="radio" name="car-rd1" class="cbox2" summary="cbox2" style="display:none !important;"  >
+                                    <span>
+                                        <label>
+                                            <input type="radio" name="car-rd1" class="cbox1" summary="cbox1" style="display:none !important;" checked >
+                                            <span>
+                                                <div class="content-1 car-content" summary="content-1"><a href="http://www.freshinbox.com"><img src="http://freshinbox.com/assets/images/cities/city-nyc.jpg" width=450 height=280 alt="" style="display:block;max-height:0" border=0></a></div>
+                                                <div class="content-2 car-content" summary="content-2"><a href="http://www.freshinbox.com"><img src="http://freshinbox.com/assets/images/cities/city-sf.jpg" width=450 height=280 alt="" style="display:block;max-height:0" border=0></a></div>
+                                                <div class="content-3 car-content" summary="content-3"><a href="http://www.freshinbox.com"><img src="http://freshinbox.com/assets/images/cities/city-chicago.jpg" width=450 height=280 alt="" style="display:block;max-height:0" border=0></a></div>
+                                                <span class="thumb" summary="thumb" style="display:none;"><img src="http://freshinbox.com/assets/images/cities/city-nyc.jpg" width="50" style="display:block;max-height:0" border=0></span>
+                                            </span>
+                                        </label>
+                                        <span class="thumb" summary="thumb" style="display:none;"><img src="http://freshinbox.com/assets/images/cities/city-sf.jpg" width="50" style="display:block;max-height:0" border=0></span>
+                                    </span>
+                                </label>
+                                <span class="thumb" summary="thumb" style="display:none;"><img src="http://freshinbox.com/assets/images/cities/city-chicago.jpg" width="50" style="display:block;max-height:0" border=0></span>
+                            </span>
+                        </label>
+                    </div>
+                    <!--<![endif]-->
+                    <div class="fallback " summary="fallback">
+                    <div class="car-content" summary="car-content"><a href="http://www.freshinbox.com"><img src="http://freshinbox.com/assets/images/cities/city-nyc.jpg" width=450 height=280 alt="."style="display:block;" border=0></a></div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+        
+</body>
+</html>

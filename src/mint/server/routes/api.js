@@ -46,6 +46,31 @@ var item = require('../amazon_sample_item.json');
 router.get('/test/item', (req, res)=>{
   res.json(item);
 })
+
+// Koh Dummy test eail
+// curl -i -X POST http://127.0.0.1:3000/api/cart/36d4750ea2b3/test/komangwluce@gmail.com
+router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
+  const email_id = req.params.email_id;
+  const cart_id = req.params.cart_id;
+
+  console.log('########## email_id: ', email_id)
+  console.log('########## cart_id: ', cart_id)
+  // Send an email to the user with the cart link
+  var email = yield db.Emails.create({
+    recipients: email_id,
+    subject: 'Share Kip Cart Test',
+    cart: cart_id
+  })
+
+  // use the new_cart email template
+  email.template('share_cart', {
+    id: cart_id,
+    name: email_id.split('@')[0]
+  })
+
+  // remember to actually send it
+  yield email.send();
+}))
 // DELETE THIS LATER 
 
 module.exports = router;

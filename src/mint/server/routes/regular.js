@@ -99,4 +99,38 @@ router.get('/newcart', (req, res) => co(function * () {
   res.redirect(`/cart/${cart.id}/`);
 }))
 
+
+// Koh test send email
+router.get('/testemail', (req, res) => co(function * () {
+  // create a blank cart
+  const cart = yield db.Carts.create({})
+
+  // find the user for this session
+  const session = req.UserSession;
+
+  if (session.user_accounts.length > 0) {
+    // make the first user the leader
+    const user = session.user_accounts[0]
+    cart.leader = user.id
+    yield cart.save()
+
+    // Send an email to the user with the cart link
+    var email = yield db.Emails.create({
+      recipients: user.email_address,
+      subject: 'Your New Cart from Kip',
+      cart: cart.id
+    })
+
+    // use the new_cart email template
+    email.template('new_cart', {
+      id: cart.id
+    })
+
+    // remember to actually send it
+    yield email.send();
+  }
+
+  res.redirect(`/cart/${cart.id}/`);
+}))
+
 module.exports = router;

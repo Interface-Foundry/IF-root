@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+    <!--  -->
+    <!--[if !mso]><!-->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--<![endif]-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Share Cart Email</title>
+    <style type="text/css">
+        /* CLIENT-SPECIFIC STYLES */
+        
+        /* Force Outlook to provide a "view in browser" message */
+        #outlook a {
+            padding:0;
+        }
+        
+        /* Force Hotmail to display emails at full width */
+        .ExternalClass,
+        .ReadMsgBody {
+            width:100%;
+        }
+        
+        /* Force Hotmail to display normal line spacing */
+        .ExternalClass, 
+        .ExternalClass p, 
+        .ExternalClass span, 
+        .ExternalClass font, 
+        .ExternalClass td, 
+        .ExternalClass div {
+            line-height: 100%;
+        } 
+        
+        /* Prevent WebKit and Windows mobile changing default text sizes */
+        body, 
+        table, 
+        td, 
+        a {
+            -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;
+        }
+        
+        /* Remove spacing between tables in Outlook 2007 and up */
+        table, 
+        td {
+            mso-table-lspace:0pt; 
+            mso-table-rspace:0pt;
+        }
+        
+        /* Allow smoother rendering of resized image in Internet Explorer */
+        img {
+            -ms-interpolation-mode:bicubic;
+        }
+
+        /* RESET STYLES */
+        img {
+            border:0; 
+            height:auto; 
+            line-height:100%; 
+            outline:none; 
+            text-decoration:none;
+        }
+        table {
+            border-collapse:collapse !important;
+        }
+        body {
+            height:100% !important; 
+            margin:0; 
+            padding:0; 
+            width:100% !important;
+            background: #FFF;
+            font-family: sans-serif;
+        }
+
+        /*Media Queries Example*/
+        @media screen and (max-width: 600px) {
+            img[class='responsive-image'] {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            table[class='responsive-table'] {
+                width: 100% !important;
+                padding: 20px;
+            }
+            table[class='responsive-table-column'] {
+                width: 100% !important;
+                padding: 10px;
+            }
+            td[class='headline'] {
+                font-size: 20px !important;
+                background: #222;
+                color: #fff;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- FULL WIDTH CONTAINER ALWAYS NEED THIS-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+            <td align="center">
+                <!-- 600px CONTAINER, THINK OF THIS AS WHERE OUR ACTUAL EMAIL CONTENT STARTS-->
+                <table width="600" cellspacing="0" cellpadding="0" border="0" class="responsive-table">
+                    <!-- FOR EVERY NEW PIECE OF CONTENT, CREATE NEW <TR><TD> -->
+                    <tr>
+                        <td>
+                            <!-- ADD CONTENT HERE! -->
+                            <img src='http://tidepools.co/kip/kip_fruit_twitter_sm.gif' width="600" height="300" class="responsive-image"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <!-- APPERNTLY ACCORDING TO EMAIL TEMPLATING BEST PRACTICE WE WANT INLINE STYLES: WEIRD -->
+                        <td align="center" style="font-size: 38px; padding: 30px 0;" class="headline">
+                            &hearts; Alyx's Group Cart &hearts;
+                        </td>
+                    </tr>                
+                     <!-- TWO COLUMN LAYOUT THAT GOES INTO ONE COLUMN -->
+                    <tr>
+                        <td>
+                            <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                            <table width="300" align="right" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                                <tr>
+                                    <td style="padding: 30px 30px 10px" align="center">
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id interdum elit, eget viverra nulla. Cras et sapien finibus, aliquet felis ut, commodo nulla. Donec massa ex, imperdiet sit amet placerat eu, ultrices ac est. Nam eu fermentum sem. Sed tincidunt erat aliquam ligula placerat luctus eget vel ante. Vivamus mattis magna odio, in molestie justo maximus quis. Donec porta erat et viverra egestas.
+                                    </td >
+                                </tr>
+                            </table>
+                           <table width="300" align="left" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                                <tr>
+                                    <td style="padding: 30px;" align="center">
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id interdum elit, eget viverra nulla. Cras et sapien finibus, aliquet felis ut, commodo nulla. Donec massa ex, imperdiet sit amet placerat eu, ultrices ac est. Nam eu fermentum sem. Sed tincidunt erat aliquam ligula placerat luctus eget vel ante. Vivamus mattis magna odio, in molestie justo maximus quis. Donec porta erat et viverra egestas.
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr> 
+                    <!-- FANCY CAROUSEL THAT FALLS BACK TO SHOWING ONLY 3 INLINE IMAGE LINKS --> 
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
