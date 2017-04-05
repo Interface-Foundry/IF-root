@@ -20,15 +20,19 @@ import Html from './components/Html';
 import graffiti from '@risingstack/graffiti';
 import { getSchema } from '@risingstack/graffiti-mongoose';
 
+
 import { connect } from './database';
 import { ErrorPageWithoutStyle } from './routes/error/ErrorPage';
 import errorPageStyle from './routes/error/ErrorPage.css';
-import Schema from './data/schema';
-import { Resolvers, GetLoaders } from './data/resolvers';
+import executableSchema from './data/schema';
+import { GetLoaders as getLoaders } from './data/resolvers';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
 import { port, auth } from './config';
 import multer from 'multer';
+
+import { graphqlExpress, graphiqlExpress } from 'graphql-server-express';
+
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -41,12 +45,21 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 const app = express();
 
+
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
 // user agent is not known.
 // -----------------------------------------------------------------------------
 global.navigator = global.navigator || {};
 global.navigator.userAgent = global.navigator.userAgent || 'all';
+
+
+// db stuff
+connect().catch(err => console.error(err.stack)).then(() => {
+  app.listen(port, () => {
+    console.log(`The server is running at http://localhost:${port}/`);
+  });
+});
 
 //
 // Register Node.js middleware
@@ -65,32 +78,28 @@ app.use(expressJwt({
   getToken: req => req.cookies.id_token,
 }));
 
+/**
+ * graphql endpoint
+ * @type
+ */
+app.use('/graphql',
+  graphqlExpress({
+    schema: executableSchema,
+    context: {
+      loaders: getLoaders(),
+    },
+  })
+);
 
-//
-// Register API middleware
-// -----------------------------------------------------------------------------
-const executableSchema = makeExecutableSchema({
-  typeDefs: Schema,
-  resolvers: Resolvers,
-});
-
-app.use('/graphql', expressGraphQL(req => ({
-  schema: executableSchema,
-  pretty: true,
-  graphiql: true,
-  context: {
-    loaders: GetLoaders(),
-  }
-  // rootValue: { request: req },
-  // pretty: process.env.NODE_ENV !== 'production',
-})));
-
-
-connect().catch(err => console.error(err.stack)).then(() => {
-  app.listen(port, () => {
-    console.log(`The server is running at http://localhost:${port}/`);
-  });
-});
+/**
+ * graphql interactive gui
+ * @type {String}
+ */
+app.use('/graphiql', graphiqlExpress({
+  endpointURL: '/graphql',
+  // prepopulate graphql with this
+  query: '{deliveries{_id, active}}',
+}));
 
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------

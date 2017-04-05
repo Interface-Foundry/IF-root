@@ -379,21 +379,21 @@ Menu.prototype.errors = function (cartItem) {
 
 module.exports = Menu
 
-if (!module.parent) {
-  var fs = require('fs')
-  var json = fs.readFileSync('./merchant_66030_menu.json', 'utf8')
-  var data = JSON.parse(json)
-  var menu = Menu(data)
-  var mock_item = {
-    user_id: '12345',
-    added_to_cart: false,
-    item: {
-      item_id: 193,
-      item_qty: 1,
-      option_qty: {'229': 1}
-    }
-  }
-  console.log(menu.flattenedMenu[228])
-  var json = menu.generateJsonForItem(mock_item)
-  console.log(JSON.stringify(json, null, 2))
-}
+// if (!module.parent) {
+//   var fs = require('fs')
+//   var json = fs.readFileSync('./merchant_66030_menu.json', 'utf8')
+//   var data = JSON.parse(json)
+//   var menu = Menu(data)
+//   var mock_item = {
+//     user_id: '12345',
+//     added_to_cart: false,
+//     item: {
+//       item_id: 193,
+//       item_qty: 1,
+//       option_qty: {'229': 1}
+//     }
+//   }
+//   console.log(menu.flattenedMenu[228])
+//   var json = menu.generateJsonForItem(mock_item)
+//   console.log(JSON.stringify(json, null, 2))
+// }
