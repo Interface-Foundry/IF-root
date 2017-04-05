@@ -66,9 +66,9 @@ module.exports = function (router) {
    * @apiParam {string} user_id -- id of the user we want to unsubscribe from our content
    * @apiParam {number} group_id -- id of the suppression group to add the user to
    * @apiParamExample Request
-   * TODO
+   * PUT http://localhost:3000/api/unsubscribe?user_id=c62f58e0-5000-47f8-addd-eb1ffd6df464&group_id=2321
    * @apiSuccessExample Response
-   * TODO
+   * OK
    */
 
   router.put('/unsubscribe', (req, res) => co(function * () {
