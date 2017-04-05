@@ -6,4 +6,7 @@ $border-color-light: #e3e3e3;
 $nav-height: 50px;
 $padding: 10px;
 
-$main-font: 'Lato', sans-serif;
+@import url('https://fonts.googleapis.com/css?family=Raleway:500,600');
+
+$main-font: 'Raleway', sans-serif;
+$secondary-font: 'Arial', sans-serif;

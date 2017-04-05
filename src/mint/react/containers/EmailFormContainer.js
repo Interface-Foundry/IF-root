@@ -21,7 +21,7 @@ const mapDispatchToProps = dispatch => ({
       dispatch(reset('SignIn'));
 
       addingItem
-        ? replace('item/add') : replace(`/cart/${cart_id}`);
+        ? replace('item/add') : replace(`/cart/${cart_id}/`);
     })
 });
 

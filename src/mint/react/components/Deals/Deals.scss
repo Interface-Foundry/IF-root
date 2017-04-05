@@ -1,3 +1,5 @@
+@import '../../styles/Constants';
+
 .dealcard__prevPrice {
   text-decoration: line-through;
 }
@@ -13,9 +15,9 @@
 .signIn__container__page__deals > section {
   border: 2px grey solid;
   background: white;
-  padding: 10px;
-  margin: 10px;
-  border-radius: 10px;
+  padding: $padding;
+  margin: $padding;
+  border-radius: $padding;
   font-size: 14px;
   height: 200px;
   max-width: 180px;

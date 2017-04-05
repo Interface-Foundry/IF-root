@@ -53,6 +53,6 @@ describe('deals reducer', () => {
 
   it('should return an array of deals', () => {
     expect(reducer(firstState, { type: RECEIVE_DEALS, deals }))
-      .toEqual(deals);
+      .toEqual({deals});
   });
 });

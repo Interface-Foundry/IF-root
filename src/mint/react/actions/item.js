@@ -14,7 +14,7 @@ export const selectItem = (item) => ({
   item
 });
 
-export function fetchItem() {
+export function fetchItem(item_id) {
   return async function (dispatch) {
     dispatch(request());
 

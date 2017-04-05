@@ -29,7 +29,7 @@ export default class Cart extends Component {
     ) {
       push('m/signin');
     } else if (leader && !addingItem && this.props.addingItem !== addingItem && members.length !== 0) {
-      replace(`/cart/${cart_id}`);
+      replace(`/cart/${cart_id}/`);
     }
   }
 
@@ -43,7 +43,7 @@ export default class Cart extends Component {
         <div className='cart__add'>
           <AddAmazonItemContainer replace={replace}/>
         </div>
-        <DealsContainer replace={replace}/>
+        <DealsContainer />
         <div className='cart__title'>
           <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>
         </div>

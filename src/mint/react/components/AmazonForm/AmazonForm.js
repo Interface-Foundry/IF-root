@@ -21,7 +21,7 @@ export default class AmazonForm extends Component {
               type="submit"
               onClick={handleSubmit}><p>Submit</p></button>
           </div>
-          <DealsContainer isDropDown={active}/>
+          <DealsContainer isDropdown={active}/>
         </div>
     );
   }
@@ -40,7 +40,7 @@ export default class AmazonForm extends Component {
             handleSubmit={handleSubmit}
             component={renderField}/>
         </div>
-        <div className="modal__drag" onClick={() => replace(`/cart/${cart_id}`)}>
+        <div className="modal__drag" onClick={() => replace(`/cart/${cart_id}/`)}>
           <Icon icon="Up"/>
         </div>
     </form>
