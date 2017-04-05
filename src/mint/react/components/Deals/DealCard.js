@@ -5,7 +5,7 @@ import Card from './Card';
 export default class DealCard extends Component {
 
   static propTypes = {
-    isDropdown: PropTypes.bool
+    isDropdown: PropTypes.bool.isRequired
   }
 
   render() {

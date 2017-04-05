@@ -1,6 +1,4 @@
 import React, { PropTypes, Component } from 'react';
-import { getNameFromEmail } from '../../utils';
-
 import Header from './Header';
 import Footer from './Footer';
 
@@ -10,7 +8,8 @@ export default class Item extends Component {
     item: PropTypes.object,
     fetchItem: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
-    addItem: PropTypes.func.isRequired
+    addItem: PropTypes.func.isRequired,
+    history: PropTypes.object.isRequired
   }
 
   componentWillMount() {
@@ -20,12 +19,18 @@ export default class Item extends Component {
   }
 
   render() {
-    const { props: { cart_id, addItem, item: { main_image_url, memberName, price, store, description } } } = this;
-    // console.log('item:', item);
-    // return <div>{item_id}</div>;
+    const {
+      props: {
+        cart_id,
+        addItem,
+        item_id,
+        item: { main_image_url, memberName, price, store, description },
+        history: { replace }
+      }
+    } = this;
     return (
       <div className='item'>
-        <Header cart_id={cart_id}/>
+        <Header replace={replace} cart_id={cart_id}/>
         <section className='item__view'>
           <div className='item__view__image image row'
             style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }/>
@@ -47,7 +52,7 @@ export default class Item extends Component {
             <p> - theGodOfIpsum</p>
           </div>
         </section>
-        <Footer addItem={addItem} cart_id={cart_id}/>
+        <Footer replace={replace} addItem={addItem} cart_id={cart_id} item_id={item_id}/>
       </div>
     );
   }
