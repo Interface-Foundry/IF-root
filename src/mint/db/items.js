@@ -49,7 +49,7 @@ var itemsCollection = Waterline.Collection.extend({
     description: 'string',
 
     /** @type {number} item price per unit */
-    price: 'number',
+    price: 'float',
 
     /** @type {string} small image */
     thumbnail_url: 'string',
@@ -58,7 +58,7 @@ var itemsCollection = Waterline.Collection.extend({
     main_image_url: 'string',
 
     /** @type {number} stars out of five */
-    rating: 'number',
+    rating: 'float',
 
     /** @type {number} number of reviews */
     number_reviews: 'integer',

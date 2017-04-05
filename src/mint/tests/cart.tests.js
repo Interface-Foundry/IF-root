@@ -3,7 +3,7 @@ var _ = require('lodash');
 
 var expect = require('chai').expect;
 
-var cart = require('../server/utilities/cart_utils.js');
+var cart = require('../server/cart/cart_utils.js');
 
 var test_item = 'https://www.amazon.com/AmazonBasics-Apple-Certified-Lightning-Cable/dp/B010S9N6OO/ref=sr_1_1?ie=UTF8&qid=1490132282&sr=8-1';
 var test_item2 = 'https://www.amazon.com/dp/B01BYO79UE';
