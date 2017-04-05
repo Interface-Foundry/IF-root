@@ -30,7 +30,7 @@ export default (props) => {
           handleSubmit={handleSubmit}
           component={renderField}/>
       </div>
-      <div className="modal__drag" onClick={() => replace(`/cart/${cart_id}`)}>
+      <div className="modal__drag" onClick={() => replace(`/cart/${cart_id}/`)}>
         <Icon icon="Up"/>
       </div>
     </form>
