@@ -1,4 +1,6 @@
 const co = require('co')
+const request = require('request-promise')
+
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -56,4 +58,58 @@ module.exports = function (router) {
     const todaysDeals = yield deals.getDeals(count, skip)
     res.send(todaysDeals)
   }))
+
+  /**
+   * @api {put} /api/unsubscribe
+   * @apiDescription TODO
+   * @apiGroup TODO
+   * @apiParam TODO
+   * @apiParam TODO
+   * @apiParamExample Request
+   * TODO
+   * @apiSuccessExample Response
+   * TODO
+   */
+
+  router.put('/unsubscribe', (req, res) => co(function * () {
+    //TODO
+  }))
+
+  /**
+   * @api {get} /api/subscription/:user
+   * @apiDescription Gets a list of unsubscribe-groups the user is unsubscribed from
+   * @apiGroup Other
+   * @apiParam {string} id of the user we're querying about
+   * @apiParamExample Request
+   * GET https://mint.kipthis.com/api/subscription/c62f58e0-5000-47f8-addd-eb1ffd6df464
+   * @apiSuccessExample Response
+   * [{"id":2273,"name":"Cart Updates","description":"Weekly updates on the status of your Kip cart"}]
+   */
+
+   router.get('/subscription/:user_id', (req, res) => co(function * () {
+     yield dbReady;
+     var user = yield db.UserAccounts.findOne({id: req.params.user_id});
+     if (!user) throw new Error('Error finding user');
+
+     var email = user.email_address;
+     console.log('EMAIL', email);
+
+     var suppressions = yield request({
+       method: 'GET',
+       uri: 'https://sendgrid.com/v3/asm/suppressions/' + email,
+       headers: {
+         'AUTHORIZATION': 'Bearer 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',
+         'Content-Type': 'application/json'
+       },
+       json: true
+     })
+
+     console.log('SUPPRESSIONS', suppressions);
+     suppressions = suppressions.suppressions.filter(sup => sup.suppressed);
+     suppressions = suppressions.map(function (sup) {
+       return {id: sup.id, name: sup.name, description: sup.description};
+     });
+
+     res.send(suppressions)
+   }))
 }
