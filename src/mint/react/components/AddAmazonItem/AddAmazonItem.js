@@ -25,3 +25,6 @@ export default class AddAmazonItem extends Component {
     );
   }
 }
+
+
+// http://localhost:3000/cart/da3f42d0c51c/
