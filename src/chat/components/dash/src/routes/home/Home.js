@@ -66,16 +66,36 @@ class Home extends Component {
     super(props);
     this.state = {
       view: 'Store',
-      startDate: moment()
+      startDate: moment(),
+      endDate: moment(),
     };
+    this.changeStart = this.changeStart.bind(this);
+    this.changeEnd = this.changeEnd.bind(this);
   }
   
   componentDidMount() {
     var self = this;
     self.setState({
       view: 'Store',
-      startDate: moment()
+      startDate: moment(),
+      endDate: moment(),
     }) 
+    self.changeStart = this.changeStart.bind(this);
+    self.changeEnd = this.changeEnd.bind(this);
+  }
+
+  changeStart(date){
+    console.log('start:', date);
+    this.setState({
+      startDate: date
+    });
+  }
+
+  changeEnd(date){
+    console.log('end:', date);
+    this.setState({
+      endDate: date
+    });
   }
 
   render(){
@@ -90,14 +110,17 @@ class Home extends Component {
               Cafe
             </Button>
           </ButtonToolbar>
+              <DatePicker selected={this.state.startDate} onChange={this.changeStart} />
+              <DatePicker selected={this.state.endDate} onChange={this.changeEnd} />
             { this.state.view=='Store' ? 
               <CartTable 
                 query={'{teams(limit:5000){team_name, carts {created_date, purchased_date, amazon, items {_id,title,image,price,ASIN,added_by}}}}'}
                 heads = {
-                  [{ field: 'created_date',
-                     descrip: 'Created Date',
-                     allowSort: true,
-                     sort: (a, b, order) => order == 'desc' ? 
+                  [{ 
+                    field: 'created_date',
+                    descrip: 'Created Date',
+                    allowSort: true,
+                    sort: (a, b, order) => order == 'desc' ? 
                         new Date(b.created_date) - new Date(a.created_date) 
                         : new Date(a.created_date) - new Date(b.created_date)
                   },
@@ -142,7 +165,6 @@ class Home extends Component {
                   (teams, team) => 
                   teams.concat(
                     team.carts.reduce((carts, cart) => {
-
                         if(cart.amazon && cart.amazon.CartItems){
                             carts.push({
                               team_name: team.team_name,
@@ -176,10 +198,11 @@ class Home extends Component {
               <DeliveryTable 
                 query={'{teams(limit:5000){members{id,name},team_name, deliveries{order, cart, payment_post}}}'}
                 heads = {
-                  [{ field: 'created_date',
-                     descrip: 'Created Date',
-                     allowSort: true,
-                     sort: (a, b, order) => order == 'desc' ? 
+                  [{ 
+                    field: 'created_date',
+                    descrip: 'Created Date',
+                    allowSort: true,
+                    sort: (a, b, order) => order == 'desc' ? 
                         new Date(b.created_date) - new Date(a.created_date) 
                         : new Date(a.created_date) - new Date(b.created_date)
                   },
@@ -257,9 +280,9 @@ class Home extends Component {
               /> 
           }
 
-
         </div>
       </div>
+
     )
   }
   
