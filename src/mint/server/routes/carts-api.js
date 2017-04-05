@@ -316,9 +316,12 @@ module.exports = function (router) {
    * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
    */
   router.get('/itempreview', (req, res) => co(function * () {
-    var item = yield db.Items.findOne({id: req.params.item_id})
-      .populate('options')
-      .populate('added_by')
+    // parse the incoming text to extract either an asin, url, or text
+    if (req.query.q.includes('amazon.com')) {
+      var item = yield scrape(req.query.q)
+    } else {
+      throw new Error('only urls supported right now sorry check back soon 감사합니다')
+    }
     res.send(item)
   }))
 }
