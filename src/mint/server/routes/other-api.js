@@ -61,10 +61,10 @@ module.exports = function (router) {
 
   /**
    * @api {put} /api/unsubscribe
-   * @apiDescription TODO
-   * @apiGroup TODO
-   * @apiParam TODO
-   * @apiParam TODO
+   * @apiDescription Unsubscribes the user in the qs from the unsubscribe group in the qs
+   * @apiGroup Other
+   * @apiParam {string} user_id -- id of the user we want to unsubscribe from our content
+   * @apiParam {number} group_id -- id of the suppression group to add the user to
    * @apiParamExample Request
    * TODO
    * @apiSuccessExample Response
@@ -72,7 +72,28 @@ module.exports = function (router) {
    */
 
   router.put('/unsubscribe', (req, res) => co(function * () {
-    //TODO
+    yield dbReady;
+
+    var user = yield db.UserAccounts.findOne({id: req.query.user_id});
+
+    request({
+      method: 'POST',
+      uri: `https://sendgrid.com/v3/asm/groups/${req.query.group_id}/suppressions`,
+      headers: {
+        'AUTHORIZATION': 'Bearer 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',
+        'Content-Type': 'application/json'
+      },
+      body: {
+        'recipient_emails': [user.email_address]
+      },
+      json: true
+    })
+    .then(function (result) {
+      res.sendStatus(200);
+    })
+    .catch(function (err) {
+      console.log('error:', err)
+    })
   }))
 
   /**
