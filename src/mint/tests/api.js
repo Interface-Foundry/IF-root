@@ -215,10 +215,8 @@ describe.only('api', () => {
     assert.equal(item.locked, settings.locked)
   }))
 
-  it('DELETE /api/cart/:cart_id/item should delete a specific item', () => co(function * () {
-    var ok = yield del('/api/cart/' + mcTesty.cart_id + '/item', {
-      item_id: mcTesty.item_id
-    })
+  it('DELETE /api/cart/:cart_id/item/:item_id should delete a specific item', () => co(function * () {
+    var ok = yield del('/api/cart/' + mcTesty.cart_id + '/item/' + mcTesty.item_id)
 
     // Check to make sure there are no more items in the cart
     var cart = yield get('/api/cart/' + mcTesty.cart_id)
