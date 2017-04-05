@@ -17,5 +17,6 @@ describe('url scrapers', () => {
     var item = yield scrape('https://www.amazon.com/Onitsuka-Tiger-Mexico-Classic-Running/dp/B00L8IXMN0/ref=sr_1_11?s=apparel&ie=UTF8&qid=1490047374&sr=1-11&nodeID=679312011&psd=1&keywords=asics%2Bshoes&th=1&psc=1')
     assert(item, 'item was not returned from scraper')
     assert.equal(item.name, 'Onitsuka Tiger Mexico 66 Slip-On Classic Running Shoe, Navy/Off White, 11 M US')
+    assert.equal(item.thumbnail_url, 'https://images-na.ssl-images-amazon.com/images/I/419MM4Fg1bL._SL110_.jpg')
   }))
 })

@@ -32,39 +32,39 @@ module.exports = function amazon_scraper (uri) {
 
     // Custom scraping TODO
     const price = parseInt(_.get(i, 'OfferSummary.LowestNewPrice.Amount')) / 100
-    console.log('price', price, typeof price)
     const rating = 0
     const nRatings = 0
 
     // Grab the images
+    const imageSet = _.get(i, 'ImageSets.ImageSet[0]') || _.get(i, 'ImageSets.ImageSet') || {}
     const thumbnailMinSize = 50
     const imageKeys = ['SwatchImage', 'SmallImage', 'ThumbnailImage', 'TinyImage', 'MediumImage', 'LargeImage', 'HiResImage']
-    const thumbnail = imageKeys.reduce((chosenImage, thisImage) => {
+    var thumbnail = imageKeys.reduce((chosenImage, thisImage) => {
       // If we have already found an image that is good enough, return it
       if (chosenImage) return chosenImage
 
       // See if this item has this image type
-      var img = _.get(i, 'ImageSets.ImageSet[0].' + thisImage)
+      var img = imageSet[thisImage]
       if (!img) {
         return
       }
 
       // See if this image type is big enough for us
-      if (parseInt(img.Height._) >= thumbnailMinSize) {
+      if (parseInt(img.Height._) >= thumbnailMinSize && parseInt(img.Width._) >= thumbnailMinSize) {
         return img.URL
       }
-    })
+    }, null)
 
     const mainImage = imageKeys.reverse().reduce((chosenImage, thisImage) => {
       // If we have already found an image that is good enough, return it
       if (chosenImage) return chosenImage
 
       // See if this item has this image type
-      var img = _.get(i, 'ImageSets.ImageSet[0].' + thisImage)
+      var img = imageSet[thisImage]
       if (img) {
         return img.URL
       }
-    })
+    }, null)
 
     // if no image was good enough to be a thumbnail, use the main image as the thumbnail
     if (!thumbnail) {
