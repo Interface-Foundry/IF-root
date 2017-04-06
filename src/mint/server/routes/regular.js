@@ -1,6 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var co = require('co');
+var validUrl = require('valid-url');
+var multer = require('multer');
+var upload = multer();
 
 var utils = require('../utilities/utils.js');
 
@@ -29,6 +32,23 @@ router.get('/', (req, res) => co(function* () {
   }
   res.render('pages/index', { carts: carts });
 }));
+
+//does this work here???
+/**
+ * TODO, etc
+ */
+router.post('/incoming', upload.array(), (req, res) => co(function * () {
+  console.log('req.body', req.body)
+  var text = req.body.text;
+  var words = text.split(/\s/);
+
+  words = words.filter(function (w) {
+    return validUrl.isUri(w);
+  });
+  console.log('URIs', words);
+
+  res.sendStatus(200);
+}))
 
 /**
  * @api {get} /auth/:auth_token MagicLink
