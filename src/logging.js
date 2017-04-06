@@ -80,12 +80,13 @@ if (userConfigFile.logging.debugFileLine.enabled === true) {
         filename = '?'
         line = '?'
       }
-      var loc = path.relative(path.resolve(require.main.filename, '..'), filename) + ':' + line
-      return loc.gray + ' ' + msg
-    } else {
-      return msg
+      if (require.main.filename && filename !== '?') {
+        var loc = path.relative(path.resolve(require.main.filename, '..'), filename) + ':' + line
+        return loc.gray + ' ' + msg
+      }
     }
-  })
+    return msg
+  });
 }
 
 

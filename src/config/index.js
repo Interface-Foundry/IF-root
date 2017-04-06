@@ -1,9 +1,11 @@
 var os = require('os')
 
 /**
- * everyconfig reads the yaml files for the right environment
+ * everyconfig reads the yaml files for the right environment. if CONFIG_DIR is
+ * set, the value is assumed to be either a path relative to the location of
+ * the current module, or an absolute path.
  */
-var config = require('everyconfig')('.')
+var config = require('everyconfig')(process.env['CONFIG_DIR'] || '.')
 config.host = os.hostname()
 
 /**
