@@ -13,7 +13,6 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   addItem: (cart_id, item_id, replace) => {
-    console.log(cart_id, item_id);
     dispatch(addItem(cart_id, item_id))
       .then(e => {
         replace(`/cart/${cart_id}/`);

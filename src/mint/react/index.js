@@ -34,7 +34,7 @@ store.dispatch(session.update());
 ReactDOM.render(
   <Provider store={store}>
    <ConnectedRouter history={history}>
-       <Route path="/" component={AppContainer} />
+       <Route path="/cart/:cart_id" component={AppContainer} />
    </ConnectedRouter>
  </Provider>,
   document.getElementById('root')

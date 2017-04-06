@@ -11,8 +11,6 @@ export default class Footer extends Component {
 
   render() {
     const { addItem, item_id, cart_id, replace } = this.props;
-    console.log('cart', cart_id);
-    console.log('item_id', item_id);
     return (
       <footer className='item__footer'>
         <button onClick={() => addItem(cart_id, item_id, replace)}>Add to Cart</button>
