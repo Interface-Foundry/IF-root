@@ -34,7 +34,6 @@ methods.map(method => {
 require('./other-api')(router)
 require('./carts-api')(router)
 require('./users-api')(router)
-// require('./incoming-mail')(router)
 
 //temporary for camel testing
 //TODO: delete

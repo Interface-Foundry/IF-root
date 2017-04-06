@@ -38,6 +38,7 @@ if (!process.env.NO_LIVE_RELOAD) {
 // idk
 var regularRoutes = require('./routes/regular.js');
 var apiRoutes = require('./routes/api.js');
+var mailRoutes = require('./routes/incoming-mail.js');
 
 require('colors');
 // require('../camel'); //uncomment to populate camel_items
@@ -111,6 +112,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
 
 // ROUTES
 app.use('/', regularRoutes);
+app.use('/incoming', mailRoutes);
 app.use('/api', apiRoutes);
 
 /**

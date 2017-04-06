@@ -125,7 +125,7 @@ module.exports = function (router) {
        json: true
      })
 
-     console.log('SUPPRESSIONS', suppressions);
+    //  console.log('SUPPRESSIONS', suppressions);
      suppressions = suppressions.suppressions.filter(sup => sup.suppressed);
      suppressions = suppressions.map(function (sup) {
        return {id: sup.id, name: sup.name, description: sup.description};
