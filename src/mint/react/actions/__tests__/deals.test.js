@@ -18,7 +18,7 @@ describe('deals actions', () => {
 
   it('creates REQUEST_DEALS, RECEIVE_DEALS when kipform is created has been done', () => {
     nock('http://localhost:3000/api')
-      .get('/sampledeals') // TODO: change this to the real deals endpoint!
+      .get('/deals')
       .reply(200, { body });
 
     const expectedActions = [

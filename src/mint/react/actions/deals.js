@@ -14,7 +14,7 @@ export function fetchDeals() {
     dispatch(request());
 
     try {
-      const response = await fetch('/api/test/deals', {
+      const response = await fetch('/api/deals', {
         credentials: 'same-origin'
       });
 
