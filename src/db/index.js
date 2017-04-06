@@ -24,6 +24,11 @@ if (mongoose.connection.readyState == 0) {
  * db.Users.find({})
  * var user = new db.User()
  */
+
+// if using mongoose/db directly in in dashboard, but commented out for time being
+// var db_files = __dirname
+// db_files = db_files.split('IF-root')[0] + 'IF-root/src/db'
+// var files = fs.readdirSync(db_files)
 var files = fs.readdirSync(__dirname)
 
 module.exports = {
