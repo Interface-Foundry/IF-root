@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb';
 import _ from 'lodash';
 import GraphQLToolsTypes from "graphql-tools-types"
 import DataLoader from 'dataloader';
-import { find } from 'lodash';
+import { find, merge } from 'lodash';
 import co from 'co';
 
 import {
@@ -35,6 +35,11 @@ import {
 import Menu from '../../../delivery.com/Menu';
 
 
+/**
+ * prepare graphql response for query about cafe items
+ * @param  {[type]} foodSession [description]
+ * @return {[type]}             [description]
+ */
 function prepareCafeCarts(foodSession) {
   foodSession.type = 'slack';
 
@@ -59,6 +64,24 @@ function prepareCafeCarts(foodSession) {
   return foodSession;
 }
 
+/**
+ * prepare graphql response object for query about amazon carts
+ * @param  {object} cart object - currently from amazon only
+ * @return {object} cart object
+ */
+function prepareStoreCarts(cart) {
+  if (cart.amazon) {
+    cart.cart_total = `$${cart.amazon.SubTotal[0].Amount / 100.0}`;
+    cart.item_count = cart.CartItems.length;
+    cart.cart_items = cart.amazon.map(item => {
+      return {
+        name: item.CartItem[0].Title,
+        category: item.CartItem[0].ProductGroup,
+      };
+    });
+  }
+  return cart;
+}
 
 // Data Loaders make it possible to batch load certain queries from mongodb,
 // which can drastically reduce the number of db queries made per graphql query
@@ -189,21 +212,37 @@ const Resolvers = {
 
   Query: {
     carts: async (root, args) => {
-      return await pagination(Carts, args);
+      // time, groupname, type (?), #items, cart total, category, product name
+      let res = await pagination(Carts, args);
+      res = res.map((cart) => {
+        cart = prepareStoreCarts(cart);
+        return cart;
+      })
+      return res;
     },
 
-    deliveries: async (root, args) => {
-      let deliveryArgs = {'cart.1': {'$exists': true}};
-      // if (args.start_date) deliveryArgs.time_started['$gt'] = new Date(args.start_date)
-      // if (args.end_date) deliveryArgs.time_started['$lt'] = new Date(args.end_date)
-      // const res = await Deliveries.find({'time_started': {$gt: "2017-02-16 23:14:50"}}).limit(10).toArray();
-      let res = await pagination(Deliveries, deliveryArgs);
+    deliveries: async (root, args, context) => {
+      console.log('root would be~~~', root)
+      let deliveryArgs = {'cart.0': {'$exists': true}};
+      if (args.start_date || args.end_date) {
+        args.time_started = {};
+        if (args.start_date) {
+          args.time_started['$gt'] = new Date(args.start_date);
+          delete args.start_date;
+        }
+        if (args.end_date) {
+          args.time_started['$lt'] = new Date(args.end_date);
+          delete args.end_date;
+        }
+      }
+
+      let res = await pagination(Deliveries, args);
 
       res = res.map((foodSession) => {
         // possibly other stuff related to team or whatever
         foodSession = prepareCafeCarts(foodSession);
         return foodSession;
-      });
+      })
 
       return res;
     },
@@ -233,7 +272,7 @@ const Resolvers = {
 
     waypoints: async (root, args) => {
       return await pagination(Waypoints, args);
-    },
+    }
 
   },
 

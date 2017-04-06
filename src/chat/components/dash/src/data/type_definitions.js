@@ -16,6 +16,9 @@ type Cart {
   type: String
   link: String
   amazon: JSON
+  cart_items: JSON
+  cart_total: String
+  item_count: Int
   # Foreign refs
   items: [Item]
   team: Slackbot
