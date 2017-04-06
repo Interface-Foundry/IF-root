@@ -6,24 +6,24 @@ export default class Cart extends Component {
   static propTypes = {
     selectItem: PropTypes.func.isRequired,
     fetchDeals: PropTypes.func.isRequired,
-    fetchCart: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
     members: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
     leader: PropTypes.object,
     items: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
-    addingItem: PropTypes.bool.isRequired
+    addingItem: PropTypes.bool.isRequired,
+    history: PropTypes.object.isRequired,
+    match: PropTypes.object.isRequired
   }
 
   componentWillMount() {
-    const { fetchCart, cart_id, fetchDeals } = this.props;
+    const { fetchDeals } = this.props;
     fetchDeals();
-    fetchCart(cart_id);
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { push, replace }, match: { url }, cart_id } = this.props;
+    const { history: { push, replace }, cart_id } = this.props;
     const { members, leader, addingItem } = nextProps;
 
     if (members.length === 0 &&
@@ -36,7 +36,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart_id, addItem, items, members, leader, selectItem, history: { push, replace }, match: { url } } = this.props;
+    const { items, members, leader, selectItem, history: { push, replace }, match: { url } } = this.props;
 
     const hasItems = items.length > 0;
 
