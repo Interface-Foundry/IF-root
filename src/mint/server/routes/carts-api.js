@@ -1,6 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
-var scrape = require('../cart/scrape_url')
+var amazonScraper = require('../cart/scraper_amazon')
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -128,7 +128,7 @@ module.exports = function (router) {
       item = yield db.Items.findOne({id: req.body.item_id})
     } else {
       // Create an item from the url
-      item = yield scrape(req.body.url)
+      item = yield amazonScraper.scrapeUrl(req.body.url)
     }
     cart.items.add(item.id)
     item.cart = cart.id
@@ -316,11 +316,21 @@ module.exports = function (router) {
    * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
    */
   router.get('/itempreview', (req, res) => co(function * () {
-    // parse the incoming text to extract either an asin, url, or text
-    if (req.query.q.includes('amazon.com')) {
-      var item = yield scrape(req.query.q)
+    // parse the incoming text to extract either an asin, url, or search query
+    const q = (req.query.q || '').trim()
+    if (!q) {
+      throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
+    }
+
+    if (q.includes('amazon.com')) {
+      // probably a url
+      var item = yield amazonScraper.scrapeUrl(q)
+    } else if (q.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
+      // probably an asin
+      var item = yield amazonScraper.scrapeAsin(q)
     } else {
-      throw new Error('only urls supported right now sorry check back soon 감사합니다')
+      // search query
+      throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
     }
     res.send(item)
   }))

@@ -184,8 +184,8 @@ describe.only('api', () => {
     assert(item)
     assert.equal(item.original_link, url)
     assert.equal(item.name, 'HiLetgo New Version NodeMCU LUA WiFi Internet ESP8266 Development')
-    assert(item.thumbnail_url)
-    assert(item.main_image_url)
+    assert.equal(item.thumbnail_url, 'https://images-na.ssl-images-amazon.com/images/I/51yZrDeRUCL._SL75_.jpg')
+    assert.equal(item.main_image_url, 'https://images-na.ssl-images-amazon.com/images/I/71FKRFAIT8L.jpg')
 
     // save item id for later
     mcTesty.item_id = item.id
