@@ -1,3 +1,4 @@
+require('colors')
 var _ = require('lodash')
 
 /**
@@ -79,7 +80,7 @@ function flattenMenu (data) {
       })
 
       if (!isAvailable) {
-        logging.debug(node.name.cyan, 'is not available'.red)
+        logging.debug('node is not available', node.name)
         return
       }
     }
