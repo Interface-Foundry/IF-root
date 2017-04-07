@@ -51,9 +51,16 @@ router.post('/', upload.array(), (req, res) => co(function * () {
       yield it.save();
     })
     yield cart.save();
+
+    var confirmation = yield db.Emails.create({
+      recipients: email,
+      sender: 'hello@kip.ai',
+      subject: 'Items have been added to your cart!',
+      message_html: '<html><body>Confirmation, woohoo!</body></html>'
+    });
+    yield confirmation.send();
   }
   else console.log('no amazon uris')
-
   // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')
   res.sendStatus(200);
 }));
