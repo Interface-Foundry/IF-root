@@ -212,7 +212,7 @@ function * getTeamMembers (slackbot) {
     yield savedUser.save()
     // check if user has open dm
     var userDM = userIMInfo.ims.find(i => i.user === user.id)
-    if (!userDM) {
+    if (!userDM && !savedUser.deleted) {
       // open new dm if user doesnt have one open w/ bot
       try {
         userDM = yield slackbotWeb.im.open(user.id)
@@ -221,6 +221,8 @@ function * getTeamMembers (slackbot) {
         return savedUser
       }
       savedUser.dm = userDM.channel.id
+    } else if (savedUser.deleted){ //fixing error throw for deleted users
+      return savedUser
     } else if (_.get(savedUser, 'dm') !== userDM.id) {
       // if their DM channel isnt equal to what we have saved, update it
       savedUser.dm = userDM.id
