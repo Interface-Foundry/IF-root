@@ -172,8 +172,6 @@ module.exports.emptyCart = function (cart_id) {
 module.exports.addExtraToCart = function (cart, slack_id, user_id, item) {
   logging.debug('firing addextratocart')
   logging.debug('adding item to cart for %s by user %s', slack_id, user_id)
-  logging.debug('ITEM ZZZZ ', item)
-  logging.debug('CART ZZZZ ', cart)
 
   // fixing bug to convert string to to int
   // if (item.reviews && item.reviews.reviewCount){

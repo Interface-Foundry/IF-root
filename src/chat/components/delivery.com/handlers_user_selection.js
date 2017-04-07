@@ -262,6 +262,7 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
 
   if (!foodSession.chosen_channel.id) foodSession.chosen_channel.id = 'everyone'
 
+  console.log('😷😷😷😷😷😷 ',message)
 
   var checkbox
   // basic buttons
@@ -318,6 +319,9 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
       text: 'Pick Channel',
       type: 'select',
       data_source: 'channels'
+      // selected_options: [{
+      //   ""
+      // }]
     });
     msg_json.attachments.push({
       'text': '',
@@ -487,6 +491,10 @@ handlers['food.admin.display_channels'] = function * (message) {
 }
 
 handlers['food.admin.toggle_channel_reorder'] = function * (message) {
+
+  console.log('😷😷😷😷😷😷 ',message.source.actions[0])
+
+
   let dataValue =_.get(message, 'data.value', _.get(message, 'source.actions[0].selected_options[0].value'));
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -508,11 +516,11 @@ handlers['food.admin.toggle_channel_reorder'] = function * (message) {
       foodSession.chosen_channel.is_channel = channel.is_channel
 
       var resp = yield infoForChannelOrGroup(slackbot, foodSession.chosen_channel)
-      logging.debug('got resp back for select_channel members', resp)
+      //logging.debug('got resp back for select_channel members', resp)
       foodSession.team_members = foodSession.all_members.filter(user => {
         return _.includes(resp.members, user.id)
       })
-      logging.info('filtered down members to these members: ', foodSession.team_members)
+      //logging.info('filtered down members to these members: ', foodSession.team_members)
       foodSession.markModified('team_members')
       yield foodSession.save()
       return [];
