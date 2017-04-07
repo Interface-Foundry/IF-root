@@ -1,55 +1,59 @@
-import { 
-  SELECT_ITEM, 
-  RECEIVE_ADD_ITEM_TO_CART, 
-  ADDING_ITEM, 
-  ADD_MEMBER_TO_CART, 
-  RECEIVE_CART, 
-  REQUEST_CART, 
-  RECEIVE_ITEMS, 
-  REQUEST_ITEMS 
-} from '../constants/ActionTypes';
+import { ADDING_ITEM, ADD_MEMBER_TO_CART, RECEIVE_CART, RECEIVE_CARTS, RECEIVE_ITEMS, RECEIVE_ADD_ITEM } from '../constants/ActionTypes';
 
 const initialState = {
-  cart_id: '',
-  magic_link: '',
-  members: [],
-  leader: null,
-  addingItem: false,
-  items: []
+  carts: [],
+  currentCart: {
+    members: [],
+    items: []
+  },
+  SetAddingItem: false
 };
 
 export default function cart(state = initialState, action) {
   switch (action.type) {
-    case ADDING_ITEM:
-      return {
-        ...state,
-        addingItem: action.addingItem
-      };
-    case RECEIVE_ADD_ITEM_TO_CART:
-      return {
-        ...state,
-        items: [...state.items, action.item]
-      };
-    case ADD_MEMBER_TO_CART:
-      return {
-        ...state,
-        members: [...state.members, action.newMember]
-      };
-    case RECEIVE_CART:
-      return {
-        ...state,
-        ...action.newCart,
-        cart_id: action.newCart.id
-      };
-    case RECEIVE_ITEMS:
-      return {
-        ...state,
+  case ADDING_ITEM:
+    return {
+      ...state,
+      addingItem: action.addingItem
+    };
+  case ADD_MEMBER_TO_CART:
+    return {
+      ...state,
+      currentCart: {
+        ...state.currentCart,
+        members: [...state.currentCart.members, action.newMember]
+      }
+    };
+  case RECEIVE_CART:
+    return {
+      ...state,
+      currentCart: action.currentCart,
+      cart_id: action.currentCart.id
+    };
+  case RECEIVE_ITEMS:
+    return {
+      ...state,
+      currentCart: {
+        ...state.currentCart,
         items: action.items
-      };
-    case REQUEST_CART:
-    case REQUEST_ITEMS:
-    default:
-      return state;
+      }
+    };
+  case RECEIVE_ADD_ITEM:
+    return {
+      ...state,
+      currentCart: {
+        ...state.currentCart,
+        items: [...state.currentCart.items, action.item]
+      }
+    };
+  case RECEIVE_CARTS:
+    console.log(action);
+    return {
+      ...state,
+      ...action.cartInfo
+    };
+  default:
+    return state;
   }
 }
 

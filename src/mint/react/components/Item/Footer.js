@@ -5,15 +5,15 @@ export default class Footer extends Component {
   static propTypes = {
     cart_id: PropTypes.string.isRequired,
     replace: PropTypes.func.isRequired,
-    item_id: PropTypes.string.isRequired,
+    uniq_id: PropTypes.string,
     addItem: PropTypes.func.isRequired
   }
 
   render() {
-    const { addItem, item_id, cart_id, replace } = this.props;
+    const { addItem, uniq_id, cart_id, replace } = this.props;
     return (
       <footer className='item__footer'>
-        <button onClick={() => addItem(cart_id, item_id, replace)}>Add to Cart</button>
+        <button onClick={() => addItem(cart_id, uniq_id, replace)}>Add to Cart</button>
       </footer>
     );
   }

@@ -14,7 +14,6 @@ const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => {
     const { history: { replace }, cart_id } = state;
     dispatch(reset('AddItem'));
-
     replace(`/cart/${cart_id}/m/item/${encodeURIComponent(values.url)}`);
   }
 });

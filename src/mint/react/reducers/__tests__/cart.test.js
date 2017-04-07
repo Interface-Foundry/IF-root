@@ -1,14 +1,13 @@
 import reducer from '../cart';
-
-import { RECEIVE_ADD_ITEM_TO_CART, ADD_MEMBER_TO_CART, RECEIVE_CART, RECEIVE_ITEMS } from '../../constants/ActionTypes';
+import { RECEIVE_ADD_ITEM, ADD_MEMBER_TO_CART, RECEIVE_CART, RECEIVE_ITEMS } from '../../constants/ActionTypes';
 
 const initialState = {
-  cart_id: '',
-  magic_link: '',
-  members: [],
-  leader: null,
-  SetAddingItem: false,
-  items: []
+  carts: [],
+  currentCart: {
+    members: [],
+    items: []
+  },
+  SetAddingItem: false
 };
 
 describe('cart reducer', () => {
@@ -21,21 +20,32 @@ describe('cart reducer', () => {
 
   it('should add 1 single item to the items array', () => {
     const item = { item: 'omg im an item', id: 123 };
-
     expect(reducer(firstState, {
-        type: RECEIVE_ADD_ITEM_TO_CART,
+        type: RECEIVE_ADD_ITEM,
         item
       }))
-      .toEqual({ ...firstState, items: [item] });
+      .toEqual({
+        ...firstState,
+        currentCart: {
+          ...firstState.currentCart,
+          items: [...firstState.currentCart.items, item]
+        }
+      });
   });
 
-  it('should add items to the array', () => {
+  it('should add items to the items array', () => {
     const items = [{ item: 'omg im an item', id: 123 }, { item: 'omg im an item too', id: 321 }];
     expect(reducer(firstState, {
         type: RECEIVE_ITEMS,
         items
       }))
-      .toEqual({ ...firstState, items: items });
+      .toEqual({
+        ...firstState,
+        currentCart: {
+          ...firstState.currentCart,
+          items: [...firstState.currentCart.items, ...items]
+        }
+      });
   });
 
   it('should update the cart with new contents', () => {
@@ -47,21 +57,34 @@ describe('cart reducer', () => {
     };
     expect(reducer(firstState, {
         type: RECEIVE_CART,
-        newCart
+        currentCart: newCart
       }))
-      .toEqual({ ...firstState, ...newCart, cart_id: id });
+      .toEqual({
+        ...firstState,
+        currentCart: newCart,
+        cart_id: id
+      });
   });
 
   it('should add a member to the cart', () => {
     const members = [{ name: 'Riley', id: 123 }, { name: 'Sam', id: 321 }];
     const newMember = { name: 'Taylor', id: 246 };
-    expect(reducer({ ...firstState, members }, {
+    expect(reducer({
+        ...firstState,
+        currentCart: {
+          ...firstState.currentCart,
+          members
+        }
+      }, {
         type: ADD_MEMBER_TO_CART,
         newMember
       }))
       .toEqual({
         ...firstState,
-        members: [...members, newMember]
+        currentCart: {
+          ...firstState.currentCart,
+          members: [...members, newMember]
+        }
       });
   });
 });
