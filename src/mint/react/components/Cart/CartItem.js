@@ -1,6 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import { getMemberById } from '../../reducers';
-import { getNameFromEmail } from '../../utils'
+import { getNameFromEmail } from '../../utils';
 
 export default class Item extends Component {
   static propTypes = {
@@ -30,6 +30,7 @@ export default class Item extends Component {
     return (
       <li className='cartItem'>
         <h4 className='cartItem__title'>{memberName}</h4>
+
         <div className='cartItem__image image col-2 ' style={
           {
             backgroundImage: `url(${main_image_url})`,

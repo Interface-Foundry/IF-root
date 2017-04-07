@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { App } from '../components';
-import { fetchCart } from '../actions/cart';
+import { fetchCart, fetchAllCarts } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: ownProps.match.params.cart_id,
@@ -9,6 +9,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
+  fetchAllCarts: () => dispatch(fetchAllCarts())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

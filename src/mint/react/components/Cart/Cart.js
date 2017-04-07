@@ -1,12 +1,13 @@
 import React, { PropTypes, Component } from 'react';
 import CartItem from './CartItem';
+import CartSwitcher from './CartSwitcher';
 import { AddAmazonItemContainer, DealsContainer } from '../../containers';
 
 export default class Cart extends Component {
   static propTypes = {
     selectItem: PropTypes.func.isRequired,
     fetchDeals: PropTypes.func.isRequired,
-    cart_id: PropTypes.string.isRequired,
+    cart_id: PropTypes.string,
     members: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
     leader: PropTypes.object,
@@ -14,7 +15,8 @@ export default class Cart extends Component {
       .isRequired,
     addingItem: PropTypes.bool.isRequired,
     history: PropTypes.object.isRequired,
-    match: PropTypes.object.isRequired
+    match: PropTypes.object.isRequired,
+    carts: PropTypes.array.isRequired
   }
 
   componentWillMount() {
@@ -26,9 +28,7 @@ export default class Cart extends Component {
     const { history: { push, replace }, cart_id } = this.props;
     const { members, leader, addingItem } = nextProps;
 
-    if (members.length === 0 &&
-      !leader
-    ) {
+    if (members.length === 0 && !leader) {
       push('m/signin');
     } else if (leader && !addingItem && this.props.addingItem !== addingItem && members.length !== 0) {
       replace(`/cart/${cart_id}/`);
@@ -36,12 +36,11 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, members, leader, selectItem, history: { push, replace }, match: { url } } = this.props;
-
+    const { items, members, leader, selectItem, carts, history: { push, replace }, match: { url } } = this.props;
     const hasItems = items.length > 0;
-
     return (
       <div className='cart'>
+        { carts ? <CartSwitcher carts={carts}/> : null }
         <div className='cart__add'>
           <AddAmazonItemContainer replace={replace}/>
         </div>

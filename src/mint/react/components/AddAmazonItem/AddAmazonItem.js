@@ -10,7 +10,7 @@ export default class AddAmazonItem extends Component {
     user_accounts: PropTypes.array.isRequired,
     addingItem: PropTypes.func.isRequired,
     replace: PropTypes.func.isRequired,
-    cart_id: PropTypes.string.isRequired
+    cart_id: PropTypes.string
   }
 
   addItemToCart() {

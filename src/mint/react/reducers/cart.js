@@ -6,7 +6,7 @@ const initialState = {
     members: [],
     items: []
   },
-  SetAddingItem: false
+  addingItem: false
 };
 
 export default function cart(state = initialState, action) {
@@ -47,10 +47,9 @@ export default function cart(state = initialState, action) {
       }
     };
   case RECEIVE_CARTS:
-    console.log(action);
     return {
       ...state,
-      ...action.cartInfo
+      carts: action.carts
     };
   default:
     return state;

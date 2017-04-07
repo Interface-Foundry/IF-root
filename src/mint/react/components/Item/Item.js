@@ -8,7 +8,7 @@ export default class Item extends Component {
     item: PropTypes.object,
     previewItem: PropTypes.func.isRequired,
     clearItem: PropTypes.func.isRequired,
-    cart_id: PropTypes.string.isRequired,
+    cart_id: PropTypes.string,
     addItem: PropTypes.func.isRequired,
     history: PropTypes.object.isRequired
   }

@@ -11,7 +11,7 @@ export default class Deals extends Component {
     isDropdown: PropTypes.bool,
     deals: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
-    cart_id: PropTypes.string.isRequired
+    cart_id: PropTypes.string
   }
 
   renderCards() {
