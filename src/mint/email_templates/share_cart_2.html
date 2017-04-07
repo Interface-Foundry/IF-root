@@ -1,164 +1,317 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
-<title>Salted | A Responsive Email Template</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width">
-<style type="text/css">
-    /* CLIENT-SPECIFIC STYLES */
-    #outlook a{padding:0;} /* Force Outlook to provide a "view in browser" message */
-    .ReadMsgBody{width:100%;} .ExternalClass{width:100%;} /* Force Hotmail to display emails at full width */
-    .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height: 100%;} /* Force Hotmail to display normal line spacing */
-    body, table, td, a{-webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;} /* Prevent WebKit and Windows mobile changing default text sizes */
-    table, td{mso-table-lspace:0pt; mso-table-rspace:0pt;} /* Remove spacing between tables in Outlook 2007 and up */
-    img{-ms-interpolation-mode:bicubic;} /* Allow smoother rendering of resized image in Internet Explorer */
-
-    /* RESET STYLES */
-    body{margin:0; padding:0;}
-    img{border:0; height:auto; line-height:100%; outline:none; text-decoration:none;}
-    table{border-collapse:collapse !important;}
-    body{height:100% !important; margin:0; padding:0; width:100% !important;}
-
-    /* iOS BLUE LINKS */
-    .appleBody a {color:#68440a; text-decoration: none;}
-    .appleFooter a {color:#999999; text-decoration: none;}
-
-    input{
-        display: none;
-    }
-    @media screen and (max-width:9999px){
-        .cboxcheck:checked + * .thumb-carousel,
-        * [summary=cboxcheck]:checked + * [summary^=thumb-carousel] {
-            height: auto !important;
-            max-height: none !important;
-            line-height:0;
+    <!--[if !mso]><!-->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--<![endif]-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Share Cart Email</title>
+    <style type="text/css">
+        /* CLIENT-SPECIFIC STYLES */
+        
+        /* Force Outlook to provide a "view in browser" message */
+        #outlook a {
+            padding:0;
         }
-        .thumb-carousel span,
-        * [summary^=thumb-carousel] span {
-            font-size:0;
-            line-height:0;
-        }
-      
-        .cboxcheck:checked + * .thumb-carousel .car-content, 
-        * [summary=cboxcheck]:checked + * [summary^=thumb-carousel] [summary^=content]{
-            display:none;
-            max-height:0px;
-            overflow:hidden;
-        }
-        .thumb-carousel .cbox1:checked + span .content-1,
-        .thumb-carousel .cbox2:checked + span .content-2,
-        .thumb-carousel .cbox3:checked + span .content-3,
-        .thumb-carousel .cbox4:checked + span .content-4,
-        .thumb-carousel .cbox5:checked + span .content-5,
-        * [summary^=thumb-carousel] [summary=cbox1]:checked + span [summary=content-1], 
-        * [summary^=thumb-carousel] [summary=cbox2]:checked + span [summary=content-2],
-        * [summary^=thumb-carousel] [summary=cbox3]:checked + span [summary=content-3], 
-        * [summary^=thumb-carousel] [summary=cbox4]:checked + span [summary=content-4], 
-        * [summary^=thumb-carousel] [summary=cbox5]:checked + span [summary=content-5] 
-        {
-            display:block !important;
-            max-height:none !important;
-            overflow:visible !important;
-        }
-      
-
-        .thumb-carousel .thumb,
-        * [summary^=thumb-carousel] [summary=thumb]{
-            cursor:pointer;
-            display:inline-block !important;
-            width:17.5%;
-            margin:1% 0.61%;
-            border:2px solid #bbbbbb;
-        }
-        /* hide for thunderbird as it doesn't support checkboxes */
-        .moz-text-html .thumb {
-            display:none !important;
-        }
-        .thumb-carousel .thumb:hover,
-        * [summary^=thumb-carousel] [summary=thumb]:hover{
-            border:2px solid #444444;
-        }
-        .thumb-carousel input:checked + span > span,
-        * [summary^=thumb-carousel] [summary^=cbox]:checked + span > span{
-            border-color: #444444;
-        }   
-        .thumb-carousel .thumb img,
-        * [summary^=thumb-carousel] [summary=thumb] img{
+        
+        /* Force Hotmail to display emails at full width */
+        .ExternalClass,
+        .ReadMsgBody {
             width:100%;
-            height: auto;
         }
-        .thumb-carousel img,
-        * [summary^=thumb-carousel] img{
-            max-height: none !important;
-        }      
-        .cboxcheck:checked + * .fallback{
-            display:none !important;
-            display:none;
-            max-height: 0px;
-            height: 0px;
-            overflow: hidden;
+        
+        /* Force Hotmail to display normal line spacing */
+        .ExternalClass, 
+        .ExternalClass p, 
+        .ExternalClass span, 
+        .ExternalClass font, 
+        .ExternalClass td, 
+        .ExternalClass div {
+            line-height: 100%;
+        } 
+        
+        /* Prevent WebKit and Windows mobile changing default text sizes */
+        body, 
+        table, 
+        td, 
+        a {
+            -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;
         }
-        * [summary="cboxcheck"]:checked + * [summary="fallback"]
-        {
-            max-height: 0px;
-            height: 0px;
-            overflow: hidden;
-        }  
-    }
+        
+        /* Remove spacing between tables in Outlook 2007 and up */
+        table, 
+        td {
+            mso-table-lspace:0pt; 
+            mso-table-rspace:0pt;
+        }
+        
+        /* Allow smoother rendering of resized image in Internet Explorer */
+        img {
+            -ms-interpolation-mode:bicubic;
+        }
 
-    @media screen and (max-width:600px){
-        .car-table.responsive,
-        .car-table.responsive .thumb-carousel,
-        .car-table.responsive .thumb-carousel .car-content img,
-        .car-table.responsive .fallback .car-content img
-        {
-            width:100% !important;
-            height:auto;
+        /* RESET STYLES */
+        img {
+            border:0; 
+            line-height:100%; 
+            outline:none; 
+            text-decoration:none;
         }
-    }    
-    
-</style>
+        table {
+            border-collapse:collapse !important;
+        }
+        body {
+            height:100% !important; 
+            margin:0; 
+            padding:0; 
+            width:100% !important;
+            background: #fff;
+            font-family: sans-serif;
+            -webkit-text-size-adjust:100%;
+            -ms-text-size-adjust:100%;
+        }
+        p[class='blue'] {
+            text-decoration: none;
+            color: #4a9ff1;
+        }
+        div[class='main'] {
+            max-width: 700px;
+            height: 100%;
+            background: #ffffff;
+            overflow: hidden;
+            margin: 80px auto 40px auto;
+            box-shadow: 0 0 7px #cdcccc;
+            -webkit-box-shadow: 0 0 7px #cdcccc;
+            -moz-box-shadow: 0 0 7px #cdcccc;
+            -o-box-shadow: 0 0 7px #cdcccc;
+        }
+        div[class='logo'] {
+            min-width: 50px;
+        }
+        span[class="red"] {
+            color: #CE5019;
+        }
+        span[class="linethrough"] {
+            text-decoration: line-through;
+        }
+        
+        @media screen and (max-width: 600px) {
+            div[class='main'] {
+                max-width: 100% !important;
+                margin: 0!important;
+            }
+        }
+    </style>
 </head>
-<body style="margin: 0; padding: 0;">
-    <table class="car-table  responsive" cellpadding=0 cellspacing=0 border=0 width="450">
-        <tr>
-            <td>
-                <!--[if !mso]><!-- -->
-                <input type=radio class="cboxcheck" summary="cboxcheck" style="display:none !important;" checked>
-                <!--<![endif]-->
-                <div>
-                    <!--[if !mso]><!-- -->
-                    <div class="thumb-carousel " summary="thumb-carousel" style="width:450px;height:0px;max-height:0px;overflow:hidden;text-align:center">
-                        <label>
-                            <input type="radio" name="car-rd1" class="cbox3" summary="cbox3" style="display:none !important;"  >
-                            <span>
-                                <label>
-                                    <input type="radio" name="car-rd1" class="cbox2" summary="cbox2" style="display:none !important;"  >
-                                    <span>
-                                        <label>
-                                            <input type="radio" name="car-rd1" class="cbox1" summary="cbox1" style="display:none !important;" checked >
-                                            <span>
-                                                <div class="content-1 car-content" summary="content-1"><a href="http://www.freshinbox.com"><img src="http://freshinbox.com/assets/images/cities/city-nyc.jpg" width=450 height=280 alt="" style="display:block;max-height:0" border=0></a></div>
-                                                <div class="content-2 car-content" summary="content-2"><a href="http://www.freshinbox.com"><img src="http://freshinbox.com/assets/images/cities/city-sf.jpg" width=450 height=280 alt="" style="display:block;max-height:0" border=0></a></div>
-                                                <div class="content-3 car-content" summary="content-3"><a href="http://www.freshinbox.com"><img src="http://freshinbox.com/assets/images/cities/city-chicago.jpg" width=450 height=280 alt="" style="display:block;max-height:0" border=0></a></div>
-                                                <span class="thumb" summary="thumb" style="display:none;"><img src="http://freshinbox.com/assets/images/cities/city-nyc.jpg" width="50" style="display:block;max-height:0" border=0></span>
-                                            </span>
-                                        </label>
-                                        <span class="thumb" summary="thumb" style="display:none;"><img src="http://freshinbox.com/assets/images/cities/city-sf.jpg" width="50" style="display:block;max-height:0" border=0></span>
-                                    </span>
-                                </label>
-                                <span class="thumb" summary="thumb" style="display:none;"><img src="http://freshinbox.com/assets/images/cities/city-chicago.jpg" width="50" style="display:block;max-height:0" border=0></span>
-                            </span>
-                        </label>
-                    </div>
-                    <!--<![endif]-->
-                    <div class="fallback " summary="fallback">
-                    <div class="car-content" summary="car-content"><a href="http://www.freshinbox.com"><img src="http://freshinbox.com/assets/images/cities/city-nyc.jpg" width=450 height=280 alt="."style="display:block;" border=0></a></div>
-                    </div>
-                </div>
+<body>
+<!-- /Gmail hack -->
+<div style="display:none; white-space:nowrap; font:15px courier; color:#ffffff; line-height:0; width:600px !important; min-width:600px !important; max-width:600px !important;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+<!-- /Gmail hack -->
+<div class="main" style="max-width: 700px; margin: 50px auto; border: 1px solid #e1e1e1; overflow: hidden;">
+    <!-- FULL WIDTH CONTAINER ALWAYS NEED THIS-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #4f4d4c; color: #fcfcf9; max-width: 700px">
+        <tr >
+            <td align="center" valign="middle">
+                <table width="100%" height="25" cellspacing="0" cellpadding="0" border="0" class="headline">
+                    <!-- FOR EVERY NEW PIECE OF CONTENT, CREATE NEW <TR><TD> -->
+                    <tr>
+                        <td align="center" width="15%" style="padding: 25px;" class="headline">
+                            <img src='http://tidepools.co/kip/head_smaller.png'  style="font-size: 28px; text-align: left; color: #fcfcf9; height: 50px;">
+                        </td>
+                        <!-- APPERNTLY ACCORDING TO EMAIL TEMPLATING BEST PRACTICE WE WANT INLINE STYLES: WEIRD -->
+                        <td align="center" width="85%" valign="middle" height="100%" style="font-size: 28px; text-align: left; color: #fcfcf9;">
+                             KIP CART
+                        </td>
+                    </tr>                
+                </table>
             </td>
         </tr>
     </table>
-        
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;  border-top: 1px solid #e1e1e1;max-width: 700px;">
+        <tr>
+            <td >
+                <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                    <tr>
+                        <td style="padding: 50px 30px; font-size: 25px;" align="center">
+                            <%=name%>'s Kip group cart
+                        </td >
+                    </tr>
+                </table>
+            </td>
+        </tr> 
+    </table>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
+        <tr>
+            <td >
+                <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                    <tr>
+                        <td style="padding: 0px 30px 10px; font-size: 16px; color: #8f8d8c; font-weight: 100;" align="center">
+                            Forward or share the cart link:
+                        </td >
+                    </tr>
+                </table>
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;">
+                    <tr>
+                        <td>
+                            <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                                <tr>
+                                    <td style="padding: 0px 30px 50px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
+                                         <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                                             <tr>
+                                                 <td align="center" style="padding: 30px 0px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1;">
+                                                    <%=baseUrl%>/cart/<%=id%>
+                                                 </td>
+                                             </tr>
+                                          </table>
+                                    </td >
+                                </tr>
+                            </table>
+                        </td>
+                    </tr> 
+                </table>
+            </td>
+        </tr> 
+    </table>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
+        <tr>
+            <td >
+                <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                <table width="100%" ellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                    <tr>
+                        <td style="padding: 0px 30px 10px; font-size: 16px; color: #8f8d8c; font-weight: 100;" align="center">
+                             Add Amazon items to the Kip Cart
+                        </td >
+                    </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td align="center" width="100%" style="box-sizing: border-box; width: 100%; padding: 0 30px 50px; ">
+                      <div style="box-sizing: border-box; width: 100%; padding: 0px 0px 0px; ">
+                        <!--[if mso]>
+                          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://litmus.com" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
+                            <w:anchorlock/>
+                            <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:20px;">VIEW KIP CART MSO</center>
+                          </v:roundrect>
+                        <![endif]-->
+                        <a href="http://buttons.cm" style="background-color:#ffe94d;border:1px solid #ffe94d;border-radius:3px;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:20px;line-height:75px;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;">VIEW KIP CART</a>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+            </td>
+        </tr> 
+    </table>
+    <!-- TWO COLUMN SECTION -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color: #4f4d4c; background: #fcfcf9; border-top: 1px solid #e1e1e1;max-width: 700px">
+        <tr>
+            <td bgcolor="#fcfcf9" align="center" style="padding: 70px 15px 70px 15px;" class="section-padding">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" class="responsive-table">
+                    <tr>
+                        <td>
+                            <!-- TITLE SECTION AND COPY -->
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td align="center" style="font-size: 25px; font-family: Helvetica, Arial, sans-serif; color: #333333;" class="padding-copy">
+                                        Daily Amazon Deals
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding: 20px 0 20px 0; font-size: 16px; line-height: 25px; font-family: Helvetica, Arial, sans-serif; color: #666666;" class="padding-copy">
+                                        Check out our latest deals, updated every day!
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <% for(var i=0; i<deals.length; i++) {%>
+                        <tr>
+                            <td>
+                                <!-- TWO COLUMNS -->
+                                <table cellspacing="0" cellpadding="0" border="0" width="100%">
+                                    <tr>
+                                        <td valign="top" style="padding: 0;" class="mobile-wrapper">
+                                            <% for(var x=0; x<deals[i].length; x++) {%>
+                                                <table cellpadding="0" cellspacing="0" border="0" width="49%" align="left" class="responsive-table">
+                                                    <tr>
+                                                        <td style="padding: 20px 10px;">
+                                                            <div style="height: 300px">                                                        
+                                                                <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid #e0e0e0">
+                                                                    <tr>
+                                                                        <td align="center" bgcolor="#ffffff" valign="middle" style="padding: 10px 20px 0;"><img src="<%=deals[i][x].large%>" width="100%" height="125px" style="display: block; color: #666666; font-family: Helvetica, arial, sans-serif; font-size: 13px; max-width: 50%;" alt="Fluid images" border="0" class="img-max"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="center" style="padding: 5px 20px; font-family: Arial, sans-serif; color: #666666; font-size: 16px; line-height: 20px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 200px" bgcolor="#ffffff">
+                                                                            <span class="appleBody"><%=deals[i][x].name%></span>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="center" style="padding: 5px 0; font-family: Arial, sans-serif; color: #CE5019; font-size: 20px;" bgcolor="#ffffff">$<%=deals[i][x].price%></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="center" style="padding: 5px 0; font-family: Arial, sans-serif; color: #666666; font-size: 14px; line-height: 20px;" bgcolor="#ffffff">
+                                                                            <span class="appleBody"><span class="linethrough">$<%=deals[i][x].previousPrice%></span> (<%=deals[i][x].savePercent%>% off)</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="center" style="padding: 5px 0 0 0; font-family: Arial, sans-serif; color: #666666; font-size: 14px; line-height: 20px;" bgcolor="#ffffff">                               <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                                              <tr>
+                                                                                <td align="center" width="100%" height="50px" style="box-sizing: border-box;">
+                                                                                  <div style="box-sizing: border-box; width: 100%; height: 100%;" >
+                                                                                    <!--[if mso]>
+                                                                                      <v:rect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://litmus.com" style="height:50px;v-text-anchor:middle;mso-width-percent: 460;" strokecolor="#e1e1e1" fillcolor="#e1e1e1">
+                                                                                        <w:anchorlock/>
+                                                                                        <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:15px;">VIEW KIP CART</center>
+                                                                                      </v:rect>
+                                                                                    <![endif]-->
+                                                                                    <a href="<%=baseUrl%>/cart/<%=id%>" style="background-color:#e1e1e1;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:15px;line-height:50px;height:100%;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">ADD ITEM</a>
+                                                                                  </div>
+                                                                                </td>
+                                                                              </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    <% } %>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- FOOTER -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 700px;">
+        <tr>
+            <td bgcolor="#ffffff" align="center" style="border-top: 1px solid #e1e1e1;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                    <tr>
+                        <td style="padding: 20px 0px 20px 0px;">
+                            <!-- UNSUBSCRIBE COPY -->
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" class="responsive-table">
+                                <tr>
+                                    <td align="center" valign="middle" style="font-size: 12px; line-height: 18px; font-family: Helvetica, Arial, sans-serif; color:#666666;">
+                                        <span class="appleFooter" style="color:#666666;">1234 Main Street, Anywhere, MA 01234, USA</span><br><a class="original-only" style="color: #666666; text-decoration: none;">Unsubscribe</a><span class="original-only" style="font-family: Arial, sans-serif; font-size: 12px; color: #444444;">&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span><a style="color: #666666; text-decoration: none;">View this email in your browser</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
 </body>
 </html>

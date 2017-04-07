@@ -53,8 +53,6 @@ router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
   const email_id = req.params.email_id;
   const cart_id = req.params.cart_id;
 
-  console.log('########## email_id: ', email_id)
-  console.log('########## cart_id: ', cart_id)
   // Send an email to the user with the cart link
   var email = yield db.Emails.create({
     recipients: email_id,
@@ -62,10 +60,14 @@ router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
     cart: cart_id
   })
 
+  var allDeals = require('../deals_sample.json');
+      deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
+
   // use the new_cart email template
-  email.template('share_cart', {
+  email.template('share_cart_2', {
     id: cart_id,
-    name: email_id.split('@')[0]
+    name: email_id.split('@')[0],
+    deals: deals
   })
 
   // remember to actually send it
