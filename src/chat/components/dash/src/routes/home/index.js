@@ -16,20 +16,20 @@ export default {
   path: '/',
 
   async action() {
-    return <Home />;
-    // const resp = await fetch('/graphql', {
-    //   method: 'post',
-    //   headers: {
-    //     Accept: 'application/json',
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     query: '{news{title,link,contentSnippet}}',
-    //   }),
-    //   credentials: 'include',
-    // });
-    // const { data } = await resp.json();
-    // if (!data || !data.news) throw new Error('Failed to load the news feed.');
-    // return <Home news={data.news} />;
+    //return <Home />;
+    const resp = await fetch('/graphql', {
+      method: 'post',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: '{teams(limit:5000){members{id,name},deliveries{order, cart, payment_post}, team_name, carts {created_date, purchased_date, amazon, items {_id,title,image,price,ASIN,added_by}}}}',
+      }),
+      credentials: 'include',
+    });
+    const { data } = await resp.json();
+    if (!data || !data.teams) throw new Error('Failed to load the news feed.');
+    return <Home teams={data.teams} />;
   }
 };

@@ -14,23 +14,43 @@ class CartTable extends Component {
     this.state = {};
   }
 
+  cartsAreSame(cart1,cart2){
+    if(cart1.length == cart2.length){
+      if(JSON.stringify(cart1) == JSON.stringify(cart2)){
+        return true;
+      }
+    }
+      return false;
+  }
+
+  shouldComponentUpdate(nextProps, nextState){
+    if(this.state.carts && this.cartsAreSame(nextState.carts,this.state.carts)){
+      if(new Date(nextProps.start).toLocaleString() == new Date(this.props.start).toLocaleString() && new Date(nextProps.end).toLocaleString() == new Date(this.props.end).toLocaleString()){
+        return false;
+      }
+    }
+    return true;
+  }
+
+  componentDidUpdate(){
+    var self = this;
+    co(function * () {
+        const teams = self.props.teams;
+        if (teams){
+          let carts = teams.reduce(self.props.process, []);
+          self.setState({carts: carts},)
+        } else  {
+          throw new Error('Failed to load carts.')
+        }
+      })
+  }
+
   componentDidMount() {
     var self = this;
     co(function * () {
-      const resp = yield fetch('/graphql', {
-          method: 'post',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: self.props.query,
-          }),
-          credentials: 'include',
-        });
-        const { data } = yield resp.json();
-        if (data && data.teams){
-          let carts = data.teams.reduce(self.props.process, []);
+        const teams = self.props.teams;
+        if (teams){
+          let carts = teams.reduce(self.props.process, []);
           self.setState({carts: carts})
         } else  {
           throw new Error('Failed to load carts.')
@@ -42,9 +62,7 @@ class CartTable extends Component {
     const {carts} = this.state;
     const data = carts ? carts : [[]];
     return (
-      <Panel className='fillSpace' header={<span><i className="fa fa-bar-chart-o fa-fw" /> Purchased Store Carts </span>}>
         <Table heads={this.props.heads} data={data} colorBy={this.props.colorBy} />
-      </Panel>
     )
   }
 }

@@ -66,55 +66,46 @@ class Home extends Component {
     super(props);
     this.state = {
       view: 'Store',
-      startDate: moment(),
+      startDate: moment().subtract(1, 'month'),
       endDate: moment(),
     };
     this.changeStart = this.changeStart.bind(this);
     this.changeEnd = this.changeEnd.bind(this);
+    this.renderCartTable = this.renderCartTable.bind(this);
+    this.renderDeliveryTable = this.renderDeliveryTable.bind(this);
+    this.changeCart = this.changeCart.bind(this);
   }
   
-  componentDidMount() {
-    var self = this;
-    self.setState({
-      view: 'Store',
-      startDate: moment(),
-      endDate: moment(),
-    }) 
-    self.changeStart = this.changeStart.bind(this);
-    self.changeEnd = this.changeEnd.bind(this);
-  }
+
 
   changeStart(date){
-    console.log('start:', date);
     this.setState({
       startDate: date
     });
   }
 
   changeEnd(date){
-    console.log('end:', date);
     this.setState({
       endDate: date
     });
   }
 
-  render(){
+  changeCart(cart){
+    this.setState({ 
+      view: cart 
+    })
+  }
+
+  renderCartTable(startDate, endDate){
+    //console.log(new Date(startDate),new Date(endDate));
+    //console.log(this.props);
     return (
-      <div>
-        <div className="container-fluid data-display">
-          <ButtonToolbar>
-            <Button onClick={ ()=> this.setState({ view: 'Store' })}>
-              Store
-            </Button>
-            <Button onClick={ ()=> this.setState({ view: 'Cafe' })}>
-              Cafe
-            </Button>
-          </ButtonToolbar>
-              <DatePicker selected={this.state.startDate} onChange={this.changeStart} />
-              <DatePicker selected={this.state.endDate} onChange={this.changeEnd} />
-            { this.state.view=='Store' ? 
-              <CartTable 
-                query={'{teams(limit:5000){team_name, carts {created_date, purchased_date, amazon, items {_id,title,image,price,ASIN,added_by}}}}'}
+      <Panel className='fillSpace' header={<span><i className="fa fa-bar-chart-o fa-fw" /> Purchased Store Carts from {new Date(startDate).toLocaleString()} to {new Date(endDate).toLocaleString()}</span>}>
+      
+        <CartTable 
+                start = {startDate}
+                end = {endDate}
+                teams = {this.props.teams}
                 heads = {
                   [{ 
                     field: 'created_date',
@@ -166,6 +157,8 @@ class Home extends Component {
                   teams.concat(
                     team.carts.reduce((carts, cart) => {
                         if(cart.amazon && cart.amazon.CartItems){
+                          var self = this;
+                          if(new Date(cart.created_date)>=new Date(startDate) && new Date(cart.created_date)<=new Date(endDate)){
                             carts.push({
                               team_name: team.team_name,
                               purchased_date: cart.purchased_date ? (new Date(cart.purchased_date)).toLocaleString() : 'Not Available',
@@ -186,17 +179,28 @@ class Home extends Component {
                                 title: item.Title
                               })
                             })
+                          }
                         }
-                      
                       return carts;
                     }, [])
 
                   )
                 }
-              />
-            : 
-              <DeliveryTable 
-                query={'{teams(limit:5000){members{id,name},team_name, deliveries{order, cart, payment_post}}}'}
+        />
+        </Panel>
+      )
+
+  }
+
+  renderDeliveryTable(startDate, endDate){
+    //console.log(new Date(startDate),new Date(endDate));
+    return(
+      <Panel className='fillSpace' header={<span><i className="fa fa-bar-chart-o fa-fw" /> Purchased Cafe Carts from {new Date(startDate).toLocaleString()} to {new Date(endDate).toLocaleString()}</span>}>
+      
+        <DeliveryTable 
+                start = {startDate}
+                end = {endDate}
+                teams = {this.props.teams}
                 heads = {
                   [{ 
                     field: 'created_date',
@@ -248,37 +252,62 @@ class Home extends Component {
                   teams.concat(
                     team.deliveries.reduce((deliveries, delivery) => {
                       if(delivery.payment_post){
+                        var self = this;
                         var addedItems = delivery.cart.filter(function(item){
                               return item.added_to_cart==true
                             })
-                        deliveries.push({
-                          team_name: team.team_name,
-                          purchased_date: (new Date(delivery.order.order_time)).toLocaleString(),
-                          created_date: (new Date(delivery.payment_post.time_started)).toLocaleString(),
-                          restaurant: delivery.order.merchant_info.name,
-                          cart_size: delivery.order.item_count,
-                          cart_total: '$'+delivery.order.total.toFixed(2),
-                          });
-                          addedItems.map(function(item){
-                              let addedItem = delivery.order.cart.find(function(i){
-                                return i.id == item.item.item_id || i.id.split('-').pop() == item.item.item_id
+                        if(new Date(delivery.payment_post.time_started)>=new Date(startDate) && new Date(delivery.payment_post.time_started)<=new Date(endDate)){
+                          deliveries.push({
+                            team_name: team.team_name,
+                            purchased_date: (new Date(delivery.order.order_time)).toLocaleString(),
+                            created_date: (new Date(delivery.payment_post.time_started)).toLocaleString(),
+                            restaurant: delivery.order.merchant_info.name,
+                            cart_size: delivery.order.item_count,
+                            cart_total: '$'+delivery.order.total.toFixed(2),
+                            });
+                            addedItems.map(function(item){
+                                let addedItem = delivery.order.cart.find(function(i){
+                                  return i.id == item.item.item_id || i.id.split('-').pop() == item.item.item_id
+                                })
+                                deliveries.push({
+                                items: addedItem.quantity,
+                                user: team.members.find(function(m){
+                                  return m.id == item.user_id
+                                }).name,
+                                order: addedItem.name
                               })
-                              deliveries.push({
-                              items: addedItem.quantity,
-                              user: team.members.find(function(m){
-                                return m.id == item.user_id
-                              }).name,
-                              order: addedItem.name
-                            })
-                        })
+                          })
+                        }
                       }
                       return deliveries;
                     }, [])
 
                   )
                 }
-              /> 
-          }
+        /> 
+
+    </Panel>
+  )
+  }
+
+  render(){
+    var self = this;
+    return (
+      <div>
+        <div className="container-fluid data-display">
+          <ButtonToolbar>
+            <Button onClick={ ()=> self.changeCart('Store')}>
+              Store
+            </Button>
+            <Button onClick={ ()=> self.changeCart('Cafe')}>
+              Cafe
+            </Button>
+          </ButtonToolbar>
+          <div>
+              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />    
+              End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
+          </div>
+            { self.state.view=='Store' ? self.renderCartTable(self.state.startDate, self.state.endDate) : self.renderDeliveryTable(self.state.startDate, self.state.endDate) }
 
         </div>
       </div>

@@ -12,8 +12,8 @@ type Cart {
   slack_id: String
   purchased: Boolean
   deleted: Boolean
-  created_date: String
-  purchased_date: String
+  created_date: Date
+  purchased_date: Date
   type: String
   link: String
   amazon: JSON
@@ -108,9 +108,9 @@ type Item {
   slack_id: String
   source_json: String
   purchased: Boolean
-  purchased_date: String
+  purchased_date: Date
   deleted: Boolean
-  added_date: String
+  added_date: Date
   bundle: String
   available: Boolean
   asins: String
@@ -151,7 +151,7 @@ type Metric {
 
 type SlackbotMeta {
   addedBy: String
-  dateAdded: String
+  dateAdded: Date
   deleted: Boolean
   cart_channels: [String]
   collect_from: String
@@ -198,7 +198,7 @@ type Waypoint {
   user_id: String
   waypoint: String
   data: JSON
-  timestamp: String
+  timestamp: Date
   # Foreign refs
   user: Chatuser
   delivery: Delivery
@@ -210,6 +210,8 @@ type Query {
     limit: Int
     offset: Int
     _id: String
+    created_date: Date
+    purchased_date: Date
   ): [Cart]
 
   deliveries(
@@ -242,6 +244,7 @@ type Query {
     limit: Int
     offset: Int
     team_id: String
+    team_name: String
   ): [Slackbot]
 
   users(

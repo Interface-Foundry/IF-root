@@ -14,37 +14,55 @@ class DeliveryTable extends Component {
     this.state = {};
   }
 
-  componentDidMount() {
+  cartsAreSame(deliveries1,deliveries2){
+    if(deliveries1.length == deliveries2.length){
+      if(JSON.stringify(deliveries1) == JSON.stringify(deliveries2)){
+        return true;
+      }
+    }
+      return false;
+  }
+
+  shouldComponentUpdate(nextProps, nextState){
+    if(this.state.deliveries && this.cartsAreSame(nextState.deliveries,this.state.deliveries)){
+      if(new Date(nextProps.start).toLocaleString() == new Date(this.props.start).toLocaleString() && new Date(nextProps.end).toLocaleString() == new Date(this.props.end).toLocaleString()){
+        return false;
+      }
+    }
+    return true;
+  }
+
+  componentDidUpdate(){
     var self = this;
     co(function * () {
-      const resp = yield fetch('/graphql', {
-          method: 'post',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: self.props.query,
-          }),
-          credentials: 'include',
-        });
-        const { data } = yield resp.json();
-        if (data && data.teams){
-          let deliveries = data.teams.reduce(self.props.process, []);
-          self.setState({deliveries: deliveries})
+        const teams = self.props.teams;
+        if (teams){
+          let deliveries = teams.reduce(self.props.process, []);
+          self.setState({deliveries: deliveries},)
         } else  {
           throw new Error('Failed to load deliveries.')
         }
-    })
+      })
+  }
+
+  componentDidMount() {
+    var self = this;
+    co(function * () {
+        const teams = self.props.teams;
+        if (teams){
+          let deliveries = teams.reduce(self.props.process, []);
+          self.setState({deliveries: deliveries},)
+        } else  {
+          throw new Error('Failed to load deliveries.')
+        }
+      })
   }
 
   render() {
     const {deliveries} = this.state;
     const data = deliveries ? deliveries : [[]];
     return (
-      <Panel className='fillSpace' header={<span><i className="fa fa-bar-chart-o fa-fw" /> Purchased Cafe Carts </span>}>
         <Table heads={this.props.heads} data={data} colorBy={this.props.colorBy} />
-      </Panel>
     )
   }
 }
