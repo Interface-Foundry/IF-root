@@ -22,6 +22,14 @@ export default class App extends Component {
     fetchAllCarts();
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { fetchCart, fetchAllCarts, cart_id } = this.props;
+    if (cart_id !== nextProps.cart_id) {
+      fetchCart(nextProps.cart_id);
+      fetchAllCarts();
+    }
+  }
+
   render() {
     const { cart_id, newAccount, leader, match } = this.props;
 
