@@ -21,29 +21,35 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   var email = req.body.from.split(' ');
   email = email[email.length-1];
   if (email[0] === '<') email = email.slice(1, email.length-1);
-  console.log('email', email)
-  var user = yield db.UserAccounts.findOne({email_address: email});
 
-  var text = req.body.text;
-  var words = text.split(/\s/);
+  var user = db.UserAccounts.findOrCreate({email: email});
+  console.log('found or created user');
 
-  var uris = words.filter(function (w) {
-    return validUrl.isUri(w);
-  });
-  console.log('URIs', uris);
+  var text = req.body.text.split(/\s/);
+  var uris = text.filter(w => validUrl.isUri(w));
+  uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u));   //validate uris as amazon links
+  // console.log('amazon URIs', uris);
+  // console.log(req.protocol + '://' + req.get('host'));
+  const cart_id = '7a43d85c928f'; //for testing
 
-  //validate uris as amazon links
-  uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u));
-  console.log('amazon URIs', uris);
+  // find all the carts where their user id appears in the leader or member field
+  console.log('gonna query for carts')
+  var cart = yield db.Carts.findOne({id: cart_id});
+  // var carts = yield db.Carts.find({
+  //   or: [
+  //     { leader: user.id },
+  //     { members: user.id }
+  //   ]
+  // }).populate('items').populate('leader').populate('members');
 
-  if (user) {
-    //TODO add uri to user's cart
-    //TODO get user cart
-  }
+  if (cart) var cart = carts[0];
   else {
-    //TODO create new user and cart and add uri to them / it
+    //TODO if user does not have a cart, make on
   }
 
+  //TODO add uri to user's cart
+
+  console.log(cart);
   res.sendStatus(200);
 }));
 
