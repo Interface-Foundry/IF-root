@@ -17,6 +17,7 @@ export function fetchDeals() {
       const response = await fetch('/api/test/deals', {
         credentials: 'same-origin'
       });
+
       return dispatch(receive(await response.json()));
     } catch (e) {
       throw 'error in cart fetchDeals';

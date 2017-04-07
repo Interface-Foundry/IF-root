@@ -1,4 +1,4 @@
-import reducer from '../deals'
+import reducer from '../deals';
 
 import { RECEIVE_DEALS, REQUEST_DEALS } from '../../constants/ActionTypes';
 
@@ -53,6 +53,6 @@ describe('deals reducer', () => {
 
   it('should return an array of deals', () => {
     expect(reducer(firstState, { type: RECEIVE_DEALS, deals }))
-      .toEqual(deals);
+      .toEqual({deals});
   });
 });

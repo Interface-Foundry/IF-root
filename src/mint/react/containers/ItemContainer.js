@@ -1,19 +1,23 @@
 import { connect } from 'react-redux';
 import { Item } from '../components';
-
-import { getMemberById } from '../reducers';
-import { changeModalComponent } from '../actions/modal';
+import { previewItem, clearItem, addItem } from '../actions/item';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.cart.cart_id,
-  leader: state.cart.leader,
-  member: getMemberById(state.cart, {id: state.cart.item.added_by}),
   addingItem: state.cart.addingItem,
-  item: state.cart.item
+  item_id: ownProps.match.params.item_id,
+  item: state.item
 });
 
 const mapDispatchToProps = dispatch => ({
-  changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
+  addItem: (cart_id, item_id, replace) => {
+    dispatch(addItem(cart_id, item_id))
+      .then(e => {
+        replace(`/cart/${cart_id}/`);
+      });
+  },
+  previewItem: (itemId) => dispatch(previewItem(itemId)),
+  clearItem: () => dispatch(clearItem())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Item);

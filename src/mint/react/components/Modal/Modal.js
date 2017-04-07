@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { Route, Switch } from 'react-router';
 
 import { Icon } from '..';
 import { EmailFormContainer, AmazonFormContainer, ItemContainer } from '../../containers';
@@ -6,32 +7,21 @@ import { EmailFormContainer, AmazonFormContainer, ItemContainer } from '../../co
 export default class SignIn extends Component {
 
   static propTypes = {
-    component: PropTypes.string.isRequired,
-    changeModalComponent: PropTypes.func.isRequired
+    match: PropTypes.object.isRequired
   }
 
   render() {
-    const { component } = this.props;
+    const { match } = this.props;
 
+    // renders modal based on route
     return (
       <div className="modal">
-        { component
-          ? this.renderComponent()
-          : null}
+        <Switch>
+          <Route path={`${match.url}/item/add`} component={AmazonFormContainer} />
+          <Route path={`${match.url}/item/:item_id`} component={ItemContainer} />
+          <Route path={`${match.url}/signin`} component={EmailFormContainer} />
+        </Switch>
       </div>
     );
-  }
-
-  renderComponent() {
-    const { component, changeModalComponent } = this.props;
-
-    const Components = {
-      AmazonFormContainer,
-      EmailFormContainer,
-      ItemContainer
-    }
-    const Component = Components[component]
-
-        return <Component changeModalComponent={changeModalComponent} />;
   }
 }

@@ -349,7 +349,7 @@ module.exports = function (router) {
  var deals = require('../deals_sample.json');
 
  // use the new_cart email template
- email.template('share_cart', {
+ email.template('daily_deals', {
    id: cart_id,
    name: email_id.split('@')[0],
    deals: deals

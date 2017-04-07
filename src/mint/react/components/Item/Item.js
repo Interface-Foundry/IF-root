@@ -1,51 +1,63 @@
 import React, { PropTypes, Component } from 'react';
-import { getNameFromEmail } from '../../utils';
-
-import Header from './Header'
-import Footer from './Footer'
+import Header from './Header';
+import Footer from './Footer';
 
 export default class Item extends Component {
   static propTypes = {
-    cart_id: PropTypes.string.isRequired,
-    leader: PropTypes.object.isRequired,
-    members: PropTypes.array,
-    addingItem: PropTypes.bool.isRequired,
-    item: PropTypes.object.isRequired
+    item_id: PropTypes.string.isRequired,
+    item: PropTypes.object,
+    previewItem: PropTypes.func.isRequired,
+    clearItem: PropTypes.func.isRequired,
+    cart_id: PropTypes.string,
+    addItem: PropTypes.func.isRequired,
+    history: PropTypes.object.isRequired
+  }
+
+  componentWillMount() {
+    const { props: { item_id, previewItem, item } } = this;
+    // only update item if there isn't one
+    if (item_id && !item.price) previewItem(item_id);
+  }
+
+  componentWillUnmount() {
+    const { props: { clearItem } } = this;
+    clearItem();
   }
 
   render() {
-    const { item: { original_link, quantity, updatedAt }, member: { email_address }, changeModalComponent } = this.props,
-          memberName = getNameFromEmail(email_address);
-
+    const {
+      props: {
+        cart_id,
+        addItem,
+        item: { main_image_url, memberName, price, store, description, id: uniq_id },
+        history: { replace }
+      }
+    } = this;
     return (
       <div className='item'>
-        <Header changeModalComponent={changeModalComponent}/>
+        <Header replace={replace} cart_id={cart_id}/>
         <section className='item__view'>
-          <div className='item__view__image image row' style={
-            {
-              backgroundImage: `url(//placehold.it/100x100)`,
-              height: 150,
-            }}/>
+          <div className='item__view__image image row'
+            style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }/>
           <div className='item__view__atts'>
             <h4>{memberName}</h4>
-            <p>Item: Ipsum Lorem</p>
+            <p>Item: {name}</p>
           </div>
           <div className='item__view__price'>
-            <h4>$OMG ORIGINAL PRICE</h4>
-            <p>Price: <span>Lame old price</span> (%2500 off)</p>
+            <h4>${price}</h4>
+            <p>Price: <span>${price + 40}</span> ($40 off)</p>
           </div>
           <div className='item__view__description'>
-            <p>Size: a size string probably</p>
-            <p>SALES OWNER?</p>
-            <p className='ellipsis'>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla velit enim, dictum vel sem a, malesuada facilisis lacus. Nullam iaculis, ex in hendrerit interdum, erat tellus tempor risus, vitae iaculis nulla odio ac enim. Donec nisi dolor, rutrum vel laoreet vitae, fringilla et ipsum. Donec scelerisque suscipit augue. Pellentesque at imperdiet mauris. Nulla mi odio, accumsan eu varius quis, aliquam vel nisl. Phasellus maximus ac quam quis blandit. Aliquam pharetra auctor ligula in dapibus. Vivamus egestas finibus turpis, ac fermentum orci porta a. Integer sed congue sapien, ac consequat diam. Nullam elementum metus sed elit rhoncus, in consequat neque tincidunt. Mauris accumsan ac arcu in suscipit. Sed pretium sed massa non semper. Curabitur ullamcorper a justo non posuere.</p>
+            <p>{store}</p>
+            <p className='ellipsis'>{description}</p>
             <a>View more</a>
           </div>
           <div className='item__view__review'>
-            <p className='ellipsis'>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla velit enim, dictum vel sem a, malesuada facilisis lacus. Nullam iaculis, ex in hendrerit interdum, erat tellus tempor risus, vitae iaculis nulla odio ac enim. Donec nisi dolor, rutrum vel laoreet vitae, fringilla et ipsum. Donec scelerisque suscipit augue. Pellentesque at imperdiet mauris. Nulla mi odio, accumsan eu varius quis, aliquam vel nisl. Phasellus maximus ac quam quis blandit. Aliquam pharetra auctor ligula in dapibus. Vivamus egestas finibus turpis, ac fermentum orci porta a. Integer sed congue sapien, ac consequat diam. Nullam elementum metus sed elit rhoncus, in consequat neque tincidunt. Mauris accumsan ac arcu in suscipit. Sed pretium sed massa non semper. Curabitur ullamcorper a justo non posuere.</p>
+            <p className='ellipsis'>{description}</p>
             <p> - theGodOfIpsum</p>
           </div>
         </section>
-        <Footer/>
+        <Footer replace={replace} addItem={addItem} cart_id={cart_id} uniq_id={uniq_id}/>
       </div>
     );
   }

@@ -5,28 +5,30 @@ export default class Deals extends Component {
   constructor(props) {
     super(props);
     this.renderCards = ::this.renderCards;
-    this.state = { deals: [] };
   }
 
   static propTypes = {
-    isDropDown: PropTypes.bool,
-    deals: PropTypes.object.isRequired
+    isDropdown: PropTypes.bool,
+    deals: PropTypes.arrayOf(PropTypes.object)
+      .isRequired,
+    cart_id: PropTypes.string
   }
 
   renderCards() {
-    const { isDropDown, deals } = this.props;
-    return deals.deals.map((deal, i) => <li key={i}><DealCard {...deal} small={isDropDown} /></li>);
+    let { isDropdown, deals, cart_id } = this.props;
+    if (isDropdown) deals = deals.slice(0, 5);
+    return deals.map((deal, i) => <section key={i}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown}/></section>);
   }
 
   render() {
     const { renderCards, props } = this;
-    const { isDropDown } = props;
+    const { isDropdown } = props;
     return (
       <div>
-      {(isDropDown ? '' : 'Today\'s Deals')}
-      <ul className={'signIn__container__page__deals' + (isDropDown ? '-small' : '')}>
-        { renderCards() }
-      </ul>
+        {(isDropdown ? '' : 'Today\'s Deals')}
+        <section className={'signIn__container__page__deals' + (isDropdown ? '-small' : '')}>
+          { renderCards() }
+        </section>
       </div>
     );
   }

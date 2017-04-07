@@ -38,7 +38,6 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   console.log('gonna query for the cart')
   var cart = yield db.Carts.findOne({id: cart_id});
 
-  //TODO add uri to user's cart
   if (uris.length) {
     var url_items = yield uris.map(function * (uri) {
       return yield amazonScraper.scrapeUrl(uri);

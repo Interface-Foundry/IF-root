@@ -96,7 +96,7 @@ router.get('/newcart', (req, res) => co(function * () {
     yield email.send();
   }
 
-  res.redirect(`/cart/${cart.id}`);
+  res.redirect(`/cart/${cart.id}/`);
 }))
 
 module.exports = router;

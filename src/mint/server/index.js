@@ -14,6 +14,7 @@ const fs = require('fs'),
   webpack = require('webpack'),
   webpackConfig = require('../webpack.config.js'),
   mailer_transport = require('../../mail/IF_mail');
+  agendas = require('./agendas');
 
 // live reloading
 if (!process.env.NO_LIVE_RELOAD) {

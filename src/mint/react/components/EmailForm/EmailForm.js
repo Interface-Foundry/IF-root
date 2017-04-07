@@ -17,7 +17,8 @@ const renderField = ({ input, label, placeholder, handleSubmit, type, meta: { to
 )
 
 export default (props) => {
-  const { handleSubmit, changeModalComponent} = props
+  const { handleSubmit, cart_id, history: { replace } } = props;
+  
   return (
     <form onSubmit={handleSubmit} className="form">
       <div>
@@ -29,7 +30,7 @@ export default (props) => {
           handleSubmit={handleSubmit}
           component={renderField}/>
       </div>
-      <div className="modal__drag" onClick={() => changeModalComponent(null)}>
+      <div className="modal__drag" onClick={() => replace(`/cart/${cart_id}/`)}>
         <Icon icon="Up"/>
       </div>
     </form>

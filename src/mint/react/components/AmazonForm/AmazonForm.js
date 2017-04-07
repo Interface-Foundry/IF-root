@@ -21,26 +21,26 @@ export default class AmazonForm extends Component {
               type="submit"
               onClick={handleSubmit}><p>Submit</p></button>
           </div>
-          <DealsContainer isDropDown={active}/>
+          <DealsContainer isDropdown={active}/>
         </div>
     );
   }
 
   render() {
     const { props, renderField } = this;
-    const { handleSubmit, changeModalComponent } = props;
+    const { handleSubmit, cart_id, history: { replace } } = props;
     return (
       <form onSubmit={handleSubmit} className="form">
-      <div>
-        <Field
-          name="url"
-          type="string"
-          label="Enter URL from Amazon?"
-          placeholder="Enter URL"
-          handleSubmit={handleSubmit}
-          component={renderField}/>
+        <div>
+          <Field
+            name="url"
+            type="string"
+            label="Enter URL from Amazon?"
+            placeholder="Enter URL"
+            handleSubmit={handleSubmit}
+            component={renderField}/>
         </div>
-        <div className="modal__drag" onClick={() => changeModalComponent(null)}>
+        <div className="modal__drag" onClick={() => replace(`/cart/${cart_id}/`)}>
           <Icon icon="Up"/>
         </div>
     </form>

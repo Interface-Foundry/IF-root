@@ -1,24 +1,15 @@
 import { connect } from 'react-redux';
 import { App } from '../components';
-
-import { changeModalComponent } from '../actions/modal';
-import { fetchCart } from '../actions/cart';
-import { fetchDeals } from '../actions/deals';
+import { fetchCart, fetchAllCarts } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: ownProps.match.params.cart_id,
-  members: state.cart.members,
-  leader: state.cart.leader,
-  newAccount: state.session.newAccount,
-  accounts: state.session.user_accounts,
-  modal: state.modal.component,
-  addingItem: state.cart.addingItem
+  cart_id: state.routing.location.pathname.match(/cart\/((\d|\w)+)/)[1], // TODO: switch to nonregex when react router allows it
+  leader: state.cart.currentCart.leader,
+  newAccount: state.session.newAccount
 });
-
 const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
-  fetchDeals: () => dispatch(fetchDeals()),
-  changeModalComponent: (componentName) => dispatch(changeModalComponent(componentName))
+  fetchAllCarts: () => dispatch(fetchAllCarts())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

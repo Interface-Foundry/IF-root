@@ -40,7 +40,6 @@ require('./users-api')(router)
 var deals = require('../deals_sample.json');
 router.get('/test/deals', (req, res)=>{
   res.json(deals);
-})
-// DELETE THIS LATER
+});
 
 module.exports = router;
