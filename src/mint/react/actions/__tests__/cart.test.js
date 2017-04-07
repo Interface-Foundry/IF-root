@@ -113,36 +113,4 @@ describe('cart actions', () => {
         // error handler
       });
   });
-
-  it('creates REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART when addItem has been done', () => {
-    nock('http://localhost:3000/api')
-      .get('/cart/fakeid/items')
-      .reply(200, { body });
-
-    const expectedActions = [
-      { type: REQUEST_ADD_ITEM_TO_CART },
-      { type: RECEIVE_ADD_ITEM_TO_CART, body }
-    ];
-
-    const store = mockStore({
-      session: {
-        newAccount: false,
-        onborded: false,
-        user_accounts: [{ id: 1 }]
-      },
-      cart: {
-        cart_id: 'testId',
-        items: [{ id: 1 }]
-      }
-    });
-
-    return store.dispatch(addItem('testId'))
-      .then(() => {
-        expect(store.getActions())
-          .toEqual(expectedActions);
-      })
-      .catch((error) => {
-        // error handler
-      });
-  });
 });

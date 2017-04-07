@@ -54,12 +54,12 @@ export default class Cart extends Component {
             { 
               hasItems ? 
                 items.map((item, i) => <CartItem key={i} 
-                                            item={item} 
-                                            itemNumber={i+1} 
-                                            members={members} 
-                                            leader={leader} 
-                                            selectItem={selectItem}
+                                            itemNumber={i}
+                                            {...item}
                                             url={url}
+                                            members={members}
+                                            leader={leader}
+                                            selectItem={selectItem}
                                             push={push}/>) 
                 : <em>Please add some products to the cart.</em>
             } 

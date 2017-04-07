@@ -6,16 +6,22 @@ export default class Item extends Component {
   static propTypes = {
     item_id: PropTypes.string.isRequired,
     item: PropTypes.object,
-    fetchItem: PropTypes.func.isRequired,
+    previewItem: PropTypes.func.isRequired,
+    clearItem: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
     addItem: PropTypes.func.isRequired,
     history: PropTypes.object.isRequired
   }
 
   componentWillMount() {
-    const { props: { item_id, fetchItem } } = this;
-    // TODO: make it request less if the item is defined
-    fetchItem(item_id);
+    const { props: { item_id, previewItem, item } } = this;
+    // only update item if there isn't one
+    if (item_id && !item.price) previewItem(item_id);
+  }
+
+  componentWillUnmount() {
+    const { props: { clearItem } } = this;
+    clearItem();
   }
 
   render() {
@@ -23,8 +29,7 @@ export default class Item extends Component {
       props: {
         cart_id,
         addItem,
-        item_id,
-        item: { main_image_url, memberName, price, store, description },
+        item: { main_image_url, memberName, price, store, description, id: uniq_id },
         history: { replace }
       }
     } = this;
@@ -52,7 +57,7 @@ export default class Item extends Component {
             <p> - theGodOfIpsum</p>
           </div>
         </section>
-        <Footer replace={replace} addItem={addItem} cart_id={cart_id} item_id={item_id}/>
+        <Footer replace={replace} addItem={addItem} cart_id={cart_id} uniq_id={uniq_id}/>
       </div>
     );
   }

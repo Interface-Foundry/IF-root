@@ -5,10 +5,11 @@ import { selectItem } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.cart.cart_id,
-  leader: state.cart.leader,
-  members: state.cart.members,
-  items: state.cart.items,
-  addingItem: state.cart.addingItem
+  leader: state.cart.currentCart.leader,
+  members: state.cart.currentCart.members,
+  items: state.cart.currentCart.items,
+  addingItem: state.cart.currentCart.addingItem,
+  carts: state.cart.carts
 });
 
 const mapDispatchToProps = dispatch => ({
