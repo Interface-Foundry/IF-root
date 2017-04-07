@@ -12,12 +12,14 @@ export default class App extends Component {
     modal: PropTypes.string,
     newAccount: PropTypes.bool,
     match: PropTypes.object.isRequired,
-    fetchCart: PropTypes.func.isRequired
+    fetchCart: PropTypes.func.isRequired,
+    fetchAllCarts: PropTypes.func.isRequired
   }
 
   componentWillMount() {
-    const { fetchCart, cart_id } = this.props;
+    const { fetchCart, fetchAllCarts, cart_id } = this.props;
     if (cart_id) fetchCart(cart_id);
+    fetchAllCarts();
   }
 
   render() {

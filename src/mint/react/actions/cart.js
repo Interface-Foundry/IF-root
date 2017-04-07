@@ -9,9 +9,9 @@ const request = () => ({
   type: REQUEST_CART
 });
 
-const receiveCarts = (cartInfo) => ({
+const receiveCarts = (carts) => ({
   type: RECEIVE_CARTS,
-  cartInfo
+  carts
 });
 
 const requestCarts = () => ({
