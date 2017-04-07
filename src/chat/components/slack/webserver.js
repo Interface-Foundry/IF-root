@@ -235,21 +235,72 @@ app.post('/slackaction', next(function * (req, res) {
             team.meta.collect_from = 'me';
             break;
           case 'channel':
-            json.attachments[0].actions[2].text = '◉ By Channel';
-            team.meta.collect_from = 'channel';
-            let channelSection = [{
-              text: '',
-              callback_id: 'channel_buttons_idk',
-              actions: [{
-                name: 'channel_btn',
-                text: 'Pick Channel',
-                type: 'select',
-                data_source: 'channels'
-              }]
-            }];
-            channelSection.push(json.attachments.pop());
-            json.attachments = [...json.attachments, ...channelSection];
-            break;
+
+            //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
+            //Œ Œ Œ Œ Œ Œ Œ Œ > SLACK LAUNCH CODE < Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
+            //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
+            if(message.source.team == 'T02PN3B25'){
+              json.attachments[0].actions[2].text = '◉ By Channel';
+              team.meta.collect_from = 'channel';
+              let channelSection = [{
+                text: '',
+                callback_id: 'channel_buttons_idk',
+                actions: [{
+                  name: 'channel_btn',
+                  text: 'Pick Channel',
+                  type: 'select',
+                  data_source: 'channels'
+                }]
+              }];
+              channelSection.push(json.attachments.pop());
+              json.attachments = [...json.attachments, ...channelSection];
+              break;
+            }
+
+            //💀 KILL THIS CODE BEFORE LAUNCH 💀
+            else {
+              json.attachments[0].actions[2].text = '◉ By Channel';
+              team.meta.collect_from = 'channel';
+              let cartChannels = team.meta.cart_channels;
+              let channels = yield utils.getChannels(team);
+              let selectedChannels = channels.reduce((arr, channel) => {
+                if (cartChannels.includes(channel.id)) {
+                  arr.push({
+                    name: 'channel_btn',
+                    text: `✓ #${channel.name}`,
+                    type: 'button',
+                    value: channel.id
+                  });
+                }
+                return arr;
+              }, []);
+              let unselectedChannels = channels.reduce((arr, channel) => {
+                if (!cartChannels.includes(channel.id)) {
+                  arr.push({
+                    name: 'channel_btn',
+                    text: `☐ #${channel.name}`,
+                    type: 'button',
+                    value: channel.id
+                  });
+                }
+                return arr;
+              }, []);
+              selectedChannels = _.uniq(selectedChannels);
+              unselectedChannels = _.uniq(unselectedChannels);
+              let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
+                : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
+              let chunkedButtons = _.chunk(buttons, 5);
+              let channelSection = chunkedButtons.map(buttonRow => {
+                return {
+                  text: '',
+                  callback_id: 'channel_buttons_idk',
+                  actions: buttonRow
+                };
+              });
+              channelSection.push(json.attachments.pop());
+              json.attachments = [...json.attachments, ...channelSection];
+              break;
+            }
         }
         team.markModified('meta.collect_from');
         yield team.save();
