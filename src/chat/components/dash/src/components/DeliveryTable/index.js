@@ -35,9 +35,9 @@ class DeliveryTable extends Component {
   componentDidUpdate(){
     var self = this;
     co(function * () {
-        const teams = self.props.teams;
-        if (teams){
-          let deliveries = teams.reduce(self.props.process, []);
+        var {data} = self.props.data;
+        if (data){
+          let deliveries = data.deliveries.reduce(self.props.process, []);
           self.setState({deliveries: deliveries},)
         } else  {
           throw new Error('Failed to load deliveries.')
@@ -48,9 +48,9 @@ class DeliveryTable extends Component {
   componentDidMount() {
     var self = this;
     co(function * () {
-        const teams = self.props.teams;
-        if (teams){
-          let deliveries = teams.reduce(self.props.process, []);
+        var {data} = self.props.data;
+        if (data){
+          let deliveries = data.deliveries.reduce(self.props.process, []);
           self.setState({deliveries: deliveries},)
         } else  {
           throw new Error('Failed to load deliveries.')

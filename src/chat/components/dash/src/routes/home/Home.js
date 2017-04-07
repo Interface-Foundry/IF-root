@@ -17,7 +17,7 @@ import {
   Tooltip,
   XAxis, YAxis, Area,
   CartesianGrid, AreaChart, Bar, BarChart,
-  ResponsiveContainer } from '../../vendor/recharts';
+  ResponsiveContainer, LineChart, Line } from '../../vendor/recharts';
 
 
 /************************************************
@@ -26,40 +26,23 @@ import {
     ┣━┃╻┃ ┃┃┃┏┫┗┫━┫┃┃┃╻┃ ┃┃┃╻┃
     ┗━┻┻┻┻┻┻┛┗━┻━┛┗━┻┻┛┗┛┗┻┛
 ************************************************/
-/*
-const data = [
-  { name: 'Page A', uv: 4000, pv: 2400, amt: 2400, value: 600 },
-  { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, value: 300 },
-  { name: 'Page C', uv: 2000, pv: 9800, amt: 2290, value: 500 },
-  { name: 'Page D', uv: 2780, pv: 3908, amt: 2000, value: 400 },
-  { name: 'Page E', uv: 1890, pv: 4800, amt: 2181, value: 200 },
-  { name: 'Page F', uv: 2390, pv: 3800, amt: 2500, value: 700 },
-  { name: 'Page G', uv: 3490, pv: 4300, amt: 2100, value: 100 },
-];
-*/
+
+// const data = [
+//   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400, value: 600 },
+//   { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, value: 300 },
+//   { name: 'Page C', uv: 2000, pv: 9800, amt: 2290, value: 500 },
+//   { name: 'Page D', uv: 2780, pv: 3908, amt: 2000, value: 400 },
+//   { name: 'Page E', uv: 1890, pv: 4800, amt: 2181, value: 200 },
+//   { name: 'Page F', uv: 2390, pv: 3800, amt: 2500, value: 700 },
+//   { name: 'Page G', uv: 3490, pv: 4300, amt: 2100, value: 100 },
+// ];
+
 
 /* *********************************************** */
 
-/*
-<Panel
-  header={<span>
-    <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
-  </span>}>
-    <div className="resizable">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
-          <XAxis dataKey="name" />
-          <YAxis />
-          <CartesianGrid stroke="#ccc" />
-          <Tooltip />
-          <Area type="monotone" dataKey="uv" stackId="1" stroke="#8884d8" fill="#8884d8" />
-          <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-          <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-</Panel>
-*/
+
+
+
 
 class Home extends Component {
   constructor(props) {
@@ -105,7 +88,7 @@ class Home extends Component {
         <CartTable 
                 start = {startDate}
                 end = {endDate}
-                teams = {this.props.teams}
+                data = {this.props.data}
                 heads = {
                   [{ 
                     field: 'created_date',
@@ -194,30 +177,20 @@ class Home extends Component {
 
   renderDeliveryTable(startDate, endDate){
     //console.log(new Date(startDate),new Date(endDate));
+
     return(
+
       <Panel className='fillSpace' header={<span><i className="fa fa-bar-chart-o fa-fw" /> Purchased Cafe Carts from {new Date(startDate).toLocaleString()} to {new Date(endDate).toLocaleString()}</span>}>
       
         <DeliveryTable 
                 start = {startDate}
                 end = {endDate}
-                teams = {this.props.teams}
+                data = {this.props.data}
                 heads = {
                   [{ 
                     field: 'created_date',
                     descrip: 'Created Date',
-                    allowSort: true,
-                    sort: (a, b, order) => order == 'desc' ? 
-                        new Date(b.created_date) - new Date(a.created_date) 
-                        : new Date(a.created_date) - new Date(b.created_date)
                   },
-                  {
-                    field: 'purchased_date',
-                    descrip: 'Purchased Date',
-                    allowSort: true,
-                    sort: (a, b, order) => order == 'desc' ? 
-                        new Date(b.purchased_date) - new Date(a.purchased_date) 
-                        : new Date(a.purchased_date) - new Date(b.purchased_date)
-                  }, 
                   {
                     field: 'team_name',
                     descrip: 'Slack ID'
@@ -235,10 +208,6 @@ class Home extends Component {
                     descrip: 'Cart Size'
                   },
                   {
-                    field: 'items',
-                    descrip: 'Quantity'
-                  },
-                  {
                     field: 'user',
                     descrip: 'User ID'
                   },
@@ -248,41 +217,28 @@ class Home extends Component {
                   }]
                 }
                 process = {
-                  (teams, team) => 
-                  teams.concat(
-                    team.deliveries.reduce((deliveries, delivery) => {
-                      if(delivery.payment_post){
+                  (deliveries, delivery) => {
                         var self = this;
-                        var addedItems = delivery.cart.filter(function(item){
-                              return item.added_to_cart==true
-                            })
-                        if(new Date(delivery.payment_post.time_started)>=new Date(startDate) && new Date(delivery.payment_post.time_started)<=new Date(endDate)){
+                        if(new Date(delivery.time_started)>=new Date(startDate) && new Date(delivery.time_started)<=new Date(endDate)){
                           deliveries.push({
-                            team_name: team.team_name,
-                            purchased_date: (new Date(delivery.order.order_time)).toLocaleString(),
-                            created_date: (new Date(delivery.payment_post.time_started)).toLocaleString(),
-                            restaurant: delivery.order.merchant_info.name,
-                            cart_size: delivery.order.item_count,
-                            cart_total: '$'+delivery.order.total.toFixed(2),
+                            team_name: delivery.team_id,
+                            created_date: (new Date(delivery.time_started)).toLocaleString(),
+                            restaurant: delivery.chosen_restaurant,
+                            cart_size: delivery.item_count,
+                            cart_total: delivery.cart_total,
                             });
-                            addedItems.map(function(item){
-                                let addedItem = delivery.order.cart.find(function(i){
-                                  return i.id == item.item.item_id || i.id.split('-').pop() == item.item.item_id
-                                })
+                            delivery.items.map(function(item){
                                 deliveries.push({
-                                items: addedItem.quantity,
-                                user: team.members.find(function(m){
-                                  return m.id == item.user_id
-                                }).name,
-                                order: addedItem.name
+                                user: item.user,
+                                order: item.item_name
                               })
                           })
                         }
-                      }
+                      
                       return deliveries;
-                    }, [])
+                    }
 
-                  )
+                  
                 }
         /> 
 
@@ -290,10 +246,89 @@ class Home extends Component {
   )
   }
 
+  renderCartsLineGraph(data){
+    var dataPlot = [];   //name:time_range #carts, #teams, and #items
+    var weekRanges=[]; 
+    //console.log(data.data.deliveries);
+    
+    for(var i = 0; i<10; i++){
+      weekRanges.push({index: i, startDate: new Date(moment().subtract(10-i, 'week')),endDate: new Date(moment().subtract(9-i, 'week')), numCarts:0,teams:[],numItems:0});
+    }
+    data.data.deliveries.map(function(delivery){
+      var week = weekRanges.find(function(w){
+        return new Date(delivery.time_started) > new Date(w.startDate) && new Date(delivery.time_started) <= new Date(w.endDate);
+      });
+      week.numCarts++;
+      week.numItems += delivery.item_count;
+      if(week.teams.length<1 || !week.teams.includes(delivery.team_id)) {
+        week.teams.push(delivery.team_id);
+      }
+      
+    })
+
+    for(var i=0;i<10;i++){
+      var currentWeek = weekRanges.find((x) => x.index==i);
+      dataPlot.push({name: currentWeek.endDate.toLocaleDateString(), numCarts: currentWeek.numCarts, numItems: currentWeek.numItems, numTeams: currentWeek.teams.length})
+    }
+    
+    return(
+      <Panel
+        header={<span>
+          <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
+        </span>}>
+          <div className="resizable">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={dataPlot} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
+                <XAxis dataKey="name" />
+                <YAxis />
+                <CartesianGrid stroke="#ccc" />
+                <Tooltip />
+                    <Line type="monotone" dataKey="numCarts" stroke="#8884d8" fill="#8884d8" />
+                    <Line type="monotone" dataKey="numItems" stroke="#82ca9d" fill="#82ca9d" />
+                    <Line type="monotone" dataKey="numTeams" stroke="#ffc658" fill="#ffc658" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+      </Panel>
+    )
+  }
+
   render(){
     var self = this;
     return (
       <div>
+      <div>
+          {self.renderCartsLineGraph(this.props.data)}
+      </div>
+        <div className="container-fluid data-display">
+          <ButtonToolbar>
+            <Button onClick={ ()=> self.changeCart('Store')}>
+              Store
+            </Button>
+            <Button onClick={ ()=> self.changeCart('Cafe')}>
+              Cafe
+            </Button>
+          </ButtonToolbar>
+          <div>
+              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />    
+              End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
+          </div>
+            { self.renderDeliveryTable(self.state.startDate, self.state.endDate) }
+
+        </div>
+      </div>
+
+    )
+  }
+
+  /*
+  render(){
+    var self = this;
+    return (
+      <div>
+      <div>
+          {self.renderCartsLineGraph(this.props.data)}
+      </div>
         <div className="container-fluid data-display">
           <ButtonToolbar>
             <Button onClick={ ()=> self.changeCart('Store')}>
@@ -314,6 +349,7 @@ class Home extends Component {
 
     )
   }
+  */
   
 }
 

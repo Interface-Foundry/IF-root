@@ -35,9 +35,9 @@ class CartTable extends Component {
   componentDidUpdate(){
     var self = this;
     co(function * () {
-        const teams = self.props.teams;
-        if (teams){
-          let carts = teams.reduce(self.props.process, []);
+        const data = self.props.data;
+        if (data){
+          let carts = data.reduce(self.props.process, []);
           self.setState({carts: carts},)
         } else  {
           throw new Error('Failed to load carts.')
@@ -48,9 +48,9 @@ class CartTable extends Component {
   componentDidMount() {
     var self = this;
     co(function * () {
-        const teams = self.props.teams;
-        if (teams){
-          let carts = teams.reduce(self.props.process, []);
+        const data = self.props.data;
+        if (data){
+          let carts = data.reduce(self.props.process, []);
           self.setState({carts: carts})
         } else  {
           throw new Error('Failed to load carts.')
