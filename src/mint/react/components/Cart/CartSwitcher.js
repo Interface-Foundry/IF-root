@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import {Link} from 'react-router-dom'
 
 export default class CartSwitcher extends Component {
   static propTypes = {
@@ -28,9 +29,9 @@ class CartItem extends Component {
     const { id, items, leader } = cart;
     return (
       <li>
-        <a className='cartswitcher__cart' href={`/cart/${id}`}>
+        <Link className='cartswitcher__cart' to={`/cart/${id}`}>
           {id} by {leader.email_address} ({items.length} items)
-        </a>
+        </Link>
       </li>
     );
   }
