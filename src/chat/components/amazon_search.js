@@ -427,32 +427,34 @@ var getPrices = function (item, callback) {
 
   verbose('price PRE PROCESS ', price)
 
-  amazonHTML.basic(url, function (err, product) {
-    kip.err(err) // print error
+  callback(price, altImage, reviews)
 
-    verbose('& & & & & & & & & & & &PRODUCT OBJ ', product)
+  // amazonHTML.basic(url, function (err, product) {
+  //   kip.err(err) // print error
 
-    if (product && product.reviews) {
-      reviews = product.reviews
-    }
+  //   verbose('& & & & & & & & & & & &PRODUCT OBJ ', product)
 
-    if (product && product.price) {
-      verbose('returning early with price: ' + product.price)
-      verbose('returning early with rice ' + product.altImage)
-      // if(product.altImage){
-      //   altImage = product.altImage
-      // }
-      return callback(product.price, product.altImage, reviews)
-    }
+  //   if (product && product.reviews) {
+  //     reviews = product.reviews
+  //   }
 
-    price = product.price || price || ''
-    verbose('final price: ' + price)
-    if (product.altImage) {
-      altImage = product.altImage
-    }
+  //   if (product && product.price) {
+  //     verbose('returning early with price: ' + product.price)
+  //     verbose('returning early with rice ' + product.altImage)
+  //     // if(product.altImage){
+  //     //   altImage = product.altImage
+  //     // }
+  //     return callback(product.price, product.altImage, reviews)
+  //   }
 
-    callback(price, altImage, reviews)
-  })
+  //   price = product.price || price || ''
+  //   verbose('final price: ' + price)
+  //   if (product.altImage) {
+  //     altImage = product.altImage
+  //   }
+
+  //   callback(price, altImage, reviews)
+  // })
 }
 
 // //////////// lol //////////////////

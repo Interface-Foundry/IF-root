@@ -136,9 +136,13 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
 //
 module.exports.emptyCart = function (cart_id) {
   return co(function * () {
-    var cart = yield db.Carts.findOne({'slack_id': cart_id}).exec()
+    //get cart
+    var cart = yield getCart(cart_id)
+    //if cart empty / null return
     if (!cart || cart == null) return null
+    //process cart items
     async.eachSeries(cart.items, function iterator (id, callback) {
+      //get items in cart
       db.Item.findById(id).then(function (err, item) {
         if (item) {
           item.deleted = true
