@@ -51,7 +51,9 @@ function * initializeTeam (team, auth) {
     var generalChannel = botChannelArray.find((c) => {
       return c.name === 'general'
     })
-    team.meta.cart_channels.push(generalChannel.id)
+    if (generalChannel) {
+      team.meta.cart_channels.push(generalChannel.id)
+    }
   }
 
   if (_.get(team, 'meta.office_assistants').length <= 0) {

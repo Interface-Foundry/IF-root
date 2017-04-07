@@ -11,9 +11,14 @@ spec:
         app: cafe-menu
     spec:
       containers:
-      - name: cafe
+      - env:
+        - name: NODE_ENV
+          value: kubernetes
+        - name: CONFIG_ENV
+          value: kubernetes
         image: gcr.io/kip-styles/cafe_menu:latest
         imagePullPolicy: Always
+        name: cafe
         ports:
         - containerPort: 8001
           protocol: TCP
