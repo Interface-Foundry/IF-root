@@ -76,7 +76,7 @@ var emailsCollection = Waterline.Collection.extend({
     			};
     		*/
         var options = {
-          from: 'Kip <hello@kipthis.com>',
+          from: 'Kip <hello@kip.ai>',
           to: me.recipients,
           subject: me.subject,
           html: me.message_html,

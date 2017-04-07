@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <title>Share Cart Email</title>
+   <style>
+       /* CLIENT-SPECIFIC STYLES */
+       #outlook a{padding:0;} /* Force Outlook to provide a "view in browser" message */
+       .ReadMsgBody{width:100%;} .ExternalClass{width:100%;} /* Force Hotmail to display emails at full width */
+       .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height: 100%;} /* Force Hotmail to display normal line spacing */
+       body, table, td, a{-webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;} /* Prevent WebKit and Windows mobile changing default text sizes */
+       table, td{mso-table-lspace:0pt; mso-table-rspace:0pt;} /* Remove spacing between tables in Outlook 2007 and up */
+       img{-ms-interpolation-mode:bicubic;} /* Allow smoother rendering of resized image in Internet Explorer */
+
+       /* RESET STYLES */
+       body{margin:0; padding:0;}
+       img{border:0; height:auto; line-height:100%; outline:none; text-decoration:none;}
+       table{border-collapse:collapse !important;}
+       body{height:100% !important; margin:0; padding:0; width:100% !important;}
+
+       /* KIP STYLING */
+       .body {
+           padding: 10px;
+       }
+       .body__email {
+           position: relative;
+           max-width: 500px;
+           border: 1px solid black;
+           padding: 20px;
+           border-radius: 5px;
+           margin: 0 auto;
+       }
+       .pre-header {
+           max-width: 500px;
+           height: 50px;
+           line-height: 50px;
+           font-size: 20px;
+           margin: 0 auto;
+       }
+
+
+       img {
+           position: absolute;
+           top: -25px;
+           right: -25px;
+           width: 50px;
+       }
+
+       button {
+           border: 1px solid #e3e3e3 ;
+           background: #333;
+           cursor: pointer;
+           color: white;
+           padding: 10px 20px;
+       }
+
+       h2 {
+           margin: 0 0 20px;
+       }
+       p {
+           margin: 20px 0;
+           font-size: 20px;
+       }
+       a {
+           font-size: 16px;
+       }
+   </style>
+</head>
+<body>
+<!-- Hidden Values -->
+<input type="hidden" name="cartId" value="<%=id%>">
+<!-- Hidden Values -->
+<div class="body">
+   <!-- This is just for email, dont worry about responsive, shows first before anything else -->
+   <div class="pre-header">
+       Share Cart Email
+   </div>
+   <div class="body__email">
+       <img src='http://tidepools.co/kip/head_smaller.png'/>
+       <h2><%=name%>'s Group Cart created</h2>
+       <a href='<%=baseUrl%>/cart/<%=id%>'><%=baseUrl%>/cart/<%=id%></a>
+       <p>Forward this email to include others in the cart</p>
+       <a href='<%=baseUrl%>/cart/<%=id%>'><button>View Cart</button></a>
+   </div>
+</div>
+</body>
+</html>

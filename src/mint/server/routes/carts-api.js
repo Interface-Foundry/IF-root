@@ -357,5 +357,6 @@ module.exports = function (router) {
 
  // remember to actually send it
  yield email.send();
+ res.sendStatus(200);
 }))
 }

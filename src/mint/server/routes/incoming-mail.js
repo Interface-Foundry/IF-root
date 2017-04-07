@@ -10,7 +10,8 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-const deals = require('../deals/deals')
+const deals = require('../deals/deals');
+var amazonScraper = require('../cart/scraper_amazon');
 
 /**
  * TODO, etc
@@ -21,35 +22,39 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   var email = req.body.from.split(' ');
   email = email[email.length-1];
   if (email[0] === '<') email = email.slice(1, email.length-1);
-
   var user = db.UserAccounts.findOrCreate({email: email});
-  console.log('found or created user');
 
   var text = req.body.text.split(/\s/);
-  var uris = text.filter(w => validUrl.isUri(w));
-  uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u));   //validate uris as amazon links
-  // console.log('amazon URIs', uris);
-  // console.log(req.protocol + '://' + req.get('host'));
-  const cart_id = '7a43d85c928f'; //for testing
+
+  var uris = (text ? text.filter(w => validUrl.isUri(w)) : null);
+  uris = (uris ? uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)) : null);   //validate uris as amazon links
+  if (!uris) res.sendStatus(200);
+
+  var html = req.body.html;
+  var cart_id = /name="cartId" value="(.*)"/.exec(html)[1];
+  console.log('cart_id', cart_id)
 
   // find all the carts where their user id appears in the leader or member field
-  console.log('gonna query for carts')
+  console.log('gonna query for the cart')
   var cart = yield db.Carts.findOne({id: cart_id});
-  // var carts = yield db.Carts.find({
-  //   or: [
-  //     { leader: user.id },
-  //     { members: user.id }
-  //   ]
-  // }).populate('items').populate('leader').populate('members');
-
-  if (cart) var cart = carts[0];
-  else {
-    //TODO if user does not have a cart, make on
-  }
 
   //TODO add uri to user's cart
+  if (uris.length) {
+    var url_items = yield uris.map(function * (uri) {
+      return yield amazonScraper.scrapeUrl(uri);
+    });
+    // console.log('amazon things', uris)
+    yield url_items.map(function * (it) {
+      cart.items.add(it.id);
+      it.cart = cart.id;
+      it.added_by = user.id
+      yield it.save();
+    })
+    yield cart.save();
+  }
+  else console.log('no amazon uris')
 
-  console.log(cart);
+  // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')
   res.sendStatus(200);
 }));
 
