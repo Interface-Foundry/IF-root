@@ -176,6 +176,23 @@ function * getChannels(team) {
 
 
 /*
+* returns channel name for a given a slackbot(team) and channel ID
+* @param {Object} slackbot object
+* @returns {array} returns channel name string
+*
+*/
+function * getChannelName(team,channelId) {
+  var res_chan = yield request('https://slack.com/api/channels.info?token=' + team.bot.bot_access_token+'&channel='+channelId); // lists all members in a channel
+  res_chan = JSON.parse(res_chan)
+  if(res_chan.channel && res_chan.channel.name){
+    return res_chan.channel.name
+  }else {
+    return '' //haha what idk 
+  }
+}
+
+
+/*
 * returns members of a team given a slackbot object, creates chatuser objects if they do not exist in db
 * @param {Object} slackbot object
 * @returns {array} returns chatuser objects
@@ -878,6 +895,7 @@ module.exports = {
   findAdmins: findAdmins,
   getTeamMembers: getTeamMembers,
   getChannels: getChannels,
+  getChannelName: getChannelName,
   getChannelMembers: getChannelMembers,
   refreshAllChannels: refreshAllChannels,
   addCartChannel: addCartChannel,

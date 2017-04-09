@@ -242,6 +242,19 @@ app.post('/slackaction', next(function * (req, res) {
             if(message.source.team == 'T02PN3B25'){
               json.attachments[0].actions[2].text = '◉ By Channel';
               team.meta.collect_from = 'channel';
+
+              // console.log('/ / / / / / MESSAGE SOURCE ',message.source.actions[0])
+
+              // if(message.source && message.source.actions && message.source.actions[0] && message.source.actions[0].selected_options){
+              //   var selectVal = [{
+              //     'value':message.source.actions[0].selected_options[0].value
+              //   }]
+              // }else {
+              //   var selectVal = false
+              // }
+
+              // console.log('\n\n\n\n\n\ !>!>! ',selectVal)
+
               let channelSection = [{
                 text: '',
                 callback_id: 'channel_buttons_idk',
@@ -250,9 +263,13 @@ app.post('/slackaction', next(function * (req, res) {
                   text: 'Pick Channel',
                   type: 'select',
                   data_source: 'channels'
+                  // selected_options: selectVal
                 }]
               }];
               channelSection.push(json.attachments.pop());
+
+             // console.log('\n\n\n\n\n CHANNELSECTION ',JSON.stringify(channelSection))
+
               json.attachments = [...json.attachments, ...channelSection];
               break;
             }
@@ -321,14 +338,53 @@ app.post('/slackaction', next(function * (req, res) {
         });
         return;
       } else if (simple_command === 'channel_btn') {
+
+        console.log("CHANNEL BUTTON % % % % % % % % % % % % ")
         let team_id = message.source.team;
         let channelId = (action.selected_options) ? action.selected_options[0].value : action.value;
         let team = yield db.Slackbots.findOne({
           'team_id': team_id
         }).exec();
         team.meta.cart_channels = [channelId];
+
+
         team.markModified('meta.cart_channels');
         yield team.save();
+
+
+        //message menus fix
+        if(parsedIn.original_message && parsedIn.original_message.attachments){
+          var index = _.findIndex(parsedIn.original_message.attachments, {callback_id: 'channel_buttons_idk'}) //idk why "_idk" is used ugh
+          console.log('ix ',index)
+          if (parsedIn.original_message.attachments[index].actions){
+            
+            let channelName = yield utils.getChannelName(team,channelId);
+
+            parsedIn.original_message.attachments[index].actions[0].selected_options = [{
+              value:channelId
+            }]
+          }
+        }
+        console.log('PLAT ',parsedIn.original_message.attachments[index].actions[0].selected_options)
+        //ugh
+
+        let stringOrig = JSON.stringify(parsedIn.original_message);
+        let map = {
+          amp: '&',
+          lt: '<',
+          gt: '>',
+          quot: '"',
+          '#039': '\''
+        };
+        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
+
+        console.log('^ ^ ^ STRING ORG ^ ^ ^ ^ ',stringOrig)
+        request({
+          method: 'POST',
+          uri: message.source.response_url,
+          body: stringOrig
+        });
+
         return;
       }
       else if (simple_command == 'view_cart_btn') {
@@ -389,7 +445,7 @@ app.post('/slackaction', next(function * (req, res) {
     }
 
     else if (buttonData) {
-        kip.debug(' \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n  BUTTODATA:', buttonData,'  \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n')
+        //kip.debug(' \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n  BUTTODATA:', buttonData,'  \n\n\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n\n')
       var message = new db.Message({
         incoming: true,
         thread_id: parsedIn.channel.id,

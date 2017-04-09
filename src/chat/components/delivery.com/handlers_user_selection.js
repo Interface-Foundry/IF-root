@@ -476,13 +476,10 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
 // allow specific channel to be used
 handlers['food.admin.display_channels'] = function * (message) {
 
-  console.log('?!?!?!?!?!?!??!')
-  
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
 
   if (!foodSession.chosen_channel.id) foodSession.chosen_channel.id = 'everyone'
-
 
   var checkbox
 
@@ -545,7 +542,6 @@ handlers['food.admin.display_channels'] = function * (message) {
         type: 'select',
         data_source: 'channels',
         selected_options:[{
-          text: message.source.actions[0].selected_options[0].text,
           value: message.source.actions[0].selected_options[0].value 
         }]
       });
@@ -793,7 +789,7 @@ handlers['food.admin.toggle_channel'] = function * (message) {
         foodSession.chosen_channel.name = channel.name
         foodSession.chosen_channel.id = channel.id
         foodSession.chosen_channel.is_channel = channel.is_channel
-        
+
         var resp = yield infoForChannelOrGroup(slackbot, foodSession.chosen_channel)
         logging.debug('got resp back for select_channel members', resp)
         foodSession.team_members = foodSession.all_members.filter(user => {
