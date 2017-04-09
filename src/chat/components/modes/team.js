@@ -27,10 +27,13 @@ module.exports.handle = handle;
 
 handlers['start'] = function * (message) {
 
+  console.log("@@ @ @ @ @ @ @ @ @")
   //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
   //Œ Œ Œ Œ Œ Œ Œ Œ > SLACK LAUNCH CODE < Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
   //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
   if(message.source.team == 'T02PN3B25'){
+
+    console.log("$ $ $ $ $ $ $")
     var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
     if (team_id == null) {
       return kip.debug('incorrect team id : ', message);
@@ -73,7 +76,11 @@ handlers['start'] = function * (message) {
           name: 'channel_btn',
           text: 'Pick Channel',
           type: 'select',
-          data_source: 'channels'
+          data_source: 'channels',
+          selected_options:[{
+            text: message.source.actions[0].selected_options[0].text,
+            value: message.source.actions[0].selected_options[0].value 
+          }]
         }]
       };
       attachments.push(channelSection);

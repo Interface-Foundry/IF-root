@@ -124,7 +124,7 @@ handlers['initial'] = function*(message) {
     msg.mode = 'collect';
     msg.action = 'home';
     msg.text = '';
-    msg.fallback = 'That\'s it!\nThanks for adding Kip to your team';
+    msg.fallback = 'Collect Orders';
     msg.source.channel = typeof msg.source.channel === 'string' ? msg.source.channel : message.thread_id;
     msg.reply = attachments;
     return [msg];
