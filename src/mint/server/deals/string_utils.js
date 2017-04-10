@@ -66,11 +66,11 @@ utils.ellipses = function (str) {
     var firstHalf = str[0].split('');
     var lastHalf = str[1].split('');
     if (firstHalf[firstHalf.length-1] === lastHalf[0]) {
-      console.log('single word split up');
+      // console.log('single word split up');
       str = firstHalf.slice(0, firstHalf.length).concat(lastHalf.slice(1)).join('');
     }
     else {
-      console.log('multiple words truncated');
+      // console.log('multiple words truncated');
       firstWords = firstHalf.join('').split(' ');
       lastWords = lastHalf.join('').split(' ');
       // console.log('first words, last words:', firstWords, lastWords);

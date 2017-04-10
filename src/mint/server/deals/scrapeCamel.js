@@ -51,7 +51,14 @@ var getAmazon = function * (asin) {
   logging.info('take a deep breath');
   yield wait(1500);
 
-  var amazon_item = yield lookupAmazonItem(asin);
+  try {
+    var amazon_item = yield lookupAmazonItem(asin);
+  }
+  catch (e) {
+    logging.debug('amazon lookup failed', e);
+    return null;
+  }
+
   if (!amazon_item) {
     logging.debug('COULD NOT FIND ITEM ON AMAZON');
     return null;
@@ -61,6 +68,7 @@ var getAmazon = function * (asin) {
     console.log('AMAZON ITEM', (amazon_item.Errors ? amazon_item.Errors: amazon_item));
     return null;
   }
+  console.log('no problems')
   amazon_item = amazon_item.Item;
   // logging.info('AMAZON OBJECT:', amazon_item);
   var item = {};
@@ -109,19 +117,13 @@ var scrapeCamel = function * () {
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
     var current = $('div.current_price', e).text().split('$')[1];
     if (current) current = Number(current.split(',').join(''));
-    console.log('CURRENT', current);
+    // console.log('CURRENT', current);
     prices.push({new: current});
 
     var old_price = $('div.compare_price', e).first().text().split('\n')[2].trim().split('$')[1];
-    console.log('old', old_price);
+    // console.log('old', old_price);
     if (old_price) old_price = Number(old_price.split(',').join(''));
     prices[prices.length-1].old = old_price;
-    // $('div.compare_price', e).each(function (i, e) {
-    //   var price = $(e).text().split('\n')[2].trim().slice(1);
-    //   price = Number(price.split(',').join(''));
-    //   if (i % 2 === 0) prices.push({new: price});
-    //   else prices[prices.length-1].old = price;
-    // });
   });
 
   var originalPricesLength = prices.length;
@@ -130,28 +132,13 @@ var scrapeCamel = function * () {
   $('table.product_grid').last().find('div.deal_bottom_inner').each(function (i, e) {
     var current = $('div.current_price', e).text().split('$')[1];
     if (current) current = Number(current.split(',').join(''));
-    console.log('CURRENT', current);
+    // console.log('CURRENT', current);
     prices.push({new: current});
     //save to prices
     var old_price = $('div.compare_price', e).first().text().split('\n')[2].trim().split('$')[1];
-    console.log('old', old_price);
+    // console.log('old', old_price);
     if (old_price) old_price = Number(old_price.split(',').join(''));
     prices[prices.length-1].old = old_price;
-    // $('div.compare_price', e).each(function (j, e) {
-      // var price = $(e).text().split('\n')[2].trim();
-      // if (j % 2 === 1) {
-      //   price = price.split(' ')[1];
-      //   price = price.slice(1, price.length-1);
-      // }
-      // price = Number(price.slice(1).split(',').join(''));
-      //
-      // if (j % 2 === 0) {
-      //   prices.push({old: price});
-      // }
-      // else {
-      //   prices[i + j + originalPricesLength - 1].new = Number((prices[i + j + originalPricesLength - 1].old - price).toFixed(2));
-      // }
-    // });
   });
 
   //set last batch of camelItems to inactive
@@ -162,7 +149,10 @@ var scrapeCamel = function * () {
     var amazon = yield getAmazon(asins[i]); //would be cleaner to do this elsewhere
     //if an item with that ASIN is already in the db, delete it
 
-    if (!amazon || !prices[i].new) continue;
+    if (!amazon || !prices[i].new) {
+      console.log('this is not real');
+      continue;
+    }
 
     //saves items to the db
     console.log('Values:', names[i], asins[i], prices[i]);
@@ -227,7 +217,7 @@ var rankDeals = function * () {
     // logging.info('dealSet', dealSet.map(c => c.category));
     // logging.info('categoryCounts', categoryCounts);
     //if we have completed a set, we don't have to worry about repeating those categories
-    // logging.info('in the loop');
+    
     // logging.info('rankedDeals.length', rankedDeals.length);
     // logging.info('deferred.length', deferred.length);
     if (!deals.length) {
@@ -258,8 +248,6 @@ var rankDeals = function * () {
     }
     logging.info('done with iteration');
   }
-
-  console.log('done iterating -- some say atlanta, some say new york');
 
   for (var i = 0; i < rankedDeals.length; i++) {
     console.log('gonna update a record now');
