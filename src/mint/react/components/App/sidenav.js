@@ -50,6 +50,13 @@ export default class Sidenav extends Component {
               <p>{`${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
             </li>
           ))}
+          <footer>
+            <a href='/newcart'>
+              <button>
+                <p>New Cart</p>
+              </button>
+            </a>
+          </footer>
         </ul>
       </div>
     );
