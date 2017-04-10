@@ -27,257 +27,111 @@ module.exports.handle = handle;
 
 handlers['start'] = function * (message) {
 
-  console.log("@@ @ @ @ @ @ @ @ @")
-  //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-  //Œ Œ Œ Œ Œ Œ Œ Œ > SLACK LAUNCH CODE < Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-  //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-  if(message.source.team == 'T02PN3B25'){
+  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
+  if (team_id == null) {
+    return kip.debug('incorrect team id : ', message);
+  }
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
 
-    console.log("$ $ $ $ $ $ $")
-    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
-    if (team_id == null) {
-      return kip.debug('incorrect team id : ', message);
-    }
-    var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  team.meta.collect_from = 'all'
 
-    team.meta.collect_from = 'all'
+  let attachments = [{
+    text: 'Who do you want to be able to use Kip?',
+    image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
+    mrkdwn_in: ['text'],
+    color: '#45a5f4',
+    actions: [{
+      name: 'collect_select',
+      text: (team.meta.collect_from === 'all' ? '◉' : '○') + ' Everyone',
+      type: 'button',
+      value: 'everyone'
+    }, {
+      name: 'collect_select',
+      text: (team.meta.collect_from === 'me' ? '◉' : '○') + ' Just Me',
+      type: 'button',
+      value: 'justme'
+    }],
+    // {
+    //   name: 'collect_select',
+    //   text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
+    //   type: 'button',
+    //   value: 'channel'
+    // }],
+    fallback: 'Which group members would you like to collect orders from?',
+    callback_id: 'none'
+  }];
 
-    let attachments = [{
-      text: 'Who do you want to be able to use Kip?',
-      image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
-      mrkdwn_in: ['text'],
-      color: '#45a5f4',
-      actions: [{
-        name: 'collect_select',
-        text: (team.meta.collect_from === 'all' ? '◉' : '○') + ' Everyone',
-        type: 'button',
-        value: 'everyone'
-      }, {
-        name: 'collect_select',
-        text: (team.meta.collect_from === 'me' ? '◉' : '○') + ' Just Me',
-        type: 'button',
-        value: 'justme'
-      }],
-      // {
-      //   name: 'collect_select',
-      //   text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
-      //   type: 'button',
-      //   value: 'channel'
-      // }],
-      fallback: 'Which group members would you like to collect orders from?',
-      callback_id: 'none'
-    }];
-
-    if (team.meta.collect_from === 'channel') {
-      let channelSection = {
-        text: '',
-        callback_id: 'channel_buttons_idk',
-        actions: [{
-          name: 'channel_btn',
-          text: 'Pick Channel',
-          type: 'select',
-          data_source: 'channels',
-          selected_options:[{
-            text: message.source.actions[0].selected_options[0].text,
-            value: message.source.actions[0].selected_options[0].value 
-          }]
-        }]
-      };
-      attachments.push(channelSection);
-    }
-
-    attachments.push({
+  if (team.meta.collect_from === 'channel') {
+    let channelSection = {
       text: '',
-      color: '#45a5f4',
-      mrkdwn_in: ['text'],
-      fallback: 'yolo',
-      actions: cardTemplate.team_buttons,
-      callback_id: 'none'
-    });
-
-    if (message.source.response_url) {
-      let stringOrig = JSON.stringify({
-        text: '',
-        attachments: attachments
-      });
-      var map = {
-        amp: '&',
-        lt: '<',
-        gt: '>',
-        quot: '"',
-        '#039': "'"
-      }
-      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
-      request({
-        method: 'POST',
-        uri: message.source.response_url,
-        body: stringOrig
-      })
-      var msg = message;
-      msg.mode = 'team';
-      msg.action = 'home';
-      msg.text = '';
-      msg.execute = [{
-        "mode": "team",
-        "action": "home",
-        "_id": message._id
-      }];
-      msg.source.team = team.team_id;
-      msg.source.channel = msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-      msg.reply = attachments;
-      yield msg.save();
-
-    } else { // in case someone types team
-      var msg = message;
-      msg.mode = 'team';
-      msg.action = 'home';
-      msg.text = '';
-      msg.execute = [{
-        "mode": "team",
-        "action": "home",
-        "_id": message._id
-      }];
-      msg.source.team = team.team_id;
-      msg.source.channel = msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-      msg.reply = attachments;
-      return [msg];
-    }
+      callback_id: 'channel_buttons_idk',
+      actions: [{
+        name: 'channel_btn',
+        text: 'Pick Channel',
+        type: 'select',
+        data_source: 'channels'
+      }]
+    };
+    attachments.push(channelSection);
   }
 
-  //💀 KILL THIS CODE BEFORE LAUNCH 💀
-  else {
-    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
-    if (team_id == null) {
-      return kip.debug('incorrect team id : ', message);
-    }
-    var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-    let attachments = [{
-      text: 'Who do you want to be able to use Kip?',
-      image_url: 'http://kipthis.com/kip_modes/mode_teamcart_members.png',
-      mrkdwn_in: ['text'],
-      color: '#45a5f4',
-      actions: [{
-        name: 'collect_select',
-        text: (team.meta.collect_from === 'all' ? '◉' : '○') + ' Everyone',
-        type: 'button',
-        value: 'everyone'
-      }, {
-        name: 'collect_select',
-        text: (team.meta.collect_from === 'me' ? '◉' : '○') + ' Just Me',
-        type: 'button',
-        value: 'justme'
-      }, {
-        name: 'collect_select',
-        text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
-        type: 'button',
-        value: 'channel'
-      }],
-      fallback: 'Which group members would you like to collect orders from?',
-      callback_id: 'none'
-    }];
+  attachments.push({
+    text: '',
+    color: '#45a5f4',
+    mrkdwn_in: ['text'],
+    fallback: 'yolo',
+    actions: cardTemplate.team_buttons,
+    callback_id: 'none'
+  });
 
-    if (team.meta.collect_from === 'channel') {
-      let cartChannels = team.meta.cart_channels;
-      let channels = yield utils.getChannels(team);
-      let selectedChannels = channels.reduce((arr, channel) => {
-        if (cartChannels.includes(channel.id)) {
-          arr.push({
-            name: 'channel_btn',
-            text: `✓ #${channel.name}`,
-            type: 'button',
-            value: channel.id
-          });
-        }
-        return arr;
-      }, []);
-      let unselectedChannels = channels.reduce((arr, channel) => {
-        if (!cartChannels.includes(channel.id)) {
-          arr.push({
-            name: 'channel_btn',
-            text: `☐ #${channel.name}`,
-            type: 'button',
-            value: channel.id
-          });
-        }
-        return arr;
-      }, []);
-      selectedChannels = _.uniq(selectedChannels);
-      unselectedChannels = _.uniq(unselectedChannels);
-      let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
-        : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
-      let chunkedButtons = _.chunk(buttons, 5);
-      let channelSection = chunkedButtons.map(buttonRow => {
-        return {
-          text: '',
-          callback_id: 'channel_buttons_idk',
-          actions: buttonRow
-        };
-      });
-      channelSection.push({
-        'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
-        mrkdwn_in: ['text']
-      });
-      attachments = attachments.concat(channelSection);
-    }
-
-    attachments.push({
+  if (message.source.response_url) {
+    let stringOrig = JSON.stringify({
       text: '',
-      color: '#45a5f4',
-      mrkdwn_in: ['text'],
-      fallback: 'yolo',
-      actions: cardTemplate.team_buttons,
-      callback_id: 'none'
+      attachments: attachments
     });
-
-    if (message.source.response_url) {
-      let stringOrig = JSON.stringify({
-        text: '',
-        attachments: attachments
-      });
-      var map = {
-        amp: '&',
-        lt: '<',
-        gt: '>',
-        quot: '"',
-        '#039': "'"
-      }
-      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
-      request({
-        method: 'POST',
-        uri: message.source.response_url,
-        body: stringOrig
-      })
-      var msg = message;
-      msg.mode = 'team';
-      msg.action = 'home';
-      msg.text = '';
-      msg.execute = [{
-        "mode": "team",
-        "action": "home",
-        "_id": message._id
-      }];
-      msg.source.team = team.team_id;
-      msg.source.channel = msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-      msg.reply = attachments;
-      yield msg.save();
-
-    } else { // in case someone types team
-      var msg = message;
-      msg.mode = 'team';
-      msg.action = 'home';
-      msg.text = '';
-      msg.execute = [{
-        "mode": "team",
-        "action": "home",
-        "_id": message._id
-      }];
-      msg.source.team = team.team_id;
-      msg.source.channel = msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-      msg.reply = attachments;
-      return [msg];
+    var map = {
+      amp: '&',
+      lt: '<',
+      gt: '>',
+      quot: '"',
+      '#039': "'"
     }
+    stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+    request({
+      method: 'POST',
+      uri: message.source.response_url,
+      body: stringOrig
+    })
+    var msg = message;
+    msg.mode = 'team';
+    msg.action = 'home';
+    msg.text = '';
+    msg.execute = [{
+      "mode": "team",
+      "action": "home",
+      "_id": message._id
+    }];
+    msg.source.team = team.team_id;
+    msg.source.channel = msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    msg.reply = attachments;
+    yield msg.save();
 
+  } else { // in case someone types team
+    var msg = message;
+    msg.mode = 'team';
+    msg.action = 'home';
+    msg.text = '';
+    msg.execute = [{
+      "mode": "team",
+      "action": "home",
+      "_id": message._id
+    }];
+    msg.source.team = team.team_id;
+    msg.source.channel = msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    msg.reply = attachments;
+    return [msg];
   }
+
 }
 
 /**
