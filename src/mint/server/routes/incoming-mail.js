@@ -19,18 +19,20 @@ var amazonScraper = require('../cart/scraper_amazon');
 router.post('/', upload.array(), (req, res) => co(function * () {
   console.log('posted to webhook');
   yield dbReady;
-  console.log('req.body', req.body)
+  // console.log('req.body', req.body)
   var email = req.body.from.split(' ');
   email = email[email.length-1];
   if (email[0] === '<') email = email.slice(1, email.length-1);
   var user = db.UserAccounts.findOrCreate({email: email});
 
+  //parse out amazon uris
   var text = req.body.text.split(/\s/);
-
   var uris = (text ? text.filter(w => validUrl.isUri(w)) : null);
   uris = (uris ? uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)) : null);   //validate uris as amazon links
   if (!uris) res.sendStatus(200);
 
+  console.log('about to get cart id, which will break')
+  //get cart id
   var html = req.body.html;
   var cart_id = /name="cartId" value="(.*)"/.exec(html)[1];
   console.log('cart_id', cart_id)

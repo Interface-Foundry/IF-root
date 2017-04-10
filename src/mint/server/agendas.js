@@ -1,53 +1,88 @@
 var Agenda = require('agenda');
+var wait = require('co-wait');
+var co = require('co');
 var config = require('../../config');
 var agenda = new Agenda({db: {address: config.mongodb.url}});
+var camel = require('./deals/deals');
 
 var db;
 const dbReady = require('../db');
 dbReady.then((models) => { db = models; })
 
-console.log('running agenda.js')
+logging.info('running agenda.js')
 
-agenda.define('daily deals', function (job, done) {
-  console.log('daily deals called');
-  dbReady.then(function () {
-    console.log('db ready')
-  })
-  .then(function () {
-    return db.Emails.create({
-      recipients: 'hannah.katznelson@kipthis.com',
-      sender: 'deals@kip.ai',
-      subject: 'Daily Deals'
-      // template_name: 'daily_deals'
-      // message_html: '<html><body>Daily Deals; Be HUMBLE.</body></html>'
+var sendDailyDeals = function * () {
+  console.log('this is the sendDailyDeals function')
+  yield wait(2000);
+  console.log('and two seconds later');
+}
+
+agenda.define('test', function (job, done) {
+  logging.info('this is a test');
+  done();
+})
+
+agenda.define('deals', function (job, done) {
+  logging.info('deals!')
+  co.wrap(sendDailyDeals)()
+    .then(function () {
+      done();
     })
-  })
-  .then(function (daily) {
-    daily.template('daily_deals', {
-      id: '7a43d85c928f',
-      baseUrl: 'https://72f2343b.ngrok.io'
-    })
-    return daily;
-  })
-  .then(function (daily) {
-    daily.send();
-    console.log('daily deal sent');
-  })
-  .then(function () {
-    done();
-  })
+    .catch(function (err) {
+      console.error('error:', err)
+    });
+  // var deals;
+  // dbReady.then(function () {
+  //   logging.info('db ready')
+  // })
+  // .then(function () {
+  //   var allDeals = 'this is a test'; //this is being returned or w/e
+  //   return camel.getDeals(6, 2);
+  // })
+  // .then(function (allDeals) {
+  //   logging.info('allDeals', allDeals)
+  //   deals = [allDeals.slice(0, 2), allDeals.slice(2, 4), allDeals.slice(4, 6)];
+  // })
+  // .then(function () {
+  //   return db.Emails.create({
+  //     recipients: 'hannah.katznelson@kipthis.com',
+  //     sender: 'deals@kip.ai',
+  //     subject: 'Daily Deals',
+  //     // template_name: 'daily_deals'
+  //     message_html: '<html><body>Daily Deals; Be HUMBLE.</body></html>'
+  //   })
+  // })
+  // .then(function (daily) {
+  //   logging.info('about to load template');
+  //   daily.template('daily_deals', {
+  //     id: '7a43d85c928f',
+  //     deals: deals
+  //   })
+  //   return daily;
+  // })
+  // .then(function (daily) {
+  //   daily.send();
+  //   logging.info('daily deal sent');
+  // })
+  // .then(function () {
+  //   logging.info('done!');
+  //   return done();
+  // })
 });
 
 agenda.on('ready', function () {
-  console.log('ready, woohoo')
+  logging.info('ready, woohoo')
   //clears the incomplete jobs so that they can restart if the server does
   function failGracefully() {
     agenda.stop(() => process.exit(0));
   }
   process.on('SIGTERM', failGracefully);
   process.on('SIGINT', failGracefully);
-  agenda.every('1 day', 'daily deals');
+  agenda.every('30 seconds', 'test');
+  agenda.every('30 seconds', 'deals');
+  // logging.info('about to start agendas');
   agenda.start();
+  logging.info('started agendas')
 });
 
 module.exports = agenda;

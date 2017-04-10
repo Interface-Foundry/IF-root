@@ -8,20 +8,22 @@ dbReady.then((models) => { db = models; }).catch(e => console.error(e));
  * @param skip {int} number of deals to skip when paging (defaults to 0)
  */
 var getDeals = function * (count, skip) {
+  console.log('get deals called')
   yield dbReady;
   if (!count) count = 10;
-  if (!skip) skip = 0;
 
   var query = {
     limit: count,
     sort: 'createdAt DESC',
-    skip: skip,
     where: {
       active: true
     }
   }
 
+  if (skip) query.skip = skip;
+
   var camels = yield db.CamelItems.find(query);
+  console.log('just got camels');
 
   //if there's something wrong with the value passed in, just start from the beginning
   if (!camels.length && lastPosition > -1) return yield getDeals();
