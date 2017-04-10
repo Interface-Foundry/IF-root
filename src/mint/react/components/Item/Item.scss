@@ -1,47 +1,37 @@
 @import '../../styles/Constants';
-
 $item__view-height: calc(100% - #{$nav-height*2});
-
 .item {
-	height: 100%;
-
-	.item__view {
-		height: $item__view-height;
-		padding: $padding*2;
-		overflow: hidden;
-
-		div[class^='item__view'] {
-			margin-bottom: $padding;
-			text-align: left;
-
-			&:last-of-type {
-				margin-bottom: 0;
-			}
-
-			.ellipsis {
-				overflow: hidden;
-				display: -webkit-box;
-				-webkit-line-clamp: 3;
-				-webkit-box-orient: vertical;  
-			}
-
-			a {
-				display: block;
-				padding: $padding/2 $padding;
-				color: red;
-			}
-		}
-
-		.item__view__image {
-			margin: 0 auto;
-		}
-
-		.item__view__atts {
-			text-align: center;
-		}
-
-		.item__view__description {
-			overflow: hidden;
-		}
-	}
+  height: 100%;
+  .item__view {
+    height: $item__view-height;
+    padding: $padding*2;
+    overflow: hidden;
+    div[class^='item__view'] {
+      margin-bottom: $padding;
+      text-align: left;
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+      .ellipsis {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+      a {
+        display: block;
+        padding: $padding/2 $padding;
+        color: red;
+      }
+    }
+    .item__view__image {
+      margin: 0 auto;
+    }
+    .item__view__atts {
+      text-align: center;
+    }
+    .item__view__description {
+      overflow: hidden;
+    }
+  }
 }

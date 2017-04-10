@@ -21,7 +21,7 @@ describe('testUtils util', () => {
     it('should return original state when getState is called', () => {
       expect(fakeStore(state)
           .getState())
-        .toEqual({ ...state });
+        .toEqual({...state });
     });
   });
 });

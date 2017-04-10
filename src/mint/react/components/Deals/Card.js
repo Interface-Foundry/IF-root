@@ -22,9 +22,8 @@ export default class Card extends Component {
       <Link to={`/cart/${cart_id}/m/item/${asin}`} className='dealcard'>
         <div className='dealcard__image' style={{backgroundImage:`url(${imageSrc})`}}/>
         <div className='dealcard__name'>{name}</div>
-        <div className='dealcard__price'>${price}</div>
-        <div className='dealcard__discount'><strike>${previousPrice}</strike> ({(savePercent * 100) | 2}% off)</div>
-        
+        <div className='dealcard__price'>${price.toFixed(2)}</div>
+        <div className='dealcard__discount'><strike>${previousPrice.toFixed(2)}</strike> ({(savePercent * 100).toFixed()}% off)</div>
       </Link>
     );
   }

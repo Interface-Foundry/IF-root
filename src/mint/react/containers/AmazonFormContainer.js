@@ -21,7 +21,7 @@ const mapDispatchToProps = dispatch => ({
 const validate = (values, state) => {
   const errors = {};
   if (!values.url) {
-    errors.url = 'Please enter a amazon URL';
+    errors.url = '';
   }
   return errors;
 };

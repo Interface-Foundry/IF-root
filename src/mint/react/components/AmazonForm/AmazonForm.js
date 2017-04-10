@@ -19,7 +19,7 @@ export default class AmazonForm extends Component {
             <button
               className='form__input__submit'
               type="submit"
-              onClick={handleSubmit}><p>Submit</p></button>
+              onClick={handleSubmit}><p>Ok</p></button>
           </div>
           <DealsContainer isDropdown={active}/>
         </div>
@@ -35,7 +35,7 @@ export default class AmazonForm extends Component {
           <Field
             name="url"
             type="string"
-            label="Enter URL from Amazon?"
+            label="Add Amazon Item to Kip"
             placeholder="Enter URL"
             handleSubmit={handleSubmit}
             component={renderField}/>
