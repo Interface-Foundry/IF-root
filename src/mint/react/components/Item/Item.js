@@ -1,5 +1,4 @@
 import React, { PropTypes, Component } from 'react';
-import Header from './Header';
 import Footer from './Footer';
 
 export default class Item extends Component {
@@ -35,7 +34,6 @@ export default class Item extends Component {
     } = this;
     return (
       <div className='item'>
-        <Header replace={replace} cart_id={cart_id}/>
         <section className='item__view'>
           <div className='item__view__image image row'
             style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }/>

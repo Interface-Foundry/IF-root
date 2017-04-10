@@ -37,14 +37,14 @@ export default class App extends Component {
   }
 
   _toggleSidenav = () => {
-    const { sidenav } = this.state
-    this.setState({sidenav: !sidenav})
+    const { sidenav } = this.state;
+    this.setState({ sidenav: !sidenav });
   }
 
   render() {
-    const { cart_id, newAccount, leader, carts, match } = this.props,
-          { sidenav } = this.state,
-          { _toggleSidenav } = this;
+    const { props, state, _toggleSidenav } = this;
+    const { cart_id, newAccount, leader, carts, match } = props;
+    const { sidenav } = state;
 
     if (newAccount === false) {
       return <Overlay/>;
@@ -52,7 +52,8 @@ export default class App extends Component {
 
     return (
       <section className='app'>
-        <Header cart_id={cart_id} leader={leader} _toggleSidenav={_toggleSidenav}/>
+
+        <Header {...props}  _toggleSidenav={ _toggleSidenav} />
         { sidenav ? <Sidenav cart_id={cart_id} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav}/> : null }
 
         { /* Renders modal when route permits */ }
