@@ -4,6 +4,8 @@ var _ = require('lodash')
 
 var router = express.Router();
 
+const dealsDb = require('../deals/deals')
+
 var db;
 const dbReady = require('../../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e))
@@ -60,7 +62,7 @@ router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
     cart: cart_id
   })
 
-  var allDeals = require('../deals_sample.json');
+  var allDeals = yield dealsDb.getDeals(4, 0)
       deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
 
   // use the new_cart email template

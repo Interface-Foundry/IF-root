@@ -28,11 +28,11 @@ var scrape = function * (previousId) {
   function makeRequest(url) {
     var res = process.env.NO_LUMINATI ? request(url) : proxy.luminatiRequest(url);
     return res.then(body => {
-	      // console.log('success', body);
+        // console.log('success', body);
         console.log('success');
         return body;
       }).catch(err => {
-  	    console.log('bad', err);
+        console.log('bad', err);
       });
   }
 
@@ -285,9 +285,9 @@ module.exports = function () {
   });
 };
 
-if (!module.parent) {
+// if (!module.parent) {
   co(function * () {
     var r = yield scrapeCamel();
     console.log('r', r);
   }).catch(console.error.bind(console));
-}
+// }
