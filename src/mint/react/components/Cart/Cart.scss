@@ -4,8 +4,6 @@ $cart__add-height: $nav-height+$padding;
   height: calc(100% - #{$nav-height});
   position: relative;
   .cart__add {
-    height: $cart__add-height;
-    line-height: $cart__add-height;
     padding: 0 $padding*2 $padding*2;
     border-bottom: 1px solid darken($border-color-light, 10);
   }
@@ -24,8 +22,7 @@ $cart__add-height: $nav-height+$padding;
   }
   .cartswitcher__cart {
     font-size: 14px;
-    font-family: $secondary-font;
-    font-weight: bold;
+    font-family: $main-font;
     text-decoration: underline;
     list-style: disc none inside;
   }

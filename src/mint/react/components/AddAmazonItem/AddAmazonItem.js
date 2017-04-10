@@ -22,7 +22,10 @@ export default class AddAmazonItem extends Component {
   render() {
     const { addItemToCart } = this;
     return (
-      <button className='amazon__button' onClick={addItemToCart}>+ Add Amazon Items to Cart</button>
+      <div className='add_to_amazon'>
+        Add Item to Kip Cart
+        <button className='add_to_amazon__button' onClick={addItemToCart}>Paste Amazon URL or Search</button>
+      </div>
     );
   }
 }
