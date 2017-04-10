@@ -10,14 +10,36 @@
     display: inline-block;
     font-weight: 500;
     font-size: 20px;
-	}
-
-	.navbar__icon {
-		display: inline-block;
-		float: right;
-		svg {
-			height: 100%;
-			line-height: $nav-height - $padding*2;
-		}
-	}
+  }
+  .navbar__modal {
+    display: flex;
+    .navbar__modal_head {
+      flex-grow: 1;
+      text-align: center;
+    }
+  }
+  .navbar__icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-align: center;
+    cursor: pointer;
+    height: $nav-height;
+    width: $nav-height;
+    svg {
+      height: 100%;
+    }
+  }
+  .navbar__icon__close {
+    position: absolute;
+    top: 0;
+    left: 0;
+    text-align: center;
+    cursor: pointer;
+    height: $nav-height;
+    width: $nav-height;
+    svg {
+      height: 100%;
+    }
+  }
 }
