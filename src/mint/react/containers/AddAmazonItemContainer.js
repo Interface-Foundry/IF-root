@@ -4,7 +4,7 @@ import { addingItem } from '../actions/cart';
 import { AddAmazonItem } from '../components';
 
 const mapStateToProps = (state, ownProps) => ({
-	cart_id: state.cart.cart_id,
+  cart_id: state.cart.cart_id,
   user_accounts: state.session.user_accounts
 });
 

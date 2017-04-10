@@ -3,6 +3,6 @@ export const fakeStore = (state) => ({
   subscribe: () => {},
   dispatch: () => {},
   getState: () => {
-    return { ...state };
+    return {...state };
   }
 });

@@ -4,7 +4,7 @@ import thunk from 'redux-thunk';
 
 import { fakeStore } from '../../utils';
 import { fetchCart, fetchItems, removeItem, addItem } from '../cart';
-import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, REQUEST_ADD_ITEM_TO_CART, RECEIVE_ADD_ITEM_TO_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../../constants/ActionTypes';
+import { RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART, RECEIVE_ITEMS, REQUEST_ITEMS } from '../../constants/ActionTypes';
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);

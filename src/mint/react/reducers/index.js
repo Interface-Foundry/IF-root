@@ -18,9 +18,11 @@ export default combineReducers({
 // export selectors
 export {
   getAccountById
-} from './session';
+}
+from './session';
 
 export {
-	getMemberById,
-	getItemById
-} from './cart';
+  getMemberById,
+  getItemById
+}
+from './cart';

@@ -18,7 +18,7 @@ const renderField = ({ input, label, placeholder, handleSubmit, type, meta: { to
 
 export default (props) => {
   const { handleSubmit, cart_id, history: { replace } } = props;
-  
+
   return (
     <form onSubmit={handleSubmit} className="form">
       <div>

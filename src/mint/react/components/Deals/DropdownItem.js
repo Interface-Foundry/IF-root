@@ -1,4 +1,3 @@
-
 import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -14,10 +13,10 @@ export default class DropdownItem extends Component {
   }
 
   render() {
-    const { name, savePercent, asin, cart_id } = this.props;
+    const { price, name, savePercent, asin, cart_id } = this.props;
     return (
-      <Link to={`/cart/${cart_id}/m/item/${asin}`} className='dealcard'>
-        <p className='dealcard__name'>{name} ({(savePercent * 100) | 2}% off)</p>
+      <Link to={`/cart/${cart_id}/m/item/${asin}`} className='dealcard-small'>
+        <p><em className='price'>${price.toFixed(2)} </em> {name} ({(savePercent * 100).toFixed()}% off)</p>
       </Link>
     );
   }
