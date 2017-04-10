@@ -21,12 +21,11 @@ agenda.define('daily deals', function (job, done) {
       message_html: '<html><body>Daily Deals; Be HUMBLE.</body></html>'
     })
   })
-  .then(function () {
-    console.log('daily deal created');
+  .then(function (daily) {
+    daily.send();
+    console.log('daily deal sent');
   })
 
-  // //TODO send a bullshit email to yrself
-  var daily = yield
   //
   // console.log('daily deal created');
 
@@ -44,7 +43,7 @@ agenda.on('ready', function () {
   }
   process.on('SIGTERM', failGracefully);
   process.on('SIGINT', failGracefully);
-  agenda.every('20 seconds', 'daily deals');
+  agenda.every('45 seconds', 'daily deals');
   agenda.start();
 });
 
