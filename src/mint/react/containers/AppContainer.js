@@ -5,6 +5,7 @@ import { fetchCart, fetchAllCarts } from '../actions/cart';
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.routing.location.pathname.match(/cart\/((\d|\w)+)/)[1], // TODO: switch to nonregex when react router allows it
   leader: state.cart.currentCart.leader,
+  carts: state.cart.carts,
   newAccount: state.session.newAccount
 });
 const mapDispatchToProps = dispatch => ({

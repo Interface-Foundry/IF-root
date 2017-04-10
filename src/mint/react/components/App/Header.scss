@@ -9,11 +9,15 @@
   h3 {
     display: inline-block;
     font-weight: 500;
-    font-size: 26px;
-  }
-  svg {
-    float: right;
-    height: 100%;
-    line-height: $nav-height - $padding*2;
-  }
+    font-size: 20px;
+	}
+
+	.navbar__icon {
+		display: inline-block;
+		float: right;
+		svg {
+			height: 100%;
+			line-height: $nav-height - $padding*2;
+		}
+	}
 }
