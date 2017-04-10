@@ -148,7 +148,11 @@ function * loadTeam(slackbot) {
     });
 
     // scheduled tasks
-    updateHomeButtonAppender(message, slackbot.bot.bot_access_token);
+    try {
+      updateHomeButtonAppender(message, slackbot.bot.bot_access_token);
+    } catch (err) {
+      logging.warn('error in updateHomeButtonAppender for message ', message.user_id)
+    }
 
     // other random things
     if ((data.type !== 'message') || (data.subtype === 'channel_join') || (data.subtype === 'channel_leave')) { // settings.name = kip's slack username
