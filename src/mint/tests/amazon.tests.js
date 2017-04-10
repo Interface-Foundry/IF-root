@@ -4,14 +4,22 @@ var assert = require('chai').assert;
 var expect = require('chai').expect;
 
 
-var amazon = require('../server/utilities/amazon_cart.js');
+var amazon = require('../server/cart/amazon_cart.js');
 
 var test_item = 'https://www.amazon.com/AmazonBasics-Apple-Certified-Lightning-Cable/dp/B010S9N6OO/ref=sr_1_1?ie=UTF8&qid=1490132282&sr=8-1';
 
 describe('testing amazon to our cart system', () => {
-  it('get item asin from url', function * () {
-    var item = amazon.getAsin(test_item);
-    expect(item).to.equal('B010S9N6OO');
+  it('get item asin from various urls', function * () {
+    const items = {
+      B010S9N6OO: 'https://www.amazon.com/AmazonBasics-Apple-Certified-Lightning-Cable/dp/B010S9N6OO/ref=sr_1_1?ie=UTF8&qid=1490132282&sr=8-1',
+      B00L8IVWQ4: 'https://www.amazon.com/dp/B00L8IVWQ4/ref=twister_B00PZKJJ5W',
+      B01K1IO3QW: 'https://www.amazon.com/Acer-E5-575-33BM-15-6-Inch-Processor-Generation/dp/B01K1IO3QW/ref=sr_1_4?s=pc&ie=UTF8&qid=1491408499&sr=1-4&keywords=laptop'
+    }
+
+    Object.keys(items).map(k => {
+      const item = amazon.getAsin(items[k])
+      assert.equal(item, k)
+    })
   });
 
   it.skip('should get item from ItemLookup using url ', function * () {

@@ -36,4 +36,3 @@ export default function session(state = initialState, action) {
 
 // selectors
 export const getAccountById = (state, props) => state.user_accounts.find(account => account.id === props.id)
-

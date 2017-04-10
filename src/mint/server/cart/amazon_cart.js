@@ -79,7 +79,7 @@ exports.lookupAmazonItem = function * (asin) {
     Condition: 'New',
     IdType: 'ASIN',
     ItemId: asin,
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
   };
   try {
     var results = yield opHelper.execute('ItemLookup', amazonParams);

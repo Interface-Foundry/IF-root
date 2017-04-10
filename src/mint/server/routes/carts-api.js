@@ -1,6 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
-var scrape = require('../cart/scrape_url')
+var amazonScraper = require('../cart/scraper_amazon')
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -41,7 +41,7 @@ module.exports = function (router) {
    * @api {get} /api/cart/:cart_id Cart
    * @apiDescription Gets a single cart, does not have to be logged in
    * @apiGroup Carts
-   * @apiParam {string} cart_id the cart id
+   * @apiParam {string} :cart_id the cart id
    *
    * @apiSuccess {[Item]} items list of items
    * @apiSuccess {UserAccount} leader the cart leader
@@ -66,7 +66,7 @@ module.exports = function (router) {
    * @api {get} /api/cart/:cart_id/items Items
    * @apiDescription Gets all items in cart
    * @apiGroup Carts
-   * @apiParam {String} cart_id
+   * @apiParam {String} :cart_id
    */
   router.get('/cart/:cart_id/items', (req, res) => co(function* () {
     var cart = yield db.Carts.findOne({ id: req.params.cart_id }).populate('items')
@@ -79,11 +79,24 @@ module.exports = function (router) {
 
   /**
    * @api {post} /api/cart/:cart_id/item Add Item
-   * @apiDescription Adds an item to a cart
+   * @apiDescription Adds an item to a cart. Must specify either url or item_id in the request body. The item_id param is meant for adding a previewd item to cart, not for adding an item from some other cart to this cart.
    * @apiGroup Carts
    * @apiParam {string} :cart_id cart id
-   * @apiParam {string} url of the item from amazon or office depot or whatever
+   * @apiParam {string} url optional url of the item from amazon or office depot or whatever
+   * @apiParam {string} item_id optional to specify the id of an item that has been already scraped for a preview
    * @apiParam {string} user_id specify the identity which is adding the item (otherwise server picks the first authenticated identity)
+   *
+   * @apiParamExample Item from Preview
+   * POST https://mint.kipthis.com/api/cart/123456/item {
+   *   item_id: 'abc-123456',
+   *   user_id: '123456y'
+   * }
+   *
+   * @apiParamExample Item from URL
+   * POST https://mint.kipthis.com/api/cart/123456/item {
+   *   url: 'https://www.amazon.com/Proctor-Silex-Belgian-Waffle-26070/dp/B00JR5AAWW/ref=sr_1_15?s=kitchen&ie=UTF8&qid=1491404786&sr=1-15&keywords=waffle+iron',
+   *   user_id: '123456y'
+   * }
    */
   router.post('/cart/:cart_id/item', (req, res) => co(function* () {
     // only available for logged-in Users
@@ -103,8 +116,20 @@ module.exports = function (router) {
       throw new Error('Cart not found')
     }
 
-    // Create an item from the url
-    const item = yield scrape(req.body.url)
+    // Get or create the item, depending on if the user specifed a previewed item_id or a new url
+    var item
+    if (req.body.item_id) {
+      // make sure it's not in a cart already
+      var existingCart = yield db.Carts.findOne({items: req.body.item_id})
+      if (existingCart && existingCart.id !== cart.id) {
+        throw new Error('Item ' + req.body.item_id + ' is already in another cart ' + existingCart.id)
+      }
+      // get the previwed item from the db
+      item = yield db.Items.findOne({id: req.body.item_id})
+    } else {
+      // Create an item from the url
+      item = yield amazonScraper.scrapeUrl(req.body.url)
+    }
     cart.items.add(item.id)
     item.cart = cart.id
 
@@ -138,13 +163,16 @@ module.exports = function (router) {
   }));
 
   /**
-   * @api {delete} /api/cart/:cart_id/item Delete Item
+   * @api {delete} /api/cart/:cart_id/item/:item_id Delete Item
    * @apiDescription Delete or subtract item from cart. The user must be a leader or a member to do this (does not have to be the person that added the item)
    * @apiGroup Carts
    * @apiParam {string} :cart_id cart to remove item from
-   * @apiParam {string} item_id the item's identifier
+   * @apiParam {string} :item_id the item to delete
+   *
+   * @apiParamExample Request
+   * DELETE https://mint.kipthis.com/api/cart/123456/item/998765
    */
-  router.delete('/cart/:cart_id/item', (req, res) => co(function* () {
+  router.delete('/cart/:cart_id/item/:item_id', (req, res) => co(function* () {
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_accounts[0]')) {
       throw new Error('Unauthorized')
@@ -157,13 +185,13 @@ module.exports = function (router) {
     }
 
     // Make sure they specified an item id
-    if (!req.body.item_id) {
+    if (!req.params.item_id) {
       throw new Error('Must specify item_id')
     }
 
     // find the item they want to delete
     var item = yield db.Items.findOne({
-      id: req.body.item_id
+      id: req.params.item_id
     })
     if (!item) {
       throw new Error('Item not found')
@@ -228,7 +256,7 @@ module.exports = function (router) {
    * @apiParam {json} body the properties you want to set on the item
    *
    * @apiParamExample Request
-   * post /api/item/cd08ca774445 {
+   * POST /api/item/cd08ca774445 {
    *   "locked": true,
    * }
    *
@@ -263,12 +291,47 @@ module.exports = function (router) {
    * @apiDescription Gets an item by id, populating the options and added_by fields
    * @apiGroup Carts
    * @apiParam {String} :item_id
-   * @type {[type]}
    */
   router.get('/item/:item_id', (req, res) => co(function * () {
     var item = yield db.Items.findOne({id: req.params.item_id})
       .populate('options')
       .populate('added_by')
+    res.send(item)
+  }))
+
+
+  /**
+   * @api {get} /api/itempreview?q=:q Item Preview
+   * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
+   * @apiGroup Carts
+   * @apiParam {String} :q either a url, asin, or search text
+   *
+   * @apiParamExample url preview
+   * GET https://mint.kipthis.com/api/itempreview?q=https%3A%2F%2Fwww.amazon.com%2FOnitsuka-Tiger-Mexico-Classic-Running%2Fdp%2FB00L8IXMN0%2Fref%3Dsr_1_11%3Fs%3Dapparel%26ie%3DUTF8%26qid%3D1490047374%26sr%3D1-11%26nodeID%3D679312011%26psd%3D1%26keywords%3Dasics%252Bshoes%26th%3D1%26psc%3D1
+   *
+   * @apiParamExample asin preview
+   * GET https://mint.kipthis.com/api/itempreview?q=1234567
+   *
+   * @apiParamExample query preview
+   * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
+   */
+  router.get('/itempreview', (req, res) => co(function * () {
+    // parse the incoming text to extract either an asin, url, or search query
+    const q = (req.query.q || '').trim()
+    if (!q) {
+      throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
+    }
+
+    if (q.includes('amazon.com')) {
+      // probably a url
+      var item = yield amazonScraper.scrapeUrl(q)
+    } else if (q.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
+      // probably an asin
+      var item = yield amazonScraper.scrapeAsin(q)
+    } else {
+      // search query
+      throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
+    }
     res.send(item)
   }))
 }

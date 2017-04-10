@@ -17,7 +17,8 @@ Babel all day and all night (gotta love writting javascript that compiles to... 
 We are using pretty standard commands just to keep it easy, webpack builds react into public then express serves it up on port: 3000
 
 1. yarn dev --> npm run dev --> runs express and webpack-dev-server with hot-reloading because meh to refreshing
-2. npm run test --> runs karma start, which has technically less characters so you could justs go with karma start 
+2. yarn react-tests --> runs karma start, which has technically less characters so you could justs go with karma start
+3. yarn test --> runs api tests if you have a server running already
 
 # API DOCS
 Peter has built a pretty awesome apidoc, should automagically open after running script.
@@ -35,7 +36,7 @@ Peter has built a pretty awesome apidoc, should automagically open after running
 		|___ styles --> (maybe rename to themes?) holds all style constants such as animations, css variables, grid system etc..
 		|___ utils --> Utility functions used accross the app
 		|___ index.js --> first file that gets run
-		|___ routes.js --> We are using react-redux-router, so holds all our routes. 
+		|___ routes.js --> We are using react-redux-router, so holds all our routes.
 
 # TEST FILES
 
@@ -55,7 +56,7 @@ Eventally Should work on mobile, tablet, and desktop.
 
 ## For Redux: (https://github.com/reactjs/redux/issues/1171)
 1. Use selectors everywhere (e.g in containers, do this myValueSelector NOT state.myValue)
-	Why: 
+	Why:
 		1. Easier to tests, lets you write ducks (e.g test action, containers, and reducers )
 		2. More reusablity for accessing attributes
 
@@ -64,7 +65,7 @@ Eventally Should work on mobile, tablet, and desktop.
 		1. according to the interwebs community "Business logic belongs in action-creators. Reducers should be stupid and simple."
 		2. So we should do most of our logic in the action-creators, and secondly in the containers
 
-3. Implement Immutable.js, but can do this last as its just an optimization thing for react. React is built to deal with immutable objects as thats how they do their virtual dom tree diffs (I think its done similar to google closure, should double check me here) so this really speeds up load time and lowers CPU usage ( goes from O(n^3) --> O(n) I think, or thats what reacts special diff algorith does). 
+3. Implement Immutable.js, but can do this last as its just an optimization thing for react. React is built to deal with immutable objects as thats how they do their virtual dom tree diffs (I think its done similar to google closure, should double check me here) so this really speeds up load time and lowers CPU usage ( goes from O(n^3) --> O(n) I think, or thats what reacts special diff algorith does).
 
 # Some cool videos cause cool.
 
@@ -76,8 +77,3 @@ https://www.youtube.com/watch?v=j-kj2qwJa_E
 
 ## Netflix RxJS + Redux + React
 https://www.youtube.com/watch?v=AslncyG8whg
-
-
-
-
-

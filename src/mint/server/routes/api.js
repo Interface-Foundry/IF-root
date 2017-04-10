@@ -73,6 +73,5 @@ router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
   // remember to actually send it
   yield email.send();
 }))
-// DELETE THIS LATER 
 
 module.exports = router;

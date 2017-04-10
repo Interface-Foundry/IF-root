@@ -1,21 +1,18 @@
 import { connect } from 'react-redux';
 import { Cart } from '../components';
-
-import { fetchCart } from '../actions/cart';
 import { fetchDeals } from '../actions/deals';
-
 import { selectItem } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
-	cart_id: ownProps.match.params.cart_id,
-  leader: state.cart.leader,
-  members: state.cart.members,
-  items: state.cart.items,
-  addingItem: state.cart.addingItem
+  cart_id: state.cart.cart_id,
+  addingItem: state.cart.addingItem,
+  leader: state.cart.currentCart.leader,
+  members: state.cart.currentCart.members,
+  items: state.cart.currentCart.items,
+  carts: state.cart.carts
 });
 
 const mapDispatchToProps = dispatch => ({
-	fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
   fetchDeals: () => dispatch(fetchDeals()),
   selectItem: item => dispatch(selectItem(item))
 });

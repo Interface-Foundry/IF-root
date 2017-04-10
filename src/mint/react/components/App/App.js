@@ -11,7 +11,23 @@ export default class App extends Component {
     leader: PropTypes.object,
     modal: PropTypes.string,
     newAccount: PropTypes.bool,
-    match: PropTypes.object.isRequired
+    match: PropTypes.object.isRequired,
+    fetchCart: PropTypes.func.isRequired,
+    fetchAllCarts: PropTypes.func.isRequired
+  }
+
+  componentWillMount() {
+    const { fetchCart, fetchAllCarts, cart_id } = this.props;
+    if (cart_id) fetchCart(cart_id);
+    fetchAllCarts();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { fetchCart, fetchAllCarts, cart_id } = this.props;
+    if (cart_id !== nextProps.cart_id) {
+      fetchCart(nextProps.cart_id);
+      fetchAllCarts();
+    }
   }
 
   render() {
@@ -26,10 +42,10 @@ export default class App extends Component {
         <Header cart_id={cart_id} leader={leader} />
 
         { /* Renders modal when route permits */ }
-        <Route path={`${match.url}cart/:cart_id/m/`} component={Modal} />
+        <Route path={`${match.url}/m/`} component={Modal} />
 
         { /* Renders cart when route permits */ }
-        <Route path={`${match.url}cart/:cart_id/`} exact component={CartContainer} />
+        <Route path={`${match.url}`} exact component={CartContainer} />
       </section>
     );
   }

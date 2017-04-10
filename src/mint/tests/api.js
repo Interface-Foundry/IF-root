@@ -175,7 +175,7 @@ describe.only('api', () => {
     assert.equal(carts[0].leader.email_address, mcTesty.email)
   }))
 
-  it('POST /api/carts/cart_id/item should let McTesty add an item to the cart, returning the cart', () => co(function * () {
+  it('POST /api/carts/cart_id/item should let McTesty add an item to the cart, returning the item', () => co(function * () {
     var url = 'https://www.amazon.com/HiLetgo-Version-NodeMCU-Internet-Development/dp/B010O1G1ES/ref=sr_1_3?ie=UTF8&qid=1490217410&sr=8-3&keywords=nodemcu'
     var item = yield post('/api/cart/' + mcTesty.cart_id + '/item', {
       url: url
@@ -183,6 +183,9 @@ describe.only('api', () => {
 
     assert(item)
     assert.equal(item.original_link, url)
+    assert.equal(item.name, 'HiLetgo New Version NodeMCU LUA WiFi Internet ESP8266 Development')
+    assert.equal(item.thumbnail_url, 'https://images-na.ssl-images-amazon.com/images/I/51yZrDeRUCL._SL75_.jpg')
+    assert.equal(item.main_image_url, 'https://images-na.ssl-images-amazon.com/images/I/71FKRFAIT8L.jpg')
 
     // save item id for later
     mcTesty.item_id = item.id
@@ -215,16 +218,45 @@ describe.only('api', () => {
     assert.equal(item.locked, settings.locked)
   }))
 
-  it('DELETE /api/cart/:cart_id/item should delete a specific item', () => co(function * () {
-    var ok = yield del('/api/cart/' + mcTesty.cart_id + '/item', {
-      item_id: mcTesty.item_id
-    })
+  it('DELETE /api/cart/:cart_id/item/:item_id should delete a specific item', () => co(function * () {
+    var ok = yield del('/api/cart/' + mcTesty.cart_id + '/item/' + mcTesty.item_id)
 
     // Check to make sure there are no more items in the cart
     var cart = yield get('/api/cart/' + mcTesty.cart_id)
     assert(cart)
     assert.equal(cart.leader.email_address, mcTesty.email)
     assert.equal(cart.items.length, 0, 'should not be any items in the cart now')
+  }))
+
+  it('GET /api/itempreview should return a preview of an item, but not add it to cart', () => co(function * () {
+    var url = 'https://www.amazon.com/HiLetgo-Version-NodeMCU-Internet-Development/dp/B010O1G1ES/ref=sr_1_3?ie=UTF8&qid=1490217410&sr=8-3&keywords=nodemcu'
+    var item = yield get('/api/itempreview?q=' + encodeURIComponent(url))
+    assert(item)
+    assert.equal(item.original_link, url)
+    assert.equal(item.name, 'HiLetgo New Version NodeMCU LUA WiFi Internet ESP8266 Development')
+    assert(item.thumbnail_url)
+    assert(item.main_image_url)
+
+    // save the preview item id for later
+    mcTesty.previewItem = item
+
+    // Check to make sure there are still no items in the cart
+    var cart = yield get('/api/cart/' + mcTesty.cart_id)
+    assert(cart)
+    assert.equal(cart.leader.email_address, mcTesty.email)
+    assert.equal(cart.items.length, 0, 'should not be any items in the cart now')
+  }))
+
+  it('POST /api/carts/:cart_id/item should allow McTesty to add a previewed item', () => co(function *() {
+    var item = yield post('/api/cart/' + mcTesty.cart_id + '/item', {
+      item_id: mcTesty.previewItem.id
+    })
+
+    assert(item)
+    assert.equal(item.original_link, mcTesty.previewItem.original_link)
+    assert.equal(item.name, 'HiLetgo New Version NodeMCU LUA WiFi Internet ESP8266 Development')
+    assert(item.thumbnail_url)
+    assert(item.main_image_url)
   }))
 
   it('POST /api/cart/:cart_id should update cart properties', () => co(function * () {

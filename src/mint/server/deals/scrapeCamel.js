@@ -5,7 +5,7 @@ var fs = require('fs');
 var wait = require('co-wait');
 var _ = require('lodash');
 
-var lookupAmazonItem = require('../utilities/amazon_cart').lookupAmazonItem;
+var lookupAmazonItem = require('../cart/amazon_cart').lookupAmazonItem;
 var proxy = require('../../../chat/components/proxy/request');
 var request = require('request-promise');
 var string_utils = require('./string_utils');
@@ -111,7 +111,7 @@ var scrapeCamel = function * () {
     if (current) current = Number(current.split(',').join(''));
     console.log('CURRENT', current);
     prices.push({new: current});
-    
+
     var old_price = $('div.compare_price', e).first().text().split('\n')[2].trim().split('$')[1];
     console.log('old', old_price);
     if (old_price) old_price = Number(old_price.split(',').join(''));
