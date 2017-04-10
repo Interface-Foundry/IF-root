@@ -53,7 +53,7 @@ handlers['start'] = function * (message) {
     var team = yield db.Slackbots.findOne({
       team_id: team_id
     }).exec();
-    let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+    let msInFuture =60 * 60 * 1000; // if in dev, 20 seconds
     let now = new Date();
     let cronMsg = {
       mode: 'onboard',
@@ -134,7 +134,7 @@ handlers['remind_later'] = function * (message, data) {
     default:
       break;
   }
-  if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
+  // if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
   let couponText = yield utils.couponText(message.source.team);
   if (msInFuture > 0) {
     let cronMsg = {
@@ -214,31 +214,43 @@ handlers['supplies'] = function * (message) {
   user.admin_shop_onboarded = true;
   user.markModified('admin_shop_onboarded');
   yield user.save();
-  var attachments = [];
-  attachments.push({
-    text: '*Step 1/3:* Choose a pre-packaged bundle:',
-    mrkdwn_in: ['text'],
-    color: '#A368F0',
-    fallback: 'Step 1/3: Choose a pre-packaged bundle',
-    callback_id: 'none'
-  });
-  attachments = attachments.concat(cardTemplate.slack_bundles(true));
-  attachments.push({
-    'text': '✎ Hint: You can also search what you want below (Example: _MacBook Pro Power Cord_)',
-    mrkdwn_in: ['text']
-  });
-  var msg = message;
-  msg.mode = 'onboard'
-  msg.action = 'home'
-  msg.text = ''
-  msg.source.team = team_id;
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  msg.reply = attachments;
-  msg.fallback = 'Step 1/3: Choose a bundle'
-  return [msg];
+  // var attachments = [];
+  // attachments.push({
+  //   text: '*Step 1/3:* Choose a pre-packaged bundle:',
+  //   mrkdwn_in: ['text'],
+  //   color: '#A368F0',
+  //   fallback: 'Step 1/3: Choose a pre-packaged bundle',
+  //   callback_id: 'none'
+  // });
+
+  return yield handlers['shopping_search'](message, ['kind bars'])
+
+  // attachments = attachments.concat(rez);
+
+  
+  // attachments.push({
+  //   'text': '✎ *Hint:* You can also search what you want below (Example: _MacBook Pro Power Cord_)',
+  //   mrkdwn_in: ['text']
+  // });
+  // var msg = message;
+  // msg.mode = 'onboard'
+  // msg.action = 'home'
+  // msg.text = ''
+  // msg.source.team = team_id;
+  // msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  // msg.reply = attachments;
+  // msg.fallback = 'Step 1/3: Choose a bundle'
+  // return [msg];
 };
 
 handlers['shopping_search'] = function*(message, data) {
+
+  //h4xor 👺
+  var h4x = false
+  if (message.text){
+    h4x = true
+  } 
+
   let team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null),
     query = data[0],
     json = message.source.original_message ? message.source.original_message : {
@@ -306,11 +318,20 @@ handlers['shopping_search'] = function*(message, data) {
   msg.amazon = JSON.stringify(results);
   msg.original_query = results.original_query;
   msg.reply = [{
-    text: 'Here are some results, try adding one to your cart!',
+    text: '*Step 1/3:* Try adding an item to your cart',
     mrkdwn_in: ['text'],
     color: '#A368F0',
-    fallback: 'Here are some results, try adding one to your cart!'
+    fallback: 'Step 1/3: Try adding an item to your cart'
   }];
+
+  //lol h4xor prevent prompt on second search in onboard cause otherwise search breaks due to unknown text input variables D:
+  if(!h4x){
+    msg.reply.push({
+      'text': '✎ *Hint:* You can also search what you want below (Example: _MacBook Pro Power Cord_)',
+      mrkdwn_in: ['text']
+    })
+  }
+
   if (message.source.response_url) {
     request({
       method: 'POST',
@@ -318,6 +339,7 @@ handlers['shopping_search'] = function*(message, data) {
       body: JSON.stringify(message.source.original_message)
     });
   }
+
   return [msg];
 };
 
@@ -393,7 +415,7 @@ handlers['lunch'] = function * (message) {
       {
         'fallback': 'Kip Cafe',
         'title': '',
-        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
+        'image_url': 'http://tidepools.co/kip/oregano/cafe.png'
       })
   }
 
@@ -573,98 +595,174 @@ handlers['cart'] = function * (message) {
  * S4
  */
 handlers['team'] = function * (message) {
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message, 'source.team.id') : null )
-  if (team_id == null) {
-    return kip.debug('incorrect team id : ', message);
-  }
-  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  let attachments = [{
-    text: '*Step 3/3:* Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include:',
-    mrkdwn_in: ['text'],
-    color: '#45a5f4',
-    actions: [{
-      name: 'collect_select',
-      text: (team.meta.collect_from === 'all' ? '◉' : '○') + ' Everyone',
-      type: 'button',
-      value: 'everyone'
-    }, {
-      name: 'collect_select',
-      text: (team.meta.collect_from === 'me' ? '◉' : '○') + ' Just Me',
-      type: 'button',
-      value: 'justme'
-    }, {
-      name: 'collect_select',
-      text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
-      type: 'button',
-      value: 'channel'
-    }],
-    fallback: 'Which group members would you like to collect orders from?',
-    callback_id: 'none'
-  }];
 
-  if (team.meta.collect_from === 'channel') {
-    let cartChannels = team.meta.cart_channels;
-    let channels = yield utils.getChannels(team);
-    let selectedChannels = channels.reduce((arr, channel) => {
-      if (cartChannels.includes(channel.id)) {
-        arr.push({
-          name: 'channel_btn',
-          text: `✓ #${channel.name}`,
-          type: 'button',
-          value: channel.id
-        });
-      }
-      return arr;
-    }, []);
-    let unselectedChannels = channels.reduce((arr, channel) => {
-      if (!cartChannels.includes(channel.id)) {
-        arr.push({
-          name: 'channel_btn',
-          text: `☐ #${channel.name}`,
-          type: 'button',
-          value: channel.id
-        });
-      }
-      return arr;
-    }, []);
-    selectedChannels = _.uniq(selectedChannels);
-    unselectedChannels = _.uniq(unselectedChannels);
-    let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
-      : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
-    let chunkedButtons = _.chunk(buttons, 5);
-    let channelSection = chunkedButtons.map(buttonRow => {
-      return {
+  //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
+  //Œ Œ Œ Œ Œ Œ Œ Œ > SLACK LAUNCH CODE < Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
+  //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
+  if(message.source.team == 'T02PN3B25'){
+    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message, 'source.team.id') : null )
+    if (team_id == null) {
+      return kip.debug('incorrect team id : ', message);
+    }
+    var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+    team.meta.collect_from = 'all';
+    team.markModified('meta.collect_from');
+    yield team.save();
+    let attachments = [{
+      text: '*Step 3/3:* Pass the word! I’ll show your team how to add items to the cart\n I\'ll send Direct Messages to each user in the selected channel:',
+      mrkdwn_in: ['text'],
+      color: '#A368F0',
+      actions: [{
+        name: 'collect_select',
+        text: (team.meta.collect_from === 'all' ? '◉' : '○') + ' Everyone',
+        type: 'button',
+        value: 'everyone'
+      }, {
+        name: 'collect_select',
+        text: (team.meta.collect_from === 'me' ? '◉' : '○') + ' Just Me',
+        type: 'button',
+        value: 'justme'
+      }, {
+        name: 'collect_select',
+        text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
+        type: 'button',
+        value: 'channel'
+      }],
+      fallback: 'Which group members would you like to collect orders from?',
+      callback_id: 'none'
+    }];
+
+    if (team.meta.collect_from === 'channel') {
+      let channelSection = {
         text: '',
         callback_id: 'channel_buttons_idk',
-        actions: buttonRow
+        actions: [{
+          name: 'channel_btn',
+          text: 'Pick Channel',
+          type: 'select',
+          data_source: 'channels'
+        }]
       };
+      attachments.push(channelSection);
+    }
+
+    attachments.push({
+      text: '',
+      color: '#45a5f4',
+      mrkdwn_in: ['text'],
+      fallback: 'yolo',
+      actions: cardTemplate.slack_onboard_team,
+      callback_id: 'onboard_team'
     });
-    channelSection.push({
-      'text': '✎ Hint: You can also type the channels to add (Example: _#nyc-office #research_)',
-      mrkdwn_in: ['text']
-    });
-    attachments = attachments.concat(channelSection);
+
+    var msg = message;
+    msg.mode = 'onboard';
+    msg.action = 'home';
+    msg.text = '';
+    msg.source.team = team.team_id;
+    msg.fallback = 'Step 3/3: Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include';
+    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    msg.reply = attachments;
+    return [msg];
   }
- 
 
-  attachments.push({
-    text: '',
-    color: '#45a5f4',
-    mrkdwn_in: ['text'],
-    fallback: 'yolo',
-    actions: cardTemplate.slack_onboard_team,
-    callback_id: 'onboard_team'
-  });
+  //💀 KILL THIS CODE BEFORE LAUNCH 💀
+  else {
+    var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message, 'source.team.id') : null )
+    if (team_id == null) {
+      return kip.debug('incorrect team id : ', message);
+    }
+    var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
 
-  var msg = message;
-  msg.mode = 'onboard';
-  msg.action = 'home';
-  msg.text = '';
-  msg.source.team = team.team_id;
-  msg.fallback = 'Step 3/3: Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include';
-  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-  msg.reply = attachments;
-  return [msg];
+    team.meta.collect_from = 'all'
+
+    let attachments = [{
+      text: '*Step 3/3:* Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include:',
+      mrkdwn_in: ['text'],
+      color: '#45a5f4',
+      actions: [{
+        name: 'collect_select',
+        text: (team.meta.collect_from === 'all' ? '◉' : '○') + ' Everyone',
+        type: 'button',
+        value: 'everyone'
+      }, {
+        name: 'collect_select',
+        text: (team.meta.collect_from === 'me' ? '◉' : '○') + ' Just Me',
+        type: 'button',
+        value: 'justme'
+      }],
+      // {
+      //   name: 'collect_select',
+      //   text: (team.meta.collect_from === 'channel' ? '◉' : '○') + ' By Channel',
+      //   type: 'button',
+      //   value: 'channel'
+      // }],
+      fallback: 'Which group members would you like to collect orders from?',
+      callback_id: 'none'
+    }];
+
+    if (team.meta.collect_from === 'channel') {
+      let cartChannels = team.meta.cart_channels;
+      let channels = yield utils.getChannels(team);
+      let selectedChannels = channels.reduce((arr, channel) => {
+        if (cartChannels.includes(channel.id)) {
+          arr.push({
+            name: 'channel_btn',
+            text: `✓ #${channel.name}`,
+            type: 'button',
+            value: channel.id
+          });
+        }
+        return arr;
+      }, []);
+      let unselectedChannels = channels.reduce((arr, channel) => {
+        if (!cartChannels.includes(channel.id)) {
+          arr.push({
+            name: 'channel_btn',
+            text: `☐ #${channel.name}`,
+            type: 'button',
+            value: channel.id
+          });
+        }
+        return arr;
+      }, []);
+      selectedChannels = _.uniq(selectedChannels);
+      unselectedChannels = _.uniq(unselectedChannels);
+      let buttons = (selectedChannels.length > 8) ? selectedChannels // always show all selected channels
+        : selectedChannels.concat(unselectedChannels.splice(0, 9 - selectedChannels.length));
+      let chunkedButtons = _.chunk(buttons, 5);
+      let channelSection = chunkedButtons.map(buttonRow => {
+        return {
+          text: '',
+          callback_id: 'channel_buttons_idk',
+          actions: buttonRow
+        };
+      });
+      attachments = attachments.concat(channelSection);
+    }
+   
+
+    attachments.push({
+      text: '',
+      color: '#45a5f4',
+      mrkdwn_in: ['text'],
+      fallback: 'yolo',
+      actions: cardTemplate.slack_onboard_team,
+      callback_id: 'onboard_team'
+    });
+
+    var msg = message;
+    msg.mode = 'onboard';
+    msg.action = 'home';
+    msg.text = '';
+    msg.source.team = team.team_id;
+    msg.fallback = 'Step 3/3: Pass the word! I’ll show your team how to add items to the cart\nChoose the groups you would like to include';
+    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    msg.reply = attachments;
+    return [msg];
+  }
+
+
 }
 
 /**
@@ -722,7 +820,7 @@ handlers['member'] = function*(message) {
     });
     yield newMessage.save();
     queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
-    let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+    // let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
     let now = new Date();
     let cronMsg = {
       text: 'Hey, it\'s me again! Ready to get started?',

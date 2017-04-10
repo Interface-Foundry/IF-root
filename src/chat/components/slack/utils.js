@@ -176,6 +176,23 @@ function * getChannels(team) {
 
 
 /*
+* returns channel name for a given a slackbot(team) and channel ID
+* @param {Object} slackbot object
+* @returns {array} returns channel name string
+*
+*/
+function * getChannelName(team,channelId) {
+  var res_chan = yield request('https://slack.com/api/channels.info?token=' + team.bot.bot_access_token+'&channel='+channelId); // lists all members in a channel
+  res_chan = JSON.parse(res_chan)
+  if(res_chan.channel && res_chan.channel.name){
+    return res_chan.channel.name
+  }else {
+    return '' //haha what idk 
+  }
+}
+
+
+/*
 * returns members of a team given a slackbot object, creates chatuser objects if they do not exist in db
 * @param {Object} slackbot object
 * @returns {array} returns chatuser objects
@@ -214,7 +231,7 @@ function * getTeamMembers (slackbot) {
     yield savedUser.save()
     // check if user has open dm
     var userDM = userIMInfo.ims.find(i => i.user === user.id)
-    if (!userDM) {
+    if (!userDM && !savedUser.deleted) {
       // open new dm if user doesnt have one open w/ bot
       try {
         userDM = yield slackbotWeb.im.open(user.id)
@@ -223,6 +240,8 @@ function * getTeamMembers (slackbot) {
         return savedUser
       }
       savedUser.dm = userDM.channel.id
+    } else if (savedUser.deleted){ //fixing error throw for deleted users
+      return savedUser
     } else if (_.get(savedUser, 'dm') !== userDM.id) {
       // if their DM channel isnt equal to what we have saved, update it
       savedUser.dm = userDM.id
@@ -765,11 +784,12 @@ function randomStoreHint() {
  */
 function randomSearching() {
   let messages = [
-    'Searching…',
+    // 'Searching…',
     'Foraging…',
-    'Looking…',
-    'Exploring…',
-    'Seeking…'
+    'Preparing…'
+    // 'Looking…',
+    // 'Exploring…',
+    // 'Seeking…'
   ];
   let num = Math.floor(Math.random() * messages.length);
   return messages[num];
@@ -875,6 +895,7 @@ module.exports = {
   findAdmins: findAdmins,
   getTeamMembers: getTeamMembers,
   getChannels: getChannels,
+  getChannelName: getChannelName,
   getChannelMembers: getChannelMembers,
   refreshAllChannels: refreshAllChannels,
   addCartChannel: addCartChannel,

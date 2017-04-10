@@ -58,7 +58,7 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
         cart = yield getCart(slack_id)
       }
     }
-    logging.debug('cart', cart)
+    //logging.debug('cart', cart)
     // make sure we can add this item to the cart
     // know it's ok if the item already exists in the cart
     var ok = false
@@ -136,9 +136,13 @@ module.exports.addToCart = function (slack_id, user_id, item, type) {
 //
 module.exports.emptyCart = function (cart_id) {
   return co(function * () {
-    var cart = yield db.Carts.findOne({'slack_id': cart_id}).exec()
+    //get cart
+    var cart = yield getCart(cart_id)
+    //if cart empty / null return
     if (!cart || cart == null) return null
+    //process cart items
     async.eachSeries(cart.items, function iterator (id, callback) {
+      //get items in cart
       db.Item.findById(id).then(function (err, item) {
         if (item) {
           item.deleted = true
@@ -168,8 +172,6 @@ module.exports.emptyCart = function (cart_id) {
 module.exports.addExtraToCart = function (cart, slack_id, user_id, item) {
   logging.debug('firing addextratocart')
   logging.debug('adding item to cart for %s by user %s', slack_id, user_id)
-  logging.debug('ITEM ZZZZ ', item)
-  logging.debug('CART ZZZZ ', cart)
 
   // fixing bug to convert string to to int
   // if (item.reviews && item.reviews.reviewCount){

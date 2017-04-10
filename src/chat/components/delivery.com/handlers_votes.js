@@ -585,8 +585,8 @@ function buildCuisineDashboard (foodSession) {
     attachments: [{
       color: '#3AA3E3',
       mrkdwn_in: ['text'],
-      text: `*Votes from the group* 👋\n${votes}`,
-      fallback: `*Votes from the group* 👋\n${votes}`,
+      text: `*Votes from the group* 👋🏽\n${votes}`,
+      fallback: `*Votes from the group* 👋🏽\n${votes}`,
       callback_id: 'admin_restaurant_pick'
     }]
   }
@@ -892,6 +892,14 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
       console.log('winning vote', vote)
       // explanation text explaining the choice when it is different / not obvious from the simple voting result
       var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with ${vote.vote} 🎉`
+
+      // explanation text explaining the choice when it is different / not obvious from the simple voting result
+      if (vote.user && vote.vote){
+        var explanationText = `<@${vote.user}> hasn't had much of a say lately, so we went with ${vote.vote} 🎉`
+      }else {
+        var explanationText = `Voting finished, <@${foodSession.convo_initiater.id}|${foodSession.convo_initiater.name}> is choosing a restaurant`
+      }
+
       //send explanation message to the non-admin users
     }
 
@@ -926,8 +934,15 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     })
   }
 
+  //clean up message
+  if (!explanationText){
+    explanationText = ''
+  } else {
+    explanationText = '*Vote Result:* ' + explanationText
+  }
+
   var responseForAdmin = {
-    'text': '*Vote Result:* ' + explanationText + '\n Here are 3 restaurant suggestions based on the team vote. Which do you want today?',
+    'text': explanationText + '\n Here are 3 restaurant suggestions based on the team vote. Which do you want today?',
     'attachments': yield viableRestaurants.slice(index, index + 3).reverse().map(utils.buildRestaurantAttachment)
   }
 

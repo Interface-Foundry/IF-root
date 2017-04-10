@@ -14,7 +14,6 @@ var handlers = {}
 handlers['food.admin.team_budget'] = function * (message) {
   logging.debug('food.admin.team_budget, team_id: %s', message.source.team)
   var foodSession = yield db.delivery.findOne({team_id: message.source.team, active: true}).exec()
-
   //waypoint logging
   db.waypoints.log(1020, foodSession._id, message.user_id, {original_text: message.original_text})
 
@@ -137,6 +136,20 @@ handlers['food.admin.team_budget'] = function * (message) {
       'mrkdwn_in': ['text']
     })
   }
+
+  //prepend cafe banner
+  var msg_jsonArr = []
+  msg_jsonArr.push({
+    'text':'',
+    'fallback':'Kip Cafe',
+    'attachments':[{
+      'fallback': 'Kip Cafe',
+      'text': '',
+      'color':'#F03745',
+      'image_url': 'https://storage.googleapis.com/kip-random/cafe.png'
+    }]
+  })
+  msg_jsonArr.push(msg_json)
 
   $replyChannel.sendReplace(message, 'food.admin.team_budget', {type: message.origin, data: msg_json})
 }

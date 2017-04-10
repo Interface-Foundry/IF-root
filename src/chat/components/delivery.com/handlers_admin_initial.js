@@ -24,6 +24,12 @@ handlers['food.admin.confirm_new_session'] = function * (message) {
 
   db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text})
 
+  //auto start new order if same user has open order
+  if(foodSession.convo_initiater.id == message.source.user){
+    return yield handlers['food.admin.select_address'](message)
+  }
+
+  //else show confirm take over order
   var restartText = (foodSession.convo_initiater.id == message.source.user ? `Looks like you already have an order started.`: `Looks like <@${foodSession.convo_initiater.id}> is ordering food right now.`)
 
   var msg_json = {
@@ -78,6 +84,7 @@ handlers['food.admin.retrieve_order_status'] = function * (message) {
 }
 
 handlers['food.admin.select_address'] = function * (message, banner) {
+  banner = true
   // loading chat users here for now, can remove once init_team is fully implemented to create chat user objects
   logging.debug('doing slackutils stuff in here')
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
@@ -148,12 +155,14 @@ handlers['food.admin.select_address'] = function * (message, banner) {
     })
   }
 
+
   if (banner) {
     msg_json.attachments.splice(0, 0,
       {
         'fallback': 'Kip Cafe',
-        'title': '',
-        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
+        'color':'#F03745',
+        'text': '',
+        'image_url': 'https://storage.googleapis.com/kip-random/cafe.png'
       })
   }
 
@@ -210,7 +219,7 @@ handlers['food.admin.select_address'] = function * (message, banner) {
   //add kip menu (should show options like Home screen view)
   msg_json.attachments[msg_json.attachments.length - 1].actions.push({
     'name': 'passthrough',
-    'text': 'Home',
+    'text': '< Home',
     'type': 'button',
     'value': 'food.exit.confirm_end_order'
   })
@@ -308,19 +317,19 @@ handlers['food.choose_address'] = function * (message) {
     var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     foodSession.chosen_location = location
 
-    // keep the banner
     var msg_json = {
       fallback: 'Kip Cafe',
-      text: 'Searching your area for good food...',
+      text: 'Preparing ingredients...',
       attachments: [
         {
           'fallback': 'Kip Cafe',
           'title': '',
-          'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png',
-          'color': '#3AA3E3'
+          'image_url': 'https://storage.googleapis.com/kip-random/cafe.png',
+          'color': '#F03745'
         }
       ]
     }
+
     $replyChannel.sendReplace(message, 'food.choose_address', {type: message.origin, data: msg_json})
 
     foodSession.fulfillment_method = 'delivery'
@@ -672,7 +681,7 @@ handlers['food.admin_polling_options'] = function * (message) {
       attachments.push({'text': 'Seems like your most recent restaurants are not available at this time.'})
     }
   }else {
-    foodSession.onboarding = true
+    //
   }
 
   //onboarding stuff
@@ -687,7 +696,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     //   'image_url': 'http://tidepools.co/kip/onboarding_2.png'
     // },
     {
-      'text': '*Step 4.* Kip polls your team on what type of food they want to eat \n Tap `✓ Start New Order` to select which team members to poll',
+      'text': '*Step 4.* Kip lets your team vote on the type of food they want to eat \n Tap `✓ Start New Vote` to select team members to include in vote',
       'fallback': 'Team voting',
       'callback_id': 'wopr_game',
       'color': '#A368F0',
@@ -701,14 +710,14 @@ handlers['food.admin_polling_options'] = function * (message) {
       'text'
     ],
     'text': '', // '*Tip:* `✓ Start New Order` polls your team on what type of food they want',
-    'fallback': '*Tip:* `✓ Start New Order` polls your team on what type of food they want',
+    'fallback': 'Poll your team on what type of food they want',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
       {
         'name': 'passthrough',
-        'text': '✓ Start New Order',
+        'text': '✓ Start New Vote',
         'style': 'primary',
         'type': 'button',
         'value': 'food.poll.confirm_send_initial'
@@ -731,7 +740,7 @@ handlers['food.admin_polling_options'] = function * (message) {
     attachments: attachments
   }
 
-  $replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: res})
+  $replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: res})
   foodSession.save()
 }
 
@@ -748,20 +757,23 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
     .exec()
   // copy all the last ordered stuff to this order
   lastOrdered = lastOrdered[0]
-  foodSession.chosen_channel = lastOrdered.chosen_channel
-  foodSession.chosen_restaurant = lastOrdered.chosen_restaurant
-  if (lastOrdered.chosen_channel.name === 'just_me' || lastOrdered.team_members.length < 1) {
-    // possible last ordered just me is another admin
-    foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
-  } else {
-    foodSession.team_members = lastOrdered.team_members
-    if (!_.find(foodSession.team_members, {'id': foodSession.convo_initiater.id})) {
-      // user not in the last ordered delivery team members since different convo_init probably
-      logging.info('adding current convo init to team_members')
-      var convoInitUser = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id, deleted: {$ne: true}}).exec()
-      foodSession.team_members.push(convoInitUser)
-    }
+  if(lastOrdered){
+    foodSession.chosen_channel = lastOrdered.chosen_channel
+    foodSession.chosen_restaurant = lastOrdered.chosen_restaurant
+    if (lastOrdered.chosen_channel.name === 'just_me' || lastOrdered.team_members.length < 1) {
+      // possible last ordered just me is another admin
+      foodSession.team_members = yield db.Chatusers.find({id: message.user_id, deleted: {$ne: true}, is_bot: {$ne: true}}).exec()
+    } else {
+      foodSession.team_members = lastOrdered.team_members
+      if (!_.find(foodSession.team_members, {'id': foodSession.convo_initiater.id})) {
+        // user not in the last ordered delivery team members since different convo_init probably
+        logging.info('adding current convo init to team_members')
+        var convoInitUser = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id, deleted: {$ne: true}}).exec()
+        foodSession.team_members.push(convoInitUser)
+      }
+    }    
   }
+
 
   foodSession.markModified('team_members')
   yield foodSession.save()
@@ -797,7 +809,7 @@ handlers['food.admin.restaurant.reordering_confirmation'] = function * (message)
       }, {
         'name': 'food.admin.select_channel_reorder',
         'value': mostRecentMerchant,
-        'text': `Manage Channels`,
+        'text': `Manage Members`,
         'type': 'button'
       }//,
       // {
@@ -1006,15 +1018,15 @@ handlers['food.restaurants.list.recent'] = function * (message) {
     'mrkdwn_in': [
       'text'
     ],
-    'text': '*Tip:* `✓ Start New Order` polls your team on what type of food they want.',
-    'fallback': '*Tip:* `✓ Start New Order` polls your team on what type of food they want.',
+    'text': '*Tip:* `✓ Start New Vote` polls your team on what type of food they want',
+    'fallback': '*Tip:* `✓ Start New Vote` polls your team on what type of food they want',
     'callback_id': 'wopr_game',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
       {
         'name': 'passthrough',
-        'text': '✓ Start New Order',
+        'text': '✓ Start New Vote',
         'style': 'primary',
         'type': 'button',
         'value': 'food.poll.confirm_send'

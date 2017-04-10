@@ -56,7 +56,7 @@ var cardTemplate = require('./card_templates');
 var slackConnections = {}
 var webserver = require('./webserver')
 var bundles = require('../bundles');
-bundles.updater(); //caches bundle items to mongo everyday at midnight
+//bundles.updater(); //caches bundle items to mongo everyday at midnight
 
 var slackUtils = require('./utils.js')
 var coupon = require('../../../coupon/coupon.js')
@@ -196,7 +196,7 @@ function * loadTeam(slackbot) {
 
 function updateHomeButtonAppender(message, token) {
   let now = new Date();
-  let msInFuture = process.env.NODE_ENV.includes('development') ? 1000 * 20 : 1000 * 60 * 20;
+  let msInFuture = 1000 * 60 * 20;
   agenda.cancel({
     'name': 'append home',
     'data.user': message.user
@@ -291,6 +291,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       // username: 'Kip',
       as_user: true
     }
+
     co(function * () {
       if (message._id) {
         startResponseUrlClearTimer(message._id);

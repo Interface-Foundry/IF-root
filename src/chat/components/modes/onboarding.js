@@ -64,6 +64,7 @@ handlers['start'] = function * (message) {
   console.log('seting reminder for team that added kip like right now')
 
   let msInFuture = (process.env.NODE_ENV.includes('development') ? 20 : 60 * 60) * 1000; // if in dev, 20 seconds
+
   let now = new Date();
   let cronMsg = {
     mode: welcome_message.mode,
@@ -113,7 +114,7 @@ handlers['remind_later'] = function * (message, data) {
     default:
       break;
   }
-  if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
+  // if (process.env.NODE_ENV.includes('development')) msInFuture = 20 * 1000; // 20 seconds for dev
   if (msInFuture > 0) {
     let cronMsg = {
       mode: message.mode,
