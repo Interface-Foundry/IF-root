@@ -40,10 +40,10 @@ export default class Cart extends Component {
     const hasItems = items.length > 0;
     return (
       <div className='cart'>
-        { carts ? <CartSwitcher carts={carts}/> : null }
         <div className='cart__add'>
           <AddAmazonItemContainer replace={replace}/>
         </div>
+        { carts ? <CartSwitcher carts={carts}/> : null }
         <DealsContainer isDropdown={false}/>
         <div className='cart__title'>
           <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>

@@ -26,7 +26,7 @@ export default class Deals extends Component {
     return (
       <div>
         {(isDropdown ? '' : 'Today\'s Deals')}
-        <section className={'signIn__container__page__deals' + (isDropdown ? '-small' : '')}>
+        <section className={'deals__section' + (isDropdown ? '-small' : '')}>
           { renderCards() }
         </section>
       </div>

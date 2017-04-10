@@ -3,7 +3,7 @@
   text-decoration: line-through;
 }
 
-.signIn__container__page__deals {
+.deals__section {
   display: flex;
   flex-direction: row;
   overflow: scroll;
@@ -11,19 +11,19 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.signIn__container__page__deals > section {
-  border: 2px grey solid;
+.deals__section > section {
+  border: 1px $border-color-light solid;
   background: white;
-  padding: $padding;
-  margin: $padding;
+  padding: $padding/2;
+  margin: $padding/2;
   border-radius: $padding;
-  font-size: 14px;
-  height: 200px;
-  width: 150px;
-  min-width: 150px;
+  font-size: 18px;
+  height: 180px;
+  width: 170px;
+  min-width: 190px;
 }
 
-.signIn__container__page__deals-small {
+.deals__section-small {
   position: relative;
   top: -12px;
   display: flex;
@@ -36,7 +36,7 @@
   overflow: hidden;
 }
 
-.signIn__container__page__deals-small > section {
+.deals__section-small > section {
   display: flex;
   border-bottom: 1px grey solid;
   background: white;
@@ -47,31 +47,30 @@
   font-size: 14px;
 }
 
-.signIn__container__page__deals-small > section:last-child {
+.deals__section-small > section:last-child {
   border: none;
 }
 
 .dealcard__name {
-  font-size: 12px;
-  white-space: nowrap;
+  font-size: 13px;
+  text-align: center;
+  height: 2.4em;
+  position: relative;
   overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dealcard__asin {
-  font-size: 8px;
-  color: grey;
+  color: #58595b;
+  content: "";
 }
 
 .dealcard__price {
-  font-size: 24px;
+  font-size: 23px;
   text-align: center;
-  color: #D15003;
+  color: $price-color;
 }
 
 .dealcard__discount {
-  font-size: 14px;
+  font-size: 15px;
   text-align: center;
+  color: $header-color;
 }
 
 .dealcard {

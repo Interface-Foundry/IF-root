@@ -5,6 +5,7 @@ html {
   margin: 0;
   overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
   height: 100%;
+  background: $kip-primary-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
@@ -16,12 +17,7 @@ html {
   }
   a {
     text-decoration: none;
-    color: black;
-    opacity: 0.7;
-  }
-    a:hover {
-    text-decoration: none;
-    opacity: 1;
+    color: inherit;
   }
 }
 
@@ -75,10 +71,6 @@ h4 {
   font-size: 12px;
 }
 
-a,
-p {
-  font-size: 10px;
-}
 
 input,
 select:focus,

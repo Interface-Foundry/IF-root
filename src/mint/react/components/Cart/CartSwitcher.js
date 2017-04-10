@@ -14,6 +14,7 @@ export default class CartSwitcher extends Component {
         <ul>
           {carts.map((cart, i)=><CartItem key={i} cart={cart}/>)}
         </ul>
+        <hr/>
       </div>
     );
   }
