@@ -13,10 +13,9 @@ export default class Sidenav extends Component {
 
   render() {
     const { leader, carts, _toggleSidenav } = this.props,
-          leaderName = _.capitalize(getNameFromEmail(leader ? leader.email_address : null)),
           leaderCarts = _.filter(carts, (c) => c.leader.email_address === leader.email_address),
           memberCarts = _.filter(carts, (c) => c.leader.email_address !== leader.email_address);
-
+          
     return (
       <div className='sidenav'>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
