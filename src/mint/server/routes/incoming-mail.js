@@ -17,6 +17,7 @@ var amazonScraper = require('../cart/scraper_amazon');
  * TODO, etc
  */
 router.post('/', upload.array(), (req, res) => co(function * () {
+  console.log('posted to webhook');
   yield dbReady;
   console.log('req.body', req.body)
   var email = req.body.from.split(' ');

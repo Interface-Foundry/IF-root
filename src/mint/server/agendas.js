@@ -33,14 +33,9 @@ agenda.define('daily deals', function (job, done) {
     daily.send();
     console.log('daily deal sent');
   })
-
-  //
-  // console.log('daily deal created');
-
-  // yield daily.send();
-  // console.log('sent email');
-
-  done();
+  .then(function () {
+    done();
+  })
 });
 
 agenda.on('ready', function () {
@@ -51,7 +46,7 @@ agenda.on('ready', function () {
   }
   process.on('SIGTERM', failGracefully);
   process.on('SIGINT', failGracefully);
-  agenda.every('45 seconds', 'daily deals');
+  agenda.every('1 day', 'daily deals');
   agenda.start();
 });
 
