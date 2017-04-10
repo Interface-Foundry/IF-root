@@ -269,6 +269,8 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
   //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
   if(message.source.team == 'T02PN3B25'){
 
+    console.log('💀1💀1💀')
+
     // basic buttons
       let chosenId = _.get(foodSession, 'chosen_channel.id');
       var genericButtons = [{
@@ -540,13 +542,11 @@ handlers['food.admin.display_channels'] = function * (message) {
         name: 'food.admin.toggle_channel',
         text: 'Pick Channel',
         type: 'select',
-        data_source: 'channels',
-        selected_options:[{
-          value: message.source.actions[0].selected_options[0].value 
-        }]
+        data_source: 'channels'
+        // selected_options: [{
+        //   value: chosenId
+        // }]
       });
-
-      console.log('* * * * * * * * *ACTIONS ',actions)
 
       msg_json.attachments.push({
         'text': '',
@@ -783,6 +783,7 @@ handlers['food.admin.toggle_channel'] = function * (message) {
       //Œ Œ Œ Œ Œ Œ Œ Œ > SLACK LAUNCH CODE < Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
       //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
       if(message.source.team == 'T02PN3B25'){
+
         // find channel in meta.all_channels
         let channelId = message.source.actions[0].selected_options[0].value;
         var channel = _.find(slackbot.meta.all_channels, {'id': channelId})
@@ -798,6 +799,46 @@ handlers['food.admin.toggle_channel'] = function * (message) {
         logging.info('filtered down members to these members: ', foodSession.team_members)
         foodSession.markModified('team_members')
         yield foodSession.save()
+
+
+        //message menus fix 💀
+        var parsedIn = message.source
+
+        if(parsedIn && parsedIn.original_message.attachments){
+          _.forEach(parsedIn.original_message.attachments,function(val,key){
+            if(val.actions && val.actions[0] && val.actions[0].data_source == 'channels'){
+              parsedIn.original_message.attachments[key].actions[0].selected_options = [{
+                value:channelId
+              }]
+            }            
+          })
+        }
+        ////ugh
+
+        let stringOrig = JSON.stringify(parsedIn.original_message);
+        let map = {
+          amp: '&',
+          lt: '<',
+          gt: '>',
+          quot: '"',
+          '#039': '\''
+        };
+        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
+
+        console.log('^ ^ ^ STRING ORG ^ ^ ^ ^ ',stringOrig)
+        console.log('^ ^ ^ source ^ ^ ^ ^ ',message.source.response_url)
+        request({
+          method: 'POST',
+          uri: message.source.response_url,
+          body: stringOrig
+        },function(asdf){
+
+          console.log('????????? ',asdf)
+        });
+
+
+
+
         return [];
       }
       //💀 KILL THIS CODE BEFORE LAUNCH 💀

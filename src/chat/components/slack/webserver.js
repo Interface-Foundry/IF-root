@@ -339,7 +339,6 @@ app.post('/slackaction', next(function * (req, res) {
         return;
       } else if (simple_command === 'channel_btn') {
 
-        console.log("CHANNEL BUTTON % % % % % % % % % % % % ")
         let team_id = message.source.team;
         let channelId = (action.selected_options) ? action.selected_options[0].value : action.value;
         let team = yield db.Slackbots.findOne({
@@ -347,25 +346,21 @@ app.post('/slackaction', next(function * (req, res) {
         }).exec();
         team.meta.cart_channels = [channelId];
 
-
         team.markModified('meta.cart_channels');
         yield team.save();
-
 
         //message menus fix
         if(parsedIn.original_message && parsedIn.original_message.attachments){
           var index = _.findIndex(parsedIn.original_message.attachments, {callback_id: 'channel_buttons_idk'}) //idk why "_idk" is used ugh
-          console.log('ix ',index)
+          //console.log('ix ',index)
           if (parsedIn.original_message.attachments[index].actions){
-            
-            let channelName = yield utils.getChannelName(team,channelId);
-
+            //let channelName = yield utils.getChannelName(team,channelId);
             parsedIn.original_message.attachments[index].actions[0].selected_options = [{
               value:channelId
             }]
           }
         }
-        console.log('PLAT ',parsedIn.original_message.attachments[index].actions[0].selected_options)
+        //console.log('PLAT ',parsedIn.original_message.attachments[index].actions[0].selected_options)
         //ugh
 
         let stringOrig = JSON.stringify(parsedIn.original_message);
@@ -378,7 +373,7 @@ app.post('/slackaction', next(function * (req, res) {
         };
         stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
 
-        console.log('^ ^ ^ STRING ORG ^ ^ ^ ^ ',stringOrig)
+        //console.log('^ ^ ^ STRING ORG ^ ^ ^ ^ ',stringOrig)
         request({
           method: 'POST',
           uri: message.source.response_url,

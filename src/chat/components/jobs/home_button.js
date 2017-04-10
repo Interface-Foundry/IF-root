@@ -47,7 +47,7 @@ function checkForHome(message) {
   message.attachments.forEach(a => {
     if (a.actions && !isHome) {
       a.actions.forEach(b => {
-        if (b.text === 'Home' || (a.text && a.text.includes('Kip Store'))) {
+        if (b.text === 'Home' || b.text === '< Home' || (a.text && a.text.includes('Kip Store'))) {
           isHome = true;
         }
       });
