@@ -6,6 +6,11 @@ const typeDefinition = `
 # these scalars are defined in the resolver.
 scalar JSON
 scalar Date
+#
+type FoodItem {
+  item_name: String
+  user: String
+}
 type Cart {
   _id: String!
   slack_id: String
@@ -92,7 +97,8 @@ type Delivery {
   delivery_error: String
   cart: JSON
   item_count: Int
-  items: JSON
+  # items: JSON
+  items: [FoodItem]
   type: String
   # Foreign refs
   # team: Slackbot
@@ -118,6 +124,7 @@ type Item {
   available: Boolean
   asins: String
   config: String
+  category: String
   # Foreign refs
   cart: Cart
 }

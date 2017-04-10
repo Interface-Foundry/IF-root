@@ -48,17 +48,16 @@ function prepareCafeCarts(foodSession) {
   }
 
   if (foodSession.cart.length > 0) {
-    const menuObj = Menu(foodSession.menu);
     foodSession.cart_total = foodSession.calculated_amount;
     foodSession.item_count = foodSession.cart.length;
-    foodSession.items = foodSession.cart.map((i) => {
-      const item = menuObj.flattenedMenu[i.item.item_id];
-      return {
-        item_name: item.name,
-        // either need to convert id to name here or with context in the resolver
-        user: i.user_id,
-      };
-    });
+    // foodSession.items = foodSession.cart.map((i) => {
+    //   const item = menuObj.flattenedMenu[i.item.item_id];
+    //   return {
+    //     item_name: item.name,
+    //     // either need to convert id to name here or with context in the resolver
+    //     user: i.user_id,
+    //   };
+    // });
   }
 
   return foodSession;
@@ -94,6 +93,7 @@ function GetLoaders() {
   return {
     DeliveriesById: new DataLoader(keys => loadDeliveriesById(keys)),
     UsersByUserId: new DataLoader(keys => loadUsersByUserId(keys)),
+    UserNameById: new DataLoader(keys => getUserNameById(keys)),
   }
 }
 
@@ -125,6 +125,12 @@ async function loadUsersByUserId(userIds) {
 }
 
 
+async function getUserNameById(userId) {
+  var user = await Chatusers.findOne({ id: userId }, { name: 1, _id:0 });
+  console.log(user)
+  return user;
+}
+
 /**
  * sets pagination parameters on the collection query if provided, or uses
  * defaults if not.
@@ -134,7 +140,7 @@ async function loadUsersByUserId(userIds) {
  * @param sort - sort option for results
  */
 async function pagination(coll, args, sort) {
-  let limit = args.limit || 10;
+  let limit = args.limit || 1;
   delete args.limit;
 
   let skip = args.offset || 0;
@@ -155,6 +161,22 @@ async function pagination(coll, args, sort) {
 const Resolvers = {
 
   // Business objects
+  //
+  Delivery: {
+    items: async (obj, args, context) => {
+      const menuObj = Menu(obj.menu);
+      return obj.cart.map(async (i) => {
+        const item = menuObj.flattenedMenu[i.item.item_id];
+        let userName = await context.loaders.UsersByUserId.load(i.user_id);
+        userName = userName.name;
+        return {
+          item_name: item.name,
+          // either need to convert id to name here or with context in the resolver
+          user: userName,
+        };
+      });
+    },
+  },
 
   Cart: {
     items: async ({_id}) => {
@@ -222,8 +244,7 @@ const Resolvers = {
     },
 
     deliveries: async (root, args, context) => {
-      console.log('root would be~~~', root)
-      let deliveryArgs = {'cart.0': {'$exists': true}};
+      let deliveryArgs = {'cart.1': {'$exists': true}};
       if (args.start_date || args.end_date) {
         args.time_started = {};
         if (args.start_date) {
