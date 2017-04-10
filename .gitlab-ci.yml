@@ -16,7 +16,7 @@ services:
   - mongo:3.2.10
 
 cache:
-  key: "$CI_BUILD_STAGE/$CI_BUILD_REF_NAME"
+  key: "$CI_BUILD_STAGE/$CI_COMMIT_SHA_NAME"
   untracked: true
 
 stages:
@@ -38,9 +38,9 @@ stages:
     - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
   script:
     # - docker pull $KIP_REGISTRY/$IMAGE_NAME:latest
-    - docker build --cache-from $KIP_REGISTRY/$IMAGE_NAME:latest -t $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF -f Dockerfiles/$IMAGE_NAME.Dockerfile .
-    - docker tag $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF $KIP_REGISTRY/$IMAGE_NAME:latest
-    - docker push $KIP_REGISTRY/$IMAGE_NAME:$CI_BUILD_REF
+    - docker build --cache-from $KIP_REGISTRY/$IMAGE_NAME:latest -t $KIP_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA -f Dockerfiles/$IMAGE_NAME.Dockerfile .
+    - docker tag $KIP_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA $KIP_REGISTRY/$IMAGE_NAME:latest
+    - docker push $KIP_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
     - docker push $KIP_REGISTRY/$IMAGE_NAME:latest
 
 .deploy_template: &deploy_defintion
@@ -56,7 +56,7 @@ stages:
     - gcloud container clusters get-credentials $KUBE_CLUSTER
   script:
     - ls $DEPLOYMENT_DIR
-    - sed -i "s/latest/$CI_BUILD_REF/" $DEPLOYMENT_DIR/$CONTEXT_FILE
+    - sed -i "s/latest/$CI_COMMIT_SHA/" $DEPLOYMENT_DIR/$CONTEXT_FILE
     - kubectl apply -f $DEPLOYMENT_DIR/$CONTEXT_FILE
   after_script:
     - rm /tmp/KUBERNETES_KEY.json
@@ -162,47 +162,47 @@ stages:
 
 #---------------
 
-build_canary_node:
+build_node:
   stage: build
   only:
     - dev
   before_script:
     - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
   script:
-    - docker build -t $KIP_REGISTRY/slack:$CI_BUILD_REF -f Dockerfiles/canary.slack.Dockerfile .
-    - docker build -t $KIP_REGISTRY/payments:$CI_BUILD_REF -f Dockerfiles/canary.payments.Dockerfile .
-    - docker build -t $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF -f Dockerfiles/canary.cafe_menu.Dockerfile .
+    - docker build -t $KIP_REGISTRY/slack:$CI_COMMIT_SHA -f Dockerfiles/slack.Dockerfile .
+    - docker build -t $KIP_REGISTRY/payments:$CI_COMMIT_SHA -f Dockerfiles/payments.Dockerfile .
+    - docker build -t $KIP_REGISTRY/cafe_menu:$CI_COMMIT_SHA -f Dockerfiles/cafe_menu.Dockerfile .
 
-    - docker tag $KIP_REGISTRY/slack:$CI_BUILD_REF $KIP_REGISTRY/slack:canary
-    - docker tag $KIP_REGISTRY/payments:$CI_BUILD_REF $KIP_REGISTRY/payments:canary
-    - docker tag $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF $KIP_REGISTRY/cafe_menu:canary
+    - docker tag $KIP_REGISTRY/slack:$CI_COMMIT_SHA $KIP_REGISTRY/slack:canary
+    - docker tag $KIP_REGISTRY/payments:$CI_COMMIT_SHA $KIP_REGISTRY/payments:canary
+    - docker tag $KIP_REGISTRY/cafe_menu:$CI_COMMIT_SHA $KIP_REGISTRY/cafe_menu:canary
 
-    - docker push $KIP_REGISTRY/slack:$CI_BUILD_REF
-    - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
-    - docker push $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/slack:$CI_COMMIT_SHA
+    - docker push $KIP_REGISTRY/payments:$CI_COMMIT_SHA
+    - docker push $KIP_REGISTRY/cafe_menu:$CI_COMMIT_SHA
 
     - docker push $KIP_REGISTRY/slack:canary
     - docker push $KIP_REGISTRY/payments:canary
     - docker push $KIP_REGISTRY/cafe_menu:canary
 
-build_canary_python:
+build_python:
   stage: build
   only:
     - dev
   before_script:
     - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
   script:
-    - docker build -t $KIP_REGISTRY/parser:$CI_BUILD_REF -f Dockerfiles/parser.Dockerfile .
-    - docker build -t $KIP_REGISTRY/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
-    - docker build -t $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF -f Dockerfiles/delivery_picstitch.Dockerfile .
+    - docker build -t $KIP_REGISTRY/parser:$CI_COMMIT_SHA -f Dockerfiles/parser.Dockerfile .
+    - docker build -t $KIP_REGISTRY/picstitch:$CI_COMMIT_SHA -f Dockerfiles/picstitch.Dockerfile .
+    - docker build -t $KIP_REGISTRY/delivery_picstitch:$CI_COMMIT_SHA -f Dockerfiles/delivery_picstitch.Dockerfile .
 
-    - docker tag $KIP_REGISTRY/parser:$CI_BUILD_REF $KIP_REGISTRY/parser:canary
-    - docker tag $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF $KIP_REGISTRY/delivery_picstitch:canary
-    - docker tag $KIP_REGISTRY/picstitch:$CI_BUILD_REF $KIP_REGISTRY/picstitch:canary
+    - docker tag $KIP_REGISTRY/parser:$CI_COMMIT_SHA $KIP_REGISTRY/parser:canary
+    - docker tag $KIP_REGISTRY/delivery_picstitch:$CI_COMMIT_SHA $KIP_REGISTRY/delivery_picstitch:canary
+    - docker tag $KIP_REGISTRY/picstitch:$CI_COMMIT_SHA $KIP_REGISTRY/picstitch:canary
 
-    - docker push $KIP_REGISTRY/parser:$CI_BUILD_REF
-    - docker push $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF
-    - docker push $KIP_REGISTRY/picstitch:$CI_BUILD_REF
+    - docker push $KIP_REGISTRY/parser:$CI_COMMIT_SHA
+    - docker push $KIP_REGISTRY/delivery_picstitch:$CI_COMMIT_SHA
+    - docker push $KIP_REGISTRY/picstitch:$CI_COMMIT_SHA
 
     - docker push $KIP_REGISTRY/parser:canary
     - docker push $KIP_REGISTRY/delivery_picstitch:canary
@@ -222,12 +222,12 @@ deploy_canary:
   script:
     - ls $DEPLOYMENT_DIR
 
-    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.parser.yaml
-    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.slack.yaml
-    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.cafe_menu.yaml
-    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.payments.yaml
-    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.delivery_picstitch.yaml
-    - sed -i "s/CANARYIMAGE/$CI_BUILD_REF/" src/k8s/canary/canary.picstitch.yaml
+    - sed -i "s/CANARYIMAGE/$CI_COMMIT_SHA/" src/k8s/canary/canary.parser.yaml
+    - sed -i "s/CANARYIMAGE/$CI_COMMIT_SHA/" src/k8s/canary/canary.slack.yaml
+    - sed -i "s/CANARYIMAGE/$CI_COMMIT_SHA/" src/k8s/canary/canary.cafe_menu.yaml
+    - sed -i "s/CANARYIMAGE/$CI_COMMIT_SHA/" src/k8s/canary/canary.payments.yaml
+    - sed -i "s/CANARYIMAGE/$CI_COMMIT_SHA/" src/k8s/canary/canary.delivery_picstitch.yaml
+    - sed -i "s/CANARYIMAGE/$CI_COMMIT_SHA/" src/k8s/canary/canary.picstitch.yaml
 
     - kubectl apply -f src/k8s/canary/canary.parser.yaml --namespace=canary
     - kubectl apply -f src/k8s/canary/canary.slack.yaml --namespace=canary
@@ -238,45 +238,6 @@ deploy_canary:
   after_script:
     - rm /tmp/KUBERNETES_KEY.json
 # -----------
-
-build_production_node:
-  stage: build
-  only:
-    - master
-  before_script:
-    - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
-  script:
-    - docker build -t $KIP_REGISTRY/slack:$CI_BUILD_REF -f Dockerfiles/slack.Dockerfile .
-    - docker build -t $KIP_REGISTRY/payments:$CI_BUILD_REF -f Dockerfiles/payments.Dockerfile .
-    - docker build -t $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF -f Dockerfiles/cafe_menu.Dockerfile .
-
-    - docker tag $KIP_REGISTRY/slack:$CI_BUILD_REF $KIP_REGISTRY/slack:latest
-    - docker tag $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF $KIP_REGISTRY/cafe_menu:latest
-    - docker tag $KIP_REGISTRY/payments:$CI_BUILD_REF $KIP_REGISTRY/payments:latest
-
-    - docker push $KIP_REGISTRY/slack:$CI_BUILD_REF
-    - docker push $KIP_REGISTRY/cafe_menu:$CI_BUILD_REF
-    - docker push $KIP_REGISTRY/payments:$CI_BUILD_REF
-
-
-build_production_python:
-  stage: build
-  only:
-    - master
-  before_script:
-    - docker login -e $GCLOUD_SA -u _json_key -p "$(cat src/k8s/other/gcloud.json)" $GKE_REGISTRY
-  script:
-    - docker build -t $KIP_REGISTRY/parser:$CI_BUILD_REF -f Dockerfiles/parser.Dockerfile .
-    - docker build -t $KIP_REGISTRY/picstitch:$CI_BUILD_REF -f Dockerfiles/picstitch.Dockerfile .
-    - docker build -t $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF -f Dockerfiles/delivery_picstitch.Dockerfile .
-
-    - docker tag $KIP_REGISTRY/parser:$CI_BUILD_REF $KIP_REGISTRY/parser:latest
-    - docker tag $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF $KIP_REGISTRY/delivery_picstitch:latest
-    - docker tag $KIP_REGISTRY/picstitch:$CI_BUILD_REF $KIP_REGISTRY/picstitch:latest
-
-    - docker push $KIP_REGISTRY/parser:$CI_BUILD_REF
-    - docker push $KIP_REGISTRY/delivery_picstitch:$CI_BUILD_REF
-    - docker push $KIP_REGISTRY/picstitch:$CI_BUILD_REF
 
 deploy_production:
   image: google/cloud-sdk
@@ -292,12 +253,12 @@ deploy_production:
   script:
     - ls $DEPLOYMENT_DIR
 
-    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/parser.production.yaml
-    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/slack.production.yaml
-    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/cafe_menu.production.yaml
-    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/payments.production.yaml
-    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/delivery_picstitch.production.yaml
-    - sed -i "s/latest/$CI_BUILD_REF/" src/k8s/production/picstitch.production.yaml
+    - sed -i "s/latest/$CI_COMMIT_SHA/" src/k8s/production/parser.production.yaml
+    - sed -i "s/latest/$CI_COMMIT_SHA/" src/k8s/production/slack.production.yaml
+    - sed -i "s/latest/$CI_COMMIT_SHA/" src/k8s/production/cafe_menu.production.yaml
+    - sed -i "s/latest/$CI_COMMIT_SHA/" src/k8s/production/payments.production.yaml
+    - sed -i "s/latest/$CI_COMMIT_SHA/" src/k8s/production/delivery_picstitch.production.yaml
+    - sed -i "s/latest/$CI_COMMIT_SHA/" src/k8s/production/picstitch.production.yaml
 
     - kubectl apply -f src/k8s/production/parser.production.yaml --namespace=production
     - kubectl apply -f src/k8s/production/slack.production.yaml --namespace=production
