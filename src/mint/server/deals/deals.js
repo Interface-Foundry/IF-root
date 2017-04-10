@@ -25,8 +25,6 @@ var getDeals = function * (count, skip) {
   var camels = yield db.CamelItems.find(query);
   console.log('just got camels');
 
-  //if there's something wrong with the value passed in, just start from the beginning
-  if (!camels.length && lastPosition > -1) return yield getDeals();
   return yield camels;
 };
 

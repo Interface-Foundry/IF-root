@@ -9,43 +9,43 @@
     <title>Share Cart Email</title>
     <style type="text/css">
         /* CLIENT-SPECIFIC STYLES */
-
+        
         /* Force Outlook to provide a "view in browser" message */
         #outlook a {
             padding:0;
         }
-
+        
         /* Force Hotmail to display emails at full width */
         .ExternalClass,
         .ReadMsgBody {
             width:100%;
         }
-
+        
         /* Force Hotmail to display normal line spacing */
-        .ExternalClass,
-        .ExternalClass p,
-        .ExternalClass span,
-        .ExternalClass font,
-        .ExternalClass td,
+        .ExternalClass, 
+        .ExternalClass p, 
+        .ExternalClass span, 
+        .ExternalClass font, 
+        .ExternalClass td, 
         .ExternalClass div {
             line-height: 100%;
-        }
-
+        } 
+        
         /* Prevent WebKit and Windows mobile changing default text sizes */
-        body,
-        table,
-        td,
+        body, 
+        table, 
+        td, 
         a {
             -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;
         }
-
+        
         /* Remove spacing between tables in Outlook 2007 and up */
-        table,
+        table, 
         td {
-            mso-table-lspace:0pt;
+            mso-table-lspace:0pt; 
             mso-table-rspace:0pt;
         }
-
+        
         /* Allow smoother rendering of resized image in Internet Explorer */
         img {
             -ms-interpolation-mode:bicubic;
@@ -53,23 +53,28 @@
 
         /* RESET STYLES */
         img {
-            border:0;
-            line-height:100%;
-            outline:none;
+            border:0; 
+            line-height:100%; 
+            outline:none; 
             text-decoration:none;
         }
         table {
             border-collapse:collapse !important;
         }
         body {
-            height:100% !important;
-            margin:0;
-            padding:0;
+            height:100% !important; 
+            margin:0; 
+            padding:0; 
             width:100% !important;
             background: #fff;
             font-family: sans-serif;
             -webkit-text-size-adjust:100%;
             -ms-text-size-adjust:100%;
+        }
+        a {
+            color: #4a9ff1;
+            cursor: pointer;
+            text-decoration: none;
         }
         p[class='blue'] {
             text-decoration: none;
@@ -95,11 +100,14 @@
         span[class="linethrough"] {
             text-decoration: line-through;
         }
-
+        
         @media screen and (max-width: 600px) {
             div[class='main'] {
                 max-width: 100% !important;
-                margin: 0;
+                margin: 0!important;
+            }
+            div[class='responsive-image'] {
+                height: 50px !important;
             }
         }
     </style>
@@ -108,9 +116,6 @@
 <!-- /Gmail hack -->
 <div style="display:none; white-space:nowrap; font:15px courier; color:#ffffff; line-height:0; width:600px !important; min-width:600px !important; max-width:600px !important;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
 <!-- /Gmail hack -->
-<!-- Hidden Values -->
-<input type="hidden" id="cartId" name="cartId" value="<%=id%>">
-<!-- Hidden Values -->
 <div class="main" style="max-width: 700px; margin: 50px auto; border: 1px solid #e1e1e1; overflow: hidden;">
     <!-- FULL WIDTH CONTAINER ALWAYS NEED THIS-->
     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #4f4d4c; color: #fcfcf9; max-width: 700px">
@@ -119,14 +124,14 @@
                 <table width="100%" height="25" cellspacing="0" cellpadding="0" border="0" class="headline">
                     <!-- FOR EVERY NEW PIECE OF CONTENT, CREATE NEW <TR><TD> -->
                     <tr>
-                        <td align="center" width="15%" style="padding: 25px;" class="headline">
+                        <td align="center" width="15%" style="padding: 25px 15px;" class="headline">
                             <img src='http://tidepools.co/kip/head_smaller.png'  style="font-size: 28px; text-align: left; color: #fcfcf9; height: 50px;">
                         </td>
                         <!-- APPERNTLY ACCORDING TO EMAIL TEMPLATING BEST PRACTICE WE WANT INLINE STYLES: WEIRD -->
                         <td align="center" width="85%" valign="middle" height="100%" style="font-size: 28px; text-align: left; color: #fcfcf9;">
                              KIP CART
                         </td>
-                    </tr>
+                    </tr>                
                 </table>
             </td>
         </tr>
@@ -137,13 +142,13 @@
                 <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
                 <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                     <tr>
-                        <td style="padding: 50px 30px; font-size: 25px;" align="left">
+                        <td style="padding: 50px 15px; font-size: 25px;" align="center">
                             <%=name%>'s Kip group cart
                         </td >
                     </tr>
                 </table>
             </td>
-        </tr>
+        </tr> 
     </table>
     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
         <tr>
@@ -151,8 +156,8 @@
                 <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
                 <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                     <tr>
-                        <td style="padding: 0px 30px 10px; font-size: 18px; color: #8f8d8c; font-weight: 100;" align="left">
-                             Forward this email to share the cart link:
+                        <td style="padding: 0px 15px 10px; font-size: 16px; color: #8f8d8c; font-weight: 100;" align="center">
+                            Forward or share the cart link:
                         </td >
                     </tr>
                 </table>
@@ -162,10 +167,10 @@
                             <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
                             <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                 <tr>
-                                    <td style="padding: 0px 30px 50px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
+                                    <td style="padding: 0px 15px 50px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
                                          <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                              <tr>
-                                                 <td align="center" style="padding: 30px 0px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1;">
+                                                 <td align="center" style="padding: 30px 15px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1; max-width: 100px; overflow: hidden;white-space: nowrap;text-overflow: ellipsis;">
                                                     <%=baseUrl%>/cart/<%=id%>
                                                  </td>
                                              </tr>
@@ -174,10 +179,10 @@
                                 </tr>
                             </table>
                         </td>
-                    </tr>
+                    </tr> 
                 </table>
             </td>
-        </tr>
+        </tr> 
     </table>
     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
         <tr>
@@ -185,14 +190,14 @@
                 <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
                 <table width="100%" ellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                     <tr>
-                        <td style="padding: 0px 30px 10px; font-size: 18px; color: #8f8d8c; font-weight: 100;" align="center">
+                        <td style="padding: 0px 15px 10px; font-size: 16px; color: #8f8d8c; font-weight: 100;" align="center">
                              Add Amazon items to the Kip Cart
                         </td >
                     </tr>
                 </table>
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
-                    <td align="center" width="100%" style="box-sizing: border-box; width: 100%; padding: 0 30px 50px; ">
+                    <td align="center" width="100%" style="box-sizing: border-box; width: 100%; padding: 0 15px 50px; ">
                       <div style="box-sizing: border-box; width: 100%; padding: 0px 0px 0px; ">
                         <!--[if mso]>
                           <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://litmus.com" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
@@ -200,18 +205,18 @@
                             <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:20px;">VIEW KIP CART MSO</center>
                           </v:roundrect>
                         <![endif]-->
-                        <a href="<%=baseUrl%>/cart/<%=id%>" style="background-color:#ffe94d;border:1px solid #ffe94d;border-radius:3px;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:20px;line-height:75px;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;">VIEW KIP CART</a>
+                        <a href="http://buttons.cm" style="background-color:#ffe94d;border:1px solid #ffe94d;border-radius:3px;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:20px;line-height:75px;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;">VIEW KIP CART</a>
                       </div>
                     </td>
                   </tr>
                 </table>
             </td>
-        </tr>
+        </tr> 
     </table>
     <!-- TWO COLUMN SECTION -->
-    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color: #4f4d4c; background: #fcfcf9; border-top: 1px solid #e1e1e1;max-width: 700px">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
         <tr>
-            <td bgcolor="#fcfcf9" align="center" style="padding: 70px 15px 70px 15px;" class="section-padding">
+            <td bgcolor="#fcfcf9" align="center" style="padding: 0px 15px 10px;" class="section-padding">
                 <table border="0" cellpadding="0" cellspacing="0" width="100%" class="responsive-table">
                     <tr>
                         <td>
@@ -240,45 +245,45 @@
                                             <% for(var x=0; x<deals[i].length; x++) {%>
                                                 <table cellpadding="0" cellspacing="0" border="0" width="49%" align="left" class="responsive-table">
                                                     <tr>
-                                                        <td style="padding: 20px 10px;">
-                                                            <table cellpadding="0" cellspacing="0" border="0" width="100%" height="350px" style="border: 1px solid #e0e0e0">
-                                                                <tr>
-                                                                    <td align="center" bgcolor="#ffffff" valign="middle" style="padding: 10px 20px 0;"><a href="http://alistapart.com" target="_blank"><img src="<%=deals[i][x].large%>" width="100%" height="125px" style="display: block; color: #666666; font-family: Helvetica, arial, sans-serif; font-size: 13px;" alt="Fluid images" border="0" class="img-max"></a></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td align="center" style="padding: 5px 10px 0; font-family: Arial, sans-serif; color: #666666; font-size: 16px; line-height: 20px;white-space: normal;overflow: hidden;text-overflow: ellipsis;" bgcolor="#ffffff">
-                                                                        <span class="appleBody" style="white-space: normal;overflow: hidden;text-overflow: ellipsis;">
-                                                                            <%=deals[i][x].name%>
-                                                                        </span>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td align="center" style="padding: 5px 0; font-family: Arial, sans-serif; color: #CE5019; font-size: 20px;" bgcolor="#ffffff">$<%=deals[i][x].price%></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td align="center" style="padding: 5px 0; font-family: Arial, sans-serif; color: #666666; font-size: 14px; line-height: 20px;" bgcolor="#ffffff">
-                                                                        <span class="appleBody"><span class="linethrough">$<%=deals[i][x].previousPrice%></span> (<%=deals[i][x].savePercent%>% off)</span>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td align="center" style="padding: 5px 0 0 0; font-family: Arial, sans-serif; color: #666666; font-size: 14px; line-height: 20px;" bgcolor="#ffffff">                               <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                                          <tr>
-                                                                            <td align="center" width="100%" height="50px" style="box-sizing: border-box;">
-                                                                              <div style="box-sizing: border-box; width: 100%; height: 100%;" >
-                                                                                <!--[if mso]>
-                                                                                  <v:rect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://litmus.com" style="height:50px;v-text-anchor:middle;mso-width-percent: 460;" strokecolor="#e1e1e1" fillcolor="#e1e1e1">
-                                                                                    <w:anchorlock/>
-                                                                                    <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:15px;">VIEW KIP CART</center>
-                                                                                  </v:rect>
-                                                                                <![endif]-->
-                                                                                <a href="<%=baseUrl%>/cart/<%=id%>" style="background-color:#e1e1e1;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:15px;line-height:50px;height:100%;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">ADD ITEM</a>
-                                                                              </div>
-                                                                            </td>
-                                                                          </tr>
-                                                                        </table>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
+                                                        <td style="padding: 5px;">
+                                                            <div>                                                        
+                                                                <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid #e0e0e0">
+                                                                    <tr>
+                                                                        <td align="center" bgcolor="#ffffff" valign="middle" style="padding: 10px 20px 0;"><img src="<%=deals[i][x].large%>" width="auto" class="responsive-image" style="height: auto;display: block; color: #666666; font-family: Helvetica, arial, sans-serif; font-size: 13px;height: 50px; max-width: 50%;" alt="Fluid images" border="0" class="img-max"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="center" style="padding: 5px 20px; font-family: Arial, sans-serif; color: #666666; font-size: 16px; line-height: 20px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 50px" bgcolor="#ffffff">
+                                                                            <span class="appleBody"><%=deals[i][x].name%></span>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="center" style="padding: 5px 0; font-family: Arial, sans-serif; color: #CE5019; font-size: 18px;overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 50px" bgcolor="#ffffff">$<%=deals[i][x].price%></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="center" style="padding: 5px 0; font-family: Arial, sans-serif; color: #666666; font-size: 10px; line-height: 20px;overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 50px" bgcolor="#ffffff">
+                                                                            <span class="appleBody"><span class="linethrough">$<%=deals[i][x].previousPrice%></span> (<%=deals[i][x].savePercent%>% off)</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="center" style="padding: 5px 0 0 0; font-family: Arial, sans-serif; color: #666666; font-size: 14px; line-height: 20px;" bgcolor="#ffffff">                               <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                                              <tr>
+                                                                                <td align="center" width="100%" height="50px" style="box-sizing: border-box;">
+                                                                                  <div style="box-sizing: border-box; width: 100%; height: 100%;" >
+                                                                                    <!--[if mso]>
+                                                                                      <v:rect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://litmus.com" style="height:50px;v-text-anchor:middle;mso-width-percent: 450;" strokecolor="#e1e1e1" fillcolor="#e1e1e1">
+                                                                                        <w:anchorlock/>
+                                                                                        <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:15px;">VIEW KIP CART</center>
+                                                                                      </v:rect>
+                                                                                    <![endif]-->
+                                                                                    <a href="<%=baseUrl%>/cart/<%=id%>" style="background-color:#e1e1e1;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:15px;line-height:50px;height:100%;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">ADD ITEM</a>
+                                                                                  </div>
+                                                                                </td>
+                                                                              </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 </table>

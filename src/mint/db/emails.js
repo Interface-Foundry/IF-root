@@ -103,4 +103,4 @@ var emailsCollection = Waterline.Collection.extend({
   }
 });
 
-module.exports = emailsCollection;
+module.exports = emailsCollection

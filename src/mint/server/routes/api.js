@@ -4,6 +4,8 @@ var _ = require('lodash')
 
 var router = express.Router();
 
+const dealsDb = require('../deals/deals')
+
 var db;
 const dbReady = require('../../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e))
@@ -40,6 +42,36 @@ require('./users-api')(router)
 var deals = require('../deals_sample.json');
 router.get('/test/deals', (req, res)=>{
   res.json(deals);
-});
+})
+
+var item = require('../amazon_sample_item.json');
+router.get('/test/item', (req, res)=>{
+  res.json(item);
+})
+
+// Koh Dummy test eail
+// curl -i -X POST http://127.0.0.1:3000/api/cart/36d4750ea2b3/test/komangwluce@gmail.com
+router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
+  const email_id = req.params.email_id;
+  const cart_id = req.params.cart_id;
+
+  var email = yield db.Emails.create({
+    recipients: email_id,
+    subject: 'Share Kip Cart Test',
+    cart: cart_id
+  })
+
+  var allDeals = yield dealsDb.getDeals(4, 0)
+      deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
+
+  email.template('new_cart', {
+    id: cart_id,
+    name: email_id.split('@')[0],
+    deals: deals
+  })
+
+  yield email.send();
+}))
+
 
 module.exports = router;
