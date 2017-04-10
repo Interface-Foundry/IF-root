@@ -24,3 +24,8 @@ logging:
     enabled: true
 menuURL: http://dev-cafe.kipthis.com/menus
 kipPayURL: https://dev-pay.kipthis.com
+proxy:
+  luminati:
+    addr: http://luminati-proxy.default.svc.cluster.local:22225
+    enabled: true
+    password: e49d4ega1696
