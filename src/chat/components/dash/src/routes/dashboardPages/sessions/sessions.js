@@ -16,6 +16,7 @@ import Table from '../../../components/Table';
 import vagueTime from 'vague-time';
 import _ from 'lodash';
 import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
+import moment from 'moment';
 
 
 class WaypointHover extends Component {
@@ -57,10 +58,10 @@ class Session extends Component {
       currentTeam:'All Team',
       rows: []
     };
+    this.renderSessionsLineGraph = this.renderSessionsLineGraph.bind(this);
   }
 
   componentDidMount() {
-    debugger;
     var self = this;
     var rows = [];
     var waypoints = self.props.waypoints;
@@ -81,6 +82,54 @@ class Session extends Component {
         rows: rows,
       }) 
   }
+
+  renderSessionsLineGraph(rows){
+    var dataPlot = [];   //name:time_range #sessions, #teams
+    var weekRanges=[]; 
+
+    for(var i = 0; i<10; i++){
+      weekRanges.push({index: i, startDate: new Date(moment().subtract(10-i, 'week')),endDate: new Date(moment().subtract(9-i, 'week')), numSessions:0, teams:[]});
+    }
+    rows.map(function(row){
+      var week = weekRanges.find(function(w){
+        return new Date(row.time_stamp) > new Date(w.startDate) && new Date(row.time_stamp) <= new Date(w.endDate);
+      });
+      if(week){
+        week.numSessions++;
+        if(week.teams.length<1 || !week.teams.includes(row.team_name)) {
+          week.teams.push(row.team_name);
+        }
+      }
+    })
+
+    for(var i=0;i<10;i++){
+      var currentWeek = weekRanges.find((x) => x.index==i);
+      if(currentWeek){
+        dataPlot.push({name: currentWeek.endDate.toLocaleDateString(), numSessions: currentWeek.numSessions, numTeams: currentWeek.teams.length})
+      }
+      
+    }
+
+    return(
+      <Panel
+        header={<span><i className="fa fa-line-chart " />Cart Tracking</span>}>
+          <div className="resizable">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={dataPlot} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
+                <XAxis dataKey="name" />
+                <YAxis />
+                <CartesianGrid stroke="#ccc" />
+                <Tooltip />
+                    <Line type="monotone" dataKey="numSessions" stroke="#8884d8" fill="#8884d8" />
+                    <Line type="monotone" dataKey="numTeams" stroke="#ffc658" fill="#ffc658" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+      </Panel>
+    )
+  }
+
+
 
   getWaypointPaths(waypoints){
     var userWaypoints = _.groupBy(waypoints,function(waypoint){
@@ -115,47 +164,56 @@ class Session extends Component {
     })
   }
 
+  renderWaypointTable(rows){
+    return(
+      <Panel header={<span>Table of Waypoint Routes</span>}>
+        <Table heads={[{
+          field: 'time_stamp',
+          descrip: 'Session Time Started',
+          allowSort: true,
+          sort: (a, b, order) => order == 'desc' ? 
+              new Date(b.time_stamp) - new Date(a.time_stamp) 
+              : new Date(a.time_stamp) - new Date(b.time_stamp)
+        }, {
+          field: 'time_stamp_end',
+          descrip: 'Session Time of Last Activity',
+          allowSort: true,
+          sort: (a, b, order) => order == 'desc' ? 
+              new Date(b.time_stamp_end) - new Date(a.time_stamp_end) 
+              : new Date(a.time_stamp_end) - new Date(b.time_stamp_end)
+        },{
+          field: 'user_id',
+          descrip: 'User ID',
+          allowSort: true
+        }, {
+          field: 'team_name',
+          descrip: 'Team Name',
+          allowSort: true,
+        }, {
+          field: 'actions',
+          descrip: 'User Actions',
+          allowSort: true,
+          dataFormat: (cell, row)=> <WaypointHover waypoints={cell}/>
+        }]} data={rows} />
+      </Panel>
+    )
+  }
+
 
   render(){
+    var self = this;
     return (
       <div>
         <div className="row">
           <div className="col-lg-12">
-            <PageHeader>{this.state.currentTeam} Sessions</PageHeader>
+            <PageHeader>{self.state.currentTeam} Sessions</PageHeader>
           </div>
         </div>
-
+        <div>
+            {self.renderSessionsLineGraph(self.state.rows)}
+        </div>
         <div className="panel panel-default fillSpace">
-            <Panel header={<span>Table of Waypoint Routes</span>}>
-              <Table heads={[{
-                field: 'time_stamp',
-                descrip: 'Session Time Started',
-                allowSort: true,
-                sort: (a, b, order) => order == 'desc' ? 
-                    new Date(b.time_stamp) - new Date(a.time_stamp) 
-                    : new Date(a.time_stamp) - new Date(b.time_stamp)
-              }, {
-                field: 'time_stamp_end',
-                descrip: 'Session Time of Last Activity',
-                allowSort: true,
-                sort: (a, b, order) => order == 'desc' ? 
-                    new Date(b.time_stamp_end) - new Date(a.time_stamp_end) 
-                    : new Date(a.time_stamp_end) - new Date(b.time_stamp_end)
-              },{
-                field: 'user_id',
-                descrip: 'User ID',
-                allowSort: true
-              }, {
-                field: 'team_name',
-                descrip: 'Team Name',
-                allowSort: true,
-              }, {
-                field: 'actions',
-                descrip: 'User Actions',
-                allowSort: true,
-                dataFormat: (cell, row)=> <WaypointHover waypoints={cell}/>
-              }]} data={this.state.rows} />
-            </Panel>
+            {self.renderWaypointTable(self.state.rows)}
         </div>
 
       </div>

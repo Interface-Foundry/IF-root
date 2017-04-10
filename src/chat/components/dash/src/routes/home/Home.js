@@ -83,7 +83,7 @@ class Home extends Component {
     //console.log(new Date(startDate),new Date(endDate));
     //console.log(this.props);
     return (
-      <Panel className='fillSpace' header={<span><i className="fa fa-bar-chart-o fa-fw" /> Purchased Store Carts from {new Date(startDate).toLocaleString()} to {new Date(endDate).toLocaleString()}</span>}>
+      <Panel className='fillSpace' header={<span><i className="fa fa-fw"/> Purchased Store Carts from {new Date(startDate).toLocaleDateString()} to {new Date(endDate).toLocaleDateString()}</span>}>
       
         <CartTable 
                 start = {startDate}
@@ -177,10 +177,9 @@ class Home extends Component {
 
   renderDeliveryTable(startDate, endDate){
     //console.log(new Date(startDate),new Date(endDate));
-
     return(
 
-      <Panel className='fillSpace' header={<span><i className="fa fa-bar-chart-o fa-fw" /> Purchased Cafe Carts from {new Date(startDate).toLocaleString()} to {new Date(endDate).toLocaleString()}</span>}>
+      <Panel header={<span><i className="fa fa-table fa-fw" /> Purchased Cafe Carts from {new Date(startDate).toLocaleDateString()} to {new Date(endDate).toLocaleDateString()}</span>}>
       
         <DeliveryTable 
                 start = {startDate}
@@ -273,9 +272,7 @@ class Home extends Component {
     
     return(
       <Panel
-        header={<span>
-          <i className="fa fa-bar-chart-o fa-fw" /> Purchased Carts
-        </span>}>
+        header={<span><i className="fa fa-line-chart " />Purchased Carts</span>}>
           <div className="resizable">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dataPlot} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
@@ -297,9 +294,9 @@ class Home extends Component {
     var self = this;
     return (
       <div>
-      <div>
-          {self.renderCartsLineGraph(this.props.data)}
-      </div>
+        <div>
+            {self.renderCartsLineGraph(this.props.data)}
+        </div>
         <div className="container-fluid data-display">
           <ButtonToolbar>
             <Button onClick={ ()=> self.changeCart('Store')}>
@@ -313,8 +310,9 @@ class Home extends Component {
               Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />    
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
+          <div className="panel panel-default">
             { self.renderDeliveryTable(self.state.startDate, self.state.endDate) }
-
+          </div>
         </div>
       </div>
 
@@ -326,9 +324,9 @@ class Home extends Component {
     var self = this;
     return (
       <div>
-      <div>
-          {self.renderCartsLineGraph(this.props.data)}
-      </div>
+        <div>
+            {self.renderCartsLineGraph(this.props.data)}
+        </div>
         <div className="container-fluid data-display">
           <ButtonToolbar>
             <Button onClick={ ()=> self.changeCart('Store')}>
@@ -342,8 +340,9 @@ class Home extends Component {
               Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />    
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
-            { self.state.view=='Store' ? self.renderCartTable(self.state.startDate, self.state.endDate) : self.renderDeliveryTable(self.state.startDate, self.state.endDate) }
-
+            <div className="panel panel-default">
+              { self.state.view=='Store' ? self.renderCartTable(self.state.startDate, self.state.endDate) : self.renderDeliveryTable(self.state.startDate, self.state.endDate) }
+            </div>
         </div>
       </div>
 
