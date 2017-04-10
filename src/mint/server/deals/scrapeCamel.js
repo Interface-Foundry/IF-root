@@ -227,9 +227,9 @@ var rankDeals = function * () {
     // logging.info('dealSet', dealSet.map(c => c.category));
     // logging.info('categoryCounts', categoryCounts);
     //if we have completed a set, we don't have to worry about repeating those categories
-    logging.info('in the loop');
-    logging.info('rankedDeals.length', rankedDeals.length);
-    logging.info('deferred.length', deferred.length);
+    // logging.info('in the loop');
+    // logging.info('rankedDeals.length', rankedDeals.length);
+    // logging.info('deferred.length', deferred.length);
     if (!deals.length) {
       console.log('early break');
       rankedDeals = rankedDeals.concat(dealSet).concat(deferred);

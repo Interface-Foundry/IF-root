@@ -17,9 +17,17 @@ agenda.define('daily deals', function (job, done) {
     return db.Emails.create({
       recipients: 'hannah.katznelson@kipthis.com',
       sender: 'deals@kip.ai',
-      subject: 'Daily Deals',
-      message_html: '<html><body>Daily Deals; Be HUMBLE.</body></html>'
+      subject: 'Daily Deals'
+      // template_name: 'daily_deals'
+      // message_html: '<html><body>Daily Deals; Be HUMBLE.</body></html>'
     })
+  })
+  .then(function (daily) {
+    daily.template('daily_deals', {
+      id: '7a43d85c928f',
+      baseUrl: 'https://72f2343b.ngrok.io'
+    })
+    return daily;
   })
   .then(function (daily) {
     daily.send();
