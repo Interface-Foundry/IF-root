@@ -16,11 +16,11 @@ var sendDailyDeals = function * () {
   yield wait(2000);
   console.log('and two seconds later');
 }
-
-agenda.define('test', function (job, done) {
-  logging.info('this is a test');
-  done();
-})
+// 
+// agenda.define('test', function (job, done) {
+//   logging.info('this is a test');
+//   done();
+// })
 
 agenda.define('deals', function (job, done) {
   logging.info('deals!')
@@ -73,12 +73,11 @@ agenda.define('deals', function (job, done) {
 agenda.on('ready', function () {
   logging.info('ready, woohoo')
   //clears the incomplete jobs so that they can restart if the server does
-  function failGracefully() {
+  function failGracefully() { //not really working oops -- just delete jobs from db in robomongo!
     agenda.stop(() => process.exit(0));
   }
   process.on('SIGTERM', failGracefully);
   process.on('SIGINT', failGracefully);
-  agenda.every('30 seconds', 'test');
   agenda.every('30 seconds', 'deals');
   // logging.info('about to start agendas');
   agenda.start();
