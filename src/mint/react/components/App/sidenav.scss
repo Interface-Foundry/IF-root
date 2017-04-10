@@ -1,0 +1,67 @@
+@import '../../styles/Constants';
+@import '../../styles/Animations';
+
+.sidenav {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	z-index: 100;
+	background: rgba(255,255,255,0.8);
+	@include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+	ul[class^='sidenav__'],
+	div[class^='sidenav__'] {
+		display: inline-block
+	}
+
+	.sidenav__overlay {
+		width: calc(100% - 200px);
+		height: 100%;
+		background: transparent;
+	}
+	.sidenav__list {
+		width: 200px;
+		height: 100%;
+		background: #999;
+		@include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+		@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+		h4 {
+			text-align: right;
+			border-bottom: 1px solid $border-color-light;
+			padding: $padding/2 $padding;
+		}
+
+		li {
+			height: $nav-height;
+			line-height: $nav-height;
+			padding: 0 $padding;
+
+			&.sidenav__list__header {
+				.icon {
+					float: right;
+				}
+
+				p {
+					padding: 0;
+					float: left;
+				}
+			}
+
+			.icon {
+				float: left;
+				height: $nav-height;
+			}
+
+			p {
+				float: right;
+				display: inline-block;
+				font-size: 13px;
+				padding: 0 $padding;
+			}
+		}
+	}
+}

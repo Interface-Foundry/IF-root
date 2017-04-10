@@ -8,7 +8,7 @@ export default class Header extends Component {
   }
 
   render() {
-    const { leader } = this.props;
+    const { leader, _toggleSidenav } = this.props;
 
     const leaderName = _.capitalize(getNameFromEmail(leader ? leader.email_address : null));
 
@@ -17,7 +17,9 @@ export default class Header extends Component {
         <h3>
           {leaderName}'s Group Cart
         </h3>
-        <Icon icon='Hamburger'/>
+        <div className='navbar__icon' onClick={_toggleSidenav}>
+          <Icon icon='Hamburger'/>
+        </div>
       </nav>
     );
   }

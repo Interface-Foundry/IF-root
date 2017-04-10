@@ -1,6 +1,5 @@
 import React, { PropTypes, Component } from 'react';
 import CartItem from './CartItem';
-import CartSwitcher from './CartSwitcher';
 import { AddAmazonItemContainer, DealsContainer } from '../../containers';
 
 export default class Cart extends Component {
@@ -43,7 +42,6 @@ export default class Cart extends Component {
         <div className='cart__add'>
           <AddAmazonItemContainer replace={replace}/>
         </div>
-        { carts ? <CartSwitcher carts={carts}/> : null }
         <DealsContainer isDropdown={false}/>
         <div className='cart__title'>
           <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>

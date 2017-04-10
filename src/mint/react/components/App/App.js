@@ -4,11 +4,17 @@ import { Route } from 'react-router';
 import { CartContainer } from '../../containers';
 import { Overlay, Modal } from '..';
 import Header from './Header';
+import Sidenav from './Sidenav';
 
 export default class App extends Component {
+  state = {
+    sidenav: false
+  }
+
   static propTypes = {
     cart_id: PropTypes.string.isRequired,
     leader: PropTypes.object,
+    carts: PropTypes.arrayOf(PropTypes.object),
     modal: PropTypes.string,
     newAccount: PropTypes.bool,
     match: PropTypes.object.isRequired,
@@ -30,8 +36,15 @@ export default class App extends Component {
     }
   }
 
+  _toggleSidenav = () => {
+    const { sidenav } = this.state
+    this.setState({sidenav: !sidenav})
+  }
+
   render() {
-    const { cart_id, newAccount, leader, match } = this.props;
+    const { cart_id, newAccount, leader, carts, match } = this.props,
+          { sidenav } = this.state,
+          { _toggleSidenav } = this;
 
     if (newAccount === false) {
       return <Overlay/>;
@@ -39,7 +52,8 @@ export default class App extends Component {
 
     return (
       <section className='app'>
-        <Header cart_id={cart_id} leader={leader} />
+        <Header cart_id={cart_id} leader={leader} _toggleSidenav={_toggleSidenav}/>
+        { sidenav ? <Sidenav cart_id={cart_id} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav}/> : null }
 
         { /* Renders modal when route permits */ }
         <Route path={`${match.url}/m/`} component={Modal} />

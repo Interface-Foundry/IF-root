@@ -3,7 +3,8 @@ import {
   IoEmail,
   IoNaviconRound,
   IoClose,
-  IoChevronUp
+  IoChevronUp,
+  IoEdit
 } from 'react-icons/lib/io';
 
 export default class Icon extends Component {
@@ -17,6 +18,8 @@ export default class Icon extends Component {
         return <IoClose/>;
       case 'Up':
         return <IoChevronUp/>;
+      case 'Edit':
+        return <IoEdit/>;
     }
   }
 }
