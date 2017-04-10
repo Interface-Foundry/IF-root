@@ -1,7 +1,6 @@
 image: docker:1.13
 variables:
   DOCKER_DRIVER: overlay
-  GIT_STRATEGY: fetch
   privileged: "true"
   GKE_REGISTRY: https://gcr.io
   KIP_REGISTRY: gcr.io/kip-styles
