@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var co = require('co');
 
+const dealsDb = require('../deals/deals')
+
 var utils = require('../utilities/utils.js');
 
 /**
@@ -80,6 +82,10 @@ router.get('/newcart', (req, res) => co(function * () {
     cart.leader = user.id
     yield cart.save()
 
+    // grab the daily deals
+    let allDeals = yield dealsDb.getDeals(4, 0),
+      deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
+
     // Send an email to the user with the cart link
     var email = yield db.Emails.create({
       recipients: user.email_address,
@@ -89,7 +95,9 @@ router.get('/newcart', (req, res) => co(function * () {
 
     // use the new_cart email template
     email.template('new_cart', {
-      id: cart.id
+      id: cart.id,
+      name: user.email_address.split('@')[0],
+      deals: deals
     })
 
     // remember to actually send it
