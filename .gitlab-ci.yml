@@ -24,6 +24,10 @@ stages:
   - build
   - deploy
 
+# -----------
+# TODO:
+#  - use templates
+
 
 # ------------------------------------------------
 # TEMPLATES
