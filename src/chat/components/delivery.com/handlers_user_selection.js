@@ -264,153 +264,26 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
 
   var checkbox
 
-  //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-  //Œ Œ Œ Œ Œ Œ Œ Œ > SLACK LAUNCH CODE < Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-  //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-  if(message.source.team == 'T02PN3B25'){
-
-    console.log('💀1💀1💀')
-
-    // basic buttons
-      let chosenId = _.get(foodSession, 'chosen_channel.id');
-      var genericButtons = [{
-        'text': `${chosenId === 'everyone' ? '◉' : '○'} Everyone`,
-        'value': 'everyone',
-        'name': 'food.admin.toggle_channel_reorder',
-        'type': 'button'
-      }, {
-        name: 'food.admin.toggle_channel_reorder',
-        text: `${(chosenId !== 'just_me' && chosenId !== 'everyone') ? '◉' : '○'} By Channel`,
-        type: 'button',
-        value: 'channel'
-      },{
-        'text': `${chosenId === 'just_me' ? '◉' : '○'} Just Me`,
-        'value': 'just_me',
-        'name': 'food.admin.toggle_channel_reorder',
-        'type': 'button'
-      }];
-
-      var groupedButtons = _.chunk(genericButtons, 5);
-      var msg_json = {
-        title: `Which team members are you ordering food for?`,
-        attachments: groupedButtons.map((buttonGroup) => {
-          return {
-            'text': '',
-            'fallback': 'Which team members are you ordering food for?',
-            'callback_id': 'channel_select',
-            'color': '#3AA3E3',
-            'attachment_type': 'default',
-            'actions': buttonGroup,
-            'mrkdwn_in': ['text']
-          }
-        })
-      }
-
-      msg_json.attachments.unshift({
-        text: `*Collect Orders from the Team* \n Select team members to include in the order:`,
-        fallback: `Send Cuisine Vote to Team`,
-        mrkdwn_in: ['text'],
-        color: '#3AA3E3'
-      })
-
-
-      // msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
-
-      if (chosenId !== 'just_me' && chosenId !== 'everyone') {
-
-        if( msg_json.attachments[0]) msg_json.attachments[0].text = '*Collect Orders from the Team* \n I\'ll send Direct Messages to each user in the selected channel:' 
-
-
-        let actions = [];
-        actions.push({
-          name: 'food.admin.toggle_channel_reorder',
-          text: 'Pick Channel',
-          type: 'select',
-          data_source: 'channels'
-          // selected_options: [{
-          //   ""
-          // }]
-        });
-        msg_json.attachments.push({
-          'text': '',
-          'color': '#45A5F4',
-          'callback_id': 'channel_select',
-          'attachment_type': 'default',
-          'actions': actions
-        })
-      }
-      // final attachment
-      msg_json.attachments.push({
-        'text': ``,
-        'fallback': 'Collect Orders?',
-        'color':'#2ab27b',
-        'callback_id': 'channel_select',
-        'attachment_type': 'default',
-        'actions': [{
-          'name': 'passthrough',
-          'text': '✓ Collect Orders',
-          'style': 'primary',
-          'type': 'button',
-          'value': 'food.admin.restaurant.confirm_reordering_of_previous_restaurant'
-        }, {
-          'name': 'food.admin.team.members.reorder',
-          'value': mostRecentMerchant,
-          'text': `Manage Members`,
-          'type': 'button'
-        }]
-      })
-
-      // if (process.env.NODE_ENV == 'development_hannah') {
-      //   msg_json.attachments[msg_json.attachments.length-1].actions.push({
-      //     'name': 'food.admin.team.email_members',
-      //     'text': 'Email Members',
-      //     'type': 'button',
-      //     'value': {
-      //       reorder: true
-      //     }
-      //   })
-      // }
-
-      msg_json.attachments[msg_json.attachments.length-1].actions.push({
-        'text': `< Back`,
-        'name': 'food.admin.restaurant.reordering_confirmation',
-        'value': message.data.value,
-        'type': 'button'
-      })
-
-      console.log('/ / / / / / / / / / \n ',msg_json)
-  }
-
-  //💀 KILL THIS CODE BEFORE LAUNCH 💀
-  else {
   // basic buttons
+    let chosenId = _.get(foodSession, 'chosen_channel.id');
     var genericButtons = [{
-      name: `Everyone`,
-      id: `everyone`
+      'text': `${chosenId === 'everyone' ? '◉' : '○'} Everyone`,
+      'value': 'everyone',
+      'name': 'food.admin.toggle_channel_reorder',
+      'type': 'button'
     }, {
-      name: `Just Me`,
-      id: `just_me`
-    }].map((channel) => {
-      checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
-      return {
-        'text': `${checkbox} ${channel.name}`,
-        'value': channel.id,
-        'name': `food.admin.toggle_channel_reorder`,
-        'type': `button`
-      }
-    })
+      name: 'food.admin.toggle_channel_reorder',
+      text: `${(chosenId !== 'just_me' && chosenId !== 'everyone') ? '◉' : '○'} By Channel`,
+      type: 'button',
+      value: 'channel'
+    },{
+      'text': `${chosenId === 'just_me' ? '◉' : '○'} Just Me`,
+      'value': 'just_me',
+      'name': 'food.admin.toggle_channel_reorder',
+      'type': 'button'
+    }];
 
-    var channelButtons = slackbot.meta.all_channels.map((channel) => {
-      checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
-      return {
-        'text': `${checkbox} #${channel.name}`,
-        'value': channel.id,
-        'name': `food.admin.toggle_channel_reorder`,
-        'type': `button`
-      }
-    })
-
-    var groupedButtons = _.chunk(genericButtons.concat(channelButtons), 5)
+    var groupedButtons = _.chunk(genericButtons, 5);
     var msg_json = {
       title: `Which team members are you ordering food for?`,
       attachments: groupedButtons.map((buttonGroup) => {
@@ -421,15 +294,48 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
           'color': '#3AA3E3',
           'attachment_type': 'default',
           'actions': buttonGroup,
-          'mrkdwn_in':['text']
+          'mrkdwn_in': ['text']
         }
       })
     }
 
-    // final attachment with send, edit members, < back
+    msg_json.attachments.unshift({
+      text: `*Collect Orders from the Team* \n Select team members to include in the order:`,
+      fallback: `Send Cuisine Vote to Team`,
+      mrkdwn_in: ['text'],
+      color: '#3AA3E3'
+    })
+
+
+    // msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
+
+    if (chosenId !== 'just_me' && chosenId !== 'everyone') {
+
+      if( msg_json.attachments[0]) msg_json.attachments[0].text = '*Collect Orders from the Team* \n I\'ll send Direct Messages to each user in the selected channel:' 
+
+
+      let actions = [];
+      actions.push({
+        name: 'food.admin.toggle_channel_reorder',
+        text: 'Pick Channel',
+        type: 'select',
+        data_source: 'channels'
+        // selected_options: [{
+        //   ""
+        // }]
+      });
+      msg_json.attachments.push({
+        'text': '',
+        'color': '#45A5F4',
+        'callback_id': 'channel_select',
+        'attachment_type': 'default',
+        'actions': actions
+      })
+    }
+    // final attachment
     msg_json.attachments.push({
       'text': ``,
-      'fallback': '✓ Send to Members',
+      'fallback': 'Collect Orders?',
       'color':'#2ab27b',
       'callback_id': 'channel_select',
       'attachment_type': 'default',
@@ -442,7 +348,7 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
       }, {
         'name': 'food.admin.team.members.reorder',
         'value': mostRecentMerchant,
-        'text': `Manage Channels`,
+        'text': `Manage Members`,
         'type': 'button'
       }]
     })
@@ -464,11 +370,6 @@ handlers['food.admin.display_channels_reorder'] = function * (message) {
       'value': message.data.value,
       'type': 'button'
     })
-  }
-
-  
-
-
 
 
   $replyChannel.sendReplace(message, 'food.admin.select_channel_reorder', {type: message.origin, data: msg_json})
@@ -485,222 +386,117 @@ handlers['food.admin.display_channels'] = function * (message) {
 
   var checkbox
 
-  //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-  //Œ Œ Œ Œ Œ Œ Œ Œ > SLACK LAUNCH CODE < Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-  //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-  if(message.source.team == 'T02PN3B25'){
-    // basic buttons
-    let chosenId = _.get(foodSession, 'chosen_channel.id');
-    var genericButtons = [{
-      'text': `${chosenId === 'everyone' ? '◉' : '○'} Everyone`,
-      'value': 'everyone',
-      'name': 'food.admin.toggle_channel',
-      'type': 'button'
-    }, {
-      name: 'food.admin.toggle_channel',
-      text: `${(chosenId !== 'just_me' && chosenId !== 'everyone') ? '◉' : '○'} By Channel`,
-      type: 'button',
-      value: 'channel'
-    },{
-      'text': `${chosenId === 'just_me' ? '◉' : '○'} Just Me`,
-      'value': 'just_me',
-      'name': 'food.admin.toggle_channel',
-      'type': 'button'
-    }];
+  // basic buttons
+  let chosenId = _.get(foodSession, 'chosen_channel.id');
+  var genericButtons = [{
+    'text': `${chosenId === 'everyone' ? '◉' : '○'} Everyone`,
+    'value': 'everyone',
+    'name': 'food.admin.toggle_channel',
+    'type': 'button'
+  }, {
+    name: 'food.admin.toggle_channel',
+    text: `${(chosenId !== 'just_me' && chosenId !== 'everyone') ? '◉' : '○'} By Channel`,
+    type: 'button',
+    value: 'channel'
+  },{
+    'text': `${chosenId === 'just_me' ? '◉' : '○'} Just Me`,
+    'value': 'just_me',
+    'name': 'food.admin.toggle_channel',
+    'type': 'button'
+  }];
 
-    var groupedButtons = _.chunk(genericButtons, 5);
-    var msg_json = {
-      title: `Which team members are you ordering food for?`,
-      attachments: groupedButtons.map((buttonGroup) => {
-        return {
-          'text': '',
-          'fallback': 'Which team members are you ordering food for?',
-          'callback_id': 'channel_select',
-          'color': '#3AA3E3',
-          'attachment_type': 'default',
-          'actions': buttonGroup,
-          'mrkdwn_in': ['text']
-        }
-      })
-    }
-
-    msg_json.attachments.unshift({
-      text: `*Send Cuisine Vote to Team* \n Select team members to include in the vote:`,
-      fallback: `Send Cuisine Vote to Team`,
-      mrkdwn_in: ['text'],
-      color: (foodSession.onboarding ? '#A368F0' : '#3AA3E3')
-    })
-
-    // msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
-
-    if (chosenId !== 'just_me' && chosenId !== 'everyone') {
-
-      if( msg_json.attachments[0]) msg_json.attachments[0].text = '*Send Cuisine Vote to Team* \n I\'ll send Direct Messages to each user in the selected channel:' 
-
-      let actions = [];
-      actions.push({
-        name: 'food.admin.toggle_channel',
-        text: 'Pick Channel',
-        type: 'select',
-        data_source: 'channels'
-        // selected_options: [{
-        //   value: chosenId
-        // }]
-      });
-
-      msg_json.attachments.push({
+  var groupedButtons = _.chunk(genericButtons, 5);
+  var msg_json = {
+    title: `Which team members are you ordering food for?`,
+    attachments: groupedButtons.map((buttonGroup) => {
+      return {
         'text': '',
-        'color': '#45A5F4',
+        'fallback': 'Which team members are you ordering food for?',
         'callback_id': 'channel_select',
+        'color': '#3AA3E3',
         'attachment_type': 'default',
-        'actions': actions
-      })
-    }
-    // final attachment with send, edit members, < back
-    msg_json.attachments.push({
-      'text': ``,
-      'fallback': '✓ Start Vote',
-      'color':'#2ab27b',
-      'callback_id': 'channel_select',
-      'attachment_type': 'default',
-      'actions': [
-        {
-          'text': `✓ Start Vote`,
-          'name': 'passthrough',
-          'value': 'food.user.poll',
-          'type': 'button',
-          'style': 'primary'
-        }
-        // }, {
-        //   'name': 'passthrough',
-        //   'value': 'food.admin.team.members',
-        //   'text': `Edit Members`,
-        //   'type': 'button'
-        // }
-      ]
-    })
-
-    // if (process.env.NODE_ENV == 'development_hannah') {
-    //   msg_json.attachments[msg_json.attachments.length-1].actions.push({
-    //     'name': 'passthrough',
-    //     'text': 'Email Members',
-    //     'type': 'button',
-    //     'value': 'food.admin.team.email_members'
-    //   })
-    // }
-
-    msg_json.attachments[msg_json.attachments.length-1].actions.push({
-      'text': `< Back`,
-      'name': 'food.poll.confirm_send_initial',
-      'value': 'food.poll.confirm_send_initial',
-      'type': 'button'
-    })
-    $replyChannel.sendReplace(message, 'food.admin.select_channel', {type: message.origin, data: msg_json})
-  }
-
-  //💀 KILL THIS CODE BEFORE LAUNCH 💀
-  else {
-    // basic buttons
-    var genericButtons = [{
-      name: `Everyone`,
-      id: `everyone`
-    }, {
-      name: `Just Me`,
-      id: `just_me`
-    }].map((channel) => {
-      checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
-      return {
-        'text': `${checkbox} ${channel.name}`,
-        'value': channel.id,
-        'name': `food.admin.toggle_channel`,
-        'type': `button`
+        'actions': buttonGroup,
+        'mrkdwn_in': ['text']
       }
     })
+  }
 
-    var channelButtons = slackbot.meta.all_channels.map((channel) => {
-      checkbox = (channel.id === _.get(foodSession, 'chosen_channel.id')) ? '◉' : '○'
-      return {
-        'text': `${checkbox} #${channel.name}`,
-        'value': channel.id,
-        'name': `food.admin.toggle_channel`,
-        'type': `button`
-      }
-    })
+  msg_json.attachments.unshift({
+    text: `*Send Cuisine Vote to Team* \n Select team members to include in the vote:`,
+    fallback: `Send Cuisine Vote to Team`,
+    mrkdwn_in: ['text'],
+    color: (foodSession.onboarding ? '#A368F0' : '#3AA3E3')
+  })
 
-    var groupedButtons = _.chunk(genericButtons.concat(channelButtons), 5)
-    var msg_json = {
-      title: `Which team members are you ordering food for?`,
-      attachments: groupedButtons.map((buttonGroup) => {
-        return {
-          'text': '',
-          'fallback': 'Which team members are you ordering food for?',
-          'callback_id': 'channel_select',
-          'color': '#3AA3E3',
-          'attachment_type': 'default',
-          'actions': buttonGroup,
-          'mrkdwn_in':['text']
-        }
-      })
-    }
+  // msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
 
-    msg_json.attachments.unshift({
-      text: `Messages from Kip will be sent in direct messages to each of the users in the selected channel:`,
-      fallback: `Messages from Kip will be sent in direct messages to each of the users in the selected channel:`,
-      color: (foodSession.onboarding ? '#A368F0' : '#3AA3E3')
-    })
+  if (chosenId !== 'just_me' && chosenId !== 'everyone') {
 
-    // msg_json.attachments[0].text = `Messages from Kip will be sent in Direct Messages to each of the users in the selected channel:`
+    if( msg_json.attachments[0]) msg_json.attachments[0].text = '*Send Cuisine Vote to Team* \n I\'ll send Direct Messages to each user in the selected channel:' 
 
-    // final attachment with send, edit members, < back
+    let actions = [];
+    actions.push({
+      name: 'food.admin.toggle_channel',
+      text: 'Pick Channel',
+      type: 'select',
+      data_source: 'channels'
+      // selected_options: [{
+      //   value: chosenId
+      // }]
+    });
+
     msg_json.attachments.push({
-      'text': ``,
-      'fallback': '✓ Start Vote',
-      'color':'#2ab27b',
+      'text': '',
+      'color': '#45A5F4',
       'callback_id': 'channel_select',
       'attachment_type': 'default',
-      'actions': [
-        {
-          'text': `✓ Start Vote`,
-          'name': 'passthrough',
-          'value': 'food.user.poll',
-          'type': 'button',
-          'style': 'primary'
-        }
-        // }, {
-        //   'name': 'passthrough',
-        //   'value': 'food.admin.team.members',
-        //   'text': `Edit Members`,
-        //   'type': 'button'
-        // }
-      ]
+      'actions': actions
     })
-
-    // if (process.env.NODE_ENV == 'development_hannah') {
-    //   msg_json.attachments[msg_json.attachments.length-1].actions.push({
-    //     'name': 'passthrough',
-    //     'text': 'Email Members',
-    //     'type': 'button',
-    //     'value': 'food.admin.team.email_members'
-    //   })
-    // }
-
-    msg_json.attachments[msg_json.attachments.length-1].actions.push({
-      'text': `< Back`,
-      'name': 'food.poll.confirm_send',
-      'value': 'food.poll.confirm_send',
-      'type': 'button'
-    })
-
-    $replyChannel.sendReplace(message, 'food.admin.select_channel', {type: message.origin, data: msg_json})
-
   }
+  // final attachment with send, edit members, < back
+  msg_json.attachments.push({
+    'text': ``,
+    'fallback': '✓ Start Vote',
+    'color':'#2ab27b',
+    'callback_id': 'channel_select',
+    'attachment_type': 'default',
+    'actions': [
+      {
+        'text': `✓ Start Vote`,
+        'name': 'passthrough',
+        'value': 'food.user.poll',
+        'type': 'button',
+        'style': 'primary'
+      }
+      // }, {
+      //   'name': 'passthrough',
+      //   'value': 'food.admin.team.members',
+      //   'text': `Edit Members`,
+      //   'type': 'button'
+      // }
+    ]
+  })
+
+  // if (process.env.NODE_ENV == 'development_hannah') {
+  //   msg_json.attachments[msg_json.attachments.length-1].actions.push({
+  //     'name': 'passthrough',
+  //     'text': 'Email Members',
+  //     'type': 'button',
+  //     'value': 'food.admin.team.email_members'
+  //   })
+  // }
+
+  msg_json.attachments[msg_json.attachments.length-1].actions.push({
+    'text': `< Back`,
+    'name': 'food.poll.confirm_send_initial',
+    'value': 'food.poll.confirm_send_initial',
+    'type': 'button'
+  })
+  $replyChannel.sendReplace(message, 'food.admin.select_channel', {type: message.origin, data: msg_json})
 
 }
 
 handlers['food.admin.toggle_channel_reorder'] = function * (message) {
-
-  console.log('😷😷😷😷😷😷 ',message.source.actions[0])
-
 
   let dataValue =_.get(message, 'data.value', _.get(message, 'source.actions[0].selected_options[0].value'));
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
@@ -716,44 +512,52 @@ handlers['food.admin.toggle_channel_reorder'] = function * (message) {
   } else {
     try {
 
-      //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-      //Œ Œ Œ Œ Œ Œ Œ Œ > SLACK LAUNCH CODE < Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-      //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-      if(message.source.team == 'T02PN3B25'){
-        //message menus
-        // find channel in meta.all_channels
-        let channelId = message.source.actions[0].selected_options[0].value;
-        var channel = _.find(slackbot.meta.all_channels, {'id': channelId})
-        foodSession.chosen_channel.name = channel.name
-        foodSession.chosen_channel.id = channel.id
-        foodSession.chosen_channel.is_channel = channel.is_channel
+      //message menus
+      // find channel in meta.all_channels
+      let channelId = message.source.actions[0].selected_options[0].value;
+      var channel = _.find(slackbot.meta.all_channels, {'id': channelId})
+      foodSession.chosen_channel.name = channel.name
+      foodSession.chosen_channel.id = channel.id
+      foodSession.chosen_channel.is_channel = channel.is_channel
 
-        var resp = yield infoForChannelOrGroup(slackbot, foodSession.chosen_channel)
-        //logging.debug('got resp back for select_channel members', resp)
-        foodSession.team_members = foodSession.all_members.filter(user => {
-          return _.includes(resp.members, user.id)
-        })
-        //logging.info('filtered down members to these members: ', foodSession.team_members)
-        foodSession.markModified('team_members')
-        yield foodSession.save()
-        return [];
-      } 
+      var resp = yield infoForChannelOrGroup(slackbot, foodSession.chosen_channel)
+      //logging.debug('got resp back for select_channel members', resp)
+      foodSession.team_members = foodSession.all_members.filter(user => {
+        return _.includes(resp.members, user.id)
+      })
+      //logging.info('filtered down members to these members: ', foodSession.team_members)
+      foodSession.markModified('team_members')
+      yield foodSession.save()
 
-      //💀 KILL THIS CODE BEFORE LAUNCH 💀
-      else {
-        // find channel in meta.all_channels
-        var channel = _.find(slackbot.meta.all_channels, {'id': message.data.value})
-        foodSession.chosen_channel.name = channel.name
-        foodSession.chosen_channel.id = channel.id
-        foodSession.chosen_channel.is_channel = channel.is_channel
-
-        var resp = yield infoForChannelOrGroup(slackbot, foodSession.chosen_channel)
-        logging.debug('got resp back for select_channel members', resp)
-        foodSession.team_members = foodSession.all_members.filter(user => {
-          return _.includes(resp.members, user.id)
+      //message menus fix 💀
+      var parsedIn = message.source
+      if(parsedIn && parsedIn.original_message.attachments){
+        _.forEach(parsedIn.original_message.attachments,function(val,key){
+          if(val.actions && val.actions[0] && val.actions[0].data_source == 'channels'){
+            parsedIn.original_message.attachments[key].actions[0].selected_options = [{
+              value:channelId
+            }]
+          }            
         })
       }
+      let stringOrig = JSON.stringify(parsedIn.original_message);
+      let map = {
+        amp: '&',
+        lt: '<',
+        gt: '>',
+        quot: '"',
+        '#039': '\''
+      };
+      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
+      request({
+        method: 'POST',
+        uri: message.source.response_url,
+        body: stringOrig
+      });
+      ////ugh
 
+      return [];
+    
     } catch (err) {
       $replyChannel.send(message, 'food.admin.select_channel', {type: message.origin, data: {text: 'hmm that didn\'t seem to work'}})
       logging.error('error getting members', err)
@@ -779,84 +583,55 @@ handlers['food.admin.toggle_channel'] = function * (message) {
   } else {
     try {
 
-      //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-      //Œ Œ Œ Œ Œ Œ Œ Œ > SLACK LAUNCH CODE < Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-      //Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ Œ 
-      if(message.source.team == 'T02PN3B25'){
+      // find channel in meta.all_channels
+      let channelId = message.source.actions[0].selected_options[0].value;
+      var channel = _.find(slackbot.meta.all_channels, {'id': channelId})
 
-        // find channel in meta.all_channels
-        let channelId = message.source.actions[0].selected_options[0].value;
-        var channel = _.find(slackbot.meta.all_channels, {'id': channelId})
-        foodSession.chosen_channel.name = channel.name
-        foodSession.chosen_channel.id = channel.id
-        foodSession.chosen_channel.is_channel = channel.is_channel
-
-        var resp = yield infoForChannelOrGroup(slackbot, foodSession.chosen_channel)
-        logging.debug('got resp back for select_channel members', resp)
-        foodSession.team_members = foodSession.all_members.filter(user => {
-          return _.includes(resp.members, user.id)
-        })
-        logging.info('filtered down members to these members: ', foodSession.team_members)
-        foodSession.markModified('team_members')
-        yield foodSession.save()
-
-
-        //message menus fix 💀
-        var parsedIn = message.source
-
-        if(parsedIn && parsedIn.original_message.attachments){
-          _.forEach(parsedIn.original_message.attachments,function(val,key){
-            if(val.actions && val.actions[0] && val.actions[0].data_source == 'channels'){
-              parsedIn.original_message.attachments[key].actions[0].selected_options = [{
-                value:channelId
-              }]
-            }            
-          })
-        }
-        ////ugh
-
-        let stringOrig = JSON.stringify(parsedIn.original_message);
-        let map = {
-          amp: '&',
-          lt: '<',
-          gt: '>',
-          quot: '"',
-          '#039': '\''
-        };
-        stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
-
-        console.log('^ ^ ^ STRING ORG ^ ^ ^ ^ ',stringOrig)
-        console.log('^ ^ ^ source ^ ^ ^ ^ ',message.source.response_url)
-        request({
-          method: 'POST',
-          uri: message.source.response_url,
-          body: stringOrig
-        },function(asdf){
-
-          console.log('????????? ',asdf)
-        });
-
-
-
-
-        return [];
+      if(!channel){
+        return []
       }
-      //💀 KILL THIS CODE BEFORE LAUNCH 💀
-      else {
-        // find channel in meta.all_channels
-        var channel = _.find(slackbot.meta.all_channels, {'id': message.data.value})
-        foodSession.chosen_channel.name = channel.name
-        foodSession.chosen_channel.id = channel.id
-        foodSession.chosen_channel.is_channel = channel.is_channel
+      foodSession.chosen_channel.name = channel.name
+      foodSession.chosen_channel.id = channel.id
+      foodSession.chosen_channel.is_channel = channel.is_channel
 
-        var resp = yield infoForChannelOrGroup(slackbot, foodSession.chosen_channel)
-        logging.debug('got resp back for select_channel members', resp)
-        foodSession.team_members = foodSession.all_members.filter(user => {
-          return _.includes(resp.members, user.id)
+      var resp = yield infoForChannelOrGroup(slackbot, foodSession.chosen_channel)
+      logging.debug('got resp back for select_channel members', resp)
+      foodSession.team_members = foodSession.all_members.filter(user => {
+        return _.includes(resp.members, user.id)
+      })
+      logging.info('filtered down members to these members: ', foodSession.team_members)
+      foodSession.markModified('team_members')
+      yield foodSession.save()
+
+      //message menus fix 💀
+      var parsedIn = message.source
+      if(parsedIn && parsedIn.original_message.attachments){
+        _.forEach(parsedIn.original_message.attachments,function(val,key){
+          if(val.actions && val.actions[0] && val.actions[0].data_source == 'channels'){
+            parsedIn.original_message.attachments[key].actions[0].selected_options = [{
+              value:channelId
+            }]
+          }            
         })
-        logging.info('filtered down members to these members: ', foodSession.team_members) 
       }
+      let stringOrig = JSON.stringify(parsedIn.original_message);
+      let map = {
+        amp: '&',
+        lt: '<',
+        gt: '>',
+        quot: '"',
+        '#039': '\''
+      };
+      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c]);
+      request({
+        method: 'POST',
+        uri: message.source.response_url,
+        body: stringOrig
+      });
+      ////ugh
 
+      return [];
+      
     } catch (err) {
       $replyChannel.send(message, 'food.admin.select_channel', {type: message.origin, data: {text: 'hmm that didn\'t seem to work'}})
       logging.error('error getting members', err)
