@@ -212,7 +212,7 @@ var emoji = {
 // Shortens a url for a cart object.  I'm not super sure about the id right now.
 //
 function getCartLink (url, cart_id) {
-  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3D' + tag)
+  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%^&]+/, '%26associate-id%3D' + tag)
   logging.debug('CART IDDDDDDDDD ', url)
 
   return googl.shorten('http://motorwaytoroswell.space/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart')
