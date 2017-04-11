@@ -29,14 +29,25 @@ module.exports = function (router) {
     // find all the carts where their user id appears in the leader or member field
     // NB: BUG: not returning carts where user is a member
     // NOTE: db.Carts.find() does not return a default value for members (isMany), unlike leader (isA)
-    const carts = yield db.Carts.find({
-      or: [
-        { leader: userIds },
-        { members: userIds }
-      ]
-    }).populate('items').populate('leader').populate('members')
 
-    res.send(carts)
+    // const carts = yield db.Carts.find({
+    //   or: [
+    //     { leader: userIds },
+    //     { members: userIds }
+    //   ]
+    // }).populate('items').populate('leader').populate('members')
+
+    db.Carts.find({
+      leader: { '!' : [undefined, null] },
+    }).populate('members').populate('leader').populate('items').then(function(allCarts) {
+
+      let carts = _.filter(allCarts, function(c) {
+        return userIds.includes(c.leader.id) || c.members.map(function(m) { return m.id }).join(',').includes(userIds[0])
+      })
+
+      res.send(carts)
+    })
+
 
   }))
 
