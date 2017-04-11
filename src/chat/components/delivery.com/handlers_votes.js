@@ -12,7 +12,7 @@ var mailerTransport = require('../../../mail/IF_mail.js')
 var email_utils = require('./email_utils')
 var score_utils = require('./score_utils')
 // var menu_utils = require('./menu_utils')
-var agenda = require('../agendas')
+//var agenda = require('../agendas')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -489,12 +489,12 @@ handlers['food.vote.submit'] = function * (message) {
     logging.info('have all the votes')
 
     // cancel any pending
-    agenda.cancel({
-      name: 'mock user message',
-      'data.user': message.user_id
-    }, function (e, numRemoved) {
-      if (e) logging.error(e)
-    })
+    // agenda.cancel({
+    //   name: 'mock user message',
+    //   'data.user': message.user_id
+    // }, function (e, numRemoved) {
+    //   if (e) logging.error(e)
+    // })
 
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {

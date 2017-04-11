@@ -1,45 +1,45 @@
 var request = require('request-promise');
 
 module.exports = function(agenda) {
-  agenda.define('append home', function(job, done) {
-    let message = JSON.parse(job.attrs.data.msg);
-    let hasHome = checkForHome(message);
-    let attachments = message.attachments ? message.attachments : [];
-    if (!hasHome) {
-      attachments = attachments.map(a => {
-        a.text = a.text ? a.text : '';
-        return a;
-      });
-      attachments.push({
-        text: '',
-        callback_id: 'appendedHome',
-        actions: [{
-          name: 'passthrough',
-          text: 'Home',
-          style: 'default',
-          type: 'button',
-          value: 'home'
-        }]
-      });
-      request.post({
-          url: 'https://slack.com/api/chat.update',
-          json: true,
-          form: {
-            token: job.attrs.data.token,
-            ts: message.ts,
-            channel: job.attrs.data.channel,
-            as_user: true,
-            attachments: stringify(attachments),
-            text: message.text
-          }
-        })
-        .then(() => kip.debug('♻️  Tried to add home button, if it isn\'t there it\'s a slack problem'))
-        .catch(() => kip.debug('😡 Couldn\'t add home, problem on our end'))
-        .then(() => done());
-    } else {
-      done();
-    }
-  });
+  // agenda.define('append home', function(job, done) {
+  //   let message = JSON.parse(job.attrs.data.msg);
+  //   let hasHome = checkForHome(message);
+  //   let attachments = message.attachments ? message.attachments : [];
+  //   if (!hasHome) {
+  //     attachments = attachments.map(a => {
+  //       a.text = a.text ? a.text : '';
+  //       return a;
+  //     });
+  //     attachments.push({
+  //       text: '',
+  //       callback_id: 'appendedHome',
+  //       actions: [{
+  //         name: 'passthrough',
+  //         text: 'Home',
+  //         style: 'default',
+  //         type: 'button',
+  //         value: 'home'
+  //       }]
+  //     });
+  //     request.post({
+  //         url: 'https://slack.com/api/chat.update',
+  //         json: true,
+  //         form: {
+  //           token: job.attrs.data.token,
+  //           ts: message.ts,
+  //           channel: job.attrs.data.channel,
+  //           as_user: true,
+  //           attachments: stringify(attachments),
+  //           text: message.text
+  //         }
+  //       })
+  //       .then(() => kip.debug('♻️  Tried to add home button, if it isn\'t there it\'s a slack problem'))
+  //       .catch(() => kip.debug('😡 Couldn\'t add home, problem on our end'))
+  //       .then(() => done());
+  //   } else {
+  //     done();
+  //   }
+  // });
 };
 
 function checkForHome(message) {

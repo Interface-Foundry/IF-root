@@ -4,7 +4,7 @@ var utils = require('../slack/utils');
 var queue = require('../queue-direct');
 var cardTemplate = require('../slack/card_templates');
 var request = require('request');
-var agenda = require('../agendas');
+//var agenda = require('../agendas');
 
 function * handle(message) {
   let action;

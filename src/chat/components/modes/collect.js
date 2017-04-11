@@ -6,7 +6,7 @@ var winston = require('winston');
 var utils = require('../slack/utils.js');
 var Fuse = require('fuse.js');
 var queue = require('../queue-direct');
-var agenda = require('../agendas');
+//var agenda = require('../agendas');
 
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
@@ -541,5 +541,5 @@ handlers['sorry'] = function*(message) {
 
 const scheduleReminder = function(type, time, data) {
   kip.debug('\n\n\nsetting reminder for ', time.toLocaleString(), '\n\n\n');
-  agenda.schedule(time, type, data);
+  //agenda.schedule(time, type, data);
 };

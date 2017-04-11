@@ -6,7 +6,7 @@ var Menu = require('./Menu')
 var api = require('./api-wrapper')
 var coupon = require('../../../coupon/couponUsing.js')
 var mailer_transport = require('../../../mail/IF_mail.js')
-var agenda = require('../agendas')
+//var agenda = require('../agendas')
 
 var createAttachmentsForAdminCheckout = require('./generateAdminCheckout.js').createAttachmentsForAdminCheckout
 
@@ -48,12 +48,12 @@ function promptCheckout (foodSession, message, waitingText) {
   logging.debug('prompt checkout called')
 
   // cancel any pending
-  agenda.cancel({
-    name: 'checkout prompt',
-    'data.user': foodSession.convo_initiater.id
-  }, function (e, numRemoved) {
-    if (e) logging.error(e)
-  })
+  // agenda.cancel({
+  //   name: 'checkout prompt',
+  //   'data.user': foodSession.convo_initiater.id
+  // }, function (e, numRemoved) {
+  //   if (e) logging.error(e)
+  // })
 
     if (waitingText) { // if there are no members who haven't ordered, don't schedule a new reminder
       var finishEarlyMessage = {
@@ -79,10 +79,10 @@ function promptCheckout (foodSession, message, waitingText) {
         }]
       }
 
-      agenda.schedule('20 minutes from now', 'checkout prompt', {
-        user: foodSession.convo_initiater.id,
-        msg: JSON.stringify(finishEarlyMessage)
-      })
+      // agenda.schedule('20 minutes from now', 'checkout prompt', {
+      //   user: foodSession.convo_initiater.id,
+      //   msg: JSON.stringify(finishEarlyMessage)
+      // })
     }
   }
 
@@ -645,12 +645,12 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
 
   // cancel any pending reminders
-  agenda.cancel({
-    name: 'checkout prompt',
-    'data.user': foodSession.convo_initiater.id
-  }, function (e, numRemoved) {
-    if (e) logging.error(e)
-  })
+  // agenda.cancel({
+  //   name: 'checkout prompt',
+  //   'data.user': foodSession.convo_initiater.id
+  // }, function (e, numRemoved) {
+  //   if (e) logging.error(e)
+  // })
 
   // show admin final confirm of thing
   var teamMembers = foodSession.team_members.map((teamMembers) => teamMembers.id)
