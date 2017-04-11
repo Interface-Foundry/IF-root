@@ -15,7 +15,8 @@ export default class Cart extends Component {
     addingItem: PropTypes.bool.isRequired,
     history: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,
-    carts: PropTypes.array.isRequired
+    carts: PropTypes.array.isRequired,
+    removeItem: PropTypes.func.isRequired
   }
 
   componentWillMount() {
@@ -37,7 +38,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, members, leader, selectItem, history: { push, replace }, match: { url } } = this.props;
+    const { removeItem, cart_id, items, members, leader, selectItem, history: { push, replace }, match: { url } } = this.props;
     const hasItems = items.length > 0;
     return (
       <div className='cart'>
@@ -59,7 +60,9 @@ export default class Cart extends Component {
                                             members={members}
                                             leader={leader}
                                             selectItem={selectItem}
-                                            push={push}/>) 
+                                            push={push}
+                                            cart_id={cart_id}
+                                            removeItem={removeItem}/>) 
                 : <em>Please add some products to the cart.</em>
             } 
           </ul>

@@ -19,11 +19,13 @@ export default class Item extends Component {
     members: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
     push: PropTypes.func.isRequired,
-    itemNumber: PropTypes.number.isRequired
+    itemNumber: PropTypes.number.isRequired,
+    cart_id: PropTypes.string.isRequired,
+    removeItem: PropTypes.func.isRequired
   }
 
   render() {
-    const { added_by, description, itemNumber, main_image_url, name, price, quantity, leader, members, } = this.props,
+    const { added_by, description, itemNumber, main_image_url, name, price, quantity, leader, members, removeItem, id, cart_id } = this.props,
       linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by }),
       memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
 
@@ -45,6 +47,7 @@ export default class Item extends Component {
         <div className='cartItem__props col-8'>
           <p>{description}</p>
         </div>
+        <button onClick={()=>removeItem(cart_id, id)}>Remove Item</button>
       </li>
     );
   }

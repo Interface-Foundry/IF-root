@@ -1,4 +1,4 @@
-import { ADDING_ITEM, ADD_MEMBER_TO_CART, RECEIVE_CART, RECEIVE_CARTS, RECEIVE_ITEMS, RECEIVE_ADD_ITEM } from '../constants/ActionTypes';
+import { ADDING_ITEM, ADD_MEMBER_TO_CART, RECEIVE_CART, RECEIVE_CARTS, RECEIVE_ITEMS, RECEIVE_ADD_ITEM, RECEIVE_REMOVE_ITEM } from '../constants/ActionTypes';
 
 const initialState = {
   carts: [],
@@ -44,6 +44,14 @@ export default function cart(state = initialState, action) {
       currentCart: {
         ...state.currentCart,
         items: [...state.currentCart.items, action.item]
+      }
+    };
+  case RECEIVE_REMOVE_ITEM:
+    return {
+      ...state,
+      currentCart: {
+        ...state.currentCart,
+        items: state.currentCart.items.filter(item => item.id !== action.itemToRemove)
       }
     };
   case RECEIVE_CARTS:
