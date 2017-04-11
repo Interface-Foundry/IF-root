@@ -37,7 +37,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, members, leader, selectItem, carts, history: { push, replace }, match: { url } } = this.props;
+    const { items, members, leader, selectItem, history: { push, replace }, match: { url } } = this.props;
     const hasItems = items.length > 0;
     return (
       <div className='cart'>

@@ -21,7 +21,7 @@ const mapDispatchToProps = dispatch => ({
 const validate = (values, state) => {
   const errors = {};
   if (!values.url) {
-    errors.url = '';
+    errors.url = 'Don\'t forget to add something!';
   }
   return errors;
 };
