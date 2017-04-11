@@ -1,7 +1,7 @@
-image: docker:1.13
+image: docker:stable
 variables:
-  DOCKER_DRIVER: overlay
   GIT_STRATEGY: fetch
+  DOCKER_DRIVER: overlay
   privileged: "true"
   GKE_REGISTRY: https://gcr.io
   KIP_REGISTRY: gcr.io/kip-styles
@@ -12,11 +12,10 @@ variables:
   PROJECT: kip-styles
 
 services:
-  - docker:1.13-dind
-  - mongo:3.2.10
+  - docker:dind
 
 cache:
-  key: "$CI_BUILD_STAGE/$CI_COMMIT_SHA_NAME"
+  key: "$CI_JOB_STAGE"
   untracked: true
 
 stages:
