@@ -8,6 +8,7 @@ const mapStateToProps = (state, ownProps) => ({
   addingItem: state.cart.addingItem,
   leader: state.cart.currentCart.leader,
   members: state.cart.currentCart.members,
+  user_accounts: state.session.user_accounts,
   items: state.cart.currentCart.items,
   carts: state.cart.carts
 });

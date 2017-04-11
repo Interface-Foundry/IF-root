@@ -17,6 +17,7 @@ export default class App extends Component {
     carts: PropTypes.arrayOf(PropTypes.object),
     modal: PropTypes.string,
     newAccount: PropTypes.bool,
+    currentUser: PropTypes.object,
     match: PropTypes.object.isRequired,
     fetchCart: PropTypes.func.isRequired,
     fetchAllCarts: PropTypes.func.isRequired
@@ -43,7 +44,7 @@ export default class App extends Component {
 
   render() {
     const { props, state, _toggleSidenav } = this;
-    const { cart_id, newAccount, leader, carts, match } = props;
+    const { cart_id, newAccount, leader, carts, match, currentUser } = props;
     const { sidenav } = state;
 
     if (newAccount === false) {
@@ -54,7 +55,7 @@ export default class App extends Component {
       <section className='app'>
 
         <Header {...props}  _toggleSidenav={ _toggleSidenav} />
-        { sidenav ? <Sidenav cart_id={cart_id} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav}/> : null }
+        { sidenav ? <Sidenav cart_id={cart_id} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser}/> : null }
 
         { /* Renders modal when route permits */ }
         <Route path={`${match.url}/m/`} component={Modal} />
