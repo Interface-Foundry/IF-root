@@ -33,6 +33,7 @@ module.exports.handle = handle;
  * S1
  */
 handlers['start'] = function * (message) {
+
   var user = yield db.Chatusers.findOne({
     id: message.source.user
   }).exec();
@@ -203,6 +204,17 @@ handlers['start_now'] = function * (message) {
  * S2
  */
 handlers['supplies'] = function * (message) {
+
+ //check for teams over 500 people
+  var teamSize = yield utils.getTeamSize(message)
+  //stop massive team sizes it makes kip no-sql no relationals sadddddd
+  if(teamSize > 500){
+    let msg = message;
+    msg.text = 'Wow it looks like you have a large team! You might need more than 1 Kip to help you. Drop us a line @ hello@kipthis.com and we can help with a custom enterprise solution';
+    msg.fallback = 'Sorry';
+    return [msg];
+  }
+
   cancelReminder('initial reminder', message.source.user);
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null);
   if (team_id == null) {

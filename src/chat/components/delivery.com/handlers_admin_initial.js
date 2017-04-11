@@ -20,6 +20,17 @@ var $allHandlers
 var handlers = {}
 
 handlers['food.admin.confirm_new_session'] = function * (message) {
+
+  //check for teams over 500 people
+  var teamSize = yield slackUtils.getTeamSize(message)
+  //stop massive team sizes it makes kip no-sql no relationals sadddddd
+  if(teamSize > 500){
+    return $replyChannel.send(message, 'food.admin.confirm_new_session', {
+      type: message.origin,
+      data: {'text': `Wow it looks like you have a large team! You might need more than 1 Kip to help you. Drop us a line @ hello@kipthis.com and we can help with a custom enterprise solution`}
+    })
+  }
+
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
   db.waypoints.log(1001, foodSession._id, message.user_id, {original_text: message.original_text})

@@ -254,6 +254,30 @@ function * getTeamMembers (slackbot) {
 }
 
 /*
+* returns number of non-deleted, non-bt users in a slack team
+* @param {Object} slackbot object
+* @returns {array} returns chatuser objects
+*
+*/
+function * getTeamSize(message) {
+  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
+  var size = yield request({url: 'https://slack.com/api/users.list?token=' + team.bot.bot_access_token, json: true});
+  if(size.members && size.members[0]){
+    function filterByDeleted(i) {
+      if (i.deleted || i.is_bot) {
+        return false;
+      } 
+      return true; 
+    }
+    //filter out deleted users and bots
+    size = size.members.filter(filterByDeleted) 
+    return size.length
+  }else {
+    return 999999 //some stupid number 
+  }
+}
+
+/*
 *
 * Channel Management
 *
@@ -894,6 +918,7 @@ module.exports = {
   initializeTeam: initializeTeam,
   findAdmins: findAdmins,
   getTeamMembers: getTeamMembers,
+  getTeamSize: getTeamSize,
   getChannels: getChannels,
   getChannelName: getChannelName,
   getChannelMembers: getChannelMembers,

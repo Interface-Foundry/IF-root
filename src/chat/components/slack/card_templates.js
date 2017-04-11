@@ -51,19 +51,19 @@ var home_screen = module.exports.home_screen = function(isAdmin, userId, couponT
 
 var onboard_home_attachments = module.exports.onboard_home_attachments = function(delay, couponText) {
   let attachments = []
-  if (delay !== 'initial') {
-    attachments.push({
-      text: '',
-      callback_id: 'whatevs',
-      actions: [{
-        name: 'onboard.start.remind_later',
-        text: '◷ Snooze',
-        style: 'default',
-        type: 'button',
-        value: `remind_later.${delay}`
-      }]
-    })
-  }
+  // if (delay !== 'initial') {
+  //   attachments.push({
+  //     text: '',
+  //     callback_id: 'whatevs',
+  //     actions: [{
+  //       name: 'onboard.start.remind_later',
+  //       text: '◷ Snooze',
+  //       style: 'default',
+  //       type: 'button',
+  //       value: `remind_later.${delay}`
+  //     }]
+  //   })
+  // }
   attachments.push({
     mrkdwn_in: ['text'],
     text: `${require('./utils').randomEmoji(true)}*Kip Café*\nI can help you collect food orders for your team\n${couponText}`,
@@ -95,19 +95,19 @@ var onboard_home_attachments = module.exports.onboard_home_attachments = functio
 
 var onboard_admin_attachments = module.exports.onboard_admin_attachments = function(delay, teamName) {
   let attachments = [];
-  if (delay !== 'initial') {
-    attachments.push({
-      text: '',
-      callback_id: 'whatevs',
-      actions: [{
-        name: `onboarding.remind_later.${delay}`,
-        text: '◷ Snooze',
-        style: 'default',
-        type: 'button',
-        value: `onboarding.remind_later.${delay}`
-      }]
-    });
-  }
+  // if (delay !== 'initial') {
+  //   attachments.push({
+  //     text: '',
+  //     callback_id: 'whatevs',
+  //     actions: [{
+  //       name: `onboarding.remind_later.${delay}`,
+  //       text: '◷ Snooze',
+  //       style: 'default',
+  //       type: 'button',
+  //       value: `onboarding.remind_later.${delay}`
+  //     }]
+  //   });
+  // }
   attachments.push({
     image_url: 'http://tidepools.co/kip/oregano/thanks.png',
     color: '#3AA3E3',
@@ -313,15 +313,15 @@ var member_onboard_attachments = module.exports.member_onboard_attachments = fun
       value: "step_1"
     }]
   }];
-  if (delay !== 'initial') {
-    reply[1].actions.push({
-      name: 'member_onboard.start.remind_later',
-      text: '◷ Snooze',
-      style: 'default',
-      type: 'button',
-      value: `remind_later.${delay}.${admin}`
-    })
-  }
+  // if (delay !== 'initial') {
+  //   reply[1].actions.push({
+  //     name: 'member_onboard.start.remind_later',
+  //     text: '◷ Snooze',
+  //     style: 'default',
+  //     type: 'button',
+  //     value: `remind_later.${delay}.${admin}`
+  //   })
+  // }
   return reply
 };
 
