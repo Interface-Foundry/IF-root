@@ -25,12 +25,14 @@ export default class Cart extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { history: { push, replace }, cart_id } = this.props;
-    const { members, leader, addingItem } = nextProps;
+    const { members, leader, addingItem, user_accounts } = nextProps;
 
-    if (members.length === 0 && !leader) {
-      push('m/signin');
-    } else if (leader && !addingItem && this.props.addingItem !== addingItem && members.length !== 0) {
-      replace(`/cart/${cart_id}/`);
+    if(cart_id) {
+      if (user_accounts.length === 0 && !leader) {
+        replace(`/cart/${cart_id}/m/signin`);
+      } else if (leader && !addingItem && this.props.addingItem !== addingItem && user_accounts.length !== 0) {
+        replace(`/cart/${cart_id}/`);
+      }
     }
   }
 
@@ -40,7 +42,7 @@ export default class Cart extends Component {
     return (
       <div className='cart'>
         <div className='cart__add'>
-          <AddAmazonItemContainer replace={replace}/>
+          <AddAmazonItemContainer replace={replace} members={members}/>
         </div>
         <DealsContainer isDropdown={false}/>
         <div className='cart__title'>

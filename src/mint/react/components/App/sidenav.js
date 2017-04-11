@@ -12,17 +12,17 @@ export default class Sidenav extends Component {
   }
 
   render() {
-    const { leader, carts, _toggleSidenav } = this.props,
-          leaderCarts = _.filter(carts, (c) => c.leader.email_address === leader.email_address),
-          memberCarts = _.filter(carts, (c) => c.leader.email_address !== leader.email_address);
-          
+    const { leader, carts, _toggleSidenav, currentUser } = this.props,
+          leaderCarts = _.filter(carts, (c) => c.leader.email_address === currentUser.email_address),
+          memberCarts = _.filter(carts, (c) => c.leader.email_address !== currentUser.email_address);
+    
     return (
       <div className='sidenav'>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
         </div>
         <ul className='sidenav__list'>
           <li className='sidenav__list__header'>
-            <p>{leader.email_address}</p>
+            <p>{currentUser.email_address}</p>
             <div className='icon' onClick={_toggleSidenav}>
               <Icon icon='Clear'/>
             </div>

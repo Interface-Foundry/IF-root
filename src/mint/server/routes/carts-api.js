@@ -27,6 +27,8 @@ module.exports = function (router) {
     const userIds = req.UserSession.user_accounts.map(a => a.id)
 
     // find all the carts where their user id appears in the leader or member field
+    // NB: BUG: not returning carts where user is a member
+    // NOTE: db.Carts.find() does not return a default value for members (isMany), unlike leader (isA)
     const carts = yield db.Carts.find({
       or: [
         { leader: userIds },
@@ -35,6 +37,7 @@ module.exports = function (router) {
     }).populate('items').populate('leader').populate('members')
 
     res.send(carts)
+
   }))
 
   /**
