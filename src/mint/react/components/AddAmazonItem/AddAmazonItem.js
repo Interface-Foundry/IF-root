@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import NotificationBubble from '../NotificationBubble';
 
 export default class AddAmazonItem extends Component {
   constructor(props) {
@@ -21,10 +22,12 @@ export default class AddAmazonItem extends Component {
 
   render() {
     const { addItemToCart } = this;
+    const newMember = true;
     return (
       <div className='add_to_amazon'>
         Add Item to Kip Cart
         <button className='add_to_amazon__button' onClick={addItemToCart}>Paste Amazon URL or Search</button>
+        {newMember ? <NotificationBubble top={44} right={12}/> : null}
       </div>
     );
   }
