@@ -18,8 +18,8 @@ logging:
   mongo:
     enabled: true
 mongodb:
-  url: mongodb://mongodb-1-server-1,mongodb-1-server-2/foundry
-  backuphost: mongodb-1-server-1
+  url: mongodb://10.142.0.13,10.142.0.14/foundry
+  backuphost: "10.142.0.13"
   options:
     replset:
       rs_name: rs0
