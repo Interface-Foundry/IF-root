@@ -15,8 +15,31 @@ var sendDailyDeals = function * () {
   console.log('this is the sendDailyDeals function')
   yield wait(2000);
   console.log('and two seconds later');
+
+  yield dbReady;
+
+  var deals = yield camel.getDeals(6);
+  logging.info('allDeals', deals)
+  deals = [deals.slice(0, 2), deals.slice(2, 4), deals.slice(4, 6)];
+
+  var daily = yield db.Emails.create({
+    recipients: 'hannah.katznelson@kipthis.com',
+    sender: 'deals@kip.ai',
+    subject: 'Daily Deals',
+    template_name: 'daily_deals'
+    // message_html: '<html><body>Daily Deals; Be HUMBLE.</body></html>'
+  })
+
+  logging.info('about to load template');
+  yield daily.template('daily_deals', {
+    id: '7a43d85c928f',
+    deals: deals,
+    name: 'hannah.katznelson'
+  })
+  console.log('loaded template');
+  yield daily.send();
 }
-// 
+//
 // agenda.define('test', function (job, done) {
 //   logging.info('this is a test');
 //   done();
@@ -78,7 +101,7 @@ agenda.on('ready', function () {
   }
   process.on('SIGTERM', failGracefully);
   process.on('SIGINT', failGracefully);
-  agenda.every('30 seconds', 'deals');
+  agenda.every('1 day', 'deals');
   // logging.info('about to start agendas');
   agenda.start();
   logging.info('started agendas')
