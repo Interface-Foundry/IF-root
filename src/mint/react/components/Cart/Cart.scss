@@ -14,7 +14,7 @@ $cart__add-height: $nav-height+$padding;
   }
   .cart__items {
     height: calc(100% - #{$cart__add-height + $nav-height - $padding});
-    overflow-y: scroll;
+    overflow-y: visable;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
   }
