@@ -1,0 +1,9 @@
+@import '../../styles/Animations';
+.notification_bubble {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 6px solid #ffe100;
+  border-radius: 18px;
+  @include animation(pulse 2s infinite)
+}

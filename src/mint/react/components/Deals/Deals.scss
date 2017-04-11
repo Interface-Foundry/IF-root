@@ -4,19 +4,25 @@
   flex-direction: row;
   overflow: scroll;
   justify-content: space-between;
+  padding: 0 10px 0 10px;
   -webkit-overflow-scrolling: touch;
-  & section {
+  &::before,
+  &::after {
+    /* Insert space before the first item and after the last one */
+    content: '';
+  }
+  section {
     border: 1px $border-color-light solid;
     background: white;
-    padding: $padding/2;
+    padding: 1px;
     margin: $padding/2;
     border-radius: $padding;
     font-size: 18px;
     height: 180px;
-    width: 170px;
-    min-width: 190px;
+    width: 150px;
+    min-width: 150px;
   }
-  & .dealcard__name {
+  .dealcard__name {
     font-size: 13px;
     text-align: center;
     height: 2.4em;
@@ -25,32 +31,42 @@
     color: #58595b;
     content: "";
   }
-  & .dealcard__price {
+  .dealcard__price {
     font-size: 23px;
     text-align: center;
     color: $price-color;
   }
-  & .dealcard__discount {
+  .dealcard__discount {
     font-size: 15px;
     text-align: center;
     color: $header-color;
   }
-  & .dealcard {
+  .dealcard {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
   }
-  & .dealcard__image {
+  .dealcard__image {
     align-self: center;
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
   }
-  & .dealcard__prevPrice {
+  .dealcard__prevPrice {
     text-decoration: line-through;
+  }
+  .dealcard__add {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: center;
+    background: $border-color-light;
+    padding: $padding/2;
+    margin: 0 -1px -1px -1px;
+    border-radius: 0 0 $padding $padding;
   }
 }
 
@@ -66,7 +82,7 @@
   border: 1px $kip-secondary-color solid;
   border-radius: 0 0 10px 10px;
   overflow: hidden;
-  & section {
+  section {
     display: flex;
     border-bottom: 1px $kip-secondary-color solid;
     background: white;
@@ -76,13 +92,13 @@
     text-align: left;
     font-size: 14px;
   }
-  & section:last-child {
+  section:last-child {
     border: none;
   }
-  & .dealcard-small {
+  .dealcard-small {
     display: flex;
     flex-direction: row;
-    & .price {
+    .price {
       color: $price-color;
       font-style: normal;
     }

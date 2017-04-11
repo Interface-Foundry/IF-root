@@ -24,7 +24,9 @@ export default class Card extends Component {
         <div className='dealcard__name'>{name}</div>
         <div className='dealcard__price'>${price.toFixed(2)}</div>
         <div className='dealcard__discount'><strike>${previousPrice.toFixed(2)}</strike> ({(savePercent * 100).toFixed()}% off)</div>
+        <div className='dealcard__add'>Add to Cart</div>
       </Link>
+
     );
   }
 }
