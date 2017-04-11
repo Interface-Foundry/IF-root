@@ -1,21 +1,19 @@
 import React, { PropTypes, Component } from 'react';
-import Button from 'react-bootstrap/lib/Button';
-import Panel from 'react-bootstrap/lib/Panel';
-import PageHeader from 'react-bootstrap/lib/PageHeader';
 import {
   LineChart, Sector, Cell, Tooltip, PieChart, Pie,
   Line, XAxis, YAxis, Legend,
   CartesianGrid, Bar, BarChart,
   ResponsiveContainer, AreaChart, Area } from '../../../vendor/recharts';
 import {
-  MenuItem,
-  DropdownButton,
-  ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger
+  MenuItem,Panel, PageHeader, 
+  DropdownButton, Button,ButtonToolbar, 
+  ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger, 
 } from 'react-bootstrap';
 import Table from '../../../components/Table';
 import vagueTime from 'vague-time';
 import _ from 'lodash';
 import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
+import DatePicker from 'react-datepicker';
 import moment from 'moment';
 
 
@@ -56,9 +54,33 @@ class Session extends Component {
     this.state = {
       view: 'Store',
       currentTeam:'All Team',
-      rows: []
+      rows: [],
+      startDate: moment().subtract(1, 'month'),
+      endDate: moment(),
     };
     this.renderSessionsLineGraph = this.renderSessionsLineGraph.bind(this);
+    this.renderWaypointTable = this.renderWaypointTable.bind(this);
+    this.changeCart = this.changeCart.bind(this);
+    this.changeStart = this.changeStart.bind(this);
+    this.changeEnd = this.changeEnd.bind(this);
+  }
+
+  changeStart(date){
+    this.setState({
+      startDate: date
+    });
+  }
+
+  changeEnd(date){
+    this.setState({
+      endDate: date
+    });
+  }
+
+  changeCart(cart){
+    this.setState({ 
+      view: cart 
+    })
   }
 
   componentDidMount() {
@@ -73,6 +95,7 @@ class Session extends Component {
     for (var i = 0; i < waypointPaths.length; i++) {
       var teamName = waypointPaths[i].team_name;
       rows.push({time_stamp: new Date(waypointPaths[i].time_stamp.split('.')[0]).toLocaleString(), time_stamp_end: new Date(waypointPaths[i].time_stamp_end.split('.')[0]).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: self.getWaypointActions(waypointPaths[i])})
+      
     }
     var currentTeam = self.props.teamName ? self.props.teamName : 'All Team';
 
@@ -117,11 +140,12 @@ class Session extends Component {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dataPlot} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
                 <XAxis dataKey="name" />
-                <YAxis />
+                 <YAxis yAxisId="left" orientation="left" stroke="#8884d8"/>
+                 <YAxis yAxisId="right" orientation="right" stroke="#ffc658"/>
                 <CartesianGrid stroke="#ccc" />
                 <Tooltip />
-                    <Line type="monotone" dataKey="numSessions" stroke="#8884d8" fill="#8884d8" />
-                    <Line type="monotone" dataKey="numTeams" stroke="#ffc658" fill="#ffc658" />
+                    <Line type="monotone" yAxisId="left" dataKey="numSessions" stroke="#8884d8" />
+                    <Line type="monotone" yAxisId="right" dataKey="numTeams" stroke="#ffc658" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -164,9 +188,15 @@ class Session extends Component {
     })
   }
 
-  renderWaypointTable(rows){
+
+
+  renderWaypointTable(rows, startDate, endDate){
+    var filteredRows = rows.filter(function(row){
+      return new Date(row.time_stamp) >= new Date(startDate) && new Date(row.time_stamp) <= new Date(endDate)
+    })
+
     return(
-      <Panel header={<span>Table of Waypoint Routes</span>}>
+      <Panel header={<span><i className="fa fa-table fa-fw" />Table of Waypoint Routes</span>}>
         <Table heads={[{
           field: 'time_stamp',
           descrip: 'Session Time Started',
@@ -194,7 +224,7 @@ class Session extends Component {
           descrip: 'User Actions',
           allowSort: true,
           dataFormat: (cell, row)=> <WaypointHover waypoints={cell}/>
-        }]} data={rows} />
+        }]} data={filteredRows} />
       </Panel>
     )
   }
@@ -209,13 +239,26 @@ class Session extends Component {
             <PageHeader>{self.state.currentTeam} Sessions</PageHeader>
           </div>
         </div>
-        <div>
-            {self.renderSessionsLineGraph(self.state.rows)}
+        <div className="container-fluid data-display">
+          <div>
+              {self.renderSessionsLineGraph(self.state.rows)}
+          </div>
+          <ButtonToolbar>
+            <Button onClick={ ()=> self.changeCart('Store')}>
+              Store
+            </Button>
+            <Button onClick={ ()=> self.changeCart('Cafe')}>
+              Cafe
+            </Button>
+          </ButtonToolbar>
+          <div>
+              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />    
+              End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
+          </div>
+          <div className="panel panel-default fillSpace">
+              {self.renderWaypointTable(self.state.rows, self.state.startDate, self.state.endDate)}
+          </div>
         </div>
-        <div className="panel panel-default fillSpace">
-            {self.renderWaypointTable(self.state.rows)}
-        </div>
-
       </div>
     );
   }

@@ -176,7 +176,6 @@ class Home extends Component {
   }
 
   renderDeliveryTable(startDate, endDate){
-    //console.log(new Date(startDate),new Date(endDate));
     return(
 
       <Panel header={<span><i className="fa fa-table fa-fw" /> Purchased Cafe Carts from {new Date(startDate).toLocaleDateString()} to {new Date(endDate).toLocaleDateString()}</span>}>
