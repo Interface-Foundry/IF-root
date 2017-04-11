@@ -9,6 +9,7 @@ export default class AddAmazonItem extends Component {
 
   static propTypes = {
     user_accounts: PropTypes.array.isRequired,
+    numUserItems: PropTypes.number.isRequired,
     addingItem: PropTypes.func.isRequired,
     replace: PropTypes.func.isRequired,
     cart_id: PropTypes.string
@@ -21,13 +22,13 @@ export default class AddAmazonItem extends Component {
   }
 
   render() {
-    const { addItemToCart } = this;
-    const newMember = true;
+    const { addItemToCart, props } = this;
+    const {numUserItems} = props;
     return (
       <div className='add_to_amazon'>
         Add Item to Kip Cart
         <button className='add_to_amazon__button' onClick={addItemToCart}>Paste Amazon URL or Search</button>
-        {newMember ? <NotificationBubble top={44} right={12}/> : null}
+        {numUserItems ? null : <NotificationBubble top={44} right={12}/>}
       </div>
     );
   }
