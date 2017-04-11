@@ -31,10 +31,14 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   uris = (uris ? uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)) : null);   //validate uris as amazon links
   if (!uris) res.sendStatus(200);
 
-  console.log('about to get cart id, which will break')
   //get cart id
   var html = req.body.html;
-  var cart_id = /name="cartId" value="(.*)"/.exec(html)[1];
+  var cart_id = /name="cartId" value="(.*)"/.exec(html);
+  if (cart_id) cart_id = cart_id[1];
+  else {
+    logging.error('email failed to pass in a cart id');
+    res.sendStatus(202);
+  }
   console.log('cart_id', cart_id)
 
   // find all the carts where their user id appears in the leader or member field

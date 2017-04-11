@@ -18,32 +18,36 @@ var sendDailyDeals = function * () {
 
   yield dbReady;
 
+  //pull most recent camel deals from db
   var deals = yield camel.getDeals(6);
   logging.info('allDeals', deals)
   deals = [deals.slice(0, 2), deals.slice(2, 4), deals.slice(4, 6)];
 
-  var daily = yield db.Emails.create({
-    recipients: 'hannah.katznelson@kipthis.com',
-    sender: 'deals@kip.ai',
-    subject: 'Daily Deals',
-    template_name: 'daily_deals'
-    // message_html: '<html><body>Daily Deals; Be HUMBLE.</body></html>'
-  })
+  //pull a list of all our users from db
+  var users = yield db.UserAccounts.find({});
+  yield users.map(function * (user) {
+    //create a new email to send
+    var daily = yield db.Emails.create({
+      recipients: user.email_address,
+      sender: 'deals@kip.ai',
+      subject: 'Daily Deals',
+      template_name: 'daily_deals',
+      unsubscribe_group_id: 2275
+    })
 
-  logging.info('about to load template');
-  yield daily.template('daily_deals', {
-    id: '7a43d85c928f',
-    deals: deals,
-    name: 'hannah.katznelson'
-  })
-  console.log('loaded template');
-  yield daily.send();
+    console.log('EMAIL:', daily)
+
+    //load the template and send it
+    logging.info('about to load template');
+    yield daily.template('daily_deals', {
+      id: '7a43d85c928f',
+      deals: deals,
+      name: 'hannah.katznelson'
+    })
+    console.log('loaded template');
+    yield daily.send();
+  });
 }
-//
-// agenda.define('test', function (job, done) {
-//   logging.info('this is a test');
-//   done();
-// })
 
 agenda.define('deals', function (job, done) {
   logging.info('deals!')
@@ -54,43 +58,6 @@ agenda.define('deals', function (job, done) {
     .catch(function (err) {
       console.error('error:', err)
     });
-  // var deals;
-  // dbReady.then(function () {
-  //   logging.info('db ready')
-  // })
-  // .then(function () {
-  //   var allDeals = 'this is a test'; //this is being returned or w/e
-  //   return camel.getDeals(6, 2);
-  // })
-  // .then(function (allDeals) {
-  //   logging.info('allDeals', allDeals)
-  //   deals = [allDeals.slice(0, 2), allDeals.slice(2, 4), allDeals.slice(4, 6)];
-  // })
-  // .then(function () {
-  //   return db.Emails.create({
-  //     recipients: 'hannah.katznelson@kipthis.com',
-  //     sender: 'deals@kip.ai',
-  //     subject: 'Daily Deals',
-  //     // template_name: 'daily_deals'
-  //     message_html: '<html><body>Daily Deals; Be HUMBLE.</body></html>'
-  //   })
-  // })
-  // .then(function (daily) {
-  //   logging.info('about to load template');
-  //   daily.template('daily_deals', {
-  //     id: '7a43d85c928f',
-  //     deals: deals
-  //   })
-  //   return daily;
-  // })
-  // .then(function (daily) {
-  //   daily.send();
-  //   logging.info('daily deal sent');
-  // })
-  // .then(function () {
-  //   logging.info('done!');
-  //   return done();
-  // })
 });
 
 agenda.on('ready', function () {
