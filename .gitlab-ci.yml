@@ -15,7 +15,7 @@ services:
   - mongo:3.2.10
 
 cache:
-  key: "$CI_BUILD_STAGE/$CI_COMMIT_SHA_NAME"
+  key: "$CI_JOB_STAGE"
   untracked: true
 
 stages:
