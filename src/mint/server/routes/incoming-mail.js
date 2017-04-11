@@ -58,12 +58,27 @@ router.post('/', upload.array(), (req, res) => co(function * () {
     })
     yield cart.save();
 
+    //create and send confirmation email
     var confirmation = yield db.Emails.create({
       recipients: email,
       sender: 'hello@kip.ai',
       subject: 'Items have been added to your cart!',
-      message_html: '<html><body>Confirmation, woohoo!</body></html>'
+      template_name: 'item_add_confirmation'
+      // message_html: '<html><body>Confirmation, woohoo!</body></html>'
     });
+
+    yield confirmation.template('item_add_confirmation', {
+      name: "Lorane",
+      baseUrl: 'https://72f2343b.ngrok.io',
+      id: '7a43d85c928f',
+      deals: []
+    })
+    // yield daily.template('daily_deals', {
+    //   id: '',
+    //   deals: deals,
+    //   name: 'hannah.katznelson'
+    // })
+
     yield confirmation.send();
   }
   else console.log('no amazon uris')
