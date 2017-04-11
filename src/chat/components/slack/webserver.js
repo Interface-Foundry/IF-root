@@ -2,7 +2,7 @@
 // "Actions" are what slack calls buttons
 //
 var queue = require('../queue-direct');
-var agenda = require('../agendas')
+//var agenda = require('../agendas')
 var refresh_team = require('../refresh_team');
 var express = require('express');
 var co = require('co');
@@ -134,10 +134,10 @@ app.post('/slackaction', next(function * (req, res) {
       }
     }
 
-    agenda.schedule(time_ms, 'onboarding reminder', {
-      msg: JSON.stringify(reminderMessage),
-      user: parsedIn.user.id
-    })
+    // agenda.schedule(time_ms, 'onboarding reminder', {
+    //   msg: JSON.stringify(reminderMessage),
+    //   user: parsedIn.user.id
+    // })
 
     var okay = {
       text: 'Okay, I\'ll remind you tomorrow',

@@ -4,7 +4,7 @@ var onboard = require('./onboard');
 var queue = require('../queue-direct');
 var slackUtils = require('../slack/utils');
 var cardTemplate = require('../slack/card_templates');
-var agenda = require('../agendas');
+//var agenda = require('../agendas');
 var request = require('request');
 var card_templates = require('../slack/card_templates');
 
@@ -424,21 +424,21 @@ handlers['addme'] = function*(message) {
 
 const scheduleReminder = function(type, time, data) {
   kip.debug('\n\n\nsetting reminder for ', time.toLocaleString(), '\n\n\n');
-  agenda.schedule(time, type, data);
+  //agenda.schedule(time, type, data);
 };
 
 const cancelReminder = function(type, userId) {
   kip.debug(`canceling ${type} for ${userId}`);
-  agenda.cancel({
-    'name': type,
-    'data.user': userId
-  }, function(err, numRemoved) {
-    if (!err) {
-      kip.debug(`Canceled ${numRemoved} tasks`);
-    } else {
-      kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
-    }
-  });
+  // agenda.cancel({
+  //   'name': type,
+  //   'data.user': userId
+  // }, function(err, numRemoved) {
+  //   if (!err) {
+  //     kip.debug(`Canceled ${numRemoved} tasks`);
+  //   } else {
+  //     kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
+  //   }
+  // });
 };
 
 module.exports = {

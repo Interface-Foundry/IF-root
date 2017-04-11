@@ -60,7 +60,7 @@ var bundles = require('../bundles');
 
 var slackUtils = require('./utils.js')
 var coupon = require('../../../coupon/coupon.js')
-var agenda = require('../agendas');
+//var agenda = require('../agendas');
 
 require('../reply_logic')
 
@@ -201,24 +201,24 @@ function * loadTeam(slackbot) {
 function updateHomeButtonAppender(message, token) {
   let now = new Date();
   let msInFuture = 1000 * 60 * 20;
-  agenda.cancel({
-    'name': 'append home',
-    'data.user': message.user
-  }, function(err, numRemoved) {
-    if (!err) {
-      kip.debug(`Canceled ${numRemoved} append home tasks`);
-    } else {
-      kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
-    }
-  });
+  // agenda.cancel({
+  //   'name': 'append home',
+  //   'data.user': message.user
+  // }, function(err, numRemoved) {
+  //   if (!err) {
+  //     kip.debug(`Canceled ${numRemoved} append home tasks`);
+  //   } else {
+  //     kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
+  //   }
+  // });
   let msg = message.attachments ? message : (message.source.attachments ? message.source : message.source.message);
-  agenda.schedule(
-    new Date(msInFuture + now.getTime()),
-    'append home', {
-      msg: JSON.stringify(msg),
-      token: token,
-      channel: message.source.channel
-    });
+  // agenda.schedule(
+  //   new Date(msInFuture + now.getTime()),
+  //   'append home', {
+  //     msg: JSON.stringify(msg),
+  //     token: token,
+  //     channel: message.source.channel
+  //   });
 }
 
 function startResponseUrlClearTimer(id) {
@@ -229,9 +229,9 @@ function startResponseUrlClearTimer(id) {
   let now = new Date();
   let msInFuture = 1000 * 60 * 30;
   let reminderTime = new Date(msInFuture + now.getTime());
-  agenda.schedule(reminderTime, 'clear response', {
-    msgId: id.toString()
-  });
+  // agenda.schedule(reminderTime, 'clear response', {
+  //   msgId: id.toString()
+  // });
 }
 
 //

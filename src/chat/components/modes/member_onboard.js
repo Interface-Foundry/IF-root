@@ -7,7 +7,7 @@ var kipcart = require('../cart');
 var winston = require('winston');
 var Fuse = require('fuse.js');
 var request = require('request');
-var agenda = require('../agendas');
+//var agenda = require('../agendas');
 var queue = require('../queue-direct');
 var utils = require('../slack/utils.js');
 
@@ -372,21 +372,21 @@ handlers['text'] = function * (message) {
 
 const scheduleReminder = function(type, time, data) {
   kip.debug('\n\n\nsetting reminder for ', time.toLocaleString(), '\n\n\n');
-  agenda.schedule(time, type, data);
+  //agenda.schedule(time, type, data);
 };
 
 const cancelReminder = function(type, userId) {
   kip.debug(`canceling ${type} for ${userId}`);
-  agenda.cancel({
-    'name': type,
-    'data.user': userId
-  }, function(err, numRemoved) {
-    if (!err) {
-      kip.debug(`Canceled ${numRemoved} tasks`);
-    } else {
-      kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
-    }
-  });
+  // agenda.cancel({
+  //   'name': type,
+  //   'data.user': userId
+  // }, function(err, numRemoved) {
+  //   if (!err) {
+  //     kip.debug(`Canceled ${numRemoved} tasks`);
+  //   } else {
+  //     kip.debug(`Could not cancel task bc ${JSON.stringify(err, null, 2)}`);
+  //   }
+  // });
 };
 
 // stolen from modes/shopping.js
