@@ -1,18 +1,11 @@
 env: production
 isProduction: true
-
-app:
-  publicAPI: https://kipapp.co/styles/api
-doc2vec: http://localhost:8084
 elasticsearch:
   url: http://elasticsearch-cerulean.internal.kipapp.co:9200
-elasticsearchElk:
-  url: http://elasticsearch-cerulean.internal.kipapp.co:9200
-geoipURL: http://localhost:8080/json/
 kipPayURL: https://pay.kipthis.com
 logging:
   console:
-    level: info
+    level: debug
     colorize: true
     prettyPrint: true
   mongo:
@@ -25,13 +18,11 @@ mongodb:
       rs_name: rs0
       socketOptions:
         keepAlive: 1
-neighborhoodServer:
-  url: http://localhost:9998
-nlp: http://parser:8083
-nlp_rnn: http://rnn:8085
-picstitch: http://picstitch:5000
+nlp: http://parser.kipthis.com
+picstitch: http://picstitch.kipthis.com
 proxy:
   luminati:
+    addr: http://luminati-proxy.default.svc.cluster.local:22225
     enabled: true
     password: e49d4ega1696
 redis:
@@ -41,6 +32,8 @@ slack:
   client_id: "2804113073.14708197459"
   client_secret: d4c324bf9caa887a66870abacb3d7cb5
   verification_token: P30EDlNgjsl9i15ZQBOElJls
-  redirect_uri: https://slack.kipapp.co/newslack
-  internal_host: http://slack:8000
+  redirect_uri: https://slack.kipthis.com/newslack
+  internal_host: https://slack.kipthis.com
 menuURL: https://cafe.kipthis.com/menus
+picstitchDelivery: http://delivery-picstitch.kipthis.com
+queueVerificationToken: JyyLKDi5WrUB7KnTP0GQm8yNMgBo
