@@ -264,7 +264,7 @@ deploy_production:
     - sed -i "s/latest/$CI_COMMIT_SHA/" src/k8s/production/picstitch.production.yaml
 
     - kubectl apply -f src/k8s/production/parser.production.yaml --namespace=production
-    - kubectl apply -f src/k8s/production/slack.production.yaml --namespace=production
+    #- kubectl apply -f src/k8s/production/slack.production.yaml --namespace=production
     - kubectl apply -f src/k8s/production/cafe_menu.production.yaml --namespace=production
     - kubectl apply -f src/k8s/production/payments.production.yaml --namespace=production
     - kubectl apply -f src/k8s/production/delivery_picstitch.production.yaml --namespace=production
