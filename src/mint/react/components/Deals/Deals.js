@@ -26,22 +26,35 @@ export default class Deals extends Component {
   }
 
   componentWillUnmount() {
-    clearTimeout(this.timer);
+    const { delayDropDown } = this;
+    delayDropDown(true)
   }
 
-  delayDropDown() {
-    // this is running after unmount
-    const { props: { isDropdown } } = this;
-    if (this.refs.deals) { // stop from being called when element doesn't exist
-      this.timer = setTimeout(() => this.setState({
-        isDropdown: isDropdown
-      }), 250);
+  componentDidMount() {
+    const { delayDropDown } = this;
+    delayDropDown();
+  }
+
+  delayDropDown(stop) {
+    const { isDropdown } = this.state
+
+    if(stop) {
+      if(self)
+        clearTimeout(self.timeout)
+
+      clearTimeout(this.timeout)
+    } else {
+      let self = this
+      self.timeout = setTimeout(() => {
+        self.setState({
+          isDropdown: isDropdown
+        }) 
+      }, 250);
     }
   }
 
   render() {
     const { renderCards, delayDropDown, state: { isDropdown } } = this;
-    delayDropDown();
     return (
       <div>
         {(isDropdown ? '' : 'Today\'s Deals')}
