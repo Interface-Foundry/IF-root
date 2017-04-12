@@ -5,7 +5,7 @@ elasticsearch:
 kipPayURL: https://pay.kipthis.com
 logging:
   console:
-    level: debug
+    level: error
     colorize: true
     prettyPrint: true
   mongo:

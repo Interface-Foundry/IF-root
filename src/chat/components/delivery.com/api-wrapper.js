@@ -109,13 +109,13 @@ function saveMerchants (merchants) {
         id: merchants[i].id
       }).select('id').exec()
       if (!m) {
-        logging.debug('saving new merchant %s', merchants[i].summary.name)
+        logging.info('saving new merchant %s', merchants[i].summary.name)
         m = new db.Merchant({
           id: merchants[i].id,
           data: merchants[i]
         })
         yield m.save()
-        logging.debug('saved')
+        logging.info('saved')
         definitelyExistingMerchants.push(m.id)
       }
     }
@@ -143,48 +143,6 @@ module.exports.getMerchant = function * (merchant_id) {
   return merchantInfo.merchant
 }
 
-/*
-  okay so the menu format returned from delivery.com is suuuuuuper complicated.
-  it has like a gazillion menus attached. like lunch menu, dinner menu, whatever.
-  really we just want to group things into categories. lunch is just a category, not a different menu
-
-  ALSO there's like a million levels of depth in the menu items themselves, like option after option after option.
-  i just want to flatten all these options out. because like seriously. so many levels of choice.
-  i'm just trying to eat some food.
-*/
-function unfuck_menu (menu) {
-  return menu
-  // first flatten out all the menus so lunch just becomes part of the lunch category not a separate menu
-  logging.debug('menu', menu)
-  var categories = menu.reduce((categories, m) => {
-    return categories.concat(m.children.map(i => i.name))
-  }, [])
-
-  var items = menu.reduce((categories, m) => {
-    return categories.concat(m.children.map(i => {
-      return i.children.map(i => {
-        return {
-          name: i.name,
-          description: i.description,
-          price: i.price,
-          id: i.id,
-          options: get_options(i)
-        }
-      })
-    }))
-  }, []).reduce((list, items) => {
-    return list.concat(items)
-  }, [])
-
-  kip.debug('categories', categories)
-  kip.debug('returning unfucked menu')
-
-  return {
-    categories: categories,
-    items: items
-  }
-}
-
 // retrieves all the options for a menu item.
 // flattens out the options to be just one layer deep.
 function get_options (item) {
@@ -203,33 +161,6 @@ function get_options (item) {
     }
   })
 }
-
-
-// var definitelyExistingLocations = []
-// function saveLocations (locations) {
-//   co(function * () {
-//     for (var i = 0; i < locations.length; i++) {
-//       if (definitelyExistingLocations.indexOf(locations[i].id) >= 0) {
-//         continue
-//       }
-//       var m = yield db.Merchants.findOne({
-//         id: merchants[i].id
-//       }).select('id').exec()
-//       if (!m) {
-//         console.log('saving new merchant', merchants[i].summary.name)
-//         m = new db.Merchant({
-//           id: merchants[i].id,
-//           data: merchants[i]
-//         })
-//         yield m.save()
-//         console.log('saved')
-//         definitelyExistingMerchants.push(m.id)
-//       }
-//     }
-//   }).catch(kip.err)
-// }
-
-
 
 
 if (!module.parent) {
