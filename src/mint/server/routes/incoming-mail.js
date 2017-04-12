@@ -12,6 +12,46 @@ dbReady.then((models) => { db = models; })
 
 const deals = require('../deals/deals');
 var amazonScraper = require('../cart/scraper_amazon');
+var amazon = require('../cart/amazon_cart.js');
+
+var sendErrorEmail = function * (email) {
+  var error = yield db.Emails.create({
+    recipients: email,
+    hender: 'hello@kip.ai',
+    subject: 'Oops',
+    message_html: '<html><p>Unfortunately I couldn\'t understand the link you sent me -- make sure that you paste a full URL that links to an item on Amazon.com</p></html>'
+  })
+
+  yield error.send();
+}
+
+var sendConfirmationEmail = function * (email, uris) {
+  //create confirmation email
+  var confirmation = yield db.Emails.create({
+    recipients: email,
+    sender: 'hello@kip.ai',
+    subject: 'Items have been added to your cart!',
+    template_name: 'item_add_confirmation'
+    // message_html: '<html><body>Confirmation, woohoo!</body></html>'
+  });
+
+  var item_names = [];
+  //find recently added items
+  yield uris.map(function * (uri) {
+    var item = yield db.Items.findOne({original_link: uri});
+    item_names.push(item.name);
+  })
+  console.log('ITEM NAMES:', item_names);
+
+  //add template and send confirmation email
+  yield confirmation.template('item_add_confirmation', {
+    baseUrl: 'https://72f2343b.ngrok.io',
+    id: '7a43d85c928f',
+    item_names: item_names.join(', ')
+  })
+
+  yield confirmation.send();
+}
 
 /**
  * TODO, etc
@@ -23,13 +63,23 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   var email = req.body.from.split(' ');
   email = email[email.length-1];
   if (email[0] === '<') email = email.slice(1, email.length-1);
-  var user = db.UserAccounts.findOrCreate({email: email});
+  var user = yield db.UserAccounts.findOrCreate({email: email});
 
   //parse out amazon uris
   var text = req.body.text.split(/\s/);
-  var uris = (text ? text.filter(w => validUrl.isUri(w)) : null);
-  uris = (uris ? uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)) : null);   //validate uris as amazon links
-  if (!uris) res.sendStatus(200);
+  var all_uris = (text ? text.filter(w => validUrl.isUri(w)) : null);
+  logging.info('all_uris', all_uris)
+  uris = (all_uris ? all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)) : null);   //validate uris as amazon links
+  if (!(uris.length) && all_uris) {
+    //send error email
+    console.log('gonna send an error email');
+    yield sendErrorEmail(email);
+  }
+  if (!uris || !uris.length) {
+    console.log('no urls');
+    res.sendStatus(200);
+    return;
+  }
 
   //get cart id
   var html = req.body.html;
@@ -38,18 +88,30 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   else {
     logging.error('email failed to pass in a cart id');
     res.sendStatus(202);
+    return;
   }
   console.log('cart_id', cart_id)
 
-  // find all the carts where their user id appears in the leader or member field
   console.log('gonna query for the cart')
-  var cart = yield db.Carts.findOne({id: cart_id});
+  var cart = yield db.Carts.findOne({id: cart_id}).populate('items');
+
+  // console.log('CART', cart)
+
+  if (!cart) {
+    logging.error('could not find cart');
+    res.sendStatus(202);
+    return;
+  }
 
   if (uris.length) {
     var url_items = yield uris.map(function * (uri) {
       return yield amazonScraper.scrapeUrl(uri);
+      // var item = yield amazon.getAmazonItem(uri);
+      console.log('ITEM', item)
+      if (item.Variations) console.log('there are options')
+      // return yield amazon.addAmazonItemToCart(item, cart);
     });
-    // console.log('amazon things', uris)
+    console.log('amazon things', uris)
     yield url_items.map(function * (it) {
       cart.items.add(it.id);
       it.cart = cart.id;
@@ -58,28 +120,7 @@ router.post('/', upload.array(), (req, res) => co(function * () {
     })
     yield cart.save();
 
-    //create and send confirmation email
-    var confirmation = yield db.Emails.create({
-      recipients: email,
-      sender: 'hello@kip.ai',
-      subject: 'Items have been added to your cart!',
-      template_name: 'item_add_confirmation'
-      // message_html: '<html><body>Confirmation, woohoo!</body></html>'
-    });
-
-    yield confirmation.template('item_add_confirmation', {
-      name: "Lorane",
-      baseUrl: 'https://72f2343b.ngrok.io',
-      id: '7a43d85c928f',
-      deals: []
-    })
-    // yield daily.template('daily_deals', {
-    //   id: '',
-    //   deals: deals,
-    //   name: 'hannah.katznelson'
-    // })
-
-    yield confirmation.send();
+    yield sendConfirmationEmail(email, uris);
   }
   else console.log('no amazon uris')
   // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')

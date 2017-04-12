@@ -37,6 +37,9 @@ var sendDailyDeals = function * () {
 
     console.log('EMAIL:', daily)
 
+    //query for correct cart id
+    yield db.Carts.find({}).limit(1)
+
     //load the template and send it
     logging.info('about to load template');
     yield daily.template('daily_deals', {
