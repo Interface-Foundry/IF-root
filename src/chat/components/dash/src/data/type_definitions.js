@@ -62,7 +62,7 @@ type Chatuser {
   first_name: String
   last_name: String
   # Foreign refs
-  # team: Slackbot
+  team: Slackbot
 }
 type Delivery {
   _id: String!
@@ -98,10 +98,10 @@ type Delivery {
   cart: JSON
   item_count: Int
   # items: JSON
-  items: [FoodItem]
   type: String
   # Foreign refs
-  # team: Slackbot
+  items: [FoodItem]
+  team: Slackbot
 }
 type Item {
   _id: String!

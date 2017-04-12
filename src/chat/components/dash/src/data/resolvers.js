@@ -67,11 +67,9 @@ function getDateFromArgs(args) {
  * @return {[type]}             [description]
  */
 function prepareCafeCarts(foodSession) {
-  foodSession.type = 'slack';
+  foodSession.type = 'slack'; // only doing slack atm
+  foodSession.chosen_restaurant = _.get(foodSession, 'chosen_restaurant.name');
 
-  if (_.get(foodSession, 'menu.menu')) {
-    foodSession.chosen_restaurant = foodSession.chosen_restaurant.name
-  }
 
   if (foodSession.cart.length > 0) {
     foodSession.cart_total = foodSession.calculated_amount;
@@ -176,6 +174,9 @@ const Resolvers = {
   //
   Delivery: {
     items: async (obj, args, context) => {
+      if (!obj.menu) {
+        return [];
+      }
       const menuObj = Menu(obj.menu);
       return obj.cart.map(async (i) => {
         const item = menuObj.flattenedMenu[i.item.item_id];
@@ -188,6 +189,10 @@ const Resolvers = {
         };
       });
     },
+
+    team: async ({team_id}) => {
+      return (await Slackbots.findOne({team_id: team_id}));
+    },
   },
 
   Cart: {
@@ -196,25 +201,20 @@ const Resolvers = {
     },
     team: async ({slack_id}) => {
       return (await Slackbots.findOne({team_id: slack_id}));
-    }
+    },
   },
 
-  // Chatuser: {
-  //   team: async ({team_id}) => {
-  //     return (await Slackbots.findOne({ team_id: team_id }));
-  //   },
-  // },
-
-  // Delivery: {
-  //   team: async ({team_id}) => {
-  //     return (await Slackbots.findOne({team_id: team_id}));
-  //   }
-  // },
+  Chatuser: {
+    team: async ({team_id}) => {
+      let team = await Slackbots.findOne({ 'team_id': team_id });
+      return team;
+    },
+  },
 
   Item: {
     cart: async ({cart_id}) => {
       return (await Carts.findOne(ObjectId(cart_id)));
-    }
+    },
   },
 
   Slackbot: {
