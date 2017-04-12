@@ -7,16 +7,16 @@ import Table from '../Table';
 import fetch from '../../core/fetch';
 import co from 'co';
 
-class CartTable extends Component {
+class DeliveryTable extends Component {
 
   constructor(props) {
     super(props);
     this.state = {};
   }
 
-  cartsAreSame(cart1,cart2){
-    if(cart1.length == cart2.length){
-      if(JSON.stringify(cart1) == JSON.stringify(cart2)){
+  cartsAreSame(deliveries1,deliveries2){
+    if(deliveries1.length == deliveries2.length){
+      if(JSON.stringify(deliveries1) == JSON.stringify(deliveries2)){
         return true;
       }
     }
@@ -24,7 +24,7 @@ class CartTable extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState){
-    if(this.state.carts && this.cartsAreSame(nextState.carts,this.state.carts)){
+    if(this.state.deliveries && this.cartsAreSame(nextState.deliveries,this.state.deliveries)){
       if(new Date(nextProps.start).toLocaleString() == new Date(this.props.start).toLocaleString() && new Date(nextProps.end).toLocaleString() == new Date(this.props.end).toLocaleString()){
         return false;
       }
@@ -35,12 +35,12 @@ class CartTable extends Component {
   componentDidUpdate(){
     var self = this;
     co(function * () {
-        const data = self.props.data;
+        var {data} = self.props.data;
         if (data){
-          let carts = data.reduce(self.props.process, []);
-          self.setState({carts: carts},)
+          let deliveries = data.deliveries.reduce(self.props.process, []);
+          self.setState({deliveries: deliveries},)
         } else  {
-          throw new Error('Failed to load carts.')
+          throw new Error('Failed to load deliveries.')
         }
       })
   }
@@ -48,19 +48,19 @@ class CartTable extends Component {
   componentDidMount() {
     var self = this;
     co(function * () {
-        const data = self.props.data;
+        var {data} = self.props.data;
         if (data){
-          let carts = data.reduce(self.props.process, []);
-          self.setState({carts: carts})
+          let deliveries = data.deliveries.reduce(self.props.process, []);
+          self.setState({deliveries: deliveries},)
         } else  {
-          throw new Error('Failed to load carts.')
+          throw new Error('Failed to load deliveries.')
         }
-    })
+      })
   }
 
   render() {
-    const {carts} = this.state;
-    const data = carts ? carts : [[]];
+    const {deliveries} = this.state;
+    const data = deliveries ? deliveries : [[]];
     return (
         <Table heads={this.props.heads} data={data} colorBy={this.props.colorBy} />
     )
@@ -68,4 +68,4 @@ class CartTable extends Component {
 }
 
 
-export default CartTable;
+export default DeliveryTable;

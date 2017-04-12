@@ -56,7 +56,7 @@ class SubSidebar extends Component {
   navToTeam(e, team) {
     e.preventDefault();
     //history.push(`/team?id=${team_id}`)
-    var url = window.location.href;
+    var url = window.location.pathname;
     let team_id = team.team_id ? team.team_id : '';
     let team_name = team.team_name ? team.team_name : '';
     if (!team.team_id || team.team_id == 'undefined') {
