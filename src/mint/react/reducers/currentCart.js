@@ -42,11 +42,8 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       items: [...state.items, action.item]
-
     };
   case RECEIVE_REMOVE_ITEM:
-  console.log('state', state);
-  console.log('id', action.itemToRemove);
     return {
       ...state,
       items: state.items.filter(item => item.id !== action.itemToRemove)

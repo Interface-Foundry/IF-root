@@ -102,7 +102,6 @@ export function addItem(cart_id, item_id) {
 }
 
 export function removeItem(cart_id, item_id) {
-  console.log('rem')
   return async dispatch => {
     dispatch(requestRemoveItem());
     try {
@@ -140,7 +139,6 @@ export function incrementItem(item_id, quantity) {
 }
 
 export function decrementItem(item_id, quantity) {
-  console.log('dec')
   return async dispatch => {
     dispatch(requestDecrementItem());
     try {
