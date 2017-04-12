@@ -48,7 +48,7 @@ export default class Item extends Component {
         items,
         index,
         item,
-        item: { main_image_url, memberName, price, store, description, id: uniq_id },
+        item: { name, main_image_url, price, store, description, id: uniq_id },
         history: { replace }
       },
       state: {
@@ -74,7 +74,6 @@ export default class Item extends Component {
           <div className='item__view__image image row'
             style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }/>
           <div className='item__view__atts'>
-            <h4>{memberName}</h4>
             <p>Item: {name}</p>
           </div>
           <div className='item__view__price'>
