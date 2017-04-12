@@ -44,6 +44,7 @@ export default class Item extends Component {
       props: {
         cart_id,
         addItem,
+        type,
         items,
         index,
         item,
@@ -62,10 +63,12 @@ export default class Item extends Component {
         onTouchStart={(e) => this.setState({originalx: e.changedTouches[e.changedTouches.length - 1].pageX})}
         onTouchMove={(e) => this.setState({x: e.changedTouches[e.changedTouches.length - 1].pageX})}
         onTouchEnd={(e) => {
-          const numericInt = parseInt(index),
-                newIndex = originalx > x ? ( numericInt === items.length - 1 ? 0 : numericInt + 1 ) : ( numericInt === 0 ? items.length - 1 : numericInt - 1 );
+          if(type === 'deal') {
+            const numericInt = parseInt(index),
+                  newIndex = originalx > x ? ( numericInt === items.length - 1 ? 0 : numericInt + 1 ) : ( numericInt === 0 ? items.length - 1 : numericInt - 1 );
 
-          if(originalx !== x && x !== 0) replace(`/cart/${cart_id}/m/deal/${newIndex}/${items[newIndex].asin}`)
+            if(originalx !== x && x !== 0) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`)
+          }
         }}>
         <section className='item__view'>
           <div className='item__view__image image row'
