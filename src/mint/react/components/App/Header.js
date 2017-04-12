@@ -14,6 +14,7 @@ export default class Header extends Component {
     return (
       <nav className='navbar'>
         <Route path={`${match.url}/m/item`} component={() => <ModalHead text={'Add to Cart'} {...props}/>} />
+        <Route path={`${match.url}/m/deal`} component={() => <ModalHead text={'Add to Cart'} {...props}/>} />
         <Route path={`${match.url}/m/share`} component={() => <ModalHead text={'Share Cart'} {...props}/>} />
         <Route path={`${match.url}`} exact component={() => <CartHead {...props}/>}/>
       </nav>
