@@ -73,7 +73,7 @@ h4 {
 input,
 select:focus,
 textarea {
-  font-size: 16px !important;
+  font-size: $input-font-size !important;
 }
 
 body::-webkit-scrollbar {

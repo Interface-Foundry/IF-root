@@ -35,8 +35,8 @@ export default class AmazonForm extends Component {
           <Field
             name="url"
             type="string"
-            label="Add Amazon Item to Kip"
-            placeholder="Enter URL"
+            label="Add Item to Kip Cart"
+            placeholder="Paste Amazon URL or Search"
             handleSubmit={handleSubmit}
             component={renderField}/>
         </div>

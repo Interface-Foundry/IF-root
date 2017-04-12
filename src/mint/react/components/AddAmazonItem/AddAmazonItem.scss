@@ -4,18 +4,18 @@
   display: flex;
   flex-direction: column;
   font-size: 18px;
-  color: $header-color;
 }
 
 .add_to_amazon__button {
   height: 100%;
   width: 100%;
-  background: white;
-  color: #bbbbbb;
+  background: transparent;
+  color: #727272;
   border: 2px dashed $color-blue;
   cursor: text;
-  font-family: $main-font;
   text-align: left;
   font-size: $input-font-size;
-  height: 46px;
+  height: 50px;
+  line-height: 49px;
+  padding: 0 $padding;
 }
