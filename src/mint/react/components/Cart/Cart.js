@@ -40,9 +40,17 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, members, history: { push, replace }, match: { url } } = this.props;
-    const hasItems = items.length > 0;
-
+    const { items, leader, members, user_accounts, history: { push, replace }, match: { url } } = this.props,
+      hasItems = items.length > 0,
+      isLeader = user_accounts[0] && (leader.id === user_accounts[0].id),
+      myItems = items.reduce((acc, item) => {
+        item.added_by === user_accounts[0].id ? acc.push(item) : null;
+        return acc;
+      }, []),
+      othersItems = items.reduce((acc, item) => {
+        item.added_by !== user_accounts[0].id ? acc.push(item) : null;
+        return acc;
+      }, []);
     return (
       <div className='cart'>
         <div className='cart__add'>
@@ -50,15 +58,25 @@ export default class Cart extends Component {
         </div>
         <DealsContainer isDropdown={false}/>
         <div className='cart__title'>
-          <h4>{ hasItems ? `#${items.length} Items in Group Cart` : 'Group Shopping Cart' }</h4>
+          <h4>{ hasItems ? `${items.length} items in Group Cart` : 'Group Shopping Cart' }</h4>
         </div>
         <div className='cart__items'>
           <ul>
             { 
-              hasItems ? 
-                items.map((item, i) => <CartItem key={i} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
-                : <em>Please add some products to the cart.</em>
+              myItems.length ? 
+                myItems.map((item, i) => <CartItem key={i} isOwner={true} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
+                : <li><em>Please add some products to the cart.</em></li>
             } 
+          </ul>
+          <hr/>
+            <div> Other's items </div>
+          <hr/>
+          <ul>
+          {
+              othersItems.length ? 
+              othersItems.map((item, i) => <CartItem key={i} isOwner={isLeader} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
+                : <li><em>Nobody else has added anything yet!</em></li>
+              }
           </ul>
         </div>
     </div>
