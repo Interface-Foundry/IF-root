@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import { Item } from '../components';
+import { fetchDeals } from '../actions/deals';
 import { previewItem, clearItem, addItem } from '../actions/item';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -19,6 +20,7 @@ const mapDispatchToProps = dispatch => ({
         replace(`/cart/${cart_id}/`);
       });
   },
+  fetchDeals: () => dispatch(fetchDeals()),
   previewItem: (itemId) => dispatch(previewItem(itemId)),
   clearItem: () => dispatch(clearItem())
 });

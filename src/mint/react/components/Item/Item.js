@@ -18,9 +18,11 @@ export default class Item extends Component {
   }
 
   componentWillMount() {
-    const { props: { item_id, previewItem, item } } = this;
+    const { props: { item_id, previewItem, item, type, items, fetchDeals } } = this;
     // only update item if there isn't one
     if (item_id && !item.price) previewItem(item_id);
+
+    if(type === 'deal' && items.length === 0) fetchDeals();
   }
 
   componentWillReceiveProps(nextProps) {

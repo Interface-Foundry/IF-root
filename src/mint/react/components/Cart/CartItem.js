@@ -2,7 +2,7 @@ import React, { PropTypes, Component } from 'react';
 import { getMemberById } from '../../reducers';
 import { getNameFromEmail } from '../../utils';
 
-export default class Item extends Component {
+export default class CartItem extends Component {
   static propTypes = {
     added_by: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
