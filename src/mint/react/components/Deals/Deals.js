@@ -22,7 +22,7 @@ export default class Deals extends Component {
     const { isDropdown } = this.state;
     let { deals, cart_id } = this.props;
     if (isDropdown) deals = deals.slice(0, 5);
-    return deals.map((deal, i) => <section key={i}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown}/></section>);
+    return deals.map((deal, i) => <section key={i}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></section>);
   }
 
   componentWillUnmount() {
@@ -30,6 +30,7 @@ export default class Deals extends Component {
   }
 
   delayDropDown() {
+    // this is running after unmount
     const { props: { isDropdown } } = this;
     if (this.refs.deals) { // stop from being called when element doesn't exist
       this.timer = setTimeout(() => this.setState({

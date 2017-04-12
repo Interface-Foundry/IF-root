@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 export default class Card extends Component {
 
   static propTypes = {
-    small: PropTypes.string.isRequired,
-    medium: PropTypes.string.isRequired,
-    large: PropTypes.string.isRequired,
+    small: PropTypes.string,
+    medium: PropTypes.string,
+    large: PropTypes.string,
     name: PropTypes.string.isRequired,
     price: PropTypes.number.isRequired,
     previousPrice: PropTypes.number.isRequired,
@@ -16,10 +16,10 @@ export default class Card extends Component {
   }
 
   render() {
-    const { small, medium, large, asin, name, price, previousPrice, savePercent, cart_id } = this.props;
+    const { small, medium, large, asin, name, price, previousPrice, savePercent, cart_id, index } = this.props;
     const imageSrc = medium || large || small;
     return (
-      <Link to={`/cart/${cart_id}/m/item/${asin}`} className='dealcard'>
+      <Link to={`/cart/${cart_id}/m/deal/${index}/${asin}`} className='dealcard'>
         <div className='dealcard__image' style={{backgroundImage:`url(${imageSrc})`}}/>
         <div className='dealcard__name'>{name}</div>
         <div className='dealcard__price'>${price.toFixed(2)}</div>

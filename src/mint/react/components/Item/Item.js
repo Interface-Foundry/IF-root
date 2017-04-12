@@ -2,6 +2,11 @@ import React, { PropTypes, Component } from 'react';
 import Footer from './Footer';
 
 export default class Item extends Component {
+  state = {
+    originalx: 0,
+    x: 0
+  }
+
   static propTypes = {
     item_id: PropTypes.string.isRequired,
     item: PropTypes.object,
@@ -18,9 +23,20 @@ export default class Item extends Component {
     if (item_id && !item.price) previewItem(item_id);
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { props: { item_id, previewItem, item } } = this;
+
+    if(nextProps.item_id !== item_id)
+      previewItem(nextProps.item_id);
+  }
+
   componentWillUnmount() {
     const { props: { clearItem } } = this;
     clearItem();
+  }
+
+  _handleSwipe = () => {
+    this.setState({x})
   }
 
   render() {
@@ -28,12 +44,29 @@ export default class Item extends Component {
       props: {
         cart_id,
         addItem,
+        items,
+        index,
+        item,
         item: { main_image_url, memberName, price, store, description, id: uniq_id },
         history: { replace }
+      },
+      state: {
+        originalx,
+        x
       }
     } = this;
+
     return (
-      <div className='item'>
+      <div 
+        className='item' 
+        onTouchStart={(e) => this.setState({originalx: e.changedTouches[e.changedTouches.length - 1].pageX})}
+        onTouchMove={(e) => this.setState({x: e.changedTouches[e.changedTouches.length - 1].pageX})}
+        onTouchEnd={(e) => {
+          const numericInt = parseInt(index),
+                newIndex = originalx > x ? ( numericInt === items.length - 1 ? 0 : numericInt + 1 ) : ( numericInt === 0 ? items.length - 1 : numericInt - 1 );
+
+          if(originalx !== x && x !== 0) replace(`/cart/${cart_id}/m/deal/${newIndex}/${items[newIndex].asin}`)
+        }}>
         <section className='item__view'>
           <div className='item__view__image image row'
             style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }/>
