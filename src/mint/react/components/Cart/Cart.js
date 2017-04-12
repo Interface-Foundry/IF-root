@@ -41,6 +41,7 @@ export default class Cart extends Component {
   render() {
     const { removeItem, cart_id, items, members, leader, selectItem, history: { push, replace }, match: { url } } = this.props;
     const hasItems = items.length > 0;
+
     return (
       <div className='cart'>
         <div className='cart__add'>

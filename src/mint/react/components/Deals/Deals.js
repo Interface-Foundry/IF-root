@@ -18,13 +18,6 @@ export default class Deals extends Component {
     cart_id: PropTypes.string
   }
 
-  renderCards() {
-    const { isDropdown } = this.state;
-    let { deals, cart_id } = this.props;
-    if (isDropdown) deals = deals.slice(0, 5);
-    return deals.map((deal, i) => <section key={i}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></section>);
-  }
-
   componentWillUnmount() {
     const { delayDropDown } = this;
     delayDropDown(true)
@@ -63,5 +56,13 @@ export default class Deals extends Component {
         </section>
       </div>
     );
+  }
+
+  renderCards() {
+    const { isDropdown } = this.state;
+    let { deals, cart_id } = this.props;
+    if (isDropdown) deals = deals.slice(0, 5);
+
+    return deals.map((deal, i) => <section key={i}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></section>);
   }
 }

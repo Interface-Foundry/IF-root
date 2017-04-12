@@ -18,13 +18,13 @@
 	}
 
 	.sidenav__overlay {
-		width: calc(100% - 200px);
+		width: calc(100% - 250px);
 		height: 100%;
 		background: transparent;
 	}
 	.sidenav__list {
 		position: relative;
-		width: 200px;
+		width: 250px;
 		height: 100%;
 		background: #999;
 		@include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
@@ -42,26 +42,28 @@
 			padding: 0 $padding;
 
 			&.sidenav__list__header {
-				.icon {
-					float: right;
-				}
-
 				p {
+					width: calc(100% - #{$nav-height/2});
 					padding: 0;
-					float: left;
+					text-align: left;
+					overflow: hidden;
+					text-overflow: ellipsis;
 				}
 			}
 
 			.icon {
-				float: left;
+				display: inline-block;
+				width: $nav-height/2;
 				height: $nav-height;
+				text-align: center;
 			}
 
 			p {
-				float: right;
+				width: calc(100% - #{$nav-height/2});
 				display: inline-block;
 				font-size: 13px;
 				padding: 0 $padding;
+				text-align: right;
 			}
 		}
 

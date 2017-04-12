@@ -18,6 +18,7 @@ export default class Card extends Component {
   render() {
     const { small, medium, large, asin, name, price, previousPrice, savePercent, cart_id, index } = this.props;
     const imageSrc = medium || large || small;
+
     return (
       <Link to={`/cart/${cart_id}/m/deal/${index}/${asin}`} className='dealcard'>
         <div className='dealcard__image' style={{backgroundImage:`url(${imageSrc})`}}/>
