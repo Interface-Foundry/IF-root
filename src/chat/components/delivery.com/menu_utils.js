@@ -66,7 +66,7 @@ utils.sortMenu = function (foodSession, user, matchingItems) {
 utils.getUrl = function * (foodSession, user_id, selected_items) {
   if (!selected_items) selected_items = [];
   try {
-    return yield request({
+    var res = yield request({
         url: popoutUrl,
         method: 'POST',
         json: {
@@ -78,9 +78,10 @@ utils.getUrl = function * (foodSession, user_id, selected_items) {
           'selected_items': selected_items
         }
     })
+    return res
   } catch (err) {
     logging.error('ERROR in getURL', err)
-    return err;
+    return;
   }
 }
 
