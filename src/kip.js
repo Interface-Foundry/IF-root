@@ -181,7 +181,7 @@ SavedTimer.prototype.tic = function (label) {
   var t = +new Date() - this.start
   var interval = t - this.last
   this.last = t
-  console.log('timer:'.grey, this.metric.metric.yellow, label.cyan, t + 'ms', `(+${interval}ms)`.gray)
+  debug('timer:'.grey, this.metric.metric.yellow, label.cyan, t + 'ms', `(+${interval}ms)`.gray)
   this.metric.data.checkpoints.push({
     label: label,
     timestamp: t,
