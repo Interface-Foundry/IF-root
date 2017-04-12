@@ -3,11 +3,9 @@
  */
 
 import { ObjectId } from 'mongodb';
-import _ from 'lodash';
-import GraphQLToolsTypes from "graphql-tools-types"
+import GraphQLToolsTypes from 'graphql-tools-types';
 import DataLoader from 'dataloader';
-import { find, merge } from 'lodash';
-import co from 'co';
+import _ from 'lodash';
 
 import {
   Carts,
@@ -17,22 +15,13 @@ import {
   Messages,
   Metrics,
   Slackbots,
-  Waypoints
+  Waypoints,
 } from '../database';
 
-// if you want to use db.whatever uncomment this
+import Menu from '../../../chat/components/delivery.com/Menu';
+
+// if you want to use mongoose/db.whatever uncomment this
 // import db from "../../../../../db/index.js"
-
-// async function getCafeCartTable(team_id, start_date, end_date) {
-//   var sessions = await Delivery.find({id: team_id});
-// }
-
-// async function getStoreCartTable(team_id, start_date, end_date) {
-//   var sessions = await Carts.find({id: team_id});
-// }
-
-
-import Menu from '../../../delivery.com/Menu';
 
 /**
  * get the date from args if using start_date and end_date in graphql query

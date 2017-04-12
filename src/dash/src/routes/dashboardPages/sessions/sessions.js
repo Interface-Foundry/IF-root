@@ -5,14 +5,14 @@ import {
   CartesianGrid, Bar, BarChart,
   ResponsiveContainer, AreaChart, Area } from '../../../vendor/recharts';
 import {
-  MenuItem,Panel, PageHeader, 
-  DropdownButton, Button,ButtonToolbar, 
-  ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger, 
+  MenuItem,Panel, PageHeader,
+  DropdownButton, Button,ButtonToolbar,
+  ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger,
 } from 'react-bootstrap';
 import Table from '../../../components/Table';
 import vagueTime from 'vague-time';
 import _ from 'lodash';
-import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
+import * as cafe_waypoints from '../../../../../chat/components/delivery.com/cafe_waypoints.js';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 
@@ -25,7 +25,7 @@ class WaypointHover extends Component {
           if(waypoint.input) {
           return (
             <OverlayTrigger trigger="click" rootClose placement="top" overlay={createOverlay(waypoint.input)}>
-              <a href='#'>{waypoint.action}</a> 
+              <a href='#'>{waypoint.action}</a>
             </OverlayTrigger>
             )}
           else {
@@ -37,7 +37,7 @@ class WaypointHover extends Component {
 
       }
       </div>
-      
+
     );
   }
 }
@@ -78,8 +78,8 @@ class Session extends Component {
   }
 
   changeCart(cart){
-    this.setState({ 
-      view: cart 
+    this.setState({
+      view: cart
     })
   }
 
@@ -95,7 +95,7 @@ class Session extends Component {
     for (var i = 0; i < waypointPaths.length; i++) {
       var teamName = waypointPaths[i].team_name;
       rows.push({time_stamp: new Date(waypointPaths[i].time_stamp.split('.')[0]).toLocaleString(), time_stamp_end: new Date(waypointPaths[i].time_stamp_end.split('.')[0]).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: self.getWaypointActions(waypointPaths[i])})
-      
+
     }
     var currentTeam = self.props.teamName ? self.props.teamName : 'All Team';
 
@@ -103,12 +103,12 @@ class Session extends Component {
         view: 'Store',
         currentTeam: currentTeam,
         rows: rows,
-      }) 
+      })
   }
 
   renderSessionsLineGraph(rows){
     var dataPlot = [];   //name:time_range #sessions, #teams
-    var weekRanges=[]; 
+    var weekRanges=[];
 
     for(var i = 0; i<10; i++){
       weekRanges.push({index: i, startDate: new Date(moment().subtract(10-i, 'week')),endDate: new Date(moment().subtract(9-i, 'week')), numSessions:0, teams:[]});
@@ -130,7 +130,7 @@ class Session extends Component {
       if(currentWeek){
         dataPlot.push({name: currentWeek.endDate.toLocaleDateString(), numSessions: currentWeek.numSessions, numTeams: currentWeek.teams.length})
       }
-      
+
     }
 
     return(
@@ -201,15 +201,15 @@ class Session extends Component {
           field: 'time_stamp',
           descrip: 'Session Time Started',
           allowSort: true,
-          sort: (a, b, order) => order == 'desc' ? 
-              new Date(b.time_stamp) - new Date(a.time_stamp) 
+          sort: (a, b, order) => order == 'desc' ?
+              new Date(b.time_stamp) - new Date(a.time_stamp)
               : new Date(a.time_stamp) - new Date(b.time_stamp)
         }, {
           field: 'time_stamp_end',
           descrip: 'Session Time of Last Activity',
           allowSort: true,
-          sort: (a, b, order) => order == 'desc' ? 
-              new Date(b.time_stamp_end) - new Date(a.time_stamp_end) 
+          sort: (a, b, order) => order == 'desc' ?
+              new Date(b.time_stamp_end) - new Date(a.time_stamp_end)
               : new Date(a.time_stamp_end) - new Date(b.time_stamp_end)
         },{
           field: 'user_id',
@@ -252,7 +252,7 @@ class Session extends Component {
             </Button>
           </ButtonToolbar>
           <div>
-              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />    
+              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
           <div className="panel panel-default fillSpace">
@@ -262,7 +262,7 @@ class Session extends Component {
       </div>
     );
   }
-    
+
 }
 
 export default Session;

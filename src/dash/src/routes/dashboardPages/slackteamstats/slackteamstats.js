@@ -15,7 +15,6 @@ import {
 import Table from '../../../components/Table';
 import vagueTime from 'vague-time';
 import _ from 'lodash';
-import * as cafe_waypoints from '../../../../../delivery.com/cafe_waypoints.js';
 
 const title = ' Team Stats';
 
@@ -108,7 +107,7 @@ const dayOfWeekStats = [ { dayString: 'Sunday', dayNumber: 1, total: 7932 },
   { dayString: 'Wednesday', dayNumber: 4, total: 29934 },
   { dayString: 'Thursday', dayNumber: 5, total: 26266 },
   { dayString: 'Friday', dayNumber: 6, total: 25602 },
-  { dayString: 'Saturday', dayNumber: 7, total: 7219 } 
+  { dayString: 'Saturday', dayNumber: 7, total: 7219 }
 ];
 */
 
@@ -167,15 +166,15 @@ function displayTeamStats(props, context) {
               field: 'time_stamp',
               descrip: 'Session Time Started',
               allowSort: true,
-              sort: (a, b, order) => order == 'desc' ? 
-                  new Date(b.time_stamp) - new Date(a.time_stamp) 
+              sort: (a, b, order) => order == 'desc' ?
+                  new Date(b.time_stamp) - new Date(a.time_stamp)
                   : new Date(a.time_stamp) - new Date(b.time_stamp)
             }, {
               field: 'time_stamp_end',
               descrip: 'Session Time of Last Activity',
               allowSort: true,
-              sort: (a, b, order) => order == 'desc' ? 
-                  new Date(b.time_stamp_end) - new Date(a.time_stamp_end) 
+              sort: (a, b, order) => order == 'desc' ?
+                  new Date(b.time_stamp_end) - new Date(a.time_stamp_end)
                   : new Date(a.time_stamp_end) - new Date(b.time_stamp_end)
             },{
               field: 'user_id',
@@ -280,7 +279,7 @@ function displayTeamStats(props, context) {
 }
 
 displayTeamStats.propTypes = {
-  
+
 };
 
 displayTeamStats.contextTypes = { setTitle: PropTypes.func.isRequired };

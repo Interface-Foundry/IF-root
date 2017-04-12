@@ -4,8 +4,8 @@
 
 import {MongoClient, ObjectId} from 'mongodb';
 
-import config from '../../../../config/index';
-import logging from '../../../../logging'
+import config from '../../config/index';
+import logging from '../../logging';
 
 var Carts, Deliveries, Items, Messages, Metrics, Slackbots, Chatusers, Waypoints;
 
