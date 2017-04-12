@@ -65,22 +65,28 @@ utils.sortMenu = function (foodSession, user, matchingItems) {
 */
 utils.getUrl = function * (foodSession, user_id, selected_items) {
   if (!selected_items) selected_items = [];
+  var requestBody = {
+    'rest_id': foodSession.chosen_restaurant.id,
+    'team_id': foodSession.team_id,
+    'delivery_ObjectId': foodSession._id,
+    'budget': (foodSession.user_budgets[user_id] ? foodSession.user_budgets[user_id] : foodSession.budget),
+    'user_id': user_id,
+    'selected_items': selected_items
+  }
+
   try {
     var res = yield request({
         url: popoutUrl,
         method: 'POST',
-        json: {
-          'rest_id': foodSession.chosen_restaurant.id,
-          'team_id': foodSession.team_id,
-          'delivery_ObjectId': foodSession._id,
-          'budget': (foodSession.user_budgets[user_id] ? foodSession.user_budgets[user_id] : foodSession.budget),
-          'user_id': user_id,
-          'selected_items': selected_items
-        }
+        json: requestBody
     })
     return res
   } catch (err) {
-    logging.error('ERROR in getURL', err)
+    logging.error('ERROR in getURL with data', {
+      requestBody: requestBody,
+      popoutUrl: popoutUrl,
+      user_id: user_id
+    })
     return;
   }
 }
