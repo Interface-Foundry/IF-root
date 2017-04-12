@@ -304,10 +304,10 @@ var search = function * (params, origin) {
   }
   timer.tic('got results from ItermSearch api')
 
-  if (results && results.length > 1) {
+  if (results && results.length >= 1) {
     kip.debug(`Found ${results.length} results (before paging)`.green)
-  }else {
-    kip.debug(`Found ${results.length} results (before paging)`.red)
+  } else {
+    kip.debug(`Found 0 results (before paging)`.red)
     return null
   }
   results = results.slice(skip, skip + 3)

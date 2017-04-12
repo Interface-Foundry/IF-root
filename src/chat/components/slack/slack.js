@@ -98,7 +98,7 @@ function * loadTeam(slackbot) {
   // })
 
   rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
-    logging.debug('loaded slack team', slackbot.team_id)
+    logging.info('loaded slack team', slackbot.team_id)
   })
 
   rtm.on(slack.CLIENT_EVENTS.RTM.DISCONNECT, (reason) => {
@@ -115,7 +115,7 @@ function * loadTeam(slackbot) {
   //
   rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
-    logging.debug('got slack message sent from user', data.user, 'on channel', data.channel)
+    logging.info('got slack message sent from user', data.user, 'on channel', data.channel)
     // For channels that are not DM's, only respond if kip is called out by name
     if ('CG'.includes(data.channel[0])) {
       if (data.text && data.text.includes(slackbot.bot.bot_user_id)) {
@@ -130,7 +130,7 @@ function * loadTeam(slackbot) {
 
     // make sure it isn't kip talking to ourselves
     if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message') {
-      logging.debug("message was from kip")
+      logging.info("message was from kip")
       return;
     }
 
@@ -156,16 +156,16 @@ function * loadTeam(slackbot) {
 
     // other random things
     if ((data.type !== 'message') || (data.subtype === 'channel_join') || (data.subtype === 'channel_leave')) { // settings.name = kip's slack username
-      logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
-      logging.debug('data.type', data.type)
-      logging.debug('data.subtype', data.subtype)
+      logging.info('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      logging.info('data.type', data.type)
+      logging.info('data.subtype', data.subtype)
       return
     }
 
     if ((data.hidden === true) && (data.subtype === 'message_changed')) {
-      logging.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
-      logging.debug('data.hidden', data.hidden)
-      logging.debug('data.subtype', data.subtype)
+      logging.info('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
+      logging.info('data.hidden', data.hidden)
+      logging.info('data.subtype', data.subtype)
       return
     }
 
@@ -275,7 +275,7 @@ function * start () {
 //
 // Mechanism for responding to messages
 //
-logging.debug('subscribing to outgoing.slack hopefully')
+logging.info('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
   logging.info('outgoing slack message', outgoing._id, _.get(outgoing, 'data.text', '[no text]'))
   outgoing = {
@@ -305,7 +305,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
         })
       }
-      logging.debug('message.mode: ', message.mode, ' message.action: ', message.action);
+      logging.info('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : { reply: message.text }
         if (message.replace_ts) {
@@ -319,7 +319,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply, (e, r) => {
             if (e) logging.error(e)
             // set the slack_ts from their server so we can update/delete specific messages
-            logging.debug('saving slack timestamp', r.ts, 'to messages.slack_ts')
+            logging.info('saving slack timestamp', r.ts, 'to messages.slack_ts')
             db.Messages.update({_id: message._id}, {$set: {slack_ts: r.ts}}).exec()
           })
         }
@@ -430,7 +430,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       try {
           bot.web.chat.postMessage(message.source.channel, message.text, null);
        } catch (err) {
-        logging.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message.reply,'\n\n\n\n');
+        logging.info('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message.reply,'\n\n\n\n');
       }
 
     }).then(() => {

@@ -471,6 +471,7 @@ queue.topic('incoming').subscribe(incoming => {
           replies = yield nlp_response(message)
           logging.debug('+++ NLPRESPONSE ' + replies)
         }
+				replies = replies || []
         timer.tic('got nlp response')
         logging.debug('nlp replies'.cyan,
           replies.map(function*(r) {
