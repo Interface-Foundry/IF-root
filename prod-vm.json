@@ -1,0 +1,11 @@
+{
+  "apps": [{
+    "name": "slack",
+    "cwd": "src/chat/components/slack",
+    "script": "slack.js",
+    "combine_logs": true,
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }]
+}
