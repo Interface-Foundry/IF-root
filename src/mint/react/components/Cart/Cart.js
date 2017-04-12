@@ -27,12 +27,13 @@ export default class Cart extends Component {
   componentWillReceiveProps(nextProps) {
     const { history: { push, replace }, cart_id } = this.props;
     const { members, leader, addingItem, user_accounts } = nextProps;
+    const cartId = cart_id || nextProps.cart_id
 
-    if(cart_id) {
+    if(cartId) {
       if (user_accounts.length === 0 && !leader) {
-        replace(`/cart/${cart_id}/m/signin`);
+        replace(`/cart/${cartId}/m/signin`);
       } else if (leader && !addingItem && this.props.addingItem !== addingItem && user_accounts.length !== 0) {
-        replace(`/cart/${cart_id}/`);
+        replace(`/cart/${cartId}/`);
       }
     }
   }

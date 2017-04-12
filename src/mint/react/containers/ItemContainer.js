@@ -6,7 +6,10 @@ const mapStateToProps = (state, ownProps) => ({
   cart_id: state.cart.cart_id,
   addingItem: state.cart.addingItem,
   item_id: ownProps.match.params.item_id,
-  item: state.item
+  item: state.item,
+  index: ownProps.match.params.index,
+  type: ownProps.match.params.item_type,
+  items: state[`${ownProps.match.params.item_type}s`][`${ownProps.match.params.item_type}s`]
 });
 
 const mapDispatchToProps = dispatch => ({

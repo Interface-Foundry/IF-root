@@ -18,7 +18,7 @@ export default class SignIn extends Component {
       <div className="modal">
         <Switch>
           <Route path={`${match.url}/item/add`} component={AmazonFormContainer} />
-          <Route path={`${match.url}/item/:item_id`} component={ItemContainer} />
+          <Route path={`${match.url}/:item_type/:index/:item_id`} component={ItemContainer} />
           <Route path={`${match.url}/signin`} component={EmailFormContainer} />
         </Switch>
       </div>
