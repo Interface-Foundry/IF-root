@@ -5,7 +5,7 @@ import { AmazonForm } from '../components';
 
 // N.B = Look into routing, Look into the correct api endpoint.
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: state.cart.cart_id,
+  cart_id: state.currentCart.cart_id,
   item: state.item
 });
 

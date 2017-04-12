@@ -82,35 +82,5 @@ describe('cart actions', () => {
       });
   });
 
-  it('creates REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM_FROM_CART when removeItem has been done', () => {
-    nock('http://localhost:3000/api')
-      .get('/cart/fakeid/items')
-      .reply(200, { body });
 
-    const expectedActions = [
-      { type: REQUEST_REMOVE_ITEM_FROM_CART },
-      { type: RECEIVE_REMOVE_ITEM_FROM_CART, body }
-    ];
-
-    const store = mockStore({
-      session: {
-        newAccount: false,
-        onborded: false,
-        user_accounts: [{ id: 1 }]
-      },
-      cart: {
-        cart_id: 'testId',
-        items: [{ id: 1 }]
-      }
-    });
-
-    return store.dispatch(removeItem('testId'))
-      .then(() => {
-        expect(store.getActions())
-          .toEqual(expectedActions);
-      })
-      .catch((error) => {
-        // error handler
-      });
-  });
 });

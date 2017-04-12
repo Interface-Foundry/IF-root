@@ -1,4 +1,16 @@
-import { REQUEST_ITEM, RECEIVE_ITEM, CLEAR_ITEM, REQUEST_ADD_ITEM, RECEIVE_ADD_ITEM, REQUEST_REMOVE_ITEM, RECEIVE_REMOVE_ITEM } from '../constants/ActionTypes';
+import {
+  REQUEST_ITEM,
+  RECEIVE_ITEM,
+  CLEAR_ITEM,
+  REQUEST_ADD_ITEM,
+  RECEIVE_ADD_ITEM,
+  REQUEST_REMOVE_ITEM,
+  RECEIVE_REMOVE_ITEM,
+  RECEIVE_INCREMENT_ITEM,
+  REQUEST_INCREMENT_ITEM,
+  RECEIVE_DECREMENT_ITEM,
+  REQUEST_DECREMENT_ITEM,
+} from '../constants/ActionTypes';
 
 const receive = (item) => ({
   type: RECEIVE_ITEM,
@@ -26,8 +38,28 @@ const requestRemoveItem = () => ({
   type: REQUEST_REMOVE_ITEM
 });
 
-const receiveRemoveItem = (item) => ({
+const receiveRemoveItem = (itemToRemove) => ({
   type: RECEIVE_REMOVE_ITEM,
+  itemToRemove
+});
+
+const receiveIncrementItem = (item) => ({
+  type: RECEIVE_INCREMENT_ITEM,
+  item
+});
+
+const requestIncrementItem = (item) => ({
+  type: REQUEST_INCREMENT_ITEM,
+  item
+});
+
+const receiveDecrementItem = (item) => ({
+  type: RECEIVE_DECREMENT_ITEM,
+  item
+});
+
+const requestDecrementItem = (item) => ({
+  type: REQUEST_DECREMENT_ITEM,
   item
 });
 
@@ -70,23 +102,62 @@ export function addItem(cart_id, item_id) {
 }
 
 export function removeItem(cart_id, item_id) {
+  console.log('rem')
   return async dispatch => {
     dispatch(requestRemoveItem());
     try {
-      const response = await fetch(`/api/cart/${cart_id}/item`, {
-        'method': 'DELETE',
+      await fetch(`/api/cart/${cart_id}/item/${item_id}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      });
+      return dispatch(receiveRemoveItem(item_id));
+    } catch (e) {
+      throw 'error in cart removeItem';
+    }
+  };
+}
+
+export function incrementItem(item_id, quantity) {
+  return async dispatch => {
+    dispatch(requestIncrementItem());
+    try {
+      const response = await fetch(`/api/item/${item_id}`, {
+        method: 'POST',
+        credentials: 'same-origin',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json'
         },
-        credentials: 'same-origin',
-        'body': JSON.stringify({
-          item_id
+        body: JSON.stringify({
+          quantity: ++quantity
         })
       });
-      return dispatch(receiveRemoveItem(await response.json()));
+      return dispatch(receiveIncrementItem(await response.json()));
     } catch (e) {
-      throw e;
+      throw 'error in cart removeItem';
+    }
+  };
+}
+
+export function decrementItem(item_id, quantity) {
+  console.log('dec')
+  return async dispatch => {
+    dispatch(requestDecrementItem());
+    try {
+      const response = await fetch(`/api/item/${item_id}`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          quantity: --quantity
+        })
+      });
+      return dispatch(receiveDecrementItem(await response.json()));
+    } catch (e) {
+      throw 'error in cart removeItem';
     }
   };
 }

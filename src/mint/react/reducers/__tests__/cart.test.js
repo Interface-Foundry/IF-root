@@ -1,5 +1,5 @@
 import reducer from '../cart';
-import { RECEIVE_ADD_ITEM, ADD_MEMBER_TO_CART, RECEIVE_CART, RECEIVE_ITEMS } from '../../constants/ActionTypes';
+import { RECEIVE_ADD_ITEM, ADD_MEMBER_TO_CART, RECEIVE_CART, RECEIVE_ITEMS, RECEIVE_REMOVE_ITEM } from '../../constants/ActionTypes';
 
 const initialState = {
   carts: [],
@@ -7,7 +7,7 @@ const initialState = {
     members: [],
     items: []
   },
-  SetAddingItem: false
+  addingItem: false
 };
 
 describe('cart reducer', () => {
@@ -85,6 +85,29 @@ describe('cart reducer', () => {
           ...firstState.currentCart,
           members: [...members, newMember]
         }
+      });
+  });
+
+  it('should remove an item in the cart', () => {
+    const items = [{ item: 'omg im an item', id: 123 }, { item: 'omg im an item too', id: 321 }];
+    const id = 'abc123';
+    const newCart = {
+      ...firstState.currentCart,
+      items: [...items, { item: 'whatevs', id }],
+    };
+    expect(reducer({
+        ...firstState,
+        currentCart: newCart
+      }, {
+        type: RECEIVE_REMOVE_ITEM,
+        itemToRemove: id
+      }))
+      .toEqual({
+        ...firstState,
+        currentCart: {
+          ...firstState.currentCart,
+          items
+        },
       });
   });
 });

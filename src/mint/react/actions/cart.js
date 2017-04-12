@@ -1,4 +1,4 @@
-import { ADDING_ITEM, RECEIVE_CART, REQUEST_CART, REQUEST_REMOVE_ITEM_FROM_CART, RECEIVE_REMOVE_ITEM, RECEIVE_ITEMS, REQUEST_ITEMS, RECEIVE_CARTS, REQUEST_CARTS } from '../constants/ActionTypes';
+import { ADDING_ITEM, RECEIVE_CART, REQUEST_CART, RECEIVE_ITEMS, REQUEST_ITEMS, RECEIVE_CARTS, REQUEST_CARTS } from '../constants/ActionTypes';
 
 const receive = (currentCart) => ({
   type: RECEIVE_CART,
@@ -27,14 +27,6 @@ const requestItems = () => ({
   type: REQUEST_ITEMS
 });
 
-const requestRemoveItem = () => ({
-  type: REQUEST_REMOVE_ITEM_FROM_CART
-});
-
-const receiveRemoveItem = (itemToRemove) => ({
-  type: RECEIVE_REMOVE_ITEM,
-  itemToRemove
-});
 
 export const addingItem = (addingItem) => ({
   type: ADDING_ITEM,
@@ -84,21 +76,6 @@ export function fetchItems(cart_id) {
       return dispatch(receiveItems(await response.json()));
     } catch (e) {
       throw 'error in cart fetchItems';
-    }
-  };
-}
-
-export function removeItem(cart_id, item_id) {
-  return async dispatch => {
-    dispatch(requestRemoveItem());
-    try {
-      await fetch(`/api/cart/${cart_id}/item/${item_id}`, {
-        'method': 'DELETE',
-        credentials: 'same-origin',
-      });
-      return dispatch(receiveRemoveItem(item_id));
-    } catch (e) {
-      throw 'error in cart removeItem';
     }
   };
 }

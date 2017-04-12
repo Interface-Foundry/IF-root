@@ -20,6 +20,10 @@ html {
   }
 }
 
+::-webkit-scrollbar { 
+    display: none; 
+}
+
 .app,
 #root {
   position: absolute;

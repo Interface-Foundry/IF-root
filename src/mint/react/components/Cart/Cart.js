@@ -16,7 +16,8 @@ export default class Cart extends Component {
     history: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,
     carts: PropTypes.array.isRequired,
-    removeItem: PropTypes.func.isRequired
+    removeItem: PropTypes.func.isRequired,
+    user_accounts: PropTypes.array
   }
 
   componentWillMount() {
@@ -25,11 +26,11 @@ export default class Cart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { push, replace }, cart_id } = this.props;
-    const { members, leader, addingItem, user_accounts } = nextProps;
-    const cartId = cart_id || nextProps.cart_id
+    const { history: { replace }, cart_id } = this.props;
+    const { leader, addingItem, user_accounts } = nextProps;
+    const cartId = cart_id || nextProps.cart_id;
 
-    if(cartId) {
+    if (cartId) {
       if (user_accounts.length === 0 && !leader) {
         replace(`/cart/${cartId}/m/signin`);
       } else if (leader && !addingItem && this.props.addingItem !== addingItem && user_accounts.length !== 0) {
@@ -39,7 +40,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { removeItem, cart_id, items, members, leader, selectItem, history: { push, replace }, match: { url } } = this.props;
+    const { items, members, history: { push, replace }, match: { url } } = this.props;
     const hasItems = items.length > 0;
 
     return (
@@ -55,16 +56,7 @@ export default class Cart extends Component {
           <ul>
             { 
               hasItems ? 
-                items.map((item, i) => <CartItem key={i} 
-                                            itemNumber={i}
-                                            {...item}
-                                            url={url}
-                                            members={members}
-                                            leader={leader}
-                                            selectItem={selectItem}
-                                            push={push}
-                                            cart_id={cart_id}
-                                            removeItem={removeItem}/>) 
+                items.map((item, i) => <CartItem key={i} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
                 : <em>Please add some products to the cart.</em>
             } 
           </ul>

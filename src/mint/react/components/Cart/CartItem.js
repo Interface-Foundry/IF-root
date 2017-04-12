@@ -21,11 +21,13 @@ export default class CartItem extends Component {
     push: PropTypes.func.isRequired,
     itemNumber: PropTypes.number.isRequired,
     cart_id: PropTypes.string.isRequired,
-    removeItem: PropTypes.func.isRequired
+    removeItem: PropTypes.func.isRequired,
+    incrementItem: PropTypes.func.isRequired,
+    decrementItem: PropTypes.func.isRequired
   }
 
   render() {
-    const { added_by, description, itemNumber, main_image_url, name, price, quantity, leader, members, removeItem, id, cart_id } = this.props,
+    const { added_by, description, itemNumber, main_image_url, name, price, quantity, leader, members, removeItem, incrementItem, decrementItem, id, cart_id } = this.props,
       linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by }),
       memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
 
@@ -48,6 +50,8 @@ export default class CartItem extends Component {
           <p>{description}</p>
         </div>
         <button onClick={()=>removeItem(cart_id, id)}>Remove Item</button>
+        <button onClick={()=>incrementItem(id, quantity)}>+</button>
+        <button onClick={()=> (quantity > 1) ? decrementItem(id, quantity) : removeItem(cart_id, id)}>-</button>
       </li>
     );
   }

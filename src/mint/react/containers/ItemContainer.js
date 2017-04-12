@@ -4,8 +4,8 @@ import { fetchDeals } from '../actions/deals';
 import { previewItem, clearItem, addItem } from '../actions/item';
 
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: state.cart.cart_id,
-  addingItem: state.cart.addingItem,
+  cart_id: state.currentCart.cart_id,
+  addingItem: state.currentCart.addingItem,
   item_id: ownProps.match.params.item_id,
   item: state.item,
   index: ownProps.match.params.index,
