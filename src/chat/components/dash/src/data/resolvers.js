@@ -34,9 +34,35 @@ import {
 
 import Menu from '../../../delivery.com/Menu';
 
+/**
+ * get the date from args if using start_date and end_date in graphql query
+ * @param  {object} args object with possible start and end dates
+ * @return {object} args object
+ */
+function getDateFromArgs(args) {
+  let dateArgs;
+  const newArgs = args;
+
+  if (newArgs.start_date || newArgs.end_date) {
+    dateArgs = {};
+  } else {
+    return newArgs;
+  }
+  if (newArgs.start_date) {
+    dateArgs.$gt = new Date(newArgs.start_date);
+    delete newArgs.start_date;
+  }
+  if (newArgs.end_date) {
+    dateArgs.$lt = new Date(newArgs.end_date);
+    delete newArgs.end_date;
+  }
+  newArgs.time_started = dateArgs;
+
+  return newArgs;
+}
 
 /**
- * prepare graphql response for query about cafe items
+ * prepare graphql response for query about delivery items
  * @param  {[type]} foodSession [description]
  * @return {[type]}             [description]
  */
@@ -50,14 +76,6 @@ function prepareCafeCarts(foodSession) {
   if (foodSession.cart.length > 0) {
     foodSession.cart_total = foodSession.calculated_amount;
     foodSession.item_count = foodSession.cart.length;
-    // foodSession.items = foodSession.cart.map((i) => {
-    //   const item = menuObj.flattenedMenu[i.item.item_id];
-    //   return {
-    //     item_name: item.name,
-    //     // either need to convert id to name here or with context in the resolver
-    //     user: i.user_id,
-    //   };
-    // });
   }
 
   return foodSession;
@@ -71,13 +89,7 @@ function prepareCafeCarts(foodSession) {
 function prepareStoreCarts(cart) {
   if (cart.amazon) {
     cart.cart_total = `$${cart.amazon.SubTotal[0].Amount / 100.0}`;
-    cart.item_count = cart.CartItems.length;
-    cart.cart_items = cart.amazon.map(item => {
-      return {
-        name: item.CartItem[0].Title,
-        category: item.CartItem[0].ProductGroup,
-      };
-    });
+    cart.item_count = cart.items.length;
   }
   return cart;
 }
@@ -140,7 +152,7 @@ async function getUserNameById(userId) {
  * @param sort - sort option for results
  */
 async function pagination(coll, args, sort) {
-  let limit = args.limit || 1;
+  let limit = args.limit || 10;
   delete args.limit;
 
   let skip = args.offset || 0;
@@ -182,6 +194,9 @@ const Resolvers = {
     items: async ({_id}) => {
       return (await Items.find({ cart_id: _id }).sort({added_date: -1}).toArray());
     },
+    team: async ({slack_id}) => {
+      return (await Slackbots.findOne({team_id: slack_id}));
+    }
   },
 
   // Chatuser: {
@@ -234,36 +249,19 @@ const Resolvers = {
 
   Query: {
     carts: async (root, args) => {
-      // time, groupname, type (?), #items, cart total, category, product name
+      args = getDateFromArgs(args);
       let res = await pagination(Carts, args);
-      res = res.map((cart) => {
-        cart = prepareStoreCarts(cart);
-        return cart;
-      })
+      res = res.map(cart => prepareStoreCarts(cart));
       return res;
     },
 
     deliveries: async (root, args, context) => {
-      let deliveryArgs = {'cart.1': {'$exists': true}};
-      if (args.start_date || args.end_date) {
-        args.time_started = {};
-        if (args.start_date) {
-          args.time_started['$gt'] = new Date(args.start_date);
-          delete args.start_date;
-        }
-        if (args.end_date) {
-          args.time_started['$lt'] = new Date(args.end_date);
-          delete args.end_date;
-        }
-      }
+      // let deliveryArgs = {'cart.1': {'$exists': true}};
+      args = getDateFromArgs(args);
 
       let res = await pagination(Deliveries, args);
 
-      res = res.map((foodSession) => {
-        // possibly other stuff related to team or whatever
-        foodSession = prepareCafeCarts(foodSession);
-        return foodSession;
-      })
+      res = res.map((foodSession) => prepareCafeCarts(foodSession));
 
       return res;
     },
