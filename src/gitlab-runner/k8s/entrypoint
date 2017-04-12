@@ -24,14 +24,14 @@ export KUBERNETES_NAMESPACE="gitlab"
 export KUBERNETES_PRIVILEGED="true"
 
 
-# # MINIO VARIABLES
-# export CACHE_TYPE="s3"
-# export S3_SERVER_ADDRESS="gitlab-cache-minio.gitlab.svc.cluster.local:9000"
-# export S3_ACCESS_KEY="DNAMPOSFN7EXAKIAIOLE"
-# export S3_SECRET_KEY="ENAMPLEKEYwG/bPxRfiCYEXJalrXUtnFEMI/K7MD"
-# export S3_BUCKET_NAME="runner"
-# export S3_CACHE_INSECURE="true"
-# export CACHE_SHARED="true"
+# MINIO VARIABLES
+export CACHE_TYPE="s3"
+export S3_SERVER_ADDRESS="gitlab-cache-minio.gitlab.svc.cluster.local:9000"
+export S3_ACCESS_KEY="DNAMPOSFN7EXAKIAIOLE"
+export S3_SECRET_KEY="ENAMPLEKEYwG/bPxRfiCYEXJalrXUtnFEMI/K7MD"
+export S3_BUCKET_NAME="runner"
+export S3_CACHE_INSECURE="true"
+export CACHE_SHARED="true"
 
 
 # gitlab-ci-multi-runner data directory
@@ -48,7 +48,7 @@ fi
 
 # set up the initial settings
 cat <<EOF > $CONFIG_FILE
-concurrent = 4
+concurrent = 2
 check_interval = 5
 
 EOF

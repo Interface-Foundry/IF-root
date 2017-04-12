@@ -10,7 +10,7 @@ spec:
   tls:
   - hosts:
     - slack.kipthis.com
-    secretName: slack-tls
+    secretName: slack-tls-prod
   backend:
     serviceName: slack
     servicePort: 80
