@@ -1,0 +1,24 @@
+@import '../../styles/Constants';
+
+.footer {
+  height: $nav-height;
+  line-height: $nav-height - $padding*2;
+  padding: $padding $padding*2;
+  font-family: 'Raleway';
+  background: $header-color;
+  color: $kip-primary-color;
+
+  button {
+  	display: inline-block;
+  	width: 45%;
+  	height: 100%;
+  	border-radius: 5px;
+  	margin: 0 auto;
+  	background: white;
+  	border: 1px solid $border-color-light;
+
+  	&:first-of-type {
+  		margin-right: 10%;
+  	}
+  }
+}
