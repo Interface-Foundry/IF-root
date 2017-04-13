@@ -10,8 +10,7 @@ export default class Cart extends Component {
     members: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
     leader: PropTypes.object,
-    items: PropTypes.arrayOf(PropTypes.object)
-      .isRequired,
+    items: PropTypes.object.isRequired,
     addingItem: PropTypes.bool.isRequired,
     history: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,
@@ -41,16 +40,8 @@ export default class Cart extends Component {
 
   render() {
     const { items, leader, members, user_accounts, history: { push, replace }, match: { url } } = this.props,
-      hasItems = items.length > 0,
-      isLeader = user_accounts[0] && leader && (leader.id === user_accounts[0].id),
-      myItems = _.reduce(items, (acc, item) => {
-        user_accounts[0] ? ( item.added_by === user_accounts[0].id ? acc.push(item) : null ) : null;
-        return acc;
-      }, []),
-      othersItems = _.reduce(items, (acc, item) => {
-        user_accounts[0] ? ( item.added_by !== user_accounts[0].id ? acc.push(item) : null ) : null;
-        return acc;
-      }, []);
+      hasItems = items.quantity > 0,
+      isLeader = user_accounts[0] && leader && (leader.id === user_accounts[0].id);
 
     return (
       <div className='cart'>
@@ -59,26 +50,23 @@ export default class Cart extends Component {
         </div>
         <DealsContainer isDropdown={false}/>
         <div className='cart__title'>
-          <h4>{ hasItems ? `${items.length} items in Group Cart` : 'Group Shopping Cart' }</h4>
+          <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
         </div>
         <div className='cart__items'>
-          <ul>
-            { 
-              myItems.length ? 
-                myItems.map((item, i) => <CartItem key={i} isOwner={true} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
-                : <li><em>Please add some products to the cart.</em></li>
-            } 
-          </ul>
-          <hr/>
-            <div> Other's items </div>
-          <hr/>
-          <ul>
-            {
-              othersItems.length ? 
-                othersItems.map((item, i) => <CartItem key={i} isOwner={isLeader} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
-                : <li><em>Nobody else has added anything yet!</em></li>
-            }
-          </ul>
+          {
+            _.map(items, (ownerArray, ownerKey) => {
+              if(ownerKey === 'quantity') return null
+
+              return <ul>
+                <div className='cart__items__title'>{ `${_.capitalize(ownerKey)} items`}</div>
+                { 
+                  ownerArray.length ? 
+                    ownerArray.map((item, i) => <CartItem key={i} isOwner={true} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
+                    : <li><em>Please add some products to the cart.</em></li>
+                } 
+              </ul>
+            })
+          }
         </div>
     </div>
     );
