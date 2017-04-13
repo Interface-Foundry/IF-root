@@ -13,9 +13,9 @@ export default class DropdownItem extends Component {
   }
 
   render() {
-    const { price, name, savePercent, asin, cart_id } = this.props;
+    const { price, name, savePercent, asin, cart_id, index } = this.props;
     return (
-      <Link to={`/cart/${cart_id}/m/item/${asin}`} className='dealcard-small'>
+      <Link to={`/cart/${cart_id}/m/deal/${index}/${asin}`} className='dealcard-small'>
         <p><em className='price'>${price.toFixed(2)} </em> {name} ({(savePercent * 100).toFixed()}% off)</p>
       </Link>
     );
