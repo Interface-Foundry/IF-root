@@ -57,7 +57,7 @@ export default class Cart extends Component {
             _.map(items, (ownerArray, ownerKey) => {
               if(ownerKey === 'quantity') return null
 
-              return <ul>
+              return <ul key={ownerKey}>
                 <div className='cart__items__title'>{ `${_.capitalize(ownerKey)} items`}</div>
                 { 
                   ownerArray.length ? 
