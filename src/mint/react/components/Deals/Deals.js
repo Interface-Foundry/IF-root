@@ -55,7 +55,7 @@ export default class Deals extends Component {
   }
 
   render() {
-    const { renderCards, delayDropDown, state: { isDropdown } } = this;
+    const { renderCards, state: { isDropdown } } = this;
 
     return (
       <div>
