@@ -14,6 +14,10 @@
   // @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
   .form {
     padding: $padding*3 $padding*2 $padding*2;
+    .deals__section {
+      padding: 10px 10px 0 10px;
+      margin: 0 -20px 0 -20px;
+    }
     label {
       display: block;
       text-align: left;
@@ -21,7 +25,7 @@
       font-size: 18px;
     }
     span {
-      color: rgba(black, 0.4);
+      display: none;
     }
     .form__input {
       height: $nav-height;

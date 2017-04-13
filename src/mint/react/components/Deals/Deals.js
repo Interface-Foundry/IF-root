@@ -31,40 +31,21 @@ export default class Deals extends Component {
   delayDropDown(stop) {
     const { props: { isDropdown } } = this;
 
-    if(stop) {
-      if(self)
-          clearTimeout(self.timeout)
-
-      clearTimeout(this.timeout)
+    if (stop) {
+      if (self) clearTimeout(self.timeout);
+      clearTimeout(this.timeout);
+    } else if (this.refs.deals) {
+      let self = this;
+      self.timeout = setTimeout(() => {
+        self.setState({
+          isDropdown: isDropdown
+        });
+        self.delayDropDown();
+      }, 100);
     } else {
-      if (this.refs.deals) { 
-        let self = this
-        self.timeout = setTimeout(() => {
-          self.setState({
-            isDropdown: isDropdown
-          })
-          self.delayDropDown()
-        }, 250);
-      } else {
-        if(self)
-          clearTimeout(self.timeout)
-
-        clearTimeout(this.timeout)
-      }
+      if (self) clearTimeout(self.timeout);
+      clearTimeout(this.timeout);
     }
-  }
-
-  render() {
-    const { renderCards, state: { isDropdown } } = this;
-
-    return (
-      <div>
-        {(isDropdown ? '' : 'Today\'s Deals')}
-        <section ref='deals' className={'deals__section' + (isDropdown ? '-small' : '')}>
-          { renderCards() }
-        </section>
-      </div>
-    );
   }
 
   renderCards() {
@@ -72,6 +53,18 @@ export default class Deals extends Component {
     let { deals, cart_id } = this.props;
     if (isDropdown) deals = deals.slice(0, 5);
 
-    return deals.map((deal, i) => <section key={i}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></section>);
+    return deals.map((deal, i) => <li key={i}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></li>);
+  }
+
+  render() {
+    const { renderCards, state: { isDropdown } } = this;
+
+    return (
+      <div>
+        <ul ref='deals' className={'deals__section' + (isDropdown ? '-small' : '')}>
+          { renderCards() }
+        </ul>
+      </div>
+    );
   }
 }
