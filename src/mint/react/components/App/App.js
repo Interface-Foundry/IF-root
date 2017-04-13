@@ -5,6 +5,7 @@ import { CartContainer } from '../../containers';
 import { Overlay, Modal } from '..';
 import Header from './Header';
 import Sidenav from './Sidenav';
+import Footer from './Footer';
 
 export default class App extends Component {
   state = {
@@ -45,7 +46,7 @@ export default class App extends Component {
 
   render() {
     const { props, state, _toggleSidenav } = this;
-    const { cart_id, newAccount, leader, carts, match, currentUser } = props;
+    const { cart_id, newAccount, leader, carts, match, currentUser, history: { replace } } = props;
     const { sidenav } = state;
 
     if (newAccount === false) {
@@ -65,6 +66,8 @@ export default class App extends Component {
           { /* Renders cart when route permits */ }
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
+
+        <Footer cart_id={cart_id} replace={replace}/>
       </section>
     );
   }

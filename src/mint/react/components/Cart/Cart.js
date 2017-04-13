@@ -25,9 +25,9 @@ export default class Cart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id } = this.props;
-    const { leader, addingItem, user_accounts } = nextProps;
-    const cartId = cart_id || nextProps.cart_id;
+    const { history: { replace }, cart_id } = this.props,
+          { leader, addingItem, user_accounts } = nextProps,
+          cartId = cart_id || nextProps.cart_id;
 
     if (cartId) {
       if (user_accounts.length === 0 && !leader) {
