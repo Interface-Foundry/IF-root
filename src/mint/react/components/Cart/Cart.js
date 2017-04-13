@@ -42,15 +42,16 @@ export default class Cart extends Component {
   render() {
     const { items, leader, members, user_accounts, history: { push, replace }, match: { url } } = this.props,
       hasItems = items.length > 0,
-      isLeader = user_accounts[0] && (leader.id === user_accounts[0].id),
-      myItems = items.reduce((acc, item) => {
-        item.added_by === user_accounts[0].id ? acc.push(item) : null;
+      isLeader = user_accounts[0] && leader && (leader.id === user_accounts[0].id),
+      myItems = _.reduce(items, (acc, item) => {
+        user_accounts[0] ? ( item.added_by === user_accounts[0].id ? acc.push(item) : null ) : null;
         return acc;
       }, []),
-      othersItems = items.reduce((acc, item) => {
-        item.added_by !== user_accounts[0].id ? acc.push(item) : null;
+      othersItems = _.reduce(items, (acc, item) => {
+        user_accounts[0] ? ( item.added_by !== user_accounts[0].id ? acc.push(item) : null ) : null;
         return acc;
       }, []);
+
     return (
       <div className='cart'>
         <div className='cart__add'>
@@ -72,11 +73,11 @@ export default class Cart extends Component {
             <div> Other's items </div>
           <hr/>
           <ul>
-          {
+            {
               othersItems.length ? 
-              othersItems.map((item, i) => <CartItem key={i} isOwner={isLeader} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
+                othersItems.map((item, i) => <CartItem key={i} isOwner={isLeader} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
                 : <li><em>Nobody else has added anything yet!</em></li>
-              }
+            }
           </ul>
         </div>
     </div>

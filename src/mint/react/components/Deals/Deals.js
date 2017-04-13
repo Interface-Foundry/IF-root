@@ -46,7 +46,10 @@ export default class Deals extends Component {
           self.delayDropDown()
         }, 250);
       } else {
-        self.delayDropDown(true)
+        if(self)
+          clearTimeout(self.timeout)
+
+        clearTimeout(this.timeout)
       }
     }
   }
