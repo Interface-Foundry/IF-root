@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import NotificationBubble from '../NotificationBubble';
 
 export default class AddAmazonItem extends Component {
@@ -23,7 +24,7 @@ export default class AddAmazonItem extends Component {
 
   render() {
     const { addItemToCart, props } = this;
-    const {numUserItems} = props;
+    const { numUserItems } = props;
     return (
       <div className='add_to_amazon'>
         Add Item to Kip Cart
