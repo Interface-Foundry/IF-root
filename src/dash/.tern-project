@@ -1,0 +1,12 @@
+{
+  "dontLoad": ["node_modules/**", "build/**", "test/**", "tools/**" ],
+  "ecmaVersion": 6,
+  "loadEagerly": ["IF-root/src/**"],
+  "libs": ["browser"],
+  "plugins": {
+    "node": {},
+    "modules": {},
+    "es_modules": {},
+    "react":{}
+  }
+}

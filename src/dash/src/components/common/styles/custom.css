@@ -1,0 +1,120 @@
+.sidebar {
+  display: flex;
+  min-width: 330px;
+}
+.page-sidebar {
+  width: 165px;
+  min-width: 0;
+  position: relative;
+  float: left;
+  margin: 0 0 0 -35px;
+}
+.react-bs-table table td, .popover-content {
+  white-space: normal;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+.sidebar-nav.navbar-collapse {
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  height: calc(100vh - 52px) !important;
+}
+.category-sidebar {
+  min-width: 170px;
+  border-right: 1px solid #e7e7e7;
+}
+.data-display {
+  display: flex;
+  padding: 10px;
+  flex-direction: column;
+  height: calc(100vh - 52px);
+}
+.resizable {
+  min-height: 150px;
+  height: 200px;
+  resize: vertical;
+  overflow: auto;
+  margin: -15px;
+  padding: 15px;
+  max-height: 700px;
+}
+.panel-body {
+  padding: 0;
+  margin: 15px;
+}
+@media (min-width:768px) {
+  #page-wrapper {
+    margin: 0 0 0 330px;
+    height: calc(100vh - 52px);
+    overflow: auto;
+    min-height: 0;
+  }
+  .fillSpace {
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
+  .table-responsive {
+    overflow-y: none;
+  }
+  .table {
+    margin-bottom: 0;
+  }
+}
+
+/**
+ * Slack Preview stuff
+ */
+.slackList {
+  list-style: none;
+}
+.slackAttachment {
+  border-left: 3px solid #45A5F4;
+  padding-left: 5px;
+  margin: 0 0 20px 0;
+}
+.slackAttachment ul > li {
+  display: inline-block;
+  border: 2px solid gray;
+  border-radius: 5px;
+  margin: 4px;
+  padding: 5px 5px 5px 5px;
+}
+.slackAttachment ul > li p {
+  margin: 0;
+}
+.slackAuthor {
+  font-size: 18px;
+  padding: 10px;
+  display: flex;
+}
+.slackUsername {
+  font-size: 18px;
+  margin: 0
+}
+.slackPreivew {
+  border: 2px solid lightgrey;
+  padding: 5px;
+  max-width: 600px;
+  border-radius: 20px;
+  margin: 20px;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: left;
+}
+.slackPreivew > img {
+  position: relative;
+  left: 10px;
+}
+.slackPreview p {
+  margin: 0;
+}
+.slackMessage {
+  margin-left: 20px;
+}
+.slackAttachments {
+  margin: 5px 0 0 -40px;
+}
+.slackAttachment ul {
+  padding: 0px;
+}
