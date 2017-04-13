@@ -1,7 +1,6 @@
 var _ = require('lodash')
 var phone = require('phone')
 var request = require('request-promise')
-var validator = require('isemail')
 var co = require('co')
 
 var coupon = require('../../../coupon/couponUsing.js')
@@ -29,7 +28,7 @@ handlers['food.admin.order.checkout.address2'] = function * (message) {
   db.waypoints.log(1310, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var response = {
-    'title': `Whats your apartment or floor number at ${foodSession.chosen_location.address_1}`,
+    'title': `What's your apartment or floor number at ${foodSession.chosen_location.address_1}`,
     'text': `Type your apartment or floor number below`,
     'fallback': 'Type your apartment or floor number below',
     'callback_id': `admin_order_checkout_address2`,
@@ -56,9 +55,9 @@ handlers['food.admin.order.checkout.name'] = function * (message) {
   db.waypoints.log(1311, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var response = {
-    'text': `Hey ${foodSession.convo_initiater.name} what's the full name of the person who will be receiving this order\n` +
-            `>Type their name below`,
-    'fallback': `Hey ${foodSession.convo_initiater.name} what's the full name of the person who will be receiving this order\n` +
+    'text': `What's the full name of the person who will be receiving this order\n` +
+            `>Type their name below (example: _Jane Doe_)`,
+    'fallback': `What's the full name of the person who will be receiving this order\n` +
             `>Type their name below`,
     'callback_id': 'food.admin.order.checkout.name'
   }
@@ -86,6 +85,7 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
 }
 
 handlers['food.admin.order.checkout.confirm'] = function * (message) {
+
   logging.debug('food.admin.order.checkout.confirm, team_id: %s', message.source.team)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
@@ -104,7 +104,9 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   db.waypoints.log(1320, foodSession._id, message.user_id, {original_text: message.original_text})
 
   var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(2).exec()
-  prevMessage = prevMessage[1]
+
+  prevMessage = prevMessage[0]
+
   if (_.get(prevMessage, 'reply')) {
     logging.info('prevMessage.reply', prevMessage.reply)
   }
@@ -125,6 +127,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   editInfo['admin.order.checkout.name'] = function * (message) {
+
     db.waypoints.log(1322, foodSession._id, message.user_id, {original_text: message.original_text})
 
     if (!_.get(message, 'text')) {
@@ -132,14 +135,16 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       return yield handlers['food.admin.order.checkout.name'](message)
     }
     logging.info('saving name of person receiving order: ', message.text)
+
     if (message.text.split(' ').length > 1) {
       foodSession.convo_initiater.first_name = message.text.split(' ')[0]
       foodSession.convo_initiater.last_name = message.text.split(' ')[1]
+
       foodSession.markModified('convo_initiater')
       yield foodSession.save()
     } else {
       // throw error in replyChannel
-      $replyChannel.sendReplace(message, 'food.admin.order.checkout.confirm', {type: message.origin, data: {text: 'hmm there was an issue, can you redo that?'}})
+      $replyChannel.sendReplace(message, 'food.admin.order.checkout.confirm', {type: message.origin, data: {text: 'Hmm please try tying a first and last name'}})
       return
     }
   }
@@ -172,7 +177,6 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   if (!foodSession.chosen_location.address_2) {
-    console.log('NO ADDRESS DETAILS :(')
     return yield handlers['food.admin.order.checkout.address2'](message)
   }
   if (!foodSession.convo_initiater.last_name) {
@@ -378,7 +382,10 @@ handlers['food.admin.order.checkout.email.submit'] = function * (message) {
   // db.waypoints.log(1301, foodSession._id, message.user_id, {original_text: message.original_text})
   var email = (message.text ? message.text.split('|') : '')
   if (email.length > 1) email = email[1].split('>')[0]
-  var valid = validator.validate(email)
+  
+  //using local validate function
+  var valid = validateEmail(email)
+
   if (!valid) {
     // not a valid email
     yield $replyChannel.send(
@@ -890,6 +897,13 @@ handlers['food.previous_credit_card.success'] = function * (guestToken) {
     data: {'text': 'Previously used card worked!'}
   })
   yield handlers['food.done'](lastMsg)
+}
+
+//alyx moved this out of the validate (isemail npm package) because that package was broken.
+function validateEmail(email) {
+    //regex with latest validation standards via: http://stackoverflow.com/a/38137215/665082
+    var re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+[^<>()\.,;:\s@\"]{2,})$/;
+    return re.test(email);
 }
 
 module.exports = function (replyChannel, allHandlers) {
