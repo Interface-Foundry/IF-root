@@ -4,22 +4,25 @@ import {
   IoNaviconRound,
   IoClose,
   IoChevronUp,
-  IoEdit
+  IoEdit,
+  IoPricetag
 } from 'react-icons/lib/io';
 
 export default class Icon extends Component {
   render() {
     switch (this.props.icon) {
-      case 'Hamburger':
-        return <IoNaviconRound/>;
-      case 'Email':
-        return <IoEmail/>;
-      case 'Clear':
-        return <IoClose/>;
-      case 'Up':
-        return <IoChevronUp/>;
-      case 'Edit':
-        return <IoEdit/>;
+    case 'Hamburger':
+      return <IoNaviconRound/>;
+    case 'Email':
+      return <IoEmail/>;
+    case 'Clear':
+      return <IoClose/>;
+    case 'Up':
+      return <IoChevronUp/>;
+    case 'Edit':
+      return <IoEdit/>;
+    case 'PriceTag':
+      return <IoPricetag/>
     }
   }
 }
