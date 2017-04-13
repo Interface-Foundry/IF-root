@@ -13,17 +13,9 @@ import App from '../components/App';
 // Child routes
 import home from './home';
 import login from './login';
-import team from './dashboardPages/team'
-import table from './dashboardPages/tables';
-import button from './dashboardPages/buttons';
+import team from './dashboardPages/team';
 import slackteamstats from './dashboardPages/slackteamstats';
 import sessions from './dashboardPages/sessions';
-import grid from './dashboardPages/grid';
-import icons from './dashboardPages/icons';
-import morrisjscharts from './dashboardPages/morrisjsCharts';
-import notification from './dashboardPages/notification';
-import panelwells from './dashboardPages/panelWells';
-import typography from './dashboardPages/typography';
 import sendMessage from './dashboardPages/sendMessage';
 import blank from './dashboardPages/blank';
 import amazoncsv from './dashboardPages/amazoncsv'
@@ -54,17 +46,7 @@ export default [
   // keep in mind, routes are evaluated in order
     children: [
       home,
-      // contact,
-      table,
-      button,
       slackteamstats,
-      grid,
-      icons,
-      morrisjscharts,
-      notification,
-      panelwells,
-      typography,
-      // register,
       amazoncsv,
       blank,
       sessions,
