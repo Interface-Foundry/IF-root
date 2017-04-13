@@ -61,3 +61,20 @@ export default function cart(state = initialState, action) {
 
 // Selector
 export const getMemberById = (state, props) => [...state.members, state.leader].find(member => member.id === props.id);
+
+export const splitCartById = (state, props) => _.reduce(state.currentCart.items, (acc, item) => {
+  acc.quantity = acc.quantity + 1
+
+  if (props.id === item.added_by) {
+    acc['my'].push(item)
+  } else {
+    acc['others'].push(item)
+  }
+
+  return acc
+}, {
+  my: [],
+  others: [],
+  quantity: 0
+})
+

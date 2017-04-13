@@ -17,6 +17,14 @@ $cart__add-height: $nav-height+$padding;
     overflow-y: visable;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
+
+    .cart__items__title {
+      height: $nav-height;
+      line-height: $nav-height;
+      padding: 0 $padding*2;
+      border-top: 1px solid $border-color-light;
+      border-bottom: 2px solid $border-color-light;
+    }
   }
   .cartswitcher__cart {
     font-size: 14px;

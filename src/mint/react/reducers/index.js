@@ -25,6 +25,6 @@ from './session';
 
 export {
   getMemberById,
-  getItemById
+  splitCartById
 }
 from './currentCart';
