@@ -8,8 +8,8 @@ import {
 import s from './Home.css';
 import StatWidget from '../../components/Widget';
 import Donut from '../../components/Donut';
-import CartTable from '../../components/CartTable';
-import DeliveryTable from '../../components/DeliveryTable';
+import CartTable from '../../components/Table/CartTable';
+import DeliveryTable from '../../components/Table/DeliveryTable';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 
@@ -18,30 +18,6 @@ import {
   XAxis, YAxis, Area,
   CartesianGrid, AreaChart, Bar, BarChart,
   ResponsiveContainer, LineChart, Line } from '../../vendor/recharts';
-
-
-/************************************************
-    ┏━┳━┳┓┏┳━┳┓┏━┓┏━┳━┳━━┳━┓
-    ┃━┫╻┃ ┗┛┃┃┃┃┃━┫┃┃┃╻┣ ┓┏┫╻┃
-    ┣━┃╻┃ ┃┃┃┏┫┗┫━┫┃┃┃╻┃ ┃┃┃╻┃
-    ┗━┻┻┻┻┻┻┛┗━┻━┛┗━┻┻┛┗┛┗┻┛
-************************************************/
-
-// const data = [
-//   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400, value: 600 },
-//   { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, value: 300 },
-//   { name: 'Page C', uv: 2000, pv: 9800, amt: 2290, value: 500 },
-//   { name: 'Page D', uv: 2780, pv: 3908, amt: 2000, value: 400 },
-//   { name: 'Page E', uv: 1890, pv: 4800, amt: 2181, value: 200 },
-//   { name: 'Page F', uv: 2390, pv: 3800, amt: 2500, value: 700 },
-//   { name: 'Page G', uv: 3490, pv: 4300, amt: 2100, value: 100 },
-// ];
-
-
-/* *********************************************** */
-
-
-
 
 
 class Home extends Component {
@@ -58,7 +34,7 @@ class Home extends Component {
     this.renderDeliveryTable = this.renderDeliveryTable.bind(this);
     this.changeCart = this.changeCart.bind(this);
   }
-  
+
 
 
   changeStart(date){
@@ -74,50 +50,51 @@ class Home extends Component {
   }
 
   changeCart(cart){
-    this.setState({ 
-      view: cart 
+    this.setState({
+      view: cart
     })
   }
+
 
   renderCartTable(startDate, endDate){
     //console.log(new Date(startDate),new Date(endDate));
     //console.log(this.props);
     return (
       <Panel className='fillSpace' header={<span><i className="fa fa-fw"/> Purchased Store Carts from {new Date(startDate).toLocaleDateString()} to {new Date(endDate).toLocaleDateString()}</span>}>
-      
-        <CartTable 
+
+        <CartTable
                 start = {startDate}
                 end = {endDate}
                 data = {this.props.data}
                 heads = {
-                  [{ 
+                  [{
                     field: 'created_date',
                     descrip: 'Created Date',
                     allowSort: true,
-                    sort: (a, b, order) => order == 'desc' ? 
-                        new Date(b.created_date) - new Date(a.created_date) 
+                    sort: (a, b, order) => order == 'desc' ?
+                        new Date(b.created_date) - new Date(a.created_date)
                         : new Date(a.created_date) - new Date(b.created_date)
                   },
                   {
                     field: 'purchased_date',
                     descrip: 'Purchased Date',
                     allowSort: true,
-                    sort: (a, b, order) => order == 'desc' ? 
-                        new Date(b.purchased_date) - new Date(a.purchased_date) 
+                    sort: (a, b, order) => order == 'desc' ?
+                        new Date(b.purchased_date) - new Date(a.purchased_date)
                         : new Date(a.purchased_date) - new Date(b.purchased_date)
-                  }, 
+                  },
                   {
                     field: 'team_name',
                     descrip: 'Slack ID'
-                  }, 
+                  },
                   {
                     field:'cart_total',
                     descrip: 'Cart Total'
-                  }, 
+                  },
                   {
                     field: 'items',
                     descrip: 'Cart Size'
-                  }, 
+                  },
                   {
                     field: 'category',
                     descrip: 'Category'
@@ -136,7 +113,7 @@ class Home extends Component {
                   }]
                 }
                 process = {
-                  (teams, team) => 
+                  (teams, team) =>
                   teams.concat(
                     team.carts.reduce((carts, cart) => {
                         if(cart.amazon && cart.amazon.CartItems){
@@ -175,28 +152,29 @@ class Home extends Component {
 
   }
 
+
   renderDeliveryTable(startDate, endDate){
-    return(
+    return (
 
       <Panel header={<span><i className="fa fa-table fa-fw" /> Purchased Cafe Carts from {new Date(startDate).toLocaleDateString()} to {new Date(endDate).toLocaleDateString()}</span>}>
-      
-        <DeliveryTable 
+
+        <DeliveryTable
                 start = {startDate}
                 end = {endDate}
                 data = {this.props.data}
                 heads = {
-                  [{ 
+                  [{
                     field: 'created_date',
                     descrip: 'Created Date',
                   },
                   {
                     field: 'team_name',
                     descrip: 'Slack ID'
-                  }, 
+                  },
                   {
                     field:'cart_total',
                     descrip: 'Cart Total'
-                  }, 
+                  },
                   {
                     field:'restaurant',
                     descrip: 'Restaurant'
@@ -232,23 +210,22 @@ class Home extends Component {
                               })
                           })
                         }
-                      
+
                       return deliveries;
                     }
 
-                  
-                }
-        /> 
 
-    </Panel>
-  )
+                }
+        />
+      </Panel>
+    )
   }
 
   renderCartsLineGraph(data){
     var dataPlot = [];   //name:time_range #carts, #teams, and #items
-    var weekRanges=[]; 
+    var weekRanges=[];
     //console.log(data.data.deliveries);
-    
+
     for(var i = 0; i<10; i++){
       weekRanges.push({index: i, startDate: new Date(moment().subtract(10-i, 'week')),endDate: new Date(moment().subtract(9-i, 'week')), numCarts:0,teams:[],numItems:0});
     }
@@ -263,15 +240,19 @@ class Home extends Component {
           week.teams.push(delivery.team_id);
         }
       }
+<<<<<<< HEAD
       
       
+=======
+
+>>>>>>> moving table components
     })
 
     for(var i=0;i<10;i++){
       var currentWeek = weekRanges.find((x) => x.index==i);
       dataPlot.push({name: currentWeek.endDate.toLocaleDateString(), numCarts: currentWeek.numCarts, numItems: currentWeek.numItems, numTeams: currentWeek.teams.length})
     }
-    
+
     return(
       <Panel
         header={<span><i className="fa fa-line-chart " />Purchased Carts</span>}>
@@ -309,7 +290,7 @@ class Home extends Component {
             </Button>
           </ButtonToolbar>
           <div>
-              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />    
+              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
           <div className="panel panel-default">
@@ -321,37 +302,6 @@ class Home extends Component {
     )
   }
 
-  /*
-  render(){
-    var self = this;
-    return (
-      <div>
-        <div>
-            {self.renderCartsLineGraph(this.props.data)}
-        </div>
-        <div className="container-fluid data-display">
-          <ButtonToolbar>
-            <Button onClick={ ()=> self.changeCart('Store')}>
-              Store
-            </Button>
-            <Button onClick={ ()=> self.changeCart('Cafe')}>
-              Cafe
-            </Button>
-          </ButtonToolbar>
-          <div>
-              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />    
-              End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
-          </div>
-            <div className="panel panel-default">
-              { self.state.view=='Store' ? self.renderCartTable(self.state.startDate, self.state.endDate) : self.renderDeliveryTable(self.state.startDate, self.state.endDate) }
-            </div>
-        </div>
-      </div>
-
-    )
-  }
-  */
-  
 }
 
 export default Home;

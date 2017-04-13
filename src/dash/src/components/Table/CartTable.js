@@ -3,8 +3,7 @@ import React, {
   PropTypes
 } from 'react';
 import {Panel} from 'react-bootstrap';
-import Table from '../Table';
-import fetch from '../../core/fetch';
+import Table from './common';
 import co from 'co';
 
 class CartTable extends Component {

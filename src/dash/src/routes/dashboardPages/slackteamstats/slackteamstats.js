@@ -12,7 +12,7 @@ import {
   DropdownButton,
   ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger
 } from 'react-bootstrap';
-import Table from '../../../components/Table';
+import Table from '../../../components/Table/common';
 import vagueTime from 'vague-time';
 import _ from 'lodash';
 
@@ -20,7 +20,6 @@ const title = ' Team Stats';
 
 
 const COLORS = ['#FF0000', '#FF8888', '#0000FF', '#8888FF'];
-
 
 
 function sumStoreTeamOrders(teams){

@@ -9,7 +9,7 @@ import {
   DropdownButton, Button,ButtonToolbar,
   ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger,
 } from 'react-bootstrap';
-import Table from '../../../components/Table';
+import Table from '../../../components/Table/common';
 import vagueTime from 'vague-time';
 import _ from 'lodash';
 import * as cafe_waypoints from '../../../../../chat/components/delivery.com/cafe_waypoints.js';

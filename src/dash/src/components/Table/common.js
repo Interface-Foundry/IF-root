@@ -14,7 +14,7 @@ class CustomTable extends Component {
 
   componentDidMount() {
     var self = this;
-    
+
   }
 
   createTableHeaders(heads) {

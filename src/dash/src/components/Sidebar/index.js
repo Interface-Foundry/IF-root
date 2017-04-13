@@ -42,8 +42,8 @@ class Sidebar extends Component {
                 <i className="fa fa fa-comments-o fa-fw" /> &nbsp; Send Message
               </a>
             </li>
-           
-           
+
+
 
             <li className={classNames({ active: !this.state.samplePagesCollapsed })}>
               <a
@@ -92,125 +92,5 @@ class Sidebar extends Component {
     );
   }
 }
-
- // <li className={classNames({ active: !this.state.uiElementsCollapsed })}>
- //              <a
- //                href=""
- //                onClick={(e) => {
- //                  e.preventDefault();
- //                  this.setState({ uiElementsCollapsed: !this.state.uiElementsCollapsed,
- //                }); return false;
- //                }}
- //              >
- //                <i className="fa fa-edit fa-fw" /> UI Elements<span className="fa arrow" />
- //              </a>
-
- //              <ul
- //                className={classNames({
- //                  'nav nav-second-level': true,
- //                  collapse: this.state.uiElementsCollapsed,
- //                })}
- //              >
- //                <li>
- //                  <a href="" onClick={(e) => { e.preventDefault(); history.push('/panelwells'); }} >
- //                    Slack Team Stats
- //                  </a>
- //                </li>
- //                <li>
- //                  <a href="" onClick={(e) => { e.preventDefault(); history.push('/button'); }} >
- //                    Buttons
- //                  </a>
- //                </li>
- //                <li>
- //                  <a
- //                    href=""
- //                    onClick={(e) => { e.preventDefault(); history.push('/notification'); }}
- //                  >
- //                    Notification
- //                  </a>
- //                </li>
- //                <li>
- //                  <a href="" onClick={(e) => { e.preventDefault(); history.push('/typography'); }} >
- //                    Typography
- //                  </a>
- //                </li>
- //                <li>
- //                  <a href="" onClick={(e) => { e.preventDefault(); history.push('/icons'); }} >
- //                    Icons
- //                  </a>
- //                </li>
- //                <li>
- //                  <a href="" onClick={(e) => { e.preventDefault(); history.push('/grid'); }} >
- //                    Grid
- //                  </a>
- //                </li>
- //              </ul>
- //            </li>
-
-
-
- // <li className={classNames({ active: !this.state.multiLevelDropdownCollapsed })}>
- //              <a
- //                href=""
- //                onClick={(e) => {
- //                  e.preventDefault();
- //                  this.setState({
- //                    multiLevelDropdownCollapsed: !this.state.multiLevelDropdownCollapsed,
- //                  });
- //                  return false;
- //                }}
- //              >
- //                <i className="fa fa-sitemap fa-fw" />
- //                &nbsp;Multi-Level Dropdown
- //                <span className="fa arrow" />
- //              </a>
- //              <ul
- //                className={
- //                  classNames({
- //                    'nav nav-second-level': true, collapse: this.state.multiLevelDropdownCollapsed,
- //                  })}
- //              >
- //                <li>
- //                  <a href="" onClick={(e) => { e.preventDefault(); }}>Second Level Item</a>
- //                </li>
- //                <li>
- //                  <a href="" onClick={(e) => { e.preventDefault(); }}>Second Level Item</a>
- //                </li>
- //                <li className={classNames({ active: !this.state.thirdLevelDropdownCollapsed })}>
- //                  <a
- //                    href=""
- //                    onClick={(e) => {
- //                      e.preventDefault();
- //                      this.setState({
- //                        thirdLevelDropdownCollapsed: !this.state.thirdLevelDropdownCollapsed,
- //                      });
- //                      return false;
- //                    }}
- //                  >
- //                    Third Level<span className="fa arrow" />
- //                  </a>
- //                  <ul
- //                    className={
- //                      classNames({
- //                        'nav nav-second-level': true,
- //                        collapse: this.state.thirdLevelDropdownCollapsed,
- //                      })}
- //                  >
- //                    <li>
- //                      <a href="" onClick={(e) => { e.preventDefault(); }}>Third Level Item</a>
- //                    </li>
- //                    <li>
- //                      <a href="" onClick={(e) => { e.preventDefault(); }}>Third Level Item</a>
- //                    </li>
- //                    <li>
- //                      <a href="" onClick={(e) => { e.preventDefault(); }}>Third Level Item</a>
- //                    </li>
- //                    <li>
- //                      <a href="" onClick={(e) => { e.preventDefault(); }}>Third Level Item</a>
- //                    </li>
- //                  </ul>
- //                </li>
- //              </ul>
- //            </li>
 
 export default Sidebar;
