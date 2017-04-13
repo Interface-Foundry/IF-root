@@ -10,8 +10,6 @@
   right: 0;
   text-align: center;
   overflow: hidden;
-  // @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
-  // @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
   .form {
     padding: $padding*3 $padding*2 $padding*2;
     .deals__section {

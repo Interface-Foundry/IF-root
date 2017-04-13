@@ -1,21 +1,23 @@
-import React, { PropTypes, Component } from 'react';
-import {Link} from 'react-router-dom'
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { getNameFromEmail } from '../../utils';
 import { Icon } from '..';
-
 
 export default class Sidenav extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
     leader: PropTypes.object,
-    carts: PropTypes.arrayOf(PropTypes.object)
+    carts: PropTypes.arrayOf(PropTypes.object),
+    _toggleSidenav: PropTypes.func.isRequired,
+    currentUser: PropTypes.object.isRequired
   }
 
   render() {
-    const { leader, carts, _toggleSidenav, currentUser } = this.props,
-          leaderCarts = _.filter(carts, (c) => c.leader.email_address === currentUser.email_address),
-          memberCarts = _.filter(carts, (c) => c.leader.email_address !== currentUser.email_address);
-    
+    const { carts, _toggleSidenav, currentUser } = this.props,
+      leaderCarts = _.filter(carts, (c) => c.leader.email_address === currentUser.email_address),
+      memberCarts = _.filter(carts, (c) => c.leader.email_address !== currentUser.email_address);
+
     return (
       <div className='sidenav'>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
