@@ -1,5 +1,5 @@
 @import '../../styles/Constants';
-$item__view-height: calc(100% - #{$nav-height*2});
+$item__view-height: calc(100% - #{$nav-height});
 .item {
   height: 100%;
   .item__view {
