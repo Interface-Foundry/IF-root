@@ -27,6 +27,7 @@ export default class App extends Component {
 
   componentWillMount() {
     const { fetchCart, fetchAllCarts, cart_id } = this.props;
+    
     if (cart_id) fetchCart(cart_id);
     fetchAllCarts();
   }

@@ -20,7 +20,7 @@ export default class Footer extends Component {
             url: 'cart.kipthis.com/URL'
         }).then(() => console.log('Successful share'))
         .catch(error => console.log('Error sharing:', error));       
-    }else {
+    } else {
       replace(`/cart/${cart_id}/m/share`)
     }
   }
