@@ -1,0 +1,96 @@
+@import '../../styles/Constants';
+
+.share {
+	position: relative;
+	height: calc(100% - #{$nav-height});
+	width: 100%;
+
+	.share__message {
+		height: 40%;
+		width: 100%;
+		border-bottom: 1px solid $border-color-light;
+		padding: $padding*2;
+
+		.share__message__imageText {
+			height: 60%;
+			width: 100%;
+
+			.image {
+				height: 100%;
+				width: 40%;
+				display: inline-block;
+			}
+			p {
+				height: 100%;
+				width: 60%;
+				padding: $padding*3 0;
+				display: inline-block;
+			}
+		}
+
+		.share__message__copy {
+			height: 40%;
+			width: 100%;
+			padding: $padding*2;
+
+			.share__message__copy__input {
+				height: $nav-height;
+				line-height: $nav-height;
+				width: 100%;
+				border: 2px solid $border-color-light;
+				padding: 0 0 0 $padding;
+
+				input {
+					display: inline-block;
+					height: 100%;
+					width: calc(100% - #{$nav-height});
+					overflow: hidden;
+					background: transparent;
+					border: 0;
+					text-overflow: ellipsis;
+				}
+
+				button {
+					cursor: pointer;
+					height: $nav-height - 4px;
+					line-height: $nav-height - 4px;
+					display: inline-block;
+					width: $nav-height;
+					padding: $padding/2;
+					margin: 0;
+					border: 0;
+					background: transparent;
+
+					p {
+						width: 100%;
+						height: $nav-height - 4px - $padding;
+						line-height: $nav-height - 4px - $padding;
+						border: 1px solid $border-color-light;
+						background: #eae7e4;
+					}
+				}
+			}
+		}
+	}
+	.share__icons {
+		height: 60%;
+		width: 100%;
+		padding: $padding*2;
+
+		.share__icons__icon {
+			position: relative;
+			display: inline-block;
+			width: 33%;
+			height: $nav-height+$padding*5;
+			padding: $padding*5 0 0;
+			svg {
+				width: 100%;
+				height: 100%;
+				padding: 0 0 $padding;
+			}
+			label {
+				font-size: 13px;
+			}
+		}
+	}
+}
