@@ -126,7 +126,6 @@ async function loadUsersByUserId(userIds) {
 
 async function getUserNameById(userId) {
   var user = await Chatusers.findOne({ id: userId }, { name: 1, _id:0 });
-  console.log(user)
   return user;
 }
 
@@ -211,9 +210,10 @@ const Resolvers = {
     members: async ({ team_id }) => {
       return (await Chatusers.find({ team_id: team_id }).toArray());
     },
-  //   carts: async ({team_id}) => {
-  //     return (await Carts.find({ slack_id: team_id }).toArray());
-  //   },
+    carts: async ({team_id}) => {
+      let carts = await Carts.find({ slack_id: team_id }).toArray();
+      return carts;
+    },
     deliveries: async({team_id}) => {
       let deliveries = await Deliveries.find({ team_id: team_id }).toArray();
       return deliveries;
@@ -238,20 +238,17 @@ const Resolvers = {
 
   Query: {
     carts: async (root, args) => {
-      args = getDateFromArgs(args);
-      let res = await pagination(Carts, args);
+      const newArgs = getDateFromArgs(args);
+      let res = await pagination(Carts, newArgs);
       res = res.map(cart => prepareStoreCarts(cart));
       return res;
     },
 
     deliveries: async (root, args, context) => {
       // let deliveryArgs = {'cart.1': {'$exists': true}};
-      args = getDateFromArgs(args);
-
-      let res = await pagination(Deliveries, args);
-
+      const newArgs = getDateFromArgs(args);
+      let res = await pagination(Deliveries, newArgs);
       res = res.map((foodSession) => prepareCafeCarts(foodSession));
-
       return res;
     },
 
@@ -268,9 +265,7 @@ const Resolvers = {
     },
 
     teams: async (root, args) => {
-      console.time('teams');
       let teams = await pagination(Slackbots, args);
-      console.timeEnd('teams');
       return teams
     },
 

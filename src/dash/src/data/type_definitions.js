@@ -188,6 +188,7 @@ type Slackbot {
   p2p: Boolean
   used_coupons: String
   # Foreign refs
+  carts: [Cart]
   members: [Chatuser]
   deliveries: [Delivery]
 }
