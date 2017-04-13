@@ -5,7 +5,8 @@ import { selectItem } from '../actions/cart';
 import { removeItem, incrementItem, decrementItem } from '../actions/item';
 import { splitCartById } from '../reducers';
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = (state, ownProps) => {
+  return{
   cart_id: state.currentCart.cart_id,
   addingItem: state.currentCart.addingItem,
   leader: state.currentCart.leader,
@@ -13,7 +14,7 @@ const mapStateToProps = (state, ownProps) => ({
   user_accounts: state.session.user_accounts,
   items: splitCartById(state, state.session.user_accounts[0]),
   carts: state.otherCarts.carts
-});
+}};
 
 const mapDispatchToProps = dispatch => ({
   fetchDeals: () => dispatch(fetchDeals()),

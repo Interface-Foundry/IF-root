@@ -17,3 +17,26 @@ export const getNameFromEmail = email => {
 
   return 'No valid email';
 };
+
+
+export const addLinkToDeepLink = (items, link) => {
+  return _.map(items, (i, index) => {
+    if(!i.deepLink) return i
+
+    return {...i, deepLink: formatLinkForApp(i, link)}
+  })
+}
+
+const formatLinkForApp = (app, link) => {
+  switch (app.icon) {
+    case 'FacebookMessenger':
+      return app.deepLink.replace('link=', `link=${link}`);
+    case 'Whatsapp':
+      return app.deepLink.replace('text=', `text=${link}`);
+    case 'Sms':
+    case 'Gmail':
+      return app.deepLink.replace('body=', `body=${link}`);
+    default:
+      return app.deepLink;
+  }
+}
