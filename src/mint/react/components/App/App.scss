@@ -30,6 +30,12 @@ html {
   overflow: auto;
 }
 
+.app__view {
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  height: calc(100% - #{$nav-height})
+}
+
 .image {
   background-repeat: no-repeat;
   background-position: center;

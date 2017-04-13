@@ -10,12 +10,11 @@
   height: 100%;
   width: 100%;
   background: white;
-  color: #bbb;
+  color: rgb(114,114,114);
   border: 2px dashed $color-blue;
   cursor: text;
   text-align: left;
   font-size: $input-font-size;
   height: 50px;
-  line-height: 49px;
   padding: 0 $padding;
 }

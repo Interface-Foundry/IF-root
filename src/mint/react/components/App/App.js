@@ -58,11 +58,13 @@ export default class App extends Component {
         <Header {...props}  _toggleSidenav={ _toggleSidenav} />
         { sidenav ? <Sidenav cart_id={cart_id} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser}/> : null }
 
-        { /* Renders modal when route permits */ }
-        <Route path={`${match.url}/m/`} component={Modal} />
+        <div className='app__view'>
+          { /* Renders modal when route permits */ }
+          <Route path={`${match.url}/m/`} component={Modal} />
 
-        { /* Renders cart when route permits */ }
-        <Route path={`${match.url}`} exact component={CartContainer} />
+          { /* Renders cart when route permits */ }
+          <Route path={`${match.url}`} exact component={CartContainer} />
+        </div>
       </section>
     );
   }
