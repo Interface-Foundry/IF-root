@@ -83,6 +83,29 @@ class Session extends Component {
     })
   }
 
+  componentWillReceiveProps(nextProps){
+    var self = this;
+    var rows = [];
+    var waypoints = nextProps.waypoints;
+    var teamWaypoints = nextProps.teamId ? waypoints.filter(function(waypoint){
+        return waypoint.user ? waypoint.user.team.team_id == nextProps.teamId : false;
+    }) : waypoints;
+
+    var waypointPaths = self.getWaypointPaths(teamWaypoints);
+    for (var i = 0; i < waypointPaths.length; i++) {
+      var teamName = waypointPaths[i].team_name;
+      rows.push({time_stamp: new Date(waypointPaths[i].time_stamp.split('.')[0]).toLocaleString(), time_stamp_end: new Date(waypointPaths[i].time_stamp_end.split('.')[0]).toLocaleString(), user_id: waypointPaths[i].user_id, team_name: teamName, actions: self.getWaypointActions(waypointPaths[i])})
+
+    }
+    var currentTeam = nextProps.teamName ? nextProps.teamName : 'All Team';
+
+      self.setState({
+        view: 'Store',
+        currentTeam: currentTeam,
+        rows: rows,
+      })
+  }
+
   componentDidMount() {
     var self = this;
     var rows = [];

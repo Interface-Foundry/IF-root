@@ -256,11 +256,14 @@ class Home extends Component {
       var week = weekRanges.find(function(w){
         return new Date(delivery.time_started) > new Date(w.startDate) && new Date(delivery.time_started) <= new Date(w.endDate);
       });
-      week.numCarts++;
-      week.numItems += delivery.item_count;
-      if(week.teams.length<1 || !week.teams.includes(delivery.team_id)) {
-        week.teams.push(delivery.team_id);
+      if(week){
+        week.numCarts++;
+        week.numItems += delivery.item_count;
+        if(week.teams.length<1 || !week.teams.includes(delivery.team_id)) {
+          week.teams.push(delivery.team_id);
+        }
       }
+      
       
     })
 
