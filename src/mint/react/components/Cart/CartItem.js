@@ -19,7 +19,6 @@ export default class CartItem extends Component {
     leader: PropTypes.object.isRequired,
     members: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
-    push: PropTypes.func.isRequired,
     itemNumber: PropTypes.number.isRequired,
     cart_id: PropTypes.string.isRequired,
     removeItem: PropTypes.func.isRequired,
