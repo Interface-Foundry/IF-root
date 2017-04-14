@@ -14,7 +14,7 @@ var _ = require('lodash')
  */
 function Menu (data,localTime) {
   if (!(this instanceof Menu)) {
-    return new Menu(data)
+    return new Menu(data,localTime)
   }
 
   this._data = data
@@ -70,11 +70,13 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
 
 // turns the menu into a single object with keys as item ids
 function flattenMenu (data,localTime) {
-
-  console.log('FOUDN LCOAL TIME ',localTime)
   var out = {}
   var schedules = data.schedule
-  var now = new Date()
+  if (localTime){
+    var now = localTime
+  }else {
+    var now = new Date()
+  }
   function flatten (node, out) {
 
     if (node.type === 'menu' && _.get(node, 'schedule[0]')) {
