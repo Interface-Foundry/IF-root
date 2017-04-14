@@ -12,14 +12,14 @@ var _ = require('lodash')
  * @class
  * @param {Object} data the menu document returnd by the delivery.com api
  */
-function Menu (data) {
+function Menu (data,localTime) {
   if (!(this instanceof Menu)) {
     return new Menu(data)
   }
 
   this._data = data
 
-  this.flattenedMenu = flattenMenu(data)
+  this.flattenedMenu = flattenMenu(data,localTime)
 }
 
 // an array of all the items, aka top-level things you can add to your cart
@@ -69,11 +69,14 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
 }
 
 // turns the menu into a single object with keys as item ids
-function flattenMenu (data) {
+function flattenMenu (data,localTime) {
+
+  console.log('FOUDN LCOAL TIME ',localTime)
   var out = {}
   var schedules = data.schedule
   var now = new Date()
   function flatten (node, out) {
+
     if (node.type === 'menu' && _.get(node, 'schedule[0]')) {
       var isAvailable = false
       node.schedule.map(id => _.find(schedules, {id: id}))[0].times.map(t => {

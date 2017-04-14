@@ -1,5 +1,6 @@
-var request = require('request-promise');
 var _ = require('lodash');
+var moment = require('moment-timezone')
+let request = require("co-request");
 
 var config = require('../../../config')
 var Menu = require('./Menu')
@@ -310,6 +311,40 @@ utils.cuisineEmoji = function (cuisine) {
             e = '🍳'
     }
     return e
+}
+
+/**
+* Gets the local time based on lat long coordinates 
+* @param location {object} the chosen_location for ordering food, user delivery address
+* @returns date {object} for user local time
+*/
+utils.getLocalTime = function * (location) {
+  //use lat long to get time  
+  if(location && location.latitude && location.longitude){
+    var k = 'AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho' //google api key
+    var t = Math.floor( Date.now() / 1000 ) 
+    var q = 'https://maps.googleapis.com/maps/api/timezone/json?location='+location.latitude+','+location.longitude+'&timestamp='+t+'&key='+k 
+
+    console.log('QUERY ',q)
+    let result = yield request(q)
+
+    if(!result.body){
+        return new Date()
+    }
+    let body = result.body
+
+    console.log('BODY1 ',body)
+
+    if(!body.timeZoneId){
+        return new Date()
+    }
+    console.log('BODY ',body)
+    console.log('MOMENT ',moment().tz(body.timeZoneId).format())
+    return moment().tz(body.timeZoneId).format()
+
+  }else {
+    return new Date()
+  }
 }
 
 module.exports = utils;
