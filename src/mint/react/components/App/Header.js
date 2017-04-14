@@ -30,16 +30,18 @@ class CartHead extends Component {
   }
 
   render() {
-    const { leader, _toggleSidenav } = this.props;
+    const { leader, _toggleSidenav, currentUser } = this.props;
     const leaderName = _.capitalize(getNameFromEmail(leader ? leader.email_address : null));
     return (
       <div>
         <h3>
           {leaderName}'s Group Cart
         </h3>
-        <div className='navbar__icon' onClick={_toggleSidenav}>
-          <Icon icon='Hamburger'/>
-        </div>
+        {
+          currentUser ? <div className='navbar__icon' onClick={_toggleSidenav}>
+            <Icon icon='Hamburger'/>
+          </div> : null
+        }
       </div>
     );
   }

@@ -19,11 +19,26 @@ $cart__add-height: $nav-height+$padding;
     -webkit-overflow-scrolling: touch;
 
     .cart__items__title {
+      font-weight: 500;
+      letter-spacing: 1px;
       height: $nav-height;
       line-height: $nav-height;
       padding: 0 $padding*2;
-      border-top: 1px solid $border-color-light;
-      border-bottom: 2px solid $border-color-light;
+      border-bottom: 1px solid $border-color-light;
+    }
+
+    .cart__items-empty {
+      padding: $padding*2;
+      background: white;
+      border-bottom: 1px solid $border-color-light;
+
+      .image {
+        height: 50px;
+      }
+      h4 {
+        text-align: center;
+        padding: $padding;
+      }
     }
   }
   .cartswitcher__cart {

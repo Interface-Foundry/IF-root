@@ -37,24 +37,24 @@ export default class CartItem extends Component {
       <li className='cartItem'>
         <h4 className='cartItem__title'>{memberName}</h4>
 
-        <div className='cartItem__image image col-2 ' style={
+        <div className='cartItem__image image col-3 ' style={
           {
             backgroundImage: `url(${main_image_url})`,
-            height: 100,
+            backgroundPosition: 'top',
+            height: 75,
           }}/>
-        <div className='cartItem__props col-2'>
-          <p>Item #{itemNumber}</p>
-          <p>{name}</p>
-          <p>Price: ${price}</p>
+        <div className='cartItem__props col-9'>
+          <p>Item #{itemNumber} {name}</p>
+          <br/>
           <p>Qty: {quantity}</p>
+          <p>Price: ${price}</p>
         </div>
-        <div className='cartItem__props col-8'>
-          <p>{description}</p>
-        </div>{
+        {
           isOwner?
-          <div>
+          <div className='cartItem__actions col-12'>
             <button onClick={()=>incrementItem(id, quantity)}>+</button>
             <button onClick={()=> (quantity > 1) ? decrementItem(id, quantity) : removeItem(cart_id, id)}>-</button>
+            <button onClick={() => {}}>Edit</button>
           </div>:
           null
         }

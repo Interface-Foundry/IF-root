@@ -2,6 +2,14 @@ import React, { Component } from 'react';
 import { Icon } from '..';
 import { addLinkToDeepLink } from '../../utils';
 
+import {
+  ShareButtons
+} from 'react-share';
+
+const {
+  FacebookShareButton
+} = ShareButtons
+
 const shareIcons = [
   {
     icon: 'FacebookMessenger',
@@ -26,25 +34,21 @@ const shareIcons = [
     icon: 'Whatsapp',
     label: 'Whatsapp',
     deepLink: 'whatsapp://send?text='
-  },
-  {
-    icon: 'Slack',
-    label: 'Slack'
   }
 ]
 
 export default class Share extends Component {
   openFailedHandler = () => {
-
+    console.log('open failed, please instal app')
   }
 
-  tryToOpen = (route) => {
+  tryToOpen = route => {
     const { openFailedHandler } = this;
 
     setTimeout(openFailedHandler(route), 300);
   }
 
-  copy = (e) => {
+  copy = e => {
     this.input.select();
     document.execCommand('copy');
     // This is just personal preference.
@@ -72,6 +76,17 @@ export default class Share extends Component {
       	<div className='share__icons'>
           {
             _.map(linkedIcons, (icon, i) => {
+              if(icon.icon === 'Facebook') return (
+                  <FacebookShareButton
+                    url={`kipthis.com/c/${pathname.match(/cart\/((\d|\w)+)/)[1]}`}
+                    title='Share Cart'
+                    picture='http://tidepools.co/kip/head_smaller.png'
+                    className="share__icons__icon">
+                    <Icon icon={icon.icon}/>
+                    <label>{icon.label}</label>
+                  </FacebookShareButton>
+                )
+
               return (
                 <a href={icon.deepLink} key={i} className='share__icons__icon'>
                   <Icon icon={icon.icon}/>
