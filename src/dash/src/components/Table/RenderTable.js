@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import DeliveryTable from './DeliveryTable';
+// import CartTable from './CartTable';
 
 /*
           <div className="panel panel-default">
@@ -12,12 +13,13 @@ import DeliveryTable from './DeliveryTable';
           </div>
 */
 
-const RenderTable = ({ data }) => {
 
-  if (true) {
-    console.log('would use deliverytable');
-    return (<DeliveryTable data={data} />);
+export default class RenderTable extends React.Component {
+  render() {
+    if (this.props.cart==="Cafe") {
+      return (<DeliveryTable data={this.props.data} />);
+
+    }
   }
-};
+}
 
-export default RenderTable;
