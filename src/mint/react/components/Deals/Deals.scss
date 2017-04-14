@@ -32,29 +32,25 @@
       .dealcard__details {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        text-align: center;
+        justify-content: space-between;
         padding: $padding;
         min-height: calc(100% - #{$nav-height/2});
         .dealcard__details__name {
           font-size: 13px;
-          text-align: center;
           position: relative;
           overflow: hidden;
           white-space: normal;
           color: #58595b;
           padding: $padding 0 0;
-          max-height: 40px;
+          height: 3.2em;
         }
         .dealcard__details__price {
           padding: $padding 0 0;
           font-size: 16px;
-          text-align: center;
           color: $price-color;
         }
         .dealcard__details__discount {
           font-size: 10px;
-          text-align: center;
           color: $header-color;
         }
         .dealcard__details__image {
@@ -77,7 +73,6 @@
         font-weight: 600;
         letter-spacing: 1px;
         text-transform: uppercase;
-        text-align: center;
         background: $border-color-light;
         border-radius: 0 0 $padding $padding;
       }

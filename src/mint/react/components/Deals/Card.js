@@ -16,7 +16,7 @@ export default class Card extends Component {
   render() {
     const { small, medium, large, name, price, previousPrice, savePercent } = this.props;
     const imageSrc = medium || large || small;
-
+    
     return (
       <section className='dealcard'>
         <div className='dealcard__details'>
