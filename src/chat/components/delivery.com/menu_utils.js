@@ -1,11 +1,13 @@
-var request = require('request-promise');
 var _ = require('lodash');
+var moment = require('moment-timezone')
+let request = require("co-request");
 
 var config = require('../../../config')
 var Menu = require('./Menu')
 
 /**@constant {string} url for pop-out menu*/
 var popoutUrl = config.menuURL + '/cafe';
+var k = 'AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho' //google api key (for maps timezone API)
 
 /**@exports menu_utils*/
 var utils = {};
@@ -80,7 +82,7 @@ utils.getUrl = function * (foodSession, user_id, selected_items) {
         method: 'POST',
         json: requestBody
     })
-    return res
+    return res.body
   } catch (err) {
     logging.error('ERROR in getURL with data', {
       requestBody: requestBody,
@@ -310,6 +312,31 @@ utils.cuisineEmoji = function (cuisine) {
             e = '🍳'
     }
     return e
+}
+
+/**
+* Gets the local time based on lat long coordinates 
+* @param location {object} the chosen_location for ordering food, user delivery address
+* @returns date {object} for user local time
+*/
+utils.getLocalTime = function * (location) {
+  //use lat long to get time  
+  if(location && location.latitude && location.longitude){
+    var t = Math.floor( Date.now() / 1000 ) 
+    var q = 'https://maps.googleapis.com/maps/api/timezone/json?location='+location.latitude+','+location.longitude+'&timestamp='+t+'&key='+k 
+
+    let result = yield request(q)
+    if(!result.body){
+        return new Date()
+    }
+    let body = JSON.parse(result.body)
+    if(!body.timeZoneId){
+        return new Date()
+    }
+    return moment().tz(body.timeZoneId).format()
+  }else {
+    return new Date()
+  }
 }
 
 module.exports = utils;
