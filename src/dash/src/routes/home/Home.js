@@ -105,10 +105,10 @@ class Home extends Component {
         </div>
         <div className="container-fluid data-display">
           <ButtonToolbar>
-            <Button onClick={ ()=> self.changeCart('Store')}>
+            <Button bsStyle={self.state.view=='Store' ? "primary" : "default"} onClick={ ()=> self.changeCart('Store')}>
               Store
             </Button>
-            <Button onClick={ ()=> self.changeCart('Cafe')}>
+            <Button bsStyle={self.state.view=='Cafe' ? "primary" : "default"} onClick={ ()=> self.changeCart('Cafe')}>
               Cafe
             </Button>
           </ButtonToolbar>
@@ -117,7 +117,9 @@ class Home extends Component {
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
           <div className="panel panel-default">
-            <DeliveryTable data={this.props.data.data} />
+            <Panel header={<span><i className="fa fa-table fa-fw" />{self.state.view} Cart</span>}>
+            { self.state.view=='Store' ? 'Placeholder for amazon cart stuff.' : <DeliveryTable data={this.props.data.data} /> }
+            </Panel>
           </div>
         </div>
       </div>

@@ -219,7 +219,6 @@ class Session extends Component {
     })
 
     return(
-      <Panel header={<span><i className="fa fa-table fa-fw" />Table of Waypoint Routes</span>}>
         <Table heads={[{
           field: 'time_stamp',
           descrip: 'Session Time Started',
@@ -248,7 +247,6 @@ class Session extends Component {
           allowSort: true,
           dataFormat: (cell, row)=> <WaypointHover waypoints={cell}/>
         }]} data={filteredRows} />
-      </Panel>
     )
   }
 
@@ -267,10 +265,10 @@ class Session extends Component {
               {self.renderSessionsLineGraph(self.state.rows)}
           </div>
           <ButtonToolbar>
-            <Button onClick={ ()=> self.changeCart('Store')}>
+            <Button bsStyle={self.state.view=='Store' ? "primary" : "default"} onClick={ ()=> self.changeCart('Store')}>
               Store
             </Button>
-            <Button onClick={ ()=> self.changeCart('Cafe')}>
+            <Button bsStyle={self.state.view=='Cafe' ? "primary" : "default"} onClick={ ()=> self.changeCart('Cafe')}>
               Cafe
             </Button>
           </ButtonToolbar>
@@ -279,7 +277,9 @@ class Session extends Component {
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
           <div className="panel panel-default fillSpace">
-              {self.renderWaypointTable(self.state.rows, self.state.startDate, self.state.endDate)}
+            <Panel header={<span><i className="fa fa-table fa-fw" />{self.state.view} Waypoint Routes</span>}>
+            { self.state.view=='Store' ? 'Placeholder for store waypoints stuff.' : self.renderWaypointTable(self.state.rows, self.state.startDate, self.state.endDate) }
+            </Panel> 
           </div>
         </div>
       </div>
