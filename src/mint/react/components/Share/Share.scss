@@ -2,7 +2,7 @@
 
 .share {
 	position: relative;
-	height: calc(100% - #{$nav-height});
+	height: 100%;
 	width: 100%;
 
 	.share__message {
@@ -82,18 +82,17 @@
 	.share__icons {
 		height: 50%;
 		width: 100%;
-		padding: $padding*2;
+		padding: 0 $padding*2;
 
 		.share__icons__icon {
 			position: relative;
 			display: inline-block;
 			width: 33%;
-			height: $nav-height+$padding*5;
+			height: 45%;
 			padding: $padding*3 0 0;
 			svg {
 				width: 100%;
 				height: calc(100% - 25px);
-				padding: 0 0 $padding;
 			}
 			label {
 				height: 25px;
