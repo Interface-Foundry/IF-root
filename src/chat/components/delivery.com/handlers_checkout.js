@@ -105,7 +105,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
 
   var prevMessage = yield db.Messages.find({thread_id: message.thread_id, incoming: false}).sort('-ts').limit(2).exec()
 
-  prevMessage = prevMessage[0]
+  prevMessage = prevMessage[1]
 
   if (_.get(prevMessage, 'reply')) {
     logging.info('prevMessage.reply', prevMessage.reply)
@@ -144,7 +144,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       yield foodSession.save()
     } else {
       // throw error in replyChannel
-      $replyChannel.sendReplace(message, 'food.admin.order.checkout.confirm', {type: message.origin, data: {text: 'Hmm please try tying a first and last name'}})
+      $replyChannel.sendReplace(message, 'food.admin.order.checkout.confirm', {type: message.origin, data: {text: 'Hmm please try typing a first and last name'}})
       return
     }
   }
