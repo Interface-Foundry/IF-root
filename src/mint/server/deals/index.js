@@ -3,30 +3,25 @@
  * @type {[type]}
  */
 
-var Agenda = require('agenda');
-var config = require('../../../config');
-var agenda = new Agenda({db: {address: config.mongodb.url}});
 var scrape = require('./scrapeCamel');
+var CronJob = require('cron').CronJob;
 
-agenda.define('scrape camel', function (job, done) {
-  scrape()
-    .then(function (result) {
+console.log('setting up the deal scraper to run at 2:15 am +/- 45 minutes M-F')
+var job = new CronJob('00 30 1 * * 1-5', function() {
+  /*
+   * Runs every weekday (Monday through Friday)
+   * at 1:30:00 AM +/- a few minutes so that it's sneakier
+   */
+  var randomMinutes = Math.random()*90
+  setTimeout(() => {
+    console.log('running the scraper')
+    scrape().then(r => {
+      console.log('scraped camel successfully at ' + new Date())
+    }).catch(e => {
+      console.error('error scraping camel at ' + new Date(), e)
     })
-    .catch(function (err) {
-      console.error('error scraping camel', err);
-    });
-  done();
-});
+  }, 1000 * randomMinutes | 0)
 
-agenda.on('ready', function () {
-  //clears the incomplete jobs so that they can restart if the server does
-  function failGracefully() {
-    agenda.stop(() => process.exit(0));
-  }
-  process.on('SIGTERM', failGracefully);
-  process.on('SIGINT', failGracefully);
-  agenda.every('1 day', 'scrape camel');
-  agenda.start();
-});
-
-module.exports = agenda;
+  },
+  true /* Start the job right now */
+);

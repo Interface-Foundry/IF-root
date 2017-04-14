@@ -285,9 +285,10 @@ module.exports = function () {
   });
 };
 
-// if (!module.parent) {
+// You can run this file to manually scrape the deals
+if (!module.parent) {
   co(function * () {
     var r = yield scrapeCamel();
     console.log('r', r);
   }).catch(console.error.bind(console));
-// }
+}

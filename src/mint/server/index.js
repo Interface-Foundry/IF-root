@@ -194,6 +194,13 @@ function printNiceError(err) {
   }
 }
 
+/**
+ * To scrape or not to scrape, that is the question 💀
+ */
+if (process.env.SCRAPE_DEALS) {
+  require('./deals')
+}
+
 process.on('unhandledRejection', (err) => {
   console.log('Unhandled Promise Rejection');
   printNiceError(err)
