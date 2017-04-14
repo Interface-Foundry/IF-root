@@ -8,7 +8,7 @@ import {
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
 
-// import RenderTable from '../../components/Table/RenderTable';
+import RenderTable from '../../components/Table/RenderTable';
 import DeliveryTable from '../../components/Table/DeliveryTable';
 
 import {

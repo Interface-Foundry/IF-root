@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import DeliveryTable from './DeliveryTable';
 
@@ -12,9 +13,11 @@ import DeliveryTable from './DeliveryTable';
 */
 
 const RenderTable = ({ data }) => {
-  return (
-      <DeliveryTable data={data} />
-  )
-}
+
+  if (true) {
+    console.log('would use deliverytable');
+    return (<DeliveryTable data={data} />);
+  }
+};
 
 export default RenderTable;
