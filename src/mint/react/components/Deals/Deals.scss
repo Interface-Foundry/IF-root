@@ -17,11 +17,8 @@
   }
   li {
     display: inline-block;
-    border: 1px $border-color-light solid;
-    background: white;
     padding: 1px;
     margin: 0 $padding/2;
-    border-radius: $padding;
     font-size: 18px;
     width: 150px;
     height: 100%;
@@ -29,6 +26,9 @@
       position: relative;
       text-align: center;
       height: 100%;
+      border: 1px $border-color-light solid;
+      border-radius: $padding;
+      background: white;
       .dealcard__details {
         display: flex;
         flex-direction: column;
