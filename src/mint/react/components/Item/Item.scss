@@ -5,7 +5,9 @@ $item__view-height: calc(100% - #{$nav-height});
   .item__view {
     height: $item__view-height;
     padding: $padding*2;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
     div[class^='item__view'] {
       margin-bottom: $padding;
       text-align: left;
@@ -21,17 +23,46 @@ $item__view-height: calc(100% - #{$nav-height});
       a {
         display: block;
         padding: $padding/2 $padding;
-        color: red;
+        color: $price-color;
       }
     }
-    .item__view__image {
+    div.item__view__image {
       margin: 0 auto;
     }
-    .item__view__atts {
+    div.item__view__atts {
       text-align: center;
+      padding: $padding $padding $padding*2;
+      margin-bottom: 0;
+      font-size: 13px;
     }
-    .item__view__description {
+    div.item__view__price {
+      h4 {
+        font-size: 15px;
+        color: $price-color;
+      }
+      p {
+        font-size: 10px;
+      }
+    }
+    div.item__view__description {
       overflow: hidden;
+
+      h4 {
+        font-size: 15px;
+        padding: $padding 0; 
+      }
+      p {
+        font-size: 13px;
+      }
+    }
+    div.item__view__review {
+      color: #999;
+      p {
+        font-size: 13px;
+      }
+      em {
+        font-size: 11px;
+      }
     }
   }
 }

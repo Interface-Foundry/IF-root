@@ -85,13 +85,13 @@ export default class Item extends Component {
             <p>Price: <span>${price + 40}</span> ($40 off)</p>
           </div>
           <div className='item__view__description'>
-            <p>{store}</p>
+            <h4>{store}</h4>
             <p className='ellipsis'>{description}</p>
             <a>View more</a>
           </div>
           <div className='item__view__review'>
             <p className='ellipsis'>{description}</p>
-            <p> - theGodOfIpsum</p>
+            <em> - theGodOfIpsum</em>
           </div>
         </section>
         <Footer replace={replace} addItem={addItem} cart_id={cart_id} uniq_id={uniq_id}/>
