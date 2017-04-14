@@ -6,7 +6,15 @@
   height: 200px;
   padding: 0 $padding $padding*2;
   -webkit-overflow-scrolling: touch;
-  /* Insert space before the first item and after the last one */
+  &::-webkit-scrollbar {
+    width: 0px; 
+    height: 0px; /* remove scrollbar space */
+    background: transparent;  /* optional: just make scrollbar invisible */
+  }
+  &::-webkit-scrollbar-thumb {
+    height: 0px;
+    background: transparent;
+  }
   li {
     display: inline-block;
     border: 1px $border-color-light solid;
