@@ -5,12 +5,11 @@ import {
   DropdownButton,
   Panel, PageHeader, ListGroup, ListGroupItem, Button, ButtonToolbar, Alert
 } from 'react-bootstrap';
+import moment from 'moment';
+import DatePicker from 'react-datepicker';
 
-import Donut from '../../components/Donut';
 // import RenderTable from '../../components/Table/RenderTable';
 import DeliveryTable from '../../components/Table/DeliveryTable';
-import DatePicker from 'react-datepicker';
-import moment from 'moment';
 
 import {
   Tooltip,
@@ -55,7 +54,6 @@ class Home extends Component {
   renderCartsLineGraph(data){
     var dataPlot = [];   //name:time_range #carts, #teams, and #items
     var weekRanges=[];
-    //console.log(data.data.deliveries);
 
     for(var i = 0; i<10; i++){
       weekRanges.push({index: i, startDate: new Date(moment().subtract(10-i, 'week')),endDate: new Date(moment().subtract(9-i, 'week')), numCarts:0,teams:[],numItems:0});
@@ -71,12 +69,6 @@ class Home extends Component {
           week.teams.push(delivery.team_id);
         }
       }
-<<<<<<< HEAD
-      
-      
-=======
-
->>>>>>> moving table components
     })
 
     for(var i=0;i<10;i++){
@@ -106,7 +98,6 @@ class Home extends Component {
 
   render(){
     var self = this;
-    console.log(this.props)
     return (
       <div>
         <div>
@@ -126,7 +117,7 @@ class Home extends Component {
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
           <div className="panel panel-default">
-            <DeliveryTable />
+            <DeliveryTable data={this.props.data.data} />
           </div>
         </div>
       </div>

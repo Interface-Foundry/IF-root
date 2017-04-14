@@ -1,6 +1,4 @@
-import React from 'react';
 import PropTypes from 'prop-types';
-import {Panel} from 'react-bootstrap';
 import DeliveryTable from './DeliveryTable';
 
 /*
@@ -13,13 +11,10 @@ import DeliveryTable from './DeliveryTable';
           </div>
 */
 
-const RenderTable = ({ data }) =>
-  {
-    return (
-      <Panel header={<span><i className="fa fa-table fa-fw" /> Delivery Carts</span>}>
-        <DeliveryTable />
-      </Panel>
-    )
+const RenderTable = ({ data }) => {
+  return (
+      <DeliveryTable data={data} />
+  )
 }
 
 export default RenderTable;
