@@ -63,7 +63,10 @@ export default class Cart extends Component {
                 { 
                   ownerArray.length ? 
                     ownerArray.map((item, i) => <CartItem key={i} isOwner={true} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
-                    : <li><em>Please add some products to the cart.</em></li>
+                    : <li className='cart__items-empty'>
+                        <div className='image' style={{backgroundImage:`url(http://tidepools.co/kip/head_smaller.png)`}}/>
+                        <h4>Please add some products to the cart.</h4>
+                    </li>
                 } 
               </ul>
             })

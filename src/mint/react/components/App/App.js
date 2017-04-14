@@ -48,7 +48,7 @@ export default class App extends Component {
 
   render() {
     const { props, state, _toggleSidenav } = this;
-    const { cart_id, newAccount, leader, carts, match, currentUser, history: { replace } } = props;
+    const { cart_id, newAccount, leader, carts, match, currentUser, history: { replace }, location: { pathname } } = props;
     const { sidenav } = state;
 
     if (newAccount === false) {
@@ -69,7 +69,7 @@ export default class App extends Component {
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
 
-        <Footer cart_id={cart_id} replace={replace}/>
+        { pathname.includes('/m/') ? null : <Footer cart_id={cart_id} replace={replace}/> }
       </section>
     );
   }

@@ -43,9 +43,6 @@ export default class AmazonForm extends Component {
           placeholder="Paste Amazon URL or Search"
           handleSubmit={handleSubmit}
           component={renderField}/>
-        <div className="modal__drag" onClick={() => replace(`/cart/${cart_id}/`)}>
-          <Icon icon="Up"/>
-        </div>
     </form>
     );
   }
