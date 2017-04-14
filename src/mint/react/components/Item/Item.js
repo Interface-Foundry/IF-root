@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Footer from './Footer';
 
 export default class Item extends Component {
   state = {
@@ -14,7 +13,6 @@ export default class Item extends Component {
     previewItem: PropTypes.func.isRequired,
     clearItem: PropTypes.func.isRequired,
     cart_id: PropTypes.string,
-    addItem: PropTypes.func.isRequired,
     history: PropTypes.object.isRequired
   }
 
@@ -46,12 +44,11 @@ export default class Item extends Component {
     const {
       props: {
         cart_id,
-        addItem,
         type,
         items,
         index,
         item,
-        item: { name, main_image_url, price, store, description, id: uniq_id },
+        item: { name, main_image_url, price, store, description },
         history: { replace }
       },
       state: {
@@ -74,27 +71,24 @@ export default class Item extends Component {
             if(originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`)
           }
         }}>
-        <section className='item__view'>
-          <div className='item__view__image image row'
-            style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }/>
-          <div className='item__view__atts'>
-            <p>Item: {name}</p>
-          </div>
-          <div className='item__view__price'>
-            <h4>${price}</h4>
-            <p>Price: <span>${price + 40}</span> ($40 off)</p>
-          </div>
-          <div className='item__view__description'>
-            <h4>{store}</h4>
-            <p className='ellipsis'>{description}</p>
-            <a>View more</a>
-          </div>
-          <div className='item__view__review'>
-            <p className='ellipsis'>{description}</p>
-            <em> - theGodOfIpsum</em>
-          </div>
-        </section>
-        <Footer replace={replace} addItem={addItem} cart_id={cart_id} uniq_id={uniq_id}/>
+        <div className='item__view__image image row'
+          style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }/>
+        <div className='item__view__atts'>
+          <p>Item: {name}</p>
+        </div>
+        <div className='item__view__price'>
+          <h4>${price}</h4>
+          <p>Price: <span>${price + 40}</span> ($40 off)</p>
+        </div>
+        <div className='item__view__description'>
+          <h4>{store}</h4>
+          <p className='ellipsis'>{description}</p>
+          <a>View more</a>
+        </div>
+        <div className='item__view__review'>
+          <p className='ellipsis'>{description}</p>
+          <em> - theGodOfIpsum</em>
+        </div>
       </div>
     );
   }

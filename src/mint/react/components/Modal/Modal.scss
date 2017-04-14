@@ -3,7 +3,7 @@
 .modal {
   position: absolute;
   background: $kip-primary-color;
-  height: calc(100% - #{$nav-height});
+  height: calc(100% - #{$nav-height*2});
   z-index: 100;
   top: $nav-height;
   bottom: 0;
