@@ -72,11 +72,14 @@ Menu.prototype.getCartItemPrice = function (cartItem) {
 function flattenMenu (data,localTime) {
   var out = {}
   var schedules = data.schedule
-  if (localTime){
-    var now = localTime
-  }else {
-    var now = new Date()
-  }
+  // if (localTime){
+  //   var now = localTime
+  // }else {
+  //   var now = new Date()
+  // }
+
+  var now = new Date()
+  
   function flatten (node, out) {
 
     if (node.type === 'menu' && _.get(node, 'schedule[0]')) {
