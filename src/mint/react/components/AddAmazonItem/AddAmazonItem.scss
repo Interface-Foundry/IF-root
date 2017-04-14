@@ -1,8 +1,6 @@
 @import '../../styles/Constants';
 .add_to_amazon {
-  padding-top: 30px;
-  display: flex;
-  flex-direction: column;
+  padding-top: $padding;
   font-size: 18px;
 }
 
