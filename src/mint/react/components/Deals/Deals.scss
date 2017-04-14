@@ -1,25 +1,38 @@
 @import '../../styles/Constants';
 .deals__section {
-  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   white-space: nowrap;
-  overflow-x: scroll;
+  overflow: scroll;
   height: 200px;
   padding: 0 $padding $padding*2;
   -webkit-overflow-scrolling: touch;
   &::-webkit-scrollbar {
-    width: 0px; 
-    height: 0px; /* remove scrollbar space */
-    background: transparent;  /* optional: just make scrollbar invisible */
+    width: 0px;
+    height: 0px;
+    /* remove scrollbar space */
+    background: transparent;
+    /* optional: just make scrollbar invisible */
   }
   &::-webkit-scrollbar-thumb {
     height: 0px;
     background: transparent;
   }
+  &::before {
+    content: '';
+    min-width: 5px;
+  }
+  &::after {
+    content: '';
+    min-width: 15px;
+  }
   li {
     display: inline-block;
     padding: 1px;
-    margin: 0 $padding/2;
+    margin: 0 $padding/3;
     font-size: 18px;
+    min-width: 150px;
     width: 150px;
     height: 100%;
     .dealcard {
