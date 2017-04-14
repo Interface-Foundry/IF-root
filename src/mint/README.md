@@ -20,6 +20,43 @@ We are using pretty standard commands just to keep it easy, webpack builds react
 2. yarn react-tests --> runs karma start, which has technically less characters so you could justs go with karma start
 3. yarn test --> runs api tests if you have a server running already
 
+
+# ENVIRONMENTAL VARIABLES AND SWITCHES
+
+* `NODE_ENV` - sort of a node.js convention for determining if server errors are logged to the user or if the user gets the fail whale or other external-facing error page. also sometimes has weird effects in some npm modules.
+	* `production` logs less debug information
+	* `development` logs more i guess
+* `SEND_EMAILS` - sends emails if set
+  * `export SEND_EMAILS=1` or `true` or anything (even `0`) will send emails
+  * `export SEND_EMAILS=;` will not send emails
+* `NO_LIVE_RELOAD` - controls whether the webpack stuff runs. I set this when working just on back-end stuff.
+* `NO_LUMINATI` - uses a regular request instead of a proxied request through luminati. only use this as a very last resort. if you need to scrape deals or something, instead of running the scraper locally with `NO_LUMINATI=1` you can ask someone for a db dump of their scraped deals.
+
+To set an environmental variable in your **.bashrc** or **.zshrc** so that it is set every time you open a terminal and for every command run:
+
+```sh
+export NODE_ENV=production
+```
+
+To set or override an environmental variable just for one command:
+```sh
+$ NODE_ENV=development node index.js
+```
+
+For **fish** users, to export a variable do
+
+```fish
+set -x NODE_ENV production
+```
+
+for a single command:
+
+```
+> env NODE_ENV=development node index.js
+```
+
+The above method using the `env` program will work for any shell, so if you're writing scripts for others to use try to use env instead of `NODE_ENV=development node index.js`.
+
 # API DOCS
 Peter has built a pretty awesome apidoc, should automagically open after running script.
 
