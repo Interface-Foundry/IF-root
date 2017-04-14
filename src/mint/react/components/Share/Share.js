@@ -78,6 +78,7 @@ export default class Share extends Component {
             _.map(linkedIcons, (icon, i) => {
               if(icon.icon === 'Facebook') return (
                   <FacebookShareButton
+                    key={i} 
                     url={`kipthis.com/c/${pathname.match(/cart\/((\d|\w)+)/)[1]}`}
                     title='Share Cart'
                     picture='http://tidepools.co/kip/head_smaller.png'

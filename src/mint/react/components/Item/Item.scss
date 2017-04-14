@@ -1,68 +1,62 @@
 @import '../../styles/Constants';
-$item__view-height: calc(100% - #{$nav-height});
 .item {
   height: 100%;
-  .item__view {
-    height: $item__view-height;
-    padding: $padding*2;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
-    div[class^='item__view'] {
-      margin-bottom: $padding;
-      text-align: left;
-      &:last-of-type {
-        margin-bottom: 0;
-      }
-      .ellipsis {
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-      }
-      a {
-        display: block;
-        padding: $padding/2 $padding;
-        color: $price-color;
-      }
-    }
-    div.item__view__image {
-      margin: 0 auto;
-    }
-    div.item__view__atts {
-      text-align: center;
-      padding: $padding $padding $padding*2;
+  padding: $padding*2;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  div[class^='item__view'] {
+    margin-bottom: $padding;
+    text-align: left;
+    &:last-of-type {
       margin-bottom: 0;
+    }
+    .ellipsis {
+      overflow: hidden;
+      max-height: 45px;
+    }
+    a {
+      display: block;
+      padding: $padding/2 $padding;
+      color: $price-color;
+    }
+  }
+  div.item__view__image {
+    margin: 0 auto;
+  }
+  div.item__view__atts {
+    text-align: center;
+    padding: $padding $padding $padding*2;
+    margin-bottom: 0;
+    font-size: 13px;
+  }
+  div.item__view__price {
+    h4 {
+      font-size: 15px;
+      color: $price-color;
+    }
+    p {
+      font-size: 10px;
+    }
+  }
+  div.item__view__description {
+    overflow: hidden;
+
+    h4 {
+      font-size: 15px;
+      padding: $padding 0; 
+    }
+    p {
       font-size: 13px;
     }
-    div.item__view__price {
-      h4 {
-        font-size: 15px;
-        color: $price-color;
-      }
-      p {
-        font-size: 10px;
-      }
+  }
+  div.item__view__review {
+    color: #999;
+    p {
+      font-size: 13px;
     }
-    div.item__view__description {
-      overflow: hidden;
-
-      h4 {
-        font-size: 15px;
-        padding: $padding 0; 
-      }
-      p {
-        font-size: 13px;
-      }
-    }
-    div.item__view__review {
-      color: #999;
-      p {
-        font-size: 13px;
-      }
-      em {
-        font-size: 11px;
-      }
+    em {
+      font-size: 11px;
     }
   }
 }
