@@ -19,6 +19,7 @@ export default class Footer extends Component {
     return (
       <footer className='footer'>
         <Route path={`${match.url}/m/item/add`} component={() => <div className='empty'/>}/>
+        <Route path={`${match.url}/m/share`} component={() => <div className='empty'/>}/>
         <Route path={`${match.url}/m/item/:index/:item_id`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/deal/:index/:item_id`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}`} exact component={() => <CartFooter {...props}/>}/>
