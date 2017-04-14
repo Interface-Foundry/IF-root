@@ -44,9 +44,7 @@
           white-space: normal;
           color: #58595b;
           padding: $padding 0 0;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;  
+          max-height: 40px;
         }
         .dealcard__details__price {
           padding: $padding 0 0;
