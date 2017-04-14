@@ -1,0 +1,14 @@
+[ignore]
+.*/__tests__/.*
+.*/public/.*
+.*/node_modules/.*
+[include]
+
+[libs]
+
+[options]
+emoji=true
+all=true
+esproposal.export_star_as=enable
+module.file_ext=.js
+esproposal.class_static_fields=enable

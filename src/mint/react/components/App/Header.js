@@ -26,7 +26,8 @@ export default class Header extends Component {
 class CartHead extends Component {
   static propTypes = {
     leader: PropTypes.object,
-    _toggleSidenav: PropTypes.func
+    _toggleSidenav: PropTypes.func,
+    currentUser: PropTypes.object
   }
 
   render() {

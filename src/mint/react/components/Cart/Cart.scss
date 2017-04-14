@@ -17,7 +17,6 @@ $cart__add-height: $nav-height+$padding;
     overflow-y: visable;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
-
     .cart__items__title {
       font-weight: 500;
       letter-spacing: 1px;
@@ -26,12 +25,10 @@ $cart__add-height: $nav-height+$padding;
       padding: 0 $padding*2;
       border-bottom: 1px solid $border-color-light;
     }
-
     .cart__items-empty {
       padding: $padding*2;
       background: white;
       border-bottom: 1px solid $border-color-light;
-
       .image {
         height: 50px;
       }

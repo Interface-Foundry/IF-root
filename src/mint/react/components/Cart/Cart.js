@@ -5,7 +5,6 @@ import { AddAmazonItemContainer, DealsContainer } from '../../containers';
 
 export default class Cart extends Component {
   static propTypes = {
-    selectItem: PropTypes.func.isRequired,
     fetchDeals: PropTypes.func.isRequired,
     cart_id: PropTypes.string,
     members: PropTypes.arrayOf(PropTypes.object)
@@ -14,9 +13,6 @@ export default class Cart extends Component {
     items: PropTypes.object.isRequired,
     addingItem: PropTypes.bool.isRequired,
     history: PropTypes.object.isRequired,
-    match: PropTypes.object.isRequired,
-    carts: PropTypes.array.isRequired,
-    removeItem: PropTypes.func.isRequired,
     user_accounts: PropTypes.array
   }
 
@@ -26,9 +22,8 @@ export default class Cart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id } = this.props,
-          { leader, addingItem, user_accounts } = nextProps,
-          cartId = cart_id || nextProps.cart_id;
+    const { history: { replace }, cart_id } = this.props, { leader, addingItem, user_accounts } = nextProps,
+      cartId = cart_id || nextProps.cart_id;
 
     if (cartId) {
       if (user_accounts.length === 0 && !leader) {
@@ -40,10 +35,9 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_accounts, history: { push, replace }, match: { url } } = this.props,
+    const { items, leader, members, user_accounts, history: { replace } } = this.props,
       hasItems = items.quantity > 0,
       isLeader = user_accounts[0] && leader && (leader.id === user_accounts[0].id);
-
     return (
       <div className='cart'>
         <div className='cart__add'>
@@ -54,25 +48,63 @@ export default class Cart extends Component {
           <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
         </div>
         <div className='cart__items'>
-          {
-            _.map(items, (ownerArray, ownerKey) => {
-              if(ownerKey === 'quantity') return null
-
-              return <ul key={ownerKey}>
-                <div className='cart__items__title'>{ `${_.capitalize(ownerKey)} items`}</div>
-                { 
-                  ownerArray.length ? 
-                    ownerArray.map((item, i) => <CartItem key={i} isOwner={true} itemNumber={i} {...item} {...this.props} url={url} push={push}/>) 
-                    : <li className='cart__items-empty'>
-                        <div className='image' style={{backgroundImage:`url(http://tidepools.co/kip/head_smaller.png)`}}/>
-                        <h4>Please add some products to the cart.</h4>
-                    </li>
-                } 
-              </ul>
-            })
-          }
+          <MyItems {...this.props} items={items.my} />
+          <OtherItems {...this.props} items={items.others} isLeader={isLeader} />
         </div>
       </div>
+    );
+  }
+}
+
+class MyItems extends Component {
+  static propTypes = {
+    items: PropTypes.array.isRequired,
+    isLeader: PropTypes.bool.isRequired
+  }
+
+  render() {
+    const { props, props: { items } } = this;
+    return (
+      <ul>
+        <div className='cart__items__title'>Your Items</div>
+        {
+          items.length 
+          ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={true} {...item} {...props} />) 
+          : <EmptyCart />
+        }
+      </ul>
+    );
+  }
+}
+
+class OtherItems extends Component {
+  static propTypes = {
+    items: PropTypes.array.isRequired,
+    isLeader: PropTypes.bool.isRequired
+  }
+
+  render() {
+    const { props, props: { items, isLeader } } = this;
+    return (
+      <ul>
+        <div className='cart__items__title'>Everyone's Items</div>
+        {
+          items.length 
+          ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={isLeader} {...item} {...props} />) 
+          : <EmptyCart />
+        }
+      </ul>
+    );
+  }
+}
+
+class EmptyCart extends Component {
+  render() {
+    return (
+      <li className='cart__items-empty'>
+        <div className='image' style={{backgroundImage:'url(http://tidepools.co/kip/head_smaller.png)'}}/>
+        <h4>Huh. Nothing to see here</h4>
+      </li>
     );
   }
 }

@@ -29,7 +29,7 @@ export default class CartItem extends Component {
   }
 
   render() {
-    const { added_by, description, itemNumber, main_image_url, name, price, quantity, leader, members, removeItem, incrementItem, decrementItem, id, cart_id, isOwner } = this.props,
+    const { added_by, itemNumber, main_image_url, name, price, quantity, leader, members, removeItem, incrementItem, decrementItem, id, cart_id, isOwner } = this.props,
       linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by }),
       memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
 
