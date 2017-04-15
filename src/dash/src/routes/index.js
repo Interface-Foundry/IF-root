@@ -23,6 +23,19 @@ import error from './error';
 
 import Header from '../components/Header';
 
+
+import { ApolloClient, ApolloProvider, createNetworkInterface } from 'react-apollo';
+
+const networkInterface = createNetworkInterface({
+  uri: 'http://localhost:3001/graphql'
+});
+
+const client = new ApolloClient({
+  networkInterface: networkInterface
+});
+
+
+
 export default [
 
   {
@@ -63,12 +76,14 @@ export default [
       // console.log('inside dasdboard component', component);
       if (component === undefined) return component;
       return render(
-        <div>
-          <Header />
-          <div id="page-wrapper" className="page-wrapper">
-            <App context={context}>{component}</App>
+        <ApolloProvider client={client}>
+          <div>
+            <Header />
+            <div id="page-wrapper" className="page-wrapper">
+              <App context={context}>{component}</App>
+            </div>
           </div>
-        </div>
+        </ApolloProvider>
       );
     },
   },

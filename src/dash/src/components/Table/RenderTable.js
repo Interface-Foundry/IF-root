@@ -1,25 +1,23 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { gql, graphql } from 'react-apollo';
 import DeliveryTable from './DeliveryTable';
-// import CartTable from './CartTable';
 
-/*
-          <div className="panel panel-default">
-            <RenderTable
-              data={this.props.data.data}
-              startDate={this.state.startDate}
-              endDate={this.state.endDate}
-            />
-          </div>
-*/
+const deliveryQuery = gql`
+  query {deliveries(limit: 10){time_started, team_id, item_count, cart_total, chosen_restaurant, team{team_name}, items {item_name, user}}}
+`;
 
-
-export default class RenderTable extends React.Component {
-  render() {
-    if (this.props.cart==="Cafe") {
-      return (<DeliveryTable data={this.props.data} />);
-
-    }
+const GetTable = ({ data }) => {
+  if (data.loading) {
+    return <p>Loading ...</p>;
   }
-}
 
+  if (data.error) {
+    return <p>{data.error.message}</p>;
+  }
+  // logic here for which table to load
+  return (<DeliveryTable data={data.deliveries} />);
+};
+
+const RenderTable = graphql(deliveryQuery, { options: { notifyOnNetworkStatusChange: true }})(GetTable);
+
+export default RenderTable;
