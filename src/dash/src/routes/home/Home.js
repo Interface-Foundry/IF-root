@@ -7,16 +7,15 @@ import {
 } from 'react-bootstrap';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
+import { gql, graphql } from 'react-apollo';
 
-import RenderTable from '../../components/Table/RenderTable';
+// import RenderTable from '../../components/Table/RenderTable';
 import DeliveryTable from '../../components/Table/DeliveryTable';
-
 import {
   Tooltip,
   XAxis, YAxis, Area,
   CartesianGrid, AreaChart, Bar, BarChart,
   ResponsiveContainer, LineChart, Line } from '../../vendor/recharts';
-
 
 class Home extends Component {
   constructor(props) {
@@ -96,8 +95,35 @@ class Home extends Component {
     )
   }
 
+  getCurrentQuery() {
+    let currentQuery;
+    if (this.state.view === 'Cafe') {
+      currentQuery = gql`
+        query {
+          deliveries(limit: 4){
+            time_started, team_id, item_count, cart_total, chosen_restaurant, team{team_name}, items {item_name, user}
+          }
+        }
+      `;
+    } else {
+      currentQuery = gql`
+        query {
+          deliveries(limit: 4){
+            time_started, team_id, item_count, cart_total, chosen_restaurant, team{team_name}, items {item_name, user}
+          }
+        }
+      `;
+    }
+    return currentQuery;
+  }
+
   render(){
     var self = this;
+
+
+    const currentQuery = this.getCurrentQuery()
+    const TableWithData = graphql(currentQuery)(GetDataForTable);
+    // const GraphWithData = graphql(this.currentQuery)
     return (
       <div>
         <div>
@@ -117,15 +143,16 @@ class Home extends Component {
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
           <div className="panel panel-default">
-            <Panel header={<span><i className="fa fa-table fa-fw" />{self.state.view} Cart</span>}>
-            { self.state.view=='Store' ? 'Placeholder for amazon cart stuff.' : <DeliveryTable data={this.props.data.data} /> }
-            </Panel>
+            <TableWithData />
           </div>
         </div>
       </div>
     )
   }
-
 }
+
+const GetDataForTable = ({ data }) => {
+  return (<DeliveryTable data={data.deliveries} />);
+};
 
 export default Home;
