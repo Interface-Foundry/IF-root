@@ -11,6 +11,7 @@ import { gql, graphql } from 'react-apollo';
 
 // import RenderTable from '../../components/Table/RenderTable';
 import DeliveryTable from '../../components/Table/DeliveryTable';
+import CartTable from '../../components/Table/CartTable';
 import {
   Tooltip,
   XAxis, YAxis, Area,
@@ -105,12 +106,11 @@ class Home extends Component {
           }
         }
       `;
-    } else {
+    } else if (this.state.view === 'Store') {
+      //store query
       currentQuery = gql`
         query {
-          deliveries(limit: 4){
-            time_started, team_id, item_count, cart_total, chosen_restaurant, team{team_name}, items {item_name, user}
-          }
+          carts{created_date, team{team_name}, type, item_count, cart_total, items{title}}
         }
       `;
     }
@@ -122,8 +122,8 @@ class Home extends Component {
 
 
     const currentQuery = this.getCurrentQuery()
-    const TableWithData = graphql(currentQuery)(GetDataForTable);
-    // const GraphWithData = graphql(this.currentQuery)
+    const TableWithData = graphql(currentQuery)(getCurrentTable);
+
     return (
       <div>
         <div>
@@ -143,7 +143,9 @@ class Home extends Component {
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
           <div className="panel panel-default">
+          <Panel header={<span><i className="fa fa-line-chart " />  Using: {self.state.view}</span>}>
             <TableWithData />
+          </Panel>
           </div>
         </div>
       </div>
@@ -151,8 +153,18 @@ class Home extends Component {
   }
 }
 
-const GetDataForTable = ({ data }) => {
-  return (<DeliveryTable data={data.deliveries} />);
+
+const getCurrentTable = ({ data }) => {
+  if (data.loading) {
+    return <p> Loading... </p>
+  }
+  console.log(data)
+  if (data.deliveries) {
+    return (<DeliveryTable data={data.deliveries} />);
+  }
+  if (data.carts) {
+    return (<CartTable data={data.carts} />)
+  }
 };
 
 export default Home;
