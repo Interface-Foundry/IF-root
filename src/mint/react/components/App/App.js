@@ -27,14 +27,14 @@ export default class App extends Component {
 
   componentWillMount() {
     const { fetchCart, fetchAllCarts, cart_id } = this.props;
-    
+
     if (cart_id) fetchCart(cart_id);
     fetchAllCarts();
   }
 
   componentWillReceiveProps(nextProps) {
     const { fetchCart, fetchAllCarts, cart_id } = this.props;
-    
+
     if (cart_id !== nextProps.cart_id) {
       fetchCart(nextProps.cart_id);
       fetchAllCarts();
@@ -48,7 +48,7 @@ export default class App extends Component {
 
   render() {
     const { props, state, _toggleSidenav } = this;
-    const { cart_id, newAccount, leader, carts, match, currentUser, history: { replace }} = props;
+    const { cart_id, newAccount, leader, carts, match, currentUser } = props;
     const { sidenav } = state;
 
     if (newAccount === false) {

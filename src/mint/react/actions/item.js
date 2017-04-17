@@ -1,4 +1,3 @@
-// @flow
 import {
   REQUEST_ITEM,
   RECEIVE_ITEM,
@@ -69,13 +68,29 @@ export function previewItem(item_id) {
     dispatch(request());
 
     try {
-      const response = await fetch(`/api/itempreview?q=${item_id}`, {
+      const response = await fetch(`/api/item/${item_id}`, {
         credentials: 'same-origin'
       });
 
       return dispatch(receive(await response.json()));
     } catch (e) {
-      throw 'error in cart fetchItem';
+      throw 'error in cart previewItem';
+    }
+  };
+}
+
+export function previewAmazonItem(amazon_id) {
+  return async function (dispatch) {
+    dispatch(request());
+
+    try {
+      const response = await fetch(`/api/itempreview?q=${amazon_id}`, {
+        credentials: 'same-origin'
+      });
+
+      return dispatch(receive(await response.json()));
+    } catch (e) {
+      throw 'error in cart previewAmazonItem';
     }
   };
 }
