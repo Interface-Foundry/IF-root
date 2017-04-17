@@ -1,5 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
+const dealsDb = require('../deals/deals')
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -125,9 +126,14 @@ module.exports = function (router) {
       cart: cart.id
     })
 
+    // grab the daily deals
+    let allDeals = yield dealsDb.getDeals(4, 0),
+      deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
+
     // use the new_cart email template
     email.template('new_cart', {
-      id: cart.id
+      cart: cart,
+      deals: deals
     })
 
     // remember to actually send it

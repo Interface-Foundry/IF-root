@@ -34,6 +34,14 @@ var userAccountCollection = Waterline.Collection.extend({
     },
 
     /**
+     * User's name, if supplied
+     * @type {Object}
+     */
+    name: {
+      type: 'string'
+    },
+
+    /**
      * List of user browser sessions
      * @type {Session}
      */

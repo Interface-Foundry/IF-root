@@ -80,6 +80,11 @@ router.get('/newcart', (req, res) => co(function * () {
     // make the first user the leader
     const user = session.user_accounts[0]
     cart.leader = user.id
+    if (user.name) {
+      cart.name = user.name + "'s Kip Group Cart"
+    } else {
+      cart.name = user.email_address + "'s Kip Group Cart"
+    }
     yield cart.save()
 
     // grab the daily deals
@@ -95,8 +100,7 @@ router.get('/newcart', (req, res) => co(function * () {
 
     // use the new_cart email template
     email.template('new_cart', {
-      id: cart.id,
-      name: user.email_address.split('@')[0],
+      cart: cart,
       deals: deals
     })
 
