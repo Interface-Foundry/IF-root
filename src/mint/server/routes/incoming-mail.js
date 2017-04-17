@@ -47,7 +47,7 @@ var sendConfirmationEmail = function * (email, uris) {
   yield confirmation.template('item_add_confirmation', {
     baseUrl: 'https://72f2343b.ngrok.io',
     id: '7a43d85c928f',
-    item_names: item_names.join(', ')
+    item_names: item_names
   })
 
   yield confirmation.send();
