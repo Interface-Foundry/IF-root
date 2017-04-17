@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Route } from 'react-router';
+import { Route, Switch } from 'react-router';
 import { getNameFromEmail } from '../../utils';
 import { Icon } from '..';
 
@@ -14,10 +14,13 @@ export default class Header extends Component {
     const { match } = props;
     return (
       <nav className='navbar'>
+      <Switch>
+        <Route path={`${match.url}/m/item/:index/:asin`} component={() => <EnumeratedHead text={'Your Cart'} {...props}/>} />
         <Route path={`${match.url}/m/item`} component={() => <ModalHead text={'Add to Cart'} {...props}/>} />
-        <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => <DealsHead {...props}/>} />
+        <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => <EnumeratedHead text={'Daily Deals'} {...props}/>} />
         <Route path={`${match.url}/m/share`} component={() => <ModalHead text={'Share Cart'} {...props}/>} />
         <Route path={`${match.url}`} exact component={() => <CartHead {...props}/>}/>
+        </Switch>
       </nav>
     );
   }
@@ -70,25 +73,28 @@ class ModalHead extends Component {
   }
 }
 
-
-class DealsHead extends Component {
+class EnumeratedHead extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
     history: PropTypes.object,
-    deals: PropTypes.array
+    deals: PropTypes.array,
+    text: PropTypes.string,
+    location: PropTypes.object,
   }
 
   render() {
-    const { cart_id, history: { replace }, text, location: { pathname }, deals } = this.props,
-        itemIndex = parseInt(pathname.split('/')[pathname.split('/').length - 2]) + 1;
-
+    let { cart_id, history: { replace }, text, location: { pathname }, deals, items } = this.props,
+      isItem = pathname.split('/')[pathname.split('/').length - 1] === 'edit',
+      itemIndex = parseInt(pathname.split('/')[pathname.split('/').length - (isItem ? 3 : 2)]) + 1;
+    items = items ? items : [];
+    console.log(this.props);
     return (
       <div className='navbar__modal'>
         <div className='navbar__icon__close' onClick={()=>replace(`/cart/${cart_id}/`)}>
           <Icon icon='Clear'/>
         </div>
         <h3 className='navbar__modal_head'>
-          Daily Deals - {itemIndex} of {deals.length || 0}
+          {text} - {itemIndex} of { (isItem ? items.length : deals.length) || 0}
         </h3>
       </div>
     );

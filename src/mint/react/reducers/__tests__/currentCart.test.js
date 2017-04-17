@@ -1,12 +1,9 @@
-import reducer from '../cart';
+import reducer from '../currentCart';
 import { RECEIVE_ADD_ITEM, ADD_MEMBER_TO_CART, RECEIVE_CART, RECEIVE_ITEMS, RECEIVE_REMOVE_ITEM } from '../../constants/ActionTypes';
 
 const initialState = {
-  carts: [],
-  currentCart: {
-    members: [],
-    items: []
-  },
+  members: [],
+  items: [],
   addingItem: false
 };
 
@@ -26,10 +23,7 @@ describe('cart reducer', () => {
       }))
       .toEqual({
         ...firstState,
-        currentCart: {
-          ...firstState.currentCart,
-          items: [...firstState.currentCart.items, item]
-        }
+        items: [...firstState.items, item]
       });
   });
 
@@ -41,10 +35,7 @@ describe('cart reducer', () => {
       }))
       .toEqual({
         ...firstState,
-        currentCart: {
-          ...firstState.currentCart,
-          items: [...firstState.currentCart.items, ...items]
-        }
+        items: [...firstState.items, ...items]
       });
   });
 
@@ -61,8 +52,8 @@ describe('cart reducer', () => {
       }))
       .toEqual({
         ...firstState,
-        currentCart: newCart,
-        cart_id: id
+        ...newCart,
+        cart_id: newCart.id
       });
   });
 
@@ -71,20 +62,14 @@ describe('cart reducer', () => {
     const newMember = { name: 'Taylor', id: 246 };
     expect(reducer({
         ...firstState,
-        currentCart: {
-          ...firstState.currentCart,
-          members
-        }
+        members
       }, {
         type: ADD_MEMBER_TO_CART,
         newMember
       }))
       .toEqual({
         ...firstState,
-        currentCart: {
-          ...firstState.currentCart,
-          members: [...members, newMember]
-        }
+        members: [...members, newMember]
       });
   });
 
@@ -92,22 +77,18 @@ describe('cart reducer', () => {
     const items = [{ item: 'omg im an item', id: 123 }, { item: 'omg im an item too', id: 321 }];
     const id = 'abc123';
     const newCart = {
-      ...firstState.currentCart,
+      ...firstState,
       items: [...items, { item: 'whatevs', id }],
     };
     expect(reducer({
-        ...firstState,
-        currentCart: newCart
+        ...newCart
       }, {
         type: RECEIVE_REMOVE_ITEM,
         itemToRemove: id
       }))
       .toEqual({
         ...firstState,
-        currentCart: {
-          ...firstState.currentCart,
-          items
-        },
+        items
       });
   });
 });
