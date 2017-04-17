@@ -4,28 +4,43 @@ $cart__add-height: $nav-height+$padding;
   height: calc(100% - #{$nav-height});
   position: relative;
   .cart__add {
-    height: $cart__add-height;
-    line-height: $cart__add-height;
     padding: 0 $padding*2 $padding*2;
-    border-bottom: 1px solid darken($border-color-light, 10);
   }
   .cart__title {
     height: $nav-height - $padding;
     line-height: $nav-height - $padding;
     background: $border-color-light;
     text-align: center;
-    border-bottom: 1px solid darken($border-color-light, 10);
   }
   .cart__items {
     height: calc(100% - #{$cart__add-height + $nav-height - $padding});
-    overflow-y: scroll;
+    overflow-y: visable;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
+    .cart__items__title {
+      font-weight: 500;
+      letter-spacing: 1px;
+      height: $nav-height;
+      line-height: $nav-height;
+      padding: 0 $padding*2;
+      border-bottom: 1px solid $border-color-light;
+    }
+    .cart__items-empty {
+      padding: $padding*2;
+      background: white;
+      border-bottom: 1px solid $border-color-light;
+      .image {
+        height: 50px;
+      }
+      h4 {
+        text-align: center;
+        padding: $padding;
+      }
+    }
   }
   .cartswitcher__cart {
     font-size: 14px;
-    font-family: $secondary-font;
-    font-weight: bold;
+    font-family: $main-font;
     text-decoration: underline;
     list-style: disc none inside;
   }

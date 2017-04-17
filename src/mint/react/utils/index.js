@@ -17,7 +17,8 @@ from './dates';
 
 export {
   commaSeparateNumber,
-  getNameFromEmail
+  getNameFromEmail,
+  addLinkToDeepLink
 }
 from './formating';
 

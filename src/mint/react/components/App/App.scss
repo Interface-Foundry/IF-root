@@ -1,10 +1,10 @@
 @import '../../styles/Constants';
-
 body,
 html {
   margin: 0;
   overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
   height: 100%;
+  background: $kip-primary-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
@@ -16,12 +16,7 @@ html {
   }
   a {
     text-decoration: none;
-    color: black;
-    opacity: 0.7;
-  }
-    a:hover {
-    text-decoration: none;
-    opacity: 1;
+    color: inherit;
   }
 }
 
@@ -33,6 +28,12 @@ html {
   left: 0;
   right: 0;
   overflow: auto;
+}
+
+.app__view {
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  height: calc(100% - #{$nav-height*2})
 }
 
 .image {
@@ -75,18 +76,12 @@ h4 {
   font-size: 12px;
 }
 
-a,
-p {
-  font-size: 10px;
-}
-
 input,
 select:focus,
 textarea {
-  font-size: 16px !important;
+  font-size: $input-font-size !important;
 }
 
 body::-webkit-scrollbar {
   display: none;
 }
- 

@@ -1,5 +1,6 @@
-import React, { PropTypes, Component } from 'react';
-import {Link} from 'react-router-dom'
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom'
 
 export default class CartSwitcher extends Component {
   static propTypes = {
@@ -14,6 +15,7 @@ export default class CartSwitcher extends Component {
         <ul>
           {carts.map((cart, i)=><CartItem key={i} cart={cart}/>)}
         </ul>
+        <hr/>
       </div>
     );
   }

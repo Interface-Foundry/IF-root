@@ -1,9 +1,18 @@
 @import '../../styles/Constants';
+.add_to_amazon {
+  padding-top: $padding;
+  font-size: 18px;
+}
 
-.amazon__button {
-	height: 100%;
+.add_to_amazon__button {
+  height: 100%;
   width: 100%;
   background: white;
-  border: 2px dashed #e3e3e3;
-  cursor: pointer;
+  color: rgb(114,114,114);
+  border: 2px dashed $color-blue;
+  cursor: text;
+  text-align: left;
+  font-size: $input-font-size;
+  height: 50px;
+  padding: 0 $padding;
 }

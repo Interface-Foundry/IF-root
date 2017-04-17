@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { Field } from 'redux-form'
 import { Icon } from '..'
 
@@ -18,7 +19,7 @@ const renderField = ({ input, label, placeholder, handleSubmit, type, meta: { to
 
 export default (props) => {
   const { handleSubmit, cart_id, history: { replace } } = props;
-  
+
   return (
     <form onSubmit={handleSubmit} className="form">
       <div>
@@ -29,9 +30,6 @@ export default (props) => {
           placeholder="Enter Email"
           handleSubmit={handleSubmit}
           component={renderField}/>
-      </div>
-      <div className="modal__drag" onClick={() => replace(`/cart/${cart_id}/`)}>
-        <Icon icon="Up"/>
       </div>
     </form>
   )

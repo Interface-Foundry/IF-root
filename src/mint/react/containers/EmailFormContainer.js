@@ -9,8 +9,8 @@ import { fetchCart } from '../actions/cart';
 import { isValidEmail } from '../utils';
 
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: state.cart.cart_id,
-  addingItem: state.cart.addingItem
+  cart_id: state.currentCart.cart_id,
+  addingItem: state.currentCart.addingItem
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -1,12 +1,13 @@
 $kip-primary-color: #fcfcf9;
-$kip-secondary-color: #333;
-
-$border-color-light: #e3e3e3;
-
+$kip-secondary-color: rgb(236, 231, 228);
+$kip-faded-color: #93918c;
+$color-blue: #4a9ff1;
+$border-color-light: #eae7e4;
+$price-color: #d65b00;
+$header-color: #4f4d4c;
 $nav-height: 50px;
 $padding: 10px;
-
 @import url('https://fonts.googleapis.com/css?family=Raleway:500,600');
-
-$main-font: 'Raleway', sans-serif;
-$secondary-font: 'Arial', sans-serif;
+$main-font: 'Arial', sans-serif;
+$secondary-font: 'Raleway', sans-serif;
+$input-font-size: 16px;

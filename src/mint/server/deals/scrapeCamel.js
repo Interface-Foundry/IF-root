@@ -217,7 +217,7 @@ var rankDeals = function * () {
     // logging.info('dealSet', dealSet.map(c => c.category));
     // logging.info('categoryCounts', categoryCounts);
     //if we have completed a set, we don't have to worry about repeating those categories
-    
+
     // logging.info('rankedDeals.length', rankedDeals.length);
     // logging.info('deferred.length', deferred.length);
     if (!deals.length) {
@@ -286,9 +286,10 @@ module.exports = function () {
   });
 };
 
-// if (!module.parent) {
+// You can run this file to manually scrape the deals
+if (!module.parent) {
   co(function * () {
     var r = yield scrapeCamel();
     console.log('r', r);
   }).catch(console.error.bind(console));
-// }
+}

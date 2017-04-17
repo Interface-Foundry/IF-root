@@ -4,7 +4,7 @@ import thunk from 'redux-thunk';
 
 import { fakeStore } from '../../utils';
 import { signIn, update } from '../session';
-import { REQUEST_UPDATE_SESSION, REQUEST_SESSION, RECEIVE_SESSION } from '../../constants/ActionTypes'
+import { REQUEST_UPDATE_SESSION, REQUEST_SESSION, RECEIVE_SESSION } from '../../constants/ActionTypes';
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);

@@ -1,8 +1,9 @@
-import React, { PropTypes, Component } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { getMemberById } from '../../reducers';
 import { getNameFromEmail } from '../../utils';
 
-export default class Item extends Component {
+export default class CartItem extends Component {
   static propTypes = {
     added_by: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
@@ -18,12 +19,16 @@ export default class Item extends Component {
     leader: PropTypes.object.isRequired,
     members: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
-    push: PropTypes.func.isRequired,
-    itemNumber: PropTypes.number.isRequired
+    itemNumber: PropTypes.number.isRequired,
+    cart_id: PropTypes.string.isRequired,
+    removeItem: PropTypes.func.isRequired,
+    incrementItem: PropTypes.func.isRequired,
+    decrementItem: PropTypes.func.isRequired,
+    isOwner: PropTypes.bool.isRequired
   }
 
   render() {
-    const { added_by, description, itemNumber, main_image_url, name, price, quantity, leader, members, } = this.props,
+    const { added_by, itemNumber, main_image_url, name, price, quantity, leader, members, removeItem, incrementItem, decrementItem, id, cart_id, isOwner } = this.props,
       linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by }),
       memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
 
@@ -31,20 +36,28 @@ export default class Item extends Component {
       <li className='cartItem'>
         <h4 className='cartItem__title'>{memberName}</h4>
 
-        <div className='cartItem__image image col-2 ' style={
+        <div className='cartItem__image image col-3 ' style={
           {
             backgroundImage: `url(${main_image_url})`,
-            height: 100,
+            backgroundPosition: 'top',
+            height: 75,
           }}/>
-        <div className='cartItem__props col-2'>
-          <p>Item #{itemNumber}</p>
-          <p>{name}</p>
-          <p>Price: ${price}</p>
+        <div className='cartItem__props col-9'>
+          <p>Item #{itemNumber} {name}</p>
+          <br/>
           <p>Qty: {quantity}</p>
+          <p>Price: ${price}</p>
         </div>
-        <div className='cartItem__props col-8'>
-          <p>{description}</p>
-        </div>
+        {
+          isOwner?
+          <div className='cartItem__actions col-12'>
+            <button onClick={()=>incrementItem(id, quantity)}>+</button>
+            <button onClick={()=> (quantity > 1) ? decrementItem(id, quantity) : removeItem(cart_id, id)}>-</button>
+            <button onClick={() => {}}>Edit</button>
+          </div>:
+          null
+        }
+        
       </li>
     );
   }

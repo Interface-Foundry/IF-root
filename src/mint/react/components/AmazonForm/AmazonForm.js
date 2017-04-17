@@ -12,14 +12,19 @@ export default class AmazonForm extends Component {
   renderField({ input, label, placeholder, handleSubmit, type, meta: { touched, error, warning, submitting, active } }) {
     return (
       <div>
-          <label>{label}</label>
-          {touched && ((error && <span>{error}</span>) || (warning && <span>{warning}</span>))}
+          <label>
+            {label}
+          </label>
           <div className='form__input'>
-            <input {...input} placeholder={placeholder} type={type} autoFocus/>
+            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete='off'/>
             <button
               className='form__input__submit'
               type="submit"
-              onClick={handleSubmit}><p>Submit</p></button>
+              onClick={handleSubmit}>
+              <p>
+                Ok
+              </p>
+            </button>
           </div>
           <DealsContainer isDropdown={active}/>
         </div>
@@ -31,18 +36,13 @@ export default class AmazonForm extends Component {
     const { handleSubmit, cart_id, history: { replace } } = props;
     return (
       <form onSubmit={handleSubmit} className="form">
-        <div>
-          <Field
-            name="url"
-            type="string"
-            label="Enter URL from Amazon?"
-            placeholder="Enter URL"
-            handleSubmit={handleSubmit}
-            component={renderField}/>
-        </div>
-        <div className="modal__drag" onClick={() => replace(`/cart/${cart_id}/`)}>
-          <Icon icon="Up"/>
-        </div>
+        <Field
+          name="url"
+          type="string"
+          label="Add Item to Kip Cart"
+          placeholder="Paste Amazon URL or Search"
+          handleSubmit={handleSubmit}
+          component={renderField}/>
     </form>
     );
   }

@@ -37,18 +37,6 @@ require('./other-api')(router)
 require('./carts-api')(router)
 require('./users-api')(router)
 
-//temporary for camel testing
-//TODO: delete
-var deals = require('../deals_sample.json');
-router.get('/test/deals', (req, res)=>{
-  res.json(deals);
-})
-
-var item = require('../amazon_sample_item.json');
-router.get('/test/item', (req, res)=>{
-  res.json(item);
-})
-
 // Koh Dummy test eail
 // curl -i -X POST http://127.0.0.1:3000/api/cart/36d4750ea2b3/test/komangwluce@gmail.com
 router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
