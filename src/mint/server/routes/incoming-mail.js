@@ -1,3 +1,5 @@
+console.log('incoming mail router')
+
 const co = require('co')
 const request = require('request-promise')
 var validUrl = require('valid-url');
@@ -35,19 +37,18 @@ var sendConfirmationEmail = function * (email, uris) {
     // message_html: '<html><body>Confirmation, woohoo!</body></html>'
   });
 
-  var item_names = [];
+  var items = [];
   //find recently added items
   yield uris.map(function * (uri) {
     var item = yield db.Items.findOne({original_link: uri});
-    item_names.push(item.name);
+    items.push(item);
   })
-  console.log('ITEM NAMES:', item_names);
 
   //add template and send confirmation email
   yield confirmation.template('item_add_confirmation', {
     baseUrl: 'https://72f2343b.ngrok.io',
     id: '7a43d85c928f',
-    item_names: item_names
+    items: items
   })
 
   yield confirmation.send();
@@ -106,7 +107,7 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   if (uris.length) {
     var url_items = yield uris.map(function * (uri) {
       return yield amazonScraper.scrapeUrl(uri);
-      // var item = yield amazon.getAmazonItem(uri);
+      var item = yield amazon.getAmazonItem(uri);
       console.log('ITEM', item)
       if (item.Variations) console.log('there are options')
       // return yield amazon.addAmazonItemToCart(item, cart);

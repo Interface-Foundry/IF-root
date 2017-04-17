@@ -170,14 +170,14 @@
                             <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                 <tr>
                                     <td style="padding: 0px 15px 50px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
-                                      <% for(var x=0; x<deals[i].length; x++) {%>
+                                      <% for(var i=0; i<items.length; i++) {%>
                                          <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                              <tr>
                                                  <td align="center" style="padding: 30px 5px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1;font-weight: 500;">
                                                     <!-- <%=baseUrl%>/cart/<%=id%> -->
                                                     <!-- TODO: repeat items in cart -->
-                                                    <!-- <p><%=item_names%></p> -->
-                                                    <p>this could be an item, you never know</p>
+                                                    <table><tr><td style="padding-right:1em"><img src="<%=items[i].thumbnail_url%>" alt="item image"></td>
+                                                    <td><p><a href="<%=items[i].original_link%>"><%=items[i].name%></a></p></td></tr></table>
                                                  </td>
                                              </tr>
                                           </table>
