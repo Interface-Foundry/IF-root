@@ -6,7 +6,6 @@ function nameFormatter(data, cell) {
 }
 
 const DeliveryTable = ({data}) => {
-	debugger;
   return (
     <BootstrapTable data={data} hover>
       <TableHeaderColumn isKey={true} dataField='time_started'>Created Date</TableHeaderColumn>

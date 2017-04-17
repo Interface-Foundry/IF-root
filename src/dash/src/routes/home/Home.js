@@ -100,8 +100,8 @@ class Home extends Component {
     let currentQuery;
     if (this.state.view === 'Cafe') {
       currentQuery = gql`
-        query {
-          deliveries(limit: 4){
+        query DeliveriesInDateRange($startDate: String!, $endDate: String!){
+          deliveries(limit: 10, start_date: $startDate, end_date: $endDate){
             time_started, team_id, item_count, cart_total, chosen_restaurant, team{team_name}, items {item_name, user}
           }
         }
@@ -120,11 +120,13 @@ class Home extends Component {
   render(){
     var self = this;
 
-
     const currentQuery = this.getCurrentQuery()
-    const TableWithData = graphql(currentQuery)(getCurrentTable);
+    const TableWithData = graphql(currentQuery,{
+  options: { variables: { startDate: self.state.startDate, endDate: self.state.endDate} },
+})(getCurrentTable);
 
     return (
+    
       <div>
         <div>
           {self.renderCartsLineGraph(this.props.data)}
