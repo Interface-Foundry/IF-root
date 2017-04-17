@@ -17,7 +17,11 @@ export default class Header extends Component {
       <Switch>
         <Route path={`${match.url}/m/item/:index/:asin`} component={() => <EnumeratedHead text={'Your Cart'} {...props}/>} />
         <Route path={`${match.url}/m/item`} component={() => <ModalHead text={'Add to Cart'} {...props}/>} />
+<<<<<<< HEAD
         <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => <EnumeratedHead text={'Daily Deals'} {...props}/>} />
+=======
+        <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => <DealsHead {...props}/>} />
+>>>>>>> added daily deals header
         <Route path={`${match.url}/m/share`} component={() => <ModalHead text={'Share Cart'} {...props}/>} />
         <Route path={`${match.url}`} exact component={() => <CartHead {...props}/>}/>
         </Switch>
@@ -73,6 +77,7 @@ class ModalHead extends Component {
   }
 }
 
+<<<<<<< HEAD
 class EnumeratedHead extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
@@ -88,13 +93,31 @@ class EnumeratedHead extends Component {
       itemIndex = parseInt(pathname.split('/')[pathname.split('/').length - (isItem ? 3 : 2)]) + 1;
     items = items ? items : [];
     console.log(this.props);
+=======
+
+class DealsHead extends Component {
+  static propTypes = {
+    cart_id: PropTypes.string,
+    history: PropTypes.object,
+    deals: PropTypes.array
+  }
+
+  render() {
+    const { cart_id, history: { replace }, text, location: { pathname }, deals } = this.props,
+        itemIndex = parseInt(pathname.split('/')[pathname.split('/').length - 2]);
+
+>>>>>>> added daily deals header
     return (
       <div className='navbar__modal'>
         <div className='navbar__icon__close' onClick={()=>replace(`/cart/${cart_id}/`)}>
           <Icon icon='Clear'/>
         </div>
         <h3 className='navbar__modal_head'>
+<<<<<<< HEAD
           {text} - {itemIndex} of { (isItem ? items.length : deals.length) || 0}
+=======
+          Daily Deals - {itemIndex} of {deals.length || 0}
+>>>>>>> added daily deals header
         </h3>
       </div>
     );
