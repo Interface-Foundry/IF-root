@@ -9,7 +9,7 @@ const mapStateToProps = (state, ownProps) => ({
   item_id: ownProps.match.params.item_id,
   amazon_id: ownProps.match.params.amazon_id,
   item: state.item,
-  index: ownProps.match.params.index,
+  index: parseInt(ownProps.match.params.index),
   type: ownProps.match.params.item_type,
   items: ownProps.match.params.item_type === 'deal' ? state[`${ownProps.match.params.item_type}s`][`${ownProps.match.params.item_type}s`] : state.currentCart.items
 });

@@ -37,26 +37,33 @@ const shareIcons = [
   }
 ]
 
+// IOS, for facebook
+
 export default class Share extends Component {
   openFailedHandler = () => {
-    console.log('open failed, please instal app')
+    if(navigator.userAgent.toLowerCase().indexOf("android") > -1) {
+      window.location.href = 'http://play.google.com/store/apps';
+    } else if(navigator.userAgent.toLowerCase().indexOf("iphone") > -1) {
+      window.location.href = 'http://itunes.apple.com';
+    } else {
+      window.location.href = 'http://itunes.apple.com';
+    }
   }
 
   tryToOpen = route => {
     const { openFailedHandler } = this;
 
-    setTimeout(openFailedHandler(route), 300);
+    setTimeout(openFailedHandler(), 2000);
   }
 
   copy = e => {
     this.input.select();
     document.execCommand('copy');
-    // This is just personal preference.
-    // I prefer to not show the the whole text area selected.
   }
 
   render() {
     const { location: { pathname } } = this.props,
+          { tryToOpen } = this,
           linkedIcons = addLinkToDeepLink(shareIcons, `kipthis.com/c/${pathname.match(/cart\/((\d|\w)+)/)[1]}`);
 
     return (
@@ -89,7 +96,7 @@ export default class Share extends Component {
                 )
 
               return (
-                <a href={icon.deepLink} key={i} className='share__icons__icon'>
+                <a href={icon.deepLink} key={i} className='share__icons__icon' onClick={() => tryToOpen(icon.icon)}>
                   <Icon icon={icon.icon}/>
                   <label>{icon.label}</label>
                 </a>

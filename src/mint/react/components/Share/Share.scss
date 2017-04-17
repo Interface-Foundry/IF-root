@@ -91,6 +91,9 @@
 			height: 45%;
 			padding: $padding*3 0 0;
 			svg {
+				display: block;
+				max-width: 50px;
+				margin: 0 auto;
 				width: 100%;
 				height: calc(100% - 25px);
 			}
