@@ -65,6 +65,7 @@ export default class Item extends Component {
       determineNav,
       props: { index, type, items, item, item: { main_image_url, store, description } }
     } = this;
+
     return (
       <div 
         className='item' onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }

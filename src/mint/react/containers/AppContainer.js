@@ -10,12 +10,8 @@ const mapStateToProps = (state, ownProps) => ({
   currentUser: state.session.user_accounts[0],
   newAccount: state.session.newAccount,
   deals: state.deals.deals,
-<<<<<<< HEAD
   item: state.item,
   items: state.currentCart.items
-=======
-  item: state.item
->>>>>>> added daily deals header
 });
 const mapDispatchToProps = dispatch => ({
 	addItem: (cart_id, item_id, replace) => {
