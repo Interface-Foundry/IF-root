@@ -37,7 +37,8 @@ export default class Cart extends Component {
   render() {
     const { items, leader, members, user_accounts, history: { replace } } = this.props,
       hasItems = items.quantity > 0,
-      isLeader = user_accounts[0] && leader && (leader.id === user_accounts[0].id);
+      isLeader = !!user_accounts[0] && !!leader && (leader.id === user_accounts[0].id);
+
     return (
       <div className='cart'>
         <div className='cart__add'>
@@ -58,12 +59,12 @@ export default class Cart extends Component {
 
 class MyItems extends Component {
   static propTypes = {
-    items: PropTypes.array.isRequired,
-    isLeader: PropTypes.bool.isRequired
+    items: PropTypes.array.isRequired
   }
 
   render() {
     const { props, props: { items } } = this;
+    
     return (
       <ul>
         <div className='cart__items__title'>Your Items</div>
