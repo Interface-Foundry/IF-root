@@ -6,7 +6,6 @@
   line-height: $nav-height - $padding*2;
   padding: $padding $padding*2;
   font-family: 'Raleway';
-  background: $header-color;
   color: $kip-primary-color;
 
   .footer__cart {
@@ -20,12 +19,20 @@
     border-radius: 5px;
     margin: 0 auto;
     background: white;
+    background: $main-button-color;
     border: 1px solid $border-color-light;
+    font-weight: 600;
 
     &:first-of-type {
       margin-right: 10%;
     }
+
+    &.share {
+      background: $secondary-button-color;
+      color: white;
+    }
   }
+
 
   .empty {
     position: absolute;

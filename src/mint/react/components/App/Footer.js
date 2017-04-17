@@ -52,7 +52,7 @@ class CartFooter extends Component {
 
     return (
       <div className='footer__cart'>
-        <button onClick={_handleShare}>SHARE</button>
+        <button className='share' onClick={_handleShare}>SHARE</button>
         <button>CHECKOUT</button>
       </div>
     );

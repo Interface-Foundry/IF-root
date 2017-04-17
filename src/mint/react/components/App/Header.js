@@ -80,7 +80,7 @@ class DealsHead extends Component {
 
   render() {
     const { cart_id, history: { replace }, text, location: { pathname }, deals } = this.props,
-        itemIndex = parseInt(pathname.split('/')[pathname.split('/').length - 2]);
+        itemIndex = parseInt(pathname.split('/')[pathname.split('/').length - 2]) + 1;
 
     return (
       <div className='navbar__modal'>
