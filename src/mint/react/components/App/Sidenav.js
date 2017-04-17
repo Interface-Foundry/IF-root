@@ -31,24 +31,24 @@ export default class Sidenav extends Component {
           </li>
           <h4>Leader</h4>
           {_.map(leaderCarts, (c, i) => (
-            <li key={i} className='sidenav__list__leader'>
+            <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+              <div className='icon'>
+                <Icon icon='Edit'/>
+              </div>
               <Link to={`/cart/${c.id}`}>
-                <div className='icon' onClick={_toggleSidenav}>
-                  <Icon icon='Edit'/>
-                </div>
+                <p>{`${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
               </Link>
-              <p>{`${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
             </li>
           ))}
           <h4>Member</h4>
           {_.map(memberCarts, (c, i) => (
-            <li key={i} className='sidenav__list__leader'>
+            <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+              <div className='icon'>
+                <Icon icon='Edit'/>
+              </div>
               <Link to={`/cart/${c.id}`}>
-                <div className='icon' onClick={_toggleSidenav}>
-                  <Icon icon='Edit'/>
-                </div>
+                <p>{`${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
               </Link>
-              <p>{`${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
             </li>
           ))}
           <footer>
