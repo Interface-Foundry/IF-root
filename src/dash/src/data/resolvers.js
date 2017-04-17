@@ -28,7 +28,7 @@ import Menu from '../../../chat/components/delivery.com/Menu';
  * @param  {object} args object with possible start and end dates
  * @return {object} args object
  */
-function getDateFromArgs(args) {
+function getDeliveryDateFromArgs(args) {
   let dateArgs;
   const newArgs = args;
 
@@ -46,6 +46,28 @@ function getDateFromArgs(args) {
     delete newArgs.end_date;
   }
   newArgs.time_started = dateArgs;
+
+  return newArgs;
+}
+
+function getCartDateFromArgs(args) {
+  let dateArgs;
+  const newArgs = args;
+
+  if (newArgs.start_date || newArgs.end_date) {
+    dateArgs = {};
+  } else {
+    return newArgs;
+  }
+  if (newArgs.start_date) {
+    dateArgs.$gt = new Date(newArgs.start_date);
+    delete newArgs.start_date;
+  }
+  if (newArgs.end_date) {
+    dateArgs.$lt = new Date(newArgs.end_date);
+    delete newArgs.end_date;
+  }
+  newArgs.created_date = dateArgs;
 
   return newArgs;
 }
@@ -76,7 +98,7 @@ function prepareCafeCarts(foodSession) {
 function prepareStoreCarts(cart) {
   if (cart.amazon) {
     if (cart.amazon.SubTotal) {
-      cart.cart_total = `$${cart.amazon.SubTotal[0].Amount / 100.0}`;
+      cart.cart_total = `$${Number(cart.amazon.SubTotal[0].Amount / 100.0).toFixed(2)}`;
     }
     cart.item_count = cart.items.length;
   }
@@ -173,7 +195,7 @@ const Resolvers = {
         let userName = await context.loaders.UsersByUserId.load(i.user_id);
         userName = userName.name;
         return {
-          item_name: (item.name) ? item.name : 'name unavail',
+          item_name: item ? item.name : 'name unavail',
           // either need to convert id to name here or with context in the resolver
           user: userName,
         };
@@ -240,7 +262,7 @@ const Resolvers = {
 
   Query: {
     carts: async (root, args) => {
-      const newArgs = getDateFromArgs(args);
+      const newArgs = getCartDateFromArgs(args);
       let res = await pagination(Carts, newArgs);
       res = res.map(cart => prepareStoreCarts(cart));
       return res;
@@ -248,7 +270,7 @@ const Resolvers = {
 
     deliveries: async (root, args, context) => {
       // let deliveryArgs = {'cart.1': {'$exists': true}};
-      const newArgs = getDateFromArgs(args);
+      const newArgs = getDeliveryDateFromArgs(args);
       let res = await pagination(Deliveries, newArgs);
       res = res.map((foodSession) => prepareCafeCarts(foodSession));
       return res;

@@ -211,6 +211,8 @@ type Query {
   carts(
     limit: Int
     offset: Int
+    start_date: String
+    end_date: String
     _id: String
   ): [Cart]
   deliveries(

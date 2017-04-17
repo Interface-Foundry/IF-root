@@ -109,8 +109,8 @@ class Home extends Component {
     } else if (this.state.view === 'Store') {
       //store query
       currentQuery = gql`
-        query {
-          carts{created_date, team{team_name}, type, item_count, cart_total, items{title}}
+        query CartsInDateRange($startDate: String!, $endDate: String!){
+          carts(limit: 10, start_date: $startDate, end_date: $endDate){created_date, team{team_name}, type, item_count, cart_total, items{title}}
         }
       `;
     }
