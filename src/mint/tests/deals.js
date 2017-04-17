@@ -26,5 +26,10 @@ describe('deals', () => {
       assert.equal(typeof d.savePercent, 'number')
       assert.equal(typeof d.active, 'boolean')
     })
+
+    // make sure the deals are recent in production
+    if (process.env.NODE_ENV === 'production') {
+      assert(new Date(deals[0].createdAt) > new Date(Date.now() - 1000 * 60 * 60 * 24), 'deals should be less than one day old')
+    }
   }))
 })
