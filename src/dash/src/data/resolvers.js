@@ -75,7 +75,7 @@ function prepareCafeCarts(foodSession) {
  */
 function prepareStoreCarts(cart) {
   if (cart.amazon) {
-    if(cart.amazon.SubTotal){
+    if (cart.amazon.SubTotal) {
       cart.cart_total = `$${cart.amazon.SubTotal[0].Amount / 100.0}`;
     }
     cart.item_count = cart.items.length;
@@ -173,8 +173,7 @@ const Resolvers = {
         let userName = await context.loaders.UsersByUserId.load(i.user_id);
         userName = userName.name;
         return {
-            item_name: item ? item.name : '',
-          
+          item_name: (item.name) ? item.name : 'name unavail',
           // either need to convert id to name here or with context in the resolver
           user: userName,
         };
