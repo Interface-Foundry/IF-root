@@ -26,30 +26,24 @@ module.exports = function (router) {
     // get the list of their user ids
     const userIds = req.UserSession.user_accounts.map(a => a.id)
 
-    // find all the carts where their user id appears in the leader or member field
-    // NB: BUG: not returning carts where user is a member
-    // NOTE: db.Carts.find() does not return a default value for members (isMany), unlike leader (isA)
-
-    // const carts = yield db.Carts.find({
-    //   or: [
-    //     { leader: userIds },
-    //     { members: userIds }
-    //   ]
-    // }).populate('items').populate('leader').populate('members')
-
-    db.Carts.find({
-      leader: { '!' : [undefined, null] },
-    }).populate('members').populate('leader').populate('items').then(function(allCarts) {
-
-      let carts = _.filter(allCarts, function(c) {
-        return userIds.includes(c.leader.id) || c.members.map(function(m) { return m.id }).join(',').includes(userIds[0])
-      })
-
-      res.send(carts)
-      
+    // find all the cart ids for which the user is a member
+    const memberCarts = yield db.carts_members__user_accounts_id.find({
+      user_accounts_id: {
+        $in: userIds
+      }
     })
 
+    const memberCartsIds = memberCarts.map( c => c.carts_members )
 
+    // find all the carts where their user id appears in the leader or member field
+    const carts = yield db.Carts.find({
+      or: [
+        { leader: userIds },
+        { id: memberCartsIds }
+      ]
+    }).populate('items').populate('leader').populate('members')
+
+    res.send(carts)
   }))
 
   /**
