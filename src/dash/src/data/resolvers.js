@@ -75,7 +75,9 @@ function prepareCafeCarts(foodSession) {
  */
 function prepareStoreCarts(cart) {
   if (cart.amazon) {
-    cart.cart_total = `$${cart.amazon.SubTotal[0].Amount / 100.0}`;
+    if(cart.amazon.Subtotal){
+      cart.cart_total = `$${cart.amazon.SubTotal[0].Amount / 100.0}`;
+    }
     cart.item_count = cart.items.length;
   }
   return cart;
