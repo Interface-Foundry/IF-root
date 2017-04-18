@@ -10,7 +10,7 @@ module.exports = function (router) {
    * @api {get} /api/session Session
    * @apiDescription Gets the user's current session
    * @apiGroup Users
-   * @apiSuccess {[UserAccount]} user_accounts list of user accounts
+   * @apiSuccess {UserAccount} user_account the user account
    * @apiSuccess {String} animal the session's randomized animal
    */
   router.get('/session', (req, res) => {
