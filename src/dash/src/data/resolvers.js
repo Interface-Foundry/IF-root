@@ -80,13 +80,15 @@ function getCartDateFromArgs(args) {
 function prepareCafeCarts(foodSession) {
   foodSession.type = 'slack'; // only doing slack atm
   foodSession.chosen_restaurant = _.get(foodSession, 'chosen_restaurant.name');
-  var cartLength = 0;
+  var cartLength=0;
   foodSession.cart_total = `$0.00`;
-  for(var i = 0; i<foodSession.cart.length; i++){
+  if(foodSession.cart){
+    for(var i = 0; i<foodSession.cart.length; i++){
       if(foodSession.cart[i].added_to_cart){
-        cartLength++;
+        cartLength+=foodSession.cart[i].item.item_qty;
       }
-  }
+    }
+  } 
 
   if (cartLength > 0) {
     foodSession.cart_total = `$${Number(foodSession.calculated_amount).toFixed(2)}`;
@@ -103,6 +105,7 @@ function prepareCafeCarts(foodSession) {
  * @return {object} cart object
  */
 function prepareStoreCarts(cart) {
+  cart.type = 'slack';
   if (cart.created_date) {
     cart.created_date = new Date(cart.created_date).toDateString()
   }

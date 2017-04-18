@@ -46,7 +46,7 @@ class Home extends Component {
       currentQuery = gql`
         query DeliveriesInDateRange($startDate: String!, $endDate: String!){
           deliveries(limit: 10, start_date: $startDate, end_date: $endDate){
-            time_started, team_id, item_count, cart_total, chosen_restaurant, team{team_name}, cart, items {item_name, user}
+            time_started, team_id, item_count, cart_total, chosen_restaurant, team{team_name, members{name,id}}, order, cart, type, items {item_name, user}
           }
         }
       `;
