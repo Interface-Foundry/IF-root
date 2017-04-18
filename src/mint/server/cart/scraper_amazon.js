@@ -50,7 +50,7 @@ module.exports.scrapeAsin = function asin_scraper (asin) {
  * @param  {json}    res response from amazon api, a totally what the fuck pile of jsonified xml data
  * @return {Promise<item>}     returns promise for a db.Item.
  */
-function res2Item(res) {
+module.exports.res2Item = function (res) {
   return co(function * () {
     // make sure the response is okay
     if (_.get(res, 'Request.IsValid') !== 'True' || !res.Item) {
@@ -105,16 +105,21 @@ function res2Item(res) {
     yield dbReady
 
     // create a new item
-    var item = yield db.Items.create({
-      store: 'amazon',
-      name: i.ItemAttributes.Title,
-      description: i.ItemAttributes.Feature,
-      price: price,
-      thumbnail_url: thumbnail,
-      main_image_url: mainImage
-    })
+    try {
+      var item = yield db.Items.create({
+        store: 'amazon',
+        name: i.ItemAttributes.Title,
+        description: i.ItemAttributes.Feature,
+        price: price,
+        thumbnail_url: thumbnail,
+        main_image_url: mainImage
+      });
 
-    return item
-
+      return item;
+    }
+    catch (err) {
+      logging.error(err);
+      return null;
+    }
   })
 }

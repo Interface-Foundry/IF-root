@@ -344,7 +344,7 @@ module.exports = function (router) {
       // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
       var item = yield amazon.searchAmazon(q);
     }
-    res.send(item);
+    res.send(item)
   }))
 
   router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
