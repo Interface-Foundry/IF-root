@@ -16,6 +16,11 @@ const deals = require('../deals/deals');
 var amazonScraper = require('../cart/scraper_amazon');
 var amazon = require('../cart/amazon_cart.js');
 
+/**
+ * Sends an email informing the user that a url they typed
+ * was not a valid amazon url we could user
+ * @param {string} email - email of the user who is receiving the error-email
+ */
 var sendErrorEmail = function * (email) {
   var error = yield db.Emails.create({
     recipients: email,
@@ -27,6 +32,12 @@ var sendErrorEmail = function * (email) {
   yield error.send();
 }
 
+/**
+ * Responds to the user with an email confirming that whatever
+ * items have been added to their cart
+ * @param {string} email - the email of the user we're responding to
+ * @param {array} uris - array of the urls of the amazon items we're confirming
+ */
 var sendConfirmationEmail = function * (email, uris) {
   //create confirmation email
   var confirmation = yield db.Emails.create({
@@ -55,6 +66,29 @@ var sendConfirmationEmail = function * (email, uris) {
 }
 
 /**
+ * TODO
+ * @param
+ * @returns
+ */
+var processText = function () {
+  //TODO
+  return "hapax legomenon"
+}
+
+/**
+ * pulls valid amazon urls from the email body
+ * @param {string} text - the text of the email body
+ * @returns an array of the valid amazon urls in the email body
+ */
+var processAmazonURIs = function (text) {
+  var words = text.split(/\s/);
+  var all_uris = text.filter(w => validUrl.isUri(w));
+  if (!all_uris) return null; // if there aren't any urls at all return null
+  //validate uris as amazon links
+  else return all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u));
+}
+
+/**
  * TODO, etc
  */
 router.post('/', upload.array(), (req, res) => co(function * () {
@@ -66,12 +100,21 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   if (email[0] === '<') email = email.slice(1, email.length-1);
   var user = yield db.UserAccounts.findOrCreate({email: email});
 
-  //parse out amazon uris
-  var text = req.body.text.split(/\s/);
-  var all_uris = (text ? text.filter(w => validUrl.isUri(w)) : null);
-  var text = (text ? text.filter(w => !validUrl.isUri(w)) : null);
-  logging.info('all_uris', all_uris)
-  uris = (all_uris ? all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)) : null);   //validate uris as amazon links
+  //parse out text and uris
+  var body = req.body.text;
+
+  //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
+  if (!body) {
+    logging.info('no email body');
+    yield sendErrorEmail(email);
+    res.sendStatus(202);
+  }
+
+  //TODO be smooth -- #warmachine
+  var text = processText(body);
+  var uris = processAmazonURIs(body;)
+
+  //business logic starts here -- TODO
   if (!(uris.length) && all_uris) {
     //send error email
     console.log('gonna send an error email');

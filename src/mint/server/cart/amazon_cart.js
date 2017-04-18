@@ -72,7 +72,7 @@ exports.getAmazonItem = function * (item_identifier) {
  * search item by keyword(s)
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
  * lookup item by asin
- * @param {string} search terms
+ * @param {string} query search terms
  * @returns {[type]} amazon items
  */
 exports.searchAmazon = function * (query) {
