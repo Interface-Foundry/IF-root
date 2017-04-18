@@ -24,11 +24,13 @@ export default class AddAmazonItem extends Component {
 
   render() {
     const { addItemToCart, props } = this;
-    const { numUserItems } = props;
+    const { numUserItems, user_accounts } = props;
     return (
       <div className='add_to_amazon'>
         Add Item to Kip Cart
-        <button className='add_to_amazon__button' onClick={addItemToCart}>Paste Amazon URL or Search</button>
+        <button className={`add_to_amazon__button ${!!user_accounts[0] ? '' : 'yellow'}`} onClick={addItemToCart}>
+          { !!user_accounts[0] ? 'Paste Amazon URL or Search' : '+ Add Amazon Item' }
+        </button>
         {numUserItems ? null : <NotificationBubble top={25} right={13}/>}
       </div>
     );

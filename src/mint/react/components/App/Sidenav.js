@@ -45,11 +45,8 @@ export default class Sidenav extends Component {
           <h4>Member</h4>
           {_.map(memberCarts, (c, i) => (
             <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-              <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
-                <div className='icon'>
-                  <Icon icon='Edit'/>
-                </div>
-              </Link>
+              <div className='icon'>
+              </div>
               <Link to={`/cart/${c.id}`}>
                 <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
               </Link>

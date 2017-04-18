@@ -16,4 +16,11 @@
   height: 50px;
   padding: 0 $padding;
   border-radius: $padding;
+  text-align: center;
+
+  &.yellow {
+    background: $main-button-color;
+    color: #333;
+    border: 2px solid $main-button-color;
+  }
 }
