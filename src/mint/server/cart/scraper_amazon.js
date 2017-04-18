@@ -50,7 +50,7 @@ module.exports.scrapeAsin = function asin_scraper (asin) {
  * @param  {json}    res response from amazon api, a totally what the fuck pile of jsonified xml data
  * @return {Promise<item>}     returns promise for a db.Item.
  */
-module.exports.res2Item = function (res) {
+var res2Item = function (res) {
   return co(function * () {
     // make sure the response is okay
     if (_.get(res, 'Request.IsValid') !== 'True' || !res.Item) {
@@ -123,3 +123,5 @@ module.exports.res2Item = function (res) {
     }
   })
 }
+
+module.exports.res2Item = res2Item;
