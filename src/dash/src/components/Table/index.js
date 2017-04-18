@@ -5,7 +5,8 @@ function nameFormatter(data, cell) {
   return `<p>${cell[data]}</p>`;
 }
 
-const DeliveryTable = ({data}) => {
+const CafeTable = ({data}) => {
+  // data transformation here
   return (
     <BootstrapTable data={data} hover>
       <TableHeaderColumn isKey={true} dataField='time_started'>Created Date</TableHeaderColumn>
@@ -17,4 +18,16 @@ const DeliveryTable = ({data}) => {
   );
 };
 
-export default DeliveryTable;
+//carts{created_date, team{team_name}, type, item_count, cart_total, items{title}}}
+const CartTable = ({data}) => {
+  return (
+    <BootstrapTable data={data} hover>
+      <TableHeaderColumn isKey={true} dataField='created_date'>Created Date</TableHeaderColumn>
+      <TableHeaderColumn dataField='item_count'>Item Count</TableHeaderColumn>
+      <TableHeaderColumn dataField='cart_total'>Cart Total</TableHeaderColumn>
+    </BootstrapTable>
+  );
+};
+      // <TableHeaderColumn dataField='team.team_name'>Team ID</TableHeaderColumn>
+
+export { CafeTable, CartTable };

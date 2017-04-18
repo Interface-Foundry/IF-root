@@ -16,25 +16,7 @@ export default {
   path: '/',
 
 
-  async action() {
-    let resp;
-
-    resp = await fetch('/graphql', {
-      method: 'post',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: '{deliveries{time_started, team_id, item_count, cart_total, chosen_restaurant, team{team_name}, items {item_name, user}}}',
-      }),
-      //
-      credentials: 'include',
-    });
-
-    const data = await resp.json();
-    if (!data) throw new Error('Failed to load teams.');
-
-    return <Home data={data} />
+  action() {
+    return <Home />
   }
 };
