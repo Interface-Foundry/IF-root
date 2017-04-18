@@ -80,14 +80,14 @@ class EnumeratedHead extends Component {
     deals: PropTypes.array,
     text: PropTypes.string,
     location: PropTypes.object,
+    items: PropTypes.array
   }
 
   render() {
     let { cart_id, history: { replace }, text, location: { pathname }, deals, items } = this.props,
       isItem = pathname.split('/')[pathname.split('/').length - 1] === 'edit',
       itemIndex = parseInt(pathname.split('/')[pathname.split('/').length - (isItem ? 3 : 2)]) + 1;
-      items = items ? items : [];
-
+    items = items ? items : [];
     return (
       <div className='navbar__modal'>
         <div className='navbar__icon__close' onClick={()=>replace(`/cart/${cart_id}/`)}>

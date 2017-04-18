@@ -2,7 +2,6 @@ import { connect } from 'react-redux';
 import { Cart } from '../components';
 import { fetchDeals } from '../actions/deals';
 import { selectItem } from '../actions/cart';
-import { removeItem, incrementItem, decrementItem } from '../actions/item';
 import { splitCartById } from '../reducers';
 
 const mapStateToProps = (state, ownProps) => {
@@ -20,9 +19,6 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => ({
   fetchDeals: () => dispatch(fetchDeals()),
   selectItem: item => dispatch(selectItem(item)),
-  removeItem: (cart_id, item_id) => dispatch(removeItem(cart_id, item_id)),
-  incrementItem: (item_id, quantity) => dispatch(incrementItem(item_id, quantity)),
-  decrementItem: (item_id, quantity) => dispatch(decrementItem(item_id, quantity)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);

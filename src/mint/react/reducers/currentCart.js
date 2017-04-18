@@ -81,4 +81,3 @@ export const splitCartById = (state, props) => {
     quantity: 0
   })
 }
-

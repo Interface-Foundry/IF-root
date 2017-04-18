@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { Item } from '../components';
 import { fetchDeals } from '../actions/deals';
-import { previewItem, clearItem, previewAmazonItem } from '../actions/item';
+import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, decrementItem } from '../actions/item';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
@@ -18,7 +18,10 @@ const mapDispatchToProps = dispatch => ({
   fetchDeals: () => dispatch(fetchDeals()),
   previewItem: (itemId) => dispatch(previewItem(itemId)),
   previewAmazonItem: (amazonId) => dispatch(previewAmazonItem(amazonId)),
-  clearItem: () => dispatch(clearItem())
+  clearItem: () => dispatch(clearItem()),
+  removeItem: (cart_id, item_id) => dispatch(removeItem(cart_id, item_id)),
+  incrementItem: (item_id, quantity) => dispatch(incrementItem(item_id, quantity)),
+  decrementItem: (item_id, quantity) => dispatch(decrementItem(item_id, quantity)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Item);

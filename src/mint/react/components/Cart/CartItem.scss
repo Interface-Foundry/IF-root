@@ -2,7 +2,8 @@
 .cartItem {
   padding: $padding*2;
   border-bottom: 1px solid $border-color-light;
-  background: white;
+  background: $kip-primary-color;
+  font-family: $secondary-font;
   .cartItem__title {
     height: $nav-height;
     line-height: $nav-height;
@@ -18,22 +19,27 @@
     display: inline-block;
     padding: 0 0 0 $padding*2;
     p {
+      float: left;
+      clear: left;
       font-size: 13px;
     }
-  }
-  .cartItem__actions {
-    height: $nav-height;
-    padding: $padding 0;
-    text-align: right;
-    button {
-      height: 100%;
-      margin: 0 $padding/2;
-      padding: 0 $padding;
-      background: $border-color-light;
-      border: 1px solid $border-color-light;
-      min-width: 30px;
-      &:last-of-type {
-        margin: 0 0 0 $padding/2;
+    .cartItem__actions {
+      float: right;
+      padding: $padding/2;
+      button {
+        cursor: pointer;
+        font-family: $secondary-font;
+        font-size: 16px;
+        color: $kip-faded-color;
+        padding: 0 $padding;
+        height: $padding * 3;
+        width: $padding * 7;
+        background: white;
+        border: 2px solid $border-color-light;
+        border-radius: $padding/2;
+        &:active {
+          background: $border-color-light;
+        }
       }
     }
   }

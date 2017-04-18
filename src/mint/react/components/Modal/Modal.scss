@@ -14,7 +14,7 @@
   .form {
     padding: $padding $padding*2 $padding*2 $padding*2;
     .deals__section {
-      padding: $padding*2 0 0;
+      padding: 0 $padding $padding;
       margin: 0 -$padding 0 -$padding;
     }
     label {

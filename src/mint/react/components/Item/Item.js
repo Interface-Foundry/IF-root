@@ -18,7 +18,7 @@ export default class Item extends Component {
     items: PropTypes.array,
     fetchDeals: PropTypes.func,
     previewAmazonItem: PropTypes.func,
-    index: PropTypes.string,
+    index: PropTypes.number,
     amazon_id: PropTypes.string
   }
 
@@ -63,6 +63,7 @@ export default class Item extends Component {
   render() {
     const {
       determineNav,
+      props,
       props: { index, type, items, item, item: { main_image_url, store, description } }
     } = this;
 
@@ -75,10 +76,13 @@ export default class Item extends Component {
         <div className='item__view__image image row'
             style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }>
         </div>
+        <div className='item__view__atts'>
+          <p>{name}</p>
+        </div>
         { 
           type === 'deal' && items[parseInt(index)]
           ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
-          : <ItemInfo {...item}/> 
+          : <ItemInfo {...props} {...item} /> 
         }
         <div className='item__view__description'>
           <h4>{store}</h4> 
@@ -100,21 +104,16 @@ class DealInfo extends Component {
     deal: PropTypes.object
   }
   render() {
-    const { item: { name }, deal: { price, previousPrice, savePercent } } = this.props;
+    const { deal: { price, previousPrice, savePercent } } = this.props;
     // make sure item and deal are defined
     const convertedPrice = price ? price.toFixed(2) : '0.00',
       convertedPrevPrice = previousPrice ? previousPrice.toFixed(2) : '0.00',
       convertedPercent = savePercent ? (savePercent * 100)
       .toFixed() : '0';
     return (
-      <div>
-        <div className='item__view__atts'>
-          <p>{name}</p>
-        </div>
-        <div className = 'item__view__price' >
-          <h4>${convertedPrice}</h4> 
-          <p><strike>${convertedPrevPrice}</strike> ({convertedPercent}% off)</p>
-        </div>
+      <div className = 'deal__view__price' >
+        <h4>${convertedPrice}</h4> 
+        <p><strike>${convertedPrevPrice}</strike> ({convertedPercent}% off)</p>
       </div>
     );
   }
@@ -127,16 +126,34 @@ class ItemInfo extends Component {
   };
 
   render() {
-    const { props: { name, price } } = this;
+    const { props, props: { price } } = this;
     const convertedPrice = price ? price.toFixed(2) : '0.00';
     return (
-      <div>
-        <div className='item__view__atts'>
-          <p>{name}</p>
-        </div>
-        <div className='item__view__price' >
-          <h4>${convertedPrice}</h4> 
-        </div>
+      <div className='item__view__price' >
+        <h4>${convertedPrice}</h4> 
+        <AddRemove {...props} />
+      </div>
+    );
+  }
+}
+
+class AddRemove extends Component {
+  static propTypes = {
+    item: PropTypes.object,
+    incrementItem: PropTypes.func,
+    decrementItem: PropTypes.func,
+  }
+  render() {
+    const { item: { id, quantity }, incrementItem, decrementItem } = this.props;
+    return (
+      <div className='item__view__quantity'>
+        <button onClick={()=>incrementItem(id, quantity)}>+</button>
+        <div className='item__view__quantity__num'>{quantity}</div>
+        {
+          (quantity > 1) 
+            ? <button onClick={()=> decrementItem(id, quantity)}>-</button>
+            : <div className='item__view__quantity__placeholder'/>
+        } 
       </div>
     );
   }
