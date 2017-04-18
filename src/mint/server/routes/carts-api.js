@@ -1,6 +1,7 @@
 const co = require('co')
 const _ = require('lodash')
 var amazonScraper = require('../cart/scraper_amazon')
+var amazon = require('../cart/amazon_cart')
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -342,6 +343,7 @@ module.exports = function (router) {
       // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
       var item = yield amazon.searchAmazon(q);
     }
+    console.log('about to send response')
     res.send(item)
   }))
 }

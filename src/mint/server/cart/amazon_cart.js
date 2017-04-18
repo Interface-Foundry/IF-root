@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const {OperationHelper} = require('apac');
 
+var scraper = require('./scraper_amazon');
+
 // amazon creds -> move to constants later
 const amazonCreds = [{
   'awsId': 'AKIAIQWK3QCI5BOJTT5Q',
@@ -80,17 +82,24 @@ exports.searchAmazon = function * (query) {
     Keywords: query,
     Condition: 'New',
     SearchIndex: 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,SalesRank,Variations'
   };
-  try {
-    var results = yield opHelper.execute('ItemSearch', amazonParams);
+  var results = yield opHelper.execute('ItemSearch', amazonParams);
     // logging.info(JSON.stringify(results.result.ItemSearchResponse.Items.Item));
     // logging.info(JSON.stringify(Object.keys(results.result.ItemSearchResponse.Items.Item)));
-    return results.result.ItemSearchResponse.Items.Item;
-  } catch (err) {
-    throw new Error('Error on search');
-    return null;
-  }
+    if (!results) {
+      throw new Error('Error on search');
+      return null;
+    }
+    //save new items to the db
+    var items = results.result.ItemSearchResponse.Items.Item
+    var validatedItems = [];
+    yield items.map(function * (item) {
+      validatedItems.push(yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item}));
+      console.log('added item to db');
+    });
+    validatedItems = validatedItems.filter(x => x); // res2Item will return null if there are validation errors and the item is not added to the db
+    return validatedItems;
 };
 
 
