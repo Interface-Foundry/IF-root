@@ -67,6 +67,34 @@ exports.getAmazonItem = function * (item_identifier) {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /**
+ * search item by keyword(s)
+ * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
+ * lookup item by asin
+ * @param {string} search terms
+ * @returns {[type]} amazon items
+ */
+exports.searchAmazon = function * (query) {
+  console.log('searching:', query)
+  var amazonParams = {
+    Availability: 'Available',
+    Keywords: query,
+    Condition: 'New',
+    SearchIndex: 'All', //the values for this vary by locale
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
+  };
+  try {
+    var results = yield opHelper.execute('ItemSearch', amazonParams);
+    // logging.info(JSON.stringify(results.result.ItemSearchResponse.Items.Item));
+    // logging.info(JSON.stringify(Object.keys(results.result.ItemSearchResponse.Items.Item)));
+    return results.result.ItemSearchResponse.Items.Item;
+  } catch (err) {
+    throw new Error('Error on search');
+    return null;
+  }
+};
+
+
+/**
  * lookup item by asin
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemLookup.html
  * lookup item by asin

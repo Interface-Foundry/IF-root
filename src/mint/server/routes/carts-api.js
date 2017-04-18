@@ -339,7 +339,8 @@ module.exports = function (router) {
       var item = yield amazonScraper.scrapeAsin(q)
     } else {
       // search query
-      throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
+      // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
+      var item = yield amazon.searchAmazon(q);
     }
     res.send(item)
   }))
