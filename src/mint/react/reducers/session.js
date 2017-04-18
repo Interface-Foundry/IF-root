@@ -23,7 +23,8 @@ export default function session(state = initialState, action) {
   case RECEIVE_UPDATE_SESSION:
     return {
       ...state,
-      ...action.newSession
+      ...action.newSession,
+      user_account: action.newSession.user
     };
   case REQUEST_SESSION:
   case REQUEST_UPDATE_SESSION:

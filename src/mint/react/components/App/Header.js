@@ -39,6 +39,7 @@ class CartHead extends Component {
   render() {
     const { leader, _toggleSidenav, currentUser, currentCart } = this.props;
     const cartName = currentCart.name ? currentCart.name : `${_.capitalize(getNameFromEmail(leader ? leader.email_address : null))}'s Group Cart`;
+   
     return (
       <div>
         <div className='image' style={
