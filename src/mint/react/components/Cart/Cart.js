@@ -44,7 +44,7 @@ export default class Cart extends Component {
         <div className='cart__add'>
           <AddAmazonItemContainer replace={replace} members={members}/>
         </div>
-        {!!user_accounts[0] ? <DealsContainer isDropdown={false}/> : null}
+        {!!user_account.id ? <DealsContainer isDropdown={false}/> : null}
         <div className='cart__title'>
           <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
         </div>
