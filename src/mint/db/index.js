@@ -3,7 +3,8 @@ var mongoAdapter = require('sails-mongo');
 
 Waterline.isA = function (collection) {
   return {
-    model: collection
+    model: collection,
+    via: 'id'
   };
 };
 
@@ -52,6 +53,7 @@ var initialize = new Promise((resolve, reject) => {
       return reject(err);
     }
 
+    // Manually make the names for our manually defined schemas
     const models = {
       Carts: ontology.collections.carts,
       Items: ontology.collections.items,
@@ -65,6 +67,12 @@ var initialize = new Promise((resolve, reject) => {
       EmailOpens: ontology.collections.email_opens,
       AuthenticationLinks: ontology.collections.authentication_links
     };
+
+    // Programmatically make available the automatically generated schemas
+    Object.keys(ontology.collections).filter(k => k.includes('__')).map(k => {
+      models[k] = ontology.collections[k]
+    })
+
     resolve(models);
   });
 });

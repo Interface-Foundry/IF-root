@@ -29,7 +29,7 @@ export default class AddAmazonItem extends Component {
       <div className='add_to_amazon'>
         Add Item to Kip Cart
         <button className='add_to_amazon__button' onClick={addItemToCart}>Paste Amazon URL or Search</button>
-        {numUserItems ? null : <NotificationBubble top={44} right={12}/>}
+        {numUserItems ? null : <NotificationBubble top={23} right={12}/>}
       </div>
     );
   }

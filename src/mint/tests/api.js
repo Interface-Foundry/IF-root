@@ -22,6 +22,17 @@ const mcTesty = {
 }
 
 /**
+ * mcFriend is another demo user
+ * @type {Object}
+ */
+const mcFriend = {
+  thingsFriendLikes: ['late night ice cream', 'my university', 'serendipitous meetings'],
+  thingsFriendIsShoppingFor: ['hydroflask', 'checkered tablecloth', 'warby parker'],
+  email: 'friend@example.com',
+  name: 'F McFriend'
+}
+
+/**
  * Convenience function to make a get request with the cookies intact
  * @param  {string}    url the path, like /api/session
  * @return {Generator}     yields with the body
@@ -69,6 +80,9 @@ describe.only('api', () => {
     yield dbReady
     yield db.UserAccounts.destroy({
       email_address: mcTesty.email
+    })
+    yield db.UserAccounts.destroy({
+      email_address: mcFriend.email
     })
   }))
 
@@ -131,6 +145,9 @@ describe.only('api', () => {
     dbsession.user_accounts.add(user.id)
     yield dbsession.save()
 
+    // save the id for later
+    mcTesty.id = user.id
+
     // now the user should be logged in
     const session2 = yield get('/api/session')
     assert(session2)
@@ -152,6 +169,7 @@ describe.only('api', () => {
 
     // make sure McTesty is the leader
     assert.equal(cart.leader.email_address, mcTesty.email)
+    assert.equal(cart.name, mcTesty.email + "'s Kip Group Cart")
 
     // lets save this cart id for later
     mcTesty.cart_id = cart.id
@@ -167,9 +185,17 @@ describe.only('api', () => {
   }))
 
   it('GET /api/carts should return all the users carts', () => co(function * () {
+    // McTesty should already be leader of one cart, but lets make mcTesty a member of a new cart, too
+    var memberCart = yield db.Carts.create({
+      name: 'Test Member Cart'
+    })
+    memberCart.members.add(mcTesty.id)
+    yield memberCart.save()
+
+    // Get them all
     var carts = yield get('/api/carts')
     assert(carts instanceof Array, 'should return an array of carts, not ' + typeof carts)
-    assert.equal(carts.length, 1, 'should only be one cart because we have only created one')
+    assert.equal(carts.length, 2, 'should have two carts')
     assert.equal(carts[0].id, mcTesty.cart_id)
     assert(carts[0].leader)
     assert.equal(carts[0].leader.email_address, mcTesty.email)

@@ -9,43 +9,43 @@
     <title>Share Cart Email</title>
     <style type="text/css">
         /* CLIENT-SPECIFIC STYLES */
-        
+
         /* Force Outlook to provide a "view in browser" message */
         #outlook a {
             padding:0;
         }
-        
+
         /* Force Hotmail to display emails at full width */
         .ExternalClass,
         .ReadMsgBody {
             width:100%;
         }
-        
+
         /* Force Hotmail to display normal line spacing */
-        .ExternalClass, 
-        .ExternalClass p, 
-        .ExternalClass span, 
-        .ExternalClass font, 
-        .ExternalClass td, 
+        .ExternalClass,
+        .ExternalClass p,
+        .ExternalClass span,
+        .ExternalClass font,
+        .ExternalClass td,
         .ExternalClass div {
             line-height: 100%;
-        } 
-        
+        }
+
         /* Prevent WebKit and Windows mobile changing default text sizes */
-        body, 
-        table, 
-        td, 
+        body,
+        table,
+        td,
         a {
             -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;
         }
-        
+
         /* Remove spacing between tables in Outlook 2007 and up */
-        table, 
+        table,
         td {
-            mso-table-lspace:0pt; 
+            mso-table-lspace:0pt;
             mso-table-rspace:0pt;
         }
-        
+
         /* Allow smoother rendering of resized image in Internet Explorer */
         img {
             -ms-interpolation-mode:bicubic;
@@ -53,18 +53,18 @@
 
         /* RESET STYLES */
         img {
-            border:0; 
-            line-height:100%; 
-            outline:none; 
+            border:0;
+            line-height:100%;
+            outline:none;
             text-decoration:none;
         }
         table {
             border-collapse:collapse !important;
         }
         body {
-            height:100% !important; 
-            margin:0; 
-            padding:0; 
+            height:100% !important;
+            margin:0;
+            padding:0;
             width:100% !important;
             background: #fff;
             font-family: sans-serif;
@@ -100,7 +100,7 @@
         span[class="linethrough"] {
             text-decoration: line-through;
         }
-        
+
         @media screen and (max-width: 600px) {
             div[class='main'] {
                 max-width: 100% !important;
@@ -131,7 +131,7 @@
                         <td align="center" width="85%" valign="middle" height="100%" style="font-size: 28px; text-align: left; color: #fcfcf9;">
                              KIP CART
                         </td>
-                    </tr>                
+                    </tr>
                 </table>
             </td>
         </tr>
@@ -143,12 +143,12 @@
                 <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                     <tr>
                         <td style="padding: 50px 15px; font-size: 25px;" align="center">
-                            <%=name%>'s Kip group cart
+                            <%=cart.name%>
                         </td >
                     </tr>
                 </table>
             </td>
-        </tr> 
+        </tr>
     </table>
     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
         <tr>
@@ -171,7 +171,7 @@
                                          <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                              <tr>
                                                  <td align="center" style="padding: 30px 5px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1;font-weight: 500;">
-                                                    <%=baseUrl%>/cart/<%=id%>
+                                                    <%=baseUrl%>/cart/<%=cart.id%>
                                                  </td>
                                              </tr>
                                           </table>
@@ -179,10 +179,10 @@
                                 </tr>
                             </table>
                         </td>
-                    </tr> 
+                    </tr>
                 </table>
             </td>
-        </tr> 
+        </tr>
     </table>
     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
         <tr>
@@ -200,18 +200,18 @@
                     <td align="center" width="100%" style="box-sizing: border-box; width: 100%; padding: 0 15px 50px; ">
                       <div style="box-sizing: border-box; width: 100%; padding: 0px 0px 0px; ">
                         <!--[if mso]>
-                          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=id%>" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
+                          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=cart.id%>" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
                             <w:anchorlock/>
                             <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:20px;">VIEW KIP CART MSO</center>
                           </v:roundrect>
                         <![endif]-->
-                        <a href="<%=baseUrl%>/cart/<%=id%>" style="background-color:#ffe94d;border:1px solid #ffe94d;border-radius:3px;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:20px;line-height:75px;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;">VIEW KIP CART</a>
+                        <a href="<%=baseUrl%>/cart/<%=cart.id%>" style="background-color:#ffe94d;border:1px solid #ffe94d;border-radius:3px;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:20px;line-height:75px;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;">VIEW KIP CART</a>
                       </div>
                     </td>
                   </tr>
                 </table>
             </td>
-        </tr> 
+        </tr>
     </table>
     <!-- TWO COLUMN SECTION -->
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
@@ -246,7 +246,7 @@
                                                 <table cellpadding="0" cellspacing="0" border="0" width="49%" align="left" class="responsive-table">
                                                     <tr>
                                                         <td style="padding: 5px;">
-                                                            <div>                                                        
+                                                            <div>
                                                                 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid #e0e0e0">
                                                                     <tr>
                                                                         <td align="center" bgcolor="#ffffff" valign="middle" style="padding: 25px 20px 0;"><img src="<%=deals[i][x].large || 'http://tidepools.co/kip/head_smaller.png'%>" width="auto" class="responsive-image" style="height: auto;display: block; color: #666666; font-family: Helvetica, arial, sans-serif; font-size: 13px;height: 50px; max-width: 50%;" alt="http://tidepools.co/kip/head_smaller.png" border="0" class="img-max"></td>
@@ -270,12 +270,12 @@
                                                                                 <td align="center" width="100%" height="50px" style="box-sizing: border-box;">
                                                                                   <div style="box-sizing: border-box; width: 100%; height: 100%;" >
                                                                                     <!--[if mso]>
-                                                                                      <v:rect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=id%> style="height:50px;v-text-anchor:middle;mso-width-percent: 450;" strokecolor="#e1e1e1" fillcolor="#e1e1e1">
+                                                                                      <v:rect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=cart.id%> style="height:50px;v-text-anchor:middle;mso-width-percent: 450;" strokecolor="#e1e1e1" fillcolor="#e1e1e1">
                                                                                         <w:anchorlock/>
                                                                                         <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:15px;">VIEW KIP CART</center>
                                                                                       </v:rect>
                                                                                     <![endif]-->
-                                                                                    <a href="<%=baseUrl%>/cart/<%=id%>" style="background-color:#e1e1e1;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:15px;line-height:50px;height:100%;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">ADD ITEM</a>
+                                                                                    <a href="<%=baseUrl%>/cart/<%=cart.id%>" style="background-color:#e1e1e1;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:15px;line-height:50px;height:100%;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">ADD ITEM</a>
                                                                                   </div>
                                                                                 </td>
                                                                               </tr>

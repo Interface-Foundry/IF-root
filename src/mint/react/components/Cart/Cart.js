@@ -37,7 +37,8 @@ export default class Cart extends Component {
   render() {
     const { items, leader, members, user_accounts, history: { replace } } = this.props,
       hasItems = items.quantity > 0,
-      isLeader = user_accounts[0] && leader && (leader.id === user_accounts[0].id);
+      isLeader = !!user_accounts[0] && !!leader && (leader.id === user_accounts[0].id);
+
     return (
       <div className='cart'>
         <div className='cart__add'>
@@ -49,7 +50,7 @@ export default class Cart extends Component {
         </div>
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
-          <OtherItems {...this.props} items={items.others} isLeader={isLeader} />
+          <OtherItems {...this.props} items={items.others} startIndex={items.my.length} isLeader={isLeader} />
         </div>
       </div>
     );
@@ -58,18 +59,18 @@ export default class Cart extends Component {
 
 class MyItems extends Component {
   static propTypes = {
-    items: PropTypes.array.isRequired,
-    isLeader: PropTypes.bool.isRequired
+    items: PropTypes.array.isRequired
   }
 
   render() {
     const { props, props: { items } } = this;
+    
     return (
       <ul>
         <div className='cart__items__title'>Your Items</div>
         {
           items.length 
-          ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={true} {...item} {...props} />) 
+          ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={true} item={item} {...props} />) 
           : <EmptyCart />
         }
       </ul>
@@ -80,17 +81,18 @@ class MyItems extends Component {
 class OtherItems extends Component {
   static propTypes = {
     items: PropTypes.array.isRequired,
-    isLeader: PropTypes.bool.isRequired
+    isLeader: PropTypes.bool.isRequired,
+    startIndex: PropTypes.number
   }
 
   render() {
-    const { props, props: { items, isLeader } } = this;
+    const { props, props: { items, isLeader, startIndex } } = this;
     return (
       <ul>
         <div className='cart__items__title'>Everyone's Items</div>
         {
           items.length 
-          ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={isLeader} {...item} {...props} />) 
+          ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
           : <EmptyCart />
         }
       </ul>

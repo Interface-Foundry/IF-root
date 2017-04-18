@@ -8,27 +8,37 @@ export default class Item extends Component {
   }
 
   static propTypes = {
-    item_id: PropTypes.string.isRequired,
+    item_id: PropTypes.string,
     item: PropTypes.object,
     previewItem: PropTypes.func.isRequired,
     clearItem: PropTypes.func.isRequired,
     cart_id: PropTypes.string,
-    history: PropTypes.object.isRequired
+    history: PropTypes.object.isRequired,
+    type: PropTypes.string,
+    items: PropTypes.array,
+    fetchDeals: PropTypes.func,
+    previewAmazonItem: PropTypes.func,
+    index: PropTypes.string,
+    amazon_id: PropTypes.string
   }
 
   componentWillMount() {
-    const { props: { item_id, previewItem, item, type, items, fetchDeals } } = this;
+    const { props: { item_id, amazon_id, previewAmazonItem, previewItem, item, type, items, fetchDeals } } = this;
     // only update item if there isn't one
-    if (item_id && !item.price) previewItem(item_id);
+    if (!item.price) {
+      if (item_id) previewItem(item_id);
+      else if (amazon_id) previewAmazonItem(amazon_id);
+    }
 
-    if(type === 'deal' && items.length === 0) fetchDeals();
+    if (type === 'deal' && items.length === 0) fetchDeals();
+    this.determineNav = ::this.determineNav;
   }
 
   componentWillReceiveProps(nextProps) {
-    const { props: { item_id, previewItem, item } } = this;
+    const { props: { item_id, amazon_id, previewItem, previewAmazonItem } } = this;
 
-    if(nextProps.item_id !== item_id)
-      previewItem(nextProps.item_id);
+    if (nextProps.item_id !== item_id) previewItem(nextProps.item_id);
+    else if (nextProps.amazon_id !== amazon_id) previewAmazonItem(nextProps.amazon_id);
   }
 
   componentWillUnmount() {
@@ -36,58 +46,95 @@ export default class Item extends Component {
     clearItem();
   }
 
-  _handleSwipe = () => {
-    this.setState({x})
+  determineNav() {
+    const {
+      props: { cart_id, type, items, index, history: { replace } },
+      state: { originalx, x }
+    } = this;
+    if (type === 'deal') {
+      const numericInt = parseInt(index),
+        diff = Math.abs(originalx - x),
+        newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
+
+      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+    }
   }
 
   render() {
     const {
-      props: {
-        cart_id,
-        type,
-        items,
-        index,
-        item,
-        item: { name, main_image_url, price, store, description },
-        history: { replace }
-      },
-      state: {
-        originalx,
-        x
-      }
+      determineNav,
+      props: { index, type, items, item, item: { main_image_url, store, description } }
     } = this;
-
     return (
       <div 
-        className='item' 
-        onTouchStart={(e) => this.setState({originalx: e.changedTouches[e.changedTouches.length - 1].pageX})}
-        onTouchMove={(e) => this.setState({x: e.changedTouches[e.changedTouches.length - 1].pageX})}
-        onTouchEnd={(e) => {
-          if(type === 'deal') {
-            const numericInt = parseInt(index),
-                  diff = Math.abs(originalx - x),
-                  newIndex = originalx > x ? ( numericInt === items.length - 1 ? 0 : numericInt + 1 ) : ( numericInt === 0 ? items.length - 1 : numericInt - 1 );
-
-            if(originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`)
-          }
-        }}>
+        className='item' onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+        onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+        onTouchEnd={ () => determineNav() }
+        >
         <div className='item__view__image image row'
-          style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }/>
-        <div className='item__view__atts'>
-          <p>Item: {name}</p>
+            style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }>
         </div>
-        <div className='item__view__price'>
-          <h4>${price}</h4>
-          <p>Price: <span>${price + 40}</span> ($40 off)</p>
-        </div>
+        { 
+          type === 'deal' && items[parseInt(index)]
+          ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
+          : <ItemInfo {...item}/> 
+        }
         <div className='item__view__description'>
-          <h4>{store}</h4>
-          <p className='ellipsis'>{description}</p>
-          <a>View more</a>
-        </div>
+          <h4>{store}</h4> 
+          <p className='ellipsis' > { description }</p>
+          <a> View more </a>
+        </div> 
         <div className='item__view__review'>
           <p className='ellipsis'>{description}</p>
-          <em> - theGodOfIpsum</em>
+          <em > -theGodOfIpsum </em>
+        </div>
+      </div>
+    );
+  }
+}
+
+class DealInfo extends Component {
+  static propTypes = {
+    item: PropTypes.object,
+    deal: PropTypes.object
+  }
+  render() {
+    const { item: { name }, deal: { price, previousPrice, savePercent } } = this.props;
+    // make sure item and deal are defined
+    const convertedPrice = price ? price.toFixed(2) : '0.00',
+      convertedPrevPrice = previousPrice ? previousPrice.toFixed(2) : '0.00',
+      convertedPercent = savePercent ? (savePercent * 100)
+      .toFixed() : '0';
+    return (
+      <div>
+        <div className='item__view__atts'>
+          <p>{name}</p>
+        </div>
+        <div className = 'item__view__price' >
+          <h4>${convertedPrice}</h4> 
+          <p><strike>${convertedPrevPrice}</strike> ({convertedPercent}% off)</p>
+        </div>
+      </div>
+    );
+  }
+}
+
+class ItemInfo extends Component {
+  static propTypes = {
+    name: PropTypes.string,
+    price: PropTypes.number
+  };
+
+  render() {
+    const { props: { name, price } } = this;
+    const convertedPrice = price ? price.toFixed(2) : '0.00';
+    return (
+      <div>
+        <div className='item__view__atts'>
+          <p>{name}</p>
+        </div>
+        <div className='item__view__price' >
+          <h4>${convertedPrice}</h4> 
         </div>
       </div>
     );

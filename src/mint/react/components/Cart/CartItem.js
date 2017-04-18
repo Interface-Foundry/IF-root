@@ -5,18 +5,9 @@ import { getNameFromEmail } from '../../utils';
 
 export default class CartItem extends Component {
   static propTypes = {
-    added_by: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired,
-    locked: PropTypes.bool.isRequired,
-    main_image_url: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    price: PropTypes.number.isRequired,
-    quantity: PropTypes.number.isRequired,
-    store: PropTypes.string.isRequired,
-    thumbnail_url: PropTypes.string.isRequired,
-    updatedAt: PropTypes.string.isRequired,
-    leader: PropTypes.object.isRequired,
+    leader: PropTypes.object,
+    history: PropTypes.object,
+    item: PropTypes.object,
     members: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
     itemNumber: PropTypes.number.isRequired,
@@ -28,10 +19,9 @@ export default class CartItem extends Component {
   }
 
   render() {
-    const { added_by, itemNumber, main_image_url, name, price, quantity, leader, members, removeItem, incrementItem, decrementItem, id, cart_id, isOwner } = this.props,
+    const { itemNumber, leader, incrementItem, removeItem, decrementItem, isOwner, cart_id, members, history: { push }, item: { added_by, main_image_url, name, price, quantity, id } } = this.props,
       linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by }),
       memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
-
     return (
       <li className='cartItem'>
         <h4 className='cartItem__title'>{memberName}</h4>
@@ -43,19 +33,19 @@ export default class CartItem extends Component {
             height: 75,
           }}/>
         <div className='cartItem__props col-9'>
-          <p>Item #{itemNumber} {name}</p>
+          <p>{name}</p>
           <br/>
           <p>Qty: {quantity}</p>
           <p>Price: ${price}</p>
         </div>
         {
-          isOwner?
-          <div className='cartItem__actions col-12'>
-            <button onClick={()=>incrementItem(id, quantity)}>+</button>
-            <button onClick={()=> (quantity > 1) ? decrementItem(id, quantity) : removeItem(cart_id, id)}>-</button>
-            <button onClick={() => {}}>Edit</button>
-          </div>:
-          null
+          isOwner
+          ? <div className='cartItem__actions col-12'>
+              <button onClick={()=>incrementItem(id, quantity)}>+</button>
+              <button onClick={()=> (quantity > 1) ? decrementItem(id, quantity) : removeItem(cart_id, id)}>-</button>
+              <button onClick={() => push(`/cart/${cart_id}/m/item/${itemNumber}/${id}/edit`)}>Edit</button>
+            </div>
+          : null
         }
         
       </li>
