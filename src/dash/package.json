@@ -56,7 +56,7 @@
     "react-datepicker": "^0.44.0",
     "react-dom": "15.3.1",
     "react-dropzone": "^3.12.2",
-    "recharts": "^0.15.1",
+    "recharts": "^0.15.3",
     "request-promise": "^4.2.0",
     "source-map-support": "0.4.2",
     "superagent": "^3.5.0",
