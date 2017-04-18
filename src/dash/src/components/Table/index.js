@@ -2,18 +2,33 @@ import React from 'react';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
 function nameFormatter(data, cell) {
-  return `<p>${cell[data]}</p>`;
+  return cell ? `<p>${cell[data]}</p>` : '';
 }
 
 const CafeTable = ({data}) => {
-  // data transformation here
+  let newData = [];
+  for (var i = 0; i<data.length; i++){
+    newData.push(data[i]);
+    data[i].cart.map(function(item){
+      if(item.added_to_cart == true){
+        newData.push({
+          user: item.user_id,
+          item_id: item.item.item_id
+        })
+      }
+
+    })
+  }
   return (
-    <BootstrapTable data={data} hover>
+    <BootstrapTable data={newData} hover>
       <TableHeaderColumn isKey={true} dataField='time_started'>Created Date</TableHeaderColumn>
       <TableHeaderColumn dataField='team_id'>Team ID</TableHeaderColumn>
       <TableHeaderColumn dataField='team' dataFormat={ nameFormatter.bind(this, 'team_name') }>Team</TableHeaderColumn>
       <TableHeaderColumn dataField='item_count'>Item Count</TableHeaderColumn>
+      <TableHeaderColumn dataField='cart_total'>Cart Total</TableHeaderColumn>
       <TableHeaderColumn dataField='chosen_restaurant'>Restaurant</TableHeaderColumn>
+      <TableHeaderColumn dataField='user'>User</TableHeaderColumn>
+      <TableHeaderColumn dataField='item_id'>Item</TableHeaderColumn>
     </BootstrapTable>
   );
 };

@@ -80,12 +80,18 @@ function getCartDateFromArgs(args) {
 function prepareCafeCarts(foodSession) {
   foodSession.type = 'slack'; // only doing slack atm
   foodSession.chosen_restaurant = _.get(foodSession, 'chosen_restaurant.name');
-
-
+  var cartLength = 0;
+  foodSession.cart_total = `$0.00`;
   if (foodSession.cart.length > 0) {
-    foodSession.cart_total = foodSession.calculated_amount;
-    foodSession.item_count = foodSession.cart.length;
+    foodSession.cart_total = `$${Number(foodSession.calculated_amount).toFixed(2)}`;
+    for(var i = 0; i<foodSession.cart.length; i++){
+      if(foodSession.cart[i].added_to_cart){
+        cartLength++;
+      }
+    }
+    foodSession.cart = foodSession.cart;
   }
+  foodSession.item_count = cartLength;
 
   return foodSession;
 }
