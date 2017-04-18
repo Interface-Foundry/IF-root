@@ -26,3 +26,8 @@ export {
   fakeStore
 }
 from './testUtils';
+
+export {
+  cloudinary
+}
+from './cloudinary';

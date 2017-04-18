@@ -1,4 +1,4 @@
-import { ADDING_ITEM, RECEIVE_CART, REQUEST_CART, RECEIVE_ITEMS, REQUEST_ITEMS, RECEIVE_CARTS, REQUEST_CARTS } from '../constants/ActionTypes';
+import { ADDING_ITEM, RECEIVE_CART, RECEIVE_UPDATE_CART, REQUEST_CART, RECEIVE_ITEMS, REQUEST_ITEMS, RECEIVE_CARTS, REQUEST_CARTS } from '../constants/ActionTypes';
 
 const receive = (currentCart) => ({
   type: RECEIVE_CART,
@@ -8,6 +8,11 @@ const receive = (currentCart) => ({
 const request = () => ({
   type: REQUEST_CART
 });
+
+const recieveUpdate = updatedCart => ({
+  type: RECEIVE_UPDATE_CART,
+  updatedCart
+})
 
 const receiveCarts = (carts) => ({
   type: RECEIVE_CARTS,
@@ -22,6 +27,8 @@ const receiveItems = (items) => ({
   type: RECEIVE_ITEMS,
   items
 });
+
+
 
 const requestItems = () => ({
   type: REQUEST_ITEMS
@@ -45,6 +52,25 @@ export function fetchCart(cart_id) {
       return dispatch(receive(await response.json()));
     } catch (e) {
       throw 'error in cart fetchCart';
+    }
+  };
+}
+
+export function updateCart(selectedCart) {
+  return async dispatch => {
+    try {
+      const response = await fetch(`/api/cart/${selectedCart.id}`, {
+        'method': 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        'body': JSON.stringify(selectedCart)
+      });
+      return dispatch(recieveUpdate(await response.json()));
+    } catch (e) {
+      throw e;
     }
   };
 }
@@ -79,3 +105,4 @@ export function fetchItems(cart_id) {
     }
   };
 }
+

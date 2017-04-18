@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 
-import { EmailFormContainer, AmazonFormContainer, ItemContainer } from '../../containers';
+import { EmailFormContainer, AmazonFormContainer, ItemContainer, EditCartContainer } from '../../containers';
 import { Share } from '..';
 
 export default class SignIn extends Component {
@@ -23,6 +23,7 @@ export default class SignIn extends Component {
           <Route path={`${match.url}/:item_type/:index/:item_id/edit`} exact component={ItemContainer} />
           <Route path={`${match.url}/:item_type/:index/:amazon_id`} component={ItemContainer} />
           <Route path={`${match.url}/signin`} component={EmailFormContainer} />
+          <Route path={`${match.url}/edit/:edit_cart_id`} component={EditCartContainer} />
           <Route path={`${match.url}/share`} component={Share} />
         </Switch>
       </div>

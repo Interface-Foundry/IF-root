@@ -5,7 +5,8 @@ import {
   IoClose,
   IoChevronUp,
   IoEdit,
-  IoPricetag
+  IoPricetag,
+  IoCamera
 } from 'react-icons/lib/io';
 import {
   Facebook,
@@ -43,6 +44,8 @@ export default class Icon extends Component {
         return <Sms/>;
       case 'Whatsapp':
         return <Whatsapp/>;
+      case 'Camera':
+        return <IoCamera/>;
     }
   }
 }

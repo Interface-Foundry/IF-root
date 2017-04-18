@@ -28,3 +28,8 @@ export {
   splitCartById
 }
 from './currentCart';
+
+export {
+  getCartById
+}
+from './otherCarts';

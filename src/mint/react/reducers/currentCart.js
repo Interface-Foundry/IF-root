@@ -2,6 +2,7 @@ import {
   ADDING_ITEM,
   ADD_MEMBER_TO_CART,
   RECEIVE_CART,
+  RECEIVE_UPDATE_CART,
   RECEIVE_ITEMS,
   RECEIVE_ADD_ITEM,
   RECEIVE_REMOVE_ITEM,
@@ -27,6 +28,14 @@ export default function cart(state = initialState, action) {
       ...state,
       members: [...state.members, action.newMember]
     };
+  case RECEIVE_UPDATE_CART:
+    if(action.updatedCart.id !== state.cart_id) break;
+    return {
+      ...state,
+      thumbnail_url: action.updatedCart.thumbnail_url,
+      name: action.updatedCart.name,
+      cart_id: action.updatedCart.id
+    }
   case RECEIVE_CART:
     return {
       ...state,

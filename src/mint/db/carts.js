@@ -36,6 +36,18 @@ var cartsCollection = Waterline.Collection.extend({
      */
     name: 'string',
 
+    /**
+     * If the cart has been locked by the leader
+     * @type {boolean}
+     */
+    locked: 'boolean',
+
+    /**
+     * Cloudinary url
+     * @type {String}
+     */
+    thumbnail_url: 'string',
+    
     // properties necessary for amazon cart
     /** @type {String} equivalent to CartId from amazon */
     amazon_cartid: 'string',

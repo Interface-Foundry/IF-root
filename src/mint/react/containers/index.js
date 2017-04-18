@@ -5,3 +5,4 @@ export EmailFormContainer from './EmailFormContainer';
 export AmazonFormContainer from './AmazonFormContainer';
 export DealsContainer from './DealsContainer';
 export ItemContainer from './ItemContainer';
+export EditCartContainer from './EditCartContainer';

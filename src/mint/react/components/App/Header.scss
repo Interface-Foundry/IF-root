@@ -1,13 +1,22 @@
 @import '../../styles/Constants';
 .navbar {
   height: $nav-height;
-  line-height: $nav-height - $padding*2;
-  padding: $padding $padding*2;
+  line-height: $nav-height;
   font-family: 'Raleway';
   background: $header-color;
   color: $kip-primary-color;
+  padding: 0 0 0 $padding;
+  .image {
+    display: inline-block;
+    height: $nav-height;
+    width: $nav-height;
+  }
   h3 {
     display: inline-block;
+    width: calc(100% - #{$nav-height*2});
+    overflow: hidden;
+    padding: 0 0 0 $padding;
+    white-space: nowrap;
     font-weight: 500;
     font-size: 20px;
   }

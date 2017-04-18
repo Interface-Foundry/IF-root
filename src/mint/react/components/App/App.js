@@ -48,7 +48,7 @@ export default class App extends Component {
 
   render() {
     const { props, state, _toggleSidenav } = this;
-    const { cart_id, newAccount, leader, carts, match, currentUser } = props;
+    const { cart_id, newAccount, leader, carts, match, currentUser, location, currentCart } = props;
     const { sidenav } = state;
 
     if (newAccount === false) {
@@ -61,7 +61,7 @@ export default class App extends Component {
         <Header {...props}  _toggleSidenav={ _toggleSidenav} />
         { sidenav ? <Sidenav cart_id={cart_id} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser}/> : null }
 
-        <div className='app__view'>
+        <div className={`app__view`}>
           { /* Renders modal when route permits */ }
           <Route path={`${match.url}/m/`} component={Modal} />
 
