@@ -70,8 +70,12 @@ var sendConfirmationEmail = function * (email, uris) {
  * @param
  * @returns
  */
-var processText = function (text) {
-  logging.info('process text called')
+var getTerms = function (text, urls) {
+  logging.info('process text called');
+  text = text.split('done')[0]
+  logging.info('TEXT:', text);
+  return;
+
   var allPars = text.split(/\r?\n|\r/g);
 
   //filter out conversation history
@@ -86,12 +90,13 @@ var processText = function (text) {
 
   var cleanPars = [];
   pars = pars.map(function (par) {
-    var words = par.split(' ').filter(w => !validUrl.isUri(w)).join(' ');
-    logging.info('words', words);
-    return words;
+
+    // logging.info('words', words);
+    // return words;
     //TODO sanitize
     //TODO emojis
     //TODO other emojis
+    return par;
   })
 
   return pars;
@@ -102,7 +107,7 @@ var processText = function (text) {
  * @param {string} text - the text of the email body
  * @returns an array of the valid amazon urls in the email body
  */
-var processAmazonURIs = function (text) {
+var getUrls = function (text) {
   var words = text.split(/\s/);
   var all_uris = words.filter(w => validUrl.isUri(w));
   if (!all_uris) return null; // if there aren't any urls at all return null
@@ -123,12 +128,8 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   var user = yield db.UserAccounts.findOrCreate({email: email});
 
   //parse out text and uris
-  var body = req.body.text;
-  // logging.info(Object.keys(req.body));
-  // logging.info(req.body.text);
-
-  // res.sendStatus(202);//DELENDUM
-  // return;
+  var bodyText = req.body.text;
+  var bodyHtml = req.body.html;
 
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
   if (!body) {
@@ -137,8 +138,10 @@ router.post('/', upload.array(), (req, res) => co(function * () {
     res.sendStatus(202);
   }
 
-  var text = processText(body);
-  var uris = processAmazonURIs(body);
+  // var text = processText(body);
+  // var uris = processAmazonURIs(body);
+  var uris = getUrls(bodyHtml);
+  var text = getTerms(bodyText, uris);
 
   //don't freak out sendgrid please
   res.sendStatus(200);
