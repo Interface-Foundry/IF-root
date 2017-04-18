@@ -38,7 +38,7 @@ export default class Sidenav extends Component {
                 </div>
               </Link>
               <Link to={`/cart/${c.id}`}>
-                <p>{`${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
               </Link>
             </li>
           ))}
@@ -51,7 +51,7 @@ export default class Sidenav extends Component {
                 </div>
               </Link>
               <Link to={`/cart/${c.id}`}>
-                <p>{`${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
               </Link>
             </li>
           ))}
