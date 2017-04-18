@@ -17,6 +17,14 @@
 		display: inline-block
 	}
 
+	* {
+		white-space: nowrap;
+	}
+
+	p {
+		overflow: hidden;
+	}
+
 	.sidenav__overlay {
 		width: calc(100% - 250px);
 		height: 100%;
