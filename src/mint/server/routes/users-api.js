@@ -31,35 +31,40 @@ module.exports = function (router) {
 
     // Find the user associated with this email, if any
     var email = req.query.email.trim().toLowerCase()
-    var user
 
     // check if the user is already identified as this email
-    req.UserSession.user_accounts.map(u => {
-      if (u.email_address === email) {
-        user = u
-      }
-    })
-    if (user) {
-      console.log('user was logged in as that email already')
-      cart.leader = user.id
-      yield cart.save()
+    var currentUser = req.UserSession.user_account
 
+    // IF they are already logged in as this email, probably in a weird state to be re-identifying
+    // idk maybe they have multiple tabs open or something, just roll with it
+    if (currentUser.email_address === email) {
+      // make them the glorious cart leader if the cart is leaderless, otherwise a member
+      if (!cart.leader) {
+        cart.leader = currentUser.id
+        yield cart.save()
+      } else if (!cart.members.includes(currentUser.id)) {
+        cart.members.add(currentUser.id)
+        yield cart.save()
+      }
+
+      // assert that everything is okay, even though like this is kind of a weird thing that just happened
       return res.send({
         ok: true,
         newAccount: false,
         status: 'USER_LOGGED_IN',
         message: 'You are already logged in with that email address on this device',
-        user: user,
+        user: currentUser,
         cart: cart,
       });
     }
 
     // If a user exists in the db, send them a magic link to prove it's them
-    user = yield db.UserAccounts.findOne({
+    var user = yield db.UserAccounts.findOne({
       email_address: email
     })
+
     if (user) {
-      console.log('email already exists in db')
+      console.log('email already exists in db, need to send a verification link in an email')
       res.send({
         ok: false,
         newAccount: false,
@@ -96,20 +101,25 @@ module.exports = function (router) {
     }
 
     // No user was found with the email address, so this is a new user, party!
-    console.log('creating new user')
+    console.log('creating new user ' + email + ' 🎉')
     user = yield db.UserAccounts.create({
       email_address: email
     })
 
-    // if there is already a leader, add the user to the members list
-    if (cart.leader && cart.leader.email_address !== user.email) {
-      cart.members.add(user.id)
-    } else {
-      cart.leader = user.id
-    }
-    req.UserSession.user_accounts.add(user.id)
-    yield [cart.save(), req.UserSession.save()]
+    // add them to the session
+    req.UserSession.user_account = user.id
+    yield req.UserSession.save()
 
+    // make them the glorious cart leader if the cart is leaderless, otherwise a member
+    if (!cart.leader) {
+      cart.leader = currentUser.id
+      yield cart.save()
+    } else if (!cart.members.includes(user.id)) {
+      cart.members.add(user.id)
+      yield cart.save()
+    }
+
+    // Tell the front end that everything worked out pretty okay and we're happy to have a new user
     res.send({
       ok: true,
       newAccount: true,
@@ -190,13 +200,15 @@ module.exports = function (router) {
    */
   router.post('/user/:user_id', (req, res) => co(function * () {
     // check permissions
-    var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
-    if (!userIds.has(req.params.user_id)) {
+    var currentUser = req.UserSession.user_account
+    if (!currentUser || currentUser.id !== req.params.user_id) {
       throw new Error('Unauthorized')
     }
 
     // Find the user in the database
     var user = yield db.UserAccounts.findOne({id: req.params.user_id})
+
+    // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
     if (!user) {
       throw new Error('Could not find user ' + req.params.user_id)
     }

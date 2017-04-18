@@ -26,7 +26,7 @@ var sessionsCollection = Waterline.Collection.extend({
     },
 
     /** Many-to-many relation with user accounts, which is like an email or something */
-    user_accounts: Waterline.isMany('user_accounts')
+    user_account: Waterline.isA('user_accounts')
   }
 })
 
