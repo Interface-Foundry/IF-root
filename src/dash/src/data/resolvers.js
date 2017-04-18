@@ -96,6 +96,10 @@ function prepareCafeCarts(foodSession) {
  * @return {object} cart object
  */
 function prepareStoreCarts(cart) {
+  if (cart.created_date) {
+    cart.created_date = new Date(cart.created_date).toDateString()
+  }
+
   if (cart.amazon) {
     if (cart.amazon.SubTotal) {
       cart.cart_total = `$${Number(cart.amazon.SubTotal[0].Amount / 100.0).toFixed(2)}`;
