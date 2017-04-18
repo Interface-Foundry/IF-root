@@ -54,7 +54,7 @@ module.exports = function (router) {
         newAccount: false,
         status: 'USER_LOGGED_IN',
         message: 'You are already logged in with that email address on this device',
-        user: currentUser,
+        user_account: currentUser,
         cart: cart
       });
     }
@@ -126,7 +126,7 @@ module.exports = function (router) {
       newAccount: true,
       status: 'NEW_USER',
       message: 'Thanks for registering for Kip! An email was sent to you with a link for this cart.',
-      user: user,
+      user_account: user,
       cart: cart
     });
 
