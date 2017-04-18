@@ -4,10 +4,10 @@ import { AddAmazonItem } from '../components';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
-  numUserItems: state.session.user_accounts.length ? state.currentCart.items.filter(item =>
-      (item.added_by === state.session.user_accounts[0].id))
+  numUserItems: state.session.user_account.id ? state.currentCart.items.filter(item =>
+      (item.added_by === state.session.user_account.id))
     .length : 0,
-  user_accounts: state.session.user_accounts
+  user_account: state.session.user_account
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -6,7 +6,7 @@ import {
 } from '../constants/ActionTypes';
 
 const initialState = {
-  user_accounts: [],
+  user_account: {},
   animal: '',
   createdAt: '',
   updatedAt: '',
@@ -21,11 +21,9 @@ export default function session(state = initialState, action) {
       ...action.newSession
     };
   case RECEIVE_UPDATE_SESSION:
-    const { user, ...newSession } = action.newSession;
     return {
       ...state,
-      ...newSession,
-      user_accounts: newSession.newAccount ? [...state.user_accounts, user] : state.user_accounts
+      ...action.newSession
     };
   case REQUEST_SESSION:
   case REQUEST_UPDATE_SESSION:
@@ -33,6 +31,3 @@ export default function session(state = initialState, action) {
     return state;
   }
 }
-
-// selectors
-export const getAccountById = (state, props) => state.user_accounts.find(account => account.id === props.id)

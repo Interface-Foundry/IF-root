@@ -33,11 +33,12 @@ module.exports = function (router) {
     var email = req.query.email.trim().toLowerCase()
 
     // check if the user is already identified as this email
+    // Koh: This returns undefined if no user_account present. Breaks subsequent code
     var currentUser = req.UserSession.user_account
 
     // IF they are already logged in as this email, probably in a weird state to be re-identifying
     // idk maybe they have multiple tabs open or something, just roll with it
-    if (currentUser.email_address === email) {
+    if (currentUser && currentUser.email_address === email) {
       // make them the glorious cart leader if the cart is leaderless, otherwise a member
       if (!cart.leader) {
         cart.leader = currentUser.id
@@ -54,7 +55,7 @@ module.exports = function (router) {
         status: 'USER_LOGGED_IN',
         message: 'You are already logged in with that email address on this device',
         user: currentUser,
-        cart: cart,
+        cart: cart
       });
     }
 
@@ -112,7 +113,7 @@ module.exports = function (router) {
 
     // make them the glorious cart leader if the cart is leaderless, otherwise a member
     if (!cart.leader) {
-      cart.leader = currentUser.id
+      cart.leader = user.id
       yield cart.save()
     } else if (!cart.members.includes(user.id)) {
       cart.members.add(user.id)
