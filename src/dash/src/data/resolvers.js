@@ -82,13 +82,14 @@ function prepareCafeCarts(foodSession) {
   foodSession.chosen_restaurant = _.get(foodSession, 'chosen_restaurant.name');
   var cartLength = 0;
   foodSession.cart_total = `$0.00`;
-  if (foodSession.cart.length > 0) {
-    foodSession.cart_total = `$${Number(foodSession.calculated_amount).toFixed(2)}`;
-    for(var i = 0; i<foodSession.cart.length; i++){
+  for(var i = 0; i<foodSession.cart.length; i++){
       if(foodSession.cart[i].added_to_cart){
         cartLength++;
       }
-    }
+  }
+
+  if (cartLength > 0) {
+    foodSession.cart_total = `$${Number(foodSession.calculated_amount).toFixed(2)}`;
     foodSession.cart = foodSession.cart;
   }
   foodSession.item_count = cartLength;
@@ -110,7 +111,12 @@ function prepareStoreCarts(cart) {
     if (cart.amazon.SubTotal) {
       cart.cart_total = `$${Number(cart.amazon.SubTotal[0].Amount / 100.0).toFixed(2)}`;
     }
-    cart.item_count = cart.items.length;
+    if(cart.amazon.CartItems){
+      cart.item_count = cart.amazon.CartItems[0].CartItem.reduce(
+                        function(a,b){
+                          return a+Number(b.Quantity);
+                        },0);
+    }
   }
   return cart;
 }
@@ -201,14 +207,21 @@ const Resolvers = {
       }
       const menuObj = Menu(obj.menu);
       return obj.cart.map(async (i) => {
-        const item = menuObj.flattenedMenu[i.item.item_id];
-        let userName = await context.loaders.UsersByUserId.load(i.user_id);
-        userName = userName.name;
-        return {
-          item_name: item ? item.name : 'name unavail',
-          // either need to convert id to name here or with context in the resolver
-          user: userName,
-        };
+        if(i.item){
+          const item = menuObj.flattenedMenu[i.item.item_id];
+          let userName = await context.loaders.UsersByUserId.load(i.user_id);
+          userName = userName.name;
+          return {
+            item_name: item ? item.name : 'name unavail',
+            // either need to convert id to name here or with context in the resolver
+            user: userName,
+          };
+        } else {
+          return {
+            item_name: 'name unavail',
+            userName: 'n/a'
+          }
+        }
       });
     },
 

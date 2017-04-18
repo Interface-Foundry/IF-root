@@ -54,7 +54,7 @@ class Home extends Component {
       //store query
       currentQuery = gql`
         query CartsInDateRange($startDate: String!, $endDate: String!){
-          carts(limit: 10, start_date: $startDate, end_date: $endDate){created_date, team{team_name}, type, item_count, cart_total, items{title}}
+          carts(limit: 10, start_date: $startDate, end_date: $endDate){created_date, team{team_name}, type, item_count, amazon, cart_total, items{title}}
         }
       `;
     }

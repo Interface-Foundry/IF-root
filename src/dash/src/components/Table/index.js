@@ -35,11 +35,26 @@ const CafeTable = ({data}) => {
 
 //carts{created_date, team{team_name}, type, item_count, cart_total, items{title}}}
 const CartTable = ({data}) => {
+  let newData = [];
+  for (var i = 0; i<data.length; i++){
+    newData.push(data[i]);
+    if(data[i].amazon && data[i].amazon.CartItems){
+      data[i].amazon.CartItems[0].CartItem.map(function(item){
+        newData.push({
+           title: item.Title,
+        })
+      })
+    }
+  }
+
+
   return (
-    <BootstrapTable data={data} hover>
+    <BootstrapTable data={newData} hover>
       <TableHeaderColumn isKey={true} dataField='created_date'>Created Date</TableHeaderColumn>
+      <TableHeaderColumn dataField='team' dataFormat={ nameFormatter.bind(this, 'team_name') }>Team</TableHeaderColumn>
       <TableHeaderColumn dataField='item_count'>Item Count</TableHeaderColumn>
       <TableHeaderColumn dataField='cart_total'>Cart Total</TableHeaderColumn>
+      <TableHeaderColumn dataField='title'>Item Name</TableHeaderColumn>
     </BootstrapTable>
   );
 };
