@@ -18,10 +18,6 @@ export default combineReducers({
 });
 
 // export selectors
-export {
-  getAccountById
-}
-from './session';
 
 export {
   getMemberById,

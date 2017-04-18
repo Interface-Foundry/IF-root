@@ -7,7 +7,7 @@ const mapStateToProps = (state, ownProps) => ({
   cart_id: state.routing.location.pathname.match(/cart\/((\d|\w)+)/)[1], // TODO: switch to nonregex when react router allows it
   leader: state.currentCart.leader,
   carts: state.otherCarts.carts,
-  currentUser: state.session.user_accounts[0],
+  currentUser: state.session.user_account,
   newAccount: state.session.newAccount,
   deals: state.deals.deals,
   item: state.item,

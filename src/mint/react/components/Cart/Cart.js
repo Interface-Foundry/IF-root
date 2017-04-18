@@ -13,7 +13,7 @@ export default class Cart extends Component {
     items: PropTypes.object.isRequired,
     addingItem: PropTypes.bool.isRequired,
     history: PropTypes.object.isRequired,
-    user_accounts: PropTypes.array
+    user_account: PropTypes.object
   }
 
   componentWillMount() {
@@ -22,22 +22,22 @@ export default class Cart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id } = this.props, { leader, addingItem, user_accounts } = nextProps,
+    const { history: { replace }, cart_id } = this.props, { leader, addingItem, user_account } = nextProps,
       cartId = cart_id || nextProps.cart_id;
 
     if (cartId) {
-      if (user_accounts.length === 0 && !leader) {
+      if (!user_account.id && !leader) {
         replace(`/cart/${cartId}/m/signin`);
-      } else if (leader && !addingItem && this.props.addingItem !== addingItem && user_accounts.length !== 0) {
+      } else if (!!leader && !addingItem && this.props.addingItem !== addingItem && !!user_account.id) {
         replace(`/cart/${cartId}/`);
       }
     }
   }
 
   render() {
-    const { items, leader, members, user_accounts, history: { replace } } = this.props,
+    const { items, leader, members, user_account, history: { replace } } = this.props,
       hasItems = items.quantity > 0,
-      isLeader = !!user_accounts[0] && !!leader && (leader.id === user_accounts[0].id);
+      isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
 
     return (
       <div className='cart'>

@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var co = require('co');
+var _ = require('lodash');
 
 const dealsDb = require('../deals/deals')
 
@@ -28,7 +29,7 @@ router.get('/', (req, res) => co(function* () {
   const memberCarts = yield db.carts_members__user_accounts_id.find({
     user_accounts_id: req.UserSession.user_account.id
   })
-
+  
   const memberCartsIds = memberCarts.map( c => c.carts_members )
 
   // find all the carts where their user id appears in the leader or member field

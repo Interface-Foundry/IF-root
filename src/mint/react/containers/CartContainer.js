@@ -11,8 +11,8 @@ const mapStateToProps = (state, ownProps) => {
     addingItem: state.currentCart.addingItem,
     leader: state.currentCart.leader,
     members: state.currentCart.members,
-    user_accounts: state.session.user_accounts,
-    items: splitCartById(state, state.session.user_accounts[0]),
+    user_account: state.session.user_account,
+    items: splitCartById(state, state.session.user_account),
     carts: state.otherCarts.carts
   };
 };

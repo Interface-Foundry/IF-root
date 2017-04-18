@@ -15,7 +15,7 @@ describe('CartContainer', () => {
       session: {
         newAccount: false,
         onborded: false,
-        user_accounts: [{ id: 1 }]
+        user_account: { id: 1 }
       },
       cart: {
         cart_id: 'testId',

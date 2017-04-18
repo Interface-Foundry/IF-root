@@ -42,7 +42,7 @@ class CartHead extends Component {
           {leaderName}'s Group Cart
         </h3>
         {
-          currentUser ? <div className='navbar__icon' onClick={_toggleSidenav}>
+          currentUser.id ? <div className='navbar__icon' onClick={_toggleSidenav}>
             <Icon icon='Hamburger'/>
           </div> : null
         }
