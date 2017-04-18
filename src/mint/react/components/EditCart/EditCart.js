@@ -16,7 +16,6 @@ class EditCart extends Component {
             { thumbnail_url } = values;
 
         if(thumbnail_url && thumbnail_url !== cart.thumbnail_url) {
-            debugger
             cloudinary(thumbnail_url).then((res) => {
                 onSubmit({...values, ...cart, thumbnail_url: res.secure_url}, e, state)
             })
