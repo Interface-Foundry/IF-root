@@ -12,7 +12,7 @@ export default function otherCarts(state = initialState, action) {
   case RECEIVE_UPDATE_CART:
     return {
       ...state,
-      carts: _.map(state.carts, (c) => ( c.id === action.updatedCart.id ? action.updatedCart : c))
+      carts: _.map(state.carts, (c) => ( c.id === action.updatedCart.id ? { ...c, thumbnail_url: action.updatedCart.thumbnail_url, name: action.updatedCart.name } : c))
     }
   default:
     return state;
