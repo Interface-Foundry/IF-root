@@ -64,13 +64,21 @@ class Home extends Component {
   render(){
     var self = this;
 
-    const currentQuery = this.getCurrentQuery()
-    const TableWithData = graphql(currentQuery,{
-  options: { variables: { startDate: self.state.startDate, endDate: self.state.endDate} },
-})(getCurrentTable);
+    const currentQuery = this.getCurrentQuery();
+    const gqlWrapper = graphql(currentQuery, {
+      options: {
+        variables: {
+          startDate: self.state.startDate,
+          endDate: self.state.endDate,
+        },
+      },
+    });
+
+    const TableWithData = gqlWrapper(getCurrentTable);
+    const GraphWithData = gqlWrapper(getCurrentGraph);
 
     return (
-    
+
       <div>
         <div>
           <GraphWithData />
