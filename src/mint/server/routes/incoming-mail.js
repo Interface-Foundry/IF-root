@@ -70,9 +70,31 @@ var sendConfirmationEmail = function * (email, uris) {
  * @param
  * @returns
  */
-var processText = function () {
-  //TODO
-  return "hapax legomenon"
+var processText = function (text) {
+  logging.info('process text called')
+  var allPars = text.split(/\r?\n|\r/g);
+
+  //filter out conversation history
+  pars = allPars.filter(function (p) {
+    return p[0] !== '>';
+  })
+
+  //if there was a conversation history, get rid of the date / time line and
+  //the two blank lines around it
+  if (pars.length !== allPars.length) pars = pars.slice(0, pars.length-3);
+  logging.info('pars', pars)
+
+  var cleanPars = [];
+  pars = pars.map(function (par) {
+    var words = par.split(' ').filter(w => !validUrl.isUri(w)).join(' ');
+    logging.info('words', words);
+    return words;
+    //TODO sanitize
+    //TODO emojis
+    //TODO other emojis
+  })
+
+  return pars;
 }
 
 /**
@@ -82,7 +104,7 @@ var processText = function () {
  */
 var processAmazonURIs = function (text) {
   var words = text.split(/\s/);
-  var all_uris = text.filter(w => validUrl.isUri(w));
+  var all_uris = words.filter(w => validUrl.isUri(w));
   if (!all_uris) return null; // if there aren't any urls at all return null
   //validate uris as amazon links
   else return all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u));
@@ -102,6 +124,11 @@ router.post('/', upload.array(), (req, res) => co(function * () {
 
   //parse out text and uris
   var body = req.body.text;
+  // logging.info(Object.keys(req.body));
+  // logging.info(req.body.text);
+
+  // res.sendStatus(202);//DELENDUM
+  // return;
 
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
   if (!body) {
@@ -110,9 +137,12 @@ router.post('/', upload.array(), (req, res) => co(function * () {
     res.sendStatus(202);
   }
 
-  //TODO be smooth -- #warmachine
   var text = processText(body);
-  var uris = processAmazonURIs(body;)
+  var uris = processAmazonURIs(body);
+
+  //don't freak out sendgrid please
+  res.sendStatus(200);
+  return;
 
   //business logic starts here -- TODO
   if (!(uris.length) && all_uris) {
