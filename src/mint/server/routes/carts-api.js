@@ -342,9 +342,9 @@ module.exports = function (router) {
     } else {
       // search query
       // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-      var items = yield amazon.searchAmazon(q);
+      var item = yield amazon.searchAmazon(q);
     }
-    res.send((item ? item : items));
+    res.send(item);
   }))
 
   router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
