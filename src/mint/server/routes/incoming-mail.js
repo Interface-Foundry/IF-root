@@ -69,6 +69,7 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   //parse out amazon uris
   var text = req.body.text.split(/\s/);
   var all_uris = (text ? text.filter(w => validUrl.isUri(w)) : null);
+  var text = (text ? text.filter(w => !validUrl.isUri(w)) : null);
   logging.info('all_uris', all_uris)
   uris = (all_uris ? all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)) : null);   //validate uris as amazon links
   if (!(uris.length) && all_uris) {
@@ -76,10 +77,24 @@ router.post('/', upload.array(), (req, res) => co(function * () {
     console.log('gonna send an error email');
     yield sendErrorEmail(email);
   }
-  if (!uris || !uris.length) {
+  if ((!uris || !uris.length) && !text) {
     console.log('no urls');
+    //TODO search amazon
     res.sendStatus(200);
     return;
+  }
+  if (text) {
+    try {
+      console.log('gonna search:', text[0])
+      var searchResults = yield amazon.searchAmazon(text[0]);
+
+      console.log('got this:', JSON.stringify(searchResults))
+      // res.sendStatus(200);
+    }
+    catch (err) {
+      logging.error(err);
+      // res.sendStatus(200);
+    }
   }
 
   //get cart id
@@ -105,6 +120,7 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   }
 
   if (uris.length) {
+    console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {
       return yield amazonScraper.scrapeUrl(uri);
       var item = yield amazon.getAmazonItem(uri);

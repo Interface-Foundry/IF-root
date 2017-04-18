@@ -1,6 +1,8 @@
 const co = require('co')
 const _ = require('lodash')
 var amazonScraper = require('../cart/scraper_amazon')
+var amazon = require('../cart/amazon_cart')
+
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -46,7 +48,7 @@ module.exports = function (router) {
       })
 
       res.send(carts)
-      
+
     })
 
 
@@ -345,9 +347,10 @@ module.exports = function (router) {
       var item = yield amazonScraper.scrapeAsin(q)
     } else {
       // search query
-      throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
+      // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
+      var items = yield amazon.searchAmazon(q);
     }
-    res.send(item)
+    res.send((item ? item : items));
   }))
 
   router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
