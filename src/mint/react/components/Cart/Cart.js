@@ -15,7 +15,10 @@ export default class Cart extends Component {
     items: PropTypes.object.isRequired,
     addingItem: PropTypes.bool.isRequired,
     history: PropTypes.object.isRequired,
-    user_account: PropTypes.object
+    user_account: PropTypes.object,
+    locked: PropTypes.bool,
+    updateCart: PropTypes.func,
+    currentCart: PropTypes.object
   }
 
   componentWillMount() {
@@ -42,7 +45,6 @@ export default class Cart extends Component {
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
 
-    console.log('locked from cart: ', locked)
     return (
       <div className='cart'>
         {

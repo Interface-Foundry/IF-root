@@ -19,11 +19,27 @@ export default class Item extends Component {
     fetchDeals: PropTypes.func,
     previewAmazonItem: PropTypes.func,
     index: PropTypes.number,
-    amazon_id: PropTypes.string
+    amazon_id: PropTypes.string,
+    nextSearch: PropTypes.func,
+    prevSearch: PropTypes.func,
+    setSearchIndex: PropTypes.func
   }
 
   componentWillMount() {
-    const { props: { item_id, amazon_id, previewAmazonItem, previewItem, item, type, items, fetchDeals } } = this;
+    const {
+      props: {
+        item_id,
+        amazon_id,
+        previewAmazonItem,
+        previewItem,
+        item,
+        type,
+        items,
+        index,
+        setSearchIndex,
+        fetchDeals
+      }
+    } = this;
     // only update item if there isn't one
     if (!item.price) {
       if (item_id) previewItem(item_id);
@@ -31,13 +47,28 @@ export default class Item extends Component {
     }
 
     if (type === 'deal' && items.length === 0) fetchDeals();
+    else if (type === 'search' && index) setSearchIndex(index);
     this.determineNav = ::this.determineNav;
   }
 
   componentWillReceiveProps(nextProps) {
-    const { props: { item_id, amazon_id, previewItem, previewAmazonItem } } = this;
+    const {
+      props: {
+        cart_id,
+        item_id,
+        amazon_id,
+        previewItem,
+        previewAmazonItem,
 
-    if (nextProps.item_id !== item_id) previewItem(nextProps.item_id);
+        item: { position },
+        history: { replace }
+      }
+    } = this;
+    const { type: nextType, item: nextItem } = nextProps;
+
+    if (nextType === 'item' && Array.isArray(nextItem.search)) replace(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
+    else if (nextType === 'search' && nextItem.position !== position) replace(`/cart/${cart_id}/m/${nextType}/${nextItem.position || 0}/${amazon_id}`);
+    else if (nextProps.item_id !== item_id) previewItem(nextProps.item_id);
     else if (nextProps.amazon_id !== amazon_id) previewAmazonItem(nextProps.amazon_id);
   }
 
@@ -48,15 +79,16 @@ export default class Item extends Component {
 
   determineNav() {
     const {
-      props: { cart_id, type, items, index, history: { replace } },
+      props: { cart_id, type, items, index, amazon_id, history: { replace } },
       state: { originalx, x }
     } = this;
-    if (type === 'deal') {
+    if (type === 'deal' || type === 'search') {
       const numericInt = parseInt(index),
         diff = Math.abs(originalx - x),
         newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
 
-      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+      if (originalx !== x && x !== 0 && diff > 100 && type === 'deal') replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+      else if (originalx !== x && x !== 0 && diff > 100 && type === 'search') replace(`/cart/${cart_id}/m/${type}/${newIndex}/${amazon_id}`);
     }
   }
 
@@ -64,9 +96,8 @@ export default class Item extends Component {
     const {
       determineNav,
       props,
-      props: { index, type, items, item, item: { main_image_url, store, description } }
+      props: { index, type, items, item, nextSearch, prevSearch, item: { main_image_url, store, description, name } }
     } = this;
-
     return (
       <div 
         className='item' onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
@@ -82,7 +113,12 @@ export default class Item extends Component {
         { 
           type === 'deal' && items[parseInt(index)]
           ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
-          : <ItemInfo {...props} {...item} /> 
+          : item.search 
+            ? <div>
+                <button onClick={()=>prevSearch()}>&lt;</button>
+                <button onClick={()=>nextSearch()}>&gt;</button>
+              </div>
+            : <ItemInfo {...props} {...item} /> 
         }
         <div className='item__view__description'>
           <h4>{store}</h4> 
@@ -144,17 +180,17 @@ class AddRemove extends Component {
     decrementItem: PropTypes.func,
   }
   render() {
-    const { item: { id, quantity }, incrementItem, decrementItem } = this.props;
-    return (
-      <div className='item__view__quantity'>
-        <button onClick={()=>incrementItem(id, quantity)}>+</button>
-        <div className='item__view__quantity__num'>{quantity}</div>
-        {
-          (quantity > 1) 
-            ? <button onClick={()=> decrementItem(id, quantity)}>-</button>
-            : <div className='item__view__quantity__placeholder'/>
-        } 
-      </div>
+    const { item: { id, quantity, added_by }, incrementItem, decrementItem } = this.props;
+    return (!added_by // hide incrementer if not added to cart
+      ? null : <div className='item__view__quantity'>
+            <button onClick={()=>incrementItem(id, quantity)}>+</button>
+            <div className='item__view__quantity__num'>{quantity}</div>
+            {
+              (quantity > 1) 
+                ? <button onClick={()=> decrementItem(id, quantity)}>-</button>
+                : <div className='item__view__quantity__placeholder'/>
+            } 
+          </div>
     );
   }
 }
