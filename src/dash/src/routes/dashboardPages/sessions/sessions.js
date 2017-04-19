@@ -3,7 +3,7 @@ import {
   LineChart, Sector, Cell, Tooltip, PieChart, Pie,
   Line, XAxis, YAxis, Legend,
   CartesianGrid, Bar, BarChart,
-  ResponsiveContainer, AreaChart, Area } from '../../../vendor/recharts';
+  ResponsiveContainer, AreaChart, Area } from 'recharts';
 import {
   MenuItem,Panel, PageHeader,
   DropdownButton, Button,ButtonToolbar,
@@ -279,7 +279,7 @@ class Session extends Component {
           <div className="panel panel-default fillSpace">
             <Panel header={<span><i className="fa fa-table fa-fw" />{self.state.view} Waypoint Routes</span>}>
             { self.state.view=='Store' ? 'Placeholder for store waypoints stuff.' : self.renderWaypointTable(self.state.rows, self.state.startDate, self.state.endDate) }
-            </Panel> 
+            </Panel>
           </div>
         </div>
       </div>
