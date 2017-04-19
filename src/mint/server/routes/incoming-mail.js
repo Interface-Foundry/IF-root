@@ -107,12 +107,17 @@ var getTerms = function (text, urls) {
  * @param {string} text - the text of the email body
  * @returns an array of the valid amazon urls in the email body
  */
-var getUrls = function (text) {
-  var words = text.split(/\s/);
-  var all_uris = words.filter(w => validUrl.isUri(w));
-  if (!all_uris) return null; // if there aren't any urls at all return null
+var getUrls = function (html) {
+  // var words = html.split(/\s/);
+  // var uris = /href="(.+?)"/gi.exec(html);
+  var uris = html.match(/href="(.+?)"/gi);
+  logging.info('html', html);
+  logging.info('uris', uris);
+  return null;
+  // var all_uris = words.filter(w => validUrl.isUri(w));
+  // if (!all_uris) return null; // if there aren't any urls at all return null
   //validate uris as amazon links
-  else return all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u));
+  return uris.filter(u => /^https:\/\/www.amazon.com\//.test(u));
 }
 
 /**
@@ -127,21 +132,21 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   if (email[0] === '<') email = email.slice(1, email.length-1);
   var user = yield db.UserAccounts.findOrCreate({email: email});
 
-  //parse out text and uris
-  var bodyText = req.body.text;
-  var bodyHtml = req.body.html;
-
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
-  if (!body) {
+  if (!req.body.text || ! req.body.html) {
     logging.info('no email body');
     yield sendErrorEmail(email);
     res.sendStatus(202);
   }
 
+  //parse out text and uris
+  var bodyText = req.body.text;
+  var bodyHtml = req.body.html;
+
   // var text = processText(body);
   // var uris = processAmazonURIs(body);
   var uris = getUrls(bodyHtml);
-  var text = getTerms(bodyText, uris);
+  // var text = getTerms(bodyText, uris);
 
   //don't freak out sendgrid please
   res.sendStatus(200);
