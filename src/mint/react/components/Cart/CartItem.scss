@@ -4,6 +4,10 @@
   border-bottom: 1px solid $border-color-light;
   background: $kip-primary-color;
   font-family: $secondary-font;
+
+  &:last-of-type {
+    border-bottom: 0;
+  }
   .cartItem__title {
     height: $nav-height;
     line-height: $nav-height;

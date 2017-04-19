@@ -40,3 +40,7 @@ const formatLinkForApp = (app, link) => {
       return app.deepLink;
   }
 }
+
+export const calculateItemTotal = (items) => {
+  return _.reduce(items, (acc, item) => acc + (item.price * item.quantity), 0)
+}

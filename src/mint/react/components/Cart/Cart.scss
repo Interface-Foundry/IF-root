@@ -49,6 +49,12 @@ $cart__add-height: $nav-height+$padding;
     overflow-y: visable;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
+    ul {
+      h3 {
+        border-bottom: 1px solid $border-color-light;
+        padding: $padding;
+      }
+    }
     .cart__items__title {
       font-weight: 500;
       letter-spacing: 1px;
