@@ -28,7 +28,6 @@ var sendErrorEmail = function * (email) {
     subject: 'Oops',
     message_html: '<html><p>Unfortunately I couldn\'t understand the link you sent me -- make sure that you paste a full URL that links to an item on Amazon.com</p></html>'
   })
-
   yield error.send();
 }
 
@@ -66,7 +65,6 @@ var sendConfirmationEmail = function * (email, uris) {
 }
 
  var testMatch = function (text, url, start) {
-   console.log('URL', url, 'text', text.slice(0, 30));
    var end = -1;
    var offset = 0; //number of extraneous (newline) characters we're editing out
    var contiguousWrong = 0;
@@ -83,7 +81,7 @@ var sendConfirmationEmail = function * (email, uris) {
        if (j === url.length-1) {
          //we're done!
         //  console.log('were done')
-         return [start, start+j+offset];
+         return [start, start+j+offset+1];
        }
      }
      else {//this might not be a match but we'll need to see
@@ -113,7 +111,7 @@ var sendConfirmationEmail = function * (email, uris) {
    for (var i = 0; i < text.length; i++) {
     //  var start = -1;
     // console.log('testing', url, 'at', i)
-    if (url[0] === text[i]) {
+    if (url.slice(0, 2) === text.slice(i, i+2)) {
       var result = testMatch(text, url, i);
       if (result) return result;
     }
@@ -136,7 +134,7 @@ var exciseUrls = function (text, urls) {
     // console.log('URL:', url)
     // console.log('TEXT:', text)
     console.log('INDICES:', indices)
-    // text = text.slice(0, indices[0]) + text.slice(indices[1], text.length);
+    text = text.slice(0, indices[0]) + text.slice(indices[1]);
     // console.log('NEW TEXT', text);
   })
   return text;
@@ -155,7 +153,7 @@ var getTerms = function (text, urls) {
 
   //TODO: filter out urls
   text = exciseUrls(text, urls);
-  return;
+  // return;
   logging.info('TEXT, replaced:', text);
 
   //filter out conversation history
