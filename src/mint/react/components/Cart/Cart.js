@@ -75,7 +75,11 @@ export default class Cart extends Component {
         </div>
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
-          <OtherItems {...this.props} items={items.others} startIndex={items.my.length} isLeader={isLeader} />
+          {
+            _.map(items.others, (value, key, index) => {
+              return <OtherItems {...this.props} key={key} title={key} items={value} startIndex={items.my.length} isLeader={isLeader} />
+            })
+          }
         </div>
       </div>
     );
@@ -112,12 +116,12 @@ class OtherItems extends Component {
   }
 
   render() {
-    const { props, props: { items, isLeader, startIndex } } = this,
+    const { props, props: { items, isLeader, startIndex, title } } = this,
           total = calculateItemTotal(items);
 
     return (
       <ul>
-        <div className='cart__items__title'>Everyone's Items</div>
+        <div className='cart__items__title'>{title}</div>
         {
           items.length 
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
