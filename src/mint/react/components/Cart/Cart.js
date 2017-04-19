@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import CartItem from './CartItem';
 import { AddAmazonItemContainer, DealsContainer } from '../../containers';
 import { Icon } from '..';
-import { calculateItemTotal, commaSeparateNumber } from '../../utils';
+import { calculateItemTotal, displayCost } from '../../utils';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -102,7 +102,7 @@ class MyItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={true} item={item} {...props} />) 
           : <EmptyCart />
         }
-        <h3>Total: <span>${commaSeparateNumber(total)}</span></h3>
+        <h3>Total: <span>{displayCost(total)}</span></h3>
       </ul>
     );
   }
@@ -112,7 +112,8 @@ class OtherItems extends Component {
   static propTypes = {
     items: PropTypes.array.isRequired,
     isLeader: PropTypes.bool.isRequired,
-    startIndex: PropTypes.number
+    startIndex: PropTypes.number,
+    title: PropTypes.string
   }
 
   render() {
@@ -127,7 +128,7 @@ class OtherItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
           : <EmptyCart />
         }
-        <h3>Total: <span>${commaSeparateNumber(total)}</span></h3>
+        <h3>Total: <span>{displayCost(total)}</span></h3>
       </ul>
     );
   }

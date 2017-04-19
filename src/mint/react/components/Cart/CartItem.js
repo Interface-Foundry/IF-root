@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { getMemberById } from '../../reducers';
-import { getNameFromEmail } from '../../utils';
+import { getNameFromEmail, displayCost } from '../../utils';
+
 
 export default class CartItem extends Component {
   static propTypes = {
@@ -36,7 +37,7 @@ export default class CartItem extends Component {
           <p>{name}</p>
           <br/>
           <p>Qty: {quantity}</p>
-          <p>Price: ${price}</p>
+          <p>Price: {displayCost(price)}</p>
           {
             isOwner
             ? <div className='cartItem__actions'>

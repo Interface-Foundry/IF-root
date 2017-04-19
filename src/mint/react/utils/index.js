@@ -19,7 +19,8 @@ export {
   commaSeparateNumber,
   getNameFromEmail,
   addLinkToDeepLink,
-  calculateItemTotal
+  calculateItemTotal,
+  displayCost
 }
 from './formating';
 
