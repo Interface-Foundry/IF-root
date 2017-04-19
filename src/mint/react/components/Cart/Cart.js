@@ -96,7 +96,7 @@ class MyItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={true} item={item} {...props} />) 
           : <EmptyCart />
         }
-        <h3>Total: ${commaSeparateNumber(total)}</h3>
+        <h3>Total: <span>${commaSeparateNumber(total)}</span></h3>
       </ul>
     );
   }
@@ -121,7 +121,7 @@ class OtherItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
           : <EmptyCart />
         }
-        <h3>Total: ${commaSeparateNumber(total)}</h3>
+        <h3>Total: <span>${commaSeparateNumber(total)}</span></h3>
       </ul>
     );
   }
