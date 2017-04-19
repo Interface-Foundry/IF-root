@@ -56,17 +56,17 @@ export function fetchCart(cart_id) {
   };
 }
 
-export function updateCart(selectedCart) {
+export function updateCart(cart) {
   return async dispatch => {
     try {
-      const response = await fetch(`/api/cart/${selectedCart.id}`, {
+      const response = await fetch(`/api/cart/${cart.id}`, {
         'method': 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json'
         },
         credentials: 'same-origin',
-        'body': JSON.stringify(selectedCart)
+        'body': JSON.stringify(cart)
       });
       return dispatch(recieveUpdate(await response.json()));
     } catch (e) {

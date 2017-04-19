@@ -16,9 +16,11 @@ export default class CartItem extends Component {
   }
 
   render() {
-    const { itemNumber, leader, isOwner, cart_id, members, history: { push }, item: { added_by, main_image_url, name, price, quantity, id } } = this.props,
+    const { itemNumber, locked, leader, isOwner, cart_id, members, history: { push }, item: { added_by, main_image_url, name, price, quantity, id } } = this.props,
       linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by }),
       memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
+
+    console.log('locked from cart__item: ', locked)
     return (
       <li className='cartItem'>
         <h4 className='cartItem__title'>{memberName}</h4>
@@ -38,7 +40,12 @@ export default class CartItem extends Component {
           {
             isOwner
             ? <div className='cartItem__actions'>
-                <button onClick={() => push(`/cart/${cart_id}/m/item/${itemNumber}/${id}/edit`)}>Edit</button>
+                <button 
+                  className={locked ? 'locked' : ''}
+                  disabled={locked} 
+                  onClick={() => push(`/cart/${cart_id}/m/item/${itemNumber}/${id}/edit`)}>
+                    { locked ? 'Locked' : 'Edit'}
+                </button>
               </div>
             : null
           }

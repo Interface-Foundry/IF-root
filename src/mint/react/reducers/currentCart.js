@@ -32,6 +32,7 @@ export default function cart(state = initialState, action) {
     if(action.updatedCart.id !== state.cart_id) break;
     return {
       ...state,
+      locked: action.updatedCart.locked,
       thumbnail_url: action.updatedCart.thumbnail_url,
       name: action.updatedCart.name,
       cart_id: action.updatedCart.id

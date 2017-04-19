@@ -16,17 +16,15 @@ const initialState = {
 export default function session(state = initialState, action) {
   switch (action.type) {
   case RECEIVE_SESSION:
-    console.log('Inside return of /api/indentify', action.newSession)
     return {
       ...state,
       ...action.newSession
     };
   case RECEIVE_UPDATE_SESSION:
-    console.log('Inside return of /api/session', action.newSession)
     return {
       ...state,
       ...action.newSession,
-      user_account: action.newSession.user
+      user_account: action.newSession.user || action.newSession.user_account
     };
   case REQUEST_SESSION:
   case REQUEST_UPDATE_SESSION:

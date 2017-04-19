@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CartItem from './CartItem';
 import { AddAmazonItemContainer, DealsContainer } from '../../containers';
+import { Icon } from '..';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -36,16 +37,36 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, history: { replace } } = this.props,
+    const { items, leader, members, user_account, history: { replace }, locked, updateCart, currentCart } = this.props,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
 
+    console.log('locked from cart: ', locked)
     return (
       <div className='cart'>
-        <div className='cart__add'>
-          <AddAmazonItemContainer replace={replace} members={members}/>
-        </div>
-        {!!user_account.id ? <DealsContainer isDropdown={false}/> : null}
+        {
+          locked ? <div className='cart__locked'>
+            <div className='cart__locked__text'>
+              <Icon icon='Locked'/>
+              <p>Locked</p>
+            </div>
+            {
+              leader.id === user_account.id ? <button onClick={() => {
+                updateCart({
+                  ...currentCart, 
+                  locked: !currentCart.locked
+                })
+              }}>
+                Unlock
+              </button> : null
+            }
+          </div> : <span>
+            <div className='cart__add'>
+              <AddAmazonItemContainer replace={replace} members={members}/>
+            </div>
+            {!!user_account.id ? <DealsContainer isDropdown={false}/> : null}
+          </span>
+        }
         <div className='cart__title'>
           <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
         </div>

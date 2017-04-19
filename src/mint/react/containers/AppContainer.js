@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { App } from '../components';
-import { fetchCart, fetchAllCarts } from '../actions/cart';
+import { fetchCart, fetchAllCarts, updateCart } from '../actions/cart';
 import { addItem } from '../actions/item';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -22,7 +22,8 @@ const mapDispatchToProps = dispatch => ({
       });
   },
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
-  fetchAllCarts: () => dispatch(fetchAllCarts())
+  fetchAllCarts: () => dispatch(fetchAllCarts()),
+  updateCart: (cart) => dispatch(updateCart(cart))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { Cart } from '../components';
 import { fetchDeals } from '../actions/deals';
-import { selectItem } from '../actions/cart';
+import { selectItem, updateCart } from '../actions/cart';
 import { splitCartById } from '../reducers';
 
 const mapStateToProps = (state, ownProps) => {
@@ -12,6 +12,8 @@ const mapStateToProps = (state, ownProps) => {
     members: state.currentCart.members,
     user_account: state.session.user_account,
     items: splitCartById(state, state.session.user_account),
+    locked: state.currentCart.locked,
+    currentCart: state.currentCart,
     carts: state.otherCarts.carts
   };
 };
@@ -19,6 +21,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => ({
   fetchDeals: () => dispatch(fetchDeals()),
   selectItem: item => dispatch(selectItem(item)),
+  updateCart: (cart) => dispatch(updateCart(cart))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);

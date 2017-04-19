@@ -29,16 +29,20 @@
       button {
         cursor: pointer;
         font-family: $secondary-font;
-        font-size: 16px;
+        font-size: 13px;
         color: $kip-faded-color;
         padding: 0 $padding;
         height: $padding * 3;
-        width: $padding * 7;
         background: white;
         border: 2px solid $border-color-light;
         border-radius: $padding/2;
         &:active {
           background: $border-color-light;
+        }
+        &:disabled {
+          background: $header-color;
+          color: white;
+          border: 2px solid $header-color;
         }
       }
     }

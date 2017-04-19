@@ -48,12 +48,18 @@ class CartFooter extends Component {
   }
 
   render() {
-    const { _handleShare } = this;
+    const { _handleShare } = this,
+          { updateCart, currentCart } = this.props;
 
     return (
       <div className='footer__cart'>
         <button className='share' onClick={_handleShare}>SHARE</button>
-        <button>CHECKOUT</button>
+        <button onClick={() => {
+          updateCart({
+            ...currentCart, 
+            locked: !currentCart.locked
+          })
+        }}>CHECKOUT</button>
       </div>
     );
   }
