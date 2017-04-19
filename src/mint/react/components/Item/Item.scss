@@ -31,9 +31,21 @@
     font-size: 13px;
   }
   div[class$='view__price'] {
+    h4,
+    h5 {
+      padding: 1px;
+      margin: 5px;
+    }
     h4 {
-      font-size: 15px;
-      color: $price-color;
+      font-size: 18px;
+      font-weight: bold;
+      span {
+        font-weight: normal;
+        color: $price-color;
+      }
+    }
+    h5 {
+      font-weight: normal;
     }
     p {
       font-size: 10px;
@@ -45,7 +57,7 @@
   .item__view__price {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: top;
     .item__view__quantity {
       display: flex;
       align-items: center;
