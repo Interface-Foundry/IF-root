@@ -37,7 +37,7 @@ class EditCart extends Component {
                 <div className="input name">
                     <Field name="name" component="input" type="text" placeholder="Add Cart Name"/>
                 </div>
-                <footer className='editCart__footer'>
+                <footer className='editCart__footer' onClick={handleSubmit(onSubmitMiddleware)}>
                     <button className="submit" type="submit">Submit</button>
                 </footer>
             </form>
