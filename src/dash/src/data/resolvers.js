@@ -23,12 +23,14 @@ import Menu from '../../../chat/components/delivery.com/Menu';
 // if you want to use mongoose/db.whatever uncomment this
 // import db from "../../../../../db/index.js"
 
+
 /**
  * get the date from args if using start_date and end_date in graphql query
  * @param  {object} args object with possible start and end dates
+ * @param  {string} property for mongodb object that search date for
  * @return {object} args object
  */
-function getDeliveryDateFromArgs(args) {
+function getDateFromArgs(args, datePropertyString) {
   let dateArgs;
   const newArgs = args;
 
@@ -45,29 +47,7 @@ function getDeliveryDateFromArgs(args) {
     dateArgs.$lt = new Date(newArgs.end_date);
     delete newArgs.end_date;
   }
-  newArgs.time_started = dateArgs;
-
-  return newArgs;
-}
-
-function getCartDateFromArgs(args) {
-  let dateArgs;
-  const newArgs = args;
-
-  if (newArgs.start_date || newArgs.end_date) {
-    dateArgs = {};
-  } else {
-    return newArgs;
-  }
-  if (newArgs.start_date) {
-    dateArgs.$gt = new Date(newArgs.start_date);
-    delete newArgs.start_date;
-  }
-  if (newArgs.end_date) {
-    dateArgs.$lt = new Date(newArgs.end_date);
-    delete newArgs.end_date;
-  }
-  newArgs.created_date = dateArgs;
+  newArgs[datePropertyString] = dateArgs;
 
   return newArgs;
 }
@@ -88,7 +68,7 @@ function prepareCafeCarts(foodSession) {
         cartLength+=foodSession.cart[i].item.item_qty;
       }
     }
-  } 
+  }
 
   if (cartLength > 0) {
     foodSession.cart_total = `$${Number(foodSession.calculated_amount).toFixed(2)}`;
@@ -285,7 +265,7 @@ const Resolvers = {
 
   Query: {
     carts: async (root, args) => {
-      const newArgs = getCartDateFromArgs(args);
+      const newArgs = getDateFromArgs(args, 'created_date');
       let res = await pagination(Carts, newArgs);
       res = res.map(cart => prepareStoreCarts(cart));
       return res;
@@ -293,7 +273,7 @@ const Resolvers = {
 
     deliveries: async (root, args, context) => {
       // let deliveryArgs = {'cart.1': {'$exists': true}};
-      const newArgs = getDeliveryDateFromArgs(args);
+      const newArgs = getDateFromArgs(args, 'time_started');
       let res = await pagination(Deliveries, newArgs);
       res = res.map((foodSession) => prepareCafeCarts(foodSession));
       return res;
