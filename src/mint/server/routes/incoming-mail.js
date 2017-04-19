@@ -67,26 +67,93 @@ var sendConfirmationEmail = function * (email, uris) {
 
 /**
  * TODO
+ * @param {string} text - the text being searched for the url
+ * @param {string} url - the url that will be identified and removed
+ * @returns {array} - start and end index for the string to be excised
+ */
+ var exciseUrl = function (text, url) {
+   for (var i = 0; i < text.length; i++) {
+     var start = -1;
+     var end = -1;
+     var offset = 0; //number of extraneous (newline) characters we're editing out
+     if (text[i] === url[0]) {
+       start = i;
+       for (var j = 1; j < url.length; j++) {
+        //  console.log(text[i+j+offset], url[j])
+         if (i+j+offset >= text.length) {
+           //this is not a match; we've run out of text //  console.log('out of text')
+           break;
+         }
+         if (text[i+j+offset] === url[j]) {
+          //  console.log('check') //this continues to be a match
+           if (j === url.length-1) {
+             //we're done! //  console.log('were done')
+             end = i + j + offset + 1;
+             break;
+           }
+         }
+         else {//this might not be a match but we'll need to see
+           if (++offset > 5) { //  console.log('well not that')
+             break;
+           }
+           else { //  console.log('gonna keep looking')
+             j--;
+             continue;
+           }
+         }
+       }
+     }
+     if (start > -1 && end > -1) return [start, end]; //check to see if we succeeded
+   }
+   return null;
+ }
+
+
+/**
+ * TODO
+ * N.B. if a user pastes the same url several times, that url will be picked out of the html
+ * multiple times, and end up in the urls array here multiple times. So we only need to excise
+ * each url once.
+ * @param
+ * @returns {string} - the text, with the urls excised
+ */
+var exciseUrls = function (text, urls) {
+  urls.map(function (url) {
+    var indices = exciseUrl(text, url);
+    text = text.slice(0, indices[0]) + text.slice(indices[1], text.length);
+    console.log('NEW TEXT', 'new text');
+  })
+  return text;
+}
+
+/**
+ * TODO
  * @param
  * @returns
  */
 var getTerms = function (text, urls) {
   logging.info('process text called');
-  text = text.split('done')[0]
+  // text = text.split('done')[0]
   logging.info('TEXT:', text);
-  return;
 
-  var allPars = text.split(/\r?\n|\r/g);
+  //TODO: filter out urls
+  text = exciseUrls(text, urls);
+
+  logging.info('TEXT, replaced:', text);
 
   //filter out conversation history
+  var allPars = text.split(/\r?\n|\r/g);
   pars = allPars.filter(function (p) {
     return p[0] !== '>';
   })
-
   //if there was a conversation history, get rid of the date / time line and
   //the two blank lines around it
   if (pars.length !== allPars.length) pars = pars.slice(0, pars.length-3);
   logging.info('pars', pars)
+
+  return;
+
+
 
   var cleanPars = [];
   pars = pars.map(function (par) {
@@ -108,16 +175,17 @@ var getTerms = function (text, urls) {
  * @returns an array of the valid amazon urls in the email body
  */
 var getUrls = function (html) {
-  // var words = html.split(/\s/);
-  // var uris = /href="(.+?)"/gi.exec(html);
+  html = html.split('mailto:')[0]; // truncates conversation history
+  console.log('html', html)
   var uris = html.match(/href="(.+?)"/gi);
-  logging.info('html', html);
   logging.info('uris', uris);
-  return null;
-  // var all_uris = words.filter(w => validUrl.isUri(w));
-  // if (!all_uris) return null; // if there aren't any urls at all return null
-  //validate uris as amazon links
-  return uris.filter(u => /^https:\/\/www.amazon.com\//.test(u));
+  if (!uris) return null;
+
+  uris = uris.map(u => u.slice(6, u.length-1)); //trim off href junk
+  console.log('should return theese', uris)
+  uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
+  console.log('should be amazon', uris)
+  return uris;
 }
 
 /**
@@ -142,11 +210,9 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   //parse out text and uris
   var bodyText = req.body.text;
   var bodyHtml = req.body.html;
-
-  // var text = processText(body);
-  // var uris = processAmazonURIs(body);
   var uris = getUrls(bodyHtml);
-  // var text = getTerms(bodyText, uris);
+  console.log('URIS', uris)
+  var text = getTerms(bodyText, uris);
 
   //don't freak out sendgrid please
   res.sendStatus(200);
