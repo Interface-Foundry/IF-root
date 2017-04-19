@@ -16,7 +16,7 @@ export default class AmazonForm extends Component {
             {label}
           </label>
           <div className='form__input'>
-            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete='off'/>
+            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete='off' spellCheck='true'/>
             <button
               className='form__input__submit'
               type="submit"
