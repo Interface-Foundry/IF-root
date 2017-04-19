@@ -120,6 +120,9 @@ var sendConfirmationEmail = function * (email, uris) {
 var exciseUrls = function (text, urls) {
   urls.map(function (url) {
     var indices = exciseUrl(text, url);
+    console.log('URL:', url)
+    console.log('TEXT:', text)
+    console.log('INDICES:', indices)
     text = text.slice(0, indices[0]) + text.slice(indices[1], text.length);
     console.log('NEW TEXT', 'new text');
   })
