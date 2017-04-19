@@ -17,36 +17,34 @@ export default class Header extends Component {
     search = search ? search : 0;
     return (
       <nav className='navbar'>
-        <Switch>
-          <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
-              <EnumeratedHead text={'My Cart Items'} length={items.length} type={'item'} {...props}/>
-            }
-          />
-          <Route path={`${match.url}/m/item`} component={() => 
-              <ModalHead text={'Add to Cart'} {...props}/>
-            }
-          />
-          <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => 
-              <EnumeratedHead text={'Daily Deals'} length={deals.length} type={'deal'} {...props}/>
-            }
-          />
-          <Route path={`${match.url}/m/search/:index/:query`} component={() => 
-              <EnumeratedHead text={'Search Results'} length={search.length||0} type={'search'} {...props}/>
-            }
-          />
-          <Route path={`${match.url}/m/share`} component={() => 
-              <ModalHead text={'Share Cart'} {...props}/>
-            }
-          />
-          <Route path={`${match.url}/m/edit`} component={() => 
-              <ModalHead text={'Edit Cart'} {...props}/>
-            }
-          />
-          <Route path={`${match.url}`} exact component={() => 
-              <CartHead {...props}/>
-            }
-          />
-        </Switch>
+        <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
+            <EnumeratedHead text={'My Cart Items'} length={items.length} type={'item'} {...props}/>
+          }
+        />
+        <Route path={`${match.url}/m/item`} component={() => 
+            <ModalHead text={'Add to Cart'} {...props}/>
+          }
+        />
+        <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => 
+            <EnumeratedHead text={'Daily Deals'} length={deals.length} type={'deal'} {...props}/>
+          }
+        />
+        <Route path={`${match.url}/m/search/:index/:query`} component={() => 
+            <EnumeratedHead text={'Search Results'} length={search.length||0} type={'search'} {...props}/>
+          }
+        />
+        <Route path={`${match.url}/m/share`} component={() => 
+            <ModalHead text={'Share Cart'} {...props}/>
+          }
+        />
+        <Route path={`${match.url}/m/edit`} component={() => 
+            <ModalHead text={'Edit Cart'} {...props}/>
+          }
+        />
+        <Route path={`${match.url}`} exact component={() => 
+            <CartHead {...props}/>
+          }
+        />
       </nav>
     );
   }
@@ -79,7 +77,7 @@ class CartHead extends Component {
         {
           currentUser.id ? <div className='navbar__icon' onClick={_toggleSidenav}>
             <Icon icon='Hamburger'/>
-          </div> : null
+          </div> : <div className='navbar__icon no-pointer'/>
         }
       </div>
     );
@@ -103,6 +101,7 @@ class ModalHead extends Component {
         <h3 className='navbar__modal_head'>
           {text}
         </h3>
+        <div className='navbar__icon no-pointer'/>
       </div>
     );
   }
@@ -121,18 +120,19 @@ class EnumeratedHead extends Component {
   }
 
   render() {
-    let { cart_id, length, type, history: { replace, location: { pathname } }, text } = this.props,
-      itemIndex = parseInt(pathname.match(/\/(\d+)\//i)[1]) + 1;
-    const query = pathname.match(/\/\d\/(.+)$/i)[1];
-    text = type === 'search' ? `"${query}"` : text;
+    const { cart_id, length, type, history: { replace, location: { pathname } }, text } = this.props,
+      itemIndex = parseInt(pathname.match(/\/(\d+)\//i)[1]) + 1,
+      query = pathname.match(/\/\d\/(.+)$/i)[1],
+      title = type === 'search' ? `"${query}"` : text;
     return (
       <div className='navbar__modal'>
-        <div className='navbar__icon__close' onClick={()=>replace(`/cart/${cart_id}/`)}>
+        <div className='navbar__icon__close' onClick={() => replace(`/cart/${cart_id}/`)}>
           <Icon icon='Clear'/>
         </div>
         <h3 className='navbar__modal_head'>
-          {text} - {itemIndex} of {length} {type === 'search' ? 'results' : null}
+          {title} - {itemIndex} of {length} {type === 'search' ? 'results' : null}
         </h3>
+        <div className='navbar__icon no-pointer'/>
       </div>
     );
   }

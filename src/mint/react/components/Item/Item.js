@@ -59,16 +59,15 @@ export default class Item extends Component {
         amazon_id,
         previewItem,
         previewAmazonItem,
-
-        item: { position },
         history: { replace }
       }
     } = this;
-    const { type: nextType, item: nextItem } = nextProps;
-
-    if (nextType === 'item' && Array.isArray(nextItem.search)) replace(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
-    else if (nextType === 'search' && nextItem.position !== position) replace(`/cart/${cart_id}/m/${nextType}/${nextItem.position || 0}/${amazon_id}`);
-    else if (nextProps.item_id !== item_id) previewItem(nextProps.item_id);
+    const { type: nextType, item: nextItem, index: nextIndex, item: { position: nextPos } } = nextProps;
+    //never replace cart_id if its undefined
+    if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) replace(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
+    else if (cart_id && nextType === 'search' && nextPos !== nextIndex) {
+      replace(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
+    } else if (nextProps.item_id !== item_id) previewItem(nextProps.item_id);
     else if (nextProps.amazon_id !== amazon_id) previewAmazonItem(nextProps.amazon_id);
   }
 
@@ -79,16 +78,18 @@ export default class Item extends Component {
 
   determineNav() {
     const {
-      props: { cart_id, type, items, index, amazon_id, history: { replace } },
+      props: { cart_id, type, items, index, nextSearch, prevSearch, history: { replace } },
       state: { originalx, x }
     } = this;
-    if (type === 'deal' || type === 'search') {
+    if (type === 'deal') {
       const numericInt = parseInt(index),
         diff = Math.abs(originalx - x),
         newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
-
-      if (originalx !== x && x !== 0 && diff > 100 && type === 'deal') replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
-      else if (originalx !== x && x !== 0 && diff > 100 && type === 'search') replace(`/cart/${cart_id}/m/${type}/${newIndex}/${amazon_id}`);
+      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+    } else if (type === 'search') {
+      const diff = Math.abs(originalx - x),
+        nav = originalx > x ? nextSearch : prevSearch;
+      if (originalx !== x && x !== 0 && diff > 100 && type === 'search') nav();
     }
   }
 
