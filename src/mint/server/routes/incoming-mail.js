@@ -23,8 +23,8 @@ var amazon = require('../cart/amazon_cart.js');
  */
 var sendErrorEmail = function * (email) {
   var error = yield db.Emails.create({
-    recipients: email,
-    hender: 'hello@kip.ai',
+    recipients: 'hannah.katznelson@kipthis.com',//email,
+    sender: 'hello@kip.ai',
     subject: 'Oops',
     message_html: '<html><p>Unfortunately I couldn\'t understand the link you sent me -- make sure that you paste a full URL that links to an item on Amazon.com</p></html>'
   })
@@ -41,7 +41,7 @@ var sendErrorEmail = function * (email) {
 var sendConfirmationEmail = function * (email, uris) {
   //create confirmation email
   var confirmation = yield db.Emails.create({
-    recipients: email,
+    recipients: 'hannah.katznelson@kipthis.com',//email,
     sender: 'hello@kip.ai',
     subject: 'Items have been added to your cart!',
     template_name: 'item_add_confirmation'
@@ -65,6 +65,44 @@ var sendConfirmationEmail = function * (email, uris) {
   yield confirmation.send();
 }
 
+ var testMatch = function (text, url, start) {
+   console.log('URL', url, 'text', text.slice(0, 30));
+   var end = -1;
+   var offset = 0; //number of extraneous (newline) characters we're editing out
+   var contiguousWrong = 0;
+   for (var j = 0; j < url.length; j++) {
+     if (j > 5) console.log(text[start+j+offset], url[j], 'offset:', offset)
+     if (start+j+offset >= text.length) {
+        //this is not a match; we've run out of text
+      // console.log('out of text')
+      return null;
+     }
+     if (text[start+j+offset] === url[j]) { //this is a match
+      //  console.log('check') //this continues to be a match
+       contiguousWrong = 0;
+       if (j === url.length-1) {
+         //we're done!
+        //  console.log('were done')
+         return [start, start+j+offset];
+       }
+     }
+     else {//this might not be a match but we'll need to see
+        if (contiguousWrong > 5) {
+    //    console.log('well not that')
+          return null;
+        }
+        else {
+          // console.log('gonna keep looking')
+          j--;
+          contiguousWrong++;
+          offset++;
+        }
+    }
+  }
+  // console.log('something went wrong')
+  return null;
+}
+
 /**
  * TODO
  * @param {string} text - the text being searched for the url
@@ -73,37 +111,12 @@ var sendConfirmationEmail = function * (email, uris) {
  */
  var exciseUrl = function (text, url) {
    for (var i = 0; i < text.length; i++) {
-     var start = -1;
-     var end = -1;
-     var offset = 0; //number of extraneous (newline) characters we're editing out
-     if (text[i] === url[0]) {
-       start = i;
-       for (var j = 1; j < url.length; j++) {
-        //  console.log(text[i+j+offset], url[j])
-         if (i+j+offset >= text.length) {
-           //this is not a match; we've run out of text //  console.log('out of text')
-           break;
-         }
-         if (text[i+j+offset] === url[j]) {
-          //  console.log('check') //this continues to be a match
-           if (j === url.length-1) {
-             //we're done! //  console.log('were done')
-             end = i + j + offset + 1;
-             break;
-           }
-         }
-         else {//this might not be a match but we'll need to see
-           if (++offset > 5) { //  console.log('well not that')
-             break;
-           }
-           else { //  console.log('gonna keep looking')
-             j--;
-             continue;
-           }
-         }
-       }
-     }
-     if (start > -1 && end > -1) return [start, end]; //check to see if we succeeded
+    //  var start = -1;
+    // console.log('testing', url, 'at', i)
+    if (url[0] === text[i]) {
+      var result = testMatch(text, url, i);
+      if (result) return result;
+    }
    }
    return null;
  }
@@ -120,11 +133,11 @@ var sendConfirmationEmail = function * (email, uris) {
 var exciseUrls = function (text, urls) {
   urls.map(function (url) {
     var indices = exciseUrl(text, url);
-    console.log('URL:', url)
-    console.log('TEXT:', text)
+    // console.log('URL:', url)
+    // console.log('TEXT:', text)
     console.log('INDICES:', indices)
-    text = text.slice(0, indices[0]) + text.slice(indices[1], text.length);
-    console.log('NEW TEXT', 'new text');
+    // text = text.slice(0, indices[0]) + text.slice(indices[1], text.length);
+    // console.log('NEW TEXT', text);
   })
   return text;
 }
@@ -135,13 +148,14 @@ var exciseUrls = function (text, urls) {
  * @returns
  */
 var getTerms = function (text, urls) {
-  logging.info('process text called');
+  // logging.info('process text called');
   // text = text.split('done')[0]
-  logging.info('TEXT:', text);
+  // logging.info('TEXT:', text);
+  urls = urls.map(url => url.replace(/&amp;/g, '&'));
 
   //TODO: filter out urls
   text = exciseUrls(text, urls);
-
+  return;
   logging.info('TEXT, replaced:', text);
 
   //filter out conversation history
