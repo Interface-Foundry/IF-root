@@ -25,6 +25,7 @@ const url = "https://www.googleapis.com/urlshortener/v1/url?shortUrl=";
 const opt = "&projection=FULL&key=AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk";
 var rows = [];
 */
+var differenceInDays = require('date-fns/difference_in_calendar_days')
 
 module.exports = function check_asin(rows, items) {
 	    var entries = JSON.parse(rows);
@@ -37,10 +38,30 @@ module.exports = function check_asin(rows, items) {
                 //console.log(matches);
                 //console.log('ROWWWWWW', row.Qty, row.Name)
                 for(var i = 0; i<row.Qty ; i++){
-                  if(i<matches.length){
+                	var closestMatch = 0;
+                	var closestDistance;
+                	if(matches[j] && matches[j].added_date){
+                		closestDistance = Math.abs(differenceInDays(row.Date, matches[0].added_date))
+                	} else {
+                        closestDistance = 1000;
+                	}
+                	
+                	for (var j = 0; j<matches.length;j++){
+                		if(matches[j] && matches[j].added_date){
+                			if(Math.abs(differenceInDays(row.Date, matches[j].added_date)<closestDistance)){
+		                      	closestDistance = Math.abs(differenceInDays(row.Date, matches[j].added_date))
+		                      	closestMatch = j;
+		                    }
+                		}
+                	}
+                  //if(i<matches.length){
                   	// console.log(matches[i]);
-                    results.push(matches[i]);
-                  }
+                  	if(matches[closestMatch]){
+                  		results.push(matches[closestMatch]);
+                      	matches.splice(closestMatch,1);
+                  	}
+                    
+                  //}
                 }
 
                 // matches.map((match) => {

@@ -46,11 +46,11 @@ const CartTable = ({data}) => {
   let newData = [];
   for (var i = 0; i<data.length; i++){
     newData.push(data[i]);
-    if(data[i].amazon && data[i].amazon.CartItems){
-      data[i].amazon.CartItems[0].CartItem.map(function(item){
+    if(data[i].items.length > 0){
+      data[i].items.map(function(item){
         newData.push({
-           title: item.Title,
-           category: item.ProductGroup
+           title: item.title,
+           purchased: item.purchased
         })
       })
     }
@@ -62,8 +62,8 @@ const CartTable = ({data}) => {
       <TableHeaderColumn dataField='type'>Type</TableHeaderColumn>
       <TableHeaderColumn dataField='item_count'>Total Item Count</TableHeaderColumn>
       <TableHeaderColumn dataField='cart_total'>Cart Total</TableHeaderColumn>
-      <TableHeaderColumn dataField='category'>Category</TableHeaderColumn>
       <TableHeaderColumn dataField='title'>Item Name</TableHeaderColumn>
+      <TableHeaderColumn dataField='purchased'>Purchased</TableHeaderColumn>
     </BootstrapTable>
   );
 };

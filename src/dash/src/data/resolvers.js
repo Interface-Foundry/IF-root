@@ -115,10 +115,7 @@ function prepareStoreCarts(cart) {
       cart.cart_total = `$${Number(cart.amazon.SubTotal[0].Amount / 100.0).toFixed(2)}`;
     }
     if(cart.amazon.CartItems){
-      cart.item_count = cart.amazon.CartItems[0].CartItem.reduce(
-                        function(a,b){
-                          return a+Number(b.Quantity);
-                        },0);
+      cart.item_count = cart.items.length;
     }
   }
   return cart;

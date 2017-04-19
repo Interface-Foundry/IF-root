@@ -115,7 +115,6 @@ class CSVDrop extends Component {
     addToCheckedRows(checkedRow){
       var self = this;
       var {checkedRows} = self.state;
-      
       if(checkedRows){
         var rowIndex = checkedRows.findIndex(function(row){
           return (row.ASIN == checkedRow.ASIN && row.added_date == checkedRow.added_date)
