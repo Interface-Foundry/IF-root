@@ -6,22 +6,46 @@ import { Icon } from '..';
 
 export default class Header extends Component {
   static propTypes = {
-    leader: PropTypes.object
+    item: PropTypes.object,
+    items: PropTypes.arrayOf(PropTypes.object),
+    deals: PropTypes.arrayOf(PropTypes.object)
   }
 
   render() {
-    const { props } = this;
+    let { props, props: { deals, items, item: { search } } } = this;
     const { match } = props;
-
+    search = search ? search : 0;
     return (
       <nav className='navbar'>
         <Switch>
-          <Route path={`${match.url}/m/item/:index/:asin`} component={() => <EnumeratedHead text={'Your Cart'} {...props}/>} />
-          <Route path={`${match.url}/m/item`} component={() => <ModalHead text={'Add to Cart'} {...props}/>} />
-          <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => <EnumeratedHead text={'Daily Deals'} {...props}/>} />
-          <Route path={`${match.url}/m/share`} component={() => <ModalHead text={'Share Cart'} {...props}/>} />
-          <Route path={`${match.url}/m/edit`} component={() => <ModalHead text={'Edit Cart'} {...props}/>} />
-          <Route path={`${match.url}`} exact component={() => <CartHead {...props}/>}/>
+          <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
+              <EnumeratedHead text={'My Cart Items'} length={items.length} type={'item'} {...props}/>
+            }
+          />
+          <Route path={`${match.url}/m/item`} component={() => 
+              <ModalHead text={'Add to Cart'} {...props}/>
+            }
+          />
+          <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => 
+              <EnumeratedHead text={'Daily Deals'} length={deals.length} type={'deal'} {...props}/>
+            }
+          />
+          <Route path={`${match.url}/m/search/:index/:query`} component={() => 
+              <EnumeratedHead text={'Search Results'} length={search.length||0} type={'search'} {...props}/>
+            }
+          />
+          <Route path={`${match.url}/m/share`} component={() => 
+              <ModalHead text={'Share Cart'} {...props}/>
+            }
+          />
+          <Route path={`${match.url}/m/edit`} component={() => 
+              <ModalHead text={'Edit Cart'} {...props}/>
+            }
+          />
+          <Route path={`${match.url}`} exact component={() => 
+              <CartHead {...props}/>
+            }
+          />
         </Switch>
       </nav>
     );
@@ -39,7 +63,7 @@ class CartHead extends Component {
   render() {
     const { leader, _toggleSidenav, currentUser, currentCart } = this.props;
     const cartName = currentCart.name ? currentCart.name : `${_.capitalize(getNameFromEmail(leader ? leader.email_address : null))}'s Group Cart`;
-   
+
     return (
       <div>
         <div className='image' style={
@@ -91,21 +115,23 @@ class EnumeratedHead extends Component {
     deals: PropTypes.array,
     text: PropTypes.string,
     location: PropTypes.object,
-    items: PropTypes.array
+    items: PropTypes.array,
+    length: PropTypes.number,
+    type: PropTypes.string
   }
 
   render() {
-    let { cart_id, history: { replace }, text, location: { pathname }, deals, items } = this.props,
-      isItem = pathname.split('/')[pathname.split('/').length - 1] === 'edit',
-      itemIndex = parseInt(pathname.split('/')[pathname.split('/').length - (isItem ? 3 : 2)]) + 1;
-    items = items ? items : [];
+    let { cart_id, length, type, history: { replace, location: { pathname } }, text } = this.props,
+      itemIndex = parseInt(pathname.match(/\/(\d+)\//i)[1]) + 1;
+    const query = pathname.match(/\/\d\/(.+)$/i)[1];
+    text = type === 'search' ? `"${query}"` : text;
     return (
       <div className='navbar__modal'>
         <div className='navbar__icon__close' onClick={()=>replace(`/cart/${cart_id}/`)}>
           <Icon icon='Clear'/>
         </div>
         <h3 className='navbar__modal_head'>
-          {text} - {itemIndex} of { (isItem ? items.length : deals.length) || 0}
+          {text} - {itemIndex} of {length} {type === 'search' ? 'results' : null}
         </h3>
       </div>
     );

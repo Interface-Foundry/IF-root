@@ -1,8 +1,8 @@
-import currentCart from './currentCart';
-import otherCarts from './otherCarts';
-import session from './session';
-import deals from './deals';
-import item from './item';
+import currentCart from './CurrentCart';
+import otherCarts from './OtherCarts';
+import session from './Session';
+import deals from './Deals';
+import item from './Item';
 import { combineReducers } from 'redux';
 import { routerReducer as routing } from 'react-router-redux';
 import { reducer as form } from 'redux-form';
@@ -23,9 +23,9 @@ export {
   getMemberById,
   splitCartById
 }
-from './currentCart';
+from './CurrentCart';
 
 export {
   getCartById
 }
-from './otherCarts';
+from './OtherCarts';

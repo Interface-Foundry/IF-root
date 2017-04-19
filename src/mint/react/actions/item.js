@@ -1,6 +1,7 @@
 import {
   REQUEST_ITEM,
   RECEIVE_ITEM,
+  RECEIVE_SEARCH,
   CLEAR_ITEM,
   REQUEST_ADD_ITEM,
   RECEIVE_ADD_ITEM,
@@ -10,11 +11,27 @@ import {
   REQUEST_INCREMENT_ITEM,
   RECEIVE_DECREMENT_ITEM,
   REQUEST_DECREMENT_ITEM,
+  SEARCH_PREV,
+  SEARCH_NEXT,
+  SET_SEARCH_INDEX
 } from '../constants/ActionTypes';
 
-const receive = (item) => ({
+const receiveItem = (item) => ({
   type: RECEIVE_ITEM,
   item
+});
+
+const receiveSearch = (items) => ({
+  type: RECEIVE_SEARCH,
+  items
+});
+
+const searchNext = () => ({
+  type: SEARCH_NEXT
+});
+
+const searchPrev = () => ({
+  type: SEARCH_PREV
 });
 
 const request = () => ({
@@ -63,6 +80,11 @@ const requestDecrementItem = (item) => ({
   item
 });
 
+const setSearch = (index) => ({
+  type: SET_SEARCH_INDEX,
+  index
+});
+
 export function previewItem(item_id) {
   return async function (dispatch) {
     dispatch(request());
@@ -71,8 +93,8 @@ export function previewItem(item_id) {
       const response = await fetch(`/api/item/${item_id}`, {
         credentials: 'same-origin'
       });
-
-      return dispatch(receive(await response.json()));
+      const json = await response.json();
+      return Array.isArray(json) ? dispatch(receiveSearch(json)) : dispatch(receiveItem(json));
     } catch (e) {
       throw 'error in cart previewItem';
     }
@@ -87,8 +109,8 @@ export function previewAmazonItem(amazon_id) {
       const response = await fetch(`/api/itempreview?q=${amazon_id}`, {
         credentials: 'same-origin'
       });
-
-      return dispatch(receive(await response.json()));
+      const json = await response.json();
+      return Array.isArray(json) ? dispatch(receiveSearch(json)) : dispatch(receiveItem(json));
     } catch (e) {
       throw 'error in cart previewAmazonItem';
     }
@@ -150,7 +172,7 @@ export function incrementItem(item_id, quantity) {
       });
       return dispatch(receiveIncrementItem(await response.json()));
     } catch (e) {
-      throw 'error in cart removeItem';
+      throw 'error in cart incrementItem';
     }
   };
 }
@@ -173,7 +195,7 @@ export function decrementItem(item_id, quantity) {
       });
       return dispatch(receiveDecrementItem(await response.json()));
     } catch (e) {
-      throw 'error in cart removeItem';
+      throw 'error in cart decrementItem';
     }
   };
 }
@@ -181,5 +203,22 @@ export function decrementItem(item_id, quantity) {
 export function clearItem() {
   return async function (dispatch) {
     return dispatch(clear());
+  };
+}
+
+export function nextSearch() {
+  return async function (dispatch) {
+    return dispatch(searchNext());
+  };
+}
+export function prevSearch() {
+  return async function (dispatch) {
+    return dispatch(searchPrev());
+  };
+}
+
+export function setSearchIndex(index) {
+  return async function (dispatch) {
+    return dispatch(setSearch(index));
   };
 }
