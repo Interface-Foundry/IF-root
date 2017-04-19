@@ -9,3 +9,4 @@ export EmailForm from './EmailForm';
 export AmazonForm from './AmazonForm';
 export Deals from './Deals';
 export Share from './Share';
+export EditCart from './EditCart';

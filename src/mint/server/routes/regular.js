@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var co = require('co');
+var _ = require('lodash');
 
 const dealsDb = require('../deals/deals')
 
@@ -19,16 +20,26 @@ dbReady.then((models) => { db = models; }).catch(e => console.error(e));
  * @apiGroup HTML
  */
 router.get('/', (req, res) => co(function* () {
-  const userIds = req.UserSession.user_accounts.map(a => a.id);
-  let carts = [];
-  if (userIds.length) {
-    carts = yield db.Carts.find({
-      or: [
-        { leader: userIds },
-        { members: userIds }
-      ]
-    });
+  // if no user, no carts
+  if (!_.get(req, 'UserSession.user_account.id')) {
+    return res.render('pages/index', { carts: [] });
   }
+
+  // otherwise, find all the cart ids for which the user is a member
+  const memberCarts = yield db.carts_members__user_accounts_id.find({
+    user_accounts_id: req.UserSession.user_account.id
+  })
+  
+  const memberCartsIds = memberCarts.map( c => c.carts_members )
+
+  // find all the carts where their user id appears in the leader or member field
+  const carts = yield db.Carts.find({
+    or: [
+      { leader: req.UserSession.user_account.id },
+      { id: memberCartsIds }
+    ]
+  }).populate('items').populate('leader').populate('members')
+
   res.render('pages/index', { carts: carts });
 }));
 
@@ -44,22 +55,19 @@ router.get('/auth/:id', (req, res) => co(function * () {
     return res.status(404).end()
   }
 
-  var user
-  // check if the user is already identified as this email
-  req.UserSession.user_accounts.map(u => {
-    if (u.email_address === link.user.email_address) {
-      user = u
-    }
-  })
-  if (user) {
-    console.log('user was logged in as that email already')
-    cart.leader = user.id
-    yield cart.save()
-    return res.redirect('/cart/' + cart.id)
+  // check if the user is already identified, as this email
+  var currentUser = req.UserSession.user_account
+  if (!currentUser) {
+    // no current user defined, so we can log them in
+    req.UserSession.user_account = link.user.id
+    yield req.UserSession.save()
+  } else if (currentUser.id === link.user.id) {
+    // already logged in as this user, so don't do anything
+  } else {
+    // logged in as another user, so log them in as this user
+    req.UserSession.user_account = link.user.id
+    yield req.UserSession.save()
   }
-
-  req.UserSession.user_accounts.add(link.user.id)
-  yield req.UserSession.save()
 
   return res.redirect('/cart/' + link.cart.id)
 }))
@@ -76,9 +84,9 @@ router.get('/newcart', (req, res) => co(function * () {
   // find the user for this session
   const session = req.UserSession;
 
-  if (session.user_accounts.length > 0) {
+  if (session.user_account) {
     // make the first user the leader
-    const user = session.user_accounts[0]
+    const user = session.user_account
     cart.leader = user.id
     if (user.name) {
       cart.name = user.name + "'s Kip Group Cart"

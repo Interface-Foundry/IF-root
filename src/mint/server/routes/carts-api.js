@@ -21,18 +21,14 @@ module.exports = function (router) {
    * [{"members":[{"email_address":"peter@interfacefoundry.com","createdAt":"2017-03-16T16:19:10.812Z","updatedAt":"2017-03-16T16:19:10.812Z","id":"bc694263-cf19-46ea-b3f1-bd463f82ce55"}],"items":[{"original_link":"watches","quantity":1,"createdAt":"2017-03-16T16:18:32.047Z","updatedAt":"2017-03-16T16:18:32.047Z","id":"58cabad83a5cd90e34b29610"}],"leader":{"email_address":"peter.m.brandt@gmail.com","createdAt":"2017-03-16T16:18:27.607Z","updatedAt":"2017-03-16T16:18:27.607Z","id":"257cd470-f19f-46cb-9201-79b8b4a95fe2"},"createdAt":"2017-03-16T16:18:23.433Z","updatedAt":"2017-03-16T16:19:10.833Z","id":"3b10fc45616e"}]
    */
   router.get('/carts', (req, res) => co(function * () {
-    if (!_.get(req, 'UserSession.user_accounts[0]')) {
+    // if no user, no carts
+    if (!_.get(req, 'UserSession.user_account.id')) {
       return res.send([])
     }
 
-    // get the list of their user ids
-    const userIds = req.UserSession.user_accounts.map(a => a.id)
-
     // find all the cart ids for which the user is a member
     const memberCarts = yield db.carts_members__user_accounts_id.find({
-      user_accounts_id: {
-        $in: userIds
-      }
+      user_accounts_id: req.UserSession.user_account.id
     })
 
     const memberCartsIds = memberCarts.map( c => c.carts_members )
@@ -40,7 +36,7 @@ module.exports = function (router) {
     // find all the carts where their user id appears in the leader or member field
     const carts = yield db.Carts.find({
       or: [
-        { leader: userIds },
+        { leader: req.UserSession.user_account.id },
         { id: memberCartsIds }
       ]
     }).populate('items').populate('leader').populate('members')
@@ -95,7 +91,6 @@ module.exports = function (router) {
    * @apiParam {string} :cart_id cart id
    * @apiParam {string} url optional url of the item from amazon or office depot or whatever
    * @apiParam {string} item_id optional to specify the id of an item that has been already scraped for a preview
-   * @apiParam {string} user_id specify the identity which is adding the item (otherwise server picks the first authenticated identity)
    *
    * @apiParamExample Item from Preview
    * POST https://mint.kipthis.com/api/cart/123456/item {
@@ -111,13 +106,7 @@ module.exports = function (router) {
    */
   router.post('/cart/:cart_id/item', (req, res) => co(function* () {
     // only available for logged-in Users
-    if (!_.get(req, 'UserSession.user_accounts[0]')) {
-      throw new Error('Unauthorized')
-    }
-
-    // if they specified the user id, verify it is them
-    var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
-    if (req.body.user_id && !userIds.has(req.body.user_id)) {
+    if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
 
@@ -145,31 +134,20 @@ module.exports = function (router) {
     item.cart = cart.id
 
     // specify who added it
-    if (req.body.user_id) {
-      item.added_by = req.body.user_id
-    } else {
-      item.added_by = req.UserSession.user_accounts[0].id
-    }
+    item.added_by = req.UserSession.user_account.id
     yield item.save()
 
-    // Add the user to the members group of the cart if they are not part of it already
-    // IF they specified a specific user_account id that they want to add the cart as,
-    // use that one, otherwise use the first user id in their list
-    if (req.body.user_id) {
-      var isLeader = cart.leader === req.body.user_id
-      var isMember = cart.members.has(req.body.user_id)
-      if (!isLeader && !isMember) {
-        cart.members.add(req.body.user_id)
-      }
-    } else {
-      var isLeader = userIds.has(cart.leader)
-      var isMember = cart.members.reduce((isMember, id) => isMember || userIds.has(id), false)
-      if (!isLeader && !isMember) {
-        cart.members.add(req.UserSession.user_accounts[0].id)
-      }
+    // make the user leader if no leader exists, otherwise make member
+    if (!cart.leader) {
+      cart.leader = req.UserSession.user_account.id
+    } else if (!cart.members.includes(req.UserSession.user_account.id)) {
+      cart.members.add(req.UserSession.user_account.id)
     }
+
+    // Save all the weird shit we've added to this poor cart.
     yield cart.save()
 
+    // And assuming it all went well we'll respond to the client with the saved item
     return res.send(item)
   }));
 
@@ -185,9 +163,12 @@ module.exports = function (router) {
    */
   router.delete('/cart/:cart_id/item/:item_id', (req, res) => co(function* () {
     // only available for logged-in Users
-    if (!_.get(req, 'UserSession.user_accounts[0]')) {
+    if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
+
+    // this will be handy later now that we know it exists
+    const userId = req.UserSession.user_account.id
 
     // Make sure the cart exists
     const cart = yield db.Carts.findOne({id: req.params.cart_id})
@@ -208,10 +189,8 @@ module.exports = function (router) {
       throw new Error('Item not found')
     }
 
-    // Make sure user has permission to delete it
-    var isLeader = req.UserSession.user_accounts.map(a => a.id).includes(cart.leader)
-    var isAdder = req.UserSession.user_accounts.map(a => a.id).includes(item.added_by)
-    if (!isLeader && !isAdder) {
+    // Make sure user has permission to delete it, leaders can delete anything, members can delete their own stuff
+    if (cart.leader !== userId && item.added_by !== userId) {
       throw new Error('Unauthorized')
     }
 
@@ -239,20 +218,26 @@ module.exports = function (router) {
    * {"leader":"02a20ec6-edec-46b7-9c7c-a6f36370177e","createdAt":"2017-03-28T22:59:39.134Z","updatedAt":"2017-03-28T22:59:39.662Z","id":"289e5e60a855","name":"Office Party"}
    */
   router.post('/cart/:cart_id', (req, res) => co(function * () {
+    // only available for logged-in Users
+    if (!_.get(req, 'UserSession.user_account.id')) {
+      throw new Error('Unauthorized')
+    }
+
+    // this will be handy later now that we know it exists
+    const userId = req.UserSession.user_account.id
+
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id})
 
     // check permissions
-    var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
-    if (!userIds.has(cart.leader)) {
+    if (cart.leader !== userId) {
       throw new Error('Unauthorized')
     }
 
     // Can't update some fields with this route
     delete req.body.id
     delete req.body.leader
-    delete req.body.members
-    delete req.body.items
+    delete req.body.items // need to go through post /api/cart/:cart_id/item route
 
     _.merge(cart, req.body)
     yield cart.save()
@@ -261,7 +246,7 @@ module.exports = function (router) {
 
   /**
    * @api {post} /api/item/:item_id Update Item
-   * @apiDescription Update item settings, except for id, leader, members, and items.
+   * @apiDescription Update item settings, except for id, added_by
    * @apiGroup Carts
    * @apiParam {string} :item_id id of the item to update
    * @apiParam {json} body the properties you want to set on the item
@@ -275,6 +260,14 @@ module.exports = function (router) {
    * {"leader":"02a20ec6-edec-46b7-9c7c-a6f36370177e","createdAt":"2017-03-28T22:59:39.134Z","updatedAt":"2017-03-28T22:59:39.662Z","id":"289e5e60a855","name":"Office Party"}
    */
   router.post('/item/:item_id', (req, res) => co(function * () {
+    // only available for logged-in Users
+    if (!_.get(req, 'UserSession.user_account.id')) {
+      throw new Error('Unauthorized')
+    }
+
+    // this will be handy later now that we know it exists
+    const userId = req.UserSession.user_account.id
+
     // get the item
     var item = yield db.Items.findOne({id: req.params.item_id}).populate('cart')
 
@@ -282,15 +275,13 @@ module.exports = function (router) {
     var cart = item.cart
 
     // check permissions
-    var userIds = req.UserSession.user_accounts.reduce((set, a) => set.add(a.id), new Set())
-    if (!userIds.has(cart.leader) && !userIds.has(item.added_by)) {
+    if (cart.leader !== userId && item.added_by !== userId) {
       throw new Error('Unauthorized')
     }
 
     // Can't update some fields with this route
     delete req.body.id
-    delete req.body.added_bys
-    // TODO what should not be allowed?
+    delete req.body.added_by
 
     _.merge(item, req.body)
     yield item.save()

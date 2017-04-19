@@ -3,8 +3,40 @@ $cart__add-height: $nav-height+$padding;
 .cart {
   height: calc(100% - #{$nav-height});
   position: relative;
+  .cart__locked {
+    padding: $padding $padding*2 $padding*2;
+    background: $header-color;
+    text-align: center;
+
+    .cart__locked__text {
+      height: $nav-height;
+      line-height: $nav-height;
+      text-align: center;
+
+      * {
+        display: inline-block;
+        font-size: 20px;
+        color: white;
+        padding: 0 $padding/2;
+      }
+
+      svg {
+        font-size: 25px;
+      }
+    }
+
+    button {
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      font-size: 15px;
+      padding: $padding $padding*2;
+      margin: 0 auto;
+      border-radius: 10px;
+    }
+  }
   .cart__add {
-    padding: 0 $padding*2 $padding*2;
+    padding: 0 $padding*2 $padding $padding*2;
   }
   .cart__title {
     height: $nav-height - $padding;
@@ -17,6 +49,12 @@ $cart__add-height: $nav-height+$padding;
     overflow-y: visable;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
+    ul {
+      h3 {
+        border-bottom: 1px solid $border-color-light;
+        padding: $padding;
+      }
+    }
     .cart__items__title {
       font-weight: 500;
       letter-spacing: 1px;

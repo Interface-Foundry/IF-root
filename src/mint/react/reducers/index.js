@@ -18,13 +18,14 @@ export default combineReducers({
 });
 
 // export selectors
-export {
-  getAccountById
-}
-from './session';
 
 export {
   getMemberById,
   splitCartById
 }
 from './currentCart';
+
+export {
+  getCartById
+}
+from './otherCarts';

@@ -12,14 +12,16 @@ export default class Header extends Component {
   render() {
     const { props } = this;
     const { match } = props;
+
     return (
       <nav className='navbar'>
-      <Switch>
-        <Route path={`${match.url}/m/item/:index/:asin`} component={() => <EnumeratedHead text={'Your Cart'} {...props}/>} />
-        <Route path={`${match.url}/m/item`} component={() => <ModalHead text={'Add to Cart'} {...props}/>} />
-        <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => <EnumeratedHead text={'Daily Deals'} {...props}/>} />
-        <Route path={`${match.url}/m/share`} component={() => <ModalHead text={'Share Cart'} {...props}/>} />
-        <Route path={`${match.url}`} exact component={() => <CartHead {...props}/>}/>
+        <Switch>
+          <Route path={`${match.url}/m/item/:index/:asin`} component={() => <EnumeratedHead text={'Your Cart'} {...props}/>} />
+          <Route path={`${match.url}/m/item`} component={() => <ModalHead text={'Add to Cart'} {...props}/>} />
+          <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => <EnumeratedHead text={'Daily Deals'} {...props}/>} />
+          <Route path={`${match.url}/m/share`} component={() => <ModalHead text={'Share Cart'} {...props}/>} />
+          <Route path={`${match.url}/m/edit`} component={() => <ModalHead text={'Edit Cart'} {...props}/>} />
+          <Route path={`${match.url}`} exact component={() => <CartHead {...props}/>}/>
         </Switch>
       </nav>
     );
@@ -30,19 +32,28 @@ class CartHead extends Component {
   static propTypes = {
     leader: PropTypes.object,
     _toggleSidenav: PropTypes.func,
-    currentUser: PropTypes.object
+    currentUser: PropTypes.object,
+    currentCart: PropTypes.object
   }
 
   render() {
-    const { leader, _toggleSidenav, currentUser } = this.props;
-    const leaderName = _.capitalize(getNameFromEmail(leader ? leader.email_address : null));
+    const { leader, _toggleSidenav, currentUser, currentCart } = this.props;
+    const cartName = currentCart.name ? currentCart.name : `${_.capitalize(getNameFromEmail(leader ? leader.email_address : null))}'s Group Cart`;
+   
     return (
       <div>
+        <div className='image' style={
+          {
+            backgroundImage: `url(${currentCart.thumbnail_url ? currentCart.thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain'
+          }}/>
         <h3>
-          {leaderName}'s Group Cart
+          {cartName}
         </h3>
         {
-          currentUser ? <div className='navbar__icon' onClick={_toggleSidenav}>
+          currentUser.id ? <div className='navbar__icon' onClick={_toggleSidenav}>
             <Icon icon='Hamburger'/>
           </div> : null
         }
@@ -80,6 +91,7 @@ class EnumeratedHead extends Component {
     deals: PropTypes.array,
     text: PropTypes.string,
     location: PropTypes.object,
+    items: PropTypes.array
   }
 
   render() {
@@ -87,7 +99,6 @@ class EnumeratedHead extends Component {
       isItem = pathname.split('/')[pathname.split('/').length - 1] === 'edit',
       itemIndex = parseInt(pathname.split('/')[pathname.split('/').length - (isItem ? 3 : 2)]) + 1;
     items = items ? items : [];
-    console.log(this.props);
     return (
       <div className='navbar__modal'>
         <div className='navbar__icon__close' onClick={()=>replace(`/cart/${cart_id}/`)}>

@@ -18,7 +18,8 @@ from './dates';
 export {
   commaSeparateNumber,
   getNameFromEmail,
-  addLinkToDeepLink
+  addLinkToDeepLink,
+  calculateItemTotal
 }
 from './formating';
 
@@ -26,3 +27,8 @@ export {
   fakeStore
 }
 from './testUtils';
+
+export {
+  cloudinary
+}
+from './cloudinary';

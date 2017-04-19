@@ -4,7 +4,7 @@ import { reset, reduxForm } from 'redux-form';
 import { EmailForm } from '../components';
 
 import { signIn } from '../actions/session';
-import { fetchCart } from '../actions/cart';
+import { fetchCart, fetchAllCarts } from '../actions/cart';
 
 import { isValidEmail } from '../utils';
 
@@ -18,6 +18,7 @@ const mapDispatchToProps = dispatch => ({
     .then(() => {
       const { history: { replace }, cart_id, addingItem } = state;
       dispatch(fetchCart(cart_id));
+      dispatch(fetchAllCarts())
       dispatch(reset('SignIn'));
 
       addingItem

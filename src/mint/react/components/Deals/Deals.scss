@@ -46,20 +46,21 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        padding: $padding;
-        min-height: calc(100% - #{$nav-height/2});
+        padding: $padding/2.5;
+        height: calc(100% - #{$nav-height/2});
         .dealcard__details__name {
-          font-size: 13px;
+          font-size: 0.7em;
           position: relative;
           overflow: hidden;
           white-space: normal;
           color: #58595b;
-          padding: $padding 0 0;
-          height: 3.2em;
+          padding: 0;
+          min-height: 2.5em; //for safari
+          height: 2.5em;
         }
         .dealcard__details__price {
-          padding: $padding 0 0;
-          font-size: 16px;
+          padding: 0;
+          font-size: 22px;
           color: $price-color;
         }
         .dealcard__details__discount {
@@ -68,8 +69,8 @@
         }
         .dealcard__details__image {
           align-self: center;
-          width: $nav-height;
-          height: $nav-height;
+          width: $nav-height + 25px;
+          height: $nav-height + 25px;
         }
         .dealcard__details__prevPrice {
           text-decoration: line-through;
@@ -87,7 +88,7 @@
         letter-spacing: 1px;
         text-transform: uppercase;
         background: $border-color-light;
-        border-radius: 0 0 $padding $padding;
+        border-radius: 0 0 $padding - 1 $padding - 1;
       }
     }
   }
@@ -103,7 +104,7 @@
   justify-content: flex-start;
   align-items: left;
   border: 1px $kip-secondary-color solid;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 $padding $padding;
   overflow: hidden;
   background: white;
   li {

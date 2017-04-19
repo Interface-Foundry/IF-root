@@ -21,16 +21,16 @@
       color: $price-color;
     }
   }
-  div.item__view__image {
+  .item__view__image {
     margin: 0 auto;
   }
-  div.item__view__atts {
+  .item__view__atts {
     text-align: center;
     padding: $padding $padding $padding*2;
     margin-bottom: 0;
     font-size: 13px;
   }
-  div.item__view__price {
+  div[class$='view__price'] {
     h4 {
       font-size: 15px;
       color: $price-color;
@@ -39,18 +39,61 @@
       font-size: 10px;
     }
   }
-  div.item__view__description {
+  .deal__view__price {
+    text-align: left;
+  }
+  .item__view__price {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .item__view__quantity {
+      display: flex;
+      align-items: center;
+      height: $nav-height/1.5; //lol whatever
+      * {
+        border-radius: 5px;
+        font-size: 16px;
+        font-family: Arial, sans-serif;
+        border: 2px solid $kip-faded-color;
+      }
+      button,
+      .item__view__quantity__placeholder {
+        height: 100%;
+        margin: 0 $padding/2;
+        background: white;
+        width: $nav-height/1.5;
+        cursor: pointer;
+        &:active {
+          background: $border-color-light;
+        }
+      }
+      .item__view__quantity__placeholder {
+        border-color: transparent;
+        background: transparent;
+        cursor: default;
+      }
+      .item__view__quantity__num {
+        font-weight: bold;
+        color: #303030;
+        margin: 0;
+        padding: 0 $padding;
+        height: 100%;
+        line-height: $padding*3;
+        border-color: $border-color-light;
+      }
+    }
+  }
+  .item__view__description {
     overflow: hidden;
-
     h4 {
       font-size: 15px;
-      padding: $padding 0; 
+      padding: $padding 0;
     }
     p {
       font-size: 13px;
     }
   }
-  div.item__view__review {
+  .item__view__review {
     color: #999;
     p {
       font-size: 13px;

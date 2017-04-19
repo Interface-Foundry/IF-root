@@ -96,8 +96,7 @@ describe.only('api', () => {
   it('GET /api/session should return anonymous session before logging in', () => co(function * () {
     const session = yield get('/api/session')
     assert(session)
-    assert(session.user_accounts instanceof Array)
-    assert(session.user_accounts.length === 0)
+    assert(!session.user_account)
     assert(session.animal)
     assert(session.id)
     assert(session.createdAt)
@@ -141,8 +140,8 @@ describe.only('api', () => {
     })
     var dbsession = yield db.Sessions.findOne({
       id: session.id
-    }).populate('user_accounts')
-    dbsession.user_accounts.add(user.id)
+    }).populate('user_account')
+    dbsession.user_account = user.id
     yield dbsession.save()
 
     // save the id for later
@@ -151,9 +150,8 @@ describe.only('api', () => {
     // now the user should be logged in
     const session2 = yield get('/api/session')
     assert(session2)
-    assert(session2.user_accounts instanceof Array)
-    assert(session2.user_accounts.length === 1)
-    assert(session2.user_accounts[0].email_address === mcTesty.email)
+    assert(session2.user_account)
+    assert(session2.user_account.email_address === mcTesty.email)
   }))
 
   it('GET /newcart should create a new cart, redirect to /cart/:Cart_id, and send an email', () => co(function * () {

@@ -14,7 +14,7 @@ export default class Sidenav extends Component {
   }
 
   render() {
-    const { carts, _toggleSidenav, currentUser } = this.props,
+    const { carts, _toggleSidenav, currentUser, cart_id } = this.props,
       leaderCarts = _.filter(carts, (c) => c.leader.email_address === currentUser.email_address),
       memberCarts = _.filter(carts, (c) => c.leader.email_address !== currentUser.email_address);
 
@@ -32,11 +32,13 @@ export default class Sidenav extends Component {
           <h4>Leader</h4>
           {_.map(leaderCarts, (c, i) => (
             <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-              <div className='icon'>
-                <Icon icon='Edit'/>
-              </div>
+              <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                <div className='icon'>
+                  <Icon icon='Edit'/>
+                </div>
+              </Link>
               <Link to={`/cart/${c.id}`}>
-                <p>{`${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
               </Link>
             </li>
           ))}
@@ -44,10 +46,9 @@ export default class Sidenav extends Component {
           {_.map(memberCarts, (c, i) => (
             <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
               <div className='icon'>
-                <Icon icon='Edit'/>
               </div>
               <Link to={`/cart/${c.id}`}>
-                <p>{`${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
               </Link>
             </li>
           ))}

@@ -133,6 +133,7 @@ export function removeItem(cart_id, item_id) {
 }
 
 export function incrementItem(item_id, quantity) {
+  quantity++;
   return async dispatch => {
     dispatch(requestIncrementItem());
     try {
@@ -144,7 +145,7 @@ export function incrementItem(item_id, quantity) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          quantity: ++quantity
+          quantity
         })
       });
       return dispatch(receiveIncrementItem(await response.json()));
@@ -155,6 +156,7 @@ export function incrementItem(item_id, quantity) {
 }
 
 export function decrementItem(item_id, quantity) {
+  quantity--;
   return async dispatch => {
     dispatch(requestDecrementItem());
     try {
@@ -166,7 +168,7 @@ export function decrementItem(item_id, quantity) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          quantity: --quantity
+          quantity
         })
       });
       return dispatch(receiveDecrementItem(await response.json()));

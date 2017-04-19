@@ -69,7 +69,7 @@ app.use(bodyParser.json());
  */
 app.use(sessions({
   cookieName: 'session',
-  secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw' + os.hostname(), // `openssl rand -base64 24 `
+  secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw' + process.env.NODE_ENV, // `openssl rand -base64 24 `
   duration: 0 // never expire
 }));
 
@@ -86,12 +86,7 @@ app.use((req, res, next) => co(function* () {
     req.session.id = session.id
   }
 
-  req.UserSession = yield db.Sessions.findOne({ id: req.session.id })
-    .populate('user_accounts')
-    // console.log(req.UserSession)
-
-  // Now that the id exists, save the tracking information, like IP, user-agent, etc
-  // TODO week of March 12
+  req.UserSession = yield db.Sessions.findOne({ id: req.session.id }).populate('user_account')
 
   next();
 }));

@@ -2,6 +2,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CartItem from './CartItem';
 import { AddAmazonItemContainer, DealsContainer } from '../../containers';
+import { Icon } from '..';
+import { calculateItemTotal, commaSeparateNumber } from '../../utils';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -13,7 +15,7 @@ export default class Cart extends Component {
     items: PropTypes.object.isRequired,
     addingItem: PropTypes.bool.isRequired,
     history: PropTypes.object.isRequired,
-    user_accounts: PropTypes.array
+    user_account: PropTypes.object
   }
 
   componentWillMount() {
@@ -22,29 +24,50 @@ export default class Cart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id } = this.props, { leader, addingItem, user_accounts } = nextProps,
+    const { history: { replace }, cart_id } = this.props, 
+      { leader, addingItem, user_account } = nextProps,
       cartId = cart_id || nextProps.cart_id;
 
     if (cartId) {
-      if (user_accounts.length === 0 && !leader) {
+      if (!user_account.id && !leader) {
         replace(`/cart/${cartId}/m/signin`);
-      } else if (leader && !addingItem && this.props.addingItem !== addingItem && user_accounts.length !== 0) {
+      } else if (!!leader && !addingItem && this.props.addingItem !== addingItem && !!user_account.id) {
         replace(`/cart/${cartId}/`);
       }
     }
   }
 
   render() {
-    const { items, leader, members, user_accounts, history: { replace } } = this.props,
+    const { items, leader, members, user_account, history: { replace }, locked, updateCart, currentCart } = this.props,
       hasItems = items.quantity > 0,
-      isLeader = !!user_accounts[0] && !!leader && (leader.id === user_accounts[0].id);
+      isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
 
+    console.log('locked from cart: ', locked)
     return (
       <div className='cart'>
-        <div className='cart__add'>
-          <AddAmazonItemContainer replace={replace} members={members}/>
-        </div>
-        <DealsContainer isDropdown={false}/>
+        {
+          locked ? <div className='cart__locked'>
+            <div className='cart__locked__text'>
+              <Icon icon='Locked'/>
+              <p>Locked</p>
+            </div>
+            {
+              leader.id === user_account.id ? <button onClick={() => {
+                updateCart({
+                  ...currentCart, 
+                  locked: !currentCart.locked
+                })
+              }}>
+                Unlock
+              </button> : null
+            }
+          </div> : <span>
+            <div className='cart__add'>
+              <AddAmazonItemContainer replace={replace} members={members}/>
+            </div>
+            {!!user_account.id ? <DealsContainer isDropdown={false}/> : null}
+          </span>
+        }
         <div className='cart__title'>
           <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
         </div>
@@ -63,8 +86,8 @@ class MyItems extends Component {
   }
 
   render() {
-    const { props, props: { items } } = this;
-    
+    const { props, props: { items } } = this,
+          total = calculateItemTotal(items);
     return (
       <ul>
         <div className='cart__items__title'>Your Items</div>
@@ -73,6 +96,7 @@ class MyItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={true} item={item} {...props} />) 
           : <EmptyCart />
         }
+        <h3>Total: ${commaSeparateNumber(total)}</h3>
       </ul>
     );
   }
@@ -86,7 +110,9 @@ class OtherItems extends Component {
   }
 
   render() {
-    const { props, props: { items, isLeader, startIndex } } = this;
+    const { props, props: { items, isLeader, startIndex } } = this,
+          total = calculateItemTotal(items);
+
     return (
       <ul>
         <div className='cart__items__title'>Everyone's Items</div>
@@ -95,6 +121,7 @@ class OtherItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
           : <EmptyCart />
         }
+        <h3>Total: ${commaSeparateNumber(total)}</h3>
       </ul>
     );
   }

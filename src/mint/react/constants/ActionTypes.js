@@ -17,6 +17,7 @@ export const REQUEST_ITEMS = 'REQUEST_ITEMS';
 export const RECEIVE_ITEMS = 'RECEIVE_ITEMS';
 export const ADDING_ITEM = 'ADDING_ITEM';
 export const ADD_MEMBER_TO_CART = 'ADD_MEMBER_TO_CART';
+export const RECEIVE_UPDATE_CART = 'RECEIVE_UPDATE_CART';
 
 // Deals
 export const REQUEST_DEALS = 'REQUEST_DEALS';
