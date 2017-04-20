@@ -5,29 +5,33 @@ var kip = require('../../../kip');
 
 module.exports = function (text) {
   console.log('INPUT', text)
-  //pad emojis with spaces???
   text = spliddit(text);
   text = text.map(function (c) {
-    console.log('c / EMOJI', c)
+    // console.log('c / EMOJI', c)
     return search(c, function (res) {
-      logging.info('search returns', res)
+      // logging.info('search returns', res)
       return res;
     })
   });
+  console.log('was ist sylvia', text);
   text = text.join('')
-  logging.info('text w/ converted emojis, round one.', text)
-  // return emojiText.convert(text.join(' '), c => c);
+  // logging.info('text w/ converted emojis, round one.', text)
+  console.log('was ist sylvia 2', text);
+  // text = emojiText.convert(text, function (emoji, data) {
+  //   console.log('data', data)
+  //   return data.description.toLowerCase() + ' ';
+  // });
+  text = emojiText.convert(text, {before: '', after: ' '})
+
+  console.log('final text', text)
   return text;
 };
 
 var search = function(input, callback) {
 
-  console.log('INPUT ', input)
-
   switch(input){
 
       case '😀': //grinning face//
-          console.log('grinning face, motherfucker');
           getRandom(['glitter','lava lamp', 'watchman graphic novel', 'potato chips crisps','coloring','chocolate', 'planetarium', 'lamp', 'feel good stickers'],function(kk){
             res = kk;
           });
