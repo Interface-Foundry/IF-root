@@ -146,14 +146,10 @@ var exciseUrls = function (text, urls) {
  * @returns
  */
 var getTerms = function (text, urls) {
-  // logging.info('process text called');
-  // text = text.split('done')[0]
   // logging.info('TEXT:', text);
   urls = urls.map(url => url.replace(/&amp;/g, '&'));
 
-  //TODO: filter out urls
   text = exciseUrls(text, urls);
-  // return;
   logging.info('TEXT, replaced:', text);
 
   //filter out conversation history
@@ -166,15 +162,8 @@ var getTerms = function (text, urls) {
   if (pars.length !== allPars.length) pars = pars.slice(0, pars.length-3);
   logging.info('pars', pars)
 
-  return;
-
-
-
-  var cleanPars = [];
   pars = pars.map(function (par) {
-
-    // logging.info('words', words);
-    // return words;
+    return par.replace(/[!@#$%^&*<>?{}]/g, '');
     //TODO sanitize
     //TODO emojis
     //TODO other emojis
