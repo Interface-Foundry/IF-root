@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { App } from '../components';
 import { fetchCart, fetchAllCarts, updateCart } from '../actions/cart';
-import { addItem } from '../actions/item';
+import { addItem, removeItem } from '../actions/item';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.routing.location.pathname.match(/cart\/((\d|\w)+)/)[1], // TODO: switch to nonregex when react router allows it
@@ -23,7 +23,8 @@ const mapDispatchToProps = dispatch => ({
   },
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
   fetchAllCarts: () => dispatch(fetchAllCarts()),
-  updateCart: (cart) => dispatch(updateCart(cart))
+  updateCart: (cart) => dispatch(updateCart(cart)),
+  removeItem: (cart_id, item_id)=> dispatch(removeItem(cart_id, item_id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
+import { Icon } from '../Icon';
 
 export default class Footer extends Component {
   static propTypes = {
@@ -18,7 +19,8 @@ export default class Footer extends Component {
         <Route path={`${match.url}/m/item/add`} component={() => <div className='empty'/>}/>
         <Route path={`${match.url}/m/share`} component={() => <div className='empty'/>}/>
         <Route path={`${match.url}/m/signin`} component={() => <div className='empty'/>}/>
-        <Route path={`${match.url}/m/item/:index/:item_id`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
+        <Route path={`${match.url}/m/item/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
+        <Route path={`${match.url}/m/item/:index/:item_id/edit`} component={() => <EditFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/deal/:index/:item_id`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/search/:index/:search`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}`} exact component={() => <CartFooter {...props}/>}/>
@@ -94,6 +96,25 @@ class ItemFooter extends Component {
     return (
       <footer className='footer__item'>
         <button onClick={() => addItem(cart_id, item_id, replace)}>Add to Cart</button>
+      </footer>
+    );
+  }
+}
+
+class EditFooter extends Component {
+  static propTypes = {
+    cart_id: PropTypes.string,
+    removeItem: PropTypes.func,
+    item_id: PropTypes.string,
+    history: PropTypes.object
+  }
+
+  render() {
+    const { cart_id, item_id, history: { push, replace }, removeItem } = this.props;
+    return (
+      <footer className='footer__save'>
+        <button className='remove' onClick={()=> {removeItem(cart_id, item_id); replace(`/cart/${cart_id}/`);}}>Remove Item</button>
+        <button className='save' onClick={() =>push(`/cart/${cart_id}/`)}>✓  Update</button>
       </footer>
     );
   }
