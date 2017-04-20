@@ -21,6 +21,9 @@
     font-weight: 500;
     font-size: 20px;
   }
+  & > div {
+    display: flex;
+  }
   .navbar__modal {
     display: flex;
     .navbar__modal_head {
@@ -29,9 +32,6 @@
     }
   }
   .navbar__icon {
-    position: absolute;
-    top: 0;
-    right: 0;
     text-align: center;
     cursor: pointer;
     height: $nav-height;
@@ -41,9 +41,6 @@
     }
   }
   .navbar__icon__close {
-    position: absolute;
-    top: 0;
-    left: 0;
     text-align: center;
     cursor: pointer;
     height: $nav-height;
@@ -51,5 +48,8 @@
     svg {
       height: 100%;
     }
+  }
+  .no-pointer {
+    cursor: default;
   }
 }

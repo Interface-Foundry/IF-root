@@ -1,4 +1,4 @@
-import reducer from '../session'
+import reducer from '../Session'
 
 import { RECEIVE_SESSION, RECEIVE_UPDATE_SESSION } from '../../constants/ActionTypes';
 

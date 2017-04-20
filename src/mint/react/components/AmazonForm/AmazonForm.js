@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Field } from 'redux-form';
 import { DealsContainer } from '../../containers';
-import { Icon } from '..';
 
 export default class AmazonForm extends Component {
   constructor(props) {
@@ -16,7 +15,7 @@ export default class AmazonForm extends Component {
             {label}
           </label>
           <div className='form__input'>
-            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete='off'/>
+            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete='off' spellCheck='true'/>
             <button
               className='form__input__submit'
               type="submit"
@@ -33,7 +32,7 @@ export default class AmazonForm extends Component {
 
   render() {
     const { props, renderField } = this;
-    const { handleSubmit, cart_id, history: { replace } } = props;
+    const { handleSubmit } = props;
     return (
       <form onSubmit={handleSubmit} className="form">
         <Field

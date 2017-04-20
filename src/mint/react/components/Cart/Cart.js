@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import CartItem from './CartItem';
 import { AddAmazonItemContainer, DealsContainer } from '../../containers';
 import { Icon } from '..';
-import { calculateItemTotal, commaSeparateNumber } from '../../utils';
+import { calculateItemTotal, displayCost } from '../../utils';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -15,7 +15,10 @@ export default class Cart extends Component {
     items: PropTypes.object.isRequired,
     addingItem: PropTypes.bool.isRequired,
     history: PropTypes.object.isRequired,
-    user_account: PropTypes.object
+    user_account: PropTypes.object,
+    locked: PropTypes.bool,
+    updateCart: PropTypes.func,
+    currentCart: PropTypes.object
   }
 
   componentWillMount() {
@@ -42,7 +45,6 @@ export default class Cart extends Component {
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
 
-    console.log('locked from cart: ', locked)
     return (
       <div className='cart'>
         {
@@ -73,7 +75,11 @@ export default class Cart extends Component {
         </div>
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
-          <OtherItems {...this.props} items={items.others} startIndex={items.my.length} isLeader={isLeader} />
+          {
+            _.map(items.others, (value, key, index) => {
+              return <OtherItems {...this.props} key={key} title={key} items={value} startIndex={items.my.length} isLeader={isLeader} />
+            })
+          }
         </div>
       </div>
     );
@@ -96,7 +102,7 @@ class MyItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={true} item={item} {...props} />) 
           : <EmptyCart />
         }
-        <h3>Total: ${commaSeparateNumber(total)}</h3>
+        <h3>Total: <span>{displayCost(total)}</span></h3>
       </ul>
     );
   }
@@ -106,22 +112,23 @@ class OtherItems extends Component {
   static propTypes = {
     items: PropTypes.array.isRequired,
     isLeader: PropTypes.bool.isRequired,
-    startIndex: PropTypes.number
+    startIndex: PropTypes.number,
+    title: PropTypes.string
   }
 
   render() {
-    const { props, props: { items, isLeader, startIndex } } = this,
+    const { props, props: { items, isLeader, startIndex, title } } = this,
           total = calculateItemTotal(items);
 
     return (
       <ul>
-        <div className='cart__items__title'>Everyone's Items</div>
+        <div className='cart__items__title'>{title}</div>
         {
           items.length 
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
           : <EmptyCart />
         }
-        <h3>Total: ${commaSeparateNumber(total)}</h3>
+        <h3>Total: <span>{displayCost(total)}</span></h3>
       </ul>
     );
   }

@@ -1,4 +1,4 @@
-import reducer from '../deals';
+import reducer from '../Deals';
 
 import { RECEIVE_DEALS, REQUEST_DEALS } from '../../constants/ActionTypes';
 

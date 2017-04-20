@@ -53,6 +53,10 @@ $cart__add-height: $nav-height+$padding;
       h3 {
         border-bottom: 1px solid $border-color-light;
         padding: $padding;
+
+        span {
+          color: $price-color;
+        }
       }
     }
     .cart__items__title {

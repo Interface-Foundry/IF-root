@@ -12,7 +12,7 @@ const request = () => ({
 const recieveUpdate = updatedCart => ({
   type: RECEIVE_UPDATE_CART,
   updatedCart
-})
+});
 
 const receiveCarts = (carts) => ({
   type: RECEIVE_CARTS,
@@ -28,12 +28,9 @@ const receiveItems = (items) => ({
   items
 });
 
-
-
 const requestItems = () => ({
   type: REQUEST_ITEMS
 });
-
 
 export const addingItem = (addingItem) => ({
   type: ADDING_ITEM,
@@ -105,4 +102,3 @@ export function fetchItems(cart_id) {
     }
   };
 }
-

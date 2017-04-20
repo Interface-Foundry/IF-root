@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { getMemberById } from '../../reducers';
-import { getNameFromEmail } from '../../utils';
+import { getNameFromEmail, displayCost } from '../../utils';
+
 
 export default class CartItem extends Component {
   static propTypes = {
@@ -12,7 +13,8 @@ export default class CartItem extends Component {
       .isRequired,
     itemNumber: PropTypes.number.isRequired,
     cart_id: PropTypes.string.isRequired,
-    isOwner: PropTypes.bool.isRequired
+    isOwner: PropTypes.bool.isRequired,
+    locked: PropTypes.bool
   }
 
   render() {
@@ -20,7 +22,6 @@ export default class CartItem extends Component {
       linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by }),
       memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
 
-    console.log('locked from cart__item: ', locked)
     return (
       <li className='cartItem'>
         <h4 className='cartItem__title'>{memberName}</h4>
@@ -36,7 +37,7 @@ export default class CartItem extends Component {
           <p>{name}</p>
           <br/>
           <p>Qty: {quantity}</p>
-          <p>Price: ${price}</p>
+          <p>Price: {displayCost(price)}</p>
           {
             isOwner
             ? <div className='cartItem__actions'>

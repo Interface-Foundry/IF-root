@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { displayCost } from '../../utils';
 
 export default class Card extends Component {
 
@@ -22,8 +23,8 @@ export default class Card extends Component {
         <div className='dealcard__details'>
           <div className='dealcard__details__image image' style={{backgroundImage:`url(${imageSrc})`}}/>
           <div className='dealcard__details__name'>{name.length > 35 ? name.substring(0, 32) + '…': name}</div>
-          <div className='dealcard__details__price'>${price.toFixed(2)}</div>
-          <div className='dealcard__details__discount'><strike>${previousPrice.toFixed(2)}</strike> ({(savePercent * 100).toFixed()}% off)</div>
+          <div className='dealcard__details__price'>{displayCost(price)}</div>
+          <div className='dealcard__details__discount'><strike>{displayCost(previousPrice)}</strike> ({(savePercent * 100).toFixed()}% off)</div>
         </div>
         <div className='dealcard__add'>Add to Cart</div>
       </section>
