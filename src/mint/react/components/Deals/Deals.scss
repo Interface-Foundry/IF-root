@@ -49,6 +49,8 @@
         padding: $padding/2.5;
         height: calc(100% - #{$nav-height/2});
         .dealcard__details__name {
+          word-break: break-all;
+          hyphens: auto;
           font-size: 0.7em;
           position: relative;
           overflow: hidden;

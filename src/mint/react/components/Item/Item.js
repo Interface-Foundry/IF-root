@@ -100,7 +100,7 @@ export default class Item extends Component {
       props,
       props: { index, type, items, item, nextSearch, prevSearch, item: { main_image_url, store, description, name } }
     } = this;
-    const imageUrl = type === 'deal' ? items[parseInt(index)].large ? items[parseInt(index)].large : main_image_url : main_image_url;
+    const imageUrl = (type === 'deal' && items && items[parseInt(index)]) ? items[parseInt(index)].large ? items[parseInt(index)].large : main_image_url : main_image_url;
     return (
       <div 
         className='item' onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }

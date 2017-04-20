@@ -11,7 +11,7 @@ const mapStateToProps = (state, ownProps) => ({
   item: state.item,
   index: parseInt(ownProps.match.params.index),
   type: ownProps.match.params.item_type,
-  items: ownProps.match.params.item_type === 'deal' ? state[`${ownProps.match.params.item_type}s`][`${ownProps.match.params.item_type}s`] : state.currentCart.items,
+  items: ownProps.match.params.item_type === 'deal' ? state.deals.deals : state.currentCart.items,
   routing: state.routing
 });
 
