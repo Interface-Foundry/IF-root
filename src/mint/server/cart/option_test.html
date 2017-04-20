@@ -38,6 +38,16 @@
   ul {
     list-style: none;
   }
+  li {
+    padding: 5px;
+    display: inline-block;
+  }
+  .selected {
+    border: 1px solid green;
+  }
+  .not-selected {
+    border: 1px solid rgba(0,0,0,0.3);
+  }
   </style>
 
 </head>
@@ -52,7 +62,6 @@
         <div class="one-half column">
           <h4 class="hero-heading">Item Option Tester</h4>
         </div>
-        <div class="one-half column"></div>
       </div>
       <div class="row">
         <label>ASIN</label>
@@ -84,12 +93,15 @@
           optionLists[o.type] = []
         }
         var html = [
-          '<li><a href="/testoptions?asin=' + o.asin + '">',
+          '<a href="/testoptions?asin=' + o.asin + '">',
+          '<li class="',
+          o.selected ? 'selected' : 'not-selected',
+          '">',
           '<label>',
           o.name,
           '</label>',
           '<img src="' + o.thumbnail_url + '">',
-          '</a></li>'
+          '</li></a>'
         ].join('')
         optionLists[o.type].push(html)
       })

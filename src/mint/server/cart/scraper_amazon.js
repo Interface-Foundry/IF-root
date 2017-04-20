@@ -131,7 +131,6 @@ var res2Item = function (res) {
       selectedItem.VariationAttributes.VariationAttribute.map(attr => {
         selectedOptions[attr.Name] = attr.Value
       })
-      console.log(selectedOptions)
 
       // make a list of all the options for all the option types
       var allOptions = {}  // hash where keys are dimension names, and values are options we've created already
@@ -176,6 +175,7 @@ var res2Item = function (res) {
 
     // um let's just get the item fresh to make sure it's okay
     item = yield db.Items.findOne({asin: i.ASIN}).populate('options')
+    console.log(item.options)
 
     return item
   })

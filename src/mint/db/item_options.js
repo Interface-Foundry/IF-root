@@ -48,16 +48,10 @@ var itemOptionsCollection = Waterline.Collection.extend({
     main_image_url: 'string',
 
     /** @type {boolean} available whether this option is available **/
-    available: {
-      type: 'boolean',
-      defaultsTo: true
-    },
+    available: 'boolean',
 
     /** @type {boolean} whether the option is selected or not */
-    selected: {
-      type: 'boolean',
-      defaultsTo: false
-    }
+    selected: 'boolean'
   }
 });
 
