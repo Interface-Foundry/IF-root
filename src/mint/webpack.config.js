@@ -1,6 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
-
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 var BUILD_DIR = path.resolve(__dirname, 'public/build');
 var APP_DIR = path.resolve(__dirname, 'react');
 
@@ -15,6 +15,7 @@ module.exports = {
   },
 
   plugins: [
+    new CaseSensitivePathsPlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
