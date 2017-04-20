@@ -46,6 +46,7 @@ require('colors');
  */
 var db;
 const dbReady = require('../db');
+
 dbReady.then((models) => { db = models; })
   .catch(e => console.error(e));
 
@@ -75,6 +76,7 @@ app.use(sessions({
 app.use((req, res, next) => co(function* () {
   // req.session will always exist, thanks to the above client-sessions middleware
   // Check to make sure we have stored this user's session in the database
+
   if (!req.session.id) {
     console.log('creating new sessionin the database')
     var session = yield db.Sessions.create({})
