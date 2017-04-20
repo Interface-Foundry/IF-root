@@ -29,7 +29,7 @@ export default function cart(state = initialState, action) {
       members: [...state.members, action.newMember]
     };
   case RECEIVE_UPDATE_CART:
-    if(action.updatedCart.id !== state.cart_id) break;
+    if (action.updatedCart.id !== state.cart_id) break;
     return {
       ...state,
       locked: action.updatedCart.locked,
@@ -73,26 +73,24 @@ export default function cart(state = initialState, action) {
 export const getMemberById = (state, props) => [...state.members, state.leader].find(member => member.id === props.id);
 
 export const splitCartById = (state, props) => {
-  const id = props ? props.id : null
-
-  if (!id) return { my: [], others: {}, quantity: 0 }
+  const id = props ? props.id : null;
 
   return _.reduce(state.currentCart.items, (acc, item) => {
-    acc.quantity = acc.quantity + ( item.quantity || 1 );
-    let linkedMemeber = getMemberById(state.currentCart, {id: item.added_by});
+    acc.quantity = acc.quantity + (item.quantity || 1);
+    let linkedMemeber = getMemberById(state.currentCart, { id: item.added_by });
 
     if (id === item.added_by) {
-      acc['my'].push(item)
-    } else if (!acc[linkedMemeber.email_address]) {
-      acc.others[linkedMemeber.email_address] = [item]
+      acc['my'].push(item);
+    } else if (!acc.others[linkedMemeber.email_address]) {
+      acc.others[linkedMemeber.email_address] = [item];
     } else {
-      acc.others[linkedMemeber.email_address].push(item)
+      acc.others[linkedMemeber.email_address].push(item);
     }
 
-    return acc
+    return acc;
   }, {
     my: [],
     others: {},
     quantity: 0
-  })
-}
+  });
+};

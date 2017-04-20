@@ -18,6 +18,7 @@ export default class App extends Component {
     leader: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
     modal: PropTypes.string,
+    cartName: PropTypes.string,
     newAccount: PropTypes.bool,
     currentUser: PropTypes.object,
     match: PropTypes.object.isRequired,
@@ -51,6 +52,7 @@ export default class App extends Component {
     const { props, state, _toggleSidenav } = this;
     const { cart_id, newAccount, leader, carts, match, currentUser, location, currentCart } = props;
     const { sidenav } = state;
+    const showFooter = !location.pathname.includes('/m/edit')
 
     if (newAccount === false) {
       return <Overlay/>;
@@ -69,7 +71,7 @@ export default class App extends Component {
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
 
-        <Footer {...props} cart_id={cart_id}/>
+        {showFooter ? <Footer {...props} cart_id={cart_id}/> : null}
       </section>
     );
   }

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Field } from 'redux-form';
 import { DealsContainer } from '../../containers';
+import SearchHistory from './SearchHistory';
 
 export default class AmazonForm extends Component {
   constructor(props) {
@@ -15,7 +16,7 @@ export default class AmazonForm extends Component {
             {label}
           </label>
           <div className='form__input'>
-            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete='off' spellCheck='true'/>
+            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete="off" spellCheck='true'/>
             <button
               className='form__input__submit'
               type="submit"
@@ -25,7 +26,7 @@ export default class AmazonForm extends Component {
               </p>
             </button>
           </div>
-          <DealsContainer isDropdown={active}/>
+          <SearchHistory filter={input.value} onChange={input.onChange} handleSubmit={handleSubmit} />
         </div>
     );
   }
@@ -46,3 +47,11 @@ export default class AmazonForm extends Component {
     );
   }
 }
+
+
+
+
+          // <DealsContainer isDropdown={active}/>
+
+
+

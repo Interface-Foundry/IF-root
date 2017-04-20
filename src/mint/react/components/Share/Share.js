@@ -75,7 +75,7 @@ export default class Share extends Component {
           </div>
           <div className='share__message__copy'>
             <div className='share__message__copy__input' onClick={this.copy}>
-              <input ref={(input) => this.input = input} value={`kipthis.com/c/${pathname.match(/cart\/((\d|\w)+)/)[1]}`} readOnly={true}/>
+              <input ref={(input) => this.input = input} value={`http://mint-dev.kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`} readOnly={true}/>
               <button><p>copy</p></button>
             </div>
           </div>

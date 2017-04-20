@@ -22,7 +22,7 @@ export default class Card extends Component {
       <section className='dealcard'>
         <div className='dealcard__details'>
           <div className='dealcard__details__image image' style={{backgroundImage:`url(${imageSrc})`}}/>
-          <div className='dealcard__details__name'>{name.length > 35 ? name.substring(0, 32) + '…': name}</div>
+          <div className='dealcard__details__name'>{name.length > 45 ? name.substring(0, 33) + '…': name}</div>
           <div className='dealcard__details__price'>{displayCost(price)}</div>
           <div className='dealcard__details__discount'><strike>{displayCost(previousPrice)}</strike> ({(savePercent * 100).toFixed()}% off)</div>
         </div>
