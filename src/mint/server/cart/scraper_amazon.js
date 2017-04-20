@@ -159,7 +159,6 @@ var res2Item = function (res) {
       })
 
       options = yield _.flatten(options).filter(Boolean)
-      console.log(options)
       options.map(o => {
         item.options.add(o.id)
       })
