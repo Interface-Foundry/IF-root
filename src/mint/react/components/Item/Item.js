@@ -110,12 +110,15 @@ export default class Item extends Component {
       props,
       props: { index, type, items, item, nextSearch, prevSearch, item: { main_image_url, store, description, name } }
     } = this;
-    const imageUrl = (type === 'deal' && items && items[parseInt(index)]) ? items[parseInt(index)].large ? items[parseInt(index)].large : main_image_url : main_image_url;
+
+    const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
+      ? items[parseInt(index)].large
+      : main_image_url;
     return (
       <div 
-        className='item' onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-        onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-        onTouchEnd={ () => determineNav() }
+          className='item' onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+          onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+          onTouchEnd={ () => determineNav() }
         >
         <div className='item__view__image image row'
             style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
@@ -125,8 +128,8 @@ export default class Item extends Component {
         </div>
         { 
           type === 'deal' && items[parseInt(index)]
-          ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
-          : <ItemInfo {...props} {...item} />
+            ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
+            : <ItemInfo {...props} {...item} />
         }
         {
         item.search 
@@ -217,3 +220,4 @@ class AddRemove extends Component {
     );
   }
 }
+
