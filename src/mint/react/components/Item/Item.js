@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../utils';
+import { splitCartById } from '../../reducers';
 
 export default class Item extends Component {
   state = {
@@ -79,7 +80,7 @@ export default class Item extends Component {
 
   determineNav() {
     const {
-      props: { cart_id, type, items, index, nextSearch, prevSearch, history: { replace } },
+      props: { cart_id, type, items, index, nextSearch, prevSearch, currentUser, history: { replace } },
       state: { originalx, x }
     } = this;
 
@@ -96,7 +97,10 @@ export default class Item extends Component {
       const numericInt = parseInt(index),
         diff = Math.abs(originalx - x),
         newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
-      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].id}/edit`);
+
+      const ourItems = splitCartById(this.props, {id: currentUser.id}).my;
+
+      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems[newIndex].id}/edit`);
     }
   }
 

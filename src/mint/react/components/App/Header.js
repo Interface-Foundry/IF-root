@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 import { getNameFromEmail } from '../../utils';
 import { Icon } from '..';
+import { splitCartById } from '../../reducers';
 
 export default class Header extends Component {
   static propTypes = {
@@ -12,9 +13,10 @@ export default class Header extends Component {
   }
 
   render() {
-    let { props, props: { deals, items, item: { search } } } = this;
+    let { props, props: { deals, items, currentUser, item: { search } } } = this;
     const { match } = props;
     search = search ? search : 0;
+    
     return (
       <nav className='navbar'>
         <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
@@ -22,7 +24,7 @@ export default class Header extends Component {
           }
         />
         <Route path={`${match.url}/m/:type/:index/:asin/edit`} component={() => 
-            <EnumeratedHead text={'My Cart Items'} length={items.length} type={'item'} {...props}/>
+            <EnumeratedHead text={'My Cart Items'} length={splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
           }
         />
         <Route path={`${match.url}/m/item`} component={() => 

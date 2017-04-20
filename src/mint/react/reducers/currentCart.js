@@ -74,13 +74,14 @@ export const getMemberById = (state, props) => [...state.members, state.leader].
 
 export const splitCartById = (state, props) => {
   const id = props ? props.id : null;
+
   return _.reduce(state.currentCart.items, (acc, item) => {
     acc.quantity = acc.quantity + (item.quantity || 1);
     let linkedMemeber = getMemberById(state.currentCart, { id: item.added_by });
 
     if (id === item.added_by) {
       acc['my'].push(item);
-    } else if (!acc[linkedMemeber.email_address]) {
+    } else if (!acc.others[linkedMemeber.email_address]) {
       acc.others[linkedMemeber.email_address] = [item];
     } else {
       acc.others[linkedMemeber.email_address].push(item);
