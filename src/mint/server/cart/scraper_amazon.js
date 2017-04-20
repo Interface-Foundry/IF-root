@@ -125,7 +125,15 @@ var res2Item = function (res) {
     // create new item options
     // this part is really really hard
     if (res.Options) {
-      var selectedItem = res.Options.filter(o => o.ASIN === item.ASIN)[0]
+      // Make the current item's selected options easy to use
+      var selectedItem = res.Options.filter(o => o.ASIN === item.asin)[0]
+      var selectedOptions = {}
+      selectedItem.VariationAttributes.VariationAttribute.map(attr => {
+        selectedOptions[attr.Name] = attr.Value
+      })
+      console.log(selectedOptions)
+
+      // make a list of all the options for all the option types
       var allOptions = {}  // hash where keys are dimension names, and values are options we've created already
       var alreadySavedOptions = yield db.ItemOptions.find({id: ''})
       var options = res.Options.map(o => {
@@ -153,12 +161,13 @@ var res2Item = function (res) {
             thumbnail_url: o.SmallImage.URL,
             main_image_url: o.LargeImage.URL,
             available: true,
-            selected: o.ASIN === item.ASIN
+            selected: attr.Value === selectedOptions[attr.Name]
           })
         })
       })
 
       options = yield _.flatten(options).filter(Boolean)
+      console.log(options)
       options.map(o => {
         item.options.add(o.id)
       })
