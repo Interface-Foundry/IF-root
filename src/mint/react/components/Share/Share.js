@@ -64,7 +64,7 @@ export default class Share extends Component {
   render() {
     const { location: { pathname } } = this.props,
           { tryToOpen } = this,
-          linkedIcons = addLinkToDeepLink(shareIcons, `kipthis.com/c/${pathname.match(/cart\/((\d|\w)+)/)[1]}`);
+          linkedIcons = addLinkToDeepLink(shareIcons, `http://mint-dev.kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`);
 
     return (
       <div className='share'>
@@ -86,7 +86,7 @@ export default class Share extends Component {
               if(icon.icon === 'Facebook') return (
                   <FacebookShareButton
                     key={i} 
-                    url={`kipthis.com/c/${pathname.match(/cart\/((\d|\w)+)/)[1]}`}
+                    url={`http://mint-dev.kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`}
                     title='Share Cart'
                     picture='http://tidepools.co/kip/head_smaller.png'
                     className="share__icons__icon">
