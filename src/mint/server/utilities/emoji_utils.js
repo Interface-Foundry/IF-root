@@ -4,23 +4,14 @@ var spliddit = require('spliddit');
 var kip = require('../../../kip');
 
 module.exports = function (text) {
-  console.log('INPUT', text)
+  // console.log('INPUT', text)
   text = spliddit(text);
   text = text.map(function (c) {
-    // console.log('c / EMOJI', c)
     return search(c, function (res) {
-      // logging.info('search returns', res)
       return res;
     })
   });
-  console.log('was ist sylvia', text);
   text = text.join('')
-  // logging.info('text w/ converted emojis, round one.', text)
-  console.log('was ist sylvia 2', text);
-  // text = emojiText.convert(text, function (emoji, data) {
-  //   console.log('data', data)
-  //   return data.description.toLowerCase() + ' ';
-  // });
   text = emojiText.convert(text, {before: '', after: ' '})
 
   console.log('final text', text)

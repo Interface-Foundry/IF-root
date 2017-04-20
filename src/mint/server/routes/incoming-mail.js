@@ -73,32 +73,25 @@ var sendConfirmationEmail = function * (email, uris) {
      if (j > 5) console.log(text[start+j+offset], url[j], 'offset:', offset)
      if (start+j+offset >= text.length) {
         //this is not a match; we've run out of text
-      // console.log('out of text')
       return null;
      }
      if (text[start+j+offset] === url[j]) { //this is a match
-      //  console.log('check') //this continues to be a match
        contiguousWrong = 0;
        if (j === url.length-1) {
-         //we're done!
-        //  console.log('were done')
          return [start, start+j+offset+1];
        }
      }
      else {//this might not be a match but we'll need to see
         if (contiguousWrong > 5) {
-    //    console.log('well not that')
           return null;
         }
         else {
-          // console.log('gonna keep looking')
           j--;
           contiguousWrong++;
           offset++;
         }
     }
   }
-  // console.log('something went wrong')
   return null;
 }
 
@@ -189,9 +182,9 @@ var getUrls = function (html) {
   if (!uris) return null;
 
   uris = uris.map(u => u.slice(6, u.length-1)); //trim off href junk
-  console.log('should return theese', uris)
-  uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
-  console.log('should be amazon', uris)
+  // console.log('should return theese', uris)
+  // uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
+  // console.log('should be amazon', uris)
   return uris;
 }
 
@@ -217,39 +210,43 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   //parse out text and uris
   var bodyText = req.body.text;
   var bodyHtml = req.body.html;
-  var uris = getUrls(bodyHtml);
+  var all_uris = getUrls(bodyHtml);
+  if (all_uris) var uris = all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
+  else var uris = null;
   console.log('URIS', uris)
   var text = getTerms(bodyText, uris);
 
-  //don't freak out sendgrid please
-  res.sendStatus(200);
-  return;
+  // //don't freak out sendgrid please
+  // res.sendStatus(200);
+  // return;
 
-  //business logic starts here -- TODO
-  if (!(uris.length) && all_uris) {
+  //business logic starts here
+  if (!uris && all_uris) {
     //send error email
     console.log('gonna send an error email');
     yield sendErrorEmail(email);
   }
-  if ((!uris || !uris.length) && !text) {
-    console.log('no urls');
-    //TODO search amazon
-    res.sendStatus(200);
-    return;
-  }
-  if (text) {
-    try {
-      console.log('gonna search:', text[0])
-      var searchResults = yield amazon.searchAmazon(text[0]);
 
-      console.log('got this:', JSON.stringify(searchResults))
-      // res.sendStatus(200);
-    }
-    catch (err) {
-      logging.error(err);
-      // res.sendStatus(200);
-    }
+  if (text && text.length) {
+    yield text.map(function * (p) {
+      if (p.length) {
+        try {
+          // console.log('gonna search:', text[0])
+          var searchResults = yield amazon.searchAmazon(text[0]);
+
+          // console.log('got this:', JSON.stringify(searchResults))
+          console.log('got a result form the amazon search')
+          // res.sendStatus(200);
+        }
+        catch (err) {
+          logging.error(err);
+          // res.sendStatus(200);
+        }
+      }
+    })
   }
+  res.sendStatus(202);
+  return;
 
   //get cart id
   var html = req.body.html;
