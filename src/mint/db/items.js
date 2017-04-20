@@ -45,6 +45,9 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {string} item name or whatever we present maybe */
     name: 'string',
 
+    /** @type {string} asin the amazon asin **/
+    asin: 'string',
+
     /** @type {string} item description */
     description: 'string',
 
