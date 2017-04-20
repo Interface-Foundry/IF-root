@@ -12,6 +12,11 @@ export const isRequired = value => {
   }
 };
 
+export const isUrl = url => {
+   const regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+   return regexp.test(url);
+}
+
 export const minLength = min => value => {
   if (!isEmpty(value) && value.length < min) {
     return `Must be at least ${min} characters`;

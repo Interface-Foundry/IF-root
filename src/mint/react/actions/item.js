@@ -104,14 +104,17 @@ export function previewItem(item_id) {
 export function previewAmazonItem(amazon_id) {
   return async function (dispatch) {
     dispatch(request());
-
     try {
       const response = await fetch(`/api/itempreview?q=${amazon_id}`, {
         credentials: 'same-origin'
       });
+       console.log(response);
       const json = await response.json();
+       console.log(json);
       return Array.isArray(json) ? dispatch(receiveSearch(json)) : dispatch(receiveItem(json));
     } catch (e) {
+      console.log(amazon_id);
+      console.log(e);
       throw 'error in cart previewAmazonItem';
     }
   };

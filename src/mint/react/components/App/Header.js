@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 import { getNameFromEmail } from '../../utils';
 import { Icon } from '..';
+import { splitCartById } from '../../reducers';
 
 export default class Header extends Component {
   static propTypes = {
@@ -12,13 +13,18 @@ export default class Header extends Component {
   }
 
   render() {
-    let { props, props: { deals, items, item: { search } } } = this;
+    let { props, props: { deals, items, currentUser, item: { search } } } = this;
     const { match } = props;
     search = search ? search : 0;
+    
     return (
       <nav className='navbar'>
         <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
             <EnumeratedHead text={'My Cart Items'} length={items.length} type={'item'} {...props}/>
+          }
+        />
+        <Route path={`${match.url}/m/:type/:index/:asin/edit`} component={() => 
+            <EnumeratedHead text={'My Cart Items'} length={splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
           }
         />
         <Route path={`${match.url}/m/item`} component={() => 
@@ -52,6 +58,7 @@ export default class Header extends Component {
 
 class CartHead extends Component {
   static propTypes = {
+    cartName: PropTypes.string,
     leader: PropTypes.object,
     _toggleSidenav: PropTypes.func,
     currentUser: PropTypes.object,
@@ -59,8 +66,7 @@ class CartHead extends Component {
   }
 
   render() {
-    const { leader, _toggleSidenav, currentUser, currentCart } = this.props;
-    const cartName = currentCart.name ? currentCart.name : `${_.capitalize(getNameFromEmail(leader ? leader.email_address : null))}'s Group Cart`;
+    const { leader, _toggleSidenav, currentUser, currentCart, cartName } = this.props;
 
     return (
       <div>

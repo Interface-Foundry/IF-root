@@ -167,7 +167,7 @@ describe.only('api', () => {
 
     // make sure McTesty is the leader
     assert.equal(cart.leader.email_address, mcTesty.email)
-    assert.equal(cart.name, mcTesty.email + "'s Kip Group Cart")
+    assert.equal(cart.name, mcTesty.email.replace(/@.*/, '') + "'s Kip Cart")
 
     // lets save this cart id for later
     mcTesty.cart_id = cart.id

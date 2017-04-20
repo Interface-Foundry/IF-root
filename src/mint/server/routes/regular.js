@@ -29,7 +29,7 @@ router.get('/', (req, res) => co(function* () {
   const memberCarts = yield db.carts_members__user_accounts_id.find({
     user_accounts_id: req.UserSession.user_account.id
   })
-  
+
   const memberCartsIds = memberCarts.map( c => c.carts_members )
 
   // find all the carts where their user id appears in the leader or member field
@@ -91,7 +91,7 @@ router.get('/newcart', (req, res) => co(function * () {
     if (user.name) {
       cart.name = user.name + "'s Kip Group Cart"
     } else {
-      cart.name = user.email_address + "'s Kip Group Cart"
+      cart.name = user.email_address.replace(/@.*/, '') + "'s Kip Cart"
     }
     yield cart.save()
 

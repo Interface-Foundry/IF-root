@@ -41,6 +41,11 @@
 		    background: $main-button-color;
 		    border: 1px solid $border-color-light;
 		    font-weight: 600;
+		    z-index: 10000;
+
+		    &:active {
+		    	background: white;
+		    }
 		}
 	}
 }

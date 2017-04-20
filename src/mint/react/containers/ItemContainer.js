@@ -6,12 +6,14 @@ import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, d
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
   addingItem: state.currentCart.addingItem,
+  currentCart: state.currentCart,
   item_id: ownProps.match.params.item_id,
   amazon_id: ownProps.match.params.amazon_id,
+  currentUser: state.session.user_account,
   item: state.item,
   index: parseInt(ownProps.match.params.index),
   type: ownProps.match.params.item_type,
-  items: ownProps.match.params.item_type === 'deal' ? state[`${ownProps.match.params.item_type}s`][`${ownProps.match.params.item_type}s`] : state.currentCart.items,
+  items: ownProps.match.params.item_type === 'deal' ? state.deals.deals : state.currentCart.items,
   routing: state.routing
 });
 

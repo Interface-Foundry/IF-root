@@ -27,8 +27,7 @@ export default class Cart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id } = this.props, 
-      { leader, addingItem, user_account } = nextProps,
+    const { history: { replace }, cart_id } = this.props, { leader, addingItem, user_account } = nextProps,
       cartId = cart_id || nextProps.cart_id;
 
     if (cartId) {
@@ -44,31 +43,32 @@ export default class Cart extends Component {
     const { items, leader, members, user_account, history: { replace }, locked, updateCart, currentCart } = this.props,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
-
     return (
       <div className='cart'>
         {
-          locked ? <div className='cart__locked'>
-            <div className='cart__locked__text'>
-              <Icon icon='Locked'/>
-              <p>Locked</p>
-            </div>
-            {
-              leader.id === user_account.id ? <button onClick={() => {
-                updateCart({
-                  ...currentCart, 
-                  locked: !currentCart.locked
-                })
-              }}>
-                Unlock
-              </button> : null
-            }
-          </div> : <span>
-            <div className='cart__add'>
-              <AddAmazonItemContainer replace={replace} members={members}/>
-            </div>
-            {!!user_account.id ? <DealsContainer isDropdown={false}/> : null}
-          </span>
+          locked 
+          ? <div className='cart__locked'>
+              <div className='cart__locked__text'>
+                <Icon icon='Locked'/>
+                <p>Locked</p>
+              </div>
+              {
+                leader.id === user_account.id ? <button onClick={() => {
+                  updateCart({
+                    ...currentCart, 
+                    locked: !currentCart.locked
+                  });
+                }}>
+                  Unlock
+                </button> : null
+              }
+            </div> 
+          : <span>
+              <div className='cart__add'>
+                <AddAmazonItemContainer replace={replace} members={members}/>
+              </div>
+              {!!user_account.id ? <DealsContainer isDropdown={false}/> : null}
+            </span>
         }
         <div className='cart__title'>
           <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
@@ -77,7 +77,7 @@ export default class Cart extends Component {
           <MyItems {...this.props} items={items.my} />
           {
             _.map(items.others, (value, key, index) => {
-              return <OtherItems {...this.props} key={key} title={key} items={value} startIndex={items.my.length} isLeader={isLeader} />
+              return (<OtherItems {...this.props} key={key} title={key} items={value} startIndex={items.my.length} isLeader={isLeader} />);
             })
           }
         </div>
@@ -93,7 +93,7 @@ class MyItems extends Component {
 
   render() {
     const { props, props: { items } } = this,
-          total = calculateItemTotal(items);
+    total = calculateItemTotal(items);
     return (
       <ul>
         <div className='cart__items__title'>Your Items</div>
@@ -118,7 +118,7 @@ class OtherItems extends Component {
 
   render() {
     const { props, props: { items, isLeader, startIndex, title } } = this,
-          total = calculateItemTotal(items);
+    total = calculateItemTotal(items);
 
     return (
       <ul>
@@ -128,7 +128,7 @@ class OtherItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
           : <EmptyCart />
         }
-        <h3>Total: <span>{displayCost(total)}</span></h3>
+        {isLeader ? <h3>Total: <span>{displayCost(total)}</span></h3> : null}
       </ul>
     );
   }

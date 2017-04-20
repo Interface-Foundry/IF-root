@@ -5,6 +5,12 @@
   overflow-x: hidden;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  &:after {
+    content: '';
+    height: 30vh;
+    width: 100vw;
+    display: inline-block;
+  }
   div[class^='item__view'] {
     margin-bottom: $padding;
     text-align: left;
