@@ -1,17 +1,16 @@
-import React, { PropTypes } from 'react';
-import Button from 'react-bootstrap/lib/Button';
-import Panel from 'react-bootstrap/lib/Panel';
+import React, { PropTypes ,Component} from 'react';
 import PageHeader from 'react-bootstrap/lib/PageHeader';
 import {
   LineChart, Sector, Cell, Tooltip, PieChart, Pie,
   Line, XAxis, YAxis, Legend,
   CartesianGrid, Bar, BarChart,
-  ResponsiveContainer, AreaChart, Area } from '../../../vendor/recharts';
+  ResponsiveContainer, AreaChart, Area } from 'recharts';
 import {
-  MenuItem,
-  DropdownButton,
+  MenuItem, Panel,
+  DropdownButton, Button, ButtonToolbar,
   ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger
 } from 'react-bootstrap';
+import { gql, graphql } from 'react-apollo';
 import Table from '../../../components/Table/common';
 import vagueTime from 'vague-time';
 import _ from 'lodash';
@@ -75,212 +74,107 @@ function getPieChartTeamStatsData(teams, teamId){ // [store item count, store or
   return data;
 }
 
-/*
-const orderTimePlaceFrequencies = [ { hour: 10, location: [ '122 W 27th St' ], total: 1 },
-  { hour: 11,
-    location: [ '7502 178th St', '122 W 27th St' ],
-    total: 9 },
-  { hour: 12,
-    location: [ '7502 178th St', '122 W 27th St' ],
-    total: 8 },
-  { hour: 13,
-    location: [ '7502 178th St', '122 W 27th St' ],
-    total: 3 },
-  { hour: 14,
-    location: [ '122 W 27th St', '902 Broadway' ],
-    total: 8 },
-  { hour: 15,
-    location: [ '7502 178th St', '122 W 27th St', '902 Broadway' ],
-    total: 23 },
-  { hour: 16,
-    location: [ '122 W 27th St', '902 Broadway', '7502 178th St' ],
-    total: 9 },
-  { hour: 17, location: [ '122 W 27th St' ], total: 4 },
-  { hour: 18, location: [ '122 W 27th St' ], total: 6 } ];
-*/
 
-/*
-const dayOfWeekStats = [ { dayString: 'Sunday', dayNumber: 1, total: 7932 },
-  { dayString: 'Monday', dayNumber: 2, total: 21892 },
-  { dayString: 'Tuesday', dayNumber: 3, total: 42004 },
-  { dayString: 'Wednesday', dayNumber: 4, total: 29934 },
-  { dayString: 'Thursday', dayNumber: 5, total: 26266 },
-  { dayString: 'Friday', dayNumber: 6, total: 25602 },
-  { dayString: 'Saturday', dayNumber: 7, total: 7219 }
-];
-*/
-
-
-function displayTeamStats(props, context) {
-  context.setTitle(title);
-  var rows = [];
-  var teams = props.teams;
-
-
-  var cells = [];
-  for (var i = 0; i < 4; i++){
-    cells.push(<Cell key={i} fill={COLORS[i]} />);
+class displayTeamStats extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      view: 'Store',
+      team_id: ''
+    };
   }
-  var currentTeam = props.teamName ? props.teamName : 'All Team';
 
-  return (
-    <div>
-      <div className="row">
-        <div className="col-lg-12">
-          <PageHeader>{currentTeam} Stats</PageHeader>
-        </div>
+  changeCart(cart){
+    this.setState({
+      view: cart
+    })
+  }
+
+  getCurrentQuery() {
+    let currentQuery;
+    if (this.state.view === 'Cafe') {
+      currentQuery = gql`
+        query GetCafeTeamById($team_id: String!){
+          teams(team_id:$team_id){
+            members{id,name,is_admin}, meta{all_channels}
+          }
+        }
+      `;
+    } else if (this.state.view === 'Store') {
+      //store query
+      currentQuery = gql`
+        query GetStoreTeamById($team_id: String!){
+          teams(team_id:$team_id){
+            members{id,name,is_admin}, meta{all_channels}
+          }
+        }
+      `;
+    }
+    return currentQuery;
+  }
+  
+  render(){
+    var self = this;
+    var teams = self.props.teams;
+    var currentTeam = teams[0];
+
+    const currentQuery = this.getCurrentQuery();
+    const gqlWrapper = graphql(currentQuery, {
+      options: {
+        variables: {
+          team_id: currentTeam.team_id,
+        },
+      },
+    });
+    const TableWithData = gqlWrapper(getCurrentTable);
+
+
+    return (
+      <div>
+        Viewing {self.state.view} stats of {currentTeam.team_name}
+        <ButtonToolbar>
+            <Button bsStyle={self.state.view=='Store' ? "primary" : "default"} onClick={ ()=> self.changeCart('Store')}>
+              Store
+            </Button>
+            <Button bsStyle={self.state.view=='Cafe' ? "primary" : "default"} onClick={ ()=> self.changeCart('Cafe')}>
+              Cafe
+            </Button>
+          </ButtonToolbar>
+          <TableWithData />
       </div>
-      <div className="row">
-        <div className="col-lg-6">
-          <Panel header={<span>Team Stats Pie Chart</span>} >
-            <div>
-              <ResponsiveContainer width="100%" aspect={2}>
-                <PieChart >
-                  <Pie isAnimationActive={false} data={getPieChartTeamStatsData(teams, props.teamId)}  label>
-                    {cells}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-        </div>
-      </div>
-    </div>
-  )
-
-  /*
-  return (
-    <div>
-      <div className="row">
-        <div className="col-lg-12">
-          <PageHeader>{currentTeam} Stats</PageHeader>
-        </div>
-      </div>
-
-      <div className="panel panel-default fillSpace">
-          <Panel header={<span>Table of Waypoint Routes</span>}>
-            <Table heads={[{
-              field: 'time_stamp',
-              descrip: 'Session Time Started',
-              allowSort: true,
-              sort: (a, b, order) => order == 'desc' ?
-                  new Date(b.time_stamp) - new Date(a.time_stamp)
-                  : new Date(a.time_stamp) - new Date(b.time_stamp)
-            }, {
-              field: 'time_stamp_end',
-              descrip: 'Session Time of Last Activity',
-              allowSort: true,
-              sort: (a, b, order) => order == 'desc' ?
-                  new Date(b.time_stamp_end) - new Date(a.time_stamp_end)
-                  : new Date(a.time_stamp_end) - new Date(b.time_stamp_end)
-            },{
-              field: 'user_id',
-              descrip: 'User ID',
-              allowSort: true
-            }, {
-              field: 'team_name',
-              descrip: 'Team Name',
-              allowSort: true,
-            }, {
-              field: 'actions',
-              descrip: 'User Actions',
-              allowSort: true,
-              dataFormat: (cell, row)=> <WaypointHover waypoints={cell}/>
-            }]} data={rows} />
-          </Panel>
-      </div>
-
-      <div className="row">
-        <div className="col-lg-6">
-          <Panel header={<span>Team Stats Pie Chart</span>} >
-            <div>
-              <ResponsiveContainer width="100%" aspect={2}>
-                <PieChart >
-                  <Pie isAnimationActive={false} data={getPieChartTeamStatsData(teams, waypoints, props.teamId)}  label>
-                    {cells}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-        </div>
-
-
-        <div className="col-lg-6">
-          <Panel header={<span>Total # of Messages by Day of Week</span>} >
-            <div>
-              <ResponsiveContainer width="100%" aspect={2}>
-                <BarChart
-                  data={dayOfWeekStats}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <XAxis dataKey="dayString" />
-                  <YAxis />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="total" fill="#F2D2C4" />
-
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-        </div>
-
-        <div className="col-lg-6">
-          <Panel header={<span>Orders by Time of Day in the past Month</span>} >
-            <div>
-              <ResponsiveContainer width="100%" aspect={2}>
-                <BarChart
-                  data={orderTimePlaceFrequencies}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="total" fill="#FA74AA" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-        </div>
-
-        <div className="col-lg-6">
-
-          <Panel header={<span>Waypoints of past 2 weeks</span>} >
-            <div>
-              <ResponsiveContainer width="100%" aspect={2}>
-                <AreaChart width={600} height={400} data={waypointsCount}
-                  margin={{top: 10, right: 30, left: 0, bottom: 0}}>
-                  <XAxis dataKey="waypoint"/>
-                  <YAxis/>
-                  <CartesianGrid strokeDasharray="3 3"/>
-                  <Tooltip />
-                  <Legend />
-                  <Area type='monotone' dataKey='total' stroke='#000000' fill='#BBB44F' />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-
-        </div>
-
-      </div>
-    </div>
-  );
-  */
+    )
+  }
+ 
 }
 
-displayTeamStats.propTypes = {
+  const getCurrentTable = ({ data }) => {
+    var self = this;
+    if (data.loading) {
+      return <p> Loading... </p>
+    }
+    var team_members = data.teams[0].members;
+    var team_channels = data.teams[0].meta.all_channels;
+    return (
+      <div>
+      <div>Users: {team_members.length}</div>
+      <div>Admins: {listTeamAdmins(team_members)}</div>
+      <div>Channels: {listTeamChannels(team_channels)}</div>
+      </div>
+    )
+  };
 
-};
+  function listTeamAdmins(teamMembers){
+    var memberList = teamMembers.reduce((list, member) => {
+      return list + " @" + member.name;
+    }, '')
+    return memberList;
+  }
 
-displayTeamStats.contextTypes = { setTitle: PropTypes.func.isRequired };
+  function listTeamChannels(teamChannels){
+    var channelList = teamChannels.reduce((list,channel) => {
+      return list + " #" + channel.name;
+    },'')
+    return channelList;
+  }
 
 export default displayTeamStats;

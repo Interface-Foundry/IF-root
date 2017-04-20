@@ -158,6 +158,7 @@ type Metric {
 }
 type SlackbotMeta {
   addedBy: String
+  all_channels: JSON
   dateAdded: String
   deleted: Boolean
   cart_channels: [String]

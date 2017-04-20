@@ -5,8 +5,9 @@ export default {
 
   path: '/slackteamstats',
 
-  async action(context) {
-    let resp;
+
+  async action(context) { 
+      let resp;
 
       resp = await fetch('/graphql', {
       method: 'post',
@@ -15,7 +16,7 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: `{teams{team_name, team_id, carts {_id, items{_id}}, deliveries{_id,cart}}}`,
+        query: `{teams{team_name, team_id}}`,
       }),
       credentials: 'include',
     });
@@ -24,11 +25,7 @@ export default {
       data
     } = await resp.json();
     if (!data || !data.teams) throw new Error('Failed to load teams.');
-
-
-    //return <FlotCharts waypoints={data.waypoints} />;
-    return <Slackteamstats teams={data.teams} teamId={context.query.id} teamName={context.query.teamname} />
-    //return <Slackteamstats waypoints={data.waypoints} teams={data.teams} teamId={context.query.id} teamName={context.query.teamname} />;
+    return <Slackteamstats teams={data.teams}/>
   }
 
 };
