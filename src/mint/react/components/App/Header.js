@@ -52,6 +52,7 @@ export default class Header extends Component {
 
 class CartHead extends Component {
   static propTypes = {
+    cartName: PropTypes.string,
     leader: PropTypes.object,
     _toggleSidenav: PropTypes.func,
     currentUser: PropTypes.object,
@@ -59,9 +60,9 @@ class CartHead extends Component {
   }
 
   render() {
-    const { leader, _toggleSidenav, currentUser, currentCart } = this.props;
-    const cartName = currentCart.name ? currentCart.name : `${_.capitalize(getNameFromEmail(leader ? leader.email_address : null))}'s Group Cart`;
+    const { leader, _toggleSidenav, currentUser, currentCart, cartName } = this.props;
 
+    console.log(leader, cartName)
     return (
       <div>
         <div className='image' style={

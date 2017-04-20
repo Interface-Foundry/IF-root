@@ -18,6 +18,7 @@ export default class App extends Component {
     leader: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
     modal: PropTypes.string,
+    cartName: PropTypes.string,
     newAccount: PropTypes.bool,
     currentUser: PropTypes.object,
     match: PropTypes.object.isRequired,

@@ -38,4 +38,20 @@
 
 // if you have searchs, you just show past searchs.
 // autocorrect
-// 
+// Should return [] of previous search terms
+
+export const getSearchHistory = (filter) => {
+	if (!localStorage.searchHistory) return []
+
+	return _.filter(localStorage.searchHistory.split(','), (pSearch) => pSearch.includes(filter))
+};
+
+export const addSearchHistory = term => {
+	localStorage.searchHistory = localStorage.searchHistory ? localStorage.searchHistory + `,${term}` : term;
+}
+
+
+
+
+
+

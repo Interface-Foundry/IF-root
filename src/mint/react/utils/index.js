@@ -1,5 +1,6 @@
 export {
   isValidEmail,
+  isUrl,
   isRequired,
   minLength,
   maxLength,
@@ -33,3 +34,9 @@ export {
   cloudinary
 }
 from './cloudinary';
+
+export {
+  getSearchHistory,
+  addSearchHistory
+}
+from './search';
