@@ -14,7 +14,8 @@ dbReady.then((models) => { db = models; })
 
 const deals = require('../deals/deals');
 var amazonScraper = require('../cart/scraper_amazon');
-var amazon = require('../cart/amazon_cart.js');
+var amazon = require('../cart/amazon_cart');
+var emoji = require('../utilities/emoji_utils')
 
 /**
  * Sends an email informing the user that a url they typed
@@ -147,10 +148,12 @@ var exciseUrls = function (text, urls) {
  */
 var getTerms = function (text, urls) {
   // logging.info('TEXT:', text);
-  urls = urls.map(url => url.replace(/&amp;/g, '&'));
+  if (urls) {
+    urls = urls.map(url => url.replace(/&amp;/g, '&'));
 
-  text = exciseUrls(text, urls);
-  logging.info('TEXT, replaced:', text);
+    text = exciseUrls(text, urls);
+    logging.info('TEXT, replaced:', text);
+  }
 
   //filter out conversation history
   var allPars = text.split(/\r?\n|\r/g);
@@ -163,12 +166,12 @@ var getTerms = function (text, urls) {
   logging.info('pars', pars)
 
   pars = pars.map(function (par) {
-    return par.replace(/[!@#$%^&*<>?{}]/g, '');
-    //TODO sanitize
-    //TODO emojis
-    //TODO other emojis
+    par = par.replace(/[\[\]!@\#$%\^&\*\.<>\?{}]/g, '');
+    par = emoji(par);
     return par;
   })
+
+  console.log('paragraphs:', pars)
 
   return pars;
 }
