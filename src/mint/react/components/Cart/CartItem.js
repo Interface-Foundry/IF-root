@@ -44,7 +44,7 @@ export default class CartItem extends Component {
                 <button 
                   className={locked ? 'locked' : ''}
                   disabled={locked} 
-                  onClick={() => push(`/cart/${cart_id}/m/item/${itemNumber}/${id}/edit`)}>
+                  onClick={() => push(`/cart/${cart_id}/m/cartItem/${itemNumber}/${id}/edit`)}>
                     { locked ? 'Locked' : 'Edit'}
                 </button>
               </div>

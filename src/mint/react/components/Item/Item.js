@@ -82,6 +82,7 @@ export default class Item extends Component {
       props: { cart_id, type, items, index, nextSearch, prevSearch, history: { replace } },
       state: { originalx, x }
     } = this;
+
     if (type === 'deal') {
       const numericInt = parseInt(index),
         diff = Math.abs(originalx - x),
@@ -91,6 +92,11 @@ export default class Item extends Component {
       const diff = Math.abs(originalx - x),
         nav = originalx > x ? nextSearch : prevSearch;
       if (originalx !== x && x !== 0 && diff > 100 && type === 'search') nav();
+    } else if (type === 'cartItem') {
+      const numericInt = parseInt(index),
+        diff = Math.abs(originalx - x),
+        newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
+      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].id}/edit`);
     }
   }
 

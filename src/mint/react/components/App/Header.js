@@ -21,6 +21,10 @@ export default class Header extends Component {
             <EnumeratedHead text={'My Cart Items'} length={items.length} type={'item'} {...props}/>
           }
         />
+        <Route path={`${match.url}/m/:type/:index/:asin/edit`} component={() => 
+            <EnumeratedHead text={'My Cart Items'} length={items.length} type={'item'} {...props}/>
+          }
+        />
         <Route path={`${match.url}/m/item`} component={() => 
             <ModalHead text={'Add to Cart'} {...props}/>
           }
