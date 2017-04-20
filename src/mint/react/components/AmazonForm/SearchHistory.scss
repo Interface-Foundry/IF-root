@@ -1,2 +1,43 @@
 @import '../../styles/Constants';
 
+.searchHistory {
+	max-height: 200px;
+	overflow: auto;
+	border-bottom: 1px solid $border-color-light;
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+
+	.searchHistory__term {
+		border-top: 0;
+		background: white;
+		border: 1px solid $border-color-light;
+		border-bottom: 0;
+		border-top: 0;
+
+		.searchHistory__term-icon {
+			display: inline-block;
+			width: $nav-height;
+			padding: $padding;
+		}
+
+		.searchHistory__term-query {
+			display: inline-block;
+			width: calc(100% - #{$nav-height});
+			text-align: left;
+			padding: $padding 0;
+			border-bottom: 1px solid $border-color-light;
+
+			p {
+				font-size: 13px;
+			}
+		} 
+
+		&:last-of-type {
+			.searchHistory__term-query {
+				border-bottom: 0;
+			}
+		}
+
+	}
+}
+

@@ -40,6 +40,7 @@
 // autocorrect
 // Should return [] of previous search terms
 
+
 export const getSearchHistory = (filter) => {
 	if (!localStorage.searchHistory) return []
 

@@ -62,7 +62,6 @@ class CartHead extends Component {
   render() {
     const { leader, _toggleSidenav, currentUser, currentCart, cartName } = this.props;
 
-    console.log(leader, cartName)
     return (
       <div>
         <div className='image' style={

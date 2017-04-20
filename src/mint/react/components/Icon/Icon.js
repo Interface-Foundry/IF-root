@@ -8,7 +8,8 @@ import {
   IoPricetag,
   IoCamera,
   IoLocked,
-  IoCheckmark
+  IoCheckmark,
+  IoSearch
 } from 'react-icons/lib/io';
 import {
   Facebook,
@@ -52,6 +53,8 @@ export default class Icon extends Component {
       return <IoLocked/>;
     case 'Check':
       return <IoCheckmark/>;
+    case 'Search':
+      return <IoSearch/>;
     }
   }
 }
