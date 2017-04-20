@@ -9,20 +9,6 @@ export default class AmazonForm extends Component {
     this.renderField = ::this.renderField;
   }
 
-  onSubmitMiddleware = (values, e, state) => {
-    debugger
-    const { handleSubmit, onSubmit, cart } = this.props,
-        { thumbnail_url } = values;
-
-    if(thumbnail_url && thumbnail_url !== cart.thumbnail_url) {
-        cloudinary(thumbnail_url).then((res) => {
-            onSubmit({...values, ...cart, thumbnail_url: res.secure_url}, e, state)
-        })
-    } else {
-        onSubmit(values, e, state)
-    }
-  }
-
   renderField({ input, label, placeholder, handleSubmit, type, meta: { touched, error, warning, submitting, active } }) {
     return (
       <div>
@@ -40,7 +26,7 @@ export default class AmazonForm extends Component {
               </p>
             </button>
           </div>
-          <SearchHistory filter={input.value} onChange={input.onChange} handleSubmit={handleSubmit} onSubmitMiddleware={this.onSubmitMiddleware}/>
+          <SearchHistory filter={input.value} onChange={input.onChange} handleSubmit={handleSubmit} />
         </div>
     );
   }
