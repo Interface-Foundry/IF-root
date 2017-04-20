@@ -33,7 +33,9 @@ class CartFooter extends Component {
     history: PropTypes.object,
     cart_id: PropTypes.string,
     updateCart: PropTypes.func,
-    currentCart: PropTypes.object
+    currentCart: PropTypes.object,
+    currentUser: PropTypes.object,
+    leader: PropTypes.object
   }
 
   _handleShare = () => {
@@ -54,17 +56,24 @@ class CartFooter extends Component {
   }
 
   render() {
-    const { _handleShare } = this, { updateCart, currentCart } = this.props;
+    const { _handleShare } = this, { updateCart, currentCart, currentUser, leader } = this.props;
+    const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
 
     return (
       <div className='footer__cart'>
         <button className='share' onClick={_handleShare}>SHARE</button>
-        <button onClick={() => {
-          updateCart({
-            ...currentCart, 
-            locked: !currentCart.locked
-          });
-        }}>CHECKOUT</button>
+        {
+          isLeader
+          ? <button onClick={() => {
+                updateCart({
+                  ...currentCart, 
+                  locked: !currentCart.locked
+                });
+              }}>
+              CHECKOUT
+            </button>
+          : null
+        }
       </div>
     );
   }
@@ -83,7 +92,7 @@ class ItemFooter extends Component {
     const { addItem, item_id, cart_id, history: { replace } } = this.props;
 
     return (
-      <footer className='item__footer'>
+      <footer className='footer__item'>
         <button onClick={() => addItem(cart_id, item_id, replace)}>Add to Cart</button>
       </footer>
     );

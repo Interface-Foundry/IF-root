@@ -33,7 +33,7 @@ html {
 .app__view {
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
-  height: calc(100% - #{$nav-height*2})
+  height: calc(100% - #{$nav-height*2 + 10})
 }
 
 .image {
