@@ -42,9 +42,6 @@ class Sidebar extends Component {
                 <i className="fa fa fa-comments-o fa-fw" /> &nbsp; Send Message
               </a>
             </li>
-
-
-
             <li className={classNames({ active: !this.state.samplePagesCollapsed })}>
               <a
                 href=""
@@ -86,8 +83,6 @@ class Sidebar extends Component {
             </li>
           </ul>
         </div>
-
-        <SubSidebar className="sidebar-nav navbar-collapse collapse" />
       </div>
     );
   }
