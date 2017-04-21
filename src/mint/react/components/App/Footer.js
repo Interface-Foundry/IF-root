@@ -96,7 +96,7 @@ class ItemFooter extends Component {
 
     return (
       <footer className='footer__item'>
-        <button onClick={() => addItem(cart_id, item_id, replace)}>Add to Cart</button>
+        <button onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`);}}>Add to Cart</button>
       </footer>
     );
   }

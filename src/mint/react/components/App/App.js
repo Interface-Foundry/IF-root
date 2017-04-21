@@ -59,11 +59,11 @@ export default class App extends Component {
     }
 
     return (
-      <section className='app' touchMove={(e) => e.stopPropagation()}>
+      <section className='app'>
 
         <Header {...props}  _toggleSidenav={ _toggleSidenav} />
         { sidenav ? <Sidenav cart_id={cart_id} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser}/> : null }
-        <div className={`app__view`} touchMove={(e) => e.stopPropagation()}>
+        <div className={`app__view`}>
           { /* Renders modal when route permits */ }
           <Route path={`${match.url}/m/`} component={Modal} />
 

@@ -4,6 +4,7 @@ import CartItem from './CartItem';
 import { AddAmazonItemContainer, DealsContainer } from '../../containers';
 import { Icon } from '..';
 import { calculateItemTotal, displayCost } from '../../utils';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -43,6 +44,7 @@ export default class Cart extends Component {
     const { items, leader, members, user_account, history: { replace }, locked, updateCart, currentCart } = this.props,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
+
     return (
       <div className='cart'>
         {
@@ -91,17 +93,34 @@ class MyItems extends Component {
     items: PropTypes.array.isRequired
   }
 
+  renderList() {
+    const { props, props: { items } } = this,
+      cartItems = items.reverse().map((item, i) => <CartItem key={item.id} itemNumber={i} isOwner={true} item={item} {...props} />);
+
+    return (
+      <CSSTransitionGroup
+        transitionName="example"
+        transitionEnterTimeout={0}
+        transitionLeaveTimeout={0}>
+        {cartItems}
+      </CSSTransitionGroup>
+    )
+  }
+
   render() {
     const { props, props: { items } } = this,
     total = calculateItemTotal(items);
+
     return (
       <ul>
         <div className='cart__items__title'>Your Items</div>
-        {
-          items.length 
-          ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={true} item={item} {...props} />) 
-          : <EmptyCart />
-        }
+        <div className='cart__items__container'>
+          {
+            items.length 
+            ? this.renderList() 
+            : <EmptyCart key="empty"/>
+          }
+        </div>
         <h3>Total: <span>{displayCost(total)}</span></h3>
       </ul>
     );

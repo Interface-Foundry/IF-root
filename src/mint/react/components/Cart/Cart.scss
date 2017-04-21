@@ -50,6 +50,7 @@ $cart__add-height: $nav-height+$padding;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
     ul {
+      overflow: hidden;
       h3 {
         border-bottom: 1px solid $border-color-light;
         padding: $padding;
@@ -58,6 +59,9 @@ $cart__add-height: $nav-height+$padding;
           color: $price-color;
         }
       }
+    }
+    .cart__items__container {
+      overflow: hidden;
     }
     .cart__items__title {
       font-weight: 500;
