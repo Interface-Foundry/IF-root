@@ -20,21 +20,14 @@ import sendMessage from './dashboardPages/sendMessage';
 import blank from './dashboardPages/blank';
 import amazoncsv from './dashboardPages/amazoncsv'
 import error from './error';
+import { port, host, auth } from '../config';
 
 import Header from '../components/Header';
 
 
-import { ApolloClient, ApolloProvider, createNetworkInterface } from 'react-apollo';
+import { ApolloClient, ApolloProvider } from 'react-apollo';
 
-const networkInterface = createNetworkInterface({
-  uri: 'http://localhost:3000/graphql'
-});
-
-const client = new ApolloClient({
-  networkInterface: networkInterface
-});
-
-
+const client = new ApolloClient();
 
 export default [
 
