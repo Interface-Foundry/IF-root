@@ -25,9 +25,9 @@ var handlers = {}
 handlers['food.menu.quickpicks'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
-  var localTime = yield menu_utils.getLocalTime(foodSession.chosen_location) //get local time for restaurant
+  //var localTime = yield menu_utils.getLocalTime(foodSession.chosen_location) //get local time for restaurant
 
-  var menu = Menu(foodSession.menu,localTime)
+  var menu = Menu(foodSession.menu)
   var sortedMenu = menu.allItems()
 
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
@@ -463,8 +463,8 @@ handlers['food.item.add_to_cart'] = function * (message) {
   else {
     if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) {
       var budgets = foodSession.user_budgets;
-      var localTime = yield menu_utils.getLocalTime(foodSession.chosen_location)
-      var menu = Menu(foodSession.menu,localTime);
+      //var localTime = yield menu_utils.getLocalTime(foodSession.chosen_location)
+      var menu = Menu(foodSession.menu);
       var itemPrice = menu.getCartItemPrice(userItem);
 
       if (itemPrice > (budgets[userItem.user_id]) * 1.125) {
