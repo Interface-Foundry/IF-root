@@ -45,6 +45,12 @@ export default class Cart extends Component {
         replace(`/cart/${cartId}/`);
       }
     }
+    
+    if(items.quantity < nextProps.items.quantity && items.quantity !== 0) {
+      this._runAnimation('✓ Item Added to Kip Cart')
+    } else if (items.quantity > nextProps.items.quantity && items.quantity !== 0) {
+      this._runAnimation('× Item Removed from Kip Cart')
+    }
   }
 
   render() {
