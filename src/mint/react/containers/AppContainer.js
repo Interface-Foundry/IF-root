@@ -15,7 +15,8 @@ const mapStateToProps = (state, ownProps) => ({
   item: state.item,
   currentCart: state.currentCart,
   cartName: state.currentCart.name ? state.currentCart.name : `${_.capitalize(getNameFromEmail(state.session.user_account ? state.session.user_account.email_address : null))}'s Group Cart`,
-  items: state.currentCart.items
+  items: state.currentCart.items,
+  session_id: state.session.id
 });
 const mapDispatchToProps = dispatch => ({
 	addItem: (cart_id, item_id, replace) => {

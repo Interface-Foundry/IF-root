@@ -32,18 +32,7 @@ export default class Item extends Component {
 
   componentWillMount() {
     const {
-      props: {
-        item_id,
-        amazon_id,
-        previewAmazonItem,
-        previewItem,
-        item,
-        type,
-        items,
-        index,
-        setSearchIndex,
-        fetchDeals
-      }
+      props: { item_id, amazon_id, previewAmazonItem, previewItem, item, type, items, index, setSearchIndex, fetchDeals }
     } = this;
     // only update item if there isn't one
     if (!item.price) {
@@ -58,14 +47,7 @@ export default class Item extends Component {
 
   componentWillReceiveProps(nextProps) {
     const {
-      props: {
-        cart_id,
-        item_id,
-        amazon_id,
-        previewItem,
-        previewAmazonItem,
-        history: { replace }
-      }
+      props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { replace } }
     } = this;
     const { type: nextType, item: nextItem, index: nextIndex, item: { position: nextPos } } = nextProps;
     //never replace cart_id if its undefined
@@ -225,8 +207,9 @@ class AddRemove extends Component {
   }
   render() {
     const { item: { id, quantity, added_by }, incrementItem, decrementItem } = this.props;
-    return (!added_by // hide incrementer if not added to cart
-      ? null : <div className='item__view__quantity'>
+    return (!added_by
+      ? null
+      : <div className='item__view__quantity'>
             <button onClick={()=>incrementItem(id, quantity)}>+</button>
             <div className='item__view__quantity__num'>{quantity}</div>
             {
@@ -238,4 +221,3 @@ class AddRemove extends Component {
     );
   }
 }
-
