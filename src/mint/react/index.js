@@ -12,6 +12,9 @@ import Reducers from './reducers';
 import { session } from './actions';
 import { AppContainer } from './containers';
 
+//Analytics!
+import ReactGA from 'react-ga';
+
 import 'whatwg-fetch';
 
 if (module.hot) {
@@ -19,6 +22,11 @@ if (module.hot) {
 }
 
 const history = createHistory();
+history.listen((location, action) => {
+  console.log('loc', location, 'act', action)
+  ReactGA.set({ path: location.pathname });
+  ReactGA.pageview(location.pathname);
+})
 const historyMiddleware = routerMiddleware(history);
 
 // creating redux store
