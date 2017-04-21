@@ -1,4 +1,6 @@
 @import '../../styles/Constants';
+@import '../../styles/Animations';
+
 .deals__section {
   display: flex;
   flex-direction: row;
@@ -8,6 +10,11 @@
   height: 200px;
   padding: 0 $padding $padding*2;
   -webkit-overflow-scrolling: touch;
+
+  span {
+    display: block;
+    height: 100%;
+  }
   &::-webkit-scrollbar {
     width: 0px;
     height: 0px;
@@ -140,4 +147,9 @@
       }
     }
   }
+}
+
+.dealsItem-leave {
+  @include animation(fallOutDown cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
 }
