@@ -44,7 +44,9 @@ describe('testing amazon to our cart system', () => {
 
   it('add another of item already added to cart', function * () {
     var cart = yield amazon.createAmazonCart({ASIN: 'B010S9N6OO'});
+    console.log(cart)
     cart = yield amazon.addAmazonItemToCart({ASIN: 'B01BYO79UE'}, cart);
+    console.log(cart)
     expect(cart.CartItems.CartItem.length).to.equal(2);
   })
 
