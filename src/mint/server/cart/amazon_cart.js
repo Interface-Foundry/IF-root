@@ -82,7 +82,7 @@ exports.searchAmazon = function * (query) {
     Keywords: query,
     Condition: 'New',
     SearchIndex: 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,SalesRank,Variations'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
   };
   var results = yield opHelper.execute('ItemSearch', amazonParams);
   if (!results || !results.result.ItemSearchResponse.Items.Item) {
@@ -97,15 +97,19 @@ exports.searchAmazon = function * (query) {
     yield items.map(function * (item) { //map of undefined
       var dbItem = yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item})
       // logging.info(dbItem);
+      if (dbItem) {
+        dbItem.original_link = item.ItemLinks.ItemLink[0].URL
+        yield dbItem.save();
+      }
       validatedItems.push(dbItem);
       console.log('added item to db');
     });
-    logging.info('validatedItems 1', validatedItems); //but there might still be some nulls here or smth?
+    // logging.info('validatedItems 1', validatedItems); //but there might still be some nulls here or smth?
     validatedItems = validatedItems.filter(function (x) {
-      console.log('is this real', x); //okay so there *is* a null there BUT that should have been successfully weeded out??
+      // console.log('is this real', x); //okay so there *is* a null there BUT that should have been successfully weeded out??
       if (x) return x;
     }); //res2Item will return null if there are validation errors and the item is not added to the db
-    logging.info('validatedItems 2', validatedItems); //this is good and what we want
+    // logging.info('validatedItems 2', validatedItems); //this is good and what we want
     return validatedItems;
   }
 };
