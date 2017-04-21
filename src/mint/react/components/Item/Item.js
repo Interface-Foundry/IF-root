@@ -2,9 +2,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../utils';
 import { splitCartById } from '../../reducers';
+import { RouteTransition } from 'react-router-transition';
+import * as presets from '../../styles/RouteAnimations';
 
 export default class Item extends Component {
   state = {
+    animation: 'slideLeft',
     originalx: 0,
     x: 0
   }
@@ -84,23 +87,31 @@ export default class Item extends Component {
       state: { originalx, x }
     } = this;
 
+    const diff = originalx - x;
+
+    if(Math.sign(diff) === -1) {
+      this.setState({ animation: 'slideRight' })
+    } else {
+      this.setState({ animation: 'slideLeft' })
+    }
+
     if (type === 'deal') {
       const numericInt = parseInt(index),
-        diff = Math.abs(originalx - x),
+        abs = Math.abs(originalx - x),
         newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
-      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+      if (originalx !== x && x !== 0 && abs > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
     } else if (type === 'search') {
-      const diff = Math.abs(originalx - x),
+      const abs = Math.abs(originalx - x),
         nav = originalx > x ? nextSearch : prevSearch;
-      if (originalx !== x && x !== 0 && diff > 100 && type === 'search') nav();
+      if (originalx !== x && x !== 0 && abs > 100 && type === 'search') nav();
     } else if (type === 'cartItem') {
       const numericInt = parseInt(index),
-        diff = Math.abs(originalx - x),
+        abs = Math.abs(originalx - x),
         newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
 
       const ourItems = splitCartById(this.props, {id: currentUser.id}).my;
 
-      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems[newIndex].id}/edit`);
+      if (originalx !== x && x !== 0 && abs > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems[newIndex].id}/edit`);
     }
   }
 
@@ -108,6 +119,7 @@ export default class Item extends Component {
     const {
       determineNav,
       props,
+      state: { animation },
       props: { index, type, items, item, nextSearch, prevSearch, item: { main_image_url, store, description, name } }
     } = this;
 
@@ -120,34 +132,40 @@ export default class Item extends Component {
           onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
           onTouchEnd={ () => determineNav() }
         >
-        <div className='item__view__image image row'
-            style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
-        </div>
-        <div className='item__view__atts'>
-          <p>{name}</p>
-        </div>
-        { 
-          type === 'deal' && items[parseInt(index)]
+        <RouteTransition
+          className="item__transition"
+          pathname={this.props.location.pathname}
+          {...presets.default[animation]}
+        >
+          <div className='item__view__image image row'
+              style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
+          </div>
+          <div className='item__view__atts'>
+            <p>{name}</p>
+          </div>
+          { 
+            type === 'deal' && items[parseInt(index)]
             ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
             : <ItemInfo {...props} {...item} />
-        }
-        {
-        item.search 
-            ? <div>
-                <button onClick={()=>prevSearch()}>&lt;</button>
-                <button onClick={()=>nextSearch()}>&gt;</button>
-              </div>
-            : null
-            } 
-        <div className='item__view__description'>
-          <h4>{store}</h4> 
-          <p className='ellipsis' > { description }</p>
-          <a> View more </a>
-        </div> 
-        <div className='item__view__review'>
-          <p className='ellipsis'>{description}</p>
-          <em > -theGodOfIpsum </em>
-        </div>
+          }
+          {
+          item.search 
+              ? <div>
+                  <button onClick={()=>prevSearch()}>&lt;</button>
+                  <button onClick={()=>nextSearch()}>&gt;</button>
+                </div>
+              : null
+              } 
+          <div className='item__view__description'>
+            <h4>{store}</h4> 
+            <p className='ellipsis' > { description }</p>
+            <a> View more </a>
+          </div> 
+          <div className='item__view__review'>
+            <p className='ellipsis'>{description}</p>
+            <em > -theGodOfIpsum </em>
+          </div>
+        </RouteTransition>
       </div>
     );
   }
