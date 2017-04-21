@@ -1,20 +1,12 @@
 @import '../../styles/Constants';
 @import '../../styles/Animations';
 
-  // @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
-  // @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-
 
 .cartItem {
   padding: $padding*2;
   border-bottom: 1px solid $border-color-light;
   background: $kip-primary-color;
   font-family: $secondary-font;
-
-  // &:first-of-type {
-  //   @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
-  //   @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
-  // }
 
   &:last-of-type {
     border-bottom: 0;
@@ -65,12 +57,12 @@
   }
 }
 
-.example-enter {
+.cartItem-enter {
   @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
   @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
-.example-leave {
+.cartItem-leave {
   @include animation(fadeOutRight cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
   @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
 }

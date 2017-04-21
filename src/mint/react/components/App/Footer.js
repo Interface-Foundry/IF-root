@@ -88,16 +88,19 @@ class ItemFooter extends Component {
     item: PropTypes.object,
     addItem: PropTypes.func.isRequired,
     item_id: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    position: PropTypes.number,
+    removeDeal: PropTypes.func
   }
 
   render() {
-    const { addItem, item_id, cart_id, history: { replace } } = this.props;
+    const { removeDeal, addItem, item_id, position, cart_id, history: { replace, location: { pathname } } } = this.props,
+          removeItem = pathname.includes('deal');
 
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
-        <button className='add triple' onClick={() => addItem(cart_id, item_id, replace)}>✓ Add to Cart</button>
+        <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>Add to Cart</button>
       </footer>
     );
   }

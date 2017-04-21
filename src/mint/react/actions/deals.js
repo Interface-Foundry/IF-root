@@ -1,4 +1,4 @@
-import { REQUEST_DEALS, RECEIVE_DEALS } from '../constants/ActionTypes';
+import { REQUEST_DEALS, RECEIVE_DEALS, SELECT_DEAL, REMOVE_DEAL } from '../constants/ActionTypes';
 
 const receive = (deals) => ({
   type: RECEIVE_DEALS,
@@ -8,6 +8,16 @@ const receive = (deals) => ({
 const request = () => ({
   type: REQUEST_DEALS
 });
+
+export const selectDeal = (selectedIndex) => ({
+  type: SELECT_DEAL,
+  selectedIndex
+})
+
+export const removeDeal = (selectedIndex) => ({
+  type: REMOVE_DEAL,
+  selectedIndex
+})
 
 export function fetchDeals() {
   return async function (dispatch) {

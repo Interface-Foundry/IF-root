@@ -22,6 +22,8 @@ export const RECEIVE_UPDATE_CART = 'RECEIVE_UPDATE_CART';
 // Deals
 export const REQUEST_DEALS = 'REQUEST_DEALS';
 export const RECEIVE_DEALS = 'RECEIVE_DEALS';
+export const SELECT_DEAL = 'SELECT_DEAL';
+export const REMOVE_DEAL = 'REMOVE_DEAL';
 
 // Item
 export const REQUEST_ITEM = 'REQUEST_ITEM';

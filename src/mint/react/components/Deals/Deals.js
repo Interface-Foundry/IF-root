@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import DealCard from './DealCard';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 export default class Deals extends Component {
   constructor(props) {
@@ -51,10 +52,17 @@ export default class Deals extends Component {
 
   renderCards() {
     const { isDropdown } = this.state;
-    let { deals, cart_id } = this.props;
+    let { deals, cart_id, selectDeal } = this.props;
     if (isDropdown) deals = deals.slice(0, 5);
 
-    return deals.map((deal, i) => <li key={i}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></li>);
+    const activeDeals = deals.map((deal, i) => <li key={deal.id} onClick={(e) => selectDeal(i)}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></li>);
+
+    return <CSSTransitionGroup
+      transitionName="dealsItem"
+      transitionEnterTimeout={0}
+      transitionLeaveTimeout={0}>
+      {activeDeals}
+    </CSSTransitionGroup>
   }
 
   render() {

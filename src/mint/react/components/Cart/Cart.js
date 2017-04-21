@@ -22,9 +22,16 @@ export default class Cart extends Component {
     currentCart: PropTypes.object
   }
 
+  state = {
+    removeDeal: false
+  }
+
   componentWillMount() {
-    const { fetchDeals } = this.props;
-    fetchDeals();
+    const { fetchDeals, deals } = this.props;
+
+    if(deals.length === 0) {
+      fetchDeals();
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -41,7 +48,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, history: { replace }, locked, updateCart, currentCart } = this.props,
+    const { items, leader, members, user_account, history, history: { replace }, locked, updateCart, currentCart, position } = this.props,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
 
@@ -99,7 +106,7 @@ class MyItems extends Component {
 
     return (
       <CSSTransitionGroup
-        transitionName="example"
+        transitionName="cartItem"
         transitionEnterTimeout={0}
         transitionLeaveTimeout={0}>
         {cartItems}
