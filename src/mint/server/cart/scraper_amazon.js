@@ -54,7 +54,8 @@ var res2Item = function (res) {
   return co(function * () {
     // make sure the response is okay
     if (_.get(res, 'Request.IsValid') !== 'True' || !res.Item) {
-      throw new Error('Invalid response for url search ' + uri.href)
+      console.error(res)
+      throw new Error('Invalid response from amazon request ' + JSON.stringify(res))
     }
 
     // Shorthand for the amazon Item object
@@ -109,18 +110,74 @@ var res2Item = function (res) {
       var item = yield db.Items.create({
         store: 'amazon',
         name: i.ItemAttributes.Title,
+        asin: i.ASIN,
         description: i.ItemAttributes.Feature,
         price: price,
         thumbnail_url: thumbnail,
         main_image_url: mainImage
       });
-
-      return item;
     }
     catch (err) {
       logging.error(err);
       return null;
     }
+
+    // create new item options
+    // this part is really really hard
+    if (res.Options) {
+      // Make the current item's selected options easy to use
+      var selectedItem = res.Options.filter(o => o.ASIN === item.asin)[0]
+      var selectedOptions = {}
+      selectedItem.VariationAttributes.VariationAttribute.map(attr => {
+        selectedOptions[attr.Name] = attr.Value
+      })
+
+      // make a list of all the options for all the option types
+      var allOptions = {}  // hash where keys are dimension names, and values are options we've created already
+      var alreadySavedOptions = yield db.ItemOptions.find({id: ''})
+      var options = res.Options.map(o => {
+        return o.VariationAttributes.VariationAttribute.map(attr => {
+          // make sure we can handle this option type
+          if (!allOptions[attr.Name]) {
+            allOptions[attr.Name] = []
+          }
+
+          // check if we've already created this option
+          if (allOptions[attr.Name].includes(attr.Value)) {
+            return
+          } else {
+            allOptions[attr.Name].push(attr.Value)
+          }
+
+          // create an option in the db
+          return db.ItemOptions.create({
+            type: attr.Name,
+            name: attr.Value,
+            description: o.ItemAttributes.Title,
+            url: '',
+            asin: o.ASIN,
+            price_difference: null, // not defined for amazon
+            thumbnail_url: o.SmallImage.URL,
+            main_image_url: o.LargeImage.URL,
+            available: true,
+            selected: attr.Value === selectedOptions[attr.Name]
+          })
+        })
+      })
+
+      options = yield _.flatten(options).filter(Boolean)
+      console.log(options)
+      options.map(o => {
+        item.options.add(o.id)
+      })
+      yield item.save()
+    }
+
+    // um let's just get the item fresh to make sure it's okay
+    item = yield db.Items.findOne({asin: i.ASIN}).populate('options')
+    console.log(item.options)
+
+    return item
   })
 }
 
