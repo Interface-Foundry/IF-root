@@ -337,4 +337,37 @@ module.exports = function (router) {
     console.log('about to send response')
     res.send(item)
   }))
+
+  /**
+   * @api {get} /api/:cart_id/checkout Checkout
+   * @apiDescription Does some upkeep on the back end (like locking items) and redirects to the amazon cart page
+   * @apiGroup Carts
+   * @apiParam {String} :cart_id the cart id
+   */
+  router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
+    // only available for logged-in Users
+    if (!_.get(req, 'UserSession.user_account.id')) {
+      throw new Error('Unauthorized')
+    }
+
+    // this will be handy later now that we know it exists
+    const userId = req.UserSession.user_account.id
+
+    // get the cart
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate(items)
+
+    // check permissions
+    if (cart.leader !== userId) {
+      throw new Error('Unauthorized')
+    }
+
+    // lock the cart and all the items
+    // TODO
+
+    // make sure the amazon cart is in sync with the cart in our database
+    var amazonCart = yield cart.syncAmazon()
+
+    // redirect to the cart url
+    res.redirect(amazonCart.CheckoutURL)
+  }))
 }

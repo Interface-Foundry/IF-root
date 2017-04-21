@@ -283,3 +283,26 @@ exports.cleaAmazonCart = function * (cart) {
   cart = yield opHelper.execute('CartClear', amazonParams);
   return cart;
 };
+
+/**
+ * Syncs amazon cart with the database cart
+ * @param  {db.Cart}    cart cart from the database
+ * @return {Generator}      returns an amazon cart that's all synced up and ready to checkout
+ */
+exports.syncAmazon = function * (cart) {
+  if (!cart) {
+    throw new Error('must supply a db.Cart')
+  } else if (!cart.id) {
+    throw new Error('parameter "cart" must be an instance of db.Cart (not a cart response from amazon.com)')
+  }
+
+  // if there are no amazon items in the cart then you can't sync it
+  if (cart.items.length === 0) {
+    throw new Error('can only sync carts that have amazon items')
+  }
+
+  // check if we need to create a new cart
+  if (!cart.amazon_cartid || !cart.amazon_hmac) {
+    var cart = exports.createAmazonCart()
+  }
+}
