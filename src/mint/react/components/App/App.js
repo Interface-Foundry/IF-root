@@ -57,6 +57,7 @@ export default class App extends Component {
   componentWillReceiveProps(nextProps) {
     const { _logPageView, props: { fetchCart, fetchAllCarts, cart_id, session_id, location: { pathname } } } = this;
     const { cart_id: nextCart_id, session_id: nextSessionId } = nextProps;
+
     if (!session_id && nextSessionId) {
       console.log('setting user to', nextSessionId);
       ReactGA.initialize('UA-97839751-1', {

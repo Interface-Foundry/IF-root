@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { Item } from '../components';
-import { fetchDeals } from '../actions/deals';
+import { fetchDeals, selectDeal } from '../actions/deals';
 import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, decrementItem, nextSearch, prevSearch, setSearchIndex } from '../actions/item';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -27,6 +27,7 @@ const mapDispatchToProps = dispatch => ({
   decrementItem: (item_id, quantity) => dispatch(decrementItem(item_id, quantity)),
   nextSearch: () => dispatch(nextSearch()),
   prevSearch: () => dispatch(prevSearch()),
+  selectDeal: (dealIndex) => dispatch(selectDeal(dealIndex)),
   setSearchIndex: (index) => dispatch(setSearchIndex(index))
 });
 

@@ -7,7 +7,7 @@ import Card from './Card';
 export default class DealCard extends Component {
 
   static propTypes = {
-    isDropdown: PropTypes.bool.isRequired,
+    isDropdown: PropTypes.bool,
     asin: PropTypes.string.isRequired,
     cart_id: PropTypes.string,
     index: PropTypes.number.isRequired

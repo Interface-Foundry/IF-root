@@ -13,8 +13,16 @@
   overflow: hidden;
   .form {
     padding: $padding $padding*2 $padding*2 $padding*2;
+
+    & > div {
+      position: relative;
+    }
     .deals__section {
-      margin: 0 (0 - $padding*2);
+      margin: $padding (0 - $padding*2);
+
+      span {
+        display: block;
+      }
     }
     label {
       display: block;
