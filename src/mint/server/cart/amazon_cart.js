@@ -345,6 +345,7 @@ exports.syncAmazon = function * (cart) {
     cartAddAmazonParams[key + 'ASIN'] = item.asin
     cartAddAmazonParams[key + 'Quantity'] = item.quantity
   })
+  console.log(cartAddAmazonParams)
 
   var cartModifyAmazonParams = {
     'AssociateTag': associateTag,
@@ -360,6 +361,7 @@ exports.syncAmazon = function * (cart) {
       }
     })
   })
+  console.log(cartModifyAmazonParams)
 
   var amazonCart = yield opHelper.execute('CartAdd', cartAddAmazonParams);
   checkError(amazonCart)
