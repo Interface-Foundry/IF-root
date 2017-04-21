@@ -297,8 +297,6 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   if (uris || searchResults) {
     if (!uris) uris = [];
     if (!searchResults) searchResults = [];
-    logging.info('SEARCH RESULTS:', searchResults.length, searchResults[0].length); //THIS WORKS NOW WOO
-    logging.info(searchResults.map(function (e) {return e.length;})) //yes, this is the problem
     logging.info('searchResults', searchResults);
     yield sendConfirmationEmail(email, uris, searchResults);
   }
