@@ -11,8 +11,10 @@ import {
   ListGroup, ListGroupItem, Alert, Popover, OverlayTrigger
 } from 'react-bootstrap';
 import { gql, graphql } from 'react-apollo';
+import DatePicker from 'react-datepicker';
 import Table from '../../../components/Table/common';
 import vagueTime from 'vague-time';
+import moment from 'moment';
 import _ from 'lodash';
 
 const title = ' Team Stats';
@@ -80,8 +82,26 @@ class displayTeamStats extends Component {
     super(props);
     this.state = {
       view: 'Store',
-      team_id: ''
+      team_id: '',
+      startDate: moment().subtract(1, 'month'),
+      endDate: moment(),
     };
+    this.changeCart = this.changeCart.bind(this);
+    this.changeStart = this.changeStart.bind(this);
+    this.changeEnd = this.changeEnd.bind(this);
+  }
+
+
+  changeStart(date){
+    this.setState({
+      startDate: date
+    });
+  }
+
+  changeEnd(date){
+    this.setState({
+      endDate: date
+    });
   }
 
   changeCart(cart){
@@ -140,6 +160,10 @@ class displayTeamStats extends Component {
               Cafe
             </Button>
           </ButtonToolbar>
+          <div>
+              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />
+              End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
+          </div>
           <TableWithData />
       </div>
     )
