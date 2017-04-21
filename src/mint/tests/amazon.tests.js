@@ -32,12 +32,18 @@ describe('testing amazon to our cart system', () => {
 
   it('create a cart', function * () {
     // var item = yield amazon.getAmazonItem(test_item);
-    var cart = yield amazon.createAmazonCart({ASIN: 'B010S9N6OO'});
+    var cart = yield amazon.createAmazonCart({asin: 'B010S9N6OO'});
     expect(cart).to.exist;
     expect(cart.HMAC).to.exist;
     expect(cart.CartId).to.exist;
     expect(cart.PurchaseURL).to.exist;
-    test.cart = cart;
+
+    // create a pretend cart in the db
+    test.cart = {
+      amazon_cartid: cart.CartId,
+      amazon_hmac: cart.HMAC,
+      amazon_purchaseurl: cart.PurchaseURL
+    }
   })
 
 
@@ -47,20 +53,22 @@ describe('testing amazon to our cart system', () => {
     expect(cart.HMAC).to.exist;
     expect(cart.CartId).to.exist;
     expect(cart.PurchaseURL).to.exist;
-    assert.equal(cart.HMAC, test.cart.HMAC);
-    assert.equal(cart.CartId, test.cart.CartId);
-    assert.equal(cart.PurchaseURL, test.cart.PurchaseURL);
+    assert.equal(cart.HMAC, test.cart.amazon_hmac);
+    assert.equal(cart.CartId, test.cart.amazon_cartid);
+    assert.equal(cart.PurchaseURL, test.cart.amazon_purchaseurl);
     assert.equal(cart.CartItems.CartItem instanceof Array, false, 'CartItems.CartItem should not be an array if only one item in cart')
   })
 
   it('add another item to cart', function * () {
-    var cart = yield amazon.addAmazonItemToCart({ASIN: 'B01BYO79UE'}, test.cart);
+    this.timeout(3000)
+    var cart = yield amazon.addAmazonItemToCart({asin: 'B01BYO79UE', quantity: 1}, test.cart);
     expect(cart.CartItems.CartItem.length).to.equal(2);
-    test.cart = cart
+    test.amazonCart = cart
   })
 
   it('add another of an item that was already added to cart to increase quantity', function * () {
-    var cart = yield amazon.addAmazonItemToCart({ASIN: 'B01BYO79UE'}, test.cart);
+    this.timeout(3000)
+    var cart = yield amazon.addAmazonItemToCart({asin: 'B01BYO79UE', quantity: 1}, test.cart);
     expect(cart.CartItems.CartItem.length).to.equal(2); // because same item
     cart.CartItems.CartItem.map(i => {
       if (i.ASIN === 'B01BYO79UE') {
@@ -69,7 +77,39 @@ describe('testing amazon to our cart system', () => {
         assert.equal(i.Quantity, '1')
       }
     })
-    test.cart = cart
+    test.amazonCart = cart
   })
-  
+
+  it('should sync up a messed up cart', function * () {
+    var messedUpCart = {
+      amazon_cartid: test.cart.amazon_cartid,
+      amazon_hmac: test.cart.amazon_hmac,
+      items: [{
+        asin: 'B01BYO79UE',
+        quantity: 4
+      }, {
+        asin: 'B007KFXICK',
+        quantity: 2
+      }]
+    }
+
+    var cart = yield exports.syncAmazon(messedUpCart)
+    expect(cart).to.exist;
+    expect(cart.HMAC).to.exist;
+    expect(cart.CartId).to.exist;
+    expect(cart.PurchaseURL).to.exist;
+    assert.equal(cart.HMAC, test.cart.amazon_hmac);
+    assert.equal(cart.CartId, test.cart.amazon_cartid);
+    assert.equal(cart.PurchaseURL, test.cart.amazon_purchaseurl);
+    cart.CartItems.CartItem.map(i => {
+      if (i.ASIN === 'B01BYO79UE') {
+        assert.equal(i.Quantity, '4')
+      } else if (i.ASIN === 'B007KFXICK') {
+        assert.equal(i.Quantity, '2')
+      } else {
+        throw new Error('Item not property deleted from cart')
+      }
+    })
+  })
+
 })

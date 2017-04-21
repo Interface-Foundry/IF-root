@@ -368,6 +368,6 @@ module.exports = function (router) {
     var amazonCart = yield cart.syncAmazon()
 
     // redirect to the cart url
-    res.redirect(amazonCart.CheckoutURL)
+    res.redirect(amazonCart.PurchaseURL)
   }))
 }
