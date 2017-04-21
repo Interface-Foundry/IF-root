@@ -23,7 +23,7 @@ export default class Cart extends Component {
   }
 
   state = {
-    removeDeal: false
+    animation: false
   }
 
   componentWillMount() {
@@ -34,8 +34,23 @@ export default class Cart extends Component {
     }
   }
 
+  _runAnimation(text) {
+    this.setState({animation: text})
+
+    this.timeout = setTimeout(() => {
+      this.setState({
+        animation: false
+      });
+    }, 3000);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timeout)
+  }
+
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id } = this.props, { leader, addingItem, user_account } = nextProps,
+    const { history: { replace }, cart_id, items } = this.props, 
+      { leader, addingItem, user_account } = nextProps,
       cartId = cart_id || nextProps.cart_id;
 
     if (cartId) {
@@ -45,7 +60,7 @@ export default class Cart extends Component {
         replace(`/cart/${cartId}/`);
       }
     }
-    
+
     if(items.quantity < nextProps.items.quantity && items.quantity !== 0) {
       this._runAnimation('✓ Item Added to Kip Cart')
     } else if (items.quantity > nextProps.items.quantity && items.quantity !== 0) {
@@ -55,6 +70,7 @@ export default class Cart extends Component {
 
   render() {
     const { items, leader, members, user_account, history, history: { replace }, locked, updateCart, currentCart, position } = this.props,
+      { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
 
@@ -85,8 +101,10 @@ export default class Cart extends Component {
               {!!user_account.id ? <DealsContainer isDropdown={false}/> : null}
             </span>
         }
-        <div className='cart__title'>
-          <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
+        <div className={`cart__title ${animation ? 'action' : ''}`}>
+          { animation ? <h4>{animation}</h4>
+            : <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
+          }
         </div>
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
@@ -108,7 +126,7 @@ class MyItems extends Component {
 
   renderList() {
     const { props, props: { items } } = this,
-      cartItems = items.reverse().map((item, i) => <CartItem key={item.id} itemNumber={i} isOwner={true} item={item} {...props} />);
+      cartItems = items.map((item, i) => <CartItem key={item.id} itemNumber={i} isOwner={true} item={item} {...props} />);
 
     return (
       <CSSTransitionGroup

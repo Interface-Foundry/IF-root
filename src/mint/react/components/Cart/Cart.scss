@@ -1,4 +1,5 @@
 @import '../../styles/Constants';
+@import '../../styles/Animations';
 $cart__add-height: $nav-height+$padding;
 .cart {
   height: calc(100% - #{$nav-height});
@@ -43,6 +44,12 @@ $cart__add-height: $nav-height+$padding;
     line-height: $nav-height - $padding;
     background: $border-color-light;
     text-align: center;
+    @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+    &.action {
+      background: $main-button-color;
+    }
   }
   .cart__items {
     height: calc(100% - #{$cart__add-height + $nav-height - $padding});

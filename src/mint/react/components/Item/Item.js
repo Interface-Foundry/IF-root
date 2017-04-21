@@ -65,7 +65,7 @@ export default class Item extends Component {
 
   determineNav() {
     const {
-      props: { cart_id, type, items, index, nextSearch, prevSearch, currentUser, history: { replace } },
+      props: { selectDeal, cart_id, type, items, index, nextSearch, prevSearch, currentUser, history: { replace } },
       state: { originalx, x }
     } = this;
 
@@ -81,7 +81,10 @@ export default class Item extends Component {
       const numericInt = parseInt(index),
         abs = Math.abs(originalx - x),
         newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
-      if (originalx !== x && x !== 0 && abs > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+      if (originalx !== x && x !== 0 && abs > 100) {
+        selectDeal(newIndex)
+        replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+      }
     } else if (type === 'search') {
       const abs = Math.abs(originalx - x),
         nav = originalx > x ? nextSearch : prevSearch;
@@ -109,17 +112,15 @@ export default class Item extends Component {
       ? items[parseInt(index)].large
       : main_image_url;
     return (
-      <div 
-          className='item' onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-          onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-          onTouchEnd={ () => determineNav() }
-        >
+      <div className='item'>
         <RouteTransition
           className="item__transition"
           pathname={this.props.location.pathname}
-          {...presets.default[animation]}
-        >
+          {...presets.default[animation]}>
           <div className='item__view__image image row'
+              onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+              onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+              onTouchEnd={ () => determineNav() }
               style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
           </div>
           <div className='item__view__atts'>

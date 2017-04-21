@@ -27,6 +27,7 @@ export default class AmazonForm extends Component {
             </button>
           </div>
           <SearchHistory filter={input.value} onChange={input.onChange} handleSubmit={handleSubmit} />
+          <DealsContainer/>
         </div>
     );
   }
