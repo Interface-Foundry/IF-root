@@ -51,7 +51,7 @@ function checkAmazonItemInCart (item, cart) {
     // coerce object into array so we dont have complicated logic
     var cartItems = [cart.CartItems.CartItem];
   } else {
-    cartItems = cart.CartItems;
+    cartItems = cart.CartItems.CartItem;
   }
   var cartItem = cartItems.find(i => i.ASIN === item.ASIN);
   if (cartItem) {
@@ -196,6 +196,7 @@ exports.createAmazonCart = function * (item) {
     var cart = yield opHelper.execute('CartCreate', amazonParams);
     return cart.result.CartCreateResponse.Cart;
   } catch (err) {
+    console.error(err)
     throw new Error('Error on creating cart')
   }
 };
@@ -208,8 +209,8 @@ exports.createAmazonCart = function * (item) {
 exports.getAmazonCart = function * (cart) {
   var amazonParams = {
     'AssociateTag': associateTag,
-    'CartId': cart.amazon_cartid,
-    'HMAC': cart.amazon_hmac
+    'CartId': cart.CartId,
+    'HMAC': cart.HMAC
   };
 
   cart = yield opHelper.execute('CartGet', amazonParams);
@@ -227,25 +228,32 @@ exports.addAmazonItemToCart = function * (item, cart) {
     throw new Error('Only add one Item to a cart at a time');
   }
   var cart
+  var quantity = item.quantity || 1
 
+  // if the item is already in the cart, then we want to increase the quantity
   var itemAlreadyAdded = checkAmazonItemInCart(item, cart)
   if (itemAlreadyAdded) {
-    var newQuantity = parseInt(itemAlreadyAdded.Quantity)
-    newQuantity++
-    cart = yield exports.changeQuantityAmazonItemFromCart(itemAlreadyAdded.cartItemId, newQuantity, cart)
-  } else {
-
+    quantity += parseInt(itemAlreadyAdded.Quantity)
     var amazonParams = {
       'AssociateTag': associateTag,
-      'CartId': cart.amazon_cartid,
-      'HMAC': cart.amazon_hmac,
-      'Item.1.ASIN': item.ASIN,
-      'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
+      'CartId': cart.CartId,
+      'HMAC': cart.HMAC,
+      'Item.1.CartItemId': itemAlreadyAdded.CartItemId,
+      'Item.1.Quantity': quantity
     };
-
+    cart = yield opHelper.execute('CartModify', amazonParams);
+    return cart.result.CartModifyResponse.Cart;
+  } else {
+    var amazonParams = {
+      'AssociateTag': associateTag,
+      'CartId': cart.CartId,
+      'HMAC': cart.HMAC,
+      'Item.1.ASIN': item.ASIN,
+      'Item.1.Quantity': quantity
+    };
     cart = yield opHelper.execute('CartAdd', amazonParams);
+    return cart.result.CartAddResponse.Cart;
   }
-  return cart.result.CartAddResponse.Cart;
 };
 
 /**
