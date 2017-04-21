@@ -119,4 +119,10 @@ router.get('/newcart', (req, res) => co(function * () {
   res.redirect(`/cart/${cart.id}/`);
 }))
 
+var fs = require('fs')
+router.get('/testoptions', (req, res) => co(function * () {
+  var html = fs.readFileSync(__dirname + '/../cart/option_test.html', 'utf8')
+  res.send(html)
+}))
+
 module.exports = router;

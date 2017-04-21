@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>Item Option Example and Test</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/6.0.0/normalize.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+
+  <!-- Scripts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="//kipthis.com/images/favicon/favicon-32x32.png">
+
+  <style>
+  body {
+    font-family: 'Fira Mono', monospace;
+  }
+  ul {
+    list-style: none;
+  }
+  li {
+    padding: 5px;
+    display: inline-block;
+  }
+  .selected {
+    border: 1px solid green;
+  }
+  .not-selected {
+    border: 1px solid rgba(0,0,0,0.3);
+  }
+  </style>
+
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+  <div class="section hero">
+    <div class="container">
+      <div class="row">
+        <div class="one-half column">
+          <h4 class="hero-heading">Item Option Tester</h4>
+        </div>
+      </div>
+      <div class="row">
+        <label>ASIN</label>
+        <input type="text" id="asin" value="B01L8PDMOG"/>
+        <button id="go">Test</button>
+      </div>
+      <div class="row">
+        <h4 id="name"></h4>
+        <h4 id="price"></h4>
+        <p id="description"></p>
+        <h4>Options</h4>
+        <div id="options"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+  $('#go').click(function () {
+    $.getJSON('/api/itempreview?q=' + $('#asin').val(), function(data) {
+      console.log(data)
+      $("#name").text(data.name)
+      $("#description").text(data.description)
+      $("#price").text('$' + data.price.toFixed(2))
+
+      // options
+      var optionLists = {}
+      data.options.map(o => {
+        if (!optionLists[o.type]) {
+          optionLists[o.type] = []
+        }
+        var html = [
+          '<a href="/testoptions?asin=' + o.asin + '">',
+          '<li class="',
+          o.selected ? 'selected' : 'not-selected',
+          '">',
+          '<label>',
+          o.name,
+          '</label>',
+          '<img src="' + o.thumbnail_url + '">',
+          '</li></a>'
+        ].join('')
+        optionLists[o.type].push(html)
+      })
+
+      var optionHTML = ''
+      Object.keys(optionLists).map(optionName => {
+        optionHTML += [
+          '<h5>',
+          optionName,
+          '</h5>',
+          '<ul>',
+          optionLists[optionName].join('\n'),
+          '</ul>'
+        ].join('')
+      })
+      $('#options').html(optionHTML)
+    })
+  })
+
+  // if there's an asin in the querystring, let's parse it and click GO
+  if (window.location.href.includes('asin')) {
+    var asin = window.location.href.split('=').pop()
+    $('#asin').val(asin)
+    $('#go').click()
+  }
+  </script>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

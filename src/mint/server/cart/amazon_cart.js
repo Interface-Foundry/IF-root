@@ -1,6 +1,13 @@
 const _ = require('lodash');
 const {OperationHelper} = require('apac');
 
+const LRU = require('lru-cache')
+const asinCache = LRU({
+  max: 500, // the number of ASIN's to store
+  maxAge: 1000 * 60 * 60 * 24, // refresh items every day
+  length: function () { return 1 } // every document just has length 1
+})
+
 var scraper = require('./scraper_amazon');
 
 // amazon creds -> move to constants later
@@ -111,6 +118,16 @@ exports.searchAmazon = function * (query) {
  * @returns {[type]} [description]
  */
 exports.lookupAmazonItem = function * (asin) {
+  if (!asin) {
+    throw new Error('No asin supplied')
+  }
+
+  // Check if we have run this lookup recently
+  const cachedValue = asinCache.get(asin)
+  if (cachedValue) {
+    return cachedValue
+  }
+
   var amazonParams = {
     Availability: 'Available',
     Condition: 'New',
@@ -119,11 +136,35 @@ exports.lookupAmazonItem = function * (asin) {
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
   };
   try {
-    var results = yield opHelper.execute('ItemLookup', amazonParams);
-    return results.result.ItemLookupResponse.Items;
+    var results = yield opHelper.execute('ItemLookup', amazonParams)
   } catch (err) {
-    throw new Error('Error on lookup');
+    throw new Error('Error on ASIN lookup');
   }
+
+  // Add some logic to find the available item variations
+  var item = results.result.ItemLookupResponse.Items.Item
+  if (item.ParentASIN && item.ParentASIN !== item.ASIN) {
+    // This item has a parent item, which means it probably has variations
+    var parent = yield module.exports.lookupAmazonItem(item.ParentASIN)
+    var options = _.get(parent, 'Item.Variations.Item', [])
+
+    // if there's only one variation, it won't be an array, so we'll array-ify it just in case
+    if (!(options instanceof Array)) {
+      options = [options]
+    }
+  }
+
+  // Craft a bespoke response for the user
+  var response = {
+    Request: results.result.ItemLookupResponse.Items.Request,
+    Item: item,
+    Options: options
+  }
+
+  // save value to cache
+  asinCache.set(asin, response)
+
+  return response
 };
 
 /**
