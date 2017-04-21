@@ -38,10 +38,10 @@ var sendErrorEmail = function * (email) {
  * @param {string} email - the email of the user we're responding to
  * @param {array} uris - array of the urls of the amazon items we're confirming
  */
-var sendConfirmationEmail = function * (email, uris) {
+var sendConfirmationEmail = function * (email, uris, searchResults) {
   //create confirmation email
   var confirmation = yield db.Emails.create({
-    recipients: 'hannah.katznelson@kipthis.com',//email,
+    recipients: 'hannah.katznelson@kipthis.com',//email, but we don't want this to work yet
     sender: 'hello@kip.ai',
     subject: 'Items have been added to your cart!',
     template_name: 'item_add_confirmation'
@@ -59,7 +59,8 @@ var sendConfirmationEmail = function * (email, uris) {
   yield confirmation.template('item_add_confirmation', {
     baseUrl: 'https://72f2343b.ngrok.io',
     id: '7a43d85c928f',
-    items: items
+    items: items,
+    searchResults: searchResults
   })
 
   yield confirmation.send();
@@ -70,7 +71,7 @@ var sendConfirmationEmail = function * (email, uris) {
    var offset = 0; //number of extraneous (newline) characters we're editing out
    var contiguousWrong = 0;
    for (var j = 0; j < url.length; j++) {
-     if (j > 5) console.log(text[start+j+offset], url[j], 'offset:', offset)
+    //  if (j > 5) console.log(text[start+j+offset], url[j], 'offset:', offset)
      if (start+j+offset >= text.length) {
         //this is not a match; we've run out of text
       return null;
@@ -127,7 +128,7 @@ var exciseUrls = function (text, urls) {
     var indices = exciseUrl(text, url);
     // console.log('URL:', url)
     // console.log('TEXT:', text)
-    console.log('INDICES:', indices)
+    // console.log('INDICES:', indices)
     text = text.slice(0, indices[0]) + text.slice(indices[1]);
     // console.log('NEW TEXT', text);
   })
@@ -176,7 +177,7 @@ var getTerms = function (text, urls) {
  */
 var getUrls = function (html) {
   html = html.split('mailto:')[0]; // truncates conversation history
-  console.log('html', html)
+  // console.log('html', html)
   var uris = html.match(/href="(.+?)"/gi);
   logging.info('uris', uris);
   if (!uris) return null;
@@ -228,14 +229,16 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   }
 
   if (text && text.length) {
-    yield text.map(function * (p) {
+    var searchResuls = yield text.map(function * (p) {
       if (p.length) {
+        console.log('searching amazon for:', p)
         try {
           // console.log('gonna search:', text[0])
-          var searchResults = yield amazon.searchAmazon(text[0]);
+          var itemResults = yield amazon.searchAmazon(p);
 
           // console.log('got this:', JSON.stringify(searchResults))
-          console.log('got a result form the amazon search')
+          console.log('got a result from amazon search')
+          return itemResults;
           // res.sendStatus(200);
         }
         catch (err) {
@@ -245,8 +248,8 @@ router.post('/', upload.array(), (req, res) => co(function * () {
       }
     })
   }
-  res.sendStatus(202);
-  return;
+  // res.sendStatus(202);
+  // return;
 
   //get cart id
   var html = req.body.html;
@@ -270,7 +273,7 @@ router.post('/', upload.array(), (req, res) => co(function * () {
     return;
   }
 
-  if (uris.length) {
+  if (uris && uris.length) {
     console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {
       return yield amazonScraper.scrapeUrl(uri);
@@ -287,10 +290,13 @@ router.post('/', upload.array(), (req, res) => co(function * () {
       yield it.save();
     })
     yield cart.save();
-
-    yield sendConfirmationEmail(email, uris);
   }
   else console.log('no amazon uris')
+
+  if (uris || searchResults) {
+    yield sendConfirmationEmail(email, uris, searchResults);
+  }
+
   // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')
   res.sendStatus(200);
 }));

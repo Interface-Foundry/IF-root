@@ -14,7 +14,7 @@ module.exports = function (text) {
   text = text.join('')
   text = emojiText.convert(text, {before: '', after: ' '})
 
-  console.log('final text', text)
+  // console.log('final text', text)
   return text;
 };
 

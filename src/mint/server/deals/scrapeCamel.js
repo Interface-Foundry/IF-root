@@ -100,7 +100,7 @@ var scrapeCamel = function * () {
   var asins = [];
   var prices = [];
 
-  logging.info('loaded cheerio');
+  // logging.info('loaded cheerio');
 
   //gets names, asins, and urls to scrape categories from
   $('div.deal_top_inner').each(function (i, e) {
@@ -111,7 +111,7 @@ var scrapeCamel = function * () {
     asins.push(qs[0]);
   });
 
-  logging.info('got names and asins');
+  // logging.info('got names and asins');
 
   //gets new and old prices from the most popular section
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
