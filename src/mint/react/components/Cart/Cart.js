@@ -61,9 +61,9 @@ export default class Cart extends Component {
       }
     }
 
-    if(items.quantity < nextProps.items.quantity && items.quantity !== 0) {
+    if(items.quantity < nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
       this._runAnimation('✓ Item Added to Kip Cart')
-    } else if (items.quantity > nextProps.items.quantity && items.quantity !== 0) {
+    } else if (items.quantity > nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
       this._runAnimation('× Item Removed from Kip Cart')
     }
   }
