@@ -85,22 +85,29 @@ exports.searchAmazon = function * (query) {
     ResponseGroup: 'ItemAttributes,Images,OfferFull,SalesRank,Variations'
   };
   var results = yield opHelper.execute('ItemSearch', amazonParams);
-    // logging.info(JSON.stringify(results.result.ItemSearchResponse.Items.Item));
-    // logging.info(JSON.stringify(Object.keys(results.result.ItemSearchResponse.Items.Item)));
-    if (!results || !results.result.ItemSearchResponse.Items.Item) {
-      if (!results) throw new Error('Error on search for query', query);
-      else logging.error("Searching " + query + ' yielded no results');
-      return null;
-    }
+  if (!results || !results.result.ItemSearchResponse.Items.Item) {
+    if (!results) throw new Error('Error on search for query', query);
+    else logging.error("Searching " + query + ' yielded no results');
+    return null;
+  }
+  else {
     //save new items to the db
     var items = results.result.ItemSearchResponse.Items.Item
     var validatedItems = [];
-    yield items.map(function * (item) {
-      validatedItems.push(yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item}));
+    yield items.map(function * (item) { //map of undefined
+      var dbItem = yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item})
+      // logging.info(dbItem);
+      validatedItems.push(dbItem);
       console.log('added item to db');
     });
-    validatedItems = validatedItems.filter(x => x); // res2Item will return null if there are validation errors and the item is not added to the db
+    logging.info('validatedItems 1', validatedItems); //but there might still be some nulls here or smth?
+    validatedItems = validatedItems.filter(function (x) {
+      console.log('is this real', x); //okay so there *is* a null there BUT that should have been successfully weeded out??
+      if (x) return x;
+    }); //res2Item will return null if there are validation errors and the item is not added to the db
+    logging.info('validatedItems 2', validatedItems); //this is good and what we want
     return validatedItems;
+  }
 };
 
 

@@ -117,8 +117,8 @@
 <input type="hidden" id="cartId" name="cartId" value="<%=id%>">
 <!-- /Gmail hack -->
 <div style="display:none; white-space:nowrap; font:15px courier; color:#ffffff; line-height:0; width:600px !important; min-width:600px !important; max-width:600px !important;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
-
-<% for(var i=0; i<items.length; i++) {%>
+<!-- Search Results -->
+<% for(var i=0; i<searchResults.length; i++) {%>
   <div class="main" style="max-width: 700px; margin: 50px auto; border: 1px solid #e1e1e1; overflow: hidden;">
       <!-- FULL WIDTH CONTAINER ALWAYS NEED THIS-->
       <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #4f4d4c; color: #fcfcf9; max-width: 700px">
@@ -132,7 +132,7 @@
                           </td>
                           <!-- APPERNTLY ACCORDING TO EMAIL TEMPLATING BEST PRACTICE WE WANT INLINE STYLES: WEIRD -->
                           <td align="center" width="85%" valign="middle" height="100%" style="font-size: 28px; text-align: left; color: #fcfcf9;">
-                               ITEMS ADDED
+                               SEARCH RESULTS
                           </td>
                       </tr>
                   </table>
@@ -171,14 +171,14 @@
                               <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                   <tr>
                                       <td style="padding: 0px 15px 50px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
-                                        <% for(var i=0; i<items.length; i++) {%>
+                                        <% for(var j=0; j<searchResults[i].length; j++) {%>
                                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                                <tr>
                                                    <td align="center" style="padding: 30px 5px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1;font-weight: 500;">
                                                       <!-- <%=baseUrl%>/cart/<%=id%> -->
                                                       <!-- TODO: repeat items in cart -->
-                                                      <table><tr><td style="padding-right:1em"><img src="<%=items[i].thumbnail_url%>" alt="item image"></td>
-                                                      <td><p><a href="<%=items[i].original_link%>"><%=items[i].name%></a></p></td></tr></table>
+                                                      <table><tr><td style="padding-right:1em"><img src="<%=searchResults[i][j].thumbnail_url%>" alt="item image"></td>
+                                                      <td><p><a href="<%=searchResults[i][j].original_link%>"><%=searchResults[i][j].name%></a></p></td></tr></table>
                                                    </td>
                                                </tr>
                                             </table>

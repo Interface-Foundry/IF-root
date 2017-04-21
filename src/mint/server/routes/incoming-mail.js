@@ -40,6 +40,7 @@ var sendErrorEmail = function * (email) {
  */
 var sendConfirmationEmail = function * (email, uris, searchResults) {
   //create confirmation email
+  console.log('sendConfirmationEmail called')
   var confirmation = yield db.Emails.create({
     recipients: 'hannah.katznelson@kipthis.com',//email, but we don't want this to work yet
     sender: 'hello@kip.ai',
@@ -57,12 +58,12 @@ var sendConfirmationEmail = function * (email, uris, searchResults) {
 
   //add template and send confirmation email
   yield confirmation.template('item_add_confirmation', {
-    baseUrl: 'https://72f2343b.ngrok.io',
+    baseUrl: 'https://52ad1dce.ngrok.io',
     id: '7a43d85c928f',
     items: items,
     searchResults: searchResults
   })
-
+  console.log('about to send the email to hardcoded hannah.katznelson@kipthis.com')
   yield confirmation.send();
 }
 
@@ -228,17 +229,17 @@ router.post('/', upload.array(), (req, res) => co(function * () {
     yield sendErrorEmail(email);
   }
 
+  var searchResults = [];
   if (text && text.length) {
-    var searchResuls = yield text.map(function * (p) {
+    yield text.map(function * (p) {
       if (p.length) {
         console.log('searching amazon for:', p)
         try {
           // console.log('gonna search:', text[0])
           var itemResults = yield amazon.searchAmazon(p);
 
-          // console.log('got this:', JSON.stringify(searchResults))
-          console.log('got a result from amazon search')
-          return itemResults;
+          console.log('got a result from amazon search', itemResults)
+          if (itemResults) searchResults.push(itemResults);
           // res.sendStatus(200);
         }
         catch (err) {
@@ -294,6 +295,11 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   else console.log('no amazon uris')
 
   if (uris || searchResults) {
+    if (!uris) uris = [];
+    if (!searchResults) searchResults = [];
+    logging.info('SEARCH RESULTS:', searchResults.length, searchResults[0].length); //THIS WORKS NOW WOO
+    logging.info(searchResults.map(function (e) {return e.length;})) //yes, this is the problem
+    logging.info('searchResults', searchResults);
     yield sendConfirmationEmail(email, uris, searchResults);
   }
 
