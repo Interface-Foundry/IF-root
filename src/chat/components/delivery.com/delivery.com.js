@@ -225,6 +225,7 @@ handlers['food.exit.confirm'] = function * (message) {
 // the user's intent is to initiate a food order
 //
 handlers['food.begin'] = function * (message) {
+
   kip.debug('🍕 food order 🌮')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
@@ -236,13 +237,19 @@ handlers['food.begin'] = function * (message) {
 
 }
 
-module.exports = function (replyChannel, allHandlers) {
-  $replyChannel = replyChannel
-  $allHandlers = allHandlers
+// //bloomthat quiz start
+// handlers['quiz.begin'] = function * (message) {
+//   kip.debug('🍕 quiz start 🌮')
+//   return yield handlers['quiz.q1'](message, true)
+// }
 
-  // merge in our own handlers
-  _.merge($allHandlers, handlers)
-}
+// module.exports = function (replyChannel, allHandlers) {
+//   $replyChannel = replyChannel
+//   $allHandlers = allHandlers
+
+//   // merge in our own handlers
+//   _.merge($allHandlers, handlers)
+// }
 
 module.exports = {
   handleMessage: handleMessage
