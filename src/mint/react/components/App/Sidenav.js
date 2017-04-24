@@ -13,10 +13,15 @@ export default class Sidenav extends Component {
     currentUser: PropTypes.object.isRequired
   }
 
+  state = {
+    show: null
+  }
+
   render() {
     const { carts, _toggleSidenav, currentUser, cart_id } = this.props,
-      leaderCarts = _.filter(carts, (c) => c.leader.email_address === currentUser.email_address),
-      memberCarts = _.filter(carts, (c) => c.leader.email_address !== currentUser.email_address);
+      { show } = this.state,
+      leaderCarts = _.filter(carts, (c, i) => c.leader.email_address === currentUser.email_address),
+      memberCarts = _.filter(carts, (c, i) => c.leader.email_address !== currentUser.email_address);
 
     return (
       <div className='sidenav'>
@@ -30,29 +35,47 @@ export default class Sidenav extends Component {
                 <Icon icon='Clear'/>
               </div>
             </li>
-            <h4>Leader</h4>
-            {_.map(leaderCarts, (c, i) => (
-              <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-                <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
+            <h4>My Kip Carts</h4>
+            {_.map(leaderCarts, (c, i) => {
+              if(i > 1 && show !== 'me') return null
+              return ( 
+                <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                  <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                    <div className='icon'>
+                      <Icon icon='Edit'/>
+                    </div>
+                  </Link>
+                  <Link to={`/cart/${c.id}`}>
+                    <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                  </Link>
+                </li>
+              )
+            })}
+            {
+              leaderCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
+              <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
+                &nbsp; {show === 'me' ? 'Less' : 'More'}
+              </h4> : null
+            }
+            <h4>Other Kip Carts</h4>
+            {_.map(memberCarts, (c, i) => {
+              if(i > 1 && show !== 'other') return null
+              return (
+                <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
                   <div className='icon'>
-                    <Icon icon='Edit'/>
                   </div>
-                </Link>
-                <Link to={`/cart/${c.id}`}>
-                  <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
-                </Link>
-              </li>
-            ))}
-            <h4>Member</h4>
-            {_.map(memberCarts, (c, i) => (
-              <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-                <div className='icon'>
-                </div>
-                <Link to={`/cart/${c.id}`}>
-                  <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
-                </Link>
-              </li>
-            ))}
+                  <Link to={`/cart/${c.id}`}>
+                    <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                  </Link>
+                </li>
+              )
+            })}
+            {
+              memberCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
+              <Icon icon={show === 'other' ? 'Up' : 'Down'}/>
+                &nbsp; {show === 'other' ? 'Less' : 'More'}
+              </h4> : null
+            }
           </div>
           <div className='sidenav__list__actions'>
             <h4><Icon icon='Settings'/> Settings</h4>

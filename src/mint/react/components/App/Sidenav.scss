@@ -48,11 +48,15 @@
 			text-align: right;
 			border-bottom: 1px solid $border-color-light;
 			padding: $padding/2 $padding;
+
+			&.show__more {
+				padding: $padding/2 $padding $padding*2;
+			}
 		}
 
 		li {
-			height: $nav-height;
-			line-height: $nav-height;
+			height: $nav-height - $padding;
+			line-height: $nav-height - $padding;
 			padding: 0 $padding;
 
 			&.sidenav__list__header {

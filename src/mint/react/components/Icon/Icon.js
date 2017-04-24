@@ -16,7 +16,8 @@ import {
   IoIosCartOutline,
   IoPlus,
   IoAndroidPersonAdd,
-  IoGearA
+  IoGearA,
+  IoChevronDown
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -78,6 +79,8 @@ export default class Icon extends Component {
       return <IoPlus/>;
     case 'Settings':
       return <IoGearA/>;
+    case 'Down':
+      return <IoChevronDown/>
     default:
       return <div>¯\_(ツ)_/¯</div>
     }
