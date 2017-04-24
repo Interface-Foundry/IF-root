@@ -27,6 +27,13 @@ const associateTag = 'motorwaytoros-20';
 
 const opHelper = new OperationHelper(amazonCreds[0]);
 
+const checkError = function (res) {
+  if (_.get(res, 'Request.Errors.Error')) {
+    var e = _.get(res, 'Request.Errors.Error.0') || _.get(res, 'Request.Errors.Error')
+    throw new Error('Amazon Error [' + e.Code + ']: ' + e.Message)
+  }
+}
+
 /**
  * the idea of this is that you can add functionality later
  * @param  {string} item_identifier is url/asin/etc that is given
@@ -51,9 +58,9 @@ function checkAmazonItemInCart (item, cart) {
     // coerce object into array so we dont have complicated logic
     var cartItems = [cart.CartItems.CartItem];
   } else {
-    cartItems = cart.CartItems;
+    cartItems = cart.CartItems.CartItem;
   }
-  var cartItem = cartItems.find(i => i.ASIN === item.ASIN);
+  var cartItem = cartItems.find(i => i.ASIN === item.asin);
   if (cartItem) {
     return cartItem;
   }
@@ -138,6 +145,7 @@ exports.lookupAmazonItem = function * (asin) {
   try {
     var results = yield opHelper.execute('ItemLookup', amazonParams)
   } catch (err) {
+    console.error(err)
     throw new Error('Error on ASIN lookup');
   }
 
@@ -189,15 +197,17 @@ exports.createAmazonCart = function * (item) {
   }
   var amazonParams = {
     'AssociateTag': associateTag,
-    'Item.1.ASIN': item.ASIN,
+    'Item.1.ASIN': item.asin,
     'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
   };
   try {
     var cart = yield opHelper.execute('CartCreate', amazonParams);
-    return cart.result.CartCreateResponse.Cart;
   } catch (err) {
+    console.error(err)
     throw new Error('Error on creating cart')
   }
+  checkError(cart.result.CartCreateResponse.Cart)
+  return cart.result.CartCreateResponse.Cart;
 };
 
 /**
@@ -213,11 +223,13 @@ exports.getAmazonCart = function * (cart) {
   };
 
   cart = yield opHelper.execute('CartGet', amazonParams);
+  checkError(cart.result.CartGetResponse.Cart)
   return cart.result.CartGetResponse.Cart;
 };
 
 /**
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CartAdd.html
+ * this is a really slow function, like 2000 ms :C
  * @param {[type]} item          [description]
  * @param {[type]} cart_id       [description]
  * @yield {[type]} [description]
@@ -226,26 +238,42 @@ exports.addAmazonItemToCart = function * (item, cart) {
   if (item instanceof Array) {
     throw new Error('Only add one Item to a cart at a time');
   }
+
+  // check if we need to create anew cart
+  if (!cart.amazon_hmac || !cart.amazon_cartid) {
+    return exports.createAmazonCart(item)
+  }
+
   var cart
+  var quantity = item.quantity
 
-  var itemAlreadyAdded = checkAmazonItemInCart(item, cart)
+  // if the item is already in the cart, then we want to increase the quantity
+  var amazonCart = yield exports.getAmazonCart(cart)
+  var itemAlreadyAdded = checkAmazonItemInCart(item, amazonCart)
   if (itemAlreadyAdded) {
-    var newQuantity = parseInt(itemAlreadyAdded.Quantity)
-    newQuantity++
-    cart = yield exports.changeQuantityAmazonItemFromCart(itemAlreadyAdded.cartItemId, newQuantity, cart)
-  } else {
-
+    quantity += parseInt(itemAlreadyAdded.Quantity)
     var amazonParams = {
       'AssociateTag': associateTag,
       'CartId': cart.amazon_cartid,
       'HMAC': cart.amazon_hmac,
-      'Item.1.ASIN': item.ASIN,
-      'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
+      'Item.1.CartItemId': itemAlreadyAdded.CartItemId,
+      'Item.1.Quantity': quantity
     };
-
+    cart = yield opHelper.execute('CartModify', amazonParams);
+    checkError(cart.result.CartModifyResponse.Cart)
+    return cart.result.CartModifyResponse.Cart;
+  } else {
+    var amazonParams = {
+      'AssociateTag': associateTag,
+      'CartId': cart.amazon_cartid,
+      'HMAC': cart.amazon_hmac,
+      'Item.1.ASIN': item.asin,
+      'Item.1.Quantity': quantity
+    };
     cart = yield opHelper.execute('CartAdd', amazonParams);
+    checkError(cart.result.CartAddResponse.Cart)
+    return cart.result.CartAddResponse.Cart;
   }
-  return cart.result.CartAddResponse.Cart;
 };
 
 /**
@@ -275,3 +303,77 @@ exports.cleaAmazonCart = function * (cart) {
   cart = yield opHelper.execute('CartClear', amazonParams);
   return cart;
 };
+
+/**
+ * Syncs amazon cart with the database cart
+ * @param {db.Cart} cart cart from the database
+ * @return {Generator} returns an amazon cart that's all synced up and ready to checkout
+ */
+exports.syncAmazon = function * (cart) {
+  if (!cart) {
+    throw new Error('must supply a db.Cart')
+  } else if (!cart.id) {
+    throw new Error('parameter "cart" must be an instance of db.Cart (not a cart response from amazon.com)')
+  }
+
+  // if there are no amazon items in the cart then you can't sync it
+  if (cart.items.length === 0 || !cart.items[0].asin) {
+    throw new Error('can only sync carts that have amazon items, and items must be populated')
+  }
+
+  // check if we need to create a new cart
+  if (!cart.amazon_cartid || !cart.amazon_hmac) {
+    var amazonCart = yield exports.createAmazonCart(cart.items[0])
+  } else {
+    amazonCart = yield exports.getAmazonCart(cart)
+  }
+
+  // Generate two requests and run them through amazon:
+  //  - a CartAdd request for the the items missing
+  //  - a CartModify request to edit the qunatities of existing items (or remove them)
+  var amazonItems = amazonCart.CartItems.CartItem instanceof Array ? amazonCart.CartItems.CartItem : [amazonCart.CartItems.CartItem]
+
+  var cartAddAmazonParams = {
+    'AssociateTag': associateTag,
+    'CartId': cart.amazon_cartid,
+    'HMAC': cart.amazon_hmac
+  };
+  var missingItems = cart.items.filter(i => {
+    return amazonItems.filter(ai => ai.ASIN === i.asin).length === 0
+  }).map((item, index) => {
+    var key = 'Item.' + (index + 1) + '.'
+    cartAddAmazonParams[key + 'ASIN'] = item.asin
+    cartAddAmazonParams[key + 'Quantity'] = item.quantity
+  })
+
+  var cartModifyAmazonParams = {
+    'AssociateTag': associateTag,
+    'CartId': cart.amazon_cartid,
+    'HMAC': cart.amazon_hmac
+  };
+  var lastModifyIndex = 0
+  var modifyItems = cart.items.map((i, index) => {
+    amazonItems.map(ai => {
+      if (ai.ASIN === i.asin && parseInt(ai.Quantity) !== i.quantity) {
+        var key = 'Item.' + (index + 1) + '.'
+        lastModifyIndex = index + 1
+        cartModifyAmazonParams[key + 'CartItemId'] = ai.CartItemId
+        cartModifyAmazonParams[key + 'Quantity'] = i.quantity || 0
+      }
+    })
+  })
+
+  var itemsToDelete = amazonItems.map(ai => {
+    if (cart.items.filter(i => i.asin === ai.ASIN).length === 0) {
+      cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.CartItemId'] = ai.CartItemId
+      cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.Quantity'] = 0
+    }
+  })
+
+  var amazonCart = yield opHelper.execute('CartAdd', cartAddAmazonParams);
+  checkError(amazonCart.result.CartAddResponse.Cart)
+  amazonCart = yield opHelper.execute('CartModify', cartModifyAmazonParams);
+  checkError(amazonCart.result.CartModifyResponse.Cart)
+
+  return amazonCart.result.CartModifyResponse.Cart
+}
