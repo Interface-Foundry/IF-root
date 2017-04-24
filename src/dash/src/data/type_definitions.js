@@ -215,6 +215,7 @@ type Query {
     start_date: String
     end_date: String
     _id: String
+    purchased: Boolean
   ): [Cart]
   deliveries(
     team_id: String
@@ -223,6 +224,7 @@ type Query {
     limit: Int
     offset: Int
     _id: String
+    completed_payment: Boolean
   ): [Delivery]
   items(
     limit: Int

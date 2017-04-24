@@ -1,18 +1,21 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { Panel, Button, ButtonToolbar } from 'react-bootstrap';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
-import { gql, graphql } from 'react-apollo';
+import { graphql } from 'react-apollo';
 
 import { CartGraph, CafeGraph } from '../../components/Graphs';
 import { CafeTable, CartTable } from '../../components/Table';
+import { cartsQuery, deliveryQuery } from '../../graphqlOperations';
+
 
 class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
       view: 'Store',
+      purchased: false,
       startDate: moment().subtract(1, 'month'),
       endDate: moment(),
     };
@@ -21,7 +24,7 @@ class Home extends Component {
     this.changeCart = this.changeCart.bind(this);
   }
 
-
+  // these could all be refactored into one vvv
   changeStart(date){
     this.setState({
       startDate: date
@@ -40,38 +43,35 @@ class Home extends Component {
     })
   }
 
+
+
   getCurrentQuery() {
-    let currentQuery;
-    if (this.state.view === 'Cafe') {
-      currentQuery = gql`
-        query DeliveriesInDateRange($startDate: String!, $endDate: String!){
-          deliveries(limit: 10, start_date: $startDate, end_date: $endDate){
-            time_started, team_id, item_count, cart_total, chosen_restaurant, team{team_name, members{name,id}}, order, cart, type, items {item_name, user}
-          }
-        }
-      `;
-    } else if (this.state.view === 'Store') {
-      //store query
-      currentQuery = gql`
-        query CartsInDateRange($startDate: String!, $endDate: String!){
-          carts(limit: 1000, start_date: $startDate, end_date: $endDate){created_date, team{team_name}, type, item_count, cart_total, items{title,purchased}}
-        }
-      `;
-    }
-    return currentQuery;
+    const queryHandler = {
+      cafe: deliveryQuery,
+      store: cartsQuery,
+    };
+    return queryHandler[this.state.view.toLowerCase()];
   }
 
+  changeState(value) {
+    this.setState(value);
+  }
+
+
   render(){
-    var self = this;
+    const self = this;
+
+    let graphqlOptions = {
+      variables: {
+        startDate: self.state.startDate,
+        endDate: self.state.endDate,
+        purchased: self.state.purchased,
+      },
+    }
 
     const currentQuery = this.getCurrentQuery();
     const gqlWrapper = graphql(currentQuery, {
-      options: {
-        variables: {
-          startDate: self.state.startDate,
-          endDate: self.state.endDate,
-        },
-      },
+      options: graphqlOptions,
     });
 
     const TableWithData = gqlWrapper(getCurrentTable);
@@ -80,24 +80,37 @@ class Home extends Component {
     return (
 
       <div>
+
+        <ButtonToolbar>
+          <Button
+            bsStyle={self.state.purchased === true ? 'primary' : 'default'}
+            onClick={() => self.changeState({ purchased: true })}
+          >Paid Carts</Button>
+          <Button
+            bsStyle={self.state.purchased === false ? 'primary' : 'default'}
+            onClick={() => self.changeState({ purchased: false })}
+          >Unpaid Carts</Button>
+        </ButtonToolbar>
+
+        <ButtonToolbar>
+          <Button bsStyle={self.state.view=='Store' ? "primary" : "default"} onClick={ ()=> self.changeCart('Store')}>
+            Store
+          </Button>
+          <Button bsStyle={self.state.view=='Cafe' ? "primary" : "default"} onClick={ ()=> self.changeCart('Cafe')}>
+            Cafe
+          </Button>
+        </ButtonToolbar>
         <div>
           <GraphWithData />
         </div>
         <div className="container-fluid data-display">
-          <ButtonToolbar>
-            <Button bsStyle={self.state.view=='Store' ? "primary" : "default"} onClick={ ()=> self.changeCart('Store')}>
-              Store
-            </Button>
-            <Button bsStyle={self.state.view=='Cafe' ? "primary" : "default"} onClick={ ()=> self.changeCart('Cafe')}>
-              Cafe
-            </Button>
-          </ButtonToolbar>
           <div>
               Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
           <div className="panel panel-default">
-          <Panel header={<span><i className="fa fa-line-chart " />  Using: {self.state.view}</span>}>
+            <Panel
+              header={<span><i className="fa fa-line-chart " />Using: {self.state.purchased ? 'purchased Carts' : 'unpurchased carts'} for {self.state.view}</span>}>
             <TableWithData />
           </Panel>
           </div>

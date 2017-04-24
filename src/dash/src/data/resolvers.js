@@ -211,8 +211,15 @@ const Resolvers = {
   },
 
   Cart: {
-    items: async ({_id}) => {
-      return (await Items.find({ cart_id: _id }).sort({added_date: -1}).toArray());
+    items: async (obj) => {
+      // possible to get the value per item if needed using
+      // (obj, args, context, info)
+      // console.log(info.operation.selectionSet.selections[0].arguments)
+      const itemArgs = {
+        cart_id: obj._id,
+      };
+      const items = await Items.find({ itemArgs }).sort({ added_date: -1 }).toArray();
+      return items;
     },
     team: async ({slack_id}) => {
       return (await Slackbots.findOne({team_id: slack_id}));
@@ -271,8 +278,7 @@ const Resolvers = {
       return res;
     },
 
-    deliveries: async (root, args, context) => {
-      // let deliveryArgs = {'cart.1': {'$exists': true}};
+    deliveries: async (root, args, context, info) => {
       const newArgs = getDateFromArgs(args, 'time_started');
       let res = await pagination(Deliveries, newArgs);
       res = res.map((foodSession) => prepareCafeCarts(foodSession));
