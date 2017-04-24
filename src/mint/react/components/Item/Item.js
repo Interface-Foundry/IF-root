@@ -9,10 +9,16 @@ import Icon from '../Icon';
 import * as presets from '../../styles/RouteAnimations';
 
 export default class Item extends Component {
+  constructor(props) {
+    super(props);
+    this.toggleDescrip = ::this.toggleDescrip;
+  }
   state = {
     animation: 'slideLeft',
     originalx: 0,
-    x: 0
+    x: 0,
+    descripHeight: 60,
+    descripTall: false
   }
 
   static propTypes = {
@@ -34,6 +40,14 @@ export default class Item extends Component {
     location: PropTypes.object,
     selectDeal: PropTypes.func,
     currentUser: PropTypes.object
+  }
+
+  toggleDescrip() {
+    const { state, state: { descripTall } } = this;
+    this.setState({
+      descripHeight: descripTall ? 60 : '100%',
+      descripTall: !descripTall
+    });
   }
 
   componentWillMount() {
@@ -112,7 +126,8 @@ export default class Item extends Component {
     const {
       determineNav,
       props,
-      state: { animation },
+      toggleDescrip,
+      state: { animation, descripHeight, descripTall },
       props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, item: { main_image_url, store, description, name, asin } }
     } = this,
     // TODO: replace this with the server url!
@@ -151,8 +166,9 @@ export default class Item extends Component {
               } 
           <div className='item__view__description'>
             <h4>{store}</h4> 
-            <p className='ellipsis' > { description }</p>
-            <a> View more </a>
+            <p className='ellipsis' style={{height: descripHeight}}> { description }</p>
+            <div className='fadeover' style={{display: descripTall?'none': 'block'}}/>
+            <a href='#' onClick={toggleDescrip}> View {descripTall ? 'less' : 'more'} </a>
           </div>
           <div className='item__view__review'>
             {/* TODO: get reviews in here */}
@@ -226,9 +242,7 @@ class AddRemove extends Component {
             <button onClick={()=>incrementItem(id, quantity)}>+</button>
             <div className='item__view__quantity__num'>{quantity}</div>
             {
-              (quantity > 1) 
-                ? <button onClick={()=> decrementItem(id, quantity)}>-</button>
-                : <div className='item__view__quantity__placeholder'/>
+              <button disabled={!(quantity > 1)} onClick={()=> decrementItem(id, quantity)}>-</button>
             } 
           </div>
     );
