@@ -1,5 +1,4 @@
 const co = require('co')
-// const request = require('request-promise')
 var validUrl = require('valid-url');
 var multer = require('multer');
 var upload = multer();
@@ -10,7 +9,6 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-// const deals = require('../deals/deals');
 var amazonScraper = require('../cart/scraper_amazon');
 var amazon = require('../cart/amazon_cart');
 var utils = require('../utilities/incoming_utils');
@@ -43,10 +41,6 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   console.log('URIS', uris)
   var text = utils.getTerms(bodyText, uris);
 
-  // //don't freak out sendgrid please
-  // res.sendStatus(200);
-  // return;
-
   //business logic starts here
   if (!uris && all_uris) {
     //send error email
@@ -60,22 +54,17 @@ router.post('/', upload.array(), (req, res) => co(function * () {
       if (p.length) {
         console.log('searching amazon for:', p)
         try {
-          // console.log('gonna search:', text[0])
           var itemResults = yield amazon.searchAmazon(p);
 
           console.log('got a result from amazon search', itemResults)
           if (itemResults) searchResults.push(itemResults);
-          // res.sendStatus(200);
         }
         catch (err) {
           logging.error(err);
-          // res.sendStatus(200);
         }
       }
     })
   }
-  // res.sendStatus(202);
-  // return;
 
   //get cart id
   var html = req.body.html;

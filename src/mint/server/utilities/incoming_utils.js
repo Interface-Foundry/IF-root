@@ -11,7 +11,7 @@ var emoji = require('../utilities/emoji_utils');
  */
 var sendErrorEmail = function * (email) {
   var error = yield db.Emails.create({
-    recipients: 'hannah.katznelson@kipthis.com',//email,
+    recipients: email,
     sender: 'hello@kip.ai',
     subject: 'Oops',
     message_html: '<html><p>Unfortunately I couldn\'t understand the link you sent me -- make sure that you paste a full URL that links to an item on Amazon.com</p></html>'
@@ -29,11 +29,10 @@ var sendConfirmationEmail = function * (email, uris, searchResults) {
   //create confirmation email
   console.log('sendConfirmationEmail called')
   var confirmation = yield db.Emails.create({
-    recipients: 'hannah.katznelson@kipthis.com',//email, but we don't want this to work yet
+    recipients: email,
     sender: 'hello@kip.ai',
     subject: 'Items have been added to your cart!',
     template_name: 'item_add_confirmation'
-    // message_html: '<html><body>Confirmation, woohoo!</body></html>'
   });
 
   var items = [];
@@ -50,7 +49,7 @@ var sendConfirmationEmail = function * (email, uris, searchResults) {
     items: items,
     searchResults: searchResults
   })
-  console.log('about to send the email to hardcoded hannah.katznelson@kipthis.com')
+  console.log('about to send the email')
   yield confirmation.send();
 }
 

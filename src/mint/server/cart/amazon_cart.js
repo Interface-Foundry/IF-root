@@ -111,12 +111,9 @@ exports.searchAmazon = function * (query) {
       validatedItems.push(dbItem);
       console.log('added item to db');
     });
-    // logging.info('validatedItems 1', validatedItems); //but there might still be some nulls here or smth?
     validatedItems = validatedItems.filter(function (x) {
-      // console.log('is this real', x); //okay so there *is* a null there BUT that should have been successfully weeded out??
       if (x) return x;
     }); //res2Item will return null if there are validation errors and the item is not added to the db
-    // logging.info('validatedItems 2', validatedItems); //this is good and what we want
     return validatedItems;
   }
 };
