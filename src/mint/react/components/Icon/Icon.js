@@ -14,6 +14,7 @@ import {
   IoCheckmark,
   IoSearch,
   IoIosCartOutline,
+  IoPlus,
   IoAndroidPersonAdd
 } from 'react-icons/lib/io';
 import {
@@ -72,6 +73,8 @@ export default class Icon extends Component {
       return <IoIosCartOutline/>;
     case 'Person':
       return <IoAndroidPersonAdd/>;
+    case 'Plus':
+      return <IoPlus/>;
     default:
       return <div>¯\_(ツ)_/¯</div>
     }

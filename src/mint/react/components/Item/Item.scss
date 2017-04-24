@@ -1,5 +1,6 @@
 @import '../../styles/Constants';
 .item {
+  position: relative;
   height: 100%;
   padding: $padding*2;
   overflow-x: hidden;
@@ -29,6 +30,15 @@
       color: $price-color;
     }
   }
+  // This is animation fix for chrome and maybe something else.
+  // Probably my error, html structing error probably.
+  .item__transition {
+    position: relative;
+    & > div {
+      position: absolute;
+    }
+  }
+
   .item__view__image {
     margin: 0 auto;
   }

@@ -34,7 +34,8 @@
 		position: relative;
 		width: 250px;
 		height: 100%;
-		background: #999;
+		background: $kip-primary-color;
+		border-left: 1px solid $border-color-light;
 		@include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
 		@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
@@ -81,14 +82,38 @@
 			width: 100%;
 			text-align: center;
 			padding: $padding;
-			height: $nav-height;
+			height: $nav-height * 2 + 10px;
 			line-height: $nav-height;
 			box-sizing: border-box;
 
 			button {
+				display: block;
 				width: 100%;
+				border-radius: 10px;
 				border: 1px solid $border-color-light;
-				height: 100%;
+				height: calc(50% - #{$padding});
+				&:first-of-type {
+					margin-bottom: 10px;
+				}
+				* {
+					display: inline-block;
+				}
+				svg {
+					vertical-align: bottom !important;
+					font-size: 15px;
+				}
+				p {
+					padding-left: $padding;
+					font-size: 15px;
+					font-weight: 600;
+				}
+				&.new {
+					background: $main-button-color;
+				}
+				&.share {
+					background: $secondary-button-color;
+					color: white;
+				}
 			}
 		}
 	}

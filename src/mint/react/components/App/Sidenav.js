@@ -53,8 +53,15 @@ export default class Sidenav extends Component {
             </li>
           ))}
           <footer>
+            <Link to={`/cart/${cart_id}/m/share`} onClick={_toggleSidenav}>
+              <button className='share'>
+                <Icon icon='Person'/>
+                <p>Add Others To Cart</p>
+              </button>
+            </Link>
             <a href='/newcart'>
-              <button>
+              <button className='new'>
+                <Icon icon='Plus'/>
                 <p>New Cart</p>
               </button>
             </a>
