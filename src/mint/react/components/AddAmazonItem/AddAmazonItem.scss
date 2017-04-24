@@ -24,8 +24,8 @@
   svg {
     height: 100%;
     vertical-align: top !important;
-    width: $nav-height;
-    padding: $padding*1.3;
+    width: $nav-height/1.5;
+    padding: $padding/1.5;
     color: rgba(114,114,114, 0.8);
   }
 

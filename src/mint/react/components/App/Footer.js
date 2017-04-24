@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
+import { Icon } from '..';
 
 export default class Footer extends Component {
   static propTypes = {
@@ -74,7 +75,10 @@ class CartFooter extends Component {
 
     return (
       <div className='footer__cart'>
-        <button className='share' onClick={_handleShare}>SHARE</button>
+        <button className='share' onClick={_handleShare}>
+          <Icon icon='Person'/>
+          SHARE
+        </button>
         {
           isLeader
           ? <button onClick={() => {
@@ -83,6 +87,7 @@ class CartFooter extends Component {
                   locked: !currentCart.locked
                 });
               }}>
+              <Icon icon='Cart'/>
               CHECKOUT
             </button>
           : null

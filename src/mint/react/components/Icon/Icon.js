@@ -13,6 +13,8 @@ import {
   IoLocked,
   IoCheckmark,
   IoSearch,
+  IoIosCartOutline,
+  IoAndroidPersonAdd
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -28,7 +30,7 @@ import {
 
 export default class Icon extends Component {
   static propTypes = {
-    icon: PropTypes.string.isRequirede
+    icon: PropTypes.string.isRequired
   }
   render() {
     switch (this.props.icon) {
@@ -66,6 +68,10 @@ export default class Icon extends Component {
       return <IoSearch/>;
     case 'Open':
       return <FaExternalLink/>; 
+    case 'Cart':
+      return <IoIosCartOutline/>;
+    case 'Person':
+      return <IoAndroidPersonAdd/>;
     default:
       return <div>¯\_(ツ)_/¯</div>
     }

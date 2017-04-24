@@ -25,6 +25,12 @@
       font-weight: 600;
       flex-grow: 1;
       flex-basis: 0;
+      svg {
+        vertical-align: top !important;
+        font-size: 18px;
+        padding: 0;
+        width: $nav-height/2;
+      }
       &.share {
         background: $secondary-button-color;
         color: white;
