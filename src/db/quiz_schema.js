@@ -8,7 +8,7 @@ var quizSchema = mongoose.Schema({
 
   // which quiz is this for
   quiz_version: {type: String, required: true},
-  answer: String,
+  answer: {type: Number, default: 0},
   question: String,
   active: {type: Boolean, default: true},
   ts: {type: Date, default: Date.now}

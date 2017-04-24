@@ -157,6 +157,13 @@ handlers['quiz_bloomthat.begin'] = function * (message) {
   return yield handlers['quiz_bloomthat.q1'](message, true)
 }
 
+// //bloomthat quiz start
+handlers['quiz_bloomthat.help'] = function * (message) {
+  console.log('🍕 quiz HELP???? 🌮')
+
+  return yield handlers['quiz_bloomthat.help_print'](message, true)
+}
+
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel

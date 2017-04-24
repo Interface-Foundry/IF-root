@@ -14,12 +14,45 @@ var $allHandlers // this is how you can access handlers from other files
 var handlers = {}
 
 
+//bloom that help
+
+handlers['quiz_bloomthat.help_print'] = function * (message) {
+
+  var msg_json = {
+    title: '^ ^ ^ ^ ^ ',
+    text: 'INFORMATION ABOUT ADMIN DAY',
+    attachments: []
+  }
+
+  msg_json.attachments.push({
+    'text': 'info info info',
+    'fallback': 'A1',
+    'callback_id': 'Q1',
+    'attachment_type': 'default',
+    'actions': [{
+      color: '#45a5f4',
+      name: 'quiz_bloomthat',
+      value: 'quiz_bloomthat',
+      text: '👀 Find Out Now',
+      style: 'primary',
+      type: 'button'
+    },{
+      'name': 'quiz_bloomthat.exit',
+      'text': 'Home',
+      'type': 'button',
+      'value': 'A2'
+    }]
+  })
+
+  $replyChannel.sendReplace(message, 'quiz_bloomthat.begin', {type: message.origin, data: msg_json})
+}
+
 //BLOOM THAT QUIZ
 handlers['quiz_bloomthat.q1'] = function * (message) {
 
   var msg_json = {
     title: '^ ^ ^ ^ ^ ',
-    text: 'Which would you do??',
+    text: 'Which weird office thing do you secretly love?',
     attachments: []
   }
 
@@ -30,19 +63,24 @@ handlers['quiz_bloomthat.q1'] = function * (message) {
     'attachment_type': 'default',
     'actions': [{
       'name': 'quiz_bloomthat.q2',
-      'text': 'meow',
+      'text': '📊 Bar chart',
       'type': 'button',
-      'value': 'A1' 
+      'value': 0 
     },{
       'name': 'quiz_bloomthat.q2',
-      'text': 'mooo',
+      'text': '📎 Paperclip',
       'type': 'button',
-      'value': 'A2'
+      'value': 2
     },{
       'name': 'quiz_bloomthat.q2',
-      'text': 'meowweee',
+      'text': '✂️ Scissors',
       'type': 'button',
-      'value': 'A3'
+      'value': 3
+    },{
+      'name': 'quiz_bloomthat.q2',
+      'text': '📈 Hockey Stick',
+      'type': 'button',
+      'value': 4
     }]
   })
 
@@ -54,7 +92,7 @@ handlers['quiz_bloomthat.q2'] = function * (message) {
 
   var msg_json = {
     title: 'asdjfla;ksdf',
-    text: 'hmmmmm?',
+    text: 'How many browser tabs do you have open?',
     attachments: []
   }
 
@@ -65,19 +103,29 @@ handlers['quiz_bloomthat.q2'] = function * (message) {
     'attachment_type': 'default',
     'actions': [{
       'name': 'quiz_bloomthat.q3',
-      'text': 'zzzzz',
+      'text': '1',
       'type': 'button',
-      'value': 'A1'
+      'value': 0
     },{
       'name': 'quiz_bloomthat.q3',
-      'text': 'xzxzxzxzxzx',
+      'text': '3',
       'type': 'button',
-      'value': 'A2'
+      'value': 1
     },{
       'name': 'quiz_bloomthat.q3',
-      'text': 'hmmmmm',
+      'text': '5',
       'type': 'button',
-      'value': 'A3'
+      'value': 2
+    },{
+      'name': 'quiz_bloomthat.q3',
+      'text': '8+',
+      'type': 'button',
+      'value': 3
+    },{
+      'name': 'quiz_bloomthat.q3',
+      'text': '😱 don’t ask',
+      'type': 'button',
+      'value': 4
     }]
   })
   $replyChannel.sendReplace(message, 'quiz_bloomthat.q3', {type: message.origin, data: msg_json})
@@ -88,7 +136,7 @@ handlers['quiz_bloomthat.q3'] = function * (message) {
 
   var msg_json = {
     title: '',
-    text: 'ok ok ...',
+    text: 'Which is your dream city?',
     attachments: []
   }
 
@@ -99,19 +147,29 @@ handlers['quiz_bloomthat.q3'] = function * (message) {
     'attachment_type': 'default',
     'actions': [{
       'name': 'quiz_bloomthat.q4',
-      'text': 'ahahaha',
+      'text': '🇫🇷 Paris',
       'type': 'button',
-      'value': 'A1'
+      'value': 0
     },{
       'name': 'quiz_bloomthat.q4',
-      'text': 'meoowww',
+      'text': '⛩️ Tokyo',
       'type': 'button',
-      'value': 'A2'
+      'value': 1
     },{
       'name': 'quiz_bloomthat.q4',
-      'text': 'meoqoqwodwewe',
+      'text': '🗽 New York',
       'type': 'button',
-      'value': 'A3'
+      'value': 4
+    },{
+      'name': 'quiz_bloomthat.q4',
+      'text': '🇬🇧 London',
+      'type': 'button',
+      'value': 2
+    },{
+      'name': 'quiz_bloomthat.q4',
+      'text': '🌉 San Francisco',
+      'type': 'button',
+      'value': 4
     }]
   })
   $replyChannel.sendReplace(message, 'quiz_bloomthat.q4', {type: message.origin, data: msg_json})
@@ -122,7 +180,7 @@ handlers['quiz_bloomthat.q4'] = function * (message) {
 
   var msg_json = {
     title: '',
-    text: 'umm sure ok whatever',
+    text: 'Finish this line: “I’ll love a _________ right now”',
     attachments: []
   }
 
@@ -133,19 +191,24 @@ handlers['quiz_bloomthat.q4'] = function * (message) {
     'attachment_type': 'default',
     'actions': [{
       'name': 'quiz_bloomthat.score',
-      'text': 'yeah',
+      'text': '🍷 glass of wine',
       'type': 'button',
-      'value': 'A1'
+      'value': 4
     },{
       'name': 'quiz_bloomthat.score',
-      'text': 'nah what',
+      'text': '☕  cup of coffee',
       'type': 'button',
-      'value': 'A2'
+      'value': 2
     },{
       'name': 'quiz_bloomthat.score',
-      'text': 'hehe',
+      'text': '🍵 cup of tea',
       'type': 'button',
-      'value': 'A3'
+      'value': 0
+    },{
+      'name': 'quiz_bloomthat.score',
+      'text': '🍺 pint of beer',
+      'type': 'button',
+      'value': 3
     }]
   })
   $replyChannel.sendReplace(message, 'quiz_bloomthat.score', {type: message.origin, data: msg_json})
@@ -157,18 +220,23 @@ handlers['quiz_bloomthat.score'] = function * (message) {
   
   var quizAnswers = yield db.Quiz.find({user_id: message.source.user, team_id: message.source.team, active: true}).exec()
 
-  var result = _(quizAnswers)
-  .countBy('answer')
-  .map((count, name) => ({ name, count }))
-  .value();
+  var result = 0
+
+  quizAnswers.map(function(a) {
+    if(a.answer && Number.isInteger(a.answer)){
+      result = result + a.answer
+    }else {
+      console.log('not a real # ',a.answer)
+    }
+  })
 
   console.log('%%%%%%% \n',result)
 
-  result = _.sortBy(result, 'count')
+ // result = _.sortBy(result, 'count')
 
   var msg_json = {
     title: '',
-    text: 'Your winning quiz answer is: '+result[0].name+'!!!!!!',
+    text: 'Your winning quiz answer is: '+result+'!!!!!!',
     attachments: []
   }
 

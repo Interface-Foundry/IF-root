@@ -29,24 +29,23 @@ const message = {
   username: 'Kip',
   as_user: true,
   attachments: [{
-    text: 'Take this quiz!',
+    text: 'Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉',
     image_url: 'http://tidepools.co/kip/kip_fruit_twitter_sm.gif',
     mrkdwn_in: ['text'],
-    fallback: 'Take this quiz!',
+    fallback: 'Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉',
     callback_id: 'none',
     color: '#f43440',
     actions: [{
-      color: '#45a5f4',
       name: 'quiz_bloomthat',
       value: 'quiz_bloomthat',
-      text: '✓ Take Quiz',
+      text: '👀 Find Out Now',
       style: 'primary',
       type: 'button'
     }, {
       color: '#45a5f4',
-      name: 'What quiz',
-      value: 'snooze',
-      text: 'Later',
+      name: 'quiz_bloomthat_help',
+      value: 'quiz_bloomthat_help',
+      text: 'What\'s Admin Day?',
       style: 'default',
       type: 'button'
     }]
@@ -67,6 +66,8 @@ function sendToUser (userId,teamId) {
       return
     }
 
+    console.log('🌵🌵 !user! ',user)
+
     // Don't re-send to someone who we have already sent this marketing message
     var sentCount = yield db.Metrics.count({
       'data.user': user.id,
@@ -80,7 +81,15 @@ function sendToUser (userId,teamId) {
     //   return
     // }
 
-    // Send a message to this user who has not started a cafe session
+    // CHECK HERE WHICH TIMEZONE THEY'RE IN, so it's 10am their time. so run it at 10am , 11am, 12pm 
+
+    //ACTUALLY GET THREE DIFFERENT LISTS OF USERS, by timezone (when it's 10am their time)
+
+    /////// HAND SORT WHICH TEAMS TO MESSAGE ////////
+    // ----> message.io + slack + howdy + betaworks, only message 1
+    // ----> 
+
+    // Send a message to this user 
     let slackbot = yield db.Slackbots.findOne({team_id: teamId}).exec()
     let bot = new slack.WebClient(slackbot.bot.bot_access_token)
     yield bot.chat.postMessage(user.dm, '', message)
