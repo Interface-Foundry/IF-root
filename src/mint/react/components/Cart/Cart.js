@@ -32,13 +32,13 @@ export default class Cart extends Component {
   componentWillMount() {
     const { fetchDeals, deals } = this.props;
 
-    if(deals.length === 0) {
+    if (deals.length === 0) {
       fetchDeals();
     }
   }
 
   _runAnimation(text) {
-    this.setState({animation: text})
+    this.setState({ animation: text });
 
     this.timeout = setTimeout(() => {
       this.setState({
@@ -48,12 +48,11 @@ export default class Cart extends Component {
   }
 
   componentWillUnmount() {
-    clearTimeout(this.timeout)
+    clearTimeout(this.timeout);
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id, items } = this.props, 
-      { leader, addingItem, user_account } = nextProps,
+    const { history: { replace }, cart_id, items } = this.props, { leader, addingItem, user_account } = nextProps,
       cartId = cart_id || nextProps.cart_id;
 
     if (cartId) {
@@ -64,16 +63,15 @@ export default class Cart extends Component {
       }
     }
 
-    if(items.quantity < nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
-      this._runAnimation('✓ Item Added to Kip Cart')
+    if (items.quantity < nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
+      this._runAnimation('✓ Item Added to Kip Cart');
     } else if (items.quantity > nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
-      this._runAnimation('× Item Removed from Kip Cart')
+      this._runAnimation('× Item Removed from Kip Cart');
     }
   }
 
   render() {
-    const { items, leader, members, user_account, history, history: { replace }, locked, updateCart, currentCart, position } = this.props,
-      { animation } = this.state,
+    const { items, leader, members, user_account, history: { push }, locked, updateCart, currentCart } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
 
@@ -99,9 +97,13 @@ export default class Cart extends Component {
             </div> 
           : <span>
               <div className='cart__add'>
-                <AddAmazonItemContainer replace={replace} members={members}/>
+                <AddAmazonItemContainer push={push} members={members}/>
               </div>
-              {!!user_account.id ? <DealsContainer isDropdown={false}/> : null}
+              {
+                !!user_account.id 
+                  ? <DealsContainer isDropdown={false}/> 
+                  : null
+              }
             </span>
         }
         <div className={`cart__title ${animation ? 'action' : ''}`}>
@@ -129,7 +131,7 @@ class MyItems extends Component {
 
   renderList() {
     const { props, props: { items } } = this,
-      cartItems = items.map((item, i) => <CartItem key={item.id} itemNumber={i} isOwner={true} item={item} {...props} />);
+    cartItems = items.map((item, i) => <CartItem key={item.id} itemNumber={i} isOwner={true} item={item} {...props} />);
 
     return (
       <CSSTransitionGroup
@@ -138,11 +140,11 @@ class MyItems extends Component {
         transitionLeaveTimeout={0}>
         {cartItems}
       </CSSTransitionGroup>
-    )
+    );
   }
 
   render() {
-    const { props, props: { items } } = this,
+    const { props: { items } } = this,
     total = calculateItemTotal(items);
 
     return (

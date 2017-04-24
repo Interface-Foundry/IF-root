@@ -153,13 +153,13 @@ export default class Item extends Component {
             <h4>{store}</h4> 
             <p className='ellipsis' > { description }</p>
             <a> View more </a>
-            
-            <a href={tempUrl} target='_blank'> <Icon icon='Open'/> View on Amazon </a>
           </div>
           <div className='item__view__review'>
-            <p className='ellipsis'>{description}</p>
-            <em > -theGodOfIpsum </em>
+            {/* TODO: get reviews in here */}
+            <p className='ellipsis'>This thing is great! Almost as good as penguin food</p>
+            <em > -Definitely not a penguin </em>
           </div>
+          <a href={tempUrl} target='_blank' className='item__view__amazon__link'> <Icon icon='Open'/> View on Amazon </a>
         </RouteTransition>
       </div>
     );

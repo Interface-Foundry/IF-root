@@ -34,9 +34,9 @@ export default class Footer extends Component {
 class SignInFooter extends Component {
   render() {
     return (
-      <div className='tos'>
+      <p className='tos'>
         By signing up you agree to the Kip <a href='https://kipthis.com/legal/'>Terms of Use</a>
-      </div>
+      </p>
     );
   }
 }

@@ -1,3 +1,4 @@
+// react/components/App/Footer.scss
 @import '../../styles/Constants';
 .footer {
   position: relative;
@@ -29,9 +30,9 @@
         color: white;
       }
       &.triple {
-        flex-grow: 4; 
+        flex-grow: 4;
       }
-      &.dimmed{
+      &.dimmed {
         background: white;
         border: 1px solid $border-color-light;
         color: $kip-faded-color;
@@ -45,11 +46,16 @@
     }
   }
   .tos {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
     margin: 0px $padding*3;
     text-align: center;
     font-size: 13px;
     color: $kip-faded-color;
     font-style: italic;
+    line-height: 17px;
     a {
       text-decoration: underline;
     }
@@ -58,3 +64,4 @@
     display: none;
   }
 }
+
