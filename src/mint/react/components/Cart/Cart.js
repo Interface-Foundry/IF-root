@@ -1,3 +1,5 @@
+// mint/react/components/Cart/Cart.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CartItem from './CartItem';
@@ -19,7 +21,8 @@ export default class Cart extends Component {
     user_account: PropTypes.object,
     locked: PropTypes.bool,
     updateCart: PropTypes.func,
-    currentCart: PropTypes.object
+    currentCart: PropTypes.object,
+    deals: PropTypes.array
   }
 
   state = {

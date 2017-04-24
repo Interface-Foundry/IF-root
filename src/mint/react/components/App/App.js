@@ -33,7 +33,7 @@ export default class App extends Component {
   }
 
   _logPageView(path, userId) {
-    ReactGA.set({ userId })
+    ReactGA.set({ userId });
     ReactGA.event({
       category: 'User',
       action: 'Initial Load'
@@ -59,9 +59,7 @@ export default class App extends Component {
     const { cart_id: nextCart_id, session_id: nextSessionId } = nextProps;
 
     if (!session_id && nextSessionId) {
-      console.log('setting user to', nextSessionId);
       ReactGA.initialize('UA-97839751-1', {
-        debug: true,
         gaOptions: {
           userId: nextSessionId
         }

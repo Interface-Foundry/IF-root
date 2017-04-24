@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { Field } from 'redux-form'
-import { Icon } from '..'
+import React from 'react';
+import { Field } from 'redux-form';
 
 const renderField = ({ input, label, placeholder, handleSubmit, type, meta: { touched, error, warning, submitting, active } }) => (
   <div>
@@ -15,7 +14,7 @@ const renderField = ({ input, label, placeholder, handleSubmit, type, meta: { to
     </div>
     {touched && ((error && <span>{error}</span>) || (warning && <span>{warning}</span>))}
   </div>
-)
+);
 
 export default (props) => {
   const { handleSubmit, cart_id, history: { replace } } = props;
@@ -26,11 +25,11 @@ export default (props) => {
         <Field 
           name="email" 
           type="email"
-          label="Whats your Email Address?"
+          label="What's your Email Address?"
           placeholder="Enter Email"
           handleSubmit={handleSubmit}
           component={renderField}/>
       </div>
     </form>
-  )
-}
+  );
+};

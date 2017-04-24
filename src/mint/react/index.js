@@ -23,10 +23,9 @@ if (module.hot) {
 
 const history = createHistory();
 history.listen((location, action) => {
-  console.log('loc', location, 'act', action)
   ReactGA.set({ path: location.pathname });
   ReactGA.pageview(location.pathname);
-})
+});
 const historyMiddleware = routerMiddleware(history);
 
 // creating redux store

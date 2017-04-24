@@ -1,8 +1,11 @@
+// // mint/react/components/Cart/Item.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../utils';
 import { splitCartById } from '../../reducers';
 import { RouteTransition } from 'react-router-transition';
+import Icon from '../Icon';
 import * as presets from '../../styles/RouteAnimations';
 
 export default class Item extends Component {
@@ -27,7 +30,10 @@ export default class Item extends Component {
     amazon_id: PropTypes.string,
     nextSearch: PropTypes.func,
     prevSearch: PropTypes.func,
-    setSearchIndex: PropTypes.func
+    setSearchIndex: PropTypes.func,
+    location: PropTypes.object,
+    selectDeal: PropTypes.func,
+    currentUser: PropTypes.object
   }
 
   componentWillMount() {
@@ -52,9 +58,8 @@ export default class Item extends Component {
     const { type: nextType, item: nextItem, index: nextIndex, item: { position: nextPos } } = nextProps;
     //never replace cart_id if its undefined
     if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) replace(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
-    else if (cart_id && nextType === 'search' && nextPos !== nextIndex) {
-      replace(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
-    } else if (nextProps.item_id !== item_id) previewItem(nextProps.item_id);
+    else if (cart_id && nextType === 'search' && nextPos !== nextIndex) replace(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
+    else if (nextProps.item_id !== item_id) previewItem(nextProps.item_id);
     else if (nextProps.amazon_id !== amazon_id) previewAmazonItem(nextProps.amazon_id);
   }
 
@@ -69,20 +74,17 @@ export default class Item extends Component {
       state: { originalx, x }
     } = this;
 
-    const diff = originalx - x;
-
-    if(Math.sign(diff) === -1) {
-      this.setState({ animation: 'slideRight' })
-    } else {
-      this.setState({ animation: 'slideLeft' })
-    }
+    if (x > originalx) this.setState({ animation: 'slideRight' });
+    else this.setState({ animation: 'slideLeft' });
 
     if (type === 'deal') {
       const numericInt = parseInt(index),
         abs = Math.abs(originalx - x),
-        newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
+        newIndex = originalx > x
+        ? (numericInt === items.length - 1 ? 0 : numericInt + 1)
+        : (numericInt === 0 ? items.length - 1 : numericInt - 1);
       if (originalx !== x && x !== 0 && abs > 100) {
-        selectDeal(newIndex)
+        selectDeal(newIndex);
         replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
       }
     } else if (type === 'search') {
@@ -92,9 +94,15 @@ export default class Item extends Component {
     } else if (type === 'cartItem') {
       const numericInt = parseInt(index),
         abs = Math.abs(originalx - x),
-        newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
+        newIndex = originalx > x
+        ? (numericInt === items.length - 1
+          ? 0
+          : numericInt + 1)
+        : (numericInt === 0 ? items.length - 1
+          : numericInt - 1);
 
-      const ourItems = splitCartById(this.props, {id: currentUser.id}).my;
+      const ourItems = splitCartById(this.props, { id: currentUser.id })
+        .my;
 
       if (originalx !== x && x !== 0 && abs > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems[newIndex].id}/edit`);
     }
@@ -105,8 +113,10 @@ export default class Item extends Component {
       determineNav,
       props,
       state: { animation },
-      props: { index, type, items, item, nextSearch, prevSearch, item: { main_image_url, store, description, name } }
-    } = this;
+      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, item: { main_image_url, store, description, name, asin } }
+    } = this,
+    // TODO: replace this with the server url!
+    tempUrl = `https://amazon.com/dp/${asin}/`;
 
     const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
       ? items[parseInt(index)].large
@@ -115,7 +125,7 @@ export default class Item extends Component {
       <div className='item'>
         <RouteTransition
           className="item__transition"
-          pathname={this.props.location.pathname}
+          pathname={pathname}
           {...presets.default[animation]}>
           <div className='item__view__image image row'
               onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
@@ -143,7 +153,9 @@ export default class Item extends Component {
             <h4>{store}</h4> 
             <p className='ellipsis' > { description }</p>
             <a> View more </a>
-          </div> 
+            
+            <a href={tempUrl} target='_blank'> <Icon icon='Open'/> View on Amazon </a>
+          </div>
           <div className='item__view__review'>
             <p className='ellipsis'>{description}</p>
             <em > -theGodOfIpsum </em>
