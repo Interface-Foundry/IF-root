@@ -1,4 +1,5 @@
 @import '../../styles/Constants';
+@import '../../styles/Animations';
 $cart__add-height: $nav-height+$padding;
 .cart {
   height: calc(100% - #{$nav-height});
@@ -43,6 +44,12 @@ $cart__add-height: $nav-height+$padding;
     line-height: $nav-height - $padding;
     background: $border-color-light;
     text-align: center;
+    @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+    &.action {
+      background: $main-button-color;
+    }
   }
   .cart__items {
     height: calc(100% - #{$cart__add-height + $nav-height - $padding});
@@ -50,6 +57,7 @@ $cart__add-height: $nav-height+$padding;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
     ul {
+      overflow: hidden;
       h3 {
         border-bottom: 1px solid $border-color-light;
         padding: $padding;
@@ -58,6 +66,9 @@ $cart__add-height: $nav-height+$padding;
           color: $price-color;
         }
       }
+    }
+    .cart__items__container {
+      overflow: hidden;
     }
     .cart__items__title {
       font-weight: 500;

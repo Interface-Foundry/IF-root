@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 
 import { EmailFormContainer, AmazonFormContainer, ItemContainer, EditCartContainer } from '../../containers';
-import { Share } from '..';
+import { Share, RouteTransitionGroup } from '..';
 
 export default class SignIn extends Component {
 

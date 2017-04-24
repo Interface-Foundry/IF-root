@@ -74,7 +74,7 @@ const del = function * (url, data) {
   return body
 }
 
-describe.only('api', () => {
+describe('api', () => {
   before(() => co(function * () {
     // clean up the db
     yield dbReady

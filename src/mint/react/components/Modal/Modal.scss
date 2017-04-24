@@ -3,17 +3,26 @@
 .modal {
   position: absolute;
   background: $kip-primary-color;
-  height: calc(100% - #{$nav-height*2});
+  height: 100%;
   z-index: 100;
-  top: $nav-height;
+  top: 0;
   bottom: 0;
   left: 0;
   right: 0;
   text-align: center;
+  overflow: hidden;
   .form {
     padding: $padding $padding*2 $padding*2 $padding*2;
+
+    & > div {
+      position: relative;
+    }
     .deals__section {
-      margin: 0 (0 - $padding*2);
+      margin: $padding (0 - $padding*2);
+
+      span {
+        display: block;
+      }
     }
     label {
       display: block;
@@ -77,4 +86,34 @@
     cursor: move;
     height: $nav-height/1.5;
   }
+}
+
+
+.example-enter {
+  opacity: 0.01;
+
+  &.example-enter-active{
+    opacity: 1;
+    transition: opacity 500ms ease-in;
+  }
+}
+
+
+.example-leave {
+  opacity: 1;
+
+  &.example-leave-active {
+    opacity: 0.01;
+    transition: opacity 300ms ease-in;
+  }
+}
+
+
+.example-appear {
+  opacity: 0.01;
+}
+
+.example-appear.example-appear-active {
+  opacity: 1;
+  transition: opacity .5s ease-in;
 }

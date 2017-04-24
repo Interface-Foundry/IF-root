@@ -10,8 +10,8 @@ picstitch: http://dev-picstitch.kipthis.com
 nlp: http://dev-parser.kipthis.com
 nlp_rnn: http://dev-rnn.kipthis.com
 slack:
-  client_id: "105555369782.117559561207"
-  client_secret: 0ccce527e8ab02cfdbe3ef63a4e16bac
-  verification_token: SeSOXUklO1kRQLu5sNHXilMn
-  redirect_uri: https://35c04bc8.ngrok.io/newslack
+  client_id: "170416483239.172257077539"
+  client_secret: b2e88d673e3ebaef2f4b558100acd058
+  verification_token: sruuuAbCZ8175dedC29lyEAH
+  redirect_uri: https://0d9b304e.ngrok.io/newslack
 kipPayURL: https://pay.kipthis.com

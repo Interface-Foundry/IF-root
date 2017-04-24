@@ -4,6 +4,7 @@ import CartItem from './CartItem';
 import { AddAmazonItemContainer, DealsContainer } from '../../containers';
 import { Icon } from '..';
 import { calculateItemTotal, displayCost } from '../../utils';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -21,13 +22,35 @@ export default class Cart extends Component {
     currentCart: PropTypes.object
   }
 
+  state = {
+    animation: false
+  }
+
   componentWillMount() {
-    const { fetchDeals } = this.props;
-    fetchDeals();
+    const { fetchDeals, deals } = this.props;
+
+    if(deals.length === 0) {
+      fetchDeals();
+    }
+  }
+
+  _runAnimation(text) {
+    this.setState({animation: text})
+
+    this.timeout = setTimeout(() => {
+      this.setState({
+        animation: false
+      });
+    }, 3000);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timeout)
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id } = this.props, { leader, addingItem, user_account } = nextProps,
+    const { history: { replace }, cart_id, items } = this.props, 
+      { leader, addingItem, user_account } = nextProps,
       cartId = cart_id || nextProps.cart_id;
 
     if (cartId) {
@@ -37,12 +60,20 @@ export default class Cart extends Component {
         replace(`/cart/${cartId}/`);
       }
     }
+
+    if(items.quantity < nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
+      this._runAnimation('✓ Item Added to Kip Cart')
+    } else if (items.quantity > nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
+      this._runAnimation('× Item Removed from Kip Cart')
+    }
   }
 
   render() {
-    const { items, leader, members, user_account, history: { replace }, locked, updateCart, currentCart } = this.props,
+    const { items, leader, members, user_account, history, history: { replace }, locked, updateCart, currentCart, position } = this.props,
+      { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
+
     return (
       <div className='cart'>
         {
@@ -70,8 +101,10 @@ export default class Cart extends Component {
               {!!user_account.id ? <DealsContainer isDropdown={false}/> : null}
             </span>
         }
-        <div className='cart__title'>
-          <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
+        <div className={`cart__title ${animation ? 'action' : ''}`}>
+          { animation ? <h4>{animation}</h4>
+            : <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
+          }
         </div>
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
@@ -91,17 +124,34 @@ class MyItems extends Component {
     items: PropTypes.array.isRequired
   }
 
+  renderList() {
+    const { props, props: { items } } = this,
+      cartItems = items.map((item, i) => <CartItem key={item.id} itemNumber={i} isOwner={true} item={item} {...props} />);
+
+    return (
+      <CSSTransitionGroup
+        transitionName="cartItem"
+        transitionEnterTimeout={0}
+        transitionLeaveTimeout={0}>
+        {cartItems}
+      </CSSTransitionGroup>
+    )
+  }
+
   render() {
     const { props, props: { items } } = this,
     total = calculateItemTotal(items);
+
     return (
       <ul>
         <div className='cart__items__title'>Your Items</div>
-        {
-          items.length 
-          ? items.map((item, i) => <CartItem key={i} itemNumber={i} isOwner={true} item={item} {...props} />) 
-          : <EmptyCart />
-        }
+        <div className='cart__items__container'>
+          {
+            items.length 
+            ? this.renderList() 
+            : <EmptyCart key="empty"/>
+          }
+        </div>
         <h3>Total: <span>{displayCost(total)}</span></h3>
       </ul>
     );

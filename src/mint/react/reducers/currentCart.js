@@ -46,12 +46,12 @@ export default function cart(state = initialState, action) {
   case RECEIVE_ITEMS:
     return {
       ...state,
-      items: action.items
+      items: action.items.reverse()
     };
   case RECEIVE_ADD_ITEM:
     return {
       ...state,
-      items: [...state.items, action.item]
+      items: [...state.items, action.item].reverse()
     };
   case RECEIVE_REMOVE_ITEM:
     return {

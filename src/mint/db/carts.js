@@ -47,10 +47,10 @@ var cartsCollection = Waterline.Collection.extend({
      * @type {String}
      */
     thumbnail_url: 'string',
-    
-    // properties necessary for amazon cart
+
     /** @type {String} equivalent to CartId from amazon */
     amazon_cartid: 'string',
+
     /** @type {String} equivalent to HMAC for amazon */
     amazon_hmac: 'string'
 

@@ -28,15 +28,16 @@
         background: $secondary-button-color;
         color: white;
       }
-      &.save {
-        flex-grow: 3; 
+      &.triple {
+        flex-grow: 4; 
       }
-      &.remove{
+      &.dimmed{
         background: white;
         border: 1px solid $border-color-light;
         color: $kip-faded-color;
         text-align: center;
         font-size: 12px;
+        padding: 0 5px 0 20px;
       }
       &:only-child {
         margin: 0 30px;

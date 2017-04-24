@@ -1,4 +1,7 @@
 @import '../../styles/Constants';
+@import '../../styles/Animations';
+
+
 .cartItem {
   padding: $padding*2;
   border-bottom: 1px solid $border-color-light;
@@ -53,3 +56,14 @@
     }
   }
 }
+
+.cartItem-enter {
+  @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.cartItem-leave {
+  @include animation(fadeOutRight cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+}
+

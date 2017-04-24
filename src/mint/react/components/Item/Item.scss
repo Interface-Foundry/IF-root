@@ -11,6 +11,15 @@
     width: 100vw;
     display: inline-block;
   }
+  .item__transition {
+    position: relative;
+  }
+  .item__transition > div {
+    display: inline-block;
+    position: absolute;
+    width: 100%;
+    left: 0;
+  }
   div[class^='item__view'] {
     margin-bottom: $padding;
     text-align: left;

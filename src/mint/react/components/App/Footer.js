@@ -88,15 +88,19 @@ class ItemFooter extends Component {
     item: PropTypes.object,
     addItem: PropTypes.func.isRequired,
     item_id: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    position: PropTypes.number,
+    removeDeal: PropTypes.func
   }
 
   render() {
-    const { addItem, item_id, cart_id, history: { replace } } = this.props;
+    const { removeDeal, addItem, item_id, position, cart_id, history: { replace, location: { pathname } } } = this.props,
+          removeItem = pathname.includes('deal');
 
     return (
       <footer className='footer__item'>
-        <button onClick={() => addItem(cart_id, item_id, replace)}>Add to Cart</button>
+        <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
+        <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>Add to Cart</button>
       </footer>
     );
   }
@@ -114,8 +118,8 @@ class EditFooter extends Component {
     const { cart_id, item_id, history: { push, replace }, removeItem } = this.props;
     return (
       <footer className='footer__save'>
-        <button className='remove' onClick={()=> {removeItem(cart_id, item_id); replace(`/cart/${cart_id}/`);}}>Remove Item</button>
-        <button className='save' onClick={() =>push(`/cart/${cart_id}/`)}>✓  Update</button>
+        <button className='remove dimmed' onClick={()=> {removeItem(cart_id, item_id); replace(`/cart/${cart_id}/`);}}>Remove Item</button>
+        <button className='save triple' onClick={() =>push(`/cart/${cart_id}/`)}>✓ Update</button>
       </footer>
     );
   }

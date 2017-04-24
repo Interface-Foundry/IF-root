@@ -2,9 +2,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../utils';
 import { splitCartById } from '../../reducers';
+import { RouteTransition } from 'react-router-transition';
+import * as presets from '../../styles/RouteAnimations';
 
 export default class Item extends Component {
   state = {
+    animation: 'slideLeft',
     originalx: 0,
     x: 0
   }
@@ -29,18 +32,7 @@ export default class Item extends Component {
 
   componentWillMount() {
     const {
-      props: {
-        item_id,
-        amazon_id,
-        previewAmazonItem,
-        previewItem,
-        item,
-        type,
-        items,
-        index,
-        setSearchIndex,
-        fetchDeals
-      }
+      props: { item_id, amazon_id, previewAmazonItem, previewItem, item, type, items, index, setSearchIndex, fetchDeals }
     } = this;
     // only update item if there isn't one
     if (!item.price) {
@@ -55,14 +47,7 @@ export default class Item extends Component {
 
   componentWillReceiveProps(nextProps) {
     const {
-      props: {
-        cart_id,
-        item_id,
-        amazon_id,
-        previewItem,
-        previewAmazonItem,
-        history: { replace }
-      }
+      props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { replace } }
     } = this;
     const { type: nextType, item: nextItem, index: nextIndex, item: { position: nextPos } } = nextProps;
     //never replace cart_id if its undefined
@@ -80,27 +65,38 @@ export default class Item extends Component {
 
   determineNav() {
     const {
-      props: { cart_id, type, items, index, nextSearch, prevSearch, currentUser, history: { replace } },
+      props: { selectDeal, cart_id, type, items, index, nextSearch, prevSearch, currentUser, history: { replace } },
       state: { originalx, x }
     } = this;
 
+    const diff = originalx - x;
+
+    if(Math.sign(diff) === -1) {
+      this.setState({ animation: 'slideRight' })
+    } else {
+      this.setState({ animation: 'slideLeft' })
+    }
+
     if (type === 'deal') {
       const numericInt = parseInt(index),
-        diff = Math.abs(originalx - x),
+        abs = Math.abs(originalx - x),
         newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
-      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+      if (originalx !== x && x !== 0 && abs > 100) {
+        selectDeal(newIndex)
+        replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+      }
     } else if (type === 'search') {
-      const diff = Math.abs(originalx - x),
+      const abs = Math.abs(originalx - x),
         nav = originalx > x ? nextSearch : prevSearch;
-      if (originalx !== x && x !== 0 && diff > 100 && type === 'search') nav();
+      if (originalx !== x && x !== 0 && abs > 100 && type === 'search') nav();
     } else if (type === 'cartItem') {
       const numericInt = parseInt(index),
-        diff = Math.abs(originalx - x),
+        abs = Math.abs(originalx - x),
         newIndex = originalx > x ? (numericInt === items.length - 1 ? 0 : numericInt + 1) : (numericInt === 0 ? items.length - 1 : numericInt - 1);
 
       const ourItems = splitCartById(this.props, {id: currentUser.id}).my;
 
-      if (originalx !== x && x !== 0 && diff > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems[newIndex].id}/edit`);
+      if (originalx !== x && x !== 0 && abs > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems[newIndex].id}/edit`);
     }
   }
 
@@ -108,43 +104,51 @@ export default class Item extends Component {
     const {
       determineNav,
       props,
+      state: { animation },
       props: { index, type, items, item, nextSearch, prevSearch, item: { main_image_url, store, description, name } }
     } = this;
-    const imageUrl = (type === 'deal' && items && items[parseInt(index)]) ? items[parseInt(index)].large ? items[parseInt(index)].large : main_image_url : main_image_url;
+
+    const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
+      ? items[parseInt(index)].large
+      : main_image_url;
     return (
-      <div 
-        className='item' onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-        onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-        onTouchEnd={ () => determineNav() }
-        >
-        <div className='item__view__image image row'
-            style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
-        </div>
-        <div className='item__view__atts'>
-          <p>{name}</p>
-        </div>
-        { 
-          type === 'deal' && items[parseInt(index)]
-          ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
-          : <ItemInfo {...props} {...item} />
-        }
-        {
-        item.search 
-            ? <div>
-                <button onClick={()=>prevSearch()}>&lt;</button>
-                <button onClick={()=>nextSearch()}>&gt;</button>
-              </div>
-            : null
-            } 
-        <div className='item__view__description'>
-          <h4>{store}</h4> 
-          <p className='ellipsis' > { description }</p>
-          <a> View more </a>
-        </div> 
-        <div className='item__view__review'>
-          <p className='ellipsis'>{description}</p>
-          <em > -theGodOfIpsum </em>
-        </div>
+      <div className='item'>
+        <RouteTransition
+          className="item__transition"
+          pathname={this.props.location.pathname}
+          {...presets.default[animation]}>
+          <div className='item__view__image image row'
+              onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+              onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+              onTouchEnd={ () => determineNav() }
+              style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
+          </div>
+          <div className='item__view__atts'>
+            <p>{name}</p>
+          </div>
+          { 
+            type === 'deal' && items[parseInt(index)]
+            ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
+            : <ItemInfo {...props} {...item} />
+          }
+          {
+          item.search 
+              ? <div>
+                  <button onClick={()=>prevSearch()}>&lt;</button>
+                  <button onClick={()=>nextSearch()}>&gt;</button>
+                </div>
+              : null
+              } 
+          <div className='item__view__description'>
+            <h4>{store}</h4> 
+            <p className='ellipsis' > { description }</p>
+            <a> View more </a>
+          </div> 
+          <div className='item__view__review'>
+            <p className='ellipsis'>{description}</p>
+            <em > -theGodOfIpsum </em>
+          </div>
+        </RouteTransition>
       </div>
     );
   }
@@ -204,8 +208,9 @@ class AddRemove extends Component {
   }
   render() {
     const { item: { id, quantity, added_by }, incrementItem, decrementItem } = this.props;
-    return (!added_by // hide incrementer if not added to cart
-      ? null : <div className='item__view__quantity'>
+    return (!added_by
+      ? null
+      : <div className='item__view__quantity'>
             <button onClick={()=>incrementItem(id, quantity)}>+</button>
             <div className='item__view__quantity__num'>{quantity}</div>
             {

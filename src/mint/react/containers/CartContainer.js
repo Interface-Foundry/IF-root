@@ -10,10 +10,12 @@ const mapStateToProps = (state, ownProps) => {
     addingItem: state.currentCart.addingItem,
     leader: state.currentCart.leader,
     members: state.currentCart.members,
+    deals: state.deals.deals,
     user_account: state.session.user_account,
     items: splitCartById(state, state.session.user_account),
     locked: state.currentCart.locked,
     currentCart: state.currentCart,
+    position: state.deals.position,
     carts: state.otherCarts.carts
   };
 };

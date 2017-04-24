@@ -338,28 +338,36 @@ module.exports = function (router) {
     res.send(item)
   }))
 
- router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
- const email_id = req.params.email_id;
- const cart_id = req.params.cart_id;
+  /**
+   * @api {get} /api/:cart_id/checkout Checkout
+   * @apiDescription Does some upkeep on the back end (like locking items) and redirects to the amazon cart page
+   * @apiGroup Carts
+   * @apiParam {String} :cart_id the cart id
+   */
+  router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
+    // only available for logged-in Users
+    if (!_.get(req, 'UserSession.user_account.id')) {
+      throw new Error('Unauthorized')
+    }
 
- // Send an email to the user with the cart link
- var email = yield db.Emails.create({
-   recipients: email_id,
-   subject: 'Share Kip Cart Test',
-   cart: cart_id
- })
+    // this will be handy later now that we know it exists
+    const userId = req.UserSession.user_account.id
 
- var deals = require('../deals_sample.json');
+    // get the cart
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate(items)
 
- // use the new_cart email template
- email.template('daily_deals', {
-   id: cart_id,
-   name: email_id.split('@')[0],
-   deals: deals
- })
+    // check permissions
+    if (cart.leader !== userId) {
+      throw new Error('Unauthorized')
+    }
 
- // remember to actually send it
- yield email.send();
- res.sendStatus(200);
-}))
+    // lock the cart and all the items
+    // TODO
+
+    // make sure the amazon cart is in sync with the cart in our database
+    var amazonCart = yield cart.syncAmazon()
+
+    // redirect to the cart url
+    res.redirect(amazonCart.PurchaseURL)
+  }))
 }

@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 import { App } from '../components';
 import { fetchCart, fetchAllCarts, updateCart } from '../actions/cart';
 import { addItem, removeItem } from '../actions/item';
+import { removeDeal } from '../actions/deals';
 
 import { getNameFromEmail } from '../utils';
 
@@ -12,10 +13,12 @@ const mapStateToProps = (state, ownProps) => ({
   currentUser: state.session.user_account,
   newAccount: state.session.newAccount,
   deals: state.deals.deals,
+  position: state.deals.position,
   item: state.item,
   currentCart: state.currentCart,
   cartName: state.currentCart.name ? state.currentCart.name : `${_.capitalize(getNameFromEmail(state.session.user_account ? state.session.user_account.email_address : null))}'s Group Cart`,
-  items: state.currentCart.items
+  items: state.currentCart.items,
+  session_id: state.session.id
 });
 const mapDispatchToProps = dispatch => ({
 	addItem: (cart_id, item_id, replace) => {
@@ -27,7 +30,12 @@ const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
   fetchAllCarts: () => dispatch(fetchAllCarts()),
   updateCart: (cart) => dispatch(updateCart(cart)),
-  removeItem: (cart_id, item_id)=> dispatch(removeItem(cart_id, item_id))
+  removeItem: (cart_id, item_id) => dispatch(removeItem(cart_id, item_id)),
+  removeDeal: (index) => {
+    setTimeout(() => {
+      dispatch(removeDeal(index))
+    }, 100)
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
