@@ -35,11 +35,16 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   //parse out text and uris
   var bodyText = req.body.text;
   var bodyHtml = req.body.html;
+  bodyText = utils.truncateConversationHistory(bodyText);
+  // logging.info('TEXT:', bodyText)
   var all_uris = utils.getUrls(bodyHtml);
+  logging.info('all_uris', all_uris);
+
+
+  var text = utils.getTerms(bodyText, all_uris);
   if (all_uris) var uris = all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
   else var uris = null;
   console.log('URIS', uris)
-  var text = utils.getTerms(bodyText, uris);
 
   //business logic starts here
   if (!uris && all_uris) {

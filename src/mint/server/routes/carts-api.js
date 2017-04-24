@@ -338,7 +338,7 @@ module.exports = function (router) {
     res.send(item)
   }))
 
-  router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
+ router.post('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
  const email_id = req.params.email_id;
  const cart_id = req.params.cart_id;
 

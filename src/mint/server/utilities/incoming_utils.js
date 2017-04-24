@@ -116,10 +116,11 @@ var testMatch = function (text, url, start) {
 var exciseUrls = function (text, urls) {
   urls.map(function (url) {
     var indices = exciseUrl(text, url);
+    console.log('INDICES', indices)
     // console.log('URL:', url)
     // console.log('TEXT:', text)
     // console.log('INDICES:', indices)
-    text = text.slice(0, indices[0]) + text.slice(indices[1]);
+    if (indices && text[indices[1]]) text = text.slice(0, indices[0]) + text.slice(indices[1]);
     // console.log('NEW TEXT', text);
   })
   return text;
@@ -160,20 +161,28 @@ var getTerms = function (text, urls) {
   return pars;
 }
 
+var truncateConversationHistory = function (text) {
+  console.log('TEXT', text)
+  var truncated = text.split(/On (Mon|Monday|Tue|Tuesday|Wed|Wednesday|Thu|Thursday|Fri|Friday|Sat|Saturday|Sun|Sunday)?,? (Jan|January|Feb|February|Mar|March|Apr|April|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)/);
+  //ugh maybe just validate by time?????
+  logging.info('new text', truncated[0]);
+  return truncated[0];
+}
+
 /**
  * pulls valid amazon urls from the email body
  * @param {string} text - the text of the email body
  * @returns an array of the valid amazon urls in the email body
  */
 var getUrls = function (html) {
-  html = html.split('mailto:')[0]; // truncates conversation history
-  // console.log('html', html)
+  // html = html.split('mailto:')[0]; // truncates conversation history ON GMAIL
+  console.log('html', html)
   var uris = html.match(/href="(.+?)"/gi);
   logging.info('uris', uris);
   if (!uris) return null;
 
   uris = uris.map(u => u.slice(6, u.length-1)); //trim off href junk
-  // console.log('should return theese', uris)
+  console.log('should return these', uris)
   // uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
   // console.log('should be amazon', uris)
   return uris;
@@ -183,5 +192,6 @@ module.exports = {
   sendErrorEmail: sendErrorEmail,
   sendConfirmationEmail: sendConfirmationEmail,
   getTerms: getTerms,
-  getUrls: getUrls
+  getUrls: getUrls,
+  truncateConversationHistory: truncateConversationHistory
 }
