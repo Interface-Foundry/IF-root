@@ -2,6 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import { displayCost } from '../../utils';
 import { splitCartById } from '../../reducers';
 import { RouteTransition } from 'react-router-transition';
@@ -9,16 +10,10 @@ import Icon from '../Icon';
 import * as presets from '../../styles/RouteAnimations';
 
 export default class Item extends Component {
-  constructor(props) {
-    super(props);
-    this.toggleDescrip = ::this.toggleDescrip;
-  }
   state = {
     animation: 'slideLeft',
     originalx: 0,
-    x: 0,
-    descripHeight: 60,
-    descripTall: false
+    x: 0
   }
 
   static propTypes = {
@@ -40,14 +35,6 @@ export default class Item extends Component {
     location: PropTypes.object,
     selectDeal: PropTypes.func,
     currentUser: PropTypes.object
-  }
-
-  toggleDescrip() {
-    const { state, state: { descripTall } } = this;
-    this.setState({
-      descripHeight: descripTall ? 60 : '100%',
-      descripTall: !descripTall
-    });
   }
 
   componentWillMount() {
@@ -126,9 +113,8 @@ export default class Item extends Component {
     const {
       determineNav,
       props,
-      toggleDescrip,
-      state: { animation, descripHeight, descripTall },
-      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, item: { main_image_url, store, description, name, asin } }
+      state: { animation },
+      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, item: { main_image_url, description, name, asin } }
     } = this,
     // TODO: replace this with the server url!
     tempUrl = `https://amazon.com/dp/${asin}/`;
@@ -164,12 +150,7 @@ export default class Item extends Component {
                 </div>
               : null
               } 
-          <div className='item__view__description'>
-            <h4>{store}</h4> 
-            <p className='ellipsis' style={{height: descripHeight}}> { description }</p>
-            <div className='fadeover' style={{display: descripTall?'none': 'block'}}/>
-            <a href='#' onClick={toggleDescrip}> View {descripTall ? 'less' : 'more'} </a>
-          </div>
+          <ProductDescription description={description} />
           <div className='item__view__review'>
             {/* TODO: get reviews in here */}
             <p className='ellipsis'>This thing is great! Almost as good as penguin food</p>
@@ -177,6 +158,69 @@ export default class Item extends Component {
           </div>
           <a href={tempUrl} target='_blank' className='item__view__amazon__link'> <Icon icon='Open'/> View on Amazon </a>
         </RouteTransition>
+      </div>
+    );
+  }
+}
+
+class ProductDescription extends Component {
+  constructor(props) {
+    super(props);
+    this.toggleDescrip = ::this.toggleDescrip;
+    this._handleWindowResize = ::this._handleWindowResize;
+  }
+
+  state = {
+    descripHeight: '100%',
+    descripTall: false,
+    showViewMore: true
+  }
+
+  static propTypes = {
+    description: PropTypes.string
+  }
+
+  toggleDescrip() {
+    const { state: { descripTall } } = this;
+    this.setState({
+      descripHeight: descripTall ? 60 : '100%',
+      descripTall: !descripTall
+    });
+  }
+
+  _handleWindowResize() {
+    const height = this.refs.descrip.clientHeight;
+    this.setState({
+      showViewMore: height > 80,
+      descripHeight: height > 80 ? 60 : '100%'
+    });
+  }
+
+  componentDidMount() {
+    this._handleWindowResize();
+    window.addEventListener('resize', this._handleWindowResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._handleWindowResize);
+  }
+
+  render() {
+    const { toggleDescrip, state: { descripHeight, descripTall, showViewMore }, props: { description } } = this;
+
+    return (
+      <div ref='descrip' className='item__view__description'>
+        <p className='ellipsis' style={{maxHeight: descripHeight}}> { description }</p>
+        {
+          (showViewMore)
+            ? <div className='fadeover' style={{display: descripTall ? 'none' : 'block'}}/>
+            : null
+        }
+        {
+          (showViewMore) 
+          ? <a href='#' onClick={toggleDescrip}> View {descripTall ? 'less' : 'more'} </a> 
+          : null
+        }
       </div>
     );
   }

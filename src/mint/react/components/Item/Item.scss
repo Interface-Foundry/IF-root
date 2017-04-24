@@ -6,7 +6,7 @@
   overflow-x: hidden;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
-  font: $main-font;
+  font-family: $main-font;
   text-align: left;
   &:after {
     content: '';
