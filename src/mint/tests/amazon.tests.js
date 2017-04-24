@@ -25,6 +25,7 @@ describe('testing amazon to our cart system', () => {
   });
 
   it('should get item from ItemLookup using url ', function * () {
+    this.timeout(3000)
     var item = yield amazon.getAmazonItem(test_item);
     expect(item).to.exist;
   })
@@ -81,7 +82,9 @@ describe('testing amazon to our cart system', () => {
   })
 
   it('should sync up a messed up cart', function * () {
+    this.timeout(5000)
     var messedUpCart = {
+      id: 'dummy',
       amazon_cartid: test.cart.amazon_cartid,
       amazon_hmac: test.cart.amazon_hmac,
       items: [{
@@ -93,7 +96,7 @@ describe('testing amazon to our cart system', () => {
       }]
     }
 
-    var cart = yield exports.syncAmazon(messedUpCart)
+    var cart = yield amazon.syncAmazon(messedUpCart)
     expect(cart).to.exist;
     expect(cart.HMAC).to.exist;
     expect(cart.CartId).to.exist;

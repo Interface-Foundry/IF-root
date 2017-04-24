@@ -60,7 +60,7 @@ function checkAmazonItemInCart (item, cart) {
   } else {
     cartItems = cart.CartItems.CartItem;
   }
-  var cartItem = cartItems.find(i => i.ASIN === item.ASIN);
+  var cartItem = cartItems.find(i => i.ASIN === item.asin);
   if (cartItem) {
     return cartItem;
   }
@@ -317,7 +317,7 @@ exports.syncAmazon = function * (cart) {
   }
 
   // if there are no amazon items in the cart then you can't sync it
-  if (cart.items.length === 0 || !cart.items[0].id) {
+  if (cart.items.length === 0 || !cart.items[0].asin) {
     throw new Error('can only sync carts that have amazon items, and items must be populated')
   }
 
@@ -352,21 +352,30 @@ exports.syncAmazon = function * (cart) {
     'CartId': cart.amazon_cartid,
     'HMAC': cart.amazon_hmac
   };
+  var lastModifyIndex = 0
   var modifyItems = cart.items.map((i, index) => {
     amazonItems.map(ai => {
       if (ai.ASIN === i.asin && parseInt(ai.Quantity) !== i.quantity) {
         var key = 'Item.' + (index + 1) + '.'
+        lastModifyIndex = index + 1
         cartModifyAmazonParams[key + 'CartItemId'] = ai.CartItemId
-        cartAddAmazonParams[key + 'Quantity'] = item.quantity
+        cartModifyAmazonParams[key + 'Quantity'] = i.quantity || 0
       }
     })
+  })
+
+  var itemsToDelete = amazonItems.map(ai => {
+    if (cart.items.filter(i => i.asin === ai.ASIN).length === 0) {
+      cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.CartItemId'] = ai.CartItemId
+      cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.Quantity'] = 0
+    }
   })
   console.log(cartModifyAmazonParams)
 
   var amazonCart = yield opHelper.execute('CartAdd', cartAddAmazonParams);
   checkError(amazonCart)
   amazonCart = yield opHelper.execute('CartModify', cartModifyAmazonParams);
-  checkError(amazonCart)
+  checkError(amazonCart.result.CartModifyResponse.Cart)
 
-  return amazonCart
+  return amazonCart.result.CartModifyResponse.Cart
 }
