@@ -37,8 +37,8 @@ const message = {
     color: '#f43440',
     actions: [{
       color: '#45a5f4',
-      name: 'quiz',
-      value: 'quiz',
+      name: 'quiz_bloomthat',
+      value: 'quiz_bloomthat',
       text: '✓ Take Quiz',
       style: 'primary',
       type: 'button'

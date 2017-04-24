@@ -237,19 +237,13 @@ handlers['food.begin'] = function * (message) {
 
 }
 
-// //bloomthat quiz start
-// handlers['quiz.begin'] = function * (message) {
-//   kip.debug('🍕 quiz start 🌮')
-//   return yield handlers['quiz.q1'](message, true)
-// }
+module.exports = function (replyChannel, allHandlers) {
+  $replyChannel = replyChannel
+  $allHandlers = allHandlers
 
-// module.exports = function (replyChannel, allHandlers) {
-//   $replyChannel = replyChannel
-//   $allHandlers = allHandlers
-
-//   // merge in our own handlers
-//   _.merge($allHandlers, handlers)
-// }
+  // merge in our own handlers
+  _.merge($allHandlers, handlers)
+}
 
 module.exports = {
   handleMessage: handleMessage

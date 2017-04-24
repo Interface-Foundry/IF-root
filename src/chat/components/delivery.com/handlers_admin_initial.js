@@ -19,66 +19,6 @@ var $allHandlers
 /**@namespace handlers*/
 var handlers = {}
 
-
-//BLOOM THAT QUIZ
-handlers['quiz.q1'] = function * (message) {
-
-  var msg_json = {
-    title: '',
-    text: 'Which would you do??',
-    attachments: []
-  }
-
-  msg_json.attachments.push({
-    'text': '',
-    'fallback': 'A1',
-    'callback_id': 'back_remove_address',
-    'attachment_type': 'default',
-    'actions': [{
-      'name': 'passthrough',
-      'text': 'A1',
-      'type': 'button',
-      'value': 'A1'
-    },{
-      'name': 'passthrough',
-      'text': 'A2',
-      'type': 'button',
-      'value': 'A2'
-    },{
-      'name': 'passthrough',
-      'text': 'A3',
-      'type': 'button',
-      'value': 'A2'
-    }]
-  })
-  $replyChannel.sendReplace(message, 'quiz.q2', {type: message.origin, data: msg_json})
-}
-
-handlers['quiz.q2'] = function * (message) {
-
-  var msg_json = {
-    title: '',
-    text: 'hmmmmm?',
-    attachments: []
-  }
-
-  msg_json.attachments.push({
-    'text': '',
-    'fallback': 'A1',
-    'callback_id': 'back_remove_address',
-    'attachment_type': 'default',
-    'actions': [{
-      'name': 'passthrough',
-      'text': 'A2',
-      'type': 'button',
-      'value': 'quiz.q2'
-    }]
-  })
-  $replyChannel.sendReplace(message, 'quiz.q2', {type: message.origin, data: msg_json})
-}
-
-
-
 handlers['food.admin.confirm_new_session'] = function * (message) {
 
   //check for teams over 500 people

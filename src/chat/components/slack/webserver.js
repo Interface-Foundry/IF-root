@@ -67,13 +67,6 @@ function simple_action_handler (action) {
       return 'more'
     case 'quiz':
       return 'quiz';
-    case 'q1':
-      return 'q1';
-    case 'q2':
-      return 'q2';
-    case 'q3':
-      return 'q3';
-
     case 'cafe_btn':
       return 'cafe_btn';
     case 'shopping_btn':
@@ -85,6 +78,8 @@ function simple_action_handler (action) {
       return 'team';
     case 'channel_btn':
       return 'channel_btn';
+    case 'quiz_bloomthat':
+      return 'quiz_bloomthat';
     case 'collect_select':
       return 'collect_select';
     case 'settings':
@@ -237,39 +232,35 @@ app.post('/slackaction', next(function * (req, res) {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
     }
-    else if (simple_command == 'quiz'){
-      message.text = '';
-      let msgData = {
-        attachments: [...cardTemplate.bt_q1()],
-        as_user: true
-      };
-      let slackBot = slackModule.slackConnections[team.team_id];
-      slackBot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      return;
-    }
-    else if (simple_command == 'q1'){
-      message.text = '';
-      let msgData = {
-        attachments: [...cardTemplate.bt_q2()],
-        as_user: true
-      };
-      let slackBot = slackModule.slackConnections[team.team_id];
-      slackBot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      return;
-    }
-    else if (simple_command == 'q2'){
-      message.text = '';
-      let msgData = {
-        attachments: [...cardTemplate.bt_q3()],
-        as_user: true
-      };
-      let slackBot = slackModule.slackConnections[team.team_id];
-      slackBot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      return;
-    }
+    else if (simple_command == 'quiz_bloomthat'){
+
+      console.log('& & & & & & & && ACTION & & & & & & & & & & & & ', action)
+
+      message.mode = 'quiz_bloomthat'
+      message.action = 'begin'
+      message.text = 'quiz_bloomthat'
+      message.save().then(() => {
+        queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+      })
 
 
-
+      // //which quiz question to send
+      // switch(action.value){
+      //   case '':
+      //   break;
+      //   case '':
+      //   break;
+      //   case '':
+      // }
+      // message.text = '';
+      // let msgData = {
+      //   attachments: [...cardTemplate.bt_q1()],
+      //   as_user: true
+      // };
+      // let slackBot = slackModule.slackConnections[team.team_id];
+      // slackBot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      return;
+    }
     else if (simple_command === 'shopping_btn' || simple_command === 'shopping') {
       message.text = '';
       let msgData = {

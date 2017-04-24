@@ -33,6 +33,7 @@ var settings = require('./modes/settings');
 var team = require('./modes/team');
 var shopping = require('./modes/shopping').handlers;
 var food = require('./delivery.com/delivery.com').handleMessage;
+var quiz = require('./quiz/bloomthat').handleMessage;
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
@@ -184,6 +185,9 @@ function switchMode(message) {
 		'food': function() {
 			return 'food';
 		},
+    'quiz_bloomthat': function() {
+      return 'quiz_bloomthat';
+    },
 		'cafe': function() {
 			return 'food';
 		},
@@ -225,6 +229,9 @@ function printMode(message) {
 		case 'settings':
 			winston.debug('In', 'SETTINGS'.red, 'mode 👋')
 			break
+    case 'quiz_bloomthat':
+      winston.debug('In', 'BLOOMTHAT QUIZ'.blue, 'mode 👋')
+      break
 		case 'food':
 			winston.debug('In', 'FOOD'.blue, 'mode 👋')
 			break
@@ -428,6 +435,9 @@ queue.topic('incoming').subscribe(incoming => {
           var replies = yield team.handle(message);
         }
         break;
+      case 'quiz_bloomthat':
+        yield quiz(message)
+        return
       case 'food':
       case 'cafe':
         yield food(message)
