@@ -49,16 +49,7 @@ class CSVDrop extends Component {
         }
     })
   }
-  // 0:"Sports & Outdoors"
-  // 1:"Fallout Vault Tec Pip Boy PipBoy Cosplay Morale PS4 XBOX PVC Rubber 3D Velcro Patch"
-  // 2:"B01B9KUGGM"
-  // 3:"2016-10-07 17:15:19"
-  // 4:"1"
-  // 5:"8.95"
-  // 6:"PA-API"
-  // 7:"eileenog-20"
-  // 8:"ndi"
-  // 9:"DESKTOP"
+
 
     onDrop (acceptedFiles, rejectedFiles) {
       var file = new FormData();
@@ -100,14 +91,12 @@ class CSVDrop extends Component {
           credentials: 'include',
         });
       const { data } = yield resp.json();
-      console.log(data);
     })
     }
     
 
     processCheckedRows(checkedRows){
       //for each checked row, set the associated cart purchased = true
-      //console.log(checkedRows);
       var self = this;
       checkedRows.map((checkedRow) => self.processCheckedRow(checkedRow));
     }
@@ -119,15 +108,12 @@ class CSVDrop extends Component {
         var rowIndex = checkedRows.findIndex(function(row){
           return (row.ASIN == checkedRow.ASIN && row.added_date == checkedRow.added_date)
         });
-        console.log(rowIndex);
         if(rowIndex!=-1){
           checkedRows.splice(rowIndex,1);
           self.setState({checkedRows: checkedRows});
-          console.log('Removing:', checkedRow.title);
         } else {
           checkedRows.push(checkedRow);
           self.setState({checkedRows: checkedRows});
-          console.log('Adding:', checkedRow.title);
         }
       }
     }
@@ -145,23 +131,47 @@ class CSVDrop extends Component {
             <Dropzone multiple={false} accept='text/csv' onDrop={this.onDrop}>
               <div>Try dropping some files here, or click to select files to upload. </div>
             </Dropzone>
-            {fname} uploaded.
+              {fname} uploaded.
           </div>
-          <div className="col-lg-6">
-            <Panel>
-              <div>
-                {dataText ? dataText.map(row=>{
-                  return <Checkbox key={row.ASIN+row.added_date} onChange={() => self.addToCheckedRows(row)}>
-                    <div>Item Name: {row.title}</div>
-                    <div>ASIN: {row.ASIN}</div>
-                    <div>Date Added: {row.added_date}</div>
-                    </Checkbox>;
-                }) : ''}
-              </div>
+          <div>
               <div>
                 { dataText ? <Button onClick={() => self.processCheckedRows(checkedRows)}>Confirm</Button> : ''}
               </div>
-            </Panel>
+              <div className="col-lg-8">
+
+                <Panel header={"Item Matches"} >
+                  <div className="col-lg-6">
+                    {dataText ? dataText.map(row=>{
+                      return <Checkbox key={row[0].ASIN+row[0].added_date} onChange={() => self.addToCheckedRows(row[0])}>
+                        <div>Item Name: {row[0].title.length > 30 ? row[0].title.substr(0,30)+'...' : row[0].title}</div>
+                        <div>ASIN: {row[0].ASIN}</div>
+                        <div>Date Added: {row[0].added_date}</div>
+                        <div>Added by: {row[0].slack_id}</div>
+                        <hr />
+                        </Checkbox>;
+                        
+                    }) : ''}
+
+                  </div>
+
+                  <div className="col-lg-6">
+
+                    {dataText ? dataText.map(row=>{
+                      return <Checkbox disabled={true}>
+                        <div>Item Name: {row[1].Name.length > 30 ? row[1].Name.substr(0,30)+'...' : row[1].Name}</div>
+                        <div>ASIN: {row[1].ASIN}</div>
+                        <div>Date Added: {row[1].Date}</div>
+                        <div>Category: {row[1].Category}</div>
+                        <hr />
+                        </Checkbox>;
+
+                    }) : ''}
+
+                  </div>
+                </Panel>
+
+                
+              </div>
           </div>
         </div>
       );

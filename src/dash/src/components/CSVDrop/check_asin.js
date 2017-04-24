@@ -29,14 +29,10 @@ var differenceInDays = require('date-fns/difference_in_calendar_days')
 
 module.exports = function check_asin(rows, items) {
 	    var entries = JSON.parse(rows);
-	    //console.log('HIYAH!', entries);
-	    //console.log('ITEMS', items);
 	    var results = [];
         entries.map((row) => 
         	{
                 var matches = items.filter(function(i){return i.ASIN == row.ASIN});
-                //console.log(matches);
-                //console.log('ROWWWWWW', row.Qty, row.Name)
                 for(var i = 0; i<row.Qty ; i++){
                 	var closestMatch = 0;
                 	var closestDistance;
@@ -57,7 +53,7 @@ module.exports = function check_asin(rows, items) {
                   //if(i<matches.length){
                   	// console.log(matches[i]);
                   	if(matches[closestMatch]){
-                  		results.push(matches[closestMatch]);
+                  		results.push([matches[closestMatch],row]); // match refers to the entry from kip,row refers to amazon's csv entry
                       	matches.splice(closestMatch,1);
                   	}
                     
