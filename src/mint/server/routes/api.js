@@ -51,7 +51,7 @@ router.get('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
   var allDeals = yield dealsDb.getDeals(4, 0)
       deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
 
-  email.template('new_cart', {
+  email.template('share_cart_demo', {
     cart: {
       id: cart_id,
       name: email_id + "\'s Kip Group Cart"
