@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import NotificationBubble from '../NotificationBubble';
+import { Icon } from '..';
 
 export default class AddAmazonItem extends Component {
   constructor(props) {
@@ -29,6 +30,7 @@ export default class AddAmazonItem extends Component {
       <div className='add_to_amazon'>
         Add Item to Kip Cart
         <button className={`add_to_amazon__button ${!!user_account.id ? '' : 'yellow'}`} onClick={addItemToCart}>
+          <Icon icon='Search'/>
           { !!user_account.id ? 'Paste Amazon URL or Search' : '+ Add Amazon Item' }
         </button>
         {numUserItems ? null : <NotificationBubble top={25} right={13}/>}
