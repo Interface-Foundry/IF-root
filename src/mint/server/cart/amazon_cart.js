@@ -345,7 +345,6 @@ exports.syncAmazon = function * (cart) {
     cartAddAmazonParams[key + 'ASIN'] = item.asin
     cartAddAmazonParams[key + 'Quantity'] = item.quantity
   })
-  console.log(cartAddAmazonParams)
 
   var cartModifyAmazonParams = {
     'AssociateTag': associateTag,
@@ -370,10 +369,9 @@ exports.syncAmazon = function * (cart) {
       cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.Quantity'] = 0
     }
   })
-  console.log(cartModifyAmazonParams)
 
   var amazonCart = yield opHelper.execute('CartAdd', cartAddAmazonParams);
-  checkError(amazonCart)
+  checkError(amazonCart.result.CartAddResponse.Cart)
   amazonCart = yield opHelper.execute('CartModify', cartModifyAmazonParams);
   checkError(amazonCart.result.CartModifyResponse.Cart)
 
