@@ -24,6 +24,7 @@ export default class Footer extends Component {
         <Route path={`${match.url}/m/item/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/:type/:index/:item_id/edit`} component={() => <EditFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/edit`} component={() => <div className='empty'/>}/>
+        <Route path={`${match.url}/m/settings`} component={() => <SettingsFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/deal/:index/:item_id`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/search/:index/:search`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}`} exact component={() => <CartFooter {...props}/>}/>
@@ -135,6 +136,21 @@ class EditFooter extends Component {
       <footer className='footer__save'>
         <button className='remove dimmed' onClick={()=> {removeItem(cart_id, item_id); replace(`/cart/${cart_id}/`);}}>Remove Item</button>
         <button className='save triple' onClick={() =>push(`/cart/${cart_id}/`)}>✓ Update</button>
+      </footer>
+    );
+  }
+}
+
+class SettingsFooter extends Component {
+  static propTypes = {
+    cart_id: PropTypes.string
+  }
+
+  render() {
+    const { cart_id, history: { push, replace }, removeItem } = this.props;
+    return (
+      <footer className='footer__settings'>
+        <button className='logout'>Logout</button>
       </footer>
     );
   }

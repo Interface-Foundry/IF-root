@@ -9,5 +9,6 @@ export Modal from './Modal';
 export EmailForm from './EmailForm';
 export AmazonForm from './AmazonForm';
 export Deals from './Deals';
+export Settings from './Settings';
 export Share from './Share';
 export EditCart from './EditCart';

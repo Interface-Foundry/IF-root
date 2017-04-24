@@ -17,7 +17,8 @@ import {
   IoPlus,
   IoAndroidPersonAdd,
   IoGearA,
-  IoChevronDown
+  IoChevronDown,
+  IoArrowLeftC
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -81,6 +82,8 @@ export default class Icon extends Component {
       return <IoGearA/>;
     case 'Down':
       return <IoChevronDown/>
+    case 'Left':
+      return <IoArrowLeftC/>
     default:
       return <div>¯\_(ツ)_/¯</div>
     }

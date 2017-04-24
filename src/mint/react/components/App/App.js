@@ -98,7 +98,7 @@ export default class App extends Component {
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
 
-        {showFooter ? <Footer {...props} cart_id={cart_id} _toggleSidenav={_toggleSidenav}/> : null}
+        {showFooter ? <Footer {...props} cart_id={cart_id}/> : null}
       </section>
     );
   }
