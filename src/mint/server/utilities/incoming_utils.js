@@ -2,7 +2,7 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-var emoji = require('../utilities/emoji_utils');
+// var emoji = require('../utilities/emoji_utils');
 
 /**
  * Sends an email informing the user that a url they typed
@@ -152,7 +152,7 @@ var getTerms = function (text, urls) {
 
   pars = pars.map(function (par) {
     par = par.replace(/[\[\]!@\#$%\^&\*\.<>\?{}]/g, '');
-    par = emoji(par);
+    // par = emoji(par);
     return par;
   })
 

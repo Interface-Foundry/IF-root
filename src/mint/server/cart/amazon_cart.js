@@ -9,6 +9,7 @@ const asinCache = LRU({
 })
 
 var scraper = require('./scraper_amazon');
+var emoji = require('../utilities/emoji_utils');
 
 // amazon creds -> move to constants later
 const amazonCreds = [{
@@ -83,6 +84,7 @@ exports.getAmazonItem = function * (item_identifier) {
  * @returns {[type]} amazon items
  */
 exports.searchAmazon = function * (query) {
+  query = emoji(query);
   console.log('searching:', query)
   var amazonParams = {
     Availability: 'Available',
