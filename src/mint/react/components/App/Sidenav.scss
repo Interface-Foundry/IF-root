@@ -39,6 +39,11 @@
 		@include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
 		@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
+		.sidenav__list__view {
+			height: calc(100% - #{$nav-height * 3 + 10px});
+			width: 100%;
+		}
+
 		h4 {
 			text-align: right;
 			border-bottom: 1px solid $border-color-light;
@@ -75,8 +80,24 @@
 				text-align: right;
 			}
 		}
+		.sidenav__list__actions {
+			display: block;
+			height: $nav-height;
 
-		footer {
+			h4 {
+				border: 0;
+				height: $nav-height/2;
+				line-height: $nav-height/2;
+
+				svg {
+					vertical-align: middle !important;
+					font-size: 18px;
+					margin-right: $padding;
+				}
+			}
+		}
+	}
+	footer {
 			position: absolute;
 			bottom: 0;
 			width: 100%;
@@ -116,5 +137,4 @@
 				}
 			}
 		}
-	}
 }

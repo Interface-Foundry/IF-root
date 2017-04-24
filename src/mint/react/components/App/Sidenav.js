@@ -23,35 +23,41 @@ export default class Sidenav extends Component {
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
         </div>
         <ul className='sidenav__list'>
-          <li className='sidenav__list__header'>
-            <p>{currentUser.email_address}</p>
-            <div className='icon' onClick={_toggleSidenav}>
-              <Icon icon='Clear'/>
-            </div>
-          </li>
-          <h4>Leader</h4>
-          {_.map(leaderCarts, (c, i) => (
-            <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-              <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
-                <div className='icon'>
-                  <Icon icon='Edit'/>
-                </div>
-              </Link>
-              <Link to={`/cart/${c.id}`}>
-                <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
-              </Link>
-            </li>
-          ))}
-          <h4>Member</h4>
-          {_.map(memberCarts, (c, i) => (
-            <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-              <div className='icon'>
+          <div className='sidenav__list__view'>
+            <li className='sidenav__list__header'>
+              <p>{currentUser.email_address}</p>
+              <div className='icon' onClick={_toggleSidenav}>
+                <Icon icon='Clear'/>
               </div>
-              <Link to={`/cart/${c.id}`}>
-                <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
-              </Link>
             </li>
-          ))}
+            <h4>Leader</h4>
+            {_.map(leaderCarts, (c, i) => (
+              <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                  <div className='icon'>
+                    <Icon icon='Edit'/>
+                  </div>
+                </Link>
+                <Link to={`/cart/${c.id}`}>
+                  <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                </Link>
+              </li>
+            ))}
+            <h4>Member</h4>
+            {_.map(memberCarts, (c, i) => (
+              <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                <div className='icon'>
+                </div>
+                <Link to={`/cart/${c.id}`}>
+                  <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                </Link>
+              </li>
+            ))}
+          </div>
+          <div className='sidenav__list__actions'>
+            <h4><Icon icon='Settings'/> Settings</h4>
+            <h4><Icon icon='Email'/>Feedback</h4>
+          </div>
           <footer>
             <Link to={`/cart/${cart_id}/m/share`} onClick={_toggleSidenav}>
               <button className='share'>

@@ -15,7 +15,8 @@ import {
   IoSearch,
   IoIosCartOutline,
   IoPlus,
-  IoAndroidPersonAdd
+  IoAndroidPersonAdd,
+  IoGearA
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -75,6 +76,8 @@ export default class Icon extends Component {
       return <IoAndroidPersonAdd/>;
     case 'Plus':
       return <IoPlus/>;
+    case 'Settings':
+      return <IoGearA/>;
     default:
       return <div>¯\_(ツ)_/¯</div>
     }
