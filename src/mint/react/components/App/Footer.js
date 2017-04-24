@@ -1,7 +1,8 @@
+// react/components/App/Footer.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-import { Icon } from '../Icon';
 
 export default class Footer extends Component {
   static propTypes = {
@@ -18,7 +19,7 @@ export default class Footer extends Component {
       <footer className='footer'>
         <Route path={`${match.url}/m/item/add`} component={() => <div className='empty'/>}/>
         <Route path={`${match.url}/m/share`} component={() => <div className='empty'/>}/>
-        <Route path={`${match.url}/m/signin`} component={() => <div className='empty'/>}/>
+        <Route path={`${match.url}/m/signin`} component={() => <SignInFooter/>}/>
         <Route path={`${match.url}/m/item/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/:type/:index/:item_id/edit`} component={() => <EditFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/edit`} component={() => <div className='empty'/>}/>
@@ -28,7 +29,16 @@ export default class Footer extends Component {
       </footer>
     );
   }
+}
 
+class SignInFooter extends Component {
+  render() {
+    return (
+      <div className='tos'>
+        By signing up you agree to the Kip <a href='https://kipthis.com/legal/'>Terms of Use</a>
+      </div>
+    );
+  }
 }
 
 class CartFooter extends Component {
@@ -95,7 +105,7 @@ class ItemFooter extends Component {
 
   render() {
     const { removeDeal, addItem, item_id, position, cart_id, history: { replace, location: { pathname } } } = this.props,
-          removeItem = pathname.includes('deal');
+      removeItem = pathname.includes('deal');
 
     return (
       <footer className='footer__item'>

@@ -1,3 +1,5 @@
+// react/actions/deals.js
+
 import { REQUEST_DEALS, RECEIVE_DEALS, SELECT_DEAL, REMOVE_DEAL } from '../constants/ActionTypes';
 
 const receive = (deals) => ({

@@ -1,3 +1,5 @@
+// react/components/AddAmazonItem/AddAmazonItem.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import NotificationBubble from '../NotificationBubble';

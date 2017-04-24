@@ -4,7 +4,7 @@
   height: $nav-height + 10px;
   line-height: $nav-height*2 - $padding*2;
   padding: $padding 0;
-  margin: 0 -15px;
+  margin: 0 (-$padding) * 1.5;
   font-family: $secondary-font;
   color: $kip-primary-color;
   .footer__cart, .footer__item, .footer__save {
@@ -42,6 +42,16 @@
       &:only-child {
         margin: 0 30px;
       }
+    }
+  }
+  .tos {
+    margin: 0px $padding*3;
+    text-align: center;
+    font-size: 13px;
+    color: $kip-faded-color;
+    font-style: italic;
+    a {
+      text-decoration: underline;
     }
   }
   .empty {

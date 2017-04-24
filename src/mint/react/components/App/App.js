@@ -1,3 +1,5 @@
+// mint/react/components/App/App.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';

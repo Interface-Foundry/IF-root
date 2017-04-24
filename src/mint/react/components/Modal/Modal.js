@@ -1,9 +1,11 @@
+// react/components/Modal/Modal.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 
 import { EmailFormContainer, AmazonFormContainer, ItemContainer, EditCartContainer } from '../../containers';
-import { Share, RouteTransitionGroup } from '..';
+import { Share } from '..';
 
 export default class SignIn extends Component {
 
