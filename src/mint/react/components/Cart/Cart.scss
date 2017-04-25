@@ -25,11 +25,14 @@ $cart__add-height: $nav-height+$padding;
           font-size: 20px;
           margin-right: $padding/2;
         }
-        &:first-of-type {
-          margin-bottom: 10px;
+        &:last-of-type {
+          margin-top: 10px;
           color: white;
           font-size: 18px;
           background: $secondary-button-color;
+        }
+        &:first-of-type {
+          margin-top: 0;
         }
       }
     }
