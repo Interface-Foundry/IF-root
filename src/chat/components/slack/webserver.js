@@ -65,6 +65,8 @@ function simple_action_handler (action) {
       return action.value
     case 'more':
       return 'more'
+    case 'quiz':
+      return 'quiz';
     case 'cafe_btn':
       return 'cafe_btn';
     case 'shopping_btn':
@@ -76,6 +78,10 @@ function simple_action_handler (action) {
       return 'team';
     case 'channel_btn':
       return 'channel_btn';
+    case 'quiz_bloomthat':
+      return 'quiz_bloomthat';
+    case 'quiz_bloomthat_help':
+      return 'quiz_bloomthat_help';
     case 'collect_select':
       return 'collect_select';
     case 'settings':
@@ -115,6 +121,22 @@ app.post('/slackaction', next(function * (req, res) {
 
   var message;
   var parsedIn = JSON.parse(req.body.payload);
+
+
+
+  if (_.get(parsedIn, 'actions[0].value') === 'start.quiz') {
+    var okay = {
+      text: 'starting quiz!!!!!',
+      replace_original: false,
+      as_user: true
+    }
+    return res.send(okay)
+
+        let slackBot = slackModule.slackConnections[team];
+        reply.as_user = true;
+        slackBot.web.chat.postMessage(message.source.channel, '', reply);
+
+  }
 
   // snooze any message by setting action.value to "snooze"
   if (_.get(parsedIn, 'actions[0].value') === 'snooze') {
@@ -161,6 +183,8 @@ app.post('/slackaction', next(function * (req, res) {
 
     var action = parsedIn.actions[0];
     kip.debug('incoming action', action);
+
+
     // kip.debug(action.name.cyan, action.value.yellow);
     // // check the verification token in production
     // if (process.env.NODE_ENV === 'production' && parsedIn.token !== kip.config.slack.verification_token) {
@@ -171,9 +195,17 @@ app.post('/slackaction', next(function * (req, res) {
     // kip.debug(action.name.cyan, action.value.yellow);
     // for things that i'm just going to parse for
     var simple_command = simple_action_handler(action);
+
     var buttonData = buttonCommand(action);
 
+    console.log('SIMPLE COMMAND ',simple_command)
+    console.log('BUTTON DATA ',buttonData)
+
+    
+
     kip.debug('\n\n\nsimple_command: ', simple_command,'\n\n\n');
+
+
     if (simple_command) {
       kip.debug('passing through button click as a regular text chat', simple_command.cyan);
       var message = new db.Message({
@@ -201,7 +233,29 @@ app.post('/slackaction', next(function * (req, res) {
           message.save().then(() => {
             queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
-      }
+    }
+    else if (simple_command == 'quiz_bloomthat'){
+
+      message.mode = 'quiz_bloomthat'
+      message.action = 'begin'
+      message.text = 'quiz_bloomthat'
+      message.save().then(() => {
+        queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+      })
+      return
+    }
+    else if (simple_command == 'quiz_bloomthat_help'){
+
+      console.log('& & & & & & & && HELP & & & & & & & & & & & & ')
+
+      message.mode = 'quiz_bloomthat'
+      message.action = 'help'
+      message.text = 'quiz_bloomthat'
+      message.save().then(() => {
+        queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+      })
+      return
+    }
     else if (simple_command === 'shopping_btn' || simple_command === 'shopping') {
       message.text = '';
       let msgData = {

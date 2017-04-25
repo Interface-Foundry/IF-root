@@ -225,6 +225,7 @@ handlers['food.exit.confirm'] = function * (message) {
 // the user's intent is to initiate a food order
 //
 handlers['food.begin'] = function * (message) {
+
   kip.debug('🍕 food order 🌮')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
