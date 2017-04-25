@@ -14,7 +14,8 @@ var amazon = require('../cart/amazon_cart');
 var utils = require('../utilities/incoming_utils');
 
 /**
- * TODO, etc
+ * @api {post} /incoming
+ * @apiDescription parses incoming user emails sent to kip.ai, and takes actions in response
  */
 router.post('/', upload.array(), (req, res) => co(function * () {
   console.log('posted to webhook');
@@ -36,15 +37,13 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   var bodyText = req.body.text;
   var bodyHtml = req.body.html;
   bodyText = utils.truncateConversationHistory(bodyText);
-  // logging.info('TEXT:', bodyText)
   var all_uris = utils.getUrls(bodyHtml);
-  logging.info('all_uris', all_uris);
-
+  // logging.info('all_uris', all_uris);
 
   var text = utils.getTerms(bodyText, all_uris);
   if (all_uris) var uris = all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
   else var uris = null;
-  console.log('URIS', uris)
+  // console.log('URIS', uris)
 
   //business logic starts here
   if (!uris && all_uris) {
@@ -61,7 +60,7 @@ router.post('/', upload.array(), (req, res) => co(function * () {
         try {
           var itemResults = yield amazon.searchAmazon(p);
 
-          console.log('got a result from amazon search', itemResults)
+          // console.log('got a result from amazon search', itemResults)
           if (itemResults) searchResults.push(itemResults);
         }
         catch (err) {
@@ -85,24 +84,21 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   console.log('gonna query for the cart')
   var cart = yield db.Carts.findOne({id: cart_id}).populate('items');
 
-  // console.log('CART', cart)
-
   if (!cart) {
     logging.error('could not find cart');
     res.sendStatus(202);
     return;
   }
 
-  if (uris && uris.length) {
+  if (uris && uris.length) { //if the user copypasted an amazon uri directly
     console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {
       return yield amazonScraper.scrapeUrl(uri);
       var item = yield amazon.getAmazonItem(uri);
-      console.log('ITEM', item)
       if (item.Variations) console.log('there are options')
       // return yield amazon.addAmazonItemToCart(item, cart);
     });
-    console.log('amazon things', uris)
+    // console.log('amazon things', uris)
     yield url_items.map(function * (it) {
       cart.items.add(it.id);
       it.cart = cart.id;
@@ -116,7 +112,7 @@ router.post('/', upload.array(), (req, res) => co(function * () {
   if (uris || searchResults) {
     if (!uris) uris = [];
     if (!searchResults) searchResults = [];
-    logging.info('searchResults', searchResults);
+    // logging.info('searchResults', searchResults);
     yield utils.sendConfirmationEmail(email, uris, searchResults);
   }
 
