@@ -191,7 +191,6 @@ class ProductDescription extends Component {
   _handleWindowResize() {
     const height = this.refs.descrip.clientHeight;
 
-    console.log(height)
     this.setState({
       showViewMore: height > 80,
       descripHeight: height > 80 ? 60 : '100%'
