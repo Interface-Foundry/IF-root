@@ -24,6 +24,7 @@ var sendErrorEmail = function * (email) {
  * items have been added to their cart
  * @param {string} email - the email of the user we're responding to
  * @param {array} uris - array of the urls of the amazon items we're confirming
+ * @param {array} searchResults - array of the items resulting from the user's search
  */
 var sendConfirmationEmail = function * (email, uris, searchResults) {
   //create confirmation email
@@ -54,7 +55,11 @@ var sendConfirmationEmail = function * (email, uris, searchResults) {
 }
 
 /**
- * TODO
+ * Locates interrupted urls within the text
+ * @param {string} text - body of the email from which we want to excise a potentially non-continuous url
+ * @param {string} url - url that we have identified and want to excise
+ * @param {int} start - the character index we want to test as a possible match for the url
+ * @returns {array} - array of length two with starting and ending coordinates for the url match, if there is one, and null otherwise
  */
 var testMatch = function (text, url, start) {
   var end = -1;
@@ -87,10 +92,10 @@ var testMatch = function (text, url, start) {
 }
 
 /**
- * TODO
+ * tests each index in the text for a fuzzy match to the url
  * @param {string} text - the text being searched for the url
  * @param {string} url - the url that will be identified and removed
- * @returns {array} - start and end index for the string to be excised
+ * @returns {array} - start and end index for the string to be excised, or null if it can't be found
  */
  var exciseUrl = function (text, url) {
    for (var i = 0; i < text.length; i++) {
@@ -106,20 +111,18 @@ var testMatch = function (text, url, start) {
 
 
 /**
- * TODO
+ * excises a series of fuzzy urls from a text
  * N.B. if a user pastes the same url several times, that url will be picked out of the html
  * multiple times, and end up in the urls array here multiple times. So we only need to excise
  * each url once.
- * @param
+ * @param {string} text - the text from which we want to excise urls
+ * @param {array} urls - an array of urls to be excised
  * @returns {string} - the text, with the urls excised
  */
 var exciseUrls = function (text, urls) {
   urls.map(function (url) {
     var indices = exciseUrl(text, url);
-    console.log('INDICES', indices)
-    // console.log('URL:', url)
-    // console.log('TEXT:', text)
-    // console.log('INDICES:', indices)
+    // console.log('INDICES', indices)
     if (indices && text[indices[1]]) text = text.slice(0, indices[0]) + text.slice(indices[1]);
     // console.log('NEW TEXT', text);
   })
@@ -127,12 +130,12 @@ var exciseUrls = function (text, urls) {
 }
 
 /**
- * TODO
- * @param
- * @returns
+ * Separates the text of an email the user has sent us into search terms / phrases by paragraph
+ * @param {string} text - the text of the body of an email, as Sendgrid reveals it to us
+ * @param {array} urls - urls we have already identified as present in the email
+ * @returns {array} - array of search terms / phrases the user has emailed us
  */
 var getTerms = function (text, urls) {
-  // logging.info('TEXT:', text);
   if (urls) {
     urls = urls.map(url => url.replace(/&amp;/g, '&'));
 
@@ -152,31 +155,31 @@ var getTerms = function (text, urls) {
 
   pars = pars.map(function (par) {
     par = par.replace(/[\[\]!@\#$%\^&\*\.<>\?{}]/g, '');
-    // par = emoji(par);
     return par;
   })
 
   console.log('paragraphs:', pars)
-
   return pars;
 }
 
+/**
+ * truncates quoted text from prior emails in the conversation in order to isolate the user's response
+ * @param {string} text - the email text to be truncated
+ * @returns {string} - the email text, truncated
+ */
 var truncateConversationHistory = function (text) {
-  console.log('TEXT', text)
   var truncated = text.split(/On (Mon|Monday|Tue|Tuesday|Wed|Wednesday|Thu|Thursday|Fri|Friday|Sat|Saturday|Sun|Sunday)?,? (Jan|January|Feb|February|Mar|March|Apr|April|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)/);
-  //ugh maybe just validate by time?????
   logging.info('new text', truncated[0]);
   return truncated[0];
-}
+};
 
 /**
  * pulls valid amazon urls from the email body
  * @param {string} text - the text of the email body
- * @returns an array of the valid amazon urls in the email body
+ * @returns {array} - an array of the valid amazon urls in the email body
  */
 var getUrls = function (html) {
-  // html = html.split('mailto:')[0]; // truncates conversation history ON GMAIL
-  console.log('html', html)
+  // console.log('html', html)
   var uris = html.match(/href="(.+?)"/gi);
   logging.info('uris', uris);
   if (!uris) return null;

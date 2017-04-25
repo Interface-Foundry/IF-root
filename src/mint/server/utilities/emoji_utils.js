@@ -1,23 +1,27 @@
 var emojiText = require('emoji-text');
 var spliddit = require('spliddit');
 
-var kip = require('../../../kip');
-
 module.exports = function (text) {
   // console.log('INPUT', text)
-  text = spliddit(text);
+  text = spliddit(text); //spliddit splits text into characters without breaking up emojis
   text = text.map(function (c) {
     return search(c, function (res) {
       return res;
     })
   });
   text = text.join('')
-  text = emojiText.convert(text, {before: '', after: ' '})
+  text = emojiText.convert(text, {before: '', after: ' '}) //replaces emojis with text
 
   // console.log('final text', text)
   return text;
 };
 
+/**
+ * Converts the specified emojis with a random word or phrase associated with it
+ * @param {string} input - the emoji we will convert to text
+ * @param {function} callback - a function to format the resulting text
+ * @returns {string} the input emoji converted into words, or simply the imput emoji if there isn't a case for it
+ */
 var search = function(input, callback) {
 
   switch(input){
