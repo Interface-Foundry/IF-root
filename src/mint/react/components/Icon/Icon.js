@@ -19,6 +19,7 @@ import {
   IoGearA,
   IoChevronDown,
   IoArrowLeftC,
+  IoLogOut,
   IoRefresh
 } from 'react-icons/lib/io';
 import {
@@ -87,6 +88,8 @@ export default class Icon extends Component {
       return <IoArrowLeftC/>
     case 'Refresh':
       return <IoRefresh/>
+    case 'Logout':
+      return <IoLogOut/>
     default:
       return <div>¯\_(ツ)_/¯</div>
     }

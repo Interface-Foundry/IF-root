@@ -161,10 +161,11 @@ class SettingsFooter extends Component {
   }
 
   render() {
-    const { cart_id, history: { push, replace }, removeItem } = this.props;
+    const { cart_id, history: { push, replace }, removeItem, logout } = this.props;
+
     return (
       <footer className='footer__settings'>
-        <button className='logout'>Logout</button>
+        <button className='logout' onClick={() => {logout(); replace(`/cart/${cart_id}/`);}}>Logout</button>
       </footer>
     );
   }
