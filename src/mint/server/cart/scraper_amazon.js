@@ -128,7 +128,8 @@ var res2Item = function (res) {
       // Make the current item's selected options easy to use
       var selectedItem = res.Options.filter(o => o.ASIN === item.asin)[0]
       var selectedOptions = {}
-      selectedItem.VariationAttributes.VariationAttribute.map(attr => {
+      var variationAttributes = selectedItem.VariationAttributes.VariationAttribute instanceof Array ? selectedItem.VariationAttributes.VariationAttribute : [selectedItem.VariationAttributes.VariationAttribute]
+      variationAttributes.map(attr => {
         selectedOptions[attr.Name] = attr.Value
       })
 
@@ -136,7 +137,8 @@ var res2Item = function (res) {
       var allOptions = {}  // hash where keys are dimension names, and values are options we've created already
       var alreadySavedOptions = yield db.ItemOptions.find({id: ''})
       var options = res.Options.map(o => {
-        return o.VariationAttributes.VariationAttribute.map(attr => {
+        var variationAttributes = o.VariationAttributes.VariationAttribute instanceof Array ? o.VariationAttributes.VariationAttribute : [o.VariationAttributes.VariationAttribute]
+        return variationAttributes.map(attr => {
           // make sure we can handle this option type
           if (!allOptions[attr.Name]) {
             allOptions[attr.Name] = []
