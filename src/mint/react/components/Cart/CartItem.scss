@@ -29,7 +29,14 @@
     p {
       float: left;
       clear: left;
-      font-size: 13px;
+      font-size: 11px;
+      color: lighten($header-color, 10%);
+
+      &:first-of-type {
+        color: $header-color;
+        margin-bottom: $padding;
+        font-size: 13px;
+      }
     }
     .cartItem__actions {
       float: right;

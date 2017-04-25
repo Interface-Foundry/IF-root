@@ -24,12 +24,12 @@ export default class CartItem extends Component {
     return (
       <li className='cartItem'>
 
-        <div className='cartItem__image image col-3 ' style={
+        {locked ? null : <div className='cartItem__image image col-3 ' style={
           {
             backgroundImage: `url(${main_image_url})`,
             backgroundPosition: 'top',
             height: 75,
-          }}/>
+          }}/>}
 
         <div className='cartItem__props col-9'>
           <p>{name}</p>
@@ -37,7 +37,7 @@ export default class CartItem extends Component {
           <p>Qty: {quantity}</p>
           <p>Price: {displayCost(price)}</p>
           {
-            isOwner
+            isOwner && !locked
             ? <div className='cartItem__actions'>
                 <button 
                   className={locked ? 'locked' : ''}

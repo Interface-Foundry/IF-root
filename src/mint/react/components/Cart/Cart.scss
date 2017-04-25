@@ -5,35 +5,95 @@ $cart__add-height: $nav-height+$padding;
   height: calc(100% - #{$nav-height});
   position: relative;
   .cart__locked {
-    padding: $padding $padding*2 $padding*2;
     background: $header-color;
-    text-align: center;
 
-    .cart__locked__text {
-      height: $nav-height;
-      line-height: $nav-height;
-      text-align: center;
+    .cart__locked__actions {
+      padding: $padding;
+      background: $kip-primary-color;
+      border-bottom: 1px solid $border-color-light;
+      border-top: 1px solid $border-color-light;
 
-      * {
-        display: inline-block;
-        font-size: 20px;
-        color: white;
-        padding: 0 $padding/2;
-      }
+      button {
+        height: $nav-height;
+        width: 100%;
+        background: #4a9ff1;
+        border: 0;
+        font-size: 18px;
+        border-radius: 5px;
+        background: $main-button-color;
 
-      svg {
-        font-size: 25px;
+        svg {
+          vertical-align: top!important;
+          font-size: 20px;
+          margin-right: $padding/2;
+        }
+
+        &:first-of-type {
+          margin-bottom: 10px;
+          color: white;
+          font-size: 18px;
+          background: $secondary-button-color;
+        }
       }
     }
 
-    button {
-      border: 2px solid white;
-      background: transparent;
-      color: white;
-      font-size: 15px;
-      padding: $padding $padding*2;
-      margin: 0 auto;
-      border-radius: 10px;
+    .cart__locked-container {
+      position: relative;
+      height: $nav-height;
+      line-height: $nav-height;
+      padding: 0 $padding;
+
+      .cart__locked__text {
+        display: inline-block;
+        height: $nav-height;
+        line-height: $nav-height;
+        text-align: left;
+        padding: $padding/2 0;
+
+        p {
+          display: block;
+          height: $nav-height/2 - 5px;
+          line-height: $nav-height/2 - 5px;
+          font-size: 13px;
+          text-align: left;
+          padding: 0;
+
+          &:first-of-type {
+            font-size: 18px;
+          }
+        }
+
+        * {
+          display: inline-block;
+          font-size: 20px;
+          color: white;
+          padding: 0 $padding/2;
+        }
+
+        svg {
+          font-size: 25px;
+        }
+      }
+
+      button {
+        position: absolute;
+        right: $padding;
+        clear: both;
+        border: 2px solid white;
+        background: transparent;
+        color: white;
+        font-size: 15px;
+        height: $nav-height - 10px;
+        padding: 0 $padding*2;
+        margin: $padding/2 auto;
+        border-radius: 10px;
+
+        svg {
+          vertical-align: top!important;
+          font-size: 17px;
+          margin-right: $padding/2;
+        }
+      }
     }
   }
   .cart__add {
