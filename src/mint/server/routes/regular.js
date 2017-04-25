@@ -132,6 +132,14 @@ router.get('/newcart', (req, res) => co(function * () {
 }))
 
 var fs = require('fs')
+
+/**
+ * @api {get} /testoptions Test Options
+ * @apiDescription an amazon option tester, ex http://localhost:3000/testoptions?asin=B00AM3Y5ZQ
+ * @apiParamExample example
+ * http://localhost:3000/testoptions?asin=B00AM3Y5ZQ
+ * @apiGroup Other
+ */
 router.get('/testoptions', (req, res) => co(function * () {
   var html = fs.readFileSync(__dirname + '/../cart/option_test.html', 'utf8')
   res.send(html)
