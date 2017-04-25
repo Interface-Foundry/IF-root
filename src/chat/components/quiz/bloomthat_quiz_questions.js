@@ -20,7 +20,7 @@ handlers['quiz_bloomthat.help_print'] = function * (message) {
 
   var msg_json = {
     title: '',
-    text: '🔑 Administrative Professionals\' Day is observed yearly. \n It\'s on Wednesday, April 26th and recognizes those on your team that juggle titles such as office manager/executive assistant/coffee marker/receptionist and conference room booker. \nStart showing your appreciation! Tap `Find Out Now` below to see *What Kind Of Team Do I Have?*',
+    text: '_Administrative Professionals\' Day is this Wednesday, April 26th_ 🔑 \n\n Admin Day recognizes those that juggle titles such as office manager/executive assistant/coffee marker/receptionist and conference room booker. \n\nShow your appreciation! Tap `Take Quiz` below to find out \n\n_What Kind Of Team Do I Have?_',
     attachments: []
   }
 
@@ -33,14 +33,9 @@ handlers['quiz_bloomthat.help_print'] = function * (message) {
     'actions': [{
       name: 'quiz_bloomthat',
       value: 'quiz_bloomthat',
-      text: '👀 Find Out Now',
+      text: 'Take Quiz 🙌🏽',
       style: 'primary',
       type: 'button'
-    },{
-      'name': 'quiz_bloomthat.exit',
-      'text': 'Home',
-      'type': 'button',
-      'value': 'A2'
     }]
   })
 
@@ -52,12 +47,12 @@ handlers['quiz_bloomthat.q1'] = function * (message) {
 
   var msg_json = {
     title: '',
-    text: 'Which weird office thing do you secretly love?',
+    text: 'What Office Thing Do You Secretly Love?',
     attachments: []
   }
 
   msg_json.attachments.push({
-    'text': 'asdfasdf',
+    'text': '',
     'fallback': 'A1',
     'callback_id': 'Q1',
     'attachment_type': 'default',
@@ -65,7 +60,7 @@ handlers['quiz_bloomthat.q1'] = function * (message) {
     'image_url':'https://storage.googleapis.com/kip-random/bloomthat_quiz/quiz_2.png',
     'actions': [{
       'name': 'quiz_bloomthat.q2',
-      'text': '📊 Bar charts',
+      'text': '📊 Bar Charts',
       'type': 'button',
       'value': 0 
     },{
@@ -80,7 +75,7 @@ handlers['quiz_bloomthat.q1'] = function * (message) {
       'value': 3
     },{
       'name': 'quiz_bloomthat.q2',
-      'text': '📈 Hockey Stick',
+      'text': '📈 Hockey Sticks',
       'type': 'button',
       'value': 4
     }]
@@ -94,7 +89,7 @@ handlers['quiz_bloomthat.q2'] = function * (message) {
 
   var msg_json = {
     title: 'asdjfla;ksdf',
-    text: 'How many browser tabs do you have open?',
+    text: 'How Many Browser Tabs Do You Have Open?',
     attachments: []
   }
 
@@ -107,27 +102,27 @@ handlers['quiz_bloomthat.q2'] = function * (message) {
     'image_url':'https://storage.googleapis.com/kip-random/bloomthat_quiz/quiz_3.png',
     'actions': [{
       'name': 'quiz_bloomthat.q3',
-      'text': '1',
+      'text': '1 tab',
       'type': 'button',
       'value': 0
     },{
       'name': 'quiz_bloomthat.q3',
-      'text': '3',
+      'text': '3 tabs',
       'type': 'button',
       'value': 1
     },{
       'name': 'quiz_bloomthat.q3',
-      'text': '5',
+      'text': '5 tabs',
       'type': 'button',
       'value': 2
     },{
       'name': 'quiz_bloomthat.q3',
-      'text': '8+',
+      'text': '8+ tabs',
       'type': 'button',
       'value': 3
     },{
       'name': 'quiz_bloomthat.q3',
-      'text': '😱 don’t ask',
+      'text': '😱 Don’t ask',
       'type': 'button',
       'value': 4
     }]
@@ -140,7 +135,7 @@ handlers['quiz_bloomthat.q3'] = function * (message) {
 
   var msg_json = {
     title: '',
-    text: 'Which is your dream city?',
+    text: 'Which Is Your Dream City?',
     attachments: []
   }
 
@@ -186,7 +181,7 @@ handlers['quiz_bloomthat.q4'] = function * (message) {
 
   var msg_json = {
     title: '',
-    text: 'Finish this line: “I’ll love a _________ right now”',
+    text: 'Finish This Line: “I’ll Love A _________ Right Now”',
     attachments: []
   }
 
@@ -199,22 +194,22 @@ handlers['quiz_bloomthat.q4'] = function * (message) {
     'image_url':'https://storage.googleapis.com/kip-random/bloomthat_quiz/quiz_5.png',
     'actions': [{
       'name': 'quiz_bloomthat.score',
-      'text': '🍷 glass of wine',
+      'text': '🍷 Glass of Wine',
       'type': 'button',
       'value': 4
     },{
       'name': 'quiz_bloomthat.score',
-      'text': '☕  cup of coffee',
+      'text': '☕  Cup of Coffee',
       'type': 'button',
       'value': 2
     },{
       'name': 'quiz_bloomthat.score',
-      'text': '🍵 cup of tea',
+      'text': '🍵 Cup of Tea',
       'type': 'button',
       'value': 0
     },{
       'name': 'quiz_bloomthat.score',
-      'text': '🍺 pint of beer',
+      'text': '🍺 Pint of Beer',
       'type': 'button',
       'value': 3
     }]
@@ -267,29 +262,39 @@ handlers['quiz_bloomthat.score'] = function * (message) {
 
   var resultItem = {
     'diligent':{
-      url:'https://www.bloomthat.com/flowers/the-dozen-get-better',
+      url:'http://www.shareasale.com/m-pr.cfm?merchantID=68182&userID=1449990&productID=682988973',
       item:'🍪 DOZEN GET BETTER',
-      descrip:'Not as showy as others, your team is methodical and precise. Work is a strategy game for long-term wins. Some may accuse you of being slow or secretive, but you know that patience and great implementation builds lasting empires'
+      item_e:'DOZEN GET BETTER',
+      img: 'https://storage.googleapis.com/kip-random/bloomthat_quiz/diligent.png',
+      descrip:'Not as showy as others, your team is methodical and precise. Work is a strategy game for long-term wins. Some may accuse you of being slow or secretive, but you know that patience and great implementation builds lasting empires.'
     },
     'creative':{
-      url:'https://www.bloomthat.com/flowers/the-bloom-break',
-      item:'💐 BLOOM BREAK',
-      descrip:'Colorful, unique and wildly imaginative, your team is full of ideas. Work is a process of perfecting craft. Sometimes it can get a lil’ messy, but that’s just small stuff when you’re busy building dreams'
+      url:'http://www.shareasale.com/r.cfm?u=1449990&b=922071&m=68182&afftrack=&urllink=www%2Ebloomthat%2Ecom%2Fflowers%2Fthe%2Dspring%2Dsweets',
+      item:'💐 THE SPRING SWEETS',
+      item_e:'THE SPRING SWEETS',
+      img: 'https://storage.googleapis.com/kip-random/bloomthat_quiz/creative2.png',
+      descrip:'Colorful, unique and wildly imaginative, your team is full of ideas. Work is a process of perfecting craft. Sometimes it can get a lil’ messy, but that’s just small stuff when you’re busy building dreams.'
     },
     'ambitious':{
-      url:'https://www.bloomthat.com/flowers/the-action-items',
-      item:'🚀 ACTION ITEMS',
-      descrip:'Fueled by coffee and competition, your team is full of driven workaholics. Work is a desire to change the world, and challenge destiny. Sometimes it can get a lil’ too intense, but that’s small stuff when you’re changing the world'
+      url:'http://www.shareasale.com/m-pr.cfm?merchantID=68182&userID=1449990&productID=682988977',
+      item:'🚀 THE WINNING PITCH',
+      item_e:'THE WINNING PITCH',
+      img: 'https://storage.googleapis.com/kip-random/bloomthat_quiz/ambitious2.png',
+      descrip:'Fueled by coffee and competition, your team is full of driven workaholics. Work is a desire to change the world, and challenge destiny. Sometimes it can get a lil’ too intense, but that’s small stuff when you’re changing the world.'
     },
     'futuristic':{
-      url:'https://www.bloomthat.com/flowers/the-walter',
+      url:'http://www.shareasale.com/m-pr.cfm?merchantID=68182&userID=1449990&productID=671660723',
       item:'🌱 THE WALTER',
-      descrip:'Artificial Intelligence? VR? Blockchain? It might be buzzwords to some, but not you. Your team is on the cutting edge of  technology, with deep research roots and serious smarts. Work is a challenge into the unknown. Sometimes it can seem impossible, but that’s small stuff when you’re at the frontier of future technology'
+      item_e:'THE WALTER',
+      img: 'https://storage.googleapis.com/kip-random/bloomthat_quiz/futuristic.png',
+      descrip:'Artificial Intelligence? VR? Blockchain? It might be buzzwords to some, but not you. Your team is on the cutting edge of  technology, with deep research roots and serious smarts. Work is a challenge into the unknown. Sometimes it can seem impossible, but that’s small stuff when you’re at the frontier of future technology.'
     },
     'confident':{
-      url:'https://www.bloomthat.com/flowers/the-savory-sampler',
+      url:'http://www.shareasale.com/m-pr.cfm?merchantID=68182&userID=1449990&productID=691230918',
       item:'🍴 SAVORY SAMPLER',
-      descrip:'Well-rounded with strong experience and all-star team players, that’s you. Work is an exciting place where you can achieve your goals. Sometimes being at the top can feel a lil’ lonely, but that’s small stuff when you’re out there seizing opportunities'
+      item_e:'SAVORY SAMPLER',
+      img: 'https://storage.googleapis.com/kip-random/bloomthat_quiz/confident.png',
+      descrip:'Well-rounded with strong experience and all-star team players, that’s you. Work is an exciting place where you can achieve your goals. Sometimes being at the top can feel a lil’ lonely, but that’s small stuff when you’re out there seizing opportunities.'
     }
   }
 
@@ -297,22 +302,23 @@ handlers['quiz_bloomthat.score'] = function * (message) {
 
   var msg_json = {
     title: '',
-    text: 'You’re *'+resultSentence+'* team \n'+resultItem[resultType].descrip+'\nRecommended Item: <'+resultItem[resultType].descrip+ ' | '+ resultItem[resultType].url +'>',
+    text: 'You’re *'+resultSentence+'* team \n'+resultItem[resultType].descrip+'\n\n_Recommended Item:_ <'+resultItem[resultType].url+ ' | '+ resultItem[resultType].item +'>',
     attachments: []
   }
 
   msg_json.attachments.push({
-    'text': '< ► Click To View | ' + resultItem[resultType].url + '>',
+    'text': '<'+resultItem[resultType].url+'| Click to View '+resultItem[resultType].item_e+' >',
     'fallback': 'A1',
     'callback_id': 'score',
     'attachment_type': 'default',
-    'color':'#f60',
+    'color':'#52A2F0',
     'author_name': "BloomThat",
     'author_link': resultItem[resultType].url,
     'author_icon': "https://storage.googleapis.com/kip-random/bloomthat_quiz/bloomthat_social_media.png",
+    'image_url': resultItem[resultType].img,
     'actions': [{
       'name': 'quiz_bloomthat.restart',
-      'text': 'Restart Quiz',
+      'text': '↺ Restart Quiz',
       'type': 'button',
       'value': 'A1'
     },{
