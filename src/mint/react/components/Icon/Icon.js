@@ -18,7 +18,9 @@ import {
   IoAndroidPersonAdd,
   IoGearA,
   IoChevronDown,
-  IoArrowLeftC
+  IoArrowLeftC,
+  IoLogOut,
+  IoRefresh
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -71,7 +73,7 @@ export default class Icon extends Component {
     case 'Search':
       return <IoSearch/>;
     case 'Open':
-      return <FaExternalLink/>; 
+      return <FaExternalLink/>;
     case 'Cart':
       return <IoIosCartOutline/>;
     case 'Person':
@@ -84,6 +86,10 @@ export default class Icon extends Component {
       return <IoChevronDown/>
     case 'Left':
       return <IoArrowLeftC/>
+    case 'Refresh':
+      return <IoRefresh/>
+    case 'Logout':
+      return <IoLogOut/>
     default:
       return <div>¯\_(ツ)_/¯</div>
     }

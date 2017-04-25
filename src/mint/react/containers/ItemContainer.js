@@ -1,3 +1,5 @@
+// react/containers/ItemContainer.js
+
 import { connect } from 'react-redux';
 import { Item } from '../components';
 import { fetchDeals, selectDeal } from '../actions/deals';

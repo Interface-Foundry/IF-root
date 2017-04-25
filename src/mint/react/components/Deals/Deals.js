@@ -1,3 +1,5 @@
+// react/components/Deals/Deals.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import DealCard from './DealCard';
@@ -17,7 +19,8 @@ export default class Deals extends Component {
     isDropdown: PropTypes.bool,
     deals: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
-    cart_id: PropTypes.string
+    cart_id: PropTypes.string,
+    selectDeal: PropTypes.func
   }
 
   componentWillUnmount() {
@@ -57,17 +60,18 @@ export default class Deals extends Component {
 
     const activeDeals = deals.map((deal, i) => <li key={deal.id} onClick={(e) => selectDeal(i)}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></li>);
 
-    return <CSSTransitionGroup
-      transitionName="dealsItem"
-      transitionEnterTimeout={0}
-      transitionLeaveTimeout={0}>
-      {activeDeals}
-    </CSSTransitionGroup>
+    return (
+      <CSSTransitionGroup
+        transitionName="dealsItem"
+        transitionEnterTimeout={0}
+        transitionLeaveTimeout={0}>
+        {activeDeals}
+      </CSSTransitionGroup>
+    );
   }
 
   render() {
     const { renderCards, state: { isDropdown } } = this;
-
     return (
       <div>
         <ul ref='deals' className={'deals__section' + (isDropdown ? '-small' : '')}>

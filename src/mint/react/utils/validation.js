@@ -1,3 +1,5 @@
+// react/utils/validation.js
+
 const isEmpty = value => value === undefined || value === null || value === '';
 const join = rules => (value, data) => rules.map(rule => rule(value, data))
   .filter(error => !!error)[0]; /* first error */
@@ -13,9 +15,9 @@ export const isRequired = value => {
 };
 
 export const isUrl = url => {
-   const regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-   return regexp.test(url);
-}
+  const regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+  return regexp.test(url);
+};
 
 export const minLength = min => value => {
   if (!isEmpty(value) && value.length < min) {

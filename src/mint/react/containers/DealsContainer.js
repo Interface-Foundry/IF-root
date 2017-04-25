@@ -1,3 +1,5 @@
+// react/containers/DealsContainer.js
+
 import { connect } from 'react-redux';
 import { Deals } from '../components';
 import { selectDeal } from '../actions/deals';

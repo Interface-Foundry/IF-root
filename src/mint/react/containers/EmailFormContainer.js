@@ -1,3 +1,5 @@
+// react/containers/EmailFormContainer.js
+
 import { connect } from 'react-redux';
 import { reset, reduxForm } from 'redux-form';
 

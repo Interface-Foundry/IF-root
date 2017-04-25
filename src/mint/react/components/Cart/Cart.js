@@ -7,6 +7,7 @@ import { AddAmazonItemContainer, DealsContainer } from '../../containers';
 import { Icon } from '..';
 import { calculateItemTotal, displayCost } from '../../utils';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import moment from 'moment';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -80,20 +81,22 @@ export default class Cart extends Component {
         {
           locked 
           ? <div className='cart__locked'>
-              <div className='cart__locked__text'>
-                <Icon icon='Locked'/>
-                <p>Locked</p>
+              <div className='cart__locked__actions'>
+                <button><Icon icon='Refresh'/>RE-ORDER CART</button>
+                { leader.id === user_account.id ? <button><Icon icon='Cart'/>CHECKOUT</button> : null }
               </div>
-              {
-                leader.id === user_account.id ? <button onClick={() => {
-                  updateCart({
-                    ...currentCart, 
-                    locked: !currentCart.locked
-                  });
-                }}>
-                  Unlock
-                </button> : null
-              }
+              <div className='cart__locked-container'>
+                <div className='cart__locked__text'>
+                  <p>{currentCart.name}</p>
+                  <p>{moment(currentCart.updatedAt).format('L')}&nbsp;{moment(currentCart.updatedAt).format('LT')}</p>
+                </div>
+                {
+                  leader.id === user_account.id ? <button onClick={() => updateCart({...currentCart, locked: !currentCart.locked})}>
+                    <Icon icon='Locked'/>
+                    Unlock
+                  </button> : null
+                }
+              </div>
             </div> 
           : <span>
               <div className='cart__add'>

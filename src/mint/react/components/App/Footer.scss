@@ -1,4 +1,5 @@
 // react/components/App/Footer.scss
+
 @import '../../styles/Constants';
 .footer {
   position: relative;
@@ -30,6 +31,10 @@
         font-size: 18px;
         padding: 0;
         width: $nav-height/2;
+      }
+      &.green {
+        background: $third-button-color;
+        color: white;
       }
       &.share {
         background: $secondary-button-color;

@@ -1,3 +1,4 @@
+// react/styles/Grid.scss
 //----- Extends
 %clearfix:after {
   display: block;
@@ -9,7 +10,7 @@
 $grid-spacing:0%;
 .row {
   @extend %clearfix;
-  & + & {
+  &+& {
     margin-top: $grid-spacing;
   }
 }
@@ -72,3 +73,4 @@ $grid-spacing:0%;
 .col-12 {
   width: 100%;
 }
+

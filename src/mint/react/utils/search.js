@@ -1,9 +1,11 @@
+// react/utils/search.js
+
 // Example markov (probablity) search
 // store markov search in local storage
 // To 
 // let terminals = {},
-// 	startwords = [],
-// 	wordstats = {};
+//  startwords = [],
+//  wordstats = {};
 
 // for (let i = 0; i < titles.length; i++) {
 //     const words = titles[i].split(' ');
@@ -40,19 +42,12 @@
 // autocorrect
 // Should return [] of previous search terms
 
-
 export const getSearchHistory = (filter) => {
-	if (!localStorage.searchHistory) return []
+  if (!localStorage.searchHistory) return [];
 
-	return _.filter(localStorage.searchHistory.split(','), (pSearch) => pSearch.includes(filter))
+  return _.filter(localStorage.searchHistory.split(','), (pSearch) => pSearch.includes(filter));
 };
 
 export const addSearchHistory = term => {
-	localStorage.searchHistory = localStorage.searchHistory ? localStorage.searchHistory + `,${term}` : term;
-}
-
-
-
-
-
-
+  localStorage.searchHistory = localStorage.searchHistory ? localStorage.searchHistory + `,${term}` : term;
+};

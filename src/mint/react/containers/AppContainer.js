@@ -1,6 +1,9 @@
+// react/containers/AppContainer.js
+
 import { connect } from 'react-redux';
 import { App } from '../components';
-import { fetchCart, fetchAllCarts, updateCart } from '../actions/cart';
+import { fetchCart, fetchAllCarts, updateCart, checkoutCart } from '../actions/cart';
+import { logout } from '../actions/session';
 import { addItem, removeItem } from '../actions/item';
 import { removeDeal } from '../actions/deals';
 
@@ -21,7 +24,7 @@ const mapStateToProps = (state, ownProps) => ({
   session_id: state.session.id
 });
 const mapDispatchToProps = dispatch => ({
-	addItem: (cart_id, item_id, replace) => {
+  addItem: (cart_id, item_id, replace) => {
     dispatch(addItem(cart_id, item_id))
       .then(e => {
         replace(`/cart/${cart_id}/`);
@@ -35,7 +38,9 @@ const mapDispatchToProps = dispatch => ({
     setTimeout(() => {
       dispatch(removeDeal(index))
     }, 100)
-  }
+  },
+  checkoutCart: (cart_id) => dispatch(checkoutCart(cart_id)),
+  logout: () => dispatch(logout())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

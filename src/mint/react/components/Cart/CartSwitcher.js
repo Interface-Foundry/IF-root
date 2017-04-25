@@ -1,6 +1,8 @@
+// react/components/Cart/CartSwitcher.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 
 export default class CartSwitcher extends Component {
   static propTypes = {

@@ -104,3 +104,18 @@ export function fetchItems(cart_id) {
     }
   };
 }
+
+export function checkoutCart(cart_id) {
+  return async dispatch => {
+    dispatch(requestItems(cart_id));
+
+    try {
+      const response = await fetch(`/api/cart/${cart_id}/checkout`, {
+        credentials: 'same-origin'
+      });
+      return dispatch(receiveItems(await response.json()));
+    } catch (e) {
+      throw 'error in cart fetchItems';
+    }
+  };
+}

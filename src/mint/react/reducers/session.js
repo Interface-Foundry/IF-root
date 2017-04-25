@@ -1,3 +1,5 @@
+// react/reducers/session.js
+
 import {
   RECEIVE_SESSION,
   REQUEST_SESSION,

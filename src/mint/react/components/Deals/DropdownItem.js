@@ -1,3 +1,5 @@
+// react/components/Deals/DropdownItem.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Icon } from '..';

@@ -69,6 +69,18 @@ router.get('/auth/:id', (req, res) => co(function * () {
     yield req.UserSession.save()
   }
 
+  if (!link.cart.leader) {
+    // make the user leader if they aren't already
+    link.cart.leader = link.user.id
+    yield link.cart.save()
+  } else if (link.cart.leader !== link.user.id) {
+    // if there was a different user as leader, this must be a member that is authing, add them as member
+    if (!link.cart.members.includes(link.user.id)) {
+      link.cart.members.add(link.user.id)
+      yield link.cart.save()
+    }
+  }
+
   return res.redirect('/cart/' + link.cart.id)
 }))
 
@@ -120,6 +132,14 @@ router.get('/newcart', (req, res) => co(function * () {
 }))
 
 var fs = require('fs')
+
+/**
+ * @api {get} /testoptions Test Options
+ * @apiDescription an amazon option tester, ex http://localhost:3000/testoptions?asin=B00AM3Y5ZQ
+ * @apiParamExample example
+ * http://localhost:3000/testoptions?asin=B00AM3Y5ZQ
+ * @apiGroup Other
+ */
 router.get('/testoptions', (req, res) => co(function * () {
   var html = fs.readFileSync(__dirname + '/../cart/option_test.html', 'utf8')
   res.send(html)

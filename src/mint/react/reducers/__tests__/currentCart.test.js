@@ -1,3 +1,5 @@
+// react/reducers/__tests__/currentCart.test.js
+
 import reducer from '../CurrentCart';
 import { RECEIVE_ADD_ITEM, ADD_MEMBER_TO_CART, RECEIVE_CART, RECEIVE_ITEMS, RECEIVE_REMOVE_ITEM } from '../../constants/ActionTypes';
 

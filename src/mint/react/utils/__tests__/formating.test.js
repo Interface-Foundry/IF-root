@@ -1,3 +1,5 @@
+// react/utils/__tests__/formating.test.js
+
 import { commaSeparateNumber, getNameFromEmail } from '..';
 
 describe('formating util', () => {

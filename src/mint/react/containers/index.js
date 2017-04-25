@@ -1,3 +1,5 @@
+// react/containers/index.js
+
 export AppContainer from './AppContainer';
 export CartContainer from './CartContainer';
 export AddAmazonItemContainer from './AddAmazonItemContainer';

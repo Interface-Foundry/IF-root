@@ -1,3 +1,5 @@
+// react/components/AmazonForm/AmazonForm.js
+
 import React, { Component } from 'react';
 import { Field } from 'redux-form';
 import { DealsContainer } from '../../containers';
@@ -49,10 +51,4 @@ export default class AmazonForm extends Component {
   }
 }
 
-
-
-
-          // <DealsContainer isDropdown={active}/>
-
-
-
+// <DealsContainer isDropdown={active}/>

@@ -1,7 +1,8 @@
+// react/components/App/Header.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Route, Switch } from 'react-router';
-import { getNameFromEmail } from '../../utils';
+import { Route } from 'react-router';
 import { Icon } from '..';
 import { splitCartById } from '../../reducers';
 
@@ -9,14 +10,15 @@ export default class Header extends Component {
   static propTypes = {
     item: PropTypes.object,
     items: PropTypes.arrayOf(PropTypes.object),
-    deals: PropTypes.arrayOf(PropTypes.object)
+    deals: PropTypes.arrayOf(PropTypes.object),
+    currentUser: PropTypes.object
   }
 
   render() {
     let { props, props: { deals, items, currentUser, item: { search } } } = this;
     const { match } = props;
     search = search ? search : 0;
-    
+
     return (
       <nav className='navbar'>
         <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
@@ -63,26 +65,27 @@ export default class Header extends Component {
 class CartHead extends Component {
   static propTypes = {
     cartName: PropTypes.string,
-    leader: PropTypes.object,
     _toggleSidenav: PropTypes.func,
     currentUser: PropTypes.object,
-    currentCart: PropTypes.object
+    currentCart: PropTypes.object,
   }
 
   render() {
-    const { leader, _toggleSidenav, currentUser, currentCart, cartName } = this.props;
+    const { _toggleSidenav, currentUser, cartName, currentCart: { locked, thumbnail_url } } = this.props;
 
     return (
       <div>
-        <div className='image' style={
+        {locked ? <div className='navbar__icon'>
+            <Icon icon='Locked'/>
+          </div> : <div className='image' style={
           {
-            backgroundImage: `url(${currentCart.thumbnail_url ? currentCart.thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
+            backgroundImage: `url(${thumbnail_url ? thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
             backgroundSize: 'contain'
-          }}/>
+          }}/>}
         <h3>
-          {cartName}
+          {locked ? 'Checkout in progress' : cartName}
         </h3>
         {
           currentUser.id ? <div className='navbar__icon' onClick={_toggleSidenav}>
@@ -149,8 +152,13 @@ class EnumeratedHead extends Component {
 }
 
 class SettingsHeader extends Component {
+  static propTypes = {
+    cart_id: PropTypes.string,
+    history: PropTypes.object,
+  }
+
   render() {
-    const { cart_id, history: { replace, location: { pathname } }} = this.props
+    const { cart_id, history: { replace } } = this.props;
 
     return (
       <div className='navbar__modal settings'>

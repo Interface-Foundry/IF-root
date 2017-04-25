@@ -71,8 +71,27 @@ class CartFooter extends Component {
   }
 
   render() {
-    const { _handleShare } = this, { updateCart, currentCart, currentUser, leader } = this.props;
+    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader } = this.props;
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
+
+    if(locked) {
+      return (
+        <div className='footer__cart'>
+          <button className='green'>
+            <Icon icon='Email'/>
+            FEEDBACK
+          </button>
+          {
+            isLeader
+            ? <button className='share'>
+                <Icon icon='Cart'/>
+                EMAIL ITEM LIST
+              </button>
+            : null
+          }
+        </div>
+      );
+    }
 
     return (
       <div className='footer__cart'>
@@ -82,12 +101,7 @@ class CartFooter extends Component {
         </button>
         {
           isLeader
-          ? <button onClick={() => {
-                updateCart({
-                  ...currentCart, 
-                  locked: !currentCart.locked
-                });
-              }}>
+          ? <button onClick={() => {updateCart({...currentCart, locked: !currentCart.locked}); checkoutCart(cart_id)}}>
               <Icon icon='Cart'/>
               CHECKOUT
             </button>
@@ -147,10 +161,11 @@ class SettingsFooter extends Component {
   }
 
   render() {
-    const { cart_id, history: { push, replace }, removeItem } = this.props;
+    const { cart_id, history: { push, replace }, removeItem, logout } = this.props;
+
     return (
       <footer className='footer__settings'>
-        <button className='logout'>Logout</button>
+        <button className='logout' onClick={() => {logout(); replace(`/cart/${cart_id}/`);}}>Logout</button>
       </footer>
     );
   }

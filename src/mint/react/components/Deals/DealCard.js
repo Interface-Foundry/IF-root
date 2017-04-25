@@ -1,3 +1,5 @@
+// react/components/Deals/DealCard.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
@@ -14,7 +16,7 @@ export default class DealCard extends Component {
   }
 
   render() {
-    const { props, props: { isDropdown, cart_id, index, asin, selectDeal } } = this;
+    const { props, props: { isDropdown, cart_id, index, asin } } = this;
     const Deal = isDropdown ? DropdownItem : Card;
     return (
       <Link to={`/cart/${cart_id}/m/deal/${index}/${asin}`}>

@@ -1,6 +1,9 @@
+// react/components/Share/Share.js
+
 import React, { Component } from 'react';
 import { Icon } from '..';
 import { addLinkToDeepLink } from '../../utils';
+import PropTypes from 'prop-types';
 
 import {
   ShareButtons
@@ -8,10 +11,9 @@ import {
 
 const {
   FacebookShareButton
-} = ShareButtons
+} = ShareButtons;
 
-const shareIcons = [
-  {
+const shareIcons = [{
     icon: 'FacebookMessenger',
     label: 'FB Messenger',
     deepLink: 'fb-messenger://share?link=&app_id=' + encodeURIComponent(1401271990193674)
@@ -35,15 +37,21 @@ const shareIcons = [
     label: 'Whatsapp',
     deepLink: 'whatsapp://send?text='
   }
-]
+];
 
 // IOS, for facebook
 
 export default class Share extends Component {
+  static propTypes = {
+    location: PropTypes.object
+  }
+
   openFailedHandler = () => {
-    if(navigator.userAgent.toLowerCase().indexOf("android") > -1) {
+    if (navigator.userAgent.toLowerCase()
+      .indexOf('android') > -1) {
       window.location.href = 'http://play.google.com/store/apps';
-    } else if(navigator.userAgent.toLowerCase().indexOf("iphone") > -1) {
+    } else if (navigator.userAgent.toLowerCase()
+      .indexOf('iphone') > -1) {
       window.location.href = 'http://itunes.apple.com';
     } else {
       window.location.href = 'http://itunes.apple.com';
@@ -62,15 +70,14 @@ export default class Share extends Component {
   }
 
   render() {
-    const { location: { pathname } } = this.props,
-          { tryToOpen } = this,
-          linkedIcons = addLinkToDeepLink(shareIcons, `http://mint-dev.kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`);
+    const { location: { pathname } } = this.props, { tryToOpen } = this,
+      linkedIcons = addLinkToDeepLink(shareIcons, `http://mint-dev.kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`);
 
     return (
       <div className='share'>
-      	<div className='share__message'>
+        <div className='share__message'>
           <div className='share__message__imageText'>
-            <div className='image' style={{backgroundImage:`url(http://tidepools.co/kip/head_smaller.png)`}}/>
+            <div className='image' style={{backgroundImage:'url(http://tidepools.co/kip/head_smaller.png)'}}/>
             <p>I just sent you an email you can forward to others! or share this link:</p>
           </div>
           <div className='share__message__copy'>
@@ -79,8 +86,8 @@ export default class Share extends Component {
               <button><p>copy</p></button>
             </div>
           </div>
-      	</div>
-      	<div className='share__icons'>
+        </div>
+        <div className='share__icons'>
           {
             _.map(linkedIcons, (icon, i) => {
               if(icon.icon === 'Facebook') return (
@@ -93,17 +100,17 @@ export default class Share extends Component {
                     <Icon icon={icon.icon}/>
                     <label>{icon.label}</label>
                   </FacebookShareButton>
-                )
+                );
 
               return (
                 <a href={icon.deepLink} key={i} className='share__icons__icon' onClick={() => tryToOpen(icon.icon)}>
                   <Icon icon={icon.icon}/>
                   <label>{icon.label}</label>
                 </a>
-              )
+              );
             })
           }
-      	</div>
+        </div>
       </div>
     );
   }

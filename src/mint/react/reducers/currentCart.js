@@ -1,3 +1,5 @@
+// react/reducers/currentCart.js
+
 import {
   ADDING_ITEM,
   ADD_MEMBER_TO_CART,
@@ -36,7 +38,7 @@ export default function cart(state = initialState, action) {
       thumbnail_url: action.updatedCart.thumbnail_url,
       name: action.updatedCart.name,
       cart_id: action.updatedCart.id
-    }
+    };
   case RECEIVE_CART:
     return {
       ...state,
