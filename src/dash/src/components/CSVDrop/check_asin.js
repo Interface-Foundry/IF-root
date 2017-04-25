@@ -36,7 +36,7 @@ module.exports = function check_asin(rows, items) {
                 for(var i = 0; i<row.Qty ; i++){
                 	var closestMatch = 0;
                 	var closestDistance;
-                	if(matches[j] && matches[j].added_date){
+                	if(matches[0] && matches[0].added_date){
                 		closestDistance = Math.abs(differenceInDays(row.Date, matches[0].added_date))
                 	} else {
                         closestDistance = 1000;

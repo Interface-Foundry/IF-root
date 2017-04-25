@@ -16,6 +16,7 @@ import Table from '../../../components/Table/common';
 import vagueTime from 'vague-time';
 import moment from 'moment';
 import _ from 'lodash';
+import { teamCartsQuery } from '../../../graphqlOperations';
 
 const title = ' Team Stats';
 
@@ -122,13 +123,7 @@ class displayTeamStats extends Component {
       `;
     } else if (this.state.view === 'Store') {
       //store query
-      currentQuery = gql`
-        query GetStoreTeamById($team_id: String!){
-          teams(team_id:$team_id){
-            members{id,name,is_admin}, meta{all_channels}
-          }
-        }
-      `;
+      currentQuery = teamCartsQuery 
     }
     return currentQuery;
   }
@@ -142,11 +137,11 @@ class displayTeamStats extends Component {
     const gqlWrapper = graphql(currentQuery, {
       options: {
         variables: {
-          team_id: currentTeam.team_id,
+          team_id: "T02PN3B25", //currentTeam.team_id,
         },
       },
     });
-    const TableWithData = gqlWrapper(getCurrentTable);
+    const ViewWithData = gqlWrapper(getCurrentData);
 
 
     return (
@@ -164,28 +159,74 @@ class displayTeamStats extends Component {
               Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
-          <TableWithData />
+          <ViewWithData />
       </div>
     )
   }
  
 }
 
-  const getCurrentTable = ({ data }) => {
-    var self = this;
+  const getCurrentData = ({ data }) => {
     if (data.loading) {
       return <p> Loading... </p>
     }
     var team_members = data.teams[0].members;
     var team_channels = data.teams[0].meta.all_channels;
+
+    if(data.teams[0].carts){
+      var team_carts = data.teams[0].carts;
+    } else if(data.teams[0].deliveries){
+      var team_deliveries = data.teams[0].deliveries;
+    }
+
     return (
       <div>
-      <div>Users: {team_members.length}</div>
-      <div>Admins: {listTeamAdmins(team_members)}</div>
-      <div>Channels: {listTeamChannels(team_channels)}</div>
+      <div><h2>Users:</h2> {team_members.length}</div>
+      <div><h2>Admins:</h2> {listTeamAdmins(team_members)}</div>
+      <div><h2>Channels:</h2> {listTeamChannels(team_channels)}</div>
+      <div><h2>Carts:</h2> {data.teams[0].carts ? listCarts(team_carts) : listDeliveries(team_deliveries)}</div>
       </div>
     )
   };
+
+  function listCarts(team_carts){
+    return team_carts.map(function(cart) {
+      var num_items = cart.item_count;
+      if(cart.items && cart.item_count !== cart.items.length){
+        num_items = cart.items.length;
+      } 
+      return (<div>
+        <div><b>Created:</b> {cart.created_date}</div>
+        <div><b>Total:</b> {cart.cart_total}</div>
+        <div><b>Items:</b> {num_items}</div>
+        <div>{listCartItems(cart.items)}</div>
+        </div>
+      )
+
+    })
+
+  }
+
+  function listCartItems(items){
+    return items.map(function(item){
+      return(<div>
+        <div>&ensp; Title: {item.title}</div>
+        <div>&ensp; Price: {item.price}</div>
+        <div>&ensp; Added by: {item.added_by}</div>
+        <div>&ensp; Purchased: {item.purchased.toString()}</div>
+      </div>
+      )
+    })
+  }
+
+  function listDeliveries(team_deliveries){
+    return 'Deliveries totals displayed here'
+    /*
+    return team_deliveries.map(function(deliveries) {
+      return <div>{deliveries.time_started}</div>
+    })
+    */
+  }
 
   function listTeamAdmins(teamMembers){
     var memberList = teamMembers.reduce((list, member) => {
