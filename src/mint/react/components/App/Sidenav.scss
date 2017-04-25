@@ -70,11 +70,19 @@
         text-align: center;
       }
       p {
+        position: relative;
         width: calc(100% - #{$nav-height/2});
         display: inline-block;
         font-size: 13px;
         padding: 0 $padding;
         text-align: right;
+
+        span {
+          position: absolute;
+          right: $padding;
+          bottom: -15px;
+          font-size: 10px;
+        }
       }
     }
     .sidenav__list__actions {

@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import moment from 'moment';
 import { getNameFromEmail } from '../../utils';
 import { Icon } from '..';
 
@@ -41,13 +42,17 @@ export default class Sidenav extends Component {
               if(i > 1 && show !== 'me') return null;
               return ( 
                 <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-                  <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
-                    <div className='icon'>
-                      <Icon icon='Edit'/>
-                    </div>
-                  </Link>
+                  { c.locked ? <div className='icon'/> : <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                      <div className='icon'>
+                        <Icon icon='Edit'/>
+                      </div>
+                    </Link>
+                  }
                   <Link to={`/cart/${c.id}`}>
-                    <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                    <p>
+                      {c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}
+                      {c.locked ? <span>{moment(c.updatedAt).format('L')}</span> : null}
+                    </p>
                   </Link>
                 </li>
               )
