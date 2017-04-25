@@ -1,8 +1,8 @@
 import React from 'react';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
-function nameFormatter(data, cell) {
-  return cell ? `<p>${cell[data]}</p>` : '';
+function nameFormatter(cell, row, property) {
+  return cell ? `<p>${cell[property]}</p>` : '';
 }
 
 const CafeTable = ({data}) => {
@@ -29,7 +29,7 @@ const CafeTable = ({data}) => {
   return (
     <BootstrapTable data={newData} hover>
       <TableHeaderColumn isKey={true} dataField='time_started'>Created Date</TableHeaderColumn>
-      <TableHeaderColumn dataField='team' dataFormat={ nameFormatter.bind(this, 'team_name') }>Team</TableHeaderColumn>
+      <TableHeaderColumn dataField='team' dataFormat={nameFormatter} formatExtraData={'team_name'}>Group Name</TableHeaderColumn>
       <TableHeaderColumn dataField='type'>Type</TableHeaderColumn>
       <TableHeaderColumn dataField='item_count'>Total Item Count</TableHeaderColumn>
       <TableHeaderColumn dataField='cart_total'>Cart Total</TableHeaderColumn>
@@ -59,14 +59,13 @@ const CartTable = ({data}) => {
     }
   }
   return (
-    <BootstrapTable data={newData} hover>
-      <TableHeaderColumn isKey={true} dataField='created_date'>Created Date</TableHeaderColumn>
-      <TableHeaderColumn dataField='team' dataFormat={ nameFormatter.bind(this, 'team_name') }>Team</TableHeaderColumn>
-      <TableHeaderColumn dataField='type'>Type</TableHeaderColumn>
-      <TableHeaderColumn dataField='item_count'>Total Item Count</TableHeaderColumn>
-      <TableHeaderColumn dataField='cart_total'>Cart Total</TableHeaderColumn>
-      <TableHeaderColumn dataField='title'>Item Name</TableHeaderColumn>
-      <TableHeaderColumn dataField='purchased'>Purchased</TableHeaderColumn>
+    <BootstrapTable data={newData} bordered={false} height='500' scrollTop={'Top'} hover>
+      <TableHeaderColumn isKey={true} dataField='created_date'>Date</TableHeaderColumn>
+      <TableHeaderColumn dataField='team' dataFormat={nameFormatter} formatExtraData={'team_name'}>Group Name</TableHeaderColumn>
+      <TableHeaderColumn dataField='type' width='50'>Type</TableHeaderColumn>
+      <TableHeaderColumn dataField='item_count' width='150'>#Items</TableHeaderColumn>
+      <TableHeaderColumn dataField='cart_total' width='100'>Cart Total</TableHeaderColumn>
+      <TableHeaderColumn dataField='title'>Product Name</TableHeaderColumn>
     </BootstrapTable>
   );
 };
