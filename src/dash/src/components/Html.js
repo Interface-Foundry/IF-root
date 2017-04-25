@@ -18,7 +18,7 @@ function Html({ title, description, style, script, children }) {
         <link rel="stylesheet" href="/css/react-bootstrap-table-all.min.css"/>
         <link rel="stylesheet" href="/css/custom.css" />
         <link rel="stylesheet" href="/css/react-datepicker.css" />
-        
+
         <style id="css" dangerouslySetInnerHTML={{ __html: style }} />
       </head>
       <body>
