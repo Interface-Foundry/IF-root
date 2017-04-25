@@ -106,6 +106,8 @@ function sendToUser (userId,teamId) {
       
       yield bot.chat.postMessage(user.dm, '', message)
 
+      console.log('🌵 SENT MESSAGE!')
+
       db.Metrics.log('feature.rollout.sent', {
         team: teamId,
         user: user.id,
@@ -3461,7 +3463,7 @@ function * main () {
             if(users[u].id && users[u].team_id){
 
               if(users[u].id !== 'USLACKBOT'){
-                yield sleep(100)
+                yield sleep(600)
                 yield sendToUser(users[u].id,users[u].team_id)
               }else {
                 console.log('slackbot found!')
@@ -3517,11 +3519,9 @@ function * main () {
         if(users){
 
           for (var u in users) {
-
+            yield sleep(600)
             if(users[u].id && users[u].team_id){
-
               if(users[u].id !== 'USLACKBOT'){
-                yield sleep(600)
                 yield sendToUser(users[u].id,users[u].team_id)
               }else {
                 console.log('slackbot found!')
