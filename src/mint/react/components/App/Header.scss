@@ -26,9 +26,29 @@
   }
   .navbar__modal {
     display: flex;
+
+    &.settings {
+      background: $kip-primary-color;
+      color: $header-color;
+      border-bottom: 1px solid $border-color-light;
+      padding: 0;
+    }
     .navbar__modal_head {
       flex-grow: 1;
       text-align: center;
+
+      &.settings {
+        text-align: right;
+        padding: 0 $padding*2 0 0;
+
+        svg {
+          font-size: 20px;
+          vertical-align: top !important;
+          line-height: $nav-height;
+          height: $nav-height;
+          margin-right: $padding/2;
+        }
+      }
     }
   }
   .navbar__icon {

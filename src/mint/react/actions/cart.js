@@ -1,3 +1,5 @@
+// react/actions/cart.js
+
 import { ADDING_ITEM, RECEIVE_CART, RECEIVE_UPDATE_CART, REQUEST_CART, RECEIVE_ITEMS, REQUEST_ITEMS, RECEIVE_CARTS, REQUEST_CARTS } from '../constants/ActionTypes';
 
 const receive = (currentCart) => ({

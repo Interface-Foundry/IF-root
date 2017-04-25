@@ -7,12 +7,12 @@ export default function otherCarts(state = initialState, action) {
   case RECEIVE_CARTS:
     return {
       ...state,
-      carts: action.carts
+      carts: action.carts.reverse()
     };
   case RECEIVE_UPDATE_CART:
     return {
       ...state,
-      carts: _.map(state.carts, (c) => ( c.id === action.updatedCart.id ? { ...c, thumbnail_url: action.updatedCart.thumbnail_url, name: action.updatedCart.name, locked: action.updatedCart.locked } : c))
+      carts: _.map(state.carts, (c) => ( c.id === action.updatedCart.id ? { ...c, thumbnail_url: action.updatedCart.thumbnail_url, name: action.updatedCart.name, locked: action.updatedCart.locked } : c)).reverse()
     }
   default:
     return state;

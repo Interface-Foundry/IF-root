@@ -1,13 +1,14 @@
+// react/components/App/Footer.scss
 @import '../../styles/Constants';
 .footer {
   position: relative;
   height: $nav-height + 10px;
   line-height: $nav-height*2 - $padding*2;
   padding: $padding 0;
-  margin: 0 -15px;
+  margin: 0 (-$padding) * 1.5;
   font-family: $secondary-font;
   color: $kip-primary-color;
-  .footer__cart, .footer__item, .footer__save {
+  .footer__cart, .footer__item, .footer__save, .footer__settings {
     height: 100%;
     display: flex;
     button {
@@ -24,14 +25,20 @@
       font-weight: 600;
       flex-grow: 1;
       flex-basis: 0;
+      svg {
+        vertical-align: top !important;
+        font-size: 18px;
+        padding: 0;
+        width: $nav-height/2;
+      }
       &.share {
         background: $secondary-button-color;
         color: white;
       }
       &.triple {
-        flex-grow: 4; 
+        flex-grow: 4;
       }
-      &.dimmed{
+      &.dimmed {
         background: white;
         border: 1px solid $border-color-light;
         color: $kip-faded-color;
@@ -44,7 +51,23 @@
       }
     }
   }
+  .tos {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0px $padding*3;
+    text-align: center;
+    font-size: 13px;
+    color: $kip-faded-color;
+    font-style: italic;
+    line-height: 17px;
+    a {
+      text-decoration: underline;
+    }
+  }
   .empty {
     display: none;
   }
 }
+

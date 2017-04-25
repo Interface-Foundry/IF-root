@@ -1,7 +1,9 @@
+// react/components/App/Footer.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-import { Icon } from '../Icon';
+import { Icon } from '..';
 
 export default class Footer extends Component {
   static propTypes = {
@@ -18,17 +20,27 @@ export default class Footer extends Component {
       <footer className='footer'>
         <Route path={`${match.url}/m/item/add`} component={() => <div className='empty'/>}/>
         <Route path={`${match.url}/m/share`} component={() => <div className='empty'/>}/>
-        <Route path={`${match.url}/m/signin`} component={() => <div className='empty'/>}/>
+        <Route path={`${match.url}/m/signin`} component={() => <SignInFooter/>}/>
         <Route path={`${match.url}/m/item/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/:type/:index/:item_id/edit`} component={() => <EditFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/edit`} component={() => <div className='empty'/>}/>
+        <Route path={`${match.url}/m/settings`} component={() => <SettingsFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/deal/:index/:item_id`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/search/:index/:search`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}`} exact component={() => <CartFooter {...props}/>}/>
       </footer>
     );
   }
+}
 
+class SignInFooter extends Component {
+  render() {
+    return (
+      <p className='tos'>
+        By signing up you agree to the Kip <a href='https://kipthis.com/legal/'>Terms of Use</a>
+      </p>
+    );
+  }
 }
 
 class CartFooter extends Component {
@@ -64,7 +76,10 @@ class CartFooter extends Component {
 
     return (
       <div className='footer__cart'>
-        <button className='share' onClick={_handleShare}>SHARE</button>
+        <button className='share' onClick={_handleShare}>
+          <Icon icon='Person'/>
+          SHARE
+        </button>
         {
           isLeader
           ? <button onClick={() => {
@@ -73,6 +88,7 @@ class CartFooter extends Component {
                   locked: !currentCart.locked
                 });
               }}>
+              <Icon icon='Cart'/>
               CHECKOUT
             </button>
           : null
@@ -95,7 +111,7 @@ class ItemFooter extends Component {
 
   render() {
     const { removeDeal, addItem, item_id, position, cart_id, history: { replace, location: { pathname } } } = this.props,
-          removeItem = pathname.includes('deal');
+      removeItem = pathname.includes('deal');
 
     return (
       <footer className='footer__item'>
@@ -120,6 +136,21 @@ class EditFooter extends Component {
       <footer className='footer__save'>
         <button className='remove dimmed' onClick={()=> {removeItem(cart_id, item_id); replace(`/cart/${cart_id}/`);}}>Remove Item</button>
         <button className='save triple' onClick={() =>push(`/cart/${cart_id}/`)}>✓ Update</button>
+      </footer>
+    );
+  }
+}
+
+class SettingsFooter extends Component {
+  static propTypes = {
+    cart_id: PropTypes.string
+  }
+
+  render() {
+    const { cart_id, history: { push, replace }, removeItem } = this.props;
+    return (
+      <footer className='footer__settings'>
+        <button className='logout'>Logout</button>
       </footer>
     );
   }

@@ -19,12 +19,10 @@ export default class CartItem extends Component {
 
   render() {
     const { itemNumber, locked, leader, isOwner, cart_id, members, history: { push }, item: { added_by, main_image_url, name, price, quantity, id } } = this.props,
-      linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by }),
-      memberName = _.capitalize(getNameFromEmail(linkedMember ? linkedMember.email_address : null));
+      linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by });
 
     return (
       <li className='cartItem'>
-        <h4 className='cartItem__title'>{memberName}</h4>
 
         <div className='cartItem__image image col-3 ' style={
           {

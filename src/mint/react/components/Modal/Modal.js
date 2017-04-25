@@ -1,9 +1,11 @@
+// react/components/Modal/Modal.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 
 import { EmailFormContainer, AmazonFormContainer, ItemContainer, EditCartContainer } from '../../containers';
-import { Share, RouteTransitionGroup } from '..';
+import { Share, Settings } from '..';
 
 export default class SignIn extends Component {
 
@@ -24,6 +26,7 @@ export default class SignIn extends Component {
           <Route path={`${match.url}/signin`} component={EmailFormContainer} />
           <Route path={`${match.url}/edit/:edit_cart_id`} component={EditCartContainer} />
           <Route path={`${match.url}/share`} component={Share} />
+          <Route path={`${match.url}/settings`} component={Settings} />
         </Switch>
       </div>
     );

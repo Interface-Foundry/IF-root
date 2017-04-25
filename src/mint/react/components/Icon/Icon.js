@@ -1,4 +1,7 @@
+// mint/react/components/Icon/Icon.js
+
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   IoEmail,
   IoNaviconRound,
@@ -9,8 +12,17 @@ import {
   IoCamera,
   IoLocked,
   IoCheckmark,
-  IoSearch
+  IoSearch,
+  IoIosCartOutline,
+  IoPlus,
+  IoAndroidPersonAdd,
+  IoGearA,
+  IoChevronDown,
+  IoArrowLeftC
 } from 'react-icons/lib/io';
+import {
+  FaExternalLink
+} from 'react-icons/lib/fa';
 import {
   Facebook,
   FacebookMessenger,
@@ -21,6 +33,9 @@ import {
 } from '../../styles'
 
 export default class Icon extends Component {
+  static propTypes = {
+    icon: PropTypes.string.isRequired
+  }
   render() {
     switch (this.props.icon) {
     case 'PriceTag':
@@ -55,6 +70,22 @@ export default class Icon extends Component {
       return <IoCheckmark/>;
     case 'Search':
       return <IoSearch/>;
+    case 'Open':
+      return <FaExternalLink/>; 
+    case 'Cart':
+      return <IoIosCartOutline/>;
+    case 'Person':
+      return <IoAndroidPersonAdd/>;
+    case 'Plus':
+      return <IoPlus/>;
+    case 'Settings':
+      return <IoGearA/>;
+    case 'Down':
+      return <IoChevronDown/>
+    case 'Left':
+      return <IoArrowLeftC/>
+    default:
+      return <div>¯\_(ツ)_/¯</div>
     }
   }
 }

@@ -43,6 +43,10 @@ export default class Header extends Component {
             <ModalHead text={'Share Cart'} {...props}/>
           }
         />
+        <Route path={`${match.url}/m/settings`} component={() => 
+            <SettingsHeader text={'Share Cart'} {...props}/>
+          }
+        />
         <Route path={`${match.url}/m/edit`} component={() => 
             <ModalHead text={'Edit Cart'} {...props}/>
           }
@@ -139,6 +143,24 @@ class EnumeratedHead extends Component {
           {title} - {itemIndex} of {length} {type === 'search' ? 'results' : null}
         </h3>
         <div className='navbar__icon no-pointer'/>
+      </div>
+    );
+  }
+}
+
+class SettingsHeader extends Component {
+  render() {
+    const { cart_id, history: { replace, location: { pathname } }} = this.props
+
+    return (
+      <div className='navbar__modal settings'>
+        <div className='navbar__icon__close' onClick={() => replace(`/cart/${cart_id}/`)}>
+          <Icon icon='Left'/>
+        </div>
+        <h3 className='navbar__modal_head settings'>
+          <Icon icon='Settings'/>
+          Settings
+        </h3>
       </div>
     );
   }

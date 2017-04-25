@@ -1,3 +1,5 @@
+// react/actions/session.js
+
 import { REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION, TOGGLE_ADDING } from '../constants/ActionTypes';
 import { SubmissionError } from 'redux-form';
 

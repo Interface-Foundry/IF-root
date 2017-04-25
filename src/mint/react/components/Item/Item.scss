@@ -1,24 +1,18 @@
 @import '../../styles/Constants';
 .item {
+  position: relative;
   height: 100%;
   padding: $padding*2;
   overflow-x: hidden;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  font-family: $main-font;
+  text-align: left;
   &:after {
     content: '';
     height: 30vh;
     width: 100vw;
     display: inline-block;
-  }
-  .item__transition {
-    position: relative;
-  }
-  .item__transition > div {
-    display: inline-block;
-    position: absolute;
-    width: 100%;
-    left: 0;
   }
   div[class^='item__view'] {
     margin-bottom: $padding;
@@ -28,14 +22,30 @@
     }
     .ellipsis {
       overflow: hidden;
-      max-height: 45px;
+    }
+    .fadeover {
+      height: 40px;
+      position: relative;
+      background: linear-gradient(to top, $kip-primary-color 0%,rgba(255,255,255,0) 100%);
+      margin: -35px 0 0 0;
     }
     a {
       display: block;
-      padding: $padding/2 $padding;
-      color: $price-color;
+      padding-top:5px;
+      color: $secondary-button-color;
+      font-size: 12px;
     }
   }
+  // This is animation fix for chrome and maybe something else.
+  // Probably my error, html structing error probably.
+  .item__transition {
+    position: relative;
+    & > div {
+      position: absolute;
+      width: 100%;
+    }
+  }
+
   .item__view__image {
     margin: 0 auto;
   }
@@ -46,8 +56,7 @@
     font-size: 13px;
   }
   div[class$='view__price'] {
-    h4,
-    h5 {
+    h4, h5 {
       padding: 1px;
       margin: 5px;
     }
@@ -83,8 +92,7 @@
         font-family: Arial, sans-serif;
         border: 2px solid $kip-faded-color;
       }
-      button,
-      .item__view__quantity__placeholder {
+      button, .item__view__quantity__placeholder {
         height: 100%;
         margin: 0 $padding/2;
         background: white;
@@ -92,6 +100,11 @@
         cursor: pointer;
         &:active {
           background: $border-color-light;
+        }
+        &:disabled {
+          background: $border-color-light;
+          border: $border-color-light;
+          cursor: not-allowed;
         }
       }
       .item__view__quantity__placeholder {
@@ -107,6 +120,7 @@
         height: 100%;
         line-height: $padding*3;
         border-color: $border-color-light;
+        cursor: default;
       }
     }
   }
@@ -121,12 +135,28 @@
     }
   }
   .item__view__review {
-    color: #999;
+    color: $header-color;
+    background-color: white;
+    border-top: 1px solid $border-color-light;
+    border-bottom: 1px solid $border-color-light;
+    font-style: italic;
+    margin: 0 -20px;
+    padding: 20px;
     p {
-      font-size: 13px;
+      font-size: 14px;
     }
     em {
-      font-size: 11px;
+      font-size: 12px;
+    }
+  }
+  .item__view__amazon__link {
+    color: $kip-faded-color;
+    font-size: 12px;
+    position: relative;
+    top: 10px;
+    &:hover {
+      color: $header-color;
     }
   }
 }
+
