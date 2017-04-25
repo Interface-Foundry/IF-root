@@ -67,11 +67,11 @@ class CartHead extends Component {
     cartName: PropTypes.string,
     _toggleSidenav: PropTypes.func,
     currentUser: PropTypes.object,
-    currentCart: PropTypes.object
+    currentCart: PropTypes.object,
   }
 
   render() {
-    const { _toggleSidenav, currentUser, currentCart, cartName, currentCart: { locked } } = this.props;
+    const { _toggleSidenav, currentUser, cartName, currentCart: { locked, thumbnail_url } } = this.props;
 
     return (
       <div>
@@ -79,7 +79,7 @@ class CartHead extends Component {
             <Icon icon='Locked'/>
           </div> : <div className='image' style={
           {
-            backgroundImage: `url(${currentCart.thumbnail_url ? currentCart.thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
+            backgroundImage: `url(${thumbnail_url ? thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
             backgroundSize: 'contain'
