@@ -347,4 +347,12 @@ describe('api', () => {
     }
     assert(err)
   }))
+
+  it('GET /api/cart/:cart_id/checkout should redirect to the amazon cart with the affiliate id', () => co(function * () {
+    var res = yield get('/api/cart/' + mcTesty.cart_id + '/checkout', true)
+
+    // make sure it's redirect to amazon.com/gp/cart/aws-merge.html
+    assert.equal(res.request.uri.pathname, '/gp/cart/aws-merge.html')
+    assert(res.request.uri.query.includes('associate-id=motorwaytoros-20'), 'should contain our affiliate id')
+  }))
 })
