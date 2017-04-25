@@ -101,6 +101,8 @@ function sendToUser (userId,teamId) {
     try {
       let bot = new slack.WebClient(slackbot.bot.bot_access_token)
       //console.log(bot)
+
+      yield sleep(100)
       yield bot.chat.postMessage(user.dm, '', message)
 
       db.Metrics.log('feature.rollout.sent', {
@@ -3464,29 +3466,29 @@ function * main () {
 
   console.log('/ / / / / / / / / / /running admin only teams')
 
-  yield teamsAdminOnly.map(function * (t) {
-    yield sleep(20)
-    console.log('MAP TEAM ',t)
-    if(t.team_name){
-      var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
+  // yield teamsAdminOnly.map(function * (t) {
+  //   yield sleep(20)
+  //   console.log('MAP TEAM ',t)
+  //   if(t.team_name){
+  //     var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
 
-      if (team && team.meta && team.meta.office_assistants && team.meta.office_assistants.length > 0){
+  //     if (team && team.meta && team.meta.office_assistants && team.meta.office_assistants.length > 0){
 
-        console.log('FOUND ADMINS ',team.meta.office_assistants)
+  //       console.log('FOUND ADMINS ',team.meta.office_assistants)
 
-        yield team.meta.office_assistants.map(function * (u) {
-          if(u){
+  //       yield team.meta.office_assistants.map(function * (u) {
+  //         if(u){
 
-            console.log('sending to id ',u)
-            yield sendToUser(u,team.team_id)
+  //           console.log('sending to id ',u)
+  //           yield sendToUser(u,team.team_id)
  
             
-          }
-        }) 
+  //         }
+  //       }) 
 
-      }
-    }
-  })
+  //     }
+  //   }
+  // })
 
   console.log('/ / / / / / / / / / admin teams ran, proceeding to all message teams')
   yield sleep(5000)
