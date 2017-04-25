@@ -101,18 +101,18 @@ function sendToUser (userId,teamId) {
     try {
       let bot = new slack.WebClient(slackbot.bot.bot_access_token)
       //console.log(bot)
+      yield bot.chat.postMessage(user.dm, '', message)
+
+      db.Metrics.log('feature.rollout.sent', {
+        team: teamId,
+        user: user.id,
+        feature: 'bloomthat'
+      })  
+
     } catch (err) {
       console.log('SLACK ERROR HERE ',err)
     }
-    // if(bot){
-    //   yield bot.chat.postMessage(user.dm, '', message)
 
-    //   db.Metrics.log('feature.rollout.sent', {
-    //     team: teamId,
-    //     user: user.id,
-    //     feature: 'bloomthat'
-    //   })      
-    // }
 
   })
 }
