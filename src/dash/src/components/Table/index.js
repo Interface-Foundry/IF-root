@@ -59,12 +59,12 @@ const CartTable = ({data}) => {
     }
   }
   return (
-    <BootstrapTable data={newData} bordered={false} height='500' scrollTop={'Top'} hover>
+    <BootstrapTable data={newData} bordered={false} height='500px' scrollTop={'Top'} hover>
       <TableHeaderColumn isKey={true} dataField='created_date'>Date</TableHeaderColumn>
       <TableHeaderColumn dataField='team' dataFormat={nameFormatter} formatExtraData={'team_name'}>Group Name</TableHeaderColumn>
-      <TableHeaderColumn dataField='type' width='50'>Type</TableHeaderColumn>
-      <TableHeaderColumn dataField='item_count' width='150'>#Items</TableHeaderColumn>
-      <TableHeaderColumn dataField='cart_total' width='100'>Cart Total</TableHeaderColumn>
+      <TableHeaderColumn dataField='type' width='50px'>Type</TableHeaderColumn>
+      <TableHeaderColumn dataField='item_count' width='150px'>#Items</TableHeaderColumn>
+      <TableHeaderColumn dataField='cart_total' width='100px'>Cart Total</TableHeaderColumn>
       <TableHeaderColumn dataField='title'>Product Name</TableHeaderColumn>
     </BootstrapTable>
   );
