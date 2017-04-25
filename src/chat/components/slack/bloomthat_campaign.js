@@ -30,11 +30,14 @@ const message = {
   as_user: true,
   attachments: [{
     text: 'Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉',
-    image_url: 'http://tidepools.co/kip/kip_fruit_twitter_sm.gif',
+    image_url: 'https://storage.googleapis.com/kip-random/bloomthat_quiz/quiz_1.png',
     mrkdwn_in: ['text'],
     fallback: 'Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉',
     callback_id: 'none',
-    color: '#f43440',
+    color:'#52A2F0',
+    author_name: "BloomThat",
+    author_link: "https://www.bloomthat.com",
+    author_icon: "https://storage.googleapis.com/kip-random/bloomthat_quiz/bloomthat_social_media.png",
     actions: [{
       name: 'quiz_bloomthat',
       value: 'quiz_bloomthat',
