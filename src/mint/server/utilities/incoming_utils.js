@@ -44,7 +44,7 @@ var sendConfirmationEmail = function * (email, uris, searchResults) {
 
   //add template and send confirmation email
   yield confirmation.template('item_add_confirmation', {
-    baseUrl: 'https://52ad1dce.ngrok.io',
+    baseUrl: 'https://e6ed386c.ngrok.io',
     id: '7a43d85c928f',
     items: items,
     searchResults: searchResults
