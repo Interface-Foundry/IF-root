@@ -100,7 +100,7 @@ var scrapeCamel = function * () {
   var asins = [];
   var prices = [];
 
-  logging.info('loaded cheerio');
+  // logging.info('loaded cheerio');
 
   //gets names, asins, and urls to scrape categories from
   $('div.deal_top_inner').each(function (i, e) {
@@ -111,7 +111,7 @@ var scrapeCamel = function * () {
     asins.push(qs[0]);
   });
 
-  logging.info('got names and asins');
+  // logging.info('got names and asins');
 
   //gets new and old prices from the most popular section
   $('table.product_grid').first().find('div.deal_bottom_inner').each(function (i, e) {
@@ -217,6 +217,7 @@ var rankDeals = function * () {
     // logging.info('dealSet', dealSet.map(c => c.category));
     // logging.info('categoryCounts', categoryCounts);
     //if we have completed a set, we don't have to worry about repeating those categories
+
     // logging.info('rankedDeals.length', rankedDeals.length);
     // logging.info('deferred.length', deferred.length);
     if (!deals.length) {

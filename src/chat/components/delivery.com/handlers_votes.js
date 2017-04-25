@@ -12,17 +12,17 @@ var mailerTransport = require('../../../mail/IF_mail.js')
 var email_utils = require('./email_utils')
 var score_utils = require('./score_utils')
 // var menu_utils = require('./menu_utils')
-var agenda = require('../agendas')
+var agenda = require('../agendas');
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
-  googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
+  googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0');
 } else {
-  googl.setKey('AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho')
+  googl.setKey('AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho');
 }
 
 // injected dependencies
-var $replyChannel
-var $allHandlers
+var $replyChannel;
+var $allHandlers;
 
 /** @namespace handlers */ //exports
 var handlers = {}
@@ -57,7 +57,7 @@ function sampleCuisines (foodSession, slackbot) {
   }
   else var teamCuisines = null;
 
-  var cuisineToUse = [top1, top2, (teamCuisines && orderedCuisines.indexOf(teamCuisines[0]) > -1 ? teamCuisines[0] : randomCuisines[0]), randomCuisines[1]]
+  var cuisineToUse = [top1, top2, (teamCuisines && orderedCuisines.indexOf(teamCuisines[0]) > -1 ? teamCuisines[0] : randomCuisines[0]), randomCuisines[1]];
 
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
     return {
@@ -65,8 +65,8 @@ function sampleCuisines (foodSession, slackbot) {
       value: cuisineName,
       text: cuisineName,
       type: 'button'
-    }
-  })
+    };
+  });
   // add cancel button
   sampleArray.push({
     name: 'food.vote.abstain',
@@ -74,9 +74,9 @@ function sampleCuisines (foodSession, slackbot) {
     text: '× No Food for Me',
     type: 'button',
     style: 'danger'
-  })
+  });
 
-  return sampleArray
+  return sampleArray;
 }
 
 //
@@ -104,14 +104,14 @@ var SORT = {
 * @returns {} object that is ranked listing of places or whatever
 */
 function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
-  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id})
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id});
   // Set a default sort order
-  sortOrder = sortOrder || SORT.cuisine
+  sortOrder = sortOrder || SORT.cuisine;
 
-  logging.info('foodSession.votes', foodSession._id)
+  logging.info('foodSession.votes', foodSession._id);
 
   // will multiply by -1 depending on ascending or decscending
-  var directionMultiplier = direction === SORT.ascending ? 1 : -1
+  var directionMultiplier = direction === SORT.ascending ? 1 : -1;
 
   //
   // Different ways to compute the score for a merchant. Higher scores show up first.
@@ -122,29 +122,29 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
     // [SORT.cuisine]: (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v.vote)).length || 0,
     [SORT.keyword]: (m) => {
       if (!keyword) {
-        throw new Error('Cannot sort based on keyword without a keyword')
+        throw new Error('Cannot sort based on keyword without a keyword');
       }
-      return (matchingRestaurants.length - matchingRestaurants.indexOf(m.id)) / matchingRestaurants.length
+      return (matchingRestaurants.length - matchingRestaurants.indexOf(m.id)) / matchingRestaurants.length;
     },
     [SORT.distance]: (m) => _.get(m, 'location.distance', 10000),
     [SORT.rating]: (m) => {
-      return _.get(m, 'summary.overall_rating', 0)
+      return _.get(m, 'summary.overall_rating', 0);
     },
     [SORT.price]: (m) => _.get(m, 'summary.price_rating', 10),
     [SORT.random]: (m) => Math.random()
-  }
+  };
 
   // First filter out the ones that are not available for delivery or pickup
   var merchants = foodSession.merchants.filter(m => {
-    return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
-  })
+    return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method);
+  });
 
   // filter out restaurants whose delivery minimum is significantly above the team's total budget
   if (foodSession.budget) {
     var max = 1.25 * foodSession.team_members.length * foodSession.budget;
     var cheap_merchants = merchants.filter(m => m.ordering.minimum <= max);
     if (cheap_merchants.length > 2) {
-      merchants = cheap_merchants
+      merchants = cheap_merchants;
     }
   }
 
@@ -157,20 +157,20 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
       matchAllTokens: true,
       findAllMatches: false,
       keys: ['summary.name']
-    })
-    matchingRestaurants = matchingRestaurants.map(r => r.id)
-    var merchantsMatched = merchants.filter(m => matchingRestaurants.includes(m.id))
+    });
+    matchingRestaurants = matchingRestaurants.map(r => r.id);
+    var merchantsMatched = merchants.filter(m => matchingRestaurants.includes(m.id));
     // if including all other results as well, concat merchantsNotMatched)
     // var merchantsNotMatched = merchants.filter(m => !matchingRestaurants.includes(m.id))
     if (merchantsMatched.length < 1) {
-      logging.error('no matched results in createSearchRanking', {foodSession, sortOrder, direction, keyword})
+      logging.error('no matched results in createSearchRanking', {foodSession, sortOrder, direction, keyword});
     } else {
-      merchants = merchantsMatched
+      merchants = merchantsMatched;
     }
   }
 
   // filter out restaurants that aggregate below a 3 on yelp
-  merchants = merchants.filter(m => parseFloat(m.yelp_info.rating.rating) > 2)
+  merchants = merchants.filter(m => parseFloat(m.yelp_info.rating.rating) > 2);
 
   // now order the restaurants in terms of descending score
   // keep track of the highest yelp review score in this particular batch of restaurants
@@ -178,46 +178,46 @@ function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
 
   merchants = merchants
     .map(m => {
-      m.score = scoreAlgorithms[sortOrder](m)
-      if (sortOrder == SORT.cuisine) {
+      m.score = scoreAlgorithms[sortOrder](m);
+      if (sortOrder === SORT.cuisine) {
         //score based on yelp reviews
         m.stars = m.yelp_info.rating.review_count * m.yelp_info.rating.rating;
-        if (m.stars > maxStars) maxStars = m.stars
+        if (m.stars > maxStars) maxStars = m.stars;
       }
-      return m
-    })
+      return m;
+    });
 
   // if we are sorting by cuisine type and want to incorporate yelp reviews into the order
   if (sortOrder === SORT.cuisine) {
     merchants = merchants
       .map(m => {
         // normalize yelp score to be in [0, 1]
-        m.stars = m.stars / maxStars
+        m.stars = m.stars / maxStars;
 
         // restaurant score equal to the yelp score (which is always <= 1) added to the (integer) number of votes for its cuisine-type(s)
-        m.score = m.score + m.stars
+        m.score = m.score + m.stars;
 
-        return m
-      })
+        return m;
+      });
   }
 
-  merchants.sort((a, b) => directionMultiplier * (a.score - b.score))
+  merchants.sort((a, b) => directionMultiplier * (a.score - b.score));
 
-  logging.info(merchants.map(m => m.score))
+  logging.info(merchants.map(m => m.score));
 
-  return merchants
+  return merchants;
 }
 
 function sortMerchantsByDistance (merchants) {
-  return _.orderBy(merchants, 'location.distance', ['asc'])
+  return _.orderBy(merchants, 'location.distance', ['asc']);
 }
 
 function sortMerchantsByRating (merchants) {
-  return _.orderBy(merchants, 'summary.overall_rating', ['desc'])
+  return _.orderBy(merchants, 'summary.overall_rating', ['desc']);
 }
 
 function getVotesFromMembers (messages) {
-  return _.map(messages, 'data.vote')
+  return _.map(messages, 'data.vote');
 }
 
 handlers['food.admin.vote'] = function * (message) {
@@ -1208,9 +1208,9 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
         ]
       }
     ]
-  }
+  };
 
-  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec()
+  var slackbot = yield db.slackbots.findOne({team_id: foodSession.team_id}).exec();
 
   var options = {
     uri: 'https://slack.com/api/team.info',
@@ -1218,24 +1218,32 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
     qs: {
       token: slackbot.bot.bot_access_token
     }
-  }
+  };
 
-  var teamInfo = yield rp(options)
-  var slacklink = 'https://' + teamInfo.team.domain + '.slack.com'
+  var teamInfo = yield rp(options);
+  var slacklink = 'https://' + teamInfo.team.domain + '.slack.com';
 
   for (var i = 0; i < foodSession.email_users.length; i++) {
-    var m = foodSession.email_users[i]
+    var m = foodSession.email_users[i];
     // var user = yield db.email_users.findOne({email: m, team_id: foodSession.team_id});
-    var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m)
+    var html = yield email_utils.quickpickHTML(foodSession, slackbot, slacklink, m);
 
     var mailOptions = {
       to: `<${m}>`,
-      from: `Kip Café <hello@kipthis.com>`,
+      from: 'Kip Café <hello@kipthis.com>',
       subject: `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name} is collecting orders for ${slackbot.team_name}!`,
-      html: html
-    }
+      html: html,
+      tracking_settings: {
+        click_tracking: {
+          enable: true
+        },
+        open_tracking: {
+          enable: true
+        }
+      }
+    };
 
-    logging.info('mailOptions', mailOptions)
+    logging.info('mailOptions', mailOptions);
     mailerTransport.sendMail(mailOptions, function (err) {
       if (err) console.log(err)
     })

@@ -2,6 +2,8 @@ const co = require('co')
 const _ = require('lodash')
 var amazonScraper = require('../cart/scraper_amazon')
 var amazon = require('../cart/amazon_cart')
+var camel = require('../deals/deals');
+
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -244,6 +246,42 @@ module.exports = function (router) {
   }))
 
   /**
+    * @api {post} /api/share/:cart_id Send share cart email
+    */
+  router.post('/share/:cart_id', (req, res) => co(function * () {
+    // only available for logged-in Users
+    // if (!_.get(req, 'UserSession.user_account.id')) {
+    //   throw new Error('Unauthorized')
+    // }
+
+    // get the cart and leader
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items');;
+    var leader = yield db.UserAccounts.findOne({id: cart.leader});
+
+    //TODO send email
+    var share = yield db.Emails.create({
+      sender: 'Kip <hello@kip.ai>',
+      recipients: (leader.email ? leader.email : leader.email_address),
+      subject: "Share your cart",
+      template_name: 'share_cart_demo'
+    });
+
+    //pull most recent camel deals from db
+    var deals = yield camel.getDeals(6);
+    logging.info('allDeals', deals)
+    deals = [deals.slice(0, 2), deals.slice(2, 4), deals.slice(4, 6)];
+
+    yield share.template('share_cart_demo', {
+      id: cart.id,
+      cartItems: cart.items,
+      deals: deals,
+      cart: cart
+    });
+    console.log('about to send the email to ' + (leader.email ? leader.email : '...' + leader.email_address)) ;
+    yield share.send();
+  }))
+
+  /**
    * @api {post} /api/item/:item_id Update Item
    * @apiDescription Update item settings, except for id, added_by
    * @apiGroup Carts
@@ -334,7 +372,6 @@ module.exports = function (router) {
       // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
       var item = yield amazon.searchAmazon(q);
     }
-    console.log('about to send response')
     res.send(item)
   }))
 

@@ -12,7 +12,9 @@ const fs = require('fs'),
   webpackDevMiddleware = require("webpack-dev-middleware"),
   webpackHotMiddleware = require("webpack-hot-middleware"),
   webpack = require('webpack'),
-  webpackConfig = require('../webpack.config.js');
+  webpackConfig = require('../webpack.config.js'),
+  mailer_transport = require('../../mail/IF_mail');
+  agendas = require('./agendas');
 
 // live reloading
 if (!process.env.NO_LIVE_RELOAD) {
@@ -37,6 +39,7 @@ if (!process.env.NO_LIVE_RELOAD) {
 // idk
 var regularRoutes = require('./routes/regular.js');
 var apiRoutes = require('./routes/api.js');
+var mailRoutes = require('./routes/incoming-mail.js');
 
 require('colors');
 // require('../camel'); //uncomment to populate camel_items
@@ -46,6 +49,7 @@ require('colors');
  */
 var db;
 const dbReady = require('../db');
+
 dbReady.then((models) => { db = models; })
   .catch(e => console.error(e));
 
@@ -75,6 +79,7 @@ app.use(sessions({
 app.use((req, res, next) => co(function* () {
   // req.session will always exist, thanks to the above client-sessions middleware
   // Check to make sure we have stored this user's session in the database
+
   if (!req.session.id) {
     console.log('creating new sessionin the database')
     var session = yield db.Sessions.create({})
@@ -93,16 +98,17 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
   app.use(function (req, res, next) {
     var methods = { GET: 'get'.cyan, HEAD: 'head'.gray, POST: 'post'.green, DELETE: 'delete'.red }
     var str = ['>'.yellow, methods[req.method] || req.method, req.originalUrl].join(' ')
-    console.log(str)
+    console.log(str);
 
-    next()
-  })
+    next();
+  });
 } else {
-  app.use(new mintLogger.NormalLogger())
+  app.use(new mintLogger.NormalLogger());
 }
 
 // ROUTES
 app.use('/', regularRoutes);
+app.use('/sendgrid', mailRoutes);
 app.use('/api', apiRoutes);
 
 /**

@@ -9,6 +9,7 @@ const asinCache = LRU({
 })
 
 var scraper = require('./scraper_amazon');
+var emoji = require('../utilities/emoji_utils');
 
 // amazon creds -> move to constants later
 const amazonCreds = [{
@@ -86,36 +87,73 @@ exports.getAmazonItem = function * (item_identifier) {
  * search item by keyword(s)
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
  * lookup item by asin
- * @param {string} search terms
+ * @param {string} query search terms
  * @returns {[type]} amazon items
  */
 exports.searchAmazon = function * (query) {
+  query = emoji(query);
   console.log('searching:', query)
   var amazonParams = {
     Availability: 'Available',
     Keywords: query,
     Condition: 'New',
     SearchIndex: 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,SalesRank,Variations'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
   };
   var results = yield opHelper.execute('ItemSearch', amazonParams);
-    // logging.info(JSON.stringify(results.result.ItemSearchResponse.Items.Item));
-    // logging.info(JSON.stringify(Object.keys(results.result.ItemSearchResponse.Items.Item)));
-    if (!results) {
-      throw new Error('Error on search');
-      return null;
-    }
+  if (!results || !results.result.ItemSearchResponse.Items.Item) {
+    if (!results) throw new Error('Error on search for query', query);
+    else logging.error("Searching " + query + ' yielded no results');
+    return null;
+  }
+  else {
     //save new items to the db
     var items = results.result.ItemSearchResponse.Items.Item
     var validatedItems = [];
-    yield items.map(function * (item) {
-      validatedItems.push(yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item}));
+    yield items.map(function * (item) { //map of undefined
+      var dbItem = yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item})
+      // logging.info(dbItem);
+      if (dbItem) {
+        dbItem.original_link = item.ItemLinks.ItemLink[0].URL
+        yield dbItem.save();
+      }
+      validatedItems.push(dbItem);
       console.log('added item to db');
     });
-    validatedItems = validatedItems.filter(x => x); // res2Item will return null if there are validation errors and the item is not added to the db
+    validatedItems = validatedItems.filter(function (x) {
+      if (x) return x;
+    }); //res2Item will return null if there are validation errors and the item is not added to the db
     return validatedItems;
+  }
 };
 
+
+/**
+ * lookup item by asin
+ * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemLookup.html
+ * lookup item by asin
+ * @param {string} asin of item
+ * @returns {[type]} [description]
+ */
+// exports.searchAmazon = function * (query) {
+//   console.log('searching:', query)
+//   var amazonParams = {
+//     Availability: 'Available',
+//     Keywords: query,
+//     Condition: 'New',
+//     SearchIndex: 'All', //the values for this vary by locale
+//     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
+//   };
+//   try {
+//     var results = yield opHelper.execute('ItemSearch', amazonParams);
+//     // logging.info(JSON.stringify(results.result.ItemSearchResponse.Items.Item));
+//     // logging.info(JSON.stringify(Object.keys(results.result.ItemSearchResponse.Items.Item)));
+//     return results.result.ItemSearchResponse.Items.Item;
+//   } catch (err) {
+//     throw new Error('Error on search');
+//     return null;
+//   }
+// };
 
 /**
  * lookup item by asin
