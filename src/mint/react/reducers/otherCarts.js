@@ -1,3 +1,5 @@
+// react/reducers/otherCarts.js
+
 import { RECEIVE_CARTS, RECEIVE_UPDATE_CART } from '../constants/ActionTypes';
 const initialState = {
   carts: []
@@ -12,12 +14,13 @@ export default function otherCarts(state = initialState, action) {
   case RECEIVE_UPDATE_CART:
     return {
       ...state,
-      carts: _.map(state.carts, (c) => ( c.id === action.updatedCart.id ? { ...c, thumbnail_url: action.updatedCart.thumbnail_url, name: action.updatedCart.name, locked: action.updatedCart.locked } : c)).reverse()
-    }
+      carts: _.map(state.carts, (c) => (c.id === action.updatedCart.id ? { ...c, thumbnail_url: action.updatedCart.thumbnail_url, name: action.updatedCart.name, locked: action.updatedCart.locked } : c))
+        .reverse()
+    };
   default:
     return state;
   }
 }
 
 //Selectors
-export const getCartById = (state, props) => state.otherCarts.carts.find(cart => cart.id === props.id)
+export const getCartById = (state, props) => state.otherCarts.carts.find(cart => cart.id === props.id);

@@ -1,3 +1,5 @@
+// react/reducers/index.js
+
 import currentCart from './currentCart';
 import otherCarts from './otherCarts';
 import session from './session';

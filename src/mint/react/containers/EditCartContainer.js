@@ -1,3 +1,5 @@
+// react/containers/EditCartContainer.js
+
 import { connect } from 'react-redux';
 import { reset, reduxForm } from 'redux-form';
 
@@ -9,10 +11,11 @@ import { updateCart } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-  cart_id: state.currentCart.cart_id,
-  cart: getCartById(state, {id: ownProps.match.params.edit_cart_id}),
-  initialValues: getCartById(state, {id: ownProps.match.params.edit_cart_id})
-}};
+    cart_id: state.currentCart.cart_id,
+    cart: getCartById(state, { id: ownProps.match.params.edit_cart_id }),
+    initialValues: getCartById(state, { id: ownProps.match.params.edit_cart_id })
+  };
+};
 
 const mapDispatchToProps = dispatch => ({
   // We need to edit the cart here

@@ -1,8 +1,8 @@
-// // mint/react/components/Cart/Item.js
+// mint/react/components/Cart/Item.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+
 import { displayCost } from '../../utils';
 import { splitCartById } from '../../reducers';
 import { RouteTransition } from 'react-router-transition';
@@ -173,7 +173,7 @@ class ProductDescription extends Component {
   state = {
     descripHeight: '100%',
     descripTall: false,
-    showViewMore: true
+    showViewMore: false,
   }
 
   static propTypes = {
@@ -198,17 +198,14 @@ class ProductDescription extends Component {
   }
 
   componentDidMount() {
-    this._handleWindowResize()
     window.addEventListener('resize', this._handleWindowResize);
   }
-
   componentWillUnmount() {
     window.removeEventListener('resize', this._handleWindowResize);
   }
-  
+
   componentDidUpdate(nextProps) {
-    if(nextProps.description !== this.props.description)
-      this._handleWindowResize()
+    if (nextProps.description !== this.props.description) this._handleWindowResize();
   }
 
   render() {

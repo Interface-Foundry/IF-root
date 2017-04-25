@@ -1,3 +1,4 @@
+// react/components/Item/Item.scss
 @import '../../styles/Constants';
 .item {
   position: relative;
@@ -26,26 +27,24 @@
     .fadeover {
       height: 40px;
       position: relative;
-      background: linear-gradient(to top, $kip-primary-color 0%,rgba(255,255,255,0) 100%);
+      background: linear-gradient(to top, $kip-primary-color 0%, rgba(255, 255, 255, 0) 100%);
       margin: -35px 0 0 0;
     }
     a {
       display: block;
-      padding-top:5px;
+      padding-top: 5px;
       color: $secondary-button-color;
       font-size: 12px;
     }
-  }
-  // This is animation fix for chrome and maybe something else.
+  } // This is animation fix for chrome and maybe something else.
   // Probably my error, html structing error probably.
   .item__transition {
     position: relative;
-    & > div {
+    &>div {
       position: absolute;
       width: 100%;
     }
   }
-
   .item__view__image {
     margin: 0 auto;
   }

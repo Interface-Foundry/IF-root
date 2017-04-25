@@ -1,6 +1,7 @@
+// react/components/App/App.scss
+
 @import '../../styles/Constants';
-body,
-html {
+body, html {
   margin: 0;
   overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
   height: 100%;
@@ -22,8 +23,7 @@ html {
   }
 }
 
-.app,
-#root {
+.app, #root {
   position: fixed;
   top: 0;
   bottom: 0;
@@ -37,7 +37,6 @@ html {
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   height: calc(100% - #{$nav-height*2 + 10});
-
   &.large {
     height: calc(100% - #{$nav-height});
   }
@@ -58,11 +57,7 @@ li {
   list-style: none;
 }
 
-h1,
-h2,
-h3,
-h4,
-p {
+h1, h2, h3, h4, p {
   margin: 0;
   letter-spacing: 0.75px;
 }
@@ -83,12 +78,11 @@ h4 {
   font-size: 12px;
 }
 
-input,
-select:focus,
-textarea {
+input, select:focus, textarea {
   font-size: $input-font-size !important;
 }
 
 body::-webkit-scrollbar {
   display: none;
 }
+

@@ -1,3 +1,5 @@
+// react/components/App/index.js
+
 import App from './App';
 import './App.scss';
 import './Header.scss';

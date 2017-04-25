@@ -1,3 +1,5 @@
+// react/components/App/Sidenav.js
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
@@ -18,8 +20,7 @@ export default class Sidenav extends Component {
   }
 
   render() {
-    const { carts, _toggleSidenav, currentUser, cart_id } = this.props,
-      { show } = this.state,
+    const { carts, _toggleSidenav, currentUser, cart_id } = this.props, { show } = this.state,
       leaderCarts = _.filter(carts, (c, i) => c.leader.email_address === currentUser.email_address),
       memberCarts = _.filter(carts, (c, i) => c.leader.email_address !== currentUser.email_address);
 
@@ -37,7 +38,7 @@ export default class Sidenav extends Component {
             </li>
             <h4>My Kip Carts</h4>
             {_.map(leaderCarts, (c, i) => {
-              if(i > 1 && show !== 'me') return null
+              if(i > 1 && show !== 'me') return null;
               return ( 
                 <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
                   <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>

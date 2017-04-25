@@ -1,3 +1,5 @@
+// react/containers/CartContainer.js
+
 import { connect } from 'react-redux';
 import { Cart } from '../components';
 import { fetchDeals } from '../actions/deals';

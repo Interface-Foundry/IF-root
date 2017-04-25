@@ -1,3 +1,4 @@
+// react/actions/__tests__/cart.test.js
 import nock from 'nock';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
@@ -81,6 +82,5 @@ describe('cart actions', () => {
         // error handler
       });
   });
-
 
 });

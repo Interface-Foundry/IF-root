@@ -1,3 +1,4 @@
+// react/components/Modal/Modal.scss
 @import '../../styles/Constants';
 @import '../../styles/Animations';
 .modal {
@@ -13,13 +14,11 @@
   overflow: hidden;
   .form {
     padding: $padding $padding*2 $padding*2 $padding*2;
-
-    & > div {
+    &>div {
       position: relative;
     }
     .deals__section {
       margin: $padding (0 - $padding*2);
-
       span {
         display: block;
       }
@@ -47,8 +46,7 @@
         padding: 0;
         margin: 0;
       }
-      button,
-      input {
+      button, input {
         height: $nav-height - 4px;
         line-height: $nav-height - 4px;
         border-radius: 4px;
@@ -92,26 +90,21 @@
   }
 }
 
-
 .example-enter {
   opacity: 0.01;
-
-  &.example-enter-active{
+  &.example-enter-active {
     opacity: 1;
     transition: opacity 500ms ease-in;
   }
 }
 
-
 .example-leave {
   opacity: 1;
-
   &.example-leave-active {
     opacity: 0.01;
     transition: opacity 300ms ease-in;
   }
 }
-
 
 .example-appear {
   opacity: 0.01;
@@ -121,3 +114,4 @@
   opacity: 1;
   transition: opacity .5s ease-in;
 }
+

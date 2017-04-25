@@ -1,6 +1,6 @@
-import {
-  isValidEmail
-} from '.';
+// react/utils/formating.js
+
+import { isValidEmail } from '.';
 
 export const commaSeparateNumber = (val, loc = undefined, opts = { maximumFractionDigits: 2 }) => {
   opts = {
@@ -30,11 +30,11 @@ export const getNameFromEmail = email => {
 
 export const addLinkToDeepLink = (items, link) => {
   return _.map(items, (i, index) => {
-    if (!i.deepLink) return i
+    if (!i.deepLink) return i;
 
-    return { ...i, deepLink: formatLinkForApp(i, link) }
-  })
-}
+    return { ...i, deepLink: formatLinkForApp(i, link) };
+  });
+};
 
 const formatLinkForApp = (app, link) => {
   switch (app.icon) {
@@ -48,8 +48,8 @@ const formatLinkForApp = (app, link) => {
   default:
     return app.deepLink;
   }
-}
+};
 
 export const calculateItemTotal = (items) => {
-  return _.reduce(items, (acc, item) => acc + (item.price * item.quantity), 0)
-}
+  return _.reduce(items, (acc, item) => acc + (item.price * item.quantity), 0);
+};

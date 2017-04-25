@@ -1,3 +1,5 @@
+// react/containers/AddAmazonItemContainer.js
+
 import { connect } from 'react-redux';
 import { addingItem } from '../actions/cart';
 import { AddAmazonItem } from '../components';

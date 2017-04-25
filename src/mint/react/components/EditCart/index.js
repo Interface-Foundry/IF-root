@@ -1,3 +1,5 @@
+// react/components/EditCart/index.js
+
 import EditCart from './EditCart';
 import './EditCart.scss';
 import './Image.scss';

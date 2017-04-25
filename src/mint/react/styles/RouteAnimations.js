@@ -1,3 +1,5 @@
+// react/styles/RouteAnimations.js
+
 import spring from 'react-motion/lib/spring';
 
 const fadeConfig = { stiffness: 200, damping: 22 };

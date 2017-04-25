@@ -1,3 +1,5 @@
+// react/containers/AppContainer.js
+
 import { connect } from 'react-redux';
 import { App } from '../components';
 import { fetchCart, fetchAllCarts, updateCart } from '../actions/cart';
@@ -21,7 +23,7 @@ const mapStateToProps = (state, ownProps) => ({
   session_id: state.session.id
 });
 const mapDispatchToProps = dispatch => ({
-	addItem: (cart_id, item_id, replace) => {
+  addItem: (cart_id, item_id, replace) => {
     dispatch(addItem(cart_id, item_id))
       .then(e => {
         replace(`/cart/${cart_id}/`);

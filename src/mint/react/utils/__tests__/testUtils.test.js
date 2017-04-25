@@ -1,3 +1,5 @@
+// react/utils/__tests__/testUtils.test.js
+
 import { fakeStore } from '..';
 
 describe('testUtils util', () => {
@@ -21,7 +23,7 @@ describe('testUtils util', () => {
     it('should return original state when getState is called', () => {
       expect(fakeStore(state)
           .getState())
-        .toEqual({...state });
+        .toEqual({ ...state });
     });
   });
 });

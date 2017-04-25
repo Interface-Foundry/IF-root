@@ -1,3 +1,5 @@
+// react/constants/ActionTypes.js
+
 // Session
 export const RECEIVE_SESSION = 'RECEIVE_SESSION';
 export const REQUEST_SESSION = 'REQUEST_SESSION';

@@ -1,43 +1,82 @@
+// react/styles/Animations.scss
 // Fade in and animate up
 @-webkit-keyframes fadeIn {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
+
 @-moz-keyframes fadeIn {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
+
 @-o-keyframes fadeIn {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
+
 @keyframes fadeIn {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes scrollInLeft {
-  0%   { transform: translate3d(200px, 0, 0)}
-  100% { transform: translate3d(0px, 0, 0)}
+  0% {
+    transform: translate3d(200px, 0, 0)
+  }
+  100% {
+    transform: translate3d(0px, 0, 0)
+  }
 }
 
 @keyframes fadeInDown {
-  0%   { opacity: 0; transform: translate3d(0, -100%, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0%, 0); }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -100%, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0%, 0);
+  }
 }
 
 @keyframes fadeOutRight {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0); }
-  100% { opacity: 0; transform: translate3d(100%, 0, 0); }
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(100%, 0, 0);
+  }
 }
 
 @keyframes fallOutDown {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0); }
-  100% { opacity: 0; transform: translate3d(0, 100%, 0); }
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
 }
-
-
-
 
 @keyframes pulse {
   0% {
@@ -58,10 +97,10 @@
   animation: $args;
 }
 
- 
 @mixin transition($transition) {
   -webkit-transition: $transition;
   -moz-transition: $transition;
   -o-transition: $transition;
-  transition: $transition; 
+  transition: $transition;
 }
+

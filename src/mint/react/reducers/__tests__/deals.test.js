@@ -1,3 +1,5 @@
+// react/reducers/__tests__/deals.test.js
+
 import reducer from '../Deals';
 
 import { RECEIVE_DEALS, REQUEST_DEALS } from '../../constants/ActionTypes';

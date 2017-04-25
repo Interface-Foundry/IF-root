@@ -1,13 +1,11 @@
+// react/components/Cart/CartItem.scss
 @import '../../styles/Constants';
 @import '../../styles/Animations';
-
-
 .cartItem {
   padding: $padding*2;
   border-bottom: 1px solid $border-color-light;
   background: $kip-primary-color;
   font-family: $secondary-font;
-
   &:last-of-type {
     border-bottom: 0;
   }
@@ -25,7 +23,6 @@
   .cartItem__props {
     display: inline-block;
     padding: 0 0 0 $padding*2;
-    
     p {
       float: left;
       clear: left;

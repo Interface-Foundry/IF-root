@@ -1,16 +1,12 @@
+// react/components/Cart/CartItem.js
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { getMemberById } from '../../reducers';
-import { getNameFromEmail, displayCost } from '../../utils';
-
+import { displayCost } from '../../utils';
 
 export default class CartItem extends Component {
   static propTypes = {
-    leader: PropTypes.object,
     history: PropTypes.object,
     item: PropTypes.object,
-    members: PropTypes.arrayOf(PropTypes.object)
-      .isRequired,
     itemNumber: PropTypes.number.isRequired,
     cart_id: PropTypes.string.isRequired,
     isOwner: PropTypes.bool.isRequired,
@@ -18,8 +14,7 @@ export default class CartItem extends Component {
   }
 
   render() {
-    const { itemNumber, locked, leader, isOwner, cart_id, members, history: { push }, item: { added_by, main_image_url, name, price, quantity, id } } = this.props,
-      linkedMember = getMemberById({ members: members, leader: leader }, { id: added_by });
+    const { itemNumber, locked, isOwner, cart_id, history: { push }, item: { main_image_url, name, price, quantity, id } } = this.props;
 
     return (
       <li className='cartItem'>

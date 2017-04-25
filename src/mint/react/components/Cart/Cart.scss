@@ -1,3 +1,4 @@
+// react/components/Cart/Cart.scss
 @import '../../styles/Constants';
 @import '../../styles/Animations';
 $cart__add-height: $nav-height+$padding;
@@ -6,13 +7,11 @@ $cart__add-height: $nav-height+$padding;
   position: relative;
   .cart__locked {
     background: $header-color;
-
     .cart__locked__actions {
       padding: $padding;
       background: $kip-primary-color;
       border-bottom: 1px solid $border-color-light;
       border-top: 1px solid $border-color-light;
-
       button {
         height: $nav-height;
         width: 100%;
@@ -21,13 +20,11 @@ $cart__add-height: $nav-height+$padding;
         font-size: 18px;
         border-radius: 5px;
         background: $main-button-color;
-
         svg {
           vertical-align: top!important;
           font-size: 20px;
           margin-right: $padding/2;
         }
-
         &:first-of-type {
           margin-bottom: 10px;
           color: white;
@@ -36,20 +33,17 @@ $cart__add-height: $nav-height+$padding;
         }
       }
     }
-
     .cart__locked-container {
       position: relative;
       height: $nav-height;
       line-height: $nav-height;
       padding: 0 $padding;
-
       .cart__locked__text {
         display: inline-block;
         height: $nav-height;
         line-height: $nav-height;
         text-align: left;
         padding: $padding/2 0;
-
         p {
           display: block;
           height: $nav-height/2 - 5px;
@@ -57,24 +51,20 @@ $cart__add-height: $nav-height+$padding;
           font-size: 13px;
           text-align: left;
           padding: 0;
-
           &:first-of-type {
             font-size: 18px;
           }
         }
-
         * {
           display: inline-block;
           font-size: 20px;
           color: white;
           padding: 0 $padding/2;
         }
-
         svg {
           font-size: 25px;
         }
       }
-
       button {
         position: absolute;
         right: $padding;
@@ -87,7 +77,6 @@ $cart__add-height: $nav-height+$padding;
         padding: 0 $padding*2;
         margin: $padding/2 auto;
         border-radius: 10px;
-
         svg {
           vertical-align: top!important;
           font-size: 17px;
@@ -106,7 +95,6 @@ $cart__add-height: $nav-height+$padding;
     text-align: center;
     @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-
     &.action {
       background: $main-button-color;
     }
@@ -121,7 +109,6 @@ $cart__add-height: $nav-height+$padding;
       h3 {
         border-bottom: 1px solid $border-color-light;
         padding: $padding;
-
         span {
           color: $price-color;
         }
@@ -158,3 +145,4 @@ $cart__add-height: $nav-height+$padding;
     list-style: disc none inside;
   }
 }
+

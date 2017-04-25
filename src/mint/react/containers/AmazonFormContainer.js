@@ -1,3 +1,5 @@
+// react/containers/AmazonFormContainer.js
+
 import { connect } from 'react-redux';
 import { reset, reduxForm } from 'redux-form';
 
@@ -14,7 +16,7 @@ const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => {
     const { history: { replace }, cart_id } = state;
     dispatch(reset('AddItem'));
-    if(!isUrl(values.url)) addSearchHistory(values.url);
+    if (!isUrl(values.url)) addSearchHistory(values.url);
     replace(`/cart/${cart_id}/m/item/0/${encodeURIComponent(values.url)}`);
   }
 });

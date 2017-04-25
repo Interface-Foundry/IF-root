@@ -1,3 +1,5 @@
+// react/utils/dates.js
+
 import moment from 'moment';
 
 export const timeFromDate = (date) => {

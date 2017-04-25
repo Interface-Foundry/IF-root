@@ -72,7 +72,7 @@ export default class Icon extends Component {
     case 'Search':
       return <IoSearch/>;
     case 'Open':
-      return <FaExternalLink/>; 
+      return <FaExternalLink/>;
     case 'Cart':
       return <IoIosCartOutline/>;
     case 'Person':
