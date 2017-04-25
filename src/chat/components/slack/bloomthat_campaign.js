@@ -25,34 +25,31 @@ const fs = require('fs')
 // We'll send this message to ppl as a marketing campaign
 //
 const message = {
-  icon_url: 'http://kipthis.com/img/kip-icon.png',
-  username: 'Kip',
-  as_user: true,
-  text: 'Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉',
-  fallback: 'Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉',
-  attachments: [{
-    text: '',
-    image_url: 'https://storage.googleapis.com/kip-random/bloomthat_quiz/quiz_1.png',
-    mrkdwn_in: ['text'],
-    fallback: '',
-    callback_id: 'none',
-    color:'#52A2F0',
-    author_name: "BloomThat",
-    author_link: "https://www.bloomthat.com",
-    author_icon: "https://storage.googleapis.com/kip-random/bloomthat_quiz/bloomthat_social_media.png",
-    actions: [{
-      name: 'quiz_bloomthat',
-      value: 'quiz_bloomthat',
-      text: 'Find Out Now 🙌🏽',
-      style: 'primary',
-      type: 'button'
+  "icon_url": "http://kipthis.com/img/kip-icon.png",
+  "username": "Kip",
+  "text": "Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
+  "attachments": [{
+    "text": "",
+    "image_url": "https://storage.googleapis.com/kip-random/bloomthat_quiz/quiz_1.png",
+    "mrkdwn_in": ["text"],
+    "fallback": "Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
+    "callback_id": "none",
+    "color":"#52A2F0",
+    "author_name": "BloomThat",
+    "author_link": "https://www.bloomthat.com",
+    "author_icon": "https://storage.googleapis.com/kip-random/bloomthat_quiz/bloomthat_social_media.png",
+    "actions": [{
+      "name": "quiz_bloomthat",
+      "value": "quiz_bloomthat",
+      "text": "Find Out Now 🙌🏽",
+      "style": "primary",
+      "type": "button"
     }, {
-      color: '#45a5f4',
-      name: 'quiz_bloomthat_help',
-      value: 'quiz_bloomthat_help',
-      text: 'What\'s Admin Day?',
-      style: 'default',
-      type: 'button'
+      "name": "quiz_bloomthat_help",
+      "value": "quiz_bloomthat_help",
+      "text": "What's Admin Day?",
+      "style": "default",
+      "type": "button"
     }]
   }]
 }
