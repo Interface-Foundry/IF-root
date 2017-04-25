@@ -32,6 +32,11 @@
         padding: 0;
         width: $nav-height/2;
       }
+      &.logout {
+        background: transparent;
+        border: 0;
+        text-align: right;
+      }
       &.green {
         background: $third-button-color;
         color: white;

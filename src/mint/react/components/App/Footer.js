@@ -85,7 +85,7 @@ class CartFooter extends Component {
             isLeader
             ? <button className='share'>
                 <Icon icon='Cart'/>
-                EMAIL ITEM LIST
+                EMAIL ITEMS
               </button>
             : null
           }

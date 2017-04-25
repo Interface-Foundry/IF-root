@@ -74,7 +74,11 @@ export default class Cart extends Component {
   render() {
     const { items, leader, members, user_account, history: { push }, locked, updateCart, currentCart } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
-      isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
+      isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
+      total = calculateItemTotal([
+        ...items.my, 
+        ..._.reduce(items.others, (acc, value) => [...acc, ...value], [])
+      ]);
 
     return (
       <div className='cart'>
@@ -82,8 +86,8 @@ export default class Cart extends Component {
           locked 
           ? <div className='cart__locked'>
               <div className='cart__locked__actions'>
-                <button><Icon icon='Refresh'/>RE-ORDER CART</button>
-                { leader.id === user_account.id ? <button><Icon icon='Cart'/>CHECKOUT</button> : null }
+                <button className='primary'><Icon icon='Refresh'/><h1>RE-ORDER CART</h1></button>
+                { leader.id === user_account.id ? <button className='secondary'><Icon icon='Cart'/><h1>CHECKOUT<br/>{displayCost(total)}</h1></button> : null }
               </div>
               <div className='cart__locked-container'>
                 <div className='cart__locked__text'>
@@ -147,7 +151,7 @@ class MyItems extends Component {
   }
 
   render() {
-    const { props: { items } } = this,
+    const { props: { items, currentCart: { locked } } } = this,
     total = calculateItemTotal(items);
 
     return (
@@ -160,7 +164,7 @@ class MyItems extends Component {
             : <EmptyCart key="empty"/>
           }
         </div>
-        <h3>Total: <span>{displayCost(total)}</span></h3>
+        <h3>Total: <span className={locked?'locked':''}>{displayCost(total)}</span></h3>
       </ul>
     );
   }
@@ -175,7 +179,7 @@ class OtherItems extends Component {
   }
 
   render() {
-    const { props, props: { items, isLeader, startIndex, title } } = this,
+    const { props, props: { items, isLeader, startIndex, title, currentCart: { locked } } } = this,
     total = calculateItemTotal(items);
 
     return (
@@ -186,7 +190,7 @@ class OtherItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
           : <EmptyCart />
         }
-        {isLeader ? <h3>Total: <span>{displayCost(total)}</span></h3> : null}
+        {isLeader ? <h3>Total: <span className={locked?'locked':''}>{displayCost(total)}</span></h3> : null}
       </ul>
     );
   }

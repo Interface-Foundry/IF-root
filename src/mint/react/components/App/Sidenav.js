@@ -29,13 +29,13 @@ export default class Sidenav extends Component {
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
         </div>
         <ul className='sidenav__list'>
+          <li className='sidenav__list__header'>
+            <p>{currentUser.email_address}</p>
+            <div className='icon' onClick={_toggleSidenav}>
+              <Icon icon='Clear'/>
+            </div>
+          </li>
           <div className='sidenav__list__view'>
-            <li className='sidenav__list__header'>
-              <p>{currentUser.email_address}</p>
-              <div className='icon' onClick={_toggleSidenav}>
-                <Icon icon='Clear'/>
-              </div>
-            </li>
             <h4>My Kip Carts</h4>
             {_.map(leaderCarts, (c, i) => {
               if(i > 1 && show !== 'me') return null;
