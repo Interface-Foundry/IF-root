@@ -37,6 +37,9 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   var bodyText = req.body.text;
   var bodyHtml = req.body.html;
   bodyText = utils.truncateConversationHistory(bodyText);
+  bodyHtml = utils.truncateConversationHistory(bodyHtml);
+  console.log('BODY HTML', bodyHtml)
+
   var all_uris = utils.getUrls(bodyHtml);
   // logging.info('all_uris', all_uris);
 
@@ -113,7 +116,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
     if (!uris) uris = [];
     if (!searchResults) searchResults = [];
     // logging.info('searchResults', searchResults);
-    yield utils.sendConfirmationEmail(email, uris, searchResults);
+    yield utils.sendConfirmationEmail(email, uris, searchResults, cart.id);
   }
 
   // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')
