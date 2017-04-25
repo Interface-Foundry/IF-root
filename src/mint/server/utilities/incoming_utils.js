@@ -181,18 +181,20 @@ var truncateConversationHistory = function (text) {
 var getUrls = function (html) {
   // **hopeful gmail version**
 
-  // console.log('html', html)
-  // var uris = html.match(/href="(.+?)"/gi);
-  // logging.info('uris', uris);
-  // if (!uris) return null;
-  //
-  // uris = uris.map(u => u.slice(6, u.length-1)); //trim off href junk
-  // console.log('should return these', uris)
-  // uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
-  // console.log('should be amazon', uris)
-
-  var uris = html.match(/(https?\:.+)\s/gi);
+  console.log('html', html)
+  var uris = html.match(/href="(.+?)"/gi);
   logging.info('uris', uris);
+  if (!uris) return null;
+
+  uris = uris.map(u => u.slice(6, u.length-1)); //trim off href junk
+  console.log('should return these', uris)
+  uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
+  console.log('should be amazon', uris)
+
+  if (!uris) {
+    var uris = html.match(/(https?:.+)["\s]/gi);
+    logging.info('janky uris', uris);
+  }
 
   return uris;
 }

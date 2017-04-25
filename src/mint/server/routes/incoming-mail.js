@@ -96,17 +96,23 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   if (uris && uris.length) { //if the user copypasted an amazon uri directly
     console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {
-      return yield amazonScraper.scrapeUrl(uri);
+      // var item = yield amazonScraper.scrapeUrl(uri);
+
       var item = yield amazon.getAmazonItem(uri);
-      if (item.Variations) console.log('there are options')
+      logging.info(item);
+      return item;
+      // yield item.save();
+      // if (item.Variations) console.log('there are options')
       // return yield amazon.addAmazonItemToCart(item, cart);
     });
     // console.log('amazon things', uris)
     yield url_items.map(function * (it) {
-      cart.items.add(it.id);
-      it.cart = cart.id;
-      it.added_by = user.id
-      yield it.save();
+      yield amazon.addAmazonItemToCart(it, cart);
+      console.log('finished calling that function you were scared to use')
+      // cart.items.add(it.id);
+      // it.cart = cart.id;
+      // it.added_by = user.id
+      // yield it.save();
     })
     yield cart.save();
   }
@@ -116,10 +122,11 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
     if (!uris) uris = [];
     if (!searchResults) searchResults = [];
     // logging.info('searchResults', searchResults);
+
     yield utils.sendConfirmationEmail(email, uris, searchResults, cart.id);
   }
 
-  // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')
+
   res.sendStatus(200);
 }));
 
