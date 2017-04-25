@@ -5,6 +5,8 @@
   <title>Kip | Verify Email Address</title>
 </head>
 <body>
+  <!-- responsible -->
+  <input type="hidden" id="cartId" name="cartId" value="<%=cart%>">
   <p>Click <a href="<%=baseUrl%>/auth/<%=link.id%>">HERE</a> to log
     in to Kip as <%=link.user.email_address%>, or copy and paste the following
     into your browser: <a href="<%=baseUrl%>/auth/<%=link.id%>"><%=baseUrl%>/auth/<%=link.id%></a>

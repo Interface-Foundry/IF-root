@@ -27,7 +27,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   var user = yield db.UserAccounts.findOrCreate({email: email});
 
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
-  if (!req.body.text || ! req.body.html) {
+  if (!req.body.text || !req.body.html) {
     logging.info('no email body');
     yield utils.sendErrorEmail(email);
     res.sendStatus(202);
