@@ -98,13 +98,17 @@ function sendToUser (userId,teamId) {
     // Send a message to this user 
     let slackbot = yield db.Slackbots.findOne({team_id: teamId}).exec()
     let bot = new slack.WebClient(slackbot.bot.bot_access_token)
-    yield bot.chat.postMessage(user.dm, '', message)
 
-    db.Metrics.log('feature.rollout.sent', {
-      team: teamId,
-      user: user.id,
-      feature: 'bloomthat'
-    })
+    if(bot){
+      yield bot.chat.postMessage(user.dm, '', message)
+
+      db.Metrics.log('feature.rollout.sent', {
+        team: teamId,
+        user: user.id,
+        feature: 'bloomthat'
+      })      
+    }
+
   })
 }
 
