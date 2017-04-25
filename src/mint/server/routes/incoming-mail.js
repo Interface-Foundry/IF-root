@@ -14,10 +14,10 @@ var amazon = require('../cart/amazon_cart');
 var utils = require('../utilities/incoming_utils');
 
 /**
- * @api {post} /incoming
+ * @api {post} /api/sendgrid/incoming
  * @apiDescription parses incoming user emails sent to kip.ai, and takes actions in response
  */
-router.post('/', upload.array(), (req, res) => co(function * () {
+router.post('/incoming', upload.array(), (req, res) => co(function * () {
   console.log('posted to webhook');
   yield dbReady;
   // console.log('req.body', req.body)

@@ -108,7 +108,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
 
 // ROUTES
 app.use('/', regularRoutes);
-app.use('/incoming', mailRoutes);
+app.use('/sendgrid', mailRoutes);
 app.use('/api', apiRoutes);
 
 /**
