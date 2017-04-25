@@ -66,7 +66,7 @@ function sendToUser (userId,teamId) {
   console.log('running for user', userId)
   
   return co(function * () {
-    yield sleep(50)
+    //yield sleep(50)
     // get the full user obj
     var user = yield db.Chatusers.findOne({id: userId, team_id: teamId}).exec()
 
@@ -97,17 +97,22 @@ function sendToUser (userId,teamId) {
 
     // Send a message to this user 
     let slackbot = yield db.Slackbots.findOne({team_id: teamId}).exec()
-    let bot = new slack.WebClient(slackbot.bot.bot_access_token)
 
-    if(bot){
-      yield bot.chat.postMessage(user.dm, '', message)
-
-      db.Metrics.log('feature.rollout.sent', {
-        team: teamId,
-        user: user.id,
-        feature: 'bloomthat'
-      })      
+    try {
+      let bot = new slack.WebClient(slackbot.bot.bot_access_token)
+      console.log(bot)
+    } catch (err) {
+      console.log('SLACK ERROR HERE ',err)
     }
+    // if(bot){
+    //   yield bot.chat.postMessage(user.dm, '', message)
+
+    //   db.Metrics.log('feature.rollout.sent', {
+    //     team: teamId,
+    //     user: user.id,
+    //     feature: 'bloomthat'
+    //   })      
+    // }
 
   })
 }
@@ -3458,28 +3463,28 @@ function * main () {
 
   console.log('/ / / / / / / / / / /running admin only teams')
 
-  yield teamsAdminOnly.map(function * (t) {
-    console.log('MAP TEAM ',t)
-    if(t.team_name){
-      var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
+  // yield teamsAdminOnly.map(function * (t) {
+  //   console.log('MAP TEAM ',t)
+  //   if(t.team_name){
+  //     var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
 
-      if (team && team.meta && team.meta.office_assistants && team.meta.office_assistants.length > 0){
+  //     if (team && team.meta && team.meta.office_assistants && team.meta.office_assistants.length > 0){
 
-        console.log('FOUND ADMINS ',team.meta.office_assistants)
+  //       console.log('FOUND ADMINS ',team.meta.office_assistants)
 
-        yield team.meta.office_assistants.map(function * (u) {
-          if(u){
+  //       yield team.meta.office_assistants.map(function * (u) {
+  //         if(u){
 
-            console.log('sending to id ',u)
-            yield sendToUser(u,team.team_id)
+  //           console.log('sending to id ',u)
+  //           yield sendToUser(u,team.team_id)
  
             
-          }
-        }) 
+  //         }
+  //       }) 
 
-      }
-    }
-  })
+  //     }
+  //   }
+  // })
 
   console.log('/ / / / / / / / / / admin teams ran, proceeding to all message teams')
   yield sleep(5000)
