@@ -1,0 +1,92 @@
+@import '../../themes/constants';
+@import '../../themes/grid';
+
+// General
+body, html {
+	height: 100%;
+	font-family: $fontFamily;
+	color: darken($bgColor, 5);
+	overflow: hidden;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+	* {
+		box-sizing: border-box;
+		vertical-align: top;
+	}
+}
+a {
+	text-decoration: none;
+}
+ul {
+	margin: 0;
+	padding: 0;
+}
+li {
+	list-style: none;
+}
+h1,h2,h3,h4,p {
+	margin: 0;
+	font-family: $secondaryFontFamily;
+	letter-spacing: 0.75px;
+}
+h1 {
+	font-size: 20px;
+}
+h2 {
+	font-size: 18px;
+}
+h3 {
+	font-size: 16px;
+}
+h4 {
+	font-family: $fontFamily;
+	font-size: 14px;
+}
+p {
+	font-family: $fontFamily;
+	font-size: 12px;
+}
+
+.image {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  min-height: 50px;
+}
+	
+// overwrites
+.Typist {
+	@media only screen and (max-width: 600px) {
+		white-space: nowrap;
+	}
+}
+.Typist .Cursor--blinking { 
+	opacity: 1;
+	display: inline-block;
+	color: lighten($bgColor, 5%);
+	font-size: 12px;
+	animation: blink 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+	@media only screen and (max-width: 600px) {
+		margin-left: 0;
+	}
+}	
+.Static .Cursor--blinking {
+	opacity: 1;
+	display: inline-block;
+	color: lighten($bgColor, 5%);
+	font-size: 12px;
+	animation: blink 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+	@media only screen and (max-width: 600px) {
+		margin-left: 0;
+	}
+} 	
+
+@keyframes blink {
+  0% {
+    opacity: 1; }
+  50% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }

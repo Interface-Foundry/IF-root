@@ -1,0 +1,77 @@
+
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.dot__bubble {
+	display: block;
+	position: absolute;
+	opacity: 1;
+	height: $ribbonHeight;
+	top: -60px;
+	width: auto;
+	border-radius: $borderRadius;
+	border: 1px solid $borderColor;
+	background: white;
+	padding: 0;
+	min-width: $ribbonHeight;
+	transform: translate3d(-45%,0,0) !important;
+	line-height: $ribbonHeight - 2px;
+	text-align: center;
+	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+	& > div {
+		height: 100%;
+	}
+
+	&.text {
+		white-space: nowrap;
+		* {
+			display: inline-block;
+		}
+		.typing__dot {
+			display: inline-block;
+			width: 33%;
+			font-size: 16px;
+			font-weight: 600;
+			padding: 0 $padding/3;
+			animation-name: blink;
+			animation-duration: 1.4s;
+			animation-iteration-count: infinite;
+			animation-fill-mode: both;
+			animation-delay: 0.2s;
+		    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+			&:first-of-type {
+				animation-delay: 0s;
+			}
+			&:last-of-type {
+				animation-delay: 0.4s;
+			}
+		}
+		.item {
+			border-radius: $borderRadius;
+			@include animation(pulse cubic-bezier(0.4, 0, 0.2, 1) 3s);
+			.image {
+				width: $ribbonHeight;
+				min-height: $ribbonHeight - 2px;
+				border-bottom-left-radius: $borderRadius;
+				border-top-left-radius: $borderRadius;
+			}
+			.details {
+				width: calc(100% - #{$ribbonHeight});
+			}
+			p {
+				white-space: nowrap;
+				display: block;
+				text-align: left;
+				padding: 0 $padding;
+				font-size: 12px;
+				line-height: $ribbonHeight/2 - 2px;
+
+				span {
+					color: $priceColor;
+				}
+			}
+		}
+	}
+}

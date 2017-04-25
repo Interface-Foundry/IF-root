@@ -1,0 +1,107 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.hero {
+	position: relative;
+	overflow: hidden;
+	padding: $ribbonHeight 0 0;
+	height: 500px;
+	width: 100%;
+	border-bottom: 1px solid $borderColor;
+	@include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+
+	&:before {
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: rgba(255,255,255,0.4);
+	}
+
+	& > * {
+		position: relative;
+		padding: $padding $padding*2 $padding*3;
+	}
+
+	@media only screen and (max-width: 600px) {
+		height: 350px;
+	}
+
+	.dots {
+		@include animation(fadeAndZoomIn cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+	    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+		.dot {
+			position: absolute;
+			width: 10px;
+			height: 10px;
+			top: 50%;
+			left: 50%;
+			border: 3px solid lighten($bgColor, 50%);
+			border-radius: 18px;
+			@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+			&.selected {
+				border: 3px solid #ffe100;
+			}
+
+			&:first-of-type {
+				top: 75%;
+				left: 10%;
+			}
+			&:nth-of-type(2) {
+				top: 45%;
+				left: 33%;
+			}
+			&:nth-of-type(3) {
+				top: 30%;
+				left: 65%;
+			}
+			&:last-of-type {
+				top: 30%;
+				left: 89%;
+			}
+
+			@media only screen and (max-width: 600px) {
+				&:first-of-type {
+					top: 25%;
+					left: 10%;
+				}
+				&:nth-of-type(2) {
+					top: 50%;
+					left: 25%;
+				}
+				&:nth-of-type(3) {
+					top: 37%;
+					left: 65%;
+				}
+				&:last-of-type {
+					top: 70%;
+					left: 80%;
+				}
+			}
+
+			.dot__bubble-enter {
+			  @include animation(fadeAndGrowInUpBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
+			  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+			}
+
+			.dot__bubble-leave {
+			  @include animation(fadeOutUpBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
+			  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+			}
+		}
+	}
+}
+
+@keyframes fadeAndGrowInUpBubble {
+  0%   { opacity: 0; transform: translate3d(-45%, 40px, 0) scale(0); }
+  100% { opacity: 1; transform: translate3d(-45%, 0px, 0) scale(1); }
+}
+
+@keyframes fadeOutUpBubble {
+  0%   { opacity: 1; transform: translate3d(-45%, 0, 0); }
+  100% { opacity: 0; transform: translate3d(-45%, -30px, 0); }
+}
+			

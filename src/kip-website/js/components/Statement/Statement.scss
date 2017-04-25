@@ -1,0 +1,64 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.statement {
+	position: relative;
+	text-align: center;
+	border-bottom: 1px dashed $borderColor;
+	@include animation(fadeInUp cubic-bezier(0.4, 0, 0.2, 1) 3s);
+
+	.card {
+		margin: 0 auto;
+		background: white;
+		padding: $padding*4 $padding*2;
+
+		.headline {
+			white-space: nowrap;
+
+			* {
+				display: inline-block;
+				height: $ribbonHeight;
+				line-height: $ribbonHeight;
+				font-size: 30px;
+			}
+
+			span {
+				height: $ribbonHeight;
+				line-height: $ribbonHeight;
+			}
+
+			h1 {
+				&.hightlight {
+					background: $primaryColor;
+				}
+			}
+		}
+
+		.text {
+			max-width: 500px;
+		}
+
+		.action {
+			padding: $padding*2;
+			button {
+				border: 0;
+				border-radius: $padding/2;
+				background: $secondaryColor;
+				padding: $padding $padding*2;
+			}
+		}
+
+		@media only screen and (max-width: 600px) {
+		    margin: 0 auto;
+		    box-shadow: none;
+		    .headline  {
+		    	* {
+		    		font-size: 18px;
+		    	}
+			}
+		}
+	}
+}
+
+
+			

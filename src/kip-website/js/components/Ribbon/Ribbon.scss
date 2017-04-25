@@ -1,0 +1,55 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.ribbon {
+	position: fixed;
+	padding: 0 ($padding*2);
+	top: 0;
+	width: 100%;
+	height: $ribbonHeight;
+	z-index: 100;
+	text-align: center;
+	background: white;
+	border-bottom: 1px solid $borderColor;
+	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
+    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+    &.background {
+    	background: white;
+		border-bottom: 1px solid $borderColor;
+    }
+	* {
+		color: $primaryColor;
+	}
+	& > div {
+		text-align: left;
+	}
+	a {
+		color: inherit;
+		cursor: pointer;
+	}
+	.row {
+		text-align: left;
+		display: inline-block;
+		.image {
+			display: inline-block;
+			background-size: contain;
+			width: $ribbonHeight - 15px;
+		}
+		h1, a {
+			display: inline-block;
+			padding: 0 $padding/2;
+			line-height: $ribbonHeight;
+		}
+		svg {
+			width: 30px;
+			height: 100%;
+		}
+		&.right {
+			float: right;
+			padding: 0 10px;
+			@media only screen and (max-width: 600px) {
+				padding: 0 ;
+			}
+		}
+	}
+}
