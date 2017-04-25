@@ -190,6 +190,8 @@ class ProductDescription extends Component {
 
   _handleWindowResize() {
     const height = this.refs.descrip.clientHeight;
+
+    console.log(height)
     this.setState({
       showViewMore: height > 80,
       descripHeight: height > 80 ? 60 : '100%'
@@ -197,12 +199,17 @@ class ProductDescription extends Component {
   }
 
   componentDidMount() {
-    this._handleWindowResize();
+    this._handleWindowResize()
     window.addEventListener('resize', this._handleWindowResize);
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this._handleWindowResize);
+  }
+  
+  componentDidUpdate(nextProps) {
+    if(nextProps.description !== this.props.description)
+      this._handleWindowResize()
   }
 
   render() {
