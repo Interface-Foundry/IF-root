@@ -24,6 +24,7 @@ type Cart {
   cart_items: JSON
   cart_total: String
   item_count: Int
+  items_done: Boolean
   # Foreign refs
   items: [Item]
   team: Slackbot

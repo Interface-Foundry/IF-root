@@ -23,7 +23,11 @@ function transformToArray(data, dateVariable) {
 
   return dates.map(d => {
     return groupedByDate[d].reduce((prev, curr) => {
-      prev.item_count += curr.item_count
+      if (curr.items.length !== curr.item_count) {
+        prev.item_count += curr.items.length;
+      } else {
+        prev.item_count += curr.item_count;
+      }
       prev.teams.push(_.get(curr, 'team.team_name'))
       return prev
     }, {

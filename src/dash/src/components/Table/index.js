@@ -45,6 +45,9 @@ const CafeTable = ({data}) => {
 const CartTable = ({data}) => {
   let newData = [];
   for (var i = 0; i<data.length; i++){
+    if (data[i].item_count !== data[i].items.length) {
+      data[i].item_count = data[i].items.length;
+    }
     newData.push(data[i]);
     if(data[i].items.length > 0){
       data[i].items.map(function(item){

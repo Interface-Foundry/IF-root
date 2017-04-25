@@ -85,24 +85,11 @@ function prepareCafeCarts(foodSession) {
  * @return {object} cart object
  */
 async function prepareStoreCarts(cart, purchasedObj) {
-  cart.type = 'slack';
+
   const itemArgs = _.merge({ cart_id: cart._id }, purchasedObj);
-  cart.items = await Items.find(itemArgs)
-    .sort({ added_date: -1 })
-    .toArray();
+  cart.items = await Items.find(itemArgs).sort({ added_date: -1 }).toArray();
 
-  cart.item_count = cart.items.length;
-
-  if (cart.created_date) {
-    cart.created_date = new Date(cart.created_date).toDateString()
-  }
-
-  if (cart.amazon) {
-    if (cart.amazon.SubTotal) {
-      cart.cart_total = `$${Number(cart.amazon.SubTotal[0].Amount / 100.0).toFixed(2)}`;
-    }
-  }
-  if (cart.item_count === 0) {
+  if (cart.items.length === 0) {
     return null;
   }
   return cart;
@@ -218,20 +205,27 @@ const Resolvers = {
   },
 
   Cart: {
-    // items: async (obj, args, context, info) => {
-    //   // possible to get the value per item if needed using
-    //   // (obj, args, context, info)
-    //   // console.log(info.operation.selectionSet.selections[0].arguments)
-    //   const itemArgs = {
-    //     cart_id: ObjectId(obj._id),
-    //   };
+    created_date: (obj) => new Date(obj.created_date).toDateString(),
+    type: () => 'slack',
 
-    //   if (info.variableValues.purchased !== undefined) {
-    //     itemArgs.purchased = info.variableValues.purchased;
-    //   }
-    //   const items = await Items.find(itemArgs).sort({ added_date: -1 }).toArray();
-    //   return items;
-    // },
+    cart_total: (obj) => {
+      if (_.get(obj, 'amazon.SubTotal')) {
+        return `$${Number(obj.amazon.SubTotal[0].Amount / 100.0).toFixed(2)}`;
+      }
+      return 'No Cart Subtotal';
+    },
+
+    items: async (obj) => {
+      // possible to get the value per item if needed using
+      if (obj.items_done) {
+        return obj.items;
+      }
+      const items = await Items.find({cart_id: ObjectId(obj._id)}).sort({ added_date: -1 }).toArray();
+      return items;
+    },
+    item_count: (obj) => {
+      return obj.items.length;
+    },
     team: async (obj) => {
       let team = await Slackbots.findOne({team_id: obj.slack_id});
       return team;
@@ -291,9 +285,17 @@ const Resolvers = {
       }
       const newArgs = getDateFromArgs(args, 'created_date');
       let res = await pagination(Carts, newArgs);
+
+
       // need the await promise.all to resolve all the stuff wrt items
-      res = await Promise.all(res.map(async (cart) => await prepareStoreCarts(cart, purchasedObj)));
-      res = res.filter(cart => cart !== null);
+      res = await Promise.all(res.map(async (cart) => {
+        const itemArgs = _.merge({cart_id: cart._id}, purchasedObj)
+        cart.items = await Items.find(itemArgs).sort({ added_date: -1 }).toArray();
+        cart.items_done = true;
+        return cart;
+      }));
+
+      res = res.filter(cart => cart.items.length > 0);
       return res;
     },
 
