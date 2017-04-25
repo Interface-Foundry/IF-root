@@ -376,7 +376,7 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/:cart_id/checkout Checkout
+   * @api {get} /api/cart/:cart_id/checkout Checkout
    * @apiDescription Does some upkeep on the back end (like locking items) and redirects to the amazon cart page
    * @apiGroup Carts
    * @apiParam {String} :cart_id the cart id
@@ -407,4 +407,32 @@ module.exports = function (router) {
     // redirect to the cart url
     res.redirect(amazonCart.PurchaseURL)
   }))
+
+
+
+  /**
+   * @api {get} /api/item/:item_id/clickthrough Item Clickthrough
+   * @apiDescription Logs metrics, adds our affiliate tag, and redirects to the amazon item detail page
+   * @apiGroup Carts
+   * @apiParam {String} :item_id the item id
+   */
+  router.get('/item/:item_id/clickthrough', (req, res) => co(function * () {
+    // get the item
+    var item = yield db.Items.findOne({id: req.params.item_id})
+
+    // let amazon compose a nice link for us
+    var amazonItem = yield amazon.lookupAmazonItem(item.asin)
+
+    // handle errors
+    if (!_.get(amazonItem, 'Item.DetailPageURL')) {
+      console.error('Error getting amazon item, request response:')
+      console.error(amazonItem)
+      throw new Error('No DetailPageURL returned for clickthrough for amazon item asin ' + item.asin)
+    }
+
+    // redirect to the cart url
+    res.redirect(amazonItem.Item.DetailPageURL)
+  }))
+
+
 }
