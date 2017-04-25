@@ -25,11 +25,12 @@ const fs = require('fs')
 // We'll send this message to ppl as a marketing campaign
 //
 const message = {
-  "text": "Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
+  "text":"",
   "attachments": [{
     "text": "",
+    "pretext":"Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
     "image_url": "https://storage.googleapis.com/kip-random/bloomthat_quiz/quiz_1.png",
-    "mrkdwn_in": ["text"],
+    "mrkdwn_in": ["text,pretext"],
     "fallback": "Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
     "callback_id": "none",
     "color":"#52A2F0",
