@@ -7,7 +7,7 @@ import { getSearchHistory } from '../../utils';
 
 export default class SearchHistory extends Component {
   static propTypes = {
-    filter: PropTypes.array,
+    filter: PropTypes.string,
     handleSubmit: PropTypes.func,
     onChange: PropTypes.func
   }

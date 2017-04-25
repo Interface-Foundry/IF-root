@@ -34,7 +34,9 @@
     @include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
     .sidenav__list__view {
-      height: calc(100% - #{$nav-height * 3 + 10px});
+      height: calc(100% - #{$nav-height * 4});
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
       width: 100%;
     }
     h4 {
@@ -44,6 +46,7 @@
       &.show__more {
         padding: $padding/2 $padding $padding*2;
         color: #4a9ff1;
+        border-bottom: 0;
       }
     }
     li {
@@ -51,6 +54,7 @@
       line-height: $nav-height - $padding;
       padding: 0 $padding;
       &.sidenav__list__header {
+        border-bottom: 1px solid $border-color-light;
         p {
           width: calc(100% - #{$nav-height/2});
           padding: 0;
@@ -66,14 +70,23 @@
         text-align: center;
       }
       p {
+        position: relative;
         width: calc(100% - #{$nav-height/2});
         display: inline-block;
         font-size: 13px;
         padding: 0 $padding;
         text-align: right;
+
+        span {
+          position: absolute;
+          right: $padding;
+          bottom: -15px;
+          font-size: 10px;
+        }
       }
     }
     .sidenav__list__actions {
+      border-top: 1px solid $border-color-light;
       display: block;
       height: $nav-height;
       h4 {

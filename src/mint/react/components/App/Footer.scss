@@ -26,11 +26,27 @@
       font-weight: 600;
       flex-grow: 1;
       flex-basis: 0;
+      h4 {
+        display: inline-block;
+        vertical-align: middle;
+        text-align: left;
+      }
       svg {
         vertical-align: top !important;
-        font-size: 18px;
+        font-size: 23px;
         padding: 0;
         width: $nav-height/2;
+        margin-right: $padding;
+      }
+      &.checkout {
+        svg {
+          font-size: 30px;
+        }
+      }
+      &.logout {
+        background: transparent;
+        border: 0;
+        text-align: right;
       }
       &.green {
         background: $third-button-color;

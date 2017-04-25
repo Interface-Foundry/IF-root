@@ -2,12 +2,14 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-
-import { displayCost } from '../../utils';
 import { splitCartById } from '../../reducers';
 import { RouteTransition } from 'react-router-transition';
 import Icon from '../Icon';
 import * as presets from '../../styles/RouteAnimations';
+import ItemVariationSelector from './ItemVariationSelector';
+import ProductDescription from './ProductDescription';
+import DealInfo from './DealInfo';
+import ItemInfo from './ItemInfo';
 
 export default class Item extends Component {
   state = {
@@ -114,7 +116,7 @@ export default class Item extends Component {
       determineNav,
       props,
       state: { animation },
-      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, item: { main_image_url, description, name, asin } }
+      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin } }
     } = this,
     // TODO: replace this with the server url!
     tempUrl = `https://amazon.com/dp/${asin}/`;
@@ -158,141 +160,13 @@ export default class Item extends Component {
             <em > -Definitely not a penguin </em>
           </div>
           <a href={tempUrl} target='_blank' className='item__view__amazon__link'> <Icon icon='Open'/> View on Amazon </a>
+          {
+            (item.options && item.options.length)
+            ? <ItemVariationSelector replace={replace} options={item.options} defaultVal={asin} {...props} /> 
+            : null
+          }
         </RouteTransition>
       </div>
-    );
-  }
-}
-
-class ProductDescription extends Component {
-  constructor(props) {
-    super(props);
-    this.toggleDescrip = ::this.toggleDescrip;
-    this._handleWindowResize = ::this._handleWindowResize;
-  }
-
-  state = {
-    descripHeight: '100%',
-    descripTall: false,
-    showViewMore: false,
-  }
-
-  static propTypes = {
-    description: PropTypes.string
-  }
-
-  toggleDescrip() {
-    const { state: { descripTall } } = this;
-    this.setState({
-      descripHeight: descripTall ? 60 : '100%',
-      descripTall: !descripTall
-    });
-  }
-
-  _handleWindowResize() {
-    const height = this.refs.descrip.clientHeight;
-
-    this.setState({
-      showViewMore: height > 80,
-      descripHeight: height > 80 ? 60 : '100%'
-    });
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this._handleWindowResize);
-  }
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._handleWindowResize);
-  }
-
-  componentDidUpdate(nextProps) {
-    if (nextProps.description !== this.props.description) this._handleWindowResize();
-  }
-
-  render() {
-    const { toggleDescrip, state: { descripHeight, descripTall, showViewMore }, props: { description } } = this;
-
-    return (
-      <div ref='descrip' className='item__view__description'>
-        <p className='ellipsis' style={{maxHeight: descripHeight}}> { description }</p>
-        {
-          (showViewMore)
-            ? <div className='fadeover' style={{display: descripTall ? 'none' : 'block'}}/>
-            : null
-        }
-        {
-          (showViewMore) 
-          ? <a href='#' onClick={toggleDescrip}> View {descripTall ? 'less' : 'more'} </a> 
-          : null
-        }
-      </div>
-    );
-  }
-}
-
-class DealInfo extends Component {
-  static propTypes = {
-    item: PropTypes.object,
-    deal: PropTypes.object
-  }
-  render() {
-    const { deal: { price, previousPrice, savePercent } } = this.props;
-    // make sure item and deal are defined
-    const convertedPrice = price ? displayCost(price) : '0.00',
-      convertedPrevPrice = previousPrice ? displayCost(previousPrice) : '0.00',
-      convertedPercent = savePercent ? (savePercent * 100)
-      .toFixed() : '0';
-    return (
-      <div className = 'deal__view__price' >
-        <div>
-          <h4>Price: <span>{convertedPrice}</span></h4>
-          <h5><strike>{convertedPrevPrice}</strike> ({convertedPercent}% off)</h5>
-        </div>
-      </div>
-    );
-  }
-}
-
-class ItemInfo extends Component {
-  static propTypes = {
-    name: PropTypes.string,
-    price: PropTypes.number,
-    quantity: PropTypes.number
-  };
-
-  render() {
-    const { props, props: { price, quantity } } = this;
-    const convertedPrice = price ? displayCost(price) : '0.00';
-    const total = displayCost(price * quantity);
-    return (
-      <div className='item__view__price'>
-        <div>
-          {quantity>1? <h5>Price: {convertedPrice}</h5>:null}
-          <h4>Total: <span>{total}</span></h4>
-        </div>
-        <AddRemove {...props} />
-      </div>
-    );
-  }
-}
-
-class AddRemove extends Component {
-  static propTypes = {
-    item: PropTypes.object,
-    incrementItem: PropTypes.func,
-    decrementItem: PropTypes.func,
-  }
-  render() {
-    const { item: { id, quantity, added_by }, incrementItem, decrementItem } = this.props;
-    return (!added_by
-      ? null
-      : <div className='item__view__quantity'>
-            <button onClick={()=>incrementItem(id, quantity)}>+</button>
-            <div className='item__view__quantity__num'>{quantity}</div>
-            {
-              <button disabled={!(quantity > 1)} onClick={()=> decrementItem(id, quantity)}>-</button>
-            } 
-          </div>
     );
   }
 }

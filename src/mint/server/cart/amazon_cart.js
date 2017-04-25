@@ -415,6 +415,7 @@ exports.syncAmazon = function * (cart) {
   // from one of the modification requests below
   var returnValue = amazonCart
   if (missingItems.length > 0) {
+    console.log('Inside Amazon Params', cartAddAmazonParams)
     var res = yield opHelper.execute('CartAdd', cartAddAmazonParams);
     checkError(res.result.CartAddResponse.Cart)
     returnValue = res.result.CartAddResponse.Cart
