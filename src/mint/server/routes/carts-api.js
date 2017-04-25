@@ -354,7 +354,7 @@ module.exports = function (router) {
     const userId = req.UserSession.user_account.id
 
     // get the cart
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate(items)
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
 
     // check permissions
     if (cart.leader !== userId) {
@@ -365,7 +365,7 @@ module.exports = function (router) {
     // TODO
 
     // make sure the amazon cart is in sync with the cart in our database
-    var amazonCart = yield cart.syncAmazon()
+    var amazonCart = yield amazon.syncAmazon(cart)
 
     // redirect to the cart url
     res.redirect(amazonCart.PurchaseURL)

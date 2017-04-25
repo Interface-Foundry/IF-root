@@ -344,6 +344,7 @@ exports.syncAmazon = function * (cart) {
     var key = 'Item.' + (index + 1) + '.'
     cartAddAmazonParams[key + 'ASIN'] = item.asin
     cartAddAmazonParams[key + 'Quantity'] = item.quantity
+    return item
   })
 
   var cartModifyAmazonParams = {
@@ -352,28 +353,39 @@ exports.syncAmazon = function * (cart) {
     'HMAC': cart.amazon_hmac
   };
   var lastModifyIndex = 0
-  var modifyItems = cart.items.map((i, index) => {
-    amazonItems.map(ai => {
+  var modifyItems = cart.items.filter((i, index) => {
+    return amazonItems.map(ai => {
       if (ai.ASIN === i.asin && parseInt(ai.Quantity) !== i.quantity) {
         var key = 'Item.' + (index + 1) + '.'
         lastModifyIndex = index + 1
         cartModifyAmazonParams[key + 'CartItemId'] = ai.CartItemId
         cartModifyAmazonParams[key + 'Quantity'] = i.quantity || 0
+        return i
       }
-    })
+    }).filter(Boolean).length > 0
   })
 
-  var itemsToDelete = amazonItems.map(ai => {
+  var itemsToDelete = amazonItems.filter(ai => {
     if (cart.items.filter(i => i.asin === ai.ASIN).length === 0) {
       cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.CartItemId'] = ai.CartItemId
       cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.Quantity'] = 0
+      return ai
     }
   })
 
-  var amazonCart = yield opHelper.execute('CartAdd', cartAddAmazonParams);
-  checkError(amazonCart.result.CartAddResponse.Cart)
-  amazonCart = yield opHelper.execute('CartModify', cartModifyAmazonParams);
-  checkError(amazonCart.result.CartModifyResponse.Cart)
+  // Return an amazon cart value, either the one we got earlier or the response
+  // from one of the modification requests below
+  var returnValue = amazonCart
+  if (missingItems.length > 0) {
+    var res = yield opHelper.execute('CartAdd', cartAddAmazonParams);
+    checkError(res.result.CartAddResponse.Cart)
+    returnValue = res.result.CartAddResponse.Cart
+  }
+  if (modifyItems.length > 0 || itemsToDelete.length > 0) {
+    res = yield opHelper.execute('CartModify', cartModifyAmazonParams);
+    checkError(res.result.CartModifyResponse.Cart)
+    returnValue = res.result.CartModifyResponse.Cart
+  }
 
-  return amazonCart.result.CartModifyResponse.Cart
+  return returnValue
 }
