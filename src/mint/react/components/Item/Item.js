@@ -122,6 +122,7 @@ export default class Item extends Component {
     const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
       ? items[parseInt(index)].large
       : main_image_url;
+
     return (
       <div className='item'>
         <RouteTransition

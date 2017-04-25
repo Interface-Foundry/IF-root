@@ -184,6 +184,15 @@ module.exports = function (router) {
   }))
 
   /**
+   * @api {get} /api/logout Get
+   * @apiDescription resets session coookie
+   */
+  router.get('/logout', (req, res) => {
+    req.session.reset();
+    res.send(200);
+  });
+
+  /**
    * @api {post} /api/user/:user_id Update
    * @apiDescription Updates a user's information
    * @apiGroup Users

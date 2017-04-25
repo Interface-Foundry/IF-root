@@ -71,7 +71,7 @@ class CartFooter extends Component {
   }
 
   render() {
-    const { _handleShare } = this, { updateCart, currentCart, currentCart: { locked }, currentUser, leader } = this.props;
+    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader } = this.props;
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
 
     if(locked) {
@@ -101,7 +101,7 @@ class CartFooter extends Component {
         </button>
         {
           isLeader
-          ? <button onClick={() => updateCart({...currentCart, locked: !currentCart.locked})}>
+          ? <button onClick={() => {updateCart({...currentCart, locked: !currentCart.locked}); checkoutCart(cart_id)}}>
               <Icon icon='Cart'/>
               CHECKOUT
             </button>

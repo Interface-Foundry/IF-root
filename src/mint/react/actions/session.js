@@ -55,3 +55,24 @@ export function signIn(cart_id, email) {
     }
   };
 }
+
+
+export function logout() {
+  return async dispatch => {
+    try {
+      const response = await fetch(`/api/logout`, {
+        credentials: 'same-origin'
+      });
+
+      return dispatch(receiveUpdate({
+        user_account: {},
+        animal: '',
+        createdAt: '',
+        updatedAt: '',
+        id: ''
+      }));
+    } catch (e) {
+      return new SubmissionError({ email: 'You are already signed in, check your email!' });
+    }
+  };
+}
