@@ -32,6 +32,10 @@
         padding: 0;
         width: $nav-height/2;
       }
+      &.green {
+        background: $thid-button-color;
+        color: white;
+      }
       &.share {
         background: $secondary-button-color;
         color: white;

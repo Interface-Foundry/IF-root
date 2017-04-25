@@ -71,19 +71,21 @@ class CartHead extends Component {
   }
 
   render() {
-    const { _toggleSidenav, currentUser, currentCart, cartName } = this.props;
+    const { _toggleSidenav, currentUser, currentCart, cartName, currentCart: { locked } } = this.props;
 
     return (
       <div>
-        <div className='image' style={
+        {locked ? <div className='navbar__icon'>
+            <Icon icon='Locked'/>
+          </div> : <div className='image' style={
           {
             backgroundImage: `url(${currentCart.thumbnail_url ? currentCart.thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
             backgroundSize: 'contain'
-          }}/>
+          }}/>}
         <h3>
-          {cartName}
+          {locked ? 'Checkout in progress' : cartName}
         </h3>
         {
           currentUser.id ? <div className='navbar__icon' onClick={_toggleSidenav}>

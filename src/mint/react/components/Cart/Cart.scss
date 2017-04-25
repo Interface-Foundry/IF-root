@@ -73,9 +73,9 @@ $cart__add-height: $nav-height+$padding;
         background: transparent;
         color: white;
         font-size: 15px;
-        height: $nav-height - 10px;
+        height: $nav-height - 20px;
         padding: 0 $padding*2;
-        margin: $padding/2 auto;
+        margin: $padding auto;
         border-radius: 10px;
         svg {
           vertical-align: top!important;
