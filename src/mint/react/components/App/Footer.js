@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
+import { calculateItemTotal, displayCost } from '../../utils';
 import { Icon } from '..';
 
 export default class Footer extends Component {
@@ -71,8 +72,9 @@ class CartFooter extends Component {
   }
 
   render() {
-    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader } = this.props;
+    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items } = this.props;
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
+    const total = calculateItemTotal(items);
 
     if(locked) {
       return (
@@ -92,18 +94,17 @@ class CartFooter extends Component {
         </div>
       );
     }
-
     return (
       <div className='footer__cart'>
         <button className='share' onClick={_handleShare}>
           <Icon icon='Person'/>
-          SHARE
+          <h4>SHARE</h4>
         </button>
         {
           isLeader
-          ? <button onClick={() => {updateCart({...currentCart, locked: !currentCart.locked}); checkoutCart(cart_id)}}>
+          ? <button className='checkout' onClick={() => {updateCart({...currentCart, locked: !currentCart.locked}); checkoutCart(cart_id)}}>
               <Icon icon='Cart'/>
-              CHECKOUT
+              <h4>CHECKOUT<br/>{displayCost(total)}</h4>
             </button>
           : null
         }
