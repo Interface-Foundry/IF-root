@@ -3,6 +3,7 @@ var co = require('co')
 var sleep = require('co-sleep')
 var slack = require('@slack/client')
 const fs = require('fs')
+var forEach = require('co-foreach');
 
 /**
  * File which was used to send marketing messages
@@ -66,7 +67,8 @@ function sendToUser (userId,teamId) {
   console.log('running for user', userId)
   
   return co(function * () {
-    //yield sleep(50)
+    
+    
     // get the full user obj
     var user = yield db.Chatusers.findOne({id: userId, team_id: teamId}).exec()
 
@@ -102,7 +104,7 @@ function sendToUser (userId,teamId) {
       let bot = new slack.WebClient(slackbot.bot.bot_access_token)
       //console.log(bot)
 
-      yield sleep(100)
+      
       yield bot.chat.postMessage(user.dm, '', message)
 
       db.Metrics.log('feature.rollout.sent', {
@@ -112,7 +114,7 @@ function sendToUser (userId,teamId) {
       })  
 
     } catch (err) {
-      console.log('SLACK ERROR HERE ',err)
+      console.log('SLACK ERROR HERE ')
     }
 
 
@@ -3442,20 +3444,27 @@ function * main () {
   console.log('/ / / / / / / / / / / running test team')
 
   yield teamsTestAll.map(function * (t) {
-    yield sleep(20)
     console.log('MAP TEAM ',t)
     if(t.team_name){
       var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
       if (team && team.team_id){
         var users = yield db.Chatusers.find({team_id: team.team_id,'is_bot':false,'deleted':false}).exec()
         if(users){
-          yield users.map(function * (u) {
-            if(u.id && u.team_id){
+        
+          for (var u in users) {
 
-              yield sendToUser(u.id,u.team_id)
-              
+            if(users[u].id && users[u].team_id){
+
+              if(users[u].id !== 'USLACKBOT'){
+                yield sleep(100)
+                yield sendToUser(users[u].id,users[u].team_id)
+              }else {
+                console.log('slackbot found!')
+              }    
             }
-          })          
+          }
+
+        
         }
       }
     }
@@ -3502,13 +3511,20 @@ function * main () {
       if (team && team.team_id){
         var users = yield db.Chatusers.find({team_id: team.team_id,'is_bot':false,'deleted':false}).exec()
         if(users){
-          yield users.map(function * (u) {
-            if(u.id && u.team_id){
 
-              yield sendToUser(u.id,u.team_id)
-              
+          for (var u in users) {
+
+            if(users[u].id && users[u].team_id){
+
+              if(users[u].id !== 'USLACKBOT'){
+                yield sleep(100)
+                yield sendToUser(users[u].id,users[u].team_id)
+              }else {
+                console.log('slackbot found!')
+              }    
             }
-          })          
+          }
+        
         }
       }
     }
