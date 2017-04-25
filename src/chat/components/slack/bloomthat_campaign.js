@@ -114,6 +114,12 @@ function sendToUser (userId,teamId) {
 
     } catch (err) {
       console.log('SLACK ERROR HERE ')
+
+      db.Metrics.log('feature.rollout.sent', {
+        team: teamId,
+        user: user.id,
+        feature: 'bloomthat'
+      })  
     }
 
 
@@ -3515,7 +3521,7 @@ function * main () {
             if(users[u].id && users[u].team_id){
 
               if(users[u].id !== 'USLACKBOT'){
-                yield sleep(100)
+                yield sleep(600)
                 yield sendToUser(users[u].id,users[u].team_id)
               }else {
                 console.log('slackbot found!')
