@@ -3,7 +3,6 @@ var co = require('co')
 var sleep = require('co-sleep')
 var slack = require('@slack/client')
 const fs = require('fs')
-var forEach = require('co-foreach');
 
 /**
  * File which was used to send marketing messages
@@ -3504,7 +3503,6 @@ function * main () {
 
 
   yield teamsAll.map(function * (t) {
-    yield sleep(20)
     console.log('MAP TEAM ',t)
     if(t.team_name){
       var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
