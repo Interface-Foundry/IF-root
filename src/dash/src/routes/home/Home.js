@@ -15,8 +15,8 @@ class Home extends Component {
     super(props);
     this.state = {
       view: 'Store',
-      purchased: false,
-      startDate: moment().subtract(1, 'month'),
+      purchased: true,
+      startDate: moment().subtract(6, 'month'),
       endDate: moment(),
     };
     this.changeStart = this.changeStart.bind(this);
