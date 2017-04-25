@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start:dev": "webpack --progress --config webpack/dev.config.js && NODE_ENV=development node server/serverStart.js",
-    "build:prod": "webpack -p --progress --config webpack/prod.config.js"
+    "dev": "webpack --progress --config webpack/dev.config.js && NODE_ENV=development node server/serverjs",
+    "prod": "webpack -p --progress --config webpack/prod.config.js"
   },
   "babel": {
     "presets": [
