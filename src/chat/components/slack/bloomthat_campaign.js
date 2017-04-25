@@ -25,8 +25,6 @@ const fs = require('fs')
 // We'll send this message to ppl as a marketing campaign
 //
 const message = {
-  "icon_url": "http://kipthis.com/img/kip-icon.png",
-  "username": "Kip",
   "text": "Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
   "attachments": [{
     "text": "",
