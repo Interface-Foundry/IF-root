@@ -119,6 +119,7 @@ module.exports = function (router) {
 
     // Get or create the item, depending on if the user specifed a previewed item_id or a new url
     var item
+    if (req.query.item_id && !req.body.item_id) req.body.item_id = req.query.item_id
     if (req.body.item_id) {
       // make sure it's not in a cart already
       var existingCart = yield db.Carts.findOne({items: req.body.item_id})
