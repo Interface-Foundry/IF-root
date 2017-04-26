@@ -4563,13 +4563,13 @@ function * spamTeam (team_name,type) {
                 yield sleep(500) //zzz
               }
             }else {
-              console.log('-')
+              //console.log('-')
               return
             }
           })  
 
         } else {
-          console.log('.')
+          //console.log('.')
           return
         }
 
