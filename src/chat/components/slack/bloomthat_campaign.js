@@ -4116,21 +4116,21 @@ function * main () {
   //   }
   // }))
 
-  yield spamTeam('Hergui','all')
-  yield spamTeam('quinnchristmas','all')
-  yield spamTeam('cyclogy','all')
-  yield spamTeam('蒋村科技有限公司','all')
-  yield spamTeam('servo-ai','all')
-  yield spamTeam('affectiva','all')
-  yield spamTeam('Campbell Lab','all')
-  yield spamTeam('boxed','all')
-  yield spamTeam('Rad Campaign','all')
-  yield spamTeam('rgb72','all')
-  yield spamTeam('Hope City','all')
-  yield spamTeam('wemart','all')
-  yield spamTeam('YS-INT','all')
-  yield spamTeam('Project G','all')
-  yield spamTeam('slisystems','all')
+  // yield spamTeam('Hergui','all')
+  // yield spamTeam('quinnchristmas','all')
+  // yield spamTeam('cyclogy','all')
+  // yield spamTeam('蒋村科技有限公司','all')
+  // yield spamTeam('servo-ai','all')
+  // yield spamTeam('affectiva','all')
+  // yield spamTeam('Campbell Lab','all')
+  // yield spamTeam('boxed','all')
+  // yield spamTeam('Rad Campaign','all')
+  // yield spamTeam('rgb72','all')
+  // yield spamTeam('Hope City','all')
+  // yield spamTeam('wemart','all')
+  // yield spamTeam('YS-INT','all')
+  // yield spamTeam('Project G','all')
+  // yield spamTeam('slisystems','all')
   yield spamTeam('midbot','all')
   yield spamTeam('cyberdine','all')
   yield spamTeam('IUrja','all')
@@ -5654,8 +5654,11 @@ function * spamTeam (team_name,type) {
 
     if (team.team_id){
       //slack is dumb lalalalal
+      console.log('getting im list')
       let imList = yield request("https://slack.com/api/im.list?token="+team.bot.bot_access_token)
       let ims = JSON.parse(imList.body)
+
+      console.log('? ? ? ? ? IMS LENGTH ',ims.ims.length)
 
       if (ims.ims && ims.ims.length < 1){
         console.log('IM NOT ALLOWED for team: ',team_name)
@@ -5711,7 +5714,6 @@ function * spamTeam (team_name,type) {
           console.log('trying USER: ',u.name)
           yield sleep(500) //zzz
 
-          console.log('? ? ? ? ? IMS LENGTH ',ims.ims.length)
           yield ims.ims.map(function * (i) {
 
             //we found the current DM channel for this user (also, fuck slack)
