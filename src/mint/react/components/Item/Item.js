@@ -114,11 +114,11 @@ export default class Item extends Component {
       determineNav,
       props,
       state: { animation },
-      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin } }
+      props: { index, type, items, item, nextSearch, prevSearch, item_id, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, search, options } }
     } = this,
     // TODO: replace this with the server url!
-    tempUrl = `https://amazon.com/dp/${asin}/`;
-
+    tempUrl = `/api/item/${item.id}/clickthrough`;
+    console.log(tempUrl)
     const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
       ? items[parseInt(index)].large
       : main_image_url;
@@ -129,14 +129,17 @@ export default class Item extends Component {
           className="item__transition"
           pathname={pathname}
           {...presets.default[animation]}>
-          <div className='item__view__image image row'
+          <div className='item__nav_wrapper'
               onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
               onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
               onTouchEnd={ () => determineNav() }
-              style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }>
-          </div>
-          <div className='item__view__atts'>
-            <p>{name}</p>
+          >
+            <div className='item__view__image image row'
+                style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }>
+            </div>
+            <div className='item__view__atts'>
+              <p>{name}</p>
+            </div>
           </div>
           { 
             type === 'deal' && items[parseInt(index)]
@@ -144,7 +147,7 @@ export default class Item extends Component {
             : <ItemInfo {...props} {...item} />
           }
           {
-          item.search 
+          search 
               ? <div>
                   <button onClick={()=>prevSearch()}>&lt;</button>
                   <button onClick={()=>nextSearch()}>&gt;</button>
@@ -159,8 +162,8 @@ export default class Item extends Component {
           </div>
           <a href={tempUrl} target='_blank' className='item__view__amazon__link'> <Icon icon='Open'/> View on Amazon </a>
           {
-            (item.options && item.options.length)
-            ? <ItemVariationSelector replace={replace} options={item.options} defaultVal={asin} {...props} /> 
+            (options && options.length)
+            ? <ItemVariationSelector replace={replace} options={options} defaultVal={asin} {...props} /> 
             : null
           }
         </RouteTransition>
