@@ -151,7 +151,6 @@ var getTerms = function (text, urls) {
   //if there was a conversation history, get rid of the date / time line and
   //the two blank lines around it
   if (pars.length !== allPars.length) pars = pars.slice(0, pars.length-3);
-  logging.info('pars', pars)
 
   pars = pars.map(function (par) {
     par = par.replace(/[\[\]!@\#$%\^&\*\.<>\?{}]/g, '');

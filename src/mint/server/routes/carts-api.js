@@ -135,6 +135,7 @@ module.exports = function (router) {
     item.cart = cart.id
 
     // specify who added it
+    logging.info('user id?', req.UserSession.user_account.id)
     item.added_by = req.UserSession.user_account.id
     yield item.save()
 

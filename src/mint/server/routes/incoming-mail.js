@@ -24,7 +24,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   var email = req.body.from.split(' ');
   email = email[email.length-1];
   if (email[0] === '<') email = email.slice(1, email.length-1);
-  var user = yield db.UserAccounts.findOrCreate({email: email});
+  var user = yield db.UserAccounts.findOrCreate({email_address: email});
 
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
   if (!req.body.text || !req.body.html) {
@@ -110,7 +110,9 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
       else {
         cart.items.add(item.id)
         item.cart = cart.id
+        logging.info('user.id', user.id)
         item.added_by = user.id
+        // item.added_by = req.UserSession.user_account.id
         yield item.save()
         if (!cart.leader) {
           cart.leader = user.id
