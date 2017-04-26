@@ -72,6 +72,9 @@ router.get('/auth/:id', (req, res) => co(function * () {
   if (!link.cart.leader) {
     // make the user leader if they aren't already
     link.cart.leader = link.user.id
+    if (!link.cart.name) {
+      link.cart.name = link.user.email_address.split('@')[0] + "'s Kip Cart"
+    }
     yield link.cart.save()
   } else if (link.cart.leader !== link.user.id) {
     // if there was a different user as leader, this must be a member that is authing, add them as member

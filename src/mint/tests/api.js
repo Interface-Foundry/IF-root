@@ -355,4 +355,11 @@ describe('api', () => {
     assert.equal(res.request.uri.pathname, '/gp/cart/aws-merge.html')
     assert(res.request.uri.query.includes('associate-id=motorwaytoros-20'), 'should contain our affiliate id')
   }))
+
+  it('GET /api/item/:item_id/clickthrough should redirect to the amazon item with the affiliate id', () => co(function * () {
+    var res = yield get('/api/item/' + mcTesty.item_id + '/clickthrough', true)
+
+    // make sure it's redirect to amazon.com/some-product/......our affiliate id here
+    assert(res.request.uri.query.includes('tag=motorwaytoros-20'), 'should contain our affiliate id')
+  }))
 })

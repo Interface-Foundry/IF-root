@@ -168,8 +168,6 @@ var res2Item = function (res) {
       })
 
       options = yield _.flatten(options).filter(Boolean)
-      console.log(options)
-      console.log('item', item)
       options.map(o => {
         item.options.add(o.id)
       })
@@ -178,7 +176,6 @@ var res2Item = function (res) {
 
     // um let's just get the item fresh to make sure it's okay
     item = yield db.Items.findOne({id: item.id}).populate('options')
-    console.log(item.options)
 
     return item
   })

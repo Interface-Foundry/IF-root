@@ -13,7 +13,7 @@ import {
   IoLocked,
   IoCheckmark,
   IoSearch,
-  IoIosCartOutline,
+  IoAndroidCart,
   IoPlus,
   IoAndroidPersonAdd,
   IoGearA,
@@ -75,7 +75,7 @@ export default class Icon extends Component {
     case 'Open':
       return <FaExternalLink/>;
     case 'Cart':
-      return <IoIosCartOutline/>;
+      return <IoAndroidCart/>;
     case 'Person':
       return <IoAndroidPersonAdd/>;
     case 'Plus':

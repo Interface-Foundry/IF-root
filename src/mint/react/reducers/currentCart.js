@@ -23,7 +23,8 @@ export default function cart(state = initialState, action) {
   case ADDING_ITEM:
     return {
       ...state,
-      addingItem: action.addingItem
+      addingItem: action.addingItem,
+
     };
   case ADD_MEMBER_TO_CART:
     return {
@@ -32,6 +33,7 @@ export default function cart(state = initialState, action) {
     };
   case RECEIVE_UPDATE_CART:
     if (action.updatedCart.id !== state.cart_id) break;
+
     return {
       ...state,
       locked: action.updatedCart.locked,
@@ -43,6 +45,7 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       ...action.currentCart,
+      locked: action.currentCart.locked || false,
       cart_id: action.currentCart.id
     };
   case RECEIVE_ITEMS:
