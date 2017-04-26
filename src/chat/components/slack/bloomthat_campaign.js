@@ -35,12 +35,12 @@ var teamsTestAll = [
 ]
 
 var teamsAll = [
-    {
-            "team_name" : "FairVentures Lab"
-    },
-    {
-      "team_name" : "INTERSECTION VENTURES"
-    },
+  {
+          "team_name" : "FairVentures Lab"
+  },
+  {
+    "team_name" : "INTERSECTION VENTURES"
+  },
    {
       "team_name":"Reload360"
    },
@@ -342,6 +342,7 @@ var teamsAll = [
       "team_name":"B Capital Group"
    }
 ]
+
 var teamsAdminOnly = [
   {
           "team_name" : "Hergui"
@@ -4120,11 +4121,11 @@ function * main () {
 
   console.log('/ / / / / / / / / / / running test team')
 
-  yield teamsTestAll.map(function * (t) {
-    if(t.team_name){
-      yield spamTeam(t.team_name,'all') //i'm over it, really
-    }
-  })
+  // yield teamsTestAll.map(function * (t) {
+  //   if(t.team_name){
+  //     yield spamTeam(t.team_name,'all') //i'm over it, really
+  //   }
+  // })
 
   console.log('/ / / / / / / / / / test team ran, proceeding to real teams')
   // yield sleep(8000)
@@ -4141,12 +4142,282 @@ function * main () {
   yield sleep(2000)
 
 
-  yield teamsAll.map(series(function * (t) {
-    if(t.team_name){
-      var res = yield spamTeam(t.team_name,'all') //i'm over it, really
-    }
-  }))
+  // yield teamsAll.map(series(function * (t) {
+  //   if(t.team_name){
+  //     var res = yield spamTeam(t.team_name,'all') //i'm over it, really
+  //   }
+  // }))
 
+
+  yield spamTeam('kip','all')
+  console.log('next team')
+
+  yield spamTeam('FairVentures Lab','all')
+  console.log('next team')
+  yield spamTeam('INTERSECTION VENTURES','all')
+  console.log('next team')
+
+  yield spamTeam('Reload360','all')
+  console.log('next team')
+  yield spamTeam('RP3','all')
+  console.log('next team')
+
+  yield spamTeam('phantlab','all')
+  console.log('next team')
+  yield spamTeam('SDG Customer Intelligence','all')
+  console.log('next team')
+
+  yield spamTeam('adatia','all')
+  console.log('next team')
+  yield spamTeam('sookoh','all')
+  console.log('next team')
+
+  yield spamTeam('startfast','all')
+  console.log('next team')
+  yield spamTeam('Nasstar','all')
+  console.log('next team')
+
+  yield spamTeam('LeanPath','all')
+  console.log('next team')
+  yield spamTeam('Dagon','all')
+  console.log('next team')
+
+  yield spamTeam('supertext','all')
+  console.log('next team')
+  yield spamTeam('ack sf','all')
+  console.log('next team')
+
+  yield spamTeam('Trimfit','all')
+  console.log('next team')
+  yield spamTeam('BIMZ','all')
+  console.log('next team')
+
+  yield spamTeam('AgentCindy','all')
+  console.log('next team')
+
+  yield spamTeam('Try The World','all')
+  console.log('next team')
+  yield spamTeam('Finalsite Support','all')
+  console.log('next team')
+
+  yield spamTeam('project-alta','all')
+  console.log('next team')
+  yield spamTeam('Alien Labs Inc.','all')
+  console.log('next team')
+
+  yield spamTeam('Bitask','all')
+  console.log('next team')
+  yield spamTeam('Pradeep','all')
+  console.log('next team')
+
+  yield spamTeam('D3','all')
+  console.log('next team')
+  yield spamTeam('Starling','all')
+  console.log('next team')
+
+  yield spamTeam('blur UX','all')
+  console.log('next team')
+  yield spamTeam('atglabs','all')
+  console.log('next team')
+
+  yield spamTeam('CommerceVC','all')
+  console.log('next team')
+  yield spamTeam('Corigin Ventures','all')
+  console.log('next team')
+
+  yield spamTeam('CERFCORP','all')
+  console.log('next team')
+  yield spamTeam('Foxtail Marketing','all')
+  console.log('next team')
+
+  yield spamTeam('Yarn','all')
+  console.log('next team')
+  yield spamTeam('InnovateMap','all')
+  console.log('next team')
+
+  yield spamTeam('centercloud','all')
+  console.log('next team')
+  yield spamTeam('Walmart Labs','all')
+  console.log('next team')
+
+  yield spamTeam('ProjectRock2.0','all')
+  console.log('next team')
+  yield spamTeam('DecksDirect','all')
+  console.log('next team')
+
+  yield spamTeam('GoPato','all')
+  console.log('next team')
+  yield spamTeam('zHome','all')
+  console.log('next team')
+
+  yield spamTeam('Awoo','all')
+  console.log('next team')
+  yield spamTeam('ZenMarket','all')
+  console.log('next team')
+
+  yield spamTeam('Appsama','all')
+  console.log('next team')
+  yield spamTeam('Essential','all')
+  console.log('next team')
+
+    yield spamTeam('Slacapella','all')
+  console.log('next team')
+  yield spamTeam('Vivaara','all')
+  console.log('next team')
+
+    yield spamTeam('Rytass','all')
+  console.log('next team')
+  yield spamTeam('geministrategy','all')
+  console.log('next team')
+
+    yield spamTeam('DPSGinteractive','all')
+  console.log('next team')
+  yield spamTeam('Britalia Optical','all')
+  console.log('next team')
+
+    yield spamTeam('19th Street Salon & Spa','all')
+  console.log('next team')
+  yield spamTeam('deMello Group','all')
+  console.log('next team')
+
+    yield spamTeam('ABC Dental','all')
+  console.log('next team')
+  yield spamTeam('J.O.O.M','all')
+  console.log('next team')
+
+    yield spamTeam('VaynerMedia','all')
+  console.log('next team')
+  yield spamTeam('emobilie','all')
+  console.log('next team')
+
+    yield spamTeam('NVP consumer','all')
+  console.log('next team')
+  yield spamTeam('BingforPartnerTeam','all')
+  console.log('next team')
+
+    yield spamTeam('Koa Studio','all')
+  console.log('next team')
+  yield spamTeam('Flow XO Services','all')
+  console.log('next team')
+
+    yield spamTeam('ShopatHome-Discovery','all')
+  console.log('next team')
+  yield spamTeam('Cuebiq','all')
+  console.log('next team')
+
+    yield spamTeam('tradeshift','all')
+  console.log('next team')
+  yield spamTeam('UT International Programs','all')
+  console.log('next team')
+
+    yield spamTeam('Altira Inc.','all')
+  console.log('next team')
+  yield spamTeam('Drippler','all')
+  console.log('next team')
+
+
+    yield spamTeam('Basket','all')
+  console.log('next team')
+  yield spamTeam('GizmoDr','all')
+  console.log('next team')
+
+    yield spamTeam('SCRLL','all')
+  console.log('next team')
+  yield spamTeam('Velocity Growth Partners','all')
+  console.log('next team')
+
+
+    yield spamTeam('Beacon Ventures','all')
+  console.log('next team')
+  yield spamTeam('LLTA','all')
+  console.log('next team')
+
+    yield spamTeam('Layer','all')
+  console.log('next team')
+  yield spamTeam('VenturesOne','all')
+  console.log('next team')
+
+    yield spamTeam('betaworks','all')
+  console.log('next team')
+  yield spamTeam('The Participation Agency','all')
+  console.log('next team')
+
+    yield spamTeam('TADA','all')
+  console.log('next team')
+  yield spamTeam('Style Wingman','all')
+  console.log('next team')
+
+
+    yield spamTeam('K+ Online','all')
+  console.log('next team')
+  yield spamTeam('Hecorat','all')
+  console.log('next team')
+
+    yield spamTeam('JANDY','all')
+  console.log('next team')
+  yield spamTeam('Sanwo','all')
+  console.log('next team')
+
+    yield spamTeam('Shooq','all')
+  console.log('next team')
+  yield spamTeam('GSD Audio Visual','all')
+  console.log('next team')
+
+    yield spamTeam('Label Insight','all')
+  console.log('next team')
+  yield spamTeam('BloomThat','all')
+  console.log('next team')
+
+  yield spamTeam('Fuel Ventures','all')
+  console.log('next team')
+
+  yield spamTeam('Sears IL','all')
+  console.log('next team')
+
+  yield spamTeam('Oak Tree Investments','all')
+  console.log('next team')
+
+
+  yield spamTeam('Staples Applied Innovation','all')
+  console.log('next team')
+  yield spamTeam('Best Buy Strategy','all')
+  console.log('next team')
+
+  yield spamTeam('Nike End User Enablement POC','all')
+  console.log('next team')
+  yield spamTeam('R/GA','all')
+  console.log('next team')
+
+  yield spamTeam('eBay N','all')
+  console.log('next team')
+
+  yield spamTeam('Morningside VC','all')
+  console.log('next team')
+
+
+  yield spamTeam('admart','all')
+  console.log('next team')
+
+  yield spamTeam('Morningside VC','all')
+  console.log('next team')
+
+
+  yield spamTeam('TOPBOTS','all')
+  console.log('next team')
+
+  yield spamTeam('Morningside VC','all')
+  console.log('next team')
+
+
+  yield spamTeam('admart','all')
+  console.log('next team')
+
+  yield spamTeam('Muji','all')
+  console.log('next team')
+
+
+  yield spamTeam('B Capital Group','all')
+  console.log('next team')
   // yield teamsAll.map(function * (t) {
   //   if(t.team_name){
   //     yield spamTeam(t.team_name,'all') //i'm over it, really
