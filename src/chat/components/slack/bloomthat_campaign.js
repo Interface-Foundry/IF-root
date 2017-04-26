@@ -4448,7 +4448,7 @@ function * spamTeam (team_name,type) {
   var p = JSON.parse(teamStatus.body) 
 
   if(p && p.ok){
-    console.log('// BOT AUTHORIZED 🌵')
+    console.log('// BOT AUTHORIZED -_-')
 
     if (team.team_id){
       //slack is dumb lalalalal
@@ -4490,13 +4490,14 @@ function * spamTeam (team_name,type) {
 
       console.log('/ / / / / / TEAM LENGTH ',finalUsers.length)
 
-      if(finalUsers.length > 100){
-        finalUsers = finalUsers.slice(0, 100)
+      if(finalUsers.length > 200){
+        finalUsers = finalUsers.slice(100, 200)
         console.log('/ / / / / / TEAM LENGTH SLICED ',finalUsers.length)
       }
 
       for (var u in finalUsers) {
 
+        console.log('trying user')
         //💀H💀A💀I💀L💀S💀L💀A💀C💀K💀
         if(finalUsers[u].id && finalUsers[u].team_id && finalUsers[u].is_bot == false && finalUsers[u].deleted == false && finalUsers[u].id !== 'USLACKBOT'){ 
 
@@ -4530,7 +4531,7 @@ function * spamTeam (team_name,type) {
                     userHistory = null
                     console.log('done with ',finalUsers[u].name)
                     yield sleep(500) //zzz
-                    return
+                   // return
                   }else {
                     console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
                     //LETS MESSAGE THEM!!!
@@ -4550,10 +4551,16 @@ function * spamTeam (team_name,type) {
                   console.log('done with ',finalUsers[u].name)
                   yield sleep(500) //zzz
                 }
+              }else {
+                console.log('no DM found! ! ! ! ! ')
               }
             })  
           } 
+          console.log('CANT GET IMS LENGHT!!!')
         } 
+        else {
+          console.log('user is dead: ',finalUsers[u].name)
+        }
       }
 
     }else {
