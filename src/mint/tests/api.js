@@ -74,7 +74,8 @@ const del = function * (url, data) {
   return body
 }
 
-describe('api', () => {
+describe('api', function () {
+  this.timeout(4000)
   before(() => co(function * () {
     // clean up the db
     yield dbReady
@@ -349,6 +350,20 @@ describe('api', () => {
   }))
 
   it('GET /api/cart/:cart_id/checkout should redirect to the amazon cart with the affiliate id', () => co(function * () {
+    var res = yield get('/api/cart/' + mcTesty.cart_id + '/checkout', true)
+
+    // make sure it's redirect to amazon.com/gp/cart/aws-merge.html
+    assert.equal(res.request.uri.pathname, '/gp/cart/aws-merge.html')
+    assert(res.request.uri.query.includes('associate-id=motorwaytoros-20'), 'should contain our affiliate id')
+  }))
+
+
+  it('GET /api/cart/:cart_id/checkout should fix messed up carts and redirect to the amazon cart with the affiliate id', () => co(function * () {
+    // let's mess up the cart!
+    var cart = yield db.Carts.findOne({id: mcTesty.cart_id}).populate('items')
+    cart.items[0].quantity++
+    yield cart.items[0].save()
+
     var res = yield get('/api/cart/' + mcTesty.cart_id + '/checkout', true)
 
     // make sure it's redirect to amazon.com/gp/cart/aws-merge.html
