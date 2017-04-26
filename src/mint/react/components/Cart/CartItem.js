@@ -23,7 +23,7 @@ export default class CartItem extends Component {
           {
             backgroundImage: `url(${main_image_url})`,
             backgroundPosition: 'top',
-            height: 75,
+            height: 75
           }}/>}
 
         <div className='cartItem__props col-9'>
