@@ -4215,7 +4215,7 @@ function * spamTeam (team_name,type) {
         //💀H💀A💀I💀L💀S💀L💀A💀C💀K💀
         if(finalUsers[u].id && finalUsers[u].team_id && finalUsers[u].is_bot == false && finalUsers[u].deleted == false && finalUsers[u].id !== 'USLACKBOT'){ 
 
-          yield sleep(900) //zzz
+          yield sleep(100) //zzz
 
           if(ims.ims && ims.ims.length > 0){
             yield ims.ims.map(function * (i) {
