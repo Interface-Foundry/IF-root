@@ -1,0 +1,14 @@
+env: dashboard
+mongodb:
+  url: mongodb://10.142.0.13:27017/foundry
+logging:
+  console:
+    level: silly
+    json: false
+    stringify: true
+    colorize: true
+    prettyPrint: true
+  mongo:
+    enabled: false
+  debugFileLine:
+    enabled: true
