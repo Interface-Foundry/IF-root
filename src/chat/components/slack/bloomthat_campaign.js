@@ -4235,6 +4235,7 @@ function * spamTeam (team_name,type) {
                      s.indexOf('Finish This Line') > -1 || 
                      s.indexOf('Recommended Item') > -1){
                     console.log('MESSAGE DETECTED')
+                    return
                   }else {
                     console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
                     //LETS MESSAGE THEM!!!
