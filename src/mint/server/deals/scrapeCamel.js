@@ -6,6 +6,7 @@ var wait = require('co-wait');
 var _ = require('lodash');
 
 var lookupAmazonItem = require('../cart/amazon_cart').lookupAmazonItem;
+var amazon = require('../cart/scraper_amazon');
 var proxy = require('../../../chat/components/proxy/request');
 var request = require('request-promise');
 var string_utils = require('./string_utils');
@@ -53,6 +54,7 @@ var getAmazon = function * (asin) {
 
   try {
     var amazon_item = yield lookupAmazonItem(asin);
+    var amazon_item_proper = yield amazon.scrapeAsin(asin);
   }
   catch (e) {
     logging.debug('amazon lookup failed', e);
@@ -77,10 +79,8 @@ var getAmazon = function * (asin) {
   // logging.info('is this a real category?', item.cat);
   item.info = amazon_item.ItemAttributes.Feature;
   item.images = {};
-  if (amazon_item.SmallImage) item.images.small = amazon_item.SmallImage.URL;
-  if (amazon_item.MediumImage) item.images.medium = amazon_item.MediumImage.URL;
-  if (amazon_item.LargeImage) item.images.large = amazon_item.LargeImage.URL;
-  if (amazon_item.DetailPageUrl) item.url = amazon_item.DetailPageUrl;
+  item.images.thumbnail = amazon_item_proper.thumbnail_url;
+  item.images.main_image = amazon_item_proper.main_image_url;
   // if (amazon_test[0].reviews) item.reviews = amazon_test[0].reviews;
   // logging.info('got this:', item);
   return item;
