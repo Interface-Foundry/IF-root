@@ -235,4 +235,58 @@ module.exports = function (router) {
 
     res.send(user)
   }))
+
+  /**
+   * @api {post} /api/feedback Feedback
+   * @apiDescription logging user feedback
+   * @apiGroup Users
+   * @apiParam {string} rating one of ['good', 'ok', 'bad']
+   * @apiParam {string} text general feedback text
+   *
+   * @apiParamExample Request
+   * post /api/feedback {
+   *  rating: "bad",
+   *  text: "can't add 36 oz beer bong to my cart. unacceptable."
+   * }
+   */
+  router.post('/feedback', (req, res) => co(function * () {
+    var feedback = yield db.Feedback.create({
+      user: _.get(req, 'UserSession.user_account.id'),
+      session: req.UserSession.id,
+      request_json: JSON.stringify({
+        ip: req.ip,
+        body: req.body,
+        cookies: req.cookies,
+        hostname: req.hostname,
+        protocol: req.protocol,
+        path: req.path,
+        query: req.query,
+        route: req.route,
+        signedCookies: req.signedCookies,
+        headers: req.headers,
+        originalUrl: req.originalUrl
+      }),
+      rating: req.body.rating,
+      text: req.body.text
+    })
+
+    // done with the http request, will move on to sending an email to hello@kipthis.com
+    res.status(200).end()
+
+    // Now send an email message to us if we have one
+    var feedbackEmail = yield db.Emails.create({
+      recipients: 'hello@kipthis.com',
+      subject: '[Mint Feedback] New Feedback from Mint'
+    })
+
+    const data = _.merge(
+      {},
+      feedback,
+      {
+        user: _.get(req, 'UserSession.user_account')
+      })
+    yield feedbackEmail.template('feedback', data)
+
+    yield feedbackEmail.send()
+  }))
 }
