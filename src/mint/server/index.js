@@ -72,7 +72,7 @@ app.use(sessions({
 /**
  * Save user sessions to the database
  */
-app.use((req, res, next) => co(function* () {
+app.use((req, res, next) => co(function * () {
   // req.session will always exist, thanks to the above client-sessions middleware
   // Check to make sure we have stored this user's session in the database
   if (!req.session.id) {
@@ -80,12 +80,12 @@ app.use((req, res, next) => co(function* () {
     var session = yield db.Sessions.create({})
     req.session.id = session.id
   }
-  logging.info('req.session.id', req.session.id);
+  // logging.info('req.session.id', req.session.id);
   req.UserSession = yield db.Sessions.findOne({ id: req.session.id }).populate('user_account')
-  logging.info('req.UserSession', req.UserSession);
   if (!req.UserSession) {
     logging.info('session not in the database; creating a new session')
-    req.UserSession = yield db.Sessions.create({}).populate('user_account')
+    yield db.Sessions.create({id: req.session.id})
+    req.UserSession = yield db.Sessions.findOne({ id: req.session.id }).populate('user_account')
   }
 
   next();
