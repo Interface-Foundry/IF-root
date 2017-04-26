@@ -137,16 +137,16 @@ class displayTeamStats extends Component {
     const gqlWrapper = graphql(currentQuery, {
       options: {
         variables: {
-          team_id: "T02PN3B25", //currentTeam.team_id,
+          team_id: "T02PN3B25", // replace with currentTeam.team_id,
         },
       },
     });
     const ViewWithData = gqlWrapper(getCurrentData);
 
-
+//Replace 'kip' with currentTeam.team_name
     return (
       <div>
-        Viewing {self.state.view} stats of {currentTeam.team_name}
+        Viewing {self.state.view} stats of {'kip'}
         <ButtonToolbar>
             <Button bsStyle={self.state.view=='Store' ? "primary" : "default"} onClick={ ()=> self.changeCart('Store')}>
               Store
@@ -178,45 +178,78 @@ class displayTeamStats extends Component {
     } else if(data.teams[0].deliveries){
       var team_deliveries = data.teams[0].deliveries;
     }
-
+    
     return (
       <div>
       <div><h2>Users:</h2> {team_members.length}</div>
       <div><h2>Admins:</h2> {listTeamAdmins(team_members)}</div>
+      <div><h2>Members:</h2> {listTeamMembers(team_members)} </div>
       <div><h2>Channels:</h2> {listTeamChannels(team_channels)}</div>
-      <div><h2>Carts:</h2> {data.teams[0].carts ? listCarts(team_carts) : listDeliveries(team_deliveries)}</div>
+      <div><h2>Carts:</h2> {data.teams[0].carts ? listCarts(team_carts, team_members) : listDeliveries(team_deliveries)}</div>
       </div>
     )
   };
 
-  function listCarts(team_carts){
-    return team_carts.map(function(cart) {
+  function listCarts(team_carts, team_members){
+    let newData = [];
+    team_carts.map(function(cart){
       var num_items = cart.item_count;
       if(cart.items && cart.item_count !== cart.items.length){
         num_items = cart.items.length;
       } 
-      return (<div>
-        <div><b>Created:</b> {cart.created_date}</div>
-        <div><b>Total:</b> {cart.cart_total}</div>
-        <div><b>Items:</b> {num_items}</div>
-        <div>{listCartItems(cart.items)}</div>
-        </div>
-      )
-
+      newData.push({
+        created_date: cart.created_date,
+        cart_total: cart.cart_total,
+        num_items: num_items,
+      })
+      newData = listCartItems(newData, cart.items, team_members);
     })
-
+    return(
+        <Table heads={[{
+          field: 'created_date',
+          descrip: 'Start Time',
+          allowSort: false
+        }, {
+          field: 'cart_total',
+          descrip: 'Cart Total',
+          allowSort: false
+        },{
+          field: 'num_items',
+          descrip: 'Cart Size',
+          allowSort: false
+        }, {
+          field: 'title',
+          descrip: 'Item Name',
+          allowSort: false
+        }, {
+          field: 'price',
+          descrip: 'Item Price',
+          allowSort: false
+        }, {
+          field: 'added_by',
+          descrip: 'Added By',
+          allowSort: false
+        }, {
+          field: 'purchased',
+          descrip: 'Purchased',
+          allowSort: false
+        }]} data={newData} />
+    )
   }
 
-  function listCartItems(items){
-    return items.map(function(item){
-      return(<div>
-        <div>&ensp; Title: {item.title}</div>
-        <div>&ensp; Price: {item.price}</div>
-        <div>&ensp; Added by: {item.added_by}</div>
-        <div>&ensp; Purchased: {item.purchased.toString()}</div>
-      </div>
-      )
+  function listCartItems(newData, items, team_members){
+
+    items.map(function(item){
+      newData.push({
+        title: item.title,
+        price: item.price,
+        added_by: team_members.find(function(m){
+          return m.id == item.added_by
+        }).name,
+        purchased: item.purchased
+      })
     })
+    return newData;
   }
 
   function listDeliveries(team_deliveries){
@@ -228,10 +261,23 @@ class displayTeamStats extends Component {
     */
   }
 
+  function listTeamMembers(teamMembers){
+    let memberList = '';
+    teamMembers.map((member) => {
+      if(!member.is_admin == true){
+        memberList += " @" + member.name;
+      }
+    })
+    return memberList;
+  }
+
   function listTeamAdmins(teamMembers){
-    var memberList = teamMembers.reduce((list, member) => {
-      return list + " @" + member.name;
-    }, '')
+    let memberList = '';
+    teamMembers.map((member) => {
+      if(member.is_admin == true){
+        memberList += " @" + member.name;
+      }
+    })
     return memberList;
   }
 
