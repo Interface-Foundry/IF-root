@@ -4130,11 +4130,11 @@ function * main () {
 
   console.log('/ / / / / / / / / / /running admin only teams')
 
-  yield teamsAdminOnly.map(function * (t) {
-    if(t.team_name){
-      yield spamTeam(t.team_name,'admins') //i'm over it, really
-    }
-  })
+  // yield teamsAdminOnly.map(function * (t) {
+  //   if(t.team_name){
+  //     yield spamTeam(t.team_name,'admins') //i'm over it, really
+  //   }
+  // })
 
   console.log('/ / / / / / / / / / admin teams ran, proceeding to all message teams')
   yield sleep(5000)
@@ -4170,11 +4170,11 @@ function * spamTeam (team_name,type) {
     if (team.team_id){
       //slack is dumb lalalalal
       let imList = yield request("https://slack.com/api/im.list?token="+team.bot.bot_access_token)
-      var ims = JSON.parse(imList.body)
+      let ims = JSON.parse(imList.body)
 
       //so dumb lalalalalalaal
       let userList = yield request("https://slack.com/api/users.list?token="+team.bot.bot_access_token)
-      var users = JSON.parse(userList.body)
+      let users = JSON.parse(userList.body)
       users = users.members
 
       // / / / / / / / / / / / / / / / 
@@ -4212,7 +4212,7 @@ function * spamTeam (team_name,type) {
         //💀H💀A💀I💀L💀S💀L💀A💀C💀K💀
         if(finalUsers[u].id && finalUsers[u].team_id && finalUsers[u].is_bot == false && finalUsers[u].deleted == false && finalUsers[u].id !== 'USLACKBOT'){ 
 
-          yield sleep(600) //zzz
+          yield sleep(900) //zzz
 
           if(ims.ims && ims.ims.length > 0){
             yield ims.ims.map(function * (i) {
@@ -4225,7 +4225,7 @@ function * spamTeam (team_name,type) {
                 userHistory = JSON.parse(userHistory.body)
 
                 if(userHistory && userHistory.messages && userHistory.messages.length > 0){
-                  var s = JSON.stringify(userHistory.messages)
+                  let s = JSON.stringify(userHistory.messages)
 
                   //so we don't accidentally spam people again for this campaign >___> dont ask 
                   if(s.indexOf('Admin Day') > -1 || 
