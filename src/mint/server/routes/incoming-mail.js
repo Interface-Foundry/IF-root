@@ -14,7 +14,7 @@ var amazon = require('../cart/amazon_cart');
 var utils = require('../utilities/incoming_utils');
 
 /**
- * @api {post} /api/sendgrid/incoming
+ * @api {post} /sendgrid/incoming
  * @apiDescription parses incoming user emails sent to kip.ai, and takes actions in response
  */
 router.post('/incoming', upload.array(), (req, res) => co(function * () {
@@ -27,7 +27,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   var user = yield db.UserAccounts.findOrCreate({email_address: email});
 
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
-  if (!req.body.text || !req.body.html) {
+  if (!req.body.text || ! req.body.html) {
     logging.info('no email body');
     yield utils.sendErrorEmail(email);
     res.sendStatus(202);
@@ -37,9 +37,6 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   var bodyText = req.body.text;
   var bodyHtml = req.body.html;
   bodyText = utils.truncateConversationHistory(bodyText);
-  bodyHtml = utils.truncateConversationHistory(bodyHtml);
-  console.log('BODY HTML', bodyHtml)
-
   var all_uris = utils.getUrls(bodyHtml);
   // logging.info('all_uris', all_uris);
 
@@ -77,15 +74,27 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   var html = req.body.html;
   var cart_id = /name="cartId" value="(.*)"/.exec(html);
   if (cart_id) cart_id = cart_id[1];
-  else {
+  console.log('gonna query for the cart')
+  var cart = yield db.Carts.findOne({id: cart_id}).populate('items');
+  if (cart) { //if the cart id isn't supplied, try to find one
+    console.log('oh, no, no cart id')
+    const memberCarts = yield db.carts_members__user_accounts_id.find({
+      user_accounts_id: user.id
+    })
+
+    const memberCartsIds = memberCarts.map( c => c.carts_members )
+
+    var cart = yield db.Carts.findOne({
+      or: [
+        { leader: user.id },
+        { id: memberCartsIds }
+      ]
+    }).populate('items').populate('leader').populate('members')})
     logging.error('email failed to pass in a cart id');
     res.sendStatus(202);
     return;
   }
   console.log('cart_id', cart_id)
-
-  console.log('gonna query for the cart')
-  var cart = yield db.Carts.findOne({id: cart_id}).populate('items');
 
   if (!cart) {
     logging.error('could not find cart');
@@ -96,36 +105,18 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   if (uris && uris.length) { //if the user copypasted an amazon uri directly
     console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {
-      var item = yield amazonScraper.scrapeUrl(uri);
-      logging.info(item);
-      return item;
+      return yield amazonScraper.scrapeUrl(uri);
+      var item = yield amazon.getAmazonItem(uri);
+      if (item.Variations) console.log('there are options')
+      // return yield amazon.addAmazonItemToCart(item, cart);
     });
     // console.log('amazon things', uris)
-    yield url_items.map(function * (item) {
-      // make sure it's not in a cart already
-      var existingCart = yield db.Carts.findOne({items: item.id})
-      if (existingCart && existingCart.id !== cart.id) {
-        throw new Error('Item ' + item.id + ' is already in another cart ' + existingCart.id)
-      }
-      else {
-        cart.items.add(item.id)
-        item.cart = cart.id
-        logging.info('user.id', user.id)
-        item.added_by = user.id
-        // item.added_by = req.UserSession.user_account.id
-        yield item.save()
-        if (!cart.leader) {
-          cart.leader = user.id
-        } else if (!cart.members.includes(user.id)) {
-          cart.members.add(user.id)
-        }
-      }
-      console.log('omg maybe this will work')
-      // cart.items.add(it.id);
-      // it.cart = cart.id;
-      // it.added_by = user.id
-      // yield it.save();
-    });
+    yield url_items.map(function * (it) {
+      cart.items.add(it.id);
+      it.cart = cart.id;
+      it.added_by = user.id
+      yield it.save();
+    })
     yield cart.save();
   }
   else console.log('no amazon uris')
@@ -134,11 +125,10 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
     if (!uris) uris = [];
     if (!searchResults) searchResults = [];
     // logging.info('searchResults', searchResults);
-
-    yield utils.sendConfirmationEmail(email, uris, searchResults, cart.id);
+    yield utils.sendConfirmationEmail(email, uris, searchResults);
   }
 
-
+  // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')
   res.sendStatus(200);
 }));
 
