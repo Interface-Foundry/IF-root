@@ -151,11 +151,12 @@ class CSVDrop extends Component {
                 <Panel header={"Item Matches"} >
                   <div className="col-lg-6">
                     {dataText ? dataText.map(row=>{
-                      return <Checkbox key={row[0].ASIN+row[0].added_date} onChange={() => self.addToCheckedRows(row[0])}>
+                      return <Checkbox key={row[0]._id+row[0].ASIN+row[0].added_date+row[1].Date} onChange={() => self.addToCheckedRows(row[0])}>
                         <div>Item Name: {row[0].title.length > 30 ? row[0].title.substr(0,30)+'...' : row[0].title}</div>
                         <div>ASIN: {row[0].ASIN}</div>
                         <div>Date Added: {row[0].added_date}</div>
-                        <div>Added by: {row[0].slack_id}</div>
+                        <div>Slack ID: {row[0].slack_id}</div>
+                        <div>Added by: {row[0].added_by}</div>
                         <hr />
                         </Checkbox>;
                         
@@ -171,6 +172,7 @@ class CSVDrop extends Component {
                         <div>ASIN: {row[1].ASIN}</div>
                         <div>Date Added: {row[1].Date}</div>
                         <div>Category: {row[1].Category}</div>
+                        <div>Quantity: {row[1].Qty}</div>
                         <hr />
                         </Checkbox>;
 
