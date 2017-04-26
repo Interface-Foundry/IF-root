@@ -4079,6 +4079,7 @@ function sendToUser (userId,teamId,channelId) {
     //Don't re-send to someone who we have already sent this marketing message
     var sentCount = yield db.Metrics.count({
       'data.user': userId,
+      'data.team': teamId,
       'data.feature': 'bloomthat_today'
     }).exec()
 
@@ -4104,21 +4105,9 @@ function sendToUser (userId,teamId,channelId) {
 
     db.Metrics.log('feature.rollout.sent', {
       team: teamId,
-      user: user.id,
+      user: userId,
       feature: 'bloomthat_today'
     })  
-
-    // } 
-    // catch (err) {
-    //   console.log('SLACK ERROR HERE ')
-
-    //   // db.Metrics.log('feature.rollout.sent', {
-    //   //   team: teamId,
-    //   //   user: user.id,
-    //   //   feature: 'bloomthat'
-    //   // })  
-    // }
-
 
   })
 }
@@ -4127,23 +4116,12 @@ function sendToUser (userId,teamId,channelId) {
 // Run it
 //
 function * main () {
-  // yield sleep(1000)
-  // console.log('batch', batch)
-  // console.log(days[batch / 10 | 0], days[batch % 10])
-  // console.log('Sending message to users in batch', batch)
-  // console.log(`there are ${users.length} users in this batch`)
-  // console.log('(ctrl-c if that looks wrong)')
 
-
-  //CHECK IF A STOP TEAM (INC AXEL TEAMS)
-  //CHECK IF AN ADMIN ONLY TEAM (inc team size > 100)
   console.log('/ / / / / / / / / / / running test team')
 
   yield teamsTestAll.map(function * (t) {
     if(t.team_name){
-
       yield spamTeam(t.team_name,'all') //i'm over it, really
-
     }
   })
 
@@ -4152,63 +4130,23 @@ function * main () {
 
   console.log('/ / / / / / / / / / /running admin only teams')
 
-  // yield teamsAdminOnly.map(function * (t) {
-  //   yield sleep(20)
-  //   console.log('MAP TEAM ',t)
-  //   if(t.team_name){
-  //     var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
-
-  //     if (team && team.meta && team.meta.office_assistants && team.meta.office_assistants.length > 0){
-
-  //       console.log('FOUND ADMINS ',team.meta.office_assistants)
-
-  //       yield team.meta.office_assistants.map(function * (u) {
-  //         if(u){
-
-  //           console.log('sending to id ',u)
-  //           yield sendToUser(u,team.team_id)
- 
-            
-  //         }
-  //       }) 
-
-  //     }
-  //   }
-  // })
+  yield teamsAdminOnly.map(function * (t) {
+    if(t.team_name){
+      yield spamTeam(t.team_name,'admins') //i'm over it, really
+    }
+  })
 
   console.log('/ / / / / / / / / / admin teams ran, proceeding to all message teams')
   yield sleep(5000)
 
-
-  // yield teamsAll.map(function * (t) {
-  //   console.log('MAP TEAM ',t)
-  //   if(t.team_name){
-  //     var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
-  //     if (team && team.team_id){
-  //       var users = yield db.Chatusers.find({team_id: team.team_id,'is_bot':false,'deleted':false}).exec()
-  //       if(users){
-
-  //         for (var u in users) {
-  //           yield sleep(600)
-  //           if(users[u].id && users[u].team_id){
-  //             if(users[u].id !== 'USLACKBOT'){
-  //               yield sendToUser(users[u].id,users[u].team_id)
-  //             }else {
-  //               console.log('slackbot found!')
-  //             }    
-  //           }
-  //         }
-        
-  //       }
-  //     }
-  //   }
-  // })
+  yield teamsAll.map(function * (t) {
+    if(t.team_name){
+      yield spamTeam(t.team_name,'all') //i'm over it, really
+    }
+  })
 
   console.log('/ / / / / / / / / / /DONE SENDING TO ALL TEAMS!!!!!!!!!!!')
-  // var userId = 'U02PN3T5R'
-  // var teamId = 'T02PN3B25'
 
-  //yield sendToUser(userId,teamId)
   process.exit(0)
 }
 
@@ -4216,6 +4154,12 @@ function * main () {
 function * spamTeam (team_name,type) {
   //get team obj from team name
   var team = yield db.Slackbots.findOne({team_name: team_name}).exec()
+
+  if(!team){
+    console.log('* * no team found in DB, return')
+    return
+  }
+
   //check if we're still authorized with team
   let teamStatus = yield request("https://slack.com/api/auth.test?token="+team.bot.bot_access_token)
   var p = JSON.parse(teamStatus.body) 
@@ -4242,10 +4186,31 @@ function * spamTeam (team_name,type) {
         return
       }
 
-      for (var u in users) {
+      var finalUsers = []
+
+      if (type == 'admins' && team.meta && team.meta.office_assistants && team.meta.office_assistants.length > 0){
+        //only get users that are admins
+        yield users.map(function * (u) {
+          if(team.meta.office_assistants.indexOf(u.id) > -1){
+            finalUsers.push(u)
+          }
+        }) 
+      }else if (type == 'admins'){
+        console.log('no admins found for admin only team, returning')
+        return
+      }else {
+        //sorry about this fam
+        yield users.map(function * (u) {
+          finalUsers.push(u)
+        }) 
+      }
+
+      //console.log('users ',finalUsers.length)
+
+      for (var u in finalUsers) {
 
         //💀H💀A💀I💀L💀S💀L💀A💀C💀K💀
-        if(users[u].id && users[u].team_id && users[u].is_bot == false && users[u].deleted == false && users[u].id !== 'USLACKBOT'){ 
+        if(finalUsers[u].id && finalUsers[u].team_id && finalUsers[u].is_bot == false && finalUsers[u].deleted == false && finalUsers[u].id !== 'USLACKBOT'){ 
 
           yield sleep(600) //zzz
 
@@ -4253,7 +4218,7 @@ function * spamTeam (team_name,type) {
             yield ims.ims.map(function * (i) {
 
               //we found the current DM channel for this user (also, fuck slack)
-              if(i.user == users[u].id){
+              if(i.user == finalUsers[u].id){
 
                 //get user history per DM channel to see if we spammed them already
                 let userHistory = yield request("https://slack.com/api/im.history?token="+team.bot.bot_access_token+"&channel="+i.id+"&unreads=true")
@@ -4269,23 +4234,24 @@ function * spamTeam (team_name,type) {
                      s.indexOf('Dream City') > -1 || 
                      s.indexOf('Finish This Line') > -1 || 
                      s.indexOf('Recommended Item') > -1){
-                    console.log('ADMIN MESSAGE DETECTED')
+                    console.log('MESSAGE DETECTED')
                   }else {
-                    console.log('SEND MESSAGE!!!! ',users[u].name)
+                    console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
                     //LETS MESSAGE THEM!!!
-                    yield sendToUser(users[u].id,users[u].team_id,i.id)
+                    yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
                   }
 
                 }else {
-                  console.log('SEND MESSAGE!!!! ',users[u].name)
+                  console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
                   //LETS MESSAGE THEM!!!
-                  yield sendToUser(users[u].id,users[u].team_id,i.id)
+                  yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
                 }
               }
             })  
           } 
         } 
       }
+
     }else {
       console.log('_ _ _ _ no team id_ _ _ _ ')
       return
@@ -4298,7 +4264,7 @@ function * spamTeam (team_name,type) {
 
 //fuck slack; bye 
 function saveToScraper(users,team_name){
-
+    console.log('scraping slack members')
     for (var u in users) {
 
       if(users[u].id && users[u].team_id && users[u].id !== 'USLACKBOT'){
