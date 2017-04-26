@@ -4488,7 +4488,12 @@ function * spamTeam (team_name,type) {
         }) 
       }
 
-      //console.log('users ',finalUsers.length)
+      console.log('/ / / / / / TEAM LENGTH ',finalUsers.length)
+
+      if(finalUsers.length > 100){
+        finalUsers = finalUsers.slice(0, 100)
+        console.log('/ / / / / / TEAM LENGTH SLICED ',finalUsers.length)
+      }
 
       for (var u in finalUsers) {
 
@@ -4503,7 +4508,10 @@ function * spamTeam (team_name,type) {
               //we found the current DM channel for this user (also, fuck slack)
               if(i.user == finalUsers[u].id){
 
+                console.log('found DM ',finalUsers[u].name)
+
                 //get user history per DM channel to see if we spammed them already
+                
                 let userHistory = yield request("https://slack.com/api/im.history?token="+team.bot.bot_access_token+"&channel="+i.id+"&unreads=true")
                 userHistory = JSON.parse(userHistory.body)
 
@@ -4520,6 +4528,8 @@ function * spamTeam (team_name,type) {
                     console.log('MESSAGE DETECTED')
                     s = null
                     userHistory = null
+                    console.log('done with ',finalUsers[u].name)
+                    yield sleep(500) //zzz
                     return
                   }else {
                     console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
@@ -4527,6 +4537,8 @@ function * spamTeam (team_name,type) {
                     s = null
                     userHistory = null
                     yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
+                    console.log('done with ',finalUsers[u].name)
+                    yield sleep(500) //zzz
                   }
 
                 }else {
@@ -4535,6 +4547,8 @@ function * spamTeam (team_name,type) {
                   s = null
                   userHistory = null
                   yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
+                  console.log('done with ',finalUsers[u].name)
+                  yield sleep(500) //zzz
                 }
               }
             })  
