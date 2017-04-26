@@ -4455,6 +4455,12 @@ function * spamTeam (team_name,type) {
       let imList = yield request("https://slack.com/api/im.list?token="+team.bot.bot_access_token)
       let ims = JSON.parse(imList.body)
 
+      if (ims.ims && ims.ims.length < 1){
+        console.log('IM NOT ALLOWED for team: ',team_name)
+        console.log('IM NOT ALLOWED ',ims)
+        return
+      }
+
       //so dumb lalalalalalaal
       let userList = yield request("https://slack.com/api/users.list?token="+team.bot.bot_access_token)
       let users = JSON.parse(userList.body)
@@ -4490,58 +4496,46 @@ function * spamTeam (team_name,type) {
 
       console.log('/ / / / / / TEAM LENGTH ',finalUsers.length)
 
-      if(finalUsers.length > 200){
-        finalUsers = finalUsers.slice(100, 200)
+      if(finalUsers.length > 300){
+        finalUsers = finalUsers.slice(200, 300)
         console.log('/ / / / / / TEAM LENGTH SLICED ',finalUsers.length)
       }
 
       for (var u in finalUsers) {
 
-        console.log('trying user')
         //💀H💀A💀I💀L💀S💀L💀A💀C💀K💀
         if(finalUsers[u].id && finalUsers[u].team_id && finalUsers[u].is_bot == false && finalUsers[u].deleted == false && finalUsers[u].id !== 'USLACKBOT'){ 
 
           yield sleep(300) //zzz
 
-          if(ims.ims && ims.ims.length > 0){
-            yield ims.ims.map(function * (i) {
+          yield ims.ims.map(function * (i) {
 
-              //we found the current DM channel for this user (also, fuck slack)
-              if(i.user == finalUsers[u].id){
+            //we found the current DM channel for this user (also, fuck slack)
+            if(i.user == finalUsers[u].id){
 
-                console.log('found DM ',finalUsers[u].name)
+              console.log('found DM ',finalUsers[u].name)
 
-                //get user history per DM channel to see if we spammed them already
-                
-                let userHistory = yield request("https://slack.com/api/im.history?token="+team.bot.bot_access_token+"&channel="+i.id+"&unreads=true")
-                userHistory = JSON.parse(userHistory.body)
+              //get user history per DM channel to see if we spammed them already
+              
+              let userHistory = yield request("https://slack.com/api/im.history?token="+team.bot.bot_access_token+"&channel="+i.id+"&unreads=true")
+              userHistory = JSON.parse(userHistory.body)
 
-                if(userHistory && userHistory.messages && userHistory.messages.length > 0){
-                  let s = JSON.stringify(userHistory.messages)
+              if(userHistory && userHistory.messages && userHistory.messages.length > 0){
+                let s = JSON.stringify(userHistory.messages)
 
-                  //so we don't accidentally spam people again for this campaign >___> dont ask 
-                  if(s.indexOf('Admin Day') > -1 || 
-                     s.indexOf('Office Thing') > -1 || 
-                     s.indexOf('Browser Tabs') > -1 || 
-                     s.indexOf('Dream City') > -1 || 
-                     s.indexOf('Finish This Line') > -1 || 
-                     s.indexOf('Recommended Item') > -1){
-                    console.log('MESSAGE DETECTED')
-                    s = null
-                    userHistory = null
-                    console.log('done with ',finalUsers[u].name)
-                    yield sleep(500) //zzz
-                   // return
-                  }else {
-                    console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
-                    //LETS MESSAGE THEM!!!
-                    s = null
-                    userHistory = null
-                    yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
-                    console.log('done with ',finalUsers[u].name)
-                    yield sleep(500) //zzz
-                  }
-
+                //so we don't accidentally spam people again for this campaign >___> dont ask 
+                if(s.indexOf('Admin Day') > -1 || 
+                   s.indexOf('Office Thing') > -1 || 
+                   s.indexOf('Browser Tabs') > -1 || 
+                   s.indexOf('Dream City') > -1 || 
+                   s.indexOf('Finish This Line') > -1 || 
+                   s.indexOf('Recommended Item') > -1){
+                  console.log('MESSAGE DETECTED')
+                  s = null
+                  userHistory = null
+                  console.log('done with ',finalUsers[u].name)
+                  yield sleep(500) //zzz
+                 // return
                 }else {
                   console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
                   //LETS MESSAGE THEM!!!
@@ -4551,15 +4545,22 @@ function * spamTeam (team_name,type) {
                   console.log('done with ',finalUsers[u].name)
                   yield sleep(500) //zzz
                 }
+
               }else {
-                console.log('no DM found! ! ! ! ! ')
+                console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
+                //LETS MESSAGE THEM!!!
+                s = null
+                userHistory = null
+                yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
+                console.log('done with ',finalUsers[u].name)
+                yield sleep(500) //zzz
               }
-            })  
-          } 
-          console.log('CANT GET IMS LENGHT!!!')
+            }
+          })  
+
         } 
         else {
-          console.log('user is dead: ',finalUsers[u].name)
+          console.log('user dead: ',finalUsers[u].name)
         }
       }
 
