@@ -11,16 +11,16 @@ export default class ItemInfo extends Component {
   };
 
   render() {
-    const { props, props: { price, quantity } } = this;
+    const { props, props: { price, quantity, type } } = this;
     const convertedPrice = price ? displayCost(price) : '0.00';
     const total = displayCost(price * quantity);
     return (
       <div className='item__view__price'>
         <div>
-          {quantity>1? <h5>Price: {convertedPrice}</h5>:null}
+          {quantity > 1 ? <h5>Price: {convertedPrice}</h5> : null}
           <h4>Total: <span>{total}</span></h4>
         </div>
-        <AddRemove {...props} />
+        {type === 'cartItem' ? <AddRemove {...props} /> : null}
       </div>
     );
   }

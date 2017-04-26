@@ -11,8 +11,9 @@ const request = () => ({
   type: REQUEST_DEALS
 });
 
-export const selectDeal = (selectedIndex) => ({
+export const selectDeal = (selectedIndex, deal) => ({
   type: SELECT_DEAL,
+  deal,
   selectedIndex
 })
 

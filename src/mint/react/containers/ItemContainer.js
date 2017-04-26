@@ -29,7 +29,7 @@ const mapDispatchToProps = dispatch => ({
   decrementItem: (item_id, quantity) => dispatch(decrementItem(item_id, quantity)),
   nextSearch: () => dispatch(nextSearch()),
   prevSearch: () => dispatch(prevSearch()),
-  selectDeal: (dealIndex) => dispatch(selectDeal(dealIndex)),
+  selectDeal: (dealIndex, deal) => dispatch(selectDeal(dealIndex, deal)),
   setSearchIndex: (index) => dispatch(setSearchIndex(index))
 });
 

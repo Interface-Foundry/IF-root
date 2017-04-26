@@ -1,26 +1,73 @@
 @import '../../styles/react-select/default.scss';
 @import '../../styles/Constants.scss';
-.Select-control {
-  height: 60px;
-  border-color: $color-blue;
-  border-width: 2px;
+.select-up .Select-menu-outer {
+  position: absolute !important;
+  top: auto !important;
+  bottom: calc(100% - 1px) !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
 }
 
-.Select-input {
-  align-self: center;
+.select-up .is-open .Select-control {
+  border-top-right-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-right-radius: 5px !important;
+  border-bottom-left-radius: 5px !important;
 }
 
-.dropdown__option {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  height: 60px;
-  .dropdown__option__image {
-    width: 40px;
-    height: 40px;
-    margin-right: 20px;
-    background-size: contain;
-    background-repeat: no-repeat;
+.item__dropdowns {
+  text-align: center;
+  padding: 0 20px;
+  background: linear-gradient(to bottom, rgba(252, 252, 249, 0) 0%, $kip-primary-color 100%);
+  .item__dropdown {
+    text-align: left;
+    background-color: $kip-primary-color;
+    padding: 3px 0;
+    .Select-control {
+      height: 40px;
+      border-color: $color-blue;
+      border-width: 2px;
+      .Select-arrow-zone {
+        padding-top: 12px; //center the arrow
+        .Select-arrow {
+          border-color: $color-blue transparent transparent;
+        }
+      }
+    }
+    .Select-input {
+      align-self: center;
+      vertical-align: none;
+      &>input {
+        line-height: 20px;
+      }
+    }
+    .Select-value {
+      .Select-value-label {
+        color: $color-blue;
+      }
+    }
+    .Select-placeholder {
+      display: flex;
+      align-items: center;
+    }
+    .Select-clear-zone {
+      display: none;
+    }
+    .dropdown__option {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      height: 40px;
+      .dropdown__option__image {
+        width: 28px;
+        height: 28px;
+        margin-right: 15px;
+        background-size: contain;
+        background-repeat: no-repeat;
+      }
+    }
   }
 }
 

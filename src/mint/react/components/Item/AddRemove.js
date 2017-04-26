@@ -11,9 +11,10 @@ export default class AddRemove extends Component {
   }
   render() {
     const { item: { id, quantity, added_by }, incrementItem, decrementItem } = this.props;
-    return (!added_by
-      ? null
-      : <div className='item__view__quantity'>
+    return (
+      !added_by
+        ? null
+        : <div className='item__view__quantity'>
             <button onClick={()=>incrementItem(id, quantity)}>+</button>
             <div className='item__view__quantity__num'>{quantity}</div>
             {

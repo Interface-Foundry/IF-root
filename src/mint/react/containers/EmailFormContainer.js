@@ -2,9 +2,8 @@
 
 import { connect } from 'react-redux';
 import { reset, reduxForm } from 'redux-form';
-
 import { EmailForm } from '../components';
-
+import ReactGA from 'react-ga';
 import { signIn } from '../actions/session';
 import { fetchCart, fetchAllCarts } from '../actions/cart';
 
@@ -19,6 +18,12 @@ const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => dispatch(signIn(state.cart_id, values.email))
     .then(() => {
       const { history: { replace }, cart_id, addingItem } = state;
+      // TODO: not do this in prod
+      ReactGA.event({
+        category: 'Sign In',
+        action: 'Added Email',
+        label: values.email.split('@').join(' ').split('.').join(' ')
+      });
       dispatch(fetchCart(cart_id));
       dispatch(fetchAllCarts())
       dispatch(reset('SignIn'));

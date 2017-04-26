@@ -85,7 +85,7 @@ export default class Item extends Component {
         ? (numericInt === items.length - 1 ? 0 : numericInt + 1)
         : (numericInt === 0 ? items.length - 1 : numericInt - 1);
       if (originalx !== x && x !== 0 && abs > 100) {
-        selectDeal(newIndex);
+        selectDeal(newIndex, items[newIndex]);
         replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
       }
     } else if (type === 'search') {
@@ -116,57 +116,58 @@ export default class Item extends Component {
       state: { animation },
       props: { index, type, items, item, nextSearch, prevSearch, item_id, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, search, options } }
     } = this,
-    // TODO: replace this with the server url!
-    tempUrl = `/api/item/${item.id}/clickthrough`;
-    console.log(tempUrl)
+    amazonLink = `/api/item/${item.id}/clickthrough`;
     const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
       ? items[parseInt(index)].large
       : main_image_url;
 
     return (
-      <div className='item'>
-        <RouteTransition
-          className="item__transition"
-          pathname={pathname}
-          {...presets.default[animation]}>
-          <div className='item__nav_wrapper'
-              onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-              onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-              onTouchEnd={ () => determineNav() }
-          >
-            <div className='item__view__image image row'
-                style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }>
+      <div className='item_container'>
+        <div className='item'>
+          <RouteTransition
+            className="item__transition"
+            pathname={pathname}
+            {...presets.default[animation]}>
+            <div className='item__nav_wrapper'
+                onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+                onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+                onTouchEnd={ () => determineNav() }
+            >
+              <div className='item__view__image image row'
+                  style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }>
+              </div>
+              <div className='item__view__atts'>
+                <p>{name}</p>
+              </div>
             </div>
-            <div className='item__view__atts'>
-              <p>{name}</p>
+            { 
+              type === 'deal' && items[parseInt(index)]
+              ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
+              : <ItemInfo {...props} {...item} />
+            }
+            {
+            search 
+                ? <div>
+                    <button onClick={()=>prevSearch()}>&lt;</button>
+                    <button onClick={()=>nextSearch()}>&gt;</button>
+                  </div>
+                : null
+                } 
+            <ProductDescription description={description} />
+            <div className='item__view__review'>
+              {/* TODO: get reviews in here */}
+              <p className='ellipsis'>This thing is great! Almost as good as penguin food</p>
+              <em > -Definitely not a penguin </em>
             </div>
-          </div>
-          { 
-            type === 'deal' && items[parseInt(index)]
-            ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
-            : <ItemInfo {...props} {...item} />
-          }
-          {
-          search 
-              ? <div>
-                  <button onClick={()=>prevSearch()}>&lt;</button>
-                  <button onClick={()=>nextSearch()}>&gt;</button>
-                </div>
-              : null
-              } 
-          <ProductDescription description={description} />
-          <div className='item__view__review'>
-            {/* TODO: get reviews in here */}
-            <p className='ellipsis'>This thing is great! Almost as good as penguin food</p>
-            <em > -Definitely not a penguin </em>
-          </div>
-          <a href={tempUrl} target='_blank' className='item__view__amazon__link'> <Icon icon='Open'/> View on Amazon </a>
-          {
-            (options && options.length)
-            ? <ItemVariationSelector replace={replace} options={options} defaultVal={asin} {...props} /> 
-            : null
-          }
-        </RouteTransition>
+            <a href={amazonLink} target='_blank' className='item__view__amazon__link'> <Icon icon='Open'/> View on Amazon </a>
+            
+          </RouteTransition>
+        </div>
+        {
+          (options && options.length)
+          ? <ItemVariationSelector replace={replace} options={options} defaultVal={asin} {...props} /> 
+          : null
+        }
       </div>
     );
   }
