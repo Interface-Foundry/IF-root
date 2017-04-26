@@ -1,5 +1,6 @@
 require('../../../kip')
 var co = require('co')
+var request = require('co-request')
 var sleep = require('co-sleep')
 var slack = require('@slack/client')
 const fs = require('fs')
@@ -21,112 +22,7 @@ const fs = require('fs')
 // const users = require('./' + filename)
 // fs.renameSync(filename, filename + '.done')
 
-//
-// We'll send this message to ppl as a marketing campaign
-//
-const message = {
-  "text":"",
-  "attachments": [{
-    "text": "",
-    "pretext":"Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
-    "image_url": "https://storage.googleapis.com/kip-random/bloomthat_quiz/quiz_1.png",
-    "mrkdwn_in": ["text,pretext"],
-    "fallback": "Tomorrow is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
-    "callback_id": "none",
-    "color":"#52A2F0",
-    "author_name": "BloomThat",
-    "author_link": "https://www.bloomthat.com",
-    "author_icon": "https://storage.googleapis.com/kip-random/bloomthat_quiz/bloomthat_social_media.png",
-    "actions": [{
-      "name": "quiz_bloomthat",
-      "value": "quiz_bloomthat",
-      "text": "Find Out Now 🙌🏽",
-      "style": "primary",
-      "type": "button"
-    }, {
-      "name": "quiz_bloomthat_help",
-      "value": "quiz_bloomthat_help",
-      "text": "What's Admin Day?",
-      "style": "default",
-      "type": "button"
-    }]
-  }]
-}
 
-
-//FIND USERS//
-//--- is_bot=false, deleted=false
-
-// America/Indiana/Indianapolis
-
-//
-// Sends a message to a specific user
-//
-function sendToUser (userId,teamId) {
-  console.log('running for user', userId)
-  
-  return co(function * () {
-    
-    
-    // get the full user obj
-    var user = yield db.Chatusers.findOne({id: userId, team_id: teamId}).exec()
-
-    if (!user) {
-      console.log('could not find user in db', userId)
-      return
-    }
-
-    //console.log('🌵🌵 !user! ',user)
-
-    // Don't re-send to someone who we have already sent this marketing message
-    var sentCount = yield db.Metrics.count({
-      'data.user': user.id,
-      'data.feature': 'bloomthat'
-    }).exec()
-
-    //console.log('🌵🌵 ! ',sentCount)
-
-    if (sentCount > 0) {
-      console.log('already sent to user', userId)
-      return
-    }
-
-    // CHECK HERE WHICH TIMEZONE THEY'RE IN, so it's 10am their time. so run it at 10am , 11am, 12pm 
-
-    //ACTUALLY GET THREE DIFFERENT LISTS OF USERS, by timezone (when it's 10am their time)
-
-
-    // Send a message to this user 
-    let slackbot = yield db.Slackbots.findOne({team_id: teamId}).exec()
-
-    try {
-      let bot = new slack.WebClient(slackbot.bot.bot_access_token)
-      //console.log(bot)
-
-      
-      yield bot.chat.postMessage(user.dm, '', message)
-
-      console.log('🌵 SENT MESSAGE!')
-
-      db.Metrics.log('feature.rollout.sent', {
-        team: teamId,
-        user: user.id,
-        feature: 'bloomthat'
-      })  
-
-    } catch (err) {
-      console.log('SLACK ERROR HERE ')
-
-      db.Metrics.log('feature.rollout.sent', {
-        team: teamId,
-        user: user.id,
-        feature: 'bloomthat'
-      })  
-    }
-
-
-  })
-}
 
  //db.chatusers.find({'is_bot':false,'deleted':false}).count()
 
@@ -138,6 +34,12 @@ var teamsTestAll = [
 ]
 
 var teamsAll = [
+    {
+            "team_name" : "FairVentures Lab"
+    },
+    {
+      "team_name" : "INTERSECTION VENTURES"
+    },
    {
       "team_name":"Reload360"
    },
@@ -440,6 +342,687 @@ var teamsAll = [
    }
 ]
 var teamsAdminOnly = [
+  {
+          "team_name" : "Hergui"
+  },
+  {
+          "team_name" : "quinnchristmas"
+  },
+  {
+          "team_name" : "cyclogy"
+  },
+  {
+          "team_name" : "蒋村科技有限公司"
+  },
+  {
+          "team_name" : "servo-ai"
+  },
+  {
+          "team_name" : "affectiva"
+  },
+  {
+          "team_name" : "Campbell Lab"
+  },
+  {
+          "team_name" : "boxed"
+  },
+  {
+          "team_name" : "Rad Campaign"
+  },
+  {
+          "team_name" : "rgb72"
+  },
+  {
+          "team_name" : "Hope City"
+  },
+  {
+          "team_name" : "wemart"
+  },
+  {
+          "team_name" : "YS-INT"
+  },
+  {
+          "team_name" : "Project G"
+  },
+  {
+          "team_name" : "slisystems"
+  },
+  {
+          "team_name" : "midbot"
+  },
+  {
+          "team_name" : "cyberdine"
+  },
+  {
+          "team_name" : "IUrja"
+  },
+  {
+          "team_name" : "Fellow Campers"
+  },
+  {
+          "team_name" : "chatbots"
+  },
+  {
+          "team_name" : "hiro"
+  },
+  {
+          "team_name" : "Idee101"
+  },
+  {
+          "team_name" : "Evergen Resources"
+  },
+  {
+          "team_name" : "luscofuscocyclery"
+  },
+  {
+          "team_name" : "Fan Fest"
+  },
+  {
+          "team_name" : "Kudi"
+  },
+  {
+          "team_name" : "Blippar"
+  },
+  {
+          "team_name" : "The Dog Company"
+  },
+  {
+          "team_name" : "RallyBound"
+  },
+  {
+          "team_name" : "Andrade & Company"
+  },
+  {
+          "team_name" : "The Oots"
+  },
+  {
+          "team_name" : "Agripod"
+  },
+  {
+          "team_name" : "Gutenberg"
+  },
+  {
+          "team_name" : "Tamedia Digital"
+  },
+  {
+          "team_name" : "techteamer"
+  },
+  {
+          "team_name" : "bismuth10"
+  },
+  {
+          "team_name" : "EP"
+  },
+  {
+          "team_name" : "C4 Security"
+  },
+  {
+          "team_name" : "gamezop"
+  },
+  {
+          "team_name" : "bismuth11"
+  },
+  {
+          "team_name" : "T"
+  },
+  {
+          "team_name" : "Leadsmarket"
+  },
+  {
+          "team_name" : "Because We Will be Rich Someday"
+  },
+  {
+          "team_name" : "How2marry"
+  },
+  {
+          "team_name" : "{一个不平凡的莫纳什IT团队}"
+  },
+  {
+          "team_name" : "liberta"
+  },
+  {
+          "team_name" : "CyberProductivity S.A."
+  },
+  {
+          "team_name" : "Tiki"
+  },
+  {
+          "team_name" : "Openix"
+  },
+  {
+          "team_name" : "egi_bots"
+  },
+  {
+          "team_name" : "WhatsNext"
+  },
+  {
+          "team_name" : "Blue Apron Pros"
+  },
+  {
+          "team_name" : "YPO"
+  },
+  {
+          "team_name" : "Mediative"
+  },
+  {
+          "team_name" : "Xpresso Commerce"
+  },
+  {
+          "team_name" : "Spindox"
+  },
+  {
+          "team_name" : "rocketscientists"
+  },
+  {
+          "team_name" : "SYNTEST1"
+  },
+  {
+          "team_name" : "Bunker604"
+  },
+  {
+          "team_name" : "Tripoto"
+  },
+  {
+          "team_name" : "Overtone Labs"
+  },
+  {
+          "team_name" : "BetterLife"
+  },
+  {
+          "team_name" : "JOHN ELLIOTT"
+  },
+  {
+          "team_name" : "Lob"
+  },
+  {
+          "team_name" : "Vital AI"
+  },
+  {
+          "team_name" : "The Post Office"
+  },
+  {
+          "team_name" : "HighTechEnt"
+  },
+  {
+          "team_name" : "The Village"
+  },
+  {
+          "team_name" : "Global Relay"
+  },
+  {
+          "team_name" : "BCGDV"
+  },
+  {
+          "team_name" : "Ngo Family"
+  },
+  {
+          "team_name" : "Blue Kangaroo"
+  },
+  {
+          "team_name" : "Visual"
+  },
+  {
+          "team_name" : "restock"
+  },
+  {
+          "team_name" : "Intros"
+  },
+  {
+          "team_name" : "微壹"
+  },
+  {
+          "team_name" : "crunchball"
+  },
+  {
+          "team_name" : "diamond1"
+  },
+  {
+          "team_name" : "Delcampe Team"
+  },
+  {
+          "team_name" : "Appscinated"
+  },
+  {
+          "team_name" : "clytemnestra"
+  },
+  {
+          "team_name" : "meow cat parlor"
+  },
+  {
+          "team_name" : "motobecane"
+  },
+  {
+          "team_name" : "AmidA"
+  },
+  {
+          "team_name" : "Black Euphoria"
+  },
+  {
+          "team_name" : "cypriengilbert"
+  },
+  {
+          "team_name" : "Soko Glam"
+  },
+  {
+          "team_name" : "BAT - Business Intelligence"
+  },
+  {
+          "team_name" : "DSC"
+  },
+  {
+          "team_name" : "Rexel"
+  },
+  {
+          "team_name" : "lifebleedsink"
+  },
+  {
+          "team_name" : "EzFlipCards"
+  },
+  {
+          "team_name" : "fintros"
+  },
+  {
+          "team_name" : "Baatch"
+  },
+  {
+          "team_name" : "Dojo Madness"
+  },
+  {
+          "team_name" : "TGEU"
+  },
+  {
+          "team_name" : "Studio Deversus"
+  },
+  {
+          "team_name" : "Happi"
+  },
+  {
+          "team_name" : "MarineTraffic Marketing"
+  },
+  {
+          "team_name" : "GRG"
+  },
+  {
+          "team_name" : "Fluenty"
+  },
+  {
+          "team_name" : "LMILTest"
+  },
+  {
+          "team_name" : "7Lab"
+  },
+  {
+          "team_name" : "Strive Labs"
+  },
+  {
+          "team_name" : "Fotawa"
+  },
+  {
+          "team_name" : "OSM Aviation"
+  },
+  {
+          "team_name" : "DG educators"
+  },
+  {
+          "team_name" : "Futures"
+  },
+  {
+          "team_name" : "enxoy"
+  },
+  {
+          "team_name" : "Pretius APEX"
+  },
+  {
+          "team_name" : "Robinsons Archipel"
+  },
+  {
+          "team_name" : "Nicolas-Jana"
+  },
+  {
+          "team_name" : "besiktas"
+  },
+  {
+          "team_name" : "botworkshop"
+  },
+  {
+          "team_name" : "Home"
+  },
+  {
+          "team_name" : "Tomigo"
+  },
+  {
+          "team_name" : "Tidridge Family"
+  },
+  {
+          "team_name" : "abzreider"
+  },
+  {
+          "team_name" : "Feathr"
+  },
+  {
+          "team_name" : "Zinda.xyz"
+  },
+  {
+          "team_name" : "instastint"
+  },
+  {
+          "team_name" : "iF"
+  },
+  {
+          "team_name" : "Localz"
+  },
+  {
+          "team_name" : "SMARTX"
+  },
+  {
+          "team_name" : "motobecane enthusiasts"
+  },
+  {
+          "team_name" : "The Andersen's"
+  },
+  {
+          "team_name" : "AdviceCoach"
+  },
+  {
+          "team_name" : "sergioska"
+  },
+  {
+          "team_name" : "vadnov"
+  },
+  {
+          "team_name" : "Web Efficient"
+  },
+  {
+          "team_name" : "prostocompany"
+  },
+  {
+          "team_name" : "Plano Foundry"
+  },
+  {
+          "team_name" : "Spawn Advertising"
+  },
+  {
+          "team_name" : "Hardcore-Development"
+  },
+  {
+          "team_name" : "Practo"
+  },
+  {
+          "team_name" : "Project Pilot"
+  },
+  {
+          "team_name" : "webklusive GmbH"
+  },
+  {
+          "team_name" : "Open Web Uruguay"
+  },
+  {
+          "team_name" : "Botomaker"
+  },
+  {
+          "team_name" : "GDMobileUIBots"
+  },
+  {
+          "team_name" : "CBC Kitchen"
+  },
+  {
+          "team_name" : "Ottowa Randonneurs"
+  },
+  {
+          "team_name" : "zentrusts"
+  },
+  {
+          "team_name" : "HLE"
+  },
+  {
+          "team_name" : "AIM Coach (Artificial Intelligence Mental Coach)"
+  },
+  {
+          "team_name" : "Sharpies Inc."
+  },
+  {
+          "team_name" : "2PAx"
+  },
+  {
+          "team_name" : "Bomoda"
+  },
+  {
+          "team_name" : "Amikuku"
+  },
+  {
+          "team_name" : "UGT IT Solutions"
+  },
+  {
+          "team_name" : "DSR09"
+  },
+  {
+          "team_name" : "nidebefuv"
+  },
+  {
+          "team_name" : "ARMDD"
+  },
+  {
+          "team_name" : "Hollys"
+  },
+  {
+          "team_name" : "Midtjys-Kloge"
+  },
+  {
+          "team_name" : "Bonaverde"
+  },
+  {
+          "team_name" : "Tomek"
+  },
+  {
+          "team_name" : "Lunchr"
+  },
+  {
+          "team_name" : "SPD"
+  },
+  {
+          "team_name" : "TestingKip"
+  },
+  {
+          "team_name" : "AI Interns Inc."
+  },
+  {
+          "team_name" : "12 Labs"
+  },
+  {
+          "team_name" : "Codementor"
+  },
+  {
+          "team_name" : "righttalent"
+  },
+  {
+          "team_name" : "iSmart"
+  },
+  {
+          "team_name" : "VidaCare"
+  },
+  {
+          "team_name" : "mutesix"
+  },
+  {
+          "team_name" : "Take it easy"
+  },
+  {
+          "team_name" : "ALPOL rozwiązania IT"
+  },
+  {
+          "team_name" : "Deus"
+  },
+  {
+          "team_name" : "Vidyanext"
+  },
+  {
+          "team_name" : "IBM"
+  },
+  {
+          "team_name" : "SavageSquad"
+  },
+  {
+          "team_name" : "SakthiGear"
+  },
+  {
+          "team_name" : "Opera"
+  },
+  {
+          "team_name" : "StarterKitGenerator"
+  },
+  {
+          "team_name" : "AngularRiders"
+  },
+  {
+          "team_name" : "dayoffun"
+  },
+  {
+          "team_name" : "ValdasPlayground"
+  },
+  {
+          "team_name" : "TheTallTeam"
+  },
+  {
+          "team_name" : "Ordy Development"
+  },
+  {
+          "team_name" : "tsepak"
+  },
+  {
+          "team_name" : "ML Startup"
+  },
+  {
+          "team_name" : "Deloitte Digital (US)"
+  },
+  {
+          "team_name" : "Klinche"
+  },
+  {
+          "team_name" : "gentlepie"
+  },
+  {
+          "team_name" : "acemee"
+  },
+  {
+          "team_name" : "MOCEANS CIL"
+  },
+  {
+          "team_name" : "Cinimod Studio"
+  },
+  {
+          "team_name" : "jTestBot"
+  },
+  {
+          "team_name" : "Solinea Group Ltd"
+  },
+  {
+          "team_name" : "iQmetrix"
+  },
+  {
+          "team_name" : "Lystable"
+  },
+  {
+          "team_name" : "Snaps"
+  },
+  {
+          "team_name" : "BotTester"
+  },
+  {
+          "team_name" : "Jagrat'sContentStack"
+  },
+  {
+          "team_name" : "ChatbotsMeetup"
+  },
+  {
+          "team_name" : "cafeliang"
+  },
+  {
+          "team_name" : "naccaratonetwork"
+  },
+  {
+          "team_name" : "Artis"
+  },
+  {
+          "team_name" : "K0_R1"
+  },
+  {
+          "team_name" : "sad"
+  },
+  {
+          "team_name" : "GD-PAL"
+  },
+  {
+          "team_name" : "FindHotel"
+  },
+  {
+          "team_name" : "RotoGrinders"
+  },
+  {
+          "team_name" : "botsociety"
+  },
+  {
+          "team_name" : "botdock"
+  },
+  {
+          "team_name" : "Crush Empire"
+  },
+  {
+          "team_name" : "Jewelsmith"
+  },
+  {
+          "team_name" : "Crate Gallery is Awesome"
+  },
+  {
+          "team_name" : "Jumpcut Studios"
+  },
+  {
+          "team_name" : "Maragi"
+  },
+  {
+          "team_name" : "SafeTrek"
+  },
+  {
+          "team_name" : "duplastudios"
+  },
+  {
+          "team_name" : "dyad"
+  },
+  {
+          "team_name" : "Hashlama029"
+  },
+  {
+          "team_name" : "Maragi"
+  },
+  {
+          "team_name" : "BTC-ECHO"
+  },
+  {
+          "team_name" : "Clara"
+  },
+  {
+          "team_name" : "Cole Haan"
+  },
+  {
+          "team_name" : "Learn Beyond Inc."
+  },
+  {
+          "team_name" : "Students for Legal Research in the Public Interest"
+  },
+  {
+          "team_name" : "UPS i-parcel IT"
+  },
+  {
+          "team_name" : "Freestyle"
+  },
+  {
+          "team_name" : "Secret Cactus"
+  },
+  {
+          "team_name" : "SBC Kingdom Ministry"
+  },
+  {
+          "team_name" : "TB4HR"
+  },
    {
       "team_name":"PI"
    },
@@ -3423,16 +4006,122 @@ var teamsAdminOnly = [
       "team_name":"OklandIT"
    }
 ]
-// var users = [
-//   {
-//     id:'U02PN3B2F',
-//     team_id:'T02PN3B25'
-//   },
-//   {
-//     id:'U02PN3T5R',
-//     team_id:'T02PN3B25'
-//   },
-// ]
+
+//
+// We'll send this message to ppl as a marketing campaign
+//
+const message = {
+  "text":"",
+  "attachments": [{
+    "text": "",
+    "pretext":"Today is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
+    "image_url": "https://storage.googleapis.com/kip-random/bloomthat_quiz/quiz_1.png",
+    "mrkdwn_in": ["text,pretext"],
+    "fallback": "Today is Admin Day! Thank team members who keep the office running smoothly\n Take this short quiz to find out what to get 🎉",
+    "callback_id": "none",
+    "color":"#52A2F0",
+    "author_name": "BloomThat",
+    "author_link": "https://www.bloomthat.com",
+    "author_icon": "https://storage.googleapis.com/kip-random/bloomthat_quiz/bloomthat_social_media.png",
+    "actions": [{
+      "name": "quiz_bloomthat",
+      "value": "quiz_bloomthat",
+      "text": "Find Out Now 🙌🏽",
+      "style": "primary",
+      "type": "button"
+    }, {
+      "name": "quiz_bloomthat_help",
+      "value": "quiz_bloomthat_help",
+      "text": "What's Admin Day?",
+      "style": "default",
+      "type": "button"
+    }]
+  }]
+}
+
+function * createChatUser (userId,teamId,channelId) {
+    console.log('creating new user for team')
+    var new_user = new db.Chatuser()
+    new_user.team_id = teamId
+    new_user.id = userId
+    new_user.dm = channelId
+    new_user.is_bot = false
+    new_user.history.interactions = []
+    new_user.save(function(err, saved) {
+      if(err){
+        console.log('saving user err ',err)
+      }
+      return
+    })
+}
+
+
+//
+// Sends a message to a specific user
+//
+function sendToUser (userId,teamId,channelId) {
+  console.log('running for user ', userId)
+  console.log('on team ', teamId)
+  console.log('on channel ', channelId)
+  
+  return co(function * () {
+    
+    //check if user exists in our DB
+    var user = yield db.Chatusers.findOne({id: userId, team_id: teamId}).exec()
+
+    if (!user) {
+      console.log('could not find user in db, creating....', userId)
+      yield createChatUser(userId,teamId,channelId)
+    }
+
+    //console.log('🌵🌵 !user! ',user)
+
+    //Don't re-send to someone who we have already sent this marketing message
+    var sentCount = yield db.Metrics.count({
+      'data.user': userId,
+      'data.feature': 'bloomthat_today'
+    }).exec()
+
+    if (sentCount > 0) {
+      console.log('already sent to user', userId)
+      return
+    }
+
+    // CHECK HERE WHICH TIMEZONE THEY'RE IN, so it's 10am their time. so run it at 10am , 11am, 12pm 
+
+    //ACTUALLY GET THREE DIFFERENT LISTS OF USERS, by timezone (when it's 10am their time)
+
+
+    // Send a message to this user 
+    let slackbot = yield db.Slackbots.findOne({team_id: teamId}).exec()
+
+    //try {
+    let bot = new slack.WebClient(slackbot.bot.bot_access_token)
+
+    yield bot.chat.postMessage(channelId, '', message)
+
+    console.log('🌵 SENT MESSAGE!')
+
+    db.Metrics.log('feature.rollout.sent', {
+      team: teamId,
+      user: user.id,
+      feature: 'bloomthat_today'
+    })  
+
+    // } 
+    // catch (err) {
+    //   console.log('SLACK ERROR HERE ')
+
+    //   // db.Metrics.log('feature.rollout.sent', {
+    //   //   team: teamId,
+    //   //   user: user.id,
+    //   //   feature: 'bloomthat'
+    //   // })  
+    // }
+
+
+  })
+}
 
 //
 // Run it
@@ -3451,29 +4140,10 @@ function * main () {
   console.log('/ / / / / / / / / / / running test team')
 
   yield teamsTestAll.map(function * (t) {
-    console.log('MAP TEAM ',t)
     if(t.team_name){
-      var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
-      if (team && team.team_id){
-        var users = yield db.Chatusers.find({team_id: team.team_id,'is_bot':false,'deleted':false}).exec()
-        if(users){
-        
-          for (var u in users) {
 
-            if(users[u].id && users[u].team_id){
+      yield spamTeam(t.team_name,'all') //i'm over it, really
 
-              if(users[u].id !== 'USLACKBOT'){
-                yield sleep(600)
-                yield sendToUser(users[u].id,users[u].team_id)
-              }else {
-                console.log('slackbot found!')
-              }    
-            }
-          }
-
-        
-        }
-      }
     }
   })
 
@@ -3510,29 +4180,29 @@ function * main () {
   yield sleep(5000)
 
 
-  yield teamsAll.map(function * (t) {
-    console.log('MAP TEAM ',t)
-    if(t.team_name){
-      var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
-      if (team && team.team_id){
-        var users = yield db.Chatusers.find({team_id: team.team_id,'is_bot':false,'deleted':false}).exec()
-        if(users){
+  // yield teamsAll.map(function * (t) {
+  //   console.log('MAP TEAM ',t)
+  //   if(t.team_name){
+  //     var team = yield db.Slackbots.findOne({team_name: t.team_name}).exec()
+  //     if (team && team.team_id){
+  //       var users = yield db.Chatusers.find({team_id: team.team_id,'is_bot':false,'deleted':false}).exec()
+  //       if(users){
 
-          for (var u in users) {
-            yield sleep(600)
-            if(users[u].id && users[u].team_id){
-              if(users[u].id !== 'USLACKBOT'){
-                yield sendToUser(users[u].id,users[u].team_id)
-              }else {
-                console.log('slackbot found!')
-              }    
-            }
-          }
+  //         for (var u in users) {
+  //           yield sleep(600)
+  //           if(users[u].id && users[u].team_id){
+  //             if(users[u].id !== 'USLACKBOT'){
+  //               yield sendToUser(users[u].id,users[u].team_id)
+  //             }else {
+  //               console.log('slackbot found!')
+  //             }    
+  //           }
+  //         }
         
-        }
-      }
-    }
-  })
+  //       }
+  //     }
+  //   }
+  // })
 
   console.log('/ / / / / / / / / / /DONE SENDING TO ALL TEAMS!!!!!!!!!!!')
   // var userId = 'U02PN3T5R'
@@ -3540,6 +4210,117 @@ function * main () {
 
   //yield sendToUser(userId,teamId)
   process.exit(0)
+}
+
+//dissect team, insert spam 🙃
+function * spamTeam (team_name,type) {
+  //get team obj from team name
+  var team = yield db.Slackbots.findOne({team_name: team_name}).exec()
+  //check if we're still authorized with team
+  let teamStatus = yield request("https://slack.com/api/auth.test?token="+team.bot.bot_access_token)
+  var p = JSON.parse(teamStatus.body) 
+
+  if(p && p.ok){
+    console.log('// BOT AUTHORIZED 🌵')
+
+    if (team.team_id){
+      //slack is dumb lalalalal
+      let imList = yield request("https://slack.com/api/im.list?token="+team.bot.bot_access_token)
+      var ims = JSON.parse(imList.body)
+
+      //so dumb lalalalalalaal
+      let userList = yield request("https://slack.com/api/users.list?token="+team.bot.bot_access_token)
+      var users = JSON.parse(userList.body)
+      users = users.members
+
+      // / / / / / / / / / / / / / / / 
+      saveToScraper(users,p.team) //store for later ;) fuck off slack.
+      // / / / / / / / / / / / / / / / 
+
+      if(!users){
+        console.log('users not found for team ',team_name)
+        return
+      }
+
+      for (var u in users) {
+
+        //💀H💀A💀I💀L💀S💀L💀A💀C💀K💀
+        if(users[u].id && users[u].team_id && users[u].is_bot == false && users[u].deleted == false && users[u].id !== 'USLACKBOT'){ 
+
+          yield sleep(600) //zzz
+
+          if(ims.ims && ims.ims.length > 0){
+            yield ims.ims.map(function * (i) {
+
+              //we found the current DM channel for this user (also, fuck slack)
+              if(i.user == users[u].id){
+
+                //get user history per DM channel to see if we spammed them already
+                let userHistory = yield request("https://slack.com/api/im.history?token="+team.bot.bot_access_token+"&channel="+i.id+"&unreads=true")
+                userHistory = JSON.parse(userHistory.body)
+
+                if(userHistory && userHistory.messages && userHistory.messages.length > 0){
+                  var s = JSON.stringify(userHistory.messages)
+
+                  //so we don't accidentally spam people again for this campaign >___> dont ask 
+                  if(s.indexOf('Admin Day') > -1 || 
+                     s.indexOf('Office Thing') > -1 || 
+                     s.indexOf('Browser Tabs') > -1 || 
+                     s.indexOf('Dream City') > -1 || 
+                     s.indexOf('Finish This Line') > -1 || 
+                     s.indexOf('Recommended Item') > -1){
+                    console.log('ADMIN MESSAGE DETECTED')
+                  }else {
+                    console.log('SEND MESSAGE!!!! ',users[u].name)
+                    //LETS MESSAGE THEM!!!
+                    yield sendToUser(users[u].id,users[u].team_id,i.id)
+                  }
+
+                }else {
+                  console.log('SEND MESSAGE!!!! ',users[u].name)
+                  //LETS MESSAGE THEM!!!
+                  yield sendToUser(users[u].id,users[u].team_id,i.id)
+                }
+              }
+            })  
+          } 
+        } 
+      }
+    }else {
+      console.log('_ _ _ _ no team id_ _ _ _ ')
+      return
+    }
+  }else {
+    console.log('// BOT NOT AUTHORIZED //')
+    return
+  }
+}
+
+//fuck slack; bye 
+function saveToScraper(users,team_name){
+
+    for (var u in users) {
+
+      if(users[u].id && users[u].team_id && users[u].id !== 'USLACKBOT'){
+
+        var email
+        if(users[u].profile && users[u].profile.email){
+          email = users[u].profile.email
+        }
+
+        var a = new db.Scraper({
+          user_id: users[u].id,
+          team_id: users[u].team_id,
+          email: email,
+          team_name: team_name,
+          real_name: users[u].real_name,
+          name: users[u].name,
+          deleted: users[u].deleted,
+        })
+        
+        a.save()
+      }
+    }
 }
 
 const days = [
