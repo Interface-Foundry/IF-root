@@ -4141,9 +4141,11 @@ function * main () {
 
   yield teamsAll.map(function * (t) {
     if(t.team_name){
-      yield spamTeam(t.team_name,'all') //i'm over it, really
+      await spamTeam(t.team_name,'all') //i'm over it, really
     }
   })
+
+
 
   console.log('/ / / / / / / / / / /DONE SENDING TO ALL TEAMS!!!!!!!!!!!')
 
@@ -4206,9 +4208,6 @@ function * spamTeam (team_name,type) {
       }
 
       //console.log('users ',finalUsers.length)
-
-
-
 
       for (var u in finalUsers) {
 
