@@ -1,0 +1,68 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.about {
+	position: relative;
+	text-align: center;
+	padding: $padding*4 $padding*2;
+	border-bottom: 1px solid $borderColor;
+
+	h1 {
+		line-height: $ribbonHeight;
+		height: $ribbonHeight;
+		margin: $padding*2 0 0;
+
+		&:last-of-type {
+			margin: $padding*2 0 0;
+		}
+		&:first-of-type {
+			margin: 0;
+		}
+	}
+
+	.about__details {
+		position: relative;
+		padding: 0 0 $padding*3;
+		white-space: nowrap;
+
+		&:after {
+			content: '';
+			position: absolute;
+			height: 30px;
+			left: 50%;
+			border: 1px solid $bgColor;
+		}
+		&:after {
+			bottom: -15px;
+		}	
+
+		h3 {
+			position: relative;
+			white-space: normal;
+			font-weight: 500;
+			padding: $padding;
+		}
+
+		p {
+			position: relative;
+			display: inline-block;
+			white-space: normal;
+			padding: $padding;
+			width: (100%/3);
+		}
+	}
+
+	.about__action {
+		padding: $padding*2;
+		button {
+			border: 0;
+			font-weight: bold;
+			border-radius: $padding/2;
+			background: $secondaryColor;
+			padding: $padding $padding*2;
+			&:focus {
+				@include animation(pulse cubic-bezier(0.4, 0, 0.2, 1) 3s);
+			}
+		}
+	}
+}

@@ -3,3 +3,7 @@ export Landing from './Landing';
 export Ribbon from './Ribbon';
 export Hero from './Hero';
 export Statement from './Statement';
+export Services from './Services';
+export About from './About';
+export Reviews from './Reviews';
+export Footer from './Footer';

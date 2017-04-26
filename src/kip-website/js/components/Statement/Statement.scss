@@ -4,7 +4,6 @@
 .statement {
 	position: relative;
 	text-align: center;
-	border-bottom: 1px dashed $borderColor;
 	@include animation(fadeInUp cubic-bezier(0.4, 0, 0.2, 1) 3s);
 
 	.card {
@@ -42,9 +41,14 @@
 			padding: $padding*2;
 			button {
 				border: 0;
+				font-weight: bold;
 				border-radius: $padding/2;
 				background: $secondaryColor;
 				padding: $padding $padding*2;
+
+				&:focus {
+					@include animation(pulse cubic-bezier(0.4, 0, 0.2, 1) 3s);
+				}
 			}
 		}
 

@@ -2,9 +2,9 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 import Typist from 'react-typist';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import { Icon } from '../../themes';
+import { Services } from '..';
 
 export default class Statement extends Component {
 
@@ -55,6 +55,7 @@ export default class Statement extends Component {
 
   	render() {
   		const { state: { typing }, props: { items } } = this;
+  		
 	    return (
 	      	<div className="statement"> 
 		        <div className="col-9 row-1 card">
