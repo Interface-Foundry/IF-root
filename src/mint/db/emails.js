@@ -22,7 +22,7 @@ var emailsCollection = Waterline.Collection.extend({
       defaultsTo: () => uuid.v4()
     },
 
-    /** User accounts which have email addresses */
+    /** String list of email addresses in the "To" box */
     recipients: 'string',
 
     /** Sender should probably always be kip */

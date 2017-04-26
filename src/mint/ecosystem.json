@@ -6,7 +6,8 @@
     "combine_logs": true,
     "watch": true,
     "env": {
-      "SEND_EMAILS": true
+      "SEND_EMAILS": true,
+      "NO_LIVE_RELOAD": true
     }
   }, {
     "name": "ci",
