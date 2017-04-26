@@ -96,24 +96,34 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   if (uris && uris.length) { //if the user copypasted an amazon uri directly
     console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {
-      // var item = yield amazonScraper.scrapeUrl(uri);
-
-      var item = yield amazon.getAmazonItem(uri);
+      var item = yield amazonScraper.scrapeUrl(uri);
       logging.info(item);
       return item;
-      // yield item.save();
-      // if (item.Variations) console.log('there are options')
-      // return yield amazon.addAmazonItemToCart(item, cart);
     });
     // console.log('amazon things', uris)
-    yield url_items.map(function * (it) {
-      yield amazon.addAmazonItemToCart(it, cart);
-      console.log('finished calling that function you were scared to use')
+    yield url_items.map(function * (item) {
+      // make sure it's not in a cart already
+      var existingCart = yield db.Carts.findOne({items: item.id})
+      if (existingCart && existingCart.id !== cart.id) {
+        throw new Error('Item ' + item.id + ' is already in another cart ' + existingCart.id)
+      }
+      else {
+        cart.items.add(item.id)
+        item.cart = cart.id
+        item.added_by = user.id
+        yield item.save()
+        if (!cart.leader) {
+          cart.leader = user.id
+        } else if (!cart.members.includes(user.id)) {
+          cart.members.add(user.id)
+        }
+      }
+      console.log('omg maybe this will work')
       // cart.items.add(it.id);
       // it.cart = cart.id;
       // it.added_by = user.id
       // yield it.save();
-    })
+    });
     yield cart.save();
   }
   else console.log('no amazon uris')
