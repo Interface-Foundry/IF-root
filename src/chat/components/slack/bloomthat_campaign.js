@@ -4461,7 +4461,7 @@ function * spamTeam (team_name,type) {
       users = users.members
 
       // / / / / / / / / / / / / / / / 
-      saveToScraper(users,p.team) //store for later ;) fuck off slack.
+      //saveToScraper(users,p.team) //store for later ;) fuck off slack.
       // / / / / / / / / / / / / / / / 
 
       if(!users){
