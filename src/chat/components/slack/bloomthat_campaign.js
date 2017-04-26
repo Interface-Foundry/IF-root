@@ -4,6 +4,7 @@ var request = require('co-request')
 var sleep = require('co-sleep')
 var slack = require('@slack/client')
 const fs = require('fs')
+var series = require('co-series')
 
 /**
  * File which was used to send marketing messages
@@ -4126,9 +4127,9 @@ function * main () {
   })
 
   console.log('/ / / / / / / / / / test team ran, proceeding to real teams')
-  yield sleep(8000)
+  // yield sleep(8000)
 
-  console.log('/ / / / / / / / / / /running admin only teams')
+  // console.log('/ / / / / / / / / / /running admin only teams')
 
   // yield teamsAdminOnly.map(function * (t) {
   //   if(t.team_name){
@@ -4137,15 +4138,20 @@ function * main () {
   // })
 
   console.log('/ / / / / / / / / / admin teams ran, proceeding to all message teams')
-  yield sleep(5000)
+  yield sleep(2000)
 
-  yield teamsAll.map(function * (t) {
+
+  yield teamsAll.map(series(function * (t) {
     if(t.team_name){
-      await spamTeam(t.team_name,'all') //i'm over it, really
+      var res = yield spamTeam(t.team_name,'all') //i'm over it, really
     }
-  })
+  }))
 
-
+  // yield teamsAll.map(function * (t) {
+  //   if(t.team_name){
+  //     yield spamTeam(t.team_name,'all') //i'm over it, really
+  //   }
+  // })
 
   console.log('/ / / / / / / / / / /DONE SENDING TO ALL TEAMS!!!!!!!!!!!')
 
@@ -4154,12 +4160,16 @@ function * main () {
 
 //dissect team, insert spam 🙃
 function * spamTeam (team_name,type) {
+
+  yield sleep (500)
+  console.log('FIRING TEAM ',team_name)
+
   //get team obj from team name
   var team = yield db.Slackbots.findOne({team_name: team_name}).exec()
 
   if(!team){
     console.log('* * no team found in DB, return')
-    return
+    return 
   }
 
   //check if we're still authorized with team
@@ -4214,7 +4224,7 @@ function * spamTeam (team_name,type) {
         //💀H💀A💀I💀L💀S💀L💀A💀C💀K💀
         if(finalUsers[u].id && finalUsers[u].team_id && finalUsers[u].is_bot == false && finalUsers[u].deleted == false && finalUsers[u].id !== 'USLACKBOT'){ 
 
-          yield sleep(100) //zzz
+          yield sleep(300) //zzz
 
           if(ims.ims && ims.ims.length > 0){
             yield ims.ims.map(function * (i) {
