@@ -10,6 +10,8 @@ import { CafeTable, CartTable } from '../../components/Table';
 import { cartsQuery, deliveryQuery } from '../../graphqlOperations';
 
 
+
+
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -66,6 +68,8 @@ class Home extends Component {
         startDate: self.state.startDate,
         endDate: self.state.endDate,
         purchased: self.state.purchased,
+        view: self.state.view,
+        purchased: self.state.purchased,
       },
     }
 
@@ -91,34 +95,35 @@ class Home extends Component {
             onClick={() => self.changeState({ purchased: false })}
           >Unpaid Carts</Button>
         </ButtonToolbar>
-
-        <ButtonToolbar>
-          <Button bsStyle={self.state.view=='Store' ? "primary" : "default"} onClick={ ()=> self.changeCart('Store')}>
-            Store
-          </Button>
-          <Button bsStyle={self.state.view=='Cafe' ? "primary" : "default"} onClick={ ()=> self.changeCart('Cafe')}>
-            Cafe
-          </Button>
-        </ButtonToolbar>
+        <div>
+          <ButtonToolbar>
+            <Button
+              bsStyle={self.state.view.toLowerCase() === 'store' ? 'primary' : 'default'}
+              onClick={()=> self.changeState({ view: 'Store'})}>
+              Store
+            </Button>
+            <Button
+              bsStyle={self.state.view.toLowerCase() === 'cafe' ? 'primary' : 'default'}
+              onClick={() => self.changeState({ view: 'Cafe'})}>
+              Cafe
+            </Button>
+          </ButtonToolbar>
+        </div>
         <div>
           <GraphWithData />
         </div>
-        <div className="container-fluid data-display">
-          <div>
-              Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />
-              End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
-          </div>
-          <div className="panel panel-default">
-            <Panel
-              header={<span><i className="fa fa-line-chart " />Using: {self.state.purchased ? 'purchased Carts' : 'unpurchased carts'} for {self.state.view}</span>}>
-            <TableWithData />
-          </Panel>
-          </div>
+        <div>
+          Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />
+          End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
         </div>
-      </div>
+        <div>
+          <TableWithData />
+        </div>
+    </div>
     )
   }
 }
+
 
 const getCurrentGraph = ({ data }) => {
   if (data.loading) {
@@ -134,16 +139,16 @@ const getCurrentGraph = ({ data }) => {
 };
 
 
-const getCurrentTable = ({ data }) => {
+const getCurrentTable = ({data}) => {
   if (data.loading) {
     return <p> Loading... </p>
   }
 
-  if (data.deliveries) {
-    return (<CafeTable data={data.deliveries} />);
+  if (data.variables.view.toLowerCase() === 'cafe') {
+    return (<CafeTable data={data.deliveries} purchased={data.variables.purchased}/>);
   }
-  if (data.carts) {
-    return (<CartTable data={data.carts} />)
+  if (data.variables.view.toLowerCase() === 'store') {
+    return (<CartTable data={data.carts} purchased={data.variables.purchased} />);
   }
 };
 

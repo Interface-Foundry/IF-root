@@ -29,9 +29,20 @@
   flex-direction: column;
   height: calc(100vh - 52px);
 }
+
+.table-display {
+  min-height: 200px;
+  height: 300px;
+  resize: vertical;
+  overflow: auto;
+  margin: 0px;
+  padding: 0px;
+  max-height: 700px;
+}
+
 .resizable {
   min-height: 150px;
-  height: 200px;
+  height: 300px;
   resize: vertical;
   overflow: auto;
   margin: -15px;
@@ -40,7 +51,7 @@
 }
 .panel-body {
   padding: 0;
-  margin: 15px;
+  margin: 0px;
 }
 @media (min-width:768px) {
   #page-wrapper {
