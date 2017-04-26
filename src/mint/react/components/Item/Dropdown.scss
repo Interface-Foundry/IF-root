@@ -1,0 +1,26 @@
+@import '../../styles/react-select/default.scss';
+@import '../../styles/Constants.scss';
+.Select-control {
+  height: 60px;
+  border-color: $color-blue;
+  border-width: 2px;
+}
+
+.Select-input {
+  align-self: center;
+}
+
+.dropdown__option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 60px;
+  .dropdown__option__image {
+    width: 40px;
+    height: 40px;
+    margin-right: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+}
+

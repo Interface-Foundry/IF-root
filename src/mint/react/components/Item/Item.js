@@ -44,10 +44,8 @@ export default class Item extends Component {
       props: { item_id, amazon_id, previewAmazonItem, previewItem, item, type, items, index, setSearchIndex, fetchDeals }
     } = this;
     // only update item if there isn't one
-    if (!item.price) {
-      if (item_id) previewItem(item_id);
-      else if (amazon_id) previewAmazonItem(amazon_id);
-    }
+    if (item_id) previewItem(item_id);
+    else if (amazon_id) previewAmazonItem(amazon_id);
 
     if (type === 'deal' && items.length === 0) fetchDeals();
     else if (type === 'search' && index) setSearchIndex(index);
@@ -135,7 +133,7 @@ export default class Item extends Component {
               onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
               onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
               onTouchEnd={ () => determineNav() }
-              style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
+              style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }>
           </div>
           <div className='item__view__atts'>
             <p>{name}</p>

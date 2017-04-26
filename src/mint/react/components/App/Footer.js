@@ -23,6 +23,7 @@ export default class Footer extends Component {
         <Route path={`${match.url}/m/share`} component={() => <div className='empty'/>}/>
         <Route path={`${match.url}/m/signin`} component={() => <SignInFooter/>}/>
         <Route path={`${match.url}/m/item/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
+        <Route path={`${match.url}/m/variant/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/:type/:index/:item_id/edit`} component={() => <EditFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/edit`} component={() => <div className='empty'/>}/>
         <Route path={`${match.url}/m/settings`} component={() => <SettingsFooter {...props} item_id={item_id}/>}/>
