@@ -51,7 +51,11 @@ export default class Header extends Component {
           }
         />
         <Route path={`${match.url}/m/settings`} component={() => 
-            <SettingsHeader text={'Share Cart'} {...props}/>
+            <SettingsHeader text='Settings' icon="Settings" {...props}/>
+          }
+        />
+        <Route path={`${match.url}/m/feedback`} component={() => 
+            <SettingsHeader text='Feedback' icon="Email" {...props}/>
           }
         />
         <Route path={`${match.url}/m/edit`} component={() => 
@@ -163,7 +167,7 @@ class SettingsHeader extends Component {
   }
 
   render() {
-    const { cart_id, history: { replace } } = this.props;
+    const { cart_id, history: { replace }, text, icon } = this.props;
 
     return (
       <div className='navbar__modal settings'>
@@ -171,8 +175,8 @@ class SettingsHeader extends Component {
           <Icon icon='Left'/>
         </div>
         <h3 className='navbar__modal_head settings'>
-          <Icon icon='Settings'/>
-          Settings
+          <Icon icon={icon}/>
+          {text}
         </h3>
       </div>
     );

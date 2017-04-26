@@ -12,3 +12,4 @@ export Deals from './Deals';
 export Settings from './Settings';
 export Share from './Share';
 export EditCart from './EditCart';
+export Feedback from './Feedback';

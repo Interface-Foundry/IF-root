@@ -85,7 +85,7 @@ export default class Sidenav extends Component {
           </div>
           <div className='sidenav__list__actions'>
             <Link to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></Link>
-            <h4><Icon icon='Email'/>Feedback</h4>
+            <Link to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></Link>
           </div>
           <footer>
             <Link to={`/cart/${cart_id}/m/share`} onClick={_toggleSidenav}>

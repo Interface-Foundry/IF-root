@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 
 import { EmailFormContainer, AmazonFormContainer, ItemContainer, EditCartContainer, SettingsContainer } from '../../containers';
-import { Share } from '..';
+import { Share, Feedback } from '..';
 
 export default class SignIn extends Component {
 
@@ -27,6 +27,7 @@ export default class SignIn extends Component {
           <Route path={`${match.url}/edit/:edit_cart_id`} component={EditCartContainer} />
           <Route path={`${match.url}/share`} component={Share} />
           <Route path={`${match.url}/settings`} component={SettingsContainer} />
+          <Route path={`${match.url}/feedback`} component={Feedback} />
         </Switch>
       </div>
     );
