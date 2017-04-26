@@ -4207,6 +4207,9 @@ function * spamTeam (team_name,type) {
 
       //console.log('users ',finalUsers.length)
 
+
+
+
       for (var u in finalUsers) {
 
         //💀H💀A💀I💀L💀S💀L💀A💀C💀K💀
@@ -4235,16 +4238,22 @@ function * spamTeam (team_name,type) {
                      s.indexOf('Finish This Line') > -1 || 
                      s.indexOf('Recommended Item') > -1){
                     console.log('MESSAGE DETECTED')
+                    s = null
+                    userHistory = null
                     return
                   }else {
                     console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
                     //LETS MESSAGE THEM!!!
+                    s = null
+                    userHistory = null
                     yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
                   }
 
                 }else {
                   console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
                   //LETS MESSAGE THEM!!!
+                  s = null
+                  userHistory = null
                   yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
                 }
               }
