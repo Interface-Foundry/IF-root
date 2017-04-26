@@ -494,30 +494,7 @@ var teamsAdminOnly = [
   {
           "team_name" : "egi_bots"
   },
-  {
-          "team_name" : "WhatsNext"
-  },
-  {
-          "team_name" : "Blue Apron Pros"
-  },
-  {
-          "team_name" : "YPO"
-  },
-  {
-          "team_name" : "Mediative"
-  },
-  {
-          "team_name" : "Xpresso Commerce"
-  },
-  {
-          "team_name" : "Spindox"
-  },
-  {
-          "team_name" : "rocketscientists"
-  },
-  {
-          "team_name" : "SYNTEST1"
-  },
+
   {
           "team_name" : "Bunker604"
   },
@@ -4149,8 +4126,8 @@ function * main () {
   // }))
 
 
-  yield spamTeam('kip','all')
-  console.log('next team')
+  // yield spamTeam('kip','all')
+  // console.log('next team')
 
   yield spamTeam('FairVentures Lab','all')
   console.log('next team')
@@ -4237,7 +4214,7 @@ function * main () {
 
   yield spamTeam('centercloud','all')
   console.log('next team')
-  yield spamTeam('Walmart Labs','all')
+  //yield spamTeam('Walmart Labs','all')
   console.log('next team')
 
   yield spamTeam('ProjectRock2.0','all')
@@ -4424,6 +4401,28 @@ function * main () {
 
   yield spamTeam('IBM','all')
   console.log('next team')
+
+  yield spamTeam('WhatsNext','all')
+  console.log('next team')
+
+
+  yield spamTeam('Blue Apron Pros','all')
+  console.log('next team')
+
+  yield spamTeam('Mediative','all')
+  console.log('next team')
+
+
+  yield spamTeam('Xpresso Commerce','all')
+  console.log('next team')
+
+  yield spamTeam('YPO','all')
+  console.log('next team')
+
+  yield spamTeam('SYNTEST1','all')
+  console.log('next team')
+
+
   // yield teamsAll.map(function * (t) {
   //   if(t.team_name){
   //     yield spamTeam(t.team_name,'all') //i'm over it, really
@@ -4515,6 +4514,7 @@ function * spamTeam (team_name,type) {
           console.log('trying USER: ',u.name)
           yield sleep(500) //zzz
 
+          console.log('? ? ? ? ? IMS LENGTH ',ims.ims.length)
           yield ims.ims.map(function * (i) {
 
             //we found the current DM channel for this user (also, fuck slack)
