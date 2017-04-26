@@ -34,21 +34,21 @@ var sendDailyDeals = function * () {
       template_name: 'daily_deals',
       unsubscribe_group_id: 2275
     })
-
-    console.log('EMAIL:', daily)
+    // console.log('EMAIL:', daily)
 
     //query for correct cart id
-    yield db.Carts.find({}).limit(1)
-
-    //load the template and send it
-    logging.info('about to load template');
-    yield daily.template('daily_deals', {
-      id: '7a43d85c928f',
-      deals: deals,
-      name: 'hannah.katznelson'
-    })
-    console.log('loaded template');
-    yield daily.send();
+    var cart = yield db.Carts.findOne({leader: user.id});
+    if (cart) {
+      //load the template and send it
+      logging.info('about to load template');
+      yield daily.template('daily_deals', {
+        id: cart.id,
+        deals: deals,
+        name: user.email_address.split('@')[0]
+      })
+      console.log('loaded template');
+      yield daily.send();
+    }
   });
 }
 

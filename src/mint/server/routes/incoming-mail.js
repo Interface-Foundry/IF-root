@@ -24,10 +24,10 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   var email = req.body.from.split(' ');
   email = email[email.length-1];
   if (email[0] === '<') email = email.slice(1, email.length-1);
-  var user = yield db.UserAccounts.findOrCreate({email: email});
+  var user = yield db.UserAccounts.findOrCreate({email_address: email});
 
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
-  if (!req.body.text || ! req.body.html) {
+  if (!req.body.text || !req.body.html) {
     logging.info('no email body');
     yield utils.sendErrorEmail(email);
     res.sendStatus(202);
@@ -37,6 +37,9 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   var bodyText = req.body.text;
   var bodyHtml = req.body.html;
   bodyText = utils.truncateConversationHistory(bodyText);
+  bodyHtml = utils.truncateConversationHistory(bodyHtml);
+  console.log('BODY HTML', bodyHtml)
+
   var all_uris = utils.getUrls(bodyHtml);
   // logging.info('all_uris', all_uris);
 
@@ -93,18 +96,36 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   if (uris && uris.length) { //if the user copypasted an amazon uri directly
     console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {
-      return yield amazonScraper.scrapeUrl(uri);
-      var item = yield amazon.getAmazonItem(uri);
-      if (item.Variations) console.log('there are options')
-      // return yield amazon.addAmazonItemToCart(item, cart);
+      var item = yield amazonScraper.scrapeUrl(uri);
+      logging.info(item);
+      return item;
     });
     // console.log('amazon things', uris)
-    yield url_items.map(function * (it) {
-      cart.items.add(it.id);
-      it.cart = cart.id;
-      it.added_by = user.id
-      yield it.save();
-    })
+    yield url_items.map(function * (item) {
+      // make sure it's not in a cart already
+      var existingCart = yield db.Carts.findOne({items: item.id})
+      if (existingCart && existingCart.id !== cart.id) {
+        throw new Error('Item ' + item.id + ' is already in another cart ' + existingCart.id)
+      }
+      else {
+        cart.items.add(item.id)
+        item.cart = cart.id
+        logging.info('user.id', user.id)
+        item.added_by = user.id
+        // item.added_by = req.UserSession.user_account.id
+        yield item.save()
+        if (!cart.leader) {
+          cart.leader = user.id
+        } else if (!cart.members.includes(user.id)) {
+          cart.members.add(user.id)
+        }
+      }
+      console.log('omg maybe this will work')
+      // cart.items.add(it.id);
+      // it.cart = cart.id;
+      // it.added_by = user.id
+      // yield it.save();
+    });
     yield cart.save();
   }
   else console.log('no amazon uris')
@@ -113,10 +134,11 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
     if (!uris) uris = [];
     if (!searchResults) searchResults = [];
     // logging.info('searchResults', searchResults);
-    yield utils.sendConfirmationEmail(email, uris, searchResults);
+
+    yield utils.sendConfirmationEmail(email, uris, searchResults, cart.id);
   }
 
-  // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')
+
   res.sendStatus(200);
 }));
 
