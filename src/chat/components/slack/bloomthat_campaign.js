@@ -4418,6 +4418,12 @@ function * main () {
 
   yield spamTeam('B Capital Group','all')
   console.log('next team')
+
+  yield spamTeam('Dropbox','all')
+  console.log('next team')
+
+  yield spamTeam('IBM','all')
+  console.log('next team')
   // yield teamsAll.map(function * (t) {
   //   if(t.team_name){
   //     yield spamTeam(t.team_name,'all') //i'm over it, really
@@ -4475,7 +4481,7 @@ function * spamTeam (team_name,type) {
         return
       }
 
-      var finalUsers = []
+      let finalUsers = []
 
       if (type == 'admins' && team.meta && team.meta.office_assistants && team.meta.office_assistants.length > 0){
         //only get users that are admins
@@ -4496,24 +4502,25 @@ function * spamTeam (team_name,type) {
 
       console.log('/ / / / / / TEAM LENGTH ',finalUsers.length)
 
-      if(finalUsers.length > 300){
-        finalUsers = finalUsers.slice(200, 300)
-        console.log('/ / / / / / TEAM LENGTH SLICED ',finalUsers.length)
-      }
+      // if(finalUsers.length > 300){
+      //   finalUsers = finalUsers.slice(200, 300)
+      //   console.log('/ / / / / / TEAM LENGTH SLICED ',finalUsers.length)
+      // }
 
-      for (var u in finalUsers) {
+      yield finalUsers.map(series(function * (u) {
 
         //💀H💀A💀I💀L💀S💀L💀A💀C💀K💀
-        if(finalUsers[u].id && finalUsers[u].team_id && finalUsers[u].is_bot == false && finalUsers[u].deleted == false && finalUsers[u].id !== 'USLACKBOT'){ 
+        if(u.id && u.team_id && u.is_bot == false && u.deleted == false && u.id !== 'USLACKBOT'){ 
 
-          yield sleep(300) //zzz
+          console.log('trying USER: ',u.name)
+          yield sleep(500) //zzz
 
           yield ims.ims.map(function * (i) {
 
             //we found the current DM channel for this user (also, fuck slack)
-            if(i.user == finalUsers[u].id){
+            if(i.user == u.id){
 
-              console.log('found DM ',finalUsers[u].name)
+              console.log('+')
 
               //get user history per DM channel to see if we spammed them already
               
@@ -4533,36 +4540,45 @@ function * spamTeam (team_name,type) {
                   console.log('MESSAGE DETECTED')
                   s = null
                   userHistory = null
-                  console.log('done with ',finalUsers[u].name)
+                  //console.log('done with ',u.name)
                   yield sleep(500) //zzz
                  // return
                 }else {
-                  console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
+                  console.log('SEND MESSAGE!!!! ',u.name)
                   //LETS MESSAGE THEM!!!
                   s = null
                   userHistory = null
-                  yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
-                  console.log('done with ',finalUsers[u].name)
+                  yield sendToUser(u.id,u.team_id,i.id)
+                  //console.log('done with ',u.name)
                   yield sleep(500) //zzz
                 }
 
               }else {
-                console.log('SEND MESSAGE!!!! ',finalUsers[u].name)
+                console.log('SEND MESSAGE!!!! ',u.name)
                 //LETS MESSAGE THEM!!!
                 s = null
                 userHistory = null
-                yield sendToUser(finalUsers[u].id,finalUsers[u].team_id,i.id)
-                console.log('done with ',finalUsers[u].name)
+                yield sendToUser(u.id,u.team_id,i.id)
+                //console.log('done with ',u.name)
                 yield sleep(500) //zzz
               }
+            }else {
+              console.log('-')
+              return
             }
           })  
 
-        } 
-        else {
-          console.log('user dead: ',finalUsers[u].name)
+        } else {
+          console.log('.')
+          return
         }
-      }
+
+
+      }))
+
+      // for (var u in finalUsers) {
+
+      // }
 
     }else {
       console.log('_ _ _ _ no team id_ _ _ _ ')
