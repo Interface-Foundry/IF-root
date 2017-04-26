@@ -22,7 +22,11 @@ class CSVDrop extends Component {
     constructor(props) {
       super(props)
       propz = props;
-      this.state = {files: '', checkedRows:[]};
+      this.state = {
+        files: '', 
+        checkedRows:[], 
+        ready: false
+      };
       this.onDrop = this.onDrop.bind(this);
       this.processCheckedRow = this.processCheckedRow.bind(this);
       this.processCheckedRows = this.processCheckedRows.bind(this);
@@ -45,7 +49,10 @@ class CSVDrop extends Component {
         const { data } = yield resp.json();
         if (!data || !data.items) throw new Error('Failed to load the items')
         else  {
-          self.setState({items: data.items})
+          self.setState({
+            items: data.items,
+            ready: true
+          })
         }
     })
   }
@@ -127,12 +134,14 @@ class CSVDrop extends Component {
       const {checkedRows} = self.state;
       return (
         <div>
+          {this.state.ready == true ?
           <div>
             <Dropzone multiple={false} accept='text/csv' onDrop={this.onDrop}>
               <div>Try dropping some files here, or click to select files to upload. </div>
             </Dropzone>
               {fname} uploaded.
-          </div>
+          </div> : 'Loading...'
+          }
           <div>
               <div>
                 { dataText ? <Button onClick={() => self.processCheckedRows(checkedRows)}>Confirm</Button> : ''}
