@@ -130,7 +130,6 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
     return;
   }
 
->>>>>>> 5f9672644e89d5a0e643084f9a3f8b2f7594b5d7
   if (uris.length) { //if the user copypasted an amazon uri directly
     console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {

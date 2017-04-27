@@ -90,7 +90,7 @@ exports.getAmazonItem = function * (item_identifier) {
  * @param {string} query search terms
  * @returns {[type]} amazon items
  */
-exports.searchAmazon = function * (query) {
+exports.searchAmazon = function * (query, index) {
   query = emoji(query);
   console.log('searching:', query)
   var amazonParams = {
@@ -98,7 +98,8 @@ exports.searchAmazon = function * (query) {
     Keywords: query,
     Condition: 'New',
     SearchIndex: 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations',
+    ItemPage: index || 1
   };
   var results = yield opHelper.execute('ItemSearch', amazonParams);
   if (!results || !results.result.ItemSearchResponse.Items.Item) {
@@ -279,12 +280,10 @@ exports.addAmazonItemToCart = function * (item, cart) {
 
   // check if we need to create anew cart
   if (!cart.amazon_hmac || !cart.amazon_cartid) {
-    let amazonCart = exports.createAmazonCart(item)
-    cart.amazon_cartid = amazonCart.CartId
-    cart.amazon_hmac = amazonCart.HMAC
-    yield cart.save()
+    return exports.createAmazonCart(item)
   }
 
+  var cart
   var quantity = item.quantity
 
   // if the item is already in the cart, then we want to increase the quantity
@@ -299,9 +298,9 @@ exports.addAmazonItemToCart = function * (item, cart) {
       'Item.1.CartItemId': itemAlreadyAdded.CartItemId,
       'Item.1.Quantity': quantity
     };
-    var cartModify = yield opHelper.execute('CartModify', amazonParams);
-    checkError(cartModify.result.CartModifyResponse.Cart)
-    return cartModify.result.CartModifyResponse.Cart;
+    cart = yield opHelper.execute('CartModify', amazonParams);
+    checkError(cart.result.CartModifyResponse.Cart)
+    return cart.result.CartModifyResponse.Cart;
   } else {
     var amazonParams = {
       'AssociateTag': associateTag,
@@ -310,9 +309,9 @@ exports.addAmazonItemToCart = function * (item, cart) {
       'Item.1.ASIN': item.asin,
       'Item.1.Quantity': quantity
     };
-    var cartAdd = yield opHelper.execute('CartAdd', amazonParams);
-    checkError(cartAdd.result.CartAddResponse.Cart)
-    return cartAdd.result.CartAddResponse.Cart;
+    cart = yield opHelper.execute('CartAdd', amazonParams);
+    checkError(cart.result.CartAddResponse.Cart)
+    return cart.result.CartAddResponse.Cart;
   }
 };
 
@@ -361,31 +360,12 @@ exports.syncAmazon = function * (cart) {
     throw new Error('can only sync carts that have amazon items, and items must be populated')
   }
 
-  // check if we need to create a new cart. if so, no need to sync, just create
+  // check if we need to create a new cart
   if (!cart.amazon_cartid || !cart.amazon_hmac) {
-    console.log('creating new cart with all the items')
-    var cartAddAmazonParams = {
-      'AssociateTag': associateTag,
-      'CartId': cart.amazon_cartid,
-      'HMAC': cart.amazon_hmac
-    };
-    cart.items.map((item, index) => {
-      var key = 'Item.' + (index + 1) + '.'
-      cartAddAmazonParams[key + 'ASIN'] = item.asin
-      cartAddAmazonParams[key + 'Quantity'] = item.quantity
-    })
-
-    var res = yield opHelper.execute('CartCreate', cartAddAmazonParams);
-    checkError(res.result.CartCreateResponse.Cart)
-    returnValue = res.result.CartCreateResponse.Cart
-    cart.amazon_cartid = returnValue.CartId
-    cart.amazon_hmac = returnValue.HMAC
-    yield cart.save()
-    return returnValue
+    var amazonCart = yield exports.createAmazonCart(cart.items[0])
+  } else {
+    amazonCart = yield exports.getAmazonCart(cart)
   }
-
-  // amazon cart already existed for this cart, so proceed to sync items
-  var amazonCart = yield exports.getAmazonCart(cart)
 
   // Generate two requests and run them through amazon:
   //  - a CartAdd request for the the items missing
@@ -436,6 +416,7 @@ exports.syncAmazon = function * (cart) {
   // from one of the modification requests below
   var returnValue = amazonCart
   if (missingItems.length > 0) {
+    console.log('Inside Amazon Params', cartAddAmazonParams)
     var res = yield opHelper.execute('CartAdd', cartAddAmazonParams);
     checkError(res.result.CartAddResponse.Cart)
     returnValue = res.result.CartAddResponse.Cart
@@ -444,10 +425,6 @@ exports.syncAmazon = function * (cart) {
     res = yield opHelper.execute('CartModify', cartModifyAmazonParams);
     checkError(res.result.CartModifyResponse.Cart)
     returnValue = res.result.CartModifyResponse.Cart
-  }
-
-  if (!returnValue.PurchaseURL) {
-    returnValue.PurchaseURL = amazonCart.PurchaseURL
   }
 
   return returnValue

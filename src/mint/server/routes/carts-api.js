@@ -342,7 +342,8 @@ module.exports = function (router) {
 
 
   /**
-   * @api {get} /api/itempreview?q=:q Item Preview
+   * @api {get} /api/itempreview?q=:q/ Item Preview
+   * optional "index" qs parameter -> page of amazon search results
    * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
    * @apiGroup Carts
    * @apiParam {String} :q either a url, asin, or search text
@@ -372,7 +373,7 @@ module.exports = function (router) {
     } else {
       // search query
       // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-      var item = yield amazon.searchAmazon(q);
+      var item = yield amazon.searchAmazon(q, req.query.index);
     }
     res.send(item)
   }))
@@ -406,7 +407,7 @@ module.exports = function (router) {
     // make sure the amazon cart is in sync with the cart in our database
     var amazonCart = yield amazon.syncAmazon(cart)
 
-    //send receipt email TODO
+    //send receipt email
     logging.info('creating receipt...')
     var receipt = yield db.Emails.create({
       recipients: req.UserSession.user_account.email_address,
