@@ -21,18 +21,18 @@
   transform: rotate(0.5turn);
 }
 
-.Select-placeholder {
-  background: $color-blue;
-  color: white;
-  .Select-control {
-    border-color: white;
-  }
-}
-
 .item__dropdowns {
   text-align: center;
-  padding: $padding $padding*2 0;
-  background: linear-gradient(to bottom, rgba(252, 252, 249, 0) 0%, $kip-primary-color 100%);
+  padding: 0 $padding*2;
+  &:before {
+    background: linear-gradient(to top, $kip-primary-color 0%, rgba($kip-primary-color, 0) 100%);
+    position: relative;
+    content: '';
+    display: block;
+    height: 10px;
+    top: -10px;
+    width: 100%;
+  }
   .item__dropdown {
     text-align: left;
     padding: 3px 0;
@@ -43,12 +43,13 @@
       border-width: 2px;
       display: flex;
       .Select-multi-value-wrapper {
-        width: 100%
+        width: 100%;
       }
       .Select-arrow-zone {
         display: flex;
         flex-direction: column;
         justify-content: center;
+        align-items: end;
         height: 100%;
         .Select-arrow {
           border: none;
@@ -80,6 +81,16 @@
       }
     }
     .Select-value {
+      &:after {
+        content: '';
+        display: block;
+        position: absolute;
+        width: 60px;
+        right: 0;
+        height: 40px;
+        top: 0;
+        background: linear-gradient(to right, rgba($kip-primary-color, 0) 0%, $kip-primary-color 65%, $kip-primary-color 100%);
+      }
       .Select-value-label {
         color: $color-blue;
       }
@@ -87,6 +98,11 @@
     .Select-placeholder {
       display: flex;
       align-items: center;
+      background: $color-blue;
+      color: white;
+      .Select-control {
+        border-color: white;
+      }
     }
     .Select-clear-zone {
       display: none;
@@ -96,10 +112,11 @@
       flex-direction: row;
       align-items: center;
       height: 40px;
+      border-bottom: 1px solid $border-color-light;
       .dropdown__option__image {
-        width: 28px;
-        height: 28px;
-        margin-right: 15px;
+        min-width: 28px;
+        min-height: 28px;
+        margin-right: 5px;
         background-size: contain;
         background-repeat: no-repeat;
       }

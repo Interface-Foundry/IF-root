@@ -25,8 +25,8 @@
       .fadeover {
         height: 40px;
         position: relative;
-        background: linear-gradient(to top, $kip-primary-color 0%, rgba(255, 255, 255, 0) 100%);
-        margin: -35px 0 0 0;
+        background: linear-gradient(to top, $kip-primary-color 0%, rgba($kip-primary-color, 0) 100%);
+        margin-top: -35px;
       }
       a {
         display: block;
