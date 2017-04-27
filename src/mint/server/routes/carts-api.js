@@ -419,9 +419,12 @@ module.exports = function (router) {
     var userItems = {}; //organize items according to which user added them
     var items= []
     var users = []
+    var total = 0;
     cart.items.map(function (item) {
       if (!userItems[item.added_by]) userItems[item.added_by] = [];
       userItems[item.added_by].push(item);
+      // logging.info('item', item) //undefined
+      total += Number(item.price);
     });
 
     for (var k in userItems) {
@@ -434,7 +437,8 @@ module.exports = function (router) {
       baseUrl: process.env.BASEURL || 'http://mint-dev.kipthis.com',
       id: cart.id,
       items: items,
-      users: users
+      users: users,
+      total: total
     })
 
     yield receipt.send();
