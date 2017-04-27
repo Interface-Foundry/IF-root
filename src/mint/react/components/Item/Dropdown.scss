@@ -17,22 +17,58 @@
   border-bottom-left-radius: 5px !important;
 }
 
+.is-open .Select-arrow {
+  transform: rotate(0.5turn);
+}
+
+.Select-placeholder {
+  background: $color-blue;
+  color: white;
+  .Select-control {
+    border-color: white;
+  }
+}
+
 .item__dropdowns {
   text-align: center;
   padding: 0 20px;
   background: linear-gradient(to bottom, rgba(252, 252, 249, 0) 0%, $kip-primary-color 100%);
   .item__dropdown {
     text-align: left;
-    background-color: $kip-primary-color;
     padding: 3px 0;
     .Select-control {
+      background-color: $kip-primary-color;
       height: 40px;
       border-color: $color-blue;
       border-width: 2px;
+      display: flex;
+      .Select-multi-value-wrapper {
+        width: 100%
+      }
       .Select-arrow-zone {
-        padding-top: 12px; //center the arrow
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
         .Select-arrow {
-          border-color: $color-blue transparent transparent;
+          border: none;
+          padding: 0 7px;
+          &:before, &:after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            height: 5px;
+            background: $color-blue;
+          }
+          &:before {
+            left: 0;
+            width: 51%;
+            transform: skew(0deg, 40deg);
+          }
+          &:after {
+            width: 50%;
+            transform: skew(0deg, -40deg);
+          }
         }
       }
     }
