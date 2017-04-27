@@ -36,7 +36,7 @@ require('./carts-api')(router)
 require('./users-api')(router)
 
 // Koh Dummy test eail
-// curl -i -X GET http://127.0.0.1:3000/api/cart/36d4750ea2b3/test/komangwluce@gmail.com
+// curl -i -X GET http://127.0.0.1:3000/api/cart/4ba2030df526/test/komangwluce@gmail.com
 const dealsDb = require('../deals/deals')
 router.get('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
   const email_id = req.params.email_id;
