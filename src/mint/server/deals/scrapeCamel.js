@@ -79,8 +79,10 @@ var getAmazon = function * (asin) {
   // logging.info('is this a real category?', item.cat);
   item.info = amazon_item.ItemAttributes.Feature;
   item.images = {};
-  item.images.thumbnail = amazon_item_proper.thumbnail_url;
-  item.images.main_image = amazon_item_proper.main_image_url;
+  if (amazon_item_proper) {
+    item.images.thumbnail = amazon_item_proper.thumbnail_url;
+    item.images.main_image = amazon_item_proper.main_image_url;
+  }
   // if (amazon_test[0].reviews) item.reviews = amazon_test[0].reviews;
   // logging.info('got this:', item);
   return item;
