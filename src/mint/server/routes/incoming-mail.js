@@ -54,6 +54,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   }
 
   var searchResults = [];
+  var searchTerms = [];
   if (text && text.length) {
     yield text.map(function * (p) {
       if (p.length) {
@@ -61,8 +62,10 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
         try {
           var itemResults = yield amazon.searchAmazon(p);
 
-          // console.log('got a result from amazon search', itemResults)
-          if (itemResults) searchResults.push(itemResults);
+          if (itemResults) {
+            searchResults.push(itemResults);
+            searchTerms.push(p);
+          }
         }
         catch (err) {
           logging.error(err);
@@ -122,7 +125,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   if (uris.length || searchResults.length) {
     // if (!searchResults) searchResults = [];
     // logging.info('searchResults', searchResults);
-    yield utils.sendConfirmationEmail(email, req.body.subject, uris, searchResults, cart);
+    yield utils.sendConfirmationEmail(email, req.body.subject, uris, searchResults, searchTerms, cart);
   }
 
   // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')
