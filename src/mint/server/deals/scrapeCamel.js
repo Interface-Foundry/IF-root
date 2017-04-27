@@ -164,9 +164,8 @@ var scrapeCamel = function * () {
       price: prices[i].new,
       previousPrice: prices[i].old,
       category: amazon.category,
-      small: (amazon.images.small || null),
-      medium: (amazon.images.medium || null),
-      large: (amazon.images.large || null),
+      thumbnail: (amazon.images.thumbnail || null),
+      main_image: (amazon.images.main_image || null),
       url: amazon.url
     });
 
