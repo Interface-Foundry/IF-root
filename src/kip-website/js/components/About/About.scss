@@ -22,7 +22,9 @@
 	.about__details {
 		position: relative;
 		padding: $padding*2 0;
-		border: 1px dashed $thirdColor;
+		background: mix(#fcfcf9, $thirdColor, 97%);
+		border: 1px solid $thirdColor;
+	    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 
 		&:after {
 			content: '';
@@ -50,8 +52,10 @@
 			border: 0;
 			font-weight: bold;
 			border-radius: $padding/2;
-			background: $secondaryColor;
+			background: $thirdColor;
+			color: #fcfcf9;
 			padding: $padding $padding*2;
+		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 			&:focus {
 				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 			}

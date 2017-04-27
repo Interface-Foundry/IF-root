@@ -82,7 +82,7 @@ p {
 	display: inline-block;
 	color: lighten($bgColor, 5%);
 	font-size: 12px;
-	animation: blink 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+	animation: blink 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 	@media only screen and (max-width: 600px) {
 		margin-left: 0;
 	}
@@ -92,7 +92,7 @@ p {
 	display: inline-block;
 	color: lighten($bgColor, 5%);
 	font-size: 12px;
-	animation: blink 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+	animation: blink 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 	@media only screen and (max-width: 600px) {
 		margin-left: 0;
 	}
