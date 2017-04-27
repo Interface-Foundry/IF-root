@@ -76,3 +76,22 @@ export function logout() {
     }
   };
 }
+
+export function postFeedback(feedback) {
+  return async dispatch => {
+    try {
+      const response = await fetch(`/api/feedback`, {
+        'method': 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        'body': JSON.stringify(feedback)
+      });
+      return dispatch(receiveFeedback(await response.json()));
+    } catch (e) {
+      throw e;
+    }
+  };
+}

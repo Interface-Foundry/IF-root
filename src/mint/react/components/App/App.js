@@ -14,9 +14,6 @@ import Footer from './Footer';
 import ReactGA from 'react-ga';
 
 export default class App extends Component {
-  state = {
-    sidenav: false
-  }
 
   static propTypes = {
     cart_id: PropTypes.string.isRequired,
@@ -32,6 +29,10 @@ export default class App extends Component {
     updateCart: PropTypes.func.isRequired,
     location: PropTypes.object.isRequired,
     session_id: PropTypes.string
+  }
+
+  state = {
+    sidenav: false
   }
 
   _logPageView(path, userId) {
