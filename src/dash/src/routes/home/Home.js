@@ -130,11 +130,11 @@ const getCurrentGraph = ({ data }) => {
     return <p> Loading... </p>
   }
 
-  if (data.deliveries) {
+  if (data.variables.view.toLowerCase() === 'cafe') {
     return (<CafeGraph data={data.deliveries} />);
   }
-  if (data.carts) {
-    return (<CartGraph data={data.carts} />)
+  if (data.variables.view.toLowerCase() === 'store') {
+    return (<CartGraph data={data.carts.filter(c => c.items.length > 0)} />)
   }
 };
 
@@ -148,7 +148,7 @@ const getCurrentTable = ({data}) => {
     return (<CafeTable data={data.deliveries} purchased={data.variables.purchased}/>);
   }
   if (data.variables.view.toLowerCase() === 'store') {
-    return (<CartTable data={data.carts} purchased={data.variables.purchased} />);
+    return (<CartTable data={data.carts.filter(c => c.items.length > 0)} purchased={data.variables.purchased} />);
   }
 };
 

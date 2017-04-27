@@ -157,6 +157,10 @@ app.post('/upload', upload.single('csv_file'), function(req, res, next){
   });
 });
 
+app.get('/health', function (req, res) {
+  res.sendStatus(200)
+})
+
 //
 // Error handling
 // -----------------------------------------------------------------------------

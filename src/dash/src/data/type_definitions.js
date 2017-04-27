@@ -24,9 +24,8 @@ type Cart {
   cart_items: JSON
   cart_total: String
   item_count: Int
-  items_done: Boolean
   # Foreign refs
-  items: [Item]
+  items(purchased: Boolean): [Item]
   team: Slackbot
 }
 type Chatuser {
@@ -192,7 +191,7 @@ type Slackbot {
   # Foreign refs
   carts: [Cart]
   members: [Chatuser]
-  deliveries: [Delivery]
+  deliveries(limit: Int=10): [Delivery]
 }
 type User {
   _id: String!
@@ -216,7 +215,6 @@ type Query {
     start_date: String
     end_date: String
     _id: String
-    purchased: Boolean
   ): [Cart]
   deliveries(
     team_id: String

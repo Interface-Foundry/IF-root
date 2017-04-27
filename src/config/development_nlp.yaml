@@ -1,6 +1,6 @@
 env: development_nlp
 mongodb:
-  url: mongodb://localhost:27017/foundry
+  url: mongodb://localhost:27017/prod_latest
 picstitch: http://0.0.0.0:5000
 nlp: http://dev-parser.kipthis.com
 nlp_rnn: http://dev-rnn.kipthis.com

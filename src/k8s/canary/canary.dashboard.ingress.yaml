@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: canary
+  name: dashboard
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "97.126.17.173"
+spec:
+  rules:
+  - host: dashboard.kipthis.com
+    http:
+      paths:
+      - backend:
+          serviceName: dashboard
+          servicePort: 80
