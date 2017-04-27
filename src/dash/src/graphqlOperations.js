@@ -3,13 +3,13 @@ import { gql } from 'react-apollo';
 
 export const cartsQuery = gql`
 query ($startDate: String!, $endDate: String!, $purchased: Boolean) {
-  carts(limit: 1000, start_date: $startDate, end_date: $endDate, purchased: $purchased) {
+  carts(limit: 1000, start_date: $startDate, end_date: $endDate) {
     created_date,
     team{team_name},
     type,
     item_count,
     cart_total,
-    items {title, purchased}
+    items(purchased: $purchased) {title, purchased}
   }
 }`;
 
