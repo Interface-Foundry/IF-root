@@ -26,6 +26,34 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   if (email[0] === '<') email = email.slice(1, email.length-1);
   var user = yield db.UserAccounts.findOrCreate({email_address: email});
 
+  //get cart id
+  var html = req.body.html;
+  var cart_id = /name="cartId" value="(.*)"/.exec(html);
+  if (cart_id) cart_id = cart_id[1];
+  console.log('cart_id', cart_id)
+  console.log('gonna query for the cart')
+  var cart = yield db.Carts.findOne({id: cart_id}).populate('items');
+  if (!cart) { //if the cart id isn't supplied, try to find one
+    console.log('oh, no, no cart id')
+    const memberCarts = yield db.carts_members__user_accounts_id.find({
+      user_accounts_id: user.id
+    })
+    const memberCartsIds = memberCarts.map( c => c.carts_members )
+
+    var cart = yield db.Carts.findOne({
+      or: [
+        { leader: user.id },
+        { id: memberCartsIds }
+      ]
+    }).populate('items').populate('leader').populate('members')
+  }
+
+  if (!cart) {
+    logging.error('could not find cart');
+    res.sendStatus(202);
+    return;
+  }
+
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
   if (!req.body.text || ! req.body.html) {
     logging.info('no email body');
@@ -72,34 +100,6 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
         }
       }
     })
-  }
-
-  //get cart id
-  var html = req.body.html;
-  var cart_id = /name="cartId" value="(.*)"/.exec(html);
-  if (cart_id) cart_id = cart_id[1];
-  console.log('cart_id', cart_id)
-  console.log('gonna query for the cart')
-  var cart = yield db.Carts.findOne({id: cart_id}).populate('items');
-  if (!cart) { //if the cart id isn't supplied, try to find one
-    console.log('oh, no, no cart id')
-    const memberCarts = yield db.carts_members__user_accounts_id.find({
-      user_accounts_id: user.id
-    })
-    const memberCartsIds = memberCarts.map( c => c.carts_members )
-
-    var cart = yield db.Carts.findOne({
-      or: [
-        { leader: user.id },
-        { id: memberCartsIds }
-      ]
-    }).populate('items').populate('leader').populate('members')
-  }
-
-  if (!cart) {
-    logging.error('could not find cart');
-    res.sendStatus(202);
-    return;
   }
 
   if (uris.length) { //if the user copypasted an amazon uri directly

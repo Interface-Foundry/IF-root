@@ -386,7 +386,7 @@ module.exports = function (router) {
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_account.id')) {
-      throw new Error('Unauthorized')
+      throw new Error('Unauthorized');
     }
 
     // this will be handy later now that we know it exists
@@ -405,6 +405,38 @@ module.exports = function (router) {
 
     // make sure the amazon cart is in sync with the cart in our database
     var amazonCart = yield amazon.syncAmazon(cart)
+
+    //send receipt email TODO
+    logging.info('creating receipt...')
+    var receipt = yield db.Emails.create({
+      recipients: req.UserSession.user_account.email_address,
+      sender: 'hello@kip.ai',
+      subject: 'Your Kip Order',
+      template_name: 'receipt'
+    });
+
+    var userItems = {}; //organize items according to which user added them
+    var items= []
+    var users = []
+    cart.items.map(function (item) {
+      if (!userItems[item.added_by]) userItems[item.added_by] = [];
+      userItems[item.added_by].push(item);
+    });
+
+    for (var k in userItems) {
+      users.push(k);
+      items.push(userItems[k]);
+    }
+
+    yield receipt.template('receipt', {
+      baseUrl: process.env.BASEURL || 'http://mint-dev.kipthis.com',
+      id: cart.id,
+      items: items,
+      users: users
+    })
+
+    yield receipt.send();
+    logging.info('receipt sent')
 
     // redirect to the cart url
     res.redirect(amazonCart.PurchaseURL)
