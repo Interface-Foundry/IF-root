@@ -43,11 +43,11 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
 
   var text = utils.getTerms(bodyText, all_uris);
   if (all_uris) var uris = all_uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
-  else var uris = null;
+  else var uris = [];
   // console.log('URIS', uris)
 
   //business logic starts here
-  if (!uris && all_uris) {
+  if (!uris.length && all_uris) {
     //send error email
     console.log('gonna send an error email');
     yield utils.sendErrorEmail(email);
@@ -99,7 +99,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
     return;
   }
 
-  if (uris && uris.length) { //if the user copypasted an amazon uri directly
+  if (uris.length) { //if the user copypasted an amazon uri directly
     console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {
       return yield amazonScraper.scrapeUrl(uri);
@@ -118,9 +118,9 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   }
   else console.log('no amazon uris')
 
-  if (uris || searchResults) {
-    if (!uris) uris = [];
-    if (!searchResults) searchResults = [];
+  // if (!uris) uris = [];
+  if (uris.length || searchResults.length) {
+    // if (!searchResults) searchResults = [];
     // logging.info('searchResults', searchResults);
     yield utils.sendConfirmationEmail(email, req.body.subject, uris, searchResults, cart);
   }

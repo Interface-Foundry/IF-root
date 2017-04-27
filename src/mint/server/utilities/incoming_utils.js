@@ -29,6 +29,7 @@ var sendErrorEmail = function * (email) {
 var sendConfirmationEmail = function * (email, subject, uris, searchResults, cart) {
   //create confirmation email
   console.log('sendConfirmationEmail called')
+  logging.info('cart id', cart.id)
   var confirmation = yield db.Emails.create({
     recipients: email,
     sender: 'hello@kip.ai',
@@ -46,8 +47,8 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults, car
   //add template and send confirmation email
   yield confirmation.template('item_add_confirmation', {
     baseUrl: 'https://cf99edcc.ngrok.io',
-    id: '7a43d85c928f',
-    items: cart,
+    id: cart.id,
+    items: items,
     searchResults: searchResults
   })
   console.log('about to send the email')
