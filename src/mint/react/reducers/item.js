@@ -45,7 +45,7 @@ export default function item(state = {}, action) {
   case SELECT_DEAL:
     return {
       ...action.deal
-    }
+    };
   default:
     return state;
   }

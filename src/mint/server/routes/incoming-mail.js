@@ -102,6 +102,35 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
     })
   }
 
+  //get cart id
+  var html = req.body.html;
+  var cart_id = /name="cartId" value="(.*)"/.exec(html);
+  if (cart_id) cart_id = cart_id[1];
+  console.log('cart_id', cart_id)
+  console.log('gonna query for the cart')
+  var cart = yield db.Carts.findOne({id: cart_id}).populate('items');
+  if (!cart) { //if the cart id isn't supplied, try to find one
+    console.log('oh, no, no cart id')
+    const memberCarts = yield db.carts_members__user_accounts_id.find({
+      user_accounts_id: user.id
+    })
+    const memberCartsIds = memberCarts.map( c => c.carts_members )
+
+    var cart = yield db.Carts.findOne({
+      or: [
+        { leader: user.id },
+        { id: memberCartsIds }
+      ]
+    }).populate('items').populate('leader').populate('members')
+  }
+
+  if (!cart) {
+    logging.error('could not find cart');
+    res.sendStatus(202);
+    return;
+  }
+
+>>>>>>> 5f9672644e89d5a0e643084f9a3f8b2f7594b5d7
   if (uris.length) { //if the user copypasted an amazon uri directly
     console.log('uris', uris)
     var url_items = yield uris.map(function * (uri) {

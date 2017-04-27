@@ -36,16 +36,38 @@ module.exports = {
       loader: 'json-loader'
     }, {
       test: /\.css$/,
-      use: ['style-loader', 'css-loader']
+      exclude: /node_modules/,
+      use: [{
+          loader: 'style-loader',
+        },
+        {
+          loader: 'css-loader',
+          options: {
+            importLoaders: 1,
+          }
+        },
+        {
+          loader: 'postcss-loader'
+        }
+      ]
     }, {
       test: /\.scss$|\.sass$/,
+      exclude: /node_modules/,
       use: [{
-        loader: 'style-loader' // creates style nodes from JS strings
-      }, {
-        loader: 'css-loader' // translates CSS into CommonJS
-      }, {
-        loader: 'sass-loader' // compiles Sass to CSS
-      }]
+          loader: 'style-loader',
+        },
+        {
+          loader: 'css-loader',
+          options: {
+            importLoaders: 1,
+          }
+        },
+        {
+          loader: 'postcss-loader'
+        }, {
+          loader: 'sass-loader'
+        }
+      ]
     }, {
       test: /\.svg$/,
       loader: 'url-loader?limit=10000&mimetype=image/svg+xml'

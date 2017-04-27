@@ -15,12 +15,12 @@ export const selectDeal = (selectedIndex, deal) => ({
   type: SELECT_DEAL,
   deal,
   selectedIndex
-})
+});
 
 export const removeDeal = (selectedIndex) => ({
   type: REMOVE_DEAL,
   selectedIndex
-})
+});
 
 export function fetchDeals() {
   return async function (dispatch) {

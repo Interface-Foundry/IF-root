@@ -9,3 +9,4 @@ export DealsContainer from './DealsContainer';
 export ItemContainer from './ItemContainer';
 export EditCartContainer from './EditCartContainer';
 export SettingsContainer from './SettingsContainer';
+export FeedbackContainer from './FeedbackContainer';

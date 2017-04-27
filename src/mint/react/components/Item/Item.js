@@ -41,7 +41,7 @@ export default class Item extends Component {
 
   componentWillMount() {
     const {
-      props: { item_id, amazon_id, previewAmazonItem, previewItem, item, type, items, index, setSearchIndex, fetchDeals }
+      props: { item_id, amazon_id, previewAmazonItem, previewItem, type, items, index, setSearchIndex, fetchDeals }
     } = this;
     // only update item if there isn't one
     if (item_id) previewItem(item_id);
@@ -114,7 +114,7 @@ export default class Item extends Component {
       determineNav,
       props,
       state: { animation },
-      props: { index, type, items, item, nextSearch, prevSearch, item_id, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, search, options } }
+      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, search, options } }
     } = this,
     amazonLink = `/api/item/${item.id}/clickthrough`;
     const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
@@ -134,7 +134,7 @@ export default class Item extends Component {
                 onTouchEnd={ () => determineNav() }
             >
               <div className='item__view__image image row'
-                  style={ { backgroundImage: `url(${main_image_url})`, height: 150 } }>
+                  style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
               </div>
               <div className='item__view__atts'>
                 <p>{name}</p>

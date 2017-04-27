@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Select from 'react-select';
-import './Dropdown.scss'
+import './Dropdown.scss';
 
 export default class ItemVariationSelector extends Component {
   constructor(props) {
@@ -83,7 +83,7 @@ class Dropdown extends Component {
   }
 
   updatePage(choice) {
-    const { replace, cart_id, index } = this.props;
+    const { replace, cart_id } = this.props;
     replace(`/cart/${cart_id}/m/variant/0/${choice.asin}`);
   }
 
@@ -103,6 +103,8 @@ class Dropdown extends Component {
             valueKey={'asin'}
             optionComponent={AmazonOption}
             valueComponent={AmazonValue}
+            autoBlur={true}
+            placeholder={`Choose ${name} >`.toUpperCase()}
           />
         </div>
       </div>
@@ -111,10 +113,13 @@ class Dropdown extends Component {
 }
 
 class AmazonValue extends Component {
+  static propTypes = {
+    value: PropTypes.object,
+    children: PropTypes.string,
+  }
   render() {
-    const { value, children, className } = this.props;
+    const { value, children } = this.props;
     return (
-
       <div className="Select-value" title={value.name}>
         <div className="Select-value-label dropdown__option">
           <div className='dropdown__option__image' style={{backgroundImage: `url(${value.thumbnail_url})`}}/>
@@ -136,22 +141,28 @@ class AmazonOption extends Component {
   static propTypes = {
     className: PropTypes.string.isRequired,
     option: PropTypes.object.isRequired,
-    children: PropTypes.string.isRequired
+    children: PropTypes.string.isRequired,
+    onSelect: PropTypes.func.isRequired,
+    onFocus: PropTypes.func.isRequired,
+    isFocused: PropTypes.bool.isRequired,
   }
 
   handleMouseDown(event) {
+    const { onSelect } = this.props;
     event.preventDefault();
     event.stopPropagation();
-    this.props.onSelect(this.props.option, event);
+    onSelect(this.props.option, event);
   }
 
   handleMouseEnter(event) {
-    this.props.onFocus(this.props.option, event);
+    const { onFocus } = this.props;
+    onFocus(this.props.option, event);
   }
 
   handleMouseMove(event) {
-    if (this.props.isFocused) return;
-    this.props.onFocus(this.props.option, event);
+    const { isFocused, onFocus, option } = this.props;
+    if (isFocused) return;
+    onFocus(option, event);
   }
 
   render() {
