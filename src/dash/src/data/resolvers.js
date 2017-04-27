@@ -176,7 +176,7 @@ const Resolvers = {
   Delivery: {
     type: () => 'slack',
     cart_total: (obj) => {
-      if (obj.cart.length > 0 && _.get(obj, 'calculated_amount')) {
+      if (obj.calculated_amount) {
         return `$${Number(obj.calculated_amount).toFixed(2)}`;
       }
       return '$0.00';
@@ -192,7 +192,9 @@ const Resolvers = {
       }
       return cartLength;
     },
-    chosen_restaurant: (obj) => _.get(obj, 'chosen_restaurant.name', undefined),
+    chosen_restaurant: (obj) => {
+      return _.get(obj, 'chosen_restaurant.name')
+    },
     items: async (obj, args, context, info) => {
       if (!obj.menu) {
         return [];
@@ -223,8 +225,7 @@ const Resolvers = {
   },
 
   Cart: {
-    created_date: (obj) => new Date(obj.created_date).toDateString(),
-    type: () => 'slack',
+
 
     cart_total: (obj) => {
       if (_.get(obj, 'amazon.SubTotal')) {
@@ -232,7 +233,7 @@ const Resolvers = {
       }
       return 'No Cart Subtotal';
     },
-
+    created_date: (obj) => new Date(obj.created_date).toDateString(),
     items: async ({ _id }, args) => {
       // possible to get the value per item if needed using
       const itemArgs = {
@@ -245,12 +246,16 @@ const Resolvers = {
       return items;
     },
     item_count: (obj) => {
-      return obj.items.length;
+      if (obj.items) {
+        return obj.items.length;
+      }
+      return 0;
     },
     team: async (obj) => {
       let team = await Slackbots.findOne({team_id: obj.slack_id});
       return team;
     },
+    type: () => 'slack',
   },
 
   Chatuser: {
