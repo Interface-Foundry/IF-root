@@ -28,11 +28,13 @@ function transformToArray(data, dateVariable) {
       } else {
         prev.item_count += curr.item_count;
       }
+      prev.cart_total = Number(curr.cart_total.replace(/[^0-9\.]+/g,""));
       prev.teams.push(_.get(curr, 'team.team_name'))
       return prev
     }, {
       date: d,
       item_count: 0,
+      cart_total: 0,
       teams: []
     })
   })
@@ -42,7 +44,7 @@ function transformToArray(data, dateVariable) {
 const CafeGraph = ({data}) => {
   data = transformToArray(data, 'time_started');
   return (
-    <Panel header={<span><i className="fa fa-line-chart " />Purchased Carts</span>}>
+    <Panel header={<span><i className="fa fa-line-chart " />Cafe Carts</span>}>
       <div className="resizable">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
@@ -62,15 +64,17 @@ const CafeGraph = ({data}) => {
 const CartGraph = ({data}) => {
   data = transformToArray(data, 'created_date');
   return (
-    <Panel header={<span><i className="fa fa-line-chart " />Purchased Carts</span>}>
+    <Panel header={<span><i className="fa fa-line-chart " />Store Carts</span>}>
       <div className="resizable">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
             <XAxis dataKey="date" />
-            <YAxis />
+            <YAxis yAxisId="left" orientation="left" stroke="#82ca9d"/>
+            <YAxis yAxisId="right" orientation="right" stroke="#ffc658"/>
             <CartesianGrid stroke="#ccc" />
           <Tooltip />
-          <Line type="monotone" dataKey="item_count" stroke="#82ca9d" fill="#82ca9d" />
+          <Line type="monotone" yAxisId="left" dataKey="item_count" stroke="#82ca9d" fill="#82ca9d" />
+          <Line type="monotone" yAxisId="right" dataKey="cart_total" stroke="#ffc658" fill="#ffc658" />
           </LineChart>
         </ResponsiveContainer>
       </div>

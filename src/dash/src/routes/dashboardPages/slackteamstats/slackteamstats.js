@@ -17,6 +17,7 @@ import vagueTime from 'vague-time';
 import moment from 'moment';
 import _ from 'lodash';
 import { teamCartsQuery } from '../../../graphqlOperations';
+import { CartGraph, CafeGraph } from '../../../components/Graphs';
 
 const title = ' Team Stats';
 
@@ -142,6 +143,9 @@ class displayTeamStats extends Component {
       },
     });
     const ViewWithData = gqlWrapper(getCurrentData);
+    const TableWithData = gqlWrapper(getCurrentTable);
+    const GraphWithData = gqlWrapper(getCurrentGraph);
+
 
 //Replace 'kip' with currentTeam.team_name
     return (
@@ -160,11 +164,51 @@ class displayTeamStats extends Component {
               End Date: <DatePicker selected={self.state.endDate} onChange={self.changeEnd} />
           </div>
           <ViewWithData />
+          <GraphWithData />
+          <TableWithData />
       </div>
     )
   }
  
 }
+
+  const getCurrentGraph = ({ data }) => {
+    if (data.loading) {
+      return <p> Loading... </p>
+    }
+    
+    if(data.teams[0].carts){
+      var team_carts = data.teams[0].carts;
+    } else if(data.teams[0].deliveries){
+      var team_deliveries = data.teams[0].deliveries;
+    }
+    return (
+      <div>
+      <div><h2>Graph: </h2> {data.teams[0].carts ? <CartGraph data={data.teams[0].carts} /> : 'No graphs for deliveries yet. '}</div>
+      </div>
+    )
+  };
+
+  const getCurrentTable = ({ data }) => {
+    if (data.loading) {
+      return <p> Loading... </p>
+    }
+    var team_members = data.teams[0].members;
+    var team_channels = data.teams[0].meta.all_channels;
+
+    if(data.teams[0].carts){
+      var team_carts = data.teams[0].carts;
+    } else if(data.teams[0].deliveries){
+      var team_deliveries = data.teams[0].deliveries;
+    }
+    
+    return (
+      <div>
+      <div><h2>Carts:</h2> {data.teams[0].carts ? listCarts(team_carts, team_members) : listDeliveries(team_deliveries)}</div>
+      </div>
+    )
+  };
+
 
   const getCurrentData = ({ data }) => {
     if (data.loading) {
@@ -185,7 +229,6 @@ class displayTeamStats extends Component {
       <div><h2>Admins:</h2> {listTeamAdmins(team_members)}</div>
       <div><h2>Members:</h2> {listTeamMembers(team_members)} </div>
       <div><h2>Channels:</h2> {listTeamChannels(team_channels)}</div>
-      <div><h2>Carts:</h2> {data.teams[0].carts ? listCarts(team_carts, team_members) : listDeliveries(team_deliveries)}</div>
       </div>
     )
   };
