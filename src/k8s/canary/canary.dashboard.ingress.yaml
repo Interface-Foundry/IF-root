@@ -4,7 +4,7 @@ metadata:
   namespace: canary
   name: dashboard
   annotations:
-    ingress.kubernetes.io/whitelist-source-range: "97.126.17.175"
+    ingress.kubernetes.io/whitelist-source-range: "97.126.17.173"
 spec:
   rules:
   - host: dashboard.kipthis.com

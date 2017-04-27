@@ -18,9 +18,9 @@ spec:
           value: dashboard
         - name: CONFIG_DIR
           value: /src/config
-        image: gcr.io/kip-styles/dashboard:k8s
+        image: gcr.io/kip-styles/dashboard:latest
         imagePullPolicy: Always
-        name: cafe
+        name: dashboard
         ports:
         - containerPort: 3000
           protocol: TCP
@@ -30,7 +30,6 @@ spec:
             port: 3000
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1
 kind: Service

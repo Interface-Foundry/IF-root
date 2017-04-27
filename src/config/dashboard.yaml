@@ -1,6 +1,6 @@
 env: dashboard
 mongodb:
-  url: mongodb://10.142.0.13:27017/foundry
+  url: mongodb://35.185.105.107:27017/foundry
 logging:
   console:
     level: silly
