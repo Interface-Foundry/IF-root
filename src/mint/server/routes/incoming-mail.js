@@ -122,7 +122,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
     if (!uris) uris = [];
     if (!searchResults) searchResults = [];
     // logging.info('searchResults', searchResults);
-    yield utils.sendConfirmationEmail(email, req.body.subject, uris, searchResults);
+    yield utils.sendConfirmationEmail(email, req.body.subject, uris, searchResults, cart);
   }
 
   // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')

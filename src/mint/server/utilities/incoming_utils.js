@@ -26,7 +26,7 @@ var sendErrorEmail = function * (email) {
  * @param {array} uris - array of the urls of the amazon items we're confirming
  * @param {array} searchResults - array of the items resulting from the user's search
  */
-var sendConfirmationEmail = function * (email, subject, uris, searchResults) {
+var sendConfirmationEmail = function * (email, subject, uris, searchResults, cart) {
   //create confirmation email
   console.log('sendConfirmationEmail called')
   var confirmation = yield db.Emails.create({
@@ -45,9 +45,9 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults) {
 
   //add template and send confirmation email
   yield confirmation.template('item_add_confirmation', {
-    baseUrl: 'https://e6ed386c.ngrok.io',
+    baseUrl: 'https://cf99edcc.ngrok.io',
     id: '7a43d85c928f',
-    items: items,
+    items: cart,
     searchResults: searchResults
   })
   console.log('about to send the email')
