@@ -84,7 +84,7 @@ var emailsCollection = Waterline.Collection.extend({
           headers: {
             'x-smtpapi': `{
               "asm_group_id": ${me.unsubscribe_group_id || 2341},
-              "asm_groups_to_display": [2273,2275]
+              "asm_groups_to_display": [2273,2275,2341]
             }`
           }
         };
