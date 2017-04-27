@@ -56,6 +56,11 @@ var emailsCollection = Waterline.Collection.extend({
 
     /** Use a template for the email */
     template: function(name, data) {
+      if (this.cart && !data.cart) {
+        data.cart = this.cart
+      } else if (!this.cart && !data.cart) {
+        data.cart = ''
+      }
       this.message_html = templates(name, data);
       this.template_name = name;
       return this.save();
