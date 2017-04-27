@@ -71,42 +71,42 @@ export default class Item extends Component {
 
   determineNav() {
     const {
-      props: { selectDeal, cart_id, type, items, index, nextSearch, prevSearch, currentUser, history: { replace } },
+      props: { type, index, items },
       state: { originalx, x }
     } = this;
 
     if (x > originalx) this.setState({ animation: 'slideRight' });
     else this.setState({ animation: 'slideLeft' });
 
-    if (type === 'deal') {
-      const numericInt = parseInt(index),
-        abs = Math.abs(originalx - x),
-        newIndex = originalx > x
-        ? (numericInt === items.length - 1 ? 0 : numericInt + 1)
-        : (numericInt === 0 ? items.length - 1 : numericInt - 1);
-      if (originalx !== x && x !== 0 && abs > 100) {
-        selectDeal(newIndex, items[newIndex]);
-        replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
-      }
-    } else if (type === 'search') {
-      const abs = Math.abs(originalx - x),
-        nav = originalx > x ? nextSearch : prevSearch;
-      if (originalx !== x && x !== 0 && abs > 100 && type === 'search') nav();
-    } else if (type === 'cartItem') {
-      const numericInt = parseInt(index),
-        abs = Math.abs(originalx - x),
-        newIndex = originalx > x
-        ? (numericInt === items.length - 1
-          ? 0
-          : numericInt + 1)
-        : (numericInt === 0 ? items.length - 1
-          : numericInt - 1);
-
-      const ourItems = splitCartById(this.props, { id: currentUser.id })
-        .my;
-
-      if (originalx !== x && x !== 0 && abs > 100) replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems[newIndex].id}/edit`);
+    const abs = Math.abs(originalx - x),
+      pageIndex = parseInt(index),
+      navOk = (originalx !== x && x !== 0 && abs > 100);
+    if (navOk) {
+      if (type === 'search') return ::this.navSearch();
+      const newIndex = (originalx > x) // we don't need this if its a search
+        ? (pageIndex === items.length - 1) ? 0 : pageIndex + 1
+        : (pageIndex === 0) ? items.length - 1 : pageIndex - 1;
+      if (type === 'deal')::this.navDeal(newIndex); //look ma, no constructor!
+      else if (type === 'cartItem')::this.navCart(newIndex);
     }
+  }
+
+  navDeal(newIndex) {
+    const { cart_id, type, items, selectDeal, history: { replace } } = this.props;
+    selectDeal(newIndex, items[newIndex]);
+    replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
+  }
+
+  navSearch() {
+    const { state: { originalx, x }, props: { nextSearch, prevSearch } } = this,
+    nav = (originalx > x) ? nextSearch : prevSearch;
+    nav();
+  }
+
+  navCart(newIndex) {
+    const { cart_id, type, currentUser: { id }, history: { replace } } = this.props;
+    const ourItems = splitCartById(this.props, { id });
+    replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems.my[newIndex].id}/edit`);
   }
 
   render() {
@@ -114,12 +114,27 @@ export default class Item extends Component {
       determineNav,
       props,
       state: { animation },
-      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, search, options } }
+      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, options } }
     } = this,
     amazonLink = `/api/item/${item.id}/clickthrough`;
     const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
       ? items[parseInt(index)].large
-      : main_image_url;
+      : main_image_url,
+      next = () => {
+        this.setState({ animation: 'slideLeft' });
+        if (type === 'search') return nextSearch();
+        const newIndex = (index === items.length - 1) ? 0 : index + 1;
+        if (type === 'deal')::this.navDeal(newIndex);
+        else if (type === 'cartItem')::this.navCart(newIndex);
+      },
+      prev = () => {
+        this.setState({ animation: 'slideRight' });
+        if (type === 'search') return prevSearch();
+        const newIndex = (index === 0) ? items.length - 1 : index - 1;
+        if (type === 'deal')::this.navDeal(newIndex);
+        else if (type === 'cartItem')::this.navCart(newIndex);
+      },
+      showButton = type === 'deal' || type === 'search' || type === 'cartItem';
 
     return (
       <div className='item_container'>
@@ -133,26 +148,22 @@ export default class Item extends Component {
                 onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
                 onTouchEnd={ () => determineNav() }
             >
-              <div className='item__view__image image row'
-                  style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
+              {showButton ? <button onClick={()=>prev()}>&lt;</button> : null}
+              <div className='item__info__wrapper'>
+                <div className='item__view__image image row'
+                    style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
+                </div>
+                <div className='item__view__atts'>
+                  <p>{name}</p>
+                </div>
               </div>
-              <div className='item__view__atts'>
-                <p>{name}</p>
-              </div>
+              {showButton ? <button onClick={()=>next()}>&gt;</button> : null}
             </div>
             { 
               type === 'deal' && items[parseInt(index)]
               ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
               : <ItemInfo {...props} {...item} />
             }
-            {
-            search 
-                ? <div>
-                    <button onClick={()=>prevSearch()}>&lt;</button>
-                    <button onClick={()=>nextSearch()}>&gt;</button>
-                  </div>
-                : null
-                } 
             <ProductDescription description={description} />
             <div className='item__view__review'>
               {/* TODO: get reviews in here */}
