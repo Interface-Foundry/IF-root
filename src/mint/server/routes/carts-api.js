@@ -424,7 +424,8 @@ module.exports = function (router) {
     });
 
     for (var k in userItems) {
-      users.push(k);
+      var addingUser = yield db.UserAccounts.findOne({id: k});
+      users.push(addingUser.email_address.toUpperCase());
       items.push(userItems[k]);
     }
 

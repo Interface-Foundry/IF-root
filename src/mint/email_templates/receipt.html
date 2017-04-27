@@ -134,7 +134,7 @@
                           </td>
                           <!-- APPERNTLY ACCORDING TO EMAIL TEMPLATING BEST PRACTICE WE WANT INLINE STYLES: WEIRD -->
                           <td align="center" width="85%" valign="middle" height="100%" style="font-size: 28px; text-align: left; color: #fcfcf9;">
-                              DOLOREM IPSUM QUIA DOLOR SIT
+                              <%=users[i]%>
                           </td>
                       </tr>
                   </table>
@@ -148,7 +148,7 @@
                   <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                       <tr>
                           <td style="padding: 50px 15px; font-size: 25px;" align="center">
-                              <%=users[i]%> added:
+                               <!-- added: -->
                           </td >
                       </tr>
                   </table>
@@ -180,7 +180,6 @@
                                                       <!-- <%=baseUrl%>/cart/<%=id%> -->
                                                       <!-- TODO: repeat items in cart -->
                                                       <table><tr>
-                                                        <!-- <td style="padding-right:1em"><img src="<%=searchResults[i][j].thumbnail_url%>" alt="item image"></td> -->
                                                       <td><p><a href="www.kipthis.com"><%=items[i][j].name%></a></p></td></tr></table>
                                                    </td>
                                                </tr>
