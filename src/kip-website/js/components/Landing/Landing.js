@@ -13,7 +13,6 @@ export default class Landing extends Component {
         <Ribbon/>
         <HeroContainer/>
         <StatementContainer/>
-        <Services/>
         <About/>
         <Reviews/>
         <Footer/>

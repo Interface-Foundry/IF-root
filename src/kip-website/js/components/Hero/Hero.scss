@@ -7,7 +7,6 @@
 	padding: $ribbonHeight 0 0;
 	height: 500px;
 	width: 100%;
-	border-bottom: 1px solid $borderColor;
 	@include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 
 	&:before {
@@ -20,16 +19,13 @@
 		background: rgba(255,255,255,0.4);
 	}
 
-	& > * {
-		position: relative;
-		padding: $padding $padding*2 $padding*3;
-	}
-
 	@media only screen and (max-width: 600px) {
 		height: 350px;
 	}
 
 	.dots {
+		position: relative;
+		padding: $padding $padding*2 $padding*3;
 		@include animation(fadeAndZoomIn cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 	    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 		.dot {

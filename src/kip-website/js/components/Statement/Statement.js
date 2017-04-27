@@ -63,14 +63,14 @@ export default class Statement extends Component {
 		        		<h1>Kip Gets Your Team</h1>
 		        		{
 				            typing ? <div className='Static'>
-				            	<span className='Cursor Cursor--blinking'>&nbsp;|</span>
+				            	<span className='Cursor Cursor--blinking'>|</span>
 				            </div> : <Typist 
 				              	cursor={{
 				                	show: true
 				              	}} 
 				              	avgTypingDelay={100} 
 				              	stdTypingDelay={0}>
-				        		<h1>&nbsp;{`${items[0].searchTerm}`}</h1>
+				        		<h1>{`${items[0].searchTerm}`}</h1>
 			            	</Typist> 
 				        }
 		        	</div>
@@ -79,10 +79,17 @@ export default class Statement extends Component {
 		        	</div>
 		        	<div className="col-12 row-1 action">
 		        		<button>
-		        			SAVE THE ARTIC!
+		        			SAVE THE ARTIC
+		        			&nbsp;<Icon icon='Right'/>
 		        		</button>
 		        	</div>
 		        </div>
+		        <svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
+					<g>
+						<path fill="#fcfcf9" d="M0,26.5c9.7,3.8,20.3,4.2,30.3,0.9c1.9-0.6,3.8-1.4,5.7-2.2c10.6-4.5,20.7-10.2,31.1-15.1s21.4-9,32.9-10
+							v31.7H0V26.5z"/>
+					</g>
+				</svg>
 	      	</div>
 	    );
   	}

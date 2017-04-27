@@ -8,12 +8,15 @@ import {
 	IoSocialNodejs,
 	IoEmail,
 	IoSocialGithub,
-	IoSocialLinkedin
+	IoSocialLinkedin,
+	IoArrowRightC
 } from 'react-icons/lib/io'
 
 export default class Icon extends Component {
 	render() {
     	switch (this.props.icon) {
+    		case 'Right':
+	          	return <IoArrowRightC/>
 	        case 'Down':
 	          	return <IoChevronDown/>
 	        case 'Server':

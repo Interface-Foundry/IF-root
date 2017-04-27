@@ -4,16 +4,16 @@
 .about {
 	position: relative;
 	text-align: center;
+	background: #fcfcf9;
 	padding: $padding*4 $padding*2;
 
-	h1 {
+	h2 {
 		line-height: $ribbonHeight;
 		height: $ribbonHeight;
-		margin: $padding*2 0 0;
+		margin: $padding*5 0 0;
+		color: $thirdColor;
+		font-size: 20px;
 
-		&:last-of-type {
-			margin: $padding*2 0 0;
-		}
 		&:first-of-type {
 			margin: 0;
 		}
@@ -21,33 +21,26 @@
 
 	.about__details {
 		position: relative;
-		padding: 0 0 $padding*3;
-		white-space: nowrap;
+		padding: $padding*2 0;
+		border: 1px dashed $thirdColor;
 
 		&:after {
 			content: '';
 			position: absolute;
 			height: 30px;
 			left: 50%;
-			border: 1px solid $bgColor;
+			border: 1px solid $thirdColor;
 		}
 		&:after {
-			bottom: -15px;
+			bottom: -50px;
 		}	
 
-		h3 {
+		p {
 			position: relative;
 			white-space: normal;
 			font-weight: 500;
 			padding: $padding;
-		}
-
-		p {
-			position: relative;
-			display: inline-block;
-			white-space: normal;
-			padding: $padding;
-			width: (100%/3);
+			font-size: 17px;
 		}
 	}
 
@@ -60,7 +53,7 @@
 			background: $secondaryColor;
 			padding: $padding $padding*2;
 			&:focus {
-				@include animation(pulse cubic-bezier(0.4, 0, 0.2, 1) 3s);
+				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 			}
 		}
 	}

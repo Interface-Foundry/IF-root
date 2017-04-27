@@ -9,8 +9,8 @@
 	height: $ribbonHeight;
 	z-index: 100;
 	text-align: center;
-	background: white;
-	border-bottom: 1px solid $borderColor;
+	background: transparent;
+	border-bottom: 1px solid transparent;
 	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
     &.background {

@@ -9,21 +9,21 @@
 	.card {
 		margin: 0 auto;
 		background: white;
-		padding: $padding*4 $padding*2;
+		padding: $padding*3 $padding*2 $padding*10;
+		text-align: left;
 
 		.headline {
-			white-space: nowrap;
-
+			padding: 0 0 $padding*2;
 			* {
 				display: inline-block;
-				height: $ribbonHeight;
-				line-height: $ribbonHeight;
-				font-size: 30px;
+				height: $ribbonHeight - $padding;
+				line-height: $ribbonHeight - $padding;
+				font-size: 32px;
 			}
 
 			span {
-				height: $ribbonHeight;
-				line-height: $ribbonHeight;
+				height: $ribbonHeight - $padding;
+				line-height: $ribbonHeight - $padding;
 			}
 
 			h1 {
@@ -31,14 +31,28 @@
 					background: $primaryColor;
 				}
 			}
+
+			.Static {
+				* {
+					display: block;
+				}
+			}
+		}
+
+		.Static {
+			display: block;
 		}
 
 		.text {
 			max-width: 500px;
+
+			p {
+				font-size: 17px;
+			}
 		}
 
 		.action {
-			padding: $padding*2;
+			padding: $padding*2 0;
 			button {
 				border: 0;
 				font-weight: bold;
@@ -47,18 +61,8 @@
 				padding: $padding $padding*2;
 
 				&:focus {
-					@include animation(pulse cubic-bezier(0.4, 0, 0.2, 1) 3s);
+					@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 				}
-			}
-		}
-
-		@media only screen and (max-width: 600px) {
-		    margin: 0 auto;
-		    box-shadow: none;
-		    .headline  {
-		    	* {
-		    		font-size: 18px;
-		    	}
 			}
 		}
 	}

@@ -9,19 +9,17 @@ export default class About extends Component {
   	render() {
 	    return (
 	      	<div className="about"> 
-	        	<h1>We Support</h1>
+	        	<h2>WE SUPPORT</h2>
 		        <div className="col-12 row-1 about__details">
-		        	<h3>Informed and Transparent Communities that Strength and Empower</h3>
+		        	<p>Informed and Transparent Communities that Strength and Empower</p>
 		        </div>
 
-	        	<h1>We Believe</h1>
+	        	<h2>WE BELIEVE</h2>
 		       	<div className="col-12 row-1 about__details">
-		       		<p>In the flying purple people eater</p>
-		        	<p className='connect'>Grumpy elves that work for santa</p>
-		        	<p>That the moon is made of cheese</p>
+		       		<p className="col-4">In the flying purple people eater <br/> Grumpy elves that work for santa <br/> That the moon is made of cheese</p>
 		        </div>
 
-	        	<h1>Grow With Us</h1>
+	        	<h2>GROW WITH US</h2>
 	        	<div className="col-12 row-1 about__action">
 	        		<button>
 	        			START USING KIP
