@@ -60,6 +60,7 @@ export default class ItemVariationSelector extends Component {
     const { renderDropdowns } = this;
     return (
       <div className='item__dropdowns'>
+        Select from options below
         {renderDropdowns()}
       </div>
     );
@@ -90,23 +91,25 @@ class Dropdown extends Component {
     const { props: { name, choices, defaultVal }, updatePage } = this;
     return (
       <div className='item__dropdown'>
-        {name}
-        <Select 
-          className='dropdown Select'
-          onChange={updatePage}
-          key={name}
-          name={name}
-          value={defaultVal ? defaultVal : ''}
-          options={choices}
-          labelKey={'name'}
-          valueKey={'asin'}
-          optionComponent={AmazonOption}
-          valueComponent={AmazonValue}
-        />
+        <div className='select-up'>
+          <Select 
+            className='dropdown Select'
+            onChange={updatePage}
+            key={name}
+            name={name}
+            value={defaultVal ? defaultVal : ''}
+            options={choices}
+            labelKey={'name'}
+            valueKey={'asin'}
+            optionComponent={AmazonOption}
+            valueComponent={AmazonValue}
+          />
+        </div>
       </div>
     );
   }
 }
+
 class AmazonValue extends Component {
   render() {
     const { value, children, className } = this.props;
@@ -121,6 +124,7 @@ class AmazonValue extends Component {
     );
   }
 }
+
 class AmazonOption extends Component {
   constructor(props) {
     super(props);

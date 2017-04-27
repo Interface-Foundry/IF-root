@@ -1,5 +1,4 @@
 // react/components/App/Footer.scss
-
 @import '../../styles/Constants';
 .footer {
   position: relative;
@@ -12,6 +11,17 @@
   .footer__cart, .footer__item, .footer__save, .footer__settings {
     height: 100%;
     display: flex;
+    a {
+      flex-grow: 1;
+      flex-basis: 0;
+      button {
+        width: 100%;
+        margin: 0;
+        &:only-child {
+          margin: 0;
+        }
+      }
+    }
     button {
       overflow: wrap;
       font-size: 15px;

@@ -77,7 +77,7 @@ class CartFooter extends Component {
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
     const total = calculateItemTotal(items);
 
-    if(locked) {
+    if (locked) {
       return (
         <div className='footer__cart'>
           <button className='green'>
@@ -103,10 +103,11 @@ class CartFooter extends Component {
         </button>
         {
           isLeader
-          ? <button className='checkout' onClick={() => {updateCart({...currentCart, locked: !currentCart.locked}); checkoutCart(cart_id)}}>
+          ? <a target="_blank" href={`/api/cart/${cart_id}/checkout`}><button className='checkout' onClick={() => {updateCart({...currentCart, locked: !currentCart.locked}); checkoutCart(cart_id)}}>
               <Icon icon='Cart'/>
               <h4>CHECKOUT<br/>{displayCost(total)}</h4>
             </button>
+            </a>
           : null
         }
       </div>

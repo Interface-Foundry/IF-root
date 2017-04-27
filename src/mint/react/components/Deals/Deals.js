@@ -58,7 +58,7 @@ export default class Deals extends Component {
     let { deals, cart_id, selectDeal } = this.props;
     if (isDropdown) deals = deals.slice(0, 5);
 
-    const activeDeals = deals.map((deal, i) => <li key={deal.id} onClick={(e) => selectDeal(i)}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></li>);
+    const activeDeals = deals.map((deal, i) => <li key={deal.id} onClick={(e) => selectDeal(i, deal)}><DealCard {...deal} cart_id={cart_id} isDropdown={isDropdown} index={i}/></li>);
 
     return (
       <CSSTransitionGroup
