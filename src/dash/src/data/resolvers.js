@@ -57,27 +57,26 @@ function getDateFromArgs(args, datePropertyString) {
  * @param  {[type]} foodSession [description]
  * @return {[type]}             [description]
  */
-function prepareCafeCarts(foodSession) {
-  foodSession.type = 'slack'; // only doing slack atm
-  foodSession.chosen_restaurant = _.get(foodSession, 'chosen_restaurant.name');
-  var cartLength=0;
-  foodSession.cart_total = `$0.00`;
-  if(foodSession.cart){
-    for(var i = 0; i<foodSession.cart.length; i++){
-      if(foodSession.cart[i].added_to_cart){
-        cartLength+=foodSession.cart[i].item.item_qty;
-      }
-    }
-  }
+// function prepareCafeCarts(foodSession) {
 
-  if (cartLength > 0) {
-    foodSession.cart_total = `$${Number(foodSession.calculated_amount).toFixed(2)}`;
-    foodSession.cart = foodSession.cart;
-  }
-  foodSession.item_count = cartLength;
+//   var cartLength=0;
+//   foodSession.cart_total = `$0.00`;
+//   if(foodSession.cart){
+//     for(var i = 0; i<foodSession.cart.length; i++){
+//       if(foodSession.cart[i].added_to_cart){
+//         cartLength+=foodSession.cart[i].item.item_qty;
+//       }
+//     }
+//   }
 
-  return foodSession;
-}
+//   if (cartLength > 0) {
+//     foodSession.cart_total = `$${Number(foodSession.calculated_amount).toFixed(2)}`;
+//     foodSession.cart = foodSession.cart;
+//   }
+//   foodSession.item_count = cartLength;
+
+//   return foodSession;
+// }
 
 /**
  * prepare graphql response object for query about amazon carts
@@ -175,6 +174,25 @@ const Resolvers = {
   // Business objects
   //
   Delivery: {
+    type: () => 'slack',
+    cart_total: (obj) => {
+      if (obj.cart.length > 0 && _.get(obj, 'calculated_amount')) {
+        return `$${Number(obj.calculated_amount).toFixed(2)}`;
+      }
+      return '$0.00';
+    },
+    item_count: (foodSession) => {
+      let cartLength = 0;
+      if (foodSession.cart) {
+        for (let i = 0; i < foodSession.cart.length; i++) {
+          if (foodSession.cart[i].added_to_cart) {
+            cartLength += foodSession.cart[i].item.item_qty;
+          }
+        }
+      }
+      return cartLength;
+    },
+    chosen_restaurant: (obj) => _.get(obj, 'chosen_restaurant.name', undefined),
     items: async (obj, args, context, info) => {
       if (!obj.menu) {
         return [];
@@ -215,12 +233,15 @@ const Resolvers = {
       return 'No Cart Subtotal';
     },
 
-    items: async (obj) => {
+    items: async ({ _id }, args) => {
       // possible to get the value per item if needed using
-      if (obj.items_done) {
-        return obj.items;
+      const itemArgs = {
+        cart_id: ObjectId(_id),
       }
-      const items = await Items.find({cart_id: ObjectId(obj._id)}).sort({ added_date: -1 }).toArray();
+      if (args.purchased !== undefined) {
+        itemArgs.purchased = args.purchased;
+      }
+      const items = await Items.find(itemArgs).sort({ added_date: -1 }).toArray();
       return items;
     },
     item_count: (obj) => {
@@ -254,9 +275,9 @@ const Resolvers = {
       let carts = await Carts.find({ slack_id: team_id }).toArray();
       return carts;
     },
-    deliveries: async({team_id}) => {
-      let deliveries = await Deliveries.find({ team_id: team_id }).toArray();
-      return deliveries;
+    deliveries: async (obj, args) => {
+      let res = await Deliveries.find({ team_id: obj.team_id }, {menu: 0}).limit(args.limit).toArray();
+      return res;
     }
   },
 
@@ -278,31 +299,15 @@ const Resolvers = {
 
   Query: {
     carts: async (root, args) => {
-      const purchasedObj = {};
-      if (args.purchased !== undefined) {
-        purchasedObj.purchased = args.purchased;
-        delete args.purchased;
-      }
       const newArgs = getDateFromArgs(args, 'created_date');
       let res = await pagination(Carts, newArgs);
-
-
-      // need the await promise.all to resolve all the stuff wrt items
-      res = await Promise.all(res.map(async (cart) => {
-        const itemArgs = _.merge({cart_id: cart._id}, purchasedObj)
-        cart.items = await Items.find(itemArgs).sort({ added_date: -1 }).toArray();
-        cart.items_done = true;
-        return cart;
-      }));
-
       res = res.filter(cart => cart.items.length > 0);
       return res;
     },
 
-    deliveries: async (root, args, context, info) => {
+    deliveries: async (root, args) => {
       const newArgs = getDateFromArgs(args, 'time_started');
       let res = await pagination(Deliveries, newArgs);
-      res = res.map((foodSession) => prepareCafeCarts(foodSession));
       return res;
     },
 
