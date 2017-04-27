@@ -5,8 +5,6 @@ import { reset, reduxForm } from 'redux-form';
 
 import { Feedback } from '../components';
 
-import { getCartById } from '../reducers';
-
 import { postFeedback } from '../actions/session';
 
 const mapStateToProps = (state, ownProps) => {
@@ -17,12 +15,14 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => ({
   // We need to edit the cart here
-  onSubmit: (values, e, state) => dispatch(postFeedback(values))
+  onSubmit: (values, e, state) => {
+    dispatch(postFeedback(values))
     .then(() => {
       const { history: { replace }, cart_id } = state;
       dispatch(reset('Feedback'));
       replace(`/cart/${cart_id}/`);
     })
+  }
 });
 
 const validate = (values, state) => {

@@ -89,7 +89,6 @@ export function postFeedback(feedback) {
         credentials: 'same-origin',
         'body': JSON.stringify(feedback)
       });
-      return dispatch(receiveFeedback(await response.json()));
     } catch (e) {
       throw e;
     }
