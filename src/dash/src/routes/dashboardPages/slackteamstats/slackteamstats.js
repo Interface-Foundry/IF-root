@@ -16,7 +16,7 @@ import Table from '../../../components/Table/common';
 import vagueTime from 'vague-time';
 import moment from 'moment';
 import _ from 'lodash';
-import { teamCartsQuery } from '../../../graphqlOperations';
+import { teamCartsQuery, teamDeliveriesQuery } from '../../../graphqlOperations';
 import { CartGraph, CafeGraph } from '../../../components/Graphs';
 
 const title = ' Team Stats';
@@ -115,15 +115,8 @@ class displayTeamStats extends Component {
   getCurrentQuery() {
     let currentQuery;
     if (this.state.view === 'Cafe') {
-      currentQuery = gql`
-        query GetCafeTeamById($team_id: String!){
-          teams(team_id:$team_id){
-            members{id,name,is_admin}, meta{all_channels}
-          }
-        }
-      `;
+      currentQuery = teamDeliveriesQuery
     } else if (this.state.view === 'Store') {
-      //store query
       currentQuery = teamCartsQuery 
     }
     return currentQuery;
@@ -204,7 +197,7 @@ class displayTeamStats extends Component {
     
     return (
       <div>
-      <div><h2>Carts:</h2> {data.teams[0].carts ? listCarts(team_carts, team_members) : listDeliveries(team_deliveries)}</div>
+      <div><h2>Carts:</h2> {data.teams[0].carts ? listCarts(team_carts, team_members) : listDeliveries(team_deliveries,team_members)}</div>
       </div>
     )
   };
@@ -281,7 +274,6 @@ class displayTeamStats extends Component {
   }
 
   function listCartItems(newData, items, team_members){
-
     items.map(function(item){
       newData.push({
         title: item.title,
@@ -295,13 +287,61 @@ class displayTeamStats extends Component {
     return newData;
   }
 
-  function listDeliveries(team_deliveries){
-    return 'Deliveries totals displayed here'
-    /*
-    return team_deliveries.map(function(deliveries) {
-      return <div>{deliveries.time_started}</div>
+  function listDeliveries(team_deliveries, team_members){
+    let newData = [];
+    team_deliveries.map(function(delivery){
+      newData.push({
+        time_started: delivery.time_started,
+        chosen_restaurant: delivery.chosen_restaurant,
+        cart_total: delivery.cart_total,
+      })
+      newData = listDeliveryItems(newData, delivery.cart, delivery.order, team_members);
     })
-    */
+      return(
+        <Table heads={[{
+          field: 'time_started',
+          descrip: 'Start Time',
+          allowSort: false
+        }, {
+          field: 'chosen_restaurant',
+          descrip: 'Restaurant',
+          allowSort: false
+        },{
+          field: 'cart_total',
+          descrip: 'Cart Total',
+          allowSort: false
+        }, {
+          field: 'title',
+          descrip: 'Item Name',
+          allowSort: false
+        }, {
+          field: 'price',
+          descrip: 'Item Price',
+          allowSort: false
+        }, {
+          field: 'user',
+          descrip: 'Added By',
+          allowSort: false
+        }]} data={newData} />
+    )
+  }
+
+  function listDeliveryItems(newData, cart, order, team_members){
+    if(order){
+      cart.map(function(item){
+      let matched_item = order.cart.find(function(i){
+          return i.id == item.item.item_id || i.id.split("-").pop() == item.item.item_id;
+        });
+      newData.push({
+        user: team_members.find(function(m){
+          return m.id == item.user_id
+        }).name,
+        title: (matched_item ? matched_item.name : ''),
+        price: (matched_item ? matched_item.price : ''),
+      })
+    })
+    }
+    return newData;
   }
 
   function listTeamMembers(teamMembers){

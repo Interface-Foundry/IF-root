@@ -52,7 +52,7 @@ const CafeGraph = ({data}) => {
             <YAxis />
             <CartesianGrid stroke="#ccc" />
           <Tooltip />
-          <Line type="monotone" dataKey="item_count" stroke="#82ca9d" fill="#82ca9d" />
+          <Line type="monotone" dataKey="item_count" stroke="#00FFFF" fill="#00FFFF" />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -69,12 +69,12 @@ const CartGraph = ({data}) => {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
             <XAxis dataKey="date" />
-            <YAxis yAxisId="left" orientation="left" stroke="#82ca9d"/>
-            <YAxis yAxisId="right" orientation="right" stroke="#ffc658"/>
+            <YAxis yAxisId="left" orientation="left" stroke="#00FFFF"/>
+            <YAxis yAxisId="right" orientation="right" stroke="#ff8000"/>
             <CartesianGrid stroke="#ccc" />
           <Tooltip />
-          <Line type="monotone" yAxisId="left" dataKey="item_count" stroke="#82ca9d" fill="#82ca9d" />
-          <Line type="monotone" yAxisId="right" dataKey="cart_total" stroke="#ffc658" fill="#ffc658" />
+          <Line type="monotone" yAxisId="left" dataKey="item_count" stroke="#00FFFF" fill="#00FFFF" />
+          <Line type="monotone" yAxisId="right" dataKey="cart_total" stroke="#ff8000" fill="#ff8000" />
           </LineChart>
         </ResponsiveContainer>
       </div>

@@ -163,12 +163,12 @@ class Session extends Component {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dataPlot} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
                 <XAxis dataKey="name" />
-                 <YAxis yAxisId="left" orientation="left" stroke="#8884d8"/>
-                 <YAxis yAxisId="right" orientation="right" stroke="#ffc658"/>
+                 <YAxis yAxisId="left" orientation="left" stroke="#00FFFF"/>
+                 <YAxis yAxisId="right" orientation="right" stroke="#ff8000"/>
                 <CartesianGrid stroke="#ccc" />
                 <Tooltip />
-                    <Line type="monotone" yAxisId="left" dataKey="numSessions" stroke="#8884d8" />
-                    <Line type="monotone" yAxisId="right" dataKey="numTeams" stroke="#ffc658" />
+                    <Line type="monotone" yAxisId="left" dataKey="numSessions" stroke="#00FFFF" />
+                    <Line type="monotone" yAxisId="right" dataKey="numTeams" stroke="#ff8000" />
               </LineChart>
             </ResponsiveContainer>
           </div>

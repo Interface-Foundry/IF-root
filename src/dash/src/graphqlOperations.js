@@ -39,9 +39,15 @@ query ($startDate: String!, $endDate: String!, $purchased: Boolean) {
 }`;
 
 export const teamCartsQuery = gql`
-        query ($team_id: String!){
-          teams(team_id:$team_id){
-            members{id,name,is_admin}, meta{all_channels},carts {_id, slack_id,purchased, created_date, cart_total,item_count, items {title, purchased, price, category, added_by, }}
-          }
-        }
-      `;
+  query ($team_id: String!){
+    teams(team_id:$team_id){
+      members{id,name,is_admin}, meta{all_channels},carts {_id, slack_id,purchased, created_date, cart_total,item_count, items {title, purchased, price, category, added_by, }}
+    }
+  }`;
+
+export const teamDeliveriesQuery = gql`
+  query ($team_id: String!){
+    teams(team_id:$team_id){
+      members{id,name,is_admin}, meta{all_channels},deliveries(limit:100){time_started,chosen_restaurant,cart_total, order, cart}
+    }
+  }`;
