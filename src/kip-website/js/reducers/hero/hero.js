@@ -2,7 +2,7 @@
 const items = [
 	{
 		imgSrc: 'https://gamefaqs.akamaized.net/box/3/8/6/422386_thumb.jpg',
-		searchTerm: 'Diablo',
+		searchTerm: 'Entertainment',
 		name: 'Diablo III',
 		price: 40,
 		oldPrice: 60,
@@ -11,7 +11,7 @@ const items = [
 	},
 	{
 		imgSrc: 'https://cdn.shopify.com/s/files/1/1228/7500/products/9723-2_small.jpg?v=1490077169',
-		searchTerm: 'Laptops',
+		searchTerm: 'Equipment',
 		name: 'Macbook Pro',
 		price: 140,
 		oldPrice: 200,
@@ -20,7 +20,7 @@ const items = [
 	},
 	{
 		imgSrc: 'http://i73.photobucket.com/albums/i224/Asiya_J/icons/23.gif',
-		searchTerm: 'Sushi',
+		searchTerm: 'Lunches',
 		name: 'California Roll',
 		price: 12,
 		oldPrice: 14,
@@ -29,7 +29,7 @@ const items = [
 	},
 	{
 		imgSrc: 'https://screenshots.en.sftcdn.net/en/scrn/333000/333602/thumbnail_1377441037-100x100.png',
-		searchTerm: 'Notebooks',
+		searchTerm: 'Supplies',
 		name: 'Memo Book',
 		price: 5,
 		oldPrice: 8,
@@ -48,7 +48,8 @@ const items = [
 ]
 
 const initialState = {
-	items: items
+	items: items,
+	quantity: 0
 };
 
 export default function reducer(state = initialState, action = {}) {
@@ -56,6 +57,7 @@ export default function reducer(state = initialState, action = {}) {
   	case 'ITEM_SHUFFLE':
   		return {
   			...state,
+  			quantity: state.quantity === 9 ? 1 : state.quantity + 1,
   			items: [..._.filter(state.items, (i) => i.id !== state.items[0].id), state.items[0]]
   		}
     default:

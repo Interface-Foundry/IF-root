@@ -4,33 +4,42 @@
 .services {
 	position: relative;
 	text-align: center;
-	height: $ribbonHeight*2.5;
+	background: mix(#fcfcf9, $primaryColor, 97%);
+	padding: $padding*3 $padding*2 $padding*6;
 
-	ul {
-		overflow: hidden;
-		overflow-x: scroll;
-	    -webkit-overflow-scrolling: touch;
-	    padding: 0;
-	    white-space: nowrap;
+	h2 {
+		margin: 0 0 $padding;
+		color: $primaryColor;
+		font-size: 23px;
+	}
 
-	    li {
-	    	display: inline-block;
-	    	width: 125px;
-	    	height: 100%;
+	.services__details {
+		position: relative;
+		padding: $padding*2 0 $padding*4;
+		border-top: 1px solid rgba(mix($bgColor, $primaryColor, 57%), 0.2);
 
-	    	.image {
-	    		border-right: 1px solid $borderColor;
-	    	}
+		svg {
+			width: 40%;
+		}
 
-	    	p {
-	    		vertical-align: bottom;
-	    		padding: $padding;
-	    		text-align: left;
-	    	}
+		p {
+			position: relative;
+			white-space: normal;
+			font-weight: 500;
+			padding: $padding;
+			font-size: 15px;
+		}
 
-	    	&:last-of-type {
-	    		margin-right: 0;
-	    	}
-	    }
+		&:first-of-type {
+			border-top: 1px solid transparent;
+		}
+	}
+
+	.sine {
+		fill: mix(#fcfcf9, $thirdColor, 97%);
+		stroke: rgba(mix($bgColor, $primaryColor, 57%), 0.2);
+	    stroke-width: 0.5;
+	    margin-left: -1px;
+	    width: calc(100% + 3px);
 	}
 }

@@ -2,7 +2,7 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 
-import { Ribbon, Services, About, Reviews, Footer } from '..';
+import { Ribbon, Services, About, Showcase, Reviews, Footer } from '..';
 import { HeroContainer, StatementContainer } from '../../containers';
 
 
@@ -13,8 +13,9 @@ export default class Landing extends Component {
         <Ribbon/>
         <HeroContainer/>
         <StatementContainer/>
+        <Services/>
         <About/>
-        <Reviews/>
+        <Showcase/>
         <Footer/>
       </div>
     );

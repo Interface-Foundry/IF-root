@@ -84,10 +84,15 @@
 			}
 
 			.dot__bubble-leave {
-			  @include animation(fadeOutUpBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
+			  @include animation(fadeOutDownBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
 			  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
 			}
 		}
+	}
+
+	.sine {
+		fill: white;
+		display: none;
 	}
 }
 
@@ -96,8 +101,8 @@
   100% { opacity: 1; transform: translate3d(-45%, 0px, 0) scale(1); }
 }
 
-@keyframes fadeOutUpBubble {
+@keyframes fadeOutDownBubble {
   0%   { opacity: 1; transform: translate3d(-45%, 0, 0); }
-  100% { opacity: 0; transform: translate3d(-45%, -30px, 0); }
+  100% { opacity: 0; transform: translate3d(-45%, 100px, 0); }
 }
 			

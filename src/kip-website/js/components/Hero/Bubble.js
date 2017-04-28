@@ -1,7 +1,6 @@
 /* eslint react/prefer-stateless-function: 0, react/forbid-prop-types: 0 */
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 export default class Bubble extends Component {
 	constructor(props) {

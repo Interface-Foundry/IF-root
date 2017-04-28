@@ -11,7 +11,7 @@
 	width: auto;
 	border-radius: $borderRadius;
 	border: 1px solid $borderColor;
-	background: white;
+	background: #fcfcf9;
 	padding: 0;
 	min-width: $ribbonHeight;
 	transform: translate3d(-45%,0,0) !important;
@@ -50,7 +50,6 @@
 		}
 		.item {
 			border-radius: $borderRadius;
-			@include animation(pulse cubic-bezier(0.4, 0, 0.2, 1) 3s);
 			.image {
 				width: $ribbonHeight;
 				min-height: $ribbonHeight - 2px;

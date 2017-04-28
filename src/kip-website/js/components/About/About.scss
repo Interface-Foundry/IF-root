@@ -4,26 +4,42 @@
 .about {
 	position: relative;
 	text-align: center;
-	background: #fcfcf9;
+	background: mix(#fcfcf9, $thirdColor, 97%);
 	padding: $padding*4 $padding*2;
 
 	h2 {
 		line-height: $ribbonHeight;
 		height: $ribbonHeight;
-		margin: $padding*5 0 0;
+		margin: $padding*5 0 $padding;
 		color: $thirdColor;
-		font-size: 20px;
+		font-size: 23px;
 
 		&:first-of-type {
-			margin: 0;
+			margin: 0 0 $padding;
+		}
+	}
+
+	.icons__hell {
+		& > div {
+			display: inline-block;
+			width: (100%/3);
+			height: $ribbonHeight;
+
+			svg {
+				width: 100%;
+				height: $ribbonHeight;
+				fill: $bgColor;
+				opacity: 0.8;
+			}
 		}
 	}
 
 	.about__details {
 		position: relative;
+		border-radius: 10px;
 		padding: $padding*2 0;
-		background: mix(#fcfcf9, $thirdColor, 97%);
-		border: 1px solid $thirdColor;
+		background: #fcfcf9;
+		border: 1px solid rgba($thirdColor, 0.1);
 	    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 
 		&:after {
@@ -37,12 +53,16 @@
 			bottom: -50px;
 		}	
 
+		svg {
+			width: 40%;
+		}
+
 		p {
 			position: relative;
 			white-space: normal;
 			font-weight: 500;
 			padding: $padding;
-			font-size: 17px;
+			font-size: 15px;
 		}
 	}
 

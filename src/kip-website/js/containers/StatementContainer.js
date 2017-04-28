@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import Statement from '../components/Statement';
 
 const mapStateToProps = (state, props) => ({
-    selectedItemIndex: state.hero.selectedItemIndex,
+    quantity: state.hero.quantity,
     items: state.hero.items
 })
 

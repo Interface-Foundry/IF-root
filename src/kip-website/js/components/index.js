@@ -6,4 +6,5 @@ export Statement from './Statement';
 export Services from './Services';
 export About from './About';
 export Reviews from './Reviews';
+export Showcase from './Showcase';
 export Footer from './Footer';

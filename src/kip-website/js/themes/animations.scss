@@ -1,3 +1,5 @@
+@import '../../themes/constants';
+
 @keyframes fadeIn {
   0%   { opacity: 0; }
   100% { opacity: 1; }
@@ -23,6 +25,16 @@
   100% { opacity: 0; transform: translate3d(0, -30px, 0); }
 }
 
+@keyframes fadeInUpSmall {
+  0%   { opacity: 0; transform: translate3d(0, 10px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0px, 0); }
+}
+
+@keyframes fadeOutUpSmall {
+  0%   { opacity: 1; transform: translate3d(0, 0, 0); }
+  100% { opacity: 0; transform: translate3d(0, -10px, 0); }
+}
+
 @keyframes fadeOutRight {
   0%   { opacity: 1; transform: translate3d(0, 0, 0); }
   100% { opacity: 0; transform: translate3d(100%, 0, 0); }
@@ -42,6 +54,30 @@
   }
   100% {
     box-shadow: 0 0 0 0 rgba(255, 223, 77, 0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba($secondaryColor, 1);
+  }
+  70% {
+    box-shadow: 0 0 0 30px rgba($secondaryColor, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba($secondaryColor, 0);
+  }
+}
+
+@keyframes pulseBlue {
+  0% {
+    box-shadow: 0 0 0 0 rgba($primaryColor, 1);
+  }
+  70% {
+    box-shadow: 0 0 0 30px rgba($primaryColor, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba($primaryColor, 0);
   }
 }
 
@@ -84,6 +120,10 @@
 @keyframes fadeAndZoomOut {
   0%   { opacity: 0; transform: scale(1.4); }
   100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInUp {
+
 }
 
 
