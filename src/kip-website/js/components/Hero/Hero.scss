@@ -63,28 +63,45 @@
 				&:first-of-type {
 					top: 25%;
 					left: 10%;
+
+					.dot__bubble-leave {
+					  @include animation(fadeOutDownRightBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
+					  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+					}
 				}
 				&:nth-of-type(2) {
 					top: 50%;
 					left: 25%;
+
+					.dot__bubble-leave {
+					  @include animation(fadeOutDownRightBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
+					  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+					}
 				}
 				&:nth-of-type(3) {
 					top: 37%;
 					left: 65%;
+
+
+					.dot__bubble-leave {
+					  @include animation(fadeOutDownLeftBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
+					  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+					}
 				}
 				&:last-of-type {
 					top: 70%;
 					left: 80%;
+
+
+					.dot__bubble-leave {
+					  @include animation(fadeOutDownLeftBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
+					  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+					}
 				}
 			}
 
 			.dot__bubble-enter {
 			  @include animation(fadeAndGrowInUpBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
-			  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
-			}
-
-			.dot__bubble-leave {
-			  @include animation(fadeOutDownBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
 			  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
 			}
 		}
@@ -101,8 +118,13 @@
   100% { opacity: 1; transform: translate3d(-45%, 0px, 0) scale(1); }
 }
 
-@keyframes fadeOutDownBubble {
+@keyframes fadeOutDownRightBubble {
   0%   { opacity: 1; transform: translate3d(-45%, 0, 0); }
-  100% { opacity: 0; transform: translate3d(-45%, 100px, 0); }
+  100% { opacity: 0; transform: translate3d(0%, 100px, 0); }
+}
+
+@keyframes fadeOutDownLeftBubble {
+  0%   { opacity: 1; transform: translate3d(-45%, 0, 0); }
+  100% { opacity: 0; transform: translate3d(-85%, 100px, 0); }
 }
 			
