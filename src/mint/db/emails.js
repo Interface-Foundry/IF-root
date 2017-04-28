@@ -70,6 +70,20 @@ var emailsCollection = Waterline.Collection.extend({
     send: function () {
       var me = this;
       return co(function *() {
+        // first filter out emails that we should obvs not send email to
+        var blacklist = [
+          'example.com'
+        ]
+
+        for (let i in blacklist) {
+          let domain = blacklist[i]
+          console.log(domain)
+          if (me.recipients.includes(domain)){
+            console.log('Not sending email to address in blacklist', me.recipients, ('(' + domain + ')').red)
+            return
+          }
+        }
+
     		/**
     			Example from https://nodemailer.com/about/
     			let mailOptions = {
