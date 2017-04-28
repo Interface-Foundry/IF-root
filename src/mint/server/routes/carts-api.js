@@ -131,6 +131,7 @@ module.exports = function (router) {
     var session = yield db.Sessions.findOne({user_account: req.params.user_id})
     if (session) {
       req.UserSession = session;
+      req.session.id = session.id;
     }
     logging.info('req.UserSession', req.UserSession)
     // And assuming it all went well we'll respond to the client with the saved item
