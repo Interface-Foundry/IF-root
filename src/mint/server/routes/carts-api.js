@@ -117,11 +117,24 @@ module.exports = function (router) {
     }
     else throw new Error('No item_id')
 
+    // make the user leader if no leader exists, otherwise make member
+    if (!cart.leader) {
+      cart.leader = req.params.user_id
+    } else if (!cart.members.includes(req.params.user_id)) {
+      cart.members.add(req.params.user_id)
+    }
+
     // Save all the weird shit we've added to this poor cart.
     yield cart.save()
 
+    // get user's session
+    var session = yield db.Sessions.findOne({user_account: req.params.user_id})
+    if (session) {
+      req.UserSession = session;
+    }
+    logging.info('req.UserSession', req.UserSession)
     // And assuming it all went well we'll respond to the client with the saved item
-    res.redirect(req.protocol + '://' + req.get('host'));
+    res.redirect(req.protocol + '://' + req.get('host') + '/cart/' + req.params.cart_id);
   }))
 
   /**
