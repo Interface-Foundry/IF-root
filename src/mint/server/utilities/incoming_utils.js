@@ -29,11 +29,10 @@ var sendErrorEmail = function * (email) {
 var sendConfirmationEmail = function * (email, subject, uris, searchResults, searchTerms, cart) {
   //create confirmation email
   console.log('sendConfirmationEmail called')
-  logging.info('cart id', cart.id)
   var confirmation = yield db.Emails.create({
     recipients: email,
     sender: 'hello@kip.ai',
-    subject: subject,
+    subject: 'Items have been added to your cart!',
     template_name: 'item_add_confirmation'
   });
 
@@ -46,13 +45,18 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults, sea
 
   searchTerms = searchTerms.map(term => term.toUpperCase());
 
+  var user = yield db.UserAccounts.findOne({email_address: email});
+
   //add template and send confirmation email
+  logging.info('is this an id')
   yield confirmation.template('item_add_confirmation', {
+    // baseUrl: 'http://mint-dev.kipthis.com',
     baseUrl: 'https://cf99edcc.ngrok.io',
-    id: cart.id,
+    id: cart,
     items: items,
     searchResults: searchResults,
-    searchTerms: searchTerms
+    searchTerms: searchTerms,
+    userId: user.id
   })
   console.log('about to send the email')
   yield confirmation.send();
@@ -155,7 +159,6 @@ var getTerms = function (text, urls) {
   //if there was a conversation history, get rid of the date / time line and
   //the two blank lines around it
   if (pars.length !== allPars.length) pars = pars.slice(0, pars.length-3);
-  logging.info('pars', pars)
 
   pars = pars.map(function (par) {
     par = par.replace(/[\[\]!@\#$%\^&\*\.<>\?{}]/g, '');
@@ -183,15 +186,23 @@ var truncateConversationHistory = function (text) {
  * @returns {array} - an array of the valid amazon urls in the email body
  */
 var getUrls = function (html) {
-  // console.log('html', html)
+  // **hopeful gmail version**
+
+  console.log('html', html)
   var uris = html.match(/href="(.+?)"/gi);
   logging.info('uris', uris);
   if (!uris) return null;
 
   uris = uris.map(u => u.slice(6, u.length-1)); //trim off href junk
   console.log('should return these', uris)
-  // uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
-  // console.log('should be amazon', uris)
+  uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
+  console.log('should be amazon', uris)
+
+  if (!uris) {
+    var uris = html.match(/(https?:.+)["\s]/gi);
+    logging.info('janky uris', uris);
+  }
+
   return uris;
 }
 

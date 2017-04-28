@@ -1,4 +1,4 @@
-const co = require('co')
+const co = require('co');
 var validUrl = require('valid-url');
 var multer = require('multer');
 var upload = multer();
@@ -19,6 +19,7 @@ var utils = require('../utilities/incoming_utils');
  */
 router.post('/incoming', upload.array(), (req, res) => co(function * () {
   console.log('posted to webhook');
+  logging.info('REQ.URL', req.url)
   yield dbReady;
   // console.log('req.body', req.body)
   var email = req.body.from.split(' ');
@@ -136,9 +137,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
       return yield amazonScraper.scrapeUrl(uri);
       var item = yield amazon.getAmazonItem(uri);
       if (item.Variations) console.log('there are options')
-      // return yield amazon.addAmazonItemToCart(item, cart);
     });
-    // console.log('amazon things', uris)
     yield url_items.map(function * (it) {
       cart.items.add(it.id);
       it.cart = cart.id;
@@ -149,14 +148,10 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   }
   else console.log('no amazon uris')
 
-  // if (!uris) uris = [];
   if (uris.length || searchResults.length) {
-    // if (!searchResults) searchResults = [];
-    // logging.info('searchResults', searchResults);
     yield utils.sendConfirmationEmail(email, req.body.subject, uris, searchResults, searchTerms, cart);
   }
 
-  // var cart = yield db.Carts.findOne({id: cart_id}).populate('items')
   res.sendStatus(200);
 }));
 

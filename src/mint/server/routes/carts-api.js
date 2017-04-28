@@ -1,5 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
+const url = require('url')
 var amazonScraper = require('../cart/scraper_amazon')
 var amazon = require('../cart/amazon_cart')
 var camel = require('../deals/deals');
@@ -86,12 +87,49 @@ module.exports = function (router) {
   }));
 
   /**
+   * @api {get} /api/sendgrid/cart/:cart_id/item/:item_id
+   */
+  router.get('/sendgrid/cart/:cart_id/user/:user_id/item/:item_id', (req, res) => co(function * () {
+    var user_account = yield db.UserAccounts.findOne({id: req.params.user_id});
+    // Make sure the cart exists
+    const cart = yield db.Carts.findOne({id: req.params.cart_id})
+    if (!cart) {
+      throw new Error('Cart not found')
+    }
+    // Get or create the item, depending on if the user specifed a previewed item_id or a new url
+    var item
+    if (req.params.item_id) {
+      // make sure it's not in a cart already
+      var existingCart = yield db.Carts.findOne({items: req.params.item_id})
+      if (existingCart && existingCart.id !== cart.id) {
+        throw new Error('Item ' + req.params.item_id + ' is already in another cart ' + existingCart.id)
+      }
+      // get the previwed item from the db
+      item = yield db.Items.findOne({id: req.params.item_id})
+      logging.info('have item');
+      cart.items.add(item.id)
+      item.cart = cart.id
+
+      // specify who added it
+      // logging.info('user id?', req.UserSession.user_account.id)
+      item.added_by = req.params.user_id
+      yield item.save()
+    }
+    else throw new Error('No item_id')
+
+    // Save all the weird shit we've added to this poor cart.
+    yield cart.save()
+
+    // And assuming it all went well we'll respond to the client with the saved item
+    res.redirect(req.protocol + '://' + req.get('host'));
+  }))
+
+  /**
    * @api {post} /api/cart/:cart_id/item Add Item
    * @apiDescription Adds an item to a cart. Must specify either url or item_id in the request body. The item_id param is meant for adding a previewd item to cart, not for adding an item from some other cart to this cart.
    * @apiGroup Carts
    * @apiParam {string} :cart_id cart id
    * @apiParam {string} url optional url of the item from amazon or office depot or whatever
-   * @apiParam {string} item_id optional to specify the id of an item that has been already scraped for a preview
    *
    * @apiParamExample Item from Preview
    * POST https://mint.kipthis.com/api/cart/123456/item {
@@ -105,7 +143,7 @@ module.exports = function (router) {
    *   user_id: '123456y'
    * }
    */
-  router.post('/cart/:cart_id/item', (req, res) => co(function* () {
+  router.post('/cart/:cart_id/item', (req, res) => co(function * () {
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
