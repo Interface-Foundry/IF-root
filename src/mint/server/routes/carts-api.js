@@ -467,42 +467,42 @@ module.exports = function (router) {
     // make sure the amazon cart is in sync with the cart in our database
     var amazonCart = yield amazon.syncAmazon(cart)
 
-    //send receipt email
-    logging.info('creating receipt...')
-    var receipt = yield db.Emails.create({
-      recipients: req.UserSession.user_account.email_address,
-      sender: 'hello@kip.ai',
-      subject: 'Your Kip Order',
-      template_name: 'receipt'
-    });
-
-    var userItems = {}; //organize items according to which user added them
-    var items= []
-    var users = []
-    var total = 0;
-    cart.items.map(function (item) {
-      if (!userItems[item.added_by]) userItems[item.added_by] = [];
-      userItems[item.added_by].push(item);
-      // logging.info('item', item) //undefined
-      total += Number(item.price);
-    });
-
-    for (var k in userItems) {
-      var addingUser = yield db.UserAccounts.findOne({id: k});
-      users.push(addingUser.email_address.toUpperCase());
-      items.push(userItems[k]);
-    }
-
-    yield receipt.template('receipt', {
-      baseUrl: process.env.BASEURL || 'http://mint-dev.kipthis.com',
-      id: cart.id,
-      items: items,
-      users: users,
-      total: total
-    })
-
-    yield receipt.send();
-    logging.info('receipt sent')
+    // //send receipt email
+    // logging.info('creating receipt...')
+    // var receipt = yield db.Emails.create({
+    //   recipients: req.UserSession.user_account.email_address,
+    //   sender: 'hello@kip.ai',
+    //   subject: 'Your Kip Order',
+    //   template_name: 'receipt'
+    // });
+    //
+    // var userItems = {}; //organize items according to which user added them
+    // var items= []
+    // var users = []
+    // var total = 0;
+    // cart.items.map(function (item) {
+    //   if (!userItems[item.added_by]) userItems[item.added_by] = [];
+    //   userItems[item.added_by].push(item);
+    //   // logging.info('item', item) //undefined
+    //   total += Number(item.price);
+    // });
+    //
+    // for (var k in userItems) {
+    //   var addingUser = yield db.UserAccounts.findOne({id: k});
+    //   users.push(addingUser.email_address.toUpperCase());
+    //   items.push(userItems[k]);
+    // }
+    //
+    // yield receipt.template('receipt', {
+    //   baseUrl: process.env.BASEURL || 'http://mint-dev.kipthis.com',
+    //   id: cart.id,
+    //   items: items,
+    //   users: users,
+    //   total: total
+    // })
+    //
+    // yield receipt.send();
+    // logging.info('receipt sent')
 
     // redirect to the cart url
     res.redirect(amazonCart.PurchaseURL)
