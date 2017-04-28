@@ -87,6 +87,14 @@ module.exports = function (router) {
   }));
 
   /**
+   * @api {get} /api/sendgrid/cart/:cart_id/itemview/:user_id/:item_id
+   */
+  router.get('/sendgrid/cart/:cart_id/itemview/:user_id/:item_id', (req, res) => co(function * () {
+    var item = yield db.Items.findOne({id: req.params.item_id});
+    res.redirect(req.protocol + '://' + req.get('host') + `/cart/${req.params.cart_id}/m/item/0/${item.asin}`)
+  }))
+
+  /**
    * @api {get} /api/sendgrid/cart/:cart_id/item/:item_id
    */
   router.get('/sendgrid/cart/:cart_id/user/:user_id/item/:item_id', (req, res) => co(function * () {
