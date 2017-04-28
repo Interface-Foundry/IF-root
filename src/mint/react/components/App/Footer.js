@@ -99,17 +99,14 @@ class CartFooter extends Component {
       <div className='footer__cart'>
         <button className='share' onClick={_handleShare}>
           <Icon icon='Person'/>
-          <h4>SHARE</h4>
+          <h4>Share</h4>
         </button>
-        {
-          isLeader
-          ? <a target="_blank" href={`/api/cart/${cart_id}/checkout`}><button className='checkout' onClick={() => {updateCart({...currentCart, locked: !currentCart.locked}); checkoutCart(cart_id)}}>
-              <Icon icon='Cart'/>
-              <h4>CHECKOUT<br/>{displayCost(total)}</h4>
-            </button>
-            </a>
-          : null
-        }
+        <a href={`/api/cart/${cart_id}/checkout`} onClick={(e)=> {e.preventDefault(); if(items.length>0) ()=> { updateCart({...currentCart, locked: !currentCart.locked}); window.open(`/api/cart/${cart_id}/checkout`);};}}>
+          <button disabled={items.length===0} className='checkout'>
+            <Icon icon='Cart'/>
+            <h4>Checkout<br/>{displayCost(total)}</h4>
+          </button>
+        </a>
       </div>
     );
   }

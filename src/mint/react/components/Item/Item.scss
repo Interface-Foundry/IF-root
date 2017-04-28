@@ -34,9 +34,10 @@
         color: $secondary-button-color;
         font-size: 12px;
       }
-    } // This is animation fix for chrome and maybe something else.
-    // Probably my error, html structing error probably.
+    }
     .item__transition {
+      // This is animation fix for chrome and maybe something else.
+      // Probably my error, html structing error probably.
       position: relative;
       &>div {
         position: absolute;
