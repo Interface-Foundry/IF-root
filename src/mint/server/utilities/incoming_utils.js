@@ -32,7 +32,7 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults, sea
   var confirmation = yield db.Emails.create({
     recipients: email,
     sender: 'hello@kip.ai',
-    subject: 'Items have been added to your cart!',
+    subject: subject,
     template_name: 'item_add_confirmation'
   });
 
