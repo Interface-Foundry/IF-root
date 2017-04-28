@@ -1,11 +1,19 @@
 var os = require('os')
+var path = require('path')
 
 /**
  * everyconfig reads the yaml files for the right environment. if CONFIG_DIR is
  * set, the value is assumed to be either a path relative to the location of
  * the current module, or an absolute path.
  */
-var config = require('everyconfig')(process.env['CONFIG_DIR'] || '.')
+
+
+if ((process.env['CONFIG_DIR'] === undefined ) && (path.basename(process.cwd()) === 'dash')) {
+    var fs = require('fs')
+    var configDirEnv = path.resolve(process.cwd(), '..', 'config')
+}
+
+var config = require('everyconfig')(configDirEnv || '.')
 config.host = os.hostname()
 
 /**
