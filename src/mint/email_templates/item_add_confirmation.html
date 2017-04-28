@@ -179,7 +179,7 @@
                                                       <!-- TODO: repeat items in cart -->
                                                       <table><tr><td style="padding-right:1em"><img src="<%=searchResults[i][j].thumbnail_url%>" alt="item image"></td>
                                                       <td><p><a href="<%=baseUrl%>/api/sendgrid/cart/<%=id.id%>/itemview/<%=userId%>/<%=searchResults[i][j].id%>"><%=searchResults[i][j].name%></a></p>
-                                                      <a href="<%=baseUrl%>/api/sendgrid/cart/<%=id.id%>/user/<%=userId%>/item/<%=searchResults[i][j].id%>">Add to Kip!</a></td></tr></table>
+                                                      <a style="padding:8px;border-width:1px;border-radius:5px;background-color:#ffdf4d;color:black;" href="<%=baseUrl%>/api/sendgrid/cart/<%=id.id%>/user/<%=userId%>/item/<%=searchResults[i][j].id%>">Add to Kip Cart</a></td></tr></table>
                                                    </td>
                                                </tr>
                                             </table>
