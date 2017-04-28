@@ -101,7 +101,19 @@ class CartFooter extends Component {
           <Icon icon='Person'/>
           <h4>Share</h4>
         </button>
-        <a href={`/api/cart/${cart_id}/checkout`} onClick={(e)=> {e.preventDefault(); if(items.length>0) ()=> { updateCart({...currentCart, locked: !currentCart.locked}); window.open(`/api/cart/${cart_id}/checkout`);};}}>
+        <a 
+          href={`/api/cart/${cart_id}/checkout`} 
+          onClick={
+            (e) => { 
+              e.preventDefault(); 
+              if (items.length > 0) { 
+                console.log('foot open')
+                updateCart({...currentCart, locked: !currentCart.locked});
+                window.open(`/api/cart/${cart_id}/checkout`);
+              }
+            }
+          }
+        >
           <button disabled={items.length===0} className='checkout'>
             <Icon icon='Cart'/>
             <h4>Checkout<br/>{displayCost(total)}</h4>

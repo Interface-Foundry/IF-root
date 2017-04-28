@@ -39,7 +39,7 @@ export default class Sidenav extends Component {
   }
 
   render() {
-    const { carts, _toggleSidenav, currentUser, cart_id, itemsLen, replace } = this.props, { show } = this.state,
+    const { carts, _toggleSidenav, currentUser, cart_id, itemsLen, replace, updateCart, currentCart } = this.props, { show } = this.state,
       leaderCarts = _.filter(carts, (c, i) => c.leader.email_address === currentUser.email_address),
       memberCarts = _.filter(carts, (c, i) => c.leader.email_address !== currentUser.email_address);
     return (
@@ -117,7 +117,18 @@ export default class Sidenav extends Component {
                 <p>Create New Cart</p>
               </button>
             </a>
-            <a href={`/api/cart/${cart_id}/checkout`} onClick={(e)=> {e.preventDefault(); if(itemsLen>0) window.open(`/api/cart/${cart_id}/checkout`);}}>
+            <a 
+              href={`/api/cart/${cart_id}/checkout`} 
+              onClick={
+                (e) => { 
+                  e.preventDefault(); 
+                  if (itemsLen>0) { 
+                    updateCart({...currentCart, locked: !currentCart.locked});
+                    window.open(`/api/cart/${cart_id}/checkout`);
+                  }
+                }
+              }
+            >
               <button disabled={itemsLen===0} className='side__checkout'>
                 <Icon icon='Cart'/>
                 <p>Checkout</p>
