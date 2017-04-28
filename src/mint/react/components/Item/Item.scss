@@ -48,15 +48,31 @@
           display: inline-block;
         }
       }
-    }
-    .item__view__image {
-      margin: 0 auto;
-    }
-    .item__view__atts {
-      text-align: center;
-      padding: $padding $padding $padding*2;
-      margin-bottom: 0;
-      font-size: 13px;
+      .item__nav_wrapper {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        button {
+          align-self: stretch;
+          background: $border-color-light;
+          border: none;
+          font-size: 20px;
+          cursor: pointer;
+        }
+        .item__info__wrapper {
+          .item__view__image {
+            margin: 0 auto;
+          }
+          .item__view__atts {
+            text-align: center;
+            padding: $padding $padding $padding*2;
+            margin-bottom: 0;
+            font-size: 13px;
+          }
+        }
+      }
     }
     div[class$='view__price'] {
       h4, h5 {
