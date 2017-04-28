@@ -65,8 +65,7 @@
 					left: 10%;
 
 					.dot__bubble-leave {
-					  @include animation(fadeOutDownRightBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
-					  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+					  @include animation(fadeOutDownRightBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 					}
 				}
 				&:nth-of-type(2) {
@@ -74,8 +73,7 @@
 					left: 25%;
 
 					.dot__bubble-leave {
-					  @include animation(fadeOutDownRightBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
-					  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+					  @include animation(fadeOutDownRightBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 					}
 				}
 				&:nth-of-type(3) {
@@ -84,8 +82,7 @@
 
 
 					.dot__bubble-leave {
-					  @include animation(fadeOutDownLeftBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
-					  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+					  @include animation(fadeOutDownLeftBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 					}
 				}
 				&:last-of-type {
@@ -94,15 +91,13 @@
 
 
 					.dot__bubble-leave {
-					  @include animation(fadeOutDownLeftBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
-					  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+					  @include animation(fadeOutDownLeftBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 					}
 				}
 			}
 
 			.dot__bubble-enter {
-			  @include animation(fadeAndGrowInUpBubble cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
-			  @include transition(all 0.66s cubic-bezier(0.4, 0, 0.2, 1));
+			  @include animation(fadeAndGrowInUpBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 			}
 		}
 	}
@@ -119,12 +114,14 @@
 }
 
 @keyframes fadeOutDownRightBubble {
-  0%   { opacity: 1; transform: translate3d(-45%, 0, 0); }
-  100% { opacity: 0; transform: translate3d(0%, 100px, 0); }
+  0%   { opacity: 1; transform: translate3d(-45%, 0, 0) scale3d(1, 1, 1) rotate(0deg); }
+  70%   { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(0%, 100px, 0) scale3d(0.2, 0.5, 1) rotate(-15deg); }
 }
 
 @keyframes fadeOutDownLeftBubble {
-  0%   { opacity: 1; transform: translate3d(-45%, 0, 0); }
-  100% { opacity: 0; transform: translate3d(-85%, 100px, 0); }
+  0%   { opacity: 1; transform: translate3d(-45%, 0, 0) scale3d(1, 1, 1) rotate(0deg); }
+  70%   { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(-85%, 100px, 0) scale3d(0.2, 0.5, 1) rotate(15deg); }
 }
 			
