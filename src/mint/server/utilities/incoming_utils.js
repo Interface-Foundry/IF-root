@@ -51,7 +51,7 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults, sea
   logging.info('is this an id')
   yield confirmation.template('item_add_confirmation', {
     // baseUrl: 'http://mint-dev.kipthis.com',
-    baseUrl: 'https://cf99edcc.ngrok.io',
+    baseUrl: 'https://44c3b93d.ngrok.io',
     id: cart,
     items: items,
     searchResults: searchResults,
