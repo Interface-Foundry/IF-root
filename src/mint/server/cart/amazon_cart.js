@@ -104,7 +104,15 @@ exports.searchAmazon = function * (query) {
   if (!results || !results.result.ItemSearchResponse.Items.Item) {
     if (!results) throw new Error('Error on search for query', query);
     else logging.error("Searching " + query + ' yielded no results');
-    return null;
+
+    // remove the last word, and try the search again
+    var newQuery = query.split(/[^\w]/).slice(0, -1).join(' ')
+    if (newQuery) {
+      var results = yield exports.searchAmazon(newQuery)
+      return results
+    } else {
+      return [];
+    }
   }
   else {
     //save new items to the db
