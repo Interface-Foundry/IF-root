@@ -35,7 +35,11 @@ if (!process.env.NO_LIVE_RELOAD) {
     path: '/__webpack_hmr',
     heartbeat: 10 * 1000
   }));
-}
+} else {
+   app.get('/__webpack_hmr', (req, res) => {
+     res.status(200).end()
+   })
+ }
 
 // idk
 var regularRoutes = require('./routes/regular.js');
