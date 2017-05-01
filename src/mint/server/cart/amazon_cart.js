@@ -175,7 +175,6 @@ exports.lookupAmazonItem = function * (asin) {
 
   var amazonParams = {
     Availability: 'Available',
-    Condition: 'New',
     IdType: 'ASIN',
     ItemId: asin,
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
