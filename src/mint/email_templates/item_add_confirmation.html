@@ -176,9 +176,9 @@
                                                <tr>
                                                    <td align="center" style="padding: 30px 5px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1;font-weight: 500;">
                                                       <!-- <%=baseUrl%>/cart/<%=id%> -->
-                                                      <!-- TODO: repeat items in cart -->
                                                       <table><tr><td style="padding-right:1em"><img src="<%=searchResults[i][j].thumbnail_url%>" alt="item image"></td>
-                                                      <td><p><a href="<%=searchResults[i][j].original_link%>"><%=searchResults[i][j].name%></a></p></td></tr></table>
+                                                      <td><p><a href="<%=baseUrl%>/api/sendgrid/cart/<%=id.id%>/itemview/<%=userId%>/<%=searchResults[i][j].id%>"><%=searchResults[i][j].name%></a></p>
+                                                      <a style="padding:8px;border-width:1px;border-radius:5px;background-color:#ffdf4d;color:black;" href="<%=baseUrl%>/api/sendgrid/cart/<%=id.id%>/user/<%=userId%>/item/<%=searchResults[i][j].id%>">Add to Kip Cart</a></td></tr></table>
                                                    </td>
                                                </tr>
                                             </table>

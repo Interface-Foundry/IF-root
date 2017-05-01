@@ -9,12 +9,16 @@ dbReady.then((models) => { db = models; })
  * was not a valid amazon url we could user
  * @param {string} email - email of the user who is receiving the error-email
  */
-var sendErrorEmail = function * (email) {
+var sendErrorEmail = function * (email, cartId, searchTerms) {
+  logging.info('search terms', searchTerms)
   var error = yield db.Emails.create({
     recipients: email,
     sender: 'hello@kip.ai',
     subject: 'Oops',
-    message_html: '<html><p>Unfortunately I couldn\'t understand the link you sent me -- make sure that you paste a full URL that links to an item on Amazon.com</p></html>'
+    message_html: `<html><input type="hidden" id="" name="cartId" value="${cartId}">` +
+      '<p>Unfortunately I wasn\'t able to find what you were looking for.' +
+      (searchTerms && searchTerms.length ? 'Your search for ' + searchTerms.join(', ') + ' yielded no results': '') + //cannot read length of undefined
+      '</p></html>'
   })
   yield error.send();
 }
@@ -29,7 +33,6 @@ var sendErrorEmail = function * (email) {
 var sendConfirmationEmail = function * (email, subject, uris, searchResults, searchTerms, cart) {
   //create confirmation email
   console.log('sendConfirmationEmail called')
-  logging.info('cart id', cart.id)
   var confirmation = yield db.Emails.create({
     recipients: email,
     sender: 'hello@kip.ai',
@@ -46,13 +49,18 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults, sea
 
   searchTerms = searchTerms.map(term => term.toUpperCase());
 
+  var user = yield db.UserAccounts.findOne({email_address: email});
+
   //add template and send confirmation email
   yield confirmation.template('item_add_confirmation', {
+    // baseUrl: 'http://mint-dev.kipthis.com',
+    // baseUrl: 'https://44c3b93d.ngrok.io',
     baseUrl: 'https://mint-dev.kipthis.com',
     id: cart.id,
     items: items,
     searchResults: searchResults,
-    searchTerms: searchTerms
+    searchTerms: searchTerms,
+    userId: user.id
   })
   console.log('about to send the email')
   yield confirmation.send();
@@ -155,7 +163,6 @@ var getTerms = function (text, urls) {
   //if there was a conversation history, get rid of the date / time line and
   //the two blank lines around it
   if (pars.length !== allPars.length) pars = pars.slice(0, pars.length-3);
-  logging.info('pars', pars)
 
   pars = pars.map(function (par) {
     par = par.replace(/[\[\]!@\#$%\^&\*\.<>\?{}]/g, '');
@@ -183,15 +190,23 @@ var truncateConversationHistory = function (text) {
  * @returns {array} - an array of the valid amazon urls in the email body
  */
 var getUrls = function (html) {
-  // console.log('html', html)
+  // **hopeful gmail version**
+
+  console.log('html', html)
   var uris = html.match(/href="(.+?)"/gi);
   logging.info('uris', uris);
   if (!uris) return null;
 
   uris = uris.map(u => u.slice(6, u.length-1)); //trim off href junk
   console.log('should return these', uris)
-  // uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
-  // console.log('should be amazon', uris)
+  uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
+  console.log('should be amazon', uris)
+
+  if (!uris) {
+    var uris = html.match(/(https?:.+)["\s]/gi);
+    logging.info('janky uris', uris);
+  }
+
   return uris;
 }
 

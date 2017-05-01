@@ -90,7 +90,7 @@ exports.getAmazonItem = function * (item_identifier) {
  * @param {string} query search terms
  * @returns {[type]} amazon items
  */
-exports.searchAmazon = function * (query) {
+exports.searchAmazon = function * (query, index) {
   query = emoji(query);
   console.log('searching:', query)
   var amazonParams = {
@@ -98,7 +98,8 @@ exports.searchAmazon = function * (query) {
     Keywords: query,
     Condition: 'New',
     SearchIndex: 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations',
+    ItemPage: index || 1
   };
   var results = yield opHelper.execute('ItemSearch', amazonParams);
   if (!results || !results.result.ItemSearchResponse.Items.Item) {
