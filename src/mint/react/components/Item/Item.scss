@@ -26,13 +26,14 @@
         height: 40px;
         position: relative;
         background: linear-gradient(to top, $kip-primary-color 0%, rgba($kip-primary-color, 0) 100%);
-        margin-top: -35px;
+        margin-top: -40px;
       }
       a {
         display: block;
-        padding-top: 5px;
         color: $secondary-button-color;
         font-size: 12px;
+        padding-top: 4em; // try to make it so all the text is tappable
+        margin-top: -4em;
       }
     }
     .item__transition {
@@ -63,6 +64,7 @@
           cursor: pointer;
         }
         .item__info__wrapper {
+          width: 100%;nsole.log
           .item__view__image {
             margin: 0 auto;
           }
@@ -78,7 +80,7 @@
     div[class$='view__price'] {
       h4, h5 {
         padding: 1px;
-        margin: 5px;
+        margin: 5px 5px 5px 0;
       }
       h4 {
         font-size: 18px;
@@ -102,6 +104,7 @@
       display: flex;
       justify-content: space-between;
       align-items: top;
+      padding-top: $padding;
       .item__view__quantity {
         display: flex;
         align-items: center;
@@ -112,12 +115,15 @@
           font-family: Arial, sans-serif;
           border: 2px solid $kip-faded-color;
         }
-        button, .item__view__quantity__placeholder {
+        button {
           height: 100%;
           margin: 0 $padding/2;
           background: white;
           width: $nav-height/1.5;
           cursor: pointer;
+          &:last-child {
+            margin-right: 0;
+          }
           &:active {
             background: $border-color-light;
           }

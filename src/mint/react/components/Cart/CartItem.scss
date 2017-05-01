@@ -23,7 +23,9 @@
   .cartItem__props {
     display: inline-block;
     padding: 0 0 0 $padding*2;
-    width: 100%;
+    &.locked {
+      width: 100%;
+    }
     p {
       float: left;
       clear: left;

@@ -128,7 +128,7 @@ $cart__add-height: $nav-height+$padding;
     }
   }
   .cart__add {
-    padding: 0 $padding*2 $padding $padding*2;
+    padding: 0 $padding*2 0 $padding*2;
   }
   .cart__title {
     height: $nav-height/2;
@@ -172,11 +172,11 @@ $cart__add-height: $nav-height+$padding;
       border-bottom: 1px solid $border-color-light;
     }
     .cart__items-empty {
-      padding: $padding*2;
+      padding: $padding;
       background: white;
       border-bottom: 1px solid $border-color-light;
       .image {
-        height: 50px;
+        height: 30px;
       }
       h4 {
         text-align: center;

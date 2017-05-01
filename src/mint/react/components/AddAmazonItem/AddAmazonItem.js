@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import NotificationBubble from '../NotificationBubble';
+import { AmazonFormContainer } from '../../containers';
 import { Icon } from '..';
 
 export default class AddAmazonItem extends Component {
@@ -19,30 +20,39 @@ export default class AddAmazonItem extends Component {
     cart_id: PropTypes.string
   }
 
+  state = {
+    clickedAmazonField: false
+  }
+
   addItemToCart() {
     const { user_account, addingItem, cart_id, push } = this.props;
     addingItem(true);
-    push(user_account.id ? `/cart/${cart_id}/m/item/add` : `/cart/${cart_id}/m/signin`);
+    user_account.id //if they have an account, just switch the button to a text field
+      ? this.setState({ clickedAmazonField: true })
+      : push(`/cart/${cart_id}/m/signin`);
   }
 
   render() {
-    const { addItemToCart, props } = this;
-    const { numUserItems, user_account } = props;
+    const { addItemToCart, props: { numUserItems, user_account }, state: { clickedAmazonField } } = this;
     return (
       <div className='add_to_amazon'>
         Add Item to Kip Cart
-        <button className={`add_to_amazon__button ${!!user_account.id ? '' : 'yellow'}`} onClick={addItemToCart}>
-          {
-            !!user_account.id
-            ? <Icon icon='Search'/>
-            : null
-          }
-          {
-            !!user_account.id
-            ? 'Paste Amazon URL or Search' 
-            : '+ Add Amazon Item'
-          }
-        </button>
+        {
+          clickedAmazonField 
+          ? <AmazonFormContainer />
+          : <button className={`add_to_amazon__button ${!!user_account.id ? '' : 'yellow'}`} onClick={addItemToCart}>
+              {
+                !!user_account.id
+                ? <Icon icon='Search'/>
+                : null
+              }
+              {
+                !!user_account.id
+                ? 'Paste Amazon URL or Search' 
+                : '+ Add Amazon Item'
+              }
+            </button>
+        }
         {numUserItems ? null : <NotificationBubble top={23} right={12}/>}
       </div>
     );

@@ -23,7 +23,7 @@ export default class ProductDescription extends Component {
   toggleDescrip() {
     const { state: { descripTall } } = this;
     this.setState({
-      descripHeight: descripTall ? 60 : '100%',
+      descripHeight: descripTall ? '3.6em' : '100%',
       descripTall: !descripTall
     });
   }
@@ -33,7 +33,7 @@ export default class ProductDescription extends Component {
 
     this.setState({
       showViewMore: height > 80,
-      descripHeight: height > 80 ? 60 : '100%'
+      descripHeight: height > 80 ?'3.6em' : '100%'
     });
   }
 

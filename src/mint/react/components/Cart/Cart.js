@@ -54,7 +54,7 @@ export default class Cart extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { history: { replace }, cart_id, items } = this.props, { leader, addingItem, user_account } = nextProps,
-      cartId = cart_id || nextProps.cart_id;
+      cartId =  nextProps.cart_id || cart_id;
 
     if (cartId) {
       if (!user_account.id && !leader) {
@@ -79,7 +79,6 @@ export default class Cart extends Component {
         ...items.my,
         ..._.reduce(items.others, (acc, value) => [...acc, ...value], [])
       ]);
-    const priceEle = <span>- Total: <span className='price'>{displayCost(total)}</span> </span>;
     return (
       <div className='cart'>
         {
@@ -116,8 +115,14 @@ export default class Cart extends Component {
         <div className={`cart__title ${animation ? 'action' : ''}`}>
           { animation 
             ? <h4>{animation}</h4>
-            : <h4>{ hasItems ? `${items.quantity} items in Group Cart`  : 'Group Shopping Cart' } 
-            {!!leader && leader.id === user_account.id ?  priceEle : null}</h4>
+            : <h4>
+              { hasItems ? `${items.quantity} items in Group Cart`  : 'Group Shopping Cart' } 
+              {
+                !!leader && leader.id === user_account.id 
+                ?  <span> (<span className='price'>{displayCost(total)}</span>)</span> 
+                : null
+              }
+            </h4>
           }
         </div>
         <div className='cart__items'>
@@ -167,7 +172,7 @@ class MyItems extends Component {
             : <EmptyCart key="empty"/>
           }
         </div>
-        <h3>Total: <span className={locked?'locked':''}>{displayCost(total)}</span></h3>
+        <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3>
       </ul>
     );
   }
@@ -178,7 +183,8 @@ class OtherItems extends Component {
     items: PropTypes.array.isRequired,
     isLeader: PropTypes.bool.isRequired,
     startIndex: PropTypes.number,
-    title: PropTypes.string
+    title: PropTypes.string,
+    currentCart: PropTypes.object
   }
 
   render() {
@@ -193,7 +199,7 @@ class OtherItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
           : <EmptyCart />
         }
-        {isLeader ? <h3>Total: <span className={locked?'locked':''}>{displayCost(total)}</span></h3> : null}
+        {isLeader ? <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3> : null}
       </ul>
     );
   }
@@ -204,7 +210,6 @@ class EmptyCart extends Component {
     return (
       <li className='cart__items-empty'>
         <div className='image' style={{backgroundImage:'url(http://tidepools.co/kip/head_smaller.png)'}}/>
-        <h4>Huh. Nothing to see here</h4>
       </li>
     );
   }
