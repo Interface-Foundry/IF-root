@@ -10,13 +10,14 @@ dbReady.then((models) => { db = models; })
  * @param {string} email - email of the user who is receiving the error-email
  */
 var sendErrorEmail = function * (email, cartId, searchTerms) {
+  logging.info('search terms', searchTerms)
   var error = yield db.Emails.create({
     recipients: email,
     sender: 'hello@kip.ai',
     subject: 'Oops',
-    message_html: '<html><input type="hidden" id="cartId" name="cartId" value="<%=id%>">' +
+    message_html: `<html><input type="hidden" id="" name="cartId" value="${cartId}">` +
       '<p>Unfortunately I wasn\'t able to find what you were looking for.' +
-      (searchTerms.length ? '': ) +
+      (searchTerms && searchTerms.length ? 'Your search for ' + searchTerms.join(', ') + ' yielded no results': '') + //cannot read length of undefined
       '</p></html>'
   })
   yield error.send();

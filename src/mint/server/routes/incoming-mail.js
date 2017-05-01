@@ -58,7 +58,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
   if (!req.body.text || ! req.body.html) {
     logging.info('no email body');
-    yield utils.sendErrorEmail(email, cart_id);
+    yield utils.sendErrorEmail(email, cart_id, searchResults);
     res.sendStatus(202);
   }
 
@@ -76,11 +76,9 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   // console.log('URIS', uris)
 
   //business logic starts here
-  if (!uris.length && all_uris) {
-    //send error email
-    console.log('gonna send an error email');
-    yield utils.sendErrorEmail(email);
-  }
+
+  text = text.filter(p => p);
+  logging.info('filtered text', text)
 
   var searchResults = [];
   var searchTerms = [];
@@ -104,20 +102,15 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   }
 
   //if a search failed to turn anything up
-  if (searchTerms.length && !searchResults.length) {
-    var noSearchResults = yield db.Emails.create({
-      sender: 'hello@kip.ai',
-      recipients: email,
-      subject: req.body.subject,
-      template_name:
-    })
+  if ((text.length && !searchResults.length) || (!uris.length && all_uris)) {
+    yield utils.sendErrorEmail(email, cart.id, text);
   }
 
   //get cart id
   var html = req.body.html;
   var cart_id = /name="cartId" value="(.*)"/.exec(html);
   if (cart_id) cart_id = cart_id[1];
-  console.log('cart_id', cart_id)
+  console.log('cart_id', JSON.stringify(cart_id))
   console.log('gonna query for the cart')
   var cart = yield db.Carts.findOne({id: cart_id}).populate('items');
   if (!cart) { //if the cart id isn't supplied, try to find one

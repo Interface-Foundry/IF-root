@@ -136,13 +136,14 @@ module.exports = function (router) {
     // Save all the weird shit we've added to this poor cart.
     yield cart.save()
 
-    // get user's session
-    var session = yield db.Sessions.findOne({user_account: req.params.user_id})
-    if (session) {
-      req.UserSession = session;
-      req.session.id = session.id;
-    }
-    logging.info('req.UserSession', req.UserSession)
+    // // get user's session and log them in
+    // var session = yield db.Sessions.findOne({user_account: req.params.user_id})
+    // if (session) {
+    //   req.UserSession = session;
+    //   req.session.id = session.id;
+    // }
+    // logging.info('req.UserSession', req.UserSession)
+    
     // And assuming it all went well we'll respond to the client with the saved item
     res.redirect(req.protocol + '://' + req.get('host') + '/cart/' + req.params.cart_id);
   }))
