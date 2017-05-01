@@ -143,7 +143,7 @@ module.exports = function (router) {
     //   req.session.id = session.id;
     // }
     // logging.info('req.UserSession', req.UserSession)
-    
+
     // And assuming it all went well we'll respond to the client with the saved item
     res.redirect(req.protocol + '://' + req.get('host') + '/cart/' + req.params.cart_id);
   }))
@@ -405,10 +405,10 @@ module.exports = function (router) {
 
   /**
    * @api {get} /api/itempreview?q=:q/ Item Preview
-   * optional "index" qs parameter -> page of amazon search results
    * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
    * @apiGroup Carts
    * @apiParam {String} :q either a url, asin, or search text
+   * @apiParam {String} :page page of amazon search results
    *
    * @apiParamExample url preview
    * GET https://mint.kipthis.com/api/itempreview?q=https%3A%2F%2Fwww.amazon.com%2FOnitsuka-Tiger-Mexico-Classic-Running%2Fdp%2FB00L8IXMN0%2Fref%3Dsr_1_11%3Fs%3Dapparel%26ie%3DUTF8%26qid%3D1490047374%26sr%3D1-11%26nodeID%3D679312011%26psd%3D1%26keywords%3Dasics%252Bshoes%26th%3D1%26psc%3D1
@@ -435,7 +435,7 @@ module.exports = function (router) {
     } else {
       // search query
       // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-      var item = yield amazon.searchAmazon(q, req.query.index);
+      var item = yield amazon.searchAmazon(q, req.query.page);
     }
     res.send(item)
   }))
