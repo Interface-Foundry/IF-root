@@ -74,7 +74,7 @@ app.use(bodyParser.json());
 app.use(sessions({
   cookieName: 'session',
   secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw' + process.env.NODE_ENV, // `openssl rand -base64 24 `
-  duration: 0 // never expire
+  duration: 10 * 365 * 24 * 60 * 60 * 1000 // expire in 10 years
 }));
 
 /**
