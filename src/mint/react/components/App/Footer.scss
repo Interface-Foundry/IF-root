@@ -37,6 +37,11 @@
       font-weight: 600;
       flex-grow: 1;
       flex-basis: 0;
+      &:disabled {
+        color: black;
+        background-color: $kip-faded-color;
+        cursor: not-allowed;
+      }
       h4 {
         display: inline-block;
         vertical-align: middle;

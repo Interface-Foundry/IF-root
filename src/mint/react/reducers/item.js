@@ -1,6 +1,17 @@
 // react/reducers/item.js
 
-import { RECEIVE_ITEM, CLEAR_ITEM, RECEIVE_INCREMENT_ITEM, RECEIVE_DECREMENT_ITEM, RECEIVE_SEARCH, SEARCH_NEXT, SEARCH_PREV, SET_SEARCH_INDEX, SELECT_DEAL } from '../constants/ActionTypes';
+import {
+  RECEIVE_ITEM,
+  CLEAR_ITEM,
+  RECEIVE_INCREMENT_ITEM,
+  RECEIVE_DECREMENT_ITEM,
+  RECEIVE_SEARCH,
+  SEARCH_NEXT,
+  SEARCH_PREV,
+  SET_SEARCH_INDEX,
+  SELECT_DEAL,
+  RECEIVE_CHANGE_ITEM_TYPE
+} from '../constants/ActionTypes';
 
 export default function item(state = {}, action) {
   let nextItemNum;
@@ -46,6 +57,8 @@ export default function item(state = {}, action) {
     return {
       ...action.deal
     };
+  case RECEIVE_CHANGE_ITEM_TYPE:
+
   default:
     return state;
   }

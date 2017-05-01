@@ -96,11 +96,9 @@ class CartHead extends Component {
         <h3>
           {locked ? 'Checkout in progress' : cartName}
         </h3>
-        {
-          currentUser.id ? <div className='navbar__icon' onClick={_toggleSidenav}>
-            <Icon icon='Hamburger'/>
-          </div> : <div className='navbar__icon no-pointer'/>
-        }
+        <div className='navbar__icon' onClick={_toggleSidenav}>
+          <Icon icon='Hamburger'/>
+        </div>
       </div>
     );
   }
