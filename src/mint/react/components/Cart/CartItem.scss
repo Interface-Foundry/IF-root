@@ -23,12 +23,14 @@
   .cartItem__props {
     display: inline-block;
     padding: 0 0 0 $padding*2;
+    &.locked {
+      width: 100%;
+    }
     p {
       float: left;
       clear: left;
       font-size: 11px;
       color: lighten($header-color, 10%);
-
       &:first-of-type {
         color: $header-color;
         margin-bottom: $padding;
@@ -55,6 +57,7 @@
           background: $header-color;
           color: white;
           border: 2px solid $header-color;
+          cursor: not-allowed;
         }
       }
     }

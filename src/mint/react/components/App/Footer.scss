@@ -2,12 +2,17 @@
 @import '../../styles/Constants';
 .footer {
   position: relative;
-  height: $nav-height + 10px;
+  height: $nav-height - $padding;
   line-height: $nav-height*2 - $padding*2;
-  padding: $padding 0;
+  padding: 2px 0 3px 0;
   margin: 0 (-$padding) * 1.5;
   font-family: $secondary-font;
   color: $kip-primary-color;
+  @media (max-width: 300px) {
+    svg {
+      display:none;
+    }
+  }
   .footer__cart, .footer__item, .footer__save, .footer__settings {
     height: 100%;
     display: flex;

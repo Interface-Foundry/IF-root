@@ -7,9 +7,11 @@ var db;
 const dbReady = require('../../db');
 dbReady.then((models) => { db = models; })
 
-logging.info('setting up send-daily-deals.js')
-
 var sendDailyDeals = function * () {
+  if (!process.env.SEND_DAILY_DEALS) {
+    console.log('set SEND_DAILY_DEALS=1 in your shell to send daily deal emails')
+    return Promise.resolve()
+  }
   yield dbReady;
   console.log('starting sendDailyDeals')
 
@@ -74,6 +76,9 @@ var job = new CronJob('0 0 10 * * *', () => co(sendDailyDeals).catch(e => {
 
 // this just says that the job is enabled, it doesn't run it right this minute
 // waits for the cron time to trigger before running.
-job.start()
+if (process.env.SEND_DAILY_DEALS) {
+  logging.info('setting up send-daily-deals.js')
+  job.start()
+}
 
 module.exports = job

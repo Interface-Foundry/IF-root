@@ -15,6 +15,9 @@ $cart__add-height: $nav-height+$padding;
       background: $kip-primary-color;
       border-bottom: 1px solid $border-color-light;
       border-top: 1px solid $border-color-light;
+      display: flex;
+      flex-direction: row;
+      margin: 0 -25px 0 -25px;
       button {
         height: $nav-height;
         width: 100%;
@@ -24,9 +27,15 @@ $cart__add-height: $nav-height+$padding;
         padding: 0 $padding*2;
         font-size: 17px;
         border-radius: 5px;
-        text-align: left;
+        text-align: center;
         font-weight: bold;
         background: $secondary-button-color;
+        margin: 0 10px;
+        overflow: hidden;
+        display:flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
         svg {
           display: inline-block;
           vertical-align: top!important;
@@ -34,27 +43,34 @@ $cart__add-height: $nav-height+$padding;
           margin-right: $padding;
           height: 100%;
         }
+        @media (max-width: 475px) {
+          svg {
+            display: none;
+          }
+        }
         h1 {
           display: inline-block;
           text-align: left;
         }
         &.secondary {
           color: $header-color;
-          margin-top: 10px;
-          font-size: 18px;
           background: $main-button-color;
           h1 {
             margin-top: 5px;
-            line-height: $nav-height/2 - 5px;
-            height: $nav-height/2;
           }
         }
         &.primary {
           margin-top: 0;
           cursor: pointer;
+        }
+        @media (max-width: 475px) {
           h1 {
-            line-height: $nav-height;
-            height: $nav-height;
+            font-size: 15px;
+          }
+        }
+        @media (max-width: 350px) {
+          h1 {
+            font-size: 12px;
           }
         }
       }
@@ -112,7 +128,7 @@ $cart__add-height: $nav-height+$padding;
     }
   }
   .cart__add {
-    padding: 0 $padding*2 $padding $padding*2;
+    padding: 0 $padding*2 0 $padding*2;
   }
   .cart__title {
     height: $nav-height/2;
@@ -139,6 +155,7 @@ $cart__add-height: $nav-height+$padding;
           color: $price-color;
           &.locked {
             color: $header-color;
+            cursor: not-allowed;
           }
         }
       }
@@ -153,14 +170,13 @@ $cart__add-height: $nav-height+$padding;
       line-height: $nav-height/2;
       padding: 0 $padding*2;
       border-bottom: 1px solid $border-color-light;
-
     }
     .cart__items-empty {
-      padding: $padding*2;
+      padding: $padding;
       background: white;
       border-bottom: 1px solid $border-color-light;
       .image {
-        height: 50px;
+        height: 30px;
       }
       h4 {
         text-align: center;
@@ -175,3 +191,4 @@ $cart__add-height: $nav-height+$padding;
     list-style: disc none inside;
   }
 }
+

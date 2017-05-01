@@ -22,7 +22,7 @@ export default class Header extends Component {
     return (
       <nav className='navbar'>
         <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
-            <EnumeratedHead text={'My Cart Items'} length={items.length} type={'item'} {...props}/>
+            <ModalHead text={'Add To Cart'} {...props}/>
           }
         />
         {/* TODO: get this working for admins */}

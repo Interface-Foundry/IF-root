@@ -33,7 +33,6 @@ export default function cart(state = initialState, action) {
     };
   case RECEIVE_UPDATE_CART:
     if (action.updatedCart.id !== state.cart_id) break;
-
     return {
       ...state,
       locked: action.updatedCart.locked,

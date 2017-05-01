@@ -131,8 +131,9 @@
     a {
       padding: 3px 0;
       cursor: pointer;
+      margin: 0 -20px 0 0;
       button {
-        padding: 5px;
+        padding: 5px 20px 5px 5px;
         overflow: wrap;
         font-size: 13px;
         text-transform: uppercase;

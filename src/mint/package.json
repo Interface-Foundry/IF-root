@@ -95,6 +95,7 @@
     "start": "npm run build && node ./server",
     "build": "NODE_PATH=$NODE_PATH:./react webpack",
     "dev": "SEND_EMAILS=; nodemon --ignore react/ --ignore public/ ./server/index.js & webpack --progress --color -d --watch --hot",
+    "clean": "rm -r public/build",
     "test": "mocha tests",
     "react-test": "node_modules/.bin/karma start karma.conf.js",
     "apidoc": "npm run apidocs",

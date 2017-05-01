@@ -54,8 +54,9 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults, sea
   //add template and send confirmation email
   yield confirmation.template('item_add_confirmation', {
     // baseUrl: 'http://mint-dev.kipthis.com',
-    baseUrl: 'https://44c3b93d.ngrok.io',
-    id: cart,
+    // baseUrl: 'https://44c3b93d.ngrok.io',
+    baseUrl: 'https://mint-dev.kipthis.com',
+    id: cart.id,
     items: items,
     searchResults: searchResults,
     searchTerms: searchTerms,

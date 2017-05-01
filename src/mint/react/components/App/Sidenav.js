@@ -15,7 +15,9 @@ export default class Sidenav extends Component {
     _toggleSidenav: PropTypes.func.isRequired,
     currentUser: PropTypes.object.isRequired,
     replace: PropTypes.func,
-    itemsLen: PropTypes.number
+    itemsLen: PropTypes.number,
+    updateCart: PropTypes.func,
+    currentCart: PropTypes.object
   }
 
   state = {
@@ -55,25 +57,28 @@ export default class Sidenav extends Component {
           </li>
           <li className='sidenav__list__view'>
             { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
-            {_.map(leaderCarts, (c, i) => {
-              if(i > 1 && show !== 'me') return null;
-              return ( 
-                <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-                  { c.locked ? <div className='icon'/> : <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
-                      <div className='icon'>
-                        <Icon icon='Edit'/>
-                      </div>
+            <ul>
+              {_.map(leaderCarts, (c, i) => {
+                if(i > 1 && show !== 'me') return null;
+                
+                return ( 
+                  <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                    { c.locked ? <div className='icon'/> : <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                        <div className='icon'>
+                          <Icon icon='Edit'/>
+                        </div>
+                      </Link>
+                    }
+                    <Link to={`/cart/${c.id}`}>
+                      <p>
+                        {c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}
+                        {c.locked ? <span><br/>{moment(c.updatedAt).format('L')}</span> : null}
+                      </p>
                     </Link>
-                  }
-                  <Link to={`/cart/${c.id}`}>
-                    <p>
-                      {c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}
-                      {c.locked ? <span>{moment(c.updatedAt).format('L')}</span> : null}
-                    </p>
-                  </Link>
-                </li>
-              );
-            })}
+                  </li>
+                );
+              })}
+            </ul>
             {
               leaderCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
               <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
@@ -81,18 +86,20 @@ export default class Sidenav extends Component {
               </h4> : null
             }
             { memberCarts.length ? <h4>Other Kip Carts</h4> : null }
-            {_.map(memberCarts, (c, i) => {
-              if(i > 1 && show !== 'other') return null;
-              return (
-                <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-                  <div className='icon'>
-                  </div>
-                  <Link to={`/cart/${c.id}`}>
-                    <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
-                  </Link>
-                </li>
-              );
-            })}
+            <ul>
+              {_.map(memberCarts, (c, i) => {
+                if(i > 1 && show !== 'other') return null;
+                return (
+                  <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                    <div className='icon'>
+                    </div>
+                    <Link to={`/cart/${c.id}`}>
+                      <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
             {
               memberCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
               <Icon icon={show === 'other' ? 'Up' : 'Down'}/>

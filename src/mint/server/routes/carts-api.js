@@ -447,24 +447,8 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart id
    */
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
-    // only available for logged-in Users
-    if (!_.get(req, 'UserSession.user_account.id')) {
-      throw new Error('Unauthorized');
-    }
-
-    // this will be handy later now that we know it exists
-    const userId = req.UserSession.user_account.id
-
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
-
-    // check permissions
-    if (cart.leader !== userId) {
-      throw new Error('Unauthorized')
-    }
-
-    // lock the cart and all the items
-    // TODO
 
     // make sure the amazon cart is in sync with the cart in our database
     var amazonCart = yield amazon.syncAmazon(cart)
