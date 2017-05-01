@@ -135,7 +135,8 @@ export default class Cart extends Component {
 
 class MyItems extends Component {
   static propTypes = {
-    items: PropTypes.array.isRequired
+    items: PropTypes.array.isRequired,
+    currentCart: PropTypes.object
   }
 
   renderList() {

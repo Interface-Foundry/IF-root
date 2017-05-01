@@ -20,6 +20,7 @@
   height: $nav-height;
   padding: 0 $padding 0 0;
   text-align: left;
+  overflow: hidden;
   svg {
     height: 100%;
     vertical-align: top !important;

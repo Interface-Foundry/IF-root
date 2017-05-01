@@ -92,20 +92,23 @@ export default class Item extends Component {
   }
 
   navDeal(newIndex) {
-    const { cart_id, type, items, selectDeal, history: { replace } } = this.props;
+    const { clearItem, cart_id, type, items, selectDeal, history: { replace } } = this.props;
+    clearItem();
     selectDeal(newIndex, items[newIndex]);
     replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
   }
 
   navSearch() {
-    const { state: { originalx, x }, props: { nextSearch, prevSearch } } = this,
+    const { state: { originalx, x }, props: { clearItem, nextSearch, prevSearch } } = this,
     nav = (originalx > x) ? nextSearch : prevSearch;
+    clearItem();
     nav();
   }
 
   navCart(newIndex) {
-    const { cart_id, type, currentUser: { id }, history: { replace } } = this.props;
+    const { clearItem, cart_id, type, currentUser: { id }, history: { replace } } = this.props;
     const ourItems = splitCartById(this.props, { id });
+    clearItem();
     replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems.my[newIndex].id}/edit`);
   }
 

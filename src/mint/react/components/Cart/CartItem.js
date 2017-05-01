@@ -2,6 +2,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../utils';
+import Icon from '../Icon';
 
 export default class CartItem extends Component {
   static propTypes = {
@@ -32,13 +33,13 @@ export default class CartItem extends Component {
           <p>Qty: {quantity}</p>
           <p>Price: {displayCost(price)}</p>
           {
-            isOwner && !locked
+            isOwner
             ? <div className='cartItem__actions'>
                 <button 
                   className={locked ? 'locked' : ''}
                   disabled={locked} 
                   onClick={() => push(`/cart/${cart_id}/m/cartItem/${itemNumber}/${id}/edit`)}>
-                    { locked ? 'Locked' : 'Edit'}
+                    { locked ? <Icon icon='Locked'/> : 'Edit'}
                 </button>
               </div>
             : null
