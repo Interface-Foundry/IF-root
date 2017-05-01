@@ -1,0 +1,118 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.about {
+	position: relative;
+	text-align: center;
+	background: white;
+	padding: $padding*4 $padding*2;
+
+	.about__header {
+		padding: 0 0 $padding*10;
+		@media only screen and (max-width: 600px) {
+			padding: 0 0 $padding*5;
+		}
+		h1 {
+			font-size: 38px;
+			color: mix($thirdColor, $bgColor, 30%);
+			@media only screen and (max-width: 600px) {
+				font-size: 34px;
+			}
+		}
+
+		p {
+			font-size: 17px;
+			color: rgba(mix($thirdColor, $bgColor, 30%), 0.8);
+		}
+	}
+
+
+	h2 {
+		line-height: $ribbonHeight;
+		height: $ribbonHeight;
+		margin: $padding*5 0 $padding*2;
+		color: $thirdColor;
+		font-size: 30px;
+
+		&:first-of-type {
+			margin: 0 0 $padding*2;
+		}
+
+
+		@media only screen and (max-width: 600px) {
+			font-size: 23px;
+			margin: $padding*5 0 $padding;
+
+			&:first-of-type {
+				margin: 0 0 $padding;
+			}
+		}
+	}
+
+	.about__details {
+		display: block;
+		max-width: 500px;
+		position: relative;
+		border-radius: 10px;
+		padding: $padding*2 0;
+		background: mix(#fcfcf9, $thirdColor, 97%);
+		border: 1px solid rgba(mix($bgColor, $thirdColor, 57%), 0.2);
+	    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+
+		&:after {
+			content: '';
+			position: absolute;
+			height: 30px;
+			left: 50%;
+			border: 1px solid $thirdColor;
+		}
+		&:after {
+			bottom: -50px;
+		}	
+
+		&:first-of-type {
+			svg {
+				path {
+					fill: white;
+				}
+			}
+		}
+
+		svg {
+			width: 40%;
+
+			circle {
+				fill: $thirdColor !important;
+			}
+
+			path {
+				fill: $thirdColor;
+			}
+		}
+
+		p {
+			position: relative;
+			white-space: normal;
+			font-weight: 500;
+			color: rgba(mix($thirdColor, $bgColor, 30%), 0.8);
+			padding: $padding $padding*2;
+			font-size: 15px;
+		}
+	}
+
+	.about__action {
+		padding: $padding*6 $padding*2 $padding*2;
+		button {
+			border: 0;
+			font-weight: bold;
+			border-radius: $padding/2;
+			background: $thirdColor;
+			color: #fcfcf9;
+			padding: $padding $padding*2;
+		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+			&:focus {
+				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+			}
+		}
+	}
+}

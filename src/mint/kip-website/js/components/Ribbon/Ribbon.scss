@@ -1,0 +1,78 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.ribbon {
+	position: fixed;
+	padding: $padding $padding*2;
+	top: 0;
+	width: 100%;
+	height: auto;
+	z-index: 100;
+	text-align: center;
+	background: transparent;
+	border-bottom: 1px solid transparent;
+	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
+    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+    &.background {
+    	background: white;
+		border-bottom: 1px solid $borderColor;
+		box-shadow: 0 4px 6px rgba(50,50,93,.33), 0 1px 3px rgba(0,0,0,.08);
+
+		h1 {
+			color: $primaryColor;
+		}
+
+		* {
+			color: mix($primaryColor, $bgColor, 30%);
+		}
+    }
+
+	* {
+		color: white;
+	}
+	& > div {
+		text-align: left;
+	}
+	a {
+		color: inherit;
+		cursor: pointer;
+	}
+	.row {
+		text-align: left;
+		height: $ribbonHeight;
+		display: inline-block;
+		.image {
+			display: inline-block;
+			background-size: contain;
+			width: $ribbonHeight - 15px;
+		}
+		h1, a {
+			display: inline-block;
+			padding: 0 $padding/2;
+			font-size: 17px;
+			line-height: $ribbonHeight;
+		}
+
+		h1 {
+			font-size: 23px;
+		}
+		svg {
+			width: 30px;
+			height: 100%;
+		}
+		&.right {
+			float: right;
+			padding: 0 10px;
+			@media only screen and (max-width: 600px) {
+				padding: 0 ;
+			}
+		}
+
+		@media only screen and (max-width: 600px) {
+			&.desktop {
+				display: none;
+			}
+		}
+	}
+}

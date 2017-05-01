@@ -1,0 +1,137 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.services {
+	position: relative;
+	text-align: center;
+	background: mix(#fcfcf9, $primaryColor, 97%);
+	padding: $padding*3 $padding*2 $padding*15;
+
+	@media only screen and (max-width: 600px) {
+		padding: $padding*3 $padding*2 $padding*6;
+	}
+
+	h1 {
+		font-size: 38px;
+		margin: 0 0 $padding*6;
+		color: mix($primaryColor, $bgColor, 30%);
+
+		@media only screen and (max-width: 600px) {
+			font-size: 34px;
+			line-height: auto;
+			margin: $padding*6 0 $padding;
+		}
+	}
+
+	h2 {
+		margin: 0 0 $padding;
+		color: mix($primaryColor, $bgColor, 30%);
+		font-size: 17px;
+	}
+
+	.video {
+		border: 1px solid $borderColor;
+		display: block;
+		margin: -230px auto 100px;
+		border-radius: 10px;
+		height: 500px;
+		box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+		overflow: hidden;
+
+		iframe {
+			border: 1px solid $borderColor;
+			height: 100%;
+		}	
+
+		@media only screen and (max-width: 600px) {
+			height: 300px;
+			margin: -230px auto 0;
+			margin-top: -130px;
+		}
+	}
+
+
+
+	.services__details {
+		position: relative;
+		padding: $padding*2 0 $padding*4;
+		text-align: left;
+
+		@media only screen and (max-width: 600px) {
+			border-bottom: 1px solid rgba(mix($bgColor, $primaryColor, 57%), 0.2);
+		}
+
+		svg {
+			width: 20%;
+			height: $ribbonHeight*2;
+			padding: $padding/2;
+
+			path {
+				fill: mix($primaryColor, $bgColor, 30%) !important;
+			}
+		}
+
+		h2 {
+			display: inline-block;
+			width: 60%;
+			white-space: nowrap;
+			line-height: $ribbonHeight*2;
+			margin: 0;
+		}
+
+
+		@media only screen and (max-width: 600px) {
+			border-bottom: 1px solid rgba(mix($bgColor, $primaryColor, 57%), 0.2);
+		}
+
+		p {
+			position: relative;
+			white-space: normal;
+			font-weight: 500;
+			font-size: 15px;
+			text-align: left;
+			padding: 0 $padding*4 0 0;
+			color: rgba(mix($primaryColor, $bgColor, 30%), 0.8);
+			@media only screen and (max-width: 600px) {
+				padding: 0;
+			}
+		}
+
+		&:last-of-type {
+			border-bottom: 1px solid transparent;
+		}
+
+
+	}
+
+	.action {
+		padding: $padding*2 0;
+		text-align: left;
+		button {
+			border: 0;
+			font-weight: bold;
+			color: $thirdColor;
+			border-radius: $padding/2;
+			background: transparent;
+			font-weight: 500;
+			padding: $padding 0 $padding*2;
+
+			&:focus {
+				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+			}
+		}
+	}
+
+	.sine {
+		fill: white;
+		stroke: rgba(mix($bgColor, $primaryColor, 57%), 0.2);
+	    stroke-width: 0.2;
+	    height: 150px;
+	    margin-left: -1px;
+	    width: calc(100% + 3px);
+
+	    @media only screen and (max-width: 600px) {
+	    	height: 50px;
+	    }
+	}
+}
