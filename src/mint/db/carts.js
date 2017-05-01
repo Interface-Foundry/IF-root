@@ -52,7 +52,13 @@ var cartsCollection = Waterline.Collection.extend({
     amazon_cartid: 'string',
 
     /** @type {String} equivalent to HMAC for amazon */
-    amazon_hmac: 'string'
+    amazon_hmac: 'string',
+
+    /** @type {String} affiliate_checkout_url url that goes through the "airport" (really we still have this thing) */
+    affiliate_checkout_url: 'string',
+
+    /** @type {String} amazon_purchase_url the url that goes directly to amazon */
+    amazon_purchase_url: 'string'
 
   }
 });
