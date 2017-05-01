@@ -1,6 +1,7 @@
 // react/reducers/item.js
 
 import {
+  REQUEST_REMOVE_ITEM,
   RECEIVE_ITEM,
   CLEAR_ITEM,
   RECEIVE_INCREMENT_ITEM,
@@ -10,7 +11,6 @@ import {
   SEARCH_PREV,
   SET_SEARCH_INDEX,
   SELECT_DEAL,
-  RECEIVE_CHANGE_ITEM_TYPE
 } from '../constants/ActionTypes';
 
 export default function item(state = {}, action) {
@@ -57,8 +57,6 @@ export default function item(state = {}, action) {
     return {
       ...action.deal
     };
-  case RECEIVE_CHANGE_ITEM_TYPE:
-
   default:
     return state;
   }

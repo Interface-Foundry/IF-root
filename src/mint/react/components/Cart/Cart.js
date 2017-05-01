@@ -72,7 +72,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, history: { push }, locked, updateCart, currentCart } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
@@ -81,6 +81,7 @@ export default class Cart extends Component {
       ]);
     return (
       <div className='cart'>
+        {currentCart.deletingItem ? <button onClick={cancelRemoveItem}>Undo Delete</button>: null}
         {
           locked 
           ? <div className='cart__locked'>

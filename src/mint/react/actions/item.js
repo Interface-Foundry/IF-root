@@ -9,6 +9,7 @@ import {
   RECEIVE_ADD_ITEM,
   REQUEST_REMOVE_ITEM,
   RECEIVE_REMOVE_ITEM,
+  CANCEL_REMOVE_ITEM,
   RECEIVE_INCREMENT_ITEM,
   REQUEST_INCREMENT_ITEM,
   RECEIVE_DECREMENT_ITEM,
@@ -17,8 +18,10 @@ import {
   SEARCH_NEXT,
   SET_SEARCH_INDEX,
   REQUEST_CHANGE_ITEM_TYPE,
-  RECEIVE_CHANGE_ITEM_TYPE
+  RECEIVE_CHANGE_ITEM_TYPE,
 } from '../constants/ActionTypes';
+
+import { sleep } from '../utils';
 
 const receiveItem = (item) => ({
   type: RECEIVE_ITEM,
@@ -55,13 +58,18 @@ const receiveAddItem = (item) => ({
   item
 });
 
-const requestRemoveItem = () => ({
-  type: REQUEST_REMOVE_ITEM
+const requestRemoveItem = (itemToRemove) => ({
+  type: REQUEST_REMOVE_ITEM,
+  itemToRemove
 });
 
-const receiveRemoveItem = (itemToRemove) => ({
+const receiveRemoveItem = (items) => ({
   type: RECEIVE_REMOVE_ITEM,
-  itemToRemove
+  items
+});
+
+const cancelDeleteItem = () => ({
+  type: CANCEL_REMOVE_ITEM
 });
 
 const receiveIncrementItem = (item) => ({
@@ -152,18 +160,29 @@ export function addItem(cart_id, item_id) {
 }
 
 export function removeItem(cart_id, item_id) {
-  return async dispatch => {
-    dispatch(requestRemoveItem());
+  return async(dispatch, getState) => {
+    dispatch(requestRemoveItem(item_id));
     try {
-      await fetch(`/api/cart/${cart_id}/item/${item_id}`, {
-        method: 'DELETE',
-        credentials: 'same-origin',
-      });
-      return dispatch(receiveRemoveItem(item_id));
+      await sleep(10000);
+      console.log(getState()
+        .currentCart.deletingItem);
+      if (getState()
+        .currentCart.deletingItem) {
+        await fetch(`/api/cart/${cart_id}/item/${item_id}`, {
+          method: 'DELETE',
+          credentials: 'same-origin',
+        });
+      }
+      const cart = await fetch(`/api/cart/${cart_id}`);
+      return dispatch(receiveRemoveItem(cart.items));
     } catch (e) {
       throw 'error in cart removeItem';
     }
   };
+}
+
+export function cancelRemoveItem() {
+  return async(dispatch) => dispatch(cancelDeleteItem());
 }
 
 export function incrementItem(item_id, quantity) {
@@ -212,31 +231,8 @@ export function decrementItem(item_id, quantity) {
   };
 }
 
-export function clearItem() {
-  return async function (dispatch) {
-    return dispatch(clear());
-  };
-}
-
-export function nextSearch() {
-  return async function (dispatch) {
-    return dispatch(searchNext());
-  };
-}
-export function prevSearch() {
-  return async function (dispatch) {
-    return dispatch(searchPrev());
-  };
-}
-
-export function setSearchIndex(index) {
-  return async function (dispatch) {
-    return dispatch(setSearch(index));
-  };
-}
-
 export function changeItemType(item_id, newAsin) {
-  return async dispatch => {
+  return async(dispatch, getState) => {
     dispatch(requestRemoveItem());
     try {
       await fetch(`/api/item/${item_id}`, {
@@ -248,4 +244,20 @@ export function changeItemType(item_id, newAsin) {
       throw 'error in cart removeItem';
     }
   };
+}
+
+export function clearItem() {
+  return async dispatch => dispatch(clear());
+}
+
+export function nextSearch() {
+  return async dispatch => dispatch(searchNext());
+}
+
+export function prevSearch() {
+  return async dispatch => dispatch(searchPrev());
+}
+
+export function setSearchIndex(index) {
+  return async dispatch => dispatch(setSearch(index));
 }

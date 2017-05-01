@@ -7,7 +7,9 @@ import {
   RECEIVE_UPDATE_CART,
   RECEIVE_ITEMS,
   RECEIVE_ADD_ITEM,
+  REQUEST_REMOVE_ITEM,
   RECEIVE_REMOVE_ITEM,
+  CANCEL_REMOVE_ITEM,
   RECEIVE_INCREMENT_ITEM,
   RECEIVE_DECREMENT_ITEM
 } from '../constants/ActionTypes';
@@ -57,10 +59,23 @@ export default function cart(state = initialState, action) {
       ...state,
       items: [...state.items, action.item].reverse()
     };
+  case REQUEST_REMOVE_ITEM: // now that we have an undo, we remove this first
+    return {
+      ...state,
+      deletingItem: true,
+      items: state.items.filter(item => item.id !== action.itemToRemove)
+    };
   case RECEIVE_REMOVE_ITEM:
     return {
       ...state,
-      items: state.items.filter(item => item.id !== action.itemToRemove)
+      deletingItem: false,
+      items: action.items
+    };
+  case CANCEL_REMOVE_ITEM:
+    return {
+      ...state,
+      deletingItem: false,
+      items: action.items
     };
   case RECEIVE_INCREMENT_ITEM:
   case RECEIVE_DECREMENT_ITEM:
