@@ -58,7 +58,7 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
   if (!req.body.text || ! req.body.html) {
     logging.info('no email body');
-    yield utils.sendErrorEmail(email);
+    yield utils.sendErrorEmail(email, cart_id);
     res.sendStatus(202);
   }
 
@@ -100,6 +100,16 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
           logging.error(err);
         }
       }
+    })
+  }
+
+  //if a search failed to turn anything up
+  if (searchTerms.length && !searchResults.length) {
+    var noSearchResults = yield db.Emails.create({
+      sender: 'hello@kip.ai',
+      recipients: email,
+      subject: req.body.subject,
+      template_name:
     })
   }
 

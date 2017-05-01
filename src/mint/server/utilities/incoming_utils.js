@@ -9,12 +9,15 @@ dbReady.then((models) => { db = models; })
  * was not a valid amazon url we could user
  * @param {string} email - email of the user who is receiving the error-email
  */
-var sendErrorEmail = function * (email) {
+var sendErrorEmail = function * (email, cartId, searchTerms) {
   var error = yield db.Emails.create({
     recipients: email,
     sender: 'hello@kip.ai',
     subject: 'Oops',
-    message_html: '<html><p>Unfortunately I couldn\'t understand the link you sent me -- make sure that you paste a full URL that links to an item on Amazon.com</p></html>'
+    message_html: '<html><input type="hidden" id="cartId" name="cartId" value="<%=id%>">' +
+      '<p>Unfortunately I wasn\'t able to find what you were looking for.' +
+      (searchTerms.length ? '': ) +
+      '</p></html>'
   })
   yield error.send();
 }
@@ -48,7 +51,6 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults, sea
   var user = yield db.UserAccounts.findOne({email_address: email});
 
   //add template and send confirmation email
-  logging.info('is this an id')
   yield confirmation.template('item_add_confirmation', {
     // baseUrl: 'http://mint-dev.kipthis.com',
     baseUrl: 'https://44c3b93d.ngrok.io',
