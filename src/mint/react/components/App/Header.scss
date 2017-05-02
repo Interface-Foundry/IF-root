@@ -7,6 +7,8 @@
   font-family: 'Raleway';
   background: $header-color;
   color: $kip-primary-color;
+  text-align: left;
+
   .image {
     display: inline-block;
     margin: $padding;
@@ -24,9 +26,11 @@
     font-weight: 500;
     font-size: 20px;
   }
-  &>div {
+
+  & > div {
     display: flex;
   }
+  
   .navbar__modal {
     display: flex;
     &.settings {

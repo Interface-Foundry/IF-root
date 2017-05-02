@@ -71,7 +71,7 @@ export default class Sidenav extends Component {
                     }
                     <Link to={`/cart/${c.id}`}>
                       <p>
-                        {c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}
+                        {c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart`}
                         {c.locked ? <span><br/>{moment(c.updatedAt).format('L')}</span> : null}
                       </p>
                     </Link>
