@@ -80,7 +80,6 @@ export default class Cart extends Component {
         ...items.my,
         ..._.reduce(items.others, (acc, value) => [...acc, ...value], [])
       ]);
-    console.log(deals);
     return (
       <div className='cart'>
         {
@@ -88,7 +87,7 @@ export default class Cart extends Component {
           ? <div className='cart__locked'>
               <div className='cart__locked__actions'>
                 <button className='primary'><Icon icon='Refresh'/><h1>RE-ORDER CART</h1></button>
-                { !!leader && leader.id === user_account.id ? <button className='secondary' onClick={(e)=>{e.preventDefault(); window.open(`/api/cart/${cart_id}/checkout`)}}><Icon icon='Cart'/><h1>CHECKOUT<br/>{displayCost(total)}</h1></button> : null }
+                { !!leader && leader.id === user_account.id ? <button className='secondary' onClick={(e)=>{e.preventDefault(); window.open(`/api/cart/${cart_id}/checkout`);}}><Icon icon='Cart'/><h1>CHECKOUT<br/>{displayCost(total)}</h1></button> : null }
               </div>
               <div className='cart__locked-container'>
                 <div className='cart__locked__text'>

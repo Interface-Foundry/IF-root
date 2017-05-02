@@ -17,11 +17,11 @@ export default class AmazonForm extends Component {
   }
 
   renderField({ input, label, placeholder, handleSubmit, type, meta: { touched, error, warning, submitting, active } }) {
-    const { onBlur } = this.props;
+
     return (
       <div>
           <div className='form__input'>
-            <input {...input} onBlur={onBlur} placeholder={placeholder} type={type} autoFocus autoComplete="off" spellCheck='true'/>
+            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete="off" spellCheck='true'/>
             <button
               className='form__input__submit'
               type="submit"

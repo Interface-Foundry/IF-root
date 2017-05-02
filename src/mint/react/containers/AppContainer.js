@@ -9,20 +9,27 @@ import { removeDeal } from '../actions/deals';
 
 import { getNameFromEmail } from '../utils';
 
-const mapStateToProps = (state, ownProps) => ({
-  cart_id: state.routing.location.pathname.match(/cart\/((\d|\w)+)/)[1], // TODO: switch to nonregex when react router allows it
-  leader: state.currentCart.leader,
-  carts: state.otherCarts.carts,
-  currentUser: state.session.user_account,
-  newAccount: state.session.newAccount,
-  deals: state.deals.deals,
-  position: state.deals.position,
-  item: state.item,
-  currentCart: state.currentCart,
-  cartName: state.currentCart.name ? state.currentCart.name : `${_.capitalize(getNameFromEmail(state.session.user_account ? state.session.user_account.email_address : null))}'s Group Cart`,
-  items: state.currentCart.items,
-  session_id: state.session.id
-});
+const mapStateToProps = (state, ownProps) => {
+  const params = decodeURIComponent(state.routing.location.search),
+    toast = params.match(/toast=([^&$]+)/),
+    status = params.match(/status=([^&$]+)/);
+  return {
+    cart_id: state.routing.location.pathname.match(/cart\/((\d|\w)+)/)[1], // TODO: switch to nonregex when react router allows it
+    toast: toast ? toast[1] : null,
+    status: status ? status[1] : null,
+    leader: state.currentCart.leader,
+    carts: state.otherCarts.carts,
+    currentUser: state.session.user_account,
+    newAccount: state.session.newAccount,
+    deals: state.deals.deals,
+    position: state.deals.position,
+    item: state.item,
+    currentCart: state.currentCart,
+    cartName: state.currentCart.name ? state.currentCart.name : `${_.capitalize(getNameFromEmail(state.session.user_account ? state.session.user_account.email_address : null))}'s Group Cart`,
+    items: state.currentCart.items,
+    session_id: state.session.id
+  };
+};
 const mapDispatchToProps = dispatch => ({
   addItem: (cart_id, item_id, replace) => {
     dispatch(addItem(cart_id, item_id))
