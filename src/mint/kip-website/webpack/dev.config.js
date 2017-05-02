@@ -7,9 +7,6 @@ var appDir = path.resolve(__dirname, '../js');
 module.exports = {
   entry: [
     'babel-polyfill',
-    './js/index.js',
-    'webpack-dev-server/client?http://localhost:3001/',
-    'webpack/hot/only-dev-server',
     'webpack-hot-middleware/client?path=/__webpack_hmr', appDir + '/index'
   ],
   module: {
@@ -44,13 +41,6 @@ module.exports = {
     path: assetsPath,
     publicPath: '/',
     filename: 'bundle.js'
-  },
-  devServer: {
-    host: '0.0.0.0',
-    disableHostCheck: true,
-    contentBase: assetsPath,
-    historyApiFallback: true,
-    hot: true
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),

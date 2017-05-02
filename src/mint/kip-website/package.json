@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "webpack --progress --config webpack/dev.config.js && NODE_ENV=development node server/serverStart.js",
+    "dev": "NODE_ENV=development node ./server/index.js & webpack --progress --color -d --watch --hot --config webpack/dev.config.js",
     "prod": "webpack -p --progress --config webpack/prod.config.js"
   },
   "babel": {
