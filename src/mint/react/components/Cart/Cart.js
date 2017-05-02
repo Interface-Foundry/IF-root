@@ -117,10 +117,10 @@ export default class Cart extends Component {
           { animation 
             ? <h4>{animation}</h4>
             : <h4>
-              { hasItems ? `${items.quantity} items in Group Cart`  : 'Group Shopping Cart' } 
+              { hasItems ? `${items.quantity} items in Kip Cart`  : 'Kip Cart' } 
               {
                 !!leader && leader.id === user_account.id 
-                ?  <span> (<span className='price'>{displayCost(total)}</span>)</span> 
+                ?  <span> – <span className='price'>{displayCost(total)} Total</span></span> 
                 : null
               }
             </h4>
