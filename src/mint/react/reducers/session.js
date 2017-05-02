@@ -18,13 +18,11 @@ const initialState = {
 export default function session(state = initialState, action) {
   switch (action.type) {
   case RECEIVE_SESSION:
-  debugger
     return {
       ...state,
       ...action.newSession
     };
   case RECEIVE_UPDATE_SESSION:
-  debugger
     return {
       ...state,
       ...action.newSession,
