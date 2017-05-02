@@ -7,8 +7,6 @@ import { logout } from '../actions/session';
 import { addItem, removeItem } from '../actions/item';
 import { removeDeal } from '../actions/deals';
 
-import { getNameFromEmail } from '../utils';
-
 const mapStateToProps = (state, ownProps) => {
   const params = decodeURIComponent(state.routing.location.search),
     toast = params.match(/toast=([^&$]+)/),
@@ -25,11 +23,12 @@ const mapStateToProps = (state, ownProps) => {
     position: state.deals.position,
     item: state.item,
     currentCart: state.currentCart,
-    cartName: state.currentCart.name ? state.currentCart.name : `${_.capitalize(getNameFromEmail(state.session.user_account ? state.session.user_account.email_address : null))}'s Group Cart`,
+    cartName: state.currentCart.name ? state.currentCart.name : state.currentCart.leader ? state.currentCart.leader.name + '\'s Kip Cart' : 'New Kip Cart',
     items: state.currentCart.items,
     session_id: state.session.id
   };
 };
+
 const mapDispatchToProps = dispatch => ({
   addItem: (cart_id, item_id, replace) => {
     dispatch(addItem(cart_id, item_id))
@@ -43,8 +42,8 @@ const mapDispatchToProps = dispatch => ({
   removeItem: (cart_id, item_id) => dispatch(removeItem(cart_id, item_id)),
   removeDeal: (index) => {
     setTimeout(() => {
-      dispatch(removeDeal(index))
-    }, 100)
+      dispatch(removeDeal(index));
+    }, 100);
   },
   checkoutCart: (cart_id) => dispatch(checkoutCart(cart_id)),
   logout: () => dispatch(logout())

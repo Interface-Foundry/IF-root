@@ -50,7 +50,6 @@ body {
   &.large {
     height: calc(100% - #{$nav-height});
   }
-
   @media (min-width: 900px) {
     display: inline-block;
     width: calc(100% - 250px);
@@ -104,7 +103,6 @@ body::-webkit-scrollbar {
 .toast {
   @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.6s);
   @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
-
   top: $padding;
   left: $padding*2;
   right: $padding*2;
@@ -118,13 +116,13 @@ body::-webkit-scrollbar {
   z-index: 100;
   box-shadow: 0 0 10px black;
   &.err {
-    background: rgba($price-color, 0.99);
+    background: rgba($price-color, 0.98);
   }
   &.warn {
-    background: rgba($main-button-color, 0.99);
+    background: rgba($main-button-color, 0.98);
   }
   &.success {
-    background: rgba($third-button-color, 0.99);
+    background: rgba($third-button-color, 0.98);
   }
 }
 

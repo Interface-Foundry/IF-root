@@ -80,6 +80,7 @@ export default class Cart extends Component {
         ...items.my,
         ..._.reduce(items.others, (acc, value) => [...acc, ...value], [])
       ]);
+    let cartItemIndex = items.my.length;
     return (
       <div className='cart'>
         {
@@ -91,7 +92,7 @@ export default class Cart extends Component {
               </div>
               <div className='cart__locked-container'>
                 <div className='cart__locked__text'>
-                  <p>{currentCart.name}</p>
+                  <p>{currentCart.name ? currentCart.name : `${user_account.name ? user_account.name.capitalize() + '\'s ' : ''}Kip Cart`}</p>
                   <p>{moment(currentCart.updatedAt).format('L')}&nbsp;{moment(currentCart.updatedAt).format('LT')}</p>
                 </div>
                 {
@@ -102,7 +103,7 @@ export default class Cart extends Component {
                 }
               </div>
             </div> 
-          : <span>
+          : <div className='add__item'>
               <div className='cart__add'>
                 <AddAmazonItemContainer push={push} members={members}/>
               </div>
@@ -111,7 +112,7 @@ export default class Cart extends Component {
                   ? <DealsContainer isDropdown={false}/> 
                   : null
               }
-            </span>
+            </div>
         }
         <div className={`cart__title ${animation ? 'action' : ''}`}>
           { animation 
@@ -130,9 +131,13 @@ export default class Cart extends Component {
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
           {
-            _.map(items.others, (value, key, index) => {
-              return (<OtherItems {...this.props} key={key} title={key} items={value} startIndex={items.my.length} isLeader={isLeader} />);
-            })
+            items.others.map(
+              member => {
+                let tempIndex = cartItemIndex;
+                cartItemIndex += member.items.length;
+                return <OtherItems {...this.props} key={member.id} member={member} startIndex={tempIndex} isLeader={isLeader} />;
+              }
+            )
           }
         </div>
       </div>
@@ -182,20 +187,19 @@ class MyItems extends Component {
 
 class OtherItems extends Component {
   static propTypes = {
-    items: PropTypes.array.isRequired,
+    member: PropTypes.object.isRequired,
     isLeader: PropTypes.bool.isRequired,
     startIndex: PropTypes.number,
-    title: PropTypes.string,
     currentCart: PropTypes.object
   }
 
   render() {
-    const { props, props: { items, isLeader, startIndex, title, currentCart: { locked } } } = this,
+    const { props, props: { isLeader, startIndex, member: { items, name, email, id }, currentCart: { locked }, } } = this,
     total = calculateItemTotal(items);
 
     return (
       <ul>
-        <div className='cart__items__title'>{title}</div>
+        <div key={id} className='cart__items__title'>{name}<span className='email'>{email}</span></div>
         {
           items.length 
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 

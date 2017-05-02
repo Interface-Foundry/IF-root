@@ -85,7 +85,7 @@ class CartHead extends Component {
   }
 
   render() {
-    const { isMobile, currentUser, _toggleSidenav, cartName, currentCart: { locked, thumbnail_url } } = this.props;
+    const { isMobile, currentUser: { name }, _toggleSidenav, cartName, currentCart: { locked, thumbnail_url } } = this.props;
 
     return (
       <div>
@@ -102,7 +102,7 @@ class CartHead extends Component {
           {locked ? 'Checkout in progress' : cartName}
         </h3>
         <div className='navbar__icon' onClick={_toggleSidenav}>
-          {isMobile ? <Icon icon='Hamburger'/> : <p>{_.capitalize(getNameFromEmail(currentUser.email_address))}</p>}
+          {isMobile ? <Icon icon='Hamburger'/> : <p>{name}</p>}
         </div>
       </div>
     );

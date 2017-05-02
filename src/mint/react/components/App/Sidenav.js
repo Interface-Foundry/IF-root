@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
-import { getNameFromEmail } from '../../utils';
 import { Icon } from '..';
 
 export default class Sidenav extends Component {
@@ -42,15 +41,15 @@ export default class Sidenav extends Component {
 
   render() {
     const { carts, _toggleSidenav, currentUser, cart_id } = this.props, { show } = this.state,
-      leaderCarts = _.filter(carts, (c, i) => c.leader.email_address === currentUser.email_address),
-      memberCarts = _.filter(carts, (c, i) => c.leader.email_address !== currentUser.email_address);
+      leaderCarts = _.filter(carts, (c, i) => c.leader.id === currentUser.id),
+      memberCarts = _.filter(carts, (c, i) => c.leader.id !== currentUser.id);
     return (
       <div className='sidenav'>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
         </div>
         <ul className='sidenav__list'>
           <li className='sidenav__list__header'>
-            <p>{currentUser.email_address}</p>
+            <p>{currentUser.name ? currentUser.name : ''}</p>
             <div className='icon' onClick={_toggleSidenav}>
               <Icon icon='Clear'/>
             </div>
@@ -60,7 +59,6 @@ export default class Sidenav extends Component {
             <ul>
               {_.map(leaderCarts, (c, i) => {
                 if(i > 1 && show !== 'me') return null;
-                
                 return ( 
                   <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
                     { c.locked ? <div className='icon'/> : <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
@@ -71,7 +69,7 @@ export default class Sidenav extends Component {
                     }
                     <Link to={`/cart/${c.id}`}>
                       <p>
-                        {c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart`}
+                        {c.name ? c.name : `${c.leader.name ? c.leader.name + '\'s ' : ''}Kip Cart`}
                         {c.locked ? <span><br/>{moment(c.updatedAt).format('L')}</span> : null}
                       </p>
                     </Link>
@@ -94,7 +92,7 @@ export default class Sidenav extends Component {
                     <div className='icon'>
                     </div>
                     <Link to={`/cart/${c.id}`}>
-                      <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                      <p>{c.name ? c.name : `${c.leader.name ? c.leader.name + '\'s ' : ''}Kip Cart`}</p>
                     </Link>
                   </li>
                 );

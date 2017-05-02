@@ -7,8 +7,13 @@ $cart__add-height: $nav-height+$padding;
   position: relative;
   max-width: 900px;
   margin: 0 auto;
-  background-color: $kip-primary-color;
-
+  .add__item {
+    background-color: $kip-primary-color;
+    border-bottom-right-radius: $padding/2;
+    border-bottom-left-radius: $padding/2;
+    box-shadow: 0 1px 5px -2px grey;
+    margin: 0 2px 0 2px;
+  }
   @media (min-width: 900px) {
     height: 100%;
   }
@@ -39,7 +44,7 @@ $cart__add-height: $nav-height+$padding;
         background: $secondary-button-color;
         margin: 0 10px;
         overflow: hidden;
-        display:flex;
+        display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
@@ -140,7 +145,6 @@ $cart__add-height: $nav-height+$padding;
   .cart__title {
     height: $nav-height/2;
     line-height: $nav-height/2;
-    background: $border-color-light;
     text-align: center;
     @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
@@ -153,14 +157,17 @@ $cart__add-height: $nav-height+$padding;
     overflow-y: visable;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
-    background-color: $kip-primary-color;
     @media (min-width: 900px) {
       height: auto;
     }
     ul {
       overflow: hidden;
+      border-radius: $padding/2;
+      background-color: $kip-primary-color;
+      margin: 0 2px 0 2px;
+      margin-bottom: $padding;
+      box-shadow: 0 2px 5px -2px grey;
       h3 {
-        border-bottom: 1px solid $border-color-light;
         padding: $padding;
         span {
           color: $price-color;
@@ -180,12 +187,16 @@ $cart__add-height: $nav-height+$padding;
       height: $nav-height/2;
       line-height: $nav-height/2;
       padding: 0 $padding*2;
-      border-bottom: 1px solid $border-color-light;
+      .email {
+        display: block;
+        font-size: 0.6em;
+        line-height: 0.6em;
+        color: lighten($header-color, 10%);
+      }
     }
     .cart__items-empty {
       padding: $padding;
       background: white;
-      border-bottom: 1px solid $border-color-light;
       .image {
         height: 30px;
       }

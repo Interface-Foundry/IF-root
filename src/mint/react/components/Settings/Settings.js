@@ -16,7 +16,7 @@ export default class Settings extends Component {
     return (
       <div className='settings'>
         <ul>
-          <li>{currentUser.email_address}  &nbsp;<Icon icon='Edit'/></li>
+          <li>{currentUser.name}  &nbsp;<Icon icon='Edit'/></li>
           <li><Link to={`/cart/${cart_id}/m/Feedback`}><Icon icon='Email'/> &nbsp; Send Feedback</Link></li>
         </ul>
         <h4>Kip Version 1.3 (Mint)</h4>
