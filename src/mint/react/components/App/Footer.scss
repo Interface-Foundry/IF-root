@@ -8,7 +8,7 @@
   margin: 0 (-$padding) * 1.5;
   font-family: $secondary-font;
   color: $kip-primary-color;
-  border-top:1px solid #eae7e4;
+  border-top:1px solid $border-color-light;
   @media (max-width: 300px) {
     svg {
       display:none;

@@ -29,12 +29,12 @@
     p {
       float: left;
       clear: left;
-      font-size: 11px;
+      font-size: 13px;
       color: lighten($header-color, 10%);
       &:first-of-type {
         color: $header-color;
         margin-bottom: $padding;
-        font-size: 13px;
+        font-size: 15px;
       }
     }
     .cartItem__actions {
