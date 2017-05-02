@@ -1,0 +1,144 @@
+// react/components/Sidenav/Sidenav.scss
+@import '../../themes/Constants';
+@import '../../themes/Animations';
+.sidenav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.8);
+  @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+  @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+  ul[class^='sidenav__'], div[class^='sidenav__'] {
+    display: inline-block
+  }
+  * {
+    white-space: nowrap;
+  }
+  p {
+    overflow: hidden;
+  }
+  .sidenav__overlay {
+    width: calc(100% - 250px);
+    height: 100%;
+    background: transparent;
+  }
+  .sidenav__list {
+    position: relative;
+    width: 250px;
+    height: 100%;
+    background: $fgColor;
+    border-left: 1px solid $borderColor;
+    @include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+    .sidenav__list__view {
+      height: calc(100% - #{$ribbonHeight * 4});
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+    }
+    h4 {
+      text-align: right;
+      border-bottom: 1px solid $borderColor;
+      padding: $padding/2 $padding;
+      &.show__more {
+        padding: $padding/2 $padding $padding*2;
+        color: #4a9ff1;
+        border-bottom: 0;
+      }
+    }
+    li {
+      height: $ribbonHeight - $padding;
+      line-height: $ribbonHeight - $padding;
+      padding: 0 $padding;
+      &.sidenav__list__header {
+        border-bottom: 1px solid $borderColor;
+        p {
+          width: calc(100% - #{$ribbonHeight/2});
+          padding: 0;
+          text-align: left;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+      .icon {
+        display: inline-block;
+        width: $ribbonHeight/2;
+        height: $ribbonHeight;
+        text-align: center;
+      }
+      p {
+        position: relative;
+        width: calc(100% - #{$ribbonHeight/2});
+        display: inline-block;
+        font-size: 13px;
+        padding: 0 $padding;
+        text-align: right;
+
+        span {
+          position: absolute;
+          right: $padding;
+          bottom: -15px;
+          font-size: 10px;
+        }
+      }
+    }
+    .sidenav__list__actions {
+      border-top: 1px solid $borderColor;
+      display: block;
+      height: $ribbonHeight;
+      h4 {
+        border: 0;
+        height: $ribbonHeight/2;
+        line-height: $ribbonHeight/2;
+        svg {
+          vertical-align: middle !important;
+          font-size: 18px;
+          margin-right: $padding;
+        }
+      }
+    }
+  }
+  footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    padding: $padding;
+    height: $ribbonHeight * 2 + 10px;
+    line-height: $ribbonHeight;
+    box-sizing: border-box;
+    button {
+      display: block;
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid $borderColor;
+      height: calc(50% - #{$padding});
+      &:first-of-type {
+        margin-bottom: 10px;
+      }
+      * {
+        display: inline-block;
+      }
+      svg {
+        vertical-align: bottom !important;
+        font-size: 15px;
+      }
+      p {
+        padding-left: $padding;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      &.new {
+        background: $primaryColor;
+      }
+      &.share {
+        background: $secondaryColor;
+        color: white;
+      }
+    }
+  }
+}
+

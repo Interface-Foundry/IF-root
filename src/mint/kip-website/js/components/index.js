@@ -1,6 +1,7 @@
 export App from './App';
 export Landing from './Landing';
 export Ribbon from './Ribbon';
+export Sidenav from './Sidenav';
 export Hero from './Hero';
 export Statement from './Statement';
 export Services from './Services';

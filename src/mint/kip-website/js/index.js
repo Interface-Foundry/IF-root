@@ -24,7 +24,6 @@ const history = syncHistoryWithStore(createHistory(), store)
 
 // Check the session?? i guess
 store.dispatch(get('/api/session', 'SESSION')).then(() => {
-	debugger
 	store.dispatch(get('/api/carts', 'CARTS'))
 })
 

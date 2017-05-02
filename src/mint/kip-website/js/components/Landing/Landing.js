@@ -34,11 +34,10 @@ export default class Landing extends Component {
   }
 
   render() {
-    const { fixed  } = this.state;
-
+    const { state: { fixed }, props: { _toggleSidenav } } = this;
     return (
       <div className="landing"> 
-        <Ribbon fixed={fixed}/>
+        <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav}/>
         <HeroContainer/>
         <StatementContainer/>
         <Services/>

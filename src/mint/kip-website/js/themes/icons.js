@@ -14,7 +14,10 @@ import {
 	IoNaviconRound,
 	IoClock,
 	IoArrowGraphDownLeft,
-	IoHappy
+	IoHappy,
+	IoChevronUp,
+	IoClose,
+	IoPlus
 } from 'react-icons/lib/io'
 
 import {
@@ -34,6 +37,12 @@ export default class Icon extends Component {
     	switch (this.props.icon) {
     		case 'Right':
 	          	return <IoArrowRightC/>
+			case 'Plus':
+				return <IoPlus/>
+			case 'Clear':
+				return <IoClose/>
+			case 'Up':
+				return <IoChevronUp/>
 	        case 'Down':
 	          	return <IoChevronDown/>
 			case 'Cart':
