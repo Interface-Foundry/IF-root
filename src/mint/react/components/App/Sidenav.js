@@ -41,7 +41,7 @@ export default class Sidenav extends Component {
   }
 
   render() {
-    const { carts, _toggleSidenav, currentUser, cart_id, itemsLen, updateCart, currentCart } = this.props, { show } = this.state,
+    const { carts, _toggleSidenav, currentUser, cart_id } = this.props, { show } = this.state,
       leaderCarts = _.filter(carts, (c, i) => c.leader.email_address === currentUser.email_address),
       memberCarts = _.filter(carts, (c, i) => c.leader.email_address !== currentUser.email_address);
     return (

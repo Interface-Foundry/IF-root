@@ -23,7 +23,8 @@ export default class Cart extends Component {
     locked: PropTypes.bool,
     updateCart: PropTypes.func,
     currentCart: PropTypes.object,
-    deals: PropTypes.array
+    deals: PropTypes.array,
+    cancelRemoveItem: PropTypes.func.isRequired
   }
 
   state = {
@@ -72,7 +73,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, deals, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
@@ -86,7 +87,7 @@ export default class Cart extends Component {
           ? <div className='cart__locked'>
               <div className='cart__locked__actions'>
                 <button className='primary'><Icon icon='Refresh'/><h1>RE-ORDER CART</h1></button>
-                { !!leader && leader.id === user_account.id ? <button className='secondary' onClick={(e)=>{e.preventDefault(); window.open(`/api/cart/${cart_id}/checkout`)}}><Icon icon='Cart'/><h1>CHECKOUT<br/>{displayCost(total)}</h1></button> : null }
+                { !!leader && leader.id === user_account.id ? <button className='secondary' onClick={(e)=>{e.preventDefault(); window.open(`/api/cart/${cart_id}/checkout`);}}><Icon icon='Cart'/><h1>CHECKOUT<br/>{displayCost(total)}</h1></button> : null }
               </div>
               <div className='cart__locked-container'>
                 <div className='cart__locked__text'>
@@ -106,7 +107,7 @@ export default class Cart extends Component {
                 <AddAmazonItemContainer push={push} members={members}/>
               </div>
               {
-                !!user_account.id 
+                !!user_account.id && deals.length
                   ? <DealsContainer isDropdown={false}/> 
                   : null
               }

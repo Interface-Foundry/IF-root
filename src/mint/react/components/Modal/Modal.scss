@@ -11,6 +11,8 @@
   left: 0;
   right: 0;
   text-align: center;
+  margin: 0 auto;
+  max-width: 900px;
   overflow: hidden;
   .form {
     padding: $padding $padding*2 $padding*2 $padding*2;

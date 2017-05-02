@@ -13,16 +13,16 @@ export default class EmailForm extends Component {
     const { handleSubmit } = this.props;
     return (
       <form onSubmit={handleSubmit} className="form">
-      <div>
-        <Field 
-          name="email" 
-          type="email"
-          label="What's your Email Address?"
-          placeholder="Enter Email"
-          handleSubmit={handleSubmit}
-          component={EmailField}/>
-      </div>
-    </form>
+        <div>
+          <Field 
+            name="email" 
+            type="email"
+            label="What's your Email Address?"
+            placeholder="Enter Email"
+            handleSubmit={handleSubmit}
+            component={EmailField}/>
+        </div>
+      </form>
     );
   }
 }

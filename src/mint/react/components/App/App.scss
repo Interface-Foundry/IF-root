@@ -1,5 +1,6 @@
 // react/components/App/App.scss
 @import '../../styles/Constants';
+@import '../../styles/Animations';
 body, html {
   margin: 0;
   overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
@@ -42,11 +43,9 @@ body {
   position: relative;
   overflow: hidden;
   overflow-y: scroll;
-  max-width: 900px;
   text-align: left;
   -webkit-overflow-scrolling: touch;
   height: calc(100% - #{$nav-height*2 - 10});
-  background-color: $kip-primary-color;
   &.large {
     height: calc(100% - #{$nav-height});
   }
@@ -54,9 +53,6 @@ body {
   @media (min-width: 900px) {
     display: inline-block;
     width: calc(100% - 250px);
-    height: calc(100% - #{$nav-height});
-    border-left: 2px solid $header-color;
-    border-right: 2px solid $header-color;
   }
 }
 
@@ -102,5 +98,42 @@ input, select:focus, textarea {
 
 body::-webkit-scrollbar {
   display: none;
+}
+
+.toast {
+  @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.6s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+
+  top: $padding;
+  left: $padding*2;
+  right: $padding*2;
+  border-radius: $padding/2;
+  font-size: 30px;
+  position: absolute;
+  background: white;
+  height: $nav-height;
+  padding: $padding;
+  color: white;
+  z-index: 100;
+  box-shadow: 0 0 10px black;
+  &.err {
+    background: rgba($price-color, 0.99);
+  }
+  &.warn {
+    background: rgba($main-button-color, 0.99);
+  }
+  &.success {
+    background: rgba($third-button-color, 0.99);
+  }
+}
+
+.toastTransition-enter {
+  @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.toastTransition-leave {
+  @include animation(fadeOutUp cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
 }
 

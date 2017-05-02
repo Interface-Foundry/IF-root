@@ -10,6 +10,9 @@ import { Overlay, Modal } from '..';
 import Header from './Header';
 import Sidenav from './Sidenav';
 import Footer from './Footer';
+
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+
 //Analytics!
 import ReactGA from 'react-ga';
 
@@ -28,11 +31,21 @@ export default class App extends Component {
     fetchAllCarts: PropTypes.func.isRequired,
     updateCart: PropTypes.func.isRequired,
     location: PropTypes.object.isRequired,
-    session_id: PropTypes.string
+    session_id: PropTypes.string,
+    currentCart: PropTypes.object,
+    logout: PropTypes.func,
+    items: PropTypes.array,
+    toast: PropTypes.string,
+    status: PropTypes.string,
+    history: PropTypes.object
   }
 
   state = {
-    sidenav: false
+    sidenav: false,
+    status: null,
+    toast: null,
+    showedToast: false,
+    isMobile: false
   }
 
   _logPageView(path, userId) {
@@ -51,22 +64,24 @@ export default class App extends Component {
   }
 
   componentWillMount() {
-    const { fetchCart, fetchAllCarts, cart_id, } = this.props;
-    // ReactDOM.findDOMNode(this)
-
+    const { props: { fetchCart, fetchAllCarts, cart_id, status, toast } } = this;
     if (cart_id) fetchCart(cart_id);
     fetchAllCarts();
+    if (toast && status)::this._showToast(status, toast);
   }
 
   componentDidMount() {
-    // ReactDOM
-    
-
+    ReactDOM.findDOMNode(this)
+    if(window.innerWidth < 900)
+      this.setState({isMobile: true})
   }
 
   componentWillReceiveProps(nextProps) {
-    const { _logPageView, props: { fetchCart, fetchAllCarts, cart_id, session_id, location: { pathname } } } = this;
-    const { cart_id: nextCart_id, session_id: nextSessionId } = nextProps;
+    const {
+      _logPageView,
+      props: { fetchCart, fetchAllCarts, cart_id, session_id, status, toast, location: { pathname } }
+    } = this;
+    const { cart_id: nextCart_id, session_id: nextSessionId, status: newStatus, toast: newToast } = nextProps;
 
     if (!session_id && nextSessionId) {
       ReactGA.initialize('UA-51752546-10', {
@@ -81,22 +96,48 @@ export default class App extends Component {
       fetchCart(nextCart_id);
       fetchAllCarts();
     }
+    if ((newToast && newStatus) && (toast !== newToast || status !== newStatus))::this._showToast(newStatus, newToast);
+  }
+
+  _showToast(status, toast) {
+    const { history: { replace }, cart_id } = this.props;
+    console.log(toast);
+    setTimeout(() => this.setState({ status, toast, showedToast: false }), 1);
+    setTimeout(() => {
+      this.setState({ toast: null, status: null, showedToast: true });
+      replace(`/cart/${cart_id}/`);
+    }, 3000);
   }
 
   render() {
-    const { props, state, _toggleSidenav } = this;
-    const { cart_id, currentCart, updateCart, newAccount, leader, carts, match, currentUser, location, logout, items } = props;
-    const { sidenav } = state;
+    const {
+      _toggleSidenav,
+      props,
+      props: { cart_id, currentCart, updateCart, newAccount, leader, carts, match, currentUser, location, logout, items },
+      state: { sidenav, toast, status, showedToast, isMobile }
+    } = this;
     const showFooter = !location.pathname.includes('/m/edit');
 
     if (newAccount === false) {
       return <Overlay/>;
     }
-
     return (
       <section className='app'>
-
-        <Header {...props}  _toggleSidenav={ _toggleSidenav} />
+        {
+           <CSSTransitionGroup
+              transitionName='toastTransition'
+              transitionEnterTimeout={0}
+              transitionLeaveTimeout={0}>
+              {
+                toast && !showedToast
+                ? <div className={`${status} toast`} key={toast}>
+                    {toast}
+                  </div>
+                : null
+            }
+            </CSSTransitionGroup> 
+        }
+        <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
         <div className={`app__view ${showFooter ? '' : 'large'}`}>
           { /* Renders modal when route permits */ }
           <Route path={`${match.url}/m/`} component={Modal} />
@@ -104,8 +145,8 @@ export default class App extends Component {
           { /* Renders cart when route permits */ }
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
-        { sidenav ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
-        {showFooter ? <Footer {...props} cart_id={cart_id}/> : null}
+        { sidenav || !isMobile ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
+        {showFooter ? <Footer {...props} cart_id={cart_id} isMobile={isMobile}/> : null}
       </section>
     );
   }
