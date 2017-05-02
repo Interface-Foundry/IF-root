@@ -8,6 +8,7 @@ import { cancelRemoveItem } from '../actions/item';
 import { splitCartById } from '../reducers';
 
 const mapStateToProps = (state, ownProps) => {
+  console.log(state, ownProps)
   return {
     cart_id: state.currentCart.cart_id,
     addingItem: state.currentCart.addingItem,

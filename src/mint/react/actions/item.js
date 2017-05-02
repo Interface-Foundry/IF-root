@@ -63,9 +63,8 @@ const requestRemoveItem = (itemToRemove) => ({
   itemToRemove
 });
 
-const receiveRemoveItem = (items) => ({
-  type: RECEIVE_REMOVE_ITEM,
-  items
+const receiveRemoveItem = () => ({
+  type: RECEIVE_REMOVE_ITEM
 });
 
 const cancelDeleteItem = () => ({
@@ -164,17 +163,13 @@ export function removeItem(cart_id, item_id) {
     dispatch(requestRemoveItem(item_id));
     try {
       await sleep(10000);
-      console.log(getState()
-        .currentCart.deletingItem);
       if (getState()
-        .currentCart.deletingItem) {
+        .currentCart.itemDeleted) {
         await fetch(`/api/cart/${cart_id}/item/${item_id}`, {
           method: 'DELETE',
           credentials: 'same-origin',
         });
       }
-      const cart = await fetch(`/api/cart/${cart_id}`);
-      return dispatch(receiveRemoveItem(cart.items));
     } catch (e) {
       throw 'error in cart removeItem';
     }

@@ -42,6 +42,7 @@ body {
 
 .app__view {
   position: relative;
+  overflow: hidden;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   height: calc(100% - #{$nav-height*2 - 10});

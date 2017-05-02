@@ -62,7 +62,7 @@ export default class App extends Component {
     const { cart_id: nextCart_id, session_id: nextSessionId } = nextProps;
 
     if (!session_id && nextSessionId) {
-      ReactGA.initialize('UA-97839751-1', { //TODO: change to Kip id!
+      ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
           userId: nextSessionId
         }
