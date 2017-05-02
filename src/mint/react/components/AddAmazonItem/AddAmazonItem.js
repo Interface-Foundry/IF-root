@@ -53,7 +53,7 @@ export default class AddAmazonItem extends Component {
               }
             </button>
         }
-        {numUserItems ? null : <NotificationBubble top={23} right={12}/>}
+        {numUserItems ? null : <NotificationBubble top={23} right={2.5}/>}
       </div>
     );
   }

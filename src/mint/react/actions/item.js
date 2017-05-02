@@ -16,9 +16,7 @@ import {
   REQUEST_DECREMENT_ITEM,
   SEARCH_PREV,
   SEARCH_NEXT,
-  SET_SEARCH_INDEX,
-  REQUEST_CHANGE_ITEM_TYPE,
-  RECEIVE_CHANGE_ITEM_TYPE,
+  SET_SEARCH_INDEX
 } from '../constants/ActionTypes';
 
 import { sleep } from '../utils';
@@ -63,10 +61,6 @@ const requestRemoveItem = (itemToRemove) => ({
   itemToRemove
 });
 
-const receiveRemoveItem = () => ({
-  type: RECEIVE_REMOVE_ITEM
-});
-
 const cancelDeleteItem = () => ({
   type: CANCEL_REMOVE_ITEM
 });
@@ -94,15 +88,6 @@ const requestDecrementItem = (item) => ({
 const setSearch = (index) => ({
   type: SET_SEARCH_INDEX,
   index
-});
-
-const requestChangeType = () => ({
-  type: REQUEST_CHANGE_ITEM_TYPE
-});
-
-const receiveChangeType = (asin) => ({
-  type: RECEIVE_CHANGE_ITEM_TYPE,
-  asin
 });
 
 export function previewItem(item_id) {
@@ -222,21 +207,6 @@ export function decrementItem(item_id, quantity) {
       return dispatch(receiveDecrementItem(await response.json()));
     } catch (e) {
       throw 'error in cart decrementItem';
-    }
-  };
-}
-
-export function changeItemType(item_id, newAsin) {
-  return async(dispatch, getState) => {
-    dispatch(requestRemoveItem());
-    try {
-      await fetch(`/api/item/${item_id}`, {
-        method: 'DELETE',
-        credentials: 'same-origin',
-      });
-      return dispatch(receiveRemoveItem(item_id));
-    } catch (e) {
-      throw 'error in cart removeItem';
     }
   };
 }

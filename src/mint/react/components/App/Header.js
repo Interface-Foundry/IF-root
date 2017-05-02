@@ -15,7 +15,7 @@ export default class Header extends Component {
   }
 
   render() {
-    let { props, props: { deals, items, currentUser, item: { search } } } = this;
+    let { props, props: { deals, currentUser, item: { search } } } = this;
     const { match } = props;
     search = search ? search : 0;
 
@@ -50,6 +50,10 @@ export default class Header extends Component {
             <ModalHead text={'Share Cart'} {...props}/>
           }
         />
+        <Route path={`${match.url}/m/signin`} component={() => 
+            <IntroHead text={'Create New Cart'} {...props}/>
+          }
+        />
         <Route path={`${match.url}/m/settings`} component={() => 
             <SettingsHeader text='Settings' icon="Settings" {...props}/>
           }
@@ -80,7 +84,7 @@ class CartHead extends Component {
   }
 
   render() {
-    const { _toggleSidenav, currentUser, cartName, currentCart: { locked, thumbnail_url } } = this.props;
+    const { _toggleSidenav, cartName, currentCart: { locked, thumbnail_url } } = this.props;
 
     return (
       <div>
@@ -99,6 +103,25 @@ class CartHead extends Component {
         <div className='navbar__icon' onClick={_toggleSidenav}>
           <Icon icon='Hamburger'/>
         </div>
+      </div>
+    );
+  }
+}
+
+class IntroHead extends Component {
+  render() {
+    return (
+      <div>
+        <div className='image' style={
+          {
+            backgroundImage: 'url(http://tidepools.co/kip/head@x2.png)',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain'
+          }}/>
+        <h3>
+          Create New Cart
+        </h3>
       </div>
     );
   }
