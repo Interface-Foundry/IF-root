@@ -54,7 +54,7 @@ export default class Cart extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { history: { replace }, cart_id, items } = this.props, { leader, addingItem, user_account } = nextProps,
-      cartId =  nextProps.cart_id || cart_id;
+      cartId = nextProps.cart_id || cart_id;
 
     if (cartId) {
       if (!user_account.id && !leader) {
@@ -72,7 +72,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, history: { push }, locked, updateCart, currentCart } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
@@ -116,15 +116,16 @@ export default class Cart extends Component {
           { animation 
             ? <h4>{animation}</h4>
             : <h4>
-              { hasItems ? `${items.quantity} items in Group Cart`  : 'Group Shopping Cart' } 
+              { hasItems ? `${items.quantity} items in Kip Cart`  : 'Kip Cart' } 
               {
                 !!leader && leader.id === user_account.id 
-                ?  <span> (<span className='price'>{displayCost(total)}</span>)</span> 
+                ?  <span> – <span className='price'>{displayCost(total)} Total</span></span> 
                 : null
               }
             </h4>
           }
         </div>
+        {currentCart.itemDeleted ? <button onClick={cancelRemoveItem}>Undo Delete</button>: null}
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
           {

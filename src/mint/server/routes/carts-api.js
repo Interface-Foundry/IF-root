@@ -452,6 +452,10 @@ module.exports = function (router) {
     // logging.info('populated cart', cart);
     var cartItems = cart.items;
 
+    if (cart.amazon_purchase_url && cart.locked) {
+      res.redirect(cart.amazon_purchase_url)
+    }
+
     // make sure the amazon cart is in sync with the cart in our database
     var amazonCart = yield amazon.syncAmazon(cart)
 
@@ -492,8 +496,13 @@ module.exports = function (router) {
     yield receipt.send();
     logging.info('receipt sent')
 
+    // save the amazon purchase url
+    if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
+      cart.amazon_purchase_url = amazonCart.PurchaseURL
+      yield cart.save()
+    }
     // redirect to the cart url
-    res.redirect(amazonCart.PurchaseURL)
+    res.redirect(cart.amazon_purchase_url)
   }))
 
 

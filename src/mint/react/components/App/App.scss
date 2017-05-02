@@ -36,12 +36,15 @@ body {
   max-width: 900px;
   margin: auto;
   background-color: $kip-primary-color;
-  border-left: 2px solid $header-color;
-  border-right: 2px solid $header-color
+  @media (min-width: 900px) {
+    border-left: 2px solid $header-color;
+    border-right: 2px solid $header-color;
+  }
 }
 
 .app__view {
   position: relative;
+  overflow: hidden;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   height: calc(100% - #{$nav-height*2 - 10});

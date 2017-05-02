@@ -39,7 +39,7 @@ export default class AddAmazonItem extends Component {
         Add Item to Kip Cart
         {
           clickedAmazonField 
-          ? <AmazonFormContainer />
+          ? <AmazonFormContainer onBlur={()=> this.setState({clickedAmazonField: false})} />
           : <button className={`add_to_amazon__button ${!!user_account.id ? '' : 'yellow'}`} onClick={addItemToCart}>
               {
                 !!user_account.id
@@ -53,7 +53,7 @@ export default class AddAmazonItem extends Component {
               }
             </button>
         }
-        {numUserItems ? null : <NotificationBubble top={23} right={12}/>}
+        {numUserItems ? null : <NotificationBubble top={23} right={2.5}/>}
       </div>
     );
   }

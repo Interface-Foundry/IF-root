@@ -1,0 +1,97 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.showcase {
+	position: relative;
+	text-align: center;
+	background: mix(#fcfcf9, $primaryColor, 97%);
+	border-top: 1px solid rgba(mix($bgColor, $primaryColor, 57%), 0.2);
+
+	h1 {
+		font-size: 38px;
+		color: mix($primaryColor, $bgColor, 30%);
+		padding: $padding*10 0;
+
+		@media only screen and (max-width: 600px) {
+			font-size: 34px;
+			padding: $padding*5 $padding;
+		}
+	}
+
+	h2 {
+		margin: 0 0 $padding;
+		color: mix($primaryColor, $bgColor, 30%);
+		font-size: 23px;
+	}
+
+	.icons__hell {
+		padding: 0 0 $padding*10;
+
+		& > div {
+			display: inline-block;
+			width: (100%/3);
+			height: $ribbonHeight;
+
+			svg {
+				width: 100%;
+				height: $ribbonHeight;
+				fill: mix($primaryColor, $bgColor, 30%);
+				opacity: 0.8;
+			}
+		}
+	}
+
+	.showcase__details {
+		display: inline-block;
+		position: relative;
+		padding: $padding*3 0;
+		text-align: left;
+		border-top: 1px solid rgba(mix($bgColor, $primaryColor, 57%), 0.2);
+
+		&.right {
+			border-right: 1px solid rgba(mix($bgColor, $primaryColor, 57%), 0.2);
+			text-align: right;
+		}
+
+		.text {
+			max-width: 500px;
+			text-align: left;
+			padding: $padding*5;
+
+			svg {
+				width: 40%;
+				fill: mix($primaryColor, $bgColor, 30%);
+			}
+
+			p {
+				position: relative;
+				white-space: normal;
+				font-weight: 500;
+				padding: $padding 0;
+				font-size: 15px;
+				color: rgba(mix($primaryColor, $bgColor, 30%), 0.8);
+			}
+
+			button {
+				color: $primaryColor;
+				border: 0;
+				background: transparent;
+				font-weight: bold;
+				padding: 0;
+
+				svg {
+					width: auto;
+					fill: $primaryColor;
+				    vertical-align: text-top !important;
+			        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+				}
+
+				&:hover {
+					svg {
+						transform: translate3d(5px,0,0);
+					}
+				}
+			}
+		}
+	}
+}

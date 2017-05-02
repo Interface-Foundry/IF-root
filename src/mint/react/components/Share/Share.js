@@ -78,7 +78,6 @@ export default class Share extends Component {
         <div className='share__message'>
           <div className='share__message__imageText'>
             <div className='image' style={{backgroundImage:'url(http://tidepools.co/kip/head_smaller.png)'}}/>
-            <p>I just sent you an email you can forward to others! or share this link:</p>
           </div>
           <div className='share__message__copy'>
             <div className='share__message__copy__input' onClick={this.copy}>

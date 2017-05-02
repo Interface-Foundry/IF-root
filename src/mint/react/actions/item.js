@@ -9,16 +9,17 @@ import {
   RECEIVE_ADD_ITEM,
   REQUEST_REMOVE_ITEM,
   RECEIVE_REMOVE_ITEM,
+  CANCEL_REMOVE_ITEM,
   RECEIVE_INCREMENT_ITEM,
   REQUEST_INCREMENT_ITEM,
   RECEIVE_DECREMENT_ITEM,
   REQUEST_DECREMENT_ITEM,
   SEARCH_PREV,
   SEARCH_NEXT,
-  SET_SEARCH_INDEX,
-  REQUEST_CHANGE_ITEM_TYPE,
-  RECEIVE_CHANGE_ITEM_TYPE
+  SET_SEARCH_INDEX
 } from '../constants/ActionTypes';
+
+import { sleep } from '../utils';
 
 const receiveItem = (item) => ({
   type: RECEIVE_ITEM,
@@ -55,13 +56,13 @@ const receiveAddItem = (item) => ({
   item
 });
 
-const requestRemoveItem = () => ({
-  type: REQUEST_REMOVE_ITEM
+const requestRemoveItem = (itemToRemove) => ({
+  type: REQUEST_REMOVE_ITEM,
+  itemToRemove
 });
 
-const receiveRemoveItem = (itemToRemove) => ({
-  type: RECEIVE_REMOVE_ITEM,
-  itemToRemove
+const cancelDeleteItem = () => ({
+  type: CANCEL_REMOVE_ITEM
 });
 
 const receiveIncrementItem = (item) => ({
@@ -87,15 +88,6 @@ const requestDecrementItem = (item) => ({
 const setSearch = (index) => ({
   type: SET_SEARCH_INDEX,
   index
-});
-
-const requestChangeType = () => ({
-  type: REQUEST_CHANGE_ITEM_TYPE
-});
-
-const receiveChangeType = (asin) => ({
-  type: RECEIVE_CHANGE_ITEM_TYPE,
-  asin
 });
 
 export function previewItem(item_id) {
@@ -152,18 +144,25 @@ export function addItem(cart_id, item_id) {
 }
 
 export function removeItem(cart_id, item_id) {
-  return async dispatch => {
-    dispatch(requestRemoveItem());
+  return async(dispatch, getState) => {
+    dispatch(requestRemoveItem(item_id));
     try {
-      await fetch(`/api/cart/${cart_id}/item/${item_id}`, {
-        method: 'DELETE',
-        credentials: 'same-origin',
-      });
-      return dispatch(receiveRemoveItem(item_id));
+      await sleep(10000);
+      if (getState()
+        .currentCart.itemDeleted) {
+        await fetch(`/api/cart/${cart_id}/item/${item_id}`, {
+          method: 'DELETE',
+          credentials: 'same-origin',
+        });
+      }
     } catch (e) {
       throw 'error in cart removeItem';
     }
   };
+}
+
+export function cancelRemoveItem() {
+  return async(dispatch) => dispatch(cancelDeleteItem());
 }
 
 export function incrementItem(item_id, quantity) {
@@ -213,39 +212,17 @@ export function decrementItem(item_id, quantity) {
 }
 
 export function clearItem() {
-  return async function (dispatch) {
-    return dispatch(clear());
-  };
+  return async dispatch => dispatch(clear());
 }
 
 export function nextSearch() {
-  return async function (dispatch) {
-    return dispatch(searchNext());
-  };
+  return async dispatch => dispatch(searchNext());
 }
+
 export function prevSearch() {
-  return async function (dispatch) {
-    return dispatch(searchPrev());
-  };
+  return async dispatch => dispatch(searchPrev());
 }
 
 export function setSearchIndex(index) {
-  return async function (dispatch) {
-    return dispatch(setSearch(index));
-  };
-}
-
-export function changeItemType(item_id, newAsin) {
-  return async dispatch => {
-    dispatch(requestRemoveItem());
-    try {
-      await fetch(`/api/item/${item_id}`, {
-        method: 'DELETE',
-        credentials: 'same-origin',
-      });
-      return dispatch(receiveRemoveItem(item_id));
-    } catch (e) {
-      throw 'error in cart removeItem';
-    }
-  };
+  return async dispatch => dispatch(setSearch(index));
 }

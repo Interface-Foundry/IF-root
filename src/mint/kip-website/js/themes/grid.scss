@@ -1,0 +1,133 @@
+//----- Extends
+%clearfix:after {
+  display: block;
+  clear: both;
+  content: '';
+}
+
+//----- Grid System
+$grid-spacing:0%;
+[class^="row-"] {
+  @extend %clearfix;
+  margin-top: $grid-spacing;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  &:last-child {
+    margin-top: 0%;
+  }
+  & + & {
+    margin-top: $grid-spacing;
+  }
+}
+
+.row-1 {
+  height: 100% - ($grid-spacing * 2);;
+}
+
+.row-2 {
+  height: (100% / 2) - ($grid-spacing * 3);
+}
+
+.row-3 {
+  height: (100% / 3) - ($grid-spacing * 4);
+}
+
+.row-4 {
+  height: (100% / 4) - ($grid-spacing * 5);
+}
+
+.row-5 {
+  height: (100% / 5) - ($grid-spacing * 6);
+}
+
+.row-6 {
+  height: (100% / 6) - ($grid-spacing * 7);
+}
+
+.row-7 {
+  height: (100% / 7) - ($grid-spacing * 8);
+}
+
+.row-8 {
+  height: (100% / 8) - ($grid-spacing * 9);
+}
+
+.row-9 {
+  height: (100% / 9) - ($grid-spacing * 10);
+}
+
+.row-10 {
+  height: (100% / 10) - ($grid-spacing * 11);
+}
+
+.row-11 {
+  height: (100% / 11) - ($grid-spacing * 12);
+}
+
+.row-12 {
+  height: (100% / 12) - ($grid-spacing * 13);
+}
+
+[class^="col-"] {
+  display: inline-block;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  max-width: 980px;
+  margin: 0 auto;
+  &:last-child {
+    margin-right: 0%;
+  }
+  @media only screen and (max-width: 600px) {
+    width: 100% !important;
+  }
+}
+
+.col-1 {
+  width: (100% / 12) - ($grid-spacing * 11 / 12);
+}
+
+.col-2 {
+  width: (100% / 6) - ($grid-spacing * 10 / 12);
+}
+
+.col-3 {
+  width: (100% / 4) - ($grid-spacing * 9 / 12);
+}
+
+.col-4 {
+  width: (100% / 3) - ($grid-spacing * 8 / 12);
+}
+
+.col-5 {
+  width: (100% / 2.4) - ($grid-spacing * 7 / 12);
+}
+
+.col-6 {
+  width: (100% / 2) - ($grid-spacing * 6 / 12);
+}
+
+.col-7 {
+  width: (100% / 1.714285714285714) - ($grid-spacing * 5 / 12);
+}
+
+.col-8 {
+  width: (100% / 1.5) - ($grid-spacing * 4 / 12);
+}
+
+.col-9 {
+  width: (100% / 1.333333333333333) - ($grid-spacing * 3 / 12);
+}
+
+.col-10 {
+  width: (100% / 1.2) - ($grid-spacing * 2 / 12);
+}
+
+.col-11 {
+  width: (100% / 1.090909090909091) - ($grid-spacing * 1 / 12);
+}
+
+.col-12 {
+  width: 100%;
+}

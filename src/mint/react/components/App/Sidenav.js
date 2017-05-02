@@ -41,7 +41,7 @@ export default class Sidenav extends Component {
   }
 
   render() {
-    const { carts, _toggleSidenav, currentUser, cart_id, itemsLen, replace, updateCart, currentCart } = this.props, { show } = this.state,
+    const { carts, _toggleSidenav, currentUser, cart_id, itemsLen, updateCart, currentCart } = this.props, { show } = this.state,
       leaderCarts = _.filter(carts, (c, i) => c.leader.email_address === currentUser.email_address),
       memberCarts = _.filter(carts, (c, i) => c.leader.email_address !== currentUser.email_address);
     return (
@@ -118,27 +118,10 @@ export default class Sidenav extends Component {
                 <p>Add Others To Cart</p> 
               </button>
             </a>
-            <a href={'/newcart'} onClick={(e)=> {e.preventDefault(); _toggleSidenav(); replace('/newcart');}}>
+            <a href={'/newcart'}>
               <button className='side__new_cart'>
                 <Icon icon='Add'/>
                 <p>Create New Cart</p>
-              </button>
-            </a>
-            <a 
-              href={`/api/cart/${cart_id}/checkout`} 
-              onClick={
-                (e) => { 
-                  e.preventDefault(); 
-                  if (itemsLen>0) { 
-                    updateCart({...currentCart, locked: !currentCart.locked});
-                    window.open(`/api/cart/${cart_id}/checkout`);
-                  }
-                }
-              }
-            >
-              <button disabled={itemsLen===0} className='side__checkout'>
-                <Icon icon='Cart'/>
-                <p>Checkout</p>
               </button>
             </a>
           </footer>

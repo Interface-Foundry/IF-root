@@ -63,6 +63,11 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {number} stars out of five */
     rating: 'float',
 
+    /** @type {string} url for iframe reviews */
+    iframe_review_url: 'string',
+
+    editorial_review: 'string',
+
     /** @type {number} number of reviews */
     number_reviews: 'integer',
 

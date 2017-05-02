@@ -14,12 +14,12 @@
     &::before {
       content: '';
       display: inline-block;
-      min-width: 15px;
+      min-width: 5px;
     }
     &::after {
       content: '';
       display: inline-block;
-      min-width: 15px;
+      min-width: 5px;
     }
     &::-webkit-scrollbar {
       display: none;

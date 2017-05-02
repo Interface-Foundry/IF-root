@@ -9,8 +9,7 @@ import {
   SEARCH_NEXT,
   SEARCH_PREV,
   SET_SEARCH_INDEX,
-  SELECT_DEAL,
-  RECEIVE_CHANGE_ITEM_TYPE
+  SELECT_DEAL
 } from '../constants/ActionTypes';
 
 export default function item(state = {}, action) {
@@ -57,8 +56,6 @@ export default function item(state = {}, action) {
     return {
       ...action.deal
     };
-  case RECEIVE_CHANGE_ITEM_TYPE:
-
   default:
     return state;
   }

@@ -98,6 +98,10 @@ var res2Item = function (res) {
     const thumbnailMinSize = 50
     const imageKeys = ['SwatchImage', 'SmallImage', 'ThumbnailImage', 'TinyImage', 'MediumImage', 'LargeImage', 'HiResImage']
     var thumbnail = imageKeys.reduce((chosenImage, thisImage) => {
+
+      // Do we have a small image available?
+      if(i.SmallImage && i.SmallImage.URL) return i.SmallImage.URL
+
       // If we have already found an image that is good enough, return it
       if (chosenImage) return chosenImage
 
@@ -114,6 +118,13 @@ var res2Item = function (res) {
     }, null)
 
     const mainImage = imageKeys.reverse().reduce((chosenImage, thisImage) => {
+
+      // Do we have a large normal image available?
+      if(i.LargeImage && i.LargeImage.URL) return i.LargeImage.URL
+
+      // Do we have a medium image available?
+      if(i.MediumImage && i.MediumImage.URL) return i.MediumImage.URL
+
       // If we have already found an image that is good enough, return it
       if (chosenImage) return chosenImage
 
@@ -126,6 +137,10 @@ var res2Item = function (res) {
 
     // if no image was good enough to be a thumbnail, use the main image as the thumbnail
     if (!thumbnail) {
+
+      // Do we have a medium image available?
+      if(i.MediumImage && i.MediumImage.URL) return i.MediumImage.URL
+
       thumbnail = mainImage
     }
 
@@ -141,10 +156,10 @@ var res2Item = function (res) {
         description: i.ItemAttributes.Feature,
         price: price,
         thumbnail_url: thumbnail,
-        main_image_url: mainImage
-      });
-    }
-    catch (err) {
+        main_image_url: mainImage,
+        iframe_review_url: (i.CustomerReviews.HasReviews === true) ? i.CustomerReviews.IFrameURL : null
+      })
+    } catch (err) {
       logging.error(err);
       return null;
     }
