@@ -181,7 +181,7 @@
                                                       <!-- TODO: repeat items in cart -->
                                                       <table><tr>
                                                       <td>
-                                                        <p><a href="www.kipthis.com"><%=items[i][j].name%></a></p>
+                                                        <p><a href="<%=baseUrl%>/item/<%=items[i][j].id%>/clickthrough"><%=items[i][j].name%></a></p>
                                                         <p>Quantity: <%=items[i][j].quantity%></p>
                                                         <p>Price: $<%=items[i][j].price.toFixed(2)%></p>
 
