@@ -21,26 +21,26 @@ dbReady.then((models) => { db = models; }).catch(e => console.error(e));
  */
 router.get('/', (req, res) => co(function* () {
   // if no user, no carts
-  if (!_.get(req, 'UserSession.user_account.id')) {
-    return res.render('pages/index', { carts: [] });
-  }
+  // if (!_.get(req, 'UserSession.user_account.id')) {
+  //   return res.render('pages/index', { carts: [] });
+  // }
 
-  // otherwise, find all the cart ids for which the user is a member
-  const memberCarts = yield db.carts_members__user_accounts_id.find({
-    user_accounts_id: req.UserSession.user_account.id
-  })
+  // // otherwise, find all the cart ids for which the user is a member
+  // const memberCarts = yield db.carts_members__user_accounts_id.find({
+  //   user_accounts_id: req.UserSession.user_account.id
+  // })
 
-  const memberCartsIds = memberCarts.map( c => c.carts_members )
+  // const memberCartsIds = memberCarts.map( c => c.carts_members )
 
-  // find all the carts where their user id appears in the leader or member field
-  const carts = yield db.Carts.find({
-    or: [
-      { leader: req.UserSession.user_account.id },
-      { id: memberCartsIds }
-    ]
-  }).populate('items').populate('leader').populate('members')
+  // // find all the carts where their user id appears in the leader or member field
+  // const carts = yield db.Carts.find({
+  //   or: [
+  //     { leader: req.UserSession.user_account.id },
+  //     { id: memberCartsIds }
+  //   ]
+  // }).populate('items').populate('leader').populate('members')
 
-  res.render('pages/index', { carts: carts });
+  res.render('pages/index');
 }));
 
 /**
