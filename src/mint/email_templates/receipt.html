@@ -203,9 +203,16 @@
 
 <% } %>
 
-<div><p style="text-weight:bold;">TOTAL: <%=total%></p></div>
-
 <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
+    <tr >
+      <td style="padding-left:2em;">
+        <table class="responsive-table-column">
+          <p style="font-weight:bold;">
+            <span style="color:#d65b00;">TOTAL: </span><span><%=total%></span>
+          </p>
+        </table
+      </td>
+    </tr>
     <tr>
         <td >
             <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
