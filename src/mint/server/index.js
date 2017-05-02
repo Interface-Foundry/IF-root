@@ -127,10 +127,16 @@ app.use('/sendgrid', mailRoutes);
  *  we can pass arrays to react by embedding their strings in javascript
  *  we could handle session data through fetching data with react
  */
-app.get('*', (req, res) =>
+app.get('/cart/*', (req, res) =>
   // Get the user_accont info, if exists (might not if they are clicking a shared link)
   // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
   res.render('pages/cart')
+);
+
+app.get('/website/*', (req, res) =>
+  // Get the user_accont info, if exists (might not if they are clicking a shared link)
+  // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
+  res.render('pages/website')
 );
 
 // Log errors to the database in production
