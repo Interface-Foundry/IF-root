@@ -8,6 +8,7 @@ export const get = (url, type) => async dispatch => {
 
 	  	const json = await response.json();
 		
+		debugger
 		dispatch({
 			type: `${type}_SUCCESS`,
 			response: json,

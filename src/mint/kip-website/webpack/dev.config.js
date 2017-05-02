@@ -9,7 +9,8 @@ module.exports = {
     'babel-polyfill',
     './js/index.js',
     'webpack-dev-server/client?http://localhost:3001/',
-    'webpack/hot/only-dev-server'
+    'webpack/hot/only-dev-server',
+    'webpack-hot-middleware/client?path=/__webpack_hmr', appDir + '/index'
   ],
   module: {
     loaders: [
