@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development node ./server/index.js & webpack --progress --color -d --watch --hot --config webpack/dev.config.js",
-    "prod": "webpack -p --progress --config webpack/prod.config.js"
+    "prod": "webpack -p --progress --config webpack/prod.config.js",
+    "build": "webpack -p --progress --config webpack/dev.config.js"
   },
   "babel": {
     "presets": [
