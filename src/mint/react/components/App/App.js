@@ -3,13 +3,13 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
+import ReactDOM from 'react-dom'
 
 import { CartContainer } from '../../containers';
 import { Overlay, Modal } from '..';
 import Header from './Header';
 import Sidenav from './Sidenav';
 import Footer from './Footer';
-
 //Analytics!
 import ReactGA from 'react-ga';
 
@@ -52,9 +52,16 @@ export default class App extends Component {
 
   componentWillMount() {
     const { fetchCart, fetchAllCarts, cart_id, } = this.props;
+    // ReactDOM.findDOMNode(this)
 
     if (cart_id) fetchCart(cart_id);
     fetchAllCarts();
+  }
+
+  componentDidMount() {
+    // ReactDOM
+    
+
   }
 
   componentWillReceiveProps(nextProps) {
@@ -62,7 +69,7 @@ export default class App extends Component {
     const { cart_id: nextCart_id, session_id: nextSessionId } = nextProps;
 
     if (!session_id && nextSessionId) {
-      ReactGA.initialize('UA-97839751-1', { //TODO: change to Kip id!
+      ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
           userId: nextSessionId
         }
@@ -90,7 +97,6 @@ export default class App extends Component {
       <section className='app'>
 
         <Header {...props}  _toggleSidenav={ _toggleSidenav} />
-        { sidenav ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
         <div className={`app__view ${showFooter ? '' : 'large'}`}>
           { /* Renders modal when route permits */ }
           <Route path={`${match.url}/m/`} component={Modal} />
@@ -98,7 +104,7 @@ export default class App extends Component {
           { /* Renders cart when route permits */ }
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
-
+        { sidenav ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
         {showFooter ? <Footer {...props} cart_id={cart_id}/> : null}
       </section>
     );

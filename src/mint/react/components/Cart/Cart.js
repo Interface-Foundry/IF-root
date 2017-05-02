@@ -54,7 +54,7 @@ export default class Cart extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { history: { replace }, cart_id, items } = this.props, { leader, addingItem, user_account } = nextProps,
-      cartId =  nextProps.cart_id || cart_id;
+      cartId = nextProps.cart_id || cart_id;
 
     if (cartId) {
       if (!user_account.id && !leader) {
@@ -81,7 +81,6 @@ export default class Cart extends Component {
       ]);
     return (
       <div className='cart'>
-        {currentCart.deletingItem ? <button onClick={cancelRemoveItem}>Undo Delete</button>: null}
         {
           locked 
           ? <div className='cart__locked'>
@@ -126,6 +125,7 @@ export default class Cart extends Component {
             </h4>
           }
         </div>
+        {currentCart.itemDeleted ? <button onClick={cancelRemoveItem}>Undo Delete</button>: null}
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
           {

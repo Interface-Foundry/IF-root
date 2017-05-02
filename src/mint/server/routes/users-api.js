@@ -5,6 +5,18 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
+
+/**
+ * turn email into user name - into a function so that it could be used
+ * elsewhere if need be and so could add more complex functionality later
+ *
+ * @param      {string}  email   the email address of the user
+ * @return     {string}  name of user as gathered from email address
+ */
+function normalizeEmailToName(email) {
+  return email.split('@')[0]
+}
+
 module.exports = function (router) {
   /**
    * @api {get} /api/session Session
@@ -33,7 +45,6 @@ module.exports = function (router) {
     var email = req.query.email.trim().toLowerCase()
 
     // check if the user is already identified as this email
-    // Koh: This returns undefined if no user_account present. Breaks subsequent code
     var currentUser = req.UserSession.user_account
 
     // IF they are already logged in as this email, probably in a weird state to be re-identifying
@@ -104,7 +115,8 @@ module.exports = function (router) {
     // No user was found with the email address, so this is a new user, party!
     console.log('creating new user ' + email + ' 🎉')
     user = yield db.UserAccounts.create({
-      email_address: email
+      email_address: email,
+      name: normalizeEmailToName(email)
     })
 
     // add them to the session

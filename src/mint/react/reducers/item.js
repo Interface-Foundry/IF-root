@@ -1,7 +1,6 @@
 // react/reducers/item.js
 
 import {
-  REQUEST_REMOVE_ITEM,
   RECEIVE_ITEM,
   CLEAR_ITEM,
   RECEIVE_INCREMENT_ITEM,
@@ -10,7 +9,7 @@ import {
   SEARCH_NEXT,
   SEARCH_PREV,
   SET_SEARCH_INDEX,
-  SELECT_DEAL,
+  SELECT_DEAL
 } from '../constants/ActionTypes';
 
 export default function item(state = {}, action) {

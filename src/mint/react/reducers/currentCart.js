@@ -8,7 +8,6 @@ import {
   RECEIVE_ITEMS,
   RECEIVE_ADD_ITEM,
   REQUEST_REMOVE_ITEM,
-  RECEIVE_REMOVE_ITEM,
   CANCEL_REMOVE_ITEM,
   RECEIVE_INCREMENT_ITEM,
   RECEIVE_DECREMENT_ITEM
@@ -59,23 +58,17 @@ export default function cart(state = initialState, action) {
       ...state,
       items: [...state.items, action.item].reverse()
     };
-  case REQUEST_REMOVE_ITEM: // now that we have an undo, we remove this first
+  case REQUEST_REMOVE_ITEM: // now that we have an undo, we remove this locally first
     return {
       ...state,
-      deletingItem: true,
+      itemDeleted: state.items.find(item => item.id === action.itemToRemove), //save item
       items: state.items.filter(item => item.id !== action.itemToRemove)
-    };
-  case RECEIVE_REMOVE_ITEM:
-    return {
-      ...state,
-      deletingItem: false,
-      items: action.items
     };
   case CANCEL_REMOVE_ITEM:
     return {
       ...state,
-      deletingItem: false,
-      items: action.items
+      items: [state.itemDeleted, ...state.items], 
+      itemDeleted: null, // clear saved item if canceled
     };
   case RECEIVE_INCREMENT_ITEM:
   case RECEIVE_DECREMENT_ITEM:

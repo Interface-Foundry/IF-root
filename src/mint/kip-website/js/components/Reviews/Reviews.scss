@@ -1,0 +1,36 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.reviews {
+	position: relative;
+	text-align: center;
+	height: $ribbonHeight*2.5;
+
+	ul {
+		overflow: hidden;
+		overflow-x: scroll;
+	    -webkit-overflow-scrolling: touch;
+	    padding: 0;
+	    white-space: nowrap;
+
+	    li {
+	    	display: inline-block;
+	    	width: 125px;
+	    	height: 100%;
+
+	    	.image {
+	    		border-right: 1px solid $borderColor;
+	    	}
+
+	    	p {
+	    		vertical-align: bottom;
+	    		padding: $padding;
+	    		text-align: left;
+	    	}
+
+	    	&:last-of-type {
+	    		margin-right: 0;
+	    	}
+	    }
+	}
+}

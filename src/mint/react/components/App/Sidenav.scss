@@ -11,6 +11,16 @@
   background: rgba(255, 255, 255, 0.8);
   @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
   @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+  @media (min-width: 900px) {
+    position: relative;
+    width: 250px;
+    height: 100%;
+    float: right;
+    display: inline-block;
+    background: $kip-secondary-color;
+  }
+
   p {
     overflow: hidden;
   }
@@ -19,6 +29,9 @@
     background: transparent;
     height: 100%;
     float: left;
+    @media (min-width: 900px) {
+      display: none;
+    }
   }
   .sidenav__list {
     display: flex;
@@ -31,6 +44,11 @@
     right: 0;
     @include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+    @media (min-width: 900px) {
+      background: $kip-secondary-color;
+    }
+    
     li {
       padding: 0 $padding;
       h4 {

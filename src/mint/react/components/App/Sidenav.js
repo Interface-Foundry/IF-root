@@ -124,23 +124,6 @@ export default class Sidenav extends Component {
                 <p>Create New Cart</p>
               </button>
             </a>
-            <a 
-              href={`/api/cart/${cart_id}/checkout`} 
-              onClick={
-                (e) => { 
-                  e.preventDefault(); 
-                  if (itemsLen>0) { 
-                    updateCart({...currentCart, locked: !currentCart.locked});
-                    window.open(`/api/cart/${cart_id}/checkout`);
-                  }
-                }
-              }
-            >
-              <button disabled={itemsLen===0} className='side__checkout'>
-                <Icon icon='Cart'/>
-                <p>Checkout</p>
-              </button>
-            </a>
           </footer>
         </ul>
       </div>
