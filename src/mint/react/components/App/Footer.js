@@ -77,10 +77,6 @@ class CartFooter extends Component {
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
     const total = calculateItemTotal(items);
 
-    if(!isMobile) {
-      return <div className='footer__cart'/>
-    }
-
     if (locked) {
       return (
         <div className='footer__cart'>

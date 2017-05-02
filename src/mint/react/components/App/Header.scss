@@ -9,9 +9,6 @@
   color: $kip-primary-color;
   text-align: left;
 
-  @media (min-width: 900px) {
-    padding: 0 $padding*2;
-  }
 
   .image {
     display: inline-block;
@@ -69,8 +66,11 @@
       height: 100%;
     }
     p {
-      padding: 0 0 0 $padding;
+      padding: 0 $padding;
       display: inline-block;
+    }
+    @media (min-width: 900px) {
+      width: auto;
     }
   }
   .navbar__icon__close {
