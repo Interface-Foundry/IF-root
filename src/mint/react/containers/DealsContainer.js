@@ -12,7 +12,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  selectDeal: (dealIndex) => dispatch(selectDeal(dealIndex)),
+  selectDeal: (dealIndex, deal) => dispatch(selectDeal(dealIndex, deal)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Deals);

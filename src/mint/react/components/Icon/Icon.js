@@ -20,7 +20,11 @@ import {
   IoChevronDown,
   IoArrowLeftC,
   IoLogOut,
-  IoRefresh
+  IoRefresh,
+  IoSad,
+  IoHappy,
+  IoOutlet,
+  IoPlusRound
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -83,15 +87,23 @@ export default class Icon extends Component {
     case 'Settings':
       return <IoGearA/>;
     case 'Down':
-      return <IoChevronDown/>
+      return <IoChevronDown/>;
     case 'Left':
-      return <IoArrowLeftC/>
+      return <IoArrowLeftC/>;
     case 'Refresh':
-      return <IoRefresh/>
+      return <IoRefresh/>;
     case 'Logout':
-      return <IoLogOut/>
+      return <IoLogOut/>;
+    case 'Happy':
+      return <IoHappy/>;
+    case 'Sad':
+      return <IoSad/>;
+    case 'Neutral':
+      return <IoOutlet/>;
+    case 'Add':
+      return <IoPlusRound/>;
     default:
-      return <div>¯\_(ツ)_/¯</div>
+      return <div>¯\_(ツ)_/¯</div>;
     }
   }
 }

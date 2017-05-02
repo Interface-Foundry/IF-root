@@ -11,7 +11,7 @@
   width: 100%;
   background: white;
   color: rgb(114, 114, 114);
-  border: 2px solid $color-blue;
+  border: 2px solid $border-color-light;
   border-radius: 3px;
   cursor: text;
   text-align: left;
@@ -20,6 +20,7 @@
   height: $nav-height;
   padding: 0 $padding 0 0;
   text-align: left;
+  overflow: hidden;
   svg {
     height: 100%;
     vertical-align: top !important;
@@ -33,6 +34,7 @@
     border: 2px solid $main-button-color;
     cursor: pointer;
     text-align: center;
+    margin-bottom: $padding;
   }
 }
 

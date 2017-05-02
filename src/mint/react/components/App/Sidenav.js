@@ -13,18 +13,37 @@ export default class Sidenav extends Component {
     leader: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
     _toggleSidenav: PropTypes.func.isRequired,
-    currentUser: PropTypes.object.isRequired
+    currentUser: PropTypes.object.isRequired,
+    replace: PropTypes.func,
+    itemsLen: PropTypes.number,
+    updateCart: PropTypes.func,
+    currentCart: PropTypes.object
   }
 
   state = {
     show: null
   }
 
+  _handleShare = () => {
+    const { replace, cart_id } = this.props;
+    // TRY THIS FIRST FOR ANY BROWSER
+    if (navigator.share !== undefined) {
+      navigator.share({
+          title: 'Kip Cart',
+          text: 'Cart Name',
+          url: 'cart.kipthis.com/URL'
+        })
+        .then(() => console.log('Successful share'))
+        .catch(error => console.log('Error sharing:', error));
+    } else {
+      replace(`/cart/${cart_id}/m/share`);
+    }
+  }
+
   render() {
-    const { carts, _toggleSidenav, currentUser, cart_id } = this.props, { show } = this.state,
+    const { carts, _toggleSidenav, currentUser, cart_id, itemsLen, updateCart, currentCart } = this.props, { show } = this.state,
       leaderCarts = _.filter(carts, (c, i) => c.leader.email_address === currentUser.email_address),
       memberCarts = _.filter(carts, (c, i) => c.leader.email_address !== currentUser.email_address);
-
     return (
       <div className='sidenav'>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
@@ -36,68 +55,73 @@ export default class Sidenav extends Component {
               <Icon icon='Clear'/>
             </div>
           </li>
-          <div className='sidenav__list__view'>
-            <h4>My Kip Carts</h4>
-            {_.map(leaderCarts, (c, i) => {
-              if(i > 1 && show !== 'me') return null;
-              return ( 
-                <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-                  { c.locked ? <div className='icon'/> : <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
-                      <div className='icon'>
-                        <Icon icon='Edit'/>
-                      </div>
+          <li className='sidenav__list__view'>
+            { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
+            <ul>
+              {_.map(leaderCarts, (c, i) => {
+                if(i > 1 && show !== 'me') return null;
+                
+                return ( 
+                  <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                    { c.locked ? <div className='icon'/> : <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                        <div className='icon'>
+                          <Icon icon='Edit'/>
+                        </div>
+                      </Link>
+                    }
+                    <Link to={`/cart/${c.id}`}>
+                      <p>
+                        {c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}
+                        {c.locked ? <span><br/>{moment(c.updatedAt).format('L')}</span> : null}
+                      </p>
                     </Link>
-                  }
-                  <Link to={`/cart/${c.id}`}>
-                    <p>
-                      {c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}
-                      {c.locked ? <span>{moment(c.updatedAt).format('L')}</span> : null}
-                    </p>
-                  </Link>
-                </li>
-              )
-            })}
+                  </li>
+                );
+              })}
+            </ul>
             {
               leaderCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
               <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
                 &nbsp; {show === 'me' ? 'Less' : 'More'}
               </h4> : null
             }
-            <h4>Other Kip Carts</h4>
-            {_.map(memberCarts, (c, i) => {
-              if(i > 1 && show !== 'other') return null
-              return (
-                <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-                  <div className='icon'>
-                  </div>
-                  <Link to={`/cart/${c.id}`}>
-                    <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
-                  </Link>
-                </li>
-              )
-            })}
+            { memberCarts.length ? <h4>Other Kip Carts</h4> : null }
+            <ul>
+              {_.map(memberCarts, (c, i) => {
+                if(i > 1 && show !== 'other') return null;
+                return (
+                  <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                    <div className='icon'>
+                    </div>
+                    <Link to={`/cart/${c.id}`}>
+                      <p>{c.name ? c.name : `${_.capitalize(getNameFromEmail(c.leader.email_address))}'s Cart (${c.items.length})`}</p>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
             {
               memberCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
               <Icon icon={show === 'other' ? 'Up' : 'Down'}/>
                 &nbsp; {show === 'other' ? 'Less' : 'More'}
               </h4> : null
             }
-          </div>
-          <div className='sidenav__list__actions'>
+          </li>
+          <li className='sidenav__list__actions'>
             <Link to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></Link>
-            <h4><Icon icon='Email'/>Feedback</h4>
-          </div>
-          <footer>
-            <Link to={`/cart/${cart_id}/m/share`} onClick={_toggleSidenav}>
-              <button className='share'>
+            <Link to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></Link>
+          </li>
+          <footer className='sidenav__footer'>
+            <a href={`/cart/${cart_id}/m/share`} onClick={(e)=> {e.preventDefault(); _toggleSidenav(); ::this._handleShare();}}>
+              <button className='side__share'>
                 <Icon icon='Person'/>
-                <p>Add Others To Cart</p>
+                <p>Add Others To Cart</p> 
               </button>
-            </Link>
-            <a href='/newcart'>
-              <button className='new'>
-                <Icon icon='Plus'/>
-                <p>New Cart</p>
+            </a>
+            <a href={'/newcart'}>
+              <button className='side__new_cart'>
+                <Icon icon='Add'/>
+                <p>Create New Cart</p>
               </button>
             </a>
           </footer>

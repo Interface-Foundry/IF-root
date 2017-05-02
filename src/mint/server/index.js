@@ -14,6 +14,9 @@ const fs = require('fs'),
   webpack = require('webpack'),
   webpackConfig = require('../webpack.config.js');
 
+// start any jobs
+var dailyDealsJob = require('./deals/send-daily-deals-job')
+
 // live reloading
 if (!process.env.NO_LIVE_RELOAD) {
   const compiler = webpack(webpackConfig);
@@ -32,11 +35,16 @@ if (!process.env.NO_LIVE_RELOAD) {
     path: '/__webpack_hmr',
     heartbeat: 10 * 1000
   }));
-}
+} else {
+   app.get('/__webpack_hmr', (req, res) => {
+     res.status(200).end()
+   })
+ }
 
 // idk
 var regularRoutes = require('./routes/regular.js');
 var apiRoutes = require('./routes/api.js');
+var mailRoutes = require('./routes/incoming-mail.js');
 
 require('colors');
 // require('../camel'); //uncomment to populate camel_items
@@ -66,22 +74,29 @@ app.use(bodyParser.json());
 app.use(sessions({
   cookieName: 'session',
   secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw' + process.env.NODE_ENV, // `openssl rand -base64 24 `
-  duration: 0 // never expire
+  duration: 10 * 365 * 24 * 60 * 60 * 1000 // expire in 10 years
 }));
 
 /**
  * Save user sessions to the database
  */
-app.use((req, res, next) => co(function* () {
+app.use((req, res, next) => co(function * () {
   // req.session will always exist, thanks to the above client-sessions middleware
   // Check to make sure we have stored this user's session in the database
   if (!req.session.id) {
-    console.log('creating new sessionin the database')
+    console.log('creating new session in the database')
     var session = yield db.Sessions.create({})
     req.session.id = session.id
+    req.UserSession = session
+  } else {
+    req.UserSession = yield db.Sessions.findOne({ id: req.session.id }).populate('user_account')
   }
 
-  req.UserSession = yield db.Sessions.findOne({ id: req.session.id }).populate('user_account')
+  if (!req.UserSession) {
+    logging.info('session not in the database; creating a new session')
+    yield db.Sessions.create({id: req.session.id})
+    req.UserSession = yield db.Sessions.findOne({ id: req.session.id }).populate('user_account')
+  }
 
   next();
 }));
@@ -104,6 +119,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
 // ROUTES
 app.use('/', regularRoutes);
 app.use('/api', apiRoutes);
+app.use('/sendgrid', mailRoutes);
 
 /**
  *  Always return the main index.html, so react-router render the route in the client

@@ -1,41 +1,41 @@
 // 'use strict'
 
-var _ = require('lodash')
-var co = require('co')
-var Menu = require('./Menu')
-var api = require('./api-wrapper')
-var coupon = require('../../../coupon/couponUsing.js')
-var mailer_transport = require('../../../mail/IF_mail.js')
-var agenda = require('../agendas')
+var _ = require('lodash');
+var co = require('co');
+var Menu = require('./Menu');
+var api = require('./api-wrapper');
+var coupon = require('../../../coupon/couponUsing.js');
+var mailer_transport = require('../../../mail/IF_mail.js');
+var agenda = require('../agendas');
 
-var createAttachmentsForAdminCheckout = require('./generateAdminCheckout.js').createAttachmentsForAdminCheckout
+var createAttachmentsForAdminCheckout = require('./generateAdminCheckout.js').createAttachmentsForAdminCheckout;
 
 // injected dependencies
-var $replyChannel
-var $allHandlers // this is how you can access handlers from other methods
+var $replyChannel;
+var $allHandlers; // this is how you can access handlers from other methods
 
 // exports
-var handlers = {}
+var handlers = {};
 
 // allow mongoose ._id to be used as button things
 String.prototype.toObjectId = function () {
-  var ObjectId = (require('mongoose').Types.ObjectId)
-  return new ObjectId(this.toString())
-}
+  var ObjectId = (require('mongoose').Types.ObjectId);
+  return new ObjectId(this.toString());
+};
 
 var restartButton = {
   'name': 'food.admin.select_address',
   'text': '↺ Restart Order',
   'type': 'button',
   'value': 'food.admin.select_address'
-}
+};
 
 restartButton.confirm = {
   title: 'Restart Order',
   text: 'Are you sure you want to restart your order?',
   ok_text: 'Yes',
   dismiss_text: 'No'
-}
+};
 
 /**
 Clears any existing checkout reminders and, unless all orders are in, sets a new one to go off in 20 minutes
@@ -45,15 +45,15 @@ Clears any existing checkout reminders and, unless all orders are in, sets a new
 */
 function promptCheckout (foodSession, message, waitingText) {
   // schedule reminder here to finish voting early in 20 minutes
-  logging.debug('prompt checkout called')
+  logging.debug('prompt checkout called');
 
   // cancel any pending
   agenda.cancel({
     name: 'checkout prompt',
     'data.user': foodSession.convo_initiater.id
   }, function (e, numRemoved) {
-    if (e) logging.error(e)
-  })
+    if (e) logging.error(e);
+  });
 
     if (waitingText) { // if there are no members who haven't ordered, don't schedule a new reminder
       var finishEarlyMessage = {
@@ -77,40 +77,40 @@ function promptCheckout (foodSession, message, waitingText) {
             value: 'food.admin.order.confirm'
           }, restartButton]
         }]
-      }
+      };
 
       agenda.schedule('20 minutes from now', 'checkout prompt', {
         user: foodSession.convo_initiater.id,
         msg: JSON.stringify(finishEarlyMessage)
-      })
+      });
     }
-  }
+  };
 
 //
 // Show the user their personal cart
 //
 handlers['food.cart.personal'] = function * (message, replace, over_budget) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  console.log("foodSession.cart.length", foodSession.cart.length) // already duplicated
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();
+  console.log('foodSession.cart.length', foodSession.cart.length);
 
-  db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text})
+  db.waypoints.log(1230, foodSession._id, message.user_id, {original_text: message.original_text});
 
-  var menu = Menu(foodSession.menu)
+  var menu = Menu(foodSession.menu);
   var myItems = foodSession.cart.filter(function (i) {
-    return i.user_id === message.user_id && i.added_to_cart
-  })
+    return i.user_id === message.user_id && i.added_to_cart;
+  });
   var totalPrice = myItems.reduce((sum, i) => {
-    return sum + menu.getCartItemPrice(i)
-  }, 0)
+    return sum + menu.getCartItemPrice(i);
+  }, 0);
 
   var banner = {
     title: '',
     image_url: 'https://storage.googleapis.com/kip-random/kip-my-cafe-cart.png'
-  }
+  };
 
   var items = myItems.map((i, index) => {
-    var item = menu.flattenedMenu[i.item.item_id]
-    var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : ''
+    var item = menu.flattenedMenu[i.item.item_id];
+    var instructions = i.item.instructions ? `\n_Special Instructions: ${i.item.instructions}_` : '';
     var quantityAttachment = {
       text: `*${item.name} – ${menu.getCartItemPrice(i).$}*\n${item.description} ${instructions}`,
       fallback: item.description + instructions,
@@ -138,7 +138,7 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
           value: index
         }
       ]
-    }
+    };
 
     if (i.item.item_qty === 1) {
       quantityAttachment.actions[0].confirm = {
@@ -146,11 +146,11 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
         text: `Are you sure you want to remove "${item.name}" from your personal cart?`,
         ok_text: 'Remove it',
         dismiss_text: 'Keep it'
-      }
+      };
     }
 
     return quantityAttachment;
-  })
+  });
 
   var bottom = {
     'text': '*My Order Total:* '+totalPrice.$,
@@ -174,14 +174,14 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
         'value': ''
       }
     ]
-  }
+  };
 
   var json = {
     text: `*Confirm Your Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     attachments: [banner].concat(items).concat([bottom])
-  }
+  };
 
-  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
+  if (foodSession.budget && foodSession.convo_initiater.id !== message.source.user && foodSession.user_budgets[message.user_id] >= foodSession.budget*0.125) {
     json.attachments.push({
       'text': `You have around $${Math.round(foodSession.user_budgets[message.user_id])} left`,
       'mrkdwn_in': ['text'],
@@ -193,87 +193,87 @@ handlers['food.cart.personal'] = function * (message, replace, over_budget) {
     json.attachments.push({
       'text': 'Unfortunately that exceeds your budget',
       'color': '#fc9600'
-    })
+    });
   }
 
   if (replace) {
-    $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
+    $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json});
   } else {
-    $replyChannel.send(message, 'food.item.submenu', {type: 'slack', data: json})
+    $replyChannel.send(message, 'food.item.submenu', {type: 'slack', data: json});
   }
-}
+};
 
 // Handles editing the quantity by using the supplied array index, the nth item in the user's personal cart
 handlers['food.cart.personal.quantity.add'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var menu = Menu(foodSession.menu)
-  var index = message.source.actions[0].value
-  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();
+  var menu = Menu(foodSession.menu);
+  var index = message.source.actions[0].value;
+  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index];
   //decrement user budget by item price
-  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+  if (foodSession.budget && foodSession.convo_initiater.id !== message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
   userItem.item.item_qty++;
-  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+  if (foodSession.budget && foodSession.convo_initiater.id !== message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
   //increment user budget by (new) item price
-  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
-  else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
+  if (foodSession.budget && foodSession.convo_initiater.id !== message.source.user) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}, $set: {user_budgets: foodSession.user_budgets}}).exec();
+  else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec();
 
-  if (foodSession.budget && foodSession.convo_initiater.id != message.source.user && foodSession.user_budgets[message.user_id] < 0) {
-    yield handlers['food.cart.personal.quantity.subtract'](message)
+  if (foodSession.budget && foodSession.convo_initiater.id !== message.source.user && foodSession.user_budgets[message.user_id] < 0) {
+    yield handlers['food.cart.personal.quantity.subtract'](message);
   } else {
-    yield handlers['food.cart.personal'](message, foodSession)
+    yield handlers['food.cart.personal'](message, foodSession);
   }
-}
+};
 
 // Handles editing the quantity by using the supplied array index
 handlers['food.cart.personal.quantity.subtract'] = function * (message, over_budget) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var menu = Menu(foodSession.menu)
-  var index = message.source.actions[0].value
-  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();
+  var menu = Menu(foodSession.menu);
+  var index = message.source.actions[0].value;
+  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index];
   if (userItem.item.item_qty === 1) {
     // don't let them go down to zero
-    userItem.deleteMe = true
-    foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
-    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
-    yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}, $set: {user_budgets: foodSession.user_budgets}}).exec()
+    userItem.deleteMe = true;
+    foodSession.cart = foodSession.cart.filter(i => !i.deleteMe);
+    if (foodSession.budget && foodSession.convo_initiater.id !== message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}, $set: {user_budgets: foodSession.user_budgets}}).exec();
   } else {
-    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
-    userItem.item.item_qty--
-    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
-    if (foodSession.budget && foodSession.convo_initiater.id != message.source.user) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec()
-    else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
+    if (foodSession.budget && foodSession.convo_initiater.id !== message.source.user) foodSession.user_budgets[message.user_id] += menu.getCartItemPrice(userItem);
+    userItem.item.item_qty--;
+    if (foodSession.budget && foodSession.convo_initiater.id !== message.source.user) foodSession.user_budgets[message.user_id] -= menu.getCartItemPrice(userItem);
+    if (foodSession.budget && foodSession.convo_initiater.id !== message.source.user) yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}, $set: {user_budgets: foodSession.user_budgets}}).exec();
+    else yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec();
   }
 
-  yield handlers['food.cart.personal'](message, true, over_budget)
-}
+  yield handlers['food.cart.personal'](message, true, over_budget);
+};
 
 //
 // The user has just clicked the confirm button on their personal cart
 //
 handlers['food.cart.personal.confirm'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec();
   // logging.debug('foodSession.cart.length', foodSession.cart.length) //already duplicated
-  var menu = Menu(foodSession.menu)
-  var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
-  var currentTime = Date.now()
+  var menu = Menu(foodSession.menu);
+  var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart);
+  var currentTime = Date.now();
   var itemArray = myItems.map(item => {
-    var deliveryItem = menu.getItemById(item.item.item_id)
+    var deliveryItem = menu.getItemById(item.item.item_id);
     return {
       'session_id': foodSession._id,
       'chosen_restaurant': foodSession.chosen_restaurant,
       'deliveryItem': deliveryItem,
       'ts': currentTime
-    }
-  })
+    };
+  });
 
   // save their items in their order history
-  yield db.Chatusers.update({'id': message.user_id, 'is_bot': false}, {$push: {'history.orders': {$each: itemArray}}}).exec()
-  foodSession.confirmed_orders.push(message.source.user)
-  foodSession.save()
+  yield db.Chatusers.update({'id': message.user_id, 'is_bot': false}, {$push: {'history.orders': {$each: itemArray}}}).exec();
+  foodSession.confirmed_orders.push(message.source.user);
+  foodSession.save();
 
-  logging.warn('fuck it')
-  yield sendOrderProgressDashboards(foodSession, message)
-}
+  logging.warn('fuck it');
+  yield sendOrderProgressDashboards(foodSession, message);
+};
 
 handlers['food.cart.update_dashboards'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
@@ -284,19 +284,19 @@ handlers['food.cart.update_dashboards'] = function * (message) {
 // Sends ALL the order progress dashboards
 //
 function * sendOrderProgressDashboards (foodSession, message) {
-  logging.debug('sending order progress dashboards')
+  logging.debug('sending order progress dashboards');
 
   // we'll have to send the dashboard to the admin even if they are not hungry
-  const adminIsNotHungry = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0
-  const allOrdersIn = foodSession.confirmed_orders.length >= foodSession.team_members.length + foodSession.email_users.length
-  logging.debug('allOrdersIn:', allOrdersIn)
+  const adminIsNotHungry = foodSession.team_members.filter(u => u.id === foodSession.convo_initiater.id).length === 0;
+  const allOrdersIn = foodSession.confirmed_orders.length >= foodSession.team_members.length + foodSession.email_users.length;
+  logging.debug('allOrdersIn:', allOrdersIn);
 
   // make the list of things that hungry team members have ordered
-  var menu = Menu(foodSession.menu)
+  var menu = Menu(foodSession.menu);
   var itemList = foodSession.cart
     .filter(i => i.added_to_cart && foodSession.confirmed_orders.includes(i.user_id))
     .map(i => menu.getItemById(i.item.item_id).name)
-    .join(', ')
+    .join(', ');
 
   // create the basic dashboard that everybody sees
   var dashboard = {
@@ -308,7 +308,7 @@ function * sendOrderProgressDashboards (foodSession, message) {
       'fallback': `*Collected so far* 👋\n_${itemList}_`,
       'actions': []
     }]
-  }
+  };
 
   // add in the info about missing persons (slackers yet to order and pending email orders)
   // Show which team members are not in the votes array
@@ -318,21 +318,21 @@ function * sendOrderProgressDashboards (foodSession, message) {
     full_email_members.push(full_eu);
   }
 
-  var emailers = []
+  var emailers = [];
   full_email_members.map(function (eu) {
     if (foodSession.confirmed_orders.indexOf(eu.id) < 0) {
-      emailers.push(eu.email)
+      emailers.push(eu.email);
     }
-  })
-  emailers = emailers.join(', ')
+  });
+  emailers = emailers.join(', ');
 
   var slackers = _.difference(foodSession.team_members.map(m => m.id), _.difference(foodSession.confirmed_orders, full_email_members.map(m => m.id)))
-    .map(id => `<@${id}>`)
+    .map(id => `<@${id}>`);
 
   if (slackers.length > 5) {
-    slackers = slackers.length + ' users'
+    slackers = slackers.length + ' users';
   } else {
-    slackers = slackers.join(' ')
+    slackers = slackers.join(' ');
   }
 
   // text that will be displayed listing the users who haven't ordered
@@ -342,38 +342,38 @@ function * sendOrderProgressDashboards (foodSession, message) {
     if (slackers && !emailers) waitingText += slackers
     else if (emailers && !slackers) waitingText += emailers
     else {
-      waitingText += `Slack: ${slackers}\nEmail: ${emailers}`
+      waitingText += `Slack: ${slackers}\nEmail: ${emailers}`;
     }
     dashboard.attachments.push({
       mrkdwn_in: ['text'],
       text: 'Waiting for orders from \n' + waitingText,
       color: '#3AA3E3',
       fallback: `Waiting for orders from ${slackers} ${emailers}`
-    })
+    });
   }
 
   // set up the reminder
-  console.log('admin ready?', foodSession.confirmed_orders.indexOf(foodSession.convo_initiater.id) > -1)
-  if (adminIsNotHungry || foodSession.confirmed_orders.indexOf(foodSession.convo_initiater.id) > -1) promptCheckout(foodSession, message, waitingText)
+  console.log('admin ready?', foodSession.confirmed_orders.indexOf(foodSession.convo_initiater.id) > -1);
+  if (adminIsNotHungry || foodSession.confirmed_orders.indexOf(foodSession.convo_initiater.id) > -1) promptCheckout(foodSession, message, waitingText);
 
   // get the list of users that we have to send a dashboard to
   var dashboardUsers = foodSession.team_members.filter(user => {
-    return foodSession.confirmed_orders.includes(user.id)
-  })
-  logging.debug('dashboardUsers', dashboardUsers.map(u => u.id))
+    return foodSession.confirmed_orders.includes(user.id);
+  });
+  logging.debug('dashboardUsers', dashboardUsers.map(u => u.id));
 
   // if admin is not in team_members, add them to the list of dashboardUsers
   if (adminIsNotHungry) {
-    dashboardUsers.push(foodSession.convo_initiater)
+    dashboardUsers.push(foodSession.convo_initiater);
   }
 
   //
   // send the dashboards to all the users that are ready to get dashboards
   //
   yield dashboardUsers.map(function * (user) {
-    var isAdmin = user.id === foodSession.convo_initiater.id
-    logging.debug('sending dashboard to user', user.id, 'isAdmin?', isAdmin)
-    var thisDashboard = _.cloneDeep(dashboard) // because mutating objects in a loop is bad
+    var isAdmin = user.id === foodSession.convo_initiater.id;
+    logging.debug('sending dashboard to user', user.id, 'isAdmin?', isAdmin);
+    var thisDashboard = _.cloneDeep(dashboard); // because mutating objects in a loop is bad
 
     // add the control buttons for the admin
     if (isAdmin && !allOrdersIn) {
@@ -385,12 +385,12 @@ function * sendOrderProgressDashboards (foodSession, message) {
         'type': 'button',
         'value': 'food.admin.order.confirm',
         'confirm': {
-          'title': `Finish Order Early?`,
+          'title': 'Finish Order Early?',
           'text': `This will finish the order. Members that haven't ordered yet won't be able to.`,
-          'ok_text': `Yes`,
-          'dismiss_text': `No`
+          'ok_text': 'Yes',
+          'dismiss_text': 'No'
         }
-      }
+      };
 
       var restartOrderButton = {
         'name': 'food.admin.select_address',
@@ -403,16 +403,16 @@ function * sendOrderProgressDashboards (foodSession, message) {
           'ok_text': 'Yes',
           'dismiss_text': 'No'
         }
-      }
+      };
 
-      var menu = Menu(foodSession.menu)
+      var menu = Menu(foodSession.menu);
 
-      var items = foodSession.cart.filter(i => i.added_to_cart)
+      var items = foodSession.cart.filter(i => i.added_to_cart);
       var totalPrice = items.reduce(function (sum, i) {
-        return sum + menu.getCartItemPrice(i) * i.item.item_qty
-      }, 0)
+        return sum + menu.getCartItemPrice(i) * i.item.item_qty;
+      }, 0);
 
-      var minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum
+      var minimumMet = totalPrice >= foodSession.chosen_restaurant.minimum;
 
       thisDashboard.attachments.push({
         'color': minimumMet ? '#3AA3E3' : '#fc9600',
@@ -420,18 +420,18 @@ function * sendOrderProgressDashboards (foodSession, message) {
         'fallback': 'Finish Order Early',
         'text': minimumMet ? '' : `*Minimum Not Yet Met:* Minimum Order For Restaurant is: *` + `_${foodSession.chosen_restaurant.minimum.$}_*`,
         'actions': minimumMet ? [finishEarlyButton, restartOrderButton] : [restartOrderButton]
-      })
+      });
     } else if (isAdmin && allOrdersIn) {
       // send the team cart to the admin
-      var adminDashboard = _.find(foodSession.order_dashboards, {user: foodSession.convo_initiater.id})
+      var adminDashboard = _.find(foodSession.order_dashboards, {user: foodSession.convo_initiater.id});
       if (adminDashboard) {
-        logging.debug('sending cart to admin, replacing existing dashboard')
+        logging.debug('sending cart to admin, replacing existing dashboard');
         // return co(function *() {
-        var msg = yield db.Messages.findById(adminDashboard.message)
-        return yield handlers['food.admin.order.confirm'](msg, foodSession)
+        var msg = yield db.Messages.findById(adminDashboard.message);
+        return yield handlers['food.admin.order.confirm'](msg, foodSession);
         // })
       } else {
-        logging.debug('sending cart to admin, with new message')
+        logging.debug('sending cart to admin, with new message');
         adminDashboard = {
           'source': {
             'user': foodSession.convo_initiater.id,
@@ -441,34 +441,34 @@ function * sendOrderProgressDashboards (foodSession, message) {
           'thread_id': foodSession.convo_initiater.dm,
           'mode': 'food',
           'action': 'food.admin.cart'
-        }
-        return yield handlers['food.admin.order.confirm'](adminDashboard, foodSession)
+        };
+        return yield handlers['food.admin.order.confirm'](adminDashboard, foodSession);
       }
     }
 
     // send or update the dashbaord message
-    var existingDashbaord = foodSession.order_dashboards.filter(d => d.user === user.id)[0]
+    var existingDashbaord = foodSession.order_dashboards.filter(d => d.user === user.id)[0];
     if (existingDashbaord) {
       try {
-        msg = yield db.Messages.findById(existingDashbaord.message)
-        yield $replyChannel.sendReplace(msg, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
+        msg = yield db.Messages.findById(existingDashbaord.message);
+        yield $replyChannel.sendReplace(msg, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard});
       } catch (err) {
-        logging.error('could not find find existing dashboard or something', err)
+        logging.error('could not find find existing dashboard or something', err);
       }
     } else if (user.id === message.source.user) {
       // send the dashboard for the first time for the user that just submitted personal cart
-      msg = yield $replyChannel.sendReplace(message, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard})
-      yield foodSession.update({$push: {'order_dashboards': {'user': message.source.user, 'message': msg._id}}})
+      msg = yield $replyChannel.sendReplace(message, 'food.cart.personal.confirm', {type: 'slack', data: thisDashboard});
+      yield foodSession.update({$push: {'order_dashboards': {'user': message.source.user, 'message': msg._id}}});
     }
-  })
+  });
 }
 
 /*
 * Confirm all users have voted for s12
 */
 handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
-  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-  db.waypoints.log(1240, foodSession._id, message.user_id, {original_text: message.original_text})
+  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession;
+  db.waypoints.log(1240, foodSession._id, message.user_id, {original_text: message.original_text});
   //
   // Reply to the user who either submitted their personal cart or said "no thanks"
   //
@@ -478,20 +478,20 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
     // console.log('FOODSESSION', foodSession)
     $replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: `Ok, maybe next time :blush:`}})
   } else {
-    foodSession.confirmed_orders.push(message.source.user)
+    foodSession.confirmed_orders.push(message.source.user);
     $replyChannel.sendReplace(message, '.', {type: message.origin, data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
-    yield foodSession.save()
+    yield foodSession.save();
   }
 
   //
   // Admin Order Dashboard
   //
-  var isAdmin = message.source.user === foodSession.convo_initiater.id
-  var menu = Menu(foodSession.menu)
+  var isAdmin = message.source.user === foodSession.convo_initiater.id;
+  var menu = Menu(foodSession.menu);
   var allItems = foodSession.cart
     .filter(i => i.added_to_cart && foodSession.confirmed_orders.includes(i.user_id))
     .map(i => menu.getItemById(i.item.item_id).name)
-    .join(', ')
+    .join(', ');
 
   // Show which team members are not in the votes array
   var full_email_members = [];
@@ -502,23 +502,23 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
   // console.log('full_email_members', full_email_members, foodSession.confirmed_orders)
 
   var slackers = _.difference(foodSession.team_members.map(m => m.id), _.difference(foodSession.confirmed_orders, full_email_members.map(m => m.id)))
-    .map(id => `<@${id}>`)
+    .map(id => `<@${id}>`);
 
-  var emailer_ids = _.difference(full_email_members.map(m => m.id), _.difference(foodSession.confirmed_orders, slackers))
+  var emailer_ids = _.difference(full_email_members.map(m => m.id), _.difference(foodSession.confirmed_orders, slackers));
   var emailers = [];
 
   if (emailer_ids) emailer_ids.map(function (eid) {
     for (var i = 0; i < full_email_members.length; i++) {
-      if (full_email_members[i].id == eid) emailers.push(full_email_members[i].email)
+      if (full_email_members[i].id === eid) emailers.push(full_email_members[i].email);
     }
-  })
+  });
 
-  emailers = emailers.map(e => /(.+)@/.exec(e)[1])
+  emailers = emailers.map(e => /(.+)@/.exec(e)[1]);
 
-  var slackText = (emailers.length ? '\nSlack: ' : '\n') + slackers.join(', ')
+  var slackText = (emailers.length ? '\nSlack: ' : '\n') + slackers.join(', ');
 
   // console.log('emailers', emailers)
-  var waitingText = (slackers ? slackText : '') + (emailers.length ? '\nEmail: ' + emailers.join(', ') : '')
+  var waitingText = (slackers ? slackText : '') + (emailers.length ? '\nEmail: ' + emailers.join(', ') : '');
 
   var dashboard = {
     text: `Collecting orders for *${foodSession.chosen_restaurant.name}*`,
@@ -529,15 +529,15 @@ handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
       'fallback': `*Collected so far* 👋\n_${allItems}_`,
       actions: []
     }]
-  }
+  };
 
-  if ((slackers || emailers.length) && message.source.user == foodSession.convo_initiater.id) {
+  if ((slackers || emailers.length) && message.source.user === foodSession.convo_initiater.id) {
     dashboard.attachments.push({
       color: '#49d63a',
       mrkdwn_in: ['text'],
       text: `*Waiting for order(s) from:*${waitingText}`,
       actions: []
-    })
+    });
   }
 
   var items = foodSession.cart.filter(i => i.added_to_cart)

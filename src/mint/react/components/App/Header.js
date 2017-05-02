@@ -15,21 +15,26 @@ export default class Header extends Component {
   }
 
   render() {
-    let { props, props: { deals, items, currentUser, item: { search } } } = this;
+    let { props, props: { deals, currentUser, item: { search } } } = this;
     const { match } = props;
     search = search ? search : 0;
 
     return (
       <nav className='navbar'>
         <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
-            <EnumeratedHead text={'My Cart Items'} length={items.length} type={'item'} {...props}/>
+            <ModalHead text={'Add To Cart'} {...props}/>
           }
         />
+        {/* TODO: get this working for admins */}
         <Route path={`${match.url}/m/:type/:index/:asin/edit`} component={() => 
             <EnumeratedHead text={'My Cart Items'} length={splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
           }
         />
         <Route path={`${match.url}/m/item`} component={() => 
+            <ModalHead text={'Add to Cart'} {...props}/>
+          }
+        />
+        <Route path={`${match.url}/m/variant/:index/:item_id`} component={() => 
             <ModalHead text={'Add to Cart'} {...props}/>
           }
         />
@@ -45,8 +50,16 @@ export default class Header extends Component {
             <ModalHead text={'Share Cart'} {...props}/>
           }
         />
+        <Route path={`${match.url}/m/signin`} component={() => 
+            <IntroHead text={'Create New Cart'} {...props}/>
+          }
+        />
         <Route path={`${match.url}/m/settings`} component={() => 
-            <SettingsHeader text={'Share Cart'} {...props}/>
+            <SettingsHeader text='Settings' icon="Settings" {...props}/>
+          }
+        />
+        <Route path={`${match.url}/m/feedback`} component={() => 
+            <SettingsHeader text='Feedback' icon="Email" {...props}/>
           }
         />
         <Route path={`${match.url}/m/edit`} component={() => 
@@ -71,7 +84,7 @@ class CartHead extends Component {
   }
 
   render() {
-    const { _toggleSidenav, currentUser, cartName, currentCart: { locked, thumbnail_url } } = this.props;
+    const { _toggleSidenav, cartName, currentCart: { locked, thumbnail_url } } = this.props;
 
     return (
       <div>
@@ -87,11 +100,28 @@ class CartHead extends Component {
         <h3>
           {locked ? 'Checkout in progress' : cartName}
         </h3>
-        {
-          currentUser.id ? <div className='navbar__icon' onClick={_toggleSidenav}>
-            <Icon icon='Hamburger'/>
-          </div> : <div className='navbar__icon no-pointer'/>
-        }
+        <div className='navbar__icon' onClick={_toggleSidenav}>
+          <Icon icon='Hamburger'/>
+        </div>
+      </div>
+    );
+  }
+}
+
+class IntroHead extends Component {
+  render() {
+    return (
+      <div>
+        <div className='image' style={
+          {
+            backgroundImage: 'url(http://tidepools.co/kip/head@x2.png)',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain'
+          }}/>
+        <h3>
+          Create New Cart
+        </h3>
       </div>
     );
   }
@@ -158,7 +188,7 @@ class SettingsHeader extends Component {
   }
 
   render() {
-    const { cart_id, history: { replace } } = this.props;
+    const { cart_id, history: { replace }, text, icon } = this.props;
 
     return (
       <div className='navbar__modal settings'>
@@ -166,8 +196,8 @@ class SettingsHeader extends Component {
           <Icon icon='Left'/>
         </div>
         <h3 className='navbar__modal_head settings'>
-          <Icon icon='Settings'/>
-          Settings
+          <Icon icon={icon}/>
+          {text}
         </h3>
       </div>
     );

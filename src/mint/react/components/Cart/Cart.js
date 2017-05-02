@@ -54,7 +54,7 @@ export default class Cart extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { history: { replace }, cart_id, items } = this.props, { leader, addingItem, user_account } = nextProps,
-      cartId = cart_id || nextProps.cart_id;
+      cartId = nextProps.cart_id || cart_id;
 
     if (cartId) {
       if (!user_account.id && !leader) {
@@ -72,14 +72,13 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, history: { push }, locked, updateCart, currentCart } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
-        ...items.my, 
+        ...items.my,
         ..._.reduce(items.others, (acc, value) => [...acc, ...value], [])
       ]);
-
     return (
       <div className='cart'>
         {
@@ -87,7 +86,7 @@ export default class Cart extends Component {
           ? <div className='cart__locked'>
               <div className='cart__locked__actions'>
                 <button className='primary'><Icon icon='Refresh'/><h1>RE-ORDER CART</h1></button>
-                { leader.id === user_account.id ? <button className='secondary'><Icon icon='Cart'/><h1>CHECKOUT<br/>{displayCost(total)}</h1></button> : null }
+                { !!leader && leader.id === user_account.id ? <button className='secondary' onClick={(e)=>{e.preventDefault(); window.open(`/api/cart/${cart_id}/checkout`)}}><Icon icon='Cart'/><h1>CHECKOUT<br/>{displayCost(total)}</h1></button> : null }
               </div>
               <div className='cart__locked-container'>
                 <div className='cart__locked__text'>
@@ -95,7 +94,7 @@ export default class Cart extends Component {
                   <p>{moment(currentCart.updatedAt).format('L')}&nbsp;{moment(currentCart.updatedAt).format('LT')}</p>
                 </div>
                 {
-                  leader.id === user_account.id ? <button onClick={() => updateCart({...currentCart, locked: !currentCart.locked})}>
+                  !!leader && leader.id === user_account.id ? <button onClick={() => updateCart({...currentCart, locked: !currentCart.locked})}>
                     <Icon icon='Locked'/>
                     Unlock
                   </button> : null
@@ -114,10 +113,19 @@ export default class Cart extends Component {
             </span>
         }
         <div className={`cart__title ${animation ? 'action' : ''}`}>
-          { animation ? <h4>{animation}</h4>
-            : <h4>{ hasItems ? `${items.quantity} items in Group Cart` : 'Group Shopping Cart' }</h4>
+          { animation 
+            ? <h4>{animation}</h4>
+            : <h4>
+              { hasItems ? `${items.quantity} items in Kip Cart`  : 'Kip Cart' } 
+              {
+                !!leader && leader.id === user_account.id 
+                ?  <span> – <span className='price'>{displayCost(total)} Total</span></span> 
+                : null
+              }
+            </h4>
           }
         </div>
+        {currentCart.itemDeleted ? <button onClick={cancelRemoveItem}>Undo Delete</button>: null}
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
           {
@@ -133,7 +141,8 @@ export default class Cart extends Component {
 
 class MyItems extends Component {
   static propTypes = {
-    items: PropTypes.array.isRequired
+    items: PropTypes.array.isRequired,
+    currentCart: PropTypes.object
   }
 
   renderList() {
@@ -164,7 +173,7 @@ class MyItems extends Component {
             : <EmptyCart key="empty"/>
           }
         </div>
-        <h3>Total: <span className={locked?'locked':''}>{displayCost(total)}</span></h3>
+        <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3>
       </ul>
     );
   }
@@ -175,7 +184,8 @@ class OtherItems extends Component {
     items: PropTypes.array.isRequired,
     isLeader: PropTypes.bool.isRequired,
     startIndex: PropTypes.number,
-    title: PropTypes.string
+    title: PropTypes.string,
+    currentCart: PropTypes.object
   }
 
   render() {
@@ -190,7 +200,7 @@ class OtherItems extends Component {
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
           : <EmptyCart />
         }
-        {isLeader ? <h3>Total: <span className={locked?'locked':''}>{displayCost(total)}</span></h3> : null}
+        {isLeader ? <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3> : null}
       </ul>
     );
   }
@@ -201,7 +211,6 @@ class EmptyCart extends Component {
     return (
       <li className='cart__items-empty'>
         <div className='image' style={{backgroundImage:'url(http://tidepools.co/kip/head_smaller.png)'}}/>
-        <h4>Huh. Nothing to see here</h4>
       </li>
     );
   }

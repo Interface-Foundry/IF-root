@@ -5,6 +5,7 @@ const dbReady = require('../../db')
 dbReady.then((models) => { db = models })
 const amazon_cart = require('./amazon_cart')
 
+
 /**
  * Scrapes an item from amazon
  * @param  {URL} uri a node.js URL object, see https://nodejs.org/docs/latest/api/url.html
@@ -46,6 +47,32 @@ module.exports.scrapeAsin = function asin_scraper (asin) {
 }
 
 /**
+ * format cents to nice price.  amazon returns amount in cents
+ *
+ * @param      {number}  amount  The amount
+ * @return     {number}  amount formated to tenths or whatever usd is
+ */
+function formatAmazonPrice(amount) {
+  return parseInt(amount) / 100
+}
+
+
+function getItemPrice(item, priceType) {
+  // place holder for time being since unsure what price to use
+  const availablePrices = {}
+  availablePrices.basicItemPrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.Price.Amount', 0))
+  if (priceType === undefined) {
+    return availablePrices.basicItemPrice
+  } else {
+    // might be useful to return other possible prices in the future
+    availablePrices.lowestPrice = formatAmazonPrice(_.get(item, 'OfferSummary.LowestNewPrice.Amount', 0))
+    availablePrices.listPrice = formatAmazonPrice(_.get(item, 'ItemAttributes.ListPrice.Amount', 0))
+    return availablePrices[priceType]
+  }
+}
+
+
+/**
  * Converts a response from the amazon api to an item in our database. Does not add this item to cart.
  * @param  {json}    res response from amazon api, a totally what the fuck pile of jsonified xml data
  * @return {Promise<item>}     returns promise for a db.Item.
@@ -62,7 +89,7 @@ var res2Item = function (res) {
     const i = res.Item
 
     // Custom scraping TODO
-    const price = parseInt(_.get(i, 'OfferSummary.LowestNewPrice.Amount')) / 100
+    const price = getItemPrice(i)
     const rating = 0
     const nRatings = 0
 
@@ -71,6 +98,10 @@ var res2Item = function (res) {
     const thumbnailMinSize = 50
     const imageKeys = ['SwatchImage', 'SmallImage', 'ThumbnailImage', 'TinyImage', 'MediumImage', 'LargeImage', 'HiResImage']
     var thumbnail = imageKeys.reduce((chosenImage, thisImage) => {
+
+      // Do we have a small image available?
+      if(i.SmallImage && i.SmallImage.URL) return i.SmallImage.URL
+
       // If we have already found an image that is good enough, return it
       if (chosenImage) return chosenImage
 
@@ -87,6 +118,13 @@ var res2Item = function (res) {
     }, null)
 
     const mainImage = imageKeys.reverse().reduce((chosenImage, thisImage) => {
+
+      // Do we have a large normal image available?
+      if(i.LargeImage && i.LargeImage.URL) return i.LargeImage.URL
+
+      // Do we have a medium image available?
+      if(i.MediumImage && i.MediumImage.URL) return i.MediumImage.URL
+
       // If we have already found an image that is good enough, return it
       if (chosenImage) return chosenImage
 
@@ -99,6 +137,10 @@ var res2Item = function (res) {
 
     // if no image was good enough to be a thumbnail, use the main image as the thumbnail
     if (!thumbnail) {
+
+      // Do we have a medium image available?
+      if(i.MediumImage && i.MediumImage.URL) return i.MediumImage.URL
+
       thumbnail = mainImage
     }
 
@@ -168,8 +210,6 @@ var res2Item = function (res) {
       })
 
       options = yield _.flatten(options).filter(Boolean)
-      console.log(options)
-      console.log('item', item)
       options.map(o => {
         item.options.add(o.id)
       })
@@ -178,7 +218,6 @@ var res2Item = function (res) {
 
     // um let's just get the item fresh to make sure it's okay
     item = yield db.Items.findOne({id: item.id}).populate('options')
-    console.log(item.options)
 
     return item
   })

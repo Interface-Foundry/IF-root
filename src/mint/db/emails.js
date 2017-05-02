@@ -22,7 +22,7 @@ var emailsCollection = Waterline.Collection.extend({
       defaultsTo: () => uuid.v4()
     },
 
-    /** User accounts which have email addresses */
+    /** String list of email addresses in the "To" box */
     recipients: 'string',
 
     /** Sender should probably always be kip */
@@ -45,6 +45,9 @@ var emailsCollection = Waterline.Collection.extend({
       type: 'string'
     },
 
+    /** id of the unsubscribe group the email is associated with */
+    unsubscribe_group_id: 'integer',
+
     /**
      * The cart associated with this email
      * @type {Cart}
@@ -53,15 +56,34 @@ var emailsCollection = Waterline.Collection.extend({
 
     /** Use a template for the email */
     template: function(name, data) {
-      this.message_html = templates(name, data)
-      this.template_name = name
-      return this.save()
+      if (this.cart && !data.cart) {
+        data.cart = this.cart
+      } else if (!this.cart && !data.cart) {
+        data.cart = ''
+      }
+      this.message_html = templates(name, data);
+      this.template_name = name;
+      return this.save();
     },
 
     /** send an email */
     send: function () {
-      var me = this
+      var me = this;
       return co(function *() {
+        // first filter out emails that we should obvs not send email to
+        var blacklist = [
+          'example.com'
+        ]
+
+        for (let i in blacklist) {
+          let domain = blacklist[i]
+          console.log(domain)
+          if (me.recipients.includes(domain)){
+            console.log('Not sending email to address in blacklist', me.recipients, ('(' + domain + ')').red)
+            return
+          }
+        }
+
     		/**
     			Example from https://nodemailer.com/about/
     			let mailOptions = {
@@ -73,26 +95,31 @@ var emailsCollection = Waterline.Collection.extend({
     			};
     		*/
         var options = {
-          from: 'Kip <hello@kipthis.com>',
+          from: 'Kip <hello@kip.ai>',
           to: me.recipients,
           subject: me.subject,
           html: me.message_html,
-          text: me.message_text_fallback
-        }
+          text: me.message_text_fallback,
+          headers: {
+            'x-smtpapi': `{
+              "asm_group_id": ${me.unsubscribe_group_id || 2341},
+              "asm_groups_to_display": [2273,2275,2341]
+            }`
+          }
+        };
 
         // There is an env variable to control sending emails or nah
         if (!process.env.SEND_EMAILS) {
-          console.log('Not sending email (use SEND_EMAILS=1 to actually send an email)')
+          console.log('Not sending email (use SEND_EMAILS=1 to actually send an email)');
         } else {
-          yield sendMail(options)
+          yield sendMail(options);
         }
 
-        me.sent_at = new Date()
-        yield me.save()
-      })
+        me.sent_at = new Date();
+        yield me.save();
+      });
     }
   }
-})
-
+});
 
 module.exports = emailsCollection

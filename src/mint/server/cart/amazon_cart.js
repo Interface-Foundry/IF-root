@@ -9,6 +9,7 @@ const asinCache = LRU({
 })
 
 var scraper = require('./scraper_amazon');
+var emoji = require('../utilities/emoji_utils');
 
 // amazon creds -> move to constants later
 const amazonCreds = [{
@@ -86,36 +87,82 @@ exports.getAmazonItem = function * (item_identifier) {
  * search item by keyword(s)
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
  * lookup item by asin
- * @param {string} search terms
+ * @param {string} query search terms
  * @returns {[type]} amazon items
  */
-exports.searchAmazon = function * (query) {
+exports.searchAmazon = function * (query, index) {
+  query = emoji(query);
   console.log('searching:', query)
   var amazonParams = {
     Availability: 'Available',
     Keywords: query,
     Condition: 'New',
     SearchIndex: 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,SalesRank,Variations'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations',
+    ItemPage: index || 1
   };
   var results = yield opHelper.execute('ItemSearch', amazonParams);
-    // logging.info(JSON.stringify(results.result.ItemSearchResponse.Items.Item));
-    // logging.info(JSON.stringify(Object.keys(results.result.ItemSearchResponse.Items.Item)));
-    if (!results) {
-      throw new Error('Error on search');
-      return null;
+  if (!results || !results.result.ItemSearchResponse.Items.Item) {
+    if (!results) throw new Error('Error on search for query', query);
+    else logging.error("Searching " + query + ' yielded no results');
+
+    // remove the last word, and try the search again
+    var newQuery = query.split(/[^\w]/).slice(0, -1).join(' ')
+    if (newQuery) {
+      var results = yield exports.searchAmazon(newQuery)
+      return results
+    } else {
+      return [];
     }
+  }
+  else {
     //save new items to the db
     var items = results.result.ItemSearchResponse.Items.Item
     var validatedItems = [];
-    yield items.map(function * (item) {
-      validatedItems.push(yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item}));
+    yield items.map(function * (item) { //map of undefined
+      var dbItem = yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item})
+      // logging.info(dbItem);
+      if (dbItem) {
+        dbItem.original_link = item.ItemLinks.ItemLink[0].URL
+        yield dbItem.save();
+      }
+      validatedItems.push(dbItem);
       console.log('added item to db');
     });
-    validatedItems = validatedItems.filter(x => x); // res2Item will return null if there are validation errors and the item is not added to the db
+    validatedItems = validatedItems.filter(function (x) {
+      if (x) return x;
+    }); //res2Item will return null if there are validation errors and the item is not added to the db
     return validatedItems;
+  }
 };
 
+
+/**
+ * lookup item by asin
+ * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemLookup.html
+ * lookup item by asin
+ * @param {string} asin of item
+ * @returns {[type]} [description]
+ */
+// exports.searchAmazon = function * (query) {
+//   console.log('searching:', query)
+//   var amazonParams = {
+//     Availability: 'Available',
+//     Keywords: query,
+//     Condition: 'New',
+//     SearchIndex: 'All', //the values for this vary by locale
+//     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
+//   };
+//   try {
+//     var results = yield opHelper.execute('ItemSearch', amazonParams);
+//     // logging.info(JSON.stringify(results.result.ItemSearchResponse.Items.Item));
+//     // logging.info(JSON.stringify(Object.keys(results.result.ItemSearchResponse.Items.Item)));
+//     return results.result.ItemSearchResponse.Items.Item;
+//   } catch (err) {
+//     throw new Error('Error on search');
+//     return null;
+//   }
+// };
 
 /**
  * lookup item by asin
@@ -137,7 +184,6 @@ exports.lookupAmazonItem = function * (asin) {
 
   var amazonParams = {
     Availability: 'Available',
-    Condition: 'New',
     IdType: 'ASIN',
     ItemId: asin,
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
@@ -241,10 +287,12 @@ exports.addAmazonItemToCart = function * (item, cart) {
 
   // check if we need to create anew cart
   if (!cart.amazon_hmac || !cart.amazon_cartid) {
-    return exports.createAmazonCart(item)
+    let amazonCart = exports.createAmazonCart(item)
+    cart.amazon_cartid = amazonCart.CartId
+    cart.amazon_hmac = amazonCart.HMAC
+    yield cart.save()
   }
 
-  var cart
   var quantity = item.quantity
 
   // if the item is already in the cart, then we want to increase the quantity
@@ -259,9 +307,9 @@ exports.addAmazonItemToCart = function * (item, cart) {
       'Item.1.CartItemId': itemAlreadyAdded.CartItemId,
       'Item.1.Quantity': quantity
     };
-    cart = yield opHelper.execute('CartModify', amazonParams);
-    checkError(cart.result.CartModifyResponse.Cart)
-    return cart.result.CartModifyResponse.Cart;
+    var cartModify = yield opHelper.execute('CartModify', amazonParams);
+    checkError(cartModify.result.CartModifyResponse.Cart)
+    return cartModify.result.CartModifyResponse.Cart;
   } else {
     var amazonParams = {
       'AssociateTag': associateTag,
@@ -270,9 +318,9 @@ exports.addAmazonItemToCart = function * (item, cart) {
       'Item.1.ASIN': item.asin,
       'Item.1.Quantity': quantity
     };
-    cart = yield opHelper.execute('CartAdd', amazonParams);
-    checkError(cart.result.CartAddResponse.Cart)
-    return cart.result.CartAddResponse.Cart;
+    var cartAdd = yield opHelper.execute('CartAdd', amazonParams);
+    checkError(cartAdd.result.CartAddResponse.Cart)
+    return cartAdd.result.CartAddResponse.Cart;
   }
 };
 
@@ -321,12 +369,31 @@ exports.syncAmazon = function * (cart) {
     throw new Error('can only sync carts that have amazon items, and items must be populated')
   }
 
-  // check if we need to create a new cart
+  // check if we need to create a new cart. if so, no need to sync, just create
   if (!cart.amazon_cartid || !cart.amazon_hmac) {
-    var amazonCart = yield exports.createAmazonCart(cart.items[0])
-  } else {
-    amazonCart = yield exports.getAmazonCart(cart)
+    console.log('creating new cart with all the items')
+    var cartAddAmazonParams = {
+      'AssociateTag': associateTag,
+      'CartId': cart.amazon_cartid,
+      'HMAC': cart.amazon_hmac
+    };
+    cart.items.map((item, index) => {
+      var key = 'Item.' + (index + 1) + '.'
+      cartAddAmazonParams[key + 'ASIN'] = item.asin
+      cartAddAmazonParams[key + 'Quantity'] = item.quantity
+    })
+
+    var res = yield opHelper.execute('CartCreate', cartAddAmazonParams);
+    checkError(res.result.CartCreateResponse.Cart)
+    returnValue = res.result.CartCreateResponse.Cart
+    cart.amazon_cartid = returnValue.CartId
+    cart.amazon_hmac = returnValue.HMAC
+    yield cart.save()
+    return returnValue
   }
+
+  // amazon cart already existed for this cart, so proceed to sync items
+  var amazonCart = yield exports.getAmazonCart(cart)
 
   // Generate two requests and run them through amazon:
   //  - a CartAdd request for the the items missing
@@ -377,7 +444,6 @@ exports.syncAmazon = function * (cart) {
   // from one of the modification requests below
   var returnValue = amazonCart
   if (missingItems.length > 0) {
-    console.log('Inside Amazon Params', cartAddAmazonParams)
     var res = yield opHelper.execute('CartAdd', cartAddAmazonParams);
     checkError(res.result.CartAddResponse.Cart)
     returnValue = res.result.CartAddResponse.Cart
@@ -386,6 +452,10 @@ exports.syncAmazon = function * (cart) {
     res = yield opHelper.execute('CartModify', cartModifyAmazonParams);
     checkError(res.result.CartModifyResponse.Cart)
     returnValue = res.result.CartModifyResponse.Cart
+  }
+
+  if (!returnValue.PurchaseURL) {
+    returnValue.PurchaseURL = amazonCart.PurchaseURL
   }
 
   return returnValue

@@ -1,5 +1,4 @@
 // react/components/App/App.scss
-
 @import '../../styles/Constants';
 body, html {
   margin: 0;
@@ -23,6 +22,10 @@ body, html {
   }
 }
 
+body {
+  background: $kip-secondary-color;
+}
+
 .app, #root {
   position: fixed;
   top: 0;
@@ -30,13 +33,21 @@ body, html {
   left: 0;
   right: 0;
   overflow: hidden;
+  max-width: 900px;
+  margin: auto;
+  background-color: $kip-primary-color;
+  @media (min-width: 900px) {
+    border-left: 2px solid $header-color;
+    border-right: 2px solid $header-color;
+  }
 }
 
 .app__view {
   position: relative;
+  overflow: hidden;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
-  height: calc(100% - #{$nav-height*2 + 10});
+  height: calc(100% - #{$nav-height*2 - 10});
   &.large {
     height: calc(100% - #{$nav-height});
   }

@@ -14,9 +14,6 @@ import Footer from './Footer';
 import ReactGA from 'react-ga';
 
 export default class App extends Component {
-  state = {
-    sidenav: false
-  }
 
   static propTypes = {
     cart_id: PropTypes.string.isRequired,
@@ -32,6 +29,10 @@ export default class App extends Component {
     updateCart: PropTypes.func.isRequired,
     location: PropTypes.object.isRequired,
     session_id: PropTypes.string
+  }
+
+  state = {
+    sidenav: false
   }
 
   _logPageView(path, userId) {
@@ -61,7 +62,7 @@ export default class App extends Component {
     const { cart_id: nextCart_id, session_id: nextSessionId } = nextProps;
 
     if (!session_id && nextSessionId) {
-      ReactGA.initialize('UA-97839751-1', {
+      ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
           userId: nextSessionId
         }
@@ -77,7 +78,7 @@ export default class App extends Component {
 
   render() {
     const { props, state, _toggleSidenav } = this;
-    const { cart_id, newAccount, leader, carts, match, currentUser, location, logout } = props;
+    const { cart_id, currentCart, updateCart, newAccount, leader, carts, match, currentUser, location, logout, items } = props;
     const { sidenav } = state;
     const showFooter = !location.pathname.includes('/m/edit');
 
@@ -89,7 +90,7 @@ export default class App extends Component {
       <section className='app'>
 
         <Header {...props}  _toggleSidenav={ _toggleSidenav} />
-        { sidenav ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser}/> : null }
+        { sidenav ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
         <div className={`app__view ${showFooter ? '' : 'large'}`}>
           { /* Renders modal when route permits */ }
           <Route path={`${match.url}/m/`} component={Modal} />

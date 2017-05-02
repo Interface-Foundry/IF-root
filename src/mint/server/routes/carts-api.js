@@ -1,7 +1,10 @@
 const co = require('co')
 const _ = require('lodash')
+const url = require('url')
 var amazonScraper = require('../cart/scraper_amazon')
 var amazon = require('../cart/amazon_cart')
+var camel = require('../deals/deals');
+
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -84,12 +87,72 @@ module.exports = function (router) {
   }));
 
   /**
+   * @api {get} /api/sendgrid/cart/:cart_id/itemview/:user_id/:item_id
+   */
+  router.get('/sendgrid/cart/:cart_id/itemview/:user_id/:item_id', (req, res) => co(function * () {
+    var item = yield db.Items.findOne({id: req.params.item_id});
+    res.redirect(req.protocol + '://' + req.get('host') + `/cart/${req.params.cart_id}/m/item/0/${item.asin}`)
+  }))
+
+  /**
+   * @api {get} /api/sendgrid/cart/:cart_id/item/:item_id
+   */
+  router.get('/sendgrid/cart/:cart_id/user/:user_id/item/:item_id', (req, res) => co(function * () {
+    var user_account = yield db.UserAccounts.findOne({id: req.params.user_id});
+    // Make sure the cart exists
+    const cart = yield db.Carts.findOne({id: req.params.cart_id})
+    if (!cart) {
+      throw new Error('Cart not found')
+    }
+    // Get or create the item, depending on if the user specifed a previewed item_id or a new url
+    var item
+    if (req.params.item_id) {
+      // make sure it's not in a cart already
+      var existingCart = yield db.Carts.findOne({items: req.params.item_id})
+      if (existingCart && existingCart.id !== cart.id) {
+        throw new Error('Item ' + req.params.item_id + ' is already in another cart ' + existingCart.id)
+      }
+      // get the previwed item from the db
+      item = yield db.Items.findOne({id: req.params.item_id})
+      logging.info('have item');
+      cart.items.add(item.id)
+      item.cart = cart.id
+
+      // specify who added it
+      // logging.info('user id?', req.UserSession.user_account.id)
+      item.added_by = req.params.user_id
+      yield item.save()
+    }
+    else throw new Error('No item_id')
+
+    // make the user leader if no leader exists, otherwise make member
+    if (!cart.leader) {
+      cart.leader = req.params.user_id
+    } else if (!cart.members.includes(req.params.user_id)) {
+      cart.members.add(req.params.user_id)
+    }
+
+    // Save all the weird shit we've added to this poor cart.
+    yield cart.save()
+
+    // // get user's session and log them in
+    // var session = yield db.Sessions.findOne({user_account: req.params.user_id})
+    // if (session) {
+    //   req.UserSession = session;
+    //   req.session.id = session.id;
+    // }
+    // logging.info('req.UserSession', req.UserSession)
+
+    // And assuming it all went well we'll respond to the client with the saved item
+    res.redirect(req.protocol + '://' + req.get('host') + '/cart/' + req.params.cart_id);
+  }))
+
+  /**
    * @api {post} /api/cart/:cart_id/item Add Item
    * @apiDescription Adds an item to a cart. Must specify either url or item_id in the request body. The item_id param is meant for adding a previewd item to cart, not for adding an item from some other cart to this cart.
    * @apiGroup Carts
    * @apiParam {string} :cart_id cart id
    * @apiParam {string} url optional url of the item from amazon or office depot or whatever
-   * @apiParam {string} item_id optional to specify the id of an item that has been already scraped for a preview
    *
    * @apiParamExample Item from Preview
    * POST https://mint.kipthis.com/api/cart/123456/item {
@@ -103,7 +166,7 @@ module.exports = function (router) {
    *   user_id: '123456y'
    * }
    */
-  router.post('/cart/:cart_id/item', (req, res) => co(function* () {
+  router.post('/cart/:cart_id/item', (req, res) => co(function * () {
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
@@ -117,6 +180,7 @@ module.exports = function (router) {
 
     // Get or create the item, depending on if the user specifed a previewed item_id or a new url
     var item
+    if (req.query.item_id && !req.body.item_id) req.body.item_id = req.query.item_id
     if (req.body.item_id) {
       // make sure it's not in a cart already
       var existingCart = yield db.Carts.findOne({items: req.body.item_id})
@@ -133,6 +197,7 @@ module.exports = function (router) {
     item.cart = cart.id
 
     // specify who added it
+    logging.info('user id?', req.UserSession.user_account.id)
     item.added_by = req.UserSession.user_account.id
     yield item.save()
 
@@ -244,6 +309,42 @@ module.exports = function (router) {
   }))
 
   /**
+    * @api {post} /api/share/:cart_id Send share cart email
+    */
+  router.post('/share/:cart_id', (req, res) => co(function * () {
+    // only available for logged-in Users
+    // if (!_.get(req, 'UserSession.user_account.id')) {
+    //   throw new Error('Unauthorized')
+    // }
+
+    // get the cart and leader
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items');;
+    var leader = yield db.UserAccounts.findOne({id: cart.leader});
+
+    //TODO send email
+    var share = yield db.Emails.create({
+      sender: 'Kip <hello@kip.ai>',
+      recipients: (leader.email ? leader.email : leader.email_address),
+      subject: "Share your cart",
+      template_name: 'share_cart_demo'
+    });
+
+    //pull most recent camel deals from db
+    var deals = yield camel.getDeals(6);
+    logging.info('allDeals', deals)
+    deals = [deals.slice(0, 2), deals.slice(2, 4), deals.slice(4, 6)];
+
+    yield share.template('share_cart_demo', {
+      id: cart.id,
+      cartItems: cart.items,
+      deals: deals,
+      cart: cart
+    });
+    console.log('about to send the email to ' + (leader.email ? leader.email : '...' + leader.email_address)) ;
+    yield share.send();
+  }))
+
+  /**
    * @api {post} /api/item/:item_id Update Item
    * @apiDescription Update item settings, except for id, added_by
    * @apiGroup Carts
@@ -302,10 +403,11 @@ module.exports = function (router) {
 
 
   /**
-   * @api {get} /api/itempreview?q=:q Item Preview
+   * @api {get} /api/itempreview?q=:q/ Item Preview
    * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
    * @apiGroup Carts
    * @apiParam {String} :q either a url, asin, or search text
+   * @apiParam {String} :page page of amazon search results
    *
    * @apiParamExample url preview
    * GET https://mint.kipthis.com/api/itempreview?q=https%3A%2F%2Fwww.amazon.com%2FOnitsuka-Tiger-Mexico-Classic-Running%2Fdp%2FB00L8IXMN0%2Fref%3Dsr_1_11%3Fs%3Dapparel%26ie%3DUTF8%26qid%3D1490047374%26sr%3D1-11%26nodeID%3D679312011%26psd%3D1%26keywords%3Dasics%252Bshoes%26th%3D1%26psc%3D1
@@ -332,42 +434,100 @@ module.exports = function (router) {
     } else {
       // search query
       // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-      var item = yield amazon.searchAmazon(q);
+      var item = yield amazon.searchAmazon(q, req.query.page);
     }
-    console.log('about to send response')
     res.send(item)
   }))
 
   /**
-   * @api {get} /api/:cart_id/checkout Checkout
+   * @api {get} /api/cart/:cart_id/checkout Checkout
    * @apiDescription Does some upkeep on the back end (like locking items) and redirects to the amazon cart page
    * @apiGroup Carts
    * @apiParam {String} :cart_id the cart id
    */
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
-    // only available for logged-in Users
-    if (!_.get(req, 'UserSession.user_account.id')) {
-      throw new Error('Unauthorized')
-    }
-
-    // this will be handy later now that we know it exists
-    const userId = req.UserSession.user_account.id
-
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
 
-    // check permissions
-    if (cart.leader !== userId) {
-      throw new Error('Unauthorized')
+    if (cart.amazon_purchase_url && cart.locked) {
+      res.redirect(cart.amazon_purchase_url)
     }
-
-    // lock the cart and all the items
-    // TODO
 
     // make sure the amazon cart is in sync with the cart in our database
     var amazonCart = yield amazon.syncAmazon(cart)
 
+    // //send receipt email
+    // logging.info('creating receipt...')
+    // var receipt = yield db.Emails.create({
+    //   recipients: req.UserSession.user_account.email_address,
+    //   sender: 'hello@kip.ai',
+    //   subject: 'Your Kip Order',
+    //   template_name: 'receipt'
+    // });
+    //
+    // var userItems = {}; //organize items according to which user added them
+    // var items= []
+    // var users = []
+    // var total = 0;
+    // cart.items.map(function (item) {
+    //   if (!userItems[item.added_by]) userItems[item.added_by] = [];
+    //   userItems[item.added_by].push(item);
+    //   // logging.info('item', item) //undefined
+    //   total += Number(item.price);
+    // });
+    //
+    // for (var k in userItems) {
+    //   var addingUser = yield db.UserAccounts.findOne({id: k});
+    //   users.push(addingUser.email_address.toUpperCase());
+    //   items.push(userItems[k]);
+    // }
+    //
+    // yield receipt.template('receipt', {
+    //   baseUrl: process.env.BASEURL || 'http://mint-dev.kipthis.com',
+    //   id: cart.id,
+    //   items: items,
+    //   users: users,
+    //   total: total
+    // })
+    //
+    // yield receipt.send();
+    // logging.info('receipt sent')
+
+    // save the amazon purchase url
+    if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
+      cart.amazon_purchase_url = amazonCart.PurchaseURL
+      yield cart.save()
+    }
+
     // redirect to the cart url
-    res.redirect(amazonCart.PurchaseURL)
+    res.redirect(cart.amazon_purchase_url)
   }))
+
+
+
+  /**
+   * @api {get} /api/item/:item_id/clickthrough Item Clickthrough
+   * @apiDescription Logs metrics, adds our affiliate tag, and redirects to the amazon item detail page
+   * @apiGroup Carts
+   * @apiParam {String} :item_id the item id
+   */
+  router.get('/item/:item_id/clickthrough', (req, res) => co(function * () {
+    // get the item
+    var item = yield db.Items.findOne({id: req.params.item_id})
+
+    // let amazon compose a nice link for us
+    var amazonItem = yield amazon.lookupAmazonItem(item.asin)
+
+    // handle errors
+    if (!_.get(amazonItem, 'Item.DetailPageURL')) {
+      console.error('Error getting amazon item, request response:')
+      console.error(amazonItem)
+      throw new Error('No DetailPageURL returned for clickthrough for amazon item asin ' + item.asin)
+    }
+
+    // redirect to the cart url
+    res.redirect(amazonItem.Item.DetailPageURL)
+  }))
+
+
 }

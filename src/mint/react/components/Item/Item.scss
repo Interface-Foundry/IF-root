@@ -1,160 +1,187 @@
 // react/components/Item/Item.scss
 @import '../../styles/Constants';
-.item {
-  position: relative;
+.item_container {
   height: 100%;
-  padding: $padding*2;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  -webkit-overflow-scrolling: touch;
-  font-family: $main-font;
-  text-align: left;
-  &:after {
-    content: '';
-    height: 30vh;
-    width: 100vw;
-    display: inline-block;
-  }
-  div[class^='item__view'] {
-    margin-bottom: $padding;
+  display: flex;
+  flex-direction: column;
+  .item {
+    position: relative;
+    height: 100%;
+    padding: $padding*2;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    font-family: $main-font;
     text-align: left;
-    &:last-of-type {
-      margin-bottom: 0;
+    div[class^='item__view'] {
+      margin-bottom: $padding;
+      text-align: left;
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+      .ellipsis {
+        overflow: hidden;
+      }
+      .fadeover {
+        height: 40px;
+        position: relative;
+        background: linear-gradient(to top, $kip-primary-color 0%, rgba($kip-primary-color, 0) 100%);
+        margin-top: -40px;
+      }
+      a {
+        display: block;
+        color: $secondary-button-color;
+        font-size: 12px;
+        padding-top: 4em; // try to make it so all the text is tappable
+        margin-top: -4em;
+      }
     }
-    .ellipsis {
-      overflow: hidden;
-    }
-    .fadeover {
-      height: 40px;
+    .item__transition {
+      // This is animation fix for chrome and maybe something else.
+      // Probably my error, html structing error probably.
       position: relative;
-      background: linear-gradient(to top, $kip-primary-color 0%, rgba(255, 255, 255, 0) 100%);
-      margin: -35px 0 0 0;
-    }
-    a {
-      display: block;
-      padding-top: 5px;
-      color: $secondary-button-color;
-      font-size: 12px;
-    }
-  } // This is animation fix for chrome and maybe something else.
-  // Probably my error, html structing error probably.
-  .item__transition {
-    position: relative;
-    &>div {
-      position: absolute;
-      width: 100%;
-    }
-  }
-  .item__view__image {
-    margin: 0 auto;
-  }
-  .item__view__atts {
-    text-align: center;
-    padding: $padding $padding $padding*2;
-    margin-bottom: 0;
-    font-size: 13px;
-  }
-  div[class$='view__price'] {
-    h4, h5 {
-      padding: 1px;
-      margin: 5px;
-    }
-    h4 {
-      font-size: 18px;
-      font-weight: bold;
-      span {
-        font-weight: normal;
-        color: $price-color;
-      }
-    }
-    h5 {
-      font-weight: normal;
-    }
-    p {
-      font-size: 10px;
-    }
-  }
-  .deal__view__price {
-    text-align: left;
-  }
-  .item__view__price {
-    display: flex;
-    justify-content: space-between;
-    align-items: top;
-    .item__view__quantity {
-      display: flex;
-      align-items: center;
-      height: $nav-height/1.5; //lol whatever
-      * {
-        border-radius: 5px;
-        font-size: 16px;
-        font-family: Arial, sans-serif;
-        border: 2px solid $kip-faded-color;
-      }
-      button, .item__view__quantity__placeholder {
-        height: 100%;
-        margin: 0 $padding/2;
-        background: white;
-        width: $nav-height/1.5;
-        cursor: pointer;
-        &:active {
-          background: $border-color-light;
-        }
-        &:disabled {
-          background: $border-color-light;
-          border: $border-color-light;
-          cursor: not-allowed;
+      &>div {
+        position: absolute;
+        width: 100%;
+        &:after {
+          content: '';
+          height: 10vh;
+          width: 100vw;
+          display: inline-block;
         }
       }
-      .item__view__quantity__placeholder {
-        border-color: transparent;
-        background: transparent;
-        cursor: default;
+      .item__nav_wrapper {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        button {
+          align-self: stretch;
+          background: $border-color-light;
+          border: none;
+          font-size: 20px;
+          cursor: pointer;
+        }
+        .item__info__wrapper {
+          width: 100%;
+          .item__view__image {
+            margin: 0 auto;
+          }
+          .item__view__atts {
+            text-align: center;
+            padding: $padding $padding $padding*2;
+            margin-bottom: 0;
+            font-size: 13px;
+          }
+        }
       }
-      .item__view__quantity__num {
+    }
+    div[class$='view__price'] {
+      h4, h5 {
+        padding: 1px;
+        margin: 5px 5px 5px 0;
+      }
+      h4 {
+        font-size: 18px;
         font-weight: bold;
-        color: #303030;
-        margin: 0;
-        padding: 0 $padding;
-        height: 100%;
-        line-height: $padding*3;
-        border-color: $border-color-light;
-        cursor: default;
+        span {
+          font-weight: normal;
+          color: $price-color;
+        }
+      }
+      h5 {
+        font-weight: normal;
+      }
+      p {
+        font-size: 10px;
       }
     }
-  }
-  .item__view__description {
-    overflow: hidden;
-    h4 {
-      font-size: 15px;
-      padding: $padding 0;
+    .deal__view__price {
+      text-align: left;
     }
-    p {
-      font-size: 13px;
+    .item__view__price {
+      display: flex;
+      justify-content: space-between;
+      align-items: top;
+      padding-top: $padding;
+      .item__view__quantity {
+        display: flex;
+        align-items: center;
+        height: $nav-height/1.5; //lol whatever
+        * {
+          border-radius: 5px;
+          font-size: 16px;
+          font-family: Arial, sans-serif;
+          border: 2px solid $kip-faded-color;
+        }
+        button {
+          height: 100%;
+          margin: 0 $padding/2;
+          background: white;
+          width: $nav-height/1.5;
+          cursor: pointer;
+          &:last-child {
+            margin-right: 0;
+          }
+          &:active {
+            background: $border-color-light;
+          }
+          &:disabled {
+            background: $border-color-light;
+            border: $border-color-light;
+            cursor: not-allowed;
+          }
+        }
+        .item__view__quantity__placeholder {
+          border-color: transparent;
+          background: transparent;
+          cursor: default;
+        }
+        .item__view__quantity__num {
+          font-weight: bold;
+          color: #303030;
+          margin: 0;
+          padding: 0 $padding;
+          height: 100%;
+          line-height: $padding*3;
+          border-color: $border-color-light;
+          cursor: default;
+        }
+      }
     }
-  }
-  .item__view__review {
-    color: $header-color;
-    background-color: white;
-    border-top: 1px solid $border-color-light;
-    border-bottom: 1px solid $border-color-light;
-    font-style: italic;
-    margin: 0 -20px;
-    padding: 20px;
-    p {
-      font-size: 14px;
+    .item__view__description {
+      overflow: hidden;
+      h4 {
+        font-size: 15px;
+        padding: $padding 0;
+      }
+      p {
+        font-size: 13px;
+      }
     }
-    em {
-      font-size: 12px;
-    }
-  }
-  .item__view__amazon__link {
-    color: $kip-faded-color;
-    font-size: 12px;
-    position: relative;
-    top: 10px;
-    &:hover {
+    .item__view__review {
       color: $header-color;
+      background-color: white;
+      border-top: 1px solid $border-color-light;
+      border-bottom: 1px solid $border-color-light;
+      font-style: italic;
+      margin: 0 -20px;
+      padding: 20px;
+      p {
+        font-size: 14px;
+      }
+      em {
+        font-size: 12px;
+      }
+    }
+    .item__view__amazon__link {
+      color: $kip-faded-color;
+      font-size: 12px;
+      margin-top: 30px;
+      &:hover {
+        color: $header-color;
+      }
     }
   }
 }

@@ -23,6 +23,7 @@ export default class Footer extends Component {
         <Route path={`${match.url}/m/share`} component={() => <div className='empty'/>}/>
         <Route path={`${match.url}/m/signin`} component={() => <SignInFooter/>}/>
         <Route path={`${match.url}/m/item/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
+        <Route path={`${match.url}/m/variant/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/:type/:index/:item_id/edit`} component={() => <EditFooter {...props} item_id={item_id}/>}/>
         <Route path={`${match.url}/m/edit`} component={() => <div className='empty'/>}/>
         <Route path={`${match.url}/m/settings`} component={() => <SettingsFooter {...props} item_id={item_id}/>}/>
@@ -76,7 +77,7 @@ class CartFooter extends Component {
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
     const total = calculateItemTotal(items);
 
-    if(locked) {
+    if (locked) {
       return (
         <div className='footer__cart'>
           <button className='green'>
@@ -98,16 +99,26 @@ class CartFooter extends Component {
       <div className='footer__cart'>
         <button className='share' onClick={_handleShare}>
           <Icon icon='Person'/>
-          <h4>SHARE</h4>
+          <h4>Share</h4>
         </button>
-        {
-          isLeader
-          ? <button className='checkout' onClick={() => {updateCart({...currentCart, locked: !currentCart.locked}); checkoutCart(cart_id)}}>
-              <Icon icon='Cart'/>
-              <h4>CHECKOUT<br/>{displayCost(total)}</h4>
-            </button>
-          : null
-        }
+        <a 
+          href={`/api/cart/${cart_id}/checkout`} 
+          onClick={
+            (e) => { 
+              e.preventDefault(); 
+              if (items.length > 0) { 
+                console.log('foot open')
+                updateCart({...currentCart, locked: !currentCart.locked});
+                window.open(`/api/cart/${cart_id}/checkout`);
+              }
+            }
+          }
+        >
+          <button disabled={items.length===0} className='checkout'>
+            <Icon icon='Cart'/>
+            <h4>Checkout<br/>{displayCost(total)}</h4>
+          </button>
+        </a>
       </div>
     );
   }
@@ -131,7 +142,7 @@ class ItemFooter extends Component {
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
-        <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>Add to Cart</button>
+        <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Add to Cart</button>
       </footer>
     );
   }
