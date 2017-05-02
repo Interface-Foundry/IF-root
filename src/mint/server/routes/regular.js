@@ -40,7 +40,7 @@ router.get('/', (req, res) => co(function* () {
     ]
   }).populate('items').populate('leader').populate('members')
 
-  res.render('pages/index');
+  res.render('pages/index', { carts: carts });
 }));
 
 /**
