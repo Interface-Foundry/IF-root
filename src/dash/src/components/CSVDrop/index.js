@@ -4,7 +4,7 @@ import {ButtonGroup, Button, ButtonToolbar, Checkbox, Panel} from 'react-bootstr
 import classNames from 'classnames';
 import fetch from '../../core/fetch';
 import co from 'co';
-import * as mintdata from './mintdata'
+import * as mintdata from '../../data/mintdata'
 
 //import csv from 'csvtojson';
 import _ from 'lodash';

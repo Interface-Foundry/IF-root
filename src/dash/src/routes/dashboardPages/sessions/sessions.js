@@ -271,6 +271,9 @@ class Session extends Component {
             <Button bsStyle={self.state.view=='Cafe' ? "primary" : "default"} onClick={ ()=> self.changeCart('Cafe')}>
               Cafe
             </Button>
+            <Button bsStyle={self.state.view=='Mint' ? "primary" : "default"} onClick={ ()=> self.changeCart('Mint')}>
+              Mint
+            </Button>
           </ButtonToolbar>
           <div>
               Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />

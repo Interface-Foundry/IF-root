@@ -30,7 +30,7 @@ module.exports = function check_asin(rows, items, mintitems, view) {
                 }
         	});
         	return results;
-	    } else {
+	    } else if (this.state.view == 'Cafe'){
 	    	entries.map((row) => {
                 var matches = mintitems.filter(function(i){return i.asin == row.ASIN});
                 for(var i = 0; i<row.Qty ; i++){

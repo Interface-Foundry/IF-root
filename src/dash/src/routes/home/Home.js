@@ -5,9 +5,10 @@ import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import { graphql } from 'react-apollo';
 
-import { CartGraph, CafeGraph } from '../../components/Graphs';
-import { CafeTable, CartTable } from '../../components/Table';
+import { CartGraph, CafeGraph, MintGraph } from '../../components/Graphs';
+import { CafeTable, CartTable, MintTable } from '../../components/Table';
 import { cartsQuery, deliveryQuery } from '../../graphqlOperations';
+import * as mintdata from '../../data/mintdata';
 
 
 
@@ -51,6 +52,7 @@ class Home extends Component {
     const queryHandler = {
       cafe: deliveryQuery,
       store: cartsQuery,
+      mint: cartsQuery, //change this when mint query is ready
     };
     return queryHandler[this.state.view.toLowerCase()];
   }
@@ -107,6 +109,11 @@ class Home extends Component {
               onClick={() => self.changeState({ view: 'Cafe'})}>
               Cafe
             </Button>
+            <Button
+              bsStyle={self.state.view.toLowerCase() === 'mint' ? 'primary' : 'default'}
+              onClick={() => self.changeState({ view: 'Mint'})}>
+              Mint
+            </Button>
           </ButtonToolbar>
         </div>
         <div>
@@ -136,6 +143,9 @@ const getCurrentGraph = ({ data }) => {
   if (data.variables.view.toLowerCase() === 'store') {
     return (<CartGraph data={data.carts.filter(c => c.items.length > 0)} />)
   }
+  if (data.variables.view.toLowerCase() === 'mint') {
+    return (<MintGraph data={mintdata.items} />) //change this when mint graph is ready
+  }
 };
 
 
@@ -143,12 +153,14 @@ const getCurrentTable = ({data}) => {
   if (data.loading) {
     return <p> Loading... </p>
   }
-
   if (data.variables.view.toLowerCase() === 'cafe') {
     return (<CafeTable data={data.deliveries} purchased={data.variables.purchased}/>);
   }
   if (data.variables.view.toLowerCase() === 'store') {
     return (<CartTable data={data.carts.filter(c => c.items.length > 0)} purchased={data.variables.purchased} />);
+  }
+  if (data.variables.view.toLowerCase() === 'mint') {
+    return (<MintTable data={mintdata.items} purchased={data.variables.purchased} />); //change this when mint table is ready
   }
 };
 

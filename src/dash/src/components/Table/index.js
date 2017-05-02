@@ -83,6 +83,28 @@ const CartTable = ({data, purchased}) => {
     </Panel>
   );
 };
-      // <TableHeaderColumn dataField='team.team_name'>Team ID</TableHeaderColumn>
 
-export { CafeTable, CartTable };
+const MintTable = ({data, purchased}) => {
+  
+  const panelTitle = (<h3> {purchased ? 'purchased carts' : 'unpurchased carts'} for mint </h3>)
+
+  return (
+    <Panel header={panelTitle}>
+      <div className="table-display">
+
+    <BootstrapTable data={data} bordered={false} scrollTop={'Top'} hover>
+      <TableHeaderColumn isKey={true} dataField='createdAt'>Date Added</TableHeaderColumn>
+      <TableHeaderColumn dataField='cart'>Cart ID</TableHeaderColumn>
+      <TableHeaderColumn dataField='added_by'>Added By</TableHeaderColumn>
+      <TableHeaderColumn dataField='asin'>ASIN</TableHeaderColumn>
+      <TableHeaderColumn dataField='quantity'>Quantity</TableHeaderColumn>
+      <TableHeaderColumn dataField='name'>Product Name</TableHeaderColumn>
+      <TableHeaderColumn dataField='price'>Price</TableHeaderColumn>
+    </BootstrapTable>
+    </div>
+    </Panel>
+
+  );
+};
+
+export { CafeTable, CartTable, MintTable };
