@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import Sidenav from '../components/Sidenav';
 
-import { shuffleItems } from '../actions/hero';
+import { get } from '../actions';
 
 const mapStateToProps = (state, props) => ({
   	myCarts: state.auth.myCarts,
@@ -9,4 +9,9 @@ const mapStateToProps = (state, props) => ({
   	currentUser: state.auth.user_account
 })
 
-export default connect(mapStateToProps)(Sidenav);
+const mapDispatchToProps = dispatch => ({
+    get: (url, type) => dispatch(get(url, type))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Sidenav);
+

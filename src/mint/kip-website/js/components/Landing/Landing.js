@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 
 import { Ribbon, Services, About, Showcase, Reviews, Footer } from '..';
-import { HeroContainer, StatementContainer } from '../../containers';
+import { HeroContainer, StatementContainer, SidenavContainer } from '../../containers';
 
 
 export default class Landing extends Component {
@@ -12,8 +12,10 @@ export default class Landing extends Component {
   constructor(props) {
     super(props);
     this._handleScroll = ::this._handleScroll;
+    this._toggleSidenav = ::this._toggleSidenav;
     this.state = {
-      fixed: false
+      fixed: false,
+      sidenav: false
     };
   }
 
@@ -33,18 +35,28 @@ export default class Landing extends Component {
     })
   }
 
+  _toggleSidenav () {
+    const { sidenav } = this.state;
+
+    this.setState({ sidenav: !sidenav });
+  }
+
   render() {
-    const { state: { fixed }, props: { _toggleSidenav } } = this;
+    const { state: { fixed, sidenav }, _handleScroll, _toggleSidenav } = this;
     return (
-      <div className="landing"> 
-        <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav}/>
-        <HeroContainer/>
-        <StatementContainer/>
-        <Services/>
-        <About/>
-        <Showcase/>
-        <Footer/>
-      </div>
+      <span>
+        { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav}/> : null }
+
+        <div className="landing"> 
+          <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav}/>
+          <HeroContainer/>
+          <StatementContainer/>
+          <Services/>
+          <About/>
+          <Showcase/>
+          <Footer/>
+        </div>
+      </span>
     );
   }
 }

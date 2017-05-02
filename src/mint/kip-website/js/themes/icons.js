@@ -17,7 +17,9 @@ import {
 	IoHappy,
 	IoChevronUp,
 	IoClose,
-	IoPlus
+	IoPlus,
+	IoLogOut,
+	IoLogIn
 } from 'react-icons/lib/io'
 
 import {
@@ -85,6 +87,10 @@ export default class Icon extends Component {
 	        	return <IoArrowGraphDownLeft/>
 	        case 'Happy':
 	        	return <IoHappy/>
+		    case 'Logout':
+		      	return <IoLogOut/>
+		    case 'Login':
+		      	return <IoLogIn/>
       	}
     }
 }

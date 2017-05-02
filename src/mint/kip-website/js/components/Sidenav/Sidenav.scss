@@ -107,15 +107,19 @@
     width: 100%;
     text-align: center;
     padding: $padding;
-    height: $ribbonHeight * 2 + 10px;
+    height: $ribbonHeight * 2 + $padding/2;
     line-height: $ribbonHeight;
     box-sizing: border-box;
     button {
       display: block;
       width: 100%;
-      border-radius: 10px;
+      padding: 0;
+      border-radius: $padding/2;
       border: 1px solid $borderColor;
       height: calc(50% - #{$padding});
+      line-height: calc(50% - #{$padding});
+      font-weight: 600;
+      font-size: 15px;
       &:first-of-type {
         margin-bottom: 10px;
       }
@@ -123,20 +127,19 @@
         display: inline-block;
       }
       svg {
-        vertical-align: bottom !important;
         font-size: 15px;
-      }
-      p {
-        padding-left: $padding;
-        font-size: 15px;
-        font-weight: 600;
+        margin-right: $padding;
+        height: 100%;
       }
       &.new {
-        background: $primaryColor;
+        background: $secondaryColor;
       }
       &.share {
-        background: $secondaryColor;
+        background: $primaryColor;
         color: white;
+      }
+      &.hide {
+        opacity: 0;
       }
     }
   }

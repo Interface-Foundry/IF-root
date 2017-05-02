@@ -14,7 +14,7 @@ export default class Sidenav extends Component {
   }
 
   render() {
-    const { currentUser, _toggleSidenav, myCarts, otherCarts } = this.props, 
+    const { currentUser, _toggleSidenav, myCarts, otherCarts, get } = this.props, 
       { show } = this.state;
 
     return (
@@ -23,7 +23,7 @@ export default class Sidenav extends Component {
         </div>
         <ul className='sidenav__list'>
           <li className='sidenav__list__header'>
-            <p>{currentUser.email_address}</p>
+            <p>{currentUser ? currentUser.email_address : 'Please Login'}</p>
             <div className='icon' onClick={_toggleSidenav}>
               <Icon icon='Clear'/>
             </div>
@@ -55,8 +55,7 @@ export default class Sidenav extends Component {
               if(i > 1 && show !== 'other') return null
               return (
                 <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
-                  <div className='icon'>
-                  </div>
+                  <div className='icon'/>
                   <a href={`/cart/${c.id}`}>
                     <p>{c.name ? c.name : `${_.capitalize(c.leader.email_address)}'s Cart (${c.items.length})`}</p>
                   </a>
@@ -71,13 +70,25 @@ export default class Sidenav extends Component {
             }
           </div>
           <div className='sidenav__list__actions'>
-            <h4><Icon icon='Email'/>Feedback</h4>
+            {currentUser ? <h4 onClick={() => {
+              get('/api/logout', 'SESSION')
+              location.reload();
+            }}><Icon icon='Logout'/>Logout</h4> : null}
           </div>
           <footer>
+            {currentUser ? <button className='hide' disabled={true}>
+              <div className='icon'/>
+              New Cart
+            </button> : <a href='/newcart'>
+              <button className='share'>
+                <Icon icon='Login'/>
+                Login
+              </button>
+            </a>}
             <a href='/newcart'>
               <button className='new'>
                 <Icon icon='Plus'/>
-                <p>New Cart</p>
+                New Cart
               </button>
             </a>
           </footer>
