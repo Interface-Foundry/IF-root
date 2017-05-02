@@ -33,6 +33,8 @@ import multer from 'multer';
 
 import { graphqlExpress, graphiqlExpress } from 'graphql-server-express';
 
+var sendgridRouter = require('./routes/sendgrid')
+
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -68,6 +70,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+//
+// Sendgrid webhook
+// -----------------------------------------------------------------------------
+app.use('/sg', sendgridRouter);
+
 
 //
 // Authentication
