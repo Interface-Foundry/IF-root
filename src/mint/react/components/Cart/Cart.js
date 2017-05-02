@@ -23,7 +23,8 @@ export default class Cart extends Component {
     locked: PropTypes.bool,
     updateCart: PropTypes.func,
     currentCart: PropTypes.object,
-    deals: PropTypes.array
+    deals: PropTypes.array,
+    cancelRemoveItem: PropTypes.func.isRequired
   }
 
   state = {
@@ -72,13 +73,14 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, deals, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
         ...items.my,
         ..._.reduce(items.others, (acc, value) => [...acc, ...value], [])
       ]);
+    console.log(deals);
     return (
       <div className='cart'>
         {
@@ -106,7 +108,7 @@ export default class Cart extends Component {
                 <AddAmazonItemContainer push={push} members={members}/>
               </div>
               {
-                !!user_account.id 
+                !!user_account.id && deals.length
                   ? <DealsContainer isDropdown={false}/> 
                   : null
               }
