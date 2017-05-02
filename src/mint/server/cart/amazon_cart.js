@@ -186,7 +186,7 @@ exports.lookupAmazonItem = function * (asin) {
     Availability: 'Available',
     IdType: 'ASIN',
     ItemId: asin,
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews'
   };
   try {
     var results = yield opHelper.execute('ItemLookup', amazonParams)
