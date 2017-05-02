@@ -464,8 +464,9 @@ module.exports = function (router) {
     var receipt = yield db.Emails.create({
       recipients: req.UserSession.user_account.email_address,
       sender: 'hello@kip.ai',
-      subject: 'Your Kip Order',
-      template_name: 'receipt'
+      subject: `Kip Receipt for ${cart.name}`,
+      template_name: 'receipt',
+      unsubscribe_group_id: 2485
     });
 
     var userItems = {}; //organize items according to which user added them
