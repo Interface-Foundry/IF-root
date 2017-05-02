@@ -469,6 +469,8 @@ module.exports = function (router) {
       unsubscribe_group_id: 2485
     });
 
+    // logging.info('REQ host', req.get('host'))
+
     var userItems = {}; //organize items according to which user added them
     var items= []
     var users = []
@@ -487,11 +489,12 @@ module.exports = function (router) {
     }
 
     yield receipt.template('receipt', {
-      baseUrl: 'http://mint-dev.kipthis.com',
+      baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
       id: cart.id,
       items: items,
       users: users,
-      total: total
+      total: total,
+      cart: cart
     })
 
     yield receipt.send();

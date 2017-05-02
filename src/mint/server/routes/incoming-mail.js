@@ -19,7 +19,6 @@ var utils = require('../utilities/incoming_utils');
  */
 router.post('/incoming', upload.array(), (req, res) => co(function * () {
   console.log('posted to webhook');
-  logging.info('REQ.URL', req.url)
   yield dbReady;
   // console.log('req.body', req.body)
   var email = req.body.from.split(' ');
