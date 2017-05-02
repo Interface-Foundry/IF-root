@@ -10,6 +10,7 @@
   color: $kip-primary-color;
   border-top:1px solid $border-color-light;
   max-width: 900px;
+  background: $kip-primary-color;
   @media (max-width: 300px) {
     svg {
       display:none;
@@ -17,8 +18,7 @@
   }
   @media (min-width: 900px) {
     display: inline-block;
-    border-left: 2px solid $header-color;
-    border-right: 2px solid $header-color;
+    margin-left: -$padding*3;
     width: calc(100% - 250px);
   }
   .footer__cart, .footer__item, .footer__save, .footer__settings {

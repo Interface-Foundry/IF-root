@@ -9,6 +9,10 @@
   color: $kip-primary-color;
   text-align: left;
 
+  @media (min-width: 900px) {
+    padding: 0 $padding*2;
+  }
+
   .image {
     display: inline-block;
     margin: $padding;
@@ -56,12 +60,17 @@
     }
   }
   .navbar__icon {
+    white-space: nowrap;
     text-align: center;
     cursor: pointer;
     height: $nav-height;
     width: $nav-height;
     svg {
       height: 100%;
+    }
+    p {
+      padding: 0 0 0 $padding;
+      display: inline-block;
     }
   }
   .navbar__icon__close {

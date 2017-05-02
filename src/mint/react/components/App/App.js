@@ -44,7 +44,8 @@ export default class App extends Component {
     sidenav: false,
     status: null,
     toast: null,
-    showedToast: false
+    showedToast: false,
+    isMobile: false
   }
 
   _logPageView(path, userId) {
@@ -70,9 +71,9 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    // ReactDOM
-    
-
+    ReactDOM.findDOMNode(this)
+    if(window.innerWidth < 900)
+      this.setState({isMobile: true})
   }
 
   componentWillReceiveProps(nextProps) {
@@ -113,7 +114,7 @@ export default class App extends Component {
       _toggleSidenav,
       props,
       props: { cart_id, currentCart, updateCart, newAccount, leader, carts, match, currentUser, location, logout, items },
-      state: { sidenav, toast, status, showedToast }
+      state: { sidenav, toast, status, showedToast, isMobile }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit');
 
@@ -136,7 +137,7 @@ export default class App extends Component {
             }
             </CSSTransitionGroup> 
         }
-        <Header {...props}  _toggleSidenav={ _toggleSidenav} />
+        <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
         <div className={`app__view ${showFooter ? '' : 'large'}`}>
           { /* Renders modal when route permits */ }
           <Route path={`${match.url}/m/`} component={Modal} />
@@ -144,8 +145,8 @@ export default class App extends Component {
           { /* Renders cart when route permits */ }
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
-        { sidenav ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
-        {showFooter ? <Footer {...props} cart_id={cart_id}/> : null}
+        { sidenav || !isMobile ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
+        {showFooter ? <Footer {...props} cart_id={cart_id} isMobile={isMobile}/> : null}
       </section>
     );
   }

@@ -47,6 +47,7 @@
 
     @media (min-width: 900px) {
       background: $kip-secondary-color;
+      height: calc(100% - #{$nav-height});
     }
     
     li {
@@ -78,6 +79,9 @@
         svg {
           height: 100%;
         }
+        @media (min-width: 900px) {
+          display: none;
+        }
       }
       &.sidenav__list__view {
         overflow-y: scroll;
@@ -105,6 +109,10 @@
             min-height: 20px;
             height: 100%;
           }
+        }
+        @media (min-width: 900px) {
+          padding: $padding 0;
+          overflow-y: auto;
         }
       }
       &.sidenav__list__actions {

@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Icon } from '..';
 import { splitCartById } from '../../reducers';
+import { getNameFromEmail } from '../../utils';
 
 export default class Header extends Component {
   static propTypes = {
@@ -84,7 +85,7 @@ class CartHead extends Component {
   }
 
   render() {
-    const { _toggleSidenav, cartName, currentCart: { locked, thumbnail_url } } = this.props;
+    const { isMobile, currentUser, _toggleSidenav, cartName, currentCart: { locked, thumbnail_url } } = this.props;
 
     return (
       <div>
@@ -102,6 +103,7 @@ class CartHead extends Component {
         </h3>
         <div className='navbar__icon' onClick={_toggleSidenav}>
           <Icon icon='Hamburger'/>
+          {isMobile ? null : <p>{_.capitalize(getNameFromEmail(currentUser.email_address))}</p>}
         </div>
       </div>
     );
