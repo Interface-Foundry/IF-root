@@ -33,23 +33,30 @@ body {
   left: 0;
   right: 0;
   overflow: hidden;
-  max-width: 900px;
   margin: auto;
-  background-color: $kip-primary-color;
-  @media (min-width: 900px) {
-    border-left: 2px solid $header-color;
-    border-right: 2px solid $header-color;
-  }
+  text-align: center;
+  background: $kip-secondary-color;
 }
 
 .app__view {
   position: relative;
   overflow: hidden;
   overflow-y: scroll;
+  max-width: 900px;
+  text-align: left;
   -webkit-overflow-scrolling: touch;
   height: calc(100% - #{$nav-height*2 - 10});
+  background-color: $kip-primary-color;
   &.large {
     height: calc(100% - #{$nav-height});
+  }
+
+  @media (min-width: 900px) {
+    display: inline-block;
+    width: calc(100% - 250px);
+    height: calc(100% - #{$nav-height});
+    border-left: 2px solid $header-color;
+    border-right: 2px solid $header-color;
   }
 }
 

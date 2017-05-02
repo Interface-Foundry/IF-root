@@ -9,10 +9,17 @@
   font-family: $secondary-font;
   color: $kip-primary-color;
   border-top:1px solid #eae7e4;
+  max-width: 900px;
   @media (max-width: 300px) {
     svg {
       display:none;
     }
+  }
+  @media (min-width: 900px) {
+    display: inline-block;
+    border-left: 2px solid $header-color;
+    border-right: 2px solid $header-color;
+    width: calc(100% - 250px);
   }
   .footer__cart, .footer__item, .footer__save, .footer__settings {
     height: 100%;
