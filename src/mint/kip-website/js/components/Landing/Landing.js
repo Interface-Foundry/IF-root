@@ -30,6 +30,7 @@ export default class Landing extends Component {
   _handleScroll (e) {
     let scrollTop = ReactDOM.findDOMNode(this).scrollTop;
 
+    debugger
     this.setState({
       fixed: scrollTop > 400
     })

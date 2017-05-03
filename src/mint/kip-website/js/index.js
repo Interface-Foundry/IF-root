@@ -32,7 +32,6 @@ ReactDOM.render(
 	<Provider store={store}>
 		<Router history={history}>
       		<Route path="/" component={App}/>
-      		<Route path="/website" component={App}/>
 		</Router>
 	</Provider>,
 	document.getElementById('root')
