@@ -95,7 +95,7 @@ class CartHead extends Component {
               <Icon icon='Locked'/>
             </div> : <div className='image' style={
             {
-              backgroundImage: `url(${thumbnail_url ? thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
+              backgroundImage: `url(${thumbnail_url})`,
             }
           }/>}
           <h3>
@@ -122,7 +122,7 @@ class IntroHead extends Component {
       <div className="header__left">
         <div className='image' style={
           {
-            backgroundImage: 'url(http://tidepools.co/kip/head@x2.png)'
+            backgroundImage: 'url(https://storage.googleapis.com/kip-random/head%40x2.png)'
           }
         }/>
         <h3>

@@ -58,9 +58,9 @@ export default class Item extends Component {
     //never replace cart_id if its undefined
     if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) {
       replace(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
-    } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItem.length) {
+    } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItem.search.length) {
       replace(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
-    } else if (cart_id && nextType === 'search' && !nextItem.length) {
+    } else if (cart_id && nextType === 'search' && !nextItem.search.length) {
       replace(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
     } else if (nextProps.item_id !== item_id) {
       previewItem(nextProps.item_id);
@@ -118,11 +118,7 @@ export default class Item extends Component {
   }
 
   render() {
-    const { determineNav, props, state: { animation }, props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, options } } } = this,
-    review = {
-      text: 'Reviews are still coming soon, but if you want my opinion, it\'s almost as good as fish',
-      author: 'Definitely not a penguin'
-    };
+    const { determineNav, props, state: { animation }, props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, options, iframe_review_url } } } = this;
     const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
       ? items[parseInt(index)].large
       : main_image_url,
@@ -171,11 +167,7 @@ export default class Item extends Component {
               : <ItemInfo {...props} {...item} />
             }
             <ProductDescription description={description} />
-            <div className='item__view__review'>
-              {/* TODO: get reviews in here */}
-              <p>{review.text}</p>
-              <em > - {review.author}</em>
-            </div>
+            {iframe_review_url ? <iframe className='review__iframe' src={iframe_review_url}/> : null}
             <a href={`/api/item/${item.id}/clickthrough`} target='_blank' className='item__view__amazon__link'> <Icon icon='Open'/> View on Amazon </a>
           </RouteTransition>
         </div>

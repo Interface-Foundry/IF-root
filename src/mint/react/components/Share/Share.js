@@ -77,7 +77,7 @@ export default class Share extends Component {
       <div className='share'>
         <div className='share__message'>
           <div className='share__message__imageText'>
-            <div className='image' style={{backgroundImage:'url(http://tidepools.co/kip/head_smaller.png)'}}/>
+            <div className='image' style={{backgroundImage:'url(https://storage.googleapis.com/kip-random/head_smaller.png)'}}/>
           </div>
           <div className='share__message__copy'>
             <div className='share__message__copy__input' onClick={this.copy}>
@@ -94,7 +94,7 @@ export default class Share extends Component {
                     key={i} 
                     url={`http://mint-dev.kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`}
                     title='Share Cart'
-                    picture='http://tidepools.co/kip/head_smaller.png'
+                    picture='https://storage.googleapis.com/kip-random/head_smaller.png'
                     className="share__icons__icon">
                     <Icon icon={icon.icon}/>
                     <label>{icon.label}</label>

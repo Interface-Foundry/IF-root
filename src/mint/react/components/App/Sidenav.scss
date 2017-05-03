@@ -22,10 +22,6 @@
     background: $kip-secondary-color;
   }
 
-  &:hover {
-    background: white;
-  }
-
   p {
     overflow: hidden;
   }
@@ -61,10 +57,15 @@
         text-align: right;
         border-bottom: 1px solid $border-color-light;
         padding: $padding/2 $padding;
+        cursor: pointer;
         &.show__more {
           padding: $padding/2 $padding $padding*2;
           color: #4a9ff1;
           border-bottom: 0;
+          text-indent: underline;
+          svg {
+            @include animation(bounceDownSmall 2s infinite);
+          }
         }
       }
       &.sidenav__list__header {
@@ -102,6 +103,12 @@
         li {
           display: flex;
           flex-direction: row;
+          border-radius: 5px 0 0 5px;
+          @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+          &:hover {
+            background: rgba(white, 0.7);
+          }
         }
         p {
           text-align: right;

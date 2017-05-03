@@ -42,8 +42,10 @@
     p {
       padding: 0 $padding;
     }
-    .navbar_icon {
-      width: 50px;
+    .navbar__icon {
+      display: flex;
+      justify-content: center;
+      width: 100%;
       cursor: pointer;
       svg {
         height: 100%;

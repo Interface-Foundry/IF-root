@@ -41,9 +41,13 @@ const checkError = function (res) {
  * @return {string} asin to lookup
  */
 exports.getAsin = function (item_identifier) {
-  if (item_identifier.includes('amazon.com')) {
-    var asin = item_identifier.split('dp')[1].split('/')[1];
+  if (!item_identifier.includes('amazon.com')) {
+    throw new Error('Only taking items with amazon.com')
   }
+
+  var itemRegex = /\/\b\w{10}\b/
+
+  var asin = item_identifier.match(itemRegex)[0].replace('/', '')
   return asin;
 };
 
@@ -98,7 +102,7 @@ exports.searchAmazon = function * (query, index) {
     Keywords: query,
     Condition: 'New',
     SearchIndex: 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations',
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
     ItemPage: index || 1
   };
   var results = yield opHelper.execute('ItemSearch', amazonParams);

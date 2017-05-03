@@ -5,6 +5,7 @@ import { reset, reduxForm } from 'redux-form';
 import { AmazonForm } from '../components';
 import { isUrl, addSearchHistory } from '../utils';
 import { push } from 'react-router-redux';
+import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
@@ -13,6 +14,10 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => {
+    ReactGA.event({
+      category: 'Search',
+      action: `Searched for ${values.url}`
+    });
     const { cart_id } = state;
     dispatch(reset('AddItem'));
     if (!isUrl(values.url)) addSearchHistory(values.url);

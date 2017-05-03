@@ -29,13 +29,13 @@ export default class Feedback extends Component {
     const { _toggleRating } = this;
 
     return (
-        <form onSubmit={handleSubmit} className="form">
+        <form onSubmit={handleSubmit} className="modal__form">
           <div>
             {
               rating ? <Field 
                 name="rating" 
                 type="custom"
-                label="How did you enjoy Kip?"
+                label="How do you enjoy Kip?"
                 _toggleRating={_toggleRating}
                 handleSubmit={handleSubmit}
                 component={RatingField}

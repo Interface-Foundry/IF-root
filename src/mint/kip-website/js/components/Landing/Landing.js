@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 
 import { Ribbon, Services, About, Showcase, Reviews, Footer } from '..';
-import { HeroContainer, StatementContainer, SidenavContainer } from '../../containers';
+import { HeroContainer, StatementContainer, SidenavContainer, ModalContainer } from '../../containers';
 
 
 export default class Landing extends Component {
@@ -13,9 +13,11 @@ export default class Landing extends Component {
     super(props);
     this._handleScroll = ::this._handleScroll;
     this._toggleSidenav = ::this._toggleSidenav;
+    this._toggleModal = ::this._toggleModal;
     this.state = {
       fixed: false,
-      sidenav: false
+      sidenav: false,
+      modal: false
     };
   }
 
@@ -41,11 +43,18 @@ export default class Landing extends Component {
     this.setState({ sidenav: !sidenav });
   }
 
+  _toggleModal () {
+    const { modal } = this.state;
+
+    this.setState({ modal: !modal });
+  }
+
   render() {
-    const { state: { fixed, sidenav }, _handleScroll, _toggleSidenav } = this;
+    const { state: { fixed, sidenav, modal}, _handleScroll, _toggleSidenav, _toggleModal } = this;
     return (
       <span>
-        { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav}/> : null }
+        { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }
+        { modal ? <ModalContainer _toggleModal={_toggleModal}/> : null }
 
         <div className="landing"> 
           <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav}/>

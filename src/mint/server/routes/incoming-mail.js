@@ -14,7 +14,8 @@ var amazon = require('../cart/amazon_cart');
 var utils = require('../utilities/incoming_utils');
 
 /**
- * @api {post} /sendgrid/incoming
+ * @api {post} /sendgrid/incoming Incoming
+ * @apiGroup Sendgrid
  * @apiDescription parses incoming user emails sent to kip.ai, and takes actions in response
  */
 router.post('/incoming', upload.array(), (req, res) => co(function * () {

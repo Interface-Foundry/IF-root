@@ -50,7 +50,7 @@ class EmailField extends Component {
             type="submit"
             onClick={handleSubmit}>
               <div className='form__modal__input__submit__description'>
-                <Icon icon='RightChevron'/>
+                OK
               </div>
           </button>
         </div>

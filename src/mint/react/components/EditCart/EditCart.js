@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Field } from 'redux-form';
 import { cloudinary } from '../../utils';
+import ReactGA from 'react-ga';
 import Image from './Image';
 
 class EditCart extends Component {
@@ -11,21 +12,24 @@ class EditCart extends Component {
     onSubmit: PropTypes.func,
     cart: PropTypes.object,
     handleSubmit: PropTypes.func.isRequired
-
   }
 
-  onSubmitMiddleware = (values, e, state) => {
+  onSubmitMiddleware = async(values, e, state) => {
     const { onSubmit, cart } = this.props, { thumbnail_url } = values;
-
+    ReactGA.event({
+      category: 'User',
+      action: 'Updated Cart Info'
+    });
     if (thumbnail_url && thumbnail_url !== cart.thumbnail_url) {
-      cloudinary(thumbnail_url)
-        .then((res) => {
-          onSubmit({ ...values, ...cart, thumbnail_url: res.secure_url }, e, state);
-        });
+      onSubmit({
+        ...cart,
+        ...values,
+        thumbnail_url: (await cloudinary(thumbnail_url))
+          .secure_url
+      }, e, state);
     } else {
       onSubmit(values, e, state);
     }
-
   }
 
   render() {

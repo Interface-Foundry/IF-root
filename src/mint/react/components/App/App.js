@@ -54,8 +54,6 @@ export default class App extends Component {
       category: 'User',
       action: 'Initial Load'
     });
-    ReactGA.set({ page: path });
-    ReactGA.pageview(path);
   }
 
   _toggleSidenav = () => {
@@ -72,8 +70,8 @@ export default class App extends Component {
 
   componentDidMount() {
     ReactDOM.findDOMNode(this)
-    if(window.innerWidth < 900)
-      this.setState({isMobile: true})
+    if (window.innerWidth < 900)
+      this.setState({ isMobile: true })
   }
 
   componentWillReceiveProps(nextProps) {
@@ -97,6 +95,7 @@ export default class App extends Component {
       fetchAllCarts();
     }
     if ((newToast && newStatus) && (toast !== newToast || status !== newStatus))::this._showToast(newStatus, newToast);
+    if (newToast && newToast.includes('Cart Updated')) fetchAllCarts();
   }
 
   _showToast(status, toast) {
@@ -112,7 +111,7 @@ export default class App extends Component {
     const {
       _toggleSidenav,
       props,
-      props: { cart_id, currentCart, updateCart, newAccount, leader, carts, match, currentUser, location, logout, items },
+      props: { cart_id, currentCart, updateCart, newAccount, leader, carts, match, currentUser, location, logout, items, history: { replace } },
       state: { sidenav, toast, status, showedToast, isMobile }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit');
@@ -145,7 +144,7 @@ export default class App extends Component {
           { /* Renders cart when route permits */ }
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
-        { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
+        { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
         {showFooter ? <Footer {...props} cart_id={cart_id} isMobile={isMobile}/> : null}
       </section>
     );
