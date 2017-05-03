@@ -78,7 +78,7 @@ export default class Sidenav extends Component {
               })}
             </ul>
             {
-              leaderCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
+              leaderCarts.length > 3 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
               <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
                 &nbsp; {show === 'me' ? 'Less' : 'More'}
               </h4> : null
@@ -99,7 +99,7 @@ export default class Sidenav extends Component {
               })}
             </ul>
             {
-              memberCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
+              memberCarts.length > 3 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
               <Icon icon={show === 'other' ? 'Up' : 'Down'}/>
                 &nbsp; {show === 'other' ? 'Less' : 'More'}
               </h4> : null

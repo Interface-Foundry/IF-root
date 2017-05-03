@@ -226,6 +226,13 @@ module.exports = function (router) {
       cart: cart.id
     })
 
+    // which email should we send?
+    if (cart.leader == user.id) {
+      console.log('SENDING LEADER EMAIL')
+    } else if (cart.members.includes(user.id)) {
+      console.log('SENDING MEMBER EMAIL')
+    }
+
     // grab the daily deals
     let allDeals = yield dealsDb.getDeals(4, 0),
       deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
