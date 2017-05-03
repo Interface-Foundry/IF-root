@@ -116,6 +116,7 @@ export default class App extends Component {
       state: { sidenav, toast, status, showedToast, isMobile }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit');
+    const showSidenav = !location.pathname.includes('/m/signin');
 
     if (newAccount === false) {
       return <Overlay/>;
@@ -144,7 +145,7 @@ export default class App extends Component {
           { /* Renders cart when route permits */ }
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
-        { sidenav || !isMobile ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
+        { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
         {showFooter ? <Footer {...props} cart_id={cart_id} isMobile={isMobile}/> : null}
       </section>
     );
