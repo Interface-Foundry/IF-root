@@ -98,7 +98,7 @@ exports.searchAmazon = function * (query, index) {
     Keywords: query,
     Condition: 'New',
     SearchIndex: 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations',
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
     ItemPage: index || 1
   };
   var results = yield opHelper.execute('ItemSearch', amazonParams);
