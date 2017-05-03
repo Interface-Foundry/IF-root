@@ -52,7 +52,7 @@ body {
   @media (min-width: 900px) {
     display: inline-block;
     width: calc(100% - 250px);
-    border-radius: 0 0 5px 5px;
+    height: calc(100% - #{$nav-height*2});
   }
 }
 

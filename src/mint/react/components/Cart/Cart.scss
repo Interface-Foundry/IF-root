@@ -16,6 +16,7 @@ $cart__add-height: $nav-height+$padding;
   }
   @media (min-width: 900px) {
     height: 100%;
+    border-radius: 0px 0px 5px 5px;
   }
   .price {
     color: $price-color;
