@@ -9,6 +9,10 @@
   color: $kip-primary-color;
   text-align: left;
 
+  @media (min-width: 900px) {
+    padding: 0 $padding;
+  }
+
 
   .image {
     display: inline-block;
