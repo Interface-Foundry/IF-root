@@ -22,10 +22,6 @@
     background: $kip-secondary-color;
   }
 
-  &:hover {
-    background: white;
-  }
-
   p {
     overflow: hidden;
   }
@@ -102,6 +98,12 @@
         li {
           display: flex;
           flex-direction: row;
+          border-radius: 5px 0 0 5px;
+          @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+          &:hover {
+            background: rgba(white, 0.7);
+          }
         }
         p {
           text-align: right;

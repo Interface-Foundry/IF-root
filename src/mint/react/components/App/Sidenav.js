@@ -43,6 +43,7 @@ export default class Sidenav extends Component {
     const { carts, _toggleSidenav, currentUser, cart_id } = this.props, { show } = this.state,
       leaderCarts = _.filter(carts, (c, i) => c.leader.id === currentUser.id),
       memberCarts = _.filter(carts, (c, i) => c.leader.id !== currentUser.id);
+
     return (
       <div className='sidenav'>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
@@ -58,7 +59,7 @@ export default class Sidenav extends Component {
             { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
             <ul>
               {_.map(leaderCarts, (c, i) => {
-                if(i > 1 && show !== 'me') return null;
+                if(i > 2 && show !== 'me') return null;
                 return ( 
                   <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
                     { c.locked ? <div className='icon'/> : <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
@@ -78,7 +79,7 @@ export default class Sidenav extends Component {
               })}
             </ul>
             {
-              leaderCarts.length > 3 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
+              leaderCarts.length >= 4 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
               <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
                 &nbsp; {show === 'me' ? 'Less' : 'More'}
               </h4> : null
@@ -86,7 +87,7 @@ export default class Sidenav extends Component {
             { memberCarts.length ? <h4>Other Kip Carts</h4> : null }
             <ul>
               {_.map(memberCarts, (c, i) => {
-                if(i > 1 && show !== 'other') return null;
+                if(i > 2 && show !== 'other') return null;
                 return (
                   <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
                     <div className='icon'>
@@ -99,7 +100,7 @@ export default class Sidenav extends Component {
               })}
             </ul>
             {
-              memberCarts.length > 3 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
+              memberCarts.length >= 4 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
               <Icon icon={show === 'other' ? 'Up' : 'Down'}/>
                 &nbsp; {show === 'other' ? 'Less' : 'More'}
               </h4> : null
