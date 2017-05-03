@@ -1,6 +1,7 @@
 @import '../../styles/Constants';
 @import '../../styles/Animations';
 .form {
+  box-shadow: $card-box-shadow;
   &>div {
     position: relative;
   }
@@ -13,19 +14,15 @@
     border-radius: 3px;
     border: 2px solid $color-blue;
     text-align: left;
-    &.email {
-      border: 2px dashed $color-blue;
-    }
     * {
       padding: 0;
       margin: 0;
     }
     button, input {
-      height: $nav-height - 4px;
-      line-height: $nav-height - 4px;
       border-radius: 4px;
       background: transparent;
       border: 0;
+      height: 100%;
     }
     input {
       background: white;
@@ -38,11 +35,17 @@
       @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
       cursor: pointer;
       color: $kip-primary-color;
-      width: 50px;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
       .form__input__submit__description {
+        font-size: 24px;
         background: $color-blue;
         width: 100%;
-        font-size: 18px;
+        height: 100%;
+        align-items: center;
+        padding: 0 10px 0 10px;
+        display: flex;
+        justify-content: center;
       }
       &:disabled {
         opacity: 0;

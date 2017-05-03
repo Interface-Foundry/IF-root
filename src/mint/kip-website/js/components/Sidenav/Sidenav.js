@@ -10,11 +10,12 @@ const defaultRoute = 'localhost:3000'
 export default class Sidenav extends Component {
 
   state = {
-    show: null
+    show: null,
+    email: null
   }
 
   render() {
-    const { currentUser, _toggleSidenav, myCarts, otherCarts, get } = this.props, 
+    const { currentUser, _toggleSidenav, _toggleModal, myCarts, otherCarts, get } = this.props, 
       { show } = this.state;
 
     return (
@@ -76,15 +77,16 @@ export default class Sidenav extends Component {
             }}><Icon icon='Logout'/>Logout</h4> : null}
           </div>
           <footer>
-            {currentUser ? <button className='hide' disabled={true}>
-              <div className='icon'/>
-              New Cart
-            </button> : <a href='/newcart'>
-              <button className='share'>
+            {
+              currentUser ? <button className='hide' disabled={true}>
+                <div className='icon'/>
+                New Cart
+              </button> : <button className='share' onClick={(e) => {
+                e.preventDefault(); _toggleModal()
+              }}>
                 <Icon icon='Login'/>
                 Login
-              </button>
-            </a>}
+              </button>}
             <a href='/newcart'>
               <button className='new'>
                 <Icon icon='Plus'/>

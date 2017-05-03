@@ -11,7 +11,7 @@ dbReady.then((models) => { db = models; }).catch(e => console.error(e))
 /**
  * Hack the router for error handling
  */
-const methods = ['get', 'post', 'delete']
+const methods = ['get', 'post', 'put', 'delete']
 methods.map(method => {
   var _originalHandler = router[method]
   router[method] = function (path, fn) {

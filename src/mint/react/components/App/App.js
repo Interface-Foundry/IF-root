@@ -72,8 +72,8 @@ export default class App extends Component {
 
   componentDidMount() {
     ReactDOM.findDOMNode(this)
-    if(window.innerWidth < 900)
-      this.setState({isMobile: true})
+    if (window.innerWidth < 900)
+      this.setState({ isMobile: true })
   }
 
   componentWillReceiveProps(nextProps) {
@@ -97,6 +97,7 @@ export default class App extends Component {
       fetchAllCarts();
     }
     if ((newToast && newStatus) && (toast !== newToast || status !== newStatus))::this._showToast(newStatus, newToast);
+    if (newToast && newToast.includes('Cart Updated')) fetchAllCarts();
   }
 
   _showToast(status, toast) {

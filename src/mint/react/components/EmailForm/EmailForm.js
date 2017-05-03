@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Field } from 'redux-form';
+import { Icon } from '..';
 
 export default class EmailForm extends Component {
   static propTypes = {
@@ -12,7 +13,7 @@ export default class EmailForm extends Component {
   render() {
     const { handleSubmit } = this.props;
     return (
-      <form onSubmit={handleSubmit} className="form">
+      <form onSubmit={handleSubmit} className="modal__form">
         <div>
           <Field 
             name="email" 
@@ -42,12 +43,16 @@ class EmailField extends Component {
     return (
       <div>
         <label>{label}</label>
-        <div className='form__input email'>
+        <div className='form__modal__input email'>
           <input {...input} placeholder={placeholder} type={type}/>
           <button 
-            className='form__input__submit' 
+            className='form__modal__input__submit' 
             type="submit"
-            onClick={handleSubmit}><p>Submit</p></button>
+            onClick={handleSubmit}>
+              <div className='form__modal__input__submit__description'>
+                OK
+              </div>
+          </button>
         </div>
         {touched && ((error && <span>{error}</span>) || (warning && <span>{warning}</span>))}
       </div>

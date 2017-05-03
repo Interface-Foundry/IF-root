@@ -10,7 +10,7 @@
   @media (min-width: 900px) {
     padding: 0;
   }
-  .header__link {
+  .header__left {
     flex-grow: 1;
     flex-basis: 0;
     .image {
@@ -20,6 +20,9 @@
       width: $nav-height - $padding*2;
       border-radius: 100%;
       background-size: cover !important;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
     }
     h3 {
       display: inline-block;
@@ -29,6 +32,23 @@
       font-size: 20px;
       @media (min-width: 900px) {
         width: auto;
+      }
+    }
+  }
+  .header__right {
+    min-width: 50px;
+    display: flex;
+    justify-content: center;
+    p {
+      padding: 0 $padding;
+    }
+    .navbar__icon {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      cursor: pointer;
+      svg {
+        height: 100%;
       }
     }
   }
@@ -56,28 +76,6 @@
           height: $nav-height;
           margin-right: $padding/2;
         }
-      }
-    }
-  }
-  .navbar__icon {
-    white-space: nowrap;
-    text-align: center;
-    cursor: pointer;
-    height: $nav-height;
-    width: $nav-height;
-    svg {
-      height: 100%;
-    }
-    p {
-      padding: 0 $padding;
-      display: inline-block;
-      font-weight: bold;
-    }
-    @media (min-width: 900px) {
-      &.right {
-        position: absolute;
-        right: 0;
-        width: auto;
       }
     }
   }

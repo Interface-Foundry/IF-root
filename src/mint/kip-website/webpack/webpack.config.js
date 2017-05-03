@@ -1,9 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-var BUILD_DIR = path.resolve(__dirname, 'public/build');
-var APP_DIR = path.resolve(__dirname, 'react');
-var WEBSITE_DIR = path.resolve(__dirname, 'kip-website/js');
+var BUILD_DIR = path.resolve(__dirname, '../../','public/build');
+var APP_DIR = path.resolve(__dirname, '../', 'js');
 
 module.exports = {
   entry: ['babel-polyfill', 'webpack-hot-middleware/client?path=/__webpack_hmr', APP_DIR + '/index'],

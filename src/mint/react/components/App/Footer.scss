@@ -53,6 +53,7 @@
       font-weight: 600;
       background: $main-button-color;
       padding: 0;
+      overflow: wrap;
       &>button {
         width: 100%;
       }
@@ -88,6 +89,9 @@
       }
       &.triple {
         flex-grow: 4;
+        @media (max-width: 900px) {
+          flex-grow: 2;
+        }
       }
       &.dimmed {
         background: white;
@@ -96,7 +100,7 @@
         text-align: center;
         font-size: 12px;
       }
-      &:disabled {
+      &:disabled, &.disabled {
         color: black;
         background-color: $kip-faded-color;
         cursor: not-allowed;
@@ -104,24 +108,21 @@
       &:last-child {
         margin-right: -5px;
         margin-left: 5px;
+        padding-right: 15px;
       }
       &:first-child {
         margin-left: -5px;
         margin-right: 5px;
+        padding-left: 15px;
       }
     }
   }
   .tos {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0px $padding*3;
     text-align: center;
     font-size: 13px;
     color: $kip-faded-color;
     font-style: italic;
-    line-height: 17px;
+    line-height: 13px;
     a {
       text-decoration: underline;
     }

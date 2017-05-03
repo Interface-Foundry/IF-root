@@ -4,10 +4,84 @@ const url = require('url')
 var amazonScraper = require('../cart/scraper_amazon')
 var amazon = require('../cart/amazon_cart')
 var camel = require('../deals/deals');
+var googl = require('goo.gl')
+
+if (process.env.NODE_ENV !== 'production') {
+  googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
+} else {
+  googl.setKey('AIzaSyCZ_lrnpJYBtjbfEcEf8kXBh1H8pJBx-bM')
+}
 
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
+
+
+
+/**
+ * delete item from cart
+ *
+ * @param      {string}  itemId  The item identifier
+ * @param      {string}  cartId  the cart identifier
+ * @param      {string}  userId  The user identifier
+ * @return     {string}  status of if item was deleted
+ */
+function * deleteItem(itemId, userId, cartId) {
+  const cart = yield db.Carts.findOne({id: cartId})
+  const item = yield db.Items.findOne({id: itemId})
+
+  // make sure cart and item exist
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+  if (!item) {
+    throw new Error('Item not found')
+  }
+
+  // Make sure user has permission to delete it, leaders can delete anything,
+  // members can delete their own stuff
+  if (cart.leader !== userId && item.added_by !== userId) {
+    throw new Error('Unauthorized')
+  }
+
+  cart.items.remove(item.id)
+  yield cart.save()
+}
+
+/**
+ * create item by user in a cart
+ *
+ * @param      {string}  itemId  The item identifier
+ * @param      {string}          userId  The user identifier
+ * @param      {string}          cartId  the cart identifier
+ * @return     {object}           item object that was created
+ */
+function * createItemFromItemId(itemId, userId, cartId) {
+
+  const cart = yield db.Carts.findOne({id: cartId})
+  const item = yield db.Items.findOne({id: itemId})
+
+  // make sure cart and item exist
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+  if (!item) {
+    throw new Error('Item not found')
+  }
+
+  // make sure it's not in a cart already
+  var existingCart = yield db.Carts.findOne({items: itemId})
+  if (existingCart && existingCart.id !== cart.id) {
+    throw new Error('Item ' + itemId + ' is already in another cart ' + existingCart.id)
+  }
+
+  cart.items.add(item.id)
+  item.added_by = userId
+  item.cart = cart.id
+
+  yield [item.save(), cart.save()]
+  return item
+}
 
 module.exports = function (router) {
   /**
@@ -87,7 +161,12 @@ module.exports = function (router) {
   }));
 
   /**
-   * @api {get} /api/sendgrid/cart/:cart_id/itemview/:user_id/:item_id
+   * @api {get} /api/sendgrid/cart/:cart_id/itemview/:user_id/:item_id View Item (from email)
+   * @apiGroup Sendgrid
+   * @apiDescription This route appears to redirect to an item view in the mint cart.
+   * @apiParam :cart_id {string} the cart id the item is in
+   * @apiParam :user_id {string} not used, TODO remove this
+   * @apiParam :item_id {string} the item id to preview in the cart
    */
   router.get('/sendgrid/cart/:cart_id/itemview/:user_id/:item_id', (req, res) => co(function * () {
     var item = yield db.Items.findOne({id: req.params.item_id});
@@ -95,7 +174,12 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/sendgrid/cart/:cart_id/item/:item_id
+   * @api {get} /api/sendgrid/sendgrid/cart/:cart_id/user/:user_id/item/:item_id Add Item (from email)
+   * @apiGroup Sendgrid
+   * @apiDescription This route appears to attempt to add an item to a cart.
+   * @apiParam :cart_id {string} the cart id the item is in
+   * @apiParam :user_id {string} probably shouldn't use this, TODO remove this
+   * @apiParam :item_id {string} the item id to preview in the cart
    */
   router.get('/sendgrid/cart/:cart_id/user/:user_id/item/:item_id', (req, res) => co(function * () {
     var user_account = yield db.UserAccounts.findOne({id: req.params.user_id});
@@ -215,6 +299,42 @@ module.exports = function (router) {
     return res.send(item)
   }));
 
+
+
+
+  /**
+   * @api {put} /api/cart/:cart_id/item Update Item - right now just replaces old item with new item
+   * @apiDescription Updates an item already in a cart. Must specify new item
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id cart id
+   * @apiParam {string} url optional url of the item from amazon or office depot or whatever
+   *
+   * @apiParamExample Item from Preview
+   * PUT https://mint.kipthis.com/api/cart/123456/item {
+   *   new_item_id: 'abc-123456',
+   *   user_id: '123456y'
+   * }
+   */
+  router.put('/cart/:cart_id/item/:item_id/update', (req, res) => co(function* () {
+    const userId = req.UserSession.user_account.id
+    const cartId = req.params.cart_id
+    const itemId = req.params.item_id
+
+    let newItemId
+    if (req.query.new_item_id) {
+      newItemId = req.query.new_item_id
+    }
+
+    yield deleteItem(itemId, userId, cartId)
+
+    const newItem = yield createItemFromItemId(newItemId, userId, cartId)
+    return res.send(newItem)
+  }));
+
+
+
+
+
   /**
    * @api {delete} /api/cart/:cart_id/item/:item_id Delete Item
    * @apiDescription Delete or subtract item from cart. The user must be a leader or a member to do this (does not have to be the person that added the item)
@@ -309,7 +429,11 @@ module.exports = function (router) {
   }))
 
   /**
-    * @api {post} /api/share/:cart_id Send share cart email
+    * @api {post} /api/share/:cart_id Share
+    * @apiGroup Carts
+    * @apiDescription Sends the share cart email to the cart leader
+    * @apiParam {string} :cart_id the id of the cart to share
+    *
     */
   router.post('/share/:cart_id', (req, res) => co(function * () {
     // only available for logged-in Users
@@ -403,7 +527,7 @@ module.exports = function (router) {
 
 
   /**
-   * @api {get} /api/itempreview?q=:q/ Item Preview
+   * @api {get} /api/itempreview?q=:q Item Preview
    * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
    * @apiGroup Carts
    * @apiParam {String} :q either a url, asin, or search text
@@ -451,8 +575,8 @@ module.exports = function (router) {
     // logging.info('populated cart', cart);
     var cartItems = cart.items;
 
-    if (cart.amazon_purchase_url && cart.locked) {
-      res.redirect(cart.amazon_purchase_url)
+    if (cart.affiliate_checkout_url && cart.locked) {
+      res.redirect(cart.affiliate_checkout_url)
     }
 
     // make sure the amazon cart is in sync with the cart in our database
@@ -467,8 +591,6 @@ module.exports = function (router) {
       template_name: 'receipt',
       unsubscribe_group_id: 2485
     });
-
-    // logging.info('REQ host', req.get('host'))
 
     var userItems = {}; //organize items according to which user added them
     var items= []
@@ -502,10 +624,11 @@ module.exports = function (router) {
     // save the amazon purchase url
     if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
       cart.amazon_purchase_url = amazonCart.PurchaseURL
+      cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
       yield cart.save()
     }
     // redirect to the cart url
-    res.redirect(cart.amazon_purchase_url)
+    res.redirect(cart.affiliate_checkout_url)
   }))
 
 
@@ -531,6 +654,7 @@ module.exports = function (router) {
     }
 
     // redirect to the cart url
+    const affiliateUrl = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(amazonItem.Item.DetailPageURL)}/id/mint/pid/${amazonItem.Item.ASIN}`)
     res.redirect(amazonItem.Item.DetailPageURL)
   }))
 

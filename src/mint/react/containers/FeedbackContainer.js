@@ -20,8 +20,8 @@ const mapDispatchToProps = dispatch => ({
     .then(() => {
       const { history: { replace }, cart_id } = state;
       dispatch(reset('Feedback'));
-      replace(`/cart/${cart_id}/`);
-    })
+      replace(`/cart/${cart_id}?toast=Feedback sent, thanks! 😎&status=success`);
+    });
   }
 });
 

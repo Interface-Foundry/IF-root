@@ -5,7 +5,6 @@
   position: absolute;
   max-height: 200px;
   overflow: auto;
-  border-bottom: 1px solid $border-color-light;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   width: 100%;
@@ -29,11 +28,6 @@
       border-bottom: 1px solid $border-color-light;
       p {
         font-size: 13px;
-      }
-    }
-    &:last-of-type {
-      .searchHistory__term-query {
-        border-bottom: 0;
       }
     }
   }
