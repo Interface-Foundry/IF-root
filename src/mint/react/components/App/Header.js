@@ -89,24 +89,22 @@ class CartHead extends Component {
 
     return (
       <div>
-        <div className='header__link'>
+        <div className='header__left'>
           <a href={`/cart/${cart_id}`}>
           {locked ? <div className='navbar__icon'>
               <Icon icon='Locked'/>
             </div> : <div className='image' style={
             {
               backgroundImage: `url(${thumbnail_url ? thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center',
-              backgroundSize: 'contain'
-            }}/>}
+            }
+          }/>}
           <h3>
             {locked ? 'Checkout in progress' : cartName}
           </h3>
           </a>
         </div>
-        <div className='navbar__icon right' onClick={_toggleSidenav}>
-          {isMobile ? <Icon icon='Hamburger'/> : <p>{name}</p>}
+        <div className='header__right' onClick={_toggleSidenav}>
+          {isMobile ? <div className='navbar__icon'><Icon icon='Hamburger'/></div> : <p>{name}</p>}
         </div>
       </div>
     );
@@ -114,18 +112,21 @@ class CartHead extends Component {
 }
 
 class IntroHead extends Component {
+  static propTypes = {
+    text: PropTypes.string
+  }
+  
   render() {
+    const { text } = this.props;
     return (
-      <div>
+      <div className="header__left">
         <div className='image' style={
           {
-            backgroundImage: 'url(http://tidepools.co/kip/head@x2.png)',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            backgroundSize: 'contain'
-          }}/>
+            backgroundImage: 'url(http://tidepools.co/kip/head@x2.png)'
+          }
+        }/>
         <h3>
-          Create New Cart
+          {text}
         </h3>
       </div>
     );
