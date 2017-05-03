@@ -41,7 +41,7 @@ function deploy() {
       cwd: path.join(__dirname, 'kip-website')
     })
     console.log(stdout.toString())
-    stdout = exec('yarn build', {
+    stdout = exec('npm run build', {
       cwd: path.join(__dirname, 'kip-website'),
       env: {
         NODE_PATH: './js'
