@@ -56,11 +56,12 @@ export default class Item extends Component {
     const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { replace } } } = this;
     const { type: nextType, item: nextItem, index: nextIndex, item: { position: nextPos } } = nextProps;
     //never replace cart_id if its undefined
+    console.log('nextProps', nextProps);
     if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) {
       replace(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
-    } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItem.length) {
+    } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItem.search.length) {
       replace(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
-    } else if (cart_id && nextType === 'search' && !nextItem.length) {
+    } else if (cart_id && nextType === 'search' && !nextItem.search.length) {
       replace(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
     } else if (nextProps.item_id !== item_id) {
       previewItem(nextProps.item_id);

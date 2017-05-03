@@ -6,6 +6,7 @@ import { fetchCart, fetchAllCarts, updateCart, checkoutCart } from '../actions/c
 import { logout } from '../actions/session';
 import { addItem, removeItem } from '../actions/item';
 import { removeDeal } from '../actions/deals';
+import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
   const params = decodeURIComponent(state.routing.location.search),
@@ -39,7 +40,10 @@ const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
   fetchAllCarts: () => dispatch(fetchAllCarts()),
   updateCart: (cart) => dispatch(updateCart(cart)),
-  removeItem: (cart_id, item_id) => dispatch(removeItem(cart_id, item_id)),
+  removeItem: (cart_id, item_id) => {
+    ReactGA.event({ category: 'Cart', action: 'removed item from cart' });
+    return dispatch(removeItem(cart_id, item_id));
+  },
   removeDeal: (index) => {
     setTimeout(() => {
       dispatch(removeDeal(index));

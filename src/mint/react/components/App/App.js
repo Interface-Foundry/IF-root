@@ -54,8 +54,6 @@ export default class App extends Component {
       category: 'User',
       action: 'Initial Load'
     });
-    ReactGA.set({ page: path });
-    ReactGA.pageview(path);
   }
 
   _toggleSidenav = () => {
