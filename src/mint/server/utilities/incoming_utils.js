@@ -15,6 +15,7 @@ var sendErrorEmail = function * (email, cartId, searchTerms) {
     recipients: email,
     sender: 'hello@kip.ai',
     subject: 'Oops',
+    cart: cartId,
     message_html: `<html><input type="hidden" id="" name="cartId" value="${cartId}">` +
       '<p>Unfortunately I wasn\'t able to find what you were looking for.' +
       (searchTerms && searchTerms.length ? 'Your search for ' + searchTerms.join(', ') + ' yielded no results': '') + //cannot read length of undefined
@@ -53,9 +54,8 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults, sea
 
   //add template and send confirmation email
   yield confirmation.template('item_add_confirmation', {
-    // baseUrl: 'http://mint-dev.kipthis.com',
-    // baseUrl: 'https://44c3b93d.ngrok.io',
-    baseUrl: 'https://mint-dev.kipthis.com',
+    baseUrl: 'https://16300459.ngrok.io',
+    // baseUrl: 'https://mint-dev.kipthis.com',
     cart: cart,
     items: items,
     searchResults: searchResults,

@@ -51,7 +51,7 @@ var emailsCollection = Waterline.Collection.extend({
     /** whether the email is incoming or outgoing; either 'sent' or 'received' */
     direction: {
       type: 'string',
-      default: 'sent'
+      defaultsTo: 'sent'
     },
 
     /**

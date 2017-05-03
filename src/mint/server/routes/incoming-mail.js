@@ -20,7 +20,10 @@ var utils = require('../utilities/incoming_utils');
 router.post('/incoming', upload.array(), (req, res) => co(function * () {
   console.log('posted to webhook');
   yield dbReady;
-  // console.log('req.body', req.body)
+  logging.info('FROM', req.body.from);
+  logging.info('TO', req.body.to);
+  var to = req.body.to.split(' ')[1]
+  to = to.slice(1, to.length-1)
   var email = req.body.from.split(' ');
   email = email[email.length-1];
   if (email[0] === '<') email = email.slice(1, email.length-1);
@@ -53,6 +56,18 @@ router.post('/incoming', upload.array(), (req, res) => co(function * () {
     res.sendStatus(202);
     return;
   }
+  logging.info('about to create email record');
+  logging.info('cart.id', cart.id)
+  //save email in the db
+  var incoming = yield db.Emails.create({
+    message_html: req.body.html,
+    cart: cart.id,
+    subject: req.body.subject,
+    direction: 'received',
+    recipients: to,
+    sender: email
+  });
+  logging.info('created email record');
 
   //If there's no text, send an error email and a 202 so sendgrid doesn't freak out
   if (!req.body.text || ! req.body.html) {
