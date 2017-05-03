@@ -157,7 +157,7 @@ var res2Item = function (res) {
         price: price,
         thumbnail_url: thumbnail,
         main_image_url: mainImage,
-        iframe_review_url: (i.CustomerReviews.HasReviews === true) ? i.CustomerReviews.IFrameURL : null
+        iframe_review_url: (i.CustomerReviews.HasReviews === 'true') ? i.CustomerReviews.IFrameURL : null
       })
     } catch (err) {
       logging.error(err);
