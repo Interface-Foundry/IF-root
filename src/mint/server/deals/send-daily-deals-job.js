@@ -60,7 +60,7 @@ var sendDailyDeals = function * () {
 
     //load the template and send it
     yield daily.template('daily_deals', {
-      id: carts[0].id,
+      cart: carts[0],
       deals: deals,
       name: user.email_address.split('@')[0]
     })

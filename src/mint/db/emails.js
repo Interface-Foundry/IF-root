@@ -48,6 +48,12 @@ var emailsCollection = Waterline.Collection.extend({
     /** id of the unsubscribe group the email is associated with */
     unsubscribe_group_id: 'integer',
 
+    /** whether the email is incoming or outgoing; either 'sent' or 'received' */
+    direction: {
+      type: 'string',
+      default: 'sent'
+    },
+
     /**
      * The cart associated with this email
      * @type {Cart}

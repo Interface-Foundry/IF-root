@@ -56,7 +56,7 @@ var sendConfirmationEmail = function * (email, subject, uris, searchResults, sea
     // baseUrl: 'http://mint-dev.kipthis.com',
     // baseUrl: 'https://44c3b93d.ngrok.io',
     baseUrl: 'https://mint-dev.kipthis.com',
-    id: cart.id,
+    cart: cart,
     items: items,
     searchResults: searchResults,
     searchTerms: searchTerms,

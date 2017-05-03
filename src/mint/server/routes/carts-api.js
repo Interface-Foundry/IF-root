@@ -336,7 +336,6 @@ module.exports = function (router) {
     deals = [deals.slice(0, 2), deals.slice(2, 4), deals.slice(4, 6)];
 
     yield share.template('share_cart_demo', {
-      id: cart.id,
       cartItems: cart.items,
       deals: deals,
       cart: cart
@@ -490,7 +489,6 @@ module.exports = function (router) {
 
     yield receipt.template('receipt', {
       baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
-      id: cart.id,
       items: items,
       users: users,
       total: total,
