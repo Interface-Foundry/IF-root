@@ -30,6 +30,9 @@ $cart__add-height: $nav-height+$padding;
       display: flex;
       flex-direction: row;
       margin: 0 -25px 0 -25px;
+      @media (min-width: 900px) {
+        background: $kip-secondary-color;
+      }
       button {
         height: $nav-height;
         width: 100%;
