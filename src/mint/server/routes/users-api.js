@@ -30,9 +30,10 @@ module.exports = function (router) {
   });
 
   /**
-   * @api {get} /api/login?email=:email&redirect=:redirect_url
+   * @api {get} /api/login?email=:email&redirect=:redirect_url Login
    * @apiGroup Users
-   * @apiDescription Makes sure a user is logged in. Allows a redirect url to be specified so that if a user clicks through an email login confirmation link it takes them to the right page.
+   * @apiDescription Logs a user in through the email authentication flow.
+   *   Allows a redirect url to be specified so that if a user clicks through an email login confirmation link it takes them to the right page.
    *   Passes back `loggedIn: true` if already logged in as that user, or `loggedIn: false` if not
    *   If logged in as a different user, it logs them out of that account
    * @apiParam {string} email the user's email address
@@ -273,7 +274,8 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/logout Get
+   * @api {get} /api/logout Logout
+   * @apiGroup Users
    * @apiDescription resets session coookie
    */
   router.get('/logout', (req, res) => {

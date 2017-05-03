@@ -94,7 +94,12 @@ module.exports = function (router) {
   }));
 
   /**
-   * @api {get} /api/sendgrid/cart/:cart_id/itemview/:user_id/:item_id
+   * @api {get} /api/sendgrid/cart/:cart_id/itemview/:user_id/:item_id View Item (from email)
+   * @apiGroup Sendgrid
+   * @apiDescription This route appears to redirect to an item view in the mint cart.
+   * @apiParam :cart_id {string} the cart id the item is in
+   * @apiParam :user_id {string} not used, TODO remove this
+   * @apiParam :item_id {string} the item id to preview in the cart
    */
   router.get('/sendgrid/cart/:cart_id/itemview/:user_id/:item_id', (req, res) => co(function * () {
     var item = yield db.Items.findOne({id: req.params.item_id});
@@ -102,7 +107,12 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/sendgrid/cart/:cart_id/item/:item_id
+   * @api {get} /api/sendgrid/sendgrid/cart/:cart_id/user/:user_id/item/:item_id Add Item (from email)
+   * @apiGroup Sendgrid
+   * @apiDescription This route appears to attempt to add an item to a cart.
+   * @apiParam :cart_id {string} the cart id the item is in
+   * @apiParam :user_id {string} probably shouldn't use this, TODO remove this
+   * @apiParam :item_id {string} the item id to preview in the cart
    */
   router.get('/sendgrid/cart/:cart_id/user/:user_id/item/:item_id', (req, res) => co(function * () {
     var user_account = yield db.UserAccounts.findOne({id: req.params.user_id});
@@ -316,7 +326,11 @@ module.exports = function (router) {
   }))
 
   /**
-    * @api {post} /api/share/:cart_id Send share cart email
+    * @api {post} /api/share/:cart_id Share
+    * @apiGroup Carts
+    * @apiDescription Sends the share cart email to the cart leader
+    * @apiParam {string} :cart_id the id of the cart to share
+    *
     */
   router.post('/share/:cart_id', (req, res) => co(function * () {
     // only available for logged-in Users
@@ -410,7 +424,7 @@ module.exports = function (router) {
 
 
   /**
-   * @api {get} /api/itempreview?q=:q/ Item Preview
+   * @api {get} /api/itempreview?q=:q Item Preview
    * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
    * @apiGroup Carts
    * @apiParam {String} :q either a url, asin, or search text
