@@ -69,6 +69,12 @@ router.get('/auth/:id', (req, res) => co(function * () {
     yield req.UserSession.save()
   }
 
+  // redirect if the link has a redirect
+  if (link.redirect_url) {
+    return res.redirect(link.redirect_url)
+  }
+
+  // handle auth link for the /identify way
   if (!link.cart.leader) {
     // make the user leader if they aren't already
     link.cart.leader = link.user.id
