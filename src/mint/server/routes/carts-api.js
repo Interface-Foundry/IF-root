@@ -4,6 +4,13 @@ const url = require('url')
 var amazonScraper = require('../cart/scraper_amazon')
 var amazon = require('../cart/amazon_cart')
 var camel = require('../deals/deals');
+var googl = require('goo.gl')
+
+if (process.env.NODE_ENV !== 'production') {
+  googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
+} else {
+  googl.setKey('AIzaSyCZ_lrnpJYBtjbfEcEf8kXBh1H8pJBx-bM')
+}
 
 var db
 const dbReady = require('../../db')
@@ -450,8 +457,8 @@ module.exports = function (router) {
     // logging.info('populated cart', cart);
     var cartItems = cart.items;
 
-    if (cart.amazon_purchase_url && cart.locked) {
-      res.redirect(cart.amazon_purchase_url)
+    if (cart.affiliate_checkout_url && cart.locked) {
+      res.redirect(cart.affiliate_checkout_url)
     }
 
     // make sure the amazon cart is in sync with the cart in our database
@@ -466,8 +473,6 @@ module.exports = function (router) {
       template_name: 'receipt',
       unsubscribe_group_id: 2485
     });
-
-    // logging.info('REQ host', req.get('host'))
 
     var userItems = {}; //organize items according to which user added them
     var items= []
@@ -500,10 +505,11 @@ module.exports = function (router) {
     // save the amazon purchase url
     if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
       cart.amazon_purchase_url = amazonCart.PurchaseURL
+      cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
       yield cart.save()
     }
     // redirect to the cart url
-    res.redirect(cart.amazon_purchase_url)
+    res.redirect(cart.affiliate_checkout_url)
   }))
 
 
@@ -529,6 +535,7 @@ module.exports = function (router) {
     }
 
     // redirect to the cart url
+    const affiliateUrl = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(amazonItem.Item.DetailPageURL)}/id/mint/pid/${amazonItem.Item.ASIN}`)
     res.redirect(amazonItem.Item.DetailPageURL)
   }))
 
