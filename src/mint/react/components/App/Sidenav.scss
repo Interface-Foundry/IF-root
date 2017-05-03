@@ -63,6 +63,9 @@
           color: #4a9ff1;
           border-bottom: 0;
           text-indent: underline;
+          svg {
+            @include animation(bounceDownSmall 2s infinite);
+          }
         }
       }
       &.sidenav__list__header {
