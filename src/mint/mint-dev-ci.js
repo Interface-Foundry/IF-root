@@ -26,26 +26,26 @@ function deploy() {
       cwd: path.join(__dirname, '../../')
     })
     console.log(stdout.toString())
-    stdout = exec('yarn install', {
+    stdout = exec('yarn', {
       cwd: __dirname
     })
     console.log(stdout.toString())
     stdout = exec('webpack', {
       cwd: __dirname,
-      env: {
+      env: _.merge(process.env, {
         NODE_PATH: './react'
-      }
+      })
     })
     console.log(stdout.toString())
-    stdout = exec('yarn install', {
+    stdout = exec('yarn', {
       cwd: path.join(__dirname, 'kip-website')
     })
     console.log(stdout.toString())
-    stdout = exec('npm run build', {
+    stdout = exec('yarn build', {
       cwd: path.join(__dirname, 'kip-website'),
-      env: {
+      env: _.merge(process.env, {
         NODE_PATH: './js'
-      }
+      })
     })
     console.log(stdout.toString())
     resolve()
