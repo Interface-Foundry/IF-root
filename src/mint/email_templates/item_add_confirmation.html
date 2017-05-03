@@ -175,7 +175,7 @@
                                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                                <tr>
                                                    <td align="center" style="padding: 30px 5px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1;font-weight: 500;">
-                                                      <!-- <%=baseUrl%>/cart/<%=id%> -->
+
                                                       <table><tr><td style="padding-right:1em"><img src="<%=searchResults[i][j].thumbnail_url%>" alt="item image"></td>
                                                       <td><p><a href="<%=baseUrl%>/api/sendgrid/cart/<%=cart.id%>/itemview/<%=userId%>/<%=searchResults[i][j].id%>"><%=searchResults[i][j].name%></a></p>
                                                       <a style="padding:8px;border-width:1px;border-radius:5px;background-color:#ffdf4d;color:black;" href="<%=baseUrl%>/api/sendgrid/cart/<%=cart.id%>/user/<%=userId%>/item/<%=searchResults[i][j].id%>">Add to Kip Cart</a></td></tr></table>
@@ -208,7 +208,7 @@
                       <td align="center" width="100%" style="box-sizing: border-box; width: 100%; padding: 0 15px 50px; ">
                         <div style="box-sizing: border-box; width: 100%; padding: 0px 0px 0px; ">
                           <!--[if mso]>
-                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=id%>" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
+                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=cart.id%>" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
                               <w:anchorlock/>
                               <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:20px;">VIEW KIP CART MSO</center>
                             </v:roundrect>
@@ -283,7 +283,7 @@
                                          <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                              <tr>
                                                  <td align="center" style="padding: 30px 5px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1;font-weight: 500;">
-                                                    <!-- <%=baseUrl%>/cart/<%=id%> -->
+
                                                     <!-- TODO: repeat items in cart -->
                                                     <table><tr><td style="padding-right:1em"><img src="<%=items[i].thumbnail_url%>" alt="item image"></td>
                                                     <td><p><a href="<%=items[i].original_link%>"><%=items[i].name%></a></p></td></tr></table>
@@ -316,7 +316,7 @@
                     <td align="center" width="100%" style="box-sizing: border-box; width: 100%; padding: 0 15px 50px; ">
                       <div style="box-sizing: border-box; width: 100%; padding: 0px 0px 0px; ">
                         <!--[if mso]>
-                          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=id%>" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
+                          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=cart.id%>" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
                             <w:anchorlock/>
                             <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:20px;">VIEW KIP CART MSO</center>
                           </v:roundrect>

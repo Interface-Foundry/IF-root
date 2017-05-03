@@ -179,8 +179,9 @@ var getTerms = function (text, urls) {
  * @returns {string} - the email text, truncated
  */
 var truncateConversationHistory = function (text) {
-  var truncated = text.split(/On (Mon|Monday|Tue|Tuesday|Wed|Wednesday|Thu|Thursday|Fri|Friday|Sat|Saturday|Sun|Sunday)?,? (Jan|January|Feb|February|Mar|March|Apr|April|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)/);
-  logging.info('new text', truncated[0]);
+  var truncated = text.split(/On (Mon|Monday|Tue|Tuesday|Wed|Wednesday|Thu|Thursday|Fri|Friday|Sat|Saturday|Sun|Sunday)?,? (Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)/);
+  // logging.info('new text', truncated[0]);
+
   return truncated[0];
 };
 
@@ -191,14 +192,12 @@ var truncateConversationHistory = function (text) {
  */
 var getUrls = function (html) {
   // **hopeful gmail version**
-
-  console.log('html', html)
+  // console.log('html', html)
   var uris = html.match(/href="(.+?)"/gi);
   logging.info('uris', uris);
   if (!uris) return null;
 
   uris = uris.map(u => u.slice(6, u.length-1)); //trim off href junk
-  console.log('should return these', uris)
   uris = uris.filter(u => /^https:\/\/www.amazon.com\//.test(u)); //validate uris as amazon links
   console.log('should be amazon', uris)
 
