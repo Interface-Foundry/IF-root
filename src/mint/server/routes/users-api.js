@@ -228,9 +228,13 @@ module.exports = function (router) {
 
     // which email should we send?
     if (cart.leader == user.id) {
+      
       console.log('SENDING LEADER EMAIL')
+
     } else if (cart.members.includes(user.id)) {
+
       console.log('SENDING MEMBER EMAIL')
+
     }
 
     // grab the daily deals

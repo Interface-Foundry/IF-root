@@ -15,7 +15,7 @@ export default class Ribbon extends Component {
             <div className="row-1">
               <div className='image' style={
                 {
-                  backgroundImage: `url(http://tidepools.co/kip/head@x2.png)`
+                  backgroundImage: `url(https://storage.googleapis.com/kip-random/head%40x2.png)`
                 }}/>
               <h1>KIP</h1>
             </div>
