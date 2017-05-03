@@ -111,7 +111,7 @@ export default class App extends Component {
     const {
       _toggleSidenav,
       props,
-      props: { cart_id, currentCart, updateCart, newAccount, leader, carts, match, currentUser, location, logout, items },
+      props: { cart_id, currentCart, updateCart, newAccount, leader, carts, match, currentUser, location, logout, items, history: { replace } },
       state: { sidenav, toast, status, showedToast, isMobile }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit');
@@ -144,7 +144,7 @@ export default class App extends Component {
           { /* Renders cart when route permits */ }
           <Route path={`${match.url}`} exact component={CartContainer} />
         </div>
-        { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
+        { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
         {showFooter ? <Footer {...props} cart_id={cart_id} isMobile={isMobile}/> : null}
       </section>
     );
