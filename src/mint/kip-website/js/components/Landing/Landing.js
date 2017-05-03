@@ -22,15 +22,15 @@ export default class Landing extends Component {
   }
 
   componentDidMount () {
-    ReactDOM.findDOMNode(this).addEventListener('scroll', this._handleScroll);
+    ReactDOM.findDOMNode(this.landing).addEventListener('scroll', this._handleScroll);
   }
 
   componentWillUnmount () {
-    ReactDOM.findDOMNode(this).removeEventListener('scroll', this._handleScroll);
+    ReactDOM.findDOMNode(this.landing).removeEventListener('scroll', this._handleScroll);
   }
 
   _handleScroll (e) {
-    let scrollTop = ReactDOM.findDOMNode(this).scrollTop;
+    let scrollTop = ReactDOM.findDOMNode(this.landing).scrollTop;
 
     this.setState({
       fixed: scrollTop > 400
@@ -56,7 +56,7 @@ export default class Landing extends Component {
         { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }
         { modal ? <ModalContainer _toggleModal={_toggleModal}/> : null }
 
-        <div className="landing"> 
+        <div className="landing" ref={(landing) => this.landing = landing}> 
           <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav}/>
           <HeroContainer/>
           <StatementContainer/>
