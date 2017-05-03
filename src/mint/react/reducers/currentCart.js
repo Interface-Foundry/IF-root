@@ -37,7 +37,7 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       locked: action.updatedCart.locked,
-      thumbnail_url: action.updatedCart.thumbnail_url,
+      thumbnail_url: action.updatedCart.thumbnail_url || 'https://storage.googleapis.com/kip-random/head%40x2.png',
       name: action.updatedCart.name,
       cart_id: action.updatedCart.id
     };
@@ -45,6 +45,7 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       ...action.currentCart,
+      thumbnail_url: action.currentCart.thumbnail_url || 'https://storage.googleapis.com/kip-random/head%40x2.png',
       locked: action.currentCart.locked || false,
       cart_id: action.currentCart.id
     };

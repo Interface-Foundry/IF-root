@@ -95,7 +95,7 @@ class CartHead extends Component {
               <Icon icon='Locked'/>
             </div> : <div className='image' style={
             {
-              backgroundImage: `url(${thumbnail_url ? thumbnail_url : 'https://storage.googleapis.com/kip-random/head%40x2.png'})`,
+              backgroundImage: `url(${thumbnail_url})`,
             }
           }/>}
           <h3>
