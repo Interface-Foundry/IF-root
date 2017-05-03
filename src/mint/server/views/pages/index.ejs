@@ -1,23 +1,29 @@
-<!-- views/pages/website.ejs -->
-<!-- Used to render react -->
+<!-- views/pages/index.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <!-- Origin Trial Token, feature = Web Share, origin = https://30058bc0.ngrok.io, expires = 2017-04-17 -->
-  <meta http-equiv="origin-trial" data-feature="Web Share" data-expires="2017-04-17" content="AuDmjphrfuMiUrQtRHP3wL0iqbK4atEiA7HDaBAHZ/vR5zlKNdTxYuIXkqJrbKpa8fodc+/izMBwDejuU0FjCgkAAABmeyJvcmlnaW4iOiJodHRwczovLzMwMDU4YmMwLm5ncm9rLmlvOjQ0MyIsImZlYXR1cmUiOiJXZWJTaGFyZSIsImV4cGlyeSI6MTQ5MjQ3MzYwMCwiaXNTdWJkb21haW4iOnRydWV9">
   <link rel="shortcut icon" href="/favicon.ico">
-  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
-  <title>Kip Site</title>
+  <title>Kip Store</title>
+  <link href="/style.css" rel="stylesheet">
 </head>
 
 <body>
-  <div id="root"></div>
-  <intent action="http://webintents.org/edit" type="text/uri-list image/*"></intent>
-  <script type="text/javascript" src="/build/bundle.js"></script>
-  <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="1e131d10-d330-48ee-8f71-81de2a5724ae";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.im/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
+  <h1>Kipthis.com</h1>
+  <p>Group shopping is easier than ever! Create and share a group shopping cart by clicking below.</p>
+  <h1>
+  <a href="/newcart">Start Shopping</a>
+  <% if(carts.length) { %> 
+    </h1>
+    Your Carts: 
+    <ul>
+      <% for(var i=0; i < carts.length; i++) { %>
+        <li><a href='/cart/<%- carts[i].id %>/'><%- carts[i].id %></a></li>
+      <% } %>
+    </ul>
+  <% } %>
 </body>
 
 </html>
