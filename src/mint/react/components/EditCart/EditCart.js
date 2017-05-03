@@ -11,21 +11,20 @@ class EditCart extends Component {
     onSubmit: PropTypes.func,
     cart: PropTypes.object,
     handleSubmit: PropTypes.func.isRequired
-
   }
 
-  onSubmitMiddleware = (values, e, state) => {
+  onSubmitMiddleware = async(values, e, state) => {
     const { onSubmit, cart } = this.props, { thumbnail_url } = values;
-
     if (thumbnail_url && thumbnail_url !== cart.thumbnail_url) {
-      cloudinary(thumbnail_url)
-        .then((res) => {
-          onSubmit({ ...values, ...cart, thumbnail_url: res.secure_url }, e, state);
-        });
+      onSubmit({
+        ...cart,
+        ...values,
+        thumbnail_url: (await cloudinary(thumbnail_url))
+          .secure_url
+      }, e, state);
     } else {
       onSubmit(values, e, state);
     }
-
   }
 
   render() {

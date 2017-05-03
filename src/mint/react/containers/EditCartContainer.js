@@ -21,9 +21,9 @@ const mapDispatchToProps = dispatch => ({
   // We need to edit the cart here
   onSubmit: (values, e, state) => dispatch(updateCart(values))
     .then(() => {
-      const { history: { replace }, cart_id } = state;
+      const { history: { push }, cart_id } = state;
       dispatch(reset('SignIn'));
-      replace(`/cart/${cart_id}/`);
+      push(`/cart/${cart_id}?toast=Cart Updated! 😊&status=success`);
     })
 });
 
