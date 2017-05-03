@@ -31,10 +31,11 @@ history.listen((location, action) => {
 const historyMiddleware = routerMiddleware(history);
 
 // creating redux store
+import { createLogger } from 'redux-logger';
+const loggerMiddleware = createLogger();
 const store = createStore(
   Reducers,
-  applyMiddleware(thunkMiddleware),
-  applyMiddleware(historyMiddleware)
+  applyMiddleware(thunkMiddleware, historyMiddleware, loggerMiddleware)
 );
 
 // update login status

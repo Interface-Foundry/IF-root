@@ -25,29 +25,29 @@ function deploy() {
     var stdout = exec('git fetch origin && git reset --hard origin/mint', {
       cwd: path.join(__dirname, '../../')
     })
-    console.log(stdout)
-    stdout = exec('yarn install', {
+    console.log(stdout.toString())
+    stdout = exec('yarn', {
       cwd: __dirname
     })
-    console.log(stdout)
+    console.log(stdout.toString())
     stdout = exec('webpack', {
       cwd: __dirname,
-      env: {
+      env: _.merge(process.env, {
         NODE_PATH: './react'
-      }
+      })
     })
-    console.log(stdout)
-    stdout = exec('yarn install', {
+    console.log(stdout.toString())
+    stdout = exec('yarn', {
       cwd: path.join(__dirname, 'kip-website')
     })
-    console.log(stdout)
-    stdout = exec('webpack --config webpack/dev.config.js', {
+    console.log(stdout.toString())
+    stdout = exec('yarn build', {
       cwd: path.join(__dirname, 'kip-website'),
-      env: {
+      env: _.merge(process.env, {
         NODE_PATH: './js'
-      }
+      })
     })
-    console.log(stdout)
+    console.log(stdout.toString())
     resolve()
   })
 }

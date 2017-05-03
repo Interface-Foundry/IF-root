@@ -85,22 +85,26 @@ class CartHead extends Component {
   }
 
   render() {
-    const { isMobile, currentUser: { name }, _toggleSidenav, cartName, currentCart: { locked, thumbnail_url } } = this.props;
+    const { isMobile, currentUser: { name }, _toggleSidenav, cartName, cart_id, currentCart: { locked, thumbnail_url } } = this.props;
 
     return (
       <div>
-        {locked ? <div className='navbar__icon'>
-            <Icon icon='Locked'/>
-          </div> : <div className='image' style={
-          {
-            backgroundImage: `url(${thumbnail_url ? thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            backgroundSize: 'contain'
-          }}/>}
-        <h3>
-          {locked ? 'Checkout in progress' : cartName}
-        </h3>
+        <div className='header__link'>
+          <a href={`/cart/${cart_id}`}>
+          {locked ? <div className='navbar__icon'>
+              <Icon icon='Locked'/>
+            </div> : <div className='image' style={
+            {
+              backgroundImage: `url(${thumbnail_url ? thumbnail_url : 'http://tidepools.co/kip/head@x2.png'})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              backgroundSize: 'contain'
+            }}/>}
+          <h3>
+            {locked ? 'Checkout in progress' : cartName}
+          </h3>
+          </a>
+        </div>
         <div className='navbar__icon right' onClick={_toggleSidenav}>
           {isMobile ? <Icon icon='Hamburger'/> : <p>{name}</p>}
         </div>

@@ -1,5 +1,4 @@
 // react/components/App/Header.scss
-
 @import '../../styles/Constants';
 .navbar {
   height: $nav-height;
@@ -8,38 +7,34 @@
   background: $header-color;
   color: $kip-primary-color;
   text-align: left;
-
   @media (min-width: 900px) {
     padding: 0;
   }
-
-
-  .image {
-    display: inline-block;
-    margin: $padding;
-    height: $nav-height - $padding*2;
-    width: $nav-height - $padding*2;
-    border-radius: 100%;
-    background-size: cover !important;
-  }
-
-  h3 {
-    display: inline-block;
-    width: calc(100% - #{$nav-height*2});
-    overflow: hidden;
-    white-space: nowrap;
-    font-weight: 500;
-    font-size: 20px;
-
-    @media (min-width: 900px) {
-      width: auto;
+  .header__link {
+    flex-grow: 1;
+    flex-basis: 0;
+    .image {
+      display: inline-block;
+      margin: $padding;
+      height: $nav-height - $padding*2;
+      width: $nav-height - $padding*2;
+      border-radius: 100%;
+      background-size: cover !important;
+    }
+    h3 {
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      font-weight: 500;
+      font-size: 20px;
+      @media (min-width: 900px) {
+        width: auto;
+      }
     }
   }
-
-  & > div {
+  &>div {
     display: flex;
   }
-  
   .navbar__modal {
     display: flex;
     &.settings {

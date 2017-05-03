@@ -107,7 +107,6 @@ class CartFooter extends Component {
             (e) => { 
               e.preventDefault(); 
               if (items.length > 0) { 
-                console.log('foot open')
                 updateCart({...currentCart, locked: !currentCart.locked});
                 window.open(`/api/cart/${cart_id}/checkout`);
               }

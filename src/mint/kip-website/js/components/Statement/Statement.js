@@ -56,9 +56,9 @@ export default class Statement extends Component {
 
   	render() {
   		const { state: { typing }, props: { items, quantity } } = this;
-  		
+
 	    return (
-	      	<div className="statement"> 
+	      	<div className="statement">
 		        <div className="col-12 row-1 card">
 		        	<div className='row-1 cart'>
 		        		<Icon icon="Cart"/>
@@ -71,7 +71,7 @@ export default class Statement extends Component {
 		        	</div>
 		        	<div className="col-12 row-1 text">
 		        		<p>
-							Whether your a small startup, or an established buisiness, when your busy making a difference, it’s easy to forget how much things cost.
+							Whether you're a small startup, or an established buisiness, when you're busy making a difference, it’s easy to forget how much things cost.
 							Kip keeps your spending lean by streamlining the budgeting process, increasing the transparency of individual spending, and allowing your team to stay connected accross a multiple platforms.
 		        		</p>
 		        	</div>
@@ -86,16 +86,3 @@ export default class Statement extends Component {
 	    );
   	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
