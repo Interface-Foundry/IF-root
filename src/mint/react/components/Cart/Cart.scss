@@ -11,7 +11,7 @@ $cart__add-height: $nav-height+$padding;
     background-color: $kip-primary-color;
     border-bottom-right-radius: $padding/2;
     border-bottom-left-radius: $padding/2;
-    box-shadow: 0 1px 5px -2px grey;
+    box-shadow: $card-box-shadow;
     margin: 0 2px 0 2px;
   }
   @media (min-width: 900px) {
@@ -168,9 +168,9 @@ $cart__add-height: $nav-height+$padding;
       overflow: hidden;
       border-radius: $padding/2;
       background-color: $kip-primary-color;
-      margin: 0 2px 0 2px;
+      margin: 0 5px 0 5px;
       margin-bottom: $padding;
-      box-shadow: 0 2px 5px -2px grey;
+      box-shadow: $card-box-shadow;
       h3 {
         padding: $padding;
         span {
@@ -193,8 +193,8 @@ $cart__add-height: $nav-height+$padding;
       padding: 0 $padding*2;
       .email {
         display: block;
-        font-size: 0.6em;
-        line-height: 0.6em;
+        font-size: 0.8em;
+        line-height: 0.8em;
         color: lighten($header-color, 10%);
       }
     }

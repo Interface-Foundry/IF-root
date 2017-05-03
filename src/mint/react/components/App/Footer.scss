@@ -8,7 +8,7 @@
   margin: 0 (-$padding) * 1.5;
   font-family: $secondary-font;
   color: $kip-primary-color;
-  border-top:1px solid $border-color-light;
+  border-top: 1px solid $border-color-light;
   max-width: 900px;
   background: $kip-primary-color;
   overflow: hidden;
@@ -21,42 +21,40 @@
     display: inline-block;
     width: calc(100% - 250px);
     background: transparent;
-    border:0;
-    border-radius:5px 5px 0 0;
+    border: 0;
+    border-radius: 5px 5px 0 0;
   }
   .footer__cart, .footer__item, .footer__save, .footer__settings {
     height: 100%;
     display: flex;
+    button {
+      &:only-child {
+        margin: 0 30px;
+      }
+    }
     a {
-      flex-grow: 1;
-      flex-basis: 0;
-      height: 100%;
       button {
-        width: 100%;
-        margin: 0;
-        &:only-child {
+        border: none;
+        &:first-child {
           margin: 0;
         }
       }
     }
-    button {
-      overflow: wrap;
+    a, button {
+      flex-grow: 1;
+      flex-basis: 0;
+      height: 100%;
       font-size: 15px;
       text-transform: uppercase;
       cursor: pointer;
-      margin: 0 10px;
-      height: 100%;
       border-radius: 5px;
       background: white;
-      background: $main-button-color;
       border: 1px solid $border-color-light;
       font-weight: 600;
-      flex-grow: 1;
-      flex-basis: 0;
-      &:disabled {
-        color: black;
-        background-color: $kip-faded-color;
-        cursor: not-allowed;
+      background: $main-button-color;
+      padding: 0;
+      &>button {
+        width: 100%;
       }
       h4 {
         display: inline-block;
@@ -93,14 +91,23 @@
       }
       &.dimmed {
         background: white;
-        border: 1px solid $border-color-light;
+        border: 1px solid $kip-faded-color;
         color: $kip-faded-color;
         text-align: center;
         font-size: 12px;
-        padding: 0 5px 0 20px;
       }
-      &:only-child {
-        margin: 0 30px;
+      &:disabled {
+        color: black;
+        background-color: $kip-faded-color;
+        cursor: not-allowed;
+      }
+      &:last-child {
+        margin-right: -5px;
+        margin-left: 5px;
+      }
+      &:first-child {
+        margin-left: -5px;
+        margin-right: 5px;
       }
     }
   }

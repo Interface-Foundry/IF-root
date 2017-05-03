@@ -16,7 +16,7 @@
   overflow: hidden;
   @media (min-width: 900px) {
     border-radius: 0px 0px 5px 5px;
-    box-shadow: 0 2px 5px -2px grey;
+    box-shadow: $card-box-shadow;
     height: 99%;
   }
   .form {
@@ -61,29 +61,27 @@
         border: 0;
       }
       input {
-        background: white
-      }
-      .form__input__submit {
-        width: $nav-height*1.5;
-        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-        p {
-          background: $color-blue;
-          height: $nav-height - 4px - $padding;
-          margin: $padding/3;
-          color: $kip-primary-color;
-          line-height: 3.6em;
-          font-weight: 600;
-          border-radius: 4px;
-        }
-        &:disabled {
-          opacity: 0;
-        }
-      }
-      input {
+        background: white;
         overflow: hidden;
         text-overflow: ellipsis;
         width: calc(100% - #{$nav-height*1.5});
         padding: $padding;
+      }
+    }
+    .form__input__submit {
+      width: $nav-height*1.5;
+      @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+      p {
+        background: $color-blue;
+        height: $nav-height - 4px - $padding;
+        margin: $padding/3;
+        color: $kip-primary-color;
+        line-height: 3.6em;
+        font-weight: 600;
+        border-radius: 4px;
+      }
+      &:disabled {
+        opacity: 0;
       }
     }
   }

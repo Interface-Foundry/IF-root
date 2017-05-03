@@ -199,7 +199,7 @@ class OtherItems extends Component {
 
     return (
       <ul>
-        <div key={id} className='cart__items__title'>{name}<span className='email'>{email}</span></div>
+        <div key={id} className='cart__items__title'>{name}<a href={`mailto:${email}`} className='email'>{email}</a></div>
         {
           items.length 
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 

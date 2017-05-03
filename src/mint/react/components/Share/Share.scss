@@ -65,7 +65,7 @@
             height: $nav-height - 4px - $padding;
             line-height: $nav-height - 4px - $padding;
             border: 1px solid $border-color-light;
-            background: #eae7e4;
+            background: $border-color-light;
           }
         }
       }

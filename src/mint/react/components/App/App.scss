@@ -115,7 +115,7 @@ body::-webkit-scrollbar {
   padding: $padding;
   color: white;
   z-index: 100;
-  box-shadow: 0 0 10px black;
+  box-shadow: $card-box-shadow;
   &.err {
     background: rgba($price-color, 0.98);
   }

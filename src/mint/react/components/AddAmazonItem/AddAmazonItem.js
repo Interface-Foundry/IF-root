@@ -33,27 +33,18 @@ export default class AddAmazonItem extends Component {
   }
 
   render() {
-    const { addItemToCart, props: { numUserItems, user_account }, state: { clickedAmazonField } } = this;
+    const { addItemToCart, props: { numUserItems, user_account } } = this;
     return (
       <div className='add_to_amazon'>
         Add Item to Kip Cart
         {
-          clickedAmazonField 
+          !!user_account.id 
           ? <AmazonFormContainer />
-          : <button className={`add_to_amazon__button ${!!user_account.id ? '' : 'yellow'}`} onClick={addItemToCart}>
-              {
-                !!user_account.id
-                ? <Icon icon='Search'/>
-                : null
-              }
-              {
-                !!user_account.id
-                ? 'Paste Amazon URL or Search' 
-                : '+ Add Amazon Item'
-              }
+          : <button className='add_to_amazon__button yellow' onClick={addItemToCart}>
+              + Add Amazon Item
             </button>
         }
-        {numUserItems ? null : <NotificationBubble top={23} right={2.5}/>}
+        {numUserItems ? null : <NotificationBubble top={21} right={3}/>}
       </div>
     );
   }
