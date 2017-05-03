@@ -101,7 +101,6 @@ export default class App extends Component {
 
   _showToast(status, toast) {
     const { history: { replace }, cart_id } = this.props;
-    console.log(toast);
     setTimeout(() => this.setState({ status, toast, showedToast: false }), 1);
     setTimeout(() => {
       this.setState({ toast: null, status: null, showedToast: true });

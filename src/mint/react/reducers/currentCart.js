@@ -67,7 +67,7 @@ export default function cart(state = initialState, action) {
   case CANCEL_REMOVE_ITEM:
     return {
       ...state,
-      items: [state.itemDeleted, ...state.items], 
+      items: [state.itemDeleted, ...state.items],
       itemDeleted: null, // clear saved item if canceled
     };
   case RECEIVE_INCREMENT_ITEM:
@@ -89,20 +89,34 @@ export const splitCartById = (state, props) => {
 
   return _.reduce(state.currentCart.items, (acc, item) => {
     acc.quantity = acc.quantity + (item.quantity || 1);
-    let linkedMemeber = getMemberById(state.currentCart, { id: item.added_by });
+    let linkedMember = getMemberById(state.currentCart, { id: item.added_by });
 
     if (id === item.added_by) {
       acc['my'].push(item);
-    } else if (!acc.others[linkedMemeber.email_address]) {
-      acc.others[linkedMemeber.email_address] = [item];
+    } else if (acc.others.find(member => member.id === linkedMember.id)) {
+      const others = acc.others.filter(member => member.id !== linkedMember.id);
+      let newMember = acc.others.find(member => member.id === linkedMember.id);
+      newMember = {
+        ...newMember,
+        items: [...newMember.items, item]
+      };
+      acc = {
+        ...acc,
+        others: [...others, newMember]
+      };
     } else {
-      acc.others[linkedMemeber.email_address].push(item);
+      acc.others.push({
+        id: item.added_by,
+        email: linkedMember.email_address,
+        name: linkedMember.name,
+        items: [item]
+      });
     }
 
     return acc;
   }, {
     my: [],
-    others: {},
+    others: [],
     quantity: 0
   });
 };

@@ -34,7 +34,7 @@ class CartItem extends Component {
     return (
       <li>
         <Link className='cartswitcher__cart' to={`/cart/${id}`}>
-          {id} by {leader.email_address} ({items.length} items)
+          {id} by {leader.name} ({items.length} items)
         </Link>
       </li>
     );

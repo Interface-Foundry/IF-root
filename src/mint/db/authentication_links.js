@@ -23,6 +23,8 @@ var authenticationLinksCollection = Waterline.Collection.extend({
     /** @type {reference} cart which item belongs to */
     cart: Waterline.isA('carts'),
 
+    redirect_url: 'string',
+
     user: Waterline.isA('user_accounts')
   }
 });

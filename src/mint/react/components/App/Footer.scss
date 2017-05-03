@@ -20,6 +20,9 @@
   @media (min-width: 900px) {
     display: inline-block;
     width: calc(100% - 250px);
+    background: transparent;
+    border:0;
+    border-radius:5px 5px 0 0;
   }
   .footer__cart, .footer__item, .footer__save, .footer__settings {
     height: 100%;

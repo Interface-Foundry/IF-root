@@ -37,6 +37,17 @@ function deploy() {
       }
     })
     console.log(stdout)
+    stdout = exec('yarn install', {
+      cwd: path.join(__dirname, 'kip-website')
+    })
+    console.log(stdout)
+    stdout = exec('webpack --config webpack/dev.config.js', {
+      cwd: path.join(__dirname, 'kip-website'),
+      env: {
+        NODE_PATH: './js'
+      }
+    })
+    console.log(stdout)
     resolve()
   })
 }

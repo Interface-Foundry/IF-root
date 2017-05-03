@@ -92,7 +92,7 @@
     "webpack-hot-middleware": "^2.17.1"
   },
   "scripts": {
-    "start": "npm run build && node ./server",
+    "start": "npm run build && cd ./kip-website && npm run build && cd .. && node ./server",
     "build": "NODE_PATH=$NODE_PATH:./react webpack",
     "dev": "SEND_EMAILS=1 nodemon --ignore react/ --ignore public/ ./server/index.js & webpack --progress --color -d --watch --hot & cd ./kip-website && npm run build",
     "clean": "rm -r public/build",

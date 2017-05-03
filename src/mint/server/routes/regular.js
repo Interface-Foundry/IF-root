@@ -22,7 +22,7 @@ dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 router.get('/', (req, res) => co(function* () {
   // if no user, no carts
   if (!_.get(req, 'UserSession.user_account.id')) {
-    return res.render('pages/website', { carts: [] });
+    return res.render('pages/index', { carts: [] });
   }
 
   // otherwise, find all the cart ids for which the user is a member
@@ -40,7 +40,7 @@ router.get('/', (req, res) => co(function* () {
     ]
   }).populate('items').populate('leader').populate('members')
 
-  res.render('pages/website', { carts: carts });
+  res.render('pages/index', { carts: carts });
 }));
 
 /**
@@ -69,6 +69,12 @@ router.get('/auth/:id', (req, res) => co(function * () {
     yield req.UserSession.save()
   }
 
+  // redirect if the link has a redirect
+  if (link.redirect_url) {
+    return res.redirect(link.redirect_url)
+  }
+
+  // handle auth link for the /identify way
   if (!link.cart.leader) {
     // make the user leader if they aren't already
     link.cart.leader = link.user.id

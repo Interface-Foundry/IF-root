@@ -30,6 +30,83 @@ module.exports = function (router) {
   });
 
   /**
+   * @api {get} /api/login?email=:email&redirect=:redirect_url
+   * @apiGroup Users
+   * @apiDescription Makes sure a user is logged in. Allows a redirect url to be specified so that if a user clicks through an email login confirmation link it takes them to the right page.
+   *   Passes back `loggedIn: true` if already logged in as that user, or `loggedIn: false` if not
+   *   If logged in as a different user, it logs them out of that account
+   * @apiParam {string} email the user's email address
+   * @apiParam {string} redirect the url to redirect to after getting logged in
+   * @apiSuccessExample Authentication Link Sent
+   *   {"ok":true,"loggedIn":false,"status":"Sent authentication link to peter.m.brandt@gmail.com"}
+   * @apiSuccessExample Already Logged In
+   *   {"ok":true,"loggedIn":true,"status":"Logged in already","user":{"email_address":"peter.m.brandt@gmail.com","createdAt":"2017-04-25T17:45:10.065Z","updatedAt":"2017-04-25T17:45:10.065Z","id":"62d8791b-3c15-4519-8fda-c3c0a3dd1e78"},"redirect":"/cart/15c0d2afa21f"}
+   */
+  router.get('/login', (req, res) => co(function * () {
+    const currentUser = _.get(req, 'UserSession.user_account', {})
+    const email = req.query.email.trim().toLowerCase()
+
+    // if the user is already logged in as this email address we can reply right away
+    if (currentUser.email_address === req.query.email) {
+      res.send({
+        ok: true,
+        loggedIn: true,
+        status: 'Logged in already',
+        user: currentUser,
+        redirect: req.query.redirect
+      })
+    } else {
+      // log out user if they are logged in
+      if (currentUser.email_address) {
+        delete req.UserSession.user_account
+        yield req.UserSession.save()
+      }
+
+      // get or create a user for this email
+      var user = yield db.UserAccounts.findOne({
+        email_address: email
+      })
+
+      if (!user) {
+        var user = yield db.UserAccounts.create({
+          email_address: email,
+          name: normalizeEmailToName(email)
+        })
+      }
+
+      // send the user a login link
+      var link = yield db.AuthenticationLinks.create({
+        user: user.id,
+        redirect_url: req.query.redirect || '/'
+      })
+
+      link = yield db.AuthenticationLinks.findOne({
+        id: link.id
+      }).populate('user')
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('http://localhost:3000/auth/' + link.id)
+      }
+
+      var loginEmail = yield db.Emails.create({
+        recipients: email,
+        subject: 'Log in to Kip'
+      })
+
+      loginEmail.template('authentication_link', {
+        link
+      })
+
+      yield loginEmail.send()
+      res.send({
+        ok: true,
+        loggedIn: false,
+        status: 'Sent authentication link to ' + email
+      })
+    }
+  }))
+
+  /**
    * @api {get} /api/identify?email=:email&cart_id=:cart_id Identify
    * @apiGroup Users
    * @apiParam {string} email the user's email

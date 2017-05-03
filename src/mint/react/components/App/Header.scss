@@ -9,6 +9,10 @@
   color: $kip-primary-color;
   text-align: left;
 
+  @media (min-width: 900px) {
+    padding: 0;
+  }
+
 
   .image {
     display: inline-block;
@@ -26,6 +30,10 @@
     white-space: nowrap;
     font-weight: 500;
     font-size: 20px;
+
+    @media (min-width: 900px) {
+      width: auto;
+    }
   }
 
   & > div {
@@ -71,7 +79,11 @@
       font-weight: bold;
     }
     @media (min-width: 900px) {
-      width: auto;
+      &.right {
+        position: absolute;
+        right: 0;
+        width: auto;
+      }
     }
   }
   .navbar__icon__close {

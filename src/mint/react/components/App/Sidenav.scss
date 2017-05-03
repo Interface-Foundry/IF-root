@@ -18,7 +18,12 @@
     height: 100%;
     float: right;
     display: inline-block;
+    z-index: 0;
     background: $kip-secondary-color;
+  }
+
+  &:hover {
+    background: white;
   }
 
   p {
@@ -200,7 +205,7 @@
         }
         &.side__new_cart {
           height: unset;
-          background: $third-button-color;
+          background: $main-button-color;
           color: white;
         }
       }

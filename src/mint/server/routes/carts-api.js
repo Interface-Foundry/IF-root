@@ -37,7 +37,6 @@ module.exports = function (router) {
 
     // find all the carts where their user id appears in the leader or member field
     const carts = yield db.Carts.find({
-      locked: false,
       or: [
         { leader: req.UserSession.user_account.id },
         { id: memberCartsIds }
