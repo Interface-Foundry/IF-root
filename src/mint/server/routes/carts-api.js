@@ -16,6 +16,73 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
+
+
+/**
+ * delete item from cart
+ *
+ * @param      {string}  itemId  The item identifier
+ * @param      {string}  cartId  the cart identifier
+ * @param      {string}  userId  The user identifier
+ * @return     {string}  status of if item was deleted
+ */
+function * deleteItem(itemId, userId, cartId) {
+  const cart = yield db.Carts.findOne({id: cartId})
+  const item = yield db.Items.findOne({id: itemId})
+
+  // make sure cart and item exist
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+  if (!item) {
+    throw new Error('Item not found')
+  }
+
+  // Make sure user has permission to delete it, leaders can delete anything,
+  // members can delete their own stuff
+  if (cart.leader !== userId && item.added_by !== userId) {
+    throw new Error('Unauthorized')
+  }
+
+  cart.items.remove(item.id)
+  yield cart.save()
+}
+
+/**
+ * create item by user in a cart
+ *
+ * @param      {string}  itemId  The item identifier
+ * @param      {string}          userId  The user identifier
+ * @param      {string}          cartId  the cart identifier
+ * @return     {object}           item object that was created
+ */
+function * createItemFromItemId(itemId, userId, cartId) {
+
+  const cart = yield db.Carts.findOne({id: cartId})
+  const item = yield db.Items.findOne({id: itemId})
+
+  // make sure cart and item exist
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+  if (!item) {
+    throw new Error('Item not found')
+  }
+
+  // make sure it's not in a cart already
+  var existingCart = yield db.Carts.findOne({items: itemId})
+  if (existingCart && existingCart.id !== cart.id) {
+    throw new Error('Item ' + itemId + ' is already in another cart ' + existingCart.id)
+  }
+
+  cart.items.add(item.id)
+  item.added_by = userId
+  item.cart = cart.id
+
+  yield [item.save(), cart.save()]
+  return item
+}
+
 module.exports = function (router) {
   /**
    * @api {get} /api/carts User Carts
@@ -231,6 +298,42 @@ module.exports = function (router) {
     // And assuming it all went well we'll respond to the client with the saved item
     return res.send(item)
   }));
+
+
+
+
+  /**
+   * @api {put} /api/cart/:cart_id/item Update Item - right now just replaces old item with new item
+   * @apiDescription Updates an item already in a cart. Must specify new item
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id cart id
+   * @apiParam {string} url optional url of the item from amazon or office depot or whatever
+   *
+   * @apiParamExample Item from Preview
+   * PUT https://mint.kipthis.com/api/cart/123456/item {
+   *   new_item_id: 'abc-123456',
+   *   user_id: '123456y'
+   * }
+   */
+  router.put('/cart/:cart_id/item/:item_id/update', (req, res) => co(function* () {
+    const userId = req.UserSession.user_account.id
+    const cartId = req.params.cart_id
+    const itemId = req.params.item_id
+
+    let newItemId
+    if (req.query.new_item_id) {
+      newItemId = req.query.new_item_id
+    }
+
+    yield deleteItem(itemId, userId, cartId)
+
+    const newItem = yield createItemFromItemId(newItemId, userId, cartId)
+    return res.send(newItem)
+  }));
+
+
+
+
 
   /**
    * @api {delete} /api/cart/:cart_id/item/:item_id Delete Item
