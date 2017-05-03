@@ -75,10 +75,10 @@
       font-weight: bold;
     }
     @media (min-width: 900px) {
-      width: auto;
       &.right {
         position: absolute;
         right: 0;
+        width: auto;
       }
     }
   }
