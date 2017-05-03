@@ -1,18 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Kip | Verify Email Address</title>
+    <!--[if !mso]><!-->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--<![endif]-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Kip | Click Here to Log in</title>
+    <style type="text/css">
+        /* CLIENT-SPECIFIC STYLES */
+
+        /* Force Outlook to provide a "view in browser" message */
+        #outlook a {
+            padding:0;
+        }
+
+        /* Force Hotmail to display emails at full width */
+        .ExternalClass,
+        .ReadMsgBody {
+            width:100%;
+        }
+
+        /* Force Hotmail to display normal line spacing */
+        .ExternalClass,
+        .ExternalClass p,
+        .ExternalClass span,
+        .ExternalClass font,
+        .ExternalClass td,
+        .ExternalClass div {
+            line-height: 100%;
+        }
+
+        /* Prevent WebKit and Windows mobile changing default text sizes */
+        body,
+        table,
+        td,
+        a {
+            -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;
+        }
+
+        /* Remove spacing between tables in Outlook 2007 and up */
+        table,
+        td {
+            mso-table-lspace:0pt;
+            mso-table-rspace:0pt;
+        }
+
+        /* Allow smoother rendering of resized image in Internet Explorer */
+        img {
+            -ms-interpolation-mode:bicubic;
+        }
+
+        /* RESET STYLES */
+        img {
+            border:0;
+            line-height:100%;
+            outline:none;
+            text-decoration:none;
+        }
+        table {
+            border-collapse:collapse !important;
+        }
+        body {
+            height:100% !important;
+            margin:0;
+            padding:0;
+            width:100% !important;
+            background: #fff;
+            font-family: sans-serif;
+            -webkit-text-size-adjust:100%;
+            -ms-text-size-adjust:100%;
+        }
+        a {
+            color: #4a9ff1;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        p[class='blue'] {
+            text-decoration: none;
+            color: #4a9ff1;
+        }
+        div[class='main'] {
+            max-width: 700px;
+            height: 100%;
+            background: #ffffff;
+            overflow: hidden;
+            margin: 80px auto 40px auto;
+            box-shadow: 0 0 7px #cdcccc;
+            -webkit-box-shadow: 0 0 7px #cdcccc;
+            -moz-box-shadow: 0 0 7px #cdcccc;
+            -o-box-shadow: 0 0 7px #cdcccc;
+        }
+        div[class='logo'] {
+            min-width: 50px;
+        }
+        span[class="red"] {
+            color: #CE5019;
+        }
+        span[class="linethrough"] {
+            text-decoration: line-through;
+        }
+
+        @media screen and (max-width: 600px) {
+            div[class='main'] {
+                max-width: 100% !important;
+                margin: 0!important;
+            }
+            div[class='responsive-image'] {
+                height: 50px !important;
+            }
+        }
+    </style>
 </head>
 <body>
-  <p>Click <a href="<%=baseUrl%>/auth/<%=link.id%>">HERE</a> to log
-    in to Kip as <%=link.user.email_address%>, or copy and paste the following
+  <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #4f4d4c; color: #fcfcf9; max-width: 700px">
+      <tr >
+          <td align="center" valign="middle">
+              <table width="100%" height="25" cellspacing="0" cellpadding="0" border="0" class="headline">
+                  <!-- FOR EVERY NEW PIECE OF CONTENT, CREATE NEW <TR><TD> -->
+                  <tr>
+                      <td align="center" width="15%" style="padding: 25px 15px;" class="headline">
+                          <img src='http://tidepools.co/kip/head_smaller.png'  style="font-size: 28px; text-align: left; color: #fcfcf9; height: 50px;">
+                      </td>
+                      <!-- APPERNTLY ACCORDING TO EMAIL TEMPLATING BEST PRACTICE WE WANT INLINE STYLES: WEIRD -->
+                      <td align="center" width="85%" valign="middle" height="100%" style="font-size: 28px; text-align: left; color: #fcfcf9;">
+                           KIP
+                      </td>
+                  </tr>
+              </table>
+          </td>
+      </tr>
+  </table>
+  <h1>Hello!</h1>
+  <p style="font-size:1.5em;padding:30px 5px;font-weight:500;">
+    You asked us to send you a log-in link for quickly signing into <span style="font-weight:bold;">Kip</span>. Here's your log-in link! ✨ </p>
+  <div style="padding:0 4px 0 4px;background-color:#ffe94d;border:1px solid #ffe94d;border-radius:8px;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:20px;line-height:65px;font-weight:bold;text-align:center;text-decoration:none;-webkit-text-size-adjust:none;mso-hide:all;">
+    <a href="<%=baseUrl%>/auth/<%=link.id%>">Sign into Kip</a>
+  </div>
+
+  <p style="font-size:1.5em;padding:30px 5px;font-weight:500;">
+    ...or copy and paste the following
     into your browser: <a href="<%=baseUrl%>/auth/<%=link.id%>"><%=baseUrl%>/auth/<%=link.id%></a>
   </p>
 
-  <h1>Keep this safe!</h1>
-  <p>Don't forward this email to anyone else; anyone with this email can pretend to be you online!</p>
+  <p>Keep this safe! Don't forward this email to anyone else; anyone with this email can pretend to be you online!</p>
 
-  <p>❤ Your Friends at Kip</p>
+  <!-- <p>❤ Your Friends at Kip</p> -->
+<table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
+    <tr>
+        <td >
+            <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                <tr>
+                    <td style="padding: 0px 15px 10px; font-size: 16px; color: #8f8d8c; font-weight: 100;" align="center">
+                        <!-- FOOTER TEXT -->
+                    </td >
+                </tr>
+            </table>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td align="center" width="100%" style="box-sizing: border-box; width: 100%; padding: 0 15px 50px; ">
+                  <div style="box-sizing: border-box; width: 100%; padding: 0px 0px 0px; ">
+                    <!--[if mso]>
+                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=cart.id%>" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
+                        <w:anchorlock/>
+                        <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:20px;">VIEW KIP CART MSO</center>
+                      </v:roundrect>
+                    <![endif]-->
+                    <!-- <a href="<%=baseUrl%>/cart/<%=cart.id%>" style="background-color:#ffe94d;border:1px solid #ffe94d;border-radius:3px;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:20px;line-height:75px;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;">VIEW KIP CART</a> -->
+                    <p style="background-color:#ffe94d;border:1px solid #ffe94d;border-radius:3px;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:20px;line-height:75px;text-align:center;text-decoration:none;width:100%;-webkit-text-size-adjust:none;mso-hide:all;"> ❤ Your Friends at Kip </p>
+                  </div>
+                </td>
+              </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 </body>
 </html>
