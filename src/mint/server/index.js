@@ -133,12 +133,6 @@ app.get('/cart/*', (req, res) =>
   res.render('pages/cart')
 );
 
-app.get('/website/*', (req, res) =>
-  // Get the user_accont info, if exists (might not if they are clicking a shared link)
-  // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
-  res.render('pages/website')
-);
-
 // Log errors to the database in production
 if (process.env.NODE_ENV === 'production') {
   app.use(new mintLogger.ErrorLogger());
