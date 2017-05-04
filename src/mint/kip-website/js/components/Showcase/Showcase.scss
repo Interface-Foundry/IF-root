@@ -7,6 +7,10 @@
 	min-height: 2000px;
 	background: rgb(234, 249, 255);
 
+	.image {
+		background-image: url("https://s3.amazonaws.com/assets-chachat/phoneclip.png");
+	}
+
 	.phone {
 		position: relative;
 		height: 800px;

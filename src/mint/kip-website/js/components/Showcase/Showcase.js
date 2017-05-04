@@ -5,16 +5,35 @@ import { DefaultPlayer as Video } from 'react-html5video';
 
 import { Icon } from '../../themes';
 
+const movies = {
+	first: 'https://s3.amazonaws.com/assets-chachat/1_sequence.webm',
+	second: 'https://s3.amazonaws.com/assets-chachat/2_sequence.webm',
+	third: 'https://s3.amazonaws.com/assets-chachat/3_sequence.webm'
+}
+
 export default class Showcase extends Component {
+
+	renderSource () {
+		const { animationState } = this.props;
+
+		switch (animationState) {
+			case 'fixed first':
+				return <Video autoPlay loop muted src='https://s3.amazonaws.com/assets-chachat/1_sequence.webm' type="video/webm"/>
+			case 'fixed second':
+				return <Video autoPlay loop muted src='https://s3.amazonaws.com/assets-chachat/2_sequence.webm' type="video/webm"/>
+			case 'fixed third':
+				return <Video autoPlay loop muted src='https://s3.amazonaws.com/assets-chachat/3_sequence.webm' type="video/webm"/>
+			default:
+				return <Video autoPlay loop muted src='https://s3.amazonaws.com/assets-chachat/1_sequence.webm' type="video/webm"/>
+		}
+	}
   	render() {
   		const { animationState } = this.props;
+
 	    return (
 	      	<div className='showcase'> 
-	      		<div className={`phone image ${animationState}`} style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/phoneclip.png")'}}> 
-			        <Video autoPlay loop muted
-			            controls={['PlayPause', 'Seek', 'Time', 'Volume', 'Fullscreen']}>
-			            <source src="https://s3.amazonaws.com/assets-chachat/1_sequence.webm" type="video/webm" />
-			        </Video>
+	      		<div className={`phone image ${animationState}`}> 
+	      			{this.renderSource()}
 	      		</div>
 				<svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
 					<g>

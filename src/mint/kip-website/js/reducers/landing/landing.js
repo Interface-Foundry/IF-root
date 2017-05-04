@@ -24,18 +24,25 @@ export const desktopScroll = (scrollTop, animationState) => {
 		}
     }
 
-    if(scrollTop > 745 && scrollTop < 1200 && animationState !== 'fixed') {
-      	console.log('fixed')
+    if(scrollTop > 745 && scrollTop < 1100 && animationState !== 'fixed') {
+      	console.log('fixed first')
         newState = {
 			animationState: 'fixed'
 		}
     }
 
-    if(scrollTop > 1200 && scrollTop < 2253 && animationState !== 'fixed second') {
+    if(scrollTop > 1100 && scrollTop < 1500 && animationState !== 'fixed second') {
       	console.log('fixed second')
         newState = {
 			animationState: 'fixed second'
 		}
+    }
+
+    if(scrollTop > 1500 && scrollTop < 2253 && animationState !== 'fixed third') {
+        console.log('fixed third')
+        newState = {
+            animationState: 'fixed third'
+        }
     }
 
     if(scrollTop > 2253 && animationState !== 'absolute') {
@@ -61,18 +68,25 @@ export const mobileScroll = (scrollTop, animationState) => {
 		}
     }
 
-    if(scrollTop > 1600 && scrollTop < 2200 && animationState !== 'fixed') {
-      	console.log('fixed')
+    if(scrollTop > 1600 && scrollTop < 2000 && animationState !== 'fixed') {
+      	console.log('fixed first')
         newState = {
 			animationState: 'fixed'
 		}
     }
 
-    if(scrollTop > 2200 && scrollTop < 3345 && animationState !== 'fixed second') {
+    if(scrollTop > 2000 && scrollTop < 2500 && animationState !== 'fixed second') {
       	console.log('fixed second')
         newState = {
 			animationState: 'fixed second'
 		}
+    }
+
+    if(scrollTop > 2500 && scrollTop < 3345 && animationState !== 'fixed third') {
+        console.log('fixed third')
+        newState = {
+            animationState: 'fixed third'
+        }
     }
 
     if(scrollTop > 3345 && animationState !== 'absolute') {
