@@ -78,7 +78,7 @@ export default class Cart extends Component {
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
         ...items.my,
-        ..._.reduce(items.others, (acc, value) => [...acc, ...value], [])
+        ...items.others.reduce((acc, member)=> [...acc, ...member.items], [])
       ]);
     let cartItemIndex = items.my.length;
     return (
