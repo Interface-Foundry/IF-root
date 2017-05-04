@@ -39,7 +39,7 @@ export default class About extends Component {
 			        	<p>Unique short URL to share</p>
 			        	<p>Invite friends with link or email</p>
 			        	<div className="col-12 row-1 action">
-			        		<button>Try Kip for Free</button>
+			        		<button><a href='/newcart'>Try Kip for Free</a></button>
 		        		</div>
 			        </div>
 
@@ -50,7 +50,7 @@ export default class About extends Component {
 			        	<p>Chat with Kip bot for essentials</p>
 			        	<p>Coordinate lunch delivery</p>
 			        	<div className="col-12 row-1 action">
-			        		<button className="slack">Add to Slack</button>
+			        		<button className="slack"><a href="https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.g4k5jo42a" target="_blank">Add to Slack</a></button>
 			        	</div>
 			        </div>
 		        </div>

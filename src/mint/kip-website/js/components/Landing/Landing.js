@@ -59,10 +59,10 @@ export default class Landing extends Component {
         <div className="landing" ref={(landing) => this.landing = landing}> 
           <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav}/>
           <HeroContainer/>
-          <StatementContainer/>
+          <StatementContainer _toggleModal={_toggleModal}/>
           <About/>
           <Showcase/>
-          <Services/>
+          <Services _toggleModal={_toggleModal}/>
           <Footer/>
         </div>
       </span>

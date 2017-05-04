@@ -11,13 +11,14 @@ export default class Statement extends Component {
 
 
   	render() {
+  		const { _toggleModal } = this.props;
 	    return (
 	      	<div className="statement">
 	      		<div className="col-12 row-1 action">
 	        		<button>
-	        			TRY KIP FOR FREE
+	        			<a href='/newcart'>TRY KIP FOR FREE</a>
 	        		</button>
-	        		<button>
+	        		<button onClick={() => _toggleModal()}>
 	        			LOGIN
 	        		</button>
 	        	</div>
