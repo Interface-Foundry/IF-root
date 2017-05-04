@@ -112,9 +112,14 @@
 		bottom: 300px;
 	} 
 	55%, 80% {
-	  	transform: rotate(0);
+	  	transform: rotate(0deg);
 	    left: 750px;
 		bottom: 300px;
+	}
+	90% {
+		transform: rotate(-3deg);
+		left: 650px;
+		bottom: 310px;
 	}
 }
 
