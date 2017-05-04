@@ -39,7 +39,7 @@ export default class About extends Component {
 			        	<p>Unique short URL to share</p>
 			        	<p>Invite friends with link or email</p>
 			        	<div className="col-12 row-1 action">
-			        		<a href='/newcart'><button>Try Kip for Free</button></a>
+			        		<a href='/newcart'><button><Icon icon='Right'/>Try Kip for Free</button></a>
 		        		</div>
 			        </div>
 
@@ -56,7 +56,7 @@ export default class About extends Component {
 
 			       	<div className="col-12 row-1 services__details card">
 			        	<h2>Learn More</h2>
-		        		<iframe width="560" height="315" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
+		        		<iframe width="100%" height="100%" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
 			        </div>
 		        </div>
 		        <svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">

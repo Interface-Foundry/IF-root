@@ -17,7 +17,7 @@ export default class Statement extends Component {
 	      		<div className="col-12 row-1 action">
 	      			<a href='/newcart'>
 	        			<button>
-		        			TRY KIP FOR FREE
+		        			<Icon icon='Right'/>TRY KIP FOR FREE
 		        		</button>
 	        		</a>
 	        		<a onClick={() => _toggleModal()}>

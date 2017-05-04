@@ -82,6 +82,10 @@
 				list-style: square outside none;
 			}
 
+			iframe {
+				border-radius: 10px;
+			}
+
 			@media only screen and (max-width: 600px) {
 				margin: $padding*2 0;
 			}
@@ -95,10 +99,6 @@
 			width: 20%;
 			height: $ribbonHeight*2;
 			padding: $padding/2;
-
-			path {
-				fill: $primaryColor !important;
-			}
 		}
 
 		.image {
@@ -146,6 +146,7 @@
 		padding: $padding*2 0 $padding*2;
 		button {
 			border: 1px solid #eccd46;
+			white-space: nowrap;
 			font-weight: bold;
 			border-radius: $padding/2;
 			background: $secondaryColor;
@@ -159,6 +160,10 @@
 			&.slack {
 				margin-right: $padding*2;
 				background: white;
+			}
+			svg {
+				height: 100%;
+				background: transparent;
 			}
 		}
 	}
