@@ -13,8 +13,8 @@
 
 	h1 {
 		font-size: 40px;
-		padding-top: $padding*4;
-		color: $primaryColor;
+		padding-top: $padding;
+		color: #42403f;
 
 		&:first-of-type {
 			padding-top: 0;
@@ -77,7 +77,7 @@
 			padding: $padding*2 $padding $padding;
 			margin: $padding*2 $padding*2;
 			z-index: 2;
-			background: mix(white, $primaryColor, 97%);
+			background: #ffffff;
 			box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
 			h2 {
 				color: $fifthColor;
@@ -171,6 +171,7 @@
 			&.slack {
 				margin-right: $padding*2;
 				background: white;
+				border: 1px solid #4a9ff1;
 			}
 			svg {
 				height: 100%;

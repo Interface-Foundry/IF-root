@@ -13,14 +13,15 @@ export default class About extends Component {
 	    return (
 	      	<div className="services"> 
 				<div className="col-12">
-					<h1>As Seen in:</h1>
+
+					<h3><em>"Group shopping bot Kip focuses on coordinating purchases with a team so they can purchase lunch together or have an office manager authorize a supply order."</em><br/><span> - Fast Company July 13, 2016</span></h3>
+
+					<h1>Press Coverage</h1>
 					<div className="col-12 row-1 icons__hell">
 		        		<div><Icon icon='Venturebeat'/></div>
 		        		<div><Icon icon='Paymentsource'/></div>
 		        		<div><Icon icon='Fastcompany'/></div>
 		        	</div>
-
-					<h3><em>"Group shopping bot Kip focuses on coordinating purchases with a team so they can purchase lunch together or have an office manager authorize a supply order."</em><br/><span> - Fast Company July 13, 2016</span></h3>
 
 					<h1>Featured Partners</h1>
 					<div className="col-12 row-1 icons__hell">
@@ -50,7 +51,7 @@ export default class About extends Component {
 			        	<p>Unique short URL to share</p>
 			        	<p>Invite friends with link or email</p>
 			        	<div className="col-12 row-1 action">
-			        		<a href='/newcart'><button><Icon icon='Right'/>Try Kip for Free</button></a>
+			        		<a href='/newcart'><button>Try Kip for Free <Icon icon='Right'/></button></a>
 		        		</div>
 			        </div>
 
