@@ -16,7 +16,10 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-
+/** used when querying the db since apparently we dont want to ever use emails? */
+const selectMembersWithoutEmail = {
+  select: ['_id', 'name', 'createdAt', 'updatedAt']
+}
 
 /**
  * delete item from cart
@@ -128,7 +131,10 @@ module.exports = function (router) {
         { leader: req.UserSession.user_account.id },
         { id: memberCartsIds }
       ]
-    }).populate('items').populate('leader').populate('members')
+    })
+      .populate('items')
+      .populate('leader')
+      .populate('members', selectMembersWithoutEmail)
 
     res.send(carts)
   }))
@@ -149,13 +155,8 @@ module.exports = function (router) {
 
     var cart = yield db.Carts.findOne({ id: req.params.cart_id })
       .populate('leader')
-      .populate('members')
+      .populate('members', selectMembersWithoutEmail)
       .populate('items')
-
-    const userId = req.UserSession.user_account.id
-    if (cart.leader !== userId) {
-      cart.members = stripEmailsFromCartMembers(cart.members)
-    }
 
     if (cart) {
       res.send(cart);
@@ -172,7 +173,8 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id
    */
   router.get('/cart/:cart_id/items', (req, res) => co(function* () {
-    var cart = yield db.Carts.findOne({ id: req.params.cart_id }).populate('items')
+    var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+      .populate('items')
 
     const userId = req.UserSession.user_account.id
     if (cart.leader !== userId) {
@@ -549,7 +551,7 @@ module.exports = function (router) {
   router.get('/item/:item_id', (req, res) => co(function * () {
     var item = yield db.Items.findOne({id: req.params.item_id})
       .populate('options')
-      .populate('added_by')
+      .populate('added_by', selectMembersWithoutEmail)
     res.send(item)
   }))
 
