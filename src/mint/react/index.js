@@ -32,7 +32,12 @@ const historyMiddleware = routerMiddleware(history);
 
 // creating redux store
 import { createLogger } from 'redux-logger';
-const loggerMiddleware = createLogger();
+const loggerMiddleware = createLogger({
+  duration: true,
+  timestamp: false,
+  collapsed: true,
+  level: 'info'
+});
 const store = createStore(
   Reducers,
   applyMiddleware(thunkMiddleware, historyMiddleware, loggerMiddleware)

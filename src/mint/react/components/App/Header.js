@@ -12,12 +12,14 @@ export default class Header extends Component {
     item: PropTypes.object,
     items: PropTypes.arrayOf(PropTypes.object),
     deals: PropTypes.arrayOf(PropTypes.object),
-    currentUser: PropTypes.object
+    currentUser: PropTypes.object,
+    currentCart: PropTypes.object,
   }
 
   render() {
-    let { props, props: { deals, currentUser, item: { search } } } = this;
-    const { match } = props;
+    let { props, props: { deals, currentUser, items, currentCart: { leader }, item: { search } } } = this;
+    const { match } = props,
+    isLeader = leader && (leader.id === currentUser.id);
     search = search ? search : 0;
 
     return (
@@ -28,7 +30,7 @@ export default class Header extends Component {
         />
         {/* TODO: get this working for admins */}
         <Route path={`${match.url}/m/:type/:index/:asin/edit`} component={() => 
-            <EnumeratedHead text={'My Cart Items'} length={splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
+            <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
           }
         />
         <Route path={`${match.url}/m/item`} component={() => 
@@ -115,7 +117,7 @@ class IntroHead extends Component {
   static propTypes = {
     text: PropTypes.string
   }
-  
+
   render() {
     const { text } = this.props;
     return (

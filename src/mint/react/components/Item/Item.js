@@ -36,7 +36,8 @@ export default class Item extends Component {
     setSearchIndex: PropTypes.func,
     location: PropTypes.object,
     selectDeal: PropTypes.func,
-    currentUser: PropTypes.object
+    currentUser: PropTypes.object,
+    currentCart: PropTypes.object
   }
 
   componentWillMount() {
@@ -53,8 +54,8 @@ export default class Item extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { replace } } } = this;
-    const { type: nextType, item: nextItem, index: nextIndex, item: { position: nextPos } } = nextProps;
+    const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, clearItem, history: { replace } } } = this;
+    const { type: nextType, item: nextItem, index: nextIndex, item_id: nextId, item: { position: nextPos } } = nextProps;
     //never replace cart_id if its undefined
     if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) {
       replace(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
@@ -62,9 +63,11 @@ export default class Item extends Component {
       replace(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
     } else if (cart_id && nextType === 'search' && !nextItem.search.length) {
       replace(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
-    } else if (nextProps.item_id !== item_id) {
+    } else if (nextId !== item_id) {
+      clearItem();
       previewItem(nextProps.item_id);
     } else if (nextProps.amazon_id !== amazon_id) {
+      clearItem();
       previewAmazonItem(nextProps.amazon_id);
     }
   }
@@ -97,42 +100,59 @@ export default class Item extends Component {
   }
 
   navDeal(newIndex) {
-    const { clearItem, cart_id, type, items, selectDeal, history: { replace } } = this.props;
-    clearItem();
+    const { cart_id, type, items, selectDeal, history: { replace } } = this.props;
     selectDeal(newIndex, items[newIndex]);
     replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
   }
 
   navSearch() {
-    const { state: { originalx, x }, props: { clearItem, nextSearch, prevSearch } } = this,
+    const { state: { originalx, x }, props: { nextSearch, prevSearch } } = this,
     nav = (originalx > x) ? nextSearch : prevSearch;
-    clearItem();
     nav();
   }
 
   navCart(newIndex) {
-    const { clearItem, cart_id, type, currentUser: { id }, history: { replace } } = this.props;
-    const ourItems = splitCartById(this.props, { id });
-    clearItem();
-    replace(`/cart/${cart_id}/m/${type}/${newIndex}/${ourItems.my[newIndex].id}/edit`);
+    const { cart_id, type, items, currentUser: { id }, currentCart: { leader: { id: leaderId } }, history: { replace } } = this.props;
+    const splitItems = splitCartById(this.props, { id });
+    const myItems = id !== leaderId
+      ? splitItems.my
+      : items;
+    let ind = newIndex > myItems.length - 1
+      ? 0
+      : newIndex < 0
+      ? myItems.length - 1
+      : newIndex;
+    console.log('navCart', {
+      myItemsLen: myItems.length,
+      newIndex,
+      ind,
+      item: myItems[ind],
+      props: this.props
+    });
+    replace(`/cart/${cart_id}/m/${type}/${ind}/${myItems[ind].id}/edit`);
   }
 
   render() {
-    const { determineNav, props, state: { animation }, props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, options, iframe_review_url } } } = this;
+    const {
+      determineNav,
+      props,
+      state: { animation },
+      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, options, iframe_review_url } }
+    } = this;
     const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
       ? items[parseInt(index)].large
       : main_image_url,
       next = () => {
         this.setState({ animation: 'slideLeft' });
         if (type === 'search') return nextSearch();
-        const newIndex = (index === items.length - 1) ? 0 : index + 1;
+        const newIndex = (index >= items.length - 1) ? 0 : index + 1;
         if (type === 'deal')::this.navDeal(newIndex);
         else if (type === 'cartItem')::this.navCart(newIndex);
       },
       prev = () => {
         this.setState({ animation: 'slideRight' });
         if (type === 'search') return prevSearch();
-        const newIndex = (index === 0) ? items.length - 1 : index - 1;
+        const newIndex = (index <= 0) ? items.length - 1 : index - 1;
         if (type === 'deal')::this.navDeal(newIndex);
         else if (type === 'cartItem')::this.navCart(newIndex);
       },
