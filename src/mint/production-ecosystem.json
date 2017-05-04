@@ -1,0 +1,16 @@
+{
+  "apps": [{
+    "name": "mint",
+    "cwd": ".",
+    "script": "./server/index.js",
+    "combine_logs": true,
+    "watch": false,
+    "env": {
+      "NODE_ENV": "production",
+      "MONGODB_URI": "mongodb://mongodb-beta-server-1:27017,mongodb-beta-server-2:27017/mint?replSet=rs0&readPreference=nearest&slaveOk=true",
+      "SEND_EMAILS": true,
+      "NO_LIVE_RELOAD": true,
+      "NO_LUMINATI": true
+    }
+  }]
+}
