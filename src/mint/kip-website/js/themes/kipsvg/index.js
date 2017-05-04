@@ -4,7 +4,7 @@ export Desk from './Desk';
 export Desktop from './Desktop';
 export DesktopIcon from './DesktopIcon';
 export Happy from './Happy';
-export KipBlinkClosed from './KipBlinkClosed';
+export KipEyesClosed from './KipEyesClosed';
 export KipBlinkHalf from './KipBlinkHalf';
 export KipHead from './KipHead';
 export Layers from './Layers';
