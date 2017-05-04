@@ -37,7 +37,7 @@ $cart__add-height: $nav-height+$padding;
       button {
         height: $nav-height;
         width: 100%;
-        background: #4a9ff1;
+        background: $secondary-button-color;
         border: 0;
         color: white;
         padding: 0 $padding*2;
@@ -155,6 +155,25 @@ $cart__add-height: $nav-height+$padding;
     &.action {
       background: $main-button-color;
     }
+    .undo__button {
+      font-weight: 500;
+      a {
+        font-weight: 700;
+        text-decoration: underline;
+      }
+      &:after {
+        @include animation(progressBar linear 10s);
+        content: '';
+        display: block;
+        height: 2px;
+        width: 100%;
+        background: transparent;
+        background: linear-gradient(to right, red 0%,red 45%, transparent 50%);
+        position: relative;
+        background-size: 200% 2px;
+        top: -2px;
+      }
+    }
   }
   .cart__items {
     height: calc(100% - #{$cart__add-height + $nav-height - $padding});
@@ -203,6 +222,9 @@ $cart__add-height: $nav-height+$padding;
       background: white;
       .image {
         height: 30px;
+        @include animation(bounceDownSmall 2s);
+        animation-iteration-count: 3; // too much twitching
+        animation-delay: 10s; //suprise!
       }
       h4 {
         text-align: center;

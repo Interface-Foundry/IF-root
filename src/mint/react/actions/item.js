@@ -8,6 +8,7 @@ import {
   REQUEST_ADD_ITEM,
   RECEIVE_ADD_ITEM,
   REQUEST_REMOVE_ITEM,
+  RECEIVE_REMOVE_ITEM,
   CANCEL_REMOVE_ITEM,
   RECEIVE_INCREMENT_ITEM,
   REQUEST_INCREMENT_ITEM,
@@ -59,6 +60,10 @@ const requestRemoveItem = (itemToRemove) => ({
   type: REQUEST_REMOVE_ITEM,
   itemToRemove
 });
+
+const receiveRemoveItem = () => ({
+  type: RECEIVE_REMOVE_ITEM
+})
 
 const cancelDeleteItem = () => ({
   type: CANCEL_REMOVE_ITEM
@@ -153,6 +158,7 @@ export function removeItem(cart_id, item_id) {
           method: 'DELETE',
           credentials: 'same-origin',
         });
+        dispatch(receiveRemoveItem());
       }
     } catch (e) {
       throw 'error in cart removeItem';

@@ -39,6 +39,8 @@ export const addingItem = (addingItem) => ({
   addingItem
 });
 
+export const updateCartItem = newItem => ({});
+
 export function fetchCart(cart_id) {
   return async function (dispatch) {
     dispatch(request());
@@ -116,6 +118,25 @@ export function checkoutCart(cart_id) {
       return dispatch(receiveItems(await response.json()));
     } catch (e) {
       throw 'error in cart fetchItems';
+    }
+  };
+}
+
+export function updateItem(cartId, currentId, new_item_id, user_id) {
+  return async dispatch => {
+    try {
+      const res = await fetch(`/cart/${cartId}/item/${currentId}/update`, {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        'body': JSON.stringify({ new_item_id, user_id })
+      });
+      dispatch(updateCartItem(await res.json()));
+    } catch (e) {
+      throw e;
     }
   };
 }

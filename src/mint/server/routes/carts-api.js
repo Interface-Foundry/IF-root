@@ -331,11 +331,11 @@ module.exports = function (router) {
 
 
   /**
-   * @api {put} /api/cart/:cart_id/item Update Item - right now just replaces old item with new item
+   * @api {put} /cart/:cart_id/item/:item_id/update Update Item - right now just replaces old item with new item
    * @apiDescription Updates an item already in a cart. Must specify new item
    * @apiGroup Carts
    * @apiParam {string} :cart_id cart id
-   * @apiParam {string} url optional url of the item from amazon or office depot or whatever
+   * @apiParam {string} :item_id item id
    *
    * @apiParamExample Item from Preview
    * PUT https://mint.kipthis.com/api/cart/123456/item {
