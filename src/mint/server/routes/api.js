@@ -54,7 +54,7 @@ router.get('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
   email.template('share_cart_demo', {
     cart: {
       id: cart_id,
-      name: email_id + "\'s Kip Group Cart"
+      name: email_id + "\'s Kip Cart"
     },
     deals: deals
   })

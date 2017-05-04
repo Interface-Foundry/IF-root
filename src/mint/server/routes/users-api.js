@@ -205,9 +205,11 @@ module.exports = function (router) {
     if (!cart.leader) {
       cart.leader = user.id
       yield cart.save()
+
     } else if (!cart.members.includes(user.id)) {
       cart.members.add(user.id)
       yield cart.save()
+
     }
 
     // Tell the front end that everything worked out pretty okay and we're happy to have a new user
@@ -220,32 +222,26 @@ module.exports = function (router) {
       cart: cart
     });
 
-    // Send an email to the user with the cart link
+    // Sending to leader
+    if (cart.leader == user.id) {
+      var subject = 'Your New Kip Cart'
+      cart.leader = true
+    } 
+    //Sending to member
+    else {
+      var subject = '[Kip] Welcome to ' + cart.name
+    }
+
+    //Send an email to the member with the cart link
     email = yield db.Emails.create({
       recipients: user.email_address,
-      subject: 'Your New Cart from Kip',
+      subject: subject,
       cart: cart.id
     })
 
-    // which email should we send?
-    if (cart.leader == user.id) {
-      
-      console.log('SENDING LEADER EMAIL')
-
-    } else if (cart.members.includes(user.id)) {
-
-      console.log('SENDING MEMBER EMAIL')
-
-    }
-
-    // grab the daily deals
-    let allDeals = yield dealsDb.getDeals(4, 0),
-      deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
-
     // use the new_cart email template
     email.template('new_cart', {
-      cart: cart,
-      deals: deals
+      cart: cart
     })
 
     // remember to actually send it

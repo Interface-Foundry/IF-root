@@ -90,7 +90,7 @@ router.get('/newcart', (req, res) => co(function * () {
     const user = session.user_account
     cart.leader = user.id
     if (user.name) {
-      cart.name = user.name + "'s Kip Group Cart"
+      cart.name = user.name + "'s Kip Cart"
     } else {
       cart.name = user.email_address.replace(/@.*/, '') + "'s Kip Cart"
     }
