@@ -40,9 +40,7 @@ var config = {
   connections: {
     default: {
       adapter: 'mongo',
-      host: 'localhost',
-      port: 27017,
-      database: 'mint'
+      url: process.env.MONGODB_URI || 'mongodb://localhost:27017/mint'
     }
   }
 };

@@ -26,6 +26,7 @@ We are using pretty standard commands just to keep it easy, webpack builds react
 * `NODE_ENV` - sort of a node.js convention for determining if server errors are logged to the user or if the user gets the fail whale or other external-facing error page. also sometimes has weird effects in some npm modules.
 	* `production` logs less debug information
 	* `development` logs more i guess
+* `MONGODB_URI` - which mongodb to connect to, defaults to `mongodb://localhost:27017/mint`
 * `SEND_EMAILS` - sends emails if set
   * `export SEND_EMAILS=1` or `true` or anything (even `0`) will send emails
   * `export SEND_EMAILS=;` will not send emails
