@@ -26,16 +26,7 @@ export default class Ribbon extends Component {
             </div>
           </div>
           <div className="right desktop row row-1">
-            <div className="right row row-1">
-              <a href="https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.g4k5jo42a" target="_blank">
-                Blog
-              </a>
-            </div>
-            <div className="right row row-1">
-              <a href="https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.g4k5jo42a" target="_blank">
-                Help
-              </a>
-            </div>
+
           </div>
         </div>
       </nav>

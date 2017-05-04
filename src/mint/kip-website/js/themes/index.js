@@ -1,6 +1,5 @@
 export Icon from './icons';
 export Fat from './fat';
-export Logo from './logo';
 export Support from './Support';
 export Empower from './Empower';
 export Believe from './Believe';

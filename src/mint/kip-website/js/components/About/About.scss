@@ -1,118 +1,40 @@
 @import '../../themes/constants';
 @import '../../themes/animations';
 
+$icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil Pizza;
+
 .about {
-	position: relative;
+    background: transparent;
+    top: 200px;
+    right: -25%;
+    z-index: 100;
+	position: absolute;
+	transform: rotate(-20deg);
 	text-align: center;
-	background: white;
-	padding: $padding*4 $padding*2;
+	width: 60%;
 
-	.about__header {
-		padding: 0 0 $padding*10;
-		@media only screen and (max-width: 600px) {
-			padding: 0 0 $padding*5;
-		}
-		h1 {
-			font-size: 38px;
-			color: mix($thirdColor, $bgColor, 30%);
-			@media only screen and (max-width: 600px) {
-				font-size: 34px;
-			}
-		}
-
-		p {
-			font-size: 17px;
-			color: rgba(mix($thirdColor, $bgColor, 30%), 0.8);
-		}
-	}
-
-
-	h2 {
-		line-height: $ribbonHeight;
-		height: $ribbonHeight;
-		margin: $padding*5 0 $padding*2;
-		color: $thirdColor;
-		font-size: 30px;
-
-		&:first-of-type {
-			margin: 0 0 $padding*2;
-		}
-
-
-		@media only screen and (max-width: 600px) {
-			font-size: 23px;
-			margin: $padding*5 0 $padding;
-
-			&:first-of-type {
-				margin: 0 0 $padding;
-			}
-		}
-	}
-
-	.about__details {
-		display: block;
-		max-width: 500px;
+	@media only screen and (max-width: 600px) {
 		position: relative;
-		border-radius: 10px;
-		padding: $padding*2 0;
-		background: mix(#fcfcf9, $thirdColor, 97%);
-		border: 1px solid rgba(mix($bgColor, $thirdColor, 57%), 0.2);
-	    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
-
-		&:after {
-			content: '';
-			position: absolute;
-			height: 30px;
-			left: 50%;
-			border: 1px solid $thirdColor;
-		}
-		&:after {
-			bottom: -50px;
-		}	
-
-		&:first-of-type {
-			svg {
-				path {
-					fill: white;
-				}
-			}
-		}
-
-		svg {
-			width: 40%;
-
-			circle {
-				fill: $thirdColor !important;
-			}
-
-			path {
-				fill: $thirdColor;
-			}
-		}
-
-		p {
-			position: relative;
-			white-space: normal;
-			font-weight: 500;
-			color: rgba(mix($thirdColor, $bgColor, 30%), 0.8);
-			padding: $padding $padding*2;
-			font-size: 15px;
-		}
+		transform: rotate(0);
+		width: 100%;
+		right: auto;
+		top: auto;
+		overflow: hidden;
+		padding-bottom: $padding*15;
 	}
 
-	.about__action {
-		padding: $padding*6 $padding*2 $padding*2;
-		button {
-			border: 0;
-			font-weight: bold;
-			border-radius: $padding/2;
-			background: $thirdColor;
-			color: #fcfcf9;
-			padding: $padding $padding*2;
-		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
-			&:focus {
-				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-			}
-		}
+	svg {
+		display: inline-block;
+		width: 100%;
+
+	}
+	// loop!
+	@each $icon in $icons {
+	  .#{$icon} {
+	    width: random(34) + 15%;
+	    display: inline-block;
+	    @include animation(fadeAndZoomIn cubic-bezier(0.4, 0, 0.2, 1) (random(3) - 0.33s));
+    	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+	  }
 	}
 }

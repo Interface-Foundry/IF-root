@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import { Icon } from '../../themes';
-import Bubble from './Bubble';
+import { Desktop, Desk, YellowBackground, KipHead, Plant } from '../../themes/kipsvg';
 
 export default class Hero extends Component {
 	constructor(props) {
@@ -29,15 +29,15 @@ export default class Hero extends Component {
 	componentWillMount() {
 		const { items } = this.props;
 
-		// Preload hero image (not sure if this will even help if the image is too large)
-		let hero = new Image();
-    	hero.src = 'https://s3.amazonaws.com/datadummy/header.png';	
+		// // Preload hero image (not sure if this will even help if the image is too large)
+		// let hero = new Image();
+  //   	hero.src = 'https://s3.amazonaws.com/datadummy/header.png';	
 
-		// preload all images to cache on mount
-		_.map(items, (i) => {
-			let image = new Image();
-	    	image.src = i.imgSrc;	
-		})
+		// // preload all images to cache on mount
+		// _.map(items, (i) => {
+		// 	let image = new Image();
+	 //    	image.src = i.imgSrc;	
+		// })
 
 
 	}
@@ -62,22 +62,27 @@ export default class Hero extends Component {
   	render() {
   		const { state: { selectedIndex }, props: { items } } = this;
 	    return (
-	      	<div className="hero image" style={
-                {
-                  backgroundImage: `url(https://s3.amazonaws.com/datadummy/header.png)`
-                }}>
-
-                <div className="col-12 row-1 hero__text">
-                	<h1>Kip - Smart assistant for your office.</h1>
-                	<p>When you’re busy building ideas, it’s easy to forget how much things cost. Kip saves you money and sets budgets for lunch and office essentials. Grow your team and keep costs lean.</p>
+	      	<div className="hero image">
+                <div className="hero__desktop">
+                	<Desktop />
+                	<h1>Hi I'm Kip! <br/> A friendly penguin that helps you collect group orders into a single shopping cart</h1>
                 </div>
 
-                <div className="col-12 row-1 action">
-	        		<button>
-	        			EXPLORE KIP
-	        			&nbsp;<Icon icon='Right'/>
-	        		</button>
-	        	</div>
+                <div className="hero__desk">
+	                <Desk/>
+				</div>
+
+				<div className="hero__kip">
+					<KipHead/>
+				</div>
+
+				<div className="hero__plant">
+					<Plant/>
+				</div>
+
+				<div className="hero__background">
+					<YellowBackground/>
+				</div>
 
 				<svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
 					<g>
@@ -90,31 +95,6 @@ export default class Hero extends Component {
 	    );
   	}
 }
-
-
-
-		        // <div className="row-1 dots">
-
-		        // 	{
-		        // 		_.map([0,1,2,3], (i) => {
-		        // 			const selected = i === selectedIndex;
-		        // 			return (
-					     //    	<div key={i} className={`dot ${selected ? 'selected' : ''}`}>
-					     //    		<CSSTransitionGroup
-								  //       transitionName="dot__bubble"
-								  //       transitionEnterTimeout={0}
-								  //       transitionLeaveTimeout={0}>
-								  //       {
-							   //      		selected ? <Bubble {...items[0]}/> : null
-						    //     		}
-							   //      </CSSTransitionGroup>
-					     //    	</div>
-				      //   	)
-		        // 		})
-		        // 	}
-		        // </div>
-
-
 
 
 

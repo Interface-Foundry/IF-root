@@ -9,8 +9,7 @@ export default class Footer extends Component {
   	render() {
 	    return (
 	      	<footer className="footer"> 
-	      		<p>Copyright © 2006-2017 John S. and James L. Knight Foundation. Other copyrights apply where noted.</p>
-				<p>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</p>
+	      		<p>Privacy - Terms of Service - Blog - About - Partners</p>
 	      		<div className="footer__icons">
 	      			<Icon icon='Email'/>
 	      			<Icon icon='Github'/>

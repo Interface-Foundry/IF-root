@@ -9,36 +9,50 @@ export default class About extends Component {
   	render() {
 	    return (
 	      	<div className="services"> 
-	      		<div className="col-12 row-1 video">
-			        <iframe width="100%" height="315"
-						src="https://www.youtube.com/embed/QPlBeTJqF1Y">
-					</iframe>
-				</div>
 				<div className="col-12">
-					<h1>Change the way you organize your team</h1>
-			        <div className="col-4 row-1 services__details">
-			        	<Icon icon='GraphDown'/>
-		        		<h2>Manage Your Burn Rate</h2>
-			        	<p>When you’re busy building ideas, it’s easy to forget how much things cost. Kip saves you money and sets budgets for lunch and office essentials. Grow your team and keep costs lean.</p>
-			        </div>
+					<h3>"Group shopping bot Kip focuses on coordinating purchases with a team so they can purchase lunch together or have an office manager authorize a supply order."<br/> - Fast Company July 13, 2016</h3>
 
-			       	<div className="col-4 row-1 services__details">
-				       	<Icon icon='Clock'/>
-			        	<h2>Onboard in Seconds</h2>
-			       		<p>It’s hard to get everyone using new software, that’s why Kip requires no downloads or sign-ups. Just add Kip to your Slack team and get started in seconds. Kip will on-board your team, send follow ups and collect orders on your behalf.</p>
-			        </div>
-
-			       	<div className="col-4 row-1 services__details">
-			       		<Icon icon='Happy'/>
-				       	<h2>100% Free</h2>
-			       		<p>Kip is a 100% free workplace solution because our retail partners pay the fees. We’re small, so understand the challenge of managing costs as you grow. Now you can easily scale up without worrying about cost.</p>
-			        </div>
-			       	<div className="col-12 row-1 action">
-		        		<button>
-		        			Explore how Kip can help you
-		        			&nbsp;<Icon icon='Right'/>
-		        		</button>
+					<div className="col-12 row-1 icons__hell">
+		        		<div><Icon icon='Amazon'/></div>
+		        		<div><Icon icon='Google'/></div>
+		        		<div><Icon icon='Slack'/></div>
+		        		<div><Icon icon='Microsoft'/></div>
+		        		<div><Icon icon='Delivery'/></div>
 		        	</div>
+
+			        <div className="col-6 row-1 services__details">
+			        	<div className="image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/moneycartClip.png")'}}/ >
+		        		<h2>TRACK SPENDING</h2>
+			        	<p>Save money and track spending with Kip. See how much you’re spending in every order, save on shipping and account fees with shared shopping carts</p>
+			        </div>
+
+			       	<div className="col-6 row-1 services__details">
+				       	<div className="image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/cloudClip.png")'}}/ >
+			        	<h2>KEEP IT IN CLOUD</h2>
+			       		<p>Use Kip to keep things you love in the cloud. Browse through different products, save things you’re interested in and checkout when the price is right.</p>
+			        </div>
+
+			        <div className="col-6 row-1 services__details card">
+			        	<div className="image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/directClip.png")'}}/ >
+		        		<h2>Kip Direct</h2>
+		        		<p>No installs or download</p>
+			        	<p>Unique short URL to share</p>
+			        	<p>Invite friends with link or email</p>
+			        	<div className="col-12 row-1 action">
+			        		<button><a href='/newcart'>Try Kip for Free</a></button>
+		        		</div>
+			        </div>
+
+			       	<div className="col-6 row-1 services__details card">
+				       	<div className="image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/slackClip.png")'}}/ >
+			        	<h2>Kip for Slack</h2>
+			        	<p>Great for teams already on Slack</p>
+			        	<p>Chat with Kip bot for essentials</p>
+			        	<p>Coordinate lunch delivery</p>
+			        	<div className="col-12 row-1 action">
+			        		<button className="slack"><a href="https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.g4k5jo42a" target="_blank">Add to Slack</a></button>
+			        	</div>
+			        </div>
 		        </div>
 		        <svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
 					<g>
