@@ -18,13 +18,13 @@ export default class Showcase extends Component {
 
 		switch (animationState) {
 			case 'fixed first':
-				return <Video autoPlay loop muted src='https://s3.amazonaws.com/assets-chachat/1_sequence.webm' type="video/webm"/>
+				return <Video autoPlay loop muted controls={['PlayPause', 'Fullscreen']} src='https://s3.amazonaws.com/assets-chachat/1_sequence.webm' type="video/webm"/>
 			case 'fixed second':
-				return <Video autoPlay loop muted src='https://s3.amazonaws.com/assets-chachat/2_sequence.webm' type="video/webm"/>
+				return <Video autoPlay loop muted controls={['PlayPause', 'Fullscreen']} src='https://s3.amazonaws.com/assets-chachat/2_sequence.webm' type="video/webm"/>
 			case 'fixed third':
-				return <Video autoPlay loop muted src='https://s3.amazonaws.com/assets-chachat/3_sequence.webm' type="video/webm"/>
+				return <Video autoPlay loop muted controls={['PlayPause', 'Fullscreen']} src='https://s3.amazonaws.com/assets-chachat/3_sequence.webm' type="video/webm"/>
 			default:
-				return <Video autoPlay loop muted src='https://s3.amazonaws.com/assets-chachat/1_sequence.webm' type="video/webm"/>
+				return <Video autoPlay loop muted controls={['PlayPause', 'Fullscreen']} src='https://s3.amazonaws.com/assets-chachat/1_sequence.webm' type="video/webm"/>
 		}
 	}
   	render() {

@@ -31,7 +31,6 @@ import {
 	Delivery,
 	Slack,
 	Microsoft,
-	Dummy,
 	Wallstreet,
 	Fastcompany,
 	Paymentsource,
@@ -83,8 +82,6 @@ export default class Icon extends Component {
 	        	return <Microsoft/>
 			case 'Delivery':
 	        	return <Delivery/>
-	        case 'Dummy':
-	        	return <Dummy/>
 	       	case 'Menu':
 	        	return <IoNaviconRound/>
 	        case 'Clock':

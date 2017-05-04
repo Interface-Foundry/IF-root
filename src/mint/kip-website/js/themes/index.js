@@ -1,5 +1,4 @@
 export Icon from './icons';
-export Fat from './fat';
 export Support from './Support';
 export Empower from './Empower';
 export Believe from './Believe';
@@ -8,7 +7,6 @@ export Google from './Google';
 export Delivery from './Delivery';
 export Slack from './Slack';
 export Microsoft from './Microsoft';
-export Dummy from './Dummy';
 export Fastcompany from './Fastcompany';
 export Paymentsource from './Paymentsource';
 export Time from './Time';
