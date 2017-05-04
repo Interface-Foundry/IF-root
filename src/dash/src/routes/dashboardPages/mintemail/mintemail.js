@@ -5,7 +5,7 @@ import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import { graphql } from 'react-apollo';
 
-//import { SendGridGraph } from '../../../components/Graphs';
+import { SendGridGraph } from '../../../components/Graphs';
 import { SendGridTable } from '../../../components/Table';
 import { cartsQuery, deliveryQuery } from '../../../graphqlOperations';
 import * as mintdata from '../../../data/mintdata';
@@ -50,7 +50,7 @@ class MintEmail extends Component {
   }
 
   graphEmailStats(stats){
-    return ('placeholder for graph email stats here');
+    return (<SendGridGraph data={stats} />);
   }
 
   generateEmailStats(startDate, endDate){
@@ -69,7 +69,7 @@ class MintEmail extends Component {
   }
 
   listEmailStats(stats){
-    return stats ? (<SendGridTable data={stats} />) : '';
+    return (<SendGridTable data={stats} />);
   }
 
   render(){
@@ -81,11 +81,10 @@ class MintEmail extends Component {
     sgStats = self.state.emailStats;
     sgStats = sgStats ? JSON.parse(sgStats) : '';
 
-
     return (
       <div>
         <div>
-          { self.graphEmailStats(sgStats) }
+          { self.state.ready == true ? self.graphEmailStats(sgStats) : 'Loading...'}
         </div>
         <div>
           Start Date: <DatePicker selected={self.state.startDate} onChange={self.changeStart} />
@@ -94,7 +93,7 @@ class MintEmail extends Component {
         <div>
           { self.state.ready == true ? self.listEmailStats(sgStats) : 'Loading...'}
         </div>
-    </div>
+      </div>
     )
 
   }
