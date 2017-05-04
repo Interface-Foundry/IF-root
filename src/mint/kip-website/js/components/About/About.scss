@@ -35,6 +35,32 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
 	    display: inline-block;
 	    @include animation(fadeAndZoomIn cubic-bezier(0.4, 0, 0.2, 1) (random(3) - 0.33s));
     	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+    	@media only screen and (min-width: 600px) {
+	    	&:last-of-type {
+	    		position: fixed;
+	    		bottom: 0;
+	    		left: -300px;
+	    	}
+    	}
+
+    	&.animate {
+    		@include animation(fallDownSqueeze cubic-bezier(0.4, 0, 0.2, 1) 1s);
+    		opacity: 0;
+    		@media only screen and (max-width: 600px) {
+    			@include animation(fallDownSqueezeMobile cubic-bezier(0.4, 0, 0.2, 1) 1s);
+    		}
+    	}
 	  }
 	}
+}
+
+@keyframes fallDownSqueezeMobile {
+  0%   { opacity: 1; transform: translate3d(0px, 0px, 0) scale(1); }
+  100% { opacity: 0; transform: translate3d(0px, 250px, 0) scale(0.3); }
+}
+
+@keyframes fallDownSqueeze {
+  0%   { opacity: 1; transform: translate3d(0px, 0px, 0) scale(1); }
+  100% { opacity: 0; transform: translate3d(-350px, -200px, 0) scale(0.3); }
 }

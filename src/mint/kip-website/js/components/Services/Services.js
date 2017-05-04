@@ -10,7 +10,7 @@ export default class About extends Component {
 	    return (
 	      	<div className="services"> 
 				<div className="col-12">
-					<h3>"Group shopping bot Kip focuses on coordinating purchases with a team so they can purchase lunch together or have an office manager authorize a supply order."<br/> - Fast Company July 13, 2016</h3>
+					<h3><em>"Group shopping bot Kip focuses on coordinating purchases with a team so they can purchase lunch together or have an office manager authorize a supply order."</em><br/><span> - Fast Company July 13, 2016</span></h3>
 
 					<div className="col-12 row-1 icons__hell">
 		        		<div><Icon icon='Amazon'/></div>
@@ -39,7 +39,7 @@ export default class About extends Component {
 			        	<p>Unique short URL to share</p>
 			        	<p>Invite friends with link or email</p>
 			        	<div className="col-12 row-1 action">
-			        		<button><a href='/newcart'>Try Kip for Free</a></button>
+			        		<a href='/newcart'><button>Try Kip for Free</button></a>
 		        		</div>
 			        </div>
 
@@ -50,7 +50,7 @@ export default class About extends Component {
 			        	<p>Chat with Kip bot for essentials</p>
 			        	<p>Coordinate lunch delivery</p>
 			        	<div className="col-12 row-1 action">
-			        		<button className="slack"><a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank">Add to Slack</a></button>
+			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button className="slack">Add to Slack</button></a>
 			        	</div>
 			        </div>
 

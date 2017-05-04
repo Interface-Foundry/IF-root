@@ -4,6 +4,7 @@
 .showcase {
 	position: relative;
 	text-align: center;
+	min-height: 2000px;
 	background: rgb(234, 249, 255);
 
 	.phone {
@@ -13,6 +14,33 @@
 		background-size: contain;
 		z-index: 50;
 		transform: translate3d(150px,-150px,0);
+
+		&.fixed {
+			position: fixed;
+			top: $ribbonHeight*5 + $padding*2;
+		}
+
+		&.absolute {
+			position: absolute;
+			bottom: -300px;
+		}
+
+		@media only screen and (max-width: 600px) {
+			width: 100%;
+			margin: 0 auto;
+			height: 400px;
+			transform: translate3d(0, -100px, 0);
+
+			&.fixed {
+				width: 215px;
+				left: calc(50% - 107.5px);
+			}
+
+			&.absolute {
+				position: absolute;
+				bottom: -135px;
+			}
+		}
 	}
 
 	.sine {
@@ -26,9 +54,13 @@
 	}
 
 	.bottom {
+		position: absolute;
 		fill: mix(white, $primaryColor, 97%);
 	    height: 150px;
 	    margin-left: -1px;
+	    bottom: 0;
+	    left: 0;
+	    right: 0;
 	    width: calc(100% + 3px);
 	}
 }
