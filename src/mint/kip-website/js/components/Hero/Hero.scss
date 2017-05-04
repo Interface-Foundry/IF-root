@@ -67,9 +67,24 @@
 		bottom: 325px;
 		left: 625px;
 		transform: rotate(11deg);
+		@include animation(moveAround 15s infinite);
+		@media only screen and (max-width: 600px) {
+			left: 155px;
+			transform: rotate(0);
+			bottom: 315px;
+			@include animation(moveAroundMobile 15s infinite);
+		}
+	}
+
+
+	.hero__plant {
+		position: absolute;
+		z-index: 1;
+		width: 200px;
+		bottom: 325px;
+		left: 750px;
 		@media only screen and (max-width: 600px) {
 			left: 35px;
-			transform: rotate(0);
 			bottom: 315px;
 		}
 	}
@@ -81,5 +96,39 @@
 	    height: 150px;
 	    z-index: 10;
 	    width: calc(100% + 3px);
+	}
+}
+
+@keyframes moveAround {
+	0%, 10%, 90%, 100% {
+	  	transform: rotate(11deg);
+	  	bottom: 325px;
+	  	left: 625px;
+	}
+	15%, 50% {
+		transform: rotate(11deg);
+	    left: 625px;
+		bottom: 300px;
+	} 
+	55%, 80% {
+	  	transform: rotate(0);
+	    left: 750px;
+		bottom: 300px;
+	}
+}
+
+@keyframes moveAroundMobile {
+	0%, 10%, 90%, 100% {
+		left: 155px;
+		transform: rotate(0);
+		bottom: 315px;
+	}
+	15%, 50% {
+		left: 155px;
+		bottom: 300px;
+	} 
+	55%, 80% {
+	    left: 35px;
+		bottom: 300px;
 	}
 }

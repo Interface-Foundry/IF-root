@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import { Icon } from '../../themes';
-import { Desktop, Desk, YellowBackground, KipHead } from '../../themes/kipsvg';
+import { Desktop, Desk, YellowBackground, KipHead, Plant } from '../../themes/kipsvg';
 
 export default class Hero extends Component {
 	constructor(props) {
@@ -74,6 +74,10 @@ export default class Hero extends Component {
 
 				<div className="hero__kip">
 					<KipHead/>
+				</div>
+
+				<div className="hero__plant">
+					<Plant/>
 				</div>
 
 				<div className="hero__background">
