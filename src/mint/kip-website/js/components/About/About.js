@@ -28,13 +28,13 @@ export default class About extends Component {
 			DesktopIcon,
 			Happy,
 			Layers,
-			Lightbulb,
 			Milk,
 			Mouse,
 			Paper,
 			Pencil,
 			Pizza,
-			Happy
+			Happy,
+			Lightbulb
   		],
   		{ animate } = this.props,
   		lastIndex = icons.length - 1;

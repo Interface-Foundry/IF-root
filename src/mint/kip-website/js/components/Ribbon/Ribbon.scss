@@ -67,4 +67,30 @@
 			}
 		}
 	}
+
+	.action {
+		padding: $padding/2;
+		button {
+			border: 1px solid $primaryColor;
+			white-space: nowrap;
+			font-weight: bold;
+			border-radius: $padding/2;
+			background: transparent;
+			padding: 0 $padding*4;
+			height: 100%;
+			font-size: 20px;
+			cursor: pointer;
+			&:focus {
+				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+			}
+			&.slack {
+				margin-right: $padding*2;
+				background: white;
+			}
+			svg {
+				height: 100%;
+				background: transparent;
+			}
+		}
+	}
 }

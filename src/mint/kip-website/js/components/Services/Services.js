@@ -4,14 +4,25 @@ import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
 
+		        		// <div><Icon icon='Time'/></div>
+		        		// <div><Icon icon='Wallstreet'/></div>
+
 export default class About extends Component {
 
   	render() {
 	    return (
 	      	<div className="services"> 
 				<div className="col-12">
+					<h1>As Seen in:</h1>
+					<div className="col-12 row-1 icons__hell">
+		        		<div><Icon icon='Venturebeat'/></div>
+		        		<div><Icon icon='Paymentsource'/></div>
+		        		<div><Icon icon='Fastcompany'/></div>
+		        	</div>
+
 					<h3><em>"Group shopping bot Kip focuses on coordinating purchases with a team so they can purchase lunch together or have an office manager authorize a supply order."</em><br/><span> - Fast Company July 13, 2016</span></h3>
 
+					<h1>Featured Partners</h1>
 					<div className="col-12 row-1 icons__hell">
 		        		<div><Icon icon='Amazon'/></div>
 		        		<div><Icon icon='Google'/></div>

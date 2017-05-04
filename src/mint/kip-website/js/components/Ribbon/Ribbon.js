@@ -6,7 +6,7 @@ import { Icon } from '../../themes';
 
 export default class Ribbon extends Component {
   render() {
-    const { fixed, _toggleSidenav } = this.props;
+    const { fixed, _toggleSidenav, _toggleModal } = this.props;
     
     return (
       <nav className={`ribbon ${fixed ? 'background' : ''}`}>
@@ -25,8 +25,10 @@ export default class Ribbon extends Component {
               <Icon icon='Menu' />
             </div>
           </div>
-          <div className="right desktop row row-1">
-
+          <div className="right row row-1">
+            <div className="col-12 row-1 action">
+              <button onClick={() => _toggleModal()}>Login</button>
+            </div>
           </div>
         </div>
       </nav>

@@ -31,11 +31,17 @@ import {
 	Delivery,
 	Slack,
 	Microsoft,
-	Dummy
+	Dummy,
+	Wallstreet,
+	Fastcompany,
+	Paymentsource,
+	Time,
+	Venturebeat
 } from './';
 
 export default class Icon extends Component {
 	render() {
+		
     	switch (this.props.icon) {
     		case 'Right':
 	          	return <IoArrowRightC/>
@@ -91,7 +97,18 @@ export default class Icon extends Component {
 		      	return <IoLogOut/>
 		    case 'Login':
 		      	return <IoLogIn/>
+		    case 'Wallstreet':
+		    	return <Wallstreet/>
+		    case 'Fastcompany':
+		    	return <Fastcompany/>
+		    case 'Paymentsource':
+		    	return <Paymentsource />
+		    case 'Time':
+		    	return <Time/>
+		    case 'Venturebeat':
+		    	return <Venturebeat/>
       	}
     }
 }
+
 

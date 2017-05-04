@@ -5,8 +5,8 @@ import ReactDOM from 'react-dom'
 
 import { desktopScroll, mobileScroll } from '../../reducers';
 
-import { Ribbon, Services, About, Showcase, Footer } from '..';
-import { HeroContainer, StatementContainer, SidenavContainer, ModalContainer } from '../../containers';
+import { Ribbon, Services, About, Showcase, Footer, Statement, Hero } from '..';
+import { SidenavContainer, ModalContainer } from '../../containers';
 
 
 export default class Landing extends Component {
@@ -67,12 +67,12 @@ export default class Landing extends Component {
     return (
       <span>
         { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }
-        { modal ? <ModalContainer _toggleModal={_toggleModal}/> : null }
+        { modal ? <ModalContainer _toggleModal={_toggleModal} /> : null }
 
         <div className="landing" ref={(landing) => this.landing = landing}> 
-          <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav}/>
-          <HeroContainer animate={!fixed}/>
-          <StatementContainer _toggleModal={_toggleModal}/>
+          <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/>
+          <Hero animate={!fixed}/>
+          <Statement _toggleModal={_toggleModal}/>
           <About animationState={animationState} animate={animationState.includes('fixed')}/>
           <Showcase animationState={animationState}/>
           <Services _toggleModal={_toggleModal}/>

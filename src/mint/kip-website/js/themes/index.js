@@ -9,3 +9,8 @@ export Delivery from './Delivery';
 export Slack from './Slack';
 export Microsoft from './Microsoft';
 export Dummy from './Dummy';
+export Fastcompany from './Fastcompany';
+export Paymentsource from './Paymentsource';
+export Time from './Time';
+export Venturebeat from './Venturebeat';
+export Wallstreet from './Wallstreet';

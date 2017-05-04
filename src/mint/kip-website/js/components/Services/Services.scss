@@ -11,24 +11,35 @@
 		padding: $padding*3 $padding*2 $padding*6;
 	}
 
+	h1 {
+		font-size: 40px;
+		padding-top: $padding*4;
+		color: $primaryColor;
+
+		&:first-of-type {
+			padding-top: 0;
+			@media only screen and (max-width: 600px) {
+				padding-top: $padding*4;
+			}
+		}
+		@media only screen and (max-width: 600px) {
+			font-size: 27px;
+		}
+	}
+
 	h3 {
-		font-size: 18px;
+		font-size: 24px;
 		margin: 0 0 $padding*6;
 		color: $primaryColor;
 
 		@media only screen and (max-width: 600px) {
 			margin: $padding*3 0;
+			font-size: 18px;
 		}
 
 		span {
 			color: #42403f;
 		}
-	}
-
-	h2 {
-		margin: 0 0 $padding;
-		color: mix($primaryColor, $bgColor, 30%);
-		font-size: 17px;
 	}
 
 	.icons__hell {

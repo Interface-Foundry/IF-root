@@ -13,6 +13,7 @@
 		width: 425px;
 		background-size: contain;
 		z-index: 50;
+		padding: $padding*4 $padding*1.5 0;
 		transform: translate3d(150px,-150px,0);
 
 		&.fixed {
@@ -26,13 +27,14 @@
 		}
 
 		@media only screen and (max-width: 600px) {
-			width: 100%;
-			margin: 0 auto;
+			width: 215px;
+			margin: 0 calc(50% - 107.5px);
 			height: 400px;
+			padding: $padding*2 $padding 0;
 			transform: translate3d(0, -100px, 0);
 
 			&.fixed {
-				width: 215px;
+				margin: 0;
 				left: calc(50% - 107.5px);
 			}
 
