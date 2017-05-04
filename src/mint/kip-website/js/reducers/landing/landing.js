@@ -61,14 +61,14 @@ export const mobileScroll = (scrollTop, animationState) => {
 	console.log('mobile')
     console.log(scrollTop)
 
-    if(scrollTop <= 1600 && animationState !== 'inital') {
+    if(scrollTop <= 1516 && animationState !== 'inital') {
       	console.log('inital')
         newState = {
 			animationState: 'inital'
 		}
     }
 
-    if(scrollTop > 1600 && scrollTop < 2000 && animationState !== 'fixed') {
+    if(scrollTop > 1516 && scrollTop < 2000 && animationState !== 'fixed') {
       	console.log('fixed first')
         newState = {
 			animationState: 'fixed'
@@ -82,14 +82,14 @@ export const mobileScroll = (scrollTop, animationState) => {
 		}
     }
 
-    if(scrollTop > 2500 && scrollTop < 3345 && animationState !== 'fixed third') {
+    if(scrollTop > 2500 && scrollTop < 3255 && animationState !== 'fixed third') {
         console.log('fixed third')
         newState = {
             animationState: 'fixed third'
         }
     }
 
-    if(scrollTop > 3345 && animationState !== 'absolute') {
+    if(scrollTop > 3255 && animationState !== 'absolute') {
       	console.log('absolute')
         newState = {
 			animationState: 'absolute'
