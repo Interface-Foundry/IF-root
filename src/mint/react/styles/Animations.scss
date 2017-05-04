@@ -113,6 +113,15 @@
   }
 }
 
+@keyframes placeHolderShimmer {
+  0% {
+    background-position: -400px 0
+  }
+  100% {
+    background-position: 400px 0
+  }
+}
+
 @mixin animation($args) {
   -webkit-animation: $args;
   -moz-animation: $args;

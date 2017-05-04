@@ -112,7 +112,14 @@ export default class Item extends Component {
   }
 
   navCart(newIndex) {
-    const { cart_id, type, items, currentUser: { id }, currentCart: { leader: { id: leaderId } }, history: { replace } } = this.props;
+    const {
+      cart_id,
+      type,
+      items,
+      currentUser: { id },
+      currentCart: { leader: { id: leaderId } },
+      history: { replace }
+    } = this.props;
     const splitItems = splitCartById(this.props, { id });
     const myItems = id !== leaderId
       ? splitItems.my
@@ -122,13 +129,6 @@ export default class Item extends Component {
       : newIndex < 0
       ? myItems.length - 1
       : newIndex;
-    console.log('navCart', {
-      myItemsLen: myItems.length,
-      newIndex,
-      ind,
-      item: myItems[ind],
-      props: this.props
-    });
     replace(`/cart/${cart_id}/m/${type}/${ind}/${myItems[ind].id}/edit`);
   }
 
@@ -137,11 +137,29 @@ export default class Item extends Component {
       determineNav,
       props,
       state: { animation },
-      props: { index, type, items, item, nextSearch, prevSearch, location: { pathname }, history: { replace }, item: { main_image_url, description, name, asin, options, iframe_review_url } }
+      props: {
+        index,
+        type,
+        items,
+        item,
+        nextSearch,
+        prevSearch,
+        location: { pathname },
+        history: { replace },
+        item: { main_image_url, description, name, asin, options, iframe_review_url },
+        currentCart: { leader },
+        currentUser: { id },
+      }
     } = this;
-    const imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
+    const splitItems = splitCartById(this.props, { id });
+    const myItems = leader && id !== leader.id
+      ? splitItems.my
+      : items;
+    let imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
       ? items[parseInt(index)].large
-      : main_image_url,
+      : main_image_url
+      ? main_image_url
+      : 'https://storage.googleapis.com/kip-random/head%40x2.png',
       next = () => {
         this.setState({ animation: 'slideLeft' });
         if (type === 'search') return nextSearch();
@@ -156,47 +174,56 @@ export default class Item extends Component {
         if (type === 'deal')::this.navDeal(newIndex);
         else if (type === 'cartItem')::this.navCart(newIndex);
       },
-      showButton = type === 'deal' || type === 'search' || type === 'cartItem';
-
+      showButton = type === 'deal' || type === 'search' || (type === 'cartItem' && myItems.length > 1);
     return (
       <div className='item_container'>
-        <div className='item'>
-          <RouteTransition
-            className="item__transition"
-            pathname={pathname}
-            {...presets.default[animation]}>
-            <div className='item__nav_wrapper'
-                onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-                onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
-                onTouchEnd={ () => determineNav() }
-            >
-              {showButton ? <button onClick={()=>prev()}>&lt;</button> : null}
-              <div className='item__info__wrapper'>
-                <div className='item__view__image image row'
-                    style={ { backgroundImage: `url(${imageUrl})`, height: 150 } }>
+          <div className='item'>
+            <RouteTransition
+              className="item__transition"
+              pathname={pathname}
+              {...presets.default[animation]}>
+              <div className='item__nav_wrapper'
+                  onTouchStart={(e) => this.setState({ originalx: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+                  onTouchMove={ (e) => this.setState({ x: e.changedTouches[e.changedTouches.length - 1].pageX }) }
+                  onTouchEnd={ () => determineNav() }
+              >
+                {showButton ? <button onClick={()=>prev()}>&lt;</button> : null}
+                <div className='item__info__wrapper'>
+                  <div className={`item__view__image image row ${imageUrl.includes('kip-random') ? 'loading' : ''}`}
+                      style={ { backgroundImage: `url(${imageUrl})` } }>
+                  </div>
+                  <div className='item__view__atts'>
+                    <p>{name}</p>
+                  </div>
                 </div>
-                <div className='item__view__atts'>
-                  <p>{name}</p>
-                </div>
+                {showButton ? <button onClick={()=>next()}>&gt;</button> : null}
               </div>
-              {showButton ? <button onClick={()=>next()}>&gt;</button> : null}
-            </div>
-            { 
-              type === 'deal' && items[parseInt(index)]
-              ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
-              : <ItemInfo {...props} {...item} />
-            }
-            <ProductDescription description={description} />
-            {iframe_review_url ? <iframe className='review__iframe' src={iframe_review_url}/> : null}
-            <a href={`/api/item/${item.id}/clickthrough`} target='_blank' className='item__view__amazon__link'> <Icon icon='Open'/> View on Amazon </a>
-          </RouteTransition>
+              { 
+                type === 'deal' && items[parseInt(index)]
+                ? <DealInfo deal={items[parseInt(index)]} item={item}/> 
+                : <ItemInfo {...props} {...item} />
+              }
+              <ProductDescription description={description} />
+              {
+                iframe_review_url 
+                  ? <iframe className='review__iframe' src={iframe_review_url}/>
+                  : null
+              }
+              {
+              item.id 
+                ? <a href={`/api/item/${item.id}/clickthrough`} target='_blank' className='item__view__amazon__link'> 
+                    <Icon icon='Open'/> View on Amazon 
+                  </a>
+                : null
+              }
+            </RouteTransition>
+          </div>
+          {
+            (options && options.length)
+            ? <ItemVariationSelector replace={replace} options={options} defaultVal={asin} {...props} /> 
+            : null
+          }
         </div>
-        {
-          (options && options.length)
-          ? <ItemVariationSelector replace={replace} options={options} defaultVal={asin} {...props} /> 
-          : null
-        }
-      </div>
     );
   }
 }

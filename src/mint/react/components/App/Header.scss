@@ -13,6 +13,8 @@
   .header__left {
     flex-grow: 1;
     flex-basis: 0;
+    white-space: nowrap;
+    overflow: scroll;
     .image {
       display: inline-block;
       margin: $padding;
@@ -26,7 +28,6 @@
     }
     h3 {
       display: inline-block;
-      overflow: hidden;
       white-space: nowrap;
       font-weight: 500;
       font-size: 20px;
@@ -45,6 +46,7 @@
     .navbar__icon {
       display: flex;
       justify-content: center;
+      align-items: center;
       width: 100%;
       cursor: pointer;
       svg {
