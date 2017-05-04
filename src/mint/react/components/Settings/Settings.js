@@ -9,10 +9,19 @@ export default class Settings extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
     currentUser: PropTypes.object,
+    updateUser: PropTypes.func
   }
   state = {
     editName: false,
     editMail: false
+  }
+
+  componentDidMount() {
+    const { currentUser: { name, email_address } } = this.props;
+    this.setState({
+      name,
+      mail: email_address
+    });
   }
 
   _editName() {
@@ -28,15 +37,19 @@ export default class Settings extends Component {
   }
 
   _saveName() {
+    const { props: { updateUser, currentUser: { id } }, state: { name } } = this;
     this.setState({
       editName: false
     });
+    updateUser(id, { name });
   }
 
   _saveMail() {
+    const { props: { updateUser, currentUser: { id } }, state: { mail } } = this;
     this.setState({
       editMail: false
     });
+    updateUser(id, { email_address: mail });
   }
 
   render() {
@@ -47,7 +60,15 @@ export default class Settings extends Component {
           { 
             editName
               ? <li>
-                  Name: <input autoFocus type='text' required placeholder='Name' value={name}/>
+                  Name: 
+                  <input 
+                    autoFocus 
+                    type='text' 
+                    required 
+                    placeholder='Name' 
+                    defaultValue={name} 
+                    onChange={(e) => this.setState({name:e.target.value})}
+                  />
                   <button onClick={::this._saveName}> Save </button>
                 </li>
               : <li onClick={::this._editName}><p>{name}  &nbsp;<Icon icon='Edit'/></p></li>
@@ -55,7 +76,14 @@ export default class Settings extends Component {
           { 
             editMail
               ? <li>
-                  Email: <input autoFocus type='text' required placeholder='Email' value={email_address}/>
+                  Email: <input 
+                    autoFocus 
+                    type='text' 
+                    required 
+                    placeholder='Email' 
+                    defaultValue={email_address} 
+                    onChange={(e) => this.setState({mail:e.target.value})}
+                  />
                   <button onClick={::this._saveMail}> Save </button>
                 </li>
               : <li onClick={::this._editMail}><p>{email_address}  &nbsp;<Icon icon='Edit'/></p></li>

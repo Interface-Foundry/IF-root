@@ -2,9 +2,8 @@
 
 import {
   RECEIVE_SESSION,
-  REQUEST_SESSION,
-  REQUEST_UPDATE_SESSION,
-  RECEIVE_UPDATE_SESSION
+  RECEIVE_UPDATE_SESSION,
+  UPDATE_USER
 } from '../constants/ActionTypes';
 
 const initialState = {
@@ -28,8 +27,11 @@ export default function session(state = initialState, action) {
       ...action.newSession,
       user_account: action.newSession.user || action.newSession.user_account
     };
-  case REQUEST_SESSION:
-  case REQUEST_UPDATE_SESSION:
+  case UPDATE_USER:
+    return {
+      ...state,
+      user_account: action.userInfo
+    };
   default:
     return state;
   }

@@ -2,16 +2,17 @@
 
 import { connect } from 'react-redux';
 import { Settings } from '../components';
-import { selectDeal } from '../actions/deals';
+import { updateUser } from '../actions/session';
 
 const mapStateToProps = (state, ownProps) => ({
-	cart_id: state.currentCart.cart_id,
-	currentCart: state.currentCart,
-	currentUser: state.session.user_account
+  cart_id: state.currentCart.cart_id,
+  currentCart: state.currentCart,
+  currentUser: state.session.user_account
 });
 
 const mapDispatchToProps = dispatch => ({
-  selectDeal: (dealIndex, deal) => dispatch(selectDeal(dealIndex, deal)),
+  updateUser: (id, userInfo) => dispatch(updateUser(id, userInfo)),
+
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);
