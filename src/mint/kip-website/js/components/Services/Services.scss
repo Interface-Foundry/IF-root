@@ -126,7 +126,6 @@
 			font-size: 15px;
 			text-align: left;
 			padding: 0 $padding*4 0 0;
-			color: rgba(mix($primaryColor, $bgColor, 30%), 0.8);
 			@media only screen and (max-width: 600px) {
 				padding: 0;
 			}
