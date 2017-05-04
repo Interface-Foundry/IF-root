@@ -34,8 +34,6 @@ import {
 	Dummy
 } from './';
 
-import Burger from './kip_website_svg/Burger.js';
-
 export default class Icon extends Component {
 	render() {
     	switch (this.props.icon) {
