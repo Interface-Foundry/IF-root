@@ -571,7 +571,7 @@ module.exports = function (router) {
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
-    // logging.info('populated cart', cart);
+    logging.info('populated cart', JSON.stringify(cart));
     var cartItems = cart.items;
 
     if (cart.affiliate_checkout_url && cart.locked) {
@@ -586,7 +586,7 @@ module.exports = function (router) {
     var receipt = yield db.Emails.create({
       recipients: req.UserSession.user_account.email_address,
       sender: 'hello@kip.ai',
-      subject: `Kip Cart Summary for ${cart.name}`,
+      subject: `[Kip] Cart Summary for ${cart.name}`,
       template_name: 'receipt',
       unsubscribe_group_id: 2485
     });

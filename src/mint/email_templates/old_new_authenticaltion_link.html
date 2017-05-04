@@ -118,50 +118,67 @@
 <!-- /Gmail hack -->
 <div style="display:none; white-space:nowrap; font:15px courier; color:#ffffff; line-height:0; width:600px !important; min-width:600px !important; max-width:600px !important;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
 <!-- /Gmail hack -->
-<div class="main" style="max-width: 700px; margin: 20px auto; border: 1px solid black; overflow: hidden;">
+<div class="main" style="max-width: 700px; margin: 20px auto; border: 1px solid #e1e1e1; overflow: hidden;">
     <!-- FULL WIDTH CONTAINER ALWAYS NEED THIS-->
-    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #fba233; color: #fcfcf9; max-width: 700px">
-        <tr>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #4f4d4c; color: #fcfcf9; max-width: 700px">
+        <tr >
             <td align="center" valign="middle">
                 <table width="100%" height="25" cellspacing="0" cellpadding="0" border="0" class="headline">
                     <!-- FOR EVERY NEW PIECE OF CONTENT, CREATE NEW <TR><TD> -->
                     <tr>
                         <td align="center" width="15%" style="padding: 5px 15px;" class="headline">
-                            <img src='https://storage.googleapis.com/kip-random/head_smaller.png'  style="font-weight:550;font-size: 28px; text-align: left; color: #fcfcf9; height: 50px;">
+                            <img src='https://storage.googleapis.com/kip-random/head_smaller.png'  style="font-size: 28px; text-align: left; color: #fcfcf9; height: 50px;">
                         </td>
                         <!-- APPERNTLY ACCORDING TO EMAIL TEMPLATING BEST PRACTICE WE WANT INLINE STYLES: WEIRD -->
-                        <td align="left" width="85%" valign="middle" height="100%" style="color:#62a5f1;font-size:46px;">
-                             Kip
+                        <td align="center" width="85%" valign="middle" height="100%" style="font-size: 24px; text-align: left; color: #fcfcf9;">
+                             Kip Cart
                         </td>
                     </tr>
                 </table>
             </td>
         </tr>
     </table>
-    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 700px;">
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;  border-top: 1px solid #e1e1e1;max-width: 700px;">
         <tr>
             <td >
                 <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
                 <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                    <tr>
+                        <td style="padding: 17px 15px; font-size: 25px; color:#4a9ff1; padding-top: 14px;" align="left">
+                            Hello,
+                        </td >
+                    </tr>
                         <tr>
-                            <td style="padding: 25px 15px; font-size: 16px; color: black; padding-top: 12px;" align="left">
-                                Hi rachel@kipthis.com,
+                            <td style="padding: 25px 15px; font-size: 18px; padding-top: 8px;" align="left">
+                                You asked us to send you a log-in link for quickly signing into <span style="font-weight:bold;">Kip</span>. Here it is! ✨
                             </td >
                         </tr>
                 </table>
             </td>
         </tr>
     </table>
-    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 700px">
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
         <tr>
-            <td>
-
-            </td>
+            <td >
+                <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                <table width="100%" ellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                    <tr>
+                        <td style="padding: 0px 15px 10px; font-size: 16px; color: #8f8d8c; font-weight: 100;" align="center">
+                             <!-- Add Amazon items to the Kip Cart -->
+                        </td >
+                    </tr>
+                </table>
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
-                    <td width="100%" style="box-sizing: border-box; width: 100%; padding: 0 15px 50px; ">
+                    <td align="center" width="100%" style="box-sizing: border-box; width: 100%; padding: 0 15px 50px; ">
                       <div style="box-sizing: border-box; width: 100%; padding: 0px 0px 0px; ">
-                        <a href="<%=baseUrl%>/auth/<%=link.id%>" style="padding:0px 6px 0px 6px;background-color:#ffdf4d;border:1px solid #ffdf4d;border-radius:9px;color:black;display:inline-block;font-family:sans-serif;font-size:18px;line-height:50px;text-align:center;font-weight:bold;text-decoration:none;-webkit-text-size-adjust:none;mso-hide:all;">Click Here to LOG IN</a>
+                        <!--[if mso]>
+                          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<%=baseUrl%>/cart/<%=cart.id%>" style="height:75px;v-text-anchor:middle;mso-width-percent: 930;" arcsize="5%" strokecolor="#ffe94d" fillcolor="#ffe94d">
+                            <w:anchorlock/>
+                            <center style="color:#4f4d4c;font-family:Helvetica, Arial,sans-serif;font-size:20px;">VIEW KIP CART MSO</center>
+                          </v:roundrect>
+                        <![endif]-->
+                        <a href="<%=baseUrl%>/auth/<%=link.id%>" style="background-color:#ffe94d;border:1px solid #ffe94d;border-radius:3px;color:#4f4d4c;display:inline-block;font-family:sans-serif;font-size:20px;line-height:53px;text-align:center;text-decoration:none;width:80%;-webkit-text-size-adjust:none;mso-hide:all;">SIGN IN TO KIP</a>
                       </div>
                     </td>
                   </tr>
@@ -169,55 +186,43 @@
             </td>
         </tr>
     </table>
-    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 700px">
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;max-width: 700px">
         <tr>
             <td >
                 <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
                 <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                     <tr>
-                        <td style="padding: 0px 15px 10px; font-size: 16px;">
-                            Copy and paste this URL into your browser to see your group cart:
-                            <br/>
-                            <br/>
+                        <td style="padding: 0px 15px 10px; font-size: 16px; color: #8f8d8c; font-weight: 100;" align="center">
+                            You can also copy and paste this link into your browser:
                         </td >
                     </tr>
                 </table>
-                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="color: #4f4d4c; background: #fcfcf9;">
                     <tr>
                         <td>
                             <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
                             <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                 <tr>
-                                    <td style="padding: 0px 15px 33px; font-size: 20px; color: 666; font-weight: 100;" align="left">
+                                    <td style="padding: 0px 15px 33px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
                                          <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                              <tr>
-                                                 <td align="center" style="padding: 5px 5px; background: #fff;color:555;font-weight: 500;">
-                                                    <div style="padding:2px 0;dispaly:inline-block; font-size:14px;color:#333;border-style:solid;border-width: 1px 0 1px 1px;border-color:#62a5f1 #62a5f1 #62a5f1 #62a5f1;border-radius:10px 0 0 10px;"><%=baseUrl%>/auth/<%=link.id%></div>
-                                                 </td>
-                                                    <div style="display:inline-blcok;border: 1px solid; border-color:#62a5f1;border-radius: 10px;">COPY</div>
-                                                 <td>
+                                                 <td align="center" style="padding: 30px 5px; border: 1px solid #e1e1e1; border-radius: 5px; background: #fff; color: #4a9ff1;font-weight: 500;">
+                                                    <%=baseUrl%>/auth/<%=link.id%>
                                                  </td>
                                              </tr>
                                           </table>
                                     </td >
-                                    <!-- <td style="padding: 0px 15px 33px; font-size: 20px; color: font-weight: 100;" align="left">
-                                         <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
-                                             <tr>
-                                                 <td align="center" style="padding: 5px 5px; background: #fff;color:555;font-weight: 500;">
-
-                                                 </td>
-                                             </tr>
-                                          </table>
-                                    </td > -->
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding: 25px 15px; font-size: 16px; padding-top: 8px;" align="left">
-                            You can always use this email to log in and check your group cart anytime :D Hope you have a lovely day ahead!
+                        <td style="padding: 25px 15px; font-size: 18px; padding-top: 8px;" align="left">
+                            Note: Your log-in link can only be used one time.
                           <br/><br/>
-                            Sincerely,
+                            See you soon!
+                          <br/><br/>
+                            Cheers,
                           <br/>
                             Kip
                         </td >
@@ -230,13 +235,8 @@
     <!-- FOOTER -->
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 700px;">
         <tr>
-            <td bgcolor="#cbecf7" align="center" style="border-top: 1px solid #e1e1e1;">
+            <td bgcolor="#ffffff" align="center" style="border-top: 1px solid #e1e1e1;">
                 <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
-                    <tr>
-                      <td>
-                        www.kipthis.com
-                      </td>
-                    </tr>
                     <tr>
                         <td style="padding: 20px 0px 20px 0px;">
                             <!-- UNSUBSCRIBE COPY -->
