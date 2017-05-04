@@ -27,7 +27,7 @@ export default class Statement extends Component {
 	        	</div>
 	        	<div className="col-12 row-1 text">
 	        		<p>
-	        			Whether you-re a project manager, grassroots organizer, or just a few friends putting together an event, Kip's east to use design takes the stress out of group orders.
+	        			Whether you're a project manager, grassroots organizer, or just a few friends putting together an event, Kip's easy to use design takes the stress out of group orders.
 	        		</p>
 	        	</div>
 	      	</div>
