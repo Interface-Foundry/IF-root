@@ -83,7 +83,6 @@ const CartGraph = ({data}) => {
 };
 
 const MintGraph = ({data}) => {
-  debugger;
   //data = transformToArray(data, 'createdAt');
   return (
     <Panel header={<span><i className="fa fa-line-chart " />Mint Carts</span>}>
@@ -102,4 +101,23 @@ const MintGraph = ({data}) => {
   )
 };
 
-export { CartGraph, CafeGraph, MintGraph };
+const SendGridGraph = ({data}) => {
+  //data = transformToArray(data, 'createdAt');
+  return (
+    <Panel header={<span><i className="fa fa-line-chart " />Mint Carts</span>}>
+      <div className="resizable">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
+            <XAxis dataKey="createdAt" />
+            <YAxis yAxisId="left" orientation="left" stroke="#00FFFF" />
+            <CartesianGrid stroke="#ccc" />
+            <Tooltip />
+            <Line type="monotone" yAxisId="left" dataKey="price" stroke="#00FFFF" fill="#00FFFF" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </Panel>
+  )
+};
+
+export { CartGraph, CafeGraph, MintGraph, SendGridGraph };

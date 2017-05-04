@@ -46,6 +46,11 @@ class Sidebar extends Component {
                 <i className="fa fa-upload fa-fw" /> &nbsp; Upload Amazon CSV
               </a>
             </li>
+            <li>
+              <a href="" onClick={(e) => { e.preventDefault(); history.push('/mintemail'); }} >
+                <i className="fa fa-envelope fa-fw" /> &nbsp; Mint Email
+              </a>
+            </li>
           </ul>
         </div>
       </div>

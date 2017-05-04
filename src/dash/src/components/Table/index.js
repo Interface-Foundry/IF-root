@@ -107,4 +107,57 @@ const MintTable = ({data, purchased}) => {
   );
 };
 
-export { CafeTable, CartTable, MintTable };
+const SendGridTable = (data) => {
+  let newData = [];
+  for(var i = 0; i<data.data.length; i++){
+    newData.push({
+      date: data.data[i].date,
+      blocks: data.data[i].stats[0].metrics.blocks,
+      bounce_drops:data.data[i].stats[0].metrics.bounce_drops,
+      bounces:data.data[i].stats[0].metrics.bounces,
+      clicks:data.data[i].stats[0].metrics.clicks,
+      deferred:data.data[i].stats[0].metrics.deferred,
+      delivered:data.data[i].stats[0].metrics.delivered,
+      invalid_emails:data.data[i].stats[0].metrics.invalid_emails,
+      opens:data.data[i].stats[0].metrics.opens,
+      processed:data.data[i].stats[0].metrics.processed,
+      requests:data.data[i].stats[0].metrics.requests,
+      spam_report_drops:data.data[i].stats[0].metrics.spam_report_drops,
+      spam_reports:data.data[i].stats[0].metrics.spam_reports,
+      unique_clicks:data.data[i].stats[0].metrics.unique_clicks,
+      unique_opens:data.data[i].stats[0].metrics.unique_opens,
+      unsubscribe_drops:data.data[i].stats[0].metrics.unsubscribe_drops,
+      unsubscribes:data.data[i].stats[0].metrics.unsubscribes
+    })
+  }
+  const panelTitle = (<h3>SendGrid Stats</h3>)
+  return (
+    <Panel header={panelTitle}>
+      <div className="table-display">
+        <BootstrapTable data={newData} bordered={false} scrollTop={'Top'} hover>
+          <TableHeaderColumn isKey={true} dataField='date'>Date</TableHeaderColumn>
+          <TableHeaderColumn dataField='blocks'>Blocks</TableHeaderColumn>
+          <TableHeaderColumn dataField='bounce_drops'>Bounce Drops</TableHeaderColumn>
+          <TableHeaderColumn dataField='bounces'>Bounces</TableHeaderColumn>
+          <TableHeaderColumn dataField='clicks'>Clicks</TableHeaderColumn>
+          <TableHeaderColumn dataField='deferred'>Deferred</TableHeaderColumn>
+          <TableHeaderColumn dataField='delivered'>Delivered</TableHeaderColumn>
+          <TableHeaderColumn dataField='invalid_emails'>Invalid Emails</TableHeaderColumn>
+          <TableHeaderColumn dataField='opens'>Opens</TableHeaderColumn>
+          <TableHeaderColumn dataField='processed'>Processed</TableHeaderColumn>
+          <TableHeaderColumn dataField='requests'>Requests</TableHeaderColumn>
+          <TableHeaderColumn dataField='spam_report_drops'>Spam Report Drops</TableHeaderColumn>
+          <TableHeaderColumn dataField='spam_reports'>Spam Reports</TableHeaderColumn>
+          <TableHeaderColumn dataField='unique_clicks'>Unique Clicks</TableHeaderColumn>
+          <TableHeaderColumn dataField='unique_opens'>Unique Opens</TableHeaderColumn>
+          <TableHeaderColumn dataField='unsubscribe_drops'>Unsubscribe Drops</TableHeaderColumn>
+          <TableHeaderColumn dataField='unsubscribes'>Unsubscribes</TableHeaderColumn>
+        </BootstrapTable>
+      </div>
+    </Panel>
+
+  );
+  
+}
+
+export { CafeTable, CartTable, MintTable, SendGridTable };

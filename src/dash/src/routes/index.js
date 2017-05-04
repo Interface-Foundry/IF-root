@@ -19,6 +19,7 @@ import sessions from './dashboardPages/sessions';
 import sendMessage from './dashboardPages/sendMessage';
 import blank from './dashboardPages/blank';
 import amazoncsv from './dashboardPages/amazoncsv'
+import mintemail from './dashboardPages/mintemail'
 import error from './error';
 import { port, host, auth } from '../config';
 
@@ -58,6 +59,7 @@ export default [
       sessions,
       team,
       sendMessage,
+      mintemail,
       // place new routes before...
       // content,
       error,
