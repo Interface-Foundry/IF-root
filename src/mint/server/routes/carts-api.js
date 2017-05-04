@@ -83,6 +83,19 @@ function * createItemFromItemId(itemId, userId, cartId) {
   return item
 }
 
+/**
+ * dont return emails to front end
+ *
+ * @param      {<type>}  cartMembers  The cartesian members
+ * @return     {<type>}  { description_of_the_return_value }
+ */
+function stripEmailsFromCartMembers(cartMembers) {
+  return cartMembers.map(member => {
+    delete member.email_address
+    return member
+  })
+}
+
 module.exports = function (router) {
   /**
    * @api {get} /api/carts User Carts
@@ -133,16 +146,23 @@ module.exports = function (router) {
    * {"members":[{"email_address":"peter@interfacefoundry.com","createdAt":"2017-03-16T16:19:10.812Z","updatedAt":"2017-03-16T16:19:10.812Z","id":"bc694263-cf19-46ea-b3f1-bd463f82ce55"}],"items":[{"original_link":"watches","quantity":1,"createdAt":"2017-03-16T16:18:32.047Z","updatedAt":"2017-03-16T16:18:32.047Z","id":"58cabad83a5cd90e34b29610"}],"leader":{"email_address":"peter.m.brandt@gmail.com","createdAt":"2017-03-16T16:18:27.607Z","updatedAt":"2017-03-16T16:18:27.607Z","id":"257cd470-f19f-46cb-9201-79b8b4a95fe2"},"createdAt":"2017-03-16T16:18:23.433Z","updatedAt":"2017-03-16T16:19:10.833Z","id":"3b10fc45616e"}
    */
   router.get('/cart/:cart_id', (req, res) => co(function* () {
+
     var cart = yield db.Carts.findOne({ id: req.params.cart_id })
       .populate('leader')
       .populate('members')
       .populate('items')
+
+    const userId = req.UserSession.user_account.id
+    if (cart.leader !== userId) {
+      cart.members = stripEmailsFromCartMembers(cart.members)
+    }
 
     if (cart) {
       res.send(cart);
     } else {
       throw new Error('Cart not found')
     }
+
   }));
 
   /**
@@ -153,6 +173,12 @@ module.exports = function (router) {
    */
   router.get('/cart/:cart_id/items', (req, res) => co(function* () {
     var cart = yield db.Carts.findOne({ id: req.params.cart_id }).populate('items')
+
+    const userId = req.UserSession.user_account.id
+    if (cart.leader !== userId) {
+      cart.members = stripEmailsFromCartMembers(cart.members)
+    }
+
     if (!cart) {
       throw new Error('Cart not found')
     }
@@ -346,6 +372,7 @@ module.exports = function (router) {
    * DELETE https://mint.kipthis.com/api/cart/123456/item/998765
    */
   router.delete('/cart/:cart_id/item/:item_id', (req, res) => co(function* () {
+
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
@@ -359,6 +386,7 @@ module.exports = function (router) {
     if (!cart) {
       throw new Error('Cart not found')
     }
+
 
     // Make sure they specified an item id
     if (!req.params.item_id) {
