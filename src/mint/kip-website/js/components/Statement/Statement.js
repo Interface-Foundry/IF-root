@@ -16,10 +16,10 @@ export default class Statement extends Component {
 	      	<div className="statement">
 	      		<div className="col-12 row-1 action">
 	        		<button>
-	        			<a href='/newcart'>TRY KIP FOR FREE</a>
+	        			<a href='/newcart'>Try Kip For Free</a>
 	        		</button>
 	        		<button onClick={() => _toggleModal()}>
-	        			LOGIN
+	        			Login
 	        		</button>
 	        	</div>
 	        	<div className="col-12 row-1 headline">

@@ -23,7 +23,7 @@ export default class About extends Component {
 			        <div className="col-6 row-1 services__details">
 			        	<div className="image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/moneycartClip.png")'}}/ >
 		        		<h2>TRACK SPENDING</h2>
-			        	<p>Save money and track spending with Kip. See how much you’re spending in every order, save on shipping and account fees with shared shopping carts</p>
+			        	<p>Save money and track spending with Kip. See how much you’re spending in every order, save on shipping and account fees with shared shopping carts.</p>
 			        </div>
 
 			       	<div className="col-6 row-1 services__details">
@@ -50,8 +50,13 @@ export default class About extends Component {
 			        	<p>Chat with Kip bot for essentials</p>
 			        	<p>Coordinate lunch delivery</p>
 			        	<div className="col-12 row-1 action">
-			        		<button className="slack"><a href="https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.g4k5jo42a" target="_blank">Add to Slack</a></button>
+			        		<button className="slack"><a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank">Add to Slack</a></button>
 			        	</div>
+			        </div>
+
+			       	<div className="col-12 row-1 services__details card">
+			        	<h2>Learn More</h2>
+		        		<iframe width="560" height="315" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
 			        </div>
 		        </div>
 		        <svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
