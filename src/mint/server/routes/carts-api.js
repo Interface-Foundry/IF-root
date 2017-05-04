@@ -586,7 +586,7 @@ module.exports = function (router) {
     var receipt = yield db.Emails.create({
       recipients: req.UserSession.user_account.email_address,
       sender: 'hello@kip.ai',
-      subject: `Kip Receipt for ${cart.name}`,
+      subject: `Kip Cart Summary for ${cart.name}`,
       template_name: 'receipt',
       unsubscribe_group_id: 2485
     });
@@ -612,7 +612,7 @@ module.exports = function (router) {
       baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
       items: items,
       users: users,
-      total: total,
+      total: '$' + total.toFixed(2),
       cart: cart
     })
 
