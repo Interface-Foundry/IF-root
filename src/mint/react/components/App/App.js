@@ -125,10 +125,9 @@ export default class App extends Component {
     if (newAccount === false) {
       return <Overlay/>;
     }
-    console.log('app', { toast, status });
     return (
       <section className='app'>
-        <Toast toast={toast} status={status} loc={location} history={history}/>
+        <Toast toast={toast} status={status} loc={location} replace={replace}/>
         <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
         <div className={`app__view ${showFooter ? '' : 'large'}`}>
           { /* Renders modal when route permits */ }

@@ -8,8 +8,8 @@ export default class Toast extends Component {
   static propTypes = {
     toast: PropTypes.string,
     status: PropTypes.string,
-    location: PropTypes.object,
-    history: PropTypes.object
+    loc: PropTypes.object,
+    replace: PropTypes.func
   }
 
   state = {
@@ -18,24 +18,22 @@ export default class Toast extends Component {
 
   componentWillMount() {
     const { status, toast } = this.props;
-    console.log({ toast, status })
     if (toast && status)::this._showToast(status, toast);
   }
 
   componentWillReceiveProps(nextProps) {
     const { toast, status } = this.props;
     const { toast: newToast, status: newStatus } = nextProps;
-    console.log({ toast, status, newToast, newStatus })
     if ((newToast && newStatus) && (toast !== newToast || status !== newStatus))::this._showToast(newStatus, newToast);
   }
 
   _showToast(status, toast) {
-    const { history: { replace }, location } = this.props;
-    console.log({ location });
+    const { replace, loc } = this.props;
+    console.log({ replace });
     setTimeout(() => this.setState({ status, toast, showToast: true }), 1);
     setTimeout(() => {
       this.setState({ toast: null, status: null, showToast: false });
-      // replace(`/cart/${cart_id}/`);
+      replace(loc.pathname);
     }, 3000);
   }
 
