@@ -4,180 +4,81 @@
 .hero {
 	position: relative;
 	overflow: hidden;
-	height: 700px;
-	padding: $padding*5 $padding*2 $padding;
+	background: rgb(244, 233, 158);
+	height: 550px;
+	padding: 0;
 	width: 100%;
 	@include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-
-	// &:before {
-	// 	content: '';
-	// 	position: absolute;
-	// 	top: 0;
-	// 	right: 0;
-	// 	bottom: 0;
-	// 	left: 0;
-	// 	background: rgba(255,255,255,0.4);
-	// }
 
 	@media only screen and (max-width: 600px) {
 		height: 500px;
 	}
 
-	.hero__text {
-		position: relative;
-		height: auto;
-		color: white;
-		text-align: left;
-		padding: $padding*10 0 $padding;
+	.hero__desktop {
+		position: absolute;
+		left: 75px;
+		bottom: 65px;
+		width: 650px;
+		z-index: 3;
 
-		* {
-			width: 50%;
+		h1 {
+			position: absolute;
+			left: 17%;
+			top: 24%;
+			font-weight: bold;
+			width: 69%;
+			font-size: 30px;
+			text-align: left;
 		}
 
 		@media only screen and (max-width: 600px) {
-			padding: $padding*5 0 $padding;
-			* {
-				width: 100%;
-			}
-		}
-
-		h1 {
-			font-size: 40px;
-			line-height: $ribbonHeight;
-			@media only screen and (max-width: 600px) {
-				font-size: 26px;
-				line-height: $ribbonHeight/2;
-			}
-		}
-
-		p {
-			margin-top: $padding;
-			font-size: 17px;
-		}
-	}
-
-	.action {
-		padding: $padding*2 0;
-		text-align: left;
-		height: auto;
-		button {
-			border: 0;
-			font-weight: bold;
-			border-radius: $padding/2;
-			background: $primaryColor;
-			color: rgba(white, 0.9);
-			padding: $padding/2 $padding*2;
-		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
-
-			&:focus {
-				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+			left: 0;
+			bottom: 105px;
+			width: 100%;
+			h1 {
+			    font-size: 5vw;
+				left: 14%;
+				top: 17%;
+			    width: 70%;
 			}
 		}
 	}
 
-	.dots {
-		position: relative;
-		padding: $padding $padding*2 $padding*3;
-		@include animation(fadeAndZoomIn cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-	    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-		.dot {
-			position: absolute;
-			width: 10px;
-			height: 10px;
-			top: 50%;
-			left: 50%;
-			border: 3px solid lighten($bgColor, 50%);
-			border-radius: 18px;
-			@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-
-			&.selected {
-				border: 3px solid $secondaryColor;
-			}
-
-			&:first-of-type {
-				top: 75%;
-				left: 10%;
-			}
-			&:nth-of-type(2) {
-				top: 45%;
-				left: 33%;
-			}
-			&:nth-of-type(3) {
-				top: 30%;
-				left: 65%;
-			}
-			&:last-of-type {
-				top: 30%;
-				left: 89%;
-			}
-
-			@media only screen and (max-width: 600px) {
-				&:first-of-type {
-					top: 25%;
-					left: 10%;
-
-					.dot__bubble-leave {
-					  @include animation(fadeOutDownRightBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-					}
-				}
-				&:nth-of-type(2) {
-					top: 50%;
-					left: 25%;
-
-					.dot__bubble-leave {
-					  @include animation(fadeOutDownRightBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-					}
-				}
-				&:nth-of-type(3) {
-					top: 37%;
-					left: 65%;
-
-
-					.dot__bubble-leave {
-					  @include animation(fadeOutDownLeftBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-					}
-				}
-				&:last-of-type {
-					top: 70%;
-					left: 80%;
-
-
-					.dot__bubble-leave {
-					  @include animation(fadeOutDownLeftBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-					}
-				}
-			}
-
-			.dot__bubble-enter {
-			  @include animation(fadeAndGrowInUpBubble cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-			}
-		}
+	.hero__desk {
+		position: absolute;
+		left: -65px;
+		bottom: -200px;
+		width: 1150px;
+		z-index: 2;
 	}
 
+	.hero__background {
+	    position: absolute;
+	    width: 1800px;
+	    left: -150px;
+	    bottom: 0;
+	    top: -150px;
+	}
+
+	.hero__kip {
+		position: absolute;
+		z-index: 1;
+		width: 200px;
+		bottom: 325px;
+		left: 625px;
+		transform: rotate(11deg);
+		@media only screen and (max-width: 600px) {
+			left: 35px;
+			transform: rotate(0);
+			bottom: 315px;
+		}
+	}
 
 	.sine {
 		fill: white;
-		stroke: $borderColor;
-	    stroke-width: 0.5;
 	    margin-left: -1px;
+	    height: 150px;
+	    z-index: 10;
 	    width: calc(100% + 3px);
 	}
 }
-
-@keyframes fadeAndGrowInUpBubble {
-  0%   { opacity: 0; transform: translate3d(-45%, 40px, 0) scale(0); }
-  100% { opacity: 1; transform: translate3d(-45%, 0px, 0) scale(1); }
-}
-
-@keyframes fadeOutDownRightBubble {
-  0%   { opacity: 1; transform: translate3d(-45%, 0, 0) scale3d(1, 1, 1) rotate(0deg); }
-  70%   { opacity: 1; }
-  100% { opacity: 0; transform: translate3d(0%, 100px, 0) scale3d(0.2, 0.5, 1) }
-}
-
-@keyframes fadeOutDownLeftBubble {
-  0%   { opacity: 1; transform: translate3d(-45%, 0, 0) scale3d(1, 1, 1) rotate(0deg); }
-  70%   { opacity: 1; }
-  100% { opacity: 0; transform: translate3d(-85%, 100px, 0) scale3d(0.2, 0.5, 1); }
-}
-			

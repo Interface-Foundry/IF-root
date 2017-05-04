@@ -3,130 +3,73 @@
 
 .statement {
 	position: relative;
-	text-align: center;
+	text-align: left;
 	background: white;
+	margin: 0 auto;
+	padding: $padding*3 $padding*5 $padding*20;
 	@include animation(fadeInUp cubic-bezier(0.4, 0, 0.2, 1) 3s);
-	.card {
-		margin: 0 auto;
-		padding: $padding*3 $padding*2 $padding*20;
+
+
+	@media only screen and (max-width: 600px) {
+		padding: $padding*3 $padding*2 $padding*5;
+	}
+
+	.headline {
+		padding:$padding 0;
 
 		@media only screen and (max-width: 600px) {
-			padding: $padding*3 $padding*2 $padding*10;
-		}
-
-		.cart {
-			position: relative;
-			text-align: center;
-			border-radius: 100%;
-			height: $ribbonHeight*1.5;
-			width: $ribbonHeight*1.5;
-			margin: -$padding*9 auto $padding*5;
-
-			@media only screen and (max-width: 600px) {
-				margin: -$padding*9 auto $padding*3;
-			}
-
-			svg {
-				height: $ribbonHeight*1.5;
-				width: $ribbonHeight*1.5;
-				background: mix($primaryColor, white, 10%);
-				border-radius: 100%;
-				color: $primaryColor;
-				padding: $padding;
-				box-shadow: 0 4px 6px rgba(50,50,93,.33), 0 1px 3px rgba(0,0,0,.08);
-			}
-
-			.cart__length {
-				position: relative;
-				display: block;
-			    color: mix(white, $primaryColor, 90%);
-			    font-size: 12px;
-			    margin: -55px auto 0 5px;
-			    font-weight: bold;
-
-			    &.cart__length__text-enter {
-				  	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 1.66s);
-				}
-
-				&.cart__length__text-leave {
-					margin: -57px 0 0 3px;
-				  	@include animation(fadeOutDown cubic-bezier(0.4, 0, 0.2, 1) 1.66s);
-				}
-
-			}
-		}
-
-		.headline {
-			padding: 0 0 $padding*2;
-
-			@media only screen and (max-width: 600px) {
-				* {
-					font-size: 27px;
-				}
-			}
-
 			* {
-				display: inline-block;
-				line-height: $ribbonHeight;
-				font-size: 38px;
-				color: mix($primaryColor, $bgColor, 30%);
-			}
-
-			span {
-				height: $ribbonHeight - $padding;
-				line-height: $ribbonHeight - $padding;
-			}
-
-			& > h1 {
-				display: block;
-			}
-
-			h1 {
-				&.hightlight {
-					background: $primaryColor;
-				}
-			}
-
-			.Static {
-				* {
-					display: block;
-				}
+				font-size: 27px;
 			}
 		}
 
-		.Static {
-			display: block;
-		}
+		h1 {
+			display: inline-block;
+			line-height: $ribbonHeight;
+			font-size: 30px;
+			color: $primaryColor;
 
-		.text {
-			max-width: 700px;
-			text-align: left;
-
-			p {
-				font-size: 17px;
-				color: rgba(mix($primaryColor, $bgColor, 30%), 0.8);
+			&.hightlight {
+				background: $primaryColor;
 			}
 		}
+	}
 
-		.action {
-			padding: $padding*2 0;
-			text-align: left;
-		    max-width: 700px;
-			button {
-				border: 0;
-				font-weight: bold;
-				color: $thirdColor;
-				border-radius: $padding/2;
-				background: transparent;
-				font-weight: 500;
-				padding: $padding 0 $padding*2;
+	.text {
+		max-width: 500px;
+		text-align: left;
 
-				&:focus {
-					@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+		p {
+			font-size: 18px;
+			color: rgba(mix($primaryColor, $bgColor, 30%), 0.8);
+		}
+	}
+
+	.action {
+		padding: $padding*2 0 $padding*2;
+		button {
+			border: 0;
+			font-weight: bold;
+			border-radius: $padding/2;
+			background: white;
+			padding: $padding $padding*4;
+			font-size: 20px;
+			cursor: pointer;
+		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+			&:focus {
+				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+			}
+			&:first-of-type {
+				margin-right: $padding*2;
+				background: $secondaryColor;
+
+				@media only screen and (max-width: 600px) {
+					margin: 0 0 $padding*2;
 				}
 			}
 		}
 	}
+
 	.sine {
 		fill: mix(#fcfcf9, $primaryColor, 97%);
 		stroke: $borderColor;

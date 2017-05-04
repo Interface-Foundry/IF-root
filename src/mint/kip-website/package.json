@@ -32,18 +32,19 @@
     "body-parser": "^1.17.1",
     "case-sensitive-paths-webpack-plugin": "^2.0.0",
     "css-loader": "^0.28.0",
+    "ejs": "^2.5.6",
     "express": "^4.13.4",
     "file-loader": "^0.11.1",
     "node-sass": "^4.5.1",
     "react-hot-loader": "^3.0.0-beta.3",
+    "react-svg-loader": "^1.1.1",
     "sass": "^0.5.0",
     "sass-loader": "^6.0.3",
     "style-loader": "^0.16.1",
     "webpack": "^2.4.1",
     "webpack-dev-middleware": "^1.10.1",
     "webpack-dev-server": "^2.4.3",
-    "webpack-hot-middleware": "^2.17.1",
-    "ejs": "^2.5.6"
+    "webpack-hot-middleware": "^2.17.1"
   },
   "dependencies": {
     "babel-polyfill": "^6.13.0",

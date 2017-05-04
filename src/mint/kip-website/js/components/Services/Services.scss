@@ -4,22 +4,20 @@
 .services {
 	position: relative;
 	text-align: center;
-	background: mix(#fcfcf9, $primaryColor, 97%);
-	padding: $padding*3 $padding*2 $padding*15;
+	background: mix(white, $primaryColor, 97%);
+	padding: $padding*10 $padding*2 0;
 
 	@media only screen and (max-width: 600px) {
 		padding: $padding*3 $padding*2 $padding*6;
 	}
 
-	h1 {
-		font-size: 38px;
+	h3 {
+		font-size: 18px;
 		margin: 0 0 $padding*6;
-		color: mix($primaryColor, $bgColor, 30%);
+		color: $primaryColor;
 
 		@media only screen and (max-width: 600px) {
-			font-size: 34px;
-			line-height: auto;
-			margin: $padding*6 0 $padding;
+			margin: $padding*3 0;
 		}
 	}
 
@@ -29,24 +27,24 @@
 		font-size: 17px;
 	}
 
-	.video {
-		border: 1px solid $borderColor;
-		display: block;
-		margin: -230px auto 100px;
-		border-radius: 10px;
-		height: 500px;
-		box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
-		overflow: hidden;
+	.icons__hell {
+		padding: $padding*5 0 $padding*10;
 
-		iframe {
-			border: 1px solid $borderColor;
-			height: 100%;
-		}	
+		& > div {
+			display: inline-block;
+			width: (100%/3);
+			height: $ribbonHeight;
+
+			svg {
+				width: 100%;
+				height: $ribbonHeight;
+				fill: $primaryColor;
+				opacity: 0.8;
+			}
+		}
 
 		@media only screen and (max-width: 600px) {
-			height: 300px;
-			margin: -230px auto 0;
-			margin-top: -130px;
+			padding: $padding*5 0;
 		}
 	}
 
@@ -54,8 +52,35 @@
 
 	.services__details {
 		position: relative;
-		padding: $padding*2 0 $padding*4;
+		padding: $padding*2 $padding*2 $padding*4;
 		text-align: left;
+
+		&.card {
+			text-align: center;
+			border-radius: 10px;
+			width: calc(50% - 40px);
+			padding: $padding*2 $padding $padding;
+			margin: $padding*2 $padding*2;
+			z-index: 2;
+			background: mix(white, $primaryColor, 97%);
+			box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+			h2 {
+				color: $fifthColor;
+				text-align: left;
+				display: inline-block;
+				padding:0;
+				width: auto;
+			}
+			p {
+				text-align: center;
+				padding: 0;
+				width: 100%;
+			}
+
+			@media only screen and (max-width: 600px) {
+				margin: $padding*2 0;
+			}
+		}
 
 		@media only screen and (max-width: 600px) {
 			border-bottom: 1px solid rgba(mix($bgColor, $primaryColor, 57%), 0.2);
@@ -67,14 +92,23 @@
 			padding: $padding/2;
 
 			path {
-				fill: mix($primaryColor, $bgColor, 30%) !important;
+				fill: $primaryColor !important;
 			}
+		}
+
+		.image {
+			width: 20%;
+			height: $ribbonHeight*2;
+			background-size: contain;
+			display: inline-block;
 		}
 
 		h2 {
 			display: inline-block;
 			width: 60%;
 			white-space: nowrap;
+			padding: 0 0 0 $padding;
+			color: $primaryColor;
 			line-height: $ribbonHeight*2;
 			margin: 0;
 		}
@@ -105,33 +139,32 @@
 	}
 
 	.action {
-		padding: $padding*2 0;
-		text-align: left;
+		padding: $padding*2 0 $padding*2;
 		button {
 			border: 0;
 			font-weight: bold;
-			color: $thirdColor;
 			border-radius: $padding/2;
-			background: transparent;
-			font-weight: 500;
-			padding: $padding 0 $padding*2;
-
+			background: $secondaryColor;
+			padding: $padding $padding*4;
+			font-size: 20px;
+			cursor: pointer;
+		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 			&:focus {
 				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+			}
+			&.slack {
+				margin-right: $padding*2;
+				background: white;
 			}
 		}
 	}
 
 	.sine {
-		fill: white;
-		stroke: rgba(mix($bgColor, $primaryColor, 57%), 0.2);
-	    stroke-width: 0.2;
-	    height: 150px;
+		fill: rgb(211, 239, 247);
 	    margin-left: -1px;
+	    height: 150px;
+	    z-index: 1;
 	    width: calc(100% + 3px);
-
-	    @media only screen and (max-width: 600px) {
-	    	height: 50px;
-	    }
 	}
+
 }

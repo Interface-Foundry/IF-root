@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 
-const assetsPath = path.resolve(__dirname, '../../public/build');
+const assetsPath = path.resolve(__dirname, '../dist');
 var appDir = path.resolve(__dirname, '../js');
 
 module.exports = {
@@ -33,6 +33,23 @@ module.exports = {
       {
         test: /\.scss$|\.sass$/,
         loader: 'style-loader!css-loader!sass-loader'
+      },
+      {
+        test: /\.svg$/,
+        loaders: [
+          {
+            loader: 'babel-loader',
+            query: {
+              presets: ['es2015']
+            }
+          },
+          {
+            loader: 'react-svg-loader',
+            query: {
+              jsx: true
+            }
+          }
+        ]
       }
     ]
   },

@@ -7,7 +7,7 @@
 	top: 0;
 	width: 100%;
 	height: auto;
-	z-index: 1;
+	z-index: 500;
 	text-align: center;
 	background: transparent;
 	border-bottom: 1px solid transparent;
@@ -18,18 +18,10 @@
     	background: white;
 		border-bottom: 1px solid $borderColor;
 		box-shadow: 0 4px 6px rgba(50,50,93,.33), 0 1px 3px rgba(0,0,0,.08);
-
-		h1 {
-			color: $primaryColor;
-		}
-
-		* {
-			color: mix($primaryColor, $bgColor, 30%);
-		}
     }
 
 	* {
-		color: white;
+		color: $primaryColor;
 	}
 	& > div {
 		text-align: left;

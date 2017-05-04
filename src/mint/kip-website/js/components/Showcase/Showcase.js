@@ -5,47 +5,22 @@ import React, { Component } from 'react';
 import { Icon } from '../../themes';
 
 export default class Showcase extends Component {
-
   	render() {
 	    return (
 	      	<div className="showcase"> 
-	      		<h1>GROW WITH US AND OUR PARTNERS</h1>
-
-	      		<div className="col-12 row-1 icons__hell">
-	        		<div><Icon icon='Amazon'/></div>
-	        		<div><Icon icon='Google'/></div>
-	        		<div><Icon icon='Slack'/></div>
-	        		<div><Icon icon='Microsoft'/></div>
-	        		<div><Icon icon='Delivery'/></div>
-	        	</div>
-
-		        <div className="col-6 row-1 showcase__details right">
-		        	<div className="col-12 row-1 text">
-			        	<Icon icon='Dummy'/>
-			        	<div className="services__text">
-		        			<h2 className="col-4">KIP MINT</h2>
-			        		<p>Use advanced machine learning that learns from 100,000+ global businesses to help your company beat fraud</p>
-			        	</div>
-			        	<button>
-		        			Check out Kip on Web
-		        			&nbsp;<Icon icon='Right'/>
-		        		</button>
-	        		</div>
-		        </div>
-
-		       	<div className="col-6 row-1 showcase__details">
-		       		<div className="col-12 row-1 text">
-				       	<Icon icon='Dummy'/>
-			        	<div className="services__text">
-		        			<h2 className="col-4">KIP SLACK</h2>
-							<p>Use advanced machine learning that learns from 100,000+ global businesses to help your company beat fraud</p>
-			        	</div>
-			        	<button>
-		        			Check out Kip on Slack
-		        			&nbsp;<Icon icon='Right'/>
-		        		</button>
-		        	</div>
-		        </div>
+	      		<div className="phone image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/phonebackground.png")'}}/ >
+				<svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
+					<g>
+						<path d="M0,26.5c9.7,3.8,20.3,4.2,30.3,0.9c1.9-0.6,3.8-1.4,5.7-2.2c10.6-4.5,20.7-10.2,31.1-15.1s21.4-9,32.9-10
+							v31.7H0V26.5z"/>
+					</g>
+				</svg>
+				<svg className="bottom" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
+					<g>
+						<path d="M0,26.5c9.7,3.8,20.3,4.2,30.3,0.9c1.9-0.6,3.8-1.4,5.7-2.2c10.6-4.5,20.7-10.2,31.1-15.1s21.4-9,32.9-10
+							v31.7H0V26.5z"/>
+					</g>
+				</svg>
 	      	</div>
 	    );
   	}

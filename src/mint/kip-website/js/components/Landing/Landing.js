@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 
-import { Ribbon, Services, About, Showcase, Reviews, Footer } from '..';
+import { Ribbon, Services, About, Showcase, Footer } from '..';
 import { HeroContainer, StatementContainer, SidenavContainer, ModalContainer } from '../../containers';
 
 
@@ -60,9 +60,9 @@ export default class Landing extends Component {
           <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav}/>
           <HeroContainer/>
           <StatementContainer/>
-          <Services/>
           <About/>
           <Showcase/>
+          <Services/>
           <Footer/>
         </div>
       </span>
