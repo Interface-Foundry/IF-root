@@ -6,12 +6,10 @@ import { Route } from 'react-router';
 import ReactDOM from 'react-dom'
 
 import { CartContainer } from '../../containers';
-import { Overlay, Modal } from '..';
+import { Overlay, Modal, Toast } from '..';
 import Header from './Header';
 import Sidenav from './Sidenav';
 import Footer from './Footer';
-
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 //Analytics!
 import ReactGA from 'react-ga';
@@ -42,9 +40,6 @@ export default class App extends Component {
 
   state = {
     sidenav: false,
-    status: null,
-    toast: null,
-    showedToast: false,
     isMobile: false
   }
 
@@ -62,10 +57,9 @@ export default class App extends Component {
   }
 
   componentWillMount() {
-    const { props: { fetchCart, fetchAllCarts, cart_id, status, toast } } = this;
+    const { props: { fetchCart, fetchAllCarts, cart_id } } = this;
     if (cart_id) fetchCart(cart_id);
     fetchAllCarts();
-    if (toast && status)::this._showToast(status, toast);
   }
 
   componentDidMount() {
@@ -77,9 +71,15 @@ export default class App extends Component {
   componentWillReceiveProps(nextProps) {
     const {
       _logPageView,
-      props: { fetchCart, fetchAllCarts, cart_id, session_id, status, toast, location: { pathname } }
+      props: {
+        fetchCart,
+        fetchAllCarts,
+        cart_id,
+        session_id,
+        location: { pathname }
+      }
     } = this;
-    const { cart_id: nextCart_id, session_id: nextSessionId, status: newStatus, toast: newToast } = nextProps;
+    const { cart_id: nextCart_id, session_id: nextSessionId, toast: newToast } = nextProps;
 
     if (!session_id && nextSessionId) {
       ReactGA.initialize('UA-51752546-10', {
@@ -94,25 +94,30 @@ export default class App extends Component {
       fetchCart(nextCart_id);
       fetchAllCarts();
     }
-    if ((newToast && newStatus) && (toast !== newToast || status !== newStatus))::this._showToast(newStatus, newToast);
     if (newToast && newToast.includes('Cart Updated')) fetchAllCarts();
-  }
-
-  _showToast(status, toast) {
-    const { history: { replace }, cart_id } = this.props;
-    setTimeout(() => this.setState({ status, toast, showedToast: false }), 1);
-    setTimeout(() => {
-      this.setState({ toast: null, status: null, showedToast: true });
-      replace(`/cart/${cart_id}/`);
-    }, 3000);
   }
 
   render() {
     const {
       _toggleSidenav,
       props,
-      props: { cart_id, currentCart, updateCart, newAccount, leader, carts, match, currentUser, location, logout, items, history: { replace } },
-      state: { sidenav, toast, status, showedToast, isMobile }
+      props: {
+        toast,
+        status,
+        cart_id,
+        currentCart,
+        updateCart,
+        newAccount,
+        leader,
+        carts,
+        match,
+        currentUser,
+        location,
+        logout,
+        items,
+        history: { replace }
+      },
+      state: { sidenav, isMobile }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit');
     const showSidenav = !location.pathname.includes('/m/signin');
@@ -120,22 +125,10 @@ export default class App extends Component {
     if (newAccount === false) {
       return <Overlay/>;
     }
+    console.log('app', { toast, status });
     return (
       <section className='app'>
-        {
-           <CSSTransitionGroup
-              transitionName='toastTransition'
-              transitionEnterTimeout={0}
-              transitionLeaveTimeout={0}>
-              {
-                toast && !showedToast
-                ? <div className={`${status} toast`} key={toast}>
-                    {toast}
-                  </div>
-                : null
-            }
-            </CSSTransitionGroup> 
-        }
+        <Toast toast={toast} status={status} loc={location} history={history}/>
         <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
         <div className={`app__view ${showFooter ? '' : 'large'}`}>
           { /* Renders modal when route permits */ }

@@ -1,0 +1,41 @@
+// react/components/Toast/Toast.scss
+@import '../../styles/Constants';
+@import '../../styles/Animations';
+
+.toast {
+  @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.6s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+  z-index: 200;
+  top: $padding;
+  left: $padding*2;
+  right: $padding*2;
+  border-radius: $padding/2;
+  font-size: 30px;
+  position: absolute;
+  background: white;
+  height: $nav-height;
+  padding: $padding;
+  color: white;
+  z-index: 100;
+  box-shadow: $card-box-shadow;
+  &.err {
+    background: rgba($price-color, 0.98);
+  }
+  &.warn {
+    background: rgba($main-button-color, 0.98);
+  }
+  &.success {
+    background: rgba($third-button-color, 0.98);
+  }
+}
+
+.toastTransition-enter {
+  @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.toastTransition-leave {
+  @include animation(fadeOutUp cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+}
+

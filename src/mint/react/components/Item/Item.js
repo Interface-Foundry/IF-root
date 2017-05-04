@@ -175,6 +175,7 @@ export default class Item extends Component {
         else if (type === 'cartItem')::this.navCart(newIndex);
       },
       showButton = type === 'deal' || type === 'search' || (type === 'cartItem' && myItems.length > 1);
+
     return (
       <div className='item_container'>
           <div className='item'>

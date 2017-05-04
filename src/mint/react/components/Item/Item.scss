@@ -76,14 +76,16 @@
             margin: 0 auto;
             height: 150px;
             &.loading {
+              opacity: 1;
+              background-size: 70px 70px;
+              height: calc(100vh - 140px);
               &:after {
                 content: '';
                 @include animation(placeHolderShimmer linear 1s infinite);
-                height: 150px;
-                width: 150px;
+                height: calc(100vh - 140px);
+                width: calc(100vw - 140px);
                 margin: auto;
-                background: $kip-primary-color;
-                background: linear-gradient(to right, rgba($kip-primary-color, 0.4) 8%, rgba($kip-primary-color, 0.7) 18%, rgba($kip-primary-color, 0.4) 33%);
+                background: linear-gradient(to right, rgba($kip-primary-color, 0.1) 8%, rgba($kip-primary-color, 0.7) 18%, rgba($kip-primary-color, 0.1) 33%);
                 background-size: 800px 150px;
                 position: relative;
               }

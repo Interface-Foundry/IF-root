@@ -60,7 +60,8 @@
           border-bottom: 0;
           text-indent: underline;
           svg {
-            @include animation(bounceDownSmall 2s infinite);
+            @include animation(bounceDownSmall 2s);
+            animation-iteration-count: 3; // too much twitching
           }
         }
       }
