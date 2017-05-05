@@ -73,20 +73,20 @@ class CartFooter extends Component {
   }
 
   render() {
-    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items, isMobile } = this.props;
+    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items, isMobile, history: { replace } } = this.props;
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
     const total = calculateItemTotal(items);
 
     if (locked) {
       return (
         <div className='footer__cart'>
-          <button className='green'>
+          <button className='green' onClick={() => replace(`/cart/${cart_id}/m/feedback`)}>
             <Icon icon='Email'/>
             FEEDBACK
           </button>
           {
             isLeader
-            ? <button className='share'>
+            ? <button className='share' onClick={() => replace(`/cart/${cart_id}/m/share`)}>
                 <Icon icon='Cart'/>
                 EMAIL ITEMS
               </button>
