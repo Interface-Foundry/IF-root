@@ -20,14 +20,14 @@ export default class SignIn extends Component {
     return (
       <div className="modal">
         <Switch>
-          <Route path={`${match.url}/item/add`} component={AmazonFormContainer} />
-          <Route path={`${match.url}/:item_type/:index/:item_id/edit`} exact component={ItemContainer} />
-          <Route path={`${match.url}/:item_type/:index/:amazon_id`} component={ItemContainer} />
-          <Route path={`${match.url}/signin`} component={EmailFormContainer} />
-          <Route path={`${match.url}/edit/:edit_cart_id`} component={EditCartContainer} />
-          <Route path={`${match.url}/share`} component={Share} />
-          <Route path={`${match.url}/settings`} component={SettingsContainer} />
-          <Route path={`${match.url}/feedback`} component={FeedbackContainer} />
+          <Route path={'/cart/:cart_id/m/item/add'} exact component={AmazonFormContainer} />
+          <Route path={'/cart/:cart_id/m/:item_type/:index/:item_id/edit'} exact component={ItemContainer} />
+          <Route path={'/cart/:cart_id/m/:item_type/:index/:amazon_id'} exact component={ItemContainer} />
+          <Route path={'/cart/:cart_id/m/signin'} exact component={EmailFormContainer} />
+          <Route path={'/cart/:cart_id/m/edit/:edit_cart_id'} exact component={EditCartContainer} />
+          <Route path={'/cart/:cart_id/m/share'} exact component={Share} />
+          <Route path={'/cart/:cart_id/m/settings'} exact component={SettingsContainer} />
+          <Route path={'/cart/:cart_id/m/feedback'} exact component={FeedbackContainer} />
         </Switch>
       </div>
     );

@@ -28,8 +28,6 @@ export default class Toast extends Component {
   }
 
   _showToast(status, toast) {
-    const { replace, loc } = this.props;
-    console.log({ replace });
     setTimeout(() => this.setState({ status, toast, showToast: true }), 1);
     setTimeout(() => {
       this.setState({ toast: null, status: null, showToast: false });
