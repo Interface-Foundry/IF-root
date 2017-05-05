@@ -18,9 +18,12 @@ export default class About extends Component {
 
 					<h1>Press Coverage</h1>
 					<div className="col-12 row-1 icons__hell">
+						<div><Icon icon='Fastcompany'/></div>
+						<div><Icon icon='Time'/></div>
 		        		<div><Icon icon='Venturebeat'/></div>
+		        		<div><Icon icon='Wallstreet'/></div>
 		        		<div><Icon icon='Paymentsource'/></div>
-		        		<div><Icon icon='Fastcompany'/></div>
+
 		        	</div>
 
 					<h1>Featured Partners</h1>
@@ -33,19 +36,19 @@ export default class About extends Component {
 		        	</div>
 
 			        <div className="col-6 row-1 services__details">
-			        	<div className="image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/moneycartClip.png")'}}/ >
+			        	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/moneycartClip.png")'}}/ >
 		        		<h2>TRACK SPENDING</h2>
 			        	<p>Save money and track spending with Kip. See how much you’re spending in every order, save on shipping and account fees with shared shopping carts.</p>
 			        </div>
 
 			       	<div className="col-6 row-1 services__details">
-				       	<div className="image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/cloudClip.png")'}}/ >
+				       	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/cloudClip.png")'}}/ >
 			        	<h2>KEEP IT IN CLOUD</h2>
 			       		<p>Use Kip to keep things you love in the cloud. Browse through different products, save things you’re interested in and checkout when the price is right.</p>
 			        </div>
 
 			        <div className="col-6 row-1 services__details card">
-			        	<div className="image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/directClip.png")'}}/ >
+			        	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/directClip.png")'}}/ >
 		        		<h2>Kip Direct</h2>
 		        		<p>No installs or download</p>
 			        	<p>Unique short URL to share</p>
@@ -56,7 +59,7 @@ export default class About extends Component {
 			        </div>
 
 			       	<div className="col-6 row-1 services__details card">
-				       	<div className="image" style={{backgroundImage: 'url("https://s3.amazonaws.com/assets-chachat/slackClip.png")'}}/ >
+				       	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/slackClip.png")'}}/ >
 			        	<h2>Kip for Slack</h2>
 			        	<p>Great for teams already on Slack</p>
 			        	<p>Chat with Kip bot for essentials</p>

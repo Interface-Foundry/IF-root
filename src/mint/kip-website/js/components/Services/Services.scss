@@ -55,7 +55,7 @@
 		& > div {
 			display: inline-block;
 			width: (100%/3);
-			height: $ribbonHeight;
+			height: $ribbonHeight+10;
 
 			svg {
 				width: 100%;
