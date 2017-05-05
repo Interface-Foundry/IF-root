@@ -23,22 +23,7 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
 		padding-bottom: $padding*15;
 
 		div {
-			&:nth-of-type(1) {
-				display: none;
-			}
-			&:nth-of-type(2) {
-				display: none;
-			}
-			&:nth-of-type(3) {
-				display: none;
-			}
-			&:nth-of-type(4) {
-				display: none;
-			}
-			&:nth-of-type(5) {
-				display: none;
-			}
-			&:nth-of-type(6) {
+			&:nth-of-type(even) {
 				display: none;
 			}
 		}
@@ -79,11 +64,11 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
 }
 
 @keyframes fallDownSqueezeMobile {
-  0%   { opacity: 1; transform: translate3d(0px, 0px, 0) scale(1); }
-  100% { opacity: 0; transform: translate3d(0px, 250px, 0) scale(0.3); }
+  0%   { opacity: 1; transform: translate3d(0px, 0px, 0) scale3d(1,1,1); }
+  100% { opacity: 0; transform: translate3d(0px, 250px, 0) scale3d(0.3,0.3,0.3); }
 }
 
 @keyframes fallDownSqueeze {
-  0%   { opacity: 1; transform: translate3d(0px, 0px, 0) scale(1); }
-  100% { opacity: 0; transform: translate3d(-350px, -200px, 0) scale(0.3); }
+  0%   { opacity: 1; transform: translate3d(0px, 0px, 0) scale3d(1,1,1); }
+  100% { opacity: 0; transform: translate3d(-350px, -200px, 0) scale3d(0.3,0.3,0.3); }
 }

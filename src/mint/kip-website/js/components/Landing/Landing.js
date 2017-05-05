@@ -22,7 +22,7 @@ export default class Landing extends Component {
       fixed: false,
       sidenav: false,
       modal: false,
-      animationHeight: 0,
+      animationOffset: 0,
       containerHeight: 0,
       animationState: 'inital'
     };
@@ -38,7 +38,7 @@ export default class Landing extends Component {
 
   _handleScroll (e) {
     const scrollTop = ReactDOM.findDOMNode(this.landing).scrollTop,
-      { state: { fixed, animationState, animationHeight, containerHeight }} = this;
+      { state: { fixed, animationState, animationOffset, containerHeight }} = this;
 
     // stops and starts header animation, and fixes navbar to top;
     if(scrollTop > 400 && !fixed ||  scrollTop <= 400 && fixed) {
@@ -47,8 +47,8 @@ export default class Landing extends Component {
       })
     }
 
-    // animate using mobile or desktop scroll;
-    this.setState(animateScroll(containerHeight, animationHeight, scrollTop, animationState))
+    // animate scroll, needs height of the container, and its distance from the top
+    this.setState(animateScroll(containerHeight, animationOffset, scrollTop, animationState))
   }
 
   _toggleSidenav () {
@@ -65,7 +65,7 @@ export default class Landing extends Component {
 
   _registerHeight (heightFromTop, containerHeight) {
     this.setState({
-      animationHeight: heightFromTop,
+      animationOffset: heightFromTop,
       containerHeight: containerHeight
     })
   }

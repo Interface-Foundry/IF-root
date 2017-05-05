@@ -68,6 +68,7 @@
 	    left: -150px;
 	    bottom: 0;
 	    top: -150px;
+	    z-index: -1;
 	}
 
 	.hero__kip {
@@ -109,39 +110,27 @@
 
 @keyframes moveAround {
 	0%, 10%, 90%, 100% {
-	  	transform: rotate(11deg);
-	  	bottom: 325px;
-	  	left: 625px;
+	  	transform: translate3d(0,0,0) rotate3d(0, 0, 0, 11deg);
 	}
 	15%, 50% {
-		transform: rotate(11deg);
-	    left: 625px;
-		bottom: 300px;
+		transform: translate3d(0,25px,0) rotate3d(0, 0, 0, 11deg);
 	} 
 	55%, 80% {
-	  	transform: rotate(0deg);
-	    left: 750px;
-		bottom: 300px;
+		transform: translate3d(125px, 25px,0) rotate3d(0, 0, 0, 0deg);
 	}
 	90% {
-		transform: rotate(-3deg);
-		left: 650px;
-		bottom: 310px;
+		transform: translate3d(25px, 15px,0) rotate3d(0, 0, 0, -3deg);
 	}
 }
 
 @keyframes moveAroundMobile {
 	0%, 10%, 90%, 100% {
-		left: 155px;
-		transform: rotate(0);
-		bottom: 315px;
+		transform: translate3d(0,0,0) rotate3d(0, 0, 0, 0deg);
 	}
 	15%, 50% {
-		left: 155px;
-		bottom: 300px;
+		transform: translate3d(0,15px,0) rotate3d(0, 0, 0, 11deg);
 	} 
 	55%, 80% {
-	    left: 35px;
-		bottom: 300px;
+		transform: translate3d(-120px,15px,0) rotate3d(0, 0, 0, 11deg);
 	}
 }
