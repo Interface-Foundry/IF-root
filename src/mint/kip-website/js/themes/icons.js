@@ -19,7 +19,9 @@ import {
 	IoClose,
 	IoPlus,
 	IoLogOut,
-	IoLogIn
+	IoLogIn,
+	IoSocialFacebook,
+	IoSocialTwitter
 } from 'react-icons/lib/io'
 
 import {
@@ -104,6 +106,10 @@ export default class Icon extends Component {
 		    	return <Time/>
 		    case 'Venturebeat':
 		    	return <Venturebeat/>
+		    case 'Facebook':
+		    	return <IoSocialFacebook/>
+		    case 'Twitter':
+		    	return <IoSocialTwitter/>
       	}
     }
 }
