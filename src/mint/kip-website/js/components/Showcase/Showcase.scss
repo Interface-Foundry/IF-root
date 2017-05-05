@@ -34,6 +34,7 @@ $centerPhone: calc(50% - 212.5px);
 			left: 0;
 			border: 1px solid $borderColor;
 			top: -120px;
+			padding: $padding*3;
 
 			svg {
 				position: absolute;
@@ -41,6 +42,16 @@ $centerPhone: calc(50% - 212.5px);
 				right: -50px;
 				height: 100px;
 				width: 100px;
+			}
+
+			h1 {
+				color: $primaryColor;
+				font-weight: bold;
+				text-align: left;
+
+				@media only screen and (max-width: 600px) {
+					font-size: 4vw;
+				}
 			}
 		}
 

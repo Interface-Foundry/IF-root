@@ -76,14 +76,17 @@ export default class Showcase extends Component {
 			case 'fixed first bubble':
 				return <div key={animationState} className='bubble'>
 					<Lightbulb/>
+					<h1>Browse items or paste a URL to add things to your Kip Cart.</h1>
 				</div>
 			case 'fixed second bubble':
 				return <div key={animationState} className='bubble'>
 					<Layers/>
+					<h1>Swipe and Save your Favourite Items to cart.</h1>
 				</div>
 			case 'fixed third bubble':
 				return <div key={animationState} className='bubble'>
 					<Mouse/>
+					<h1>Invite friends to add to your Kip Cart, share shipping and other fees.</h1>
 				</div>
 			case 'absolute':
 				return null
