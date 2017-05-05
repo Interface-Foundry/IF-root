@@ -13,6 +13,11 @@ const imageSrc = [
 ]
 
 export default class Showcase extends Component {
+	  constructor(props) {
+		super(props);
+		this._getSource = ::this._getSource;
+		this.renderBubbles = :: this.renderBubbles;
+	}
 
 	componentDidMount () {
 		const { animationState, _registerHeight } = this.props;
@@ -27,7 +32,7 @@ export default class Showcase extends Component {
 		})
 	}
 
-	renderSource () {
+	_getSource () {
 		const { animationState } = this.props;
 
 		switch (animationState) {
@@ -44,15 +49,33 @@ export default class Showcase extends Component {
 		}
 	}
 
+	renderBubbles () {
+		const { animationState } = this.props;
+
+		switch (animationState) {
+			case 'inital':
+				return <div></div>
+			case 'fixed first':
+				return <div></div>
+			case 'fixed second':
+				return <div></div>
+			case 'fixed third':
+				return <div></div>
+			case 'absolute':
+				return <div></div>
+		}
+	}
+
   	render() {
-  		const { animationState } = this.props;
+  		const { props: { animationState }, _getSource, renderBubbles } = this;
 
 	    return (
 	      	<div className='showcase'> 
 	      		<div className={`phone image ${animationState}`}> 
 	      			<div className='image gif'
-                      style={ { backgroundImage: `url(${this.renderSource()})` } }/>
+                      style={ { backgroundImage: `url(${_getSource()})` } }/>
 	      		</div>
+	      		{ renderBubbles() }
 				<svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
 					<g>
 						<path d="M0,26.5c9.7,3.8,20.3,4.2,30.3,0.9c1.9-0.6,3.8-1.4,5.7-2.2c10.6-4.5,20.7-10.2,31.1-15.1s21.4-9,32.9-10

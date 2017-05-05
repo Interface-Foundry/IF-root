@@ -39,18 +39,10 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
 	// loop!
 	@each $icon in $icons {
 	  .#{$icon} {
-	    width: random(34) + 15%;
+	    width: random(34) + 14%;
 	    display: inline-block;
 	    @include animation(fadeAndZoomIn cubic-bezier(0.4, 0, 0.2, 1) (random(3) - 0.33s));
     	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-
-    	@media only screen and (min-width: 600px) {
-	    	&:last-of-type {
-	    		position: fixed;
-	    		bottom: 0;
-	    		left: -300px;
-	    	}
-    	}
 
     	&.animate {
     		@include animation(fallDownSqueeze cubic-bezier(0.4, 0, 0.2, 1) 1s);

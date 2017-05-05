@@ -216,7 +216,7 @@ class EmptyCart extends Component {
   render() {
     return (
       <li className='cart__items-empty'>
-        <div className='image' style={{backgroundImage:'url(https://storage.googleapis.com/kip-random/head_smaller.png)'}}/>
+        <div className='image' style={{backgroundImage:'url(//storage.googleapis.com/kip-random/head_smaller.png)'}}/>
       </li>
     );
   }

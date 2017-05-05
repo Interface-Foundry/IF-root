@@ -159,7 +159,7 @@ export default class Item extends Component {
       ? items[parseInt(index)].large
       : main_image_url
       ? main_image_url
-      : 'https://storage.googleapis.com/kip-random/head%40x2.png',
+      : '//storage.googleapis.com/kip-random/head%40x2.png',
       next = () => {
         this.setState({ animation: 'slideLeft' });
         if (type === 'search') return nextSearch();

@@ -116,6 +116,7 @@ export default class App extends Component {
         newAccount,
         leader,
         carts,
+        match,
         currentUser,
         location,
         logout,
@@ -138,7 +139,7 @@ export default class App extends Component {
             <Route path={'/404'} exact component={ErrorPage} />
 
             { /* Renders modal when route permits */ }
-            <Route path={'/cart/:cart_id/m/'} component={Modal} />
+            <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
 
             { /* Renders cart when route permits */ }
             <Route path={'/cart/:cart_id'} exact component={CartContainer} />
