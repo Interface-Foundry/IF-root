@@ -4,6 +4,6 @@ import React, { Component } from 'react';
 
 export default class ErrorPage extends Component {
   render() {
-    return <div> whoops! </div>;
+    return <div> <img src='//storage.googleapis.com/kip-random/kip404.png'/> whoops! </div>;
   }
 }

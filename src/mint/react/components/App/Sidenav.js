@@ -42,8 +42,8 @@ export default class Sidenav extends Component {
   render() {
     const { carts, _toggleSidenav, currentUser, cart_id } = this.props, { show } = this.state;
 
-    const leaderCarts = _.filter(carts, (c, i) => c.leader.id && currentUser.id && c.leader.id === currentUser.id),
-      memberCarts = _.filter(carts, (c, i) => !c.leader || (c.leader.id !== currentUser.id));
+    const leaderCarts = carts.filter((c, i) => _.get(c, 'leader.id') === _.get(currentUser, 'id')),
+      memberCarts = carts.filter((c, i) => _.get(c, 'leader.id') !== _.get(currentUser, 'id'));
 
     return (
       <div className='sidenav'>
