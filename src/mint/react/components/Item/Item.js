@@ -155,11 +155,10 @@ export default class Item extends Component {
     const myItems = leader && id !== leader.id
       ? splitItems.my
       : items;
-    let imageUrl = (items[parseInt(index)] && items[parseInt(index)].large)
+    let imageUrl =
+      (items[parseInt(index)] && items[parseInt(index)].large)
       ? items[parseInt(index)].large
-      : main_image_url
-      ? main_image_url
-      : '//storage.googleapis.com/kip-random/head%40x2.png',
+      : main_image_url,
       next = () => {
         this.setState({ animation: 'slideLeft' });
         if (type === 'search') return nextSearch();
@@ -176,7 +175,17 @@ export default class Item extends Component {
       },
       showButton = type === 'deal' || type === 'search' || (type === 'cartItem' && myItems.length > 1);
 
-    return (
+    if (!imageUrl) return (
+      <div className='placeholder' src='//storage.googleapis.com/kip-random/head_smaller.png'>
+        <div className='mask top' />
+        <div className='mask left photo' />
+        <div className='mask right photo' />
+        <div className='mask middle' />
+        <div className='mask left text' />
+        <div className='mask right text' />
+      </div>
+    );
+    else return (
       <div className='item_container'>
           <div className='item'>
             <RouteTransition
@@ -190,7 +199,7 @@ export default class Item extends Component {
               >
                 {showButton ? <button onClick={()=>prev()}>&lt;</button> : null}
                 <div className='item__info__wrapper'>
-                  <div className={`item__view__image image row ${imageUrl.includes('kip-random') ? 'loading' : ''}`}
+                  <div className={'item__view__image image row'}
                       style={ { backgroundImage: `url(${imageUrl})` } }>
                   </div>
                   <div className='item__view__atts'>

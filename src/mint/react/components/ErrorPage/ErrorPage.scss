@@ -1,9 +1,4 @@
 // react/components/ErrorPage/ErrorPage.scss
-$pink: #d61c5b;
-$red: #f1573f;
-$orange: #feb213;
-$green: #6abc4e;
-$blue: #2599d8;
 .uhoh {
   display: flex;
   flex-direction: column;
@@ -11,42 +6,45 @@ $blue: #2599d8;
   align-items: center;
   justify-items: flex-start;
   .faceplant {
-    height: 300px;
+    width: 40vw;
     margin: auto;
   }
   .ohno {
-    text-transform: uppercase;
-    font-size: 70px;
-    line-height: 1;
-    transform: translate(0, -50%);
-    color: $blue;
-    &:before, &:after, span:before, span:after {
+    //stolen from https://codepen.io/mandymichael/pen/evZPZG
+    font-size: 20vw;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    font-weight: 900;
+    white-space: nowrap;
+    font-family: 'Vaba';
+    color: #d5274e;
+    mix-blend-mode: difference;
+    text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, -2px 2px 0 #fcde8b, 2px 2px 0 #fcde8b, -3px 3px 0 #fcde8b, 3px 3px 0 #fcde8b;
+    &:before {
       content: attr(data-heading);
       position: absolute;
-      overflow: hidden;
       left: 0;
-    }
-    &:before {
-      color: $pink;
-      height: 34%;
-      z-index: 5;
+      top: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      color: #000;
+      clip-path: polygon(0% 30%, 6% 27%, 37% 47%, 49% 32%, 63% 46%, 84% 28%, 98% 56%, 89% 95%, 45% 70%, 14% 75%);
     }
     &:after {
-      color: $red;
-      height: 50%;
-      z-index: 4;
-    }
-    span {
-      &:before {
-        color: $orange;
-        height: 66%;
-        z-index: 3;
-      }
-      &:after {
-        color: $green;
-        height: 80%;
-        z-index: 2;
-      }
+      content: attr(data-heading);
+      position: absolute;
+      left: 0;
+      top: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      color: #0b5e51;
+      clip-path: polygon(0% 18%, 8% 27%, 37% 47%, 49% 32%, 63% 46%, 84% 28%, 98% 56%, 89% 95%, 45% 70%, 17% 75%);
+      transform: scale(1.01, .85) translate(-1%, 1%);
     }
   }
 }

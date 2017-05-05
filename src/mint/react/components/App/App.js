@@ -126,10 +126,11 @@ export default class App extends Component {
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404');
     const showSidenav = !location.pathname.includes('/m/signin');
+    if (newAccount === false) {
+      return <Overlay/>;
+    }
     return (
-      newAccount
-      ? <Overlay/>
-      : <section className='app'>
+        <section className='app'>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
           <div className={`app__view ${showFooter ? '' : 'large'}`}>
