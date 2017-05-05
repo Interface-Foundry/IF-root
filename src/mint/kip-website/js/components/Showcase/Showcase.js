@@ -3,8 +3,22 @@
 import React, { Component } from 'react';
 import { DefaultPlayer as Video } from 'react-html5video';
 import ReactDOM from 'react-dom'
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import { Icon } from '../../themes';
+import { 
+	Burger,
+	Clock,
+	DesktopIcon,
+	Happy,
+	Layers,
+	Lightbulb,
+	Milk,
+	Mouse,
+	Paper,
+	Pencil,
+	Pizza
+} from '../../themes/kipsvg';
 
 const imageSrc = [
 	'https://storage.googleapis.com/kip-random/demo_1_desktop.gif',
@@ -54,15 +68,21 @@ export default class Showcase extends Component {
 
 		switch (animationState) {
 			case 'inital':
-				return <div></div>
+				return null
 			case 'fixed first':
-				return <div></div>
+				return <div key={animationState} className='bubble'>
+					<Lightbulb/>
+				</div>
 			case 'fixed second':
-				return <div></div>
+				return <div key={animationState} className='bubble'>
+					<Layers/>
+				</div>
 			case 'fixed third':
-				return <div></div>
+				return <div key={animationState} className='bubble'>
+					<Mouse/>
+				</div>
 			case 'absolute':
-				return <div></div>
+				return null
 		}
 	}
 
@@ -72,10 +92,15 @@ export default class Showcase extends Component {
 	    return (
 	      	<div className='showcase'> 
 	      		<div className={`phone image ${animationState}`}> 
+	      			<CSSTransitionGroup
+				        transitionName="bubble"
+				        transitionEnterTimeout={0}
+				        transitionLeaveTimeout={0}>
+		      			{ renderBubbles() }
+		      		</CSSTransitionGroup>
 	      			<div className='image gif'
                       style={ { backgroundImage: `url(${_getSource()})` } }/>
 	      		</div>
-	      		{ renderBubbles() }
 				<svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
 					<g>
 						<path d="M0,26.5c9.7,3.8,20.3,4.2,30.3,0.9c1.9-0.6,3.8-1.4,5.7-2.2c10.6-4.5,20.7-10.2,31.1-15.1s21.4-9,32.9-10

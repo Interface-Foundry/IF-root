@@ -24,6 +24,33 @@ $centerPhone: calc(50% - 212.5px);
 		left: 0;
 		transform: translate3d(0, -150px,0);
 
+		.bubble {
+			width: 80%;
+			height: 150px;
+			margin: 0 10%;
+			position: absolute;
+			background: white;
+			border-radius: 10px;
+			left: 0;
+			border: 1px solid $borderColor;
+			top: -120px;
+
+			svg {
+				position: absolute;
+				top: -50px;
+				right: -50px;
+				height: 100px;
+				width: 100px;
+			}
+		}
+
+		.bubble-enter {
+			@include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+		}
+		.bubble-leave {
+			@include animation(scrollOutRight cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+		}
+
 		&.inital {
 			@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 		}
