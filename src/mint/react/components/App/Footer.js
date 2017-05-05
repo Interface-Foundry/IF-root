@@ -39,7 +39,7 @@ class SignInFooter extends Component {
   render() {
     return (
       <p className='tos'>
-        By signing up you agree to the Kip <a href='https://kipthis.com/legal/'>Terms of Use</a>
+        By signing up you agree to the Kip <a href='https://www.kipthis.com/legal/'>Terms of Use</a>
       </p>
     );
   }
@@ -84,14 +84,24 @@ class CartFooter extends Component {
             <Icon icon='Email'/>
             FEEDBACK
           </button>
-          {
-            isLeader
-            ? <button className='share'>
-                <Icon icon='Cart'/>
-                EMAIL ITEMS
-              </button>
-            : null
-          }
+          <a 
+            className={items.length===0 ? 'disabled':''}
+            href={`/api/cart/${cart_id}/checkout`} 
+            onClick={
+              (e) => { 
+                e.preventDefault(); 
+                if (items.length > 0) { 
+                  updateCart({...currentCart, locked: !currentCart.locked});
+                  window.open(`/api/cart/${cart_id}/checkout`);
+                }
+              }
+            }
+          >
+            <button disabled={items.length===0} className='checkout'>
+              <Icon icon='Cart'/>
+              <h4>Checkout<br/>{displayCost(total)}</h4>
+            </button>
+          </a>
         </div>
       );
     }

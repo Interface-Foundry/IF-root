@@ -94,14 +94,14 @@ class CartHead extends Component {
         <div className='header__left'>
           <a href={`/cart/${cart_id}`}>
           {locked ? <div className='navbar__icon'>
-              <Icon icon='Locked'/>
+              <Icon icon='Locked'/> Checkout In Progress
             </div> : <div className='image' style={
             {
               backgroundImage: `url(${thumbnail_url})`,
             }
           }/>}
           <h3>
-            {locked ? 'Checkout in progress' : cartName}
+            {locked ? '' : cartName}
           </h3>
           </a>
         </div>

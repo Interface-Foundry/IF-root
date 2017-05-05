@@ -87,7 +87,7 @@ export default class Cart extends Component {
           locked 
           ? <div className='cart__locked'>
               <div className='cart__locked__actions'>
-                <button className='primary'><Icon icon='Refresh'/><h1>RE-ORDER CART</h1></button>
+                {/*<button className='primary'><Icon icon='Refresh'/><h1>RE-ORDER CART</h1></button>*/}
                 { !!leader && leader.id === user_account.id ? <button className='secondary' onClick={(e)=>{e.preventDefault(); window.open(`/api/cart/${cart_id}/checkout`);}}><Icon icon='Cart'/><h1>CHECKOUT<br/>{displayCost(total)}</h1></button> : null }
               </div>
               <div className='cart__locked-container'>
@@ -167,12 +167,12 @@ class MyItems extends Component {
   }
 
   render() {
-    const { props: { items, currentCart: { locked } } } = this,
+    const { props: { items, user_account, currentCart: { locked } } } = this,
     total = calculateItemTotal(items);
-
+  
     return (
       <ul>
-        <div className='cart__items__title'>Your Items</div>
+        <div className='cart__items__title'>{user_account.name}</div>
         <div className='cart__items__container'>
           {
             items.length 
