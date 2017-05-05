@@ -28,13 +28,8 @@ export default class Header extends Component {
             <ModalHead text={'Add To Cart'} {...props}/>
           }
         />
-        {/* TODO: get this working for admins */}
         <Route path={`${match.url}/m/:type/:index/:asin/edit`} component={() => 
             <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
-          }
-        />
-        <Route path={`${match.url}/m/item`} component={() => 
-            <ModalHead text={'Add to Cart'} {...props}/>
           }
         />
         <Route path={`${match.url}/m/variant/:index/:item_id`} component={() => 

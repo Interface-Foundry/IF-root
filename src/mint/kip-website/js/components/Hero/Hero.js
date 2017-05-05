@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import { Icon } from '../../themes';
-import { Desktop, Desk, YellowBackground, KipHead, Plant } from '../../themes/kipsvg';
+import { Desktop, Desk, KipHead, Plant } from '../../themes/kipsvg';
 
 export default class Hero extends Component {
   	render() {
@@ -26,10 +26,6 @@ export default class Hero extends Component {
 
 				<div className="hero__plant">
 					<Plant/>
-				</div>
-
-				<div className="hero__background">
-					<YellowBackground/>
 				</div>
 
 				<svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">

@@ -15,6 +15,16 @@
     flex-basis: 0;
     white-space: nowrap;
     overflow: hidden;
+    .navbar__icon {
+      display: inline-block;
+      width: auto;
+      min-width: 50px;
+      text-align: center;
+      cursor: pointer;
+      svg {
+        height: 100%;
+      }
+    }
     .image {
       display: inline-block;
       margin: $padding;

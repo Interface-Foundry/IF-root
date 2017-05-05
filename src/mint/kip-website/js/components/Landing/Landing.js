@@ -5,8 +5,8 @@ import ReactDOM from 'react-dom'
 
 import { animateScroll } from '../../reducers';
 
-import { Ribbon, Services, About, Showcase, Footer, Statement, Hero } from '..';
-import { SidenavContainer, ModalContainer } from '../../containers';
+import { Services, About, Showcase, Footer, Statement, Hero } from '..';
+import { SidenavContainer, ModalContainer, RibbonContainer } from '../../containers';
 
 
 export default class Landing extends Component {
@@ -22,7 +22,7 @@ export default class Landing extends Component {
       fixed: false,
       sidenav: false,
       modal: false,
-      animationHeight: 0,
+      animationOffset: 0,
       containerHeight: 0,
       animationState: 'inital'
     };
@@ -38,7 +38,7 @@ export default class Landing extends Component {
 
   _handleScroll (e) {
     const scrollTop = ReactDOM.findDOMNode(this.landing).scrollTop,
-      { state: { fixed, animationState, animationHeight, containerHeight }} = this;
+      { state: { fixed, animationState, animationOffset, containerHeight }} = this;
 
     // stops and starts header animation, and fixes navbar to top;
     if(scrollTop > 400 && !fixed ||  scrollTop <= 400 && fixed) {
@@ -47,8 +47,8 @@ export default class Landing extends Component {
       })
     }
 
-    // animate using mobile or desktop scroll;
-    this.setState(animateScroll(containerHeight, animationHeight, scrollTop, animationState))
+    // animate scroll, needs height of the container, and its distance from the top
+    this.setState(animateScroll(containerHeight, animationOffset, scrollTop, animationState))
   }
 
   _toggleSidenav () {
@@ -65,20 +65,20 @@ export default class Landing extends Component {
 
   _registerHeight (heightFromTop, containerHeight) {
     this.setState({
-      animationHeight: heightFromTop,
+      animationOffset: heightFromTop,
       containerHeight: containerHeight
     })
   }
 
   render() {
-    const { state: { fixed, sidenav, modal, animationState }, _handleScroll, _toggleSidenav, _toggleModal, _registerHeight } = this;
+    const { state: { fixed, sidenav, modal, animationState }, props: { currentUser }, _handleScroll, _toggleSidenav, _toggleModal, _registerHeight } = this;
     return (
       <span>
         { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }
         { modal ? <ModalContainer _toggleModal={_toggleModal} /> : null }
 
         <div className="landing" ref={(landing) => this.landing = landing}> 
-          <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/>
+          <RibbonContainer fixed={fixed} _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/>
           <Hero animate={!fixed}/>
           <Statement _toggleModal={_toggleModal}/>
           <About animationState={animationState} animate={animationState.includes('fixed')}/>

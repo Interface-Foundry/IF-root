@@ -33,7 +33,6 @@ export default class Toast extends Component {
     setTimeout(() => this.setState({ status, toast, showToast: true }), 1);
     setTimeout(() => {
       this.setState({ toast: null, status: null, showToast: false });
-      replace(loc.pathname);
     }, 3000);
   }
 

@@ -44,13 +44,15 @@ export const updateCartItem = newItem => ({});
 export function fetchCart(cart_id) {
   return async function (dispatch) {
     dispatch(request());
-
     try {
       const response = await fetch(`/api/cart/${cart_id}`, {
         credentials: 'same-origin'
       });
-
-      return dispatch(receive(await response.json()));
+      if (response.ok) {
+        return dispatch(receive(await response.json()));
+      } else {
+        return null;
+      }
     } catch (e) {
       throw 'error in cart fetchCart';
     }
