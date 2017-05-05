@@ -79,6 +79,13 @@
 			z-index: 2;
 			background: #ffffff;
 			box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+			&.video {
+				padding: $padding*2 $padding*3.4;
+				h2 {
+					height: $ribbonHeight;
+					line-height: $ribbonHeight;
+				}
+			}
 			h2 {
 				color: $fifthColor;
 				text-align: left;
@@ -94,7 +101,7 @@
 			}
 
 			iframe {
-				border-radius: 10px;
+				height: 215px;
 			}
 
 			@media only screen and (max-width: 600px) {

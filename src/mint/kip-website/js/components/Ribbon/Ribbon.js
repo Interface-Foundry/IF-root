@@ -10,7 +10,7 @@ export default class Ribbon extends Component {
     
     return (
       <nav className={`ribbon ${fixed ? 'background' : ''}`}>
-        <div className='col-12 row-1'> 
+        <div className='row-1'> 
           <div className="row row-1">
             <div className="row-1">
               <div className='image' style={

@@ -31,20 +31,19 @@
 		}
 
 		@media only screen and (max-width: 600px) {
-			width: 215px;
-			margin: 0 calc(50% - 107.5px);
-			height: 400px;
+			width: 318.75px;
+			height: 600px;
+			margin: 0;
 			padding: $padding*2 $padding 0;
-			transform: translate3d(0, -100px, 0);
+			transform: translate3d(-150px, -100px, 0);
 
 			&.fixed {
 				margin: 0;
-				left: calc(50% - 107.5px);
 			}
 
 			&.absolute {
 				position: absolute;
-				bottom: -135px;
+				bottom: -100px;
 			}
 		}
 	}

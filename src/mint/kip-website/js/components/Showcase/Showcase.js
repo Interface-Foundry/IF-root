@@ -2,6 +2,7 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 import { DefaultPlayer as Video } from 'react-html5video';
+import ReactDOM from 'react-dom'
 
 import { Icon } from '../../themes';
 
@@ -13,18 +14,26 @@ const movies = {
 
 export default class Showcase extends Component {
 
+	componentDidMount () {
+		const { animationState, _registerHeight } = this.props;
+
+	    _registerHeight(ReactDOM.findDOMNode(this).offsetTop, ReactDOM.findDOMNode(this).clientHeight)
+	}
+
 	renderSource () {
 		const { animationState } = this.props;
 
 		switch (animationState) {
+			case 'inital':
+				return 'https://s3.amazonaws.com/assets-chachat/1_sequence.webm'
 			case 'fixed first':
-				return <Video autoPlay loop muted controls={['PlayPause', 'Fullscreen']} src='https://s3.amazonaws.com/assets-chachat/1_sequence.webm' type="video/webm"/>
+				return 'https://s3.amazonaws.com/assets-chachat/1_sequence.webm'
 			case 'fixed second':
-				return <Video autoPlay loop muted controls={['PlayPause', 'Fullscreen']} src='https://s3.amazonaws.com/assets-chachat/2_sequence.webm' type="video/webm"/>
+				return 'https://s3.amazonaws.com/assets-chachat/2_sequence.webm'
 			case 'fixed third':
-				return <Video autoPlay loop muted controls={['PlayPause', 'Fullscreen']} src='https://s3.amazonaws.com/assets-chachat/3_sequence.webm' type="video/webm"/>
-			default:
-				return <Video autoPlay loop muted controls={['PlayPause', 'Fullscreen']} src='https://s3.amazonaws.com/assets-chachat/1_sequence.webm' type="video/webm"/>
+				return 'https://s3.amazonaws.com/assets-chachat/3_sequence.webm'
+			case 'absolute':
+				return 'https://s3.amazonaws.com/assets-chachat/3_sequence.webm'
 		}
 	}
   	render() {
@@ -33,7 +42,7 @@ export default class Showcase extends Component {
 	    return (
 	      	<div className='showcase'> 
 	      		<div className={`phone image ${animationState}`}> 
-	      			{this.renderSource()}
+		      		<Video loop muted controls={['PlayPause', 'Fullscreen']} src={this.renderSource()} type="video/webm"/>
 	      		</div>
 				<svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
 					<g>

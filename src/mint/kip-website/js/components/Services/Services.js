@@ -66,7 +66,7 @@ export default class About extends Component {
 			        	</div>
 			        </div>
 
-			       	<div className="col-12 row-1 services__details card">
+			       	<div className="col-12 row-1 services__details card video">
 			        	<h2>Learn More</h2>
 		        		<iframe width="100%" height="100%" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
 			        </div>
