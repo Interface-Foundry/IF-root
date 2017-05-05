@@ -12,13 +12,15 @@ export default class Ribbon extends Component {
       <nav className={`ribbon ${fixed ? 'background' : ''}`}>
         <div className='row-1'> 
           <div className="row row-1">
-            <div className="row-1">
-              <div className='image' style={
-                {
-                  backgroundImage: `url(https://storage.googleapis.com/kip-random/head%40x2.png)`
-                }}/>
-              <h1>Kip</h1>
-            </div>
+            <a href="/">
+              <div className="row-1">
+                <div className='image' style={
+                  {
+                    backgroundImage: `url(https://storage.googleapis.com/kip-random/head%40x2.png)`
+                  }}/>
+                <h1>Kip</h1>
+              </div>
+            </a>
           </div>
           <div className="right row row-1">
             <div className="right row row-1" onClick={() => _toggleSidenav()}>
