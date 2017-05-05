@@ -15,12 +15,11 @@ export default class Statement extends Component {
 	    return (
 	      	<div className="statement">
 	      		<div className="col-12 row-1 action">
-	        		<button>
-	        			<a href='/newcart'>TRY KIP FOR FREE</a>
-	        		</button>
-	        		<button onClick={() => _toggleModal()}>
-	        			LOGIN
-	        		</button>
+	      			<a href='/newcart'>
+	        			<button>
+		        			Try Kip For Free <Icon icon='Right'/>
+		        		</button>
+	        		</a>
 	        	</div>
 	        	<div className="col-12 row-1 headline">
 	        		<h1>COLLABORATE AND COORDINATE SHOPPING</h1>

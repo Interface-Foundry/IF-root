@@ -16,7 +16,10 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-
+/** used when querying the db since apparently we dont want to ever use emails? */
+const selectMembersWithoutEmail = {
+  select: ['_id', 'name', 'createdAt', 'updatedAt']
+}
 
 /**
  * delete item from cart
@@ -83,6 +86,19 @@ function * createItemFromItemId(itemId, userId, cartId) {
   return item
 }
 
+/**
+ * dont return emails to front end
+ *
+ * @param      {<type>}  cartMembers  The cartesian members
+ * @return     {<type>}  { description_of_the_return_value }
+ */
+function stripEmailsFromCartMembers(cartMembers) {
+  return cartMembers.map(member => {
+    delete member.email_address
+    return member
+  })
+}
+
 module.exports = function (router) {
   /**
    * @api {get} /api/carts User Carts
@@ -115,7 +131,10 @@ module.exports = function (router) {
         { leader: req.UserSession.user_account.id },
         { id: memberCartsIds }
       ]
-    }).populate('items').populate('leader').populate('members')
+    })
+      .populate('items')
+      .populate('leader')
+      .populate('members', selectMembersWithoutEmail)
 
     res.send(carts)
   }))
@@ -133,9 +152,10 @@ module.exports = function (router) {
    * {"members":[{"email_address":"peter@interfacefoundry.com","createdAt":"2017-03-16T16:19:10.812Z","updatedAt":"2017-03-16T16:19:10.812Z","id":"bc694263-cf19-46ea-b3f1-bd463f82ce55"}],"items":[{"original_link":"watches","quantity":1,"createdAt":"2017-03-16T16:18:32.047Z","updatedAt":"2017-03-16T16:18:32.047Z","id":"58cabad83a5cd90e34b29610"}],"leader":{"email_address":"peter.m.brandt@gmail.com","createdAt":"2017-03-16T16:18:27.607Z","updatedAt":"2017-03-16T16:18:27.607Z","id":"257cd470-f19f-46cb-9201-79b8b4a95fe2"},"createdAt":"2017-03-16T16:18:23.433Z","updatedAt":"2017-03-16T16:19:10.833Z","id":"3b10fc45616e"}
    */
   router.get('/cart/:cart_id', (req, res) => co(function* () {
+
     var cart = yield db.Carts.findOne({ id: req.params.cart_id })
       .populate('leader')
-      .populate('members')
+      .populate('members', selectMembersWithoutEmail)
       .populate('items')
 
     if (cart) {
@@ -143,6 +163,7 @@ module.exports = function (router) {
     } else {
       throw new Error('Cart not found')
     }
+
   }));
 
   /**
@@ -152,7 +173,14 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id
    */
   router.get('/cart/:cart_id/items', (req, res) => co(function* () {
-    var cart = yield db.Carts.findOne({ id: req.params.cart_id }).populate('items')
+    var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+      .populate('items')
+
+    const userId = req.UserSession.user_account.id
+    if (cart.leader !== userId) {
+      cart.members = stripEmailsFromCartMembers(cart.members)
+    }
+
     if (!cart) {
       throw new Error('Cart not found')
     }
@@ -303,11 +331,11 @@ module.exports = function (router) {
 
 
   /**
-   * @api {put} /api/cart/:cart_id/item Update Item - right now just replaces old item with new item
+   * @api {put} /cart/:cart_id/item/:item_id/update Update Item - right now just replaces old item with new item
    * @apiDescription Updates an item already in a cart. Must specify new item
    * @apiGroup Carts
    * @apiParam {string} :cart_id cart id
-   * @apiParam {string} url optional url of the item from amazon or office depot or whatever
+   * @apiParam {string} :item_id item id
    *
    * @apiParamExample Item from Preview
    * PUT https://mint.kipthis.com/api/cart/123456/item {
@@ -346,6 +374,7 @@ module.exports = function (router) {
    * DELETE https://mint.kipthis.com/api/cart/123456/item/998765
    */
   router.delete('/cart/:cart_id/item/:item_id', (req, res) => co(function* () {
+
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
@@ -359,6 +388,7 @@ module.exports = function (router) {
     if (!cart) {
       throw new Error('Cart not found')
     }
+
 
     // Make sure they specified an item id
     if (!req.params.item_id) {
@@ -520,7 +550,7 @@ module.exports = function (router) {
   router.get('/item/:item_id', (req, res) => co(function * () {
     var item = yield db.Items.findOne({id: req.params.item_id})
       .populate('options')
-      .populate('added_by')
+      .populate('added_by', selectMembersWithoutEmail)
     res.send(item)
   }))
 

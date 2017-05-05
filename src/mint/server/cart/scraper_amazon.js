@@ -14,7 +14,7 @@ const amazon_cart = require('./amazon_cart')
 module.exports.scrapeUrl = function amazon_scraper (uri) {
   return co(function * () {
     // Make double sure that we are parsing an amazon.com url
-    if (!uri || !uri.match(/www.amazon.com/)) {
+    if (!uri || !uri.match(/amazon.com/)) {
       throw new Error('Can only handle uris from "www.amazon.com" but got "' + uri + '"')
     }
 

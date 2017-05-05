@@ -52,6 +52,7 @@
 		svg {
 			width: 30px;
 			height: 100%;
+			cursor: pointer;
 		}
 		&.right {
 			float: right;
@@ -64,6 +65,32 @@
 		@media only screen and (max-width: 600px) {
 			&.desktop {
 				display: none;
+			}
+		}
+	}
+
+	.action {
+		padding: $padding/2;
+		button {
+			border: 1px solid $primaryColor;
+			white-space: nowrap;
+			font-weight: bold;
+			border-radius: $padding/2;
+			background: transparent;
+			padding: 0 $padding*2;
+			height: 100%;
+			font-size: 16px;
+			cursor: pointer;
+			&:focus {
+				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+			}
+			&.slack {
+				margin-right: $padding*2;
+				background: white;
+			}
+			svg {
+				height: 100%;
+				background: transparent;
 			}
 		}
 	}

@@ -78,7 +78,7 @@ export default class Cart extends Component {
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
         ...items.my,
-        ..._.reduce(items.others, (acc, value) => [...acc, ...value], [])
+        ...items.others.reduce((acc, member) => [...acc, ...member.items], [])
       ]);
     let cartItemIndex = items.my.length;
     return (
@@ -114,9 +114,10 @@ export default class Cart extends Component {
               }
             </div>
         }
-        <div className={`cart__title ${animation ? 'action' : ''}`}>
+        <div className={`cart__title ${animation || currentCart.itemDeleted  ? 'action' : ''}`}>
           { animation 
             ? <h4>{animation}</h4>
+            : currentCart.itemDeleted ? <h4 className='undo__button' onClick={cancelRemoveItem}>Item Removed. <a href='#'>Undo</a></h4>
             : <h4>
               { hasItems ? `${items.quantity} items in Kip Cart`  : 'Kip Cart' } 
               {
@@ -127,7 +128,7 @@ export default class Cart extends Component {
             </h4>
           }
         </div>
-        {currentCart.itemDeleted ? <button onClick={cancelRemoveItem}>Undo Delete</button>: null}
+        
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
           {

@@ -7,62 +7,10 @@ import { Icon } from '../../themes';
 import { Desktop, Desk, YellowBackground, KipHead, Plant } from '../../themes/kipsvg';
 
 export default class Hero extends Component {
-	constructor(props) {
-		super(props);
-		this._animation = ::this._animation;
-		this.state = {
-		  selectedIndex: 0
-		};
-	}
-
-	componentWillUnmount() {
-		// const { _animation } = this;
-		// _animation(true);
-	}
-
-	componentDidMount() {
-		// const { _animation } = this;
-		// _animation();
-	}
-
-
-	componentWillMount() {
-		const { items } = this.props;
-
-		// // Preload hero image (not sure if this will even help if the image is too large)
-		// let hero = new Image();
-  //   	hero.src = 'https://s3.amazonaws.com/datadummy/header.png';	
-
-		// // preload all images to cache on mount
-		// _.map(items, (i) => {
-		// 	let image = new Image();
-	 //    	image.src = i.imgSrc;	
-		// })
-
-
-	}
-
-	_animation(stop) {
-		if (stop) {
-			if (self) clearTimeout(self.timeout);
-			clearTimeout(this.timeout);
-		} else {
-			let self = this,
-				possibleIndexs = _.filter([0,1,2,3], (i) => i !== self.state.selectedIndex);
-
-			self.timeout = setTimeout(() => {
-				self.setState({
-					selectedIndex: possibleIndexs[Math.floor(Math.random() * possibleIndexs.length)],
-				});
-				self._animation();
-				self.props.shuffleItems()
-			}, 6000);
-		}
-	}
   	render() {
-  		const { state: { selectedIndex }, props: { items } } = this;
+  		const { items, animate } = this.props;
 	    return (
-	      	<div className="hero image">
+	      	<div className={`hero image ${animate ? 'start' : ''}`}>
                 <div className="hero__desktop">
                 	<Desktop />
                 	<h1>Hi I'm Kip! <br/> A friendly penguin that helps you collect group orders into a single shopping cart</h1>

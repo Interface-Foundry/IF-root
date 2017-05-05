@@ -28,20 +28,22 @@ export default class About extends Component {
 			DesktopIcon,
 			Happy,
 			Layers,
-			Lightbulb,
 			Milk,
 			Mouse,
 			Paper,
 			Pencil,
 			Pizza,
-			Happy
-  		]
+			Happy,
+			Lightbulb
+  		],
+  		{ animate } = this.props,
+  		lastIndex = icons.length - 1;
 
 	    return (
 	      	<div className="about"> 
 	      		{
 	      			_.map(icons, (Icon, i) => {
-	      				return <div key={Icon.name + i} className={Icon.name}><Icon/></div>
+	      				return <div key={Icon.name + i} className={`${Icon.name} ${i === lastIndex && animate ? 'animate' : ''}`}><Icon/></div>
 	      			})
 	      		}
 	      	</div>

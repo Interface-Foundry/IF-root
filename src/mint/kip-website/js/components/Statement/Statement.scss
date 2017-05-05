@@ -38,6 +38,8 @@
 	.text {
 		max-width: 500px;
 		text-align: left;
+		display: block;
+		margin-left: 0;
 
 		p {
 			font-size: 18px;
@@ -47,7 +49,7 @@
 	.action {
 		padding: $padding*2 0 $padding*2;
 		button {
-			border: 0;
+			border: 1px solid #eccd46;
 			font-weight: bold;
 			border-radius: $padding/2;
 			background: white;
@@ -58,12 +60,16 @@
 			&:focus {
 				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 			}
+		}
+		a {
 			&:first-of-type {
-				margin-right: $padding*2;
-				background: $secondaryColor;
+				button {
+					margin-right: $padding*2;
+					background: $secondaryColor;
 
-				@media only screen and (max-width: 600px) {
-					margin: 0 0 $padding*2;
+					@media only screen and (max-width: 600px) {
+						margin: 0 0 $padding*2;
+					}
 				}
 			}
 		}

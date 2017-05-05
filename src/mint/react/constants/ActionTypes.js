@@ -9,6 +9,7 @@ export const LOGGED_IN = 'LOGGED_IN';
 export const REGISTER_EMAIL = 'REGISTER_EMAIL';
 export const ONBOARD_NEW_USER = 'ONBOARD_NEW_USER';
 export const TOGGLE_ADDING = 'TOGGLE_ADDING';
+export const UPDATE_USER = 'UPDATE_USER';
 
 // Cart
 export const RECEIVE_CART = 'RECEIVE_CART';

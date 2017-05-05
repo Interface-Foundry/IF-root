@@ -1,6 +1,6 @@
 // react/actions/session.js
 
-import { REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION, TOGGLE_ADDING } from '../constants/ActionTypes';
+import { REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION, TOGGLE_ADDING, UPDATE_USER } from '../constants/ActionTypes';
 import { SubmissionError } from 'redux-form';
 
 const receive = (newSession) => ({
@@ -19,6 +19,11 @@ const requestUpdate = () => ({
 const receiveUpdate = (newSession) => ({
   type: RECEIVE_UPDATE_SESSION,
   newSession
+});
+
+const updateUserInfo = userInfo => ({
+  type: UPDATE_USER,
+  userInfo
 });
 
 export const toggleAddingToCart = () => ({
@@ -56,11 +61,10 @@ export function signIn(cart_id, email) {
   };
 }
 
-
 export function logout() {
   return async dispatch => {
     try {
-      const response = await fetch(`/api/logout`, {
+      await fetch('/api/logout', {
         credentials: 'same-origin'
       });
 
@@ -80,7 +84,7 @@ export function logout() {
 export function postFeedback(feedback) {
   return async dispatch => {
     try {
-      const response = await fetch(`/api/feedback`, {
+      await fetch('/api/feedback', {
         'method': 'POST',
         headers: {
           Accept: 'application/json',
@@ -89,6 +93,25 @@ export function postFeedback(feedback) {
         credentials: 'same-origin',
         'body': JSON.stringify(feedback)
       });
+    } catch (e) {
+      throw e;
+    }
+  };
+}
+
+export function updateUser(id, newInfo) {
+  return async dispatch => {
+    try {
+      const res = await fetch(`/api/user/${id}`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(newInfo)
+      });
+      return dispatch(updateUserInfo(await res.json()));
     } catch (e) {
       throw e;
     }

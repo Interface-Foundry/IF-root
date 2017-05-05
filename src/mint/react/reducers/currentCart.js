@@ -8,9 +8,11 @@ import {
   RECEIVE_ITEMS,
   RECEIVE_ADD_ITEM,
   REQUEST_REMOVE_ITEM,
+  RECEIVE_REMOVE_ITEM,
   CANCEL_REMOVE_ITEM,
   RECEIVE_INCREMENT_ITEM,
-  RECEIVE_DECREMENT_ITEM
+  RECEIVE_DECREMENT_ITEM,
+
 } from '../constants/ActionTypes';
 
 const initialState = {
@@ -70,6 +72,11 @@ export default function cart(state = initialState, action) {
       ...state,
       items: [state.itemDeleted, ...state.items],
       itemDeleted: null, // clear saved item if canceled
+    };
+  case RECEIVE_REMOVE_ITEM:
+    return {
+      ...state,
+      itemDeleted: null
     };
   case RECEIVE_INCREMENT_ITEM:
   case RECEIVE_DECREMENT_ITEM:

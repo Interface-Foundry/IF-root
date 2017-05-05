@@ -1,5 +1,6 @@
 // react/components/Item/Item.scss
 @import '../../styles/Constants';
+@import '../../styles/Animations';
 .item_container {
   height: 100%;
   display: flex;
@@ -60,18 +61,40 @@
           align-self: stretch;
           background: $border-color-light;
           border: none;
-          font-size: 20px;
+          font-size: 30px;
           cursor: pointer;
+          &:first-child {
+            margin-right: $padding;
+          }
+          &:last-child {
+            margin-left: $padding;
+          }
         }
         .item__info__wrapper {
           width: 100%;
           .item__view__image {
             margin: 0 auto;
+            height: 150px;
+            &.loading {
+              opacity: 1;
+              background-size: 70px 70px;
+              height: calc(100vh - 140px);
+              &:after {
+                content: '';
+                @include animation(placeHolderShimmer linear 1s infinite);
+                height: calc(100vh - 140px);
+                width: calc(100vw - 140px);
+                margin: auto;
+                background: linear-gradient(to right, rgba($kip-primary-color, 0.1) 8%, rgba($kip-primary-color, 0.7) 18%, rgba($kip-primary-color, 0.1) 33%);
+                background-size: 800px 150px;
+                position: relative;
+              }
+            }
           }
           .item__view__atts {
-            text-align: center;
-            padding: $padding $padding $padding*2;
-            margin-bottom: 0;
+            text-align: left;
+            margin-bottom: 5px;
+            margin-top: 10px;
             font-size: 13px;
           }
         }

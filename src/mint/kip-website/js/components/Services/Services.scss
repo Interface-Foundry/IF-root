@@ -5,26 +5,41 @@
 	position: relative;
 	text-align: center;
 	background: mix(white, $primaryColor, 97%);
-	padding: $padding*10 $padding*2 0;
+	padding: $padding*25 $padding*2 0;
 
 	@media only screen and (max-width: 600px) {
 		padding: $padding*3 $padding*2 $padding*6;
 	}
 
+	h1 {
+		font-size: 40px;
+		padding-top: $padding;
+		color: #42403f;
+
+		&:first-of-type {
+			padding-top: 0;
+			@media only screen and (max-width: 600px) {
+				padding-top: $padding*4;
+			}
+		}
+		@media only screen and (max-width: 600px) {
+			font-size: 27px;
+		}
+	}
+
 	h3 {
-		font-size: 18px;
+		font-size: 24px;
 		margin: 0 0 $padding*6;
 		color: $primaryColor;
 
 		@media only screen and (max-width: 600px) {
 			margin: $padding*3 0;
+			font-size: 18px;
 		}
-	}
 
-	h2 {
-		margin: 0 0 $padding;
-		color: mix($primaryColor, $bgColor, 30%);
-		font-size: 17px;
+		span {
+			color: #42403f;
+		}
 	}
 
 	.icons__hell {
@@ -62,7 +77,7 @@
 			padding: $padding*2 $padding $padding;
 			margin: $padding*2 $padding*2;
 			z-index: 2;
-			background: mix(white, $primaryColor, 97%);
+			background: #ffffff;
 			box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
 			h2 {
 				color: $fifthColor;
@@ -78,6 +93,10 @@
 				list-style: square outside none;
 			}
 
+			iframe {
+				border-radius: 10px;
+			}
+
 			@media only screen and (max-width: 600px) {
 				margin: $padding*2 0;
 			}
@@ -91,10 +110,6 @@
 			width: 20%;
 			height: $ribbonHeight*2;
 			padding: $padding/2;
-
-			path {
-				fill: $primaryColor !important;
-			}
 		}
 
 		.image {
@@ -141,7 +156,8 @@
 	.action {
 		padding: $padding*2 0 $padding*2;
 		button {
-			border: 0;
+			border: 1px solid #eccd46;
+			white-space: nowrap;
 			font-weight: bold;
 			border-radius: $padding/2;
 			background: $secondaryColor;
@@ -155,6 +171,11 @@
 			&.slack {
 				margin-right: $padding*2;
 				background: white;
+				border: 1px solid #4a9ff1;
+			}
+			svg {
+				height: 100%;
+				background: transparent;
 			}
 		}
 	}
