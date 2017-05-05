@@ -24,13 +24,12 @@ export default class Header extends Component {
 
     return (
       <nav className='navbar'>
-        {/* TODO: get this working for admins */}
-        <Route path={`${match.url}/m/:type/:index/:asin/edit`} component={() => 
-            <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
+        <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
+            <ModalHead text={'Add To Cart'} {...props}/>
           }
         />
-        <Route path={`${match.url}/m/item`} component={() => 
-            <ModalHead text={'Add to Cart'} {...props}/>
+        <Route path={`${match.url}/m/:type/:index/:asin/edit`} component={() => 
+            <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
           }
         />
         <Route path={`${match.url}/m/variant/:index/:item_id`} component={() => 
