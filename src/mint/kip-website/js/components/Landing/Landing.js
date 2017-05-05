@@ -5,8 +5,8 @@ import ReactDOM from 'react-dom'
 
 import { animateScroll } from '../../reducers';
 
-import { Ribbon, Services, About, Showcase, Footer, Statement, Hero } from '..';
-import { SidenavContainer, ModalContainer } from '../../containers';
+import { Services, About, Showcase, Footer, Statement, Hero } from '..';
+import { SidenavContainer, ModalContainer, RibbonContainer } from '../../containers';
 
 
 export default class Landing extends Component {
@@ -71,14 +71,14 @@ export default class Landing extends Component {
   }
 
   render() {
-    const { state: { fixed, sidenav, modal, animationState }, _handleScroll, _toggleSidenav, _toggleModal, _registerHeight } = this;
+    const { state: { fixed, sidenav, modal, animationState }, props: { currentUser }, _handleScroll, _toggleSidenav, _toggleModal, _registerHeight } = this;
     return (
       <span>
         { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }
         { modal ? <ModalContainer _toggleModal={_toggleModal} /> : null }
 
         <div className="landing" ref={(landing) => this.landing = landing}> 
-          <Ribbon fixed={fixed} _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/>
+          <RibbonContainer fixed={fixed} _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/>
           <Hero animate={!fixed}/>
           <Statement _toggleModal={_toggleModal}/>
           <About animationState={animationState} animate={animationState.includes('fixed')}/>
