@@ -1,6 +1,8 @@
 @import '../../themes/constants';
 @import '../../themes/animations';
 
+$centerPhone: calc(50% - 212.5px);
+
 .showcase {
 	position: relative;
 	text-align: center;
@@ -18,15 +20,27 @@
 		background-size: contain;
 		z-index: 50;
 		padding: $padding*4 $padding*1.5 0;
-		transform: translate3d(150px,-150px,0);
+		margin-left: 150px;
+		left: 0;
+		transform: translate3d(0, -150px,0);
+
+		&.inital {
+			@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+		}
 
 		&.fixed {
 			position: fixed;
-			top: $ribbonHeight*5 + $padding*2;
+			top: $ribbonHeight*8;
+			margin-left: calc(50% - (425px/2));
+			transform: translate3d(0, -150px, 0);
+
+			&.first {
+				@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+			}
 		}
 
 		&.absolute {
-			position: absolute;
+			margin-left: calc(50% - (410px/2));
 			bottom: -300px;
 		}
 
@@ -45,11 +59,16 @@
 			height: 600px;
 			margin: 0 calc(50% - (275px/2));
 			padding: $padding*2 $padding 0;
-			transform: translate3d(0, -100px, 0);
 
 			&.absolute {
 				position: absolute;
 				bottom: -100px;
+				margin-left: calc(50% - (275px/2));
+			}
+
+			&.fixed {
+				position: fixed;
+				margin-left: calc(50% - (275px/2));
 			}
 		}
 	}

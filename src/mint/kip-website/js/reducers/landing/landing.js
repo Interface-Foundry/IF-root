@@ -13,7 +13,7 @@ export default function reducer(state = initialState, action = {}) {
 //Selectors
 export const animateScroll = (containerHeight, animationOffset, scrollTop, animationState) => {
 	let newState = {}
-  let animationStart = animationOffset - 270;
+  let animationStart = animationOffset - 400;
   let breakPointHeight = containerHeight/4;
 
 	console.log('desktop')
