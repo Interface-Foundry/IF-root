@@ -4,7 +4,7 @@ export default class Wallstreet extends Component {
 	render() {
 	  	return (
 			<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
-				 viewBox="0 0 800 110" enableBackground="new 0 0 100 100" xmlSpace="preserve">
+				 viewBox="-50 0 900 70" enableBackground="new 0 0 100 100" xmlSpace="preserve">
 			<g>
 				<g>
 <path d="M21.652,61.544c0,3.023,0.878,3.607,2.829,4.097l3.023,0.683v1.365H7.412v-1.365l2.536-0.584
