@@ -28,17 +28,24 @@
 	}
 
 	h3 {
-		font-size: 24px;
+		font-size: 27px;
 		margin: 0 0 $padding*6;
 		color: $primaryColor;
+	    line-height: 35px;
 
 		@media only screen and (max-width: 600px) {
 			margin: $padding*3 0;
 			font-size: 18px;
+			line-height: 25px;
 		}
 
 		span {
 			color: #42403f;
+			font-size: 20px;
+			line-height: 60px;
+			@media only screen and (max-width: 600px) {
+				font-size: 16px;
+			}
 		}
 	}
 
@@ -55,6 +62,10 @@
 				height: $ribbonHeight;
 				fill: $primaryColor;
 				opacity: 0.8;
+			}
+
+			@media only screen and (max-width: 600px) {
+				width: (100%/2);
 			}
 		}
 
