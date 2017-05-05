@@ -6,11 +6,11 @@ import ReactDOM from 'react-dom'
 
 import { Icon } from '../../themes';
 
-const movies = {
-	first: 'https://s3.amazonaws.com/assets-chachat/1_sequence.webm',
-	second: 'https://s3.amazonaws.com/assets-chachat/2_sequence.webm',
-	third: 'https://s3.amazonaws.com/assets-chachat/3_sequence.webm'
-}
+const imageSrc = [
+	'https://storage.googleapis.com/kip-random/demo_1_desktop.gif',
+	'https://storage.googleapis.com/kip-random/demo_2_desktop.gif',
+	'https://storage.googleapis.com/kip-random/demo_3_desktop.gif'
+]
 
 export default class Showcase extends Component {
 
@@ -20,29 +20,38 @@ export default class Showcase extends Component {
 	    _registerHeight(ReactDOM.findDOMNode(this).offsetTop, ReactDOM.findDOMNode(this).clientHeight)
 	}
 
+	componentWillMount() {
+		_.map(imageSrc, (src) => {
+			let img = new Image()
+			img.src = src;
+		})
+	}
+
 	renderSource () {
 		const { animationState } = this.props;
 
 		switch (animationState) {
 			case 'inital':
-				return 'https://s3.amazonaws.com/assets-chachat/1_sequence.webm'
+				return 'https://storage.googleapis.com/kip-random/demo_1_desktop.gif'
 			case 'fixed first':
-				return 'https://s3.amazonaws.com/assets-chachat/1_sequence.webm'
+				return 'https://storage.googleapis.com/kip-random/demo_1_desktop.gif'
 			case 'fixed second':
-				return 'https://s3.amazonaws.com/assets-chachat/2_sequence.webm'
+				return 'https://storage.googleapis.com/kip-random/demo_2_desktop.gif'
 			case 'fixed third':
-				return 'https://s3.amazonaws.com/assets-chachat/3_sequence.webm'
+				return 'https://storage.googleapis.com/kip-random/demo_3_desktop.gif'
 			case 'absolute':
-				return 'https://s3.amazonaws.com/assets-chachat/3_sequence.webm'
+				return 'https://storage.googleapis.com/kip-random/demo_3_desktop.gif'
 		}
 	}
+
   	render() {
   		const { animationState } = this.props;
 
 	    return (
 	      	<div className='showcase'> 
 	      		<div className={`phone image ${animationState}`}> 
-		      		<Video loop muted controls={['PlayPause', 'Fullscreen']} src={this.renderSource()} type="video/webm"/>
+	      			<div className='image gif'
+                      style={ { backgroundImage: `url(${this.renderSource()})` } }/>
 	      		</div>
 				<svg className="sine" width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
 					<g>
