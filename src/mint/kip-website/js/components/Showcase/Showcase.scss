@@ -41,15 +41,11 @@
 		}
 
 		@media only screen and (max-width: 600px) {
-			width: 318.75px;
+			width: 275px;
 			height: 600px;
-			margin: 0;
+			margin: 0 calc(50% - (275px/2));
 			padding: $padding*2 $padding 0;
-			transform: translate3d(-150px, -100px, 0);
-
-			&.fixed {
-				margin: 0;
-			}
+			transform: translate3d(0, -100px, 0);
 
 			&.absolute {
 				position: absolute;
