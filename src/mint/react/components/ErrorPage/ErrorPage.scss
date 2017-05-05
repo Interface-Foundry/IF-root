@@ -1,2 +1,53 @@
 // react/components/ErrorPage/ErrorPage.scss
+$pink: #d61c5b;
+$red: #f1573f;
+$orange: #feb213;
+$green: #6abc4e;
+$blue: #2599d8;
+.uhoh {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: center;
+  justify-items: flex-start;
+  .faceplant {
+    height: 300px;
+    margin: auto;
+  }
+  .ohno {
+    text-transform: uppercase;
+    font-size: 70px;
+    line-height: 1;
+    transform: translate(0, -50%);
+    color: $blue;
+    &:before, &:after, span:before, span:after {
+      content: attr(data-heading);
+      position: absolute;
+      overflow: hidden;
+      left: 0;
+    }
+    &:before {
+      color: $pink;
+      height: 34%;
+      z-index: 5;
+    }
+    &:after {
+      color: $red;
+      height: 50%;
+      z-index: 4;
+    }
+    span {
+      &:before {
+        color: $orange;
+        height: 66%;
+        z-index: 3;
+      }
+      &:after {
+        color: $green;
+        height: 80%;
+        z-index: 2;
+      }
+    }
+  }
+}
 

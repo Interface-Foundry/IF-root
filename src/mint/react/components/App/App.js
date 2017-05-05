@@ -116,7 +116,6 @@ export default class App extends Component {
         newAccount,
         leader,
         carts,
-        match,
         currentUser,
         location,
         logout,
@@ -136,13 +135,13 @@ export default class App extends Component {
           <div className={`app__view ${showFooter ? '' : 'large'}`}>
 
             {/* Render Error Page */}
-            <Route path={`${match.url}/404`} exact component={ErrorPage} />
+            <Route path={'/404'} exact component={ErrorPage} />
 
             { /* Renders modal when route permits */ }
             <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
 
             { /* Renders cart when route permits */ }
-            <Route path={`${match.url}`} exact component={CartContainer} />
+            <Route path={'/cart/:cart_id'} exact component={CartContainer} />
 
           </div>
           { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
