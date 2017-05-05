@@ -39,12 +39,27 @@ export default class Sidenav extends Component {
     }
   }
 
+  // moves cart with id to front of list
+  _moveToFront(carts, id) {
+    return carts.reduce((acc, cart) => {
+      if (cart.id === id) return [cart, ...acc];
+      else return [...acc, cart];
+    }, []);
+  }
+
   render() {
-    const { carts, _toggleSidenav, currentUser, cart_id } = this.props, { show } = this.state;
+    const {
+      _moveToFront,
+      props: { carts, _toggleSidenav, currentUser, cart_id },
+      state: { show }
+    } = this;
 
-    const leaderCarts = carts.filter((c, i) => _.get(c, 'leader.id') === _.get(currentUser, 'id')),
-      memberCarts = carts.filter((c, i) => _.get(c, 'leader.id') !== _.get(currentUser, 'id'));
-
+    let leaderCarts = _moveToFront(
+        carts.filter((c, i) => _.get(c, 'leader.id') === _.get(currentUser, 'id')),
+        cart_id),
+      memberCarts = _moveToFront(
+        carts.filter((c, i) => _.get(c, 'leader.id') !== _.get(currentUser, 'id')),
+        cart_id);
     return (
       <div className='sidenav'>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
