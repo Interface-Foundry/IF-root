@@ -54,9 +54,11 @@ export default class Showcase extends Component {
 				return 'https://storage.googleapis.com/kip-random/demo_1_desktop.gif'
 			case 'fixed first':
 				return 'https://storage.googleapis.com/kip-random/demo_1_desktop.gif'
-			case 'fixed second':
+			case 'fixed first bubble':
+				return 'https://storage.googleapis.com/kip-random/demo_1_desktop.gif'
+			case 'fixed second bubble':
 				return 'https://storage.googleapis.com/kip-random/demo_2_desktop.gif'
-			case 'fixed third':
+			case 'fixed third bubble':
 				return 'https://storage.googleapis.com/kip-random/demo_3_desktop.gif'
 			case 'absolute':
 				return 'https://storage.googleapis.com/kip-random/demo_3_desktop.gif'
@@ -70,14 +72,16 @@ export default class Showcase extends Component {
 			case 'inital':
 				return null
 			case 'fixed first':
+				return null
+			case 'fixed first bubble':
 				return <div key={animationState} className='bubble'>
 					<Lightbulb/>
 				</div>
-			case 'fixed second':
+			case 'fixed second bubble':
 				return <div key={animationState} className='bubble'>
 					<Layers/>
 				</div>
-			case 'fixed third':
+			case 'fixed third bubble':
 				return <div key={animationState} className='bubble'>
 					<Mouse/>
 				</div>

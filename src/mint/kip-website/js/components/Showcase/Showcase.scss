@@ -6,7 +6,7 @@ $centerPhone: calc(50% - 212.5px);
 .showcase {
 	position: relative;
 	text-align: center;
-	min-height: 2000px;
+	min-height: 4000px;
 	background: rgb(234, 249, 255);
 
 	.image {
@@ -83,7 +83,7 @@ $centerPhone: calc(50% - 212.5px);
 
 		@media only screen and (max-width: 600px) {
 			width: 275px;
-			height: 600px;
+			height: 515px;
 			margin: 0 calc(50% - (275px/2));
 			padding: $padding*2 $padding 0;
 

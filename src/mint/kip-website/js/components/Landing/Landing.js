@@ -49,7 +49,7 @@ export default class Landing extends Component {
     }
 
     // animate scroll, needs height of the container, and its distance from the top
-    this.setState(animateScroll(containerHeight, animationOffset, scrollTop, animationState))
+    this.setState(animateScroll(containerHeight, animationOffset, scrollTop, animationState, window.innerWidth < 600))
   }
 
   _toggleSidenav () {
