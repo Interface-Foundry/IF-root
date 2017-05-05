@@ -23,6 +23,7 @@
 		&.fixed {
 			position: fixed;
 			top: $ribbonHeight*5 + $padding*2;
+			pointer-events:none;
 		}
 
 		&.absolute {
