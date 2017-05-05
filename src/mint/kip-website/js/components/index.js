@@ -9,3 +9,4 @@ export About from './About';
 export Showcase from './Showcase';
 export Footer from './Footer';
 export Modal from './Modal';
+export Legal from './Legal';

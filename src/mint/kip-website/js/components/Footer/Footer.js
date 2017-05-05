@@ -13,8 +13,8 @@ export default class Footer extends Component {
 	      		<p>Kip © 2017 – Contact: hello@kipthis.com</p>
 	      		<div className="footer__icons">
 	      			<a href="mailto:hello@kipthis.com?subject=Subscribe"><Icon icon='Email'/></a>
-	      			<a href="www.facebook.com/talkto.kip"><Icon icon='Facebook'/></a>
-	      			<a href="https://twitter.com/kiptalk"><Icon icon='Twitter'/></a>
+	      			<a href="//www.facebook.com/talkto.kip"><Icon icon='Facebook'/></a>
+	      			<a href="//twitter.com/kiptalk"><Icon icon='Twitter'/></a>
 	      		</div>
 	      	</footer>
 	    );

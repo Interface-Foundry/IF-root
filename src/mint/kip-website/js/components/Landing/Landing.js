@@ -2,6 +2,7 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import { animateScroll } from '../../reducers';
 
