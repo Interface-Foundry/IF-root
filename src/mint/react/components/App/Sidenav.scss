@@ -49,6 +49,9 @@
     }
     li {
       padding: 0 $padding;
+      &.currentCart {
+        background: $kip-primary-color;
+      }
       h4 {
         text-align: right;
         border-bottom: 1px solid $border-color-light;

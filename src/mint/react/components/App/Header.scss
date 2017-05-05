@@ -1,5 +1,6 @@
 // react/components/App/Header.scss
 @import '../../styles/Constants';
+@import '../../styles/Animations';
 .navbar {
   height: $nav-height;
   line-height: $nav-height;
@@ -46,7 +47,8 @@
       }
     }
     .bounce {
-      display: none;
+      @include animation(bounceDownSmall 1.5s);
+      animation-iteration-count: 2; // too much twitching
     }
   }
   .header__right {

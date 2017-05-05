@@ -68,7 +68,7 @@ export default class Cart extends Component {
     if (items.quantity < nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
       this._runAnimation('✓ Item Added to Kip Cart');
     } else if (items.quantity > nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
-      this._runAnimation('× Item Removed from Kip Cart');
+      setTimeout(() => this._runAnimation('× Item Removed from Kip Cart'), 10050); // don't show until after animation
     }
   }
 
@@ -169,7 +169,7 @@ class MyItems extends Component {
   render() {
     const { props: { items, user_account, currentCart: { locked } } } = this,
     total = calculateItemTotal(items);
-  
+
     return (
       <ul>
         <div className='cart__items__title'>{user_account.name}</div>

@@ -16,10 +16,8 @@ export default class Header extends Component {
   }
 
   render() {
-    let { props, props: { deals, currentUser, items, currentCart: { leader }, item: { search } } } = this;
-    const { match } = props,
+    const { props, props: { deals, currentUser, items, currentCart: { leader }, item: { search } } } = this,
     isLeader = leader && (leader.id === currentUser.id);
-    search = search ? search : 0;
     return (
       <nav className='navbar'>
         <Route path={'/404'} exact component={() => 
@@ -43,7 +41,7 @@ export default class Header extends Component {
           }
         />
         <Route path={'/cart/:cart_id/m/search/:index/:query'} exact component={() => 
-            <EnumeratedHead text={'Search Results'} length={search.length||0} type={'search'} {...props}/>
+            <EnumeratedHead text={'Search Results'} length={search ? search.length : 0} type={'search'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/share'} exact component={() => 
@@ -92,9 +90,10 @@ class CartHead extends Component {
     bounce: false
   }
 
-  _bounceImage() {
+  _bounceImage(e) {
+    e.preventDefault();
     this.setState({ bounce: true });
-    setTimeout(() => this.setState({ bounce: false }), 100000);
+    setTimeout(() => this.setState({ bounce: false }), 3000);
   }
 
   render() {
@@ -106,14 +105,14 @@ class CartHead extends Component {
     return (
       <div>
         <div className='header__left'>
-          <a href='#' onClick={()=>::this._bounceImage}>
+          <a href='#' onClick={(e)=>::this._bounceImage(e)}>
           {locked 
-            ? <div className={`navbar__icon ${bounce? 'bounce': ''}`}>
+            ? <div className={`navbar__icon ${bounce ? 'bounce': ''}`}>
                 <Icon icon='Locked'/>
               </div> 
             : <div className={`image ${bounce ? 'bounce': ''}`} style={
                 {
-                  backgroundImage: `url(${thumbnail_url})`,
+                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/head%40x2.png)'})`,
                 }
               }/>}
           <h3>
