@@ -6,6 +6,7 @@ export Cart from './Cart';
 export Deals from './Deals';
 export EditCart from './EditCart';
 export EmailForm from './EmailForm';
+export ErrorPage from './ErrorPage';
 export Feedback from './Feedback';
 export Icon from './Icon';
 export Item from './Item';
