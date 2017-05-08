@@ -98,4 +98,35 @@
 			}
 		}
 	}
+
+	.action2 {
+		padding: $padding*2 0 $padding*2;
+		button {
+			border: 1px solid #eccd46;
+			font-weight: bold;
+			border-radius: $padding/2;
+			background: white;
+			padding: $padding $padding*4;
+			font-size: 20px;
+			cursor: pointer;
+			color: #42403f;
+		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+			&:focus {
+				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+			}
+
+		}
+		a {
+			&:first-of-type {
+				button {
+					margin-right: $padding*2;
+					background: $secondaryColor;
+
+					@media only screen and (max-width: 600px) {
+						margin: 0 0 $padding*2;
+					}
+				}
+			}
+		}
+	}
 }

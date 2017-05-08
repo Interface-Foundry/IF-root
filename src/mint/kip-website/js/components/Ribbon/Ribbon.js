@@ -22,18 +22,39 @@ export default class Ribbon extends Component {
               </div>
             </a>
           </div>
-          <div className="right row row-1">
-            <div className="right row row-1" onClick={() => _toggleSidenav()}>
-              <Icon icon='Menu' />
-            </div>
-          </div>
+
+          {
+            currentUser && currentUser.email_address ? <div className="right row row-1">
+              <div className="right row row-1" onClick={() => _toggleSidenav()}>
+                <Icon icon='Menu' />
+              </div>
+            </div> : null     
+          }
+
+          {
+            currentUser && currentUser.email_address ? <div className="right row row-1 action2">
+                <a href='/newcart'><button>
+                  + New Cart
+                </button></a>
+            </div> : null  
+          }
+
+          {
+            currentUser ? null : <div className="right row row-1 action2">
+                <a href='/newcart'><button>
+                  Try Kip For Free
+                </button></a>
+            </div> 
+          }
+
           {
             currentUser ? null : <div className="right row row-1">
               <div className="col-12 row-1 action">
-                <button onClick={() => _toggleModal()}>Login</button>
+                <button onClick={() => _toggleModal()}>Log in</button>
               </div>
             </div>
           }
+
         </div>
       </nav>
     );
