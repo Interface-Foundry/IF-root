@@ -1,17 +1,5 @@
 
 /**
- * @param {string} - session or something? idk really
- * @yield {object} cart object
- */
-exports.createNewCart = function * methodName(req, session_id) {
-  var cart = yield db.Carts.create({
-    cart_leader: req.session.session_id
-  });
-
-  return cart.cart_id;
-};
-
-/**
  * @param {string} cart - unique identifier for cart we can look up, would be from /cart/:id
  * @yield {object} cart - returns cart object if it exists else undefined or create new cart
  */

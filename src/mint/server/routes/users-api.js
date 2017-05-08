@@ -212,6 +212,12 @@ module.exports = function (router) {
 
     }
 
+    // Update cart name if not set
+    if (!cart.name) {
+      cart.name = user.name + '\'s Kip Cart'
+      yield cart.save()
+    }
+
     // Tell the front end that everything worked out pretty okay and we're happy to have a new user
     res.send({
       ok: true,
@@ -226,7 +232,7 @@ module.exports = function (router) {
     if (cart.leader == user.id) {
       var subject = 'Your New Kip Cart'
       cart.leader = true
-    } 
+    }
     //Sending to member
     else {
       var subject = '[Kip] Welcome to ' + cart.name
