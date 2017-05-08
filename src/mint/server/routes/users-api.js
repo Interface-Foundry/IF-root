@@ -226,7 +226,7 @@ module.exports = function (router) {
     if (cart.leader == user.id) {
       var subject = 'Your New Kip Cart'
       cart.leader = true
-    } 
+    }
     //Sending to member
     else {
       var subject = '[Kip] Welcome to ' + cart.name

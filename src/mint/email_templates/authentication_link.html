@@ -130,7 +130,7 @@
                             <img src='https://storage.googleapis.com/kip-random/head_smaller.png'  style="font-weight:550;font-size: 28px; text-align: left; color: #fcfcf9; height: 50px;">
                         </td>
                         <!-- APPERNTLY ACCORDING TO EMAIL TEMPLATING BEST PRACTICE WE WANT INLINE STYLES: WEIRD -->
-                        <td align="left" width="85%" valign="middle" height="100%" style="color:#62a5f1;font-size:46px;">
+                        <td align="left" width="85%" valign="middle" height="100%" style="color:#62a5f1;font-size:46px;font-weight:690;">
                              Kip
                         </td>
                     </tr>
@@ -145,7 +145,7 @@
                 <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                         <tr>
                             <td style="padding: 25px 15px; font-size: 16px; color: black; padding-top: 12px;" align="left">
-                                Hi rachel@kipthis.com,
+                                Hi <%=link.user.email_address%>,
                             </td >
                         </tr>
                 </table>
@@ -161,7 +161,7 @@
                   <tr>
                     <td width="100%" style="box-sizing: border-box; width: 100%; padding: 0 15px 50px; ">
                       <div style="box-sizing: border-box; width: 100%; padding: 0px 0px 0px; ">
-                        <a href="<%=baseUrl%>/auth/<%=link.id%>" style="padding:0px 6px 0px 6px;background-color:#ffdf4d;border:1px solid #ffdf4d;border-radius:9px;color:black;display:inline-block;font-family:sans-serif;font-size:18px;line-height:50px;text-align:center;font-weight:bold;text-decoration:none;-webkit-text-size-adjust:none;mso-hide:all;">Click Here to LOG IN</a>
+                        <a href="<%=baseUrl%>/auth/<%=link.id%>" style="padding:0px 6px 0px 6px;background-color:#ffdf4d;border:1px solid #ffdf4d;border-radius:9px;color:black;display:inline-block;font-family:sans-serif;font-size:16px;line-height:50px;text-align:center;font-weight:bold;text-decoration:none;-webkit-text-size-adjust:none;mso-hide:all;">Click Here to LOG IN</a>
                       </div>
                     </td>
                   </tr>
@@ -190,12 +190,12 @@
                                 <tr>
                                     <td style="padding: 0px 15px 33px; font-size: 20px; color: 666; font-weight: 100;" align="left">
                                          <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
-                                             <tr>
+                                             <tr style="position:absolute;">
                                                  <td align="center" style="padding: 5px 5px; background: #fff;color:555;font-weight: 500;">
-                                                    <div style="padding:2px 0;dispaly:inline-block; color: #666666;font-size:14px;color:#333;border-style:solid;border-width: 1px 0 1px 1px;border-color:#62a5f1 #62a5f1 #62a5f1 #62a5f1;border-radius:10px 0 0 10px;"><%=baseUrl%>/auth/<%=link.id%></div>
-                                                 </td>
-                                                    <div style="display:inline-blcok;border: 1px solid; border-color:#62a5f1;border-radius: 10px;">COPY</div>
-                                                 <td>
+                                                    <div style="width:450px;padding:8px;display:inline-block;color:#666666;font-size:16px;border-style:solid;border-width:1px;border-color:#62a5f1;border-radius:10px;"><%=baseUrl%>/auth/<%=link.id%></div>
+                                                 <!-- </td> -->
+                                                    <!-- <div style="position:relative;left:4px;height:35px;padding:2px 1px;display:inline-block;background-color:#4fa1ee;color:#ffffff;border-style:solid;font-size:14px;font-weight:650;border-color:#62a5f1;border-width:1px 1px 1px 0;border-radius: 0 10px 10px 0;">COPY</div> -->
+                                                 <!-- <td> -->
                                                  </td>
                                              </tr>
                                           </table>
@@ -215,7 +215,7 @@
                     </tr>
                     <tr>
                         <td style="padding: 25px 15px; font-size: 16px; padding-top: 8px;" align="left">
-                            You can always use this email to log in and check your group cart anytime :D Hope you have a lovely day ahead!
+                            You can always use this email to log in and check your group cart anytime 😄 Hope you have a lovely day ahead!
                           <br/><br/>
                             Sincerely,
                           <br/>
@@ -230,14 +230,14 @@
     <!-- FOOTER -->
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 700px;">
         <tr>
-            <td bgcolor="#cbecf7" align="center" style="border-top: 1px solid #e1e1e1;">
-                <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
-                    <tr>
-                      <td style="font-weight:700; font-size:18px; color:##62a5f1">
-                        www.kipthis.com
+            <td bgcolor="#cbecf7" align="center" style="padding-top:8px;border-top: 1px solid #e1e1e1;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="3px" style="font-size:16px;font-weight:800" align="center">
+                    <tr style="padding:10px;">
+                      <td style="padding:10px;">
+                        <a style="display:inline-block;padding-left:4px; color:##62a5f1" href="www.kipthis.com">www.kipthis.com</a>
                       </td>
-                      <td>
-                        Social Media Icons :+1:
+                      <td style="display:inline-block;padding:5px;font-size:12px;">
+                        Social Media Icons
                       </td>
                     </tr>
                     <!-- <tr>
@@ -251,12 +251,13 @@
                                 <!-- </tr> -->
                             <!-- </table> -->
                         <!-- </td> -->
-                    <!-- </tr> --> -->
+                    <!-- </tr> -->
                 </table>
+                <br/>
+                <br/>
+                </body>
             </td>
         </tr>
     </table>
-
 </div>
-</body>
 </html>
