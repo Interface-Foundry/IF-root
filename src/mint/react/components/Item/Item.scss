@@ -39,6 +39,16 @@
       &.left {
         left: 0;
       }
+      &.mid {
+        width: 100%;
+        height: 10px;
+        &.l1 {
+          top: 240px;
+        }
+        &.l2 {
+          top: 270px;
+        }
+      }
       &.right {
         right: 0;
       }

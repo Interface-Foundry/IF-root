@@ -54,7 +54,7 @@ export default class Item extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, clearItem, history: { replace } } } = this;
+    const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { replace } } } = this;
     const { type: nextType, item: nextItem, index: nextIndex, item_id: nextId, item: { position: nextPos } } = nextProps;
     //never replace cart_id if its undefined
     if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) {
@@ -64,16 +64,14 @@ export default class Item extends Component {
     } else if (cart_id && nextType === 'search' && !nextItem.search.length) {
       replace(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
     } else if (nextId !== item_id) {
-      clearItem();
       previewItem(nextProps.item_id);
     } else if (nextProps.amazon_id !== amazon_id) {
-      clearItem();
       previewAmazonItem(nextProps.amazon_id);
     }
   }
 
   componentWillUnmount() {
-    const { props: { clearItem } } = this;
+    const { clearItem } = this.props;
     clearItem();
   }
 
@@ -181,6 +179,8 @@ export default class Item extends Component {
         <div className='mask left photo' />
         <div className='mask right photo' />
         <div className='mask middle' />
+        <div className='mask mid l1 text' />
+        <div className='mask mid l2 text' />
         <div className='mask left text' />
         <div className='mask right text' />
       </div>
