@@ -14,8 +14,8 @@ export default class App extends Component {
 	  	return (
 	      <div className='app'>
 	      	<Route path={`${match.url}`} exact component={Landing}/>
-	      	<Route path={`${match.url}s/legal`} exact component={Legal}/>
-	      	<Route path={`${match.url}:src`} exact component={Landing}/>
+	      	<Route path={`${match.url}legal`} exact component={Legal}/>
+	      	<Route path={`${match.url}s/:src`} exact component={Landing}/>
 	      </div>
 	    );
 	}

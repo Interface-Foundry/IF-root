@@ -14,18 +14,15 @@ module.exports = {
     hotUpdateChunkFilename: 'hot/[hash].hot-update.js',
     hotUpdateMainFilename: 'hot/[hash].hot-update.json'
   },
-  devtool: 'eval-source-map',  // TODO: not do this in prod!
+
   plugins: [
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
-    }),
+    new CaseSensitivePathsPlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
-    new webpack.LoaderOptionsPlugin({
-      minimize: true,
-      debug: false
-    }),
+    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
-    new webpack.optimize.UglifyJsPlugin({minimize: true, compress: {warnings: false}})
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+    })
   ],
   module: {
     loaders: [{
