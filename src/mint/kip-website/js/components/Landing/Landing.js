@@ -73,7 +73,13 @@ export default class Landing extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
-    return nextState.animationState !== this.state.animationState
+    if(
+        nextState.animationState !== this.state.animationState ||
+        nextState.fixed !== this.state.fixed ||
+        nextState.sidenav !== this.state.sidenav ||
+        nextState.modal !== this.state.modal 
+      )
+      return true;
   }
 
   render() {

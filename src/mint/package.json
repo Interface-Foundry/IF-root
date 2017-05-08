@@ -98,7 +98,7 @@
     "build-cart": "NODE_PATH=$NODE_PATH:./react webpack",
     "build-home": "NODE_PATH=$NODE_PATH:./kip-website webpack",
     "build": "npm run build-cart & npm run build-home",
-    "cart": "NODE_PATH=$NODE_PATH:./react webpack --progress --color --watch --hot",
+    "cart": "NODE_PATH=$NODE_PATH:./react webpack --config ./webpack.dev.config.js --progress --color --watch --hot",
     "home": "NODE_PATH=$NODE_PATH:./kip-website webpack --progress --color --watch --hot",
     "backend": "env SEND_EMAILS='' nodemon --ignore react/ --ignore public/ ./server/index.js",
     "dev": "npm run backend & npm run cart & npm run home",
