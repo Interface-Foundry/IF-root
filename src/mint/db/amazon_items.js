@@ -9,6 +9,7 @@ var Waterline = require('waterline');
 var AmazonItemsCollection = Waterline.Collection.extend({
   identity: 'amazon_items',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     /** @type {string} ASIN id number */
     asin: 'string',

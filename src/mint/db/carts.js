@@ -8,6 +8,7 @@ var constants = require('../server/constants.js');
 var cartsCollection = Waterline.Collection.extend({
   identity: 'carts',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     /** Generated when a cart is created for the first time */
 

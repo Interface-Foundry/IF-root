@@ -8,6 +8,7 @@ var constants = require('../server/constants.js');
 var magiclinksCollection = Waterline.Collection.extend({
   identity: 'magiclinks',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
 
     /** string magic link that ties a user account into a cart */
@@ -27,4 +28,3 @@ var magiclinksCollection = Waterline.Collection.extend({
 });
 
 module.exports = magiclinksCollection;
-

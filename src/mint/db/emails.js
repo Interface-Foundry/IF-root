@@ -11,6 +11,7 @@ var sendMail = require('../../mail/IF_mail').send
 var emailsCollection = Waterline.Collection.extend({
   identity: 'emails',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     /** Generated when an email is created */
     id: {

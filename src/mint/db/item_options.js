@@ -7,6 +7,7 @@ var uuid = require('uuid');
 var itemOptionsCollection = Waterline.Collection.extend({
   identity: 'item_options',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     /**
      * @type {string} id the option id, which for amazon items is the asin

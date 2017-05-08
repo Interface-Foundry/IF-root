@@ -8,6 +8,7 @@ var animals = ['quasar', 'black hole', 'habitable planet', 'galaxy cluster', 'ba
 var sessionsCollection = Waterline.Collection.extend({
   identity: 'sessions',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     /** Generated when a session is created for the first time */
     id: {

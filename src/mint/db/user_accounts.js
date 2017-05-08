@@ -9,6 +9,7 @@ var co = require('co')
 var userAccountCollection = Waterline.Collection.extend({
   identity: 'user_accounts',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     /**
      * Randomly-generated unique UUID

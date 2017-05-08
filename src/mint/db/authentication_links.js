@@ -8,6 +8,7 @@ var constants = require('../server/constants.js');
 var authenticationLinksCollection = Waterline.Collection.extend({
   identity: 'authentication_links',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     /** Generated when user is added for the first time */
 

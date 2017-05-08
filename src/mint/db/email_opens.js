@@ -8,6 +8,7 @@ var uuid = require('uuid')
 var emailOpensCollection = Waterline.Collection.extend({
   identity: 'email_opens',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     // id: No id needed for opens
 

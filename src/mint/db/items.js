@@ -11,6 +11,7 @@ var uuid = require('uuid');
 var itemsCollection = Waterline.Collection.extend({
   identity: 'items',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     /** Generated when an item is added for the first time */
     id: {

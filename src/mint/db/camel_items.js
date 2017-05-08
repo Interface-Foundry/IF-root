@@ -3,6 +3,7 @@ var Waterline = require('waterline');
 var camelItemsCollection = Waterline.Collection.extend({
   identity: 'camel_items',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     name: 'string',
     original_name: 'string',

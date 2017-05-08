@@ -7,6 +7,7 @@ var uuid = require('uuid');
 var feedbackCollection = Waterline.Collection.extend({
   identity: 'feedback',
   connection: 'default',
+  migrate: 'safe',
   attributes: {
     /** Generated when user is added for the first time */
 
