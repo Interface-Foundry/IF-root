@@ -148,33 +148,6 @@ exports.searchAmazon = function * (query, index) {
  * @param {string} asin of item
  * @returns {[type]} [description]
  */
-// exports.searchAmazon = function * (query) {
-//   console.log('searching:', query)
-//   var amazonParams = {
-//     Availability: 'Available',
-//     Keywords: query,
-//     Condition: 'New',
-//     SearchIndex: 'All', //the values for this vary by locale
-//     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations'
-//   };
-//   try {
-//     var results = yield opHelper.execute('ItemSearch', amazonParams);
-//     // logging.info(JSON.stringify(results.result.ItemSearchResponse.Items.Item));
-//     // logging.info(JSON.stringify(Object.keys(results.result.ItemSearchResponse.Items.Item)));
-//     return results.result.ItemSearchResponse.Items.Item;
-//   } catch (err) {
-//     throw new Error('Error on search');
-//     return null;
-//   }
-// };
-
-/**
- * lookup item by asin
- * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemLookup.html
- * lookup item by asin
- * @param {string} asin of item
- * @returns {[type]} [description]
- */
 exports.lookupAmazonItem = function * (asin) {
   if (!asin) {
     throw new Error('No asin supplied')
@@ -260,6 +233,96 @@ exports.createAmazonCart = function * (item) {
   return cart.result.CartCreateResponse.Cart;
 };
 
+
+/**
+ * condense items from multiple users/same user with same asin to conform amazon
+ * format.
+ *
+ * @param      {array}  items   array of items from cart
+ * @return     {array}  same as above but if asin was already there just reduced into same object
+ */
+function condenseItems(items) {
+  var seenAsins = []
+  return items.reduce((prev, curr) => {
+    if (seenAsins.includes(curr.asin)) {
+      prev.find(x => x.asin === curr.asin).quantity += curr.quantity
+    } else {
+      seenAsins.push(curr.asin)
+      prev.push({
+        asin: curr.asin,
+        quantity: curr.quantity
+      })
+    }
+  return prev
+  }, [])
+}
+
+/**
+ * create an amazon cart instead of worrying about updating cart and removing etc
+ *
+ * @param {array} items - array of items that would include:
+ *                        ASIN - asin from amazon (TODO: allow for OfferListingId)
+ *                        Quantity - quantity
+ */
+ function createAmazonCartWithItems (items) {
+  const useAsin = true
+  if (!items instanceof Array) {
+    items = [items]
+  }
+
+  // ability to use offerlistingid or asin later, just using asin rn
+
+  var amazonParams = {
+    'AssociateTag': associateTag,
+  }
+
+  var condendesedItems = condenseItems(items)
+  var k = 1
+  for (i of condendesedItems) {
+    amazonParams[`Item.${k}.ASIN`] = i.asin
+    amazonParams[`Item.${k}.Quantity`] = i.quantity
+    k++
+  }
+  return amazonParams
+}
+
+/**
+ * parse errors if any from creating an amazon cart
+ *
+ * @param {object} res the res from amazon after creating a cart
+ * @return {array} The errors from amazon into an array if the cart is still fine
+ *                 albeit changed objects/quantities, into an explicit object explaining
+ *                 what happened if not (TODO)
+ */
+function getErrorsFromAmazonCartCreate (res) {
+  if (!res.Request.Errors) {
+    console.log('no errors from creating cart, phew')
+    return null
+  }
+
+  if (res.Request.Errors.Error) {
+    var errorsArray = res.Request.Errors.Error
+    if (!(errorsArray instanceof Array)) {
+      errorsArrays = [errorsArray]
+    }
+  }
+
+  return errorsArrays.map(obj => {
+    console.log('dealing with error:', obj)
+    if (obj === 'AWS.ECommerceService.InvalidQuantity') {
+      try {
+        var itemID = obj.Message.match(/\b\w{10}\b/)
+        return {
+          'error': 'InvalidQuantity (either reduced or removed)',
+          'item': (itemID) ? itemID[0] : 'couldnt get what amazon item it was'
+        }
+      } catch (err) {
+        throw new Error('error getting item', res.Error.Message)
+      }
+    }
+  })
+}
+
 /**
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CartGet.html
  * @param {[type]} cart          [description]
@@ -269,7 +332,8 @@ exports.getAmazonCart = function * (cart) {
   var amazonParams = {
     'AssociateTag': associateTag,
     'CartId': cart.amazon_cartid,
-    'HMAC': cart.amazon_hmac
+    'HMAC': cart.amazon_hmac,
+    'ResponseGroup': 'Cart',
   };
 
   cart = yield opHelper.execute('CartGet', amazonParams);
@@ -345,7 +409,7 @@ exports.removeAmazonItemFromCart = function * (item, cart) {
  * @param {[type]} item          [description]
  * @yield {[type]} [description]
  */
-exports.cleaAmazonCart = function * (cart) {
+exports.clearAmazonCart = function * (cart) {
   var amazonParams = {
     'AssociateTag': associateTag,
     'CartId': cart.amazon_cartid,
@@ -355,6 +419,7 @@ exports.cleaAmazonCart = function * (cart) {
   cart = yield opHelper.execute('CartClear', amazonParams);
   return cart;
 };
+
 
 /**
  * Syncs amazon cart with the database cart
@@ -373,94 +438,81 @@ exports.syncAmazon = function * (cart) {
     throw new Error('can only sync carts that have amazon items, and items must be populated')
   }
 
-  // check if we need to create a new cart. if so, no need to sync, just create
-  if (!cart.amazon_cartid || !cart.amazon_hmac) {
-    console.log('creating new cart with all the items')
-    var cartAddAmazonParams = {
-      'AssociateTag': associateTag,
-      'CartId': cart.amazon_cartid,
-      'HMAC': cart.amazon_hmac
-    };
-    cart.items.map((item, index) => {
-      var key = 'Item.' + (index + 1) + '.'
-      cartAddAmazonParams[key + 'ASIN'] = item.asin
-      cartAddAmazonParams[key + 'Quantity'] = item.quantity
-    })
-
-    var res = yield opHelper.execute('CartCreate', cartAddAmazonParams);
-    checkError(res.result.CartCreateResponse.Cart)
-    returnValue = res.result.CartCreateResponse.Cart
-    cart.amazon_cartid = returnValue.CartId
-    cart.amazon_hmac = returnValue.HMAC
-    yield cart.save()
-    return returnValue
-  }
-
-  // amazon cart already existed for this cart, so proceed to sync items
-  var amazonCart = yield exports.getAmazonCart(cart)
-
-  // Generate two requests and run them through amazon:
-  //  - a CartAdd request for the the items missing
-  //  - a CartModify request to edit the qunatities of existing items (or remove them)
-  var amazonItems = amazonCart.CartItems.CartItem instanceof Array ? amazonCart.CartItems.CartItem : [amazonCart.CartItems.CartItem]
-
-  var cartAddAmazonParams = {
-    'AssociateTag': associateTag,
-    'CartId': cart.amazon_cartid,
-    'HMAC': cart.amazon_hmac
-  };
-  var missingItems = cart.items.filter(i => {
-    return amazonItems.filter(ai => ai.ASIN === i.asin).length === 0
-  }).map((item, index) => {
-    var key = 'Item.' + (index + 1) + '.'
-    cartAddAmazonParams[key + 'ASIN'] = item.asin
-    cartAddAmazonParams[key + 'Quantity'] = item.quantity
-    return item
-  })
-
-  var cartModifyAmazonParams = {
-    'AssociateTag': associateTag,
-    'CartId': cart.amazon_cartid,
-    'HMAC': cart.amazon_hmac
-  };
-  var lastModifyIndex = 0
-  var modifyItems = cart.items.filter((i, index) => {
-    return amazonItems.map(ai => {
-      if (ai.ASIN === i.asin && parseInt(ai.Quantity) !== i.quantity) {
-        var key = 'Item.' + (index + 1) + '.'
-        lastModifyIndex = index + 1
-        cartModifyAmazonParams[key + 'CartItemId'] = ai.CartItemId
-        cartModifyAmazonParams[key + 'Quantity'] = i.quantity || 0
-        return i
-      }
-    }).filter(Boolean).length > 0
-  })
-
-  var itemsToDelete = amazonItems.filter(ai => {
-    if (cart.items.filter(i => i.asin === ai.ASIN).length === 0) {
-      cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.CartItemId'] = ai.CartItemId
-      cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.Quantity'] = 0
-      return ai
-    }
-  })
-
-  // Return an amazon cart value, either the one we got earlier or the response
-  // from one of the modification requests below
-  var returnValue = amazonCart
-  if (missingItems.length > 0) {
-    var res = yield opHelper.execute('CartAdd', cartAddAmazonParams);
-    checkError(res.result.CartAddResponse.Cart)
-    returnValue = res.result.CartAddResponse.Cart
-  }
-  if (modifyItems.length > 0 || itemsToDelete.length > 0) {
-    res = yield opHelper.execute('CartModify', cartModifyAmazonParams);
-    checkError(res.result.CartModifyResponse.Cart)
-    returnValue = res.result.CartModifyResponse.Cart
-  }
-
-  if (!returnValue.PurchaseURL) {
-    returnValue.PurchaseURL = amazonCart.PurchaseURL
-  }
-
+  var cartAddAmazonParams = createAmazonCartWithItems(cart.items);
+  var res = yield opHelper.execute('CartCreate', cartAddAmazonParams);
+  var amazonErrors = getErrorsFromAmazonCartCreate(res.result.CartCreateResponse.Cart)
+  returnValue = res.result.CartCreateResponse.Cart
+  cart.amazon_cartid = returnValue.CartId
+  cart.amazon_hmac = returnValue.HMAC
   return returnValue
 }
+
+// commented out but i think this is all unnecessary now?  idk
+//   // amazon cart already existed for this cart, so proceed to sync items
+//   var amazonCart = yield exports.getAmazonCart(cart)
+
+//   // Generate two requests and run them through amazon:
+//   //  - a CartAdd request for the the items missing
+//   //  - a CartModify request to edit the qunatities of existing items (or remove them)
+//   var amazonItems = amazonCart.CartItems.CartItem instanceof Array ? amazonCart.CartItems.CartItem : [amazonCart.CartItems.CartItem]
+
+//   var cartAddAmazonParams = {
+//     'AssociateTag': associateTag,
+//     'CartId': cart.amazon_cartid,
+//     'HMAC': cart.amazon_hmac
+//   };
+//   var missingItems = cart.items.filter(i => {
+//     return amazonItems.filter(ai => ai.ASIN === i.asin).length === 0
+//   }).map((item, index) => {
+//     var key = 'Item.' + (index + 1) + '.'
+//     cartAddAmazonParams[key + 'ASIN'] = item.asin
+//     cartAddAmazonParams[key + 'Quantity'] = item.quantity
+//     return item
+//   })
+
+//   var cartModifyAmazonParams = {
+//     'AssociateTag': associateTag,
+//     'CartId': cart.amazon_cartid,
+//     'HMAC': cart.amazon_hmac
+//   };
+//   var lastModifyIndex = 0
+//   var modifyItems = cart.items.filter((i, index) => {
+//     return amazonItems.map(ai => {
+//       if (ai.ASIN === i.asin && parseInt(ai.Quantity) !== i.quantity) {
+//         var key = 'Item.' + (index + 1) + '.'
+//         lastModifyIndex = index + 1
+//         cartModifyAmazonParams[key + 'CartItemId'] = ai.CartItemId
+//         cartModifyAmazonParams[key + 'Quantity'] = i.quantity || 0
+//         return i
+//       }
+//     }).filter(Boolean).length > 0
+//   })
+
+//   var itemsToDelete = amazonItems.filter(ai => {
+//     if (cart.items.filter(i => i.asin === ai.ASIN).length === 0) {
+//       cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.CartItemId'] = ai.CartItemId
+//       cartModifyAmazonParams['Item.' + (lastModifyIndex + 1) + '.Quantity'] = 0
+//       return ai
+//     }
+//   })
+
+//   // Return an amazon cart value, either the one we got earlier or the response
+//   // from one of the modification requests below
+//   var returnValue = amazonCart
+//   if (missingItems.length > 0) {
+//     var res = yield opHelper.execute('CartAdd', cartAddAmazonParams);
+//     checkError(res.result.CartAddResponse.Cart)
+//     returnValue = res.result.CartAddResponse.Cart
+//   }
+//   if (modifyItems.length > 0 || itemsToDelete.length > 0) {
+//     res = yield opHelper.execute('CartModify', cartModifyAmazonParams);
+//     checkError(res.result.CartModifyResponse.Cart)
+//     returnValue = res.result.CartModifyResponse.Cart
+//   }
+
+//   if (!returnValue.PurchaseURL) {
+//     returnValue.PurchaseURL = amazonCart.PurchaseURL
+//   }
+
+//   return returnValue
+// }
