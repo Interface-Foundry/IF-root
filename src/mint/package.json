@@ -95,7 +95,7 @@
   "scripts": {
     "start": "npm run build && node ./server",
     "build": "NODE_PATH=$NODE_PATH:./react webpack",
-    "dev": "SEND_EMAILS=; nodemon --ignore react/ --ignore public/ ./server/index.js & webpack --progress --color -d --watch --hot & cd ./kip-website && npm run build",
+    "dev": "env SEND_EMAILS='' nodemon --ignore react/ --ignore public/ ./server/index.js && webpack --progress --color -d --watch --hot && cd ./kip-website && npm run build",
     "clean": "rm -r public/build",
     "test": "mocha tests",
     "react-test": "node_modules/.bin/karma start karma.conf.js",
