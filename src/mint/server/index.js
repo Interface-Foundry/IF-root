@@ -8,23 +8,23 @@ const fs = require('fs'),
   path = require('path'),
   mintLogger = require('./mint_logging.js'),
   _ = require('lodash'),
-  co = require('co'),
-  webpackConfig = process.env.NODE_ENV.includes('dev') ? require('../webpack.dev.config.js') : require('../webpack.config.js');
+  co = require('co');
+  // webpackConfig = process.env.NODE_ENV.includes('dev') ? require('../webpack.dev.config.js') : require('../webpack.config.js');
 
 // start any jobs
 var dailyDealsJob = require('./deals/send-daily-deals-job')
 
 // live reloading
-if (!process.env.NO_LIVE_RELOAD) {
-  const compiler = require('webpack')(webpackConfig);
-  app.use(require("webpack-dev-middleware")(compiler, {publicPath: webpackConfig.output.publicPath}));
-  app.use(require("webpack-hot-middleware")(compiler, {reload: true, path: '/__webpack_hmr', heartbeat: 10 * 1000}));
-} else {
-  app.get('/__webpack_hmr', (req, res) => {
-    res.status(200)
-      .end()
-  })
-}
+// if (!process.env.NO_LIVE_RELOAD) {
+//   const compiler = require('webpack')(webpackConfig);
+//   app.use(require('webpack-dev-middleware')(compiler, {publicPath: webpackConfig.output.publicPath}));
+//   app.use(require('webpack-hot-middleware')(compiler, {reload: true, path: '/__webpack_hmr', heartbeat: 10 * 1000}));
+// } else {
+//   app.get('/__webpack_hmr', (req, res) => {
+//     res.status(200)
+//       .end();
+//   });
+// }
 
 // idk
 var regularRoutes = require('./routes/regular.js');

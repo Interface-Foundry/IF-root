@@ -101,7 +101,7 @@
     "cart": "NODE_PATH=$NODE_PATH:./react webpack --config ./webpack.dev.config.js --progress --color --watch --hot",
     "home": "NODE_PATH=$NODE_PATH:./kip-website webpack --progress --color --watch --hot",
     "backend": "env SEND_EMAILS='' nodemon --ignore react/ --ignore public/ ./server/index.js",
-    "dev": "npm run backend && npm run cart",
+    "dev": "yarn backend & yarn home & yarn cart",
     "clean": "rm -r public/build",
     "test": "mocha tests",
     "react-test": "node_modules/.bin/karma start karma.conf.js",

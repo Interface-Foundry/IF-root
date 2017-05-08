@@ -29,21 +29,25 @@ export default class Toast extends Component {
   }
 
   _cancelRedirect() {
+    this.setState({ toast: null, status: null, showToast: false });
     clearTimeout(this.redirect);
     this.redirect = null;
   }
 
   _showToast(status, toast) {
     setTimeout(() => this.setState({ status, toast, showToast: true }), 1);
-    setTimeout(() => this.setState({ toast: null, status: null, showToast: false }), 3000);
-    ::this._clearParams();
+    setTimeout(() => {
+      this.setState({ toast: null, status: null, showToast: false });
+      ::this._clearParams();
+    }, 3000);
+
   }
 
   _clearParams() {
     const { replace, loc } = this.props;
     clearTimeout(this.redirect);
-    this.redirect = setTimeout(() => replace(loc.pathname), 2999);
-    this.setState({ showToast: false })
+    this.setState({ showToast: false });
+    replace(loc.pathname);
   }
 
   render() {
