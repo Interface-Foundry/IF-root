@@ -10,7 +10,8 @@
       "MONGODB_URI": "mongodb://mongodb-beta-server-1:27017,mongodb-beta-server-2:27017/mint?replicaSet=rs0&readPreference=nearest&slaveOk=true",
       "SEND_EMAILS": true,
       "NO_LIVE_RELOAD": true,
-      "NO_LUMINATI": true
+      "NO_LUMINATI": true,
+      "BASEURL": "https://www.kipthis.com"
     }
   }]
 }

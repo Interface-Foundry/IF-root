@@ -34,6 +34,7 @@ We are using pretty standard commands just to keep it easy, webpack builds react
 * `NO_LUMINATI` - uses a regular request instead of a proxied request through luminati. only use this as a very last resort. if you need to scrape deals or something, instead of running the scraper locally with `NO_LUMINATI=1` you can ask someone for a db dump of their scraped deals.
 * `SCRAPE_DEALS` - turn on and off the periodic scraping of deals, recommend to leave unset in development and just use a dump of the deals db.
 * `SEND_DAILY_DEALS` - turn on and off the emailing of daily deals to customers.
+* `BASEURL` - the base url used in email links, like `https://www.kipthis.com` or `http://localhost:3000`
 
 To set an environmental variable in your **.bashrc** or **.zshrc** so that it is set every time you open a terminal and for every command run:
 
