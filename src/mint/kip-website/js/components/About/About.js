@@ -43,7 +43,7 @@ export default class About extends Component {
 	      	<div className="about"> 
 	      		{
 	      			_.map(icons, (Icon, key) => {
-	      				return <div key={key} className={`${key} ${i === lastIndex && animate ? '' : ''}`}><Icon/></div>
+	      				return <div key={key} className={`${key} ${animate ? '' : ''}`}><Icon/></div>
 	      			})
 	      		}
 	      	</div>
