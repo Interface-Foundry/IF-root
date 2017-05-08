@@ -133,23 +133,23 @@ const SendGridGraph = ({data}) => {
             <YAxis yAxisId="left" orientation="left" stroke="#000000" />
             <CartesianGrid stroke="#ccc" />
             <Tooltip />
-            <Line type="monotone" yAxisId="left" dataKey="price" stroke="#000000" fill="#000000" />
-            <Line type="monotone" yAxisId="left" dataKey="blocks" stroke="#0000FF" fill="#0000FF" />
-            <Line type="monotone" yAxisId="left" dataKey="bounce_drops" stroke="#00FFFF" fill="#00FFFF" />
-            <Line type="monotone" yAxisId="left" dataKey="bounces" stroke="#FF0000" fill="#FF0000" />
-            <Line type="monotone" yAxisId="left" dataKey="clicks" stroke="#FFFF00" fill="#FFFF00" />
-            <Line type="monotone" yAxisId="left" dataKey="deferred" stroke="#FF8000" fill="#FF8000" />
-            <Line type="monotone" yAxisId="left" dataKey="delivered" stroke="#FFBBFF" fill="#FFBBFF" />
-            <Line type="monotone" yAxisId="left" dataKey="invalid_emails" stroke="#88FF88" fill="#88FF88" />
-            <Line type="monotone" yAxisId="left" dataKey="opens" stroke="#00FF00" fill="#00FF00" />
-            <Line type="monotone" yAxisId="left" dataKey="processed" stroke="#FF00FF" fill="#FF00FF" />
-            <Line type="monotone" yAxisId="left" dataKey="requests" stroke="#888888" fill="#888888" />
-            <Line type="monotone" yAxisId="left" dataKey="spam_report_drops" stroke="#888800" fill="#888800" />
-            <Line type="monotone" yAxisId="left" dataKey="spam_reports" stroke="#880000" fill="#880000" />
-            <Line type="monotone" yAxisId="left" dataKey="unique_clicks" stroke="#008888" fill="#008888" />
-            <Line type="monotone" yAxisId="left" dataKey="unique_opens" stroke="#880088" fill="#880088" />
-            <Line type="monotone" yAxisId="left" dataKey="unsubscribe_drops" stroke="#BBBBBB" fill="#BBBBB" />
-            <Line type="monotone" yAxisId="left" dataKey="unsubscribes" stroke="#33BB33" fill="#33BB33" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="price" stroke="#000000" fill="#000000" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="blocks" stroke="#0000FF" fill="#0000FF" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="bounce_drops" stroke="#00FFFF" fill="#00FFFF" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="bounces" stroke="#FF0000" fill="#FF0000" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="clicks" stroke="#FFFF00" fill="#FFFF00" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="deferred" stroke="#FF8000" fill="#FF8000" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="delivered" stroke="#FFBBFF" fill="#FFBBFF" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="invalid_emails" stroke="#88FF88" fill="#88FF88" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="opens" stroke="#00FF00" fill="#00FF00" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="processed" stroke="#FF00FF" fill="#FF00FF" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="requests" stroke="#888888" fill="#888888" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="spam_report_drops" stroke="#888800" fill="#888800" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="spam_reports" stroke="#880000" fill="#880000" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="unique_clicks" stroke="#008888" fill="#008888" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="unique_opens" stroke="#880088" fill="#880088" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="unsubscribe_drops" stroke="#BBBBBB" fill="#BBBBB" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="unsubscribes" stroke="#33BB33" fill="#33BB33" />
           </LineChart>
         </ResponsiveContainer>
       </div>

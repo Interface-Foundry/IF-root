@@ -22,7 +22,8 @@ class MintEmail extends Component {
       startDate: moment().subtract(6, 'month'),
       endDate: moment(),
       emailStats: '',
-      ready:false
+      ready:false,
+      sg_data: '',
     };
     this.changeStart = this.changeStart.bind(this);
     this.changeEnd = this.changeEnd.bind(this);
@@ -55,7 +56,7 @@ class MintEmail extends Component {
 
   generateEmailStats(startDate, endDate){
     var self = this;
-    request.post('/sg')
+    request.post('/sgquery')
     .send({ startDate: startDate.format("YYYY-MM-DD"), endDate: endDate.format("YYYY-MM-DD") })
     .end(function(err, resp) {
           if (err) { 
@@ -66,10 +67,32 @@ class MintEmail extends Component {
               emailStats: resp.text
             })
         });
+    request.post('/sgdata')
+    .send({filename: 'sg_log.txt'})
+    .end(function(err, resp){
+      if(err){
+        console.error(err);
+      }
+      self.setState({
+        sg_data: resp.text
+      })
+    })
+
   }
 
   listEmailStats(stats){
     return (<SendGridTable data={stats} />);
+  }
+
+  listGroupSendgridStats(){
+    //return (<div>To be created.</div>)
+    var stats = this.getSendgridEmails();
+    return (<div>To be created.</div>);
+  }
+
+  getSendgridEmails(){
+    var self = this;
+    
   }
 
   render(){
@@ -92,6 +115,9 @@ class MintEmail extends Component {
         </div>
         <div>
           { self.state.ready == true ? self.listEmailStats(sgStats) : 'Loading...'}
+        </div>
+        <div>
+          { self.state.ready == true ? self.listGroupSendgridStats() : 'Loading...'}
         </div>
       </div>
     )

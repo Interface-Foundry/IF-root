@@ -33,6 +33,10 @@ import multer from 'multer';
 
 import { graphqlExpress, graphiqlExpress } from 'graphql-server-express';
 
+
+var sendgridRouter = require('./routes/sendgrid')
+var fs = require('fs');
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './client/csvfiles')
@@ -68,7 +72,9 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use('/sg', function(req, res, next){
+app.use('/sg', sendgridRouter);
+
+app.use('/sgquery', function(req, res, next){
   var request = require('request');
   var url = "https://api.sendgrid.com/v3/stats?start_date=" + req.body.startDate + "&end_date=" + req.body.endDate;
   request.get( {
@@ -79,6 +85,12 @@ app.use('/sg', function(req, res, next){
     }, function(error, response, body) {
         res.end(body);
     });
+})
+
+app.use('/sgdata', function(req,res,next){
+    fs.readFile(req.body.filename,"utf-8", function(err, data) {
+      res.end(data)
+    })
 })
 
 
