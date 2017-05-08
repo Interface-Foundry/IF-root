@@ -18,6 +18,7 @@ describe('testing amazon to our cart system', () => {
       B00L8IVWQ4: 'https://www.amazon.com/dp/B00L8IVWQ4/ref=twister_B00PZKJJ5W',
       B01K1IO3QW: 'https://www.amazon.com/Acer-E5-575-33BM-15-6-Inch-Processor-Generation/dp/B01K1IO3QW/ref=sr_1_4?s=pc&ie=UTF8&qid=1491408499&sr=1-4&keywords=laptop',
       B01KPW0UF2: 'https://www.amazon.com/Misfit-Ray-Fitness-Tracker-Stainless/dp/B01KPW0UF2/ref=sr_1_1?ie=UTF8&qid=1493748463&sr=8-1&keywords=B01KPW0UF2',
+      B01DORE8GC: 'https://www.amazon.com/gp/product/B01DORE8GC/ref=s9_acsd_aas_bw_c_x_1_w?ie=UTF8&pd_rd_r=C89PKSMDTK3MDR7TRENK&pd_rd_w=EH95W&pd_rd_wg=cP41Z&pf_rd_m=ATVPDKIKX0DER&pf_rd_s=merchandised-search-1&pf_rd_r=C89PKSMDTK3MDR7TRENK&pf_rd_r=C89PKSMDTK3MDR7TRENK&pf_rd_t=101&pf_rd_p=2b20b3ce-7494-42e5-9acd-14c3e0df0f17&pf_rd_p=2b20b3ce-7494-42e5-9acd-14c3e0df0f17&pf_rd_i=16313234011',
       B01DORE8GC: 'https://www.amazon.com/gp/product/B01DORE8GC/ref=s9_acsd_aas_bw_c_x_1_w?ie=UTF8&pd_rd_r=C89PKSMDTK3MDR7TRENK&pd_rd_w=EH95W&pd_rd_wg=cP41Z&pf_rd_m=ATVPDKIKX0DER&pf_rd_s=merchandised-search-1&pf_rd_r=C89PKSMDTK3MDR7TRENK&pf_rd_r=C89PKSMDTK3MDR7TRENK&pf_rd_t=101&pf_rd_p=2b20b3ce-7494-42e5-9acd-14c3e0df0f17&pf_rd_p=2b20b3ce-7494-42e5-9acd-14c3e0df0f17&pf_rd_i=16313234011'
     }
 
