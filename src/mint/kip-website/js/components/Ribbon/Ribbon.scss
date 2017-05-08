@@ -38,6 +38,7 @@
 	.row {
 		text-align: left;
 		height: $ribbonHeight;
+		pointer-events: auto;
 		display: inline-block;
 		.image {
 			display: inline-block;

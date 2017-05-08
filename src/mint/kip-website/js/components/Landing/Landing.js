@@ -71,17 +71,23 @@ export default class Landing extends Component {
     })
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    // need this, otherwise page always rerender every scroll
+    return nextState.animationState !== this.state.animationState
+  }
+
   render() {
-    const { state: { fixed, sidenav, modal, animationState }, props: { currentUser }, _handleScroll, _toggleSidenav, _toggleModal, _registerHeight } = this;
+    const { state: { fixed, sidenav, modal, animationState }, props: { currentUser, match: { params: { src }} }, _handleScroll, _toggleSidenav, _toggleModal, _registerHeight } = this;
+
     return (
       <span>
         { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }
         { modal ? <ModalContainer _toggleModal={_toggleModal} /> : null }
 
         <div className="landing" ref={(landing) => this.landing = landing}> 
-          <RibbonContainer fixed={fixed} _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/>
-          <Hero animate={!fixed}/>
-          <Statement _toggleModal={_toggleModal}/>
+          <RibbonContainer fixed={fixed} src={src} _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/>
+          <Hero animate={!fixed} />
+          <Statement _toggleModal={_toggleModal} src={src}/>
           <About animationState={animationState} animate={animationState.includes('fixed')}/>
           <Showcase animationState={animationState} _registerHeight={_registerHeight}/>
           <Services _toggleModal={_toggleModal}/>

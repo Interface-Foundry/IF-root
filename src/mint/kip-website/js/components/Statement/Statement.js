@@ -11,16 +11,23 @@ export default class Statement extends Component {
 
 
   	render() {
-  		const { _toggleModal } = this.props;
+  		const { _toggleModal, src } = this.props;
 	    return (
 	      	<div className="statement">
-	      		<div className="col-12 row-1 action">
-	      			<a href='/newcart'>
-	        			<button>
-		        			Try Kip For Free <Icon icon='Right'/>
-		        		</button>
-	        		</a>
-	        	</div>
+	      		{
+		      		src !== 'slack' ? <div className="col-12 row-1 action">
+		      			<a href='/newcart'>
+		        			<button>
+			        			Try Kip For Free <Icon icon='Right'/>
+			        		</button>
+		        		</a>
+		        	</div> : <div className="col-12 row-1 action">
+	                  	<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button>
+	                    	Add To Slack
+	                  	</button></a>
+	              	</div>
+		      	}
+
 	        	<div className="col-12 row-1 headline">
 	        		<h1>COLLABORATE AND COORDINATE SHOPPING</h1>
 	        	</div>

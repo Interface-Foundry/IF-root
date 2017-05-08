@@ -6,8 +6,7 @@ import { Icon } from '../../themes';
 
 export default class Ribbon extends Component {
   render() {
-    const { fixed, _toggleSidenav, _toggleModal, currentUser } = this.props;
-    
+    const { fixed, _toggleSidenav, _toggleModal, currentUser, src } = this.props;
     return (
       <nav className={`ribbon ${fixed ? 'background' : ''}`}>
         <div className='row-1'> 
@@ -40,11 +39,16 @@ export default class Ribbon extends Component {
           }
 
           {
-            currentUser ? null : <div className="right row row-1 action2">
+            currentUser ? null : ( src !== 'slack' ? <div className="right row row-1 action2">
                 <a href='/newcart'><button>
                   Try Kip For Free
                 </button></a>
-            </div> 
+              </div> : <div className="right row row-1 action2">
+                  <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button>
+                    Add To Slack
+                  </button></a>
+              </div>
+            )  
           }
 
           {
