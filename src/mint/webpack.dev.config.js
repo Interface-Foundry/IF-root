@@ -3,7 +3,6 @@ const webpack = require('webpack');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 var BUILD_DIR = path.resolve(__dirname, 'public/build');
 var APP_DIR = path.resolve(__dirname, 'react');
-var WEBSITE_DIR = path.resolve(__dirname, 'kip-website/js');
 
 module.exports = {
   entry: ['babel-polyfill', 'webpack-hot-middleware/client?path=/__webpack_hmr', APP_DIR + '/index'],
@@ -15,7 +14,7 @@ module.exports = {
     hotUpdateMainFilename: 'hot/[hash].hot-update.json',
     devtoolModuleFilenameTemplate: 'webpack:///[absolute-resource-path]'
   },
-  devtool: 'cheap-module-source-map', // TODO: not do this in prod!
+  devtool: 'cheap-module-source-map',
   plugins: [
     new CaseSensitivePathsPlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),

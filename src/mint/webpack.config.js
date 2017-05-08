@@ -1,9 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 var BUILD_DIR = path.resolve(__dirname, 'public/build');
 var APP_DIR = path.resolve(__dirname, 'react');
-var WEBSITE_DIR = path.resolve(__dirname, 'kip-website/js');
 
 module.exports = {
   entry: ['babel-polyfill', APP_DIR],
@@ -22,7 +20,7 @@ module.exports = {
       debug: false
     }),
     new webpack.NoEmitOnErrorsPlugin(),
-    new webpack.optimize.UglifyJsPlugin({minimize: true, compress: {warnings: false}})
+    new webpack.optimize.UglifyJsPlugin({ minimize: true, compress: { warnings: false } })
   ],
   module: {
     loaders: [{
@@ -47,9 +45,9 @@ module.exports = {
             importLoaders: 1,
           }
         },
-        // {
-        //   loader: 'postcss-loader'
-        // }
+        {
+          loader: 'postcss-loader'
+        }
       ]
     }, {
       test: /\.scss$|\.sass$/,
@@ -63,9 +61,9 @@ module.exports = {
             importLoaders: 1,
           }
         },
-        // {
-        //   loader: 'postcss-loader'
-        // },
+        {
+          loader: 'postcss-loader'
+        },
         {
           loader: 'sass-loader'
         }
