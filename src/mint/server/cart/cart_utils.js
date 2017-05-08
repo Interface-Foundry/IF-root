@@ -43,7 +43,7 @@ var removeItemHandlers = {
 }
 
 var clearCartHandlers = {
-  'amazon': amazon.cleaAmazonCart
+  'amazon': amazon.clearAmazonCart
 }
 /**
  * the idea of this is that you can be agnostic if you match up the functionality
