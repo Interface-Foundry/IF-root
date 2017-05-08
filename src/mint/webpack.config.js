@@ -6,16 +6,12 @@ var APP_DIR = path.resolve(__dirname, 'react');
 var WEBSITE_DIR = path.resolve(__dirname, 'kip-website/js');
 
 module.exports = {
-  entry: ['babel-polyfill', 'webpack-hot-middleware/client?path=/__webpack_hmr', APP_DIR + '/index'],
+  entry: ['babel-polyfill', APP_DIR],
   output: {
     path: BUILD_DIR,
     filename: '[name].js',
-    publicPath: '/build/',
-    hotUpdateChunkFilename: 'hot/[hash].hot-update.js',
-    hotUpdateMainFilename: 'hot/[hash].hot-update.json',
-    devtoolModuleFilenameTemplate: 'webpack:///[absolute-resource-path]'
+    publicPath: '/build/'
   },
-  devtool: 'cheap-module-source-map', // TODO: not do this in prod!
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')

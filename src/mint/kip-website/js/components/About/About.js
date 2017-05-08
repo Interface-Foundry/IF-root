@@ -22,7 +22,7 @@ import {
 export default class About extends Component {
 
   	render() {
-  		const icons = [
+  		const icons = {
 			Burger,
 			Clock,
 			DesktopIcon,
@@ -35,15 +35,15 @@ export default class About extends Component {
 			Pizza,
 			Happy,
 			Lightbulb
-  		],
+  		},
   		{ animate } = this.props,
   		lastIndex = icons.length - 1;
 
 	    return (
 	      	<div className="about"> 
 	      		{
-	      			_.map(icons, (Icon, i) => {
-	      				return <div key={Icon.name + i} className={`${Icon.name} ${i === lastIndex && animate ? '' : ''}`}><Icon/></div>
+	      			_.map(icons, (Icon, key) => {
+	      				return <div key={key} className={`${key} ${i === lastIndex && animate ? '' : ''}`}><Icon/></div>
 	      			})
 	      		}
 	      	</div>

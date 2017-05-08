@@ -95,8 +95,8 @@
   },
   "scripts": {
     "start": "npm run build & node ./server",
-    "build-cart": "NODE_PATH=$NODE_PATH:./react webpack",
-    "build-home": "NODE_PATH=$NODE_PATH:./kip-website webpack",
+    "build-cart": "NODE_PATH=$NODE_PATH:./react webpack -p",
+    "build-home": "NODE_PATH=$NODE_PATH:./kip-website webpack -p",
     "build": "npm run build-cart & npm run build-home",
     "cart": "NODE_PATH=$NODE_PATH:./react webpack --config ./webpack.dev.config.js --progress --color --watch --hot",
     "home": "NODE_PATH=$NODE_PATH:./kip-website webpack --progress --color --watch --hot",
