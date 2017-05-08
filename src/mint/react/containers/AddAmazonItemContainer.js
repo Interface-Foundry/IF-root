@@ -3,6 +3,7 @@
 import { connect } from 'react-redux';
 import { addingItem } from '../actions/cart';
 import { AddAmazonItem } from '../components';
+import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
@@ -13,7 +14,13 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  addingItem: (bool) => dispatch(addingItem(bool))
+  addingItem: (bool) => {
+    ReactGA.event({
+      category: 'Cart',
+      action: 'Item Added',
+    });
+    dispatch(addingItem(bool));
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddAmazonItem);

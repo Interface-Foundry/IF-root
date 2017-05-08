@@ -2,9 +2,8 @@
 
 import { connect } from 'react-redux';
 import { reset, reduxForm } from 'redux-form';
-
 import { Feedback } from '../components';
-
+import ReactGA from 'react-ga';
 import { postFeedback } from '../actions/session';
 
 const mapStateToProps = (state, ownProps) => {
@@ -17,11 +16,15 @@ const mapDispatchToProps = dispatch => ({
   // We need to edit the cart here
   onSubmit: (values, e, state) => {
     dispatch(postFeedback(values))
-    .then(() => {
-      const { history: { replace }, cart_id } = state;
-      dispatch(reset('Feedback'));
-      replace(`/cart/${cart_id}?toast=Feedback sent, thanks! 😎&status=success`);
-    });
+      .then(() => {
+        ReactGA.event({
+          category: 'Feedback',
+          action: 'Feedback Sent',
+        });
+        const { history: { replace }, cart_id } = state;
+        dispatch(reset('Feedback'));
+        replace(`/cart/${cart_id}?toast=Feedback sent, thanks! 😎&status=success`);
+      });
   }
 });
 

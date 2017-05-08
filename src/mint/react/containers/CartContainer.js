@@ -6,6 +6,7 @@ import { fetchDeals } from '../actions/deals';
 import { selectItem, updateCart } from '../actions/cart';
 import { cancelRemoveItem } from '../actions/item';
 import { splitCartById } from '../reducers';
+import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
@@ -23,7 +24,13 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   fetchDeals: () => dispatch(fetchDeals()),
-  selectItem: item => dispatch(selectItem(item)),
+  selectItem: item => {
+    ReactGA.event({
+      category: 'Cart',
+      action: 'Selected Item in Cart',
+    });
+    dispatch(selectItem(item));
+  },
   updateCart: (cart) => dispatch(updateCart(cart)),
   cancelRemoveItem: () => dispatch(cancelRemoveItem())
 });

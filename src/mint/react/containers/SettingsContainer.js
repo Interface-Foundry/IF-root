@@ -3,6 +3,7 @@
 import { connect } from 'react-redux';
 import { Settings } from '../components';
 import { updateUser } from '../actions/session';
+import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
@@ -11,7 +12,13 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  updateUser: (id, userInfo) => dispatch(updateUser(id, userInfo)),
+  updateUser: (id, userInfo) => {
+    ReactGA.event({
+      category: 'Person',
+      action: 'Edited Info',
+    });
+    dispatch(updateUser(id, userInfo));
+  },
 
 });
 

@@ -12,9 +12,9 @@ const mapStateToProps = (state, ownProps) => {
   const params = decodeURIComponent(state.routing.location.search),
     toast = params.match(/toast=([^&$]+)/),
     status = params.match(/status=([^&$]+)/);
-  const cart_id= state.routing.location.pathname.match(/cart\/((\d|\w)+)/);
+  const cart_id = state.routing.location.pathname.match(/cart\/((\d|\w)+)/);
   return {
-    cart_id: cart_id ? cart_id[1]: null, // TODO: switch to nonregex when react router allows it
+    cart_id: cart_id ? cart_id[1] : null, // TODO: switch to nonregex when react router allows it
     toast: toast ? toast[1] : null,
     status: status ? status[1] : null,
     leader: state.currentCart.leader,
@@ -33,12 +33,22 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => ({
   addItem: (cart_id, item_id, replace) => {
+    ReactGA.event({
+      category: 'Cart',
+      action: 'Item Added',
+    });
     dispatch(addItem(cart_id, item_id))
       .then(e => {
         replace(`/cart/${cart_id}/`);
       });
   },
-  fetchCart: (cart_id) => dispatch(fetchCart(cart_id)),
+  fetchCart: (cart_id) => {
+    ReactGA.event({
+      category: 'Cart',
+      action: 'Getting Cart ' + cart_id,
+    });
+    dispatch(fetchCart(cart_id));
+  },
   fetchAllCarts: () => dispatch(fetchAllCarts()),
   updateCart: (cart) => dispatch(updateCart(cart)),
   removeItem: (cart_id, item_id) => {

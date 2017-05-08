@@ -2,11 +2,9 @@
 
 import { connect } from 'react-redux';
 import { reset, reduxForm } from 'redux-form';
-
+import ReactGA from 'react-ga';
 import { EditCart } from '../components';
-
 import { getCartById } from '../reducers';
-
 import { updateCart } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => {
@@ -21,6 +19,10 @@ const mapDispatchToProps = dispatch => ({
   // We need to edit the cart here
   onSubmit: (values, e, state) => dispatch(updateCart(values))
     .then(() => {
+      ReactGA.event({
+        category: 'Cart',
+        action: 'Cart edited!',
+      });
       const { history: { push }, cart_id } = state;
       dispatch(reset('SignIn'));
       push(`/cart/${cart_id}?toast=Cart Updated! 😊&status=success`);

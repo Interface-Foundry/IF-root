@@ -18,14 +18,12 @@ const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => dispatch(signIn(state.cart_id, values.email))
     .then(() => {
       const { history: { replace }, cart_id, addingItem } = state;
-      // TODO: not do this in prod
       ReactGA.event({
         category: 'Sign In',
         action: 'Added Email',
-        label: values.email.split('@').join(' ').split('.').join(' ')
       });
       dispatch(fetchCart(cart_id));
-      dispatch(fetchAllCarts())
+      dispatch(fetchAllCarts());
       dispatch(reset('SignIn'));
 
       addingItem
@@ -50,18 +48,3 @@ const EmailFormContainer = reduxForm({
 })(EmailForm);
 
 export default connect(mapStateToProps, mapDispatchToProps)(EmailFormContainer);
-
-// In case we want asyncValidation
-// const asyncValidate = (values, dispatch, state) =>
-//   dispatch(signIn(state.cart_id, values.email))
-//   .then(session => {
-//     if (!session.newSession.newAccount) {
-//       throw { email: 'You\'ve logged in already' };
-//     }
-//     return session.newAccount;
-//   })
-//   .catch(error => {
-//     // currently this reroutes you to the email overlay, but kept this in case we want to do some error handling
-//   });
-
-// const shouldAsyncValidate = (params) => params.trigger === 'blur' && params.syncValidationPasses;

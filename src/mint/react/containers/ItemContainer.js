@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Item } from '../components';
 import { fetchDeals, selectDeal } from '../actions/deals';
 import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, decrementItem, nextSearch, prevSearch, setSearchIndex } from '../actions/item';
+import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
@@ -21,10 +22,28 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   fetchDeals: () => dispatch(fetchDeals()),
-  previewItem: (itemId) => dispatch(previewItem(itemId)),
-  previewAmazonItem: (amazonId) => dispatch(previewAmazonItem(amazonId)),
+  previewItem: (itemId) => {
+    ReactGA.event({
+      category: 'Item',
+      action: 'previewed item',
+    });
+    dispatch(previewItem(itemId));
+  },
+  previewAmazonItem: (amazonId) => {
+    ReactGA.event({
+      category: 'Item',
+      action: 'Item Added',
+    });
+    dispatch(previewAmazonItem(amazonId));
+  },
   clearItem: () => dispatch(clearItem()),
-  removeItem: (cart_id, item_id) => dispatch(removeItem(cart_id, item_id)),
+  removeItem: (cart_id, item_id) => {
+    ReactGA.event({
+      category: 'Item',
+      action: 'Item Removed',
+    });
+    dispatch(removeItem(cart_id, item_id));
+  },
   incrementItem: (item_id, quantity) => dispatch(incrementItem(item_id, quantity)),
   decrementItem: (item_id, quantity) => dispatch(decrementItem(item_id, quantity)),
   nextSearch: () => dispatch(nextSearch()),

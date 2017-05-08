@@ -3,6 +3,7 @@
 import { connect } from 'react-redux';
 import { Deals } from '../components';
 import { selectDeal } from '../actions/deals';
+import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   isDropdown: ownProps.isDropdown,
@@ -12,7 +13,13 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  selectDeal: (dealIndex, deal) => dispatch(selectDeal(dealIndex, deal)),
+  selectDeal: (dealIndex, deal) => {
+    ReactGA.event({
+      category: 'Deal',
+      action: `Selected a deal (number ${dealIndex}`,
+    });
+    dispatch(selectDeal(dealIndex, deal));
+  },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Deals);
