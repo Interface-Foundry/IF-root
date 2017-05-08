@@ -13,6 +13,7 @@ $cart__add-height: $nav-height+$padding;
     border-bottom-left-radius: $padding/2;
     box-shadow: $card-box-shadow;
     margin: 0 2px 0 2px;
+    position: relative;
   }
   @media (min-width: 900px) {
     height: 100%;
@@ -150,6 +151,8 @@ $cart__add-height: $nav-height+$padding;
     height: $nav-height/2;
     line-height: $nav-height/2;
     text-align: center;
+    margin: -2px 2px 5px 2px;
+    border-radius: 0 0 5px 5px;
     @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
     &.action {
@@ -161,17 +164,16 @@ $cart__add-height: $nav-height+$padding;
         font-weight: 700;
         text-decoration: underline;
       }
-      &:after {
+      &:before {
         @include animation(progressBar linear 10s);
         content: '';
         display: block;
         height: 2px;
         width: 100%;
-        background: transparent;
-        background: linear-gradient(to right, red 0%,red 45%, transparent 50%);
+        background: linear-gradient(to right, red 0%, red 45%, transparent 50%);
         position: relative;
         background-size: 200% 2px;
-        top: -2px;
+        top: 2px;
       }
     }
   }

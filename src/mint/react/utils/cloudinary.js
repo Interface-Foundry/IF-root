@@ -1,7 +1,7 @@
 // react/utils/cloudinary.js
 
 export const cloudinary = image => {
-  return fetch('https://api.cloudinary.com/v1_1/kipthis-com/image/upload', {
+  return fetch('//api.cloudinary.com/v1_1/kipthis-com/image/upload', {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'

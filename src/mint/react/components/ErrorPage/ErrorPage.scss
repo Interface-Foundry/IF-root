@@ -1,0 +1,51 @@
+// react/components/ErrorPage/ErrorPage.scss
+.uhoh {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: center;
+  justify-items: flex-start;
+  .faceplant {
+    width: 40vw;
+    margin: auto;
+  }
+  .ohno {
+    //stolen from https://codepen.io/mandymichael/pen/evZPZG
+    font-size: 20vw;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    font-weight: 900;
+    white-space: nowrap;
+    font-family: 'Vaba';
+    color: #d5274e;
+    mix-blend-mode: difference;
+    text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, -2px 2px 0 #fcde8b, 2px 2px 0 #fcde8b, -3px 3px 0 #fcde8b, 3px 3px 0 #fcde8b;
+    &:before {
+      content: attr(data-heading);
+      position: absolute;
+      left: 0;
+      top: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      color: #000;
+      clip-path: polygon(0% 30%, 6% 27%, 37% 47%, 49% 32%, 63% 46%, 84% 28%, 98% 56%, 89% 95%, 45% 70%, 14% 75%);
+    }
+    &:after {
+      content: attr(data-heading);
+      position: absolute;
+      left: 0;
+      top: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      color: #0b5e51;
+      clip-path: polygon(0% 18%, 8% 27%, 37% 47%, 49% 32%, 63% 46%, 84% 28%, 98% 56%, 89% 95%, 45% 70%, 17% 75%);
+      transform: scale(1.01, .85) translate(-1%, 1%);
+    }
+  }
+}
+

@@ -5,7 +5,6 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Icon } from '..';
 import { splitCartById } from '../../reducers';
-import { getNameFromEmail } from '../../utils';
 
 export default class Header extends Component {
   static propTypes = {
@@ -17,60 +16,60 @@ export default class Header extends Component {
   }
 
   render() {
-    let { props, props: { deals, currentUser, items, currentCart: { leader }, item: { search } } } = this;
-    const { match } = props,
+    const { props, props: { deals, currentUser, items, currentCart: { leader }, item: { search } } } = this,
     isLeader = leader && (leader.id === currentUser.id);
-    search = search ? search : 0;
-
     return (
       <nav className='navbar'>
-        <Route path={`${match.url}/m/item/:index/:asin`} component={() => 
+        <Route path={'/404'} exact component={() => 
+              <IntroHead text={'Oh No!'} {...props}/>
+            }
+        />
+        <Route path={'/cart/:cart_id/m/item/:index/:asin'} exact component={() => 
             <ModalHead text={'Add To Cart'} {...props}/>
           }
         />
-        {/* TODO: get this working for admins */}
-        <Route path={`${match.url}/m/:type/:index/:asin/edit`} component={() => 
+        <Route path={'/cart/:cart_id/m/:type/:index/:asin/edit'} exact component={() => 
             <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
           }
         />
-        <Route path={`${match.url}/m/item`} component={() => 
+        <Route path={'/cart/:cart_id/m/variant/:index/:item_id'} exact component={() => 
             <ModalHead text={'Add to Cart'} {...props}/>
           }
         />
-        <Route path={`${match.url}/m/variant/:index/:item_id`} component={() => 
-            <ModalHead text={'Add to Cart'} {...props}/>
-          }
-        />
-        <Route path={`${match.url}/m/deal/:index/:dealId`} component={() => 
+        <Route path={'/cart/:cart_id/m/deal/:index/:dealId'} exact component={() => 
             <EnumeratedHead text={'Daily Deals'} length={deals.length} type={'deal'} {...props}/>
           }
         />
-        <Route path={`${match.url}/m/search/:index/:query`} component={() => 
-            <EnumeratedHead text={'Search Results'} length={search.length||0} type={'search'} {...props}/>
+        <Route path={'/cart/:cart_id/m/search/:index/:query'} exact component={() => 
+            <EnumeratedHead text={'Search Results'} length={search ? search.length : 0} type={'search'} {...props}/>
           }
         />
-        <Route path={`${match.url}/m/share`} component={() => 
+        <Route path={'/cart/:cart_id/m/share'} exact component={() => 
             <ModalHead text={'Share Cart'} {...props}/>
           }
         />
-        <Route path={`${match.url}/m/signin`} component={() => 
+        <Route path={'/cart/:cart_id/m/signin'} exact component={() => 
             <IntroHead text={'Create New Cart'} {...props}/>
           }
         />
-        <Route path={`${match.url}/m/settings`} component={() => 
+        <Route path={'/cart/:cart_id/m/settings'} exact component={() => 
             <SettingsHeader text='Settings' icon="Settings" {...props}/>
           }
         />
-        <Route path={`${match.url}/m/feedback`} component={() => 
+        <Route path={'/cart/:cart_id/m/feedback'} exact component={() => 
             <SettingsHeader text='Feedback' icon="Email" {...props}/>
           }
         />
-        <Route path={`${match.url}/m/edit`} component={() => 
+        <Route path={'/cart/:cart_id/m/edit'} exact component={() => 
             <ModalHead text={'Edit Cart'} {...props}/>
           }
         />
-        <Route path={`${match.url}`} exact component={() => 
-            <CartHead {...props}/>
+        <Route path={'/cart/:cart_id/m/edit/:cart_id'} exact component={() => 
+            <ModalHead text={'Edit Cart'} {...props}/>
+          }
+        />
+        <Route path={'/cart/:cart_id'} exact component={() => 
+            <CartHead text={'Edit Cart'} {...props}/>
           }
         />
       </nav>
@@ -84,29 +83,45 @@ class CartHead extends Component {
     _toggleSidenav: PropTypes.func,
     currentUser: PropTypes.object,
     currentCart: PropTypes.object,
+    isMobile: PropTypes.bool
+  }
+
+  state = {
+    bounce: false
+  }
+
+  _bounceImage(e) {
+    e.preventDefault();
+    this.setState({ bounce: true });
+    setTimeout(() => this.setState({ bounce: false }), 3000);
   }
 
   render() {
-    const { isMobile, currentUser: { name }, _toggleSidenav, cartName, cart_id, currentCart: { locked, thumbnail_url } } = this.props;
+    const {
+      state: { bounce },
+      props: { currentUser: { name }, _toggleSidenav, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url } }
+    } = this;
 
     return (
       <div>
         <div className='header__left'>
-          <a href={`/cart/${cart_id}`}>
-          {locked ? <div className='navbar__icon'>
-              <Icon icon='Locked'/>
-            </div> : <div className='image' style={
-            {
-              backgroundImage: `url(${thumbnail_url})`,
-            }
-          }/>}
+          <a href='#' onClick={(e)=>::this._bounceImage(e)}>
+          {locked 
+            ? <div className={`navbar__icon ${bounce ? 'bounce': ''}`}>
+                <Icon icon='Locked'/>
+              </div> 
+            : <div className={`image ${bounce ? 'bounce': ''}`} style={
+                {
+                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/head%40x2.png)'})`,
+                }
+              }/>}
           <h3>
-            {locked ? 'Checkout in progress' : cartName}
+            {locked ? 'Checkout in Progress' : cartName}
           </h3>
           </a>
         </div>
         <div className='header__right' onClick={_toggleSidenav}>
-          {isMobile ? <div className='navbar__icon'><Icon icon='Hamburger'/></div> : <p>{name}</p>}
+          {isMobile ? <div className='navbar__icon'><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
         </div>
       </div>
     );
@@ -124,7 +139,7 @@ class IntroHead extends Component {
       <div className="header__left">
         <div className='image' style={
           {
-            backgroundImage: 'url(https://storage.googleapis.com/kip-random/head%40x2.png)'
+            backgroundImage: 'url(//storage.googleapis.com/kip-random/head%40x2.png)'
           }
         }/>
         <h3>

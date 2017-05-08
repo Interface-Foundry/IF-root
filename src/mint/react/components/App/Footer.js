@@ -16,20 +16,20 @@ export default class Footer extends Component {
   }
 
   render() {
-    const { props, props: { match, item: { id: item_id } } } = this;
+    const { props, props: { item: { id: item_id } } } = this;
     return (
       <footer className='footer'>
-        <Route path={`${match.url}/m/item/add`} component={() => <div className='empty'/>}/>
-        <Route path={`${match.url}/m/share`} component={() => <div className='empty'/>}/>
-        <Route path={`${match.url}/m/signin`} component={() => <SignInFooter/>}/>
-        <Route path={`${match.url}/m/item/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
-        <Route path={`${match.url}/m/variant/:index/:item_id`} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
-        <Route path={`${match.url}/m/:type/:index/:item_id/edit`} component={() => <EditFooter {...props} item_id={item_id}/>}/>
-        <Route path={`${match.url}/m/edit`} component={() => <div className='empty'/>}/>
-        <Route path={`${match.url}/m/settings`} component={() => <SettingsFooter {...props} item_id={item_id}/>}/>
-        <Route path={`${match.url}/m/deal/:index/:item_id`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
-        <Route path={`${match.url}/m/search/:index/:search`} component={() => <ItemFooter {...props} item_id={item_id}/>}/>
-        <Route path={`${match.url}`} exact component={() => <CartFooter {...props}/>}/>
+        <Route path={'/cart/:cart_id/m/item/add'} exact component={() => <div className='empty'/>}/>
+        <Route path={'/cart/:cart_id/m/share'} exact component={() => <div className='empty'/>}/>
+        <Route path={'/cart/:cart_id/m/signin'} exact component={() => <SignInFooter/>}/>
+        <Route path={'/cart/:cart_id/m/item/:index/:item_id'} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
+        <Route path={'/cart/:cart_id/m/variant/:index/:item_id'} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
+        <Route path={'/cart/:cart_id/m/:type/:index/:item_id/edit'} exact component={() => <EditFooter {...props} item_id={item_id}/>}/>
+        <Route path={'/cart/:cart_id/m/edit'} exact component={() => <div className='empty'/>}/>
+        <Route path={'/cart/:cart_id/m/settings'} exact component={() => <SettingsFooter {...props} item_id={item_id}/>}/>
+        <Route path={'/cart/:cart_id/m/deal/:index/:item_id'} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
+        <Route path={'/cart/:cart_id/m/search/:index/:search'} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
+        <Route path={'/cart/:cart_id'} exact component={() => <CartFooter {...props}/>}/>
       </footer>
     );
   }
@@ -39,7 +39,7 @@ class SignInFooter extends Component {
   render() {
     return (
       <p className='tos'>
-        By signing up you agree to the Kip <a href='https://kipthis.com/legal/'>Terms of Use</a>
+        By signing up you agree to the Kip <a href='https://www.kipthis.com/legal/'>Terms of Use</a>
       </p>
     );
   }
@@ -73,25 +73,35 @@ class CartFooter extends Component {
   }
 
   render() {
-    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items, isMobile } = this.props;
+    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items, isMobile, history: { replace } } = this.props;
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
     const total = calculateItemTotal(items);
 
     if (locked) {
       return (
         <div className='footer__cart'>
-          <button className='green'>
+          <button className='green' onClick={() => replace(`/cart/${cart_id}/m/feedback`)}>
             <Icon icon='Email'/>
             FEEDBACK
           </button>
-          {
-            isLeader
-            ? <button className='share'>
-                <Icon icon='Cart'/>
-                EMAIL ITEMS
-              </button>
-            : null
-          }
+          <a 
+            className={items.length===0 ? 'disabled':''}
+            href={`/api/cart/${cart_id}/checkout`} 
+            onClick={
+              (e) => { 
+                e.preventDefault(); 
+                if (items.length > 0) { 
+                  updateCart({...currentCart, locked: !currentCart.locked});
+                  window.open(`/api/cart/${cart_id}/checkout`);
+                }
+              }
+            }
+          >
+            <button disabled={items.length===0} className='checkout'>
+              <Icon icon='Cart'/>
+              <h4>Checkout<br/>{displayCost(total)}</h4>
+            </button>
+          </a>
         </div>
       );
     }

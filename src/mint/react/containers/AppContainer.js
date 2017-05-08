@@ -12,8 +12,9 @@ const mapStateToProps = (state, ownProps) => {
   const params = decodeURIComponent(state.routing.location.search),
     toast = params.match(/toast=([^&$]+)/),
     status = params.match(/status=([^&$]+)/);
+  const cart_id= state.routing.location.pathname.match(/cart\/((\d|\w)+)/);
   return {
-    cart_id: state.routing.location.pathname.match(/cart\/((\d|\w)+)/)[1], // TODO: switch to nonregex when react router allows it
+    cart_id: cart_id ? cart_id[1]: null, // TODO: switch to nonregex when react router allows it
     toast: toast ? toast[1] : null,
     status: status ? status[1] : null,
     leader: state.currentCart.leader,

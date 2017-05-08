@@ -6,12 +6,12 @@
 	text-align: left;
 	background: white;
 	margin: 0 auto;
-	padding: $padding*3 $padding*5 $padding*20;
+	padding: $padding*3 $padding*12.5 $padding*20;
 	@include animation(fadeInUp cubic-bezier(0.4, 0, 0.2, 1) 3s);
 
 
 	@media only screen and (max-width: 600px) {
-		padding: $padding*3 $padding*2 $padding*5;
+		padding: $padding $padding*2 $padding*5;
 	}
 
 	.headline {
@@ -31,6 +31,10 @@
 
 			&.hightlight {
 				background: $primaryColor;
+			}
+
+			@media only screen and (max-width: 600px) {
+				line-height: 40px;
 			}
 		}
 	}

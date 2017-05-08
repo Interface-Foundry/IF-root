@@ -1,5 +1,6 @@
 // react/components/App/Header.scss
 @import '../../styles/Constants';
+@import '../../styles/Animations';
 .navbar {
   height: $nav-height;
   line-height: $nav-height;
@@ -15,6 +16,16 @@
     flex-basis: 0;
     white-space: nowrap;
     overflow: hidden;
+    .navbar__icon {
+      display: inline-block;
+      width: auto;
+      min-width: 50px;
+      text-align: center;
+      cursor: pointer;
+      svg {
+        height: 100%;
+      }
+    }
     .image {
       display: inline-block;
       margin: $padding;
@@ -34,6 +45,10 @@
       @media (min-width: 900px) {
         width: auto;
       }
+    }
+    .bounce {
+      @include animation(bounceDownSmall 1.5s);
+      animation-iteration-count: 2; // too much twitching
     }
   }
   .header__right {

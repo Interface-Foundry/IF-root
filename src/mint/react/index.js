@@ -12,7 +12,7 @@ import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
 import Reducers from './reducers';
 import { session } from './actions';
-import { AppContainer } from './containers';
+import { AppContainer, ErrorPage } from './containers';
 
 //Analytics!
 import ReactGA from 'react-ga';
@@ -49,7 +49,7 @@ store.dispatch(session.update());
 ReactDOM.render(
   <Provider store={store}>
    <ConnectedRouter history={history}>
-       <Route path="/cart/:cart_id" component={AppContainer} />
+       <Route path="*" component={AppContainer} />
    </ConnectedRouter>
  </Provider>,
   document.getElementById('root')

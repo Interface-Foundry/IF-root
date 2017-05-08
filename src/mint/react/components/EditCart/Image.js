@@ -18,7 +18,7 @@ class Image extends Component {
             <div>
               <div className='image column-2' style={
                 {
-                  backgroundImage: `url(${value ? value : 'https://storage.googleapis.com/kip-random/head%40x2.png'})`,
+                  backgroundImage: `url(${value ? value : '//storage.googleapis.com/kip-random/head%40x2.png'})`,
                 backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'center',
                   backgroundSize: 'contain'

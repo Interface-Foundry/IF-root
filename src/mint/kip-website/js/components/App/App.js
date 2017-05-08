@@ -2,7 +2,7 @@
 /* eslint global-require: 0 */
 
 import React, { Component } from 'react';
-import { Landing } from '..';
+import { Landing, Legal } from '..';
 
 import { Route } from 'react-router';
 
@@ -10,9 +10,11 @@ export default class App extends Component {
   	
 	render() {
 		const { match } = this.props;
+
 	  	return (
 	      <div className='app'>
-	      	<Route path={`${match.url}`} component={Landing}/>
+	      	<Route path={`${match.url}`} exact component={Landing}/>
+	      	<Route path={`${match.url}legal`} component={Legal}/>
 	      </div>
 	    );
 	}

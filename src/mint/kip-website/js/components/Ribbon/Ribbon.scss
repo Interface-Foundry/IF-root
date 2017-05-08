@@ -3,7 +3,7 @@
 
 .ribbon {
 	position: fixed;
-	padding: $padding $padding*2;
+	padding: $padding $padding*12.5;
 	top: 0;
 	width: 100%;
 	height: auto;
@@ -13,6 +13,10 @@
 	border-bottom: 1px solid transparent;
 	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+    @media only screen and (max-width: 600px) {
+    	padding: $padding $padding*2;
+    }
 
     &.background {
     	background: white;
@@ -72,7 +76,7 @@
 	.action {
 		padding: $padding/2;
 		button {
-			border: 1px solid $primaryColor;
+			border: 0px solid $primaryColor;
 			white-space: nowrap;
 			font-weight: bold;
 			border-radius: $padding/2;

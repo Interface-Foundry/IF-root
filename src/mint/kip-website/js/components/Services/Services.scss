@@ -28,17 +28,24 @@
 	}
 
 	h3 {
-		font-size: 24px;
+		font-size: 27px;
 		margin: 0 0 $padding*6;
 		color: $primaryColor;
+	    line-height: 35px;
 
 		@media only screen and (max-width: 600px) {
 			margin: $padding*3 0;
 			font-size: 18px;
+			line-height: 25px;
 		}
 
 		span {
 			color: #42403f;
+			font-size: 20px;
+			line-height: 60px;
+			@media only screen and (max-width: 600px) {
+				font-size: 16px;
+			}
 		}
 	}
 
@@ -48,13 +55,17 @@
 		& > div {
 			display: inline-block;
 			width: (100%/3);
-			height: $ribbonHeight;
+			height: $ribbonHeight+10;
 
 			svg {
 				width: 100%;
 				height: $ribbonHeight;
 				fill: $primaryColor;
 				opacity: 0.8;
+			}
+
+			@media only screen and (max-width: 600px) {
+				width: (100%/2);
 			}
 		}
 
@@ -79,6 +90,13 @@
 			z-index: 2;
 			background: #ffffff;
 			box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+			&.video {
+				padding: $padding*2 $padding*3.4;
+				h2 {
+					height: $ribbonHeight;
+					line-height: $ribbonHeight;
+				}
+			}
 			h2 {
 				color: $fifthColor;
 				text-align: left;
@@ -94,7 +112,7 @@
 			}
 
 			iframe {
-				border-radius: 10px;
+				height: 215px;
 			}
 
 			@media only screen and (max-width: 600px) {

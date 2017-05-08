@@ -39,11 +39,27 @@ export default class Sidenav extends Component {
     }
   }
 
-  render() {
-    const { carts, _toggleSidenav, currentUser, cart_id } = this.props, { show } = this.state,
-      leaderCarts = _.filter(carts, (c, i) => c.leader.id === currentUser.id),
-      memberCarts = _.filter(carts, (c, i) => c.leader.id !== currentUser.id);
+  // moves cart with id to front of list
+  _moveToFront(carts, id) {
+    return carts.reduce((acc, cart) => {
+      if (cart.id === id) return [cart, ...acc];
+      else return [...acc, cart];
+    }, []);
+  }
 
+  render() {
+    const {
+      _moveToFront,
+      props: { carts, _toggleSidenav, currentUser, cart_id },
+      state: { show }
+    } = this;
+
+    let leaderCarts = _moveToFront(
+        carts.filter((c, i) => _.get(c, 'leader.id') === _.get(currentUser, 'id')),
+        cart_id),
+      memberCarts = _moveToFront(
+        carts.filter((c, i) => _.get(c, 'leader.id') !== _.get(currentUser, 'id')),
+        cart_id);
     return (
       <div className='sidenav'>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
@@ -61,7 +77,7 @@ export default class Sidenav extends Component {
               {_.map(leaderCarts, (c, i) => {
                 if(i > 2 && show !== 'me') return null;
                 return ( 
-                  <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                  <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} onClick={_toggleSidenav}>
                     { c.locked ? <div className='icon'/> : <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
                         <div className='icon'>
                           <Icon icon='Edit'/>
@@ -89,7 +105,7 @@ export default class Sidenav extends Component {
               {_.map(memberCarts, (c, i) => {
                 if(i > 2 && show !== 'other') return null;
                 return (
-                  <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                  <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} onClick={_toggleSidenav}>
                     <div className='icon'>
                     </div>
                     <Link to={`/cart/${c.id}`}>
@@ -107,7 +123,7 @@ export default class Sidenav extends Component {
             }
           </li>
           <li className='sidenav__list__actions'>
-            <Link to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></Link>
+            {currentUser.name ? <Link to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></Link> : null }
             <Link to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></Link>
           </li>
           <footer className='sidenav__footer'>
