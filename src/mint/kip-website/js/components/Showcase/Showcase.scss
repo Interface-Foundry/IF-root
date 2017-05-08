@@ -9,6 +9,24 @@ $centerPhone: calc(50% - 212.5px);
 	min-height: 4000px;
 	background: rgb(234, 249, 255);
 
+	.outline {
+		position: absolute;
+		top: 0;
+		right: 0;
+		left: 0;
+		pointer-events:none;
+
+		&.fixed {
+			position: fixed;
+			transform: translate3d(0, -150px,0);
+		}
+
+		&.absolute {
+			top: auto;
+			bottom: 0;
+		}
+	}
+
 	.image {
 		background-image: url("https://storage.googleapis.com/kip-random/website/phoneclip.png");
 	}
@@ -21,6 +39,7 @@ $centerPhone: calc(50% - 212.5px);
 		z-index: 50;
 		padding: $padding*4 $padding*1.5 0;
 		margin-left: 150px;
+		pointer-events:none;
 		left: 0;
 		transform: translate3d(0, -150px,0);
 

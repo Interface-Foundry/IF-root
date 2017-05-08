@@ -19,6 +19,9 @@ import {
 	Pencil,
 	Pizza
 } from '../../themes/kipsvg';
+import {
+	OfficeOutline
+} from '../../themes';
 
 const imageSrc = [
 	'https://storage.googleapis.com/kip-random/demo_1_desktop.gif',
@@ -98,6 +101,9 @@ export default class Showcase extends Component {
 
 	    return (
 	      	<div className='showcase'> 
+	      		<div className={`outline ${animationState}`}>
+	      			<OfficeOutline/>
+	      		</div>
 	      		<div className={`phone image ${animationState}`}> 
 	      			<CSSTransitionGroup
 				        transitionName="bubble"

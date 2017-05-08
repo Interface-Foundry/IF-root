@@ -5,6 +5,7 @@
 	position: fixed;
 	padding: $padding $padding*12.5;
 	top: 0;
+	pointer-events:none;
 	width: 100%;
 	height: auto;
 	z-index: 500;
@@ -76,6 +77,9 @@
 	.action {
 		padding: $padding/2;
 		button {
+			display: table-cell;
+		    vertical-align: middle;
+		    text-align: center;
 			border: 0px solid $primaryColor;
 			white-space: nowrap;
 			font-weight: bold;
@@ -96,17 +100,24 @@
 				height: 100%;
 				background: transparent;
 			}
+			@media only screen and (max-width: 600px) {
+			    padding: 0px $padding/2;
+			    font-size: 12px;
+			}
 		}
 	}
 
 	.action2 {
-		padding: $padding*2 0 $padding*2;
+		padding: 0;
 		button {
+			display: table-cell;
+		    vertical-align: middle;
+		    text-align: center;
 			border: 1px solid #eccd46;
 			font-weight: bold;
 			border-radius: $padding/2;
 			background: white;
-			padding: $padding $padding*4;
+			padding: $padding $padding;
 			font-size: 20px;
 			cursor: pointer;
 			color: #42403f;
@@ -114,7 +125,9 @@
 			&:focus {
 				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 			}
-
+			@media only screen and (max-width: 600px) {
+				font-size: 12px;
+			}
 		}
 		a {
 			&:first-of-type {
@@ -123,7 +136,7 @@
 					background: $secondaryColor;
 
 					@media only screen and (max-width: 600px) {
-						margin: 0 0 $padding*2;
+						margin: 0;
 					}
 				}
 			}
