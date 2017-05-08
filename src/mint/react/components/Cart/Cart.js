@@ -33,7 +33,7 @@ export default class Cart extends Component {
 
   componentWillMount() {
     const { fetchDeals, deals } = this.props;
-
+    console.log('mount!')
     if (deals.length === 0) {
       fetchDeals();
     }

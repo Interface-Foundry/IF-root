@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-var BUILD_DIR = path.resolve(__dirname, '../../','public/build');
+var BUILD_DIR = path.resolve(__dirname, '../../', 'public/build');
 var APP_DIR = path.resolve(__dirname, '../', 'js');
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
     hotUpdateChunkFilename: 'hot/[hash].hot-update.js',
     hotUpdateMainFilename: 'hot/[hash].hot-update.json'
   },
-
+  devtool: 'eval-source-map', // TODO: not do this in prod!
   plugins: [
     new CaseSensitivePathsPlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
