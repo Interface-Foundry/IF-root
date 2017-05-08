@@ -5530,6 +5530,10 @@ react-motion@^0.4.2:
     prop-types "^15.5.8"
     raf "^3.1.0"
 
+react-progressive-image@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/react-progressive-image/-/react-progressive-image-0.1.2.tgz#e3c89a834e41666a284d13f4a9b775ba55dc45d8"
+
 react-redux@^5.0.3:
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-5.0.4.tgz#1563babadcfb2672f57f9ceaa439fb16bf85d55b"

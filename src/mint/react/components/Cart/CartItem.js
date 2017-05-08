@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../utils';
 import Icon from '../Icon';
+import ProgressiveImage from 'react-progressive-image';
 
 export default class CartItem extends Component {
   static propTypes = {
@@ -21,12 +22,24 @@ export default class CartItem extends Component {
       : `/cart/${cart_id}/m/item/0/${asin}`;
     return (
       <li className='cartItem'>
-        {locked ? null : <div className='cartItem__image image col-3 ' style={
-          {
-            backgroundImage: `url(${main_image_url})`,
-            backgroundPosition: 'top',
-            height: 75
-          }}/>}
+
+        {locked 
+          ? null 
+          : <ProgressiveImage src={main_image_url} placeholder='//storage.googleapis.com/kip-random/head%40x2.png'>
+              {(src) => 
+                <div 
+                  className='cartItem__image image col-3 ' 
+                  style={
+                    {
+                      backgroundImage: `url(${src})`,
+                      backgroundPosition: 'top',
+                      height: src.includes('kip-random') ? 25 : 75
+                    }
+                  }
+                />
+              }
+            </ProgressiveImage>
+        }
         <div className={`cartItem__props col-9 ${ locked ? 'locked' : ''}`}>
           <p>{name}</p>
           <br/>

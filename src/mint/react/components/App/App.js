@@ -58,7 +58,6 @@ export default class App extends Component {
 
   componentWillMount() {
     const { props: { fetchCart, fetchAllCarts, cart_id, history: { replace } } } = this;
-    console.log(fetchCart);
     if (cart_id) {
       fetchCart(cart_id)
         .then(cart => !cart ? replace('/404') : null);
