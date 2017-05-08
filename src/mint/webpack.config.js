@@ -12,9 +12,10 @@ module.exports = {
     filename: '[name].js',
     publicPath: '/build/',
     hotUpdateChunkFilename: 'hot/[hash].hot-update.js',
-    hotUpdateMainFilename: 'hot/[hash].hot-update.json'
+    hotUpdateMainFilename: 'hot/[hash].hot-update.json',
+    devtoolModuleFilenameTemplate: 'webpack:///[absolute-resource-path]'
   },
-  devtool: 'eval-source-map',  // TODO: not do this in prod!
+  devtool: 'cheap-module-source-map', // TODO: not do this in prod!
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
