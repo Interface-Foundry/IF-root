@@ -78,8 +78,11 @@ export default class Landing extends Component {
         nextState.fixed !== this.state.fixed ||
         nextState.sidenav !== this.state.sidenav ||
         nextState.modal !== this.state.modal 
-      )
+      ) {
       return true;
+    }
+
+    return false
   }
 
   render() {

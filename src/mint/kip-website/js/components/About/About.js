@@ -23,26 +23,26 @@ export default class About extends Component {
 
   	render() {
   		const icons = {
-			Burger,
-			Clock,
-			DesktopIcon,
-			Happy,
-			Layers,
-			Milk,
-			Mouse,
-			Paper,
-			Pencil,
-			Pizza,
-			Happy,
-			Lightbulb
+			'Burger': Burger,
+			'Clock': Clock,
+			'DesktopIcon': DesktopIcon,
+			'Happy': Happy,
+			'Layers': Layers,
+			'Milk': Milk,
+			'Mouse': Mouse,
+			'Paper': Paper,
+			'Pencil': Pencil,
+			'Pizza': Pizza,
+			'Happy': Happy,
+			'Lightbulb': Lightbulb
   		},
-  		{ animate } = this.props,
-  		lastIndex = icons.length - 1;
+  		{ animate } = this.props;
 
 	    return (
 	      	<div className="about"> 
 	      		{
 	      			_.map(icons, (Icon, key) => {
+	      				console.log(key)
 	      				return <div key={key} className={`${key} ${animate ? '' : ''}`}><Icon/></div>
 	      			})
 	      		}
