@@ -29,7 +29,7 @@ const mapDispatchToProps = dispatch => ({
       category: 'Cart',
       action: 'Selected Item in Cart',
     });
-    dispatch(selectItem(item));
+    return dispatch(selectItem(item));
   },
   updateCart: (cart) => dispatch(updateCart(cart)),
   cancelRemoveItem: () => dispatch(cancelRemoveItem())

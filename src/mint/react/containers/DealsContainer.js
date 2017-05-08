@@ -18,7 +18,7 @@ const mapDispatchToProps = dispatch => ({
       category: 'Deal',
       action: `Selected a deal (number ${dealIndex}`,
     });
-    dispatch(selectDeal(dealIndex, deal));
+    return dispatch(selectDeal(dealIndex, deal));
   },
 });
 

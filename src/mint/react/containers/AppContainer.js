@@ -37,7 +37,7 @@ const mapDispatchToProps = dispatch => ({
       category: 'Cart',
       action: 'Item Added',
     });
-    dispatch(addItem(cart_id, item_id))
+    return dispatch(addItem(cart_id, item_id))
       .then(e => {
         replace(`/cart/${cart_id}/`);
       });
@@ -47,7 +47,7 @@ const mapDispatchToProps = dispatch => ({
       category: 'Cart',
       action: 'Getting Cart ' + cart_id,
     });
-    dispatch(fetchCart(cart_id));
+    return dispatch(fetchCart(cart_id));
   },
   fetchAllCarts: () => dispatch(fetchAllCarts()),
   updateCart: (cart) => dispatch(updateCart(cart)),

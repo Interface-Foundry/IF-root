@@ -19,7 +19,7 @@ const mapDispatchToProps = dispatch => ({
       category: 'Cart',
       action: 'Item Added',
     });
-    dispatch(addingItem(bool));
+    return dispatch(addingItem(bool));
   }
 });
 

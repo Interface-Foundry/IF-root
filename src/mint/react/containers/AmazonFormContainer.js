@@ -21,7 +21,7 @@ const mapDispatchToProps = dispatch => ({
     const { cart_id } = state;
     dispatch(reset('AddItem'));
     if (!isUrl(values.url)) addSearchHistory(values.url);
-    dispatch(push(`/cart/${cart_id}/m/item/0/${encodeURIComponent(values.url)}`));
+    return dispatch(push(`/cart/${cart_id}/m/item/0/${encodeURIComponent(values.url)}`));
   }
 });
 

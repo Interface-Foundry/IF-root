@@ -27,14 +27,14 @@ const mapDispatchToProps = dispatch => ({
       category: 'Item',
       action: 'previewed item',
     });
-    dispatch(previewItem(itemId));
+    return dispatch(previewItem(itemId));
   },
   previewAmazonItem: (amazonId) => {
     ReactGA.event({
       category: 'Item',
       action: 'Item Added',
     });
-    dispatch(previewAmazonItem(amazonId));
+    return dispatch(previewAmazonItem(amazonId));
   },
   clearItem: () => dispatch(clearItem()),
   removeItem: (cart_id, item_id) => {
@@ -42,7 +42,7 @@ const mapDispatchToProps = dispatch => ({
       category: 'Item',
       action: 'Item Removed',
     });
-    dispatch(removeItem(cart_id, item_id));
+    return dispatch(removeItem(cart_id, item_id));
   },
   incrementItem: (item_id, quantity) => dispatch(incrementItem(item_id, quantity)),
   decrementItem: (item_id, quantity) => dispatch(decrementItem(item_id, quantity)),

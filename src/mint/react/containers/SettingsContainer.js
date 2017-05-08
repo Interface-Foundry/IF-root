@@ -17,7 +17,7 @@ const mapDispatchToProps = dispatch => ({
       category: 'Person',
       action: 'Edited Info',
     });
-    dispatch(updateUser(id, userInfo));
+    return dispatch(updateUser(id, userInfo));
   },
 
 });
