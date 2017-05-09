@@ -1,10 +1,13 @@
-const path = require('path');
-const webpack = require('webpack');
-var BUILD_DIR = path.resolve(__dirname, 'public/build');
-var APP_DIR = path.resolve(__dirname, 'react');
-
+const path = require('path'),
+  webpack = require('webpack'),
+  BUILD_DIR = path.resolve(__dirname, 'public/build'),
+  CART_DIR = path.resolve(__dirname, 'react'),
+  HOME_DIR = path.resolve(__dirname, 'kip-website/js');
 module.exports = {
-  entry: ['babel-polyfill', APP_DIR],
+  entry: {
+    cart: ['babel-polyfill', CART_DIR + '/index'],
+    home: ['babel-polyfill', HOME_DIR + '/index']
+  },
   output: {
     path: BUILD_DIR,
     filename: '[name].js',
@@ -22,6 +25,9 @@ module.exports = {
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.optimize.UglifyJsPlugin({ minimize: true, compress: { warnings: false } })
   ],
+  resolve: {
+    extensions: ['.js', '.jsx', '.json']
+  },
   module: {
     loaders: [{
       test: /\.jsx?$|\.js$/,
@@ -35,20 +41,7 @@ module.exports = {
       loader: 'json-loader'
     }, {
       test: /\.css$/,
-      exclude: /node_modules/,
-      use: [{
-          loader: 'style-loader',
-        },
-        {
-          loader: 'css-loader',
-          options: {
-            importLoaders: 1,
-          }
-        },
-        {
-          loader: 'postcss-loader'
-        }
-      ]
+      loader: 'style-loader!css-loader!autoprefixer?browsers=last 2 versions'
     }, {
       test: /\.scss$|\.sass$/,
       exclude: /node_modules/,
@@ -69,14 +62,11 @@ module.exports = {
         }
       ]
     }, {
-      test: /\.svg$/,
-      loader: 'url-loader?limit=10000&mimetype=image/svg+xml'
+      test: /\.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
+      loader: 'file-loader?name=fonts/[name].[ext]'
     }, {
-      test: /\.(woff2?|svg)$/,
-      loader: 'url-loader?limit=10000'
-    }, {
-      test: /\.(ttf|eot)$/,
-      loader: 'file-loader'
-    }]
+      test: /\.(png|jpg)$/,
+      loader: 'file-loader?name=images/[name].[ext]'
+    }, ]
   }
 };

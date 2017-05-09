@@ -41,13 +41,6 @@ function deploy() {
       cwd: path.join(__dirname, 'kip-website')
     })
     console.log(stdout.toString())
-    stdout = exec('yarn build', {
-      cwd: path.join(__dirname, 'kip-website'),
-      env: _.merge(process.env, {
-        NODE_PATH: './js'
-      })
-    })
-    console.log(stdout.toString())
     resolve()
   })
 }
@@ -73,12 +66,10 @@ handler.on('push', function (event) {
   var message = _.get(event, 'payload.head_commit.message', '[no commit message]')
 
   deploy('HEAD').then(() => {
-    var successChat = `${new Date()}: Deployed to ${server} - "${message}"`
-    console.log(successChat)
+    var successChat = `Deployed to ${server} - "${message}"`
     //prof.say(successChat)
   }).catch((e) => {
     var errorChat = `Error deploying to ${server}- "${message}"\n${e}`
-    console.error(errorChat)
     //prof.say(errorChat)
   })
 

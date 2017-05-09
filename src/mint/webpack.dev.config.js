@@ -1,11 +1,15 @@
 const path = require('path');
 const webpack = require('webpack');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-var BUILD_DIR = path.resolve(__dirname, 'public/build');
-var APP_DIR = path.resolve(__dirname, 'react');
+const BUILD_DIR = path.resolve(__dirname, 'public/build');
+const CART_DIR = path.resolve(__dirname, 'react');
+const HOME_DIR = path.resolve(__dirname, 'kip-website/js');
 
 module.exports = {
-  entry: ['babel-polyfill', 'webpack-hot-middleware/client?path=/__webpack_hmr', APP_DIR + '/index'],
+  entry: {
+    cart: ['babel-polyfill', 'webpack-hot-middleware/client?name=cart', CART_DIR + '/index'],
+    home: ['babel-polyfill', 'webpack-hot-middleware/client?name=cart', HOME_DIR + '/index']
+  },
   output: {
     path: BUILD_DIR,
     filename: '[name].js',
@@ -20,6 +24,7 @@ module.exports = {
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.ProgressPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
     })
