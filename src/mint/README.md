@@ -4,14 +4,15 @@ Implemented using React, Redux, Webpack.
 
 Karma, Jasmine, Enzyme (airBnB's pretty awesome react specific testing library)
 
-Babel all day and all night (gotta love writting javascript that compiles to... more javascript!!!)
+Babel all day and all night (gotta love writing javascript that compiles to... more javascript!!!)
 
 # SETUP
 
 1. Install [NodeJS](nodejs.org)
 2. Install [Mongodb](mongodb.com)
-3. Go to root directory and run `npm install`
-4. Go to mint directory and run `npm install`
+3. Go to `IF-root` directory and run `npm install`
+4. Go to `IF-root/src/mint` directory and run `npm install`
+5. Go to `IF-root/src/mint/kip-website` directory and run `npm install`
 
 # HOW TO DO INTERNETS
 We are using pretty standard commands just to keep it easy, webpack builds react into public then express serves it up on port: 3000
@@ -29,25 +30,25 @@ We are using pretty standard commands just to keep it easy, webpack builds react
 * `MONGODB_URI` - which mongodb to connect to, defaults to `mongodb://localhost:27017/mint`
 * `SEND_EMAILS` - sends emails if set
   * `export SEND_EMAILS=1` or `true` or anything (even `0`) will send emails
-  * `export SEND_EMAILS=;` will not send emails
+  * `export SEND_EMAILS=''` will not send emails
 * `NO_LIVE_RELOAD` - controls whether the webpack stuff runs. I set this when working just on back-end stuff.
 * `NO_LUMINATI` - uses a regular request instead of a proxied request through luminati. only use this as a very last resort. if you need to scrape deals or something, instead of running the scraper locally with `NO_LUMINATI=1` you can ask someone for a db dump of their scraped deals.
 * `SCRAPE_DEALS` - turn on and off the periodic scraping of deals, recommend to leave unset in development and just use a dump of the deals db.
 * `SEND_DAILY_DEALS` - turn on and off the emailing of daily deals to customers.
 * `BASEURL` - the base url used in email links, like `https://www.kipthis.com` or `http://localhost:3000`
 
-To set an environmental variable in your **.bashrc** or **.zshrc** so that it is set every time you open a terminal and for every command run:
+For newbies, if you want to set an environmental variable in your **.bashrc** or **.zshrc** so that it is set every time you open a terminal and for every command run, for all the env vars above you can add a line like this:
 
 ```sh
 export NODE_ENV=production
 ```
 
-To set or override an environmental variable just for one command:
+Or to set or override an environmental variable just for one command:
 ```sh
 $ NODE_ENV=development node index.js
 ```
 
-For **fish** users, to export a variable do
+For [fish](https://fishshell.com/) users, to export a variable do
 
 ```fish
 set -x NODE_ENV production
@@ -59,10 +60,10 @@ for a single command:
 > env NODE_ENV=development node index.js
 ```
 
-The above method using the `env` program will work for any shell, so if you're writing scripts for others to use try to use env instead of `NODE_ENV=development node index.js`.
+The above method using the `env` program will work for any shell, so if you're writing snippets for others to use try to use env instead of `NODE_ENV=development node index.js`.
 
 # API DOCS
-Peter has built a pretty awesome apidoc, should automagically open after running script.
+To view the back end api documentation, run the following command.
 
 1. npm run apidoc
 
@@ -82,16 +83,14 @@ Peter has built a pretty awesome apidoc, should automagically open after running
 # TEST FILES
 
 All test files are in __test__ folders in their respective folders (e.g actions/__test__, components/__test__)
-Not full coverage yet, and most tests are very basic unit tests. Should test more use cases/edge cases expecially for any async functions that talk with the backend.
+Not full coverage yet, and most tests are very basic unit tests. Should test more use cases/edge cases especially for any async functions that talk with the back end.
+
+All back end tests are in the `IF-root/src/mint/tests` folder. You can run them with `mocha -b api.js` etc.
 
 # PLATFORMS
 
 No styling implemented yet.
-Eventally Should work on mobile, tablet, and desktop.
-
-# (current) Sub-branches
-
-1. Mint-react --> refactoring mint front, streamlining onboarding process, building memebers onboarding.
+Eventually Should work on mobile, tablet, and desktop.
 
 # Posible Optimizations/Refactors for future (in order of priority-ish).
 

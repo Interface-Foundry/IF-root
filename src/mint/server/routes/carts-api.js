@@ -331,8 +331,9 @@ module.exports = function (router) {
 
 
   /**
-   * @api {put} /cart/:cart_id/item/:item_id/update Update Item - right now just replaces old item with new item
-   * @apiDescription Updates an item already in a cart. Must specify new item
+   * @api {put} /cart/:cart_id/item/:item_id/update Update Item
+   * @apiDescription Updates an item already in a cart. Must specify new item.
+   * Right now just replaces old item with new item
    * @apiGroup Carts
    * @apiParam {string} :cart_id cart id
    * @apiParam {string} :item_id item id
