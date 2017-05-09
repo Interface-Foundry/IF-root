@@ -21,6 +21,10 @@ import {
 
 export default class About extends Component {
 
+	shouldComponentUpdate(nextProps, nextState) {
+		return false;
+	}
+
   	render() {
   		const icons = {
 			'Burger': Burger,
@@ -43,7 +47,7 @@ export default class About extends Component {
 	      		{
 	      			_.map(icons, (Icon, key) => {
 	      				console.log(key)
-	      				return <div key={key} className={`${key} ${animate ? '' : ''}`}><Icon/></div>
+	      				return <div key={key} style={{width: `${Math.floor(Math.random() * (40 - 20)) + 20}%`}}className={`icon ${animate ? '' : ''}`}><Icon/></div>
 	      			})
 	      		}
 	      	</div>

@@ -17,7 +17,6 @@ export const animateScroll = (containerHeight, animationOffset, scrollTop, anima
   let breakPointHeight = containerHeight/4;
   let animationEnd = mobile ? containerHeight + 700 : containerHeight + 150 ;
 
-
   if(scrollTop <= animationStart && animationState !== 'inital') {
     newState = {
   		animationState: 'inital'
