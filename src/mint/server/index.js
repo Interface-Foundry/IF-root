@@ -110,6 +110,13 @@ app.get('/cart/*', (req, res) =>
 app.get('/404', (_, res) => {
   res.render('pages/cart');
 });
+app.get('/legal', (_, res) => {
+  res.render('pages/index');
+});
+app.get('/s/*', (_, res) => {
+  res.render('pages/index');
+});
+
 
 // Log errors to the database in production
 if (process.env.NODE_ENV === 'production') {
