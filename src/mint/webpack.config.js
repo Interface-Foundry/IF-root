@@ -1,5 +1,6 @@
 const path = require('path'),
   webpack = require('webpack'),
+  CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin'),
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
   CART_DIR = path.resolve(__dirname, 'react'),
   HOME_DIR = path.resolve(__dirname, 'kip-website/js');
@@ -23,7 +24,8 @@ module.exports = {
       debug: false
     }),
     new webpack.NoEmitOnErrorsPlugin(),
-    new webpack.optimize.UglifyJsPlugin({ minimize: true, compress: { warnings: false } })
+    new webpack.optimize.UglifyJsPlugin({ minimize: true, compress: { warnings: false } }),
+    new CommonsChunkPlugin('common')
   ],
   resolve: {
     extensions: ['.js', '.jsx', '.json']

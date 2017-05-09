@@ -33,7 +33,6 @@ export default class Cart extends Component {
 
   componentWillMount() {
     const { fetchDeals, deals } = this.props;
-    console.log('mount!')
     if (deals.length === 0) {
       fetchDeals();
     }
@@ -195,15 +194,23 @@ class OtherItems extends Component {
   }
 
   render() {
-    const { props, props: { isLeader, startIndex, member: { items, name, email, id }, currentCart: { locked }, } } = this,
+    const { props, props: { isLeader, startIndex, member: { items, name, email, id }, currentCart: { locked, name: cartName } } } = this,
     total = calculateItemTotal(items);
 
     return (
       <ul>
-        <div key={id} className='cart__items__title'>{name}<a href={`mailto:${email}`} className='email'>{email}</a></div>
+       { 
+        email 
+        ? <a href={`mailto:${email}?subject=From ${cartName}`}>
+            <div key={id} className='cart__items__title'>{name}
+              <br/><span className='email'>{email}</span>
+            </div>
+          </a>
+        : <div key={id} className='cart__items__title'>{name}</div>
+        }
         {
           items.length 
-          ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />) 
+          ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />)
           : <EmptyCart />
         }
         {isLeader ? <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3> : null}

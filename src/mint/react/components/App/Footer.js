@@ -112,13 +112,13 @@ class CartFooter extends Component {
           <h4>Share</h4>
         </button>
         <a 
-          className={items.length===0 ? 'disabled':''}
+          className={items.length === 0 ? 'disabled':''}
           href={`/api/cart/${cart_id}/checkout`} 
           onClick={
             (e) => { 
               e.preventDefault(); 
               if (items.length > 0) { 
-                updateCart({...currentCart, locked: !currentCart.locked});
+                updateCart({...currentCart, locked: true});
                 window.open(`/api/cart/${cart_id}/checkout`);
               }
             }
