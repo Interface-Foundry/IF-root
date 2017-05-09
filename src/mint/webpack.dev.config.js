@@ -1,15 +1,14 @@
 const path = require('path'),
   webpack = require('webpack'),
   CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin'),
-  CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin'),
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
   CART_DIR = path.resolve(__dirname, 'react'),
-  HOME_DIR = path.resolve(__dirname, 'kip-website/js');
+  HOME_DIR = path.resolve(__dirname, 'kip-website');
 
 module.exports = {
   entry: {
     cart: ['babel-polyfill', 'webpack-hot-middleware/client?name=cart', CART_DIR + '/index'],
-    home: ['babel-polyfill', 'webpack-hot-middleware/client?name=cart', HOME_DIR + '/index']
+    home: ['babel-polyfill', 'webpack-hot-middleware/client?name=home', HOME_DIR + '/index']
   },
   output: {
     path: BUILD_DIR,
@@ -26,7 +25,7 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.ProgressPlugin(),
-    new CommonsChunkPlugin('common'),
+    new webpack.optimize.CommonsChunkPlugin({ name: 'common' }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
     })

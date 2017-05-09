@@ -1,9 +1,8 @@
 const path = require('path'),
   webpack = require('webpack'),
-  CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin'),
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
   CART_DIR = path.resolve(__dirname, 'react'),
-  HOME_DIR = path.resolve(__dirname, 'kip-website/js');
+  HOME_DIR = path.resolve(__dirname, 'kip-website');
 module.exports = {
   entry: {
     cart: ['babel-polyfill', CART_DIR + '/index'],
@@ -25,7 +24,7 @@ module.exports = {
     }),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.optimize.UglifyJsPlugin({ minimize: true, compress: { warnings: false } }),
-    new CommonsChunkPlugin('common')
+    new webpack.optimize.CommonsChunkPlugin({ name: 'common' })
   ],
   resolve: {
     extensions: ['.js', '.jsx', '.json']

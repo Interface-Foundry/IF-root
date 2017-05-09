@@ -70,9 +70,10 @@ export default class Share extends Component {
   }
 
   render() {
-    const { location: { pathname } } = this.props, { tryToOpen } = this,
-      linkedIcons = addLinkToDeepLink(shareIcons, `http://mint-dev.kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`);
-
+    const { location, location: { pathname } } = this.props, { tryToOpen } = this;
+    let shareUrl = window.location.href.match(/(.+)\/m\//);
+    shareUrl = shareUrl ? shareUrl[1] : `http://kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`;
+    const linkedIcons = addLinkToDeepLink(shareIcons, shareUrl);
     return (
       <div className='share'>
         <div className='share__message'>
@@ -81,7 +82,7 @@ export default class Share extends Component {
           </div>
           <div className='share__message__copy'>
             <div className='share__message__copy__input' onClick={this.copy}>
-              <input ref={(input) => this.input = input} value={`http://mint-dev.kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`} readOnly={true}/>
+              <input ref={(input) => this.input = input} value={shareUrl} readOnly={true}/>
               <button><p>copy</p></button>
             </div>
           </div>
@@ -92,7 +93,7 @@ export default class Share extends Component {
               if(icon.icon === 'Facebook') return (
                   <FacebookShareButton
                     key={i} 
-                    url={`http://mint-dev.kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`}
+                    url={shareUrl}
                     title='Share Cart'
                     picture='//storage.googleapis.com/kip-random/head_smaller.png'
                     className="share__icons__icon">

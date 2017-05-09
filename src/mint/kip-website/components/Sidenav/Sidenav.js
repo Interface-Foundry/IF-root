@@ -31,7 +31,7 @@ export default class Sidenav extends Component {
           </li>
           <div className='sidenav__list__view'>
             <h4>My Kip Carts</h4>
-            {_.map(myCarts, (c, i) => {
+            {myCarts.map((c, i) => {
               if(i > 1 && show !== 'me') return null;
               return ( 
                 <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
@@ -52,13 +52,13 @@ export default class Sidenav extends Component {
               </h4> : null
             }
             <h4>Other Kip Carts</h4>
-            {_.map(otherCarts, (c, i) => {
+            {otherCarts.map((c, i) => {
               if(i > 1 && show !== 'other') return null
               return (
                 <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
                   <div className='icon'/>
                   <a href={`/cart/${c.id}`}>
-                    <p>{c.name ? c.name : `${_.capitalize(c.leader.email_address)}'s Cart (${c.items.length})`}</p>
+                    <p>{c.name ? c.name : `${c.leader.name ? c.leader.name + '\'s ' : ''}Kip Cart`}</p>
                   </a>
                 </li>
               )

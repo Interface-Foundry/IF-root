@@ -14,23 +14,23 @@ const fs = require('fs'),
   var dailyDealsJob = require('./deals/send-daily-deals-job')
 
 // live reloading
-if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
-  const webpackConfig = require('../webpack.dev.config.js');
-  const compiler = require('webpack')(webpackConfig);
-  app.use(require('webpack-dev-middleware')(compiler, {
-    hot: true,
-    publicPath: webpackConfig.output.publicPath,
-    stats: {
-      colors: true,
-    },
-    historyApiFallback: true
-  }));
-  app.use(require('webpack-hot-middleware')(compiler, {
-    reload: true,
-    path: '/__webpack_hmr',
-    heartbeat: 10 * 1000
-  }));
-}
+// if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
+//   const webpackConfig = require('../webpack.dev.config.js');
+//   const compiler = require('webpack')(webpackConfig);
+//   app.use(require('webpack-dev-middleware')(compiler, {
+//     hot: true,
+//     publicPath: webpackConfig.output.publicPath,
+//     stats: {
+//       colors: true,
+//     },
+//     historyApiFallback: true
+//   }));
+//   app.use(require('webpack-hot-middleware')(compiler, {
+//     reload: true,
+//     path: '/__webpack_hmr',
+//     heartbeat: 10 * 1000
+//   }));
+// }
 
 // idk
 var regularRoutes = require('./routes/regular.js');

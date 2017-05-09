@@ -1,23 +1,17 @@
-// react/index.js
+// kip-website/index.js
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
+import { Route } from 'react-router';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import { createLogger } from 'redux-logger';
-
 import Reducers from './reducers';
-import { session } from './actions';
-import { AppContainer } from './containers';
-
-//Analytics!
-import ReactGA from 'react-ga';
-
-import 'whatwg-fetch';
+import { get } from './actions';
+import { App } from './components';
 
 if (module.hot) {
   module.hot.accept();
@@ -30,24 +24,24 @@ const loggerMiddleware = createLogger({
   level: 'info'
 });
 const history = createHistory();
-history.listen((location, action) => {
-  ReactGA.set({ path: location.pathname });
-  ReactGA.pageview(location.pathname);
-});
 const historyMiddleware = routerMiddleware(history);
 const store = createStore(
   Reducers,
   applyMiddleware(thunkMiddleware, historyMiddleware, loggerMiddleware)
 );
 
-// update login status
-store.dispatch(session.update());
+// Check the session?? i guess
+store.dispatch(get('/api/session', 'SESSION'))
+  .then(() => {
+    store.dispatch(get('/api/carts', 'CARTS'))
+  });
 
+// Configure View
 ReactDOM.render(
   <Provider store={store}>
-   <ConnectedRouter history={history}>
-       <Route path="*" component={AppContainer} />
-   </ConnectedRouter>
- </Provider>,
+    <ConnectedRouter history={history}>
+          <Route path="/" component={App}/>
+    </ConnectedRouter>
+  </Provider>,
   document.getElementById('root')
 );
