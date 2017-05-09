@@ -23,14 +23,14 @@ export const animateScroll = (containerHeight, animationOffset, scrollTop, anima
   	}
   }
 
-  if(scrollTop > animationStart && scrollTop < animationStart + 150  && animationState !== 'fixed first') {
+  if(scrollTop > animationStart && scrollTop < animationStart + 350  && animationState !== 'fixed first') {
     newState = {
 	   	animationState: 'fixed first'
     }
   }
 
 
-  if(scrollTop > animationStart + 150 && scrollTop < animationStart + breakPointHeight && animationState !== 'fixed first bubble') {
+  if(scrollTop > animationStart + 350 && scrollTop < animationStart + breakPointHeight && animationState !== 'fixed first bubble') {
     newState = {
       animationState: 'fixed first bubble'
     }

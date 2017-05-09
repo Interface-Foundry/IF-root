@@ -29,14 +29,11 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
 		}
 	}
 
-
-
 	svg {
 		display: inline-block;
 		width: 100%;
-
 	}
-	// loop!
+
 	.icon {
 	    display: inline-block;
 	    @include animation(fadeAndZoomIn cubic-bezier(0.4, 0, 0.2, 1) (random(3) - 0.33s));

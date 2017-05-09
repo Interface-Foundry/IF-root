@@ -11,19 +11,22 @@ $centerPhone: calc(50% - 212.5px);
 
 	.outline {
 		position: absolute;
-		top: 0;
-		right: 0;
-		left: 0;
+		top:: 0;
+		opacity: 0;
+		right: 50px;
+		left: 50px;
 		pointer-events:none;
+		@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
-		&.fixed {
+		&.bubble {
 			position: fixed;
-			transform: translate3d(0, -150px,0);
+			opacity: 1;
 		}
 
 		&.absolute {
 			top: auto;
-			bottom: 0;
+			bottom: 190px;
+			opacity: 1;
 		}
 	}
 
@@ -98,7 +101,7 @@ $centerPhone: calc(50% - 212.5px);
 
 		&.absolute {
 			margin-left: calc(50% - (410px/2));
-			bottom: -300px;
+			bottom: -290px;
 		}
 
 		.image {
