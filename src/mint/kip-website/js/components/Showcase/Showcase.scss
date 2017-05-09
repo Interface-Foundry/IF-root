@@ -28,6 +28,10 @@ $centerPhone: calc(50% - 212.5px);
 			bottom: 190px;
 			opacity: 1;
 		}
+
+		@media only screen and (max-width: 600px) {
+			display: none;
+		}
 	}
 
 	.image {

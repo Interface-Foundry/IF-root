@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
-import { animateScroll } from '../../reducers';
+import { animateScroll } from '../../utils';
 
 import { Services, About, Showcase, Footer, Statement, Hero } from '..';
 import { SidenavContainer, ModalContainer, RibbonContainer } from '../../containers';
