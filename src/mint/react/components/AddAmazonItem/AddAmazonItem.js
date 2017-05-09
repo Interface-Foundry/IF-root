@@ -37,15 +37,18 @@ export default class AddAmazonItem extends Component {
     return (
       <div className='add_to_amazon'>
         Add Item to Kip Cart
-        {
-          !!user_account.id 
-          ? <AmazonFormContainer />
-          : <button className='add_to_amazon__button yellow' onClick={addItemToCart}>
-              + Add Amazon Item
-            </button>
-        }
+        <AmazonFormContainer />
         {numUserItems ? null : <NotificationBubble top={21} right={3}/>}
       </div>
     );
   }
 }
+
+
+        // {
+        //   !!user_account.id 
+        //   ? <AmazonFormContainer />
+        //   : <button className='add_to_amazon__button yellow' onClick={addItemToCart}>
+        //       + Add Amazon Item
+        //     </button>
+        // }

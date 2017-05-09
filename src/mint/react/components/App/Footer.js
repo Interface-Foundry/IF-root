@@ -152,7 +152,10 @@ class ItemFooter extends Component {
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
-        { !!currentUser.id ? <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> : null}
+        { !!currentUser.id ? 
+          <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> 
+          : <button className='add triple' onClick={() => {replace(`/cart/${cart_id}/m/signin`)}}>✓ Sign Up!</button> 
+        }
       </footer>
     );
   }
