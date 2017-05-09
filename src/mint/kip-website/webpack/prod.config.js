@@ -1,8 +1,8 @@
 const webpack = require('webpack');
 const path = require('path');
 
-// const assetsPath = path.resolve(__dirname, '../../public/build');
-const assetsPath = path.resolve(__dirname, '../dist');
+const assetsPath = path.resolve(__dirname, '../../public/build');
+// const assetsPath = path.resolve(__dirname, '../dist');
 
 module.exports = {
   entry: [
