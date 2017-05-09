@@ -39,7 +39,7 @@ export default class ProductDescription extends Component {
 
   componentDidMount() {
     window.addEventListener('resize', this._handleWindowResize);
-    this._handleWindowResize()
+    this._handleWindowResize();
   }
   componentWillUnmount() {
     window.removeEventListener('resize', this._handleWindowResize);

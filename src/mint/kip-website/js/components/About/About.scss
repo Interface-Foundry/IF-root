@@ -6,7 +6,7 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
 .about {
     background: transparent;
     top: 200px;
-    right: -25%;
+    left: 900px;
     z-index: 100;
 	position: absolute;
 	transform: rotate(-20deg);
@@ -17,6 +17,7 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
 		position: relative;
 		transform: rotate(0);
 		width: 100%;
+		left: auto;
 		right: auto;
 		top: auto;
 		overflow: hidden;
