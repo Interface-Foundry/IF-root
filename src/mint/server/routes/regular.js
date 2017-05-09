@@ -5,7 +5,6 @@ var _ = require('lodash');
 
 const dealsDb = require('../deals/deals')
 
-var utils = require('../utilities/utils.js');
 
 /**
  * Models loaded from the waterline ORM
@@ -79,11 +78,9 @@ router.get('/auth/:id', (req, res) => co(function * () {
  * @apiGroup HTML
  */
 router.get('/newcart', (req, res) => co(function * () {
-  // create a blank cart
-  const cart = yield db.Carts.create({})
-
+  // create a cart
+  let cart = yield cartUtils.createCart(_.get(req, 'body.store'))
   // find the user for this session
-  const session = req.UserSession;
 
   if (session.user_account) {
     // make the first user the leader
@@ -124,7 +121,6 @@ router.get('/newcart', (req, res) => co(function * () {
   res.redirect(`/cart/${cart.id}/`);
 }))
 
-var fs = require('fs')
 
 /**
  * @api {get} /testoptions Test Options
