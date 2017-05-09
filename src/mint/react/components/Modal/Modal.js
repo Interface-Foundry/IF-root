@@ -14,8 +14,6 @@ export default class SignIn extends Component {
   }
 
   render() {
-    const { match } = this.props;
-
     // renders modal based on route
     return (
       <div className="modal">
