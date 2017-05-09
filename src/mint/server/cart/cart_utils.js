@@ -8,19 +8,10 @@ const dbReady = require('../../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 
-/**
- * figure out who the retailer is for an item pasted,
- * very rudimentary since idk what to expect at this time
- * @param  {string} item is the way the item is passed in
- * @return {string} retail api one of: amazon,
+/************************************************
+ * generalized handlers
+ ************************************************
  */
-exports.getRetailer = function (item) {
-  if (item.includes('amazon.com')) {
-    return 'amazon'
-  } else {
-    throw new Error('Not currently supported')
-  }
-};
 
 const syncCartHandlers = {
   'amazon': amazon.syncAmazon
@@ -32,10 +23,6 @@ const getItemHandlers = {
 
 const getCartHandlers = {
   'amazon': amazon.getAmazonCart
-}
-
-const createCartHandlers = {
-  'amazon': amazon.createAmazonCart
 }
 
 const addItemHandlers = {
@@ -50,6 +37,27 @@ const clearCartHandlers = {
   'amazon': amazon.clearAmazonCart
 }
 
+/************************************************
+ * functions for carts
+ ************************************************
+ */
+
+/**
+ * create a cart
+ *
+ * @param      {string}  store -  the store type to create
+ * @return     {object}  cart - the cart object
+ */
+exports.createCart = function * (store) {
+  const cartOpts = {
+    // store can be ypo or amazon
+    store: (store === undefined) ? 'amazon' : store,
+  }
+
+  // create a cart
+  const cart = yield db.Carts.create(cartOpts)
+  return cart;
+}
 
 /**
  * the idea of this is that you can be agnostic if you match up the functionality
@@ -71,11 +79,7 @@ exports.syncCart = function * (cart) {
   return cart
 }
 
-exports.createCart = function * (item) {
-  var retailer = exports.getRetailer(item)
-  var cart = yield createCartHandlers[retailer](item)
-  return cart
-}
+
 
 exports.getCart = function * (cart, retailer) {
   var cart = yield getCartHandlers[retailer](cart)
@@ -155,4 +159,21 @@ exports.createItemFromItemId = function * (itemId, userId, cartId) {
   yield [item.save(), cart.save()]
   return item
 }
+
+
+
+
+/**
+ * figure out who the retailer is for an item pasted,
+ * very rudimentary since idk what to expect at this time
+ * @param  {string} item is the way the item is passed in
+ * @return {string} retail api one of: amazon,
+ */
+exports.getRetailer = function (item) {
+  if (item.includes('amazon.com')) {
+    return 'amazon'
+  } else {
+    throw new Error('Not currently supported')
+  }
+};
 
