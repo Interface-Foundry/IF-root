@@ -644,7 +644,7 @@ module.exports = function (router) {
       id: cart.id,
       items: items,
       users: users,
-      total: total,
+      total: '$' + total.toFixed(2),
       cart: cart
     })
 
