@@ -7,7 +7,10 @@
     "watch": true,
     "env": {
       "SEND_EMAILS": true,
-      "NO_LIVE_RELOAD": true
+      "NO_LIVE_RELOAD": true,
+      "NODE_ENV": "production",
+      "NO_LUMINATI": true,
+      "BASEURL": "http://mint-dev.kipthis.com"
     }
   }, {
     "name": "ci",
