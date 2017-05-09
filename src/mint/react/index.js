@@ -8,6 +8,7 @@ import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
+import { createLogger } from 'redux-logger';
 
 import Reducers from './reducers';
 import { session } from './actions';
@@ -39,6 +40,7 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   });
   middleware = [...middleware, loggerMiddleware];
 }
+
 const store = createStore(
   Reducers,
   applyMiddleware(...middleware)
