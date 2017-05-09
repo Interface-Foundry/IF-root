@@ -29,7 +29,7 @@ var options = {
     group_unsubscribe: 1,
     group_resubscribe: 1,
     spamreport: 1,
-    url: "https://32bb5d78.ngrok.io/sg"
+    url: "https://0a8370bb.ngrok.io/sg"
   }
 };
 rp(options)

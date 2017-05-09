@@ -107,7 +107,7 @@ const MintTable = ({data, purchased}) => {
   );
 };
 
-const SendGridTable = (data) => {
+const SendgridTable = (data) => {
   let newData = [];
   for(var i = 0; i<data.data.length; i++){
     newData.push({
@@ -158,6 +158,37 @@ const SendGridTable = (data) => {
 
   );
   
-}
+};
 
-export { CafeTable, CartTable, MintTable, SendGridTable };
+const SendgridTeamsTable = (data) => {
+  let newData = [];
+  for(var i = 0; i<data.data.length; i++){
+    var entry = data.data[i]
+    newData.push({
+      groupId: entry.asm_group_id,
+      email: entry.email,
+      event: entry.event,
+      event_id: entry.sg_event_id,
+      message_id: entry.sg_message_id,
+      timestamp: new Date(entry.timestamp*1000).toLocaleString(),
+    })
+  }
+  const panelTitle = (<h3>SendGrid Group Stats</h3>)
+  return (
+    <Panel header={panelTitle}>
+      <div className="table-display">
+        <BootstrapTable data={newData} bordered={false} scrollTop={'Top'} hover>
+          <TableHeaderColumn isKey={true} dataField='groupId'>Group ID</TableHeaderColumn>
+          <TableHeaderColumn dataField='email'>Email</TableHeaderColumn>
+          <TableHeaderColumn dataField='event'>Event</TableHeaderColumn>
+          <TableHeaderColumn dataField='event_id'>Event ID</TableHeaderColumn>
+          <TableHeaderColumn dataField='message_id'>Message ID</TableHeaderColumn>
+          <TableHeaderColumn dataField='timestamp'>Timestamp</TableHeaderColumn>
+        </BootstrapTable>
+      </div>
+    </Panel>
+
+  );
+};
+
+export { CafeTable, CartTable, MintTable, SendgridTable, SendgridTeamsTable };

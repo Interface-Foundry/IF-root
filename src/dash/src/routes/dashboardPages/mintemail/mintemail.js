@@ -6,7 +6,7 @@ import DatePicker from 'react-datepicker';
 import { graphql } from 'react-apollo';
 
 import { SendGridGraph } from '../../../components/Graphs';
-import { SendGridTable } from '../../../components/Table';
+import { SendgridTable, SendgridTeamsTable } from '../../../components/Table';
 import { cartsQuery, deliveryQuery } from '../../../graphqlOperations';
 import * as mintdata from '../../../data/mintdata';
 
@@ -59,50 +59,54 @@ class MintEmail extends Component {
     request.post('/sgquery')
     .send({ startDate: startDate.format("YYYY-MM-DD"), endDate: endDate.format("YYYY-MM-DD") })
     .end(function(err, resp) {
-          if (err) { 
-            console.error(err); 
-          }
-          self.setState({
-              ready: true,
-              emailStats: resp.text
-            })
-        });
+      if (err) { 
+        console.error(err); 
+      }
+      if(resp){
+        self.setState({
+          ready: true,
+          emailStats: resp.text
+        })
+      }
+    });
     request.post('/sgdata')
     .send({filename: 'sg_log.txt'})
     .end(function(err, resp){
       if(err){
         console.error(err);
       }
-      self.setState({
-        sg_data: resp.text
-      })
+      if(resp){
+        self.setState({
+          sg_data: resp.text
+        })
+      }
     })
 
   }
 
   listEmailStats(stats){
-    return (<SendGridTable data={stats} />);
+    return (<SendgridTable data={stats} />);
   }
 
-  listGroupSendgridStats(){
-    //return (<div>To be created.</div>)
-    var stats = this.getSendgridEmails();
-    return (<div>To be created.</div>);
+  listGroupSendgridStats(stats){
+    return (<SendgridTeamsTable data={stats} />);
   }
 
-  getSendgridEmails(){
-    var self = this;
-    
-  }
 
   render(){
     const self = this;
     let sgStats = '';
+    let sgTeamStats = '';
+
     if(self.state.ready == false){
       self.generateEmailStats(self.state.startDate, self.state.endDate);
     }
     sgStats = self.state.emailStats;
     sgStats = sgStats ? JSON.parse(sgStats) : '';
+
+    sgTeamStats = self.state.sg_data;
+    sgTeamStats = sgTeamStats ? sgTeamStats.replace(/\]\[/g, ',') : '';
+    sgTeamStats = sgTeamStats ? JSON.parse(sgTeamStats) : '';
 
     return (
       <div>
@@ -117,7 +121,7 @@ class MintEmail extends Component {
           { self.state.ready == true ? self.listEmailStats(sgStats) : 'Loading...'}
         </div>
         <div>
-          { self.state.ready == true ? self.listGroupSendgridStats() : 'Loading...'}
+          { self.state.ready == true ? self.listGroupSendgridStats(sgTeamStats) : 'Loading...'}
         </div>
       </div>
     )
