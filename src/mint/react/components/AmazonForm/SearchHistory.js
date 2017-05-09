@@ -19,7 +19,7 @@ export default class SearchHistory extends Component {
     return (
       <ul className='searchHistory'>
         {
-          _.map(searchHistory, (previousSearch, i) => {
+          searchHistory.map((previousSearch, i) => {
             return (
               <li key={i} className='searchHistory__term'>
                 <div className='searchHistory__term-icon'>

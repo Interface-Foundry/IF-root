@@ -55,10 +55,10 @@ export default class Sidenav extends Component {
     } = this;
 
     let leaderCarts = _moveToFront(
-        carts.filter((c, i) => _.get(c, 'leader.id') === _.get(currentUser, 'id')),
+        carts.filter((c, i) => (c && c.leader && currentUser) && (c.leader.id === currentUser.id)),
         cart_id),
       memberCarts = _moveToFront(
-        carts.filter((c, i) => _.get(c, 'leader.id') !== _.get(currentUser, 'id')),
+        carts.filter((c, i) => (c && c.leader && currentUser) && (c.leader.id !== currentUser.id)),
         cart_id);
     return (
       <div className='sidenav'>
@@ -74,7 +74,7 @@ export default class Sidenav extends Component {
           <li className='sidenav__list__view'>
             { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
             <ul>
-              {_.map(leaderCarts, (c, i) => {
+              {leaderCarts.map((c, i) => {
                 if(i > 2 && show !== 'me') return null;
                 return ( 
                   <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} onClick={_toggleSidenav}>
@@ -102,7 +102,7 @@ export default class Sidenav extends Component {
             }
             { memberCarts.length ? <h4>Other Kip Carts</h4> : null }
             <ul>
-              {_.map(memberCarts, (c, i) => {
+              {memberCarts.map((c, i) => {
                 if(i > 2 && show !== 'other') return null;
                 return (
                   <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} onClick={_toggleSidenav}>

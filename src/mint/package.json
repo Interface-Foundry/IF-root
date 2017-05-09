@@ -96,6 +96,7 @@
   "scripts": {
     "start": "npm run build & node ./server",
     "build": "webpack -p --progress",
+    "frontend-dev": "webpack --config ./webpack.dev.config.js --progress --color --watch --hot --profile",
     "backend": "env SEND_EMAILS='' nodemon --ignore react/ --ignore public/ --ignore kip-website/ ./server/index.js",
     "dev": "yarn backend",
     "cleanup": "rm -r public/build",

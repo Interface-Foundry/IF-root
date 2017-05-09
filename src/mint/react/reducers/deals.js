@@ -19,7 +19,7 @@ export default function kipForm(state = initialState, action) {
   case REMOVE_DEAL:
     return {
       ...state,
-      deals: _.filter(state.deals, (deal, index) => index !== action.selectedIndex),
+      deals: state.deals.filter((deal, index) => index !== action.selectedIndex),
       position: null
     };
   default:
