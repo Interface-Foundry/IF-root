@@ -59,7 +59,16 @@ var cartsCollection = Waterline.Collection.extend({
     affiliate_checkout_url: 'string',
 
     /** @type {String} amazon_purchase_url the url that goes directly to amazon */
-    amazon_purchase_url: 'string'
+    amazon_purchase_url: 'string',
+
+        /** @type {string} the online retailer */
+    store: {
+      type: 'string',
+      enum: [
+        'amazon',
+        'ypo'
+      ]
+    },
 
   }
 });

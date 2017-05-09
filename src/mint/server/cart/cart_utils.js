@@ -90,7 +90,69 @@ exports.addItemToCart = function * (item, cart) {
   var cart = yield addItemHandlers[retailer](item, cart)
 };
 
-exports.removeItemFromCart = function * (item, cart) {
-  var cart = yield removeItemHandlers[retailer](item, cart)
-};
+
+/**
+ * delete item from cart
+ *
+ * @param      {string}  itemId  The item identifier
+ * @param      {string}  cartId  the cart identifier
+ * @param      {string}  userId  The user identifier
+ * @return     {string}  status of if item was deleted
+ */
+exports.deleteItemFromCart = function * (itemId, userId, cartId) {
+  const cart = yield db.Carts.findOne({id: cartId})
+  const item = yield db.Items.findOne({id: itemId})
+
+  // make sure cart and item exist
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+  if (!item) {
+    throw new Error('Item not found')
+  }
+
+  // Make sure user has permission to delete it, leaders can delete anything,
+  // members can delete their own stuff
+  if (cart.leader !== userId && item.added_by !== userId) {
+    throw new Error('Unauthorized')
+  }
+
+  cart.items.remove(item.id)
+  yield cart.save()
+}
+
+/**
+ * create item by user in a cart
+ *
+ * @param      {string}  itemId  The item identifier
+ * @param      {string}          userId  The user identifier
+ * @param      {string}          cartId  the cart identifier
+ * @return     {object}           item object that was created
+ */
+exports.createItemFromItemId = function * (itemId, userId, cartId) {
+
+  const cart = yield db.Carts.findOne({id: cartId})
+  const item = yield db.Items.findOne({id: itemId})
+
+  // make sure cart and item exist
+  if (!cart) {
+    throw new Error('Cart not found')
+  }
+  if (!item) {
+    throw new Error('Item not found')
+  }
+
+  // make sure it's not in a cart already
+  var existingCart = yield db.Carts.findOne({items: itemId})
+  if (existingCart && existingCart.id !== cart.id) {
+    throw new Error('Item ' + itemId + ' is already in another cart ' + existingCart.id)
+  }
+
+  cart.items.add(item.id)
+  item.added_by = userId
+  item.cart = cart.id
+
+  yield [item.save(), cart.save()]
+  return item
+}
 
