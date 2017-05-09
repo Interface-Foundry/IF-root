@@ -30,7 +30,7 @@ function deploy() {
       cwd: __dirname
     })
     console.log(stdout.toString())
-    stdout = exec('webpack', {
+    stdout = exec('yarn build', {
       cwd: __dirname,
       env: _.merge(process.env, {
         NODE_PATH: './react'
@@ -73,10 +73,12 @@ handler.on('push', function (event) {
   var message = _.get(event, 'payload.head_commit.message', '[no commit message]')
 
   deploy('HEAD').then(() => {
-    var successChat = `Deployed to ${server} - "${message}"`
+    var successChat = `${new Date()}: Deployed to ${server} - "${message}"`
+    console.log(successChat)
     //prof.say(successChat)
   }).catch((e) => {
     var errorChat = `Error deploying to ${server}- "${message}"\n${e}`
+    console.error(errorChat)
     //prof.say(errorChat)
   })
 
