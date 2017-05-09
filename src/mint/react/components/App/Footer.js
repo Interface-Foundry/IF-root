@@ -146,13 +146,13 @@ class ItemFooter extends Component {
   }
 
   render() {
-    const { removeDeal, addItem, item_id, position, cart_id, history: { replace, location: { pathname } } } = this.props,
+    const { removeDeal, addItem, item_id, position, cart_id, currentUser, history: { replace, location: { pathname } } } = this.props,
       removeItem = pathname.includes('deal');
 
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
-        <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Add to Cart</button>
+        { !!currentUser.id ? <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Add to Cart</button> : null}
       </footer>
     );
   }
