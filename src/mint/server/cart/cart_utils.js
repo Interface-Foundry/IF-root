@@ -22,29 +22,35 @@ exports.getRetailer = function (item) {
   }
 };
 
-var getItemHandlers = {
+const syncCartHandlers = {
+  'amazon': amazon.syncAmazon
+}
+
+const getItemHandlers = {
   'amazon': amazon.getAmazonItem
 }
 
-var getCartHandlers = {
+const getCartHandlers = {
   'amazon': amazon.getAmazonCart
 }
 
-var createCartHandlers = {
+const createCartHandlers = {
   'amazon': amazon.createAmazonCart
 }
 
-var addItemHandlers = {
+const addItemHandlers = {
   'amazon': amazon.addAmazonItemToCart
 }
 
-var removeItemHandlers = {
+const removeItemHandlers = {
   'amazon': amazon.removeAmazonItemFromCart
 }
 
-var clearCartHandlers = {
+const clearCartHandlers = {
   'amazon': amazon.clearAmazonCart
 }
+
+
 /**
  * the idea of this is that you can be agnostic if you match up the functionality
  * per item to the respective retailer function in the handlers above
@@ -59,6 +65,11 @@ exports.getItem = function * (item) {
   var retailerItem = yield getItemHandlers[retailer](item)
   return retailerItem;
 };
+
+exports.syncCart = function * (cart) {
+  var cart = yield syncCartHandlers(cart)
+  return cart
+}
 
 exports.createCart = function * (item) {
   var retailer = exports.getRetailer(item)
