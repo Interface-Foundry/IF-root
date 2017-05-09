@@ -67,7 +67,8 @@ var cartsCollection = Waterline.Collection.extend({
       enum: [
         'amazon',
         'ypo'
-      ]
+      ],
+      defaultsTo: 'amazon'
     },
 
   }
