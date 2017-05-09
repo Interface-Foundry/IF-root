@@ -182,6 +182,7 @@ $cart__add-height: $nav-height+$padding;
     overflow-y: visable;
     /* has to be scroll, not auto */
     -webkit-overflow-scrolling: touch;
+    @include animation(fadeInDownShort cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
     @media (min-width: 900px) {
       height: auto;
     }
