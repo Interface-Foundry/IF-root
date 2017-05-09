@@ -206,7 +206,7 @@ export default class Item extends Component {
                     <p>{name}</p>
                   </div>
                 </div>
-                {showButton ? <button onClick={()=>next()}>&gt;</button> : null}
+                {showButton ? <button onClick={()=> next()}>&gt;</button> : null}
               </div>
               { 
                 type === 'deal' && items[parseInt(index)]
