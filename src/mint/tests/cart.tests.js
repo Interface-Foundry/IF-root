@@ -1,26 +1,32 @@
 require('co-mocha');
-var _ = require('lodash');
+const dbReady = require('../db');
+const _ = require('lodash');
 
 var expect = require('chai').expect;
 
-var cart = require('../server/cart/cart_utils.js');
+var cartUtils = require('../server/cart/cart_utils');
 
 var test_item = 'https://www.amazon.com/AmazonBasics-Apple-Certified-Lightning-Cable/dp/B010S9N6OO/ref=sr_1_1?ie=UTF8&qid=1490132282&sr=8-1';
 var test_item2 = 'https://www.amazon.com/dp/B01BYO79UE';
 
-describe('testing amazon to our cart system', () => {
-  it('get item retailer from url', function * () {
+describe('testing cart system', () => {
+  before(function * () {
+    yield dbReady;
+  })
+
+  it.skip('get item retailer from url', function * () {
     var retailer = cart.getRetailer(test_item);
     expect(retailer).to.equal('amazon')
   });
 
-  it('should get item from ItemLookup using url ', function * () {
-    var item = yield cart.getItem(test_item);
-    console.log(item)
+  it('should create a new cart for ypo', function * () {
+    let cart = yield cartUtils.createCart('ypo')
+    expect(cart.store).to.equal('ypo')
   })
 
-  it.skip('should create the cart with the first test_item ', function * () {
-    var item = yield cart.createCart(test_item);
+  it('should create a new cart with no store (equal to amazon)', function * () {
+    let cart = yield cartUtils.createCart()
+    expect(cart.store).to.equal('amazon')
   })
 
   it.skip('should add the item to the cart', function * () {
