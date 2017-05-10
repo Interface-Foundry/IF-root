@@ -23,8 +23,11 @@ if (module.hot) {
 }
 
 const history = createHistory();
+history.listen((location, action) => {
+  ReactGA.set({ path: location.pathname });
+  ReactGA.pageview(location.pathname);
+});
 const historyMiddleware = routerMiddleware(history);
-
 let middleware = [thunkMiddleware, historyMiddleware];
 if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   const { createLogger } = require('redux-logger');
@@ -36,10 +39,6 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   });
   middleware = [...middleware, loggerMiddleware];
 }
-history.listen((location, action) => {
-  ReactGA.set({ path: location.pathname });
-  ReactGA.pageview(location.pathname);
-});
 const store = createStore(
   Reducers,
   applyMiddleware(...middleware)
