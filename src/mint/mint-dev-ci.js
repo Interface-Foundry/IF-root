@@ -19,6 +19,7 @@ const server = 'mint-dev'
 //var Professor = require('../monitoring/prof_oak').Professor
 //var prof = new Professor(channel)
 
+
 function deploy() {
   return new Promise((resolve, reject) => {
     // doing this sync for now, maybe async later
@@ -26,24 +27,50 @@ function deploy() {
       cwd: path.join(__dirname, '../../')
     })
     console.log(stdout.toString())
-    stdout = exec('yarn', {
+    stdout = exec('rm -rf node_modules', {
       cwd: __dirname
     })
     console.log(stdout.toString())
-    stdout = exec('yarn build', {
+    stdout = exec('npm install', {
+      cwd: __dirname
+    })
+    console.log(stdout.toString())
+    stdout = exec('npm run build', {
       cwd: __dirname,
       env: _.merge(process.env, {
         NODE_PATH: './react'
       })
     })
     console.log(stdout.toString())
-    stdout = exec('yarn', {
-      cwd: path.join(__dirname, 'kip-website')
-    })
-    console.log(stdout.toString())
     resolve()
   })
 }
+
+// function deploy() {
+//   return new Promise((resolve, reject) => {
+//     // doing this sync for now, maybe async later
+//     var stdout = exec('git fetch origin && git reset --hard origin/mint', {
+//       cwd: path.join(__dirname, '../../')
+//     })
+//     console.log(stdout.toString())
+//     stdout = exec('yarn', {
+//       cwd: __dirname
+//     })
+//     console.log(stdout.toString())
+//     stdout = exec('yarn build', {
+//       cwd: __dirname,
+//       env: _.merge(process.env, {
+//         NODE_PATH: './react'
+//       })
+//     })
+//     console.log(stdout.toString())
+//     stdout = exec('yarn', {
+//       cwd: path.join(__dirname, 'kip-website')
+//     })
+//     console.log(stdout.toString())
+//     resolve()
+//   })
+// }
 
 http.createServer(function (req, res) {
   handler(req, res, function (err) {
