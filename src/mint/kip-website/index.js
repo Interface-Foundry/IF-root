@@ -16,7 +16,7 @@ if (module.hot) {
   module.hot.accept();
 }
 
-let middleware;
+let middleware = [thunkMiddleware, historyMiddleware];
 if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   const ReduxLogger = require('redux-logger');
   const loggerMiddleware = ReduxLogger.createLogger({
@@ -25,16 +25,14 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
     collapsed: true,
     level: 'info'
   });
-  middleware = applyMiddleware(thunkMiddleware, historyMiddleware, loggerMiddleware);
-} else {
-  middleware = applyMiddleware(thunkMiddleware, historyMiddleware);
+  middleware = [...middleware, loggerMiddleware];
 }
 
 const history = createHistory();
 const historyMiddleware = routerMiddleware(history);
 const store = createStore(
   Reducers,
-  middleware
+  applyMiddleware(...middleware)
 );
 
 // Check the session?? i guess
