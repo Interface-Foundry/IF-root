@@ -8,7 +8,6 @@ import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
-import { createLogger } from 'redux-logger';
 
 import Reducers from './reducers';
 import { session } from './actions';

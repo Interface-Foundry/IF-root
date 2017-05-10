@@ -18,7 +18,7 @@ if (module.hot) {
 }
 
 const history = createHistory();
-const historyMiddleware = routerMiddleware(history)
+const historyMiddleware = routerMiddleware(history);
 
 let middleware = [thunkMiddleware, historyMiddleware];
 if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
@@ -39,7 +39,7 @@ const store = createStore(
 // Check the session?? i guess
 store.dispatch(get('/api/session', 'SESSION'))
   .then(() => {
-    store.dispatch(get('/api/carts', 'CARTS'))
+    store.dispatch(get('/api/carts', 'CARTS'));
   });
 
 // Configure View
