@@ -25,20 +25,9 @@ module.exports = function * (source, fields) {
     var invItem = yield db[`${source}InventoryItems`].create({});
     for (var i = 0; i < fields.length; i++) {
       invItem[fields[i]] = record[i];
-
-      if (i == 6 || i == 7) {
-        var cats = record[i].split(',');
-        cats.map(c => {
-          if (!categories[c]) categories[c] = true;
-        })
-      }
-
-      console.log(invItem)
     }
     yield invItem.save();
-    // console.log('categories:', categories)
     // console.log('INVITEM', invItem);
   }));
-  fs.writeFile('./categories.txt', Object.keys(categories).join('\n'))
   console.log('done ingesting tsv')
 }
