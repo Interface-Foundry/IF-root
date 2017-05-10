@@ -133,11 +133,21 @@
                 Hi <%=username%>,
             </td>
         </tr>
-        <tr>
-            <td style="padding:10px 40px; font-size: 18px; color: #000;" align="left">
-                You just made a new Kip Group Cart! Nice :)
-            </td>
-        </tr>
+        <!-- Show leader message -->
+        <% if(cart.leader){ %>
+            <tr>
+                <td style="padding:10px 40px; font-size: 18px; color: #000;" align="left">
+                    <%=cart.name%> has been created, nice job! 😊
+                </td >
+            </tr>
+        <!-- Show member message -->
+        <% } else{ %>  
+            <tr>
+                <td style="padding:10px 40px; font-size: 18px; color: #000;" align="left">
+                    You joined <%=cart.name%>, nice job! 😊
+                </td >
+            </tr>
+        <% } %>
         <tr>
             <td style="padding:10px 40px 0; font-size: 18px; color: #000;" align="left">
                 Add stuff you’re interested in: Books, Gaming, Music or even a thoughtful gift, you can save it in your Kip cart for later
