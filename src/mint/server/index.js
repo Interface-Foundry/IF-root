@@ -136,6 +136,27 @@ app.get('/s/*', (_, res) => {
   res.render('pages/index');
 });
 
+// cart select screen test data
+app.get('/api/test/store_list', (req, res) => {
+  res.json({
+    stores: [{
+      cart_img: 'http://placekitten.com/150/50',
+      cart_type: 'amazonus',
+      cart_name: 'Amazon US',
+      cart_domain: 'Amazon.com'
+    }, {
+      cart_img: 'http://placekitten.com/150/50',
+      cart_type: 'amazonuk',
+      cart_name: 'Amazon Uk',
+      cart_domain: 'Amazon.co.uk'
+    }, {
+      cart_img: 'http://placekitten.com/150/50',
+      cart_type: 'ypo',
+      cart_name: 'YPO',
+      cart_domain: 'ypo.co.uk'
+    }]
+  });
+});
 
 // Log errors to the database in production
 if (process.env.LOGGING_MODE === 'database') {
