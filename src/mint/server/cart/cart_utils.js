@@ -1,5 +1,5 @@
 const amazon = require('./amazon_cart.js');
-
+const constants = require('../constants.js');
 /**
  * Models loaded from the waterline ORM
  */
