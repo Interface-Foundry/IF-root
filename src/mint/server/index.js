@@ -10,8 +10,8 @@ const fs = require('fs'),
   _ = require('lodash'),
   co = require('co');
 
-  // start any jobs
-  var dailyDealsJob = require('./deals/send-daily-deals-job')
+// start any jobs
+var dailyDealsJob = require('./deals/send-daily-deals-job')
 
 // live reloading
 if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {

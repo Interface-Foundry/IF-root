@@ -7,10 +7,8 @@ import { Landing, Legal } from '..';
 import { Route } from 'react-router';
 
 export default class App extends Component {
-  	
 	render() {
 		const { match } = this.props;
-		console.log(match.url)
 	  	return (
 	      <div className='app'>
 	      	<Route path={`${match.url}`} exact component={Landing}/>
@@ -19,6 +17,5 @@ export default class App extends Component {
 	      </div>
 	    );
 	}
-
 }
 

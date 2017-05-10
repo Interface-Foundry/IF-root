@@ -17,7 +17,7 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => dispatch(signIn(state.cart_id, values.email))
     .then(() => {
-      const { cart_id } = state;
+      const { cart_id, history: { push } } = state;
 
       ReactGA.event({
         category: 'Sign In',
@@ -27,6 +27,7 @@ const mapDispatchToProps = dispatch => ({
       dispatch(fetchAllCarts());
       dispatch(reset('SignIn'));
 
+      dispatch(push(`/cart/${cart_id}`));
       // goBack()
     })
 });

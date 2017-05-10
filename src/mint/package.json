@@ -85,6 +85,7 @@
     "mocha": "^3.2.0",
     "nock": "^9.0.11",
     "node-sass": "^4.5.1",
+    "nodemon": "^1.11.0",
     "postcss-loader": "^1.3.3",
     "postcss-smart-import": "^0.6.12",
     "precss": "^1.4.0",
@@ -101,11 +102,11 @@
     "webpack-hot-middleware": "^2.17.1"
   },
   "scripts": {
-    "start": "npm run build & node ./server",
+    "start": "npm run build & NODE_ENV='production' node ./server",
     "build": "webpack -p --progress",
     "frontend-dev": "webpack --config ./webpack.dev.config.js --progress --color --watch --hot --profile",
-    "backend": "env SEND_EMAILS='' nodemon --ignore react/ --ignore public/ --ignore kip-website/ ./server/index.js",
-    "dev": "yarn backend",
+    "backend": "SEND_EMAILS=; nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ ",
+    "dev": "npm run backend",
     "cleanup": "rm -r public/build",
     "test": "mocha tests",
     "react-test": "node_modules/.bin/karma start karma.conf.js",
