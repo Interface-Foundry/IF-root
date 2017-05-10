@@ -378,6 +378,16 @@ describe('api', function () {
     assert(res.request.uri.query.includes('tag=motorwaytoros-20'), 'should contain our affiliate id')
   }))
 
+  it('GET /api/cart/:cart_id/clear should clear all items in the cart', () => co(function * () {
+    var res = yield get('/api/cart/' + mcTesty.cart_id + '/clear')
+
+    // make sure the next time we get the cart all the items are really gone
+    var cart = yield get('/api/cart/' + mcTesty.cart_id)
+    assert(cart)
+    assert.equal(cart.leader.email_address, mcTesty.email)
+    assert.equal(cart.items.length, 0, 'should not be any items in the cart now')
+  }))
+
   it('POST /api/feedback should save feedback to the db', () => co(function * () {
     var text = 'wow what a neat app. ' + Date.now()
     var res = yield post('/api/feedback', {

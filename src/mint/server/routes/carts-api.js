@@ -298,8 +298,28 @@ module.exports = function (router) {
     return res.send(newItem)
   }));
 
+  /**
+   * @api {delete} /api/cart/:cart_id/clear Clear
+   * @apiDescription Clears all the items from the whole cart. rm -rf cart items.
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id cart to clear
+   *
+   * @apiParamExample Request
+   * DELETE https://mint.kipthis.com/api/cart/123456/clear
+   */
+   router.get('/cart/:cart_id/clear', (req, res) => co(function * () {
+     // only leaders have sudo rm -rf permission
+     const cart = yield db.Carts.findOne({
+       id: req.params.cart_id
+     }).populate('leader').populate('items')
 
-
+     if (_.get(req, 'UserSession.user_account.id') !== _.get(cart, 'leader.id')) {
+       throw new Error('Unauthorized, only cart leader can clear cart items')
+     }
+     cart.items.map(i => cart.items.remove(i.id))
+     yield cart.save()
+     res.status(200).end()
+   }))
 
 
   /**
