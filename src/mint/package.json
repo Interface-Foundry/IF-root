@@ -93,6 +93,7 @@
     "react-addons-test-utils": "^15.4.2",
     "react-hot-loader": "^3.0.0-beta.3",
     "react-svg-loader": "^1.1.1",
+    "redux-logger": "^3.0.1",
     "redux-mock-store": "^1.2.2",
     "sass": "^0.5.0",
     "sass-loader": "^6.0.3",
@@ -103,8 +104,9 @@
     "webpack-hot-middleware": "^2.17.1"
   },
   "scripts": {
-    "start": "npm run build & NODE_ENV='production' node ./server",
+    "start": "npm run build & node ./server",
     "build": "webpack -p --progress",
+    "build-dev": "webpack -d --progress --config ./webpack.dev.config.js",
     "frontend-dev": "webpack --config ./webpack.dev.config.js --progress --color --watch --hot --profile",
     "backend": "SEND_EMAILS=; nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ ",
     "dev": "npm run backend",

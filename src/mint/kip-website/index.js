@@ -5,6 +5,7 @@ import { createStore, applyMiddleware } from 'redux';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import createHistory from 'history/createBrowserHistory';
+import { createLogger } from 'redux-logger';
 import thunkMiddleware from 'redux-thunk';
 import { Route } from 'react-router';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
@@ -16,9 +17,11 @@ if (module.hot) {
   module.hot.accept();
 }
 
+const history = createHistory();
+const historyMiddleware = routerMiddleware(history)
+
 let middleware = [thunkMiddleware, historyMiddleware];
 if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
-  const { createLogger } = require('redux-logger');
   const loggerMiddleware = createLogger({
     duration: true,
     timestamp: false,
@@ -28,8 +31,6 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   middleware = [...middleware, loggerMiddleware];
 }
 
-const history = createHistory();
-const historyMiddleware = routerMiddleware(history);
 const store = createStore(
   Reducers,
   applyMiddleware(...middleware)
