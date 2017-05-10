@@ -1,30 +1,44 @@
-// var parse = require('csv-parse/lib/sync');
+var parse = require('csv-parse/lib/sync');
 var fs = require('co-fs');
 var series = require('co-series');
-var tsv = require('tsv').Parser
+var co = require('co');
+// var tsv = require('tsv').Parser
 
 var db
 const dbReady = require('../db')
 dbReady.then((models) => { db = models; })
 
-// first argument is source (string), then array of fields
+/**
+ * @param source {string} - string representing the source of data
+ * @param fields {array} - array of strings that are ordered to correspond
+ * to the columns in the tsv and fields in the db schema
+ */
 module.exports = function * (source, fields) {
   yield dbReady;
-  console.log('about to read file')
-  var data = yield fs.readFile(`./csv/${source}.tsv`);;
-  console.log('about to parse');
-  var records = tsv.parse(data);
-  console.log('parsed');
-  var test = yield db.YpoInventoryItems.create({});
+  var data = yield fs.readFile(`./tsv/${source}.tsv`);
+  var records = parse(data, {delimiter: '\t', relax: true});
 
+  var categories = {}
+  // console.log(records);
   yield records.map(series(function * (record) {
     var options = {};
     var invItem = yield db[`${source}InventoryItems`].create({});
     for (var i = 0; i < fields.length; i++) {
       invItem[fields[i]] = record[i];
+
+      if (i == 6 || i == 7) {
+        var cats = record[i].split(',');
+        cats.map(c => {
+          if (!categories[c]) categories[c] = true;
+        })
+      }
+
+      console.log(invItem)
     }
     yield invItem.save();
-    console.log('INVITEM', invItem);
+    // console.log('categories:', categories)
+    // console.log('INVITEM', invItem);
   }));
-  console.log('done')
+  fs.writeFile('./categories.txt', Object.keys(categories).join('\n'))
+  console.log('done ingesting tsv')
 }

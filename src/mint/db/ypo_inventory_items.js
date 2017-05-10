@@ -28,25 +28,25 @@ var ypoInventoryItemsCollection = Waterline.Collection.extend({
     represents. e.g. "pack". */
     unit_type: 'string',
 
-    /**@type {string} TODO*/
+    /**@type {string} description of the item (e.g. color, size, etc)*/
     description: 'string',
 
-    /**@type {string} TODO*/
+    /**@type {string} UNSPSC code*/
     unspsc_code: 'string',
 
-    /**@type {string} TODO*/
+    /**@type {string} item category */
     category_1: 'string',
 
-    /**@type {string} TODO*/
+    /**@type {string} another item category */
     category_2: 'string',
 
-    /**@type {string} TODO*/
+    /**@type {string} keywords*/
     keywords: 'string',
 
-    /**@type {string} TODO*/
+    /**@type {string} url to item image*/
     image_url: 'string',
 
-    /**@type {string} TODO*/
+    /**@type {string} url for item view on YPO site*/
     product_url: 'string'
   }
 });
