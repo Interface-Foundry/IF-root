@@ -26,7 +26,28 @@ var ypoInventoryItemsCollection = Waterline.Collection.extend({
 
     /**@type {string} unit by which this item is sold / which this item
     represents. e.g. "pack". */
-    unit_type: 'string'
+    unit_type: 'string',
+
+    /**@type {string} TODO*/
+    description: 'string',
+
+    /**@type {string} TODO*/
+    unspsc_code: 'string',
+
+    /**@type {string} TODO*/
+    category_1: 'string',
+
+    /**@type {string} TODO*/
+    category_2: 'string',
+
+    /**@type {string} TODO*/
+    keywords: 'string',
+
+    /**@type {string} TODO*/
+    image_url: 'string',
+
+    /**@type {string} TODO*/
+    product_url: 'string'
   }
 });
 

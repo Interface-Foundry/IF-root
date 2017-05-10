@@ -46,6 +46,7 @@
     "sails-mongo": "^0.12.2",
     "spliddit": "^2.1.1",
     "thunkify": "^2.1.2",
+    "tsv": "^0.2.0",
     "urlencode": "^1.1.0",
     "uuid": "^3.0.1",
     "valid-url": "^1.0.9",
