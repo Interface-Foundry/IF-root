@@ -108,9 +108,13 @@ router.get('/newcart', (req, res) => co(function * () {
     })
 
     // use the new_cart email template
-    email.template('new_cart', {
+    // email.template('new_cart', {
+    //   cart: cart,
+    //   deals: deals
+    // })
+    email.template('new_email', {
       cart: cart,
-      deals: deals
+      username: user.name || user.email_address
     })
 
     // remember to actually send it

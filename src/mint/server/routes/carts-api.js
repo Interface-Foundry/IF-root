@@ -1,5 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
+const moment = require('moment')
 const url = require('url')
 const amazonScraper = require('../cart/scraper_amazon')
 const amazon = require('../cart/amazon_cart')
@@ -577,7 +578,7 @@ module.exports = function (router) {
       recipients: req.UserSession.user_account.email_address,
       sender: 'hello@kip.ai',
       subject: `Kip Receipt for ${cart.name}`,
-      template_name: 'receipt',
+      template_name: 'summary_email',
       unsubscribe_group_id: 2485
     });
 
@@ -585,25 +586,30 @@ module.exports = function (router) {
     var items= []
     var users = []
     var total = 0;
+    var totalItems = 0;
     cartItems.map(function (item) {
       if (!userItems[item.added_by]) userItems[item.added_by] = [];
       userItems[item.added_by].push(item);
       logging.info('item', item) //undefined
-      total += Number(item.price);
+      totalItems += Number(item.quantity || 1);
+      total += (Number(item.price) * Number(item.quantity || 1));
     });
 
     for (var k in userItems) {
       var addingUser = yield db.UserAccounts.findOne({id: k});
-      users.push(addingUser.email_address.toUpperCase());
+      users.push(addingUser.name || addingUser.email_address);
       items.push(userItems[k]);
     }
 
-    yield receipt.template('receipt', {
+    yield receipt.template('summary_email', {
+      username: req.UserSession.user_account.name || req.UserSession.user_account.email_address,
       baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
       id: cart.id,
       items: items,
       users: users,
+      date: moment().format('dddd, MMMM Do, h:mm a'),
       total: '$' + total.toFixed(2),
+      totalItems: totalItems,
       cart: cart
     })
 
