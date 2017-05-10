@@ -137,10 +137,20 @@ const SendGridGraph = ({data}) => {
             <Line type="monotone" dot={false} yAxisId="left" dataKey="blocks" stroke="#0000FF" fill="#0000FF" />
             <Line type="monotone" dot={false} yAxisId="left" dataKey="bounce_drops" stroke="#00FFFF" fill="#00FFFF" />
             <Line type="monotone" dot={false} yAxisId="left" dataKey="bounces" stroke="#FF0000" fill="#FF0000" />
-            <Line type="monotone" dot={false} yAxisId="left" dataKey="clicks" stroke="#FFFF00" fill="#FFFF00" />
+            <Line type="monotone" dot={false} yAxisId="left" dataKey="clicks" stroke="#996633" fill="#996633" />
             <Line type="monotone" dot={false} yAxisId="left" dataKey="deferred" stroke="#FF8000" fill="#FF8000" />
             <Line type="monotone" dot={false} yAxisId="left" dataKey="delivered" stroke="#FFBBFF" fill="#FFBBFF" />
             <Line type="monotone" dot={false} yAxisId="left" dataKey="invalid_emails" stroke="#88FF88" fill="#88FF88" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="resizable">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={newData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} >
+            <XAxis dataKey="date" />
+            <YAxis yAxisId="left" orientation="left" stroke="#000000" />
+            <CartesianGrid stroke="#ccc" />
+            <Tooltip />
             <Line type="monotone" dot={false} yAxisId="left" dataKey="opens" stroke="#00FF00" fill="#00FF00" />
             <Line type="monotone" dot={false} yAxisId="left" dataKey="processed" stroke="#FF00FF" fill="#FF00FF" />
             <Line type="monotone" dot={false} yAxisId="left" dataKey="requests" stroke="#888888" fill="#888888" />

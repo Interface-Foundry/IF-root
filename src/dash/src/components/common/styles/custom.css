@@ -42,7 +42,7 @@
 
 .resizable {
   min-height: 150px;
-  height: 300px;
+  height: 350px;
   resize: vertical;
   overflow: auto;
   margin: -15px;

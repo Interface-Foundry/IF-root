@@ -167,6 +167,7 @@ const SendgridTeamsTable = (data) => {
     newData.push({
       groupId: entry.asm_group_id,
       email: entry.email,
+      ip: entry.ip,
       event: entry.event,
       event_id: entry.sg_event_id,
       message_id: entry.sg_message_id,
@@ -179,6 +180,7 @@ const SendgridTeamsTable = (data) => {
       <div className="table-display">
         <BootstrapTable data={newData} bordered={false} scrollTop={'Top'} hover>
           <TableHeaderColumn isKey={true} dataField='groupId'>Group ID</TableHeaderColumn>
+          <TableHeaderColumn dataField='ip'>IP Address</TableHeaderColumn>
           <TableHeaderColumn dataField='email'>Email</TableHeaderColumn>
           <TableHeaderColumn dataField='event'>Event</TableHeaderColumn>
           <TableHeaderColumn dataField='event_id'>Event ID</TableHeaderColumn>
