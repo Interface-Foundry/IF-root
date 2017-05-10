@@ -414,6 +414,13 @@ module.exports = function (router) {
       throw new Error('Unauthorized')
     }
 
+    if (_.get(req, 'body.store')) {
+      // tbh i dont know if this should just be part of _.merge() below but doing this like so for time being
+      cart.store = req.body.store
+      yield cart.save()
+      return res.send(cart)
+    }
+
     // Can't update some fields with this route
     delete req.body.id
     delete req.body.leader
