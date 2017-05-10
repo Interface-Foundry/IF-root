@@ -121,6 +121,7 @@
 			padding: $padding $padding;
 			font-size: 20px;
 			cursor: pointer;
+			height: $ribbonHeight;
 			color: #42403f;
 		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 			&:focus {
@@ -128,9 +129,11 @@
 			}
 			@media only screen and (max-width: 600px) {
 				font-size: 12px;
+				padding: 0 $padding/2;
 			}
 		}
 		a {
+			height: 50px;
 			&:first-of-type {
 				button {
 					margin-right: $padding*2;

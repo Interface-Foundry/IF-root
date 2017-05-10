@@ -21,29 +21,31 @@ import {
 
 export default class About extends Component {
 
+	shouldComponentUpdate(nextProps, nextState) {
+		return false;
+	}
+
   	render() {
-  		const icons = [
+  		const icons = {
 			Burger,
 			Clock,
 			DesktopIcon,
 			Happy,
-			Layers,
-			Milk,
+			Layers,Milk,
 			Mouse,
 			Paper,
 			Pencil,
 			Pizza,
 			Happy,
 			Lightbulb
-  		],
-  		{ animate } = this.props,
-  		lastIndex = icons.length - 1;
+  		},
+  		{ animate } = this.props;
 
 	    return (
 	      	<div className="about"> 
 	      		{
-	      			_.map(icons, (Icon, i) => {
-	      				return <div key={Icon.name + i} className={`${Icon.name} ${i === lastIndex && animate ? '' : ''}`}><Icon/></div>
+	      			_.map(icons, (Icon, key) => {
+	      				return <div key={key} style={{width: `${Math.floor(Math.random() * (40 - 20)) + 20}%`}}className={`icon ${animate ? '' : ''}`}><Icon/></div>
 	      			})
 	      		}
 	      	</div>

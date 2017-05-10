@@ -88,7 +88,7 @@ export default class Share extends Component {
         </div>
         <div className='share__icons'>
           {
-            _.map(linkedIcons, (icon, i) => {
+            linkedIcons.map((icon, i) => {
               if(icon.icon === 'Facebook') return (
                   <FacebookShareButton
                     key={i} 

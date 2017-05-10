@@ -112,13 +112,13 @@ class CartFooter extends Component {
           <h4>Share</h4>
         </button>
         <a 
-          className={items.length===0 ? 'disabled':''}
+          className={items.length === 0 ? 'disabled':''}
           href={`/api/cart/${cart_id}/checkout`} 
           onClick={
             (e) => { 
               e.preventDefault(); 
               if (items.length > 0) { 
-                updateCart({...currentCart, locked: !currentCart.locked});
+                updateCart({...currentCart, locked: true});
                 window.open(`/api/cart/${cart_id}/checkout`);
               }
             }
@@ -146,13 +146,16 @@ class ItemFooter extends Component {
   }
 
   render() {
-    const { removeDeal, addItem, item_id, position, cart_id, history: { replace, location: { pathname } } } = this.props,
+    const { removeDeal, addItem, item_id, position, cart_id, currentUser, history: { replace, location: { pathname } } } = this.props,
       removeItem = pathname.includes('deal');
 
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
-        <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Add to Cart</button>
+        { !!currentUser.id ? 
+          <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> 
+          : <button className='add triple' onClick={() => {replace(`/cart/${cart_id}/m/signin`)}}>✓ Save to Cart</button> 
+        }
       </footer>
     );
   }

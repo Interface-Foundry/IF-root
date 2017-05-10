@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { displayCost } from '../../utils';
 import Icon from '../Icon';
 import ProgressiveImage from 'react-progressive-image';
+import { Link } from 'react-router-dom';
 
 export default class CartItem extends Component {
   static propTypes = {

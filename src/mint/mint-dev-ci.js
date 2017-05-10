@@ -30,7 +30,7 @@ function deploy() {
       cwd: __dirname
     })
     console.log(stdout.toString())
-    stdout = exec('webpack', {
+    stdout = exec('yarn build', {
       cwd: __dirname,
       env: _.merge(process.env, {
         NODE_PATH: './react'
@@ -39,13 +39,6 @@ function deploy() {
     console.log(stdout.toString())
     stdout = exec('yarn', {
       cwd: path.join(__dirname, 'kip-website')
-    })
-    console.log(stdout.toString())
-    stdout = exec('yarn build', {
-      cwd: path.join(__dirname, 'kip-website'),
-      env: _.merge(process.env, {
-        NODE_PATH: './js'
-      })
     })
     console.log(stdout.toString())
     resolve()

@@ -11,7 +11,7 @@ export default class Toast extends Component {
     loc: PropTypes.object,
     replace: PropTypes.func
   }
-
+  redirect = null
   state = {
     showToast: false
   }
@@ -22,16 +22,32 @@ export default class Toast extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { toast, status } = this.props;
-    const { toast: newToast, status: newStatus } = nextProps;
+    const { toast, status, loc: { pathname: path } } = this.props;
+    const { toast: newToast, status: newStatus, loc: { pathname: newPath } } = nextProps;
     if ((newToast && newStatus) && (toast !== newToast || status !== newStatus))::this._showToast(newStatus, newToast);
+    else if (newPath !== path)::this._cancelRedirect();
+  }
+
+  _cancelRedirect() {
+    this.setState({ toast: null, status: null, showToast: false });
+    clearTimeout(this.redirect);
+    this.redirect = null;
   }
 
   _showToast(status, toast) {
     setTimeout(() => this.setState({ status, toast, showToast: true }), 1);
     setTimeout(() => {
       this.setState({ toast: null, status: null, showToast: false });
+      ::this._clearParams();
     }, 3000);
+
+  }
+
+  _clearParams() {
+    const { replace, loc } = this.props;
+    clearTimeout(this.redirect);
+    this.setState({ showToast: false });
+    replace(loc.pathname);
   }
 
   render() {

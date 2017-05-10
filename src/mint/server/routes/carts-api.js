@@ -1,10 +1,12 @@
 const co = require('co')
 const _ = require('lodash')
 const url = require('url')
-var amazonScraper = require('../cart/scraper_amazon')
-var amazon = require('../cart/amazon_cart')
-var camel = require('../deals/deals');
-var googl = require('goo.gl')
+const amazonScraper = require('../cart/scraper_amazon')
+const amazon = require('../cart/amazon_cart')
+const cartUtils = require('../cart/cart_utils')
+const camel = require('../deals/deals')
+const googl = require('goo.gl')
+
 
 if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
@@ -21,70 +23,6 @@ const selectMembersWithoutEmail = {
   select: ['_id', 'name', 'createdAt', 'updatedAt']
 }
 
-/**
- * delete item from cart
- *
- * @param      {string}  itemId  The item identifier
- * @param      {string}  cartId  the cart identifier
- * @param      {string}  userId  The user identifier
- * @return     {string}  status of if item was deleted
- */
-function * deleteItem(itemId, userId, cartId) {
-  const cart = yield db.Carts.findOne({id: cartId})
-  const item = yield db.Items.findOne({id: itemId})
-
-  // make sure cart and item exist
-  if (!cart) {
-    throw new Error('Cart not found')
-  }
-  if (!item) {
-    throw new Error('Item not found')
-  }
-
-  // Make sure user has permission to delete it, leaders can delete anything,
-  // members can delete their own stuff
-  if (cart.leader !== userId && item.added_by !== userId) {
-    throw new Error('Unauthorized')
-  }
-
-  cart.items.remove(item.id)
-  yield cart.save()
-}
-
-/**
- * create item by user in a cart
- *
- * @param      {string}  itemId  The item identifier
- * @param      {string}          userId  The user identifier
- * @param      {string}          cartId  the cart identifier
- * @return     {object}           item object that was created
- */
-function * createItemFromItemId(itemId, userId, cartId) {
-
-  const cart = yield db.Carts.findOne({id: cartId})
-  const item = yield db.Items.findOne({id: itemId})
-
-  // make sure cart and item exist
-  if (!cart) {
-    throw new Error('Cart not found')
-  }
-  if (!item) {
-    throw new Error('Item not found')
-  }
-
-  // make sure it's not in a cart already
-  var existingCart = yield db.Carts.findOne({items: itemId})
-  if (existingCart && existingCart.id !== cart.id) {
-    throw new Error('Item ' + itemId + ' is already in another cart ' + existingCart.id)
-  }
-
-  cart.items.add(item.id)
-  item.added_by = userId
-  item.cart = cart.id
-
-  yield [item.save(), cart.save()]
-  return item
-}
 
 /**
  * dont return emails to front end
@@ -331,8 +269,9 @@ module.exports = function (router) {
 
 
   /**
-   * @api {put} /cart/:cart_id/item/:item_id/update Update Item - right now just replaces old item with new item
-   * @apiDescription Updates an item already in a cart. Must specify new item
+   * @api {put} /cart/:cart_id/item/:item_id/update Update Item
+   * @apiDescription Updates an item already in a cart. Must specify new item.
+   * Right now just replaces old item with new item
    * @apiGroup Carts
    * @apiParam {string} :cart_id cart id
    * @apiParam {string} :item_id item id
@@ -353,9 +292,9 @@ module.exports = function (router) {
       newItemId = req.query.new_item_id
     }
 
-    yield deleteItem(itemId, userId, cartId)
+    yield cartUtils.deleteItemFromCart(itemId, userId, cartId)
 
-    const newItem = yield createItemFromItemId(newItemId, userId, cartId)
+    const newItem = yield cartUtils.createItemFromItemId(newItemId, userId, cartId)
     return res.send(newItem)
   }));
 
@@ -644,7 +583,7 @@ module.exports = function (router) {
       id: cart.id,
       items: items,
       users: users,
-      total: total,
+      total: '$' + total.toFixed(2),
       cart: cart
     })
 

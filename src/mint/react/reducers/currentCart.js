@@ -95,7 +95,7 @@ export const getMemberById = (state, props) => [...state.members, state.leader].
 export const splitCartById = (state, props) => {
   const id = props ? props.id : null;
 
-  return _.reduce(state.currentCart.items, (acc, item) => {
+  return state.currentCart.items.reduce((acc, item) => {
     acc.quantity = acc.quantity + (item.quantity || 1);
     let linkedMember = getMemberById(state.currentCart, { id: item.added_by });
 

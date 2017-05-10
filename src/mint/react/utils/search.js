@@ -45,7 +45,8 @@
 export const getSearchHistory = (filter) => {
   if (!localStorage.searchHistory) return [];
 
-  return _.filter(localStorage.searchHistory.split(','), (pSearch) => pSearch.includes(filter));
+  return localStorage.searchHistory.split(',')
+    .filter((pSearch) => pSearch.includes(filter));
 };
 
 export const addSearchHistory = term => {

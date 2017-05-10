@@ -54,15 +54,15 @@ export default class Item extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { replace } } } = this;
+    const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { replace, push } } } = this;
     const { type: nextType, item: nextItem, index: nextIndex, item_id: nextId, item: { position: nextPos } } = nextProps;
     //never replace cart_id if its undefined
     if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) {
-      replace(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
+      push(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
     } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItem.search.length) {
-      replace(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
+      push(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
     } else if (cart_id && nextType === 'search' && !nextItem.search.length) {
-      replace(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
+      push(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
     } else if (nextId !== item_id) {
       previewItem(nextProps.item_id);
     } else if (nextProps.amazon_id !== amazon_id) {
@@ -206,7 +206,7 @@ export default class Item extends Component {
                     <p>{name}</p>
                   </div>
                 </div>
-                {showButton ? <button onClick={()=>next()}>&gt;</button> : null}
+                {showButton ? <button onClick={()=> next()}>&gt;</button> : null}
               </div>
               { 
                 type === 'deal' && items[parseInt(index)]

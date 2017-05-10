@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
-import { animateScroll } from '../../reducers';
+import { animateScroll } from '../../utils';
 
 import { Services, About, Showcase, Footer, Statement, Hero } from '..';
 import { SidenavContainer, ModalContainer, RibbonContainer } from '../../containers';
@@ -78,8 +78,11 @@ export default class Landing extends Component {
         nextState.fixed !== this.state.fixed ||
         nextState.sidenav !== this.state.sidenav ||
         nextState.modal !== this.state.modal 
-      )
+      ) {
       return true;
+    }
+
+    return false
   }
 
   render() {

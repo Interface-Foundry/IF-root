@@ -2,7 +2,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import _ from 'lodash';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import { Route } from 'react-router';
@@ -12,7 +11,7 @@ import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
 import Reducers from './reducers';
 import { session } from './actions';
-import { AppContainer, ErrorPage } from './containers';
+import { AppContainer } from './containers';
 
 //Analytics!
 import ReactGA from 'react-ga';

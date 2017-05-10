@@ -1,25 +1,32 @@
-const path = require('path');
-const webpack = require('webpack');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-var BUILD_DIR = path.resolve(__dirname, 'public/build');
-var APP_DIR = path.resolve(__dirname, 'react');
-var WEBSITE_DIR = path.resolve(__dirname, 'kip-website/js');
+const path = require('path'),
+  webpack = require('webpack'),
+  CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin'),
+  CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin'),
+  BUILD_DIR = path.resolve(__dirname, 'public/build'),
+  CART_DIR = path.resolve(__dirname, 'react'),
+  HOME_DIR = path.resolve(__dirname, 'kip-website/js');
 
 module.exports = {
-  entry: ['babel-polyfill', 'webpack-hot-middleware/client?path=/__webpack_hmr', APP_DIR + '/index'],
+  entry: {
+    cart: ['babel-polyfill', 'webpack-hot-middleware/client?name=cart', CART_DIR + '/index'],
+    home: ['babel-polyfill', 'webpack-hot-middleware/client?name=cart', HOME_DIR + '/index']
+  },
   output: {
     path: BUILD_DIR,
     filename: '[name].js',
     publicPath: '/build/',
     hotUpdateChunkFilename: 'hot/[hash].hot-update.js',
-    hotUpdateMainFilename: 'hot/[hash].hot-update.json'
+    hotUpdateMainFilename: 'hot/[hash].hot-update.json',
+    devtoolModuleFilenameTemplate: 'webpack:///[absolute-resource-path]'
   },
-
+  devtool: 'cheap-module-source-map',
   plugins: [
     new CaseSensitivePathsPlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.ProgressPlugin(),
+    new CommonsChunkPlugin('common'),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
     })

@@ -8,38 +8,29 @@ const fs = require('fs'),
   path = require('path'),
   mintLogger = require('./mint_logging.js'),
   _ = require('lodash'),
-  co = require('co'),
-  webpackDevMiddleware = require("webpack-dev-middleware"),
-  webpackHotMiddleware = require("webpack-hot-middleware"),
-  webpack = require('webpack'),
-  webpackConfig = require('../webpack.config.js');
+  co = require('co');
 
-// start any jobs
-var dailyDealsJob = require('./deals/send-daily-deals-job')
+  // start any jobs
+  var dailyDealsJob = require('./deals/send-daily-deals-job')
 
 // live reloading
-if (!process.env.NO_LIVE_RELOAD) {
-  const compiler = webpack(webpackConfig);
-  app.use(webpackDevMiddleware(compiler, {
+if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
+  const webpackConfig = require('../webpack.dev.config.js');
+  const compiler = require('webpack')(webpackConfig);
+  app.use(require('webpack-dev-middleware')(compiler, {
     hot: true,
-    filename: '[name].js',
-    publicPath: '/build/',
+    publicPath: webpackConfig.output.publicPath,
     stats: {
-      colors: true
+      colors: true,
     },
     historyApiFallback: true
   }));
-
-  app.use(webpackHotMiddleware(compiler, {
-    log: console.log,
+  app.use(require('webpack-hot-middleware')(compiler, {
+    reload: true,
     path: '/__webpack_hmr',
     heartbeat: 10 * 1000
   }));
-} else {
-   app.get('/__webpack_hmr', (req, res) => {
-     res.status(200).end()
-   })
- }
+}
 
 // idk
 var regularRoutes = require('./routes/regular.js');
@@ -80,7 +71,7 @@ app.use(sessions({
 /**
  * Save user sessions to the database
  */
-app.use((req, res, next) => co(function * () {
+app.use((req, res, next) => co(function* () {
   // req.session will always exist, thanks to the above client-sessions middleware
   // Check to make sure we have stored this user's session in the database
   if (!req.session.id) {
@@ -89,13 +80,15 @@ app.use((req, res, next) => co(function * () {
     req.session.id = session.id
     req.UserSession = session
   } else {
-    req.UserSession = yield db.Sessions.findOne({ id: req.session.id }).populate('user_account')
+    req.UserSession = yield db.Sessions.findOne({ id: req.session.id })
+      .populate('user_account')
   }
 
   if (!req.UserSession) {
     logging.info('session not in the database; creating a new session')
-    yield db.Sessions.create({id: req.session.id})
-    req.UserSession = yield db.Sessions.findOne({ id: req.session.id }).populate('user_account')
+    yield db.Sessions.create({ id: req.session.id })
+    req.UserSession = yield db.Sessions.findOne({ id: req.session.id })
+      .populate('user_account')
   }
 
   next();
@@ -132,9 +125,16 @@ app.get('/cart/*', (req, res) =>
   // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
   res.render('pages/cart')
 );
-app.get('/404', (_, res)=>{
+app.get('/404', (_, res) => {
   res.render('pages/cart');
 });
+app.get('/legal', (_, res) => {
+  res.render('pages/index');
+});
+app.get('/s/*', (_, res) => {
+  res.render('pages/index');
+});
+
 
 // Log errors to the database in production
 if (process.env.NODE_ENV === 'production') {

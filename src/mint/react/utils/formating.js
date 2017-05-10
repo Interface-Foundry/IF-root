@@ -29,7 +29,7 @@ export const getNameFromEmail = email => {
 };
 
 export const addLinkToDeepLink = (items, link) => {
-  return _.map(items, (i, index) => {
+  return items.map((i, index) => {
     if (!i.deepLink) return i;
 
     return { ...i, deepLink: formatLinkForApp(i, link) };
@@ -51,5 +51,5 @@ const formatLinkForApp = (app, link) => {
 };
 
 export const calculateItemTotal = (items) => {
-  return _.reduce(items, (acc, item) => acc + (item.price * item.quantity), 0);
+  return items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 };
