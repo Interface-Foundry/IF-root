@@ -5,8 +5,8 @@ var uuid = require('uuid')
  * Emails collection stores all the common data for any email we send out
  * Considerable insirpation taken from <https://schema.org/EmailMessage>
  */
-var emailOpensCollection = Waterline.Collection.extend({
-  identity: 'email_opens',
+var emailProcessesCollection = Waterline.Collection.extend({
+  identity: 'email_processes',
   connection: 'default',
   migrate: 'safe',
   attributes: {
@@ -19,13 +19,12 @@ var emailOpensCollection = Waterline.Collection.extend({
     email: Waterline.isA('emails')
 
     // email: 'string' //stored in emails.recipient
-    // asm_group_id: 'integer', //stored in emails.unsubscribe_group_id
+    "smtp-id": 'string',
     timestamp: 'integer',
-    ip: 'string',
+    // asm_group_id: 'integer', //stored in emails.unsubscribe_group_id
     sg_event_id: 'string',
     sg_message_id: 'string',
-    useragent: 'string',
   }
 })
 
-module.exports = emailOpensCollection
+module.exports = emailProcessesCollection
