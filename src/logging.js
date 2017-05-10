@@ -1,15 +1,9 @@
 var winston = require('winston');
 var MongoDB = require('winston-mongodb').MongoDB;
 var path = require('path')
-
-var userConfigFile = require('./config');
+require('colors')
 
 var logging;
-
-// slight fix for mongodb stuff to work with config files
-if (userConfigFile.mongodb.url.indexOf('mongodb://') < 0) {
-  userConfigFile.mongodb.url = 'mongodb://' + userConfigFile.mongodb.url;
-}
 
 var levelConfig = {
   levels: {
@@ -32,27 +26,28 @@ var levelConfig = {
   }
 };
 
-var level_message = "You're logging at level " + userConfigFile.logging.console.level
+var level = process.env.LOGGING_LEVEL || 'info'
+
+var level_message = "You're logging at level " + level
 level_message += "\nerror < warn < data < info < verbose < debug < silly"
-level_message = level_message.replace(new RegExp(userConfigFile.logging.console.level, 'g'), userConfigFile.logging.console.level.rainbow)
+level_message = level_message.replace(new RegExp(level, 'g'), level.rainbow)
 console.log(level_message);
 
 var transports = [
   new (winston.transports.Console)({
-    level: userConfigFile.logging.console.level,
-    json: userConfigFile.logging.console.json,
-    stringify: userConfigFile.logging.console.stringify,
-    colorize: userConfigFile.logging.console.colorize,
-    prettyPrint: userConfigFile.logging.console.prettyPrint,
+    level: level,
+    json: false,
+    stringify: true,
+    colorize: true,
+    prettyPrint: true,
   })
 ]
 
 
-if (userConfigFile.logging.mongo.enabled) {
+if (process.env.LOGGING_MODE === 'database') {
   transports.push(new MongoDB({
     level: 'error',
-    db: userConfigFile.mongodb.url,
-    options: userConfigFile.mongodb.options,
+    db: process.env.MONGODB_URL || 'mongodb://localhost:27017/mint',
     collection: 'errors',
     label: 'winston',
     decolorize: true,
@@ -67,7 +62,7 @@ logging = new(winston.Logger)({
 })
 
 // show file:line on debug
-if (userConfigFile.logging.debugFileLine.enabled === true) {
+if (true) {
   logging.filters.push(function(level, msg, meta) {
     if (level === 'debug') {
       var e = new Error()

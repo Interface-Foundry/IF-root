@@ -36,6 +36,8 @@ We are using pretty standard commands just to keep it easy, webpack builds react
 * `SCRAPE_DEALS` - turn on and off the periodic scraping of deals, recommend to leave unset in development and just use a dump of the deals db.
 * `SEND_DAILY_DEALS` - turn on and off the emailing of daily deals to customers.
 * `BASEURL` - the base url used in email links, like `https://www.kipthis.com` or `http://localhost:3000`
+* `LOGGING_MODE` - if set to `database`, will log to the database
+* `LOGGING_LEVEL` - defaults to `info`
 
 For newbies, if you want to set an environmental variable in your **.bashrc** or **.zshrc** so that it is set every time you open a terminal and for every command run, for all the env vars above you can add a line like this:
 

@@ -97,7 +97,9 @@ app.use((req, res, next) => co(function* () {
 /**
  * Add in logging after sessions have been created
  */
-if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
+if (process.env.LOGGING_MODE === 'database') {
+  app.use(new mintLogger.NormalLogger())
+} else {
   app.use(function (req, res, next) {
     var methods = { GET: 'get'.cyan, HEAD: 'head'.gray, POST: 'post'.green, DELETE: 'delete'.red }
     var str = ['>'.yellow, methods[req.method] || req.method, req.originalUrl].join(' ')
@@ -105,8 +107,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
 
     next()
   })
-} else {
-  app.use(new mintLogger.NormalLogger())
+
 }
 
 // ROUTES
@@ -137,7 +138,7 @@ app.get('/s/*', (_, res) => {
 
 
 // Log errors to the database in production
-if (process.env.NODE_ENV === 'production') {
+if (process.env.LOGGING_MODE === 'database') {
   app.use(new mintLogger.ErrorLogger());
 }
 
