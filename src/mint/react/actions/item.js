@@ -14,6 +14,8 @@ import {
   REQUEST_INCREMENT_ITEM,
   RECEIVE_DECREMENT_ITEM,
   REQUEST_DECREMENT_ITEM,
+  REQUEST_UPDATE_ITEM,
+  RECEIVE_UPDATE_ITEM,
   SEARCH_PREV,
   SEARCH_NEXT,
   SET_SEARCH_INDEX
@@ -63,7 +65,7 @@ const requestRemoveItem = (itemToRemove) => ({
 
 const receiveRemoveItem = () => ({
   type: RECEIVE_REMOVE_ITEM
-})
+});
 
 const cancelDeleteItem = () => ({
   type: CANCEL_REMOVE_ITEM
@@ -87,6 +89,16 @@ const receiveDecrementItem = (item) => ({
 const requestDecrementItem = (item) => ({
   type: REQUEST_DECREMENT_ITEM,
   item
+});
+
+const requestUpdateItem = () => ({
+  type: REQUEST_UPDATE_ITEM,
+});
+
+const receiveUpdateItem = (item, old_item_id) => ({
+  type: RECEIVE_UPDATE_ITEM,
+  item,
+  old_item_id
 });
 
 const setSearch = (index) => ({
@@ -212,6 +224,28 @@ export function decrementItem(item_id, quantity) {
       return dispatch(receiveDecrementItem(await response.json()));
     } catch (e) {
       throw 'error in cart decrementItem';
+    }
+  };
+}
+
+export function updateItem(cart_id, old_item_id, new_item_id) {
+  return async dispatch => {
+    dispatch(requestUpdateItem());
+    try {
+      const response = await fetch(`/api/cart/${cart_id}/item/${old_item_id}`, {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          new_item_id
+        })
+      });
+      return dispatch(receiveUpdateItem(await response.json(), old_item_id));
+    } catch (e) {
+      throw 'error in cart updateItem';
     }
   };
 }

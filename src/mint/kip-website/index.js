@@ -8,7 +8,6 @@ import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { Route } from 'react-router';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
-import { createLogger } from 'redux-logger';
 import Reducers from './reducers';
 import { get } from './actions';
 import { App } from './components';
@@ -17,17 +16,25 @@ if (module.hot) {
   module.hot.accept();
 }
 
-const loggerMiddleware = createLogger({
-  duration: true,
-  timestamp: false,
-  collapsed: true,
-  level: 'info'
-});
+let middleware;
+if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
+  const ReduxLogger = require('redux-logger');
+  const loggerMiddleware = ReduxLogger.createLogger({
+    duration: true,
+    timestamp: false,
+    collapsed: true,
+    level: 'info'
+  });
+  middleware = applyMiddleware(thunkMiddleware, historyMiddleware, loggerMiddleware);
+} else {
+  middleware = applyMiddleware(thunkMiddleware, historyMiddleware);
+}
+
 const history = createHistory();
 const historyMiddleware = routerMiddleware(history);
 const store = createStore(
   Reducers,
-  applyMiddleware(thunkMiddleware, historyMiddleware, loggerMiddleware)
+  middleware
 );
 
 // Check the session?? i guess
