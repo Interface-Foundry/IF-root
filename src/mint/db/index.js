@@ -31,6 +31,7 @@ waterline.loadCollection(require('./item_options'))
 waterline.loadCollection(require('./items'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./user_accounts'))
+waterline.loadCollection(require('./ypo_inventory_items'))
 
 var config = {
   adapters: {
@@ -66,6 +67,7 @@ var initialize = new Promise((resolve, reject) => {
       Items: ontology.collections.items,
       Sessions: ontology.collections.sessions,
       UserAccounts: ontology.collections.user_accounts,
+      YpoInventoryItems: ontology.collections.ypo_inventory_items
     };
 
     // Programmatically make available the automatically generated schemas
