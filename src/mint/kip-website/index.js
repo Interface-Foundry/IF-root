@@ -18,8 +18,8 @@ if (module.hot) {
 
 let middleware = [thunkMiddleware, historyMiddleware];
 if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
-  const ReduxLogger = require('redux-logger');
-  const loggerMiddleware = ReduxLogger.createLogger({
+  const { createLogger } = require('redux-logger');
+  const loggerMiddleware = createLogger({
     duration: true,
     timestamp: false,
     collapsed: true,
