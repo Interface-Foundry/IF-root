@@ -65,7 +65,9 @@ export default class Cards extends Component {
       <li key={card.id} onClick={(e) => selectCard(i, card)}>
         {cardType === 'search' ? <Link to={`/cart/${cart_id}/m/search/${i}/${encodeURIComponent(getLastSearch())}`}>
           <SearchCard {...card} cart_id={cart_id} index={i}/>
-        </Link> : <CategoryCard {...card} cart_id={cart_id} index={i}/>}
+        </Link> : <Link to={`/cart/${cart_id}/m/search/${i}/${encodeURIComponent(card.machineName)}`}>
+          <CategoryCard {...card} cart_id={cart_id} index={i}/>
+        </Link>}
       </li>
     ));
 
