@@ -9,7 +9,8 @@ const camel = require('../deals/deals')
 const googl = require('goo.gl')
 const fs = require('co-fs')
 const path = require('path')
-
+const thunkify = require('thunkify')
+const ipinfo = thunkify(require('ipinfo'))
 
 if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
@@ -674,15 +675,21 @@ module.exports = function (router) {
    * @apiDescription Retrieves a list of carts sorted by IP location
    * @apiGroup Carts
    */
-  // router.get('/cart_type', (req, res) => co(function * () {
-  //   // get customer IP
-  //   var ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
-  //   logging.info('ip', ip)
-  //   // get location (ie country) based on that
-  //   // fallback for ^^
-  //   // if no exact match, use haversine thing
-  //   // send back list of stores in format on the git issue
-  // }))
+  router.get('/cart_type', (req, res) => co(function * () {
+    // get customer IP
+    var ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
+    console.log('IP', ip)
+
+    var ipresponse = yield ipinfo(ip);
+    country = ipresponse.country;
+    console.log('ipresponse', ipresponse)
+
+
+    // fallback for ^^
+    // if no exact match, use haversine thing
+    // send back list of stores in format on the git issue
+    res.send(country)
+  }))
 
   /**
    * @api {get} /api/categories gets a list of item categories
