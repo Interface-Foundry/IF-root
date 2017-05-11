@@ -12,14 +12,17 @@ Babel all day and all night (gotta love writing javascript that compiles to... m
 2. Install [Mongodb](mongodb.com)
 3. Go to `IF-root` directory and run `npm install`
 4. Go to `IF-root/src/mint` directory and run `npm install`
-5. Go to `IF-root/src/mint/kip-website` directory and run `npm install`
 
 # HOW TO DO INTERNETS
 We are using pretty standard commands just to keep it easy, webpack builds react into public then express serves it up on port: 3000
 
-1. yarn dev --> npm run dev --> runs express and webpack-dev-server with hot-reloading because meh to refreshing
-2. yarn react-tests --> runs karma start, which has technically less characters so you could justs go with karma start
-3. yarn test --> runs api tests if you have a server running already
+For hot reloading.
+1. `yarn dev` -> `npm run dev`
+	runs express and webpack-dev-server with hot-reloading for both website and mint.
+
+For static.
+1. `yarn start` -> `npm run start`
+	runs npm run build (which builds the website and mint) and runs the server.
 
 
 # ENVIRONMENTAL VARIABLES AND SWITCHES
@@ -71,7 +74,7 @@ To view the back end api documentation, run the following command.
 
 # FILE STRUCTURE
 
-	* -- react
+	* -- react/website
 		|___ actions --> Action creators, Async Actions (basically fancy middleware, sends an "action" object(type, params) to the reducer/store)
 		|___ components --> The only real react, holds all our react components. Try to keep as much "logic" out of these as possible. Local state is also cool but ensure that the local state does not bloat to much, otherwise move to reducer.
 		|___ constants --> Hold all action type constants (e.g for the type field in the action object)
@@ -80,7 +83,7 @@ To view the back end api documentation, run the following command.
 		|___ styles --> (maybe rename to themes?) holds all style constants such as animations, css variables, grid system etc..
 		|___ utils --> Utility functions used accross the app
 		|___ index.js --> first file that gets run
-		|___ routes.js --> We are using react-redux-router, so holds all our routes.
+
 
 # TEST FILES
 
