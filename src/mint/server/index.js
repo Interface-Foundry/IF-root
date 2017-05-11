@@ -14,7 +14,7 @@ const fs = require('fs'),
 var dailyDealsJob = require('./deals/send-daily-deals-job')
 
 // live reloading
-if (!process.env.NO_LIVE_RELOAD && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
+if (process.env.BUILD_MODE !== 'prebuilt') {
   const webpackConfig = require('../webpack.dev.config.js');
   const compiler = require('webpack')(webpackConfig);
   app.use(require('webpack-dev-middleware')(compiler, {
