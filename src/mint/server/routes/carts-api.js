@@ -701,16 +701,27 @@ module.exports = function (router) {
     // read in categories file
     var categories = yield fs.readFile(path.join(__dirname, '../../ingest/categories.json'));
     categories = JSON.parse(categories.toString());
+    categoryArray = [];
 
     //replace sub-categories w/ accumulated counts of all subcategories
-    Object.keys(categories).map(cat => {
-      var total = 0;
+    yield Object.keys(categories).map(function * (cat) {
+      var categoryObject = {
+        itemCount: 0,
+        humanName: cat,
+        machineName: cat,
+        searchType: 'category'
+      }
+
+      var sampleItem = yield db.YpoInventoryItems.findOne({category_2: cat});
+
+      categoryObject.image = sampleItem.image_url
+
       Object.keys(categories[cat]).map(c => {
-        total += Number(categories[cat][c]);
+        categoryObject.itemCount += Number(categories[cat][c]);
       })
-      categories[cat] = total;
+      categoryArray.push(categoryObject)
     })
-    console.log('categories:', categories)
-    res.send(categories);
+    console.log('categories:', categoryArray)
+    res.send(categoryArray);
   }))
 }
