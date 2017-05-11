@@ -32,9 +32,6 @@ export default class AmazonForm extends Component {
 
   renderField({ input, label, placeholder, handleSubmit, type, meta, meta: { touched, error, warning, submitting, active, dirty } }) {
     const { onSubmitMiddleware, _toggleHistory, state: { showHistroy } } = this;
-    console.log('renderField, ', this.state.showHistroy)
-    console.log('meta, ', meta)
-    console.log()
     return (
       <div>
           <div className='form__input'>

@@ -27,7 +27,7 @@ export function fetchCards() {
     dispatch(request());
 
     try {
-      const response = await fetch('/api/deals', {
+      const response = await fetch('/api/categories', {
         credentials: 'same-origin'
       });
 
