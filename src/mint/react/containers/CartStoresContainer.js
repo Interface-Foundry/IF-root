@@ -7,7 +7,8 @@ import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   store: state.currentCart.store,
-  choices: state.cartStores.stores
+  cart_id: state.currentCart.id,
+  choices: state.cartStores.stores,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -18,7 +19,7 @@ const mapDispatchToProps = dispatch => ({
     });
     return dispatch(setStore(cart_id, type));
   },
-  fetchStores: () => dispatch(fetchStores())
+  fetchStores: () => dispatch(fetchStores()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(CartStore);

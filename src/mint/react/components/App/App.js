@@ -123,32 +123,34 @@ export default class App extends Component {
       },
       state: { sidenav, isMobile }
     } = this;
-    const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404');
+    const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('store_choice');
     const showSidenav = !location.pathname.includes('/m/signin');
+    if (leader && (!currentCart.store && currentUser.id === leader.id && !location.pathname.includes('store_choice'))) replace(`/cart/${currentCart.id}/store_choice`);
 
-    const inner =
-      newAccount === false
-      ? <Overlay/>
-      : currentCart.members.length > 0 && !currentCart.store //only show cartstores container if a cart exists
-        ? <CartStoresContainer />
-        : (
-          <div>
-            {/* Render Error Page */}
-            <Route path={'/404'} exact component={ErrorPage} />
-
-            { /* Renders modal when route permits */ }
-            <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
-
-            { /* Renders cart when route permits */ }
-            <Route path={'/cart/:cart_id'} exact component={CartContainer} />
-          </div>
-          );
     return (
       <section className='app'>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
           <div className={`app__view ${showFooter ? '' : 'large'}`}>
-            {inner}
+            {
+              newAccount === false //soon there will be no overlay
+              ? <Overlay/>
+              : (
+                <div>
+                  {/* Render Error Page */}
+                  <Route path={'/404'} exact component={ErrorPage} />
+
+                  { /* Renders modal when route permits */ }
+                  <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
+
+                  { /* Renders cart when route permits */ }
+                  <Route path={'/cart/:cart_id'} exact component={CartContainer} />
+
+                  { /* Renders cart choice if theres no store set */}
+                  <Route path={'/cart/:cart_id/store_choice'} exact component={CartStoresContainer} />
+                </div>
+              )
+            }
           </div>
           { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
           {showFooter ? <Footer {...props} cart_id={cart_id} isMobile={isMobile}/> : null}
