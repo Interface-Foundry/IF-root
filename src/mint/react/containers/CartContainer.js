@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Cart } from '../components';
-import { fetchDeals } from '../actions/deals';
+import { fetchCards } from '../actions/cards';
 import { selectItem, updateCart } from '../actions/cart';
 import { cancelRemoveItem } from '../actions/item';
 import { splitCartById } from '../reducers';
@@ -13,17 +13,17 @@ const mapStateToProps = (state, ownProps) => ({
   addingItem: state.currentCart.addingItem,
   leader: state.currentCart.leader,
   members: state.currentCart.members,
-  deals: state.deals.deals,
+  cards: state.cards.cards,
   user_account: state.session.user_account,
   items: splitCartById(state, state.session.user_account),
   locked: state.currentCart.locked,
   currentCart: state.currentCart,
-  position: state.deals.position,
+  position: state.cards.position,
   carts: state.otherCarts.carts
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchDeals: () => dispatch(fetchDeals()),
+  fetchCards: () => dispatch(fetchCards()),
   selectItem: item => {
     ReactGA.event({
       category: 'Cart',

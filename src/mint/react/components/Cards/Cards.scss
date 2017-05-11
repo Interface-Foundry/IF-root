@@ -1,7 +1,7 @@
-// react/components/Deals/Deals.scss
+// react/components/Cards/Cards.scss
 @import '../../styles/Constants';
 @import '../../styles/Animations';
-.deals__section {
+.cards__section {
   span {
     height: 190px;
     padding: 0 0 $padding 0;
@@ -41,20 +41,20 @@
       min-width: 150px;
       width: 150px;
       height: 100%;
-      .dealcard {
+      section[class^="card__type"] {
         position: relative;
         text-align: center;
         height: 100%;
         border: 1px $border-color-light solid;
         border-radius: $padding;
         background: white;
-        .dealcard__details {
+        .details {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
           padding: $padding/2.5;
           height: calc(100% - #{$nav-height/2});
-          .dealcard__details__name {
+          .details__name {
             hyphens: auto;
             font-size: 0.7em;
             position: relative;
@@ -65,25 +65,25 @@
             min-height: 2.5em; //for safari
             height: 2.5em;
           }
-          .dealcard__details__price {
+          .details__price {
             padding: 0;
             font-size: 22px;
             color: $price-color;
           }
-          .dealcard__details__discount {
+          .details__discount {
             font-size: 10px;
             color: $header-color;
           }
-          .dealcard__details__image {
+          .details__image {
             align-self: center;
             width: $nav-height + 25px;
             height: $nav-height + 25px;
           }
-          .dealcard__details__prevPrice {
+          .details__prevPrice {
             text-decoration: line-through;
           }
         }
-        .dealcard__add {
+        .add {
           position: absolute;
           width: 100%;
           height: $nav-height/2;
@@ -102,7 +102,7 @@
   }
 }
 
-.deals__section-small {
+.cards__section-small {
   position: relative;
   font-size: 15px;
   top: -10px;
@@ -137,7 +137,7 @@
       box-shadow: none;
       margin: 0;
     }
-    .dealcard-small {
+    .categorycard-small {
       display: flex;
       flex-direction: row;
       .price {
@@ -148,7 +148,7 @@
   }
 }
 
-.dealsItem-leave {
+.cardsItem-leave {
   @include animation(fallOutDown cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
   @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
 }

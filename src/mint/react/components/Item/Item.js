@@ -27,7 +27,7 @@ export default class Item extends Component {
     history: PropTypes.object.isRequired,
     type: PropTypes.string,
     items: PropTypes.array,
-    fetchDeals: PropTypes.func,
+    fetchCards: PropTypes.func,
     previewAmazonItem: PropTypes.func,
     index: PropTypes.number,
     amazon_id: PropTypes.string,
@@ -35,20 +35,20 @@ export default class Item extends Component {
     prevSearch: PropTypes.func,
     setSearchIndex: PropTypes.func,
     location: PropTypes.object,
-    selectDeal: PropTypes.func,
+    selectCard: PropTypes.func,
     currentUser: PropTypes.object,
     currentCart: PropTypes.object
   }
 
   componentWillMount() {
     const {
-      props: { item_id, amazon_id, previewAmazonItem, previewItem, type, item, items, index, setSearchIndex, fetchDeals }
+      props: { item_id, amazon_id, previewAmazonItem, previewItem, type, item, items, index, setSearchIndex, fetchCards }
     } = this;
     // only update item if there isn't one
     if (item_id) previewItem(item_id);
     else if (amazon_id) previewAmazonItem(amazon_id);
 
-    if (type === 'deal' && items.length === 0) fetchDeals();
+    if (type === 'deal' && items.length === 0) fetchCards();
     else if (type === 'search' && index && item.length) setSearchIndex(index);
     this.determineNav = ::this.determineNav;
   }
@@ -98,8 +98,8 @@ export default class Item extends Component {
   }
 
   navDeal(newIndex) {
-    const { cart_id, type, items, selectDeal, history: { replace } } = this.props;
-    selectDeal(newIndex, items[newIndex]);
+    const { cart_id, type, items, selectCard, history: { replace } } = this.props;
+    selectCard(newIndex, items[newIndex]);
     replace(`/cart/${cart_id}/m/${type}/${newIndex}/${items[newIndex].asin}`);
   }
 

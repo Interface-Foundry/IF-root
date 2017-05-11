@@ -5,7 +5,7 @@ import { App } from '../components';
 import { fetchCart, fetchAllCarts, updateCart, checkoutCart } from '../actions/cart';
 import { logout } from '../actions/session';
 import { addItem, removeItem } from '../actions/item';
-import { removeDeal } from '../actions/deals';
+import { removeCard } from '../actions/cards';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
@@ -21,8 +21,8 @@ const mapStateToProps = (state, ownProps) => {
     carts: state.otherCarts.carts,
     currentUser: state.session.user_account,
     newAccount: state.session.newAccount,
-    deals: state.deals.deals,
-    position: state.deals.position,
+    cards: state.cards.cards,
+    position: state.cards.position,
     item: state.item,
     currentCart: state.currentCart,
     cartName: state.currentCart.name ? state.currentCart.name : state.currentCart.leader ? state.currentCart.leader.name + '\'s Kip Cart' : 'New Kip Cart',
@@ -55,7 +55,7 @@ const mapDispatchToProps = dispatch => ({
     ReactGA.event({ category: 'Cart', action: 'removed item from cart' });
     return dispatch(removeItem(cart_id, item_id));
   },
-  removeDeal: (index) => {
+  removeCard: (index) => {
     setTimeout(() => {
       dispatch(removeDeal(index));
     }, 100);
