@@ -97,9 +97,14 @@
           margin-right: $padding/2;
         }
       }
+      span {
+        border-bottom: 3px solid $secondary-button-color;
+      }
     }
   }
   .navbar__icon__close {
+    position: absolute;
+    z-index: 10;
     text-align: center;
     cursor: pointer;
     height: $nav-height;
