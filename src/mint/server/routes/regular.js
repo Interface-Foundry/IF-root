@@ -3,6 +3,7 @@ var router = express.Router();
 var co = require('co');
 var _ = require('lodash');
 
+const cartUtils = require('../cart/cart_utils')
 const dealsDb = require('../deals/deals')
 
 
@@ -79,7 +80,8 @@ router.get('/auth/:id', (req, res) => co(function * () {
  */
 router.get('/newcart', (req, res) => co(function * () {
   // create a cart
-  let cart = yield cartUtils.createCart()
+  const cart = yield db.Carts.create({})
+  const session = req.UserSession
   // find the user for this session
 
   if (session.user_account) {
@@ -126,6 +128,7 @@ router.get('/newcart', (req, res) => co(function * () {
  */
 router.get('/newcart/:store', (req, res) => co(function * () {
   let cart = yield cartUtils.createCart(req.params.store)
+  const session = req.UserSession
 
   if (session.user_account) {
     // make the first user the leader
