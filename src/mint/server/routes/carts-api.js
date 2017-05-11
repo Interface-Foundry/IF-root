@@ -655,4 +655,27 @@ module.exports = function (router) {
   }))
 
 
+  /**
+   * @api {get} /api/cart_type list of carts sorted by location
+   * @apiDescription Retrieves a list of carts sorted by IP location
+   * @apiGroup Carts
+   */
+  // router.get('/cart_type', (req, res) => co(function * () {
+  //   // get customer IP
+  //   var ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
+  //   logging.info('ip', ip)
+  //   // get location (ie country) based on that
+  //   // fallback for ^^
+  //   // if no exact match, use haversine thing
+  //   // send back list of stores in format on the git issue
+  // }))
+
+  /**
+   * @api {get} /api/categories gets a list of item categories
+   * @apiDescription Retrieves a JSON of item categories -- currently just from a file for YPO
+   * @apiGroup Carts
+   */
+  router.get('/categories', (req, res) => co(function * () {
+    
+  }))
 }
