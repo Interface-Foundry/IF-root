@@ -7,6 +7,8 @@ const amazon = require('../cart/amazon_cart')
 const cartUtils = require('../cart/cart_utils')
 const camel = require('../deals/deals')
 const googl = require('goo.gl')
+const fs = require('co-fs')
+const path = require('path')
 
 
 if (process.env.NODE_ENV !== 'production') {
@@ -688,6 +690,20 @@ module.exports = function (router) {
    * @apiGroup Carts
    */
   router.get('/categories', (req, res) => co(function * () {
-    
+
+    // read in categories file
+    var categories = yield fs.readFile(path.join(__dirname, '../../ingest/categories.json'));
+    categories = JSON.parse(categories.toString());
+
+    //replace sub-categories w/ accumulated counts of all subcategories
+    Object.keys(categories).map(cat => {
+      var total = 0;
+      Object.keys(categories[cat]).map(c => {
+        total += Number(categories[cat][c]);
+      })
+      categories[cat] = total;
+    })
+    console.log('categories:', categories)
+    res.send(categories);
   }))
 }
