@@ -15,10 +15,12 @@ export default class CategoryCard extends Component {
   }
 
   render() {
-    const { humanName, image, itemCount, machineName, searchType } = this.props;
+    const { humanName, image, itemCount, machineName, searchType, previewAmazonItem } = this.props;
 
     return (
-      <section className='card__type-category'>
+      <section className='card__type-category' onClick={() => {
+        previewAmazonItem(machineName)
+      }}>
         <div className='details'>
           <div className='details__image image' style={{backgroundImage:`url(${image})`}}/>
           <div className='details__name'>{humanName.length > 42 ? humanName.substring(0, 33) + '…': humanName}</div>

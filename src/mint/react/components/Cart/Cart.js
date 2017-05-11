@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CartItem from './CartItem';
-import { AddAmazonItemContainer, CardContainer } from '../../containers';
+import { AddAmazonItemContainer, CardsContainer } from '../../containers';
 import { Icon } from '..';
 import { calculateItemTotal, displayCost } from '../../utils';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
@@ -106,7 +106,7 @@ export default class Cart extends Component {
               <div className='cart__add'>
                 <AddAmazonItemContainer push={push} members={members}/>
               </div>
-              <CardContainer isDropdown={false}/> 
+              <CardsContainer isDropdown={false}/> 
             </div>
         }
         <div className={`cart__title ${animation || currentCart.itemDeleted  ? 'action' : ''}`}>

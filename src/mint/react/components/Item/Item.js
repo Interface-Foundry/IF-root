@@ -46,22 +46,25 @@ export default class Item extends Component {
     } = this;
     // only update item if there isn't one
     if (item_id) previewItem(item_id);
-    else if (amazon_id) previewAmazonItem(amazon_id);
+    else if (amazon_id && items.length === 0) previewAmazonItem(amazon_id);
 
     if (type === 'deal' && items.length === 0) fetchCards();
-    else if (type === 'search' && index && item.length) setSearchIndex(index);
+    else if (type === 'search' && index && items.length) setSearchIndex(index);
+  
     this.determineNav = ::this.determineNav;
   }
 
   componentWillReceiveProps(nextProps) {
+
     const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { replace, push } } } = this;
-    const { type: nextType, item: nextItem, index: nextIndex, item_id: nextId, item: { position: nextPos } } = nextProps;
+    const { type: nextType, item: nextItem, items: nextItems, index: nextIndex, item_id: nextId, item: { position: nextPos } } = nextProps;
     //never replace cart_id if its undefined
+
     if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) {
       push(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
-    } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItem.search.length) {
+    } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItems.length) {
       push(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
-    } else if (cart_id && nextType === 'search' && !nextItem.search.length) {
+    } else if (cart_id && nextType === 'search' && !nextItems.length) {
       push(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
     } else if (nextId !== item_id) {
       previewItem(nextProps.item_id);
@@ -149,6 +152,7 @@ export default class Item extends Component {
         currentUser: { id },
       }
     } = this;
+
     const splitItems = splitCartById(this.props, { id });
     const myItems = leader && id !== leader.id
       ? splitItems.my

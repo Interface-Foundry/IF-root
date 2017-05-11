@@ -1,8 +1,10 @@
-// react/containers/CardContainer.js
+// react/containers/CardsContainer.js
 
 import { connect } from 'react-redux';
 import { Cards } from '../components';
 import { selectCard } from '../actions/cards';
+import { previewAmazonItem } from '../actions/item';
+import { addSearchHistory } from '../utils';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -21,6 +23,10 @@ const mapDispatchToProps = dispatch => ({
     });
     return dispatch(selectCard(cardIndex, card));
   },
+  previewAmazonItem: (url) => {
+    addSearchHistory(url);
+    return dispatch(previewAmazonItem(encodeURIComponent(url)));
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cards);

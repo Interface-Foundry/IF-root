@@ -19,7 +19,6 @@ export default class AmazonForm extends Component {
   }
 
   _toggleHistory = () => {
-    console.log('_toggleHistory: ', !this.state.showHistroy)
     this.setState({showHistroy: !this.state.showHistroy})
   }
 
@@ -50,7 +49,7 @@ export default class AmazonForm extends Component {
   render() {
     const { props, renderField, onSubmitMiddleware } = this;
     const { handleSubmit } = props;
-    console.log('render, ', this.state.showHistroy)
+    
     return (
       <form onSubmit={handleSubmit(onSubmitMiddleware)} className="form">
         <Field

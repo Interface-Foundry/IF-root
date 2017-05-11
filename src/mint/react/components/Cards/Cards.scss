@@ -44,6 +44,7 @@
       section[class^="card__type"] {
         position: relative;
         text-align: center;
+        cursor: pointer;
         height: 100%;
         border: 1px $border-color-light solid;
         border-radius: $padding;
