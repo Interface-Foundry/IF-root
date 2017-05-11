@@ -1,1 +1,0 @@
-export { animateScroll } from './scroll';

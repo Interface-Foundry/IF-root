@@ -28,18 +28,21 @@ history.listen((location, action) => {
   ReactGA.pageview(location.pathname);
 });
 const historyMiddleware = routerMiddleware(history);
+let middleware = [thunkMiddleware, historyMiddleware];
+if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
+  const { createLogger } = require('redux-logger');
+  const loggerMiddleware = createLogger({
+    duration: true,
+    timestamp: false,
+    collapsed: true,
+    level: 'info'
+  });
+  middleware = [...middleware, loggerMiddleware];
+}
 
-// creating redux store
-import { createLogger } from 'redux-logger';
-const loggerMiddleware = createLogger({
-  duration: true,
-  timestamp: false,
-  collapsed: true,
-  level: 'info'
-});
 const store = createStore(
   Reducers,
-  applyMiddleware(thunkMiddleware, historyMiddleware, loggerMiddleware)
+  applyMiddleware(...middleware)
 );
 
 // update login status

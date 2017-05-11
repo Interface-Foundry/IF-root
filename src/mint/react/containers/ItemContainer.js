@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { Item } from '../components';
 import { fetchDeals, selectDeal } from '../actions/deals';
-import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, decrementItem, nextSearch, prevSearch, setSearchIndex } from '../actions/item';
+import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, decrementItem, nextSearch, prevSearch, setSearchIndex, updateItem } from '../actions/item';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -49,7 +49,8 @@ const mapDispatchToProps = dispatch => ({
   nextSearch: () => dispatch(nextSearch()),
   prevSearch: () => dispatch(prevSearch()),
   selectDeal: (dealIndex, deal) => dispatch(selectDeal(dealIndex, deal)),
-  setSearchIndex: (index) => dispatch(setSearchIndex(index))
+  setSearchIndex: (index) => dispatch(setSearchIndex(index)),
+  updateItem: (cart_id, old_item_id, new_item_id) => dispatch(updateItem(cart_id, old_item_id, new_item_id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Item);

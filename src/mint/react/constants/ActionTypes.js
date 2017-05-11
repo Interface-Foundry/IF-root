@@ -45,3 +45,9 @@ export const RECEIVE_SEARCH = 'RECEIVE_SEARCH';
 export const SEARCH_NEXT = 'SEARCH_NEXT';
 export const SEARCH_PREV = 'SEARCH_PREV';
 export const SET_SEARCH_INDEX = 'SET_SEARCH_INDEX';
+
+//cart stores
+export const REQUEST_STORES = 'REQUEST_STORES';
+export const RECEIVE_STORES = 'RECEIVE_STORES';
+export const REQUEST_SET_STORE = 'REQUEST_SET_STORE';
+export const RECEIVE_SET_STORE = 'RECEIVE_SET_STORE';

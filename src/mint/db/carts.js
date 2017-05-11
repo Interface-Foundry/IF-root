@@ -64,10 +64,7 @@ var cartsCollection = Waterline.Collection.extend({
         /** @type {string} the online retailer */
     store: {
       type: 'string',
-      enum: [
-        'amazon',
-        'ypo'
-      ],
+      enum: constants.STORES,
       defaultsTo: 'amazon'
     },
 

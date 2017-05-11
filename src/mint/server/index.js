@@ -10,8 +10,8 @@ const fs = require('fs'),
   _ = require('lodash'),
   co = require('co');
 
-  // start any jobs
-  var dailyDealsJob = require('./deals/send-daily-deals-job')
+// start any jobs
+var dailyDealsJob = require('./deals/send-daily-deals-job')
 
 // live reloading
 if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
@@ -97,7 +97,9 @@ app.use((req, res, next) => co(function* () {
 /**
  * Add in logging after sessions have been created
  */
-if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
+if (process.env.LOGGING_MODE === 'database') {
+  app.use(new mintLogger.NormalLogger())
+} else {
   app.use(function (req, res, next) {
     var methods = { GET: 'get'.cyan, HEAD: 'head'.gray, POST: 'post'.green, DELETE: 'delete'.red }
     var str = ['>'.yellow, methods[req.method] || req.method, req.originalUrl].join(' ')
@@ -105,8 +107,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.includes('development')) {
 
     next()
   })
-} else {
-  app.use(new mintLogger.NormalLogger())
+
 }
 
 // ROUTES
@@ -135,9 +136,30 @@ app.get('/s/*', (_, res) => {
   res.render('pages/index');
 });
 
+// cart select screen test data
+app.get('/api/test/store_list', (req, res) => {
+  res.json({
+    stores: [{
+      cart_img: 'http://placekitten.com/150/50',
+      cart_type: 'amazonus',
+      cart_name: 'Amazon US',
+      cart_domain: 'Amazon.com'
+    }, {
+      cart_img: 'http://placekitten.com/150/50',
+      cart_type: 'amazonuk',
+      cart_name: 'Amazon Uk',
+      cart_domain: 'Amazon.co.uk'
+    }, {
+      cart_img: 'http://placekitten.com/150/50',
+      cart_type: 'ypo',
+      cart_name: 'YPO',
+      cart_domain: 'ypo.co.uk'
+    }]
+  });
+});
 
 // Log errors to the database in production
-if (process.env.NODE_ENV === 'production') {
+if (process.env.LOGGING_MODE === 'database') {
   app.use(new mintLogger.ErrorLogger());
 }
 

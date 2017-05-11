@@ -79,7 +79,7 @@ router.get('/auth/:id', (req, res) => co(function * () {
  */
 router.get('/newcart', (req, res) => co(function * () {
   // create a cart
-  let cart = yield cartUtils.createCart(_.get(req, 'body.store'))
+  let cart = yield cartUtils.createCart()
   // find the user for this session
 
   if (session.user_account) {
@@ -112,6 +112,31 @@ router.get('/newcart', (req, res) => co(function * () {
 
     // remember to actually send it
     yield email.send();
+  }
+
+  res.redirect(`/cart/${cart.id}/`);
+}))
+
+
+/**
+ * @api {get} /newcart/:store New Cart for a specific store
+ * @apiDescription create new cart for user, redirect them to /cart/:id and send an email
+ * @apiGroup HTML
+ * @apiParam {string} : the token from the auth db
+ */
+router.get('/newcart/:store', (req, res) => co(function * () {
+  let cart = yield cartUtils.createCart(req.params.store)
+
+  if (session.user_account) {
+    // make the first user the leader
+    const user = session.user_account
+    cart.leader = user.id
+    if (user.name) {
+      cart.name = user.name + "'s Kip Cart"
+    } else {
+      cart.name = user.email_address.replace(/@.*/, '') + "'s Kip Cart"
+    }
+    yield cart.save()
   }
 
   res.redirect(`/cart/${cart.id}/`);

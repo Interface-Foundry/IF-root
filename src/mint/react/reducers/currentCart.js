@@ -12,7 +12,8 @@ import {
   CANCEL_REMOVE_ITEM,
   RECEIVE_INCREMENT_ITEM,
   RECEIVE_DECREMENT_ITEM,
-
+  RECEIVE_UPDATE_ITEM,
+  REQUEST_SET_STORE
 } from '../constants/ActionTypes';
 
 const initialState = {
@@ -83,6 +84,16 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       items: state.items.map(item => item.id === action.item.id ? action.item : item) //replace item that matches with new one
+    };
+  case RECEIVE_UPDATE_ITEM:
+    return {
+      ...state,
+      items: state.items.map(item => item.id === action.old_item_id ? action.item : item)
+    };
+  case REQUEST_SET_STORE:
+    return {
+      ...state,
+      store: action.storeType
     };
   default:
     return state;

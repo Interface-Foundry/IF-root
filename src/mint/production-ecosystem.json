@@ -11,7 +11,9 @@
       "SEND_EMAILS": true,
       "NO_LIVE_RELOAD": true,
       "NO_LUMINATI": true,
-      "BASEURL": "https://www.kipthis.com"
+      "BASEURL": "https://www.kipthis.com",
+      "LOGGING_MODE": "database",
+      "LOGGING_LEVEL": "info"
     }
   }]
 }

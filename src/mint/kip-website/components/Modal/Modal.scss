@@ -1,0 +1,112 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.modal {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	z-index: 1001;
+	padding: $padding*5 $padding*2 0;
+	background: rgba(255, 255, 255, 0.3);
+	@include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+	.modal__card {
+		position: relative;
+		width: 100%;
+		max-width: 500px;
+		margin: 0 auto;
+		border: 1px solid $borderColor;
+		border-top: 5px solid $primaryColor;
+		background: $fgColor;
+		border-radius: $padding/2;
+	    box-shadow: 0 1px 5px -2px grey;
+	    text-align: center;
+
+	    @media (min-width: 900px) {
+	    	h1 {
+	    		font-size: 24px;
+	    	}
+	    }
+
+	    .modal__description {
+	    	border-top: 1px solid $borderColor;
+	    	margin-top: $padding*2;
+	    	padding: $padding*2;
+
+	    	p {
+	    		font-size: 10px;
+	    	}
+	    }
+
+	    .modal__card-icon {
+	    	position: absolute;
+	    	width: $ribbonHeight;
+	    	height: $ribbonHeight;
+	    	line-height: $ribbonHeight;
+	    	padding: $padding*1.5;
+	    	right: 0;
+	    	top: 0;
+	    	cursor: pointer;
+
+	    	svg {
+	    		height: 100%;
+	    		width: 100%;
+	    		vertical-align: top !important;
+	    	}
+	    }
+
+	    span {
+			line-height: $ribbonHeight/2;
+			height: $ribbonHeight/2 + ($padding/2);
+			padding-bottom: $padding;
+			display: inline-block;
+	    }
+
+	    h1 {
+	    	line-height: $ribbonHeight*2;
+	    	font-size: 20px;
+
+	    	@media (min-width: 900px) {
+	    		font-size: 30px;
+	    	}
+	    }
+
+	    input {
+	    	border: 2px solid $primaryColor;
+	    	padding: $padding;
+	    	width: 80%;
+	    	max-width: 500px;
+	    	font-size: 23px;
+	    	border-radius: $padding/2;
+	    	display: block;
+	    	margin: 0 auto;
+	    }
+
+	    button {
+	    	background: $primaryColor;
+	    	border: 0;
+	    	margin: $padding*4 0 $padding;
+	    	padding: $padding $padding*5;
+	    	border-radius: $padding/2;
+	    	color: white;
+	    	width: 80%;
+	    	font-size: 15px;
+	    	font-weight: bold;
+	    	max-width: 300px;
+
+	    	&:disabled {
+	    		opacity: 0.4;
+	    		cursor: not-allowed;
+	    	}
+
+	    	svg {
+	    		margin-right: $padding;
+	    		font-size: 18px;
+	    	}
+	    }
+	}
+
+}

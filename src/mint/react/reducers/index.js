@@ -2,6 +2,7 @@
 
 import currentCart from './currentCart';
 import otherCarts from './otherCarts';
+import cartStores from './cartStores';
 import session from './session';
 import deals from './deals';
 import item from './item';
@@ -16,7 +17,8 @@ export default combineReducers({
   item,
   session,
   form,
-  routing
+  routing,
+  cartStores
 });
 
 // export selectors

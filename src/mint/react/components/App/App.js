@@ -2,10 +2,10 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Route, Switch } from 'react-router';
+import { Route } from 'react-router';
 import ReactDOM from 'react-dom';
 
-import { CartContainer } from '../../containers';
+import { CartContainer, CartStoresContainer } from '../../containers';
 import { Overlay, Modal, Toast, ErrorPage } from '..';
 import Header from './Header';
 import Sidenav from './Sidenav';
@@ -125,15 +125,14 @@ export default class App extends Component {
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404');
     const showSidenav = !location.pathname.includes('/m/signin');
-    if (newAccount === false) {
-      return <Overlay/>;
-    }
-    return (
-        <section className='app'>
-          <Toast toast={toast} status={status} loc={location} replace={replace}/>
-          <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
-          <div className={`app__view ${showFooter ? '' : 'large'}`}>
 
+    const inner =
+      newAccount === false
+      ? <Overlay/>
+      : currentCart.members.length > 0 && !currentCart.store //only show cartstores container if a cart exists
+        ? <CartStoresContainer />
+        : (
+          <div>
             {/* Render Error Page */}
             <Route path={'/404'} exact component={ErrorPage} />
 
@@ -142,7 +141,14 @@ export default class App extends Component {
 
             { /* Renders cart when route permits */ }
             <Route path={'/cart/:cart_id'} exact component={CartContainer} />
-
+          </div>
+          );
+    return (
+      <section className='app'>
+          <Toast toast={toast} status={status} loc={location} replace={replace}/>
+          <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
+          <div className={`app__view ${showFooter ? '' : 'large'}`}>
+            {inner}
           </div>
           { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
           {showFooter ? <Footer {...props} cart_id={cart_id} isMobile={isMobile}/> : null}

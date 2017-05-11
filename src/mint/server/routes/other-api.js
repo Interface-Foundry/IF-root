@@ -133,4 +133,20 @@ module.exports = function (router) {
 
      res.send(suppressions)
    }))
+
+
+  /**
+   * @api {get} /api/store_list/ possible stores
+   * @apiDescription Sends possible stores available
+   * @apiGroup Other
+   * @apiParamExample Request
+   * get https://mint.kipthis.com/api/store_list
+   *
+   * @type {Array} object of stores
+   */
+  router.get('/store_list', (req, res) => co(function * () {
+    res.send({
+      'stores': constants.STORES
+    })
+  }))
 }

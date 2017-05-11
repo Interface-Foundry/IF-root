@@ -71,14 +71,14 @@ describe('testing amazon to our cart system', () => {
     assert.equal(cart.CartItems.CartItem instanceof Array, false, 'CartItems.CartItem should not be an array if only one item in cart')
   })
 
-  it('add another item to cart', function * () {
+  it.skip('add another item to cart', function * () {
     this.timeout(3000)
     var cart = yield amazon.addAmazonItemToCart({asin: 'B01BYO79UE', quantity: 1}, test.cart);
     expect(cart.CartItems.CartItem.length).to.equal(2);
     test.amazonCart = cart
   })
 
-  it('add another of an item that was already added to cart to increase quantity', function * () {
+  it.skip('add another of an item that was already added to cart to increase quantity', function * () {
     this.timeout(3000)
     var cart = yield amazon.addAmazonItemToCart({asin: 'B01BYO79UE', quantity: 1}, test.cart);
     expect(cart.CartItems.CartItem.length).to.equal(2); // because same item

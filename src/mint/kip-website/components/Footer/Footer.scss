@@ -1,0 +1,25 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.footer {
+	position: relative;
+	text-align: center;
+	background: rgb(211, 239, 247);
+	color: white;
+	padding: $padding*2 $padding*2;
+
+	p {
+		font-size: 12px;
+		color: $primaryColor;
+		margin-bottom: $padding;
+	}
+
+	.footer__icons {
+		svg {
+			fill: $primaryColor;
+			margin: 0 $padding;
+			height: $ribbonHeight/2;
+			width: $ribbonHeight/2;
+		}
+	}
+}
