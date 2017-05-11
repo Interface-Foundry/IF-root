@@ -89,14 +89,19 @@ module.exports = function (router) {
         console.log('http://localhost:3000/auth/' + link.id)
       }
 
+      console.log('inside login', currentUser.name || email)
+
       var loginEmail = yield db.Emails.create({
         recipients: email,
         subject: 'Log in to Kip'
       })
 
-      loginEmail.template('authentication_link', {
-        link
+      loginEmail.template('login_email', {
+        link,
+        username: currentUser.name || email
       })
+
+
 
       yield loginEmail.send()
       res.send({
@@ -182,8 +187,9 @@ module.exports = function (router) {
         cart: cart.id
       })
 
-      lostEmail.template('authentication_link', {
-        link
+      lostEmail.template('login_email', {
+        link,
+        username: user.name || email
       })
 
       yield lostEmail.send()
@@ -246,8 +252,9 @@ module.exports = function (router) {
     })
 
     // use the new_cart email template
-    email.template('new_cart', {
-      cart: cart
+    email.template('new_email', {
+      cart: cart,
+      username: user.name || email
     })
 
     // remember to actually send it

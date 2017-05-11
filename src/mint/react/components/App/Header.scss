@@ -5,8 +5,6 @@
   height: $nav-height;
   line-height: $nav-height;
   font-family: 'Raleway';
-  background: $header-color;
-  color: $kip-primary-color;
   text-align: left;
   @media (min-width: 900px) {
     padding: 0;
@@ -40,8 +38,9 @@
     h3 {
       display: inline-block;
       white-space: nowrap;
-      font-weight: 500;
-      font-size: 20px;
+      height: 40px;
+      font-size: 21px;
+      border-bottom: 3px solid $color-blue;
       @media (min-width: 900px) {
         width: auto;
       }
@@ -55,8 +54,12 @@
     min-width: 50px;
     display: flex;
     justify-content: center;
+    padding: 0 $padding;
     p {
-      padding: 0 $padding;
+      padding: 0;
+      height: 40px;
+      font-weight: bold;
+      border-bottom: 3px solid $main-button-color;
     }
     .navbar__icon {
       display: flex;
@@ -94,9 +97,14 @@
           margin-right: $padding/2;
         }
       }
+      span {
+        border-bottom: 3px solid $secondary-button-color;
+      }
     }
   }
   .navbar__icon__close {
+    position: absolute;
+    z-index: 10;
     text-align: center;
     cursor: pointer;
     height: $nav-height;

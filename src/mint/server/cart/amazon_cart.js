@@ -342,54 +342,14 @@ exports.getAmazonCart = function * (cart) {
 };
 
 /**
- * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CartAdd.html
- * this is a really slow function, like 2000 ms :C
- * @param {[type]} item          [description]
- * @param {[type]} cart_id       [description]
- * @yield {[type]} [description]
+ * creates the item in our cart from asin
+ * doesnt
+ * @param {string} item from asin
+ * @yield {object} created item
  */
-exports.addAmazonItemToCart = function * (item, cart) {
-  if (item instanceof Array) {
-    throw new Error('Only add one Item to a cart at a time');
-  }
-
-  // check if we need to create anew cart
-  if (!cart.amazon_hmac || !cart.amazon_cartid) {
-    let amazonCart = exports.createAmazonCart(item)
-    cart.amazon_cartid = amazonCart.CartId
-    cart.amazon_hmac = amazonCart.HMAC
-    yield cart.save()
-  }
-
-  var quantity = item.quantity
-
-  // if the item is already in the cart, then we want to increase the quantity
-  var amazonCart = yield exports.getAmazonCart(cart)
-  var itemAlreadyAdded = checkAmazonItemInCart(item, amazonCart)
-  if (itemAlreadyAdded) {
-    quantity += parseInt(itemAlreadyAdded.Quantity)
-    var amazonParams = {
-      'AssociateTag': associateTag,
-      'CartId': cart.amazon_cartid,
-      'HMAC': cart.amazon_hmac,
-      'Item.1.CartItemId': itemAlreadyAdded.CartItemId,
-      'Item.1.Quantity': quantity
-    };
-    var cartModify = yield opHelper.execute('CartModify', amazonParams);
-    checkError(cartModify.result.CartModifyResponse.Cart)
-    return cartModify.result.CartModifyResponse.Cart;
-  } else {
-    var amazonParams = {
-      'AssociateTag': associateTag,
-      'CartId': cart.amazon_cartid,
-      'HMAC': cart.amazon_hmac,
-      'Item.1.ASIN': item.asin,
-      'Item.1.Quantity': quantity
-    };
-    var cartAdd = yield opHelper.execute('CartAdd', amazonParams);
-    checkError(cartAdd.result.CartAddResponse.Cart)
-    return cartAdd.result.CartAddResponse.Cart;
-  }
+exports.addItemAmazon = function * (itemAsin) {
+  var item = yield scraper.scrapeAsin(itemAsin)
+  return item
 };
 
 /**

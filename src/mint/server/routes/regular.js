@@ -118,7 +118,6 @@ router.get('/newcart', (req, res) => co(function * () {
 }))
 
 
-
 /**
  * @api {get} /newcart/:store New Cart for a specific store
  * @apiDescription create new cart for user, redirect them to /cart/:id and send an email
@@ -142,7 +141,6 @@ router.get('/newcart/:store', (req, res) => co(function * () {
 
   res.redirect(`/cart/${cart.id}/`);
 }))
-
 
 
 /**

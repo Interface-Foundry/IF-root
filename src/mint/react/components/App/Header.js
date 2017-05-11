@@ -165,7 +165,7 @@ class ModalHead extends Component {
           <Icon icon='Clear'/>
         </div>
         <h3 className='navbar__modal_head'>
-          {text}
+          <span>{text}</span>
         </h3>
         <div className='navbar__icon no-pointer'/>
       </div>
@@ -196,7 +196,7 @@ class EnumeratedHead extends Component {
           <Icon icon='Clear'/>
         </div>
         <h3 className='navbar__modal_head'>
-          {title} - {itemIndex} of {length} {type === 'search' ? 'results' : null}
+          <span>{title}</span> - {itemIndex} of {length} {type === 'search' ? 'results' : null}
         </h3>
         <div className='navbar__icon no-pointer'/>
       </div>

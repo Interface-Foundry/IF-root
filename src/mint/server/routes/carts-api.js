@@ -1,5 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
+const moment = require('moment')
 const url = require('url')
 const amazonScraper = require('../cart/scraper_amazon')
 const amazon = require('../cart/amazon_cart')
@@ -278,23 +279,29 @@ module.exports = function (router) {
    *
    * @apiParamExample Item from Preview
    * PUT https://mint.kipthis.com/api/cart/123456/item {
-   *   new_item_id: 'abc-123456',
+   *   new_item_asin: 'abc-123456',
    *   user_id: '123456y'
    * }
    */
   router.put('/cart/:cart_id/item/:item_id/update', (req, res) => co(function* () {
+    if (!_.get(req, 'body.new_item_asin')) {
+      throw new Error('Only accepting asins in new item at the moment')
+    }
+    const newItemAsin = req.body.new_item_asin
     const userId = req.UserSession.user_account.id
-    const cartId = req.params.cart_id
-    const itemId = req.params.item_id
+    let cart = yield db.Carts.findOne({id: req.params.cart_id})
+    const oldItem = yield db.Items.findOne({id: req.params.item_id})
 
-    let newItemId
-    if (req.query.new_item_id) {
-      newItemId = req.query.new_item_id
+    // make sure cart and item exist
+    if (!cart) {
+      throw new Error('Cart not found')
+    }
+    if (!oldItem) {
+      throw new Error('Old Item not found')
     }
 
-    yield cartUtils.deleteItemFromCart(itemId, userId, cartId)
-
-    const newItem = yield cartUtils.createItemFromItemId(newItemId, userId, cartId)
+    cart = yield cartUtils.deleteItemFromCart(oldItem, cart, userId)
+    const newItem = yield cartUtils.addItemToCart(newItemAsin, cart, userId, oldItem.quantity)
     return res.send(newItem)
   }));
 
@@ -584,7 +591,7 @@ module.exports = function (router) {
       recipients: req.UserSession.user_account.email_address,
       sender: 'hello@kip.ai',
       subject: `Kip Receipt for ${cart.name}`,
-      template_name: 'receipt',
+      template_name: 'summary_email',
       unsubscribe_group_id: 2485
     });
 
@@ -592,25 +599,30 @@ module.exports = function (router) {
     var items= []
     var users = []
     var total = 0;
+    var totalItems = 0;
     cartItems.map(function (item) {
       if (!userItems[item.added_by]) userItems[item.added_by] = [];
       userItems[item.added_by].push(item);
       logging.info('item', item) //undefined
-      total += Number(item.price);
+      totalItems += Number(item.quantity || 1);
+      total += (Number(item.price) * Number(item.quantity || 1));
     });
 
     for (var k in userItems) {
       var addingUser = yield db.UserAccounts.findOne({id: k});
-      users.push(addingUser.email_address.toUpperCase());
+      users.push(addingUser.name || addingUser.email_address);
       items.push(userItems[k]);
     }
 
-    yield receipt.template('receipt', {
+    yield receipt.template('summary_email', {
+      username: req.UserSession.user_account.name || req.UserSession.user_account.email_address,
       baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
       id: cart.id,
       items: items,
       users: users,
+      date: moment().format('dddd, MMMM Do, h:mm a'),
       total: '$' + total.toFixed(2),
+      totalItems: totalItems,
       cart: cart
     })
 
