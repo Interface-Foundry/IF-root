@@ -279,23 +279,29 @@ module.exports = function (router) {
    *
    * @apiParamExample Item from Preview
    * PUT https://mint.kipthis.com/api/cart/123456/item {
-   *   new_item_id: 'abc-123456',
+   *   new_item_asin: 'abc-123456',
    *   user_id: '123456y'
    * }
    */
   router.put('/cart/:cart_id/item/:item_id/update', (req, res) => co(function* () {
+    if (!_.get(req, 'body.new_item_asin')) {
+      throw new Error('Only accepting asins in new item at the moment')
+    }
+    const newItemAsin = req.body.new_item_asin
     const userId = req.UserSession.user_account.id
-    const cartId = req.params.cart_id
-    const itemId = req.params.item_id
+    let cart = yield db.Carts.findOne({id: req.params.cart_id})
+    const oldItem = yield db.Items.findOne({id: req.params.item_id})
 
-    let newItemId
-    if (req.query.new_item_id) {
-      newItemId = req.query.new_item_id
+    // make sure cart and item exist
+    if (!cart) {
+      throw new Error('Cart not found')
+    }
+    if (!oldItem) {
+      throw new Error('Old Item not found')
     }
 
-    yield cartUtils.deleteItemFromCart(itemId, userId, cartId)
-
-    const newItem = yield cartUtils.createItemFromItemId(newItemId, userId, cartId)
+    cart = yield cartUtils.deleteItemFromCart(oldItem, cart, userId)
+    const newItem = yield cartUtils.addItemToCart(newItemAsin, cart, userId, oldItem.quantity)
     return res.send(newItem)
   }));
 

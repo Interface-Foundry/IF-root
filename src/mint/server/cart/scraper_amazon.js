@@ -6,45 +6,6 @@ dbReady.then((models) => { db = models })
 const amazon_cart = require('./amazon_cart')
 
 
-/**
- * Scrapes an item from amazon
- * @param  {URL} uri a node.js URL object, see https://nodejs.org/docs/latest/api/url.html
- * @return {Promise<Item>} returns an item with the populated options
- */
-module.exports.scrapeUrl = function amazon_scraper (uri) {
-  return co(function * () {
-    // Make double sure that we are parsing an amazon.com url
-    if (!uri || !uri.match(/amazon.com/)) {
-      throw new Error('Can only handle uris from "www.amazon.com" but got "' + uri + '"')
-    }
-
-    // Scrape the item
-    var res = yield amazon_cart.getAmazonItem(uri)
-    var item = yield res2Item(res)
-    item.original_link = uri
-    yield item.save()
-    return item
-  })
-}
-
-/**
- * Scrapes an item from an amazon.com ASIN
- * @param  {string} asin amazon.com asin, should match /^B[\dA-Z]{9}|\d{9}(X|\d)$/
- * @return {Promise<item>}      returns an item with the populated options
- */
-module.exports.scrapeAsin = function asin_scraper (asin) {
-  return co(function * () {
-    // Make double sure that we are parsing an amazon.com asin
-    if (!asin || !asin.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
-      throw new Error('Can only handle asins from amazon.com but got "' + asin + '"')
-    }
-
-    // Scrape the item
-    var res = yield amazon_cart.lookupAmazonItem(asin)
-    var item = yield res2Item(res)
-    return item
-  })
-}
 
 /**
  * format cents to nice price.  amazon returns amount in cents
@@ -73,6 +34,47 @@ function getItemPrice(item, priceType) {
 
 
 /**
+ * Scrapes an item from amazon
+ * @param  {URL} uri a node.js URL object, see https://nodejs.org/docs/latest/api/url.html
+ * @return {Promise<Item>} returns an item with the populated options
+ */
+module.exports.scrapeUrl = function amazon_scraper (uri) {
+  return co(function * () {
+    // Make double sure that we are parsing an amazon.com url
+    if (!uri || !uri.match(/amazon.com/)) {
+      throw new Error('Can only handle uris from "www.amazon.com" but got "' + uri + '"')
+    }
+
+    // Scrape the item
+    var res = yield amazon_cart.getAmazonItem(uri)
+    var item = yield res2Item(res)
+    item.original_link = uri
+    yield item.save()
+    return item
+  })
+}
+
+/**
+ * Scrapes an item from an amazon.com ASIN
+ * @param  {string} asin amazon.com asin, should match /^B[\dA-Z]{9}|\d{9}(X|\d)$/
+ * @return {Promise<item>}      returns an item with the populated options
+ */
+module.exports.scrapeAsin = function (asin) {
+  return co(function * () {
+    // Make double sure that we are parsing an amazon.com asin
+    if (!asin || !asin.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
+      throw new Error('Can only handle asins from amazon.com but got "' + asin + '"')
+    }
+
+    // Scrape the item
+    var res = yield amazon_cart.lookupAmazonItem(asin)
+    var item = yield res2Item(res)
+    return item
+  })
+}
+
+
+/**
  * Converts a response from the amazon api to an item in our database. Does not add this item to cart.
  * @param  {json}    res response from amazon api, a totally what the fuck pile of jsonified xml data
  * @return {Promise<item>}     returns promise for a db.Item.
@@ -81,7 +83,7 @@ var res2Item = function (res) {
   return co(function * () {
     // make sure the response is okay
     if (_.get(res, 'Request.IsValid') !== 'True' || !res.Item) {
-      console.error(res)
+      [c]onsole.error(res)
       throw new Error('Invalid response from amazon request ' + JSON.stringify(res))
     }
 
@@ -222,5 +224,8 @@ var res2Item = function (res) {
     return item
   })
 }
+
+
+
 
 module.exports.res2Item = res2Item;

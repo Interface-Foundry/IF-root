@@ -39,11 +39,7 @@ const createCartHandlers = {
 }
 
 const addItemHandlers = {
-  'amazon': amazon.addAmazonItemToCart
-}
-
-const removeItemHandlers = {
-  'amazon': amazon.removeAmazonItemFromCart
+  'amazon': amazon.addItemAmazon // uses asin
 }
 
 const clearCartHandlers = {
@@ -99,10 +95,7 @@ exports.addItemToCart = function * (item, cart) {
  * @param      {string}  userId  The user identifier
  * @return     {string}  status of if item was deleted
  */
-exports.deleteItemFromCart = function * (itemId, userId, cartId) {
-  const cart = yield db.Carts.findOne({id: cartId})
-  const item = yield db.Items.findOne({id: itemId})
-
+exports.deleteItemFromCart = function * (item, cart, userId) {
   // make sure cart and item exist
   if (!cart) {
     throw new Error('Cart not found')
@@ -119,38 +112,34 @@ exports.deleteItemFromCart = function * (itemId, userId, cartId) {
 
   cart.items.remove(item.id)
   yield cart.save()
+  return cart
 }
 
 /**
  * create item by user in a cart
  *
- * @param      {string}  itemId  The item identifier
+ * @param      {string}  itemId  The item identifier/asin
  * @param      {string}          userId  The user identifier
  * @param      {string}          cartId  the cart identifier
- * @return     {object}           item object that was created
+ * @param      {number}          quantity the item quantity
+ * @return     {object}          item object that was created
  */
-exports.createItemFromItemId = function * (itemId, userId, cartId) {
-
-  const cart = yield db.Carts.findOne({id: cartId})
-  const item = yield db.Items.findOne({id: itemId})
+exports.addItemToCart = function * (itemId, cart, userId, quantity) {
+  if (quantity === undefined) {
+    quantity = 1
+  }
 
   // make sure cart and item exist
   if (!cart) {
     throw new Error('Cart not found')
   }
-  if (!item) {
-    throw new Error('Item not found')
-  }
 
-  // make sure it's not in a cart already
-  var existingCart = yield db.Carts.findOne({items: itemId})
-  if (existingCart && existingCart.id !== cart.id) {
-    throw new Error('Item ' + itemId + ' is already in another cart ' + existingCart.id)
-  }
-
-  cart.items.add(item.id)
+  let item = yield addItemHandlers[cart.store](itemId)
   item.added_by = userId
   item.cart = cart.id
+  item.quantity = quantity
+
+  cart.items.add(item.id)
 
   yield [item.save(), cart.save()]
   return item
