@@ -18,14 +18,25 @@ var emailDeliversCollection = Waterline.Collection.extend({
      */
     email: Waterline.isA('emails')
 
-    // email: 'string' //stored in emails.recipient
+    /** String list of email addresses in the "To" box */
     "smtp-id": 'string',
+
+    /** Timestamp of email event */
     timestamp: 'integer',
-    // asm_group_id: 'integer', //stored in emails.unsubscribe_group_id
+
+    /** Sendgrid unique event ID */
     sg_event_id: 'string',
+
+    /** Sendgrid unique message ID */
     sg_message_id: 'string',
+
+    /** IP Address where event occurred */
     ip: 'string',
+
+    /** Response from mail transfer agent */
     response: 'string',
+
+    /** Whether TLS was used when email was sent. 1 for true and 0 for false. */
     tls: 'integer',
   }
 })

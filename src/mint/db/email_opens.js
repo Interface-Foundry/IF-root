@@ -18,12 +18,19 @@ var emailOpensCollection = Waterline.Collection.extend({
      */
     email: Waterline.isA('emails')
 
-    // email: 'string' //stored in emails.recipient
-    // asm_group_id: 'integer', //stored in emails.unsubscribe_group_id
+    /** Timestamp of email event */
     timestamp: 'integer',
+
+    /** IP Address where event occurred */
     ip: 'string',
+
+    /** Sendgrid unique event ID */
     sg_event_id: 'string',
+
+    /** Sendgrid unique message ID */
     sg_message_id: 'string',
+
+    /** User agent where event occurred */
     useragent: 'string',
   }
 })
