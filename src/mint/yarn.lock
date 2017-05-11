@@ -1647,6 +1647,17 @@ co-read@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/co-read/-/co-read-0.0.1.tgz#f81b3eb8a86675fec51e3d883a7f564e873c9389"
 
+co-series@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/co-series/-/co-series-3.0.2.tgz#f48e98795cff85d60a851a5a669c119b0a6aa177"
+  dependencies:
+    co-use "^1.1.0"
+    is-generator "^1.0.2"
+
+co-use@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/co-use/-/co-use-1.1.0.tgz#c6bb3cdf10cb735ecaa9daeeda46d725c94a4e62"
+
 co@^4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
@@ -2309,16 +2320,9 @@ domhandler@^2.3.0:
   dependencies:
     domelementtype "1"
 
-domutils@1.5.1:
+domutils@1.5.1, domutils@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/domutils/-/domutils-1.5.1.tgz#dcd8488a26f563d61079e48c9f7b7e32373682cf"
-  dependencies:
-    dom-serializer "0"
-    domelementtype "1"
-
-domutils@^1.5.1:
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/domutils/-/domutils-1.6.2.tgz#1958cc0b4c9426e9ed367fb1c8e854891b0fa3ff"
   dependencies:
     dom-serializer "0"
     domelementtype "1"
@@ -3551,6 +3555,10 @@ is-fullwidth-code-point@^1.0.0:
 is-generator-function@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/is-generator-function/-/is-generator-function-1.0.6.tgz#9e71653cd15fff341c79c4151460a131d31e9fc4"
+
+is-generator@^1.0.2:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/is-generator/-/is-generator-1.0.3.tgz#c14c21057ed36e328db80347966c693f886389f3"
 
 is-glob@^2.0.0, is-glob@^2.0.1:
   version "2.0.1"
