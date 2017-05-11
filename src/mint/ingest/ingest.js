@@ -18,16 +18,27 @@ module.exports = function * (source, fields) {
   var data = yield fs.readFile(`./tsv/${source}.tsv`);
   var records = parse(data, {delimiter: '\t', relax: true});
 
-  var categories = {}
+  // var categories = {}
   // console.log(records);
   yield records.map(series(function * (record) {
     var options = {};
     var invItem = yield db[`${source}InventoryItems`].create({});
     for (var i = 0; i < fields.length; i++) {
       invItem[fields[i]] = record[i];
+      // if (i == 7) {
+      //   if (!categories[record[i]]) categories[record[i]] = {};
+      //   if (!categories[record[i]][record[i-1]]) {
+      //     categories[record[i]][record[i-1]] = 1;
+      //   }
+      //   else {
+      //     categories[record[i]][record[i-1]]++;
+      //   }
+      // }
     }
     yield invItem.save();
-    // console.log('INVITEM', invItem);
+    console.log('INVITEM', invItem);
   }));
+  // console.log(categories);
+  // fs.writeFile('./categories.txt', JSON.stringify(categories))
   console.log('done ingesting tsv')
 }
