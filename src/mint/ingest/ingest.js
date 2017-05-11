@@ -8,6 +8,7 @@ var db
 const dbReady = require('../db')
 dbReady.then((models) => { db = models; })
 
+
 /**
  * @param source {string} - string representing the source of data
  * @param fields {array} - array of strings that are ordered to correspond
@@ -15,7 +16,7 @@ dbReady.then((models) => { db = models; })
  */
 module.exports = function * (source, fields) {
   yield dbReady;
-  var data = yield fs.readFile(`./tsv/${source}.tsv`);
+  var data = yield fs.readFile(`./ingest/tsv/${source}.tsv`);
   var records = parse(data, {delimiter: '\t', relax: true});
 
   // var categories = {}

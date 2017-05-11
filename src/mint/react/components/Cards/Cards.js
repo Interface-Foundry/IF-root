@@ -8,7 +8,7 @@ import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import { Link } from 'react-router-dom';
 import { getLastSearch } from '../../utils';
 
-export default class Categories extends Component {
+export default class Cards extends Component {
   constructor(props) {
     super(props);
     this.renderCards = ::this.renderCards;

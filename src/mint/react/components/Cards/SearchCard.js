@@ -19,9 +19,9 @@ export default class SearchCard extends Component {
         <div className='details'>
           <div className='details__image image' style={{backgroundImage: `url(${thumbnail_url})`}}/>
           <div className='details__name'>{name.length > 42 ? name.substring(0, 33) + '…': name}</div>
-          <div className='details__price'>{displayCost(price)}</div>
+          <div className='details__price'>{displayCost(price)} /each</div>
         </div>
-        <div className='add'>View</div>
+        <div className='add'>VIEW</div>
       </section>
     );
   }

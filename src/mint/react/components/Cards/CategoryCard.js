@@ -7,22 +7,23 @@ import { displayCost } from '../../utils';
 export default class CategoryCard extends Component {
 
   static propTypes = {
-    name: PropTypes.string.isRequired,
-    price: PropTypes.number.isRequired
+    humanName: PropTypes.string.isRequired,
+    machineName: PropTypes.string.isRequired,
+    searchType: PropTypes.string.isRequired,
+    itemCount: PropTypes.number.isRequired,
+    image: PropTypes.string.isRequired
   }
 
   render() {
-    const { thumbnail: image, name, price, previousPrice, savePercent } = this.props;
+    const { humanName, image, itemCount, machineName, searchType } = this.props;
 
     return (
       <section className='card__type-category'>
         <div className='details'>
           <div className='details__image image' style={{backgroundImage:`url(${image})`}}/>
-          <div className='details__name'>{name.length > 42 ? name.substring(0, 33) + '…': name}</div>
-          <div className='details__price'>{displayCost(price)}</div>
-          <div className='details__discount'><strike>{displayCost(previousPrice)}</strike> ({(savePercent * 100).toFixed()}% off)</div>
+          <div className='details__name'>{humanName.length > 42 ? humanName.substring(0, 33) + '…': humanName}</div>
         </div>
-        <div className='add'>Add to Cart</div>
+        <div className='add'>BROWSE ({itemCount})</div>
       </section>
     );
   }
