@@ -83,7 +83,6 @@ var res2Item = function (res) {
   return co(function * () {
     // make sure the response is okay
     if (_.get(res, 'Request.IsValid') !== 'True' || !res.Item) {
-      [c]onsole.error(res)
       throw new Error('Invalid response from amazon request ' + JSON.stringify(res))
     }
 
