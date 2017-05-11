@@ -24,14 +24,7 @@ waterline.loadCollection(require('./amazon_items'))
 waterline.loadCollection(require('./authentication_links'))
 waterline.loadCollection(require('./camel_items'))
 waterline.loadCollection(require('./carts'))
-waterline.loadCollection(require('./email_opens'))
-waterline.loadCollection(require('./email_processes'))
-waterline.loadCollection(require('./email_drops'))
-waterline.loadCollection(require('./email_delivers'))
-waterline.loadCollection(require('./email_bounces'))
-waterline.loadCollection(require('./email_clicks'))
-waterline.loadCollection(require('./email_group_unsubscribes'))
-waterline.loadCollection(require('./email_group_resubscribes'))
+waterline.loadCollection(require('./email_events'))
 waterline.loadCollection(require('./emails'))
 waterline.loadCollection(require('./feedback'))
 waterline.loadCollection(require('./item_options'))
@@ -66,14 +59,7 @@ var initialize = new Promise((resolve, reject) => {
       AuthenticationLinks: ontology.collections.authentication_links,
       CamelItems: ontology.collections.camel_items,
       Carts: ontology.collections.carts,
-      EmailOpens: ontology.collections.email_opens,
-      EmailProcesses: ontology.collections.email_processes,
-      EmailDrops: ontology.collections.email_drops,
-      EmailDelivers: ontology.collections.email_delivers,
-      EmailBounces: ontology.collections.email_bounces,
-      EmailClicks: ontology.collections.email_clicks,
-      EmailGroupUnsubscribes: ontology.collections.email_group_unsubscribes,
-      EmailGroupResubscribes: ontology.collections.email_group_resubscribes,
+      EmailEvents: ontology.collections.email_events,
       Emails: ontology.collections.emails,
       Feedback: ontology.collections.feedback,
       ItemOptions: ontology.collections.item_options,
