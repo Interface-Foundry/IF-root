@@ -9,10 +9,9 @@ $cart__add-height: $nav-height+$padding;
   margin: 0 auto;
   .add__item {
     background-color: $kip-primary-color;
-    border-bottom-right-radius: $padding/2;
-    border-bottom-left-radius: $padding/2;
+    border-radius: $padding/2;
     box-shadow: $card-box-shadow;
-    margin: 0 2px 0 2px;
+    margin: 5px 2px 0 2px;
     position: relative;
   }
   @media (min-width: 900px) {
@@ -165,7 +164,7 @@ $cart__add-height: $nav-height+$padding;
         text-decoration: underline;
       }
       &:before {
-        @include animation(progressBar linear 10s);
+        @include animation(progressBar ease 10s);
         content: '';
         display: block;
         height: 2px;
@@ -190,7 +189,6 @@ $cart__add-height: $nav-height+$padding;
       overflow: hidden;
       border-radius: $padding/2;
       background-color: $kip-primary-color;
-      margin: 0 5px 0 5px;
       margin-bottom: $padding;
       box-shadow: $card-box-shadow;
       h3 {
