@@ -18,7 +18,7 @@
     float: right;
     display: inline-block;
     z-index: 0;
-    background: $kip-secondary-color;
+    background: darken($kip-secondary-color, 5%);
   }
   p {
     overflow: hidden;
@@ -37,14 +37,13 @@
     flex-direction: column;
     width: 250px;
     background: $kip-primary-color;
-    border-left: 1px solid $border-color-light;
     height: 100%;
     position: absolute;
     right: 0;
     @include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
     @media (min-width: 900px) {
-      background: $kip-secondary-color;
+      background: darken($kip-secondary-color, 5%);
       height: calc(100% - #{$nav-height});
     }
     li {
@@ -54,13 +53,11 @@
       }
       h4 {
         text-align: right;
-        border-bottom: 1px solid $border-color-light;
         padding: $padding/2 $padding;
         cursor: pointer;
         &.show__more {
           padding: $padding/2 $padding $padding*2;
           color: #4a9ff1;
-          border-bottom: 0;
           text-indent: underline;
           svg {
             @include animation(bounceDownSmall 2s);
@@ -69,7 +66,6 @@
         }
       }
       &.sidenav__list__header {
-        border-bottom: 1px solid $border-color-light;
         height: $nav-height;
         padding: 0;
         display: flex;
@@ -137,7 +133,6 @@
         }
       }
       &.sidenav__list__actions {
-        border-top: 1px solid $border-color-light;
         display: block;
         font-size: 20px;
         h4 {
