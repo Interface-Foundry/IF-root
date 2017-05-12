@@ -4,6 +4,7 @@ import {
   REQUEST_ITEM,
   RECEIVE_ITEM,
   RECEIVE_SEARCH,
+  RECEIVE_CATEGORY,
   CLEAR_ITEM,
   REQUEST_ADD_ITEM,
   RECEIVE_ADD_ITEM,
@@ -30,6 +31,11 @@ const receiveItem = (item) => ({
 
 const receiveSearch = (items) => ({
   type: RECEIVE_SEARCH,
+  items
+});
+
+const receiveCategory = (items) => ({
+  type: RECEIVE_CATEGORY,
   items
 });
 
@@ -122,7 +128,7 @@ export function previewItem(item_id) {
   };
 }
 
-export function previewAmazonItem(amazon_id) {
+export function previewAmazonItem(amazon_id, category) {
   return async function (dispatch) {
     dispatch(request());
     try {
@@ -130,6 +136,7 @@ export function previewAmazonItem(amazon_id) {
         credentials: 'same-origin'
       });
       const json = await response.json();
+      if(category) return dispatch(receiveCategory(json))
       return Array.isArray(json) ? dispatch(receiveSearch(json)) : dispatch(receiveItem(json));
     } catch (e) {
       throw 'error in cart previewAmazonItem';

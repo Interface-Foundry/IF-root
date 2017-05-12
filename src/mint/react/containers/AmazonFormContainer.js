@@ -17,12 +17,12 @@ const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => {
     ReactGA.event({
       category: 'Search',
-      action: `Searched for ${values.url}`
+      action: values.url
     });
     const { cart_id } = state;
     if (!isUrl(values.url)) addSearchHistory(values.url);
     else dispatch(push(`/cart/${cart_id}/m/item/0/${encodeURIComponent(values.url)}`));
-    
+
     return dispatch(previewAmazonItem(encodeURIComponent(values.url)))
   }
 });
