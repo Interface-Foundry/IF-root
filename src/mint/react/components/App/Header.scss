@@ -11,6 +11,7 @@
     padding: 0;
   }
   .header__left {
+    position: relative;
     flex-grow: 1;
     flex-basis: 0;
     white-space: nowrap;
@@ -36,12 +37,20 @@
       background-position: center;
       background-size: contain;
     }
+    .members {
+      position: absolute;
+      height: 25px;
+      line-height: 25px;
+      bottom: 0;
+      left: 50px;
+      font-size: 10px;
+    }
     h3 {
       display: inline-block;
       white-space: nowrap;
       height: 40px;
+      line-height: 40px;
       font-size: 21px;
-      border-bottom: 3px solid $color-blue;
       @media (min-width: 900px) {
         width: auto;
       }

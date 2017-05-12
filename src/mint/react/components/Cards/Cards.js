@@ -24,6 +24,10 @@ export default class Cards extends Component {
     selectDeal: PropTypes.func
   }
 
+  state = {
+    hide: 'left'
+  }
+
   _scrollHorizontal(direction) {
     clearInterval(this.scrollInterval); 
 
@@ -48,6 +52,7 @@ export default class Cards extends Component {
             clearInterval(this.scrollInterval); 
           }
         }, 15);
+
         break;
       case 'right':
         end = element.scrollLeft + 600 < element.firstElementChild.clientWidth ? element.scrollLeft + 600 : element.firstElementChild.clientWidth;
@@ -63,6 +68,7 @@ export default class Cards extends Component {
             clearInterval(this.scrollInterval); 
           }
         }, 15);
+
         break;
     }
   }
@@ -95,7 +101,7 @@ export default class Cards extends Component {
   }
 
   render() {
-    const { renderCards, _scrollHorizontal, props: { cardType, position, cards, clearItem }} = this,
+    const { renderCards, _scrollHorizontal, props: { cardType, position, cards, clearItem }, state: { hide }} = this,
       type = cardType || 'categories';
 
     return (
@@ -120,8 +126,8 @@ export default class Cards extends Component {
           </div> 
           { renderCards() }
           <div className='icon right'onClick={() => {
-            _scrollHorizontal('right')
-          }}>
+              _scrollHorizontal('right')
+            }}>
             <Icon icon='RightChevron'/>
           </div>
         </ul>

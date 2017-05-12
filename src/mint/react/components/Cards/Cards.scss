@@ -20,9 +20,8 @@
       &.cards__section__breadcrumb-type {
         cursor: pointer;
         font-weight: 500;
-        background: #e6f8ff;
-        padding: $padding/2 $padding*2;
-        border-radius: $padding/2;
+        padding: $padding/2 0;
+        border-bottom: 3px solid $main-button-color;
       }
     }
   }
@@ -99,6 +98,12 @@
       min-width: 150px;
       width: 150px;
       height: 100%;
+      &:first-of-type {
+        margin-left: 40px;
+      }
+      &:last-of-type {
+        margin-right: 40px;
+      }
       section[class^="card__type"] {
         position: relative;
         text-align: center;

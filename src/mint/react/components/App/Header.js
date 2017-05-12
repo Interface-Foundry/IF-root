@@ -103,7 +103,7 @@ class CartHead extends Component {
   render() {
     const {
       state: { bounce },
-      props: { currentUser: { name }, _toggleSidenav, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url } }
+      props: { currentUser: { name }, _toggleSidenav, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members } }
     } = this;
 
     return (
@@ -122,6 +122,7 @@ class CartHead extends Component {
           <h3>
             {locked ? 'Checkout in Progress' : cartName}
           </h3>
+          <span className='members'>{`${members.length} Members`}</span>
           </a>
         </div>
         <div className='header__right' onClick={_toggleSidenav}>
