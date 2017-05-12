@@ -12,34 +12,39 @@ dbReady.then((models) => { db = models; })
 /**
  * @param source {string} - string representing the source of data
  * @param fields {array} - array of strings that are ordered to correspond
+ * @param fields {array} - array of text indexes to do
  * to the columns in the tsv and fields in the db schema
  */
-module.exports = function * (source, fields) {
+module.exports = function * (source, fields, textIndex) {
   yield dbReady;
-  var data = yield fs.readFile(`./ingest/tsv/${source}.tsv`);
-  var records = parse(data, {delimiter: '\t', relax: true});
+  yield db[`${source}InventoryItems`].destroy({})
 
-  // var categories = {}
-  // console.log(records);
-  yield records.map(series(function * (record) {
-    var options = {};
-    var invItem = yield db[`${source}InventoryItems`].create({});
-    for (var i = 0; i < fields.length; i++) {
-      invItem[fields[i]] = record[i];
-      // if (i == 7) {
-      //   if (!categories[record[i]]) categories[record[i]] = {};
-      //   if (!categories[record[i]][record[i-1]]) {
-      //     categories[record[i]][record[i-1]] = 1;
-      //   }
-      //   else {
-      //     categories[record[i]][record[i-1]]++;
-      //   }
-      // }
-    }
-    yield invItem.save();
-    console.log('INVITEM', invItem);
-  }));
-  // console.log(categories);
-  // fs.writeFile('./categories.txt', JSON.stringify(categories))
-  console.log('done ingesting tsv')
+  var data = yield fs.readFile(`./ingest/tsv/${source}.tsv`);
+  var records = parse(data, {
+    delimiter: '\t',
+    relax: true,
+    columns: (labels) => labels.map(label => label.replace(' ', '_').toLowerCase()),
+    auto_parse: true
+  });
+
+
+  console.log('creating inventory...')
+  yield db[`${source}InventoryItems`].create(records);
+  console.log('done with creating inventory')
+
+  if (textIndex) {
+    console.log('creating text indexes for mongodb...')
+    var createIndexForArray = textIndex.reduce((prev, curr) => { prev[curr] = "text"; return prev}, {})
+    console.log('INNDND', createIndexForArray)
+    yield new Promise((resolve, reject) => {
+      db[`${source}InventoryItems`].native((err, collection) => {
+        if (err) reject(err)
+        else {
+          resolve(collection.createIndex(createIndexForArray))
+        }
+      })
+    })
+  }
+
 }
+

@@ -45,6 +45,21 @@ const itemPreviewHandlers = {
  */
 
 /**
+ * get info for item based on retailer
+ *
+ * @param      {string}  query   The query with asin/url/item code/title
+ * @param      {string}  store   The store type
+ * @return     {object}  item    the item preview object for that store
+ */
+exports.itemPreview = function * (query, store) {
+  if (store === undefined) {
+    throw new Error('Store required for item preview')
+  }
+  const item = yield itemPreviewHandlers[store](query)
+  return item
+}
+
+/**
  * create a cart
  *
  * @param      {string}  store -  the store type to create

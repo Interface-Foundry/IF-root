@@ -78,11 +78,15 @@ export default class Sidenav extends Component {
                 if(i > 2 && show !== 'me') return null;
                 return ( 
                   <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} onClick={_toggleSidenav}>
-                    { c.locked ? <div className='icon'/> : <Link to={`/cart/${cart_id}/m/edit/${c.id}`}>
-                        <div className='icon'>
-                          <Icon icon='Edit'/>
-                        </div>
-                      </Link>
+                    { c.locked 
+                      ? <div className='icon'/> 
+                      : !i 
+                        ? <Link className='editIcon' to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                            <div className='icon'>
+                              <Icon icon='Edit'/>
+                            </div>
+                          </Link>
+                        : null
                     }
                     <Link to={`/cart/${c.id}`}>
                       <p>

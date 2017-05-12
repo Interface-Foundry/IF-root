@@ -66,7 +66,6 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    ReactDOM.findDOMNode(this)
     if (window.innerWidth < 900)
       this.setState({ isMobile: true })
   }

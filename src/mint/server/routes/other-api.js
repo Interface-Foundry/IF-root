@@ -146,8 +146,16 @@ module.exports = function (router) {
    * @type {Array} object of stores
    */
   router.get('/store_list', (req, res) => co(function * () {
-    res.send({
-      'stores': constants.STORES
+    const storesArray = constants.STORES.map( store => {
+      return {
+        store_img: 'String',
+        store_type: store,
+        store_name: store,
+        store_domain: 'String',
+        store_countries: '[Array]'
+      }
     })
+
+    res.send(storesArray)
   }))
 }

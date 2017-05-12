@@ -555,24 +555,15 @@ module.exports = function (router) {
    * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
    */
   router.get('/itempreview', (req, res) => co(function * () {
-    console.log('req!!!', req)
     // parse the incoming text to extract either an asin, url, or search query
+    //
     const q = (req.query.q || '').trim()
     if (!q) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
     }
 
-    if (q.includes('amazon.com')) {
-      // probably a url
-      var item = yield amazonScraper.scrapeUrl(q)
-    } else if (q.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
-      // probably an asin
-      var item = yield amazonScraper.scrapeAsin(q)
-    } else {
-      // search query
-      // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-      var item = yield amazon.searchAmazon(q, req.query.page);
-    }
+    const store = _.get(req, 'query.store') ? req.query.store : 'ypo' // <--- CHANGE THIS BACK TO AMAZON IN THE FUTURE, JUST FOR YPO PURPOSES
+    const item = yield cartUtils.itemPreview(q, store)
     res.send(item)
   }))
 
@@ -597,47 +588,50 @@ module.exports = function (router) {
 
     //send receipt email
     logging.info('creating receipt...')
-    var receipt = yield db.Emails.create({
-      recipients: req.UserSession.user_account.email_address,
-      sender: 'hello@kip.ai',
-      subject: `Kip Receipt for ${cart.name}`,
-      template_name: 'summary_email',
-      unsubscribe_group_id: 2485
-    });
+    if(req.UserSession.user_account) {
+      var receipt = yield db.Emails.create({
+        recipients: req.UserSession.user_account.email_address,
+        sender: 'hello@kip.ai',
+        subject: `Kip Receipt for ${cart.name}`,
+        template_name: 'summary_email',
+        unsubscribe_group_id: 2485
+      });
 
-    var userItems = {}; //organize items according to which user added them
-    var items= []
-    var users = []
-    var total = 0;
-    var totalItems = 0;
-    cartItems.map(function (item) {
-      if (!userItems[item.added_by]) userItems[item.added_by] = [];
-      userItems[item.added_by].push(item);
-      logging.info('item', item) //undefined
-      totalItems += Number(item.quantity || 1);
-      total += (Number(item.price) * Number(item.quantity || 1));
-    });
+      var userItems = {}; //organize items according to which user added them
+      var items= []
+      var users = []
+      var total = 0;
+      var totalItems = 0;
+      cartItems.map(function (item) {
+        if (!userItems[item.added_by]) userItems[item.added_by] = [];
+        userItems[item.added_by].push(item);
+        logging.info('item', item) //undefined
+        totalItems += Number(item.quantity || 1);
+        total += (Number(item.price) * Number(item.quantity || 1));
+      });
 
-    for (var k in userItems) {
-      var addingUser = yield db.UserAccounts.findOne({id: k});
-      users.push(addingUser.name || addingUser.email_address);
-      items.push(userItems[k]);
+      for (var k in userItems) {
+        var addingUser = yield db.UserAccounts.findOne({id: k});
+        users.push(addingUser.name || addingUser.email_address);
+        items.push(userItems[k]);
+      }
+
+      yield receipt.template('summary_email', {
+        username: req.UserSession.user_account.name || req.UserSession.user_account.email_address,
+        baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
+        id: cart.id,
+        items: items,
+        users: users,
+        date: moment().format('dddd, MMMM Do, h:mm a'),
+        total: '$' + total.toFixed(2),
+        totalItems: totalItems,
+        cart: cart
+      })
+
+      yield receipt.send();
+      logging.info('receipt sent')
+
     }
-
-    yield receipt.template('summary_email', {
-      username: req.UserSession.user_account.name || req.UserSession.user_account.email_address,
-      baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
-      id: cart.id,
-      items: items,
-      users: users,
-      date: moment().format('dddd, MMMM Do, h:mm a'),
-      total: '$' + total.toFixed(2),
-      totalItems: totalItems,
-      cart: cart
-    })
-
-    yield receipt.send();
-    logging.info('receipt sent')
 
     // save the amazon purchase url
     if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
