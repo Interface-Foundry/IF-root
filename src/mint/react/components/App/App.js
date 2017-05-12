@@ -17,7 +17,7 @@ import ReactGA from 'react-ga';
 export default class App extends Component {
 
   static propTypes = {
-    cart_id: PropTypes.string.isRequired,
+    cart_id: PropTypes.string,
     leader: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
     modal: PropTypes.string,
@@ -84,8 +84,7 @@ export default class App extends Component {
       }
     } = this;
     const { cart_id: nextCart_id, session_id: nextSessionId, toast: newToast } = nextProps;
-
-    if (!session_id && nextSessionId) {
+    if (!session_id && nextSessionId && process.env.GA) {
       ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
           userId: nextSessionId

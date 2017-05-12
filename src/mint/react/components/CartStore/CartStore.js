@@ -23,13 +23,11 @@ export default class CartStore extends Component {
     return (
       <ul className="cart_store">
         {choices.map(choice => 
-            <a href={`/newcart/${choice.store_type}`}>
-              <StoreChoice 
-                key={choice.store_type} 
-                {...choice} 
-                onClick={() => replace(`/newcart/${choice.store_type}`)} 
-              />
-            </a>
+            <StoreChoice 
+              key={choice.store_type} 
+              {...choice} 
+              onClick={() => replace(`/newcart/${choice.store_type}`)} 
+            />
           )
         }
       </ul>
@@ -54,8 +52,8 @@ class StoreChoice extends Component {
     } = this.props;
 
     return (
-      <li>
-        <div className='cart__choice' key={type}>
+      <a href={`/newcart/${type}`}  key={type}>
+        <div className='cart__choice'>
           <div className='choice__details'>
             <div className='choice__image image' style={{backgroundImage:`url(${img})`}}/>
             <span className='choice__name'> { name } </span>
@@ -65,7 +63,7 @@ class StoreChoice extends Component {
             Choose
           </div>
         </div>
-      </li>
+      </a>
     );
   }
 }
