@@ -23,9 +23,10 @@ module.exports = function * (source, fields, textIndex) {
   var records = parse(data, {
     delimiter: '\t',
     relax: true,
-    columns: true,
+    columns: (labels) => labels.map(label => label.replace(' ', '_').toLowerCase()),
     auto_parse: true
   });
+
 
   console.log('creating inventory...')
   yield db[`${source}InventoryItems`].create(records);
