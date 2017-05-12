@@ -18,7 +18,7 @@
     float: right;
     display: inline-block;
     z-index: 0;
-    background: darken($kip-secondary-color, 5%);
+    background: $kip-secondary-color;
   }
   p {
     overflow: hidden;
@@ -43,7 +43,7 @@
     @include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
     @media (min-width: 900px) {
-      background: darken($kip-secondary-color, 5%);
+      background: $kip-secondary-color;
       height: calc(100% - #{$nav-height});
     }
     li {
