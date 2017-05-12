@@ -37,6 +37,9 @@ var regularRoutes = require('./routes/regular.js');
 var apiRoutes = require('./routes/api.js');
 var mailRoutes = require('./routes/incoming-mail.js');
 
+// sendgrid router
+var sendgridRouter = require('./sendgrid-webhook.js')
+
 require('colors');
 // require('../camel'); //uncomment to populate camel_items
 
@@ -114,6 +117,11 @@ if (process.env.LOGGING_MODE === 'database') {
 app.use('/', regularRoutes);
 app.use('/api', apiRoutes);
 app.use('/sendgrid', mailRoutes);
+
+/**
+ * Sendgrid Webhook
+ */
+app.use('/sg', sendgridRouter);
 
 /**
  *  Always return the main index.html, so react-router render the route in the client
