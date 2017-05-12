@@ -91,7 +91,7 @@ class CartFooter extends Component {
               (e) => { 
                 e.preventDefault(); 
                 if (items.length > 0) { 
-                  updateCart({...currentCart, locked: !currentCart.locked});
+                  if(isLeader) updateCart({...currentCart, locked: !currentCart.locked});
                   window.open(`/api/cart/${cart_id}/checkout`);
                 }
               }
@@ -118,7 +118,7 @@ class CartFooter extends Component {
             (e) => { 
               e.preventDefault(); 
               if (items.length > 0) { 
-                updateCart({...currentCart, locked: true});
+                if(isLeader) updateCart({...currentCart, locked: true});
                 window.open(`/api/cart/${cart_id}/checkout`);
               }
             }
