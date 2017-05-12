@@ -554,24 +554,15 @@ module.exports = function (router) {
    * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
    */
   router.get('/itempreview', (req, res) => co(function * () {
-    console.log('req!!!', req)
     // parse the incoming text to extract either an asin, url, or search query
+    //
     const q = (req.query.q || '').trim()
     if (!q) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
     }
 
-    if (q.includes('amazon.com')) {
-      // probably a url
-      var item = yield amazonScraper.scrapeUrl(q)
-    } else if (q.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
-      // probably an asin
-      var item = yield amazonScraper.scrapeAsin(q)
-    } else {
-      // search query
-      // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-      var item = yield amazon.searchAmazon(q, req.query.page);
-    }
+    const store = _.get(req, 'query.store') ? req.query.store : 'amazon'
+    const item = yield cartUtils.itemPreview(q, store)
     res.send(item)
   }))
 
@@ -751,7 +742,6 @@ module.exports = function (router) {
       }
 
       var sampleItem = yield db.YpoInventoryItems.findOne({category_2: cat});
-
       categoryObject.image = sampleItem.image_url
 
       Object.keys(categories[cat]).map(c => {

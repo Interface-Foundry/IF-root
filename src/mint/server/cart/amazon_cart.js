@@ -35,6 +35,21 @@ const checkError = function (res) {
   }
 }
 
+exports.itemPreview = function * (query) {
+  if (item.includes('amazon.com')) {
+    // probably a url
+    var item = yield amazonScraper.scrapeUrl(query)
+  } else if (query.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
+    // probably an asin
+    var item = yield amazonScraper.scrapeAsin(query)
+  } else {
+    // search query
+    // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
+    var item = yield amazon.searchAmazon(query, req.query.page);
+  }
+  return item
+}
+
 /**
  * the idea of this is that you can add functionality later
  * @param  {string} item_identifier is url/asin/etc that is given
