@@ -24,12 +24,12 @@ export function fetchStores() {
   return async function (dispatch) {
     dispatch(request());
     try {
-      const response = await fetch('/api/test/store_list', {
+      const response = await fetch('/api/cart_type', {
         credentials: 'same-origin'
       });
       if (response.ok) {
         const json = await response.json();
-        return dispatch(receive(json.stores));
+        return dispatch(receive(json));
       } else {
         return null;
       }
@@ -50,7 +50,7 @@ export function setStore(cart_id, store) {
           'Content-Type': 'application/json'
         },
         credentials: 'same-origin',
-        'body': JSON.stringify({store})
+        'body': JSON.stringify({ store })
       });
       return dispatch(receiveSetStore());
     } catch (e) {

@@ -20,7 +20,6 @@ export default class Cards extends Component {
   }
 
   shouldComponentUpdate (nextProps, nextState){
-    console.log(nextProps.cards.length !== this.props.cards.length)
     if(nextProps.cards.length !== this.props.cards.length) return true;
 
     return false;

@@ -22,7 +22,7 @@ export default class CartStore extends Component {
     const { choices, setStore, cart_id, history: { replace } } = this.props;
     return (
       <ul className="cart_store">
-        {choices.map(choice => <StoreChoice key={choice.cart_type} {...choice} setStore={store => {setStore(cart_id, store); replace(`/cart/${cart_id}`);}} />)}
+        {choices.map(choice => <StoreChoice key={choice.store_type} {...choice} setStore={store => {setStore(cart_id, store); replace(`/cart/${cart_id}`);}} />)}
       </ul>
     );
   }
@@ -30,18 +30,18 @@ export default class CartStore extends Component {
 
 class StoreChoice extends Component {
   static propTypes = {
-    cart_name: PropTypes.string,
-    cart_img: PropTypes.string,
-    cart_type: PropTypes.string,
-    cart_domain: PropTypes.string,
+    store_name: PropTypes.string,
+    store_img: PropTypes.string,
+    store_type: PropTypes.string,
+    store_domain: PropTypes.string,
     setStore: PropTypes.func
   }
   render() {
     const {
-      cart_img: img,
-      cart_type: type,
-      cart_name: name,
-      cart_domain: domain,
+      store_img: img,
+      store_type: type,
+      store_name: name,
+      store_domain: domain,
       setStore
     } = this.props;
 
