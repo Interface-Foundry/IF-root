@@ -561,7 +561,7 @@ module.exports = function (router) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
     }
 
-    const store = _.get(req, 'query.store') ? req.query.store : 'amazon'
+    const store = _.get(req, 'query.store') ? req.query.store : 'ypo' // <--- CHANGE THIS BACK TO AMAZON IN THE FUTURE, JUST FOR YPO PURPOSES
     const item = yield cartUtils.itemPreview(q, store)
     res.send(item)
   }))
@@ -629,7 +629,7 @@ module.exports = function (router) {
 
       yield receipt.send();
       logging.info('receipt sent')
-    
+
     }
 
     // save the amazon purchase url
