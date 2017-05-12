@@ -3,7 +3,7 @@
 @import '../../styles/Animations';
 .cards__section {
   .cards__section__breadcrumb {
-    padding: 0 $padding*3 $padding*2;
+    padding: $padding $padding $padding*2;
     font-size: 16px;
 
     svg {
@@ -20,7 +20,9 @@
       &.cards__section__breadcrumb-type {
         cursor: pointer;
         font-weight: 500;
-        border-bottom: 3px solid #ffdf4d;
+        background: #e6f8ff;
+        padding: $padding/2 $padding*2;
+        border-radius: $padding/2;
       }
     }
   }

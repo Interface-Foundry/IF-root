@@ -78,7 +78,7 @@ export default class Cards extends Component {
     const { props: { cards, cart_id, selectCard, cardType, previewAmazonItem }} = this;
 
     const activeCards = cards.map((card, i) => {
-      return <li key={i} onClick={(e) => selectCard(i + 1, card)}>
+      return <li key={card.id} onClick={(e) => selectCard(i + 1, card)}>
         {
           cardType.includes('search')  ? <SearchCard {...card} cart_id={cart_id} index={i}/> : <CategoryCard {...card} cart_id={cart_id} index={i} previewAmazonItem={previewAmazonItem}/>
         }
@@ -87,12 +87,9 @@ export default class Cards extends Component {
 
     return (
       <div ref='scroll' className='scroll__horizontal'>
-        <CSSTransitionGroup
-          transitionName="cardsItem"
-          transitionEnterTimeout={0}
-          transitionLeaveTimeout={0}>
+        <span>
           {activeCards}
-        </CSSTransitionGroup>
+        </span>
       </div>
     );
   }
