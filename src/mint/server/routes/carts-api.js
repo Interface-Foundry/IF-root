@@ -684,8 +684,6 @@ module.exports = function (router) {
     country = ipresponse.country;
     console.log('ipresponse', ipresponse)
 
-
-    // fallback for ^^
     // if no exact match, use haversine thing
     // send back list of stores in format on the git issue
     res.send(country)
