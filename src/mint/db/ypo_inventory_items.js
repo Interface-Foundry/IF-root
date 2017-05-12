@@ -22,7 +22,7 @@ var ypoInventoryItemsCollection = Waterline.Collection.extend({
     name: 'string',
 
     /**@type {number} item price*/
-    price: 'string',
+    price: 'float',
 
     /**@type {string} unit by which this item is sold / which this item
     represents. e.g. "pack". */
