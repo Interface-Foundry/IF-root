@@ -9,8 +9,12 @@ const camel = require('../deals/deals')
 const googl = require('goo.gl')
 const fs = require('co-fs')
 const path = require('path')
+const haversine = require('haversine')
 const thunkify = require('thunkify')
 const ipinfo = thunkify(require('ipinfo'))
+
+const cart_types = require('../cart/cart_types').stores
+const country_coordinates = require('../cart/cart_types').country_coordinates
 
 if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
@@ -685,11 +689,18 @@ module.exports = function (router) {
     country = ipresponse.country;
     console.log('ipresponse', ipresponse)
 
-
-    // fallback for ^^
-    // if no exact match, use haversine thing
     // send back list of stores in format on the git issue
-    res.send(country)
+    var stores = cart_types.filter(cart => cart.store_countries.indexOf(country) > -1);
+
+    // if (stores.length === 0) {
+    //   res.send(cart_types.sort(function (a, b) {
+    //     //if return -1 ==> a comes first
+    //
+    //   }))
+    // }
+
+    // if no exact match, use haversine thing
+    res.send(stores)
   }))
 
   /**
