@@ -46,7 +46,7 @@ exports.itemPreview = function * (query) {
   } else {
     // search query
     // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-    item = yield amazon.searchAmazon(query, req.query.page);
+    item = yield searchAmazon(query, req.query.page);
   }
   return item
 }
