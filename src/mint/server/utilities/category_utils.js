@@ -1,3 +1,5 @@
+var amazonCategories = require('../../amazonCategories');
+
 var getYpoCategories = function * () {
   // read in categories file
   var categories = yield fs.readFile(path.join(__dirname, '../../ingest/categories.json'));
@@ -28,12 +30,18 @@ var getYpoCategories = function * () {
   return categoryArray;
 }
 
-var getAmazonNodeCode = function (node) {
-  switch (node) {
-    
-  }
+var getAmazonCategories = function () {
+  return Object.keys(amazonCategories).map(cat => {
+    return {
+      humanName: cat,
+      machineName: amazonCategories[cat],
+      searchType: 'category',
+      id: amazonCategories[cat]
+    }
+  })
 }
 
 module.exports = {
-  getYpoCategories: getYpoCategories
+  getYpoCategories: getYpoCategories,
+  getAmazonCategories: getAmazonCategories
 }

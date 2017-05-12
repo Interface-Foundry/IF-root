@@ -742,7 +742,7 @@ module.exports = function (router) {
 
     switch (store) {
       case 'amazon':
-        //something
+        var categories = yield category_utils.getAmazonCategories();
         break;
       case 'ypo':
         var categories = yield category_utils.getYpoCategories();
