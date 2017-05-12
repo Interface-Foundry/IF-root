@@ -42,7 +42,6 @@ export function fetchStores() {
 export function setStore(cart_id, store) {
   return async dispatch => {
     dispatch(requestSetStore(store));
-    console.log(JSON.stringify({store})) 
     try {
       await fetch(`/api/cart/${cart_id}`, {
         'method': 'POST',
