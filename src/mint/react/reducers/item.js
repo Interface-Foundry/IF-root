@@ -9,7 +9,7 @@ import {
   SEARCH_NEXT,
   SEARCH_PREV,
   SET_SEARCH_INDEX,
-  SELECT_DEAL
+  SELECT_CARD
 } from '../constants/ActionTypes';
 
 export default function item(state = {}, action) {
@@ -52,9 +52,11 @@ export default function item(state = {}, action) {
       ...state,
       position: action.index
     };
-  case SELECT_DEAL:
+  case SELECT_CARD:
     return {
-      ...action.deal
+      ...state,
+      position: action.selectedIndex,
+      ...action.card
     };
   default:
     return state;

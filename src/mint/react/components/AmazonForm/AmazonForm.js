@@ -10,44 +10,55 @@ export default class AmazonForm extends Component {
   constructor(props) {
     super(props);
     this.renderField = ::this.renderField;
+    this.onSubmitMiddleware = ::this.onSubmitMiddleware;
+    this._toggleHistory = ::this._toggleHistory;
   }
 
-  static propTypes = {
-    onBlur: PropTypes.func
+  state = {
+    showHistroy: false
   }
 
-  renderField({ input, label, placeholder, handleSubmit, type, meta: { touched, error, warning, submitting, active } }) {
+  _toggleHistory = () => {
+    this.setState({showHistroy: !this.state.showHistroy})
+  }
 
+  onSubmitMiddleware = (values, e, state) => {
+    const { _toggleHistory, props: { handleSubmit, onSubmit } } = this;
+
+    _toggleHistory()
+    onSubmit(values, e, state)
+  }
+
+  renderField({ input, label, placeholder, handleSubmit, type, meta, meta: { touched, error, warning, submitting, active, dirty } }) {
+    const { onSubmitMiddleware, _toggleHistory, state: { showHistroy } } = this;
     return (
       <div>
           <div className='form__input'>
-            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete="off" spellCheck='true'/>
+            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete="off" spellCheck='true' onFocus={() => this.setState({showHistroy: true})}/>
             <button
               className='form__input__submit'
-              type="submit"
               onClick={handleSubmit}>
               <div className='form__input__submit__description'><Icon icon='Search'/></div>
             </button>
           </div>
-          <SearchHistory filter={input.value} onChange={input.onChange} handleSubmit={handleSubmit} />
+          {showHistroy || active && dirty ? <SearchHistory filter={input.value} onChange={input.onChange} handleSubmit={handleSubmit} _toggleHistory={_toggleHistory} />:null}
         </div>
     );
   }
 
   render() {
-    const { props, renderField } = this;
+    const { props, renderField, onSubmitMiddleware } = this;
     const { handleSubmit } = props;
+    
     return (
-      <form onSubmit={handleSubmit} className="form">
+      <form onSubmit={handleSubmit(onSubmitMiddleware)} className="form">
         <Field
           name="url"
           type="string"
           placeholder="Paste Amazon URL or Search"
-          handleSubmit={handleSubmit}
+          handleSubmit={handleSubmit(onSubmitMiddleware)}
           component={renderField}/>
       </form>
     );
   }
 }
-
-// <DealsContainer isDropdown={active}/>

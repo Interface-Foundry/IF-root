@@ -9,8 +9,7 @@ $cart__add-height: $nav-height+$padding;
   margin: 0 auto;
   .add__item {
     background-color: $kip-primary-color;
-    border-bottom-right-radius: $padding/2;
-    border-bottom-left-radius: $padding/2;
+    border-radius: $padding/2;
     box-shadow: $card-box-shadow;
     margin: 0 2px 0 2px;
     position: relative;

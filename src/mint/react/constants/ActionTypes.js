@@ -22,11 +22,11 @@ export const ADDING_ITEM = 'ADDING_ITEM';
 export const ADD_MEMBER_TO_CART = 'ADD_MEMBER_TO_CART';
 export const RECEIVE_UPDATE_CART = 'RECEIVE_UPDATE_CART';
 
-// Deals
-export const REQUEST_DEALS = 'REQUEST_DEALS';
-export const RECEIVE_DEALS = 'RECEIVE_DEALS';
-export const SELECT_DEAL = 'SELECT_DEAL';
-export const REMOVE_DEAL = 'REMOVE_DEAL';
+// Cards
+export const REQUEST_CARDS = 'REQUEST_CARDS';
+export const RECEIVE_CARDS = 'RECEIVE_CARDS';
+export const SELECT_CARD = 'SELECT_CARD';
+export const REMOVE_CARD = 'REMOVE_CARD';
 
 // Item
 export const REQUEST_ITEM = 'REQUEST_ITEM';

@@ -1,4 +1,5 @@
 const amazon = require('./amazon_cart.js');
+const ypo = require('./ypo_cart.js')
 const constants = require('../constants.js');
 /**
  * Models loaded from the waterline ORM
@@ -31,6 +32,11 @@ const addItemHandlers = {
 
 const clearCartHandlers = {
   'amazon': amazon.clearAmazonCart
+}
+
+const itemPreviewHandlers = {
+  'amazon': amazon.itemPreview,
+  'ypo': ypo.itemPreview
 }
 
 /************************************************

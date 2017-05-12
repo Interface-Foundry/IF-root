@@ -1,0 +1,156 @@
+// react/components/Cards/Cards.scss
+@import '../../styles/Constants';
+@import '../../styles/Animations';
+.cards__section {
+  span {
+    height: 190px;
+    padding: 0 0 $padding 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    white-space: nowrap;
+    overflow: scroll;
+    -webkit-overflow-scrolling: touch;
+    &::before {
+      content: '';
+      display: inline-block;
+      min-width: 5px;
+    }
+    &::after {
+      content: '';
+      display: inline-block;
+      min-width: 5px;
+    }
+    &::-webkit-scrollbar {
+      display: none;
+      width: 0px;
+      height: 0px;
+      /* remove scrollbar space */
+      background: transparent;
+      /* optional: just make scrollbar invisible */
+    }
+    &::-webkit-scrollbar-thumb {
+      height: 0px;
+      background: transparent;
+    }
+    li {
+      display: inline-block;
+      padding: 1px;
+      margin: 0 $padding/3;
+      font-size: 18px;
+      min-width: 150px;
+      width: 150px;
+      height: 100%;
+      section[class^="card__type"] {
+        position: relative;
+        text-align: center;
+        cursor: pointer;
+        height: 100%;
+        border: 1px $border-color-light solid;
+        border-radius: $padding;
+        background: white;
+        .details {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: $padding/2.5;
+          height: calc(100% - #{$nav-height/2});
+          .details__name {
+            hyphens: auto;
+            font-size: 0.7em;
+            position: relative;
+            overflow: hidden;
+            white-space: normal;
+            color: #58595b;
+            padding: 0;
+            min-height: 2.5em; //for safari
+            height: 2.5em;
+          }
+          .details__price {
+            padding: 0;
+            font-size: 22px;
+            color: $price-color;
+          }
+          .details__discount {
+            font-size: 10px;
+            color: $header-color;
+          }
+          .details__image {
+            align-self: center;
+            width: $nav-height + 25px;
+            height: $nav-height + 25px;
+          }
+          .details__prevPrice {
+            text-decoration: line-through;
+          }
+        }
+        .add {
+          position: absolute;
+          width: 100%;
+          height: $nav-height/2;
+          line-height: $nav-height/2;
+          left: 0;
+          bottom: 0;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          background: $border-color-light;
+          border-radius: 0 0 $padding - 1 $padding - 1;
+        }
+      }
+    }
+  }
+}
+
+.cards__section-small {
+  position: relative;
+  font-size: 15px;
+  top: -10px;
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+  justify-content: flex-start;
+  align-items: left;
+  border: 1px $kip-secondary-color solid;
+  border-radius: 0 0 $padding $padding;
+  overflow: hidden;
+  background: white;
+  li {
+    display: flex;
+    box-shadow: 35px 1px 1px $kip-secondary-color;
+    background: white;
+    margin-bottom: 1px;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    a {
+      padding: $padding/2;
+      width: 100%;
+    }
+    .priceTagIcon {
+      padding: 0 10px 0 5px;
+    }
+    &:hover {
+      background: $kip-secondary-color;
+    }
+    &:last-child {
+      box-shadow: none;
+      margin: 0;
+    }
+    .categorycard-small {
+      display: flex;
+      flex-direction: row;
+      .price {
+        color: $price-color;
+        font-style: normal;
+      }
+    }
+  }
+}
+
+.cardsItem-leave {
+  @include animation(fallOutDown cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
+  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+}
+

@@ -553,6 +553,7 @@ module.exports = function (router) {
    * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
    */
   router.get('/itempreview', (req, res) => co(function * () {
+    console.log('req!!!', req)
     // parse the incoming text to extract either an asin, url, or search query
     const q = (req.query.q || '').trim()
     if (!q) {

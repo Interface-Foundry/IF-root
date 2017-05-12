@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CartItem from './CartItem';
-import { AddAmazonItemContainer, DealsContainer } from '../../containers';
+import { AddAmazonItemContainer, CardsContainer } from '../../containers';
 import { Icon } from '..';
 import { calculateItemTotal, displayCost } from '../../utils';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
@@ -11,7 +11,7 @@ import moment from 'moment';
 
 export default class Cart extends Component {
   static propTypes = {
-    fetchDeals: PropTypes.func.isRequired,
+    fetchCards: PropTypes.func.isRequired,
     cart_id: PropTypes.string,
     members: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
@@ -23,7 +23,7 @@ export default class Cart extends Component {
     locked: PropTypes.bool,
     updateCart: PropTypes.func,
     currentCart: PropTypes.object,
-    deals: PropTypes.array,
+    cards: PropTypes.array,
     cancelRemoveItem: PropTypes.func.isRequired
   }
 
@@ -32,9 +32,9 @@ export default class Cart extends Component {
   }
 
   componentWillMount() {
-    const { fetchDeals, deals } = this.props;
-    if (deals.length === 0) {
-      fetchDeals();
+    const { fetchCards, cards } = this.props;
+    if (cards.length === 0) {
+      fetchCards();
     }
   }
 
@@ -72,7 +72,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, deals, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, cards, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
@@ -106,11 +106,7 @@ export default class Cart extends Component {
               <div className='cart__add'>
                 <AddAmazonItemContainer push={push} members={members}/>
               </div>
-              {
-                !!user_account.id && deals.length
-                  ? <DealsContainer isDropdown={false}/> 
-                  : null
-              }
+              <CardsContainer isDropdown={false}/> 
             </div>
         }
         <div className={`cart__title ${animation || currentCart.itemDeleted  ? 'action' : ''}`}>

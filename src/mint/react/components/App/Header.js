@@ -10,13 +10,13 @@ export default class Header extends Component {
   static propTypes = {
     item: PropTypes.object,
     items: PropTypes.arrayOf(PropTypes.object),
-    deals: PropTypes.arrayOf(PropTypes.object),
+    cards: PropTypes.arrayOf(PropTypes.object),
     currentUser: PropTypes.object,
     currentCart: PropTypes.object,
   }
 
   render() {
-    const { props, props: { deals, currentUser, items, currentCart: { leader }, item: { search } } } = this,
+    const { props, props: { cards, currentUser, items, currentCart: { leader }, item: { search } } } = this,
     isLeader = leader && (leader.id === currentUser.id);
     return (
       <nav className='navbar'>
@@ -36,8 +36,12 @@ export default class Header extends Component {
             <ModalHead text={'Add to Cart'} {...props}/>
           }
         />
+        <Route path={'/cart/:cart_id/store_choice'} exact component={() => 
+            <IntroHead text={'Choose a store for your cart'} {...props}/>
+          }
+        />
         <Route path={'/cart/:cart_id/m/deal/:index/:dealId'} exact component={() => 
-            <EnumeratedHead text={'Daily Deals'} length={deals.length} type={'deal'} {...props}/>
+            <EnumeratedHead text={'Daily Deals'} length={cards.length} type={'deal'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/search/:index/:query'} exact component={() => 
@@ -177,7 +181,7 @@ class EnumeratedHead extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
     history: PropTypes.object,
-    deals: PropTypes.array,
+    cards: PropTypes.array,
     text: PropTypes.string,
     location: PropTypes.object,
     items: PropTypes.array,

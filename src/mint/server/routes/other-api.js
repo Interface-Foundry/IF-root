@@ -5,6 +5,7 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
+const constants = require('../constants.js')
 const deals = require('../deals/deals')
 
 module.exports = function (router) {

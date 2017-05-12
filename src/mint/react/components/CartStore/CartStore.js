@@ -9,7 +9,8 @@ export default class CartStore extends Component {
     fetchStores: PropTypes.func,
     setStore: PropTypes.func,
     choices: PropTypes.array,
-    cart_id: PropTypes.string
+    cart_id: PropTypes.string,
+    history: PropTypes.object
   }
 
   componentWillMount() {
@@ -18,10 +19,10 @@ export default class CartStore extends Component {
   }
 
   render() {
-    const { choices, setStore, cart_id } = this.props;
+    const { choices, setStore, cart_id, history: { replace } } = this.props;
     return (
       <ul className="cart_store">
-        {choices.map(choice => <StoreChoice key={choice.cart_type} {...choice} setStore={store => setStore(cart_id, store)} />)}
+        {choices.map(choice => <StoreChoice key={choice.cart_type} {...choice} setStore={store => {setStore(cart_id, store); replace(`/cart/${cart_id}`);}} />)}
       </ul>
     );
   }
@@ -45,10 +46,17 @@ class StoreChoice extends Component {
     } = this.props;
 
     return (
-      <li key={type} onClick={() => setStore(type)}>
-        <img src={img}/> 
-        { name }
-        { domain }
+      <li>
+        <div className='cart__choice' key={type} onClick={() => setStore(type)}>
+          <div className='choice__details'>
+            <div className='choice__image image' style={{backgroundImage:`url(${img})`}}/>
+            <span className='choice__name'> { name } </span>
+            <span className='choice__domain'> { domain } </span>
+          </div>
+          <div className='choice__select'>
+            Choose
+          </div>
+        </div>
       </li>
     );
   }

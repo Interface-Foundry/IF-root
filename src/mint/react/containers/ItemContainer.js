@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Item } from '../components';
-import { fetchDeals, selectDeal } from '../actions/deals';
+import { fetchCards, selectCard } from '../actions/cards';
 import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, decrementItem, nextSearch, prevSearch, setSearchIndex, updateItem } from '../actions/item';
 import ReactGA from 'react-ga';
 
@@ -16,12 +16,12 @@ const mapStateToProps = (state, ownProps) => ({
   item: state.item,
   index: parseInt(ownProps.match.params.index),
   type: ownProps.match.params.item_type,
-  items: ownProps.match.params.item_type === 'deal' ? state.deals.deals : state.currentCart.items,
+  items: ownProps.match.params.item_type === 'search' ? state.cards.cards : state.currentCart.items,
   routing: state.routing
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchDeals: () => dispatch(fetchDeals()),
+  fetchCards: () => dispatch(fetchCards()),
   previewItem: (itemId) => {
     ReactGA.event({
       category: 'Item',
@@ -48,7 +48,7 @@ const mapDispatchToProps = dispatch => ({
   decrementItem: (item_id, quantity) => dispatch(decrementItem(item_id, quantity)),
   nextSearch: () => dispatch(nextSearch()),
   prevSearch: () => dispatch(prevSearch()),
-  selectDeal: (dealIndex, deal) => dispatch(selectDeal(dealIndex, deal)),
+  selectCard: (cardIndex, card) => dispatch(selectCard(cardIndex, card)),
   setSearchIndex: (index) => dispatch(setSearchIndex(index)),
   updateItem: (cart_id, old_item_id, new_item_id) => dispatch(updateItem(cart_id, old_item_id, new_item_id))
 });

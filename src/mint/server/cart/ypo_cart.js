@@ -21,3 +21,11 @@ function removeItemFromCart(argument) {
 function clearCart(argument) {
     // body...
 }
+
+function itemPreview(argument) {
+  // body
+}
+
+module.exports = {
+  itemPreview: itemPreview,
+}

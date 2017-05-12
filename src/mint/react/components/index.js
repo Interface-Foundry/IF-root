@@ -4,7 +4,7 @@ export AmazonForm from './AmazonForm';
 export App from './App';
 export Cart from './Cart';
 export CartStore from './CartStore';
-export Deals from './Deals';
+export Cards from './Cards';
 export EditCart from './EditCart';
 export EmailForm from './EmailForm';
 export ErrorPage from './ErrorPage';

@@ -13,7 +13,7 @@ export default class SearchHistory extends Component {
   }
 
   render() {
-    const { props: { filter, handleSubmit, onChange } } = this,
+    const { props: { filter, handleSubmit, onChange, _toggleHistory } } = this,
     searchHistory = filter.length > 0 ? getSearchHistory(filter) : [];
 
     return (
@@ -27,9 +27,8 @@ export default class SearchHistory extends Component {
                 </div>
                 <div className='searchHistory__term-query' onClick={(e) => {
                   onChange(previousSearch);
-                  setTimeout(() => {
-                    handleSubmit();
-                  }, 100);
+                  _toggleHistory()
+                  handleSubmit();
                 }}>
                   <p>{previousSearch}</p>
                 </div>
