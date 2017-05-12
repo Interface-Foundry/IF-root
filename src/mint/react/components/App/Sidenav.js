@@ -80,11 +80,13 @@ export default class Sidenav extends Component {
                   <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} onClick={_toggleSidenav}>
                     { c.locked 
                       ? <div className='icon'/> 
-                      : <Link className='editIcon' to={`/cart/${cart_id}/m/edit/${c.id}`}>
-                          <div className='icon'>
-                            <Icon icon='Edit'/>
-                          </div>
-                        </Link>
+                      : !i 
+                        ? <Link className='editIcon' to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                            <div className='icon'>
+                              <Icon icon='Edit'/>
+                            </div>
+                          </Link>
+                        : null
                     }
                     <Link to={`/cart/${c.id}`}>
                       <p>
