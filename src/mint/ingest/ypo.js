@@ -14,7 +14,7 @@ co(function * () {
     'keywords',
     'image_url',
     'product_url'
-  ], ['keywords']);
+  ], ['name', 'keywords']);
 
   process.exit();
 });
