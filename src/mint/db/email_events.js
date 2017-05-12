@@ -13,10 +13,23 @@ var emailEventsCollection = Waterline.Collection.extend({
     // id: No id needed for opens
 
     /**
-     * The email record
+     * The email record created by mint.
      * @type {Email}
      */
-    email: Waterline.isA('emails')
+    //mint_email: Waterline.isA('emails'),
+
+
+    /** 
+     * Email group ID
+     * Available for all events
+     */
+    asm_group_id: 'integer',
+
+    /** 
+     * Email address string
+     * Available for all events
+     */
+    email: 'string',
 
     /** 
      * Event type
@@ -26,7 +39,7 @@ var emailEventsCollection = Waterline.Collection.extend({
 
     /** 
      * IP Address where event occurred 
-     * Available for bounce, click, deliver, group resubscribe, group unsubscribe, and open events
+     * Available for bounce, click, deliver, group resubscribe, group unsubscribe, defer, and open events
      */
     ip: 'string',
 
@@ -38,7 +51,7 @@ var emailEventsCollection = Waterline.Collection.extend({
 
     /** 
     * Response from mail transfer agent 
-    * Available for deliver events
+    * Available for deliver and defer events
     */
     response: 'string',
 
@@ -56,7 +69,7 @@ var emailEventsCollection = Waterline.Collection.extend({
 
     /** 
      * Sendgrid unique SMTP ID 
-     * Available for bounce, deliver, drop, and process events
+     * Available for bounce, deliver, defer, drop, and process events
      */
     "smtp-id": 'string',
 
@@ -74,7 +87,7 @@ var emailEventsCollection = Waterline.Collection.extend({
 
     /** 
      * Whether TLS was used when email was sent. 1 for true and 0 for false. 
-     * Available for bounce and deliver events
+     * Available for bounce, defer, and deliver events
      */
     tls: 'integer',
 
@@ -94,16 +107,19 @@ var emailEventsCollection = Waterline.Collection.extend({
      * Index of group of links. Type of link clicked 
      * Available for click events
      */
-    url_offset: {
-      index: 'integer',
-      type: 'string'
-    },
+    url_offset: 'json',
 
     /** 
      * User agent where event occurred 
      * Available for click, group resubscribe, group unsubscribe, and open events
      */
     useragent: 'string',
+
+    /**
+     * Attempt number (sendgrid set this as string for some reason)
+     * Available for defer events.
+     */
+     attempt: 'string'
 
   }
 })
