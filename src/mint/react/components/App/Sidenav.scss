@@ -97,6 +97,7 @@
         a {
           padding: 10px 2px;
           &.editIcon {
+            @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
             padding: $padding $padding;
             background: transparent;
             border-radius: 5px 0 0 5px;
