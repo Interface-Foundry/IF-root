@@ -24,7 +24,8 @@ export default class Cart extends Component {
     updateCart: PropTypes.func,
     currentCart: PropTypes.object,
     deals: PropTypes.array,
-    cancelRemoveItem: PropTypes.func.isRequired
+    cancelRemoveItem: PropTypes.func.isRequired,
+    clearCart: PropTypes.func.isRequired
   }
 
   state = {
@@ -72,7 +73,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, deals, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, deals, locked, updateCart, currentCart, cancelRemoveItem, clearCart, cancelClearCart, history: { push } } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
@@ -113,10 +114,11 @@ export default class Cart extends Component {
               }
             </div>
         }
-        <div className={`cart__title ${animation || currentCart.itemDeleted  ? 'action' : ''}`}>
+        <div className={`cart__title ${animation || currentCart.itemDeleted || currentCart.oldItems.length  ? 'action' : ''}`}>
           { animation 
             ? <h4>{animation}</h4>
             : currentCart.itemDeleted ? <h4 className='undo__button' onClick={cancelRemoveItem}>Item Removed. <a href='#'>Undo</a></h4>
+            : currentCart.oldItems.length ? <h4 className='undo__button' onClick={cancelClearCart}>Cart cleared. <a href='#'>Undo</a></h4>
             : <h4>
               { hasItems ? `${items.quantity} items in Kip Cart`  : 'Kip Cart' } 
               {
@@ -127,7 +129,10 @@ export default class Cart extends Component {
             </h4>
           }
         </div>
-        
+        {items.quantity > 3 && isLeader
+          ? <button onClick={() => clearCart(cart_id)}>Empty Cart</button>
+          : null
+        }
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
           {

@@ -164,7 +164,7 @@ $cart__add-height: $nav-height+$padding;
         text-decoration: underline;
       }
       &:before {
-        @include animation(progressBar ease 10s);
+        @include animation(progressBar cubic-bezier(0.0, 0.0, 0.2, 1) 10s);
         content: '';
         display: block;
         height: 2px;

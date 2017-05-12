@@ -314,7 +314,7 @@ module.exports = function (router) {
    * @apiParamExample Request
    * DELETE https://mint.kipthis.com/api/cart/123456/clear
    */
-   router.get('/cart/:cart_id/clear', (req, res) => co(function * () {
+   router.delete('/cart/:cart_id/clear', (req, res) => co(function * () {
      // only leaders have sudo rm -rf permission
      const cart = yield db.Carts.findOne({
        id: req.params.cart_id

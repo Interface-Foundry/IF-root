@@ -2,7 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Route, Switch } from 'react-router';
+import { Route } from 'react-router';
 import ReactDOM from 'react-dom';
 
 import { CartContainer } from '../../containers';
