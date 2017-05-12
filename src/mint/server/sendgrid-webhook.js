@@ -44,7 +44,7 @@ var options = {
     group_unsubscribe: 1,
     group_resubscribe: 1,
     spamreport: 1,
-    url: "https://d0b65060.ngrok.io/sg" //Change this if needed when the code incorporates live data.
+    url: process.env.SENDGRID_WEBHOOK
   }
 };
 
