@@ -9,6 +9,7 @@ const camel = require('../deals/deals')
 const googl = require('goo.gl')
 const fs = require('co-fs')
 const path = require('path')
+const haversine = require('haversine')
 const thunkify = require('thunkify')
 const ipinfo = thunkify(require('ipinfo'))
 
@@ -689,6 +690,13 @@ module.exports = function (router) {
 
     // send back list of stores in format on the git issue
     var stores = cart_types.filter(cart => cart.store_countries.indexOf(country) > -1);
+
+    // if (stores.length === 0) {
+    //   res.send(cart_types.sort(function (a, b) {
+    //     //if return -1 ==> a comes first
+    //
+    //   }))
+    // }
 
     // if no exact match, use haversine thing
     res.send(stores)
