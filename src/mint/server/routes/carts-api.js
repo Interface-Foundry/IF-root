@@ -12,6 +12,9 @@ const path = require('path')
 const thunkify = require('thunkify')
 const ipinfo = thunkify(require('ipinfo'))
 
+const cart_types = require('../cart/cart_types').stores
+const country_coordinates = require('../cart/cart_types').country_coordinates
+
 if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
 } else {
@@ -684,9 +687,11 @@ module.exports = function (router) {
     country = ipresponse.country;
     console.log('ipresponse', ipresponse)
 
-    // if no exact match, use haversine thing
     // send back list of stores in format on the git issue
-    res.send(country)
+    var stores = cart_types.filter(cart => cart.store_countries.indexOf(country) > -1);
+
+    // if no exact match, use haversine thing
+    res.send(stores)
   }))
 
   /**
