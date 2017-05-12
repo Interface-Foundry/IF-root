@@ -78,46 +78,46 @@ router.get('/auth/:id', (req, res) => co(function * () {
  * @apiDescription create new cart for user, redirect them to /cart/:id and send an email
  * @apiGroup HTML
  */
-router.get('/newcart', (req, res) => co(function * () {
-  // create a cart
-  const cart = yield db.Carts.create({})
-  const session = req.UserSession
-  // find the user for this session
+// router.get('/newcart', (req, res) => co(function * () {
+//   // create a cart
+//   const cart = yield db.Carts.create({})
+//   const session = req.UserSession
+//   // find the user for this session
 
-  if (session.user_account) {
-    // make the first user the leader
-    const user = session.user_account
-    cart.leader = user.id
-    if (user.name) {
-      cart.name = user.name + "'s Kip Cart"
-    } else {
-      cart.name = user.email_address.replace(/@.*/, '') + "'s Kip Cart"
-    }
-    yield cart.save()
+//   if (session.user_account) {
+//     // make the first user the leader
+//     const user = session.user_account
+//     cart.leader = user.id
+//     if (user.name) {
+//       cart.name = user.name + "'s Kip Cart"
+//     } else {
+//       cart.name = user.email_address.replace(/@.*/, '') + "'s Kip Cart"
+//     }
+//     yield cart.save()
 
-    // grab the daily deals
-    let allDeals = yield dealsDb.getDeals(4, 0),
-      deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
+//     // grab the daily deals
+//     let allDeals = yield dealsDb.getDeals(4, 0),
+//       deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
 
-    // Send an email to the user with the cart link
-    var email = yield db.Emails.create({
-      recipients: user.email_address,
-      subject: 'Your New Cart from Kip',
-      cart: cart.id
-    })
+//     // Send an email to the user with the cart link
+//     var email = yield db.Emails.create({
+//       recipients: user.email_address,
+//       subject: 'Your New Cart from Kip',
+//       cart: cart.id
+//     })
 
-    // use the new_cart email template
-    email.template('new_cart', {
-      cart: cart,
-      deals: deals
-    })
+//     // use the new_cart email template
+//     email.template('new_cart', {
+//       cart: cart,
+//       deals: deals
+//     })
 
-    // remember to actually send it
-    yield email.send();
-  }
+//     // remember to actually send it
+//     yield email.send();
+//   }
 
-  res.redirect(`/cart/${cart.id}/`);
-}))
+//   res.redirect(`/cart/${cart.id}/`);
+// }))
 
 
 /**

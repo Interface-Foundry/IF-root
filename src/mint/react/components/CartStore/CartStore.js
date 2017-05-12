@@ -19,10 +19,19 @@ export default class CartStore extends Component {
   }
 
   render() {
-    const { choices, setStore, cart_id, history: { replace } } = this.props;
+    const { choices, history: { replace } } = this.props;
     return (
       <ul className="cart_store">
-        {choices.map(choice => <StoreChoice key={choice.store_type} {...choice} setStore={store => {setStore(cart_id, store); replace(`/cart/${cart_id}`);}} />)}
+        {choices.map(choice => 
+            <a href={`/newcart/${choice.store_type}`}>
+              <StoreChoice 
+                key={choice.store_type} 
+                {...choice} 
+                onClick={() => replace(`/newcart/${choice.store_type}`)} 
+              />
+            </a>
+          )
+        }
       </ul>
     );
   }
@@ -42,12 +51,11 @@ class StoreChoice extends Component {
       store_type: type,
       store_name: name,
       store_domain: domain,
-      setStore
     } = this.props;
 
     return (
       <li>
-        <div className='cart__choice' key={type} onClick={() => setStore(type)}>
+        <div className='cart__choice' key={type}>
           <div className='choice__details'>
             <div className='choice__image image' style={{backgroundImage:`url(${img})`}}/>
             <span className='choice__name'> { name } </span>

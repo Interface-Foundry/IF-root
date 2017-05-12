@@ -123,9 +123,8 @@ export default class App extends Component {
       },
       state: { sidenav, isMobile }
     } = this;
-    const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('store_choice');
-    const showSidenav = !location.pathname.includes('/m/signin');
-    if (leader && (!currentCart.store && currentUser.id === leader.id && !location.pathname.includes('store_choice'))) replace(`/cart/${currentCart.id}/store_choice`);
+    const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
+    const showSidenav = !(location.pathname.includes('/m/signin') || location.pathname.includes('newcart'));
 
     return (
       <section className='app'>
@@ -147,7 +146,7 @@ export default class App extends Component {
                   <Route path={'/cart/:cart_id'} exact component={CartContainer} />
 
                   { /* Renders cart choice if theres no store set */}
-                  <Route path={'/cart/:cart_id/store_choice'} exact component={CartStoresContainer} />
+                  <Route path={'/newcart'} exact component={CartStoresContainer} />
                 </div>
               )
             }

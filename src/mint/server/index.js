@@ -130,6 +130,14 @@ app.get('/cart/*', (req, res) =>
   // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
   res.render('pages/cart')
 );
+app.get('/cart/*', (req, res) =>
+  // Get the user_accont info, if exists (might not if they are clicking a shared link)
+  // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
+  res.render('pages/cart')
+);
+app.get('/newcart', (req, res)=>{
+  res.render('pages/cart'); // render cart selection screen on server
+});
 app.get('/404', (_, res) => {
   res.render('pages/cart');
 });

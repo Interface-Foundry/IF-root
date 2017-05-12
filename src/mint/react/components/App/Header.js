@@ -36,7 +36,7 @@ export default class Header extends Component {
             <ModalHead text={'Add to Cart'} {...props}/>
           }
         />
-        <Route path={'/cart/:cart_id/store_choice'} exact component={() => 
+        <Route path={'/newcart'} exact component={() => 
             <IntroHead text={'Choose a store for your cart'} {...props}/>
           }
         />
