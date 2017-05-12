@@ -50,7 +50,6 @@ module.exports.itemPreview = function * (query) {
       }
     })
   })
-  console.log('items', items)
   return items
 }
 
