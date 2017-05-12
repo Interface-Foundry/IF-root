@@ -10,11 +10,12 @@ const googl = require('goo.gl')
 const fs = require('co-fs')
 const path = require('path')
 const haversine = require('haversine')
+const stable = require('stable')
 const thunkify = require('thunkify')
 const ipinfo = thunkify(require('ipinfo'))
 
 const cart_types = require('../cart/cart_types').stores
-const country_coordinates = require('../cart/cart_types').country_coordinates
+const countryCoordinates = require('../cart/cart_types').countryCoordinates
 
 if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
@@ -686,20 +687,43 @@ module.exports = function (router) {
     console.log('IP', ip)
 
     var ipresponse = yield ipinfo(ip);
-    country = ipresponse.country;
+
+    if (!ipresponse.country) {
+      ipresponse.country = 'US',
+      ipresponse.loc = '40.7449,-73.9782'
+    }
+
+    var country = ipresponse.country;
+    var userCoords = {
+      latitude: ipresponse.loc.split(',')[0],
+      longitude: ipresponse.loc.split(',')[1]
+    }
     console.log('ipresponse', ipresponse)
 
     // send back list of stores in format on the git issue
-    var stores = cart_types.filter(cart => cart.store_countries.indexOf(country) > -1);
+    // var stores = cart_types.filter(cart => cart.store_countries.indexOf(country) > -1);
 
-    // if (stores.length === 0) {
-    //   res.send(cart_types.sort(function (a, b) {
-    //     //if return -1 ==> a comes first
-    //
-    //   }))
-    // }
+    var stores = [];
+    //sort by distance
+    stores = cart_types.sort(function (a, b) {
+      // console.log('a', a, 'b', b)
+      //if return -1 ==> a comes first
+      var coordsA = countryCoordinates[a.store_countries[0]]
+      var coordsB = countryCoordinates[b.store_countries[0]]
+      var havA = haversine(userCoords, {latitude: coordsA[0], longitude: coordsA[1]});
+      var havB = haversine(userCoords, {latitude: coordsB[0], longitude: coordsB[1]})
+      logging.info(a.store_name, 'havA', havA)
+      logging.info(b.store_name, 'havB', havB)
+      return Math.abs(havA) - Math.abs(havB)
+    })
+    //now sort by "is this the right country", using a stable sort to keep everything else still ordered by distance
+    stores = stable(stores, function (a, b) {
+      if (a.store_countries.indexOf(country) > -1 && b.store_countries.indexOf(country) <= -1) return -1;
+      else if (b.store_countries.indexOf(country) > -1 && a.store_countries.indexOf(country) <= -1) return 1;
+      else return 0;
+    })
 
-    // if no exact match, use haversine thing
+    console.log('stores', stores)
     res.send(stores)
   }))
 
@@ -713,7 +737,8 @@ module.exports = function (router) {
     // read in categories file
     var categories = yield fs.readFile(path.join(__dirname, '../../ingest/categories.json'));
     categories = JSON.parse(categories.toString());
-    categoryArray = [];
+    var categoryArray = [];
+    var id = 0;
 
     //replace sub-categories w/ accumulated counts of all subcategories
     yield Object.keys(categories).map(function * (cat) {
@@ -721,7 +746,8 @@ module.exports = function (router) {
         itemCount: 0,
         humanName: cat,
         machineName: cat,
-        searchType: 'category'
+        searchType: 'category',
+        id: id++
       }
 
       var sampleItem = yield db.YpoInventoryItems.findOne({category_2: cat});
