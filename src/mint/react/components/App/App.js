@@ -17,7 +17,7 @@ import ReactGA from 'react-ga';
 export default class App extends Component {
 
   static propTypes = {
-    cart_id: PropTypes.string.isRequired,
+    cart_id: PropTypes.string,
     leader: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
     modal: PropTypes.string,
@@ -84,8 +84,7 @@ export default class App extends Component {
       }
     } = this;
     const { cart_id: nextCart_id, session_id: nextSessionId, toast: newToast } = nextProps;
-
-    if (!session_id && nextSessionId) {
+    if (!session_id && nextSessionId && process.env.GA) {
       ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
           userId: nextSessionId
@@ -123,9 +122,8 @@ export default class App extends Component {
       },
       state: { sidenav, isMobile }
     } = this;
-    const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('store_choice');
-    const showSidenav = !location.pathname.includes('/m/signin');
-    if (leader && (!currentCart.store && currentUser.id === leader.id && !location.pathname.includes('store_choice'))) replace(`/cart/${currentCart.id}/store_choice`);
+    const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
+    const showSidenav = !(location.pathname.includes('/m/signin') || location.pathname.includes('newcart'));
 
     return (
       <section className='app'>
@@ -147,7 +145,7 @@ export default class App extends Component {
                   <Route path={'/cart/:cart_id'} exact component={CartContainer} />
 
                   { /* Renders cart choice if theres no store set */}
-                  <Route path={'/cart/:cart_id/store_choice'} exact component={CartStoresContainer} />
+                  <Route path={'/newcart'} exact component={CartStoresContainer} />
                 </div>
               )
             }

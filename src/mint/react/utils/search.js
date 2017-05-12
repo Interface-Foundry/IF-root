@@ -13,5 +13,14 @@ export const getLastSearch = () => {
 }
 
 export const addSearchHistory = term => {
-  localStorage.searchHistory = localStorage.searchHistory ? localStorage.searchHistory + `,${term}` : term;
+	if(localStorage.searchHistory) {
+		if(!localStorage.searchHistory.includes(term)) {
+			localStorage.searchHistory = localStorage.searchHistory + `,${term}`;
+		} else if (localStorage.searchHistory.includes(`,${term},`)) { 
+			localStorage.searchHistory = localStorage.searchHistory.replace(`,${term},`, '')
+			localStorage.searchHistory = localStorage.searchHistory + `,${term}`;
+		}
+	} else {
+		localStorage.searchHistory = term;
+	}
 };

@@ -130,6 +130,14 @@ app.get('/cart/*', (req, res) =>
   // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
   res.render('pages/cart')
 );
+app.get('/cart/*', (req, res) =>
+  // Get the user_accont info, if exists (might not if they are clicking a shared link)
+  // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
+  res.render('pages/cart')
+);
+app.get('/newcart', (req, res)=>{
+  res.render('pages/cart'); // render cart selection screen on server
+});
 app.get('/404', (_, res) => {
   res.render('pages/cart');
 });
@@ -138,28 +146,6 @@ app.get('/legal', (_, res) => {
 });
 app.get('/s/*', (_, res) => {
   res.render('pages/index');
-});
-
-// cart select screen test data
-app.get('/api/test/store_list', (req, res) => {
-  res.json({
-    stores: [{
-      cart_img: 'http://lorempixel.com/100/100/cats/1',
-      cart_type: 'amazonus',
-      cart_name: 'Amazon US',
-      cart_domain: 'Amazon.com'
-    }, {
-      cart_img: 'http://lorempixel.com/100/100/cats/2',
-      cart_type: 'amazonuk',
-      cart_name: 'Amazon Uk',
-      cart_domain: 'Amazon.co.uk'
-    }, {
-      cart_img: 'http://lorempixel.com/100/100/cats/3',
-      cart_type: 'ypo',
-      cart_name: 'YPO',
-      cart_domain: 'ypo.co.uk'
-    }]
-  });
 });
 
 // Log errors to the database in production

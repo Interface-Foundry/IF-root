@@ -9,7 +9,8 @@ import {
   SEARCH_NEXT,
   SEARCH_PREV,
   SET_SEARCH_INDEX,
-  SELECT_CARD
+  SELECT_CARD,
+  RECEIVE_CATEGORY
 } from '../constants/ActionTypes';
 
 export default function item(state = {}, action) {
@@ -24,6 +25,7 @@ export default function item(state = {}, action) {
       ...state,
       ...action.item
     };
+  case RECEIVE_CATEGORY:
   case RECEIVE_SEARCH:
     nextItemNum = state.position ? state.position : 0;
     nextItemNum = action.index > action.items.length ? action.index % action.items.length : action.index < 0 ? -1 * (action.index % action.items.length) : nextItemNum; // try to keep it legal

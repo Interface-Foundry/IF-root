@@ -2,6 +2,28 @@
 @import '../../styles/Constants';
 @import '../../styles/Animations';
 .cards__section {
+  .cards__section__breadcrumb {
+    padding: $padding $padding*3;
+    font-size: 16px;
+
+    svg {
+      vertical-align: top !important;
+      padding: 0 $padding/5;
+    }
+
+    span {
+      display: inline;
+      height: auto;
+      padding: 0 0 3px;
+      font-weight: bold;
+
+      &.cards__section__breadcrumb-type {
+        cursor: pointer;
+        font-weight: 500;
+        border-bottom: 3px solid #ffdf4d;
+      }
+    }
+  }
   span {
     height: 190px;
     padding: 0 0 $padding 0;

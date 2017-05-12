@@ -19,7 +19,7 @@ export default class CategoryCard extends Component {
 
     return (
       <section className='card__type-category' onClick={() => {
-        previewAmazonItem(machineName)
+        previewAmazonItem(machineName, true)
       }}>
         <div className='details'>
           <div className='details__image image' style={{backgroundImage:`url(${image})`}}/>
