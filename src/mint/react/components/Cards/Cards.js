@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import CategoryCard from './CategoryCard';
 import SearchCard from './SearchCard';
 import { getLastSearch } from '../../utils';
@@ -13,6 +14,7 @@ export default class Cards extends Component {
   constructor(props) {
     super(props);
     this.renderCards = ::this.renderCards;
+    this._scrollHorizontal = :: this._scrollHorizontal;
   }
 
   static propTypes = {
@@ -20,6 +22,49 @@ export default class Cards extends Component {
       .isRequired,
     cart_id: PropTypes.string,
     selectDeal: PropTypes.func
+  }
+
+  _scrollHorizontal(direction) {
+    clearInterval(this.scrollInterval); 
+
+    let end, cosParameter, scrollMargin,
+      scrollCount = 0,
+      scrollStep = Math.PI / ( 2000 / 15 );
+
+    const element = ReactDOM.findDOMNode(this.refs.scroll)
+
+    switch (direction) {
+      case 'left':
+        end = element.scrollLeft - 600 > 2 ? element.scrollLeft - 600 : 2;
+        cosParameter = end / 2;
+
+        this.scrollInterval = setInterval(() => {
+          if ( element.scrollLeft >= end ) {
+            scrollCount = scrollCount + 1;
+            scrollMargin =  cosParameter - cosParameter * Math.cos( scrollCount * scrollStep );
+            element.scrollLeft = element.scrollLeft - scrollMargin;
+          } 
+          else {
+            clearInterval(this.scrollInterval); 
+          }
+        }, 15);
+        break;
+      case 'right':
+        end = element.scrollLeft + 600 < element.firstElementChild.clientWidth ? element.scrollLeft + 600 : element.firstElementChild.clientWidth;
+        cosParameter = end / 2;
+
+        this.scrollInterval = setInterval(() => {
+          if ( element.scrollLeft <= end ) {
+            scrollCount = scrollCount + 1;
+            scrollMargin =  cosParameter - cosParameter * Math.cos( scrollCount * scrollStep );
+            element.scrollLeft = element.scrollLeft + scrollMargin;
+          } 
+          else {
+            clearInterval(this.scrollInterval); 
+          }
+        }, 15);
+        break;
+    }
   }
 
   shouldComponentUpdate (nextProps, nextState){
@@ -30,8 +75,7 @@ export default class Cards extends Component {
 
 
   renderCards() {
-    let { cards, cart_id, selectCard, cardType, previewAmazonItem } = this.props;
-
+    const { props: { cards, cart_id, selectCard, cardType, previewAmazonItem }} = this;
 
     const activeCards = cards.map((card, i) => {
       return <li key={i} onClick={(e) => selectCard(i + 1, card)}>
@@ -41,23 +85,21 @@ export default class Cards extends Component {
       </li>
     });
 
-    console.log(activeCards)
-
     return (
-      <CSSTransitionGroup
-        transitionName="cardsItem"
-        transitionEnterTimeout={0}
-        transitionLeaveTimeout={0}>
-        {activeCards}
-      </CSSTransitionGroup>
+      <div ref='scroll' className='scroll__horizontal'>
+        <CSSTransitionGroup
+          transitionName="cardsItem"
+          transitionEnterTimeout={0}
+          transitionLeaveTimeout={0}>
+          {activeCards}
+        </CSSTransitionGroup>
+      </div>
     );
   }
 
   render() {
-    const { renderCards, props: { cardType, position, cards, clearItem }} = this,
+    const { renderCards, _scrollHorizontal, props: { cardType, position, cards, clearItem }} = this,
       type = cardType || 'categories';
-
-    console.log(cardType)
 
     return (
       <div>
@@ -73,8 +115,18 @@ export default class Cards extends Component {
                 {`${getLastSearch()}`}
               </span> </em> : null
             }
-          </p>         
+          </p>
+          <div className='icon left' onClick={() => {
+            _scrollHorizontal('left')
+          }}>
+            <Icon icon='LeftChevron'/>
+          </div> 
           { renderCards() }
+          <div className='icon right'onClick={() => {
+            _scrollHorizontal('right')
+          }}>
+            <Icon icon='RightChevron'/>
+          </div>
         </ul>
       </div>
     );

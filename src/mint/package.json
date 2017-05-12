@@ -116,7 +116,7 @@
     "build": "webpack -p --progress",
     "build-dev": "webpack -d --progress --config ./webpack.dev.config.js",
     "frontend-dev": "webpack --config ./webpack.dev.config.js --progress --color --watch --hot --profile",
-    "backend": "SEND_EMAILS=1 nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ ",
+    "backend": "SEND_EMAILS=; nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ ",
     "dev": "npm run backend",
     "cleanup": "rm -r public/build",
     "test": "mocha tests",

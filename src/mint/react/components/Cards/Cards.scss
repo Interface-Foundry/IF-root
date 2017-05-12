@@ -3,7 +3,7 @@
 @import '../../styles/Animations';
 .cards__section {
   .cards__section__breadcrumb {
-    padding: $padding $padding*3;
+    padding: 0 $padding*3 $padding*2;
     font-size: 16px;
 
     svg {
@@ -24,14 +24,48 @@
       }
     }
   }
-  span {
+  & > .icon {
+    position: absolute;
+    bottom: 0;
+    height: 200px;
+    z-index: 100;
+    padding: $padding;
+    width: 50px;
+
+    svg {
+      height: 100%;
+      width: 100%;
+      background: rgba(#eae7e4, 0.8);
+      cursor: pointer;
+      padding: 0 $padding;
+    }
+
+    &.right {
+      right: 0;
+      padding: 10px 10px 10px 0;
+      svg {
+        border-radius: 0 5px 5px 0;
+      }
+    }
+    &.left {
+      left: 0;
+      padding: 10px 0 10px 10px;
+      svg {
+        border-radius: 5px 0 0 5px;
+      }
+    }
+  }
+  & > .scroll__horizontal {
     height: 190px;
+    width: calc(100% - 20px);
     padding: 0 0 $padding 0;
     display: flex;
+    margin: 0 auto;
     flex-direction: row;
     justify-content: space-between;
     white-space: nowrap;
-    overflow: scroll;
+    overflow: hidden;
+    overflow-x: scroll;
     -webkit-overflow-scrolling: touch;
     &::before {
       content: '';

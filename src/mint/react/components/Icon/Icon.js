@@ -25,7 +25,8 @@ import {
   IoHappy,
   IoOutlet,
   IoPlusRound,
-  IoChevronRight
+  IoChevronRight,
+  IoChevronLeft
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -105,6 +106,8 @@ export default class Icon extends Component {
       return <IoPlusRound/>;
     case 'RightChevron':
       return <IoChevronRight />;
+    case 'LeftChevron':
+      return <IoChevronLeft />;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }
