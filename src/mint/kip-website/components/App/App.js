@@ -4,7 +4,7 @@
 import React, { Component } from 'react';
 import { Landing, Legal } from '..';
 
-import { Route } from 'react-router';
+import { Route } from 'react-router-dom';
 
 export default class App extends Component {
 	render() {
