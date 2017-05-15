@@ -26,7 +26,7 @@ export default class Modal extends Component {
 
 		if(_validateEmail(input.value)) {
 			this.setState({error: null, success: 'We just sent you a login link to ' + input.value})
-			get(`/api/login?email=${input.value}&redirect=/`, 'LOGIN')
+			get(`/api/login?email=${encodeURIComponent(input.value)}&redirect=/`, 'LOGIN')
 		} else {
 			this.setState({error: 'Invalid email address!'})
 		}
@@ -36,7 +36,7 @@ export default class Modal extends Component {
   		const { props: { _toggleModal }, state: { error, success }, _onSubmit } = this;
 
 	    return (
-	      	<section className="modal" onClick={(e) => {if(e.target.className === "modal") _toggleModal()}}> 
+	      	<section className="modal" onClick={(e) => {if(e.target.className === "modal") _toggleModal()}}>
 	      		<form className="modal__card" onSubmit={_onSubmit}>
 	      			<div className="modal__card-icon" onClick={() =>  _toggleModal()}>
 		      			<Icon icon='Clear'/>

@@ -50,7 +50,7 @@ export function signIn(cart_id, email) {
     dispatch(requestUpdate());
 
     try {
-      const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
+      const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${encodeURIComponent(email)}`, {
         credentials: 'same-origin'
       });
 

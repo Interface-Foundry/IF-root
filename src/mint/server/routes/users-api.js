@@ -45,7 +45,7 @@ module.exports = function (router) {
    */
   router.get('/login', (req, res) => co(function * () {
     const currentUser = _.get(req, 'UserSession.user_account', {})
-    const email = req.query.email.trim().toLowerCase()
+    const email = decodeURIComponent(req.query.email.trim().toLowerCase())
 
     // if the user is already logged in as this email address we can reply right away
     if (currentUser.email_address === req.query.email) {
@@ -119,13 +119,13 @@ module.exports = function (router) {
    * @apiParam {string} cart_id the cart id
    */
   router.get('/identify', (req, res) => co(function* () {
-    console.log('identify');
+    console.log('identify', req.query)
 
     // Check the cart to see if there's already a leader
     var cart = yield db.Carts.findOne({ id: req.query.cart_id }).populate('leader')
 
     // Find the user associated with this email, if any
-    var email = req.query.email.trim().toLowerCase()
+    var email = decodeURIComponent(req.query.email.trim().toLowerCase())
 
     // check if the user is already identified as this email
     var currentUser = req.UserSession.user_account
