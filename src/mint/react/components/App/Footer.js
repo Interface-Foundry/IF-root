@@ -139,7 +139,6 @@ class ItemFooter extends Component {
     cart_id: PropTypes.string,
     item: PropTypes.object,
     addItem: PropTypes.func.isRequired,
-    item_id: PropTypes.string,
     history: PropTypes.object,
     position: PropTypes.number,
     removeDeal: PropTypes.func
