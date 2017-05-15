@@ -4,9 +4,6 @@ import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
 
-		        		// <div><Icon icon='Time'/></div>
-		        		// <div><Icon icon='Wallstreet'/></div>
-
 export default class About extends Component {
 
   	render() {
