@@ -124,6 +124,7 @@
     "react-test": "node_modules/.bin/karma start karma.conf.js",
     "apidoc": "npm run apidocs",
     "apidocs": "apidoc -i server/routes/ -o ../../docs/api/ && http-server ../../docs/api -o",
-    "ingest": "node ingest/ypo.js"
+    "ingest": "node ingest/ypo.js",
+    "clean-db": "mongo mint --eval 'db.ypo_inventory_items.drop()'"
   }
 }
