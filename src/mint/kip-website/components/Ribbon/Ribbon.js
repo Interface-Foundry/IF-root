@@ -54,7 +54,7 @@ export default class Ribbon extends Component {
           {
             currentUser ? null : ( src !== 'slack' ? <div className="right row row-1 action2">
                 <a href='/newcart'><button>
-                  Try Kip For Free
+                  Create New Cart
                 </button></a>
               </div> : <div className="right row row-1 action2">
                   <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button>

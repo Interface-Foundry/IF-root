@@ -23,9 +23,10 @@ div[class^='showcase-'] {
 
 	div[class^='row-'] {
 		position: relative;
-		max-width: 900px;
+		max-width: 1300px;
 		margin: 0 auto;
 		text-align: center;
+		white-space: nowrap;
 		padding: $padding*5 0 $padding*15;
 
 		@media only screen and (max-width: 600px) {
@@ -44,14 +45,25 @@ div[class^='showcase-'] {
 				}
 			}
 
-			@media only screen and (max-width: 600px) {
+			@media only screen and (max-width: 1000px) {
 				.phone {
-					margin: 0 -175px 0 0;
+					margin: 0 -125px 0 0;
 				}
 
 				.bubble {
 					right: auto;
 					left: -115px;
+					padding: $padding*4  $padding*2 $padding*2 $padding*13;
+				}
+			}
+			
+			@media only screen and (max-width: 600px) {
+				.phone {
+					margin: 0 -125px 0 0;
+				}
+
+				.bubble {
+					right: auto;
 					padding: $padding*4  $padding*2 $padding*2 $padding*13;
 				}
 			}
@@ -65,8 +77,8 @@ div[class^='showcase-'] {
 	.phone {
 		position: relative;
 		float: left;
-		width: 450px;
-		height: 500px;
+		width: 550px;
+		height: 700px;
 		display: inline-block;
 		background-size: contain;
 		z-index: 50;
@@ -91,39 +103,45 @@ div[class^='showcase-'] {
 			transform: translate3d(0px, -225px,0) !important;
 		}
 
+		@media only screen and (max-width: 1000px) {
+			margin: 0 0 0 -125px;
+		}
 		@media only screen and (max-width: 600px) {
 			padding: $padding*2.3 $padding*5;
 			width: 321px;
 			height: 450px;
-			margin: 0 0 0 -175px;
+			margin: 0 0 0 -125px;
 		}
 	}
 
 	.bubble {
 		position: relative;
 		display: inline-block;
-		float: right;
 		width: 400px;
 		margin: 0 auto;
 		z-index: 50;
 		background: white;
 		opacity: 0;
+		white-space: normal;
 		border-radius: 10px;
 		border: 1px solid $borderColor;
 		padding: $padding*3;
-		transform: translate3d(0px, 75px,0);
+		transform: translate3d(0px, 150px,0);
 		@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
 		&.enter {
 			opacity: 1;
-			transform: translate3d(0px, 0px,0) !important;
+			transform: translate3d(0px, 75px,0) !important;
 		}
 
 		&.leave {
 			opacity: 0;
-			transform: translate3d(0px, -75px,0) !important;
+			transform: translate3d(0px, 0px,0) !important;
 		}
 
+		@media only screen and (max-width: 1000px) {
+			padding: $padding*4 $padding*12 $padding*2 $padding*2;
+		}
 		@media only screen and (max-width: 600px) {
 			position: absolute;
 			width: 80%;
@@ -145,9 +163,10 @@ div[class^='showcase-'] {
 			color: $primaryColor;
 			font-weight: bold;
 			text-align: left;
+			font-size: 19px;
 
 			@media only screen and (max-width: 600px) {
-				font-size: 14px;
+				font-size: 19px;
 			}
 		}
 

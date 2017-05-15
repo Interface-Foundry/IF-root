@@ -16,16 +16,6 @@ export default class About extends Component {
 
 					<h3><em>"Group shopping bot Kip focuses on coordinating purchases with a team so they can purchase lunch together or have an office manager authorize a supply order."</em><br/><span> - Fast Company July 13, 2016</span></h3>
 
-					<h1>Press Coverage</h1>
-					<div className="col-12 row-1 icons__hell">
-						<div><Icon icon='Fastcompany'/></div>
-						<div><Icon icon='Time'/></div>
-		        		<div><Icon icon='Venturebeat'/></div>
-		        		<div><Icon icon='Wallstreet'/></div>
-		        		<div><Icon icon='Paymentsource'/></div>
-
-		        	</div>
-
 					<h1>Featured Partners</h1>
 					<div className="col-12 row-1 icons__hell">
 		        		<div><Icon icon='Amazon'/></div>
@@ -35,12 +25,6 @@ export default class About extends Component {
 		        		<div><Icon icon='Delivery'/></div>
 		        	</div>
 
-			       	<div className="col-6 row-1 services__details">
-				       	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/cloudClip.png")'}}/ >
-			        	<h2>KEEP IT IN CLOUD</h2>
-			       		<p>Use Kip to keep things you love in the cloud. Browse through different products, save things you’re interested in and checkout when the price is right.</p>
-			        </div>
-
 			        <div className="col-6 row-1 services__details card">
 			        	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/directClip.png")'}}/ >
 		        		<h2>Kip Direct</h2>
@@ -48,7 +32,7 @@ export default class About extends Component {
 			        	<p>Unique short URL to share</p>
 			        	<p>Invite friends with link or email</p>
 			        	<div className="col-12 row-1 action">
-			        		<a href='/newcart'><button>Try Kip for Free <Icon icon='Right'/></button></a>
+			        		<a href='/newcart'><button>Create New Cart <Icon icon='Right'/></button></a>
 		        		</div>
 			        </div>
 

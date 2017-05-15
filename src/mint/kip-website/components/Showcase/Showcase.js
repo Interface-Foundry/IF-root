@@ -25,17 +25,17 @@ import {
 const rows = [
   { 
     icon: <Lightbulb/>,
-    blurb: 'Browse items or paste a URL to add things to your Kip Cart.', 
+    blurb: 'Browse Items or Paste a URL to Add Things to Your Kip Cart', 
     src: 'https://storage.googleapis.com/kip-random/demo_1_desktop.gif' 
   },
   { 
     icon: <Layers/>,
-    blurb: 'Swipe and Save your Favourite Items to cart.',
+    blurb: 'Use Kip to Keep Things you Love in the Cloud. Browse through different products, Save Things you’re Interested in and Checkout when the Price is Right',
     src: 'https://storage.googleapis.com/kip-random/demo_2_desktop.gif' 
   },
   { 
     icon: <Mouse/>,
-    blurb: 'Invite friends to add to your Kip Cart, share shipping and other fees.',
+    blurb: 'Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees',
     src: 'https://storage.googleapis.com/kip-random/demo_3_desktop.gif' 
   }
 ]
