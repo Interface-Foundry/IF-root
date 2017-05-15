@@ -68,6 +68,11 @@ var cartsCollection = Waterline.Collection.extend({
       defaultsTo: 'amazon'
     },
 
+    store_locale: {
+      type: 'string',
+      enum: constants.AMAZON_LOCALES
+    },
+
   }
 });
 
