@@ -1,20 +1,38 @@
 var ingest = require('./ingest');
 var co = require('co');
 
-co(function * () {
-  yield ingest('Ypo', [
-    'code',
-    'name',
-    'description',
-    'price',
-    'unit_type',
-    'unspsc_code',
-    'category_1',
-    'category_2',
-    'keywords',
-    'image_url',
-    'product_url'
-  ], ['name', 'keywords']);
 
+
+/**
+ * key value to map the keys from the tsv to better values
+ *
+ * Item -> code
+ * Code Name -> name
+ * Description -> description
+ * Price -> price
+ * UOM -> unit_type
+ * UNSPSC code -> unspsc_code
+ * Category 1
+ * Category 2
+ * Keywords
+ * Image URL
+ * Product URL
+ */
+const ypoFieldDict = {
+    'Item': 'code',
+    'Code Name':'name',
+    'Description': 'description',
+    'Price': 'price',
+    'UOM': 'unit_type',
+    'UNSPSC code': 'unspsc_code',
+    'Category 1': 'category_1',
+    'Category 2': 'category_2',
+    'Keywords': 'keywords',
+    'Image URL': 'image_url',
+    'Product URL': 'product_url'
+  }
+
+co(function * () {
+  yield ingest('Ypo', ypoFieldDict, ['name', 'keywords']);
   process.exit();
 });

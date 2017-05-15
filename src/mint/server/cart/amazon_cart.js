@@ -8,7 +8,7 @@ const asinCache = LRU({
   length: function () { return 1 } // every document just has length 1
 })
 
-var scraper = require('./scraper_amazon');
+var amazonScraper = require('./scraper_amazon');
 var emoji = require('../utilities/emoji_utils');
 
 // amazon creds -> move to constants later
@@ -144,7 +144,7 @@ exports.searchAmazon = function * (query, index, category) {
     var items = results.result.ItemSearchResponse.Items.Item
     var validatedItems = [];
     yield items.map(function * (item) { //map of undefined
-      var dbItem = yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item})
+      var dbItem = yield amazonScraper.res2Item({Request: {IsValid: 'True'}, Item: item})
       // logging.info(dbItem);
       if (dbItem) {
         dbItem.original_link = item.ItemLinks.ItemLink[0].URL
@@ -368,7 +368,7 @@ exports.getAmazonCart = function * (cart) {
  * @yield {object} created item
  */
 exports.addItemAmazon = function * (itemAsin) {
-  var item = yield scraper.scrapeAsin(itemAsin)
+  var item = yield amazonScraper.scrapeAsin(itemAsin)
   return item
 };
 

@@ -8,6 +8,14 @@ var db;
 const dbReady = require('../../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
+// not necessary anymore but keeping for longevity
+function amazonHandlersMerge(fn) {
+  let obj = {}
+  constants.AMAZON_LOCALES.map(store => {
+    obj[store] = fn
+  })
+  return obj
+}
 
 /************************************************
  * generalized handlers
@@ -27,7 +35,8 @@ const getCartHandlers = {
 }
 
 const addItemHandlers = {
-  'amazon': amazon.addItemAmazon // uses asin
+  'amazon': amazon.addItemAmazon, // uses asin
+  'ypo': ypo.addItem
 }
 
 const clearCartHandlers = {
@@ -36,8 +45,10 @@ const clearCartHandlers = {
 
 const itemPreviewHandlers = {
   'amazon': amazon.itemPreview,
-  'ypo': ypo.itemPreview
+  'ypo': ypo.itemPreview,
 }
+
+
 
 /************************************************
  * functions for carts
@@ -67,9 +78,17 @@ exports.itemPreview = function * (query, store, page, category) {
  * @return     {object}  cart - the cart object
  */
 exports.createCart = function * (store) {
+  if (store.includes('amazon')) {
+    [store, locale] = store.split('_')
+  }
+
   const cartOpts = {
     // store can be ypo or amazon
     store: (store === undefined) ? 'amazon' : store,
+  }
+
+  if (locale) {
+    cartOpts.store_locale = locale
   }
 
   // create a cart

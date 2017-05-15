@@ -4,5 +4,6 @@ module.exports = {
   MAGIC_URL_LENGTH: 32,
 
   // available stores we are supporting atm
-  STORES: ['ypo', 'amazon']
+  STORES: ['ypo', 'amazon'],
+  AMAZON_LOCALES: ['us', 'canada', 'uk']
 };

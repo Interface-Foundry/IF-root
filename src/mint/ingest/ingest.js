@@ -15,7 +15,7 @@ dbReady.then((models) => { db = models; })
  * @param fields {array} - array of text indexes to do
  * to the columns in the tsv and fields in the db schema
  */
-module.exports = function * (source, fields, textIndex) {
+module.exports = function * (source, fieldsToChange, textIndex) {
   yield dbReady;
   yield db[`${source}InventoryItems`].destroy({})
 
@@ -23,7 +23,13 @@ module.exports = function * (source, fields, textIndex) {
   var records = parse(data, {
     delimiter: '\t',
     relax: true,
-    columns: (labels) => labels.map(label => label.replace(' ', '_').toLowerCase()),
+    columns: (labels) => labels.map(label => {
+      if (Object.keys(fieldsToChange).includes(label)) {
+        return fieldsToChange[label]
+      } else {
+        return label.replace(' ', '_').toLowerCase()
+      }
+    }),
     auto_parse: true
   });
 
@@ -35,7 +41,6 @@ module.exports = function * (source, fields, textIndex) {
   if (textIndex) {
     console.log('creating text indexes for mongodb...')
     var createIndexForArray = textIndex.reduce((prev, curr) => { prev[curr] = "text"; return prev}, {})
-    console.log('INNDND', createIndexForArray)
     yield new Promise((resolve, reject) => {
       db[`${source}InventoryItems`].native((err, collection) => {
         if (err) reject(err)
@@ -45,6 +50,5 @@ module.exports = function * (source, fields, textIndex) {
       })
     })
   }
-
 }
 
