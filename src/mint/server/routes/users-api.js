@@ -348,6 +348,51 @@ module.exports = function (router) {
   }))
 
   /**
+   * @api {post} /api/user/:user_id/address Add address to user
+   * @apiDescription Creates a new address and associates it with a user
+   * @apiGroup Users
+   * @apiParam {string} :user_id id of the user to update
+   * @apiParam {json} body the properties of the new address we're creating
+   *
+   * @apiParamExample Request TODO
+  //  * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b {
+  //  *   "venmo_accepted": true,
+  //  *   "venmo_id": "MoMcTesty"
+  //  * }
+   */
+  router.post('/user/:user_id/address', (req, res) => co(function * () {
+    // check permissions
+    var currentUser = req.UserSession.user_account
+    if (!currentUser || currentUser.id !== req.params.user_id) {
+      throw new Error('Unauthorized')
+    }
+
+    // Find the user in the database
+    var user = yield db.UserAccounts.findOne({id: req.params.user_id})
+
+    // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
+    if (!user) {
+      throw new Error('Could not find user ' + req.params.user_id)
+    }
+
+    var addr = yield db.addresses.create(req.body);
+
+    res.send(addr);
+
+    // // Can't update some fields
+    // delete req.body.id
+    // delete req.body.email_address
+    // delete req.body.sessions
+    //
+    // // update the properties that they set
+    // _.merge(user, req.body)
+    //
+    // yield user.save()
+    //
+    // res.send(user)
+  }))
+
+  /**
    * @api {post} /api/feedback Feedback
    * @apiDescription logging user feedback
    * @apiGroup Users
