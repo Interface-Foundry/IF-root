@@ -6,7 +6,8 @@
   line-height: $nav-height;
   font-family: 'Raleway';
   text-align: left;
-  background: darken($kip-secondary-color, 6%);
+  background: $kip-primary-color;
+  border-bottom: 1px solid $border-color-light;
   @media (min-width: 900px) {
     padding: 0;
   }
