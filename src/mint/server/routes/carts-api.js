@@ -16,6 +16,7 @@ const ipinfo = thunkify(require('ipinfo'))
 
 const cart_types = require('../cart/cart_types').stores
 const countryCoordinates = require('../cart/cart_types').countryCoordinates
+const category_utils = require('../utilities/category_utils');
 
 if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
@@ -538,11 +539,12 @@ module.exports = function (router) {
 
 
   /**
-   * @api {get} /api/itempreview?q=:q Item Preview
+   * @api {get} /api/itempreview?q=:q&page=:page&category=:category Item Preview
    * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
    * @apiGroup Carts
    * @apiParam {String} :q either a url, asin, or search text
    * @apiParam {String} :page page of amazon search results
+   * @apiParam {String} :category category name to bound the results of the search
    *
    * @apiParamExample url preview
    * GET https://mint.kipthis.com/api/itempreview?q=https%3A%2F%2Fwww.amazon.com%2FOnitsuka-Tiger-Mexico-Classic-Running%2Fdp%2FB00L8IXMN0%2Fref%3Dsr_1_11%3Fs%3Dapparel%26ie%3DUTF8%26qid%3D1490047374%26sr%3D1-11%26nodeID%3D679312011%26psd%3D1%26keywords%3Dasics%252Bshoes%26th%3D1%26psc%3D1
@@ -562,7 +564,7 @@ module.exports = function (router) {
     }
 
     const store = _.get(req, 'query.store') ? req.query.store : 'ypo' // <--- CHANGE THIS BACK TO AMAZON IN THE FUTURE, JUST FOR YPO PURPOSES
-    const item = yield cartUtils.itemPreview(q, store)
+    const item = yield cartUtils.itemPreview(q, store, (req.query.page || 1), req.query.category)
     res.send(item)
   }))
 
@@ -676,6 +678,7 @@ module.exports = function (router) {
    * @apiGroup Carts
    */
   router.get('/cart_type', (req, res) => co(function * () {
+
     // get customer IP
     var ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
     console.log('IP', ip)
@@ -725,34 +728,24 @@ module.exports = function (router) {
    * @api {get} /api/categories gets a list of item categories
    * @apiDescription Retrieves a JSON of item categories -- currently just from a file for YPO
    * @apiGroup Carts
+   * @apiParam {String} :cart_id the cart id
    */
-  router.get('/categories', (req, res) => co(function * () {
+  router.get('/categories/:cart_id', (req, res) => co(function * () {
+    //get cart
+    var cart = yield db.Carts.findOne({id: req.params.cart_id})
+    var store = cart.store;
 
-    // read in categories file
-    var categories = yield fs.readFile(path.join(__dirname, '../../ingest/categories.json'));
-    categories = JSON.parse(categories.toString());
-    var categoryArray = [];
-    var id = 0;
-
-    //replace sub-categories w/ accumulated counts of all subcategories
-    yield Object.keys(categories).map(function * (cat) {
-      var categoryObject = {
-        itemCount: 0,
-        humanName: cat,
-        machineName: cat,
-        searchType: 'category',
-        id: id++
-      }
-
-      var sampleItem = yield db.YpoInventoryItems.findOne({category_2: cat});
-      categoryObject.image = sampleItem.image_url
-
-      Object.keys(categories[cat]).map(c => {
-        categoryObject.itemCount += Number(categories[cat][c]);
-      })
-      categoryArray.push(categoryObject)
-    })
-    console.log('categories:', categoryArray)
-    res.send(categoryArray);
+    switch (store) {
+      case 'amazon':
+        var categories = yield category_utils.getAmazonCategories();
+        break;
+      case 'ypo':
+        var categories = yield category_utils.getYpoCategories();
+        break;
+    }
+    //get cart type and whatever else
+    //get the right collection of categories and send that back
+    if (categories) res.send(categories);
+    else res.sendStatus(422);
   }))
 }

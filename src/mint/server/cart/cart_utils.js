@@ -51,11 +51,12 @@ const itemPreviewHandlers = {
  * @param      {string}  store   The store type
  * @return     {object}  item    the item preview object for that store
  */
-exports.itemPreview = function * (query, store) {
+exports.itemPreview = function * (query, store, page, category) {
   if (store === undefined) {
     throw new Error('Store required for item preview')
   }
-  const item = yield itemPreviewHandlers[store](query)
+
+  const item = yield itemPreviewHandlers[store](query, page, category)
   return item
 }
 
@@ -186,4 +187,3 @@ exports.getRetailer = function (item) {
     throw new Error('Not currently supported')
   }
 };
-
