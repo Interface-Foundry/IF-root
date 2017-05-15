@@ -379,7 +379,7 @@ describe('api', function () {
   }))
 
   it('GET /api/cart/:cart_id/clear should clear all items in the cart', () => co(function * () {
-    var res = yield get('/api/cart/' + mcTesty.cart_id + '/clear')
+    var res = yield del('/api/cart/' + mcTesty.cart_id + '/clear')
 
     // make sure the next time we get the cart all the items are really gone
     var cart = yield get('/api/cart/' + mcTesty.cart_id)
