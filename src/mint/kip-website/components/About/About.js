@@ -44,7 +44,7 @@ export default class About extends Component {
       <div className="about"> 
             {
               icons.map((Icon, key) => {
-                return <div key={key} style={{width: `${Math.floor(Math.random() * (40 - 20)) + 20}%`}} className={`icon `}><Icon/></div>
+                return <div key={key} style={{width: `${Math.floor(Math.random() * (40 - 10)) + 10}%`}} className={`icon `}><Icon/></div>
               })
             }
           </div>

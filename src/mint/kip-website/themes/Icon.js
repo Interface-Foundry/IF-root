@@ -37,7 +37,8 @@ import {
 	Fastcompany,
 	Paymentsource,
 	Time,
-	Venturebeat
+	Venturebeat,
+	Newsweek
 } from './';
 
 export default class Icon extends Component {
@@ -102,6 +103,8 @@ export default class Icon extends Component {
 		    	return <Fastcompany/>
 		    case 'Paymentsource':
 		    	return <Paymentsource />
+		   	case 'Newsweek':
+		   		return <Newsweek />
 		    case 'Time':
 		    	return <Time/>
 		    case 'Venturebeat':

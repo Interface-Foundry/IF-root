@@ -40,7 +40,7 @@ export default class Statement extends Component {
 				<h1 className="col-12 row-1 icons__hell__header">As seen in</h1>
 				<div className="col-12 row-1 icons__hell">
 					<div><Icon icon='Fastcompany'/></div>
-					<div><Icon icon='Time'/></div>
+					<div><Icon icon='Newsweek'/></div>
 	        		<div><Icon icon='Venturebeat'/></div>
 	        		<div><Icon icon='Paymentsource'/></div>
 	        		<div><Icon icon='Wallstreet'/></div>
