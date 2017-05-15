@@ -23,7 +23,7 @@ div[class^='showcase-'] {
 
 	div[class^='row-'] {
 		position: relative;
-		max-width: 1300px;
+		max-width: 1000px;
 		margin: 0 auto;
 		text-align: center;
 		white-space: nowrap;
@@ -86,7 +86,7 @@ div[class^='showcase-'] {
 		pointer-events:none;
 		left: 0;
 		opacity: 0;
-		transform: translate3d(0, -75px,0);
+		transform: translate3d(0, -100px,0);
 		@include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
 
 		.image {
@@ -95,12 +95,12 @@ div[class^='showcase-'] {
 
 		&.enter {
 			opacity: 1;
-			transform: translate3d(0px, -150px,0) !important;
+			transform: translate3d(0px, -175px,0) !important;
 		}
 
 		&.leave {
 			opacity: 0;
-			transform: translate3d(0px, -225px,0) !important;
+			transform: translate3d(0px, -250px,0) !important;
 		}
 
 		@media only screen and (max-width: 1000px) {
@@ -126,17 +126,17 @@ div[class^='showcase-'] {
 		border-radius: 10px;
 		border: 1px solid $borderColor;
 		padding: $padding*3;
-		transform: translate3d(0px, 150px,0);
+		transform: translate3d(0px, 75px,0);
 		@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
 		&.enter {
 			opacity: 1;
-			transform: translate3d(0px, 75px,0) !important;
+			transform: translate3d(0px, 0,0) !important;
 		}
 
 		&.leave {
 			opacity: 0;
-			transform: translate3d(0px, 0px,0) !important;
+			transform: translate3d(0px, -75px,0) !important;
 		}
 
 		@media only screen and (max-width: 1000px) {
@@ -194,7 +194,7 @@ div[class^='showcase-'] {
 	    top: 0;
 	    margin-left: -1px;
 	    height: 150px;
-	    z-index: 10;
+	    z-index: 50;
 	    width: calc(100% + 3px);
 	    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 	   	@media only screen and (max-width: 600px) {

@@ -42,12 +42,13 @@ export default class About extends Component {
 
     return (
       <div className="about"> 
-            {
-              icons.map((Icon, key) => {
-                return <div key={key} style={{width: `${Math.floor(Math.random() * (40 - 10)) + 10}%`}} className={`icon `}><Icon/></div>
-              })
-            }
-          </div>
+        {
+          icons.map((Icon, key) => {
+            return <div key={key} style={{width: `${Math.floor(Math.random() * (40 - 10)) + 10}%`}} className={`icon`}><Icon/></div>
+          })
+        }           
+        <div className='image gif' style={{ backgroundImage: `url(https://storage.googleapis.com/kip-random/website/kip_star.gif)` }}/>
+      </div>
     );
   }
 }

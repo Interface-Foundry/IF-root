@@ -30,7 +30,7 @@ const rows = [
   },
   { 
     icon: <Layers/>,
-    blurb: 'Use Kip to Keep Things you Love in the Cloud. Browse through different products, Save Things you’re Interested in and Checkout when the Price is Right',
+    blurb: 'Use Kip to Store the Items you Love in the Cloud.',
     src: 'https://storage.googleapis.com/kip-random/demo_2_desktop.gif' 
   },
   { 

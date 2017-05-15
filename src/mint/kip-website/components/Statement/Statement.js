@@ -37,7 +37,7 @@ export default class Statement extends Component {
 	        		</p>
 	        	</div>
 
-				<h1 className="col-12 row-1 icons__hell__header">As seen in</h1>
+				<h1 className="col-12 row-1 icons__hell__header">As Seen In</h1>
 				<div className="col-12 row-1 icons__hell">
 					<div><Icon icon='Fastcompany'/></div>
 					<div><Icon icon='Newsweek'/></div>
