@@ -2,44 +2,58 @@
 @import '../../styles/Constants';
 .editCart {
   height: 100%;
-  .src {
-    height: 40%;
-  }
   .name {
-    height: 60%;
     padding: $padding*2;
+    font-size: 30px;
+    width: 80%;
+    margin: 0 auto;
+    font-family: $secondary-font;
+    cursor: pointer;
+    svg {
+      height: 0.8em;
+      width: 0.8em;
+      position: relative;
+      bottom: 2px;
+    }
+    .editText {
+      font-size: 10px;
+      text-transform: uppercase;
+      position: relative;
+      left: -15px;
+      top: 20px;
+    }
     input {
-      height: $nav-height;
-      padding: 0 $padding;
+      font-family: $secondary-font;
+      text-align: center;
+      font-size: 30px;
       width: 100%;
       border-radius: 5px;
       border: 1px solid $border-color-light;
     }
   }
-  .editCart__footer {
-    position: absolute;
-    bottom: 0px;
-    left: 0;
-    height: $nav-height;
-    width: 100%;
-    line-height: $nav-height - $padding*2;
-    padding: $padding $padding*2;
-    font-family: 'Raleway';
-    color: $kip-primary-color;
-    button {
-      display: inline-block;
-      width: 100%;
-      height: 100%;
-      border-radius: 5px;
-      margin: 0 auto;
-      background: white;
-      background: $main-button-color;
-      border: 1px solid $border-color-light;
-      font-weight: 600;
-      z-index: 10000;
-      &:active {
-        background: white;
+  .dangerzone {
+    text-align: left;
+    width: 70%;
+    margin: 0 auto;
+    padding-top: $padding * 40;
+    li {
+      padding-top: $padding;
+      p {
+        width: 60%;
+        float: left;
+        clear: both;
       }
+      button {
+        float: right;
+        display: inline;
+      }
+      h2 {
+        clear: both;
+      }
+    }
+    header {
+      color: white;
+      background: $fourth-button-color;
     }
   }
 }

@@ -123,6 +123,19 @@ export function clearCart(cart_id) {
   };
 }
 
+export function deleteCart(cart_id) {
+  return async dispatch => {
+    try {
+      await fetch(`/api/cart/${cart_id}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      });
+    } catch (e) {
+      throw 'error in cart delete';
+    }
+  };
+}
+
 export function cancelClear() {
   return async(dispatch) => dispatch(cancelClearCart());
 }

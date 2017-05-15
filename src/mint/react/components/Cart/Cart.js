@@ -129,10 +129,6 @@ export default class Cart extends Component {
             </h4>
           }
         </div>
-        {items.quantity > 3 && isLeader
-          ? <button onClick={() => clearCart(cart_id)}>Empty Cart</button>
-          : null
-        }
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
           {
