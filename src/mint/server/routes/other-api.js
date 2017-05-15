@@ -158,4 +158,11 @@ module.exports = function (router) {
 
     res.send(storesArray)
   }))
+
+  /**
+   *
+   */
+  router.get('/postcode', (req, res) => co(function * () {
+
+  }));
 }
