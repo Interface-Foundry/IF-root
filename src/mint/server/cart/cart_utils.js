@@ -78,6 +78,7 @@ exports.itemPreview = function * (query, store, page, category) {
  * @return     {object}  cart - the cart object
  */
 exports.createCart = function * (store) {
+  var locale
   if (store.includes('amazon')) {
     [store, locale] = store.split('_')
   }
@@ -184,7 +185,11 @@ exports.addItemToCart = function * (itemId, cart, userId, quantity) {
   item.cart = cart.id
   item.quantity = quantity
 
-  cart.items.add(item.id)
+  if (!item.id) {
+    cart.items.add(item._id)
+  } else {
+    cart.items.add(item.id)
+  }
 
   yield [item.save(), cart.save()]
   return item

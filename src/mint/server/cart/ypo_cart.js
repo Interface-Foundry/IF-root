@@ -1,5 +1,7 @@
 var db
 const dbReady = require('../../db')
+const xml2js = require('xml2js')
+
 dbReady.then((models) => { db = models })
 
 
@@ -11,9 +13,7 @@ function syncCart(argument) {
     // body...
 }
 
-function addItemToCart(argument) {
-    // body...
-}
+
 
 function removeItemFromCart(argument) {
     // body...
@@ -21,6 +21,36 @@ function removeItemFromCart(argument) {
 
 function clearCart(argument) {
     // body...
+}
+
+
+/**
+ * creat the xml stuff for a cart
+ *
+ * @param      {<type>}  cartId  The cartesian identifier
+ */
+module.exports.checkoutCart = function * (cartId) {
+  const builder = new xml2js.Builder()
+  let cart = yield db.Carts.findOne({_id: cartId})
+  const xml = builder.buildObject(cart)
+  return xml
+}
+
+
+/**
+ * çreates item that can be generalized to add to cart
+ *
+ * @param      {item id}  the item id for ypo item
+ */
+module.exports.addItem = function * (itemId) {
+  let item
+  if (itemId.includes('ypo.co.uk')) {
+    itemId = itemId.match(/[0-9]{6}/)[0]
+    item = yield db.YpoInventoryItems.findOne({item_code: itemId})
+  } else {
+    item = yield db.YpoInventoryItems.findOne({_id: itemId})
+  }
+  return item
 }
 
 /**
