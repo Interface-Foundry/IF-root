@@ -1,4 +1,4 @@
-export Icon from './icons';
+export Icon from './Icon';
 export Support from './Support';
 export Empower from './Empower';
 export Believe from './Believe';
