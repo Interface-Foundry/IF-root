@@ -9,6 +9,9 @@ var co = require('co')
 co(function * () {
   db = yield dbReady
 
+
+  debugger;
+
   //
   // create a session
 
@@ -61,7 +64,7 @@ co(function * () {
   user = yield db.UserAccounts.findOne({user_id: user.user_id}).populate('sessions')
 
   console.log('user with mobile session', user)
-  
+
 
   console.log('done')
 }).catch(e => {

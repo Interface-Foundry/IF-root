@@ -328,6 +328,36 @@ module.exports = function (router) {
      res.status(200).end()
    }))
 
+  /**
+  * @api {delete} /api/cart/:cart_id/clear Delete
+  * @apiDescription archive, delete, cold storage, whatever, just make it so that no user can ever see it again.
+  * @apiGroup Carts
+  * @apiParam {string} :cart_id cart to delete
+  *
+  * @apiParamExample Request
+  * DELETE https://mint.kipthis.com/api/cart/123456
+  */
+  router.delete('/cart/:cart_id', (req, res) => co(function * () {
+    // only leaders have sudo rm -rf permission
+    const cart = yield db.Carts.findOne({
+      id: req.params.cart_id
+    }).populate('leader').populate('items')
+
+    console.log(cart)
+
+    // if the cart doesn't exist, neat. congrats.
+    if (!cart) {
+      res.status(200).end()
+    }
+
+    if (_.get(req, 'UserSession.user_account.id') !== _.get(cart, 'leader.id')) {
+      throw new Error('Unauthorized, only cart leader can clear cart items')
+    }
+
+    // archive the cart
+    yield cart.archive()
+    res.status(200).end()
+  }))
 
   /**
    * @api {delete} /api/cart/:cart_id/item/:item_id Delete Item
