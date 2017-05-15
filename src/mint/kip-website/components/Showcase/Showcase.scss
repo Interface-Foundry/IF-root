@@ -73,8 +73,8 @@ div[class^='showcase-'] {
 		padding: $padding*2 $padding*10 $padding*3;
 		pointer-events:none;
 		left: 0;
-		opacity: 1;
-		transform: translate3d(0, -150px,0);
+		opacity: 0;
+		transform: translate3d(0, -75px,0);
 		@include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
 
 		.image {
@@ -84,6 +84,11 @@ div[class^='showcase-'] {
 		&.enter {
 			opacity: 1;
 			transform: translate3d(0px, -150px,0) !important;
+		}
+
+		&.leave {
+			opacity: 0;
+			transform: translate3d(0px, -225px,0) !important;
 		}
 
 		@media only screen and (max-width: 600px) {
