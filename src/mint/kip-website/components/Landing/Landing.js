@@ -25,7 +25,7 @@ export default class Landing extends Component {
       modal: false,
       animationOffset: 0,
       containerHeight: 0,
-      animationState: 'inital'
+      animationState: 0
     };
   }
 
@@ -49,7 +49,7 @@ export default class Landing extends Component {
     }
 
     // animate scroll, needs height of the container, and its distance from the top
-    this.setState(animateScroll(containerHeight, animationOffset, scrollTop, animationState, window.innerWidth < 600))
+    this.setState(animateScroll(containerHeight, animationOffset, scrollTop, animationState))
   }
 
   _toggleSidenav () {
@@ -97,7 +97,7 @@ export default class Landing extends Component {
           <RibbonContainer fixed={fixed} src={src} _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/>
           <Hero animate={!fixed} />
           <Statement _toggleModal={_toggleModal} src={src}/>
-          <About animationState={animationState} animate={animationState.includes('fixed')}/>
+          <About animationState={animationState}/>
           <Showcase animationState={animationState} _registerHeight={_registerHeight}/>
           <Services _toggleModal={_toggleModal}/>
           <Footer/>

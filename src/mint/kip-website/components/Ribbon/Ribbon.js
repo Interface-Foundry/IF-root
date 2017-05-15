@@ -5,6 +5,19 @@ import React, { Component } from 'react';
 import { Icon } from '../../themes';
 
 export default class Ribbon extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    // need this, otherwise page always rerender every scroll
+    if(
+        nextProps.fixed !== this.props.fixed ||
+        nextProps.currentUser !== this.props.currentUser ||
+        nextProps.src !== this.props.src 
+      ) {
+      return true;
+    }
+
+    return false
+  }
+
   render() {
     const { fixed, _toggleSidenav, _toggleModal, currentUser, src } = this.props;
     return (

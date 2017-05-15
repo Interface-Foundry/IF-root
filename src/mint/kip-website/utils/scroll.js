@@ -1,44 +1,31 @@
-export const animateScroll = (containerHeight, animationOffset, scrollTop, animationState, mobile) => {
+export const animateScroll = (containerHeight, animationOffset, scrollTop, animationState) => {
 	let newState = {}
-  let animationStart = animationOffset - 400;
-  let breakPointHeight = containerHeight/4;
-  let animationEnd = mobile ? containerHeight + 700 : containerHeight + 150 ;
+  let animationStart = animationOffset;
+  let breakPointHeight = (containerHeight/8);
+  let animationEnd = containerHeight + animationOffset;
 
-  if(scrollTop <= animationStart && animationState !== 'inital') {
-    return newState = {
-  		animationState: 'inital'
+  console.log('scrollTop:', scrollTop)
+
+  if(scrollTop <= animationStart && scrollTop < animationStart + breakPointHeight && animationState !== 0) {
+    console.log('inside 0')
+    newState = {
+  		animationState: 0
   	}
   }
 
-  if(scrollTop > animationStart && scrollTop < animationStart + 350  && animationState !== 'fixed first') {
-    return newState = {
-	   	animationState: 'fixed first'
+  if(scrollTop > animationStart + breakPointHeight && scrollTop < animationStart + (breakPointHeight*4)  && animationState !== 1) {
+    console.log('inside 1')
+    newState = {
+	   	animationState: 1
     }
   }
 
 
-  if(scrollTop > animationStart + 350 && scrollTop < animationStart + breakPointHeight && animationState !== 'fixed first bubble') {
-    return newState = {
-      animationState: 'fixed first bubble'
+  if(scrollTop > animationStart + (breakPointHeight*4) && scrollTop < animationStart + (breakPointHeight*8) && animationState !== 2) {
+    console.log('inside 2')
+    newState = {
+      animationState: 2
     }
-  }
-
-  if(scrollTop > animationStart + breakPointHeight && scrollTop < animationStart + (breakPointHeight*2) && animationState !== 'fixed second bubble') {
-    return newState = {
-  		animationState: 'fixed second bubble'
-  	}
-  }
-
-  if(scrollTop > animationStart + (breakPointHeight*2) && scrollTop < animationEnd && animationState !== 'fixed third bubble') {
-    return newState = {
-        animationState: 'fixed third bubble'
-    }
-  }
-
-  if(scrollTop > animationEnd && animationState !== 'absolute') {
-    return newState = {
-			animationState: 'absolute'
-		}
   }
 
   return newState;

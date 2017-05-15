@@ -8,7 +8,6 @@
 	height: 550px;
 	padding: 0;
 	width: 100%;
-	@include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
 
 	@media only screen and (max-width: 600px) {
 		height: 500px;

@@ -5,10 +5,10 @@
 	position: relative;
 	text-align: center;
 	background: mix(white, $primaryColor, 97%);
-	padding: $padding*25 $padding*2 0;
+	padding: $padding*10 $padding*2 0;
 
 	@media only screen and (max-width: 600px) {
-		padding: $padding*3 $padding*2 $padding*6;
+		padding: $padding*5 $padding*2 $padding*6;
 	}
 
 	h1 {

@@ -3,11 +3,11 @@
 
 .ribbon {
 	position: fixed;
-	padding: $padding $padding*12.5;
+	padding: 0 $padding*12.5;
 	top: 0;
 	pointer-events:none;
 	width: 100%;
-	height: auto;
+	height: $ribbonHeight;
 	z-index: 500;
 	text-align: center;
 	background: transparent;
@@ -16,7 +16,7 @@
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
     @media only screen and (max-width: 600px) {
-    	padding: $padding $padding*2;
+    	padding: 0 $padding*2;
     }
 
     &.background {
@@ -37,7 +37,6 @@
 	}
 	.row {
 		text-align: left;
-		height: $ribbonHeight;
 		pointer-events: auto;
 		display: inline-block;
 		.image {
@@ -49,11 +48,11 @@
 			display: inline-block;
 			padding: 0 $padding/2;
 			font-size: 17px;
-			line-height: $ribbonHeight;
 		}
 
 		h1 {
 			font-size: 23px;
+			line-height: 50px;
 		}
 		svg {
 			width: 30px;
@@ -78,8 +77,6 @@
 	.action {
 		padding: $padding/2;
 		button {
-			display: table-cell;
-		    vertical-align: middle;
 		    text-align: center;
 			border: 0px solid $primaryColor;
 			white-space: nowrap;
@@ -114,14 +111,16 @@
 			display: table-cell;
 		    vertical-align: middle;
 		    text-align: center;
-			border: 1px solid #eccd46;
+			border: 0px solid #eccd46;
 			font-weight: bold;
 			border-radius: $padding/2;
 			background: white;
-			padding: $padding $padding;
-			font-size: 20px;
+			padding: 0 $padding;
+			font-size: 13px;
 			cursor: pointer;
-			height: $ribbonHeight;
+			margin-top: 10px;
+			height: 30px;
+			line-height: 30px;
 			color: #42403f;
 		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 			&:focus {
@@ -133,15 +132,9 @@
 			}
 		}
 		a {
-			height: 50px;
 			&:first-of-type {
 				button {
-					margin-right: $padding*2;
 					background: $secondaryColor;
-
-					@media only screen and (max-width: 600px) {
-						margin: 0;
-					}
 				}
 			}
 		}
