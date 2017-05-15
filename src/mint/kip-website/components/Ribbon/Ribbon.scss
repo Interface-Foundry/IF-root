@@ -116,7 +116,7 @@
 			border-radius: $padding/2;
 			background: white;
 			padding: 0 $padding;
-			font-size: 13px;
+			font-size: 14px;
 			cursor: pointer;
 			margin-top: 10px;
 			height: 30px;
@@ -125,10 +125,6 @@
 		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 			&:focus {
 				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-			}
-			@media only screen and (max-width: 600px) {
-				font-size: 12px;
-				padding: 0 $padding/2;
 			}
 		}
 		a {

@@ -29,11 +29,11 @@ export default class Statement extends Component {
 		      	}
 
 	        	<div className="col-12 row-1 headline">
-	        		<h1>COLLABORATE AND COORDINATE SHOPPING</h1>
+	        		<h1>COLLABORATIVE GROUP SHOPPING</h1>
 	        	</div>
 	        	<div className="col-12 row-1 text">
 	        		<p>
-	        			Whether you're a project manager, grassroots organizer, or just a few friends putting together an event, Kip's easy to use design takes the stress out of group orders.
+	        			Save money and track spending with Kip. See how much you’re spending in every order, save on shipping and account fees with shared shopping carts.
 	        		</p>
 	        	</div>
 	      	</div>

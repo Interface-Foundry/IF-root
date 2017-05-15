@@ -35,12 +35,6 @@ export default class About extends Component {
 		        		<div><Icon icon='Delivery'/></div>
 		        	</div>
 
-			        <div className="col-6 row-1 services__details">
-			        	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/moneycartClip.png")'}}/ >
-		        		<h2>TRACK SPENDING</h2>
-			        	<p>Save money and track spending with Kip. See how much you’re spending in every order, save on shipping and account fees with shared shopping carts.</p>
-			        </div>
-
 			       	<div className="col-6 row-1 services__details">
 				       	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/cloudClip.png")'}}/ >
 			        	<h2>KEEP IT IN CLOUD</h2>
