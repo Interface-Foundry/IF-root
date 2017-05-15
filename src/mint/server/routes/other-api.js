@@ -160,9 +160,23 @@ module.exports = function (router) {
   }))
 
   /**
-   *
+   * @api {Get} /api/postcode/:code looks up a list of addresses associated with a british postal code
+   * @apiGroup Other
+   * @apiParam {string} code the postal code we want addresses for
    */
-  router.get('/postcode', (req, res) => co(function * () {
 
+   // v1.10/json3.ws?callback=jQuery22408501059686096974_1494875679968&Key=UX83-MY94-GN78-FN27&SearchTerm=S122SF&PreferredLanguage=English&Filter=None&_=1494875679970
+  router.get('/postcode', (req, res) => co(function * () {
+    var code = req.query.code;
+    var pcaFindResult = yield request(`https://services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/Find/v1.10/json.ws?Key=UX83-MY94-GN78-FN27&Filter=None&SearchTerm=${code}`);
+    // logging.info('pcaFind result', pcaFindResult)
+
+    var addresses = yield JSON.parse(pcaFindResult).map(function * (item) {
+      var fullAddress = yield request(`https://services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/RetrieveById/v1.30/json.ws?Key=UX83-MY94-GN78-FN27&Id=${item.Id}`);
+      // logging.info('full address:', fullAddress);
+      return JSON.parse(fullAddress)
+    });
+
+    res.send(addresses);
   }));
 }
