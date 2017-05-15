@@ -544,6 +544,7 @@ module.exports = function (router) {
    * @apiGroup Carts
    * @apiParam {String} :q either a url, asin, or search text
    * @apiParam {String} :page page of amazon search results
+   * @apiParam {String} :category category name to bound the results of the search
    *
    * @apiParamExample url preview
    * GET https://mint.kipthis.com/api/itempreview?q=https%3A%2F%2Fwww.amazon.com%2FOnitsuka-Tiger-Mexico-Classic-Running%2Fdp%2FB00L8IXMN0%2Fref%3Dsr_1_11%3Fs%3Dapparel%26ie%3DUTF8%26qid%3D1490047374%26sr%3D1-11%26nodeID%3D679312011%26psd%3D1%26keywords%3Dasics%252Bshoes%26th%3D1%26psc%3D1
@@ -563,7 +564,7 @@ module.exports = function (router) {
     }
 
     const store = _.get(req, 'query.store') ? req.query.store : 'ypo' // <--- CHANGE THIS BACK TO AMAZON IN THE FUTURE, JUST FOR YPO PURPOSES
-    const item = yield cartUtils.itemPreview(q, store)
+    const item = yield cartUtils.itemPreview(q, store, (req.query.page || 1), req.query.category)
     res.send(item)
   }))
 

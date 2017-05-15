@@ -35,7 +35,7 @@ const checkError = function (res) {
   }
 }
 
-exports.itemPreview = function * (query) {
+exports.itemPreview = function * (query, page, category) {
   var item
   if (query.includes('amazon.com')) {
     // probably a url
@@ -46,7 +46,7 @@ exports.itemPreview = function * (query) {
   } else {
     // search query
     // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-    item = yield searchAmazon(query, req.query.page);
+    item = yield exports.searchAmazon(query, page, category);
   }
   return item
 }
@@ -110,7 +110,7 @@ exports.getAmazonItem = function * (item_identifier) {
  * @param {string} query search terms
  * @returns {[type]} amazon items
  */
-exports.searchAmazon = function * (query, index) {
+exports.searchAmazon = function * (query, index, category) {
   query = emoji(query);
   console.log('searching:', query)
   var amazonParams = {
@@ -121,6 +121,10 @@ exports.searchAmazon = function * (query, index) {
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
     ItemPage: index || 1
   };
+  if (category) amazonParams.SearchIndex = category;
+
+  logging.info('amazonParams:', amazonParams)
+
   var results = yield opHelper.execute('ItemSearch', amazonParams);
   if (!results || !results.result.ItemSearchResponse.Items.Item) {
     if (!results) throw new Error('Error on search for query', query);

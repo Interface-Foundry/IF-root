@@ -1,4 +1,4 @@
-var amazonCategories = require('../../amazonCategories');
+var amazonCategories = require('../amazonCategories');
 
 var getYpoCategories = function * () {
   // read in categories file
