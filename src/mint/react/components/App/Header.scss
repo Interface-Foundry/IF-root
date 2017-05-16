@@ -93,12 +93,15 @@
       color: $header-color;
       border-bottom: 1px solid $border-color-light;
       padding: 0;
+
+      span {
+        border-bottom: 1px solid $secondary-button-color;;
+      }
     }
     .navbar__modal_head {
       flex-grow: 1;
       text-align: center;
       &.settings {
-        text-align: right;
         padding: 0 $padding*2 0 0;
         svg {
           font-size: 20px;

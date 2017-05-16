@@ -45,7 +45,7 @@ body {
   overflow-y: scroll;
   text-align: left;
   -webkit-overflow-scrolling: touch;
-  height: calc(100% - #{$nav-height*2 - 10});
+  height: calc(100% - #{$nav-height*2 });
   &.large {
     height: calc(100% - #{$nav-height});
   }

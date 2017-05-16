@@ -232,8 +232,23 @@ $cart__add-height: $nav-height+$padding;
         animation-delay: 10s; //suprise!
       }
       h4 {
+        position: relative;
         text-align: center;
-        padding: $padding $padding*5;
+        padding: $padding;
+        border: 3px solid $main-button-color;
+        border-radius: $padding;
+        margin-bottom: $padding*2;
+        &:before {
+          content:"";
+          position: absolute;
+          bottom: -15px;
+          width: 0;
+          height: 0;
+          left: calc(50% - 15px);
+          border-left: 13px solid transparent;
+          border-top: 15px solid $main-button-color;
+          border-right: 13px solid transparent;
+        }
       }
     }
   }

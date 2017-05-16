@@ -53,7 +53,7 @@ export default class Header extends Component {
           }
         />
         <Route path={'/cart/:cart_id/m/settings'} exact component={() => 
-            <SettingsHeader text='Settings' icon="Settings" {...props}/>
+            <SettingsHeader text='Edit My Settings' icon="Settings" {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/feedback'} exact component={() => 
@@ -118,7 +118,7 @@ class CartHead extends Component {
           <h3>
             {locked ? 'Checkout in Progress' : cartName}
           </h3>
-          <span className='members'>{`${members.length} Members`}</span>
+          <span className='members'>Created by: {name} | {`${members.length} Members`}</span>
           </a>
         </div>
         <div className='header__right' onClick={_toggleSidenav}>
@@ -221,7 +221,7 @@ class SettingsHeader extends Component {
         </div>
         <h3 className='navbar__modal_head settings'>
           <Icon icon={icon}/>
-          {text}
+          <span className='underline'>{text}</span>
         </h3>
       </div>
     );
