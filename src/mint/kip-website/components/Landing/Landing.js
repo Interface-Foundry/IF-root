@@ -25,7 +25,7 @@ export default class Landing extends Component {
       modal: false,
       animationOffset: 0,
       containerHeight: 0,
-      animationState: 0
+      animationState: -2
     };
   }
 

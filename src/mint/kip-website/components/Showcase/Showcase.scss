@@ -5,8 +5,9 @@ $centerPhone: calc(50% - 212.5px);
 div[class^='showcase-'] {
 	position: relative;
 	text-align: center;
+	background: #eaf9ff;
 	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-
+	
 	&.showcase-0 {
 		background: #eaf9ff;
 	}
