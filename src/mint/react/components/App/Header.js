@@ -49,7 +49,7 @@ export default class Header extends Component {
           }
         />
         <Route path={'/cart/:cart_id/m/signin'} exact component={() => 
-            <IntroHead text={'Create New Cart'} {...props}/>
+            <IntroHead text={'Add Item to Cart'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/settings'} exact component={() => 
