@@ -211,6 +211,10 @@ $cart__add-height: $nav-height+$padding;
       height: $nav-height/2;
       line-height: $nav-height/2;
       padding: 0 $padding*2;
+      span {
+        font-size: 12px;
+        color: rgba($header-color, 0.8);
+      }
       .email {
         display: block;
         font-size: 0.8em;
@@ -222,14 +226,14 @@ $cart__add-height: $nav-height+$padding;
       padding: $padding;
       background: white;
       .image {
-        height: 30px;
+        height: 50px;
         @include animation(bounceDownSmall 2s);
         animation-iteration-count: 3; // too much twitching
         animation-delay: 10s; //suprise!
       }
       h4 {
         text-align: center;
-        padding: $padding;
+        padding: $padding $padding*5;
       }
     }
   }

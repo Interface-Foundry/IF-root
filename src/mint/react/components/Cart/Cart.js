@@ -172,7 +172,7 @@ class MyItems extends Component {
 
     return (
       <ul>
-        <div className='cart__items__title'>{user_account.name}</div>
+        <div className='cart__items__title'>{user_account.name} <span> - {items.length} Items</span></div>
         <div className='cart__items__container'>
           {
             items.length 
@@ -180,7 +180,7 @@ class MyItems extends Component {
             : <EmptyCart key="empty"/>
           }
         </div>
-        <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3>
+        {items.length ? <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3>:null}
       </ul>
     );
   }
@@ -204,10 +204,10 @@ class OtherItems extends Component {
         email 
         ? <a href={`mailto:${email}?subject=From ${cartName}`}>
             <div key={id} className='cart__items__title'>{name}
-              <br/><span className='email'>{email}</span>
+              <br/><span className='email'>{email} <span>- {items.length} Items</span></span>
             </div>
           </a>
-        : <div key={id} className='cart__items__title'>{name}</div>
+        : <div key={id} className='cart__items__title'>{name} <span>- {items.length} Items</span></div>
         }
         {
           items.length 
@@ -225,6 +225,7 @@ class EmptyCart extends Component {
     return (
       <li className='cart__items-empty'>
         <div className='image' style={{backgroundImage:'url(//storage.googleapis.com/kip-random/head_smaller.png)'}}/>
+        <h4>Looks like you havn't added any items. Get started by adding stuff to the cart, or invite others to add to the cart by tapping the Share button</h4>
       </li>
     );
   }

@@ -7,7 +7,7 @@ div[class^='showcase-'] {
 	text-align: center;
 	background: #eaf9ff;
 	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-	
+
 	&.showcase-0 {
 		background: #eaf9ff;
 	}
@@ -142,7 +142,7 @@ div[class^='showcase-'] {
 		}
 
 		@media only screen and (max-width: 1000px) {
-			padding: $padding*4  $padding*2 $padding*2 $padding*13;
+			padding: $padding*4 $padding*2 $padding*2 $padding*13;
 		}
 		@media only screen and (max-width: 600px) {
 			position: absolute;
