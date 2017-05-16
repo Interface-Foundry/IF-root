@@ -191,14 +191,6 @@ module.exports = function (router) {
         console.log('http://localhost:3000/auth/' + link.id)
       }
 
-      // generate magic code here TODO
-      var code = randomstring({
-        length: 6,
-        readable: true,
-        capitalization: 'uppercase'
-      })
-      logging.info('code:', code)
-
       var lostEmail = yield db.Emails.create({
         recipients: email,
         subject: 'Log in to Kip',
