@@ -8,8 +8,8 @@
 	bottom: 0;
 	right: 0;
 	z-index: 1001;
-	padding: $padding*5 $padding*2 0;
-	background: rgba(255, 255, 255, 0.3);
+	padding: $padding*10 $padding*2 0;
+	background: rgba($secondary-button-color, 0.3);
 	@include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
 	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
