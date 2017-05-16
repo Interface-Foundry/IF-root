@@ -23,7 +23,7 @@ const randomGifCacheNumber = Math.random(8000);
 export default class About extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
-    if(nextProps.animationState !== this.props.animationState) return true
+    if(nextProps.animationState !== this.props.animationState && window.innerWidth < 600) return true
 
     return false
   }
@@ -45,7 +45,6 @@ export default class About extends Component {
     ],
     { animationState } = this.props;
 
-    console.log(animationState)
     return (
       <div className="about"> 
         {

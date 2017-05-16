@@ -15,9 +15,10 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
     height: 100%;
 
 	.image {
-		background-position: center;
-
+		display: none;
+		
 		@media only screen and (max-width: 1000px) {
+			display: block;
 			height: 300px;
 			background-position: center;
 	    }
