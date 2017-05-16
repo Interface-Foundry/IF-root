@@ -33,10 +33,12 @@ class EditCart extends Component {
   }
 
   render() {
-    const { handleSubmit } = this.props, { onSubmitMiddleware } = this;
+    const { handleSubmit, cart } = this.props, { onSubmitMiddleware } = this;
 
     return (
       <form className="editCart" onSubmit={handleSubmit(onSubmitMiddleware)}> 
+          <div> Store: {cart? cart.store:'idk'} </div>
+          <div> Locale: {cart?cart.store_locale:'idk'} </div>
           <div className="input custom src">
               <Field name="thumbnail_url" component={Image} />
           </div>
@@ -46,6 +48,7 @@ class EditCart extends Component {
           <footer className='editCart__footer' onClick={handleSubmit(onSubmitMiddleware)}>
               <button className="submit" type="submit">Submit</button>
           </footer>
+
       </form>
     );
   }
