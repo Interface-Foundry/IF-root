@@ -1,5 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
+const randomstring = require('randomstring')
 const dealsDb = require('../deals/deals')
 var db
 const dbReady = require('../../db')
@@ -91,6 +92,16 @@ module.exports = function (router) {
 
       console.log('inside login', currentUser.name || email)
 
+      // generate magic code here TODO
+      var code = randomstring.generate({
+        length: 6,
+        readable: true,
+        capitalization: 'uppercase'
+      })
+      // logging.info('code:', code)
+      user.login_code = code
+      yield user.save()
+
       var loginEmail = yield db.Emails.create({
         recipients: email,
         subject: 'Log in to Kip'
@@ -98,10 +109,9 @@ module.exports = function (router) {
 
       loginEmail.template('login_email', {
         link,
-        username: currentUser.name || email
+        username: currentUser.name || email,
+        code: code
       })
-
-
 
       yield loginEmail.send()
       res.send({
@@ -181,6 +191,14 @@ module.exports = function (router) {
         console.log('http://localhost:3000/auth/' + link.id)
       }
 
+      // generate magic code here TODO
+      var code = randomstring({
+        length: 6,
+        readable: true,
+        capitalization: 'uppercase'
+      })
+      logging.info('code:', code)
+
       var lostEmail = yield db.Emails.create({
         recipients: email,
         subject: 'Log in to Kip',
@@ -189,7 +207,8 @@ module.exports = function (router) {
 
       lostEmail.template('login_email', {
         link,
-        username: user.name || email
+        username: user.name || email,
+        code: code
       })
 
       yield lostEmail.send()
