@@ -24,8 +24,7 @@ export default class Cart extends Component {
     updateCart: PropTypes.func,
     currentCart: PropTypes.object,
     deals: PropTypes.array,
-    cancelRemoveItem: PropTypes.func.isRequired,
-    clearCart: PropTypes.func.isRequired
+    cancelRemoveItem: PropTypes.func.isRequired
   }
 
   state = {

@@ -118,7 +118,7 @@ class CartHead extends Component {
           <h3>
             {locked ? 'Checkout in Progress' : cartName}
           </h3>
-          <span className='members'>Created by: {leader.name} </span>
+          <span className='members'>Created by: {leader ? leader.name : ''} </span>
           </a>
         </div>
         <div className='header__right'>

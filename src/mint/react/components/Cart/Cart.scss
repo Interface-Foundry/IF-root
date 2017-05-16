@@ -237,7 +237,8 @@ $cart__add-height: $nav-height+$padding;
         padding: $padding;
         border: 3px solid $main-button-color;
         border-radius: $padding;
-        margin-bottom: $padding*2;
+        margin: $padding auto $padding*2;
+        max-width: 300px;
         &:before {
           content:"";
           position: absolute;

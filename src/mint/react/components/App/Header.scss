@@ -6,7 +6,8 @@
   line-height: $nav-height;
   font-family: 'Raleway';
   text-align: left;
-  background: $kip-primary-color;
+  background: $secondary-button-color;
+  color: white;
   border-bottom: 1px solid $border-color-light;
   @media (min-width: 900px) {
     padding: 0;
