@@ -99,7 +99,7 @@ class CartHead extends Component {
   render() {
     const {
       state: { bounce },
-      props: { currentUser: { name }, _toggleSidenav, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members } }
+      props: { currentUser: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members } }
     } = this;
 
     return (
@@ -121,8 +121,9 @@ class CartHead extends Component {
           <span className='members'>Created by: {name} | {`${members.length} Members`}</span>
           </a>
         </div>
-        <div className='header__right' onClick={_toggleSidenav}>
-          {isMobile ? <div className='navbar__icon'><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
+        <div className='header__right'>
+          {!name ? <p onClick={() => _togglePopup()}><span>Login</span></p> : null}
+          {isMobile ? <div className='navbar__icon' onClick={_toggleSidenav}><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
         </div>
       </div>
     );

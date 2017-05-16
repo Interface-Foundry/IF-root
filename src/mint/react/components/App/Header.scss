@@ -68,8 +68,15 @@
     padding: 0 $padding;
     p {
       padding: 0;
-      height: 40px;
+      line-height: 50px;
       font-weight: bold;
+      margin-right: $padding;
+      cursor: pointer;
+      span {
+        border-bottom: 3px solid $main-button-color;
+      }
+    }
+    a {
       border-bottom: 3px solid $main-button-color;
     }
     .navbar__icon {

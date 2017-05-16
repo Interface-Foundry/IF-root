@@ -81,6 +81,28 @@ export function logout() {
   };
 }
 
+export function login(cart_id, email) {
+  return async dispatch => {
+    try {
+      await fetch(`/api/login?email=${encodeURIComponent(email)}&redirect=/cart/${cart_id}`, {
+        credentials: 'same-origin'
+      });
+
+      return dispatch(receiveUpdate(await response.json()));
+      debugger
+      return dispatch(receiveUpdate({
+        user_account: {},
+        animal: '',
+        createdAt: '',
+        updatedAt: '',
+        id: ''
+      }));
+    } catch (e) {
+      return new SubmissionError({ email: 'Something went wrong with login' });
+    }
+  };
+}
+
 export function postFeedback(feedback) {
   return async dispatch => {
     try {

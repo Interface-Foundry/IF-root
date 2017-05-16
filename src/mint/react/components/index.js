@@ -15,3 +15,4 @@ export Overlay from './Overlay';
 export Settings from './Settings';
 export Share from './Share';
 export Toast from './Toast';
+export Popup from './Popup';
