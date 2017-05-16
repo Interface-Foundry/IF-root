@@ -11,6 +11,18 @@
 		padding: $padding*5 $padding*2 $padding*6;
 	}
 
+	.services__comparison {
+		ul {
+			display: inline-block;
+
+			li {
+				height: $ribbonHeight;
+				border-bottom: 1px solid #e3e3e3;
+				font-size: 3vw;
+			}
+		}
+	}
+
 	h1 {
 		font-size: 40px;
 		padding-top: $padding;

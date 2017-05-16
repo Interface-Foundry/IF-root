@@ -4,12 +4,87 @@ import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
 
+const comparisonArray = [
+	{
+		name: null,
+		order: true,
+		budget: true,
+		tracking: true,
+		vendors: true,
+		noSignup: true,
+		accessability: [],
+		pricing: null
+	},
+	{
+		name: 'Kip',
+		order: true,
+		budget: true,
+		tracking: true,
+		vendors: true,
+		noSignup: true,
+		accessability: ['Facebook', 'Email', 'Slack', 'Outlook', 'Chrome'],
+		pricing: 'FREE'
+	},
+	{
+		name: 'Hivy',
+		order: true,
+		budget: true,
+		tracking: false,
+		vendors: false,
+		noSignup: false,
+		accessability: ['Slack', 'Apple'],
+		pricing: 'Credit Card Required'
+	},
+	{
+		name: 'Hivy',
+		order: true,
+		budget: false,
+		tracking: false,
+		vendors: true,
+		noSignup: false,
+		accessability: ['Google', 'Apple'],
+		pricing: 'Credit Card Required'
+	}
+]
+
 export default class About extends Component {
 
   	render() {
 	    return (
 	      	<div className="services"> 
 				<div className="col-12">
+
+					<div className="col-12 row-1 services__comparison">
+						{
+							comparisonArray.map((app) => {
+								if(!app.name) return (
+									<ul className="app col-3 row-1">
+										<li></li>
+										<li>Order Management</li>
+										<li>Budget Setting</li>
+										<li>Track Orders</li>
+										<li>Multiple Vendors</li>
+										<li>No Signup <br/> No Download</li>
+										<li>Accessibility</li>
+										<li>Pricing</li>
+									</ul>
+								)
+
+								return (
+									<ul className="app col-3 row-1">
+										<li>{app.name}</li>
+										<li>{app.order}</li>
+										<li>{app.budget}</li>
+										<li>{app.tracking}</li>
+										<li>{app.vendors}</li>
+										<li>{app.noSignup}</li>
+										<li>{app.accessability[0]}</li>
+										<li>{app.pricing}</li>
+									</ul>
+								)
+							})
+						}
+					</div>
 
 					<h3><em>"Group shopping bot Kip focuses on coordinating purchases with a team so they can purchase lunch together or have an office manager authorize a supply order."</em><br/><span> - Fast Company July 13, 2016</span></h3>
 
