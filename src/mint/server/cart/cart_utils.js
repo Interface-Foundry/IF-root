@@ -48,12 +48,31 @@ const itemPreviewHandlers = {
   'ypo': ypo.itemPreview,
 }
 
+const checkoutHandlers = {
+  'amazon': amazon.checkout,
+  'ypo': ypo.checkout
+}
 
 
 /************************************************
  * functions for carts
  ************************************************
  */
+
+/**
+ * checkout for a specified cart
+ *
+ * @param      {object}  cart    The
+ * @param      {object}  res    The res
+ */
+exports.checkout = function * (cart, res) {
+  if (cart.store === undefined) {
+    throw new Error('Store required for checkout')
+  }
+
+  yield checkoutHandlers[cart.store](cart, res)
+}
+
 
 /**
  * get info for item based on retailer

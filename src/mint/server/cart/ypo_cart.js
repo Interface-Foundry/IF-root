@@ -29,7 +29,7 @@ function clearCart(argument) {
  *
  * @param      {<type>}  cartId  The cartesian identifier
  */
-module.exports.checkoutCart = function * (cartId) {
+module.exports.checkout = function * (cartId) {
   const builder = new xml2js.Builder()
   let cart = yield db.Carts.findOne({_id: cartId})
   const xml = builder.buildObject(cart)
