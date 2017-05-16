@@ -58,17 +58,14 @@ export default class App extends Component {
 
   componentWillMount() {
     const { props: { fetchCart, fetchAllCarts, cart_id, history: { replace } } } = this;
-    if (cart_id) {
-      fetchCart(cart_id)
-        .then(cart => !cart ? replace('/404') : null);
-    }
+    if (cart_id) fetchCart(cart_id)
+      .then(cart => { console.log({ cart });!cart ? replace('/404') : null });
     fetchAllCarts();
   }
 
   componentDidMount() {
-    ReactDOM.findDOMNode(this)
-    if (window.innerWidth < 900)
-      this.setState({ isMobile: true })
+    ReactDOM.findDOMNode(this);
+    if (window.innerWidth < 900) this.setState({ isMobile: true });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -94,7 +91,7 @@ export default class App extends Component {
 
       _logPageView(pathname, nextSessionId); //log initial load
     }
-    if (cart_id !== nextCart_id) {
+    if (cart_id !== nextCart_id && nextCart_id) {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
       fetchAllCarts();
@@ -129,7 +126,7 @@ export default class App extends Component {
       return <Overlay/>;
     }
     return (
-        <section className='app'>
+      <section className='app'>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
           <div className={`app__view ${showFooter ? '' : 'large'}`}>

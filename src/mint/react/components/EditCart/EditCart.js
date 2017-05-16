@@ -70,26 +70,33 @@ class EditCart extends Component {
               <Icon icon='Edit'/> <span className='editText'>Edit</span>
             </div>
         }
-        <ul className='dangerzone'>
-          <header>Danger Will Robinson!</header>
-          <section>Buttons in this area can ruin your perfect cart permanently!</section>
-          <ul>
-            <li>
-              <h2> Empty Cart </h2>
-              <p>
-                This will permanently remove everything from your cart!
-              </p>
-              <button onClick={() => {clearCart(cart_id); replace(`/cart/${cart.id}`);}}>Empty Cart</button>
-            </li>
-            <li>
-            <h2> Delete Cart </h2>
-              <p>
-                This will permanently delete your cart, there's no going back from here!
-              </p>
-              <button onClick={()=> {replace('/newcart'); deleteCart(cart_id); }}>Delete Cart</button>
-            </li>
-          </ul>
-        </ul>
+        <div className='pad'/>
+        <table className='dangerzone'>
+          <caption>
+            <h1 className='danger'> Danger Will Robinson!</h1>
+            <h3>Buttons in this area can ruin your perfect cart permanently!</h3>
+          </caption>
+          <tbody>
+            <tr>
+              <td> 
+                <h2>Empty Cart</h2>
+                <p>This will permanently remove everything from your cart!</p>
+              </td>
+              <td>
+                <button onClick={() => {clearCart(cart_id); replace(`/cart/${cart.id}`);}}>Empty Cart</button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <h2>Delete Cart</h2>
+                <p>This will permanently delete your cart, there's no going back from here!</p>
+              </td>
+              <td>
+                <button onClick={()=> {deleteCart(cart_id); replace('/newcart');  }}>Delete Cart</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     );
   }
