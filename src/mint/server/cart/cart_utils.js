@@ -181,7 +181,7 @@ exports.deleteItemFromCart = function * (item, cart, userId) {
 }
 
 /**
- * create item by user in a cart
+ * create item in db.Items for a specified store
  *
  * @param      {string}  itemId  The item identifier/asin
  * @param      {string}          userId  The user identifier
@@ -189,7 +189,7 @@ exports.deleteItemFromCart = function * (item, cart, userId) {
  * @param      {number}          quantity the item quantity
  * @return     {object}          item object that was created
  */
-exports.addItemToCart = function * (itemId, cart, userId, quantity) {
+exports.addItem = function * (itemId, cart, quantity) {
   if (quantity === undefined) {
     quantity = 1
   }
@@ -200,17 +200,6 @@ exports.addItemToCart = function * (itemId, cart, userId, quantity) {
   }
 
   let item = yield addItemHandlers[cart.store](itemId)
-  item.added_by = userId
-  item.cart = cart.id
-  item.quantity = quantity
-
-  if (!item.id) {
-    cart.items.add(item._id)
-  } else {
-    cart.items.add(item.id)
-  }
-
-  yield [item.save(), cart.save()]
   return item
 }
 

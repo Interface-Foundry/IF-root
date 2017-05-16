@@ -259,22 +259,19 @@ module.exports = function (router) {
       item = yield db.Items.findOne({id: req.body.item_id})
     } else {
       // Create an item from the url
-      item = yield cartUtils.addItemToCart(req.body, cart, userId, 1)
+      item = yield cartUtils.addItem(req.body, cart, 1)
     }
-    // old/
-    // cart.items.add(item.id)
-    // item.cart = cart.id
 
-    // specify who added it
+    cart.items.add(_.get(item, 'id', item._id))
+    item.cart = cart.id
+
     logging.info('user id?', req.UserSession.user_account.id)
-    // item.added_by = req.UserSession.user_account.id
-    // yield item.save()
-
-
+    item.added_by = userId
 
     // Save all the weird shit we've added to this poor cart.
+    yield [item.save(), cart.save()]
+    // specify who added it
 
-    // And assuming it all went well we'll respond to the client with the saved item
     return res.send(item)
   }));
 
@@ -555,7 +552,6 @@ module.exports = function (router) {
    */
   router.get('/itempreview', (req, res) => co(function * () {
     // parse the incoming text to extract either an asin, url, or search query
-    //
     const q = (req.query.q || '').trim()
     if (!q) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
@@ -580,6 +576,7 @@ module.exports = function (router) {
     // logging.info('populated cart', cart);
     var cartItems = cart.items;
 
+    // yield cartUtils.checkout(cart)
     if (cart.affiliate_checkout_url && cart.locked) {
       res.redirect(cart.affiliate_checkout_url)
     }

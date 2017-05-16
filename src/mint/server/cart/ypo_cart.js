@@ -80,7 +80,17 @@ module.exports.itemPreview = function * (query) {
       }
     })
   })
-  return items
+  return yield items.map(function * (item) {
+    return yield db.Items.create({
+        store: 'ypo',
+        name: item.name,
+        asin: item.item_code.toString(),
+        description: item.description,
+        price: item.price,
+        thumbnail_url: item.image_url,
+        main_image_url: item.image_url
+      })
+  })
 }
 
 /**
