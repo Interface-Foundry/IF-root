@@ -48,7 +48,7 @@ export default class Item extends Component {
     if (item_id) previewItem(item_id);
     else if (amazon_id && items.length === 0) previewAmazonItem(amazon_id);
 
-    if (type === 'deal' && items.length === 0) fetchCards();
+    if (type === 'deal' && items.length === 0) fetchCards(cart_id);
     else if (type === 'search' && index && items.length) setSearchIndex(index);
 
     this.determineNav = ::this.determineNav;

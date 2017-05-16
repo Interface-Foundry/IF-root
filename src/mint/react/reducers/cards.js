@@ -10,7 +10,7 @@ export default function kipForm(state = initialState, action) {
     return { 
       ...state,     
       type: 'categories',
-      cards: state.categories
+      cards: state.categories || []
     };
   case RECEIVE_CARDS:
     return {

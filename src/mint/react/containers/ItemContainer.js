@@ -21,7 +21,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchCards: () => dispatch(fetchCards()),
+  fetchCards: (cart_id) => dispatch(fetchCards(cart_id)),
   previewItem: (itemId) => {
     ReactGA.event({
       category: 'Item',
