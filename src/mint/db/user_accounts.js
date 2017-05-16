@@ -49,6 +49,12 @@ var userAccountCollection = Waterline.Collection.extend({
     sessions: Waterline.isMany('sessions'),
 
     /**
+     * List of addresses associated with the user
+     * @type {Address}
+     */
+    addresses: Waterline.isMany('addresses'),
+
+    /**
      * Whether the user accepts a cash or not
      * @type {Boolean}
      */
@@ -82,7 +88,25 @@ var userAccountCollection = Waterline.Collection.extend({
      * The user's PayPal id
      * @type {String}
      */
-    paypal_id: 'string'
+    paypal_id: 'string',
+
+    /**
+     * The user's account number for YPO
+     * @type {String}
+     */
+    ypo_account_number: 'string',
+
+    /**
+     * The user's account name for YPO
+     * @type {String}
+     */
+    ypo_account_name: 'string',
+
+    /**
+     * YPO voucher code, whatever this is
+     * @type {String}
+     */
+    ypo_voucher_code: 'string',
   }
 })
 

@@ -130,7 +130,7 @@ module.exports = function (router) {
     // check if the user is already identified as this email
     var currentUser = req.UserSession.user_account
 
-    // IF they are already logged in as this email, probably in a weird state to be re-identifying
+    // If they are already logged in as this email, probably in a weird state to be re-identifying
     // idk maybe they have multiple tabs open or something, just roll with it
     if (currentUser && currentUser.email_address === email) {
       // make them the glorious cart leader if the cart is leaderless, otherwise a member
@@ -345,6 +345,48 @@ module.exports = function (router) {
     yield user.save()
 
     res.send(user)
+  }))
+
+  /**
+   * @api {post} /api/user/:user_id/address Add address to user
+   * @apiDescription Creates a new address and associates it with a user
+   * @apiGroup Users
+   * @apiParam {string} :user_id id of the user to update
+   * @apiParam {json} body the properties of the new address we're creating
+   *
+   * @apiParamExample Request
+   * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b {
+   *   "line_1": '2222 Fredrick Douglass Blvd',
+   *   "line_2": "Apt 2B",
+   *   "city": "New York",
+   *   "state": 'NY',
+   *   "zip": 94306,
+   *   "country": 'USA',
+   *   "user_account": user_id
+   * }
+   */
+  router.post('/user/:user_id/address', (req, res) => co(function * () {
+    // check permissions
+    var currentUser = req.UserSession.user_account
+    if (!currentUser || currentUser.id !== req.params.user_id) {
+      throw new Error('Unauthorized')
+    }
+
+    // Find the user in the database
+    var user = yield db.UserAccounts.findOne({id: req.params.user_id})
+
+    // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
+    if (!user) {
+      throw new Error('Could not find user ' + req.params.user_id)
+    }
+
+    logging.info('req.body:', req.body);
+
+    var addr = yield db.Addresses.create(req.body);
+    addr.user_account = user.id;
+    yield addr.save();
+
+    res.send(addr);
   }))
 
   /**

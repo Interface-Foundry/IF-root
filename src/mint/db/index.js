@@ -19,6 +19,7 @@ Waterline.isMany = function (collection) {
  * Set up the database connections
  */
 var waterline = new Waterline()
+waterline.loadCollection(require('./addresses'))
 waterline.loadCollection(require('./amazon_blurbs'))
 waterline.loadCollection(require('./amazon_items'))
 waterline.loadCollection(require('./authentication_links'))
@@ -55,6 +56,7 @@ var initialize = new Promise((resolve, reject) => {
 
     // Manually make the names for our manually defined schemas
     const models = {
+      Addresses: ontology.collections.addresses,
       AmazonBlurbs: ontology.collections.amazon_blurbs,
       AmazonItems: ontology.collections.amazon_items,
       AuthenticationLinks: ontology.collections.authentication_links,
