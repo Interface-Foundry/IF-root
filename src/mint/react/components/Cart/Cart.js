@@ -172,7 +172,7 @@ class MyItems extends Component {
 
     return (
       <ul>
-        <div className='cart__items__title'>{user_account.name} <span> - {items.length} Items</span></div>
+        {items.length ? <div className='cart__items__title'>{user_account.name} <span> - {items.length} Items</span></div> :null}
         <div className='cart__items__container'>
           {
             items.length 
