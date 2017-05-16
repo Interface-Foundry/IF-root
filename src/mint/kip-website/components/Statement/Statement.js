@@ -29,7 +29,7 @@ export default class Statement extends Component {
 		      	}
 
 	        	<div className="col-12 row-1 headline">
-	        		<h1>FREE COLLABORATIVE GROUP SHOPPING</h1>
+	        		<h1>COLLABORATIVE GROUP SHOPPING</h1>
 	        	</div>
 	        	<div className="col-12 row-1 text">
 	        		<p>
