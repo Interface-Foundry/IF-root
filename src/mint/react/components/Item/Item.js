@@ -42,7 +42,7 @@ export default class Item extends Component {
 
   componentWillMount() {
     const {
-      props: { item_id, amazon_id, previewAmazonItem, previewItem, type, item, items, index, setSearchIndex, fetchCards }
+      props: { item_id, amazon_id, previewAmazonItem, previewItem, type, items, index, setSearchIndex, fetchCards }
     } = this;
     // only update item if there isn't one
     if (item_id) previewItem(item_id);
@@ -50,13 +50,13 @@ export default class Item extends Component {
 
     if (type === 'deal' && items.length === 0) fetchCards();
     else if (type === 'search' && index && items.length) setSearchIndex(index);
-  
+
     this.determineNav = ::this.determineNav;
   }
 
   componentWillReceiveProps(nextProps) {
 
-    const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { replace, push } } } = this;
+    const { props: { cart_id, item_id, amazon_id, previewItem, previewAmazonItem, history: { push } } } = this;
     const { type: nextType, item: nextItem, items: nextItems, index: nextIndex, item_id: nextId, item: { position: nextPos } } = nextProps;
     //never replace cart_id if its undefined
 
@@ -147,12 +147,11 @@ export default class Item extends Component {
         prevSearch,
         location: { pathname },
         history: { replace },
-        item: { main_image_url, description, name, asin, options, iframe_review_url },
-        currentCart: { leader },
+        currentCart: { leader, store },
         currentUser: { id },
+        item: { description, name, options, iframe_review_url, main_image_url, asin } = item
       }
     } = this;
-
     const splitItems = splitCartById(this.props, { id });
     const myItems = leader && id !== leader.id
       ? splitItems.my

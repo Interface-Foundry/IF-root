@@ -8,18 +8,15 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-
     svg {
       vertical-align: top !important;
       padding: 0 $padding/5;
     }
-
     span {
       display: inline;
       height: auto;
       padding: 0 0 3px;
       font-weight: bold;
-
       &.cards__section__breadcrumb-type {
         cursor: pointer;
         font-weight: 500;
@@ -28,14 +25,13 @@
       }
     }
   }
-  & > .icon {
+  &>.icon {
     position: absolute;
     bottom: 0;
     height: 160px;
     z-index: 100;
     padding: $padding;
     width: 50px;
-
     svg {
       height: 100%;
       width: 100%;
@@ -43,7 +39,6 @@
       cursor: pointer;
       padding: 0 $padding;
     }
-
     &.right {
       right: 0;
       padding: 10px 10px 10px 0;
@@ -59,7 +54,7 @@
       }
     }
   }
-  & > .scroll__horizontal {
+  &>.scroll__horizontal {
     height: 150px;
     width: calc(100% - 20px);
     padding: 0 0 $padding 0;
@@ -136,6 +131,12 @@
             padding: 0;
             font-size: 22px;
             color: $price-color;
+            span {
+              font-size: 12px;
+              vertical-align: bottom;
+              position: relative;
+              bottom: 2px;
+            }
           }
           .details__discount {
             font-size: 10px;
