@@ -231,11 +231,19 @@ module.exports = function (router) {
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
+    const userId = req.UserSession.user_account.id
 
     // Make sure the cart exists
     const cart = yield db.Carts.findOne({id: req.params.cart_id})
     if (!cart) {
       throw new Error('Cart not found')
+    }
+
+    // make the user leader if no leader exists, otherwise make member
+    if (!cart.leader) {
+      cart.leader = userId
+    } else if (!cart.members.includes(userId)) {
+      cart.members.add(userId)
     }
 
     // Get or create the item, depending on if the user specifed a previewed item_id or a new url
@@ -251,27 +259,19 @@ module.exports = function (router) {
       item = yield db.Items.findOne({id: req.body.item_id})
     } else {
       // Create an item from the url
-      item = yield amazonScraper.scrapeUrl(req.body.url)
+      item = yield cartUtils.addItem(req.body, cart, 1)
     }
-    cart.items.add(item.id)
+
+    cart.items.add(_.get(item, 'id', item._id))
     item.cart = cart.id
 
-    // specify who added it
     logging.info('user id?', req.UserSession.user_account.id)
-    item.added_by = req.UserSession.user_account.id
-    yield item.save()
-
-    // make the user leader if no leader exists, otherwise make member
-    if (!cart.leader) {
-      cart.leader = req.UserSession.user_account.id
-    } else if (!cart.members.includes(req.UserSession.user_account.id)) {
-      cart.members.add(req.UserSession.user_account.id)
-    }
+    item.added_by = userId
 
     // Save all the weird shit we've added to this poor cart.
-    yield cart.save()
+    yield [item.save(), cart.save()]
+    // specify who added it
 
-    // And assuming it all went well we'll respond to the client with the saved item
     return res.send(item)
   }));
 
@@ -552,13 +552,14 @@ module.exports = function (router) {
    */
   router.get('/itempreview', (req, res) => co(function * () {
     // parse the incoming text to extract either an asin, url, or search query
-    //
     const q = (req.query.q || '').trim()
     if (!q) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
     }
 
-    const store = _.get(req, 'query.store') ? req.query.store : 'ypo' // <--- CHANGE THIS BACK TO AMAZON IN THE FUTURE, JUST FOR YPO PURPOSES
+
+
+    const store = _.get(req, 'query.store') ? req.query.store : 'amazon'
     const item = yield cartUtils.itemPreview(q, store, (req.query.page || 1), req.query.category)
     res.send(item)
   }))
@@ -575,6 +576,7 @@ module.exports = function (router) {
     // logging.info('populated cart', cart);
     var cartItems = cart.items;
 
+    // yield cartUtils.checkout(cart)
     if (cart.affiliate_checkout_url && cart.locked) {
       res.redirect(cart.affiliate_checkout_url)
     }

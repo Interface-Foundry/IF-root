@@ -48,12 +48,31 @@ const itemPreviewHandlers = {
   'ypo': ypo.itemPreview,
 }
 
+const checkoutHandlers = {
+  'amazon': amazon.checkout,
+  'ypo': ypo.checkout
+}
 
 
 /************************************************
  * functions for carts
  ************************************************
  */
+
+/**
+ * checkout for a specified cart
+ *
+ * @param      {object}  cart    The
+ * @param      {object}  res    The res
+ */
+exports.checkout = function * (cart, res) {
+  if (cart.store === undefined) {
+    throw new Error('Store required for checkout')
+  }
+
+  yield checkoutHandlers[cart.store](cart, res)
+}
+
 
 /**
  * get info for item based on retailer
@@ -78,6 +97,7 @@ exports.itemPreview = function * (query, store, page, category) {
  * @return     {object}  cart - the cart object
  */
 exports.createCart = function * (store) {
+  var locale
   if (store.includes('amazon')) {
     [store, locale] = store.split('_')
   }
@@ -161,7 +181,7 @@ exports.deleteItemFromCart = function * (item, cart, userId) {
 }
 
 /**
- * create item by user in a cart
+ * create item in db.Items for a specified store
  *
  * @param      {string}  itemId  The item identifier/asin
  * @param      {string}          userId  The user identifier
@@ -169,7 +189,7 @@ exports.deleteItemFromCart = function * (item, cart, userId) {
  * @param      {number}          quantity the item quantity
  * @return     {object}          item object that was created
  */
-exports.addItemToCart = function * (itemId, cart, userId, quantity) {
+exports.addItem = function * (itemId, cart, quantity) {
   if (quantity === undefined) {
     quantity = 1
   }
@@ -180,13 +200,6 @@ exports.addItemToCart = function * (itemId, cart, userId, quantity) {
   }
 
   let item = yield addItemHandlers[cart.store](itemId)
-  item.added_by = userId
-  item.cart = cart.id
-  item.quantity = quantity
-
-  cart.items.add(item.id)
-
-  yield [item.save(), cart.save()]
   return item
 }
 
