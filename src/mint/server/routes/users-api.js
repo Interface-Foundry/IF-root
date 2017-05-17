@@ -94,6 +94,13 @@ module.exports = function (router) {
 
       console.log('inside login', currentUser.name || email)
 
+      // check to see if there's already a code on a different link and if so remove it
+      var previousLink = yield db.AuthenticationLinks.findOne({code: {'not': null}});
+      if (previousLink) {
+        previousLink.code = null;
+        yield previousLink.save();
+      }
+
       // generate magic code here
       var code = randomstring.generate({
         length: 6,
@@ -101,7 +108,8 @@ module.exports = function (router) {
         capitalization: 'uppercase'
       })
       logging.info('code:', code)
-      //add code to auth link
+
+      // add code to auth link
       link.code = code;
       yield link.save();
 
@@ -195,7 +203,7 @@ module.exports = function (router) {
 
       var lostEmail = yield db.Emails.create({
         recipients: email,
-        subject: 'Log in to Kip: ' + code,
+        subject: 'Log in to Kip',
         cart: cart.id
       })
 
