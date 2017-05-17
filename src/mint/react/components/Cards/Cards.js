@@ -131,8 +131,8 @@ export default class Cards extends Component {
             }}>
             <Icon icon='RightChevron'/>
           </div>
-      < /ul>
-      < /div>
+        </ul>
+      </div>
     );
   }
 }

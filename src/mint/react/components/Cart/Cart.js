@@ -75,7 +75,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, deals, locked, updateCart, currentCart, cancelRemoveItem, clearCart, cancelClearCart, history: { push } } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
@@ -112,10 +112,11 @@ export default class Cart extends Component {
               <CardsContainer isDropdown={false}/> 
             </div>
         }
-        <div className={`cart__title ${animation || currentCart.itemDeleted  ? 'action' : ''}`}>
+        <div className={`cart__title ${animation || currentCart.itemDeleted || currentCart.oldItems.length  ? 'action' : ''}`}>
           { animation 
             ? <h4>{animation}</h4>
             : currentCart.itemDeleted ? <h4 className='undo__button' onClick={cancelRemoveItem}>Item Removed. <a href='#'>Undo</a></h4>
+            : currentCart.oldItems.length ? <h4 className='undo__button' onClick={cancelClearCart}>Cart cleared. <a href='#'>Undo</a></h4>
             : <h4>
               { hasItems ? `${items.quantity} items in Kip Cart`  : 'Kip Cart' } 
               {
@@ -126,7 +127,6 @@ export default class Cart extends Component {
             </h4>
           }
         </div>
-        
         <div className='cart__items'>
           <MyItems {...this.props} items={items.my} />
           {
@@ -170,7 +170,7 @@ class MyItems extends Component {
     
     return (
       <ul>
-        <div className='cart__items__title'>{user_account.name}</div>
+        {items.length ? <div className='cart__items__title'>{user_account.name} <span> - {items.length} Items</span></div> :null}
         <div className='cart__items__container'>
           {
             items.length 
@@ -178,7 +178,7 @@ class MyItems extends Component {
             : <EmptyCart key="empty"/>
           }
         </div>
-        <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3>
+        {items.length ? <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3>:null}
       </ul>
     );
   }
@@ -203,10 +203,10 @@ class OtherItems extends Component {
         email 
         ? <a href={`mailto:${email}?subject=From ${cartName}`}>
             <div key={id} className='cart__items__title'>{name}
-              <br/><span className='email'>{email}</span>
+              <br/><span className='email'>{email} <span>- {items.length} Items</span></span>
             </div>
           </a>
-        : <div key={id} className='cart__items__title'>{name}</div>
+        : <div key={id} className='cart__items__title'>{name} <span>- {items.length} Items</span></div>
         }
         {
           items.length 
@@ -223,6 +223,7 @@ class EmptyCart extends Component {
   render() {
     return (
       <li className='cart__items-empty'>
+        <h4>Looks like you havn't added any items. Get started by adding stuff to the cart, or invite others to add to the cart by tapping the Share button</h4>
         <div className='image' style={{backgroundImage:'url(//storage.googleapis.com/kip-random/head_smaller.png)'}}/>
       </li>
     );

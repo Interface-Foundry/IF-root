@@ -2,8 +2,10 @@
 
 import { connect } from 'react-redux';
 import { Cart } from '../components';
+
 import { fetchCards } from '../actions/cards';
-import { selectItem, updateCart } from '../actions/cart';
+import { selectItem, updateCart, cancelClear } from '../actions/cart';
+
 import { cancelRemoveItem } from '../actions/item';
 import { splitCartById } from '../reducers';
 import ReactGA from 'react-ga';
@@ -32,7 +34,8 @@ const mapDispatchToProps = dispatch => ({
     return dispatch(selectItem(item));
   },
   updateCart: (cart) => dispatch(updateCart(cart)),
-  cancelRemoveItem: () => dispatch(cancelRemoveItem())
+  cancelRemoveItem: () => dispatch(cancelRemoveItem()),
+  cancelClearCart: () => dispatch(cancelClear()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);

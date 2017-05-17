@@ -37,6 +37,8 @@ body {
   margin: auto;
   text-align: center;
   background: $kip-secondary-color;
+  background-image: url(https://storage.googleapis.com/kip-random/website/kip_scribble_pattern.png);
+  background-size: 400px;
 }
 
 .app__view {
@@ -45,7 +47,7 @@ body {
   overflow-y: scroll;
   text-align: left;
   -webkit-overflow-scrolling: touch;
-  height: calc(100% - #{$nav-height*2 - 10});
+  height: calc(100% - #{$nav-height*2 });
   &.large {
     height: calc(100% - #{$nav-height});
   }
@@ -94,9 +96,10 @@ h4 {
 }
 
 input, select:focus, textarea {
-  font-size: $input-font-size !important;
+  font-size: $input-font-size;
 }
 
 body::-webkit-scrollbar {
   display: none;
 }
+

@@ -2,110 +2,173 @@
 @import '../../themes/animations';
 
 $centerPhone: calc(50% - 212.5px);
-
-.showcase {
+div[class^='showcase-'] {
 	position: relative;
 	text-align: center;
-	min-height: 4000px;
 	background: #eaf9ff;
+	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
-	.outline {
-		position: absolute;
-		top:: 0;
-		opacity: 0;
-		right: 50px;
-		left: 50px;
-		pointer-events:none;
-		@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-
-		&.bubble {
-			position: fixed;
-			opacity: 1;
-		}
-
-		&.absolute {
-			top: auto;
-			bottom: 190px;
-			opacity: 1;
-		}
-
-		@media only screen and (max-width: 600px) {
-			display: none;
-		}
+	&.showcase-0 {
+		background: #eaf9ff;
+	}
+	&.showcase-1 {
+		background: #fddcdc;
+	}
+	&.showcase-2 {
+		background: #d9f8f0;
 	}
 
 	.image {
 		background-image: url("https://storage.googleapis.com/kip-random/website/phoneclip.png");
 	}
 
-	.phone {
-		position: absolute;
-		height: 800px;
-		width: 425px;
-		background-size: contain;
-		z-index: 50;
-		padding: $padding*4 $padding*1.5 0;
-		margin-left: 150px;
-		pointer-events:none;
-		left: 0;
-		transform: translate3d(0, -150px,0);
+	div[class^='row-'] {
+		position: relative;
+		max-width: 1000px;
+		margin: 0 auto;
+		text-align: center;
+		white-space: nowrap;
+		padding: $padding*5 0 $padding*15;
 
-		.bubble {
-			width: 80%;
-			height: 150px;
-			margin: 0 10%;
-			position: absolute;
-			background: white;
-			border-radius: 10px;
-			left: 0;
-			border: 1px solid $borderColor;
-			top: -120px;
-			padding: $padding*3;
+		@media only screen and (max-width: 600px) {
+			padding: $padding*5 0 $padding*25;
+		}
 
-			svg {
-				position: absolute;
-				top: -50px;
-				right: -50px;
-				height: 100px;
-				width: 100px;
+		&:nth-of-type(even) {
+			.phone {
+				float: left;
 			}
 
-			h1 {
-				color: $primaryColor;
-				font-weight: bold;
-				text-align: left;
+			.bubble {
+				svg {
+					right: auto;
+					left: -50px;
+				}
+			}
 
-				@media only screen and (max-width: 600px) {
-					font-size: 14px;
+			@media only screen and (max-width: 1000px) {
+				.phone {
+					margin: 0 0 0 -125px;
+				}
+
+				.bubble {
+					left: auto;
+					right: -115px;
+					padding: $padding*4 $padding*13 $padding*2 $padding*2;
+				}
+			}
+			
+			@media only screen and (max-width: 600px) {
+				.phone {
+					margin: 0 0 0 -125px;
+				}
+
+				.bubble {
+					left: auto;
+					right: -115px;
+					padding: $padding*4 $padding*13 $padding*2 $padding*2;
 				}
 			}
 		}
 
-		.bubble-enter {
-			@include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+		&:last-of-type {
+			padding: $padding*5 0 0;
 		}
-		.bubble-leave {
-			@include animation(scrollOutRight cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+	}
+
+	.phone {
+		position: relative;
+		float: right;
+		width: 550px;
+		height: 700px;
+		display: inline-block;
+		background-size: contain;
+		z-index: 50;
+		padding: $padding*2 $padding*10 $padding*3;
+		pointer-events:none;
+		left: 0;
+		opacity: 0;
+		transform: translate3d(0, -100px,0);
+		@include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+
+		.image {
+			height: 100%;
 		}
 
-		&.inital {
-			@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+		&.enter {
+			opacity: 1;
+			transform: translate3d(0px, -175px,0) !important;
 		}
 
-		&.fixed {
-			position: fixed;
-			top: $ribbonHeight*8;
-			margin-left: calc(50% - (425px/2));
-			transform: translate3d(0, -150px, 0);
-			pointer-events:none;
-			&.first {
-				@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+		&.leave {
+			opacity: 0;
+			transform: translate3d(0px, -250px,0) !important;
+		}
+
+		@media only screen and (max-width: 1000px) {
+			margin: 0 -125px 0 0;
+		}
+		@media only screen and (max-width: 600px) {
+			padding: $padding*2.3 $padding*5;
+			width: 321px;
+			height: 450px;
+			margin: 0 -125px 0 0;
+		}
+	}
+
+	.bubble {
+		position: relative;
+		display: inline-block;
+		width: 400px;
+		margin: 0 auto;
+		z-index: 50;
+		background: white;
+		opacity: 0;
+		white-space: normal;
+		border-radius: 10px;
+		border: 1px solid $borderColor;
+		padding: $padding*3;
+		transform: translate3d(0px, 75px,0);
+		@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+		&.enter {
+			opacity: 1;
+			transform: translate3d(0px, 0,0) !important;
+		}
+
+		&.leave {
+			opacity: 0;
+			transform: translate3d(0px, -75px,0) !important;
+		}
+
+		@media only screen and (max-width: 1000px) {
+			padding: $padding*4 $padding*2 $padding*2 $padding*13;
+		}
+		@media only screen and (max-width: 600px) {
+			position: absolute;
+			width: 80%;
+			top: 0;
+			left: -115px;
+			margin: 0;
+		}
+
+		svg {
+			position: absolute;
+			top: -50px;
+			right: -50px;
+			height: 100px;
+			width: 100px;
+		}
+
+		h1 {
+			color: $primaryColor;
+			font-weight: bold;
+			text-align: left;
+			font-size: 19px;
+
+			@media only screen and (max-width: 600px) {
+				font-size: 16px;
 			}
-		}
-
-		&.absolute {
-			margin-left: calc(50% - (410px/2));
-			bottom: -290px;
 		}
 
 		.image {
@@ -117,38 +180,43 @@ $centerPhone: calc(50% - 212.5px);
 				margin: -12px auto 0;
 			}
 		}
-
-		@media only screen and (max-width: 600px) {
-			width: 275px;
-			height: 515px;
-			margin: 0 calc(50% - (275px/2));
-			padding: $padding*2 $padding 0;
-
-			&.absolute {
-				position: absolute;
-				bottom: -100px;
-				margin-left: calc(50% - (275px/2));
-			}
-
-			&.fixed {
-				position: fixed;
-				margin-left: calc(50% - (275px/2));
-			}
-		}
 	}
 
-	.sine {
+	.bubble-enter {
+		@include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+	}
+	.bubble-leave {
+		@include animation(scrollOutRight cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+	}
+
+	svg[class^="sine-"] {
 		fill: rgb(234, 249, 255);
 	    margin-top: -150px;
 	    top: 0;
 	    margin-left: -1px;
 	    height: 150px;
-	    z-index: 10;
+	    z-index: 50;
 	    width: calc(100% + 3px);
+	    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 	   	@media only screen and (max-width: 600px) {
 	   		margin-top: -100px;
 	    	height: 100px;
 	    }
+	    &.sine-0 {
+			fill: #eaf9ff;
+		}
+		&.sine-1 {
+			fill: #fddcdc;
+		}
+		&.sine-2 {
+			fill: #d9f8f0;
+		}
+
+		@media only screen and (max-width: 600px) {
+	   		margin-top: -100px;
+	    	height: 100px;
+	    }
+
 	}
 
 	.bottom {

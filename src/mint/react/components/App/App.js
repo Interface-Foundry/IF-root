@@ -6,7 +6,8 @@ import { Route } from 'react-router';
 import ReactDOM from 'react-dom';
 
 import { CartContainer, CartStoresContainer } from '../../containers';
-import { Overlay, Modal, Toast, ErrorPage } from '..';
+import { Overlay, Modal, Toast, ErrorPage, Popup } from '..';
+
 import Header from './Header';
 import Sidenav from './Sidenav';
 import Footer from './Footer';
@@ -40,6 +41,7 @@ export default class App extends Component {
 
   state = {
     sidenav: false,
+    popup: false,
     isMobile: false
   }
 
@@ -56,12 +58,15 @@ export default class App extends Component {
     this.setState({ sidenav: !sidenav });
   }
 
+  _togglePopup = () => {
+    const { popup } = this.state;
+    this.setState({ popup: !popup });
+  }
+
   componentWillMount() {
     const { props: { fetchCart, fetchAllCarts, cart_id, history: { replace } } } = this;
-    if (cart_id) {
-      fetchCart(cart_id)
-        .then(cart => !cart ? replace('/404') : null);
-    }
+    if (cart_id) fetchCart(cart_id)
+      .then(cart => { console.log({ cart });!cart ? replace('/404') : null });
     fetchAllCarts();
   }
 
@@ -92,7 +97,7 @@ export default class App extends Component {
 
       _logPageView(pathname, nextSessionId); //log initial load
     }
-    if (cart_id !== nextCart_id) {
+    if (cart_id !== nextCart_id && nextCart_id) {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
       fetchAllCarts();
@@ -103,6 +108,7 @@ export default class App extends Component {
   render() {
     const {
       _toggleSidenav,
+      _togglePopup,
       props,
       props: {
         toast,
@@ -116,10 +122,11 @@ export default class App extends Component {
         currentUser,
         location,
         logout,
+        login,
         items,
         history: { replace }
       },
-      state: { sidenav, isMobile }
+      state: { sidenav, isMobile, popup }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
     const showSidenav = !(location.pathname.includes('/m/signin') || location.pathname.includes('newcart'));
@@ -127,7 +134,8 @@ export default class App extends Component {
     return (
       <section className='app'>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
-          <Header {...props}  _toggleSidenav={ _toggleSidenav}  isMobile={isMobile}/>
+          <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
+          {popup ? <Popup {...props} cart_id={cart_id} _togglePopup={_togglePopup}/> : null}
           <div className={`app__view ${showFooter ? '' : 'large'}`}>
             {
               newAccount === false //soon there will be no overlay
@@ -150,7 +158,7 @@ export default class App extends Component {
             }
           </div>
           { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
-          {showFooter ? <Footer {...props} cart_id={cart_id} isMobile={isMobile}/> : null}
+          {showFooter ? <Footer {...props} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> : null}
         </section>
     );
   }

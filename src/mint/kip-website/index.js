@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import createHistory from 'history/createBrowserHistory';
 import { createLogger } from 'redux-logger';
 import thunkMiddleware from 'redux-thunk';
-import { Route } from 'react-router';
+import { Route } from 'react-router-dom';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import Reducers from './reducers';
 import { get } from './actions';
@@ -46,7 +46,7 @@ store.dispatch(get('/api/session', 'SESSION'))
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-          <Route path="/" component={App}/>
+      <Route path="/" component={App}/>
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root')

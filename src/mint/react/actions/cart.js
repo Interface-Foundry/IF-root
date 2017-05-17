@@ -1,6 +1,19 @@
 // react/actions/cart.js
 
-import { ADDING_ITEM, RECEIVE_CART, RECEIVE_UPDATE_CART, REQUEST_CART, RECEIVE_ITEMS, REQUEST_ITEMS, RECEIVE_CARTS, REQUEST_CARTS } from '../constants/ActionTypes';
+import {
+  ADDING_ITEM,
+  RECEIVE_CART,
+  RECEIVE_UPDATE_CART,
+  REQUEST_CART,
+  RECEIVE_ITEMS,
+  REQUEST_ITEMS,
+  RECEIVE_CARTS,
+  REQUEST_CARTS,
+  REQUEST_CLEAR_CART,
+  CANCEL_CLEAR_CART,
+  RECEIVE_CLEAR_CART
+} from '../constants/ActionTypes';
+import { sleep } from '../utils';
 
 const receive = (currentCart) => ({
   type: RECEIVE_CART,
@@ -32,6 +45,18 @@ const receiveItems = (items) => ({
 
 const requestItems = () => ({
   type: REQUEST_ITEMS
+});
+
+const requestClearCart = () => ({
+  type: REQUEST_CLEAR_CART
+});
+
+const cancelClearCart = () => ({
+  type: CANCEL_CLEAR_CART
+});
+
+const receiveClearCart = () => ({
+  type: RECEIVE_CLEAR_CART
 });
 
 export const addingItem = (addingItem) => ({
@@ -76,6 +101,43 @@ export function updateCart(cart) {
       throw e;
     }
   };
+}
+
+{ /* https://mint.kipthis.com/api/cart/:cart_id/clear */ }
+export function clearCart(cart_id) {
+  return async(dispatch, getState) => {
+    dispatch(requestClearCart());
+    try {
+      await sleep(10000);
+      if (getState()
+        .currentCart.oldItems.length) {
+        await fetch(`/api/cart/${cart_id}/clear`, {
+          method: 'DELETE',
+          credentials: 'same-origin',
+        });
+        dispatch(receiveClearCart(cart_id));
+      }
+    } catch (e) {
+      throw 'error in cart removeItem';
+    }
+  };
+}
+
+export function deleteCart(cart_id) {
+  return async dispatch => {
+    try {
+      await fetch(`/api/cart/${cart_id}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      });
+    } catch (e) {
+      throw 'error in cart delete';
+    }
+  };
+}
+
+export function cancelClear() {
+  return async(dispatch) => dispatch(cancelClearCart());
 }
 
 export function fetchAllCarts() {
