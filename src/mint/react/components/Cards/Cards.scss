@@ -194,10 +194,18 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         }
       }
 
+      .card__type-search {
+        .add {
+          background: $border-color-light;
+        }
+      }
+
       @for $i from 1 through length($colorList) {
         &:nth-of-type(#{length($colorList)}n+#{$i}) {
-          .add {
-            background: nth($colorList, $i)
+          .card__type-category {
+            .add {
+              background: nth($colorList, $i);
+            }
           }
         }
       }

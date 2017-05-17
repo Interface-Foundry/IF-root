@@ -54,7 +54,7 @@ export default class Cards extends Component {
           } else {
             clearInterval(this.scrollInterval);
           }
-        }, 15);
+        }, 5);
 
         break;
       case 'right':
@@ -69,7 +69,7 @@ export default class Cards extends Component {
           } else {
             clearInterval(this.scrollInterval);
           }
-        }, 15);
+        }, 5);
 
         break;
     }
