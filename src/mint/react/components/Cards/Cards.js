@@ -43,10 +43,9 @@ export default class Cards extends Component {
 
     switch (direction) {
       case 'left':
-        end = element.scrollLeft - 600 > 0 ? element.scrollLeft - 600 : 0;
+        end = element.scrollLeft - 600 > 1 ? element.scrollLeft - 600 : 1;
         cosParameter = end / 2;
 
-        console.log(end)
         this.scrollInterval = setInterval(() => {
           if (element.scrollLeft >= end) {
             scrollCount = scrollCount + 1;
