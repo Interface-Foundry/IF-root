@@ -41,14 +41,12 @@ module.exports = function * (source, fieldsToChange, textIndex) {
   if (textIndex) {
     console.log('creating text indexes for mongodb...')
     var createIndexForArray = textIndex.reduce((prev, curr) => { prev[curr] = "text"; return prev}, {})
-    yield new Promise((resolve, reject) => {
-      db[`${source}InventoryItems`].native((err, collection) => {
-        if (err) reject(err)
-        else {
-          resolve(collection.createIndex(createIndexForArray))
-        }
-      })
+
+    var rawCollection = yield new Promise((resolve, reject) => {
+      db[`${source}InventoryItems`].native((e, r) => e ? reject(e) : resolve(r))
     })
+
+    yield rawCollection.createIndex(createIndexForArray)
   }
 }
 
