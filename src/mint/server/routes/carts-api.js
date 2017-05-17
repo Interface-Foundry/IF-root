@@ -1,13 +1,11 @@
 const co = require('co')
 const _ = require('lodash')
-const moment = require('moment')
 const url = require('url')
 const amazonScraper = require('../cart/scraper_amazon')
 const amazon = require('../cart/amazon_cart')
 const cartUtils = require('../cart/cart_utils')
 const camel = require('../deals/deals')
 const googl = require('goo.gl')
-const fs = require('co-fs')
 const path = require('path')
 const haversine = require('haversine')
 const stable = require('stable')
@@ -605,79 +603,14 @@ module.exports = function (router) {
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
     // logging.info('populated cart', cart);
 
-// <<<<<<< HEAD
-//     try {
-//       yield cartUtils.checkout(cart, req, res)
-//     } catch (err) {
-//       throw new Error('Error on checkout', err)
-//     }
-//     // send receipt email
-//     yield cartUtils.sendReceipt(cart, req.UserSession.user_account)
-// =======
 
-    var cartItems = cart.items;
-
-    if (cart.affiliate_checkout_url && cart.locked) {
-      res.redirect(cart.affiliate_checkout_url)
+    try {
+      yield cartUtils.checkout(cart, req, res)
+    } catch (err) {
+      throw new Error('Error on checkout', err)
     }
 
-    // make sure the amazon cart is in sync with the cart in our database
-    var amazonCart = yield amazon.syncAmazon(cart)
-
-    //send receipt email
-    if(req.UserSession.user_account) {
-      logging.info('creating receipt...')
-      var receipt = yield db.Emails.create({
-        recipients: req.UserSession.user_account.email_address,
-        sender: 'hello@kip.ai',
-        subject: `Kip Receipt for ${cart.name}`,
-        template_name: 'summary_email',
-        unsubscribe_group_id: 2485
-      });
-
-      var userItems = {}; //organize items according to which user added them
-      var items= []
-      var users = []
-      var total = 0;
-      var totalItems = 0;
-      cartItems.map(function (item) {
-        if (!userItems[item.added_by]) userItems[item.added_by] = [];
-        userItems[item.added_by].push(item);
-        logging.info('item', item) //undefined
-        totalItems += Number(item.quantity || 1);
-        total += (Number(item.price) * Number(item.quantity || 1));
-      });
-
-      for (var k in userItems) {
-        var addingUser = yield db.UserAccounts.findOne({id: k});
-        users.push(addingUser.name || addingUser.email_address);
-        items.push(userItems[k]);
-      }
-
-      yield receipt.template('summary_email', {
-        username: req.UserSession.user_account.name || req.UserSession.user_account.email_address,
-        baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
-        id: cart.id,
-        items: items,
-        users: users,
-        date: moment().format('dddd, MMMM Do, h:mm a'),
-        total: '$' + total.toFixed(2),
-        totalItems: totalItems,
-        cart: cart
-      })
-
-      yield receipt.send();
-      logging.info('receipt sent')
-    }
-
-    // save the amazon purchase url
-    if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
-      cart.amazon_purchase_url = amazonCart.PurchaseURL
-      cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
-      yield cart.save()
-    }
-    // redirect to the cart url
-    res.redirect(cart.affiliate_checkout_url)
+    yield cartUtils.sendReceipt(cart, req)
   }))
 
 

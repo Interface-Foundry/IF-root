@@ -1,9 +1,18 @@
 var db
 const dbReady = require('../../db')
 const xml2js = require('xml2js')
+const fs = require('fs')
+const _ = require('lodash')
+const path = require('path')
+
+
 
 dbReady.then((models) => { db = models })
 
+function getCategorysArray() {
+  return _.keys(JSON.parse(fs.readFileSync(path.join(__dirname, '../../ingest/categories.json'))))
+}
+const categorysArray = getCategorysArray()
 
 /**
  * çreates item that can be generalized to add to cart

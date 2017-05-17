@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 const amazon = require('./amazon_cart.js');
 const ypo = require('./ypo_cart.js')
 const constants = require('../constants.js');
@@ -227,7 +229,8 @@ exports.getRetailer = function (item) {
  * @param      {<type>}  userAccount  The user account
  * @return     {<type>}  { description_of_the_return_value }
  */
-exports.sendRecipt = function * (cart, userAccount) {
+exports.sendReceipt = function * (cart, req) {
+  const userAccount = req.UserSession.user_account
   //send receipt email
   const cartItems = cart.items;
   logging.info('creating receipt...')
