@@ -9,10 +9,21 @@ const path = require('path')
 
 dbReady.then((models) => { db = models })
 
+/**
+ * Gets the category1 + category2 array .
+ *
+ * @return     {Object}  The categorys array.
+ */
 function getCategorysArray() {
-  return _.keys(JSON.parse(fs.readFileSync(path.join(__dirname, '../../ingest/categories.json'))))
+  const categoryFile = JSON.parse(fs.readFileSync(path.join(__dirname, '../../ingest/categories.json')))
+
+  return {
+    category1: _.map(_.flatMap(categoryFile, (category) =>  _.keys(category)), (i) => i.trim().toLowerCase()),
+    category2: _.map(_.keys(categoryFile), (i) => i.trim().toLowerCase())
+  }
 }
-const categorysArray = getCategorysArray()
+const categorysObject = getCategorysArray()
+
 
 /**
  * çreates item that can be generalized to add to cart
@@ -50,13 +61,28 @@ function * createYpoItem (item) {
  */
 module.exports.itemPreview = function * (query) {
   let items
+  logging.info('looking for query: ', query)
+  query = query.trim().toLowerCase()
+  var regexString = new RegExp(["^", query, "$"].join(""), "i");
 
-  // see if they pasted url or itemcode
-  if (query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
+  if (categorysObject.category2.includes(query)) {
+    logging.info('in cat2: ', query)
+    items = yield db.YpoInventoryItems.find({category_2: regexString}).limit(20)
+  }
+
+  else if (categorysObject.category1.includes(query)) {
+    logging.info('in cat1: ', query)
+    items = yield db.YpoInventoryItems.find({category_1: regexString}).limit(20)
+  }
+
+
+  // see if they pasted url or itemcode and just return that item
+  else if (query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
     const itemCode = query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)[0]
     item = yield db.YpoInventoryItems.findOne({item_code: itemCode})
     return yield createYpoItem(item)
   }
+
   // search by text index stuff
   else {
     items = yield new Promise((resolve, reject) => {
@@ -79,10 +105,11 @@ module.exports.itemPreview = function * (query) {
         }
       })
     })
-    return yield items.map(function * (item) {
-      return yield createYpoItem(item)
-    })
   }
+
+  return yield items.map(function * (item) {
+    return yield createYpoItem(item)
+  })
 }
 
 /**
