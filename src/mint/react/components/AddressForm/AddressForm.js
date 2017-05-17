@@ -21,7 +21,9 @@ export default class AddressForm extends Component {
   static propTypes = {
     sendAddressData: PropTypes.func,
     sendYPOData: PropTypes.func,
-    user_id: PropTypes.string
+    history: PropTypes.object,
+    user_id: PropTypes.string,
+    cart_id: PropTypes.string
   }
 
   // address things
@@ -42,7 +44,7 @@ export default class AddressForm extends Component {
   _checkout = (e) => {
     e.preventDefault();
     const {
-      props: { sendAddressData, sendYPOData, user_id },
+      props: { sendAddressData, sendYPOData, user_id, cart_id },
       state: {
         name,
         line_1,
@@ -59,6 +61,7 @@ export default class AddressForm extends Component {
     } = this;
     sendAddressData(user_id, name, line_1, line_2, city, region, code, country, deliveryMessage);
     sendYPOData(user_id, accountNumber, accountName, voucherCode);
+    window.location(`/cart/${cart_id}/checkout`); // ¯\_(ツ)_/¯
   }
   render() {
     const {
@@ -78,10 +81,11 @@ export default class AddressForm extends Component {
     return (
       <div className='checkout_overlay'>
         <div className='add_to_amazon'>
-          Just a couple more things before we can checkout your cart!
+          <h1>Just a couple more things before we can checkout your cart!</h1>
           <form onSubmit={_checkout}>
             <ul>
-              <li> Your YPO Account
+              <li> 
+                <h2>Your YPO Account</h2>
                 <ul>
                   <li>
                     <p><input onChange={_updateAccountName} placeholder='YPO Account Name' type='text' required autoFocus/></p>
@@ -97,7 +101,8 @@ export default class AddressForm extends Component {
                   </li>
                 </ul>
               </li>
-              <li> Your Address
+              <li> 
+                <h2>Your Address</h2>
                 <ul>
                   <li>
                     <p><input onChange={_updateName} placeholder='Full Name' autoComplete='name' type='text' required/></p>

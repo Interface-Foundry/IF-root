@@ -1,6 +1,7 @@
 // react/components/AddressForm/AddressForm.scss
 @import '../../styles/Constants';
 .checkout_overlay {
+  letter-spacing: 1;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -13,6 +14,15 @@
   display: flex;
   align-content: center;
   justify-content: center;
+  h2, h1 {
+    display: inline-block;
+    font-weight: normal;
+    border-bottom: 4px solid $main-button-color;
+    width: auto;
+  }
+  h2 {
+    border-color: $secondary-button-color;
+  }
   .add_to_amazon {
     background: $kip-secondary-color;
     margin: auto;
