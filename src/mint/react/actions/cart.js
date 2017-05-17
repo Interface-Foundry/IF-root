@@ -186,7 +186,6 @@ export function checkoutCart(cart_id) {
 }
 
 export function sendAddressData(user_id, full_name, line_1, line_2, city, region, code, country) {
-  console.log(user_id);
   return async dispatch => {
     try {
       const response = await fetch(`/api/user/${user_id}/address`, {

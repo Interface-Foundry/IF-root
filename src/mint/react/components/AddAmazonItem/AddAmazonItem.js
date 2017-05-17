@@ -34,7 +34,6 @@ export default class AddAmazonItem extends Component {
   }
 
   render() {
-    console.log(this.props.store)
     const { addItemToCart, props: { numUserItems, user_account, storeName } } = this;
     const displayStore = storeName === 'ypo' ? 'YPO' : _.capitalize(storeName);
     return (

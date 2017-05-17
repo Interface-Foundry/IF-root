@@ -84,14 +84,33 @@ export function logout() {
 export function login(cart_id, email) {
   return async dispatch => {
     try {
-      await fetch(`/api/login?email=${encodeURIComponent(email)}&redirect=/cart/${cart_id}`, {
+      const response = await fetch(`/api/login?email=${encodeURIComponent(email)}&redirect=/cart/${cart_id}`, {
         credentials: 'same-origin'
       });
 
-      
       return dispatch(receiveUpdate(await response.json()));
     } catch (e) {
       return new SubmissionError({ email: 'Something went wrong with login' });
+    }
+  };
+}
+
+export function validateCode(email, code) {
+  return async dispatch => {
+    try {
+      const response = await fetch(`/auth/quick/${code}`, {
+        'method': 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        'body': JSON.stringify({ email })
+      });
+      const json = await response.json();
+      return dispatch(receiveUpdate({ user_account: {}, ...json }));
+    } catch (e) {
+      return new SubmissionError({ ok: false, message: 'That code didn\'t work, try again?' });
     }
   };
 }

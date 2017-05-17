@@ -2,6 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { Icon } from '..';
 
 export default class AddressForm extends Component {
   state = {
@@ -44,7 +45,7 @@ export default class AddressForm extends Component {
   _checkout = (e) => {
     e.preventDefault();
     const {
-      props: { sendAddressData, sendYPOData, user_id, cart_id, history: {replace} },
+      props: { sendAddressData, sendYPOData, user_id, cart_id, history: { replace } },
       state: {
         name,
         line_1,
@@ -77,12 +78,16 @@ export default class AddressForm extends Component {
       _updateAccountName,
       _updateAccountNumber,
       _updateVoucherCode,
-      _checkout
+      _checkout,
+      props: { cart_id, history: { replace } }
     } = this;
     return (
       <div className='checkout_overlay'>
         <div className='add_to_amazon'>
-          <h1>Just a couple more things before we can checkout your cart!</h1>
+          <h1>
+            <span onClick={()=>replace(`/cart/${cart_id}`)}><Icon icon='Clear'/></span>
+            Just a couple more things before we can checkout your cart!
+          </h1>
           <form onSubmit={_checkout}>
             <ul>
               <li> 

@@ -99,7 +99,6 @@ export default class Cards extends Component {
     const { renderCards, _scrollHorizontal, props: { cardType, clearItem, storeName } } = this,
     type = cardType || 'categories';
 
-    console.log('inside cards render')
     return (
       <div>
         <ul ref='cards' className={'cards__section'}>

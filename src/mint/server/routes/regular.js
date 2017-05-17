@@ -59,11 +59,11 @@ router.post('/auth/quick/:code', (req, res) => co(function * () {
         realLink.attempts = 0;
         yield realLink.save();
         logging.info('too many attempts')
-        return res.send({
+        return res.json({
           ok: false,
           newAccount: false,
           status: 'TOO_MANY_ATTEMPTS',
-          message: 'user has attempted to log in too many times',
+          message: 'You\'ve tried to log in too many times!',
         });
       }
     }
@@ -114,12 +114,12 @@ router.post('/auth/quick/:code', (req, res) => co(function * () {
   yield link.save();
 
   // send back actual json like the other routes
-  res.send({
+  res.json({
     ok: true,
     newAccount: false,
     status: 'LOG_IN',
     message: 'user has been logged in via code',
-    user: link.user
+    userInfo: realUser
   });
 }))
 

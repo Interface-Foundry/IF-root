@@ -3,9 +3,8 @@
 import { connect } from 'react-redux';
 import { App } from '../components';
 import { fetchCart, fetchAllCarts, updateCart, checkoutCart } from '../actions/cart';
-import { logout, login } from '../actions/session';
 import { addItem, removeItem, clearItem } from '../actions/item';
-import { removeCard } from '../actions/cards';
+import { logout, login, validateCode } from '../actions/session';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
@@ -56,13 +55,9 @@ const mapDispatchToProps = dispatch => ({
     ReactGA.event({ category: 'Cart', action: 'removed item from cart' });
     return dispatch(removeItem(cart_id, item_id));
   },
-  removeCard: (index) => {
-    setTimeout(() => {
-      dispatch(removeDeal(index));
-    }, 100);
-  },
   checkoutCart: (cart_id) => dispatch(checkoutCart(cart_id)),
   login: (cart_id, email) => dispatch(login(cart_id, email)),
+  validateCode: (email, code) => dispatch(validateCode(email, code)),
   logout: () => dispatch(logout())
 });
 
