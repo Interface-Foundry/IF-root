@@ -44,7 +44,7 @@ export default class AddressForm extends Component {
   _checkout = (e) => {
     e.preventDefault();
     const {
-      props: { sendAddressData, sendYPOData, user_id, cart_id },
+      props: { sendAddressData, sendYPOData, user_id, cart_id, history: {replace} },
       state: {
         name,
         line_1,
@@ -61,7 +61,8 @@ export default class AddressForm extends Component {
     } = this;
     sendAddressData(user_id, name, line_1, line_2, city, region, code, country, deliveryMessage);
     sendYPOData(user_id, accountNumber, accountName, voucherCode);
-    window.open(`/cart/${cart_id}/checkout`); // ¯\_(ツ)_/¯
+    replace(`/cart/${cart_id}`);
+    window.open(`/api/cart/${cart_id}/checkout`); // ¯\_(ツ)_/¯
   }
   render() {
     const {
