@@ -61,7 +61,7 @@ export default class AddressForm extends Component {
     } = this;
     sendAddressData(user_id, name, line_1, line_2, city, region, code, country, deliveryMessage);
     sendYPOData(user_id, accountNumber, accountName, voucherCode);
-    window.location(`/cart/${cart_id}/checkout`); // ¯\_(ツ)_/¯
+    window.open(`/cart/${cart_id}/checkout`); // ¯\_(ツ)_/¯
   }
   render() {
     const {

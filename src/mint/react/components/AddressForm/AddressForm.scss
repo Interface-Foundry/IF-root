@@ -41,10 +41,13 @@
           background: transparent;
           width: 75%;
           &:invalid {
-            box-shadow: 0 0 3px red;
+            border-color: $fourth-button-color;
           }
           &:required {
             box-shadow: none;
+          }
+          &:active, &:focus {
+            border-color: $fifth-button-color;
           }
         }
         label {
