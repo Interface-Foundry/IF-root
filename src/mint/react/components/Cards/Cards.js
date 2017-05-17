@@ -43,9 +43,10 @@ export default class Cards extends Component {
 
     switch (direction) {
       case 'left':
-        end = element.scrollLeft - 600 > 2 ? element.scrollLeft - 600 : 2;
+        end = element.scrollLeft - 600 > 0 ? element.scrollLeft - 600 : 0;
         cosParameter = end / 2;
 
+        console.log(end)
         this.scrollInterval = setInterval(() => {
           if (element.scrollLeft >= end) {
             scrollCount = scrollCount + 1;
@@ -58,7 +59,7 @@ export default class Cards extends Component {
 
         break;
       case 'right':
-        end = element.scrollLeft + 600 < element.firstElementChild.clientWidth ? element.scrollLeft + 600 : element.firstElementChild.clientWidth;
+        end = element.scrollLeft + 600;
         cosParameter = end / 2;
 
         this.scrollInterval = setInterval(() => {
@@ -105,7 +106,7 @@ export default class Cards extends Component {
         <ul ref='cards' className={'cards__section'}>
           {
             storeName === 'ypo' ? <p className='cards__section__breadcrumb'>
-              <span className='cards__section__breadcrumb-type' onClick={() => clearItem()}>
+              <span className={`cards__section__breadcrumb-type ${type.includes('search') ? 'yellow' : ''}`} onClick={() => clearItem()}>
                 {type.includes('search') ? <Icon icon='LeftChevron'/> : _.capitalize(type.split('-search')[0])}
               </span> 
               { 

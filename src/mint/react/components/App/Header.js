@@ -107,9 +107,9 @@ class CartHead extends Component {
   render() {
     const {
       state: { bounce },
-      props: { currentUser: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader } }
+      props: { currentUser: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader, store } }
     } = this;
-
+    const displayStore = store === 'ypo' ? 'YPO' : _.capitalize(store);
     return (
       <div>
         <div className='header__left'>
@@ -126,7 +126,7 @@ class CartHead extends Component {
           <h3>
             {locked ? 'Checkout in Progress' : cartName}
           </h3>
-          <span className='members'>Created by: {leader ? leader.name : ''} </span>
+          <span className='members'>Created by: {leader ? leader.name : ''} | {displayStore} </span>
           </a>
         </div>
         <div className='header__right'>
