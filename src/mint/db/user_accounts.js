@@ -55,12 +55,6 @@ var userAccountCollection = Waterline.Collection.extend({
     addresses: Waterline.isMany('addresses'),
 
     /**
-     * Single-use six-digit login code
-     * @type {String}
-     */
-    login_code: 'string',
-
-    /**
      * Whether the user accepts a cash or not
      * @type {Boolean}
      */

@@ -24,47 +24,69 @@ router.get('/', (req, res) => co(function* () {
 }));
 
 /**
- * @api {get} /auth/quick/:code single-use login code
+ * @api {post} /auth/quick/:code single-use login code
  * @apiDescription Logs someone in via single-use code and then redirects them to a cart or something
  * @apiGroup HTML
  * @apiParam {string} :code six-digit single-use login code
  */
-router.get('/auth/quick/:code', (req, res) => co(function * () {
-  logging.info('hit new auth route');
-  logging.info('log in code:', req.params.code)
-  var user = yield db.UserAccounts.findOne({login_code: req.params.code})
-  logging.info('queried for user', user)
-  if (!user) {
-    return res.send('no user with that code')
-    // return res.status(404).end()
+router.post('/auth/quick/:code', (req, res) => co(function * () {
+  var email = req.body.email;
+  var realUser = yield db.UserAccounts.findOne({email_address: email});
+  var realLink = yield db.AuthenticationLinks.findOne({user: realUser.id})
+
+  var link = yield db.AuthenticationLinks.findOne({code: req.params.code}).populate('user').populate('cart')
+  if (!link || !link.user || link.id != link.id) {
+    //augment counter for link actually associated w/ that email
+    realLink.attempts++;
+    yield realLink.save()
+
+    if (realLink.attempts >= 4) {
+      //if there have been too many attempts, scrap the code and tell the front-end
+      realLink.code = null;
+      realLink.attempts = 0;
+      yield realLink.save();
+      return res.sendStatus(429);
+    }
+
+    return res.status(404).end()
   }
 
-  //kill code in db so that it can't be used more than once
-  user.login_code = null;
-  yield user.save();
-
-  // check if the user is already identified, as this email
-  var currentUser = req.UserSession.user_account
-  if (!currentUser) {
-    // no current user defined, so we can log them in
-    req.UserSession.user_account = user.id
-    yield req.UserSession.save()
-  } else if (currentUser.id === user.id) {
-    // already logged in as this user, so don't do anything
-  } else {
-    // logged in as another user, so log them in as this user
-    req.UserSession.user_account = user.id
-    yield req.UserSession.save()
-  }
-
-  // assert that everything is okay and that the user has just been logged in
-  return res.send({
-    ok: true,
-    newAccount: false,
-    status: 'USER_LOGGED_IN',
-    message: 'You have been logged in with this email address',
-    user: user
-  });
+  // // check if the user is already identified, as this email
+  // var currentUser = req.UserSession.user_account
+  // if (!currentUser) {
+  //   // no current user defined, so we can log them in
+  //   req.UserSession.user_account = link.user.id
+  //   yield req.UserSession.save()
+  // } else if (currentUser.id === link.user.id) {
+  //   // already logged in as this user, so don't do anything
+  // } else {
+  //   // logged in as another user, so log them in as this user
+  //   req.UserSession.user_account = link.user.id
+  //   yield req.UserSession.save()
+  // }
+  //
+  // // redirect if the link has a redirect
+  // if (link.redirect_url) {
+  //   return res.redirect(link.redirect_url)
+  // }
+  //
+  // // handle auth link for the /identify way
+  // if (!link.cart.leader) {
+  //   // make the user leader if they aren't already
+  //   link.cart.leader = link.user.id
+  //   if (!link.cart.name) {
+  //      link.cart.name = link.user.email_address.split('@')[0] + "'s Kip Cart"
+  //   }
+  //   yield link.cart.save()
+  // } else if (link.cart.leader !== link.user.id) {
+  //   // if there was a different user as leader, this must be a member that is authing, add them as member
+  //   if (!link.cart.members.includes(link.user.id)) {
+  //     link.cart.members.add(link.user.id)
+  //     yield link.cart.save()
+  //   }
+  // }
+  //TODO send back actual json like the other routes
+  res.sendStatus(200);
 }))
 
 /**

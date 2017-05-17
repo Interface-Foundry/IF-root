@@ -99,18 +99,18 @@ module.exports = function (router) {
         capitalization: 'uppercase'
       })
       // logging.info('code:', code)
-      user.login_code = code
-      yield user.save()
+      //TODO add code to auth link
+      // link.code = code;
+      // yield link.save();
 
       var loginEmail = yield db.Emails.create({
         recipients: email,
-        subject: 'Log in to Kip'
+        subject: `Log in to Kip: ${code}`
       })
 
       loginEmail.template('login_email', {
         link,
-        username: currentUser.name || email,
-        code: code
+        username: currentUser.name || email
       })
 
       yield loginEmail.send()
@@ -193,14 +193,13 @@ module.exports = function (router) {
 
       var lostEmail = yield db.Emails.create({
         recipients: email,
-        subject: 'Log in to Kip',
+        subject: 'Log in to Kip: ' + code,
         cart: cart.id
       })
 
       lostEmail.template('login_email', {
         link,
-        username: user.name || email,
-        code: code
+        username: user.name || email
       })
 
       yield lostEmail.send()
