@@ -45,7 +45,6 @@ module.exports.itemPreview = function * (query) {
   // see if they pasted url or itemcode
   if (query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
     const itemCode = query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)[0]
-    console.log('matching query, ', itemCode)
     item = yield db.YpoInventoryItems.findOne({item_code: itemCode})
     return yield createYpoItem(item)
   }
