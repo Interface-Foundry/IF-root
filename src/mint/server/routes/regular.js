@@ -33,7 +33,10 @@ router.post('/auth/quick/:code', (req, res) => co(function * () {
   var email = req.body.email;
   var realUser = yield db.UserAccounts.findOne({email_address: email});
 
-  if (!realUser) return res.status(404).end()
+  if (!realUser) {
+    logging.info('user not found');
+    return res.status(404).end()
+  }
 
   var realLink = yield db.AuthenticationLinks.findOne({
     user: realUser.id,
