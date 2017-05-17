@@ -16,7 +16,6 @@ export const displayCost = (val, currency) => {
     style: 'currency',
     currency: currency || 'USD'
   };
-  console.log(opts)
   return val.toLocaleString({}, opts);
 };
 
