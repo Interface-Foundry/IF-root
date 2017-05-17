@@ -26,15 +26,13 @@ var authenticationLinksCollection = Waterline.Collection.extend({
 
     redirect_url: 'string',
 
-    code: 'number',
+    code: 'string',
 
     /** Number of times someone has tried to log into this email with the wrong code
         Should never be higher than four. */
     attempts: {
-      type: 'number',
-      defaultsTo: function () {
-        return 0;
-      }
+      type: 'integer',
+      defaultsTo: 0
     },
 
     user: Waterline.isA('user_accounts')

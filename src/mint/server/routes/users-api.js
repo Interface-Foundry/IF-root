@@ -86,22 +86,24 @@ module.exports = function (router) {
         id: link.id
       }).populate('user')
 
+      logging.info('created this auth link:', link)
+
       if (process.env.NODE_ENV !== 'production') {
         console.log('http://localhost:3000/auth/' + link.id)
       }
 
       console.log('inside login', currentUser.name || email)
 
-      // generate magic code here TODO
+      // generate magic code here
       var code = randomstring.generate({
         length: 6,
         readable: true,
         capitalization: 'uppercase'
       })
-      // logging.info('code:', code)
-      //TODO add code to auth link
-      // link.code = code;
-      // yield link.save();
+      logging.info('code:', code)
+      //add code to auth link
+      link.code = code;
+      yield link.save();
 
       var loginEmail = yield db.Emails.create({
         recipients: email,
