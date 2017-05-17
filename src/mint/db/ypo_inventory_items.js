@@ -16,7 +16,7 @@ var ypoInventoryItemsCollection = Waterline.Collection.extend({
       defaultsTo: () => uuid.v4()
     },
     /**@type {string} item id internal to YPO*/
-    code: 'string',
+    item_code: 'string',
 
     /**@type {string} item name*/
     name: 'string',

@@ -19,7 +19,7 @@ var co = require('co');
  * Product URL
  */
 const ypoFieldDict = {
-    'Item': 'code',
+    'Item Code': 'item_code',
     'Code Name':'name',
     'Description': 'description',
     'Price': 'price',
