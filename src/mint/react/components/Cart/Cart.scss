@@ -164,7 +164,7 @@ $cart__add-height: $nav-height+$padding;
         text-decoration: underline;
       }
       &:before {
-        @include animation(progressBar ease 10s);
+        @include animation(progressBar cubic-bezier(0.0, 0.0, 0.2, 1) 10s);
         content: '';
         display: block;
         height: 2px;
@@ -211,6 +211,10 @@ $cart__add-height: $nav-height+$padding;
       height: $nav-height/2;
       line-height: $nav-height/2;
       padding: 0 $padding*2;
+      span {
+        font-size: 12px;
+        color: rgba($header-color, 0.8);
+      }
       .email {
         display: block;
         font-size: 0.8em;
@@ -222,14 +226,30 @@ $cart__add-height: $nav-height+$padding;
       padding: $padding;
       background: white;
       .image {
-        height: 30px;
+        height: 50px;
         @include animation(bounceDownSmall 2s);
         animation-iteration-count: 3; // too much twitching
         animation-delay: 10s; //suprise!
       }
       h4 {
+        position: relative;
         text-align: center;
         padding: $padding;
+        border: 3px solid $main-button-color;
+        border-radius: $padding;
+        margin: $padding auto $padding*2;
+        max-width: 300px;
+        &:before {
+          content:"";
+          position: absolute;
+          bottom: -15px;
+          width: 0;
+          height: 0;
+          left: calc(50% - 15px);
+          border-left: 13px solid transparent;
+          border-top: 15px solid $main-button-color;
+          border-right: 13px solid transparent;
+        }
       }
     }
   }

@@ -7,8 +7,17 @@ import { Icon } from '../../themes';
 import { Desktop, Desk, KipHead, Plant } from '../../themes/kipsvg';
 
 export default class Hero extends Component {
+
+	shouldComponentUpdate(nextProps, nextState) {
+   		 // need this, otherwise page always rerender every scroll
+	   	if(nextProps.animate !== this.props.animate) return true
+
+    	return false
+  	}
+
   	render() {
-  		const { items, animate } = this.props;
+  		const { animate } = this.props;
+  		
 	    return (
 	      	<div className={`hero image ${animate ? 'start' : ''}`}>
                 <div className="hero__desktop">

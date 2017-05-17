@@ -30,8 +30,7 @@
     width: 250px;
     height: 100%;
     background: $fgColor;
-    border-left: 1px solid $borderColor;
-    @include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+    @include animation(scrollInRight cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
     .sidenav__list__view {
       height: calc(100% - #{$ribbonHeight * 4});
@@ -41,7 +40,6 @@
     }
     h4 {
       text-align: right;
-      border-bottom: 1px solid $borderColor;
       padding: $padding/2 $padding;
       &.show__more {
         padding: $padding/2 $padding $padding*2;
@@ -54,7 +52,6 @@
       line-height: $ribbonHeight - $padding;
       padding: 0 $padding;
       &.sidenav__list__header {
-        border-bottom: 1px solid $borderColor;
         p {
           width: calc(100% - #{$ribbonHeight/2});
           padding: 0;
@@ -86,7 +83,6 @@
       }
     }
     .sidenav__list__actions {
-      border-top: 1px solid $borderColor;
       display: block;
       height: $ribbonHeight;
       h4 {

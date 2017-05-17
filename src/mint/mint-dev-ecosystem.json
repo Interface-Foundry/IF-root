@@ -12,7 +12,8 @@
       "NO_LUMINATI": true,
       "BASEURL": "http://mint-dev.kipthis.com",
       "LOGGING_MODE": "database",
-      "LOGGING_LEVEL": "info"
+      "LOGGING_LEVEL": "info",
+      "BUILD_MODE": "prebuilt"
     }
   }, {
     "name": "ci",

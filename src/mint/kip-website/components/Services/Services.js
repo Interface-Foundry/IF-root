@@ -4,8 +4,58 @@ import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
 
-		        		// <div><Icon icon='Time'/></div>
-		        		// <div><Icon icon='Wallstreet'/></div>
+import {
+  Facebook,
+  Outlook,
+  Chrome,
+  SlackIcon,
+  Gmail,
+  Apple,
+  GooglePlay
+} from '../../themes';
+
+const comparisonArray = [
+	{
+		nameSrc: null,
+		order: true,
+		budget: true,
+		tracking: true,
+		vendors: true,
+		noSignup: true,
+		accessability: [],
+		pricing: null
+	},
+	{
+		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_kip.svg',
+		order: true,
+		budget: true,
+		tracking: true,
+		vendors: true,
+		noSignup: true,
+		accessability: [Facebook, Gmail, SlackIcon, Outlook, Chrome],
+		pricing: 'FREE'
+	},
+	{
+		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_hivy.svg',
+		order: true,
+		budget: true,
+		tracking: false,
+		vendors: false,
+		noSignup: false,
+		accessability: [SlackIcon, Apple],
+		pricing: 'Credit Card Required'
+	},
+	{
+		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_q.svg',
+		order: true,
+		budget: false,
+		tracking: false,
+		vendors: true,
+		noSignup: false,
+		accessability: [GooglePlay, Apple],
+		pricing: 'Credit Card Required'
+	}
+]
 
 export default class About extends Component {
 
@@ -14,17 +64,43 @@ export default class About extends Component {
 	      	<div className="services"> 
 				<div className="col-12">
 
+					<div className="col-12 row-1 services__comparison">
+						{
+							comparisonArray.map((app, i) => {
+								if(!app.nameSrc) return (
+									<ul key={i} className="app col-3 row-1">
+										<li></li>
+										<li><p>Order Management</p></li>
+										<li><p>Budget Setting</p></li>
+										<li><p>Track Orders</p></li>
+										<li><p>Multiple Vendors</p></li>
+										<li><p>No Signup/Download</p></li>
+										<li className='accessability'><p>Accessibility</p></li>
+										<li><p>Pricing</p></li>
+									</ul>
+								)
+
+								return (
+									<ul key={i} className={`app col-3 row-1 ${i === 1 ? 'kip' : ''}`}>
+										<li style={{backgroundImage: `url(${app.nameSrc})`}}></li>
+										<li className={app.order}>{app.order ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className={app.budget}>{app.budget ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className={app.tracking}>{app.tracking ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className={app.vendors}>{app.vendors ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className={app.noSignup}>{app.noSignup ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className='accessability'>{
+											app.accessability.map((Svg, i) => {
+												return <Svg key={i}/>
+											})
+										}</li>
+										<li><p>{app.pricing}</p></li>
+									</ul>
+								)
+							})
+						}
+					</div>
+
 					<h3><em>"Group shopping bot Kip focuses on coordinating purchases with a team so they can purchase lunch together or have an office manager authorize a supply order."</em><br/><span> - Fast Company July 13, 2016</span></h3>
-
-					<h1>Press Coverage</h1>
-					<div className="col-12 row-1 icons__hell">
-						<div><Icon icon='Fastcompany'/></div>
-						<div><Icon icon='Time'/></div>
-		        		<div><Icon icon='Venturebeat'/></div>
-		        		<div><Icon icon='Wallstreet'/></div>
-		        		<div><Icon icon='Paymentsource'/></div>
-
-		        	</div>
 
 					<h1>Featured Partners</h1>
 					<div className="col-12 row-1 icons__hell">
@@ -35,18 +111,6 @@ export default class About extends Component {
 		        		<div><Icon icon='Delivery'/></div>
 		        	</div>
 
-			        <div className="col-6 row-1 services__details">
-			        	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/moneycartClip.png")'}}/ >
-		        		<h2>TRACK SPENDING</h2>
-			        	<p>Save money and track spending with Kip. See how much you’re spending in every order, save on shipping and account fees with shared shopping carts.</p>
-			        </div>
-
-			       	<div className="col-6 row-1 services__details">
-				       	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/cloudClip.png")'}}/ >
-			        	<h2>KEEP IT IN CLOUD</h2>
-			       		<p>Use Kip to keep things you love in the cloud. Browse through different products, save things you’re interested in and checkout when the price is right.</p>
-			        </div>
-
 			        <div className="col-6 row-1 services__details card">
 			        	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/directClip.png")'}}/ >
 		        		<h2>Kip Direct</h2>
@@ -54,7 +118,7 @@ export default class About extends Component {
 			        	<p>Unique short URL to share</p>
 			        	<p>Invite friends with link or email</p>
 			        	<div className="col-12 row-1 action">
-			        		<a href='/newcart'><button>Try Kip for Free <Icon icon='Right'/></button></a>
+			        		<a href='/newcart'><button>Create New Cart <Icon icon='Right'/></button></a>
 		        		</div>
 			        </div>
 

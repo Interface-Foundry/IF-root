@@ -1,44 +1,81 @@
 //react/components/EditCart/EditCart.scss
 @import '../../styles/Constants';
 .editCart {
+  overflow: scroll;
   height: 100%;
-  .src {
-    height: 40%;
-  }
+  display: flex;
+  flex-direction: column;
   .name {
-    height: 60%;
     padding: $padding*2;
+    font-size: 30px;
+    width: 80%;
+    margin: 0 auto;
+    font-family: $secondary-font;
+    cursor: pointer;
+    svg {
+      height: 0.8em;
+      width: 0.8em;
+      position: relative;
+      bottom: 2px;
+    }
+    .editText {
+      font-size: 10px;
+      text-transform: uppercase;
+      position: relative;
+      left: -15px;
+      top: 20px;
+    }
     input {
-      height: $nav-height;
-      padding: 0 $padding;
+      font-family: $secondary-font;
+      text-align: center;
+      font-size: 30px;
       width: 100%;
       border-radius: 5px;
       border: 1px solid $border-color-light;
     }
   }
-  .editCart__footer {
-    position: absolute;
-    bottom: 0px;
-    left: 0;
-    height: $nav-height;
-    width: 100%;
-    line-height: $nav-height - $padding*2;
-    padding: $padding $padding*2;
-    font-family: 'Raleway';
-    color: $kip-primary-color;
-    button {
-      display: inline-block;
-      width: 100%;
-      height: 100%;
-      border-radius: 5px;
-      margin: 0 auto;
-      background: white;
-      background: $main-button-color;
-      border: 1px solid $border-color-light;
-      font-weight: 600;
-      z-index: 10000;
-      &:active {
-        background: white;
+  .pad {
+    flex: 1 1 auto;
+  }
+  .dangerzone {
+    text-align: left;
+    align-self: center;
+    margin-bottom: $padding * 4;
+    border: 1px solid lightgrey;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    caption {
+      font-weight: normal;
+      border: 1px solid lightgrey;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      .danger {
+        color: white;
+        background: $fourth-button-color;
+      }
+    }
+    td {
+      vertical-align: middle;
+      padding: $padding/2;
+      padding-top: $padding;
+      p {
+        width: 60%;
+      }
+      button {
+        min-width: 150px;
+        background: lightgrey;
+        color: red;
+        border: none;
+        height: 30px;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: $card-box-shadow;
+        border: 1px solid grey;
+        border-radius: 2px;
+        &:active {
+          box-shadow: none;
+          border: none;
+        }
       }
     }
   }

@@ -6,28 +6,33 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
 .about {
     background: transparent;
     top: 200px;
-    left: 900px;
-    z-index: 100;
-	position: absolute;
-	transform: rotate(-20deg);
-	text-align: center;
-	width: 60%;
+    left: 55%;
+    z-index: 50;
+    position: absolute;
+    transform: rotate(-25deg);
+    text-align: center;
+    width: 75%;
+    height: 100%;
 
-	@media only screen and (max-width: 600px) {
+	.image {
+		display: none;
+		
+		@media only screen and (max-width: 1000px) {
+			display: block;
+			height: 300px;
+			background-position: center;
+	    }
+	}
+
+	@media only screen and (max-width: 1000px) {
 		position: relative;
 		transform: rotate(0);
 		width: 100%;
+		height: 400px;
 		left: auto;
 		right: auto;
 		top: auto;
 		overflow: hidden;
-		padding-bottom: $padding*15;
-
-		div {
-			&:nth-of-type(even) {
-				display: none;
-			}
-		}
 	}
 
 	svg {
@@ -37,16 +42,11 @@ $icons: Burger Clock DesktopIcon Happy Layers Lightbulb Milk Mouse Paper Pencil 
 
 	.icon {
 	    display: inline-block;
-	    @include animation(fadeAndZoomIn cubic-bezier(0.4, 0, 0.2, 1) (random(3) - 0.33s));
-    	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+	    max-width: 250px;
 
-    	&.animate {
-    		@include animation(fallDownSqueeze cubic-bezier(0.4, 0, 0.2, 1) 1s);
-    		opacity: 0;
-    		@media only screen and (max-width: 600px) {
-    			@include animation(fallDownSqueezeMobile cubic-bezier(0.4, 0, 0.2, 1) 1s);
-    		}
-    	}
+	    @media only screen and (max-width: 1000px) {
+	    	display: none;
+	    }
 	}
 }
 

@@ -9,6 +9,9 @@
 	padding: $padding*3 $padding*12.5 $padding*20;
 	@include animation(fadeInUp cubic-bezier(0.4, 0, 0.2, 1) 3s);
 
+	@media only screen and (max-width: 1000px) {
+		padding: $padding $padding*12.5  $padding*5;
+	}
 
 	@media only screen and (max-width: 600px) {
 		padding: $padding $padding*2 $padding*5;
@@ -77,6 +80,48 @@
 				}
 			}
 		}
+	}
+
+	.icons__hell__header {
+		font-size: 40px;
+		padding-top: $padding*4;
+		color: #42403f;
+		text-align: center;
+
+		@media only screen and (max-width: 600px) {
+			font-size: 27px;
+		}
+	}
+
+	.icons__hell {
+		padding: $padding*5 0 0;
+		text-align: center;
+
+		& > div {
+			display: inline-block;
+			width: (100%/3);
+			height: $ribbonHeight+10;
+
+			svg {
+				width: 100%;
+				height: $ribbonHeight;
+				fill: $primaryColor;
+				opacity: 0.8;
+			}
+
+			@media only screen and (max-width: 600px) {
+				width: (100%/2);
+
+				&:last-of-type {
+					width: 100%;
+				}
+			}
+		}
+
+		@media only screen and (max-width: 600px) {
+			padding: $padding*5 0 0;
+		}
+
 	}
 
 	.sine {

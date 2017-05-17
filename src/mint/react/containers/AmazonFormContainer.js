@@ -1,7 +1,7 @@
 // react/containers/AmazonFormContainer.js
 
 import { connect } from 'react-redux';
-import { reset, reduxForm } from 'redux-form';
+import { reduxForm } from 'redux-form';
 import { AmazonForm } from '../components';
 import { isUrl, addSearchHistory } from '../utils';
 import { previewAmazonItem } from '../actions/item';

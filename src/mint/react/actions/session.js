@@ -50,7 +50,7 @@ export function signIn(cart_id, email) {
     dispatch(requestUpdate());
 
     try {
-      const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${email}`, {
+      const response = await fetch(`/api/identify?cart_id=${cart_id}&email=${encodeURIComponent(email)}`, {
         credentials: 'same-origin'
       });
 
@@ -77,6 +77,27 @@ export function logout() {
       }));
     } catch (e) {
       return new SubmissionError({ email: 'You are already signed in, check your email!' });
+    }
+  };
+}
+
+export function login(cart_id, email) {
+  return async dispatch => {
+    try {
+      await fetch(`/api/login?email=${encodeURIComponent(email)}&redirect=/cart/${cart_id}`, {
+        credentials: 'same-origin'
+      });
+
+      return dispatch(receiveUpdate(await response.json()));
+      return dispatch(receiveUpdate({
+        user_account: {},
+        animal: '',
+        createdAt: '',
+        updatedAt: '',
+        id: ''
+      }));
+    } catch (e) {
+      return new SubmissionError({ email: 'Something went wrong with login' });
     }
   };
 }

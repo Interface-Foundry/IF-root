@@ -1,0 +1,116 @@
+@import '../../styles/Constants';
+@import '../../styles/Animations';
+
+.popup {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	z-index: 1001;
+	padding: $padding*10 $padding*2 0;
+	background: rgba($secondary-button-color, 0.3);
+	@include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+	.popup__card {
+		position: relative;
+		width: 100%;
+		max-width: 500px;
+		margin: 0 auto;
+		border: 1px solid $border-color-light;
+		border-top: 5px solid $secondary-button-color;
+		background: white;
+		border-radius: $padding/2;
+	    box-shadow: 0 1px 5px -2px grey;
+	    text-align: center;
+
+	    @media (min-width: 900px) {
+	    	h1 {
+	    		font-size: 24px;
+	    	}
+	    }
+
+	    .popup__description {
+	    	border-top: 1px solid $border-color-light;
+	    	margin-top: $padding*2;
+	    	padding: $padding*2;
+
+	    	p {
+	    		font-size: 10px;
+	    	}
+	    }
+
+	    .popup__card-icon {
+	    	position: absolute;
+	    	width: $nav-height;
+	    	height: $nav-height;
+	    	line-height: $nav-height;
+	    	padding: $padding*1.5;
+	    	right: 0;
+	    	top: 0;
+	    	cursor: pointer;
+
+	    	svg {
+	    		height: 100%;
+	    		width: 100%;
+	    		vertical-align: top !important;
+	    	}
+	    }
+
+	    span {
+			line-height: $nav-height/2;
+			height: $nav-height/2 + ($padding/2);
+			padding-bottom: $padding;
+			display: inline-block;
+			font-size: 3.5vw;
+			@media (min-width: 900px) {
+				font-size: 13px;
+			}
+	    }
+
+	    h1 {
+	    	line-height: $nav-height*2;
+	    	font-size: 20px;
+
+	    	@media (min-width: 900px) {
+	    		font-size: 30px;
+	    	}
+	    }
+
+	    input {
+	    	border: 2px solid $secondary-button-color;
+	    	padding: $padding;
+	    	width: 80%;
+	    	max-width: 500px;
+	    	font-size: 23px;
+	    	border-radius: $padding/2;
+	    	display: block;
+	    	margin: 0 auto;
+	    }
+
+	    button {
+	    	background: $secondary-button-color;
+	    	border: 0;
+	    	margin: $padding*4 0 $padding;
+	    	padding: $padding $padding*5;
+	    	border-radius: $padding/2;
+	    	color: white;
+	    	width: 80%;
+	    	font-size: 15px;
+	    	font-weight: bold;
+	    	max-width: 300px;
+
+	    	&:disabled {
+	    		opacity: 0.4;
+	    		cursor: not-allowed;
+	    	}
+
+	    	svg {
+	    		margin-right: $padding;
+	    		font-size: 18px;
+	    	}
+	    }
+	}
+
+}

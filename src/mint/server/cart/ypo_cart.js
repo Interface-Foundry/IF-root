@@ -5,25 +5,6 @@ const xml2js = require('xml2js')
 dbReady.then((models) => { db = models })
 
 
-function getCart(argument) {
-    // body...
-}
-
-function syncCart(argument) {
-    // body...
-}
-
-
-
-function removeItemFromCart(argument) {
-    // body...
-}
-
-function clearCart(argument) {
-    // body...
-}
-
-
 /**
  * çreates item that can be generalized to add to cart
  *
@@ -40,6 +21,18 @@ module.exports.addItem = function * (itemId) {
   return item
 }
 
+function * createYpoItem (item) {
+  return yield db.Items.create({
+    store: 'ypo',
+    name: item.name,
+    asin: item.item_code.toString(),
+    description: item.description,
+    price: item.price,
+    thumbnail_url: item.image_url,
+    main_image_url: item.image_url
+  })
+}
+
 /**
  * get info for an item based on description
  *
@@ -47,37 +40,40 @@ module.exports.addItem = function * (itemId) {
  * @return     {Promise}  { description_of_the_return_value }
  */
 module.exports.itemPreview = function * (query) {
-  const items = yield new Promise((resolve, reject) => {
-    db.YpoInventoryItems.native((err, collection) => {
-      if (err) reject(err)
-      else {
-        collection.find({
-          $text: {
-            $search: `\"${query}\"`
-          }
-        }, {
-          createdAt: false,
-          updatedAt: false
-        })
-        .limit(10)
-        .toArray((err, results) => {
-          if (err) reject(err)
-          else resolve(results)
-        });
-      }
-    })
-  })
-  return yield items.map(function * (item) {
-    return yield db.Items.create({
-        store: 'ypo',
-        name: item.name,
-        asin: item.item_code.toString(),
-        description: item.description,
-        price: item.price,
-        thumbnail_url: item.image_url,
-        main_image_url: item.image_url
+  let items
+
+  // see if they pasted url or itemcode
+  if (query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
+    const itemCode = query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)[0]
+    item = yield db.YpoInventoryItems.findOne({item_code: itemCode})
+    return yield createYpoItem(item)
+  }
+  // search by text index stuff
+  else {
+    items = yield new Promise((resolve, reject) => {
+      db.YpoInventoryItems.native((err, collection) => {
+        if (err) reject(err)
+        else {
+          collection.find({
+            $text: {
+              $search: `\"${query}\"`
+            }
+          }, {
+            createdAt: false,
+            updatedAt: false
+          })
+          .limit(10)
+          .toArray((err, results) => {
+            if (err) reject(err)
+            else resolve(results)
+          });
+        }
       })
-  })
+    })
+    return yield items.map(function * (item) {
+      return yield createYpoItem(item)
+    })
+  }
 }
 
 /**
