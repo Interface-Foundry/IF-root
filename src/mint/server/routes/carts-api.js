@@ -476,6 +476,34 @@ module.exports = function (router) {
   }))
 
   /**
+   * @api {get} /api/views/:cart_id Get cart views
+   * @apiDescription Get the number of times a cart has been viewed
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id the id of the cart whose views we want to access
+   */
+  router.get('/views/:cart_id', (req, res) => co(function * () {
+    var cart = yield db.Carts.findOne(id: req.params.cart_id);
+    if (!cart) res.sendStatus(404);
+    else return res.send(cart.views);
+  }))
+
+  /**
+   * @api {put} /api/views/:cart_id increment cart views
+   * @apiDescription Increment the number of times a cart has been viewed
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id the id of the cart whose views we want to increment
+   */
+  router.put('/views/:cart_id', (req, res) => co(function * () {
+    var cart = yield db.Carts.findOne(id: req.params.cart_id);
+    if (!cart) return res.sendStatus(404);
+    else {
+      cart.views++;
+      yield cart.save();
+      return res.send(cart);
+    }
+  }))
+
+  /**
    * @api {post} /api/item/:item_id Update Item
    * @apiDescription Update item settings, except for id, added_by
    * @apiGroup Carts

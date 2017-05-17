@@ -73,6 +73,11 @@ var cartsCollection = Waterline.Collection.extend({
       enum: constants.AMAZON_LOCALES
     },
 
+    /** @type {integer} the number of times this cart has been #viewed */
+    views: {
+      type: 'integer',
+      defaultsTo: 0
+    }
   }
 });
 
