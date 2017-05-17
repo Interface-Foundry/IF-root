@@ -4,7 +4,7 @@ export default class SlackIcon extends Component {
 	render() {
 	  	return (
 			<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-				 viewBox="0 0 270 270" enableBackground="new 0 0 270 270;" xmlSpace="preserve">
+				 viewBox="65 65 150 150" enableBackground="new 0 0 270 270;" xmlSpace="preserve">
 				<g>
 					<g>
 						<path className="st0" style={{fill:'#ECB32D'}} d="M154.3,87.1c-1.9-5.7-8-8.8-13.7-7c-5.7,1.9-8.8,8-7,13.7l28.1,86.4c1.9,5.3,7.7,8.3,13.2,6.7
