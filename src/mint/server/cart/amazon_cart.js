@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const googl = require('goo.gl');
 const {OperationHelper} = require('apac');
 
 const LRU = require('lru-cache')
@@ -492,7 +493,6 @@ exports.checkout = function * (cart, req, res) {
 
     yield receipt.send();
     logging.info('receipt sent')
-
   }
 
   // save the amazon purchase url
