@@ -74,7 +74,7 @@ export default class About extends Component {
 										<li><p>Budget Setting</p></li>
 										<li><p>Track Orders</p></li>
 										<li><p>Multiple Vendors</p></li>
-										<li><p>No Signup/Download</p></li>
+										<li><p>No Signup or Download</p></li>
 										<li className='accessability'><p>Accessibility</p></li>
 										<li><p>Pricing</p></li>
 									</ul>
