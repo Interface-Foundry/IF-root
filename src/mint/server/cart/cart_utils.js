@@ -205,7 +205,6 @@ exports.addItem = function * (itemId, cart, quantity) {
 
 
 
-
 /**
  * figure out who the retailer is for an item pasted,
  * very rudimentary since idk what to expect at this time
@@ -219,3 +218,60 @@ exports.getRetailer = function (item) {
     throw new Error('Not currently supported')
   }
 };
+
+
+/**
+ * send generic receipt email
+ *
+ * @param      {<type>}  cart         The cartesian
+ * @param      {<type>}  userAccount  The user account
+ * @return     {<type>}  { description_of_the_return_value }
+ */
+exports.sendRecipt = function * (cart, userAccount) {
+  //send receipt email
+  const cartItems = cart.items;
+  logging.info('creating receipt...')
+  if (userAccount) {
+    var receipt = yield db.Emails.create({
+      recipients: userAccount.email_address,
+      sender: 'hello@kip.ai',
+      subject: `Kip Receipt for ${cart.name}`,
+      template_name: 'summary_email',
+      unsubscribe_group_id: 2485
+    });
+
+    var userItems = {}; //organize items according to which user added them
+    var items= []
+    var users = []
+    var total = 0;
+    var totalItems = 0;
+    cartItems.map(function (item) {
+      if (!userItems[item.added_by]) userItems[item.added_by] = [];
+      userItems[item.added_by].push(item);
+      logging.info('item', item) //undefined
+      totalItems += Number(item.quantity || 1);
+      total += (Number(item.price) * Number(item.quantity || 1));
+    });
+
+    for (var k in userItems) {
+      var addingUser = yield db.UserAccounts.findOne({id: k});
+      users.push(addingUser.name || addingUser.email_address);
+      items.push(userItems[k]);
+    }
+
+    yield receipt.template('summary_email', {
+      username: userAccount.name || userAccount.email_address,
+      baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
+      id: cart.id,
+      items: items,
+      users: users,
+      date: moment().format('dddd, MMMM Do, h:mm a'),
+      total: '$' + total.toFixed(2),
+      totalItems: totalItems,
+      cart: cart
+    })
+
+    yield receipt.send();
+    logging.info('receipt sent')
+  }
+}

@@ -579,6 +579,8 @@ module.exports = function (router) {
     } catch (err) {
       throw new Error('Error on checkout', err)
     }
+    // send receipt email
+    yield cartUtils.sendReceipt(cart, req.UserSession.user_account)
   }))
 
 
