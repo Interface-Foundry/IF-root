@@ -189,9 +189,9 @@ export function sendAddressData(user_id, full_name, line_1, line_2, city, region
   console.log(user_id);
   return async dispatch => {
     try {
-      const response = await fetch(`/api/user/${user_id}`, {
+      const response = await fetch(`/api/user/${user_id}/address`, {
         credentials: 'same-origin',
-        method: 'PUT',
+        method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json'
