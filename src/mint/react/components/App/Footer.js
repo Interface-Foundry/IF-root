@@ -156,14 +156,14 @@ class ItemFooter extends Component {
   }
 
   render() {
-    const { removeDeal, addItem, _togglePopup, item_id, position, cart_id, currentUser, history: { replace, location: { pathname } } } = this.props,
+    const { removeDeal, addItem, _togglePopup, item_id, position, cart_id, clearItem, currentUser, history: { replace, location: { pathname } } } = this.props,
       removeItem = pathname.includes('deal');
 
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
         { !!currentUser.id ? 
-          <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> 
+          <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); clearItem(); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> 
           : <button className='add triple' onClick={() => _togglePopup()}>✓ Save to Cart</button> 
         }
       </footer>

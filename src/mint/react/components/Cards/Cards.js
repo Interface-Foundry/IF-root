@@ -42,36 +42,36 @@ export default class Cards extends Component {
     const element = ReactDOM.findDOMNode(this.refs.scroll)
 
     switch (direction) {
-    case 'left':
-      end = element.scrollLeft - 600 > 2 ? element.scrollLeft - 600 : 2;
-      cosParameter = end / 2;
+      case 'left':
+        end = element.scrollLeft - 600 > 2 ? element.scrollLeft - 600 : 2;
+        cosParameter = end / 2;
 
-      this.scrollInterval = setInterval(() => {
-        if (element.scrollLeft >= end) {
-          scrollCount = scrollCount + 1;
-          scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
-          element.scrollLeft = element.scrollLeft - scrollMargin;
-        } else {
-          clearInterval(this.scrollInterval);
-        }
-      }, 15);
+        this.scrollInterval = setInterval(() => {
+          if (element.scrollLeft >= end) {
+            scrollCount = scrollCount + 1;
+            scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
+            element.scrollLeft = element.scrollLeft - scrollMargin;
+          } else {
+            clearInterval(this.scrollInterval);
+          }
+        }, 15);
 
-      break;
-    case 'right':
-      end = element.scrollLeft + 600 < element.firstElementChild.clientWidth ? element.scrollLeft + 600 : element.firstElementChild.clientWidth;
-      cosParameter = end / 2;
+        break;
+      case 'right':
+        end = element.scrollLeft + 600 < element.firstElementChild.clientWidth ? element.scrollLeft + 600 : element.firstElementChild.clientWidth;
+        cosParameter = end / 2;
 
-      this.scrollInterval = setInterval(() => {
-        if (element.scrollLeft <= end) {
-          scrollCount = scrollCount + 1;
-          scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
-          element.scrollLeft = element.scrollLeft + scrollMargin;
-        } else {
-          clearInterval(this.scrollInterval);
-        }
-      }, 15);
+        this.scrollInterval = setInterval(() => {
+          if (element.scrollLeft <= end) {
+            scrollCount = scrollCount + 1;
+            scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
+            element.scrollLeft = element.scrollLeft + scrollMargin;
+          } else {
+            clearInterval(this.scrollInterval);
+          }
+        }, 15);
 
-      break;
+        break;
     }
   }
 
@@ -110,11 +110,11 @@ export default class Cards extends Component {
         <ul ref='cards' className={'cards__section'}>
           <p className='cards__section__breadcrumb'>
             <span className='cards__section__breadcrumb-type' onClick={() => clearItem()}>
-              {_.capitalize(type.split('-search')[0])}
+              {type.includes('search') ? <Icon icon='LeftChevron'/> : _.capitalize(type.split('-search')[0])}
             </span> 
             { 
               type.includes('search') ? <em>
-              <Icon icon='RightChevron'/>
+              &nbsp;
               <span>
                 {`${getLastSearch()}`}
               </span> </em> : null

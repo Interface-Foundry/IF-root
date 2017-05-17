@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../utils';
+import { Link } from 'react-router-dom';
 
 export default class CategoryCard extends Component {
 

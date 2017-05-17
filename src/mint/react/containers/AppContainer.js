@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { App } from '../components';
 import { fetchCart, fetchAllCarts, updateCart, checkoutCart } from '../actions/cart';
 import { logout, login } from '../actions/session';
-import { addItem, removeItem } from '../actions/item';
+import { addItem, removeItem, clearItem } from '../actions/item';
 import { removeCard } from '../actions/cards';
 import ReactGA from 'react-ga';
 
@@ -51,6 +51,7 @@ const mapDispatchToProps = dispatch => ({
   },
   fetchAllCarts: () => dispatch(fetchAllCarts()),
   updateCart: (cart) => dispatch(updateCart(cart)),
+  clearItem: () => dispatch(clearItem()),
   removeItem: (cart_id, item_id) => {
     ReactGA.event({ category: 'Cart', action: 'removed item from cart' });
     return dispatch(removeItem(cart_id, item_id));

@@ -199,11 +199,11 @@ class EnumeratedHead extends Component {
     const { cart_id, length, type, history: { replace, location: { pathname } }, text } = this.props,
       itemIndex = parseInt(pathname.match(/\/(\d+)\//i)[1]) + 1,
       query = pathname.match(/\/\d\/(.+)$/i)[1],
-      title = type === 'search' ? `"${query}"` : text;
+      title = type === 'search' ? `${decodeURIComponent(query)}` : text;
     return (
       <div className='navbar__modal'>
         <div className='navbar__icon__close' onClick={() => replace(`/cart/${cart_id}/`)}>
-          <Icon icon='Clear'/>
+          <Icon icon='LeftChevron'/>
         </div>
         <h3 className='navbar__modal_head'>
           <span>{title}</span> - {itemIndex} of {length} {type === 'search' ? 'results' : null}

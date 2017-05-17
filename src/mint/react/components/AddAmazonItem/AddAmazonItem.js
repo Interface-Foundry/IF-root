@@ -17,7 +17,8 @@ export default class AddAmazonItem extends Component {
     numUserItems: PropTypes.number.isRequired,
     addingItem: PropTypes.func.isRequired,
     push: PropTypes.func.isRequired,
-    cart_id: PropTypes.string
+    cart_id: PropTypes.string,
+    storeName: PropTypes.string
   }
 
   state = {
@@ -33,10 +34,11 @@ export default class AddAmazonItem extends Component {
   }
 
   render() {
-    const { addItemToCart, props: { numUserItems, user_account } } = this;
+    console.log(this.props.store)
+    const { addItemToCart, props: { numUserItems, user_account, storeName } } = this;
     return (
       <div className='add_to_amazon'>
-        Add Item to Kip Cart
+        Add {_.capitalize(storeName)} Item to Kip Cart
         <AmazonFormContainer />
         {numUserItems ? null : <NotificationBubble top={21} right={3}/>}
       </div>

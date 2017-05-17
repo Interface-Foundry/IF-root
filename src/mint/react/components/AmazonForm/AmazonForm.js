@@ -48,14 +48,14 @@ export default class AmazonForm extends Component {
 
   render() {
     const { props, renderField, onSubmitMiddleware } = this;
-    const { handleSubmit } = props;
+    const { handleSubmit, storeName } = props;
     
     return (
       <form onSubmit={handleSubmit(onSubmitMiddleware)} className="form">
         <Field
           name="url"
           type="string"
-          placeholder="Paste Amazon URL or Search"
+          placeholder={`Search or Paste ${_.capitalize(storeName)} URL`}
           handleSubmit={handleSubmit(onSubmitMiddleware)}
           component={renderField}/>
       </form>

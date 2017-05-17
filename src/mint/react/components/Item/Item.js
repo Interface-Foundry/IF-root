@@ -73,7 +73,7 @@ export default class Item extends Component {
 
   componentWillUnmount() {
     const { clearItem } = this.props;
-    clearItem();
+    // clearItem();
   }
 
   determineNav() {

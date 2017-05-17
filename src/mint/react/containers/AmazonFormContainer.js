@@ -7,10 +7,14 @@ import { isUrl, addSearchHistory } from '../utils';
 import { previewAmazonItem } from '../actions/item';
 import { push } from 'react-router-redux';
 import ReactGA from 'react-ga';
+import { getLastSearch } from '../utils';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
-  item: state.item
+  storeName: state.currentCart.store,
+  item: state.item,
+  cardType: state.cards.type,
+  initialValues: {url: state.cards.type ? ( state.cards.type.includes('search') ? getLastSearch() : '' ) : ''}
 });
 
 const mapDispatchToProps = dispatch => ({

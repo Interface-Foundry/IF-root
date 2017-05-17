@@ -88,14 +88,8 @@ export function login(cart_id, email) {
         credentials: 'same-origin'
       });
 
+      
       return dispatch(receiveUpdate(await response.json()));
-      return dispatch(receiveUpdate({
-        user_account: {},
-        animal: '',
-        createdAt: '',
-        updatedAt: '',
-        id: ''
-      }));
     } catch (e) {
       return new SubmissionError({ email: 'Something went wrong with login' });
     }

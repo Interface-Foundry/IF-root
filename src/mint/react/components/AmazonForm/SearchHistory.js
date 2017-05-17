@@ -27,8 +27,9 @@ export default class SearchHistory extends Component {
                 </div>
                 <div className='searchHistory__term-query' onClick={(e) => {
                   onChange(previousSearch);
-                  _toggleHistory()
-                  handleSubmit();
+                  setTimeout(() => {
+                    handleSubmit();
+                  }, 100)
                 }}>
                   <p>{previousSearch}</p>
                 </div>
