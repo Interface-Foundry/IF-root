@@ -103,8 +103,7 @@ module.exports = function (router) {
       // generate magic code here
       var code = randomstring.generate({
         length: 6,
-        readable: true,
-        capitalization: 'uppercase'
+        charset: 'numeric'
       })
       logging.info('code:', code)
 
@@ -114,12 +113,13 @@ module.exports = function (router) {
 
       var loginEmail = yield db.Emails.create({
         recipients: email,
-        subject: `Log in to Kip: ${code}`
+        subject: `Log in to Kip with ${code}`
       })
 
       loginEmail.template('login_email', {
         link,
-        username: currentUser.name || email
+        username: currentUser.name || email.split('@')[0],
+        code: code
       })
 
       yield loginEmail.send()
