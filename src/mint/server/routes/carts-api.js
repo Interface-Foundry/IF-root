@@ -482,9 +482,11 @@ module.exports = function (router) {
    * @apiParam {string} :cart_id the id of the cart whose views we want to access
    */
   router.get('/views/:cart_id', (req, res) => co(function * () {
-    var cart = yield db.Carts.findOne(id: req.params.cart_id);
+    var cart = yield db.Carts.findOne({id: req.params.cart_id});
     if (!cart) res.sendStatus(404);
-    else return res.send(cart.views);
+    else return res.send({
+      views: cart.views
+    });
   }))
 
   /**
@@ -494,7 +496,7 @@ module.exports = function (router) {
    * @apiParam {string} :cart_id the id of the cart whose views we want to increment
    */
   router.put('/views/:cart_id', (req, res) => co(function * () {
-    var cart = yield db.Carts.findOne(id: req.params.cart_id);
+    var cart = yield db.Carts.findOne({id: req.params.cart_id});
     if (!cart) return res.sendStatus(404);
     else {
       cart.views++;

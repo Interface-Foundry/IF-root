@@ -76,7 +76,7 @@ var cartsCollection = Waterline.Collection.extend({
     /** @type {integer} the number of times this cart has been #viewed */
     views: {
       type: 'integer',
-      defaultsTo: 0
+      defaultsTo: '0'
     }
   }
 });
