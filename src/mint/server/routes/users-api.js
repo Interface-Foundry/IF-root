@@ -1,5 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
+const randomstring = require('randomstring')
 const dealsDb = require('../deals/deals')
 var db
 const dbReady = require('../../db')
@@ -85,23 +86,41 @@ module.exports = function (router) {
         id: link.id
       }).populate('user')
 
+      logging.info('created this auth link:', link)
+
       if (process.env.NODE_ENV !== 'production') {
         console.log('http://localhost:3000/auth/' + link.id)
       }
 
       console.log('inside login', currentUser.name || email)
 
+      // check to see if this user already has auth links and if so destroy them
+      yield db.AuthenticationLinks.destroy({
+        id: {'not': link.id},
+        user: user.id
+      });
+
+      // generate magic code here
+      var code = randomstring.generate({
+        length: 6,
+        readable: true,
+        capitalization: 'uppercase'
+      })
+      logging.info('code:', code)
+
+      // add code to auth link
+      link.code = code;
+      yield link.save();
+
       var loginEmail = yield db.Emails.create({
         recipients: email,
-        subject: 'Log in to Kip'
+        subject: `Log in to Kip: ${code}`
       })
 
       loginEmail.template('login_email', {
         link,
         username: currentUser.name || email
       })
-
-
 
       yield loginEmail.send()
       res.send({
