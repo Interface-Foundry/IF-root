@@ -1,11 +1,17 @@
 // react/reducers/cards.js
 
-import { RECEIVE_CARDS, SELECT_CARD, REMOVE_CARD, RECEIVE_SEARCH, CLEAR_ITEM, RECEIVE_CATEGORY} from '../constants/ActionTypes';
+import { RECEIVE_CARDS, RECEIVE_CART, SELECT_CARD, REMOVE_CARD, RECEIVE_SEARCH, CLEAR_ITEM, RECEIVE_CATEGORY} from '../constants/ActionTypes';
 
 const initialState = { cards: [], position: null };
 
 export default function kipForm(state = initialState, action) {
   switch (action.type) {
+  case RECEIVE_CART:
+    return { 
+      ...state,     
+      type: 'categories',
+      cards: []
+    };
   case CLEAR_ITEM:
     return { 
       ...state,     
