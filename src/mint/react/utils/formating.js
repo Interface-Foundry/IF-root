@@ -10,14 +10,14 @@ export const commaSeparateNumber = (val, loc = undefined, opts = { maximumFracti
   return val.toLocaleString(loc, opts);
 };
 
-export const displayCost = (val, loc = undefined, opts) => {
-  opts = {
+export const displayCost = (val, currency) => {
+  const opts = {
     maximumFractionDigits: 2,
     style: 'currency',
-    currency: 'USD',
-    ...opts
+    currency: currency || 'USD'
   };
-  return val.toLocaleString(loc, opts);
+  console.log(opts)
+  return val.toLocaleString({}, opts);
 };
 
 export const getNameFromEmail = email => {

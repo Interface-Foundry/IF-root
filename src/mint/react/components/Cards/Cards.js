@@ -75,19 +75,13 @@ export default class Cards extends Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    const { cards = [], cardType } = this.props;
-    const { cards: nextCards = [], cardType: nextCardType } = nextProps;
-    return ((nextCards.length !== cards.length) || nextCardType !== cardType);
-  }
-
   renderCards() {
-    const { props: { cards = [], cart_id, selectCard, cardType, previewAmazonItem } } = this;
+    const { props: { currentCart, cards = [], cart_id, selectCard, cardType, previewAmazonItem } } = this;
 
     const activeCards = cards.map((card, i) => {
       return <li key={card._id || card.id} onClick={(e) => selectCard(i + 1, card)}>
         {
-          cardType.includes('search')  ? <SearchCard {...card} cart_id={cart_id} index={i}/> : <CategoryCard {...card} cart_id={cart_id} index={i} previewAmazonItem={previewAmazonItem}/>
+          cardType.includes('search')  ? <SearchCard {...card} currentCart={currentCart} cart_id={cart_id} index={i}/> : <CategoryCard {...card} cart_id={cart_id} index={i} previewAmazonItem={previewAmazonItem}/>
         }
       </li>;
     });
@@ -102,24 +96,27 @@ export default class Cards extends Component {
   }
 
   render() {
-    const { renderCards, _scrollHorizontal, props: { cardType, clearItem } } = this,
+    const { renderCards, _scrollHorizontal, props: { cardType, clearItem, storeName } } = this,
     type = cardType || 'categories';
 
+    console.log('inside cards render')
     return (
       <div>
         <ul ref='cards' className={'cards__section'}>
-          <p className='cards__section__breadcrumb'>
-            <span className='cards__section__breadcrumb-type' onClick={() => clearItem()}>
-              {type.includes('search') ? <Icon icon='LeftChevron'/> : _.capitalize(type.split('-search')[0])}
-            </span> 
-            { 
-              type.includes('search') ? <em>
-              &nbsp;
-              <span>
-                {`${getLastSearch()}`}
-              </span> </em> : null
-            }
-          </p>
+          {
+            storeName === 'ypo' ? <p className='cards__section__breadcrumb'>
+              <span className='cards__section__breadcrumb-type' onClick={() => clearItem()}>
+                {type.includes('search') ? <Icon icon='LeftChevron'/> : _.capitalize(type.split('-search')[0])}
+              </span> 
+              { 
+                type.includes('search') ? <em>
+                &nbsp;
+                <span>
+                  {`${getLastSearch()}`}
+                </span> </em> : null
+              }
+            </p> : null
+          }
           <div className='icon left' onClick={() => {
             _scrollHorizontal('left')
           }}>

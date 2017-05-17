@@ -76,6 +76,7 @@ class CartFooter extends Component {
     const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items, isMobile, history: { replace, push } } = this.props;
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
     const total = calculateItemTotal(items);
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'uk' ? 'GBP' : 'USD') : 'GBP' : null;
     if (locked) {
       return (
         <div className='footer__cart'>
@@ -103,7 +104,7 @@ class CartFooter extends Component {
           >
             <button disabled={items.length===0} className='checkout'>
               <Icon icon='Cart'/>
-              <h4>Checkout<br/>{displayCost(total)}</h4>
+              <h4>Checkout<br/>{displayCost(total, locale)}</h4>
             </button>
           </a>
         </div>
@@ -135,7 +136,7 @@ class CartFooter extends Component {
         >
           <button disabled={items.length === 0} className='checkout'>
             <Icon icon='Cart'/>
-            <h4>Checkout<br/>{displayCost(total)}</h4>
+            <h4>Checkout<br/>{displayCost(total, locale)}</h4>
           </button>
         </a>
       </div>
