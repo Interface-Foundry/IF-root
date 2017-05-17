@@ -9,7 +9,7 @@
   right: 0;
   height: 100%;
   width: 100%;
-  background: rgba(white, 0.7);
+  background: rgba(white, 0.9);
   z-index: 10000;
   display: flex;
   align-content: center;
@@ -24,7 +24,7 @@
     border-color: $secondary-button-color;
   }
   .add_to_amazon {
-    background: $kip-secondary-color;
+    background: $kip-primary-color;
     margin: auto;
     padding: $padding;
     box-shadow: $card-box-shadow;
