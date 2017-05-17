@@ -3,11 +3,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CartItem from './CartItem';
-import { AddAmazonItemContainer, CardsContainer } from '../../containers';
+import { AddAmazonItemContainer, CardsContainer, AddressFormContainer } from '../../containers';
 import { Icon } from '..';
 import { calculateItemTotal, displayCost } from '../../utils';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import moment from 'moment';
+import { Route } from 'react-router';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -85,6 +86,7 @@ export default class Cart extends Component {
     let cartItemIndex = items.my.length;
     return (
       <div className='cart'>
+        <Route path={'/cart/:cart_id/address'} exact component={AddressFormContainer}/>
         {
           locked 
           ? <div className='cart__locked'>
@@ -167,7 +169,7 @@ class MyItems extends Component {
   render() {
     const { props: { items, user_account, currentCart: { locked } } } = this,
     total = calculateItemTotal(items);
-    
+
     return (
       <ul>
         {items.length ? <div className='cart__items__title'>{user_account.name} <span> - {items.length} Items</span></div> :null}
@@ -195,7 +197,6 @@ class OtherItems extends Component {
   render() {
     const { props, props: { isLeader, startIndex, member: { items, name, email, id }, currentCart: { locked, name: cartName } } } = this,
     total = calculateItemTotal(items);
-
 
     return (
       <ul>

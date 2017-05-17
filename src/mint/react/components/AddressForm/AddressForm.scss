@@ -1,0 +1,62 @@
+// react/components/AddressForm/AddressForm.scss
+@import '../../styles/Constants';
+.checkout_overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(white, 0.7);
+  z-index: 10000;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  .add_to_amazon {
+    background: $kip-secondary-color;
+    margin: auto;
+    padding: $padding;
+    box-shadow: $card-box-shadow;
+    width: 70%;
+    ul {
+      padding-top: $padding;
+      li {
+        padding: $padding/2;
+        padding-left: 5px;
+        margin-left: $padding;
+        input {
+          border: none;
+          border-bottom: 4px solid $third-button-color;
+          background: transparent;
+          width: 75%;
+          &:invalid {
+            box-shadow: 0 0 3px red;
+          }
+          &:required {
+            box-shadow: none;
+          }
+        }
+        label {
+          font-size: 10px;
+          text-transform: uppercase;
+          font-weight: bold;
+          padding-left: 5px;
+        }
+        button {
+          border: 1px solid $border-color-light;
+          font-weight: 600;
+          cursor: pointer;
+          border: none;
+          background: $main-button-color;
+          font-size: 15px;
+          height: 30px;
+          width: 75%;
+          margin: 0 auto;
+          display: block;
+        }
+      }
+    }
+  }
+}
+

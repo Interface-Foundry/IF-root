@@ -375,11 +375,12 @@ module.exports = function (router) {
    *
    * @apiParamExample Request
    * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b {
+   *   "full_name": 'Chris Barry',
    *   "line_1": '2222 Fredrick Douglass Blvd',
    *   "line_2": "Apt 2B",
    *   "city": "New York",
-   *   "state": 'NY',
-   *   "zip": 94306,
+   *   "region": 'NY',
+   *   "code": 94306,
    *   "country": 'USA',
    *   "user_account": user_id
    * }

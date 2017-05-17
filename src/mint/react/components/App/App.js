@@ -3,7 +3,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-import ReactDOM from 'react-dom';
 
 import { CartContainer, CartStoresContainer } from '../../containers';
 import { Overlay, Modal, Toast, ErrorPage, Popup } from '..';
@@ -66,7 +65,7 @@ export default class App extends Component {
   componentWillMount() {
     const { props: { fetchCart, fetchAllCarts, cart_id, history: { replace } } } = this;
     if (cart_id) fetchCart(cart_id)
-      .then(cart => { console.log({ cart });!cart ? replace('/404') : null });
+      .then(cart => !cart ? replace('/404') : null);
     fetchAllCarts();
   }
 
@@ -150,6 +149,7 @@ export default class App extends Component {
 
                   { /* Renders cart when route permits */ }
                   <Route path={'/cart/:cart_id'} exact component={CartContainer} />
+                  <Route path={'/cart/:cart_id/address'} exact component={CartContainer} />
 
                   { /* Renders cart choice if theres no store set */}
                   <Route path={'/newcart'} exact component={CartStoresContainer} />

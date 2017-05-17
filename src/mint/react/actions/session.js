@@ -89,7 +89,6 @@ export function login(cart_id, email) {
       });
 
       return dispatch(receiveUpdate(await response.json()));
-      debugger
       return dispatch(receiveUpdate({
         user_account: {},
         animal: '',

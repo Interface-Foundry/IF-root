@@ -1,6 +1,7 @@
 // mint/react/components/index.js
 export AddAmazonItem from './AddAmazonItem';
 export AmazonForm from './AmazonForm';
+export AddressForm from './AddressForm';
 export App from './App';
 export Cart from './Cart';
 export CartStore from './CartStore';

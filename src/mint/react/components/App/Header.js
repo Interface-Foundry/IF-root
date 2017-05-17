@@ -76,6 +76,10 @@ export default class Header extends Component {
             <CartHead text={'Edit Cart'} {...props}/>
           }
         />
+        <Route path={'/cart/:cart_id/address'} exact component={() => 
+            <CartHead text={'Edit Cart'} {...props}/>
+          }
+        />
       </nav>
     );
   }
