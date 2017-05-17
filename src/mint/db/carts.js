@@ -1,6 +1,7 @@
 var Waterline = require('waterline');
 var uuid = require('uuid');
 var constants = require('../server/constants.js');
+var archive = require('./cold_storage')
 
 /**
  * Session collection is the database side of the node-client-session cookie
@@ -44,6 +45,12 @@ var cartsCollection = Waterline.Collection.extend({
     locked: 'boolean',
 
     /**
+     * If archived, the cart will not show up in user's side bar
+     * @type {String}
+     */
+    archived: 'boolean',
+
+    /**
      * Cloudinary url
      * @type {String}
      */
@@ -77,7 +84,9 @@ var cartsCollection = Waterline.Collection.extend({
     views: {
       type: 'integer',
       defaultsTo: '0'
-    }
+    },
+  
+    archive: archive
   }
 });
 

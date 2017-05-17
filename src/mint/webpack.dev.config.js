@@ -27,7 +27,7 @@ module.exports = {
     new webpack.ProgressPlugin(),
     new webpack.optimize.CommonsChunkPlugin({ name: 'common' }),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+      'process.env.NODE_ENV': JSON.stringify('development')
     })
   ],
   module: {

@@ -5,10 +5,117 @@
 	position: relative;
 	text-align: center;
 	background: mix(white, $primaryColor, 97%);
-	padding: $padding*25 $padding*2 0;
+	padding: $padding*10 $padding*2 0;
 
 	@media only screen and (max-width: 600px) {
-		padding: $padding*3 $padding*2 $padding*6;
+		padding: $padding*5 $padding*2 $padding*6;
+	}
+
+	.services__comparison {
+		max-width: 750px;
+		padding: $padding 0 $padding*10;
+		ul {
+			display: inline-block;
+
+			&.kip {
+				li {
+					background: #d3eff7;
+				}
+			}
+
+			li {
+				position: relative;
+				height: $ribbonHeight;
+				width: 100%;
+				border-bottom: 1px solid #d8d8d8;
+				font-size: 3vw;
+				height: 50px;
+				padding: $padding*1.5 $padding*2;
+
+			    p {
+			    	color: #42403f;
+					vertical-align: middle;
+			    }
+
+			    @media only screen and (max-width: 600px) {
+			    	padding: 0;
+			    }
+
+			    &.accessability {
+			    	padding: 12.5px;
+			    	height: 75px;
+			    	font-size: 0;
+
+			    	@media only screen and (max-width: 600px) {
+			    		padding: 10px 0;
+			    		height: 65px;
+			    	}
+			    	svg {
+			    		display: inline-block;
+			    		width: 25px;
+			    		margin: 0 6.5%;
+			    		height: 25px;
+			    		display: inline-block;
+			    		@media only screen and (max-width: 600px) {
+			    			width: 15px;
+			    			height: 20px;
+			    		}
+			    	}
+			    }
+
+			    svg {
+			    	display: block;
+					width: 25px;
+					height: 25px;
+					margin: 0 auto;
+					fill: #ee4047;
+					@media only screen and (max-width: 600px) {
+		    			height: 100%;
+    				}
+			    }
+
+			    &.true {
+			    	svg {
+			    		fill: #91d158;
+			    	}
+			    }
+
+			    &:first-of-type {
+			    	background: transparent;
+					background-size: 75px;
+					background-position: center;
+					background-repeat: no-repeat;
+
+					@media only screen and (max-width: 600px) {
+						background-size: 50px;
+					}
+			    }
+			}
+
+			&:first-of-type {
+				li {
+					text-align: left;
+					@media only screen and (max-width: 600px) {
+						padding: 5px;
+
+						p {
+							font-size: 10px;
+							text-overflow: ellipsis;
+							overflow: hidden;
+						}
+					}
+				}
+			}
+
+			&:last-of-type {
+				li {
+					background-size: 150px;
+					@media only screen and (max-width: 600px) {
+						background-size: 75px;
+					}
+				}
+			}
+		}
 	}
 
 	h1 {

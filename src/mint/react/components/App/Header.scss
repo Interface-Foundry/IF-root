@@ -6,7 +6,9 @@
   line-height: $nav-height;
   font-family: 'Raleway';
   text-align: left;
-  background: darken($kip-secondary-color, 6%);
+  background: $secondary-button-color;
+  color: white;
+  border-bottom: 1px solid $border-color-light;
   @media (min-width: 900px) {
     padding: 0;
   }
@@ -67,8 +69,15 @@
     padding: 0 $padding;
     p {
       padding: 0;
-      height: 40px;
+      line-height: 50px;
       font-weight: bold;
+      margin-right: $padding;
+      cursor: pointer;
+      span {
+        border-bottom: 3px solid $main-button-color;
+      }
+    }
+    a {
       border-bottom: 3px solid $main-button-color;
     }
     .navbar__icon {
@@ -92,12 +101,15 @@
       color: $header-color;
       border-bottom: 1px solid $border-color-light;
       padding: 0;
+
+      span {
+        border-bottom: 1px solid $secondary-button-color;;
+      }
     }
     .navbar__modal_head {
       flex-grow: 1;
       text-align: center;
       &.settings {
-        text-align: right;
         padding: 0 $padding*2 0 0;
         svg {
           font-size: 20px;
@@ -109,6 +121,11 @@
       }
       span {
         border-bottom: 3px solid $secondary-button-color;
+        max-width: 150px;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
   }

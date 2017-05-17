@@ -5,6 +5,19 @@ import React, { Component } from 'react';
 import { Icon } from '../../themes';
 
 export default class Ribbon extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    // need this, otherwise page always rerender every scroll
+    if(
+        nextProps.fixed !== this.props.fixed ||
+        nextProps.currentUser !== this.props.currentUser ||
+        nextProps.src !== this.props.src 
+      ) {
+      return true;
+    }
+
+    return false
+  }
+
   render() {
     const { fixed, _toggleSidenav, _toggleModal, currentUser, src } = this.props;
     return (
@@ -41,7 +54,7 @@ export default class Ribbon extends Component {
           {
             currentUser ? null : ( src !== 'slack' ? <div className="right row row-1 action2">
                 <a href='/newcart'><button>
-                  Try Kip For Free
+                  Create New Cart
                 </button></a>
               </div> : <div className="right row row-1 action2">
                   <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button>

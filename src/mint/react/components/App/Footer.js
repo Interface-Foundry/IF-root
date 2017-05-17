@@ -73,10 +73,10 @@ class CartFooter extends Component {
   }
 
   render() {
-    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items, isMobile, history: { replace } } = this.props;
+    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items, isMobile, history: { replace, push } } = this.props;
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
     const total = calculateItemTotal(items);
-
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'uk' ? 'GBP' : 'USD') : 'GBP' : null;
     if (locked) {
       return (
         <div className='footer__cart'>
@@ -90,16 +90,21 @@ class CartFooter extends Component {
             onClick={
               (e) => { 
                 e.preventDefault(); 
-                if (items.length > 0) { 
-                  if(isLeader) updateCart({...currentCart, locked: !currentCart.locked});
-                  window.open(`/api/cart/${cart_id}/checkout`);
+                if (items.length > 0) {
+                  if(currentCart.store === 'ypo'){
+                    push(`/cart/${currentCart.id}/address`)
+                  }
+                  else {
+                    if(isLeader) updateCart({...currentCart, locked: !currentCart.locked});
+                    window.open(`/api/cart/${cart_id}/checkout`);
+                  }
                 }
               }
             }
           >
             <button disabled={items.length===0} className='checkout'>
               <Icon icon='Cart'/>
-              <h4>Checkout<br/>{displayCost(total)}</h4>
+              <h4>Checkout<br/>{displayCost(total, locale)}</h4>
             </button>
           </a>
         </div>
@@ -117,16 +122,21 @@ class CartFooter extends Component {
           onClick={
             (e) => { 
               e.preventDefault(); 
-              if (items.length > 0) { 
-                if(isLeader) updateCart({...currentCart, locked: true});
-                window.open(`/api/cart/${cart_id}/checkout`);
-              }
+              if (items.length > 0) {
+                  if(currentCart.store === 'ypo'){
+                    push(`/cart/${currentCart.id}/address`)
+                  }
+                  else {
+                    if(isLeader) updateCart({...currentCart, locked: !currentCart.locked});
+                    window.open(`/api/cart/${cart_id}/checkout`);
+                  }
+                }
             }
           }
         >
           <button disabled={items.length === 0} className='checkout'>
             <Icon icon='Cart'/>
-            <h4>Checkout<br/>{displayCost(total)}</h4>
+            <h4>Checkout<br/>{displayCost(total, locale)}</h4>
           </button>
         </a>
       </div>
@@ -147,15 +157,15 @@ class ItemFooter extends Component {
   }
 
   render() {
-    const { removeDeal, addItem, item_id, position, cart_id, currentUser, history: { replace, location: { pathname } } } = this.props,
+    const { removeDeal, addItem, _togglePopup, item_id, position, cart_id, clearItem, currentUser, history: { replace, location: { pathname } } } = this.props,
       removeItem = pathname.includes('deal');
 
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
         { !!currentUser.id ? 
-          <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> 
-          : <button className='add triple' onClick={() => {replace(`/cart/${cart_id}/m/signin`)}}>✓ Save to Cart</button> 
+          <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); clearItem(); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> 
+          : <button className='add triple' onClick={() => _togglePopup()}>✓ Save to Cart</button> 
         }
       </footer>
     );

@@ -1,5 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
+const randomstring = require('randomstring')
 const dealsDb = require('../deals/deals')
 var db
 const dbReady = require('../../db')
@@ -45,7 +46,7 @@ module.exports = function (router) {
    */
   router.get('/login', (req, res) => co(function * () {
     const currentUser = _.get(req, 'UserSession.user_account', {})
-    const email = req.query.email.trim().toLowerCase()
+    const email = decodeURIComponent(req.query.email.trim().toLowerCase())
 
     // if the user is already logged in as this email address we can reply right away
     if (currentUser.email_address === req.query.email) {
@@ -85,23 +86,41 @@ module.exports = function (router) {
         id: link.id
       }).populate('user')
 
+      logging.info('created this auth link:', link)
+
       if (process.env.NODE_ENV !== 'production') {
         console.log('http://localhost:3000/auth/' + link.id)
       }
 
       console.log('inside login', currentUser.name || email)
 
+      // check to see if this user already has auth links and if so destroy them
+      yield db.AuthenticationLinks.destroy({
+        id: {'not': link.id},
+        user: user.id
+      });
+
+      // generate magic code here
+      var code = randomstring.generate({
+        length: 6,
+        charset: 'numeric'
+      })
+      logging.info('code:', code)
+
+      // add code to auth link
+      link.code = code;
+      yield link.save();
+
       var loginEmail = yield db.Emails.create({
         recipients: email,
-        subject: 'Log in to Kip'
+        subject: `Log in to Kip with ${code}`
       })
 
       loginEmail.template('login_email', {
         link,
-        username: currentUser.name || email
+        username: currentUser.name || email.split('@')[0],
+        code: code
       })
-
-
 
       yield loginEmail.send()
       res.send({
@@ -119,13 +138,13 @@ module.exports = function (router) {
    * @apiParam {string} cart_id the cart id
    */
   router.get('/identify', (req, res) => co(function* () {
-    console.log('identify');
+    console.log('identify', req.query)
 
     // Check the cart to see if there's already a leader
     var cart = yield db.Carts.findOne({ id: req.query.cart_id }).populate('leader')
 
     // Find the user associated with this email, if any
-    var email = req.query.email.trim().toLowerCase()
+    var email = decodeURIComponent(req.query.email.trim().toLowerCase())
 
     // check if the user is already identified as this email
     var currentUser = req.UserSession.user_account
@@ -356,11 +375,12 @@ module.exports = function (router) {
    *
    * @apiParamExample Request
    * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b {
+   *   "full_name": 'Chris Barry',
    *   "line_1": '2222 Fredrick Douglass Blvd',
    *   "line_2": "Apt 2B",
    *   "city": "New York",
-   *   "state": 'NY',
-   *   "zip": 94306,
+   *   "region": 'NY',
+   *   "code": 94306,
    *   "country": 'USA',
    *   "user_account": user_id
    * }

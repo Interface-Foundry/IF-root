@@ -9,13 +9,13 @@ var addressesCollection = Waterline.Collection.extend({
     line_1: 'string',
     line_2: 'string',
     city: 'string',
-    state: 'string',
-    zip: 'string',
+    region: 'string',
+    code: 'string',
     country: 'string',
 
     /** Many-to-many relation with user accounts */
     user_account: Waterline.isA('user_accounts')
   }
-})
+});
 
 module.exports = addressesCollection

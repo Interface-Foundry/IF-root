@@ -13,12 +13,16 @@ import {
   RECEIVE_INCREMENT_ITEM,
   RECEIVE_DECREMENT_ITEM,
   RECEIVE_UPDATE_ITEM,
-  REQUEST_SET_STORE
+  REQUEST_SET_STORE,
+  REQUEST_CLEAR_CART,
+  CANCEL_CLEAR_CART,
+  RECEIVE_CLEAR_CART
 } from '../constants/ActionTypes';
 
 const initialState = {
   members: [],
   items: [],
+  oldItems: [],
   addingItem: false
 };
 
@@ -94,6 +98,24 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       store: action.storeType
+    };
+  case REQUEST_CLEAR_CART:
+    return {
+      ...state,
+      items: [],
+      oldItems: state.items
+    };
+  case CANCEL_CLEAR_CART:
+    return {
+      ...state,
+      items: state.oldItems,
+      oldItems: []
+    };
+  case RECEIVE_CLEAR_CART:
+    return {
+      ...state,
+      items: [],
+      oldItems: []
     };
   default:
     return state;

@@ -1,27 +1,28 @@
 var db
 const dbReady = require('../../db')
 const xml2js = require('xml2js')
+const fs = require('fs')
+const _ = require('lodash')
+const path = require('path')
+
+
 
 dbReady.then((models) => { db = models })
 
+/**
+ * Gets the category1 + category2 array .
+ *
+ * @return     {Object}  The categorys array.
+ */
+function getCategorysArray() {
+  const categoryFile = JSON.parse(fs.readFileSync(path.join(__dirname, '../../ingest/categories.json')))
 
-function getCart(argument) {
-    // body...
+  return {
+    category1: _.map(_.flatMap(categoryFile, (category) =>  _.keys(category)), (i) => i.trim().toLowerCase()),
+    category2: _.map(_.keys(categoryFile), (i) => i.trim().toLowerCase())
+  }
 }
-
-function syncCart(argument) {
-    // body...
-}
-
-
-
-function removeItemFromCart(argument) {
-    // body...
-}
-
-function clearCart(argument) {
-    // body...
-}
+const categorysObject = getCategorysArray()
 
 
 /**
@@ -40,6 +41,18 @@ module.exports.addItem = function * (itemId) {
   return item
 }
 
+function * createYpoItem (item) {
+  return yield db.Items.create({
+    store: 'ypo',
+    name: item.name,
+    asin: item.item_code.toString(),
+    description: item.description,
+    price: item.price,
+    thumbnail_url: item.image_url,
+    main_image_url: item.image_url
+  })
+}
+
 /**
  * get info for an item based on description
  *
@@ -47,36 +60,55 @@ module.exports.addItem = function * (itemId) {
  * @return     {Promise}  { description_of_the_return_value }
  */
 module.exports.itemPreview = function * (query) {
-  const items = yield new Promise((resolve, reject) => {
-    db.YpoInventoryItems.native((err, collection) => {
-      if (err) reject(err)
-      else {
-        collection.find({
-          $text: {
-            $search: `\"${query}\"`
-          }
-        }, {
-          createdAt: false,
-          updatedAt: false
-        })
-        .limit(10)
-        .toArray((err, results) => {
-          if (err) reject(err)
-          else resolve(results)
-        });
-      }
-    })
-  })
-  return yield items.map(function * (item) {
-    return yield db.Items.create({
-        store: 'ypo',
-        name: item.name,
-        asin: item.item_code.toString(),
-        description: item.description,
-        price: item.price,
-        thumbnail_url: item.image_url,
-        main_image_url: item.image_url
+  let items
+  logging.info('looking for query: ', query)
+  query = query.trim().toLowerCase()
+  var regexString = new RegExp(["^", query, "$"].join(""), "i");
+
+  if (categorysObject.category2.includes(query)) {
+    logging.info('in cat2: ', query)
+    items = yield db.YpoInventoryItems.find({category_2: regexString}).limit(20)
+  }
+
+  else if (categorysObject.category1.includes(query)) {
+    logging.info('in cat1: ', query)
+    items = yield db.YpoInventoryItems.find({category_1: regexString}).limit(20)
+  }
+
+
+  // see if they pasted url or itemcode and just return that item
+  else if (query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
+    const itemCode = query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)[0]
+    item = yield db.YpoInventoryItems.findOne({item_code: itemCode})
+    return yield createYpoItem(item)
+  }
+
+  // search by text index stuff
+  else {
+    items = yield new Promise((resolve, reject) => {
+      db.YpoInventoryItems.native((err, collection) => {
+        if (err) reject(err)
+        else {
+          collection.find({
+            $text: {
+              $search: `\"${query}\"`
+            }
+          }, {
+            createdAt: false,
+            updatedAt: false
+          })
+          .limit(10)
+          .toArray((err, results) => {
+            if (err) reject(err)
+            else resolve(results)
+          });
+        }
       })
+    })
+  }
+
+  return yield items.map(function * (item) {
+    return yield createYpoItem(item)
   })
 }
 

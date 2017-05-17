@@ -53,11 +53,11 @@ export default class Header extends Component {
           }
         />
         <Route path={'/cart/:cart_id/m/signin'} exact component={() => 
-            <IntroHead text={'Create New Cart'} {...props}/>
+            <IntroHead text={'Add Item to Cart'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/settings'} exact component={() => 
-            <SettingsHeader text='Settings' icon="Settings" {...props}/>
+            <SettingsHeader text='Edit My Settings' icon="Settings" {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/feedback'} exact component={() => 
@@ -73,6 +73,10 @@ export default class Header extends Component {
           }
         />
         <Route path={'/cart/:cart_id'} exact component={() => 
+            <CartHead text={'Edit Cart'} {...props}/>
+          }
+        />
+        <Route path={'/cart/:cart_id/address'} exact component={() => 
             <CartHead text={'Edit Cart'} {...props}/>
           }
         />
@@ -103,7 +107,7 @@ class CartHead extends Component {
   render() {
     const {
       state: { bounce },
-      props: { currentUser: { name }, _toggleSidenav, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members } }
+      props: { currentUser: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader } }
     } = this;
 
     return (
@@ -122,11 +126,12 @@ class CartHead extends Component {
           <h3>
             {locked ? 'Checkout in Progress' : cartName}
           </h3>
-          <span className='members'>{`${members.length} Members`}</span>
+          <span className='members'>Created by: {leader ? leader.name : ''} </span>
           </a>
         </div>
-        <div className='header__right' onClick={_toggleSidenav}>
-          {isMobile ? <div className='navbar__icon'><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
+        <div className='header__right'>
+          {!name ? <p onClick={() => _togglePopup()}><span>Login</span></p> : null}
+          {isMobile && name ? <div className='navbar__icon' onClick={_toggleSidenav}><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
         </div>
       </div>
     );
@@ -194,11 +199,11 @@ class EnumeratedHead extends Component {
     const { cart_id, length, type, history: { replace, location: { pathname } }, text } = this.props,
       itemIndex = parseInt(pathname.match(/\/(\d+)\//i)[1]) + 1,
       query = pathname.match(/\/\d\/(.+)$/i)[1],
-      title = type === 'search' ? `"${query}"` : text;
+      title = type === 'search' ? `${decodeURIComponent(query)}` : text;
     return (
       <div className='navbar__modal'>
         <div className='navbar__icon__close' onClick={() => replace(`/cart/${cart_id}/`)}>
-          <Icon icon='Clear'/>
+          <Icon icon='LeftChevron'/>
         </div>
         <h3 className='navbar__modal_head'>
           <span>{title}</span> - {itemIndex} of {length} {type === 'search' ? 'results' : null}
@@ -225,7 +230,7 @@ class SettingsHeader extends Component {
         </div>
         <h3 className='navbar__modal_head settings'>
           <Icon icon={icon}/>
-          {text}
+          <span className='underline'>{text}</span>
         </h3>
       </div>
     );

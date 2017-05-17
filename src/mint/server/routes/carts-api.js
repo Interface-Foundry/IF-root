@@ -1,13 +1,11 @@
 const co = require('co')
 const _ = require('lodash')
-const moment = require('moment')
 const url = require('url')
 const amazonScraper = require('../cart/scraper_amazon')
 const amazon = require('../cart/amazon_cart')
 const cartUtils = require('../cart/cart_utils')
 const camel = require('../deals/deals')
 const googl = require('goo.gl')
-const fs = require('co-fs')
 const path = require('path')
 const haversine = require('haversine')
 const stable = require('stable')
@@ -323,7 +321,7 @@ module.exports = function (router) {
    * @apiParamExample Request
    * DELETE https://mint.kipthis.com/api/cart/123456/clear
    */
-   router.get('/cart/:cart_id/clear', (req, res) => co(function * () {
+   router.delete('/cart/:cart_id/clear', (req, res) => co(function * () {
      // only leaders have sudo rm -rf permission
      const cart = yield db.Carts.findOne({
        id: req.params.cart_id
@@ -337,6 +335,36 @@ module.exports = function (router) {
      res.status(200).end()
    }))
 
+  /**
+  * @api {delete} /api/cart/:cart_id/clear Delete
+  * @apiDescription archive, delete, cold storage, whatever, just make it so that no user can ever see it again.
+  * @apiGroup Carts
+  * @apiParam {string} :cart_id cart to delete
+  *
+  * @apiParamExample Request
+  * DELETE https://mint.kipthis.com/api/cart/123456
+  */
+  router.delete('/cart/:cart_id', (req, res) => co(function * () {
+    // only leaders have sudo rm -rf permission
+    const cart = yield db.Carts.findOne({
+      id: req.params.cart_id
+    }).populate('leader').populate('items')
+
+    console.log(cart)
+
+    // if the cart doesn't exist, neat. congrats.
+    if (!cart) {
+      res.status(200).end()
+    }
+
+    if (_.get(req, 'UserSession.user_account.id') !== _.get(cart, 'leader.id')) {
+      throw new Error('Unauthorized, only cart leader can clear cart items')
+    }
+
+    // archive the cart
+    yield cart.archive()
+    res.status(200).end()
+  }))
 
   /**
    * @api {delete} /api/cart/:cart_id/item/:item_id Delete Item
@@ -604,13 +632,15 @@ module.exports = function (router) {
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
     // logging.info('populated cart', cart);
+
+
     try {
       yield cartUtils.checkout(cart, req, res)
     } catch (err) {
       throw new Error('Error on checkout', err)
     }
-    // send receipt email
-    yield cartUtils.sendReceipt(cart, req.UserSession.user_account)
+
+    yield cartUtils.sendReceipt(cart, req)
   }))
 
 
@@ -694,7 +724,7 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/categories gets a list of item categories
+   * @api {get} /api/categories/:cart_id gets a list of item categories
    * @apiDescription Retrieves a JSON of item categories -- currently just from a file for YPO
    * @apiGroup Carts
    * @apiParam {String} :cart_id the cart id

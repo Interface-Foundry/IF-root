@@ -11,6 +11,8 @@ const mapStateToProps = (state, ownProps) => ({
   isDropdown: ownProps.isDropdown,
   cards: state.cards.cards,
   cardType: state.cards.type,
+  storeName: state.currentCart.store,
+  currentCart: state.currentCart,
   cart_id: state.currentCart.cart_id,
   position: state.cards.position
 });

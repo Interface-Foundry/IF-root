@@ -15,7 +15,7 @@ var dailyDealsJob = require('./deals/send-daily-deals-job')
 
 
 // live reloading
-if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
+if (process.env.BUILD_MODE !== 'prebuilt') {
   const webpackConfig = require('../webpack.dev.config.js');
   const compiler = require('webpack')(webpackConfig);
   app.use(require('webpack-dev-middleware')(compiler, {
@@ -38,6 +38,9 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
 var regularRoutes = require('./routes/regular.js');
 var apiRoutes = require('./routes/api.js');
 var mailRoutes = require('./routes/incoming-mail.js');
+
+// sendgrid router
+var sendgridRouter = require('./sendgrid-webhook.js')
 
 require('colors');
 // require('../camel'); //uncomment to populate camel_items
@@ -118,6 +121,11 @@ if (process.env.LOGGING_MODE === 'database') {
 app.use('/', regularRoutes);
 app.use('/api', apiRoutes);
 app.use('/sendgrid', mailRoutes);
+
+/**
+ * Sendgrid Webhook
+ */
+app.use('/sg', sendgridRouter);
 
 /**
  *  Always return the main index.html, so react-router render the route in the client

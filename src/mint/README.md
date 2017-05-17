@@ -34,14 +34,17 @@ For static.
 * `SEND_EMAILS` - sends emails if set
   * `export SEND_EMAILS=1` or `true` or anything (even `0`) will send emails
   * `export SEND_EMAILS=''` will not send emails
-* `NO_LIVE_RELOAD` - controls whether the webpack stuff runs. I set this when working just on back-end stuff.
 * `NO_LUMINATI` - uses a regular request instead of a proxied request through luminati. only use this as a very last resort. if you need to scrape deals or something, instead of running the scraper locally with `NO_LUMINATI=1` you can ask someone for a db dump of their scraped deals.
 * `SCRAPE_DEALS` - turn on and off the periodic scraping of deals, recommend to leave unset in development and just use a dump of the deals db.
 * `SEND_DAILY_DEALS` - turn on and off the emailing of daily deals to customers.
 * `BASEURL` - the base url used in email links, like `https://www.kipthis.com` or `http://localhost:3000`
 * `LOGGING_MODE` - if set to `database`, will log to the database
 * `LOGGING_LEVEL` - defaults to `info`
+<<<<<<< HEAD
 * `GA` - if set to true, logs to google analytics. MUST EXPLICITLY SET FALSE WHEN RUNNING `yarn build` OR `yarn start` TO DISABLE
+=======
+* `BUILD_MODE` - if set to `prebuilt` then webpack stuff will not be done. Otherwise builds and hot reloads front end assets.
+>>>>>>> fb65ee43c5e52d99f05d62422bc30f0997e2e855
 
 For newbies, if you want to set an environmental variable in your **.bashrc** or **.zshrc** so that it is set every time you open a terminal and for every command run, for all the env vars above you can add a line like this:
 

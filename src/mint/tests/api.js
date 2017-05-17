@@ -179,7 +179,7 @@ describe('api', function () {
     assert.equal(email.cart, cart.id)
     assert.equal(email.recipients, mcTesty.email)
     assert(email.message_html)
-    assert.equal(email.template_name, 'new_cart')
+    assert.equal(email.template_name, 'new_email')
     assert(email.id)
   }))
 
@@ -379,13 +379,28 @@ describe('api', function () {
   }))
 
   it('GET /api/cart/:cart_id/clear should clear all items in the cart', () => co(function * () {
-    var res = yield get('/api/cart/' + mcTesty.cart_id + '/clear')
+    var res = yield del('/api/cart/' + mcTesty.cart_id + '/clear')
 
     // make sure the next time we get the cart all the items are really gone
     var cart = yield get('/api/cart/' + mcTesty.cart_id)
     assert(cart)
     assert.equal(cart.leader.email_address, mcTesty.email)
     assert.equal(cart.items.length, 0, 'should not be any items in the cart now')
+  }))
+
+  it('DELETE /api/cart/:cart_id should archive the cart so that it cannot be found', () => co(function * () {
+    var res = yield del('/api/cart/' + mcTesty.cart_id)
+
+    // make sure it's gone
+    try {
+      var cart = yield get('/api/cart/' + mcTesty.cart_id)
+    } catch (e) {
+      assert(e)
+    }
+
+    // make sure it doesn't show up in the user's cart list
+    var carts = yield get('/api/carts')
+    assert.equal(carts.filter(c => c.id === mcTesty.cart_id).length, 0, 'should not be able to get this cart anymore for the cart list')
   }))
 
   it('POST /api/feedback should save feedback to the db', () => co(function * () {

@@ -1,8 +1,14 @@
 const express = require('express');
 const rp = require('request-promise');
+var co = require('co');
 const sg_const = require('../sg_const');
 
 var router = express.Router();
+
+var db;
+const dbReady = require('../db');
+dbReady.then((models) => { db = models; })
+  .catch(e => console.error(e));
 
 // //test route
 // router.get('/test', function (req, res) {
@@ -11,10 +17,12 @@ var router = express.Router();
 // });
 
 //route sg will post to
-router.post('/', function (req, res) {
+router.post('/', (req, res) => co(function* () {
+
   console.log('req.body', req.body);
+  yield db.EmailEvents.create(req.body);
   res.send('posted at by sendgrid');
-});
+}));
 
 //~~~~~post request to send-grid api setting up the webhook~~~~~//
 
@@ -36,7 +44,7 @@ var options = {
     group_unsubscribe: 1,
     group_resubscribe: 1,
     spamreport: 1,
-    url: "https://533179ca.ngrok.io/sg"
+    url: process.env.SENDGRID_WEBHOOK
   }
 };
 
