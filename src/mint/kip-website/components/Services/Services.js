@@ -4,9 +4,19 @@ import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
 
+import {
+  Facebook,
+  Outlook,
+  Chrome,
+  SlackIcon,
+  Gmail,
+  Apple,
+  GooglePlay
+} from '../../themes';
+
 const comparisonArray = [
 	{
-		name: null,
+		nameSrc: null,
 		order: true,
 		budget: true,
 		tracking: true,
@@ -16,33 +26,33 @@ const comparisonArray = [
 		pricing: null
 	},
 	{
-		name: 'Kip',
+		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_kip.svg',
 		order: true,
 		budget: true,
 		tracking: true,
 		vendors: true,
 		noSignup: true,
-		accessability: ['Facebook', 'Email', 'Slack', 'Outlook', 'Chrome'],
+		accessability: [Facebook, Gmail, SlackIcon, Outlook, Chrome],
 		pricing: 'FREE'
 	},
 	{
-		name: 'Hivy',
+		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_hivy.svg',
 		order: true,
 		budget: true,
 		tracking: false,
 		vendors: false,
 		noSignup: false,
-		accessability: ['Slack', 'Apple'],
+		accessability: [SlackIcon, Apple],
 		pricing: 'Credit Card Required'
 	},
 	{
-		name: 'Hivy',
+		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_q.svg',
 		order: true,
 		budget: false,
 		tracking: false,
 		vendors: true,
 		noSignup: false,
-		accessability: ['Google', 'Apple'],
+		accessability: [GooglePlay, Apple],
 		pricing: 'Credit Card Required'
 	}
 ]
@@ -56,30 +66,34 @@ export default class About extends Component {
 
 					<div className="col-12 row-1 services__comparison">
 						{
-							comparisonArray.map((app) => {
-								if(!app.name) return (
-									<ul className="app col-3 row-1">
+							comparisonArray.map((app, i) => {
+								if(!app.nameSrc) return (
+									<ul key={i} className="app col-3 row-1">
 										<li></li>
-										<li>Order Management</li>
-										<li>Budget Setting</li>
-										<li>Track Orders</li>
-										<li>Multiple Vendors</li>
-										<li>No Signup <br/> No Download</li>
-										<li>Accessibility</li>
-										<li>Pricing</li>
+										<li><p>Order Management</p></li>
+										<li><p>Budget Setting</p></li>
+										<li><p>Track Orders</p></li>
+										<li><p>Multiple Vendors</p></li>
+										<li><p>No Signup/Download</p></li>
+										<li className='accessability'><p>Accessibility</p></li>
+										<li><p>Pricing</p></li>
 									</ul>
 								)
 
 								return (
-									<ul className="app col-3 row-1">
-										<li>{app.name}</li>
-										<li>{app.order}</li>
-										<li>{app.budget}</li>
-										<li>{app.tracking}</li>
-										<li>{app.vendors}</li>
-										<li>{app.noSignup}</li>
-										<li>{app.accessability[0]}</li>
-										<li>{app.pricing}</li>
+									<ul key={i} className={`app col-3 row-1 ${i === 1 ? 'kip' : ''}`}>
+										<li style={{backgroundImage: `url(${app.nameSrc})`}}></li>
+										<li className={app.order}>{app.order ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className={app.budget}>{app.budget ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className={app.tracking}>{app.tracking ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className={app.vendors}>{app.vendors ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className={app.noSignup}>{app.noSignup ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
+										<li className='accessability'>{
+											app.accessability.map((Svg, i) => {
+												return <Svg key={i}/>
+											})
+										}</li>
+										<li><p>{app.pricing}</p></li>
 									</ul>
 								)
 							})

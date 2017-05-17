@@ -21,7 +21,8 @@ import {
 	IoLogOut,
 	IoLogIn,
 	IoSocialFacebook,
-	IoSocialTwitter
+	IoSocialTwitter,
+	IoCheckmark
 } from 'react-icons/lib/io'
 
 import {
@@ -51,6 +52,8 @@ export default class Icon extends Component {
 				return <IoPlus/>
 			case 'Clear':
 				return <IoClose/>
+			case 'Check':
+    			return <IoCheckmark/>
 			case 'Up':
 				return <IoChevronUp/>
 	        case 'Down':

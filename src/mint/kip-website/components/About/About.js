@@ -2,8 +2,6 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 
-import { Icon } from '../../themes';
-
 import {
   Burger,
   Clock,
@@ -48,8 +46,8 @@ export default class About extends Component {
     return (
       <div className="about"> 
         {
-          icons.map((Icon, key) => {
-            return <div key={key} style={{width: `${Math.floor(Math.random() * (40 - 15)) + 15}%`}} className={`icon`}><Icon/></div>
+          icons.map((Component, i) => {
+            return <div key={i} style={{width: `${Math.floor(Math.random() * (40 - 15)) + 15}%`}} className={`icon`}><Component/></div>
           })
         }           
         <div className={`image gif-${animationState}`} style={{ backgroundImage: animationState > -2 ? `url(https://storage.googleapis.com/kip-random/website/kip_star.gif?dummy=${randomGifCacheNumber})` : null }}/>

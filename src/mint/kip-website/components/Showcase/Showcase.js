@@ -19,7 +19,7 @@ import {
   Pizza
 } from '../../themes/kipsvg';
 import {
-  OfficeOutline
+  OfficeOutline,
 } from '../../themes';
 
 const rows = [
