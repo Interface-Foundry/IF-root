@@ -24,6 +24,103 @@ router.get('/', (req, res) => co(function* () {
 }));
 
 /**
+ * @api {post} /auth/quick/:code single-use login code
+ * @apiDescription Logs someone in via single-use code and then redirects them to a cart or something
+ * @apiGroup HTML
+ * @apiParam {string} :code six-digit single-use login code
+ */
+router.post('/auth/quick/:code', (req, res) => co(function * () {
+  var email = req.body.email;
+  var realUser = yield db.UserAccounts.findOne({email_address: email});
+
+  if (!realUser) return res.status(404).end()
+
+  var realLink = yield db.AuthenticationLinks.findOne({
+    user: realUser.id,
+    code: {
+      'not': null
+    }
+  })
+
+  var link = yield db.AuthenticationLinks.findOne({code: req.params.code}).populate('user').populate('cart')
+  if (!link || !link.user || realLink.id != link.id) {
+    //augment counter for link actually associated w/ that email
+    if (realLink) {
+      realLink.attempts++;
+      logging.info('bad attempt');
+      yield realLink.save()
+
+      if (realLink.attempts >= 5) {
+        //if there have been too many attempts, scrap the code and tell the front-end
+        realLink.code = null;
+        realLink.attempts = 0;
+        yield realLink.save();
+        logging.info('too many attempts')
+        return res.send({
+          ok: false,
+          newAccount: false,
+          status: 'TOO_MANY_ATTEMPTS',
+          message: 'user has attempted to log in too many times',
+        });
+      }
+    }
+
+    logging.info('we are done here');
+    return res.status(404).end()
+  }
+
+  // check if the user is already identified, as this email
+  var currentUser = req.UserSession.user_account
+  if (!currentUser) {
+    // no current user defined, so we can log them in
+    req.UserSession.user_account = link.user.id
+    yield req.UserSession.save()
+  } else if (currentUser.id === link.user.id) {
+    // already logged in as this user, so don't do anything
+  } else {
+    // logged in as another user, so log them in as this user
+    req.UserSession.user_account = link.user.id
+    yield req.UserSession.save()
+  }
+  logging.info('logged in')
+  // // redirect if the link has a redirect
+  // if (link.redirect_url) {
+  //   return res.redirect(link.redirect_url)
+  // }
+
+  if (link.cart) {
+    // handle auth link for the /identify way
+    if (!link.cart.leader) {
+      // make the user leader if they aren't already
+      link.cart.leader = link.user.id
+      if (!link.cart.name) {
+         link.cart.name = link.user.email_address.split('@')[0] + "'s Kip Cart"
+      }
+      yield link.cart.save()
+    } else if (link.cart.leader !== link.user.id) {
+      // if there was a different user as leader, this must be a member that is authing, add them as member
+      if (!link.cart.members.includes(link.user.id)) {
+        link.cart.members.add(link.user.id)
+        yield link.cart.save()
+      }
+    }
+  }
+
+  // delete code from link
+  link.code = null;
+  yield link.save();
+
+  // send back actual json like the other routes
+  res.send({
+    ok: true,
+    newAccount: false,
+    status: 'LOG_IN',
+    message: 'user has been logged in via code',
+    user: link.user
+  });
+}))
+
+/**
  * @api {get} /auth/:auth_token MagicLink
  * @apiDescription Logs someone in via link, like forgot password style, then redirects them to a cart or something
  * @apiGroup HTML

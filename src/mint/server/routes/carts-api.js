@@ -761,7 +761,7 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/categories gets a list of item categories
+   * @api {get} /api/categories/:cart_id gets a list of item categories
    * @apiDescription Retrieves a JSON of item categories -- currently just from a file for YPO
    * @apiGroup Carts
    * @apiParam {String} :cart_id the cart id
