@@ -65,12 +65,12 @@ const checkoutHandlers = {
  * @param      {object}  cart    The
  * @param      {object}  res    The res
  */
-exports.checkout = function * (cart, res) {
+exports.checkout = function * (cart, req, res) {
   if (cart.store === undefined) {
     throw new Error('Store required for checkout')
   }
 
-  yield checkoutHandlers[cart.store](cart, res)
+  yield checkoutHandlers[cart.store](cart, req, res)
 }
 
 

@@ -11,6 +11,10 @@ const asinCache = LRU({
 var amazonScraper = require('./scraper_amazon');
 var emoji = require('../utilities/emoji_utils');
 
+var db
+const dbReady = require('../../db')
+dbReady.then((models) => { db = models })
+
 // amazon creds -> move to constants later
 const amazonCreds = [{
   'awsId': 'AKIAIQWK3QCI5BOJTT5Q',
@@ -434,66 +438,70 @@ exports.syncAmazon = function * (cart) {
  * @param      {object}  cart    the cart object
  * @return     {response}  the response
  */
-exports.checkout = function * (cart) {
+exports.checkout = function * (cart, req, res) {
+  var cartItems = cart.items;
+
   if (cart.affiliate_checkout_url && cart.locked) {
-      res.redirect(cart.affiliate_checkout_url)
+    res.redirect(cart.affiliate_checkout_url)
+  }
+
+  // make sure the amazon cart is in sync with the cart in our database
+  var amazonCart = yield exports.syncAmazon(cart)
+
+  //send receipt email
+  logging.info('creating receipt...')
+  if (req.UserSession.user_account) {
+    var receipt = yield db.Emails.create({
+      recipients: req.UserSession.user_account.email_address,
+      sender: 'hello@kip.ai',
+      subject: `Kip Receipt for ${cart.name}`,
+      template_name: 'summary_email',
+      unsubscribe_group_id: 2485
+    });
+
+    var userItems = {}; //organize items according to which user added them
+    var items= []
+    var users = []
+    var total = 0;
+    var totalItems = 0;
+    cartItems.map(function (item) {
+      if (!userItems[item.added_by]) userItems[item.added_by] = [];
+      userItems[item.added_by].push(item);
+      logging.info('item', item) //undefined
+      totalItems += Number(item.quantity || 1);
+      total += (Number(item.price) * Number(item.quantity || 1));
+    });
+
+    for (var k in userItems) {
+      var addingUser = yield db.UserAccounts.findOne({id: k});
+      users.push(addingUser.name || addingUser.email_address);
+      items.push(userItems[k]);
     }
 
-    // make sure the amazon cart is in sync with the cart in our database
-    var amazonCart = yield amazon.syncAmazon(cart)
+    yield receipt.template('summary_email', {
+      username: req.UserSession.user_account.name || req.UserSession.user_account.email_address,
+      baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
+      id: cart.id,
+      items: items,
+      users: users,
+      date: moment().format('dddd, MMMM Do, h:mm a'),
+      total: '$' + total.toFixed(2),
+      totalItems: totalItems,
+      cart: cart
+    })
 
-    //send receipt email
-    logging.info('creating receipt...')
-    if(req.UserSession.user_account) {
-      var receipt = yield db.Emails.create({
-        recipients: req.UserSession.user_account.email_address,
-        sender: 'hello@kip.ai',
-        subject: `Kip Receipt for ${cart.name}`,
-        template_name: 'summary_email',
-        unsubscribe_group_id: 2485
-      });
+    yield receipt.send();
+    logging.info('receipt sent')
 
-      var userItems = {}; //organize items according to which user added them
-      var items= []
-      var users = []
-      var total = 0;
-      var totalItems = 0;
-      cartItems.map(function (item) {
-        if (!userItems[item.added_by]) userItems[item.added_by] = [];
-        userItems[item.added_by].push(item);
-        logging.info('item', item) //undefined
-        totalItems += Number(item.quantity || 1);
-        total += (Number(item.price) * Number(item.quantity || 1));
-      });
+  }
 
-      for (var k in userItems) {
-        var addingUser = yield db.UserAccounts.findOne({id: k});
-        users.push(addingUser.name || addingUser.email_address);
-        items.push(userItems[k]);
-      }
-
-      yield receipt.template('summary_email', {
-        username: req.UserSession.user_account.name || req.UserSession.user_account.email_address,
-        baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
-        id: cart.id,
-        items: items,
-        users: users,
-        date: moment().format('dddd, MMMM Do, h:mm a'),
-        total: '$' + total.toFixed(2),
-        totalItems: totalItems,
-        cart: cart
-      })
-
-      yield receipt.send();
-      logging.info('receipt sent')
-
-    }
-
-    // save the amazon purchase url
-    if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
-      cart.amazon_purchase_url = amazonCart.PurchaseURL
-      cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
-      yield cart.save()
-    }
-    // redirect to the cart url
+  // save the amazon purchase url
+  if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
+    cart.amazon_purchase_url = amazonCart.PurchaseURL
+    cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
+    yield cart.save()
+  }
+  // redirect to the cart url
+  res.redirect(cart.affiliate_checkout_url)
+  // redirect to the cart url
 }

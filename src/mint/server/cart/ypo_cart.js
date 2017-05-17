@@ -25,19 +25,6 @@ function clearCart(argument) {
 
 
 /**
- * creat the xml stuff for a cart
- *
- * @param      {<type>}  cartId  The cartesian identifier
- */
-module.exports.checkout = function * (cartId) {
-  const builder = new xml2js.Builder()
-  let cart = yield db.Carts.findOne({_id: cartId})
-  const xml = builder.buildObject(cart)
-  return xml
-}
-
-
-/**
  * çreates item that can be generalized to add to cart
  *
  * @param      {item id}  the item id for ypo item
@@ -94,9 +81,9 @@ module.exports.itemPreview = function * (query) {
 }
 
 /**
- * Creates a cartesian.
+ * create the xml stuff for a cart
  *
- * @param      {<type>}  argument  The argument
+ * @param      {cart}  argument  The argument
  * example out put
  * <?xml version="1.0" encoding="UTF-8" ?>
  * <cart>
@@ -139,7 +126,33 @@ module.exports.itemPreview = function * (query) {
  * </YPO_delivery_details>
  * </cart>
  */
-module.exports.createCart = function * (argument) {
-  // body
+module.exports.checkout = function * (cart, req, res) {
+  // leader not showing up atm
+  const leader = yield db.UserAccounts.findOne({user_id: cart.leader})
+  let cartFinal = {
+    items: cart.items.map(item => {
+      return {
+        'store': item.store,
+        'name': item.name,
+        'code': item.asin,
+        'price': item.price,
+        'quantity': item.quantity,
+        'cart': cart.id
+      }
+    }),
+    cart_id: cart.id,
+    // ordered_by: {
+    //   'username': leader.name,
+    //   'email': leader.email_address
+    // },
+    ypo_delivery_details: {
+      'account_number': 123,
+      'account_name': 'asdf',
+      'address_1': '87 Hurlfield Road'
+    }
+  }
+  const builder = new xml2js.Builder()
+  const xml = builder.buildObject(cartFinal)
+  res.set('Content-Type', 'text/xml');
+  return res.send(xml)
 }
-
