@@ -94,12 +94,11 @@ module.exports = function (router) {
 
       console.log('inside login', currentUser.name || email)
 
-      // check to see if there's already a code on a different link and if so remove it
-      var previousLink = yield db.AuthenticationLinks.findOne({code: {'not': null}});
-      if (previousLink) {
-        previousLink.code = null;
-        yield previousLink.save();
-      }
+      // check to see if this user already has auth links and if so destroy them
+      yield db.AuthenticationLinks.destroy({
+        id: {'not': link.id},
+        user: user.id
+      });
 
       // generate magic code here
       var code = randomstring.generate({
