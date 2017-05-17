@@ -231,11 +231,19 @@ module.exports = function (router) {
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
+    const userId = req.UserSession.user_account.id
 
     // Make sure the cart exists
     const cart = yield db.Carts.findOne({id: req.params.cart_id})
     if (!cart) {
       throw new Error('Cart not found')
+    }
+
+    // make the user leader if no leader exists, otherwise make member
+    if (!cart.leader) {
+      cart.leader = userId
+    } else if (!cart.members.includes(userId)) {
+      cart.members.add(userId)
     }
 
     // Get or create the item, depending on if the user specifed a previewed item_id or a new url
@@ -251,27 +259,19 @@ module.exports = function (router) {
       item = yield db.Items.findOne({id: req.body.item_id})
     } else {
       // Create an item from the url
-      item = yield amazonScraper.scrapeUrl(req.body.url)
+      item = yield cartUtils.addItem(req.body, cart, 1)
     }
-    cart.items.add(item.id)
+
+    cart.items.add(_.get(item, 'id', item._id))
     item.cart = cart.id
 
-    // specify who added it
     logging.info('user id?', req.UserSession.user_account.id)
-    item.added_by = req.UserSession.user_account.id
-    yield item.save()
-
-    // make the user leader if no leader exists, otherwise make member
-    if (!cart.leader) {
-      cart.leader = req.UserSession.user_account.id
-    } else if (!cart.members.includes(req.UserSession.user_account.id)) {
-      cart.members.add(req.UserSession.user_account.id)
-    }
+    item.added_by = userId
 
     // Save all the weird shit we've added to this poor cart.
-    yield cart.save()
+    yield [item.save(), cart.save()]
+    // specify who added it
 
-    // And assuming it all went well we'll respond to the client with the saved item
     return res.send(item)
   }));
 
@@ -423,17 +423,12 @@ module.exports = function (router) {
       throw new Error('Unauthorized')
     }
 
-    if (_.get(req, 'body.store')) {
-      // tbh i dont know if this should just be part of _.merge() below but doing this like so for time being
-      cart.store = req.body.store
-      yield cart.save()
-      return res.send(cart)
-    }
-
     // Can't update some fields with this route
     delete req.body.id
     delete req.body.leader
     delete req.body.items // need to go through post /api/cart/:cart_id/item route
+    delete req.body.store
+    delete req.body.store_locale
 
     _.merge(cart, req.body)
     yield cart.save()
@@ -557,13 +552,14 @@ module.exports = function (router) {
    */
   router.get('/itempreview', (req, res) => co(function * () {
     // parse the incoming text to extract either an asin, url, or search query
-    //
     const q = (req.query.q || '').trim()
     if (!q) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
     }
 
-    const store = _.get(req, 'query.store') ? req.query.store : 'ypo' // <--- CHANGE THIS BACK TO AMAZON IN THE FUTURE, JUST FOR YPO PURPOSES
+
+
+    const store = _.get(req, 'query.store') ? req.query.store : 'amazon'
     const item = yield cartUtils.itemPreview(q, store, (req.query.page || 1), req.query.category)
     res.send(item)
   }))
@@ -578,70 +574,13 @@ module.exports = function (router) {
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
     // logging.info('populated cart', cart);
-    var cartItems = cart.items;
-
-    if (cart.affiliate_checkout_url && cart.locked) {
-      res.redirect(cart.affiliate_checkout_url)
+    try {
+      yield cartUtils.checkout(cart, req, res)
+    } catch (err) {
+      throw new Error('Error on checkout', err)
     }
-
-    // make sure the amazon cart is in sync with the cart in our database
-    var amazonCart = yield amazon.syncAmazon(cart)
-
-    //send receipt email
-    logging.info('creating receipt...')
-    if(req.UserSession.user_account) {
-      var receipt = yield db.Emails.create({
-        recipients: req.UserSession.user_account.email_address,
-        sender: 'hello@kip.ai',
-        subject: `Kip Receipt for ${cart.name}`,
-        template_name: 'summary_email',
-        unsubscribe_group_id: 2485
-      });
-
-      var userItems = {}; //organize items according to which user added them
-      var items= []
-      var users = []
-      var total = 0;
-      var totalItems = 0;
-      cartItems.map(function (item) {
-        if (!userItems[item.added_by]) userItems[item.added_by] = [];
-        userItems[item.added_by].push(item);
-        logging.info('item', item) //undefined
-        totalItems += Number(item.quantity || 1);
-        total += (Number(item.price) * Number(item.quantity || 1));
-      });
-
-      for (var k in userItems) {
-        var addingUser = yield db.UserAccounts.findOne({id: k});
-        users.push(addingUser.name || addingUser.email_address);
-        items.push(userItems[k]);
-      }
-
-      yield receipt.template('summary_email', {
-        username: req.UserSession.user_account.name || req.UserSession.user_account.email_address,
-        baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
-        id: cart.id,
-        items: items,
-        users: users,
-        date: moment().format('dddd, MMMM Do, h:mm a'),
-        total: '$' + total.toFixed(2),
-        totalItems: totalItems,
-        cart: cart
-      })
-
-      yield receipt.send();
-      logging.info('receipt sent')
-
-    }
-
-    // save the amazon purchase url
-    if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
-      cart.amazon_purchase_url = amazonCart.PurchaseURL
-      cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
-      yield cart.save()
-    }
-    // redirect to the cart url
-    res.redirect(cart.affiliate_checkout_url)
+    // send receipt email
+    yield cartUtils.sendReceipt(cart, req.UserSession.user_account)
   }))
 
 

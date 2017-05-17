@@ -124,7 +124,7 @@ class CartFooter extends Component {
             }
           }
         >
-          <button disabled={items.length===0} className='checkout'>
+          <button disabled={items.length === 0} className='checkout'>
             <Icon icon='Cart'/>
             <h4>Checkout<br/>{displayCost(total)}</h4>
           </button>
@@ -141,7 +141,9 @@ class ItemFooter extends Component {
     addItem: PropTypes.func.isRequired,
     history: PropTypes.object,
     position: PropTypes.number,
-    removeDeal: PropTypes.func
+    removeDeal: PropTypes.func,
+    item_id: PropTypes.string,
+    currentUser: PropTypes.object
   }
 
   render() {
@@ -181,11 +183,13 @@ class EditFooter extends Component {
 
 class SettingsFooter extends Component {
   static propTypes = {
-    cart_id: PropTypes.string
+    cart_id: PropTypes.string,
+    history: PropTypes.object,
+    logout: PropTypes.func
   }
 
   render() {
-    const { cart_id, history: { push, replace }, removeItem, logout } = this.props;
+    const { cart_id, history: { replace }, logout } = this.props;
 
     return (
       <footer className='footer__settings'>

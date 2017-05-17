@@ -1,5 +1,7 @@
 var db
 const dbReady = require('../../db')
+const xml2js = require('xml2js')
+
 dbReady.then((models) => { db = models })
 
 
@@ -11,9 +13,7 @@ function syncCart(argument) {
     // body...
 }
 
-function addItemToCart(argument) {
-    // body...
-}
+
 
 function removeItemFromCart(argument) {
     // body...
@@ -21,6 +21,23 @@ function removeItemFromCart(argument) {
 
 function clearCart(argument) {
     // body...
+}
+
+
+/**
+ * çreates item that can be generalized to add to cart
+ *
+ * @param      {item id}  the item id for ypo item
+ */
+module.exports.addItem = function * (itemId) {
+  let item
+  if (itemId.includes('ypo.co.uk')) {
+    itemId = itemId.match(/[0-9]{6}/)[0]
+    item = yield db.YpoInventoryItems.findOne({item_code: itemId})
+  } else {
+    item = yield db.YpoInventoryItems.findOne({_id: itemId})
+  }
+  return item
 }
 
 /**
@@ -50,13 +67,23 @@ module.exports.itemPreview = function * (query) {
       }
     })
   })
-  return items
+  return yield items.map(function * (item) {
+    return yield db.Items.create({
+        store: 'ypo',
+        name: item.name,
+        asin: item.item_code.toString(),
+        description: item.description,
+        price: item.price,
+        thumbnail_url: item.image_url,
+        main_image_url: item.image_url
+      })
+  })
 }
 
 /**
- * Creates a cartesian.
+ * create the xml stuff for a cart
  *
- * @param      {<type>}  argument  The argument
+ * @param      {cart}  argument  The argument
  * example out put
  * <?xml version="1.0" encoding="UTF-8" ?>
  * <cart>
@@ -99,7 +126,33 @@ module.exports.itemPreview = function * (query) {
  * </YPO_delivery_details>
  * </cart>
  */
-module.exports.createCart = function * (argument) {
-  // body
+module.exports.checkout = function * (cart, req, res) {
+  // leader not showing up atm
+  const leader = yield db.UserAccounts.findOne({user_id: cart.leader})
+  let cartFinal = {
+    items: cart.items.map(item => {
+      return {
+        'store': item.store,
+        'name': item.name,
+        'code': item.asin,
+        'price': item.price,
+        'quantity': item.quantity,
+        'cart': cart.id
+      }
+    }),
+    cart_id: cart.id,
+    // ordered_by: {
+    //   'username': leader.name,
+    //   'email': leader.email_address
+    // },
+    ypo_delivery_details: {
+      'account_number': 123,
+      'account_name': 'asdf',
+      'address_1': '87 Hurlfield Road'
+    }
+  }
+  const builder = new xml2js.Builder()
+  const xml = builder.buildObject(cartFinal)
+  res.set('Content-Type', 'text/xml');
+  return res.send(xml)
 }
-

@@ -48,12 +48,31 @@ const itemPreviewHandlers = {
   'ypo': ypo.itemPreview,
 }
 
+const checkoutHandlers = {
+  'amazon': amazon.checkout,
+  'ypo': ypo.checkout
+}
 
 
 /************************************************
  * functions for carts
  ************************************************
  */
+
+/**
+ * checkout for a specified cart
+ *
+ * @param      {object}  cart    The
+ * @param      {object}  res    The res
+ */
+exports.checkout = function * (cart, req, res) {
+  if (cart.store === undefined) {
+    throw new Error('Store required for checkout')
+  }
+
+  yield checkoutHandlers[cart.store](cart, req, res)
+}
+
 
 /**
  * get info for item based on retailer
@@ -78,6 +97,7 @@ exports.itemPreview = function * (query, store, page, category) {
  * @return     {object}  cart - the cart object
  */
 exports.createCart = function * (store) {
+  var locale
   if (store.includes('amazon')) {
     [store, locale] = store.split('_')
   }
@@ -161,7 +181,7 @@ exports.deleteItemFromCart = function * (item, cart, userId) {
 }
 
 /**
- * create item by user in a cart
+ * create item in db.Items for a specified store
  *
  * @param      {string}  itemId  The item identifier/asin
  * @param      {string}          userId  The user identifier
@@ -169,7 +189,7 @@ exports.deleteItemFromCart = function * (item, cart, userId) {
  * @param      {number}          quantity the item quantity
  * @return     {object}          item object that was created
  */
-exports.addItemToCart = function * (itemId, cart, userId, quantity) {
+exports.addItem = function * (itemId, cart, quantity) {
   if (quantity === undefined) {
     quantity = 1
   }
@@ -180,16 +200,8 @@ exports.addItemToCart = function * (itemId, cart, userId, quantity) {
   }
 
   let item = yield addItemHandlers[cart.store](itemId)
-  item.added_by = userId
-  item.cart = cart.id
-  item.quantity = quantity
-
-  cart.items.add(item.id)
-
-  yield [item.save(), cart.save()]
   return item
 }
-
 
 
 
@@ -206,3 +218,60 @@ exports.getRetailer = function (item) {
     throw new Error('Not currently supported')
   }
 };
+
+
+/**
+ * send generic receipt email
+ *
+ * @param      {<type>}  cart         The cartesian
+ * @param      {<type>}  userAccount  The user account
+ * @return     {<type>}  { description_of_the_return_value }
+ */
+exports.sendRecipt = function * (cart, userAccount) {
+  //send receipt email
+  const cartItems = cart.items;
+  logging.info('creating receipt...')
+  if (userAccount) {
+    var receipt = yield db.Emails.create({
+      recipients: userAccount.email_address,
+      sender: 'hello@kip.ai',
+      subject: `Kip Receipt for ${cart.name}`,
+      template_name: 'summary_email',
+      unsubscribe_group_id: 2485
+    });
+
+    var userItems = {}; //organize items according to which user added them
+    var items= []
+    var users = []
+    var total = 0;
+    var totalItems = 0;
+    cartItems.map(function (item) {
+      if (!userItems[item.added_by]) userItems[item.added_by] = [];
+      userItems[item.added_by].push(item);
+      logging.info('item', item) //undefined
+      totalItems += Number(item.quantity || 1);
+      total += (Number(item.price) * Number(item.quantity || 1));
+    });
+
+    for (var k in userItems) {
+      var addingUser = yield db.UserAccounts.findOne({id: k});
+      users.push(addingUser.name || addingUser.email_address);
+      items.push(userItems[k]);
+    }
+
+    yield receipt.template('summary_email', {
+      username: userAccount.name || userAccount.email_address,
+      baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
+      id: cart.id,
+      items: items,
+      users: users,
+      date: moment().format('dddd, MMMM Do, h:mm a'),
+      total: '$' + total.toFixed(2),
+      totalItems: totalItems,
+      cart: cart
+    })
+
+    yield receipt.send();
+    logging.info('receipt sent')
+  }
+}

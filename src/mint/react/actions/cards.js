@@ -22,12 +22,12 @@ export const removeCard = (selectedIndex) => ({
   selectedIndex
 });
 
-export function fetchCards() {
+export function fetchCards(cart_id) {
   return async function (dispatch) {
     dispatch(request());
 
     try {
-      const response = await fetch('/api/categories', {
+      const response = await fetch(`/api/categories/${cart_id}`, {
         credentials: 'same-origin'
       });
 

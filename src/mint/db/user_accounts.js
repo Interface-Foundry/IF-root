@@ -35,7 +35,7 @@ var userAccountCollection = Waterline.Collection.extend({
     },
 
     /**
-     * User's name, if supplied
+     * User's name, if supplied (i.e. username, i.e. the first 1/2 of the email)
      * @type {Object}
      */
     name: {

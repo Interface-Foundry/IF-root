@@ -5,6 +5,7 @@ var addressesCollection = Waterline.Collection.extend({
   connection: 'default',
   migrate: 'safe',
   attributes: {
+    full_name: 'string',
     line_1: 'string',
     line_2: 'string',
     city: 'string',

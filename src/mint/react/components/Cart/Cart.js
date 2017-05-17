@@ -32,7 +32,7 @@ export default class Cart extends Component {
   }
 
   componentWillMount() {
-    const { fetchCards, cards } = this.props;
+    const { fetchCards, cards = [] } = this.props;
     if (cards.length === 0) {
       fetchCards();
     }
@@ -53,10 +53,13 @@ export default class Cart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id, items } = this.props, { leader, addingItem, user_account } = nextProps,
+    const { history: { replace }, fetchCards, cart_id, items, cards } = this.props, { leader, addingItem, user_account } = nextProps,
       cartId = nextProps.cart_id || cart_id;
 
     if (cartId) {
+      if (cards.length === 0) {
+        fetchCards(cartId);
+      }
       if (!user_account.id && !leader) {
         replace(`/cart/${cartId}/m/signin`);
       } else if (!!leader && !addingItem && this.props.addingItem !== addingItem && !!user_account.id) {
@@ -72,7 +75,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, cards, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, history: { push }, locked, updateCart, currentCart, cancelRemoveItem } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
@@ -164,7 +167,7 @@ class MyItems extends Component {
   render() {
     const { props: { items, user_account, currentCart: { locked } } } = this,
     total = calculateItemTotal(items);
-
+    
     return (
       <ul>
         <div className='cart__items__title'>{user_account.name}</div>
@@ -192,6 +195,7 @@ class OtherItems extends Component {
   render() {
     const { props, props: { isLeader, startIndex, member: { items, name, email, id }, currentCart: { locked, name: cartName } } } = this,
     total = calculateItemTotal(items);
+
 
     return (
       <ul>
