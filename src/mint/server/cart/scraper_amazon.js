@@ -38,7 +38,7 @@ function getItemPrice(item, priceType) {
  * @param  {URL} uri a node.js URL object, see https://nodejs.org/docs/latest/api/url.html
  * @return {Promise<Item>} returns an item with the populated options
  */
-module.exports.scrapeUrl = function amazon_scraper (uri) {
+module.exports.scrapeUrl = function amazon_scraper (uri, locale) {
   return co(function * () {
     // Make double sure that we are parsing an amazon.com url
     if (!uri || !uri.match(/amazon.com/)) {
@@ -46,7 +46,7 @@ module.exports.scrapeUrl = function amazon_scraper (uri) {
     }
 
     // Scrape the item
-    var res = yield amazon_cart.getAmazonItem(uri)
+    var res = yield amazon_cart.getAmazonItem(uri, locale)
     var item = yield res2Item(res)
     item.original_link = uri
     yield item.save()
@@ -57,17 +57,21 @@ module.exports.scrapeUrl = function amazon_scraper (uri) {
 /**
  * Scrapes an item from an amazon.com ASIN
  * @param  {string} asin amazon.com asin, should match /^B[\dA-Z]{9}|\d{9}(X|\d)$/
+ * @param {string} locale US, UK, CA
  * @return {Promise<item>}      returns an item with the populated options
  */
-module.exports.scrapeAsin = function (asin) {
+module.exports.scrapeAsin = function (asin, locale) {
   return co(function * () {
     // Make double sure that we are parsing an amazon.com asin
     if (!asin || !asin.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
       throw new Error('Can only handle asins from amazon.com but got "' + asin + '"')
     }
+    if (!locale) {
+      throw new Error('No locale supplied')
+    }
 
     // Scrape the item
-    var res = yield amazon_cart.lookupAmazonItem(asin)
+    var res = yield amazon_cart.lookupAmazonItem(asin, locale)
     var item = yield res2Item(res)
     return item
   })

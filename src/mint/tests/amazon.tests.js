@@ -30,21 +30,21 @@ describe('testing amazon to our cart system', () => {
 
   it('should get item from ItemLookup using url ', function * () {
     this.timeout(3000)
-    var item = yield amazon.getAmazonItem(test_item);
+    var item = yield amazon.getAmazonItem(test_item, 'US');
     expect(item).to.exist;
   })
 
   it('check item price on item with lower cost but higher shipping', function * () {
     // price should be like 26.65 and not lowest price which might
     //  be 21.90 + 9.99 shipping
-    var item = yield amazon.getAmazonItem('https://www.amazon.com/dp/B00I3PN2NQ/')
+    var item = yield amazon.getAmazonItem('https://www.amazon.com/dp/B00I3PN2NQ/', 'US')
     expect(parseInt(item.Item.Offers.Offer.OfferListing.Price.Amount)/100).to.be.above(25)
   })
 
 
   it('create a cart', function * () {
     // var item = yield amazon.getAmazonItem(test_item);
-    var cart = yield amazon.createAmazonCart({asin: 'B010S9N6OO'});
+    var cart = yield amazon.createAmazonCart({asin: 'B010S9N6OO'}, 'US');
     expect(cart).to.exist;
     expect(cart.HMAC).to.exist;
     expect(cart.CartId).to.exist;

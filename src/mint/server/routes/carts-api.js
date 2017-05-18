@@ -656,10 +656,10 @@ module.exports = function (router) {
    */
   router.get('/item/:item_id/clickthrough', (req, res) => co(function * () {
     // get the item
-    var item = yield db.Items.findOne({id: req.params.item_id})
+    var item = yield db.Items.findOne({id: req.params.item_id}).populate('cart')
 
     // let amazon compose a nice link for us
-    var amazonItem = yield amazon.lookupAmazonItem(item.asin)
+    var amazonItem = yield amazon.lookupAmazonItem(item.asin, cart.store_locale)
 
     // handle errors
     if (!_.get(amazonItem, 'Item.DetailPageURL')) {

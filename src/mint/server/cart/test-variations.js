@@ -4,7 +4,7 @@ var asins = {
   laptop: 'B01L8PDMOG'
 }
 co(function * () {
-  var res = yield amazon.lookupAmazonItem(asins.laptop)
+  var res = yield amazon.lookupAmazonItem(asins.laptop, 'US')
   // if (res.Item.ParentASIN && res.Item.ParentASIN !== res.Item.ASIN) {
   //   res = yield amazon.lookupAmazonItem(res.Item.ParentASIN)
   // }

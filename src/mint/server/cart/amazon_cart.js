@@ -44,18 +44,18 @@ const checkError = function (res) {
   }
 }
 
-exports.itemPreview = function * (query, page, category) {
+exports.itemPreview = function * (query, locale, page, category) {
   var item
   if (query.includes('amazon.com')) {
     // probably a url
-    item = yield amazonScraper.scrapeUrl(query)
+    item = yield amazonScraper.scrapeUrl(query, locale)
   } else if (query.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
     // probably an asin
-    item = yield amazonScraper.scrapeAsin(query)
+    item = yield amazonScraper.scrapeAsin(query, locale)
   } else {
     // search query
     // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-    item = yield exports.searchAmazon(query, page, category);
+    item = yield exports.searchAmazon(query, locale, page, category);
   }
   return item
 }
@@ -102,9 +102,9 @@ function checkAmazonItemInCart (item, cart) {
  * @param {string} original_url entered into box or whatever
  * @y just return item title for now
  */
-exports.getAmazonItem = function * (item_identifier) {
+exports.getAmazonItem = function * (item_identifier, locale) {
   var asin = exports.getAsin(item_identifier);
-  var res = yield exports.lookupAmazonItem(asin);
+  var res = yield exports.lookupAmazonItem(asin, locale);
   return res;
 };
 
@@ -135,7 +135,7 @@ exports.searchAmazon = function * (query, locale, page, category) {
 
   logging.info('amazonParams:', amazonParams)
 
-  var results = yield opHelper.execute('ItemSearch', amazonParams);
+  var results = yield opHelpers[locale].execute('ItemSearch', amazonParams);
   if (!results || !results.result.ItemSearchResponse.Items.Item) {
     if (!results) throw new Error('Error on search for query', query);
     else logging.error("Searching " + query + ' yielded no results');
@@ -178,13 +178,16 @@ exports.searchAmazon = function * (query, locale, page, category) {
  * @param {string} asin of item
  * @returns {[type]} [description]
  */
-exports.lookupAmazonItem = function * (asin) {
+exports.lookupAmazonItem = function * (asin, locale) {
   if (!asin) {
     throw new Error('No asin supplied')
   }
+  if (!locale) {
+    throw new Error('No locale supplied')
+  }
 
   // Check if we have run this lookup recently
-  const cachedValue = asinCache.get(asin)
+  const cachedValue = asinCache.get(asin + locale)
   if (cachedValue) {
     return cachedValue
   }
@@ -196,7 +199,7 @@ exports.lookupAmazonItem = function * (asin) {
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews'
   };
   try {
-    var results = yield opHelper.execute('ItemLookup', amazonParams)
+    var results = yield opHelpers[locale].execute('ItemLookup', amazonParams)
   } catch (err) {
     console.error(err)
     throw new Error('Error on ASIN lookup');
@@ -206,7 +209,7 @@ exports.lookupAmazonItem = function * (asin) {
   var item = results.result.ItemLookupResponse.Items.Item
   if (item.ParentASIN && item.ParentASIN !== item.ASIN) {
     // This item has a parent item, which means it probably has variations
-    var parent = yield module.exports.lookupAmazonItem(item.ParentASIN)
+    var parent = yield module.exports.lookupAmazonItem(item.ParentASIN, locale)
     var options = _.get(parent, 'Item.Variations.Item', [])
 
     // if there's only one variation, it won't be an array, so we'll array-ify it just in case
@@ -223,7 +226,7 @@ exports.lookupAmazonItem = function * (asin) {
   }
 
   // save value to cache
-  asinCache.set(asin, response)
+  asinCache.set(asin + locale, response)
 
   return response
 };
@@ -240,9 +243,12 @@ exports.lookupAmazonItem = function * (asin) {
       - SubTotal
       - CartItems
  */
-exports.createAmazonCart = function * (item) {
+exports.createAmazonCart = function * (item, locale) {
   if (item instanceof Array) {
     throw new Error('Only create cart for single item at a time');
+  }
+  if (!locale) {
+    throw new Error('No locale supplied')
   }
 
   if (_.get(item, 'OfferListingId')) {
@@ -254,7 +260,7 @@ exports.createAmazonCart = function * (item) {
     'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
   };
   try {
-    var cart = yield opHelper.execute('CartCreate', amazonParams);
+    var cart = yield opHelpers[locale].execute('CartCreate', amazonParams);
   } catch (err) {
     console.error(err)
     throw new Error('Error on creating cart')
@@ -366,7 +372,7 @@ exports.getAmazonCart = function * (cart) {
     'ResponseGroup': 'Cart',
   };
 
-  cart = yield opHelper.execute('CartGet', amazonParams);
+  cart = yield opHelpers[cart.store_locale].execute('CartGet', amazonParams);
   checkError(cart.result.CartGetResponse.Cart)
   return cart.result.CartGetResponse.Cart;
 };
@@ -374,13 +380,14 @@ exports.getAmazonCart = function * (cart) {
 /**
  * creates the item in our cart from asin
  * @param {string} item which might be an asin itself or like {url: someurl}
+ * @param {string} locale US, UK, CA
  * @yield {object} created item
  */
-exports.addItemAmazon = function * (item) {
+exports.addItemAmazon = function * (item, locale) {
   if (item.url) {
-    item = yield amazonScraper.scrapeUrl(item.url)
+    item = yield amazonScraper.scrapeUrl(item.url, locale)
   } else {
-    item = yield amazonScraper.scrapeAsin(item)
+    item = yield amazonScraper.scrapeAsin(item, locale)
   }
   return item
 };
@@ -399,7 +406,7 @@ exports.removeAmazonItemFromCart = function * (item, cart) {
 
 /**
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CartClear.html
- * @param {[type]} item          [description]
+ * @param {[type]} cart          [description]
  * @yield {[type]} [description]
  */
 exports.clearAmazonCart = function * (cart) {
@@ -409,7 +416,7 @@ exports.clearAmazonCart = function * (cart) {
     'HMAC': cart.amazon_hmac
   };
 
-  cart = yield opHelper.execute('CartClear', amazonParams);
+  cart = yield opHelpers[cart.store_locale].execute('CartClear', amazonParams);
   return cart;
 };
 
@@ -432,7 +439,7 @@ exports.syncAmazon = function * (cart) {
   }
 
   var cartAddAmazonParams = createAmazonCartWithItems(cart.items);
-  var res = yield opHelper.execute('CartCreate', cartAddAmazonParams);
+  var res = yield opHelpers[cart.store_locale].execute('CartCreate', cartAddAmazonParams);
   var amazonErrors = getErrorsFromAmazonCartCreate(res.result.CartCreateResponse.Cart)
   returnValue = res.result.CartCreateResponse.Cart
   cart.amazon_cartid = returnValue.CartId
