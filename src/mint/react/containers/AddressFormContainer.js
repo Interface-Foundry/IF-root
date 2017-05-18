@@ -20,12 +20,12 @@ const mapDispatchToProps = dispatch => ({
     });
     return dispatch(sendAddressData(...args));
   },
-  sendYPOData: (user_id, accountNumber, accountName, voucherCode) => {
+  sendYPOData: (user_id, ypo_account_number, ypo_account_name, ypo_voucher_code) => {
     ReactGA.event({
       category: 'Cart',
       action: 'Added Address',
     });
-    return dispatch(updateUser(user_id, {accountNumber, accountName, voucherCode}));
+    return dispatch(updateUser(user_id, { ypo_account_number, ypo_account_name, ypo_voucher_code }));
   }
 });
 
