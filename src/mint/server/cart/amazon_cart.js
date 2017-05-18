@@ -28,6 +28,12 @@ Object.keys(amazonConstants.credentials).map(locale => {
 })
 
 /**
+ * Default ophelper which is used to look up ASINS etc
+ * @type {[type]}
+ */
+const opHelper = opHelpers.US
+
+/**
  * Checks the response from an amazon request for an error, and throws a nicer
  * error if there was a request error
  */
@@ -367,12 +373,15 @@ exports.getAmazonCart = function * (cart) {
 
 /**
  * creates the item in our cart from asin
- * doesnt
- * @param {string} item from asin
+ * @param {string} item which might be an asin itself or like {url: someurl}
  * @yield {object} created item
  */
-exports.addItemAmazon = function * (itemAsin) {
-  var item = yield amazonScraper.scrapeAsin(itemAsin)
+exports.addItemAmazon = function * (item) {
+  if (item.url) {
+    item = yield amazonScraper.scrapeUrl(item.url)
+  } else {
+    item = yield amazonScraper.scrapeAsin(item)
+  }
   return item
 };
 

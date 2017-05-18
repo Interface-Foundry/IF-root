@@ -245,14 +245,15 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   }
 
   // Add the cart leader if they are logged in
-  const user_id = _.get(session, 'UserSession.user_account.id')
+  const user_id = _.get(req, 'UserSession.user_account.id')
   if (user_id) {
     cart.leader = user_id
-    cart.name = session.UserSession.user_account.name + '\'s Kip Cart'
+    cart.name = req.UserSession.user_account.name + '\'s Kip Cart'
   }
 
   // This is all the investors care about right here. This is the money line.
   cart = yield db.Carts.create(cart)
+  console.log(cart)
 
   res.redirect(`/cart/${cart.id}/`);
 }).catch(e => {

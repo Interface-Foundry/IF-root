@@ -124,6 +124,11 @@ exports.clearCart = function * (cart, retailer) {
 };
 
 exports.addItemToCart = function * (item, cart) {
+  console.log('item', item)
+  // check for pasted URL
+  if (item.url) {
+    console.log('i found you bitch')
+  }
   var cart = yield addItemHandlers[retailer](item, cart)
 };
 
@@ -159,13 +164,12 @@ exports.deleteItemFromCart = function * (item, cart, userId) {
 /**
  * create item in db.Items for a specified store
  *
- * @param      {string}  itemId  The item identifier/asin
- * @param      {string}          userId  The user identifier
+ * @param      {string}  item  The item, which who even fucking knows what it could be
  * @param      {string}          cartId  the cart identifier
  * @param      {number}          quantity the item quantity
  * @return     {object}          item object that was created
  */
-exports.addItem = function * (itemId, cart, quantity) {
+exports.addItem = function * (item, cart, quantity) {
   if (quantity === undefined) {
     quantity = 1
   }
@@ -175,7 +179,7 @@ exports.addItem = function * (itemId, cart, quantity) {
     throw new Error('Cart not found')
   }
 
-  let item = yield addItemHandlers[cart.store](itemId)
+  item = yield addItemHandlers[cart.store](item)
   return item
 }
 

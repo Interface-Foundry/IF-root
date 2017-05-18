@@ -137,7 +137,8 @@ describe('api', function () {
 
     // pretend to sign in here
     const user = yield db.UserAccounts.create({
-      email_address: mcTesty.email
+      email_address: mcTesty.email,
+      name: mcTesty.name
     })
     var dbsession = yield db.Sessions.findOne({
       id: session.id
@@ -168,7 +169,7 @@ describe('api', function () {
 
     // make sure McTesty is the leader
     assert.equal(cart.leader.email_address, mcTesty.email)
-    assert.equal(cart.name, mcTesty.email.replace(/@.*/, '') + "'s Kip Cart")
+    assert.equal(cart.name, mcTesty.name + "'s Kip Cart")
 
     // lets save this cart id for later
     mcTesty.cart_id = cart.id
