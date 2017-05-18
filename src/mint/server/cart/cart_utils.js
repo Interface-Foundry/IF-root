@@ -83,12 +83,13 @@ exports.checkout = function * (cart, req, res) {
  * @param      {string}  store   The store type
  * @return     {object}  item    the item preview object for that store
  */
-exports.itemPreview = function * (query, store, page, category) {
+exports.itemPreview = function * (query, store, locale, page, category) {
+  console.log('itemPreview', query, store, locale, page, category)
   if (store === undefined) {
     throw new Error('Store required for item preview')
   }
 
-  const item = yield itemPreviewHandlers[store](query, page, category)
+  const item = yield itemPreviewHandlers[store](query, locale, page, category)
   return item
 }
 
@@ -124,11 +125,7 @@ exports.clearCart = function * (cart, retailer) {
 };
 
 exports.addItemToCart = function * (item, cart) {
-  console.log('item', item)
   // check for pasted URL
-  if (item.url) {
-    console.log('i found you bitch')
-  }
   var cart = yield addItemHandlers[retailer](item, cart)
 };
 

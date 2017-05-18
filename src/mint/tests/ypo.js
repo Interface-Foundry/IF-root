@@ -87,50 +87,6 @@ describe('api', function () {
     })
   }))
 
-  it('should keep track of user sessions', () => co(function * () {
-    const me = yield get('/api/session')
-    const me2 = yield get('/api/session')
-    assert(me.id)
-    assert(me.id === me2.id, 'ID must remain the same for same session')
-  }))
-
-  it('GET /api/session should return anonymous session before logging in', () => co(function * () {
-    const session = yield get('/api/session')
-    assert(session)
-    assert(!session.user_account)
-    assert(session.animal)
-    assert(session.id)
-    assert(session.createdAt)
-  }))
-
-  it('POST /api/cart/:cart_id/item should return Unauthorized for anyone that tries to push an item to a cart without being signed in', () => co(function * () {
-    var err
-    try {
-      yield post('/api/cart/12345/item', {
-        url: 'https://www.amazon.com/Onitsuka-Tiger-Mexico-Classic-Running/dp/B00L8IXMN0/ref=sr_1_11?s=apparel&ie=UTF8&qid=1490047374&sr=1-11&nodeID=679312011&psd=1&keywords=asics%2Bshoes&th=1&psc=1'
-      })
-    } catch (e) {
-      err = e
-    }
-    assert(err)
-    assert.equal(err.statusCode, 500, 'Should be 500 Unauthorized')
-    err.response.body.should.startWith('Unauthorized')
-  }))
-
-  it('GET /api/cart/[Bad Id] should return 500 for a DNE cart', () => co(function * () {
-    var err
-    var res
-    try {
-      res = yield get('/api/cart/12345')
-    } catch (e) {
-      err = e
-    }
-
-    assert(err)
-    assert.equal(err.statusCode, 500)
-    err.response.body.should.startWith('Cart not found')
-  }))
-
   it('GET /api/session should return the user_account if signed in', () => co(function * () {
     // not signed in yet, just getting the session id
     const session = yield get('/api/session')
@@ -157,7 +113,7 @@ describe('api', function () {
   }))
 
   it('GET /newcart/store should create a new cart, redirect to /cart/:Cart_id, and send an email', () => co(function * () {
-    var res = yield get('/newcart/amazon_US', true)
+    var res = yield get('/newcart/ypo', true)
     console.log(res.request.uri)
 
     // make sure it's redirect to /cart/123456
@@ -206,20 +162,18 @@ describe('api', function () {
     assert.equal(carts[0].leader.email_address, mcTesty.email)
   }))
 
+  it('GET /api/itempreview should let McTesty search items', () => co(function * () {
+    var res = yield get('/api/itempreview?q=notebook&store=ypo&store_locale=UK')
+    console.log(res[0])
+    mcTesty.item_id = res[0].id
+  }))
+
   it('POST /api/carts/cart_id/item should let McTesty add an item to the cart, returning the item', () => co(function * () {
-    var url = 'https://www.amazon.com/HiLetgo-Version-NodeMCU-Internet-Development/dp/B010O1G1ES/ref=sr_1_3?ie=UTF8&qid=1490217410&sr=8-3&keywords=nodemcu'
     var item = yield post('/api/cart/' + mcTesty.cart_id + '/item', {
-      url: url
+      item_id: mcTesty.item_id
     })
 
     assert(item)
-    assert.equal(item.original_link, url)
-    assert.equal(item.name, 'HiLetgo New Version NodeMCU LUA WiFi Internet ESP8266 Development')
-    assert.equal(item.thumbnail_url, 'https://images-na.ssl-images-amazon.com/images/I/51yZrDeRUCL._SL75_.jpg')
-    assert.equal(item.main_image_url, 'https://images-na.ssl-images-amazon.com/images/I/71FKRFAIT8L.jpg')
-
-    // save item id for later
-    mcTesty.item_id = item.id
   }))
 
   it('GET /api/cart/:cart_id should return all the info for a specific cart', () => co(function * () {
@@ -355,7 +309,7 @@ describe('api', function () {
     assert(err)
   }))
 
-  it('GET /api/cart/:cart_id/checkout should redirect to the amazon cart with the affiliate id', () => co(function * () {
+  it.skip('GET /api/cart/:cart_id/checkout should redirect to the amazon cart with the affiliate id', () => co(function * () {
     var res = yield get('/api/cart/' + mcTesty.cart_id + '/checkout', true)
 
     // make sure it's redirect to amazon.com/gp/cart/aws-merge.html
@@ -364,7 +318,7 @@ describe('api', function () {
   }))
 
 
-  it('GET /api/cart/:cart_id/checkout should fix messed up carts and redirect to the amazon cart with the affiliate id', () => co(function * () {
+  it.skip('GET /api/cart/:cart_id/checkout should fix messed up carts and redirect to the amazon cart with the affiliate id', () => co(function * () {
     // let's mess up the cart!
     var cart = yield db.Carts.findOne({id: mcTesty.cart_id}).populate('items')
     cart.items[0].quantity++
@@ -377,15 +331,15 @@ describe('api', function () {
     assert(res.request.uri.query.includes('associate-id=motorwaytoros-20'), 'should contain our affiliate id')
   }))
 
-  it('GET /api/item/:item_id/clickthrough should redirect to the amazon item with the affiliate id', () => co(function * () {
+  it.skip('GET /api/item/:item_id/clickthrough should redirect to the amazon item with the affiliate id', () => co(function * () {
     var res = yield get('/api/item/' + mcTesty.item_id + '/clickthrough', true)
 
     // make sure it's redirect to amazon.com/some-product/......our affiliate id here
     assert(res.request.uri.query.includes('tag=motorwaytoros-20'), 'should contain our affiliate id')
   }))
 
-  it('GET /api/cart/:cart_id/clear should clear all items in the cart', () => co(function * () {
-    var res = yield get('/api/cart/' + mcTesty.cart_id + '/clear')
+  it('DELETE /api/cart/:cart_id/clear should clear all items in the cart', () => co(function * () {
+    var res = yield del('/api/cart/' + mcTesty.cart_id + '/clear')
 
     // make sure the next time we get the cart all the items are really gone
     var cart = yield get('/api/cart/' + mcTesty.cart_id)

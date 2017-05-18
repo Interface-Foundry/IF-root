@@ -617,8 +617,6 @@ module.exports = function (router) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
     }
 
-
-
     const store = _.get(req, 'query.store', 'amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
     const item = yield cartUtils.itemPreview(q, store, locale, (req.query.page || 1), req.query.category)
@@ -637,16 +635,8 @@ module.exports = function (router) {
     // logging.info('populated cart', cart);
 
 
-    try {
-      yield cartUtils.checkout(cart, req, res)
-    } catch (err) {
-      throw new Error('Error on checkout', err)
-    }
-
+    yield cartUtils.checkout(cart, req, res)
     yield cartUtils.sendReceipt(cart, req)
-  }).catch(e => {
-    logging.error(e)
-    throw e
   }))
 
 
@@ -662,7 +652,7 @@ module.exports = function (router) {
     var item = yield db.Items.findOne({id: req.params.item_id}).populate('cart')
 
     // let amazon compose a nice link for us
-    var amazonItem = yield amazon.lookupAmazonItem(item.asin, cart.store_locale)
+    var amazonItem = yield amazon.lookupAmazonItem(item.asin, item.cart.store_locale)
 
     // handle errors
     if (!_.get(amazonItem, 'Item.DetailPageURL')) {

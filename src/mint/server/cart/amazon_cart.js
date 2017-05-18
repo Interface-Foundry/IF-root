@@ -34,6 +34,14 @@ Object.keys(amazonConstants.credentials).map(locale => {
 const opHelper = opHelpers.US
 
 /**
+ * Gets associate tag for a locale
+ * @type {[type]}
+ */
+function localeTag(locale) {
+  return amazonConstants.credentials[locale][0].assocId
+}
+
+/**
  * Checks the response from an amazon request for an error, and throws a nicer
  * error if there was a request error
  */
@@ -130,7 +138,7 @@ exports.searchAmazon = function * (query, locale, page, category) {
     Condition: 'New',
     SearchIndex: category || 'All', //the values for this vary by locale
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
-    ItemPage: index || 1
+    ItemPage: page || 1
   };
 
   logging.info('amazonParams:', amazonParams)
@@ -255,7 +263,7 @@ exports.createAmazonCart = function * (item, locale) {
     throw new Error('Need ASIN, not using OfferListingId for time being');
   }
   var amazonParams = {
-    'AssociateTag': associateTag,
+    'AssociateTag': localeTag(locale),
     'Item.1.ASIN': item.asin,
     'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
   };
@@ -308,9 +316,7 @@ function condenseItems(items) {
 
   // ability to use offerlistingid or asin later, just using asin rn
 
-  var amazonParams = {
-    'AssociateTag': associateTag,
-  }
+  var amazonParams = {}
 
   var condendesedItems = condenseItems(items)
   var k = 1
@@ -366,7 +372,7 @@ function getErrorsFromAmazonCartCreate (res) {
  */
 exports.getAmazonCart = function * (cart) {
   var amazonParams = {
-    'AssociateTag': associateTag,
+    'AssociateTag': localeTag(cart.store_locale),
     'CartId': cart.amazon_cartid,
     'HMAC': cart.amazon_hmac,
     'ResponseGroup': 'Cart',
@@ -411,7 +417,7 @@ exports.removeAmazonItemFromCart = function * (item, cart) {
  */
 exports.clearAmazonCart = function * (cart) {
   var amazonParams = {
-    'AssociateTag': associateTag,
+    'AssociateTag': localeTag(cart.store_locale),
     'CartId': cart.amazon_cartid,
     'HMAC': cart.amazon_hmac
   };
@@ -439,6 +445,7 @@ exports.syncAmazon = function * (cart) {
   }
 
   var cartAddAmazonParams = createAmazonCartWithItems(cart.items);
+  cartAddAmazonParams.AssociateTag = localeTag(cart.store_locale)
   var res = yield opHelpers[cart.store_locale].execute('CartCreate', cartAddAmazonParams);
   var amazonErrors = getErrorsFromAmazonCartCreate(res.result.CartCreateResponse.Cart)
   returnValue = res.result.CartCreateResponse.Cart
