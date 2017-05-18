@@ -114,7 +114,6 @@ describe('api', function () {
 
   it('GET /newcart/store should create a new cart, redirect to /cart/:Cart_id, and send an email', () => co(function * () {
     var res = yield get('/newcart/ypo', true)
-    console.log(res.request.uri)
 
     // make sure it's redirect to /cart/123456
     assert.equal(res.request.uri.path.split('/')[1], 'cart')
@@ -164,7 +163,6 @@ describe('api', function () {
 
   it('GET /api/itempreview should let McTesty search items', () => co(function * () {
     var res = yield get('/api/itempreview?q=notebook&store=ypo&store_locale=UK')
-    console.log(res[0])
     mcTesty.item_id = res[0].id
   }))
 

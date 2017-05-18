@@ -158,7 +158,6 @@ describe('api', function () {
 
   it('GET /newcart/store should create a new cart, redirect to /cart/:Cart_id, and send an email', () => co(function * () {
     var res = yield get('/newcart/amazon_US', true)
-    console.log(res.request.uri)
 
     // make sure it's redirect to /cart/123456
     assert.equal(res.request.uri.path.split('/')[1], 'cart')
@@ -392,6 +391,21 @@ describe('api', function () {
     assert(cart)
     assert.equal(cart.leader.email_address, mcTesty.email)
     assert.equal(cart.items.length, 0, 'should not be any items in the cart now')
+  }))
+
+  it('DELETE /api/cart/:cart_id should archive the cart so that it cannot be found', () => co(function * () {
+    var res = yield del('/api/cart/' + mcTesty.cart_id)
+
+    // make sure it's gone
+    try {
+      var cart = yield get('/api/cart/' + mcTesty.cart_id)
+    } catch (e) {
+      assert(e)
+    }
+
+    // make sure it doesn't show up in the user's cart list
+    var carts = yield get('/api/carts')
+    assert.equal(carts.filter(c => c.id === mcTesty.cart_id).length, 0, 'should not be able to get this cart anymore for the cart list')
   }))
 
   it('POST /api/feedback should save feedback to the db', () => co(function * () {
