@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 
 import { CartContainer, CartStoresContainer } from '../../containers';
-import { Overlay, Modal, Toast, ErrorPage, Popup } from '..';
+import { Modal, Toast, ErrorPage, Popup } from '..';
 
 import Header from './Header';
 import Sidenav from './Sidenav';
@@ -35,7 +35,8 @@ export default class App extends Component {
     items: PropTypes.array,
     toast: PropTypes.string,
     status: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    clearItem: PropTypes.func
   }
 
   state = {
@@ -115,14 +116,12 @@ export default class App extends Component {
         cart_id,
         currentCart,
         updateCart,
-        newAccount,
         leader,
         carts,
         currentUser,
         location,
         logout,
         clearItem,
-        login,
         items,
         history: { replace }
       },
@@ -137,26 +136,20 @@ export default class App extends Component {
           <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
           {popup ? <Popup {...props} cart_id={cart_id} _togglePopup={_togglePopup}/> : null}
           <div className={`app__view ${showFooter ? '' : 'large'}`}>
-            {
-              newAccount === false //soon there will be no overlay
-              ? <Overlay/>
-              : (
-                <div>
-                  {/* Render Error Page */}
-                  <Route path={'/404'} exact component={ErrorPage} />
+            <div>
+              {/* Render Error Page */}
+              <Route path={'/404'} exact component={ErrorPage} />
 
-                  { /* Renders modal when route permits */ }
-                  <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
+              { /* Renders modal when route permits */ }
+              <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
 
-                  { /* Renders cart when route permits */ }
-                  <Route path={'/cart/:cart_id'} exact component={CartContainer} />
-                  <Route path={'/cart/:cart_id/address'} exact component={CartContainer} />
+              { /* Renders cart when route permits */ }
+              <Route path={'/cart/:cart_id'} exact component={CartContainer} />
+              <Route path={'/cart/:cart_id/address'} exact component={CartContainer} />
 
-                  { /* Renders cart choice if theres no store set */}
-                  <Route path={'/newcart'} exact component={CartStoresContainer} />
-                </div>
-              )
-            }
+              { /* Renders cart choice if theres no store set */}
+              <Route path={'/newcart'} exact component={CartStoresContainer} />
+            </div>
           </div>
           { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
           {showFooter ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> : null}

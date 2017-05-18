@@ -254,8 +254,9 @@ module.exports = function (router) {
     });
 
     // Sending to leader
+    var storeName = cart.store === 'ypo' ? 'YPO' : _.capitalize(cart.store);
     if (cart.leader == user.id) {
-      var subject = 'Your New Kip Cart'
+      var subject = `Your New ${storeName} Kip Cart`
       cart.leader = true
     }
     //Sending to member

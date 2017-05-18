@@ -1,6 +1,9 @@
 // react/components/Cards/Cards.scss
 @import '../../styles/Constants';
 @import '../../styles/Animations';
+
+$colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
+
 .cards__section {
   .cards__section__breadcrumb {
     padding: $padding $padding $padding*2;
@@ -20,10 +23,16 @@
       &.cards__section__breadcrumb-type {
         cursor: pointer;
         font-weight: 500;
-        padding: $padding/2 $padding;
-        background: $main-button-color;
-        box-shadow: $card-box-shadow;
-        border-radius: 5px;
+        padding: $padding/2 0;
+        border-bottom: 3px solid $main-button-color;
+
+        &.yellow {
+          padding: $padding/2 $padding;
+          background: $main-button-color;
+          border-bottom: 0;
+          box-shadow: $card-box-shadow;
+          border-radius: 5px;
+        }
       }
     }
   }
@@ -181,8 +190,23 @@
           font-size: 10px;
           letter-spacing: 1px;
           text-transform: uppercase;
-          background: $border-color-light;
           border-radius: 0 0 $padding - 1 $padding - 1;
+        }
+      }
+
+      .card__type-search {
+        .add {
+          background: $border-color-light;
+        }
+      }
+
+      @for $i from 1 through length($colorList) {
+        &:nth-of-type(#{length($colorList)}n+#{$i}) {
+          .card__type-category {
+            .add {
+              background: nth($colorList, $i);
+            }
+          }
         }
       }
     }

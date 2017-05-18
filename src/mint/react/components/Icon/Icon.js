@@ -48,7 +48,7 @@ export default class Icon extends Component {
   render() {
     switch (this.props.icon) {
     case 'PriceTag':
-      return <IoPricetag/>
+      return <IoPricetag/>;
     case 'Hamburger':
       return <IoNaviconRound/>;
     case 'Email':

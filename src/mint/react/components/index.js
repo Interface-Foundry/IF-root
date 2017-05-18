@@ -13,7 +13,6 @@ export Feedback from './Feedback';
 export Icon from './Icon';
 export Item from './Item';
 export Modal from './Modal';
-export Overlay from './Overlay';
 export Settings from './Settings';
 export Share from './Share';
 export Toast from './Toast';

@@ -43,7 +43,7 @@ export default class Cards extends Component {
 
     switch (direction) {
       case 'left':
-        end = element.scrollLeft - 600 > 2 ? element.scrollLeft - 600 : 2;
+        end = element.scrollLeft - 600 > 1 ? element.scrollLeft - 600 : 1;
         cosParameter = end / 2;
 
         this.scrollInterval = setInterval(() => {
@@ -54,11 +54,11 @@ export default class Cards extends Component {
           } else {
             clearInterval(this.scrollInterval);
           }
-        }, 15);
+        }, 5);
 
         break;
       case 'right':
-        end = element.scrollLeft + 600 < element.firstElementChild.clientWidth ? element.scrollLeft + 600 : element.firstElementChild.clientWidth;
+        end = element.scrollLeft + 600;
         cosParameter = end / 2;
 
         this.scrollInterval = setInterval(() => {
@@ -69,7 +69,7 @@ export default class Cards extends Component {
           } else {
             clearInterval(this.scrollInterval);
           }
-        }, 15);
+        }, 5);
 
         break;
     }
@@ -99,13 +99,12 @@ export default class Cards extends Component {
     const { renderCards, _scrollHorizontal, props: { cardType, clearItem, storeName } } = this,
     type = cardType || 'categories';
 
-    console.log('inside cards render')
     return (
       <div>
         <ul ref='cards' className={'cards__section'}>
           {
             storeName === 'ypo' ? <p className='cards__section__breadcrumb'>
-              <span className='cards__section__breadcrumb-type' onClick={() => clearItem()}>
+              <span className={`cards__section__breadcrumb-type ${type.includes('search') ? 'yellow' : ''}`} onClick={() => clearItem()}>
                 {type.includes('search') ? <Icon icon='LeftChevron'/> : _.capitalize(type.split('-search')[0])}
               </span> 
               { 

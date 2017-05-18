@@ -45,7 +45,6 @@ export default class Item extends Component {
       props: { item_id, amazon_id, previewAmazonItem, cart_id, previewItem, type, items, index, setSearchIndex, currentCart, fetchCards }
     } = this;
     // only update item if there isn't one
-    console.log('inside componentWillMount')
     if (item_id && currentCart.store) previewItem(item_id);
     else if (amazon_id && items.length === 0 && currentCart.store) previewAmazonItem(amazon_id, currentCart.store);
 
