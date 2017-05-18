@@ -59,20 +59,23 @@ function * createYpoItem (item) {
  * @param      {<type>}   query   The query
  * @return     {Promise}  { description_of_the_return_value }
  */
-module.exports.itemPreview = function * (query) {
+module.exports.itemPreview = function * (query, page, category) {
+  if (!query) query = category;
+  if (!page) page = 1;
   let items
   logging.info('looking for query: ', query)
+
   query = query.trim().toLowerCase()
   var regexString = new RegExp(["^", query, "$"].join(""), "i");
 
   if (categorysObject.category2.includes(query)) {
     logging.info('in cat2: ', query)
-    items = yield db.YpoInventoryItems.find({category_2: regexString}).limit(20)
+    items = yield db.YpoInventoryItems.find({category_2: regexString}).limit(20 * page)
   }
 
   else if (categorysObject.category1.includes(query)) {
     logging.info('in cat1: ', query)
-    items = yield db.YpoInventoryItems.find({category_1: regexString}).limit(20)
+    items = yield db.YpoInventoryItems.find({category_1: regexString}).limit(20 * page)
   }
 
 
@@ -97,7 +100,7 @@ module.exports.itemPreview = function * (query) {
             createdAt: false,
             updatedAt: false
           })
-          .limit(10)
+          .limit(10 * page)
           .toArray((err, results) => {
             if (err) reject(err)
             else resolve(results)
@@ -106,6 +109,9 @@ module.exports.itemPreview = function * (query) {
       })
     })
   }
+
+  var numberOfItems = items.length / page;
+  items = items.slice(items.length - numberOfItems);
 
   return yield items.map(function * (item) {
     return yield createYpoItem(item)
