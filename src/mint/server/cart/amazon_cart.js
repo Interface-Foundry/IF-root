@@ -10,29 +10,27 @@ const asinCache = LRU({
 })
 
 var amazonScraper = require('./scraper_amazon');
+var amazonConstants = require('./amazon_constants');
 var emoji = require('../utilities/emoji_utils');
 
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models })
 
-// amazon creds -> move to constants later
-const amazonCreds = [{
-  'awsId': 'AKIAIQWK3QCI5BOJTT5Q',
-  'awsSecret': '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',
-  'assocId': 'motorwaytoros-20',
-  'maxRequestsPerSecond': 1
-}, {
-  'awsId': 'AKIAJLM6YRRSPF4UQHOA',
-  'awsSecret': '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',
-  'assocId': 'motorwaytoros-20',
-  'maxRequestsPerSecond': 1
-}];
+/**
+ * List of aws product api operation helpers from the APAC npm library
+ * @type {Object}
+ */
+const opHelpers = {}
+Object.keys(amazonConstants.credentials).map(locale => {
+  // We'll just use the first one in the list for now TODO switch between the two api keys
+  opHelpers[locale] = new OperationHelper(amazonConstants.credentials[locale][0])
+})
 
-const associateTag = 'motorwaytoros-20';
-
-const opHelper = new OperationHelper(amazonCreds[0]);
-
+/**
+ * Checks the response from an amazon request for an error, and throws a nicer
+ * error if there was a request error
+ */
 const checkError = function (res) {
   if (_.get(res, 'Request.Errors.Error')) {
     var e = _.get(res, 'Request.Errors.Error.0') || _.get(res, 'Request.Errors.Error')
@@ -111,22 +109,23 @@ exports.getAmazonItem = function * (item_identifier) {
 /**
  * search item by keyword(s)
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
- * lookup item by asin
  * @param {string} query search terms
- * @returns {[type]} amazon items
+ * @param {string} locale amazone website locale, can leave blank, defaults to US
+ * @param {number} page serach result page, starts at 1
+ * @param {string} category search index to use, I guess like "Gourmet Grocery" or whatever. can leave blank
+ * @returns {[db.Items]} amazon items
  */
-exports.searchAmazon = function * (query, index, category) {
+exports.searchAmazon = function * (query, locale, page, category) {
   query = emoji(query);
-  console.log('searching:', query)
+
   var amazonParams = {
     Availability: 'Available',
     Keywords: query,
     Condition: 'New',
-    SearchIndex: 'All', //the values for this vary by locale
+    SearchIndex: category || 'All', //the values for this vary by locale
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
     ItemPage: index || 1
   };
-  if (category) amazonParams.SearchIndex = category;
 
   logging.info('amazonParams:', amazonParams)
 
@@ -138,7 +137,7 @@ exports.searchAmazon = function * (query, index, category) {
     // remove the last word, and try the search again
     var newQuery = query.split(/[^\w]/).slice(0, -1).join(' ')
     if (newQuery) {
-      var results = yield exports.searchAmazon(newQuery)
+      var results = yield exports.searchAmazon(newQuery, locale, page, category)
       return results
     } else {
       return [];

@@ -2,8 +2,6 @@ var fs = require('co-fs')
 var path = require('path')
 var db = require('../../db')
 
-var amazonCategories = require('../amazonCategories');
-
 db.then((models) => { db = models; })
 
 var getYpoCategories = function * () {
