@@ -77,7 +77,7 @@ var cartsCollection = Waterline.Collection.extend({
 
     store_locale: {
       type: 'string',
-      enum: constants.AMAZON_LOCALES
+      enum: constants.LOCALES
     },
 
     /** @type {integer} the number of times this cart has been #viewed */

@@ -1,3 +1,4 @@
+var co = require('co')
 var db
 const dbReady = require('../../db')
 const xml2js = require('xml2js')
@@ -59,62 +60,59 @@ function * createYpoItem (item) {
  * @param      {<type>}   query   The query
  * @return     {Promise}  { description_of_the_return_value }
  */
-module.exports.itemPreview = function * (query, page, category) {
-  if (!query) query = category;
-  if (!page) page = 1;
-  let items
-  logging.info('looking for query: ', query)
+module.exports.itemPreview = function (query, page, category) {
+  return co(function * () {
+    // see if they pasted url or itemcode
+    if (!query) query = category;
+    if (!page) page = 1;
+    let items
+    logging.info('looking for query: ', query)
 
-  query = query.trim().toLowerCase()
-  var regexString = new RegExp(["^", query, "$"].join(""), "i");
+    query = query.trim().toLowerCase()
+    var regexString = new RegExp(["^", query, "$"].join(""), "i");
 
-  if (categorysObject.category2.includes(query)) {
-    logging.info('in cat2: ', query)
-    items = yield db.YpoInventoryItems.find({category_2: regexString}).limit(20 * page)
-  }
+    if (categorysObject.category2.includes(query)) {
+      logging.info('in cat2: ', query)
+      items = yield db.YpoInventoryItems.find({category_2: regexString}).limit(20 * page)
+    }
 
-  else if (categorysObject.category1.includes(query)) {
-    logging.info('in cat1: ', query)
-    items = yield db.YpoInventoryItems.find({category_1: regexString}).limit(20 * page)
-  }
+    else if (categorysObject.category1.includes(query)) {
+      logging.info('in cat1: ', query)
+      items = yield db.YpoInventoryItems.find({category_1: regexString}).limit(20 * page)
+    }
+    if (query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
+      const itemCode = query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)[0]
+      item = yield db.YpoInventoryItems.findOne({item_code: itemCode})
+      return yield createYpoItem(item)
+    }
 
-
-  // see if they pasted url or itemcode and just return that item
-  else if (query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
-    const itemCode = query.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)[0]
-    item = yield db.YpoInventoryItems.findOne({item_code: itemCode})
-    return yield createYpoItem(item)
-  }
-
-  // search by text index stuff
-  else {
-    items = yield new Promise((resolve, reject) => {
-      db.YpoInventoryItems.native((err, collection) => {
-        if (err) reject(err)
-        else {
-          collection.find({
-            $text: {
-              $search: `\"${query}\"`
-            }
-          }, {
-            createdAt: false,
-            updatedAt: false
-          })
-          .limit(10 * page)
-          .toArray((err, results) => {
-            if (err) reject(err)
-            else resolve(results)
-          });
-        }
-      })
+    // get a raw db connection to do a text index search
+    var ypoRawCollection = yield new Promise((resolve, reject) => {
+      db.YpoInventoryItems.native((e, r) => e ? reject(e) : resolve(r))
     })
-  }
 
-  var numberOfItems = items.length / page;
-  items = items.slice(items.length - numberOfItems);
+    // Query mongodb using the native connection, which allows text index search
+    var ypoItems = yield ypoRawCollection.find({
+        $text: {
+          $search: `\"${query}\"`
+        },
+        createdAt: false,
+        updatedAt: false
+      })
+      .limit(10)
+      .toArray()
 
-  return yield items.map(function * (item) {
-    return yield createYpoItem(item)
+    // transform the YPO catalog items into kip cart items
+    var items = yield ypoItems.map(item => db.Items.create({
+      store: 'ypo',
+      name: item.name,
+      asin: item.item_code.toString(),
+      description: item.description,
+      price: item.price,
+      thumbnail_url: item.image_url,
+      main_image_url: item.image_url
+    }))
+    return items
   })
 }
 

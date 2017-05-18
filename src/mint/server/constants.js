@@ -5,5 +5,5 @@ module.exports = {
 
   // available stores we are supporting atm
   STORES: ['ypo', 'amazon'],
-  AMAZON_LOCALES: ['us', 'canada', 'uk']
+  LOCALES: ['US', 'CA', 'UK']
 };
