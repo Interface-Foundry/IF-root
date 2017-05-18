@@ -31,8 +31,7 @@ export default function cart(state = initialState, action) {
   switch (action.type) {
   case LOGOUT:
     return {
-      ...initialState,
-      cart_id: state.cart_id
+      ...state
     };
   case ADDING_ITEM:
     return {
