@@ -185,7 +185,7 @@ export function checkoutCart(cart_id) {
   };
 }
 
-export function sendAddressData(user_id, full_name, line_1, line_2, city, region, code, country) {
+export function sendAddressData(user_id, full_name, line_1, line_2, city, region, code, country, delivery_message) {
   return async dispatch => {
     try {
       const response = await fetch(`/api/user/${user_id}/address`, {
@@ -195,7 +195,7 @@ export function sendAddressData(user_id, full_name, line_1, line_2, city, region
           Accept: 'application/json',
           'Content-Type': 'application/json'
         },
-        'body': JSON.stringify({ full_name, line_1, line_2, city, region, code, country })
+        'body': JSON.stringify({ full_name, line_1, line_2, city, region, code, country, delivery_message })
       });
       return dispatch(receiveItems(await response.json()));
     } catch (e) {
