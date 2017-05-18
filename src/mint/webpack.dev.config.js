@@ -3,7 +3,8 @@ const path = require('path'),
   CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin'),
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
   CART_DIR = path.resolve(__dirname, 'react'),
-  HOME_DIR = path.resolve(__dirname, 'kip-website');
+  HOME_DIR = path.resolve(__dirname, 'kip-website'),
+  CACHE_DIR = path.resolve(__dirname, 'webpack-cache');
 
 module.exports = {
   entry: {
@@ -31,12 +32,15 @@ module.exports = {
     })
   ],
   module: {
-    loaders: [{
-      test: /\.jsx?$|\.js$/,
+    rules: [{
+      test: /\.jsx?$|\.js?$/,
       exclude: /node_modules/,
-      loader: 'babel-loader',
-      query: {
-        'presets': ['react', 'es2015', 'stage-0']
+      use: {
+        loader: 'babel-loader',
+        options: {
+          cacheDirectory: true,
+          'presets': ['react', 'es2015', 'stage-0']
+        }
       }
     }, {
       test: /\.json?$/,
