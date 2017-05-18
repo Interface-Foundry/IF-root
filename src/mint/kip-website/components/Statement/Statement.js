@@ -8,8 +8,6 @@ import { Icon } from '../../themes';
 import { Services } from '..';
 
 export default class Statement extends Component {
-
-
   	render() {
   		const { _toggleModal, src } = this.props;
 	    return (
@@ -49,3 +47,6 @@ export default class Statement extends Component {
 	    );
   	}
 }
+
+
+

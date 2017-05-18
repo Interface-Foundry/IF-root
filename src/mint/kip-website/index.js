@@ -36,11 +36,14 @@ const store = createStore(
   applyMiddleware(...middleware)
 );
 
-// Check the session?? i guess
+// Check session and prep carts and blogs
 store.dispatch(get('/api/session', 'SESSION'))
   .then(() => {
     store.dispatch(get('/api/carts', 'CARTS'));
+    store.dispatch(get('api/blog/posts', 'POSTS'));
   });
+
+
 
 // Configure View
 ReactDOM.render(

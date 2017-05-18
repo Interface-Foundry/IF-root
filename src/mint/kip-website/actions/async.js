@@ -14,6 +14,6 @@ export const get = (url, type) => async dispatch => {
 		});
 
 	} catch (e) {
-	 	 throw 'error in session update';
+	 	throw `error in get ${type}`;
 	}
 };
