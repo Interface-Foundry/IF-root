@@ -31,6 +31,8 @@ router.get('/', (req, res) => co(function* () {
  */
 router.post('/auth/quick/:code', (req, res) => co(function * () {
   var email = req.body.email;
+
+  // verifies that an account actually exists for the email
   var realUser = yield db.UserAccounts.findOne({email_address: email});
 
   if (!realUser) {
@@ -38,6 +40,7 @@ router.post('/auth/quick/:code', (req, res) => co(function * () {
     return res.status(404).end()
   }
 
+  // find the auth link that matches the user whose account we're trying to log into
   var realLink = yield db.AuthenticationLinks.findOne({
     user: realUser.id,
     code: {
@@ -45,16 +48,20 @@ router.post('/auth/quick/:code', (req, res) => co(function * () {
     }
   })
 
+  // find the auth link that matches the code that was passed in
   var link = yield db.AuthenticationLinks.findOne({code: req.params.code}).populate('user').populate('cart')
+
+  // if there isn't one, or if it doesn't match the email, do some stuff
   if (!link || !link.user || realLink.id != link.id) {
-    //augment counter for link actually associated w/ that email
+
     if (realLink) {
+      // augment counter for bad log in attempts on the link actually associated w/ that email
       realLink.attempts++;
       logging.info('bad attempt');
       yield realLink.save()
 
+      //if there have been too many attempts, scrap the log-in code and tell the front-end
       if (realLink.attempts >= 5) {
-        //if there have been too many attempts, scrap the code and tell the front-end
         realLink.code = null;
         realLink.attempts = 0;
         yield realLink.save();
