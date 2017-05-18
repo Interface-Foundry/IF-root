@@ -68,13 +68,24 @@ var cartsCollection = Waterline.Collection.extend({
     /** @type {String} amazon_purchase_url the url that goes directly to amazon */
     amazon_purchase_url: 'string',
 
-        /** @type {string} the online retailer */
+    /** @type {string} the online retailer */
     store: {
       type: 'string',
       enum: [
         'amazon',
         'ypo'
       ]
+    },
+
+    /** @type {string} the cart's privacy setting*/
+    privacy: {
+      type: 'string',
+      enum: [
+        'private', // you can only view or join the cart if you have the same email domain as the leader
+        'public', // anyone with the link can view or join the cart -- this is the current and default setting
+        'display' // anyone can view the cart but only the admin can join, i.e. add items to it
+      ],
+      defaultsTo: 'public'
     },
 
     archive: archive

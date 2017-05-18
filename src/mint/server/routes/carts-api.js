@@ -92,10 +92,27 @@ module.exports = function (router) {
    */
   router.get('/cart/:cart_id', (req, res) => co(function* () {
 
+    //TODO check cart privacy sendStatus
+    //
+
     var cart = yield db.Carts.findOne({ id: req.params.cart_id })
       .populate('leader')
       .populate('members', selectMembersWithoutEmail)
       .populate('items')
+
+    if (cart && cart.privacy == 'private') {
+      // if the cart is set to "private", check to see if they're logged in and if they're a member of the cart
+      if (!_.get(req, 'UserSession.user_account.id')) {
+        // if they're not logged in they can't see the cart
+        res.sendStatus(401)
+      }
+      else {
+        //if they're logged in but don't have the right email domain, they can't see the cart
+        var userDomain = _.get(req, 'UserSession.user_account.email_address').split('@')[1]
+        var leaderDomain = cart.leader.email_address.split('@')[1]
+        if (userDomain !== leaderDomain) res.sendStatus(403);
+      }
+    }
 
     if (cart) {
       res.send(cart);
