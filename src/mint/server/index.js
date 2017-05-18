@@ -32,16 +32,8 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
   }));
 }
 
-// idk
-var regularRoutes = require('./routes/regular.js');
-var apiRoutes = require('./routes/api.js');
-var mailRoutes = require('./routes/incoming-mail.js');
-
-// sendgrid router
-var sendgridRouter = require('./sendgrid-webhook.js')
 
 require('colors');
-// require('../camel'); //uncomment to populate camel_items
 
 /**
  * Models loaded from the waterline ORM
@@ -113,15 +105,17 @@ if (process.env.LOGGING_MODE === 'database') {
 
 }
 
-// ROUTES
-app.use('/', regularRoutes);
-app.use('/api', apiRoutes);
-app.use('/sendgrid', mailRoutes);
+//
+// Back end routes
+//
+app.use('/', require('./routes/regular.js'));
+app.use('/api', require('./routes/api.js'));
+app.use('/sendgrid', require('./routes/incoming-mail.js'));
+app.use('/sg', require('./sendgrid-webhook.js'));
 
-/**
- * Sendgrid Webhook
- */
-app.use('/sg', sendgridRouter);
+//
+// Front end routes
+//
 
 /**
  *  Always return the main index.html, so react-router render the route in the client

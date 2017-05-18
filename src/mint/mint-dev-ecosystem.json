@@ -7,6 +7,7 @@
     "watch": true,
     "env": {
       "SEND_EMAILS": true,
+      "SENDGRID_WEBHOOK": "http://mint-dev.kipthis.com/sq",
       "NO_LIVE_RELOAD": true,
       "NODE_ENV": "production",
       "NO_LUMINATI": true,
