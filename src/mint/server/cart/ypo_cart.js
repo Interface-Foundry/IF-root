@@ -11,22 +11,6 @@ const path = require('path')
 dbReady.then((models) => { db = models })
 
 /**
- * Gets the category1 + category2 array .
- *
- * @return     {Object}  The categorys array.
- */
-function getCategorysArray() {
-  const categoryFile = JSON.parse(fs.readFileSync(path.join(__dirname, '../../ingest/categories.json')))
-
-  return {
-    category1: _.map(_.flatMap(categoryFile, (category) =>  _.keys(category)), (i) => i.trim().toLowerCase()),
-    category2: _.map(_.keys(categoryFile), (i) => i.trim().toLowerCase())
-  }
-}
-const categorysObject = getCategorysArray()
-
-
-/**
  * çreates item that can be generalized to add to cart
  *
  * @param      {item id}  the item id for ypo item
@@ -103,7 +87,7 @@ module.exports.itemPreview = function (query, page, category) {
       .toArray()
 
     // transform the YPO catalog items into kip cart items
-    var items = yield ypoItems.map(item => db.Items.create({
+    items = yield ypoItems.map(item => db.Items.create({
       store: 'ypo',
       name: item.name,
       asin: item.item_code.toString(),

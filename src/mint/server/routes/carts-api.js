@@ -2,6 +2,8 @@ const co = require('co')
 const _ = require('lodash')
 const url = require('url')
 const amazonScraper = require('../cart/scraper_amazon')
+const amazonConstants = require('../cart/amazon_constants')
+const ypoConstants = require('../cart/ypo_constants')
 const amazon = require('../cart/amazon_cart')
 const cartUtils = require('../cart/cart_utils')
 const camel = require('../deals/deals')
@@ -617,8 +619,9 @@ module.exports = function (router) {
 
 
 
-    const store = _.get(req, 'query.store') ? req.query.store : 'amazon'
-    const item = yield cartUtils.itemPreview(q, store, (req.query.page || 1), req.query.category)
+    const store = _.get(req, 'query.store', 'amazon')
+    const locale = _.get(req, 'query.store_locale', 'US')
+    const item = yield cartUtils.itemPreview(q, store, locale, (req.query.page || 1), req.query.category)
     res.send(item)
   }))
 
@@ -730,21 +733,22 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart id
    */
   router.get('/categories/:cart_id', (req, res) => co(function * () {
-    //get cart
+    // the cart has the store and locale information, which we need to know what cateogires to show
     var cart = yield db.Carts.findOne({id: req.params.cart_id})
-    var store = cart.store;
 
-    switch (store) {
+    switch (cart.store) {
       case 'amazon':
-        var categories = yield category_utils.getAmazonCategories();
+        if (amazonConstants.categories[cart.store_locale]) {
+          res.send(amazonConstants.categories[cart.store_locale])
+        } else {
+          throw new Error('Cannot fetch categories for unhandled amazon store locale: ' + cart.store_locale)
+        }
         break;
       case 'ypo':
-        var categories = yield category_utils.getYpoCategories();
+        res.send(ypoConstants.categories)
         break;
+      default:
+        throw new Error('Cannot fetch categories for unhandled cart type: ' + cart.store)
     }
-    //get cart type and whatever else
-    //get the right collection of categories and send that back
-    if (categories) res.send(categories);
-    else res.sendStatus(422);
   }))
 }
