@@ -38,7 +38,7 @@ module.exports = {
       use: {
         loader: 'babel-loader',
         options: {
-          cacheDirectory: CACHE_DIR,
+          cacheDirectory: true,
           'presets': ['react', 'es2015', 'stage-0']
         }
       }

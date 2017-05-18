@@ -28,6 +28,10 @@ export default class Header extends Component {
             <ModalHead text={'Add To Cart'} {...props}/>
           }
         />
+        <Route path={'/newcart'} exact component={() => 
+            <IntroHead text={'Create A Cart'} {...props}/>
+          }
+        />
         <Route path={'/cart/:cart_id/m/:type/:index/:asin/edit'} exact component={() => 
             <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
           }
@@ -83,7 +87,8 @@ class CartHead extends Component {
     _toggleSidenav: PropTypes.func,
     currentUser: PropTypes.object,
     currentCart: PropTypes.object,
-    isMobile: PropTypes.bool
+    isMobile: PropTypes.bool,
+    _togglePopup: PropTypes.func
   }
 
   state = {
@@ -99,7 +104,7 @@ class CartHead extends Component {
   render() {
     const {
       state: { bounce },
-      props: { currentUser: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader } }
+      props: { currentUser: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, leader } }
     } = this;
 
     return (
@@ -210,6 +215,8 @@ class SettingsHeader extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
     history: PropTypes.object,
+    text: PropTypes.string,
+    icon: PropTypes.object
   }
 
   render() {

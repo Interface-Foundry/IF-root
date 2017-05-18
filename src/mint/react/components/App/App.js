@@ -122,7 +122,6 @@ export default class App extends Component {
         currentUser,
         location,
         logout,
-        login,
         items,
         history: { replace }
       },
@@ -150,7 +149,9 @@ export default class App extends Component {
             <Route path={'/cart/:cart_id'} exact component={CartContainer} />
 
           </div>
-          { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
+          { showSidenav && ( sidenav || !isMobile )
+            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> 
+            : null }
           {showFooter ? <Footer {...props} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> : null}
         </section>
     );
