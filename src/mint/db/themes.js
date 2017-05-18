@@ -10,8 +10,13 @@ var themesCollection = Waterline.Collection.extend({
      * The name of the theme
      * @type {String}
      */
-    name: 'string'
+    name: 'string',
 
+    /**
+     * The color associated with the theme
+     * @type {String}
+     */
+    color: 'string'
   }
 });
 
