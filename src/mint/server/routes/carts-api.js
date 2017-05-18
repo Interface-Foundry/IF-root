@@ -92,9 +92,6 @@ module.exports = function (router) {
    */
   router.get('/cart/:cart_id', (req, res) => co(function* () {
 
-    //TODO check cart privacy sendStatus
-    //
-
     var cart = yield db.Carts.findOne({ id: req.params.cart_id })
       .populate('leader')
       .populate('members', selectMembersWithoutEmail)
