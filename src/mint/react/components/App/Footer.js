@@ -65,7 +65,7 @@ class CartFooter extends Component {
     const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, user_account, leader, items, isMobile, history: { replace, push } } = this.props;
     const isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
     const total = calculateItemTotal(items);
-    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'uk' ? 'GBP' : 'USD') : 'GBP' : null;
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
     if (locked) {
       return (
         <div className='footer__cart'>
@@ -73,12 +73,12 @@ class CartFooter extends Component {
             <Icon icon='Email'/>
             FEEDBACK
           </button>
-          <a 
+          <a
             className={items.length===0 ? 'disabled':''}
-            href={`/api/cart/${cart_id}/checkout`} 
+            href={`/api/cart/${cart_id}/checkout`}
             onClick={
-              (e) => { 
-                e.preventDefault(); 
+              (e) => {
+                e.preventDefault();
                 if (items.length > 0) {
                   if(currentCart.store === 'ypo'){
                     push(`/cart/${currentCart.id}/address`)
@@ -105,12 +105,12 @@ class CartFooter extends Component {
           <Icon icon='Person'/>
           <h4>Share</h4>
         </button>
-        <a 
+        <a
           className={items.length === 0 ? 'disabled':''}
-          href={`/api/cart/${cart_id}/checkout`} 
+          href={`/api/cart/${cart_id}/checkout`}
           onClick={
-            (e) => { 
-              e.preventDefault(); 
+            (e) => {
+              e.preventDefault();
               if (items.length > 0) {
                   if(currentCart.store === 'ypo'){
                     push(`/cart/${currentCart.id}/address`)

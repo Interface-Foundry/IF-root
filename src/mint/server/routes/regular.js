@@ -228,28 +228,43 @@ router.get('/auth/:id', (req, res) => co(function * () {
 
 
 /**
- * @api {get} /newcart/:store New Cart for a specific store
+ * @api {get} /newcart/:store New Cart
  * @apiDescription create new cart for user, redirect them to /cart/:id and send an email
  * @apiGroup HTML
- * @apiParam {string} : the token from the auth db
+ * @apiParam {string} :store one of amazon_US, amazon_UK, amazon_CA, ypo (all defined in cart/cart_types.js)
  */
 router.get('/newcart/:store', (req, res) => co(function * () {
-  let cart = yield cartUtils.createCart(req.params.store)
-  const session = req.UserSession
+  // cart body, used in db.Carts.create(cart) later
+  var cart = {}
 
-  if (session.user_account) {
-    // make the first user the leader
-    const user = session.user_account
-    cart.leader = user.id
-    if (user.name) {
-      cart.name = user.name + "'s Kip Cart"
-    } else {
-      cart.name = user.email_address.replace(/@.*/, '') + "'s Kip Cart"
-    }
-    yield cart.save()
+  // Figure out what store they are shopping at and in what locale
+  if (!req.params.store) {
+    cart.store = 'amazon'
+    cart.store_locale = 'US'
+  } else if (req.params.store === 'ypo') {
+    cart.store = 'ypo'
+    cart.store_locale = 'UK'
+  } else if (req.params.store.includes('amazon')) {
+    cart.store = 'amazon'
+    cart.store_locale = req.params.store.split('_')[1]
+  } else {
+    throw new Error('Cannot create new cart for store ' + req.params.store)
   }
 
+  // Add the cart leader if they are logged in
+  const user_id = _.get(req, 'UserSession.user_account.id')
+  if (user_id) {
+    cart.leader = user_id
+    cart.name = req.UserSession.user_account.name + '\'s Kip Cart'
+  }
+
+  // This is all the investors care about right here. This is the money line.
+  cart = yield db.Carts.create(cart)
+  console.log(cart)
+
   res.redirect(`/cart/${cart.id}/`);
+}).catch(e => {
+  console.log(e)
 }))
 
 

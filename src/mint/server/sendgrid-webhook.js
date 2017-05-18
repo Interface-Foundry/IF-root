@@ -48,14 +48,14 @@ var options = {
   }
 };
 
-rp(options)
-  .then(function (result) {
-    console.log('successfully connected to sendgrid webhook');
-    console.log(result);
-  })
-  .catch(function (error) {
-    console.log('error with sendgrid webhook', error);
-  });
+// rp(options)
+//   .then(function (result) {
+//     console.log('successfully connected to sendgrid webhook');
+//     console.log(result);
+//   })
+//   .catch(function (error) {
+//     console.log('error with sendgrid webhook', error);
+//   });
 
 //~~~~~~~~~~//
 

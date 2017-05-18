@@ -83,39 +83,14 @@ exports.checkout = function * (cart, req, res) {
  * @param      {string}  store   The store type
  * @return     {object}  item    the item preview object for that store
  */
-exports.itemPreview = function * (query, store, page, category) {
+exports.itemPreview = function * (query, store, locale, page, category) {
+  console.log('itemPreview', query, store, locale, page, category)
   if (store === undefined) {
     throw new Error('Store required for item preview')
   }
 
-  const item = yield itemPreviewHandlers[store](query, page, category)
+  const item = yield itemPreviewHandlers[store](query, locale, page, category)
   return item
-}
-
-/**
- * create a cart
- *
- * @param      {string}  store -  the store type to create
- * @return     {object}  cart - the cart object
- */
-exports.createCart = function * (store) {
-  var locale
-  if (store.includes('amazon')) {
-    [store, locale] = store.split('_')
-  }
-
-  const cartOpts = {
-    // store can be ypo or amazon
-    store: (store === undefined) ? 'amazon' : store,
-  }
-
-  if (locale) {
-    cartOpts.store_locale = locale
-  }
-
-  // create a cart
-  const cart = yield db.Carts.create(cartOpts)
-  return cart;
 }
 
 /**
@@ -150,6 +125,7 @@ exports.clearCart = function * (cart, retailer) {
 };
 
 exports.addItemToCart = function * (item, cart) {
+  // check for pasted URL
   var cart = yield addItemHandlers[retailer](item, cart)
 };
 
@@ -185,13 +161,12 @@ exports.deleteItemFromCart = function * (item, cart, userId) {
 /**
  * create item in db.Items for a specified store
  *
- * @param      {string}  itemId  The item identifier/asin
- * @param      {string}          userId  The user identifier
+ * @param      {string}  item  The item, which who even fucking knows what it could be
  * @param      {string}          cartId  the cart identifier
  * @param      {number}          quantity the item quantity
  * @return     {object}          item object that was created
  */
-exports.addItem = function * (itemId, cart, quantity) {
+exports.addItem = function * (item, cart, quantity) {
   if (quantity === undefined) {
     quantity = 1
   }
@@ -201,7 +176,7 @@ exports.addItem = function * (itemId, cart, quantity) {
     throw new Error('Cart not found')
   }
 
-  let item = yield addItemHandlers[cart.store](itemId)
+  item = yield addItemHandlers[cart.store](item, cart.store_locale)
   return item
 }
 

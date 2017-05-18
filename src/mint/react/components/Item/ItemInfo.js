@@ -15,7 +15,7 @@ export default class ItemInfo extends Component {
 
   render() {
     const { props, props: { price, currentCart, quantity = 1, type, unit_type } } = this;
-    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'uk' ? 'GBP' : 'USD') : 'GBP' : null;
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
     let convertedPrice = price ? displayCost(price, locale) : 0,
       total = price ? displayCost(price * quantity, locale) : 0;
 
