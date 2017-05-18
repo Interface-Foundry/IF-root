@@ -155,7 +155,7 @@ describe('api', function () {
     assert(session2.user_account.email_address === mcTesty.email)
   }))
 
-  it('GET /newcart should create a new cart, redirect to /cart/:Cart_id, and send an email', () => co(function * () {
+  it('GET /newcart/store should create a new cart, redirect to /cart/:Cart_id, and send an email', () => co(function * () {
     var res = yield get('/newcart', true)
     console.log(res.request.uri)
 

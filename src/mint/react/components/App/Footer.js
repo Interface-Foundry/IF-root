@@ -76,7 +76,7 @@ class CartFooter extends Component {
     const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items, isMobile, history: { replace, push } } = this.props;
     const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
     const total = calculateItemTotal(items);
-    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'uk' ? 'GBP' : 'USD') : 'GBP' : null;
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
     if (locked) {
       return (
         <div className='footer__cart'>
@@ -84,12 +84,12 @@ class CartFooter extends Component {
             <Icon icon='Email'/>
             FEEDBACK
           </button>
-          <a 
+          <a
             className={items.length===0 ? 'disabled':''}
-            href={`/api/cart/${cart_id}/checkout`} 
+            href={`/api/cart/${cart_id}/checkout`}
             onClick={
-              (e) => { 
-                e.preventDefault(); 
+              (e) => {
+                e.preventDefault();
                 if (items.length > 0) {
                   if(currentCart.store === 'ypo'){
                     push(`/cart/${currentCart.id}/address`)
@@ -116,12 +116,12 @@ class CartFooter extends Component {
           <Icon icon='Person'/>
           <h4>Share</h4>
         </button>
-        <a 
+        <a
           className={items.length === 0 ? 'disabled':''}
-          href={`/api/cart/${cart_id}/checkout`} 
+          href={`/api/cart/${cart_id}/checkout`}
           onClick={
-            (e) => { 
-              e.preventDefault(); 
+            (e) => {
+              e.preventDefault();
               if (items.length > 0) {
                   if(currentCart.store === 'ypo'){
                     push(`/cart/${currentCart.id}/address`)
@@ -163,9 +163,9 @@ class ItemFooter extends Component {
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
-        { !!currentUser.id ? 
-          <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); clearItem(); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> 
-          : <button className='add triple' onClick={() => _togglePopup()}>✓ Save to Cart</button> 
+        { !!currentUser.id ?
+          <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); clearItem(); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button>
+          : <button className='add triple' onClick={() => _togglePopup()}>✓ Save to Cart</button>
         }
       </footer>
     );

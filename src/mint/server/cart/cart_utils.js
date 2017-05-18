@@ -93,32 +93,6 @@ exports.itemPreview = function * (query, store, page, category) {
 }
 
 /**
- * create a cart
- *
- * @param      {string}  store -  the store type to create
- * @return     {object}  cart - the cart object
- */
-exports.createCart = function * (store) {
-  var locale
-  if (store.includes('amazon')) {
-    [store, locale] = store.split('_')
-  }
-
-  const cartOpts = {
-    // store can be ypo or amazon
-    store: (store === undefined) ? 'amazon' : store,
-  }
-
-  if (locale) {
-    cartOpts.store_locale = locale
-  }
-
-  // create a cart
-  const cart = yield db.Carts.create(cartOpts)
-  return cart;
-}
-
-/**
  * the idea of this is that you can be agnostic if you match up the functionality
  * per item to the respective retailer function in the handlers above
  * @param  {string} item_identifier is url/asin/etc that is given
