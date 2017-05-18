@@ -1,6 +1,6 @@
 // react/actions/session.js
 
-import { REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION, TOGGLE_ADDING, UPDATE_USER } from '../constants/ActionTypes';
+import { REQUEST_SESSION, RECEIVE_SESSION, REQUEST_UPDATE_SESSION, RECEIVE_UPDATE_SESSION, TOGGLE_ADDING, UPDATE_USER, LOGOUT } from '../constants/ActionTypes';
 import { SubmissionError } from 'redux-form';
 
 const receive = (newSession) => ({
@@ -21,9 +21,13 @@ const receiveUpdate = (newSession) => ({
   newSession
 });
 
-const updateUserInfo = userInfo => ({
+const logoutAll = () => ({
+  type: LOGOUT
+});
+
+const updateuser_account = user_account => ({
   type: UPDATE_USER,
-  userInfo
+  user_account
 });
 
 export const toggleAddingToCart = () => ({
@@ -68,13 +72,7 @@ export function logout() {
         credentials: 'same-origin'
       });
 
-      return dispatch(receiveUpdate({
-        user_account: {},
-        animal: '',
-        createdAt: '',
-        updatedAt: '',
-        id: ''
-      }));
+      return dispatch(logoutAll());
     } catch (e) {
       return new SubmissionError({ email: 'You are already signed in, check your email!' });
     }
@@ -145,7 +143,7 @@ export function updateUser(id, newInfo) {
         credentials: 'same-origin',
         body: JSON.stringify(newInfo)
       });
-      return dispatch(updateUserInfo(await res.json()));
+      return dispatch(updateuser_account(await res.json()));
     } catch (e) {
       throw e;
     }

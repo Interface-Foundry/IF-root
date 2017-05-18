@@ -16,7 +16,8 @@ import {
   REQUEST_SET_STORE,
   REQUEST_CLEAR_CART,
   CANCEL_CLEAR_CART,
-  RECEIVE_CLEAR_CART
+  RECEIVE_CLEAR_CART,
+  LOGOUT
 } from '../constants/ActionTypes';
 
 const initialState = {
@@ -28,6 +29,11 @@ const initialState = {
 
 export default function cart(state = initialState, action) {
   switch (action.type) {
+  case LOGOUT:
+    return {
+      ...initialState,
+      cart_id: state.cart_id
+    };
   case ADDING_ITEM:
     return {
       ...state,

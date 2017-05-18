@@ -126,7 +126,7 @@ router.post('/auth/quick/:code', (req, res) => co(function * () {
     newAccount: false,
     status: 'LOG_IN',
     message: 'user has been logged in via code',
-    userInfo: realUser
+    user_account: realUser
   });
 }))
 

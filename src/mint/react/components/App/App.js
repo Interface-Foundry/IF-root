@@ -23,7 +23,7 @@ export default class App extends Component {
     modal: PropTypes.string,
     cartName: PropTypes.string,
     newAccount: PropTypes.bool,
-    currentUser: PropTypes.object,
+    user_account: PropTypes.object,
     match: PropTypes.object.isRequired,
     fetchCart: PropTypes.func.isRequired,
     fetchAllCarts: PropTypes.func.isRequired,
@@ -72,7 +72,7 @@ export default class App extends Component {
 
   componentDidMount() {
     if (window.innerWidth < 900)
-      this.setState({ isMobile: true })
+      this.setState({ isMobile: true });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -83,11 +83,12 @@ export default class App extends Component {
         fetchAllCarts,
         cart_id,
         session_id,
+        user_account: { id },
         location: { pathname },
         history: { replace }
       }
     } = this;
-    const { cart_id: nextCart_id, session_id: nextSessionId, toast: newToast } = nextProps;
+    const { cart_id: nextCart_id, session_id: nextSessionId, toast: newToast, user_account: { id: nextId } } = nextProps;
     if (!session_id && nextSessionId && process.env.GA) {
       ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
@@ -97,12 +98,11 @@ export default class App extends Component {
 
       _logPageView(pathname, nextSessionId); //log initial load
     }
-    if (cart_id !== nextCart_id && nextCart_id) {
+    if ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id)) {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
       fetchAllCarts();
-    }
-    if (newToast && newToast.includes('Cart Updated')) fetchAllCarts();
+    } else if (newToast && newToast.includes('Cart Updated')) fetchAllCarts();
   }
 
   render() {
@@ -118,17 +118,18 @@ export default class App extends Component {
         updateCart,
         leader,
         carts,
-        currentUser,
+        user_account,
         location,
         logout,
         clearItem,
         items,
+        fetchAllCarts,
         history: { replace }
       },
       state: { sidenav, isMobile, popup }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
-    const showSidenav = !(location.pathname.includes('/m/signin') || location.pathname.includes('newcart'));
+    const showSidenav = !location.pathname.includes('newcart');
 
     return (
       <section className='app'>
@@ -151,8 +152,16 @@ export default class App extends Component {
               <Route path={'/newcart'} exact component={CartStoresContainer} />
             </div>
           </div>
-          { showSidenav && ( sidenav || !isMobile ) ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> : null }
-          {showFooter ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> : null}
+          { 
+            showSidenav && (sidenav || !isMobile) 
+            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} /> 
+            : null
+          }
+          {
+            showFooter 
+            ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> 
+            : null
+          }
         </section>
     );
   }

@@ -1,6 +1,6 @@
 // react/reducers/cartStores.js
 
-import { RECEIVE_STORES } from '../constants/ActionTypes';
+import { RECEIVE_STORES, LOGOUT } from '../constants/ActionTypes';
 
 const initialState = {
   stores: []
@@ -8,6 +8,8 @@ const initialState = {
 
 export default function cartStores(state = initialState, action) {
   switch (action.type) {
+  case LOGOUT:
+    return initialState;
   case RECEIVE_STORES:
     return {
       stores: action.stores

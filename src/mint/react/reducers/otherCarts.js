@@ -1,11 +1,13 @@
 // react/reducers/otherCarts.js
 
-import { RECEIVE_CARTS, RECEIVE_UPDATE_CART } from '../constants/ActionTypes';
+import { RECEIVE_CARTS, RECEIVE_UPDATE_CART, LOGOUT } from '../constants/ActionTypes';
 const initialState = {
   carts: []
 };
 export default function otherCarts(state = initialState, action) {
   switch (action.type) {
+  case LOGOUT:
+    return initialState;
   case RECEIVE_CARTS:
     return {
       ...state,

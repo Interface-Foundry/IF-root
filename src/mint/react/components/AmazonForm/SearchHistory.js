@@ -13,7 +13,7 @@ export default class SearchHistory extends Component {
   }
 
   render() {
-    const { props: { filter, handleSubmit, onChange, _toggleHistory } } = this,
+    const { props: { filter, handleSubmit, onChange } } = this,
     searchHistory = filter.length > 0 ? getSearchHistory(filter) : [];
 
     return (
@@ -29,7 +29,7 @@ export default class SearchHistory extends Component {
                   onChange(previousSearch);
                   setTimeout(() => {
                     handleSubmit();
-                  }, 100)
+                  }, 100);
                 }}>
                   <p>{previousSearch}</p>
                 </div>

@@ -10,13 +10,15 @@ import {
   SEARCH_PREV,
   SET_SEARCH_INDEX,
   SELECT_CARD,
-  RECEIVE_CATEGORY
+  RECEIVE_CATEGORY,
+  LOGOUT
 } from '../constants/ActionTypes';
 
 export default function item(state = {}, action) {
   let nextItemNum;
   switch (action.type) {
   case CLEAR_ITEM:
+  case LOGOUT:
     return {};
   case RECEIVE_ITEM:
   case RECEIVE_INCREMENT_ITEM:
