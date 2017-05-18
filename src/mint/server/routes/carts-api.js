@@ -239,11 +239,24 @@ module.exports = function (router) {
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
+    const currentUser = yield db.UserAccounts.findOne(_.get(req, 'UserSession.user_account.id'));
 
     // Make sure the cart exists
-    const cart = yield db.Carts.findOne({id: req.params.cart_id})
+    const cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('leader')
     if (!cart) {
       throw new Error('Cart not found')
+    }
+
+    logging.info('current privacy setting:', cart.privacy)
+
+    //if the cart is display, the user must be the cart leader
+    if (cart.privacy == 'display' && currentUser.id !== cart.leader.id) {
+      return res.sendStatus(403);
+    }
+
+    //if the cart is private, the user must be in the same domain
+    if (cart.privacy == 'private' && currentUser.email_address.split('@')[1] !== cart.leader.email_address.split('@')[1]) {
+      return res.sendStatus(403);
     }
 
     // Get or create the item, depending on if the user specifed a previewed item_id or a new url
@@ -613,9 +626,27 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart id
    */
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
+
     // get the cart
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
-    // logging.info('populated cart', cart);
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('leader')
+
+    //~~~~~make sure the user is allowed to check this cart out~~~~~//
+
+    const currentUser = yield db.UserAccounts.findOne(_.get(req, 'UserSession.user_account.id'));
+    if (cart.privacy !== 'public' && !currentUser) return res.sendStatus(401);
+
+    //if the cart is display, the user must be the cart leader
+    if (cart.privacy == 'display' && currentUser.id !== cart.leader.id) {
+      return res.sendStatus(403);
+    }
+
+    //if the cart is private, the user must be in the same domain
+    if (cart.privacy == 'private' && currentUser.email_address.split('@')[1] !== cart.leader.email_address.split('@')[1]) {
+      return res.sendStatus(403);
+    }
+
+    //~~~~~~~~~~//
+
     var cartItems = cart.items;
 
     if (cart.affiliate_checkout_url && cart.locked) {
