@@ -31,6 +31,7 @@ waterline.loadCollection(require('./feedback'))
 waterline.loadCollection(require('./item_options'))
 waterline.loadCollection(require('./items'))
 waterline.loadCollection(require('./sessions'))
+waterline.loadCollection(require('./themes'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./ypo_inventory_items'))
 
@@ -68,6 +69,7 @@ var initialize = new Promise((resolve, reject) => {
       ItemOptions: ontology.collections.item_options,
       Items: ontology.collections.items,
       Sessions: ontology.collections.sessions,
+      Themes: ontology.collections.themes,
       UserAccounts: ontology.collections.user_accounts,
       YpoInventoryItems: ontology.collections.ypo_inventory_items
     };

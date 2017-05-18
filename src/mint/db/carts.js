@@ -33,7 +33,7 @@ var cartsCollection = Waterline.Collection.extend({
     items: Waterline.isMany('items'),
 
     /**
-     * THe name of the cart, if one exists
+     * The name of the cart, if one exists
      * @type {String}
      */
     name: 'string',
@@ -85,7 +85,7 @@ var cartsCollection = Waterline.Collection.extend({
       type: 'integer',
       defaultsTo: '0'
     },
-  
+
     archive: archive
   }
 });
