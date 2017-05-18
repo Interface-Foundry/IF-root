@@ -122,7 +122,7 @@ module.exports.itemPreview = function * (query, page, category) {
  * create the xml stuff for a cart
  *
  * @param      {cart}  argument  The argument
- * example out put
+ * example output
  * <?xml version="1.0" encoding="UTF-8" ?>
  * <cart>
  * <items>
@@ -166,7 +166,8 @@ module.exports.itemPreview = function * (query, page, category) {
  */
 module.exports.checkout = function * (cart, req, res) {
   // leader not showing up atm
-  const leader = yield db.UserAccounts.findOne({user_id: cart.leader})
+  const leader = yield db.UserAccounts.findOne({id: cart.leader})
+  const address = yield db.Addresses.findOne({user_account: leader.id})
   let cartFinal = {
     items: cart.items.map(item => {
       return {
@@ -178,15 +179,22 @@ module.exports.checkout = function * (cart, req, res) {
         'cart': cart.id
       }
     }),
+    name: cart.name,
     cart_id: cart.id,
-    // ordered_by: {
-    //   'username': leader.name,
-    //   'email': leader.email_address
-    // },
+    ordered_by: {
+      'username': leader.name || leader.email_address.split('@')[0],
+      'email': leader.email_address,
+      'orderedAt': (new Date()).toString()
+    },
     ypo_delivery_details: {
-      'account_number': 123,
-      'account_name': 'asdf',
-      'address_1': '87 Hurlfield Road'
+      'account_number': leader.account_number,
+      'account_name': leader.account_name,
+      'address_1': address.line_1 || '',
+      'address_2': address.line_1 || '',
+      'town': address.city,
+      'postcode': address.code,
+      'delivery_message': address.delivery_message,
+      'voucher_code': leader.ypo_voucher_code
     }
   }
   const builder = new xml2js.Builder()
