@@ -126,7 +126,6 @@ module.exports = function (router) {
        json: true
      })
 
-    //  console.log('SUPPRESSIONS', suppressions);
      suppressions = suppressions.suppressions.filter(sup => sup.suppressed);
      suppressions = suppressions.map(function (sup) {
        return {id: sup.id, name: sup.name, description: sup.description};
@@ -168,10 +167,11 @@ module.exports = function (router) {
 
   router.get('/postcode', (req, res) => co(function * () {
     var code = req.query.code;
+    //query api to find addressses associated w/ the postcode by their internal ids
     var pcaFindResult = yield request(`https://services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/Find/v1.10/json.ws?Key=UX83-MY94-GN78-FN27&Filter=None&SearchTerm=${code}`);
-    // logging.info('pcaFind result', pcaFindResult)
 
     var addresses = yield JSON.parse(pcaFindResult).map(function * (item) {
+      // query their api again to get full details of those addresses
       var fullAddress = yield request(`https://services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/RetrieveById/v1.30/json.ws?Key=UX83-MY94-GN78-FN27&Id=${item.Id}`);
       // logging.info('full address:', fullAddress);
       return JSON.parse(fullAddress)

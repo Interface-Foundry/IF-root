@@ -33,7 +33,7 @@ export default class ProductDescription extends Component {
 
     this.setState({
       showViewMore: height > 80,
-      descripHeight: height > 80 ?'3.6em' : '100%'
+      descripHeight: height > 80 ? '3.6em' : '100%'
     });
   }
 

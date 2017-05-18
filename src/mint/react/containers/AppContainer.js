@@ -18,7 +18,7 @@ const mapStateToProps = (state, ownProps) => {
     status: status ? status[1] : null,
     leader: state.currentCart.leader,
     carts: state.otherCarts.carts,
-    currentUser: state.session.user_account,
+    user_account: state.session.user_account,
     newAccount: state.session.newAccount,
     cards: state.cards.cards,
     position: state.cards.position,

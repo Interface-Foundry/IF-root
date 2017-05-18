@@ -12,7 +12,7 @@ const mapStateToProps = (state, ownProps) => ({
   currentCart: state.currentCart,
   item_id: ownProps.match.params.item_id,
   amazon_id: ownProps.match.params.amazon_id,
-  currentUser: state.session.user_account,
+  user_account: state.session.user_account,
   item: state.item,
   index: parseInt(ownProps.match.params.index),
   type: ownProps.match.params.item_type,

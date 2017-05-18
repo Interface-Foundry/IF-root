@@ -401,8 +401,7 @@ module.exports = function (router) {
       throw new Error('Could not find user ' + req.params.user_id)
     }
 
-    logging.info('req.body:', req.body);
-
+    // create a new address associated with this user
     var addr = yield db.Addresses.create(req.body);
     addr.user_account = user.id;
     yield addr.save();

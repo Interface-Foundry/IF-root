@@ -668,8 +668,8 @@ module.exports = function (router) {
 
 
   /**
-   * @api {get} /api/cart_type list of carts sorted by location
-   * @apiDescription Retrieves a list of carts sorted by IP location
+   * @api {get} /api/cart_type list of carts sorted by the user's location
+   * @apiDescription Retrieves a list of carts sorted by the user's IP location and country
    * @apiGroup Carts
    */
   router.get('/cart_type', (req, res) => co(function * () {
@@ -680,6 +680,7 @@ module.exports = function (router) {
 
     var ipresponse = yield ipinfo(ip);
 
+    // if we can't tell where they are, assume the US
     if (!ipresponse.country) {
       ipresponse.country = 'US',
       ipresponse.loc = '40.7449,-73.9782'
@@ -692,14 +693,18 @@ module.exports = function (router) {
     }
     console.log('ipresponse', ipresponse)
 
-    // send back list of stores in format on the git issue
-    // var stores = cart_types.filter(cart => cart.store_countries.indexOf(country) > -1);
-
+    // assemble list of stores
     var stores = [];
-    //sort by distance
+
+    // if we're in production, don't show YPO
+    if (process.env.NODE_ENV == 'production') {
+      stores = stores.filter( s => store.type !== 'ypo');
+    }
+
+    // first sort the stores by distance to / from the user
+    // using haversine, which calculates distance on a sphere
+    // because earth, unfortunately, is a sphere
     stores = cart_types.sort(function (a, b) {
-      // console.log('a', a, 'b', b)
-      //if return -1 ==> a comes first
       var coordsA = countryCoordinates[a.store_countries[0]]
       var coordsB = countryCoordinates[b.store_countries[0]]
       var havA = haversine(userCoords, {latitude: coordsA[0], longitude: coordsA[1]});
@@ -708,14 +713,17 @@ module.exports = function (router) {
       logging.info(b.store_name, 'havB', havB)
       return Math.abs(havA) - Math.abs(havB)
     })
-    //now sort by "is this the right country", using a stable sort to keep everything else still ordered by distance
+    // but since the geocoordinates of countries are pretty random,
+    // the country a user is in won't necessarily be the country that they're "closest" to
+    // so resort the list by "is this the right country",
+    // using a stable sort to keep everything else still ordered by distance
     stores = stable(stores, function (a, b) {
       if (a.store_countries.indexOf(country) > -1 && b.store_countries.indexOf(country) <= -1) return -1;
       else if (b.store_countries.indexOf(country) > -1 && a.store_countries.indexOf(country) <= -1) return 1;
       else return 0;
     })
 
-    console.log('stores', stores)
+    // logging.info('stores', stores)
     res.send(stores)
   }))
 

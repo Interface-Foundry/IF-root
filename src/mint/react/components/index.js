@@ -7,7 +7,6 @@ export Cart from './Cart';
 export CartStore from './CartStore';
 export Cards from './Cards';
 export EditCart from './EditCart';
-export EmailForm from './EmailForm';
 export ErrorPage from './ErrorPage';
 export Feedback from './Feedback';
 export Icon from './Icon';

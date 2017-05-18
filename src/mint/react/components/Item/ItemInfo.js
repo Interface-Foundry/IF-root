@@ -9,7 +9,8 @@ export default class ItemInfo extends Component {
     price: PropTypes.number,
     quantity: PropTypes.number,
     type: PropTypes.string,
-    unit_type: PropTypes.string
+    unit_type: PropTypes.string,
+    currentCart: PropTypes.object
   };
 
   render() {

@@ -12,11 +12,12 @@ export default class Sidenav extends Component {
     leader: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
     _toggleSidenav: PropTypes.func.isRequired,
-    currentUser: PropTypes.object.isRequired,
+    user_account: PropTypes.object.isRequired,
     replace: PropTypes.func,
     itemsLen: PropTypes.number,
     updateCart: PropTypes.func,
-    currentCart: PropTypes.object
+    currentCart: PropTypes.object,
+    fetchAllCarts: PropTypes.func
   }
 
   state = {
@@ -50,15 +51,15 @@ export default class Sidenav extends Component {
   render() {
     const {
       _moveToFront,
-      props: { carts, _toggleSidenav, currentUser, cart_id },
+      props: { carts, _toggleSidenav, user_account, cart_id },
       state: { show }
     } = this;
 
     let leaderCarts = _moveToFront(
-        carts.filter((c, i) => (c && c.leader && currentUser) && (c.leader.id === currentUser.id)),
+        carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id)),
         cart_id),
       memberCarts = _moveToFront(
-        carts.filter((c, i) => (c && c.leader && currentUser) && (c.leader.id !== currentUser.id)),
+        carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id)),
         cart_id);
     return (
       <div className='sidenav'>
@@ -66,7 +67,7 @@ export default class Sidenav extends Component {
         </div>
         <ul className='sidenav__list'>
           <li className='sidenav__list__header'>
-            <p>{currentUser.name ? currentUser.name : ''}</p>
+            <p>{user_account.name ? user_account.name : ''}</p>
             <div className='icon' onClick={_toggleSidenav}>
               <Icon icon='Clear'/>
             </div>
@@ -127,7 +128,7 @@ export default class Sidenav extends Component {
             }
           </li>
           <li className='sidenav__list__actions'>
-            {currentUser.name ? <Link to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></Link> : null }
+            {user_account.name ? <Link to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></Link> : null }
             <Link to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></Link>
           </li>
           <footer className='sidenav__footer'>

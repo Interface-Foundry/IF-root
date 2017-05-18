@@ -7,6 +7,9 @@ import { PropTypes } from 'prop-types';
 import { Icon } from '..';
 
 export default class AmazonForm extends Component {
+  static propTypes = {
+    onSubmit: PropTypes.func
+  }
   constructor(props) {
     super(props);
     this.renderField = ::this.renderField;
@@ -15,33 +18,33 @@ export default class AmazonForm extends Component {
   }
 
   state = {
-    showHistroy: false
+    showHistory: false
   }
 
   _toggleHistory = () => {
-    this.setState({showHistroy: !this.state.showHistroy})
+    this.setState({ showHistory: !this.state.showHistory });
   }
 
   onSubmitMiddleware = (values, e, state) => {
-    const { _toggleHistory, props: { handleSubmit, onSubmit } } = this;
+    const { _toggleHistory, props: { onSubmit } } = this;
 
-    _toggleHistory()
-    onSubmit(values, e, state)
+    _toggleHistory();
+    onSubmit(values, e, state);
   }
 
   renderField({ input, label, placeholder, handleSubmit, type, meta, meta: { touched, error, warning, submitting, active, dirty } }) {
-    const { onSubmitMiddleware, _toggleHistory, state: { showHistroy } } = this;
+    const { _toggleHistory, state: { showHistory } } = this;
     return (
       <div>
           <div className='form__input'>
-            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete="off" spellCheck='true' onFocus={() => this.setState({showHistroy: true})}/>
+            <input {...input} placeholder={placeholder} type={type} autoFocus autoComplete="off" spellCheck='true' onFocus={() => this.setState({showHistory: true})}/>
             <button
               className='form__input__submit'
               onClick={handleSubmit}>
               <div className='form__input__submit__description'><Icon icon='Search'/></div>
             </button>
           </div>
-          {showHistroy || active && dirty ? <SearchHistory filter={input.value} onChange={input.onChange} handleSubmit={handleSubmit} _toggleHistory={_toggleHistory} />:null}
+          {showHistory || active && dirty ? <SearchHistory filter={input.value} onChange={input.onChange} handleSubmit={handleSubmit} _toggleHistory={_toggleHistory} />:null}
         </div>
     );
   }
@@ -50,7 +53,7 @@ export default class AmazonForm extends Component {
     const { props, renderField, onSubmitMiddleware } = this;
     const { handleSubmit, storeName } = props;
     const displayStore = storeName === 'ypo' ? 'YPO' : _.capitalize(storeName);
-    
+
     return (
       <form onSubmit={handleSubmit(onSubmitMiddleware)} className="form">
         <Field

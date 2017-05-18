@@ -25,7 +25,8 @@ export default class Cart extends Component {
     updateCart: PropTypes.func,
     currentCart: PropTypes.object,
     cards: PropTypes.array,
-    cancelRemoveItem: PropTypes.func.isRequired
+    cancelRemoveItem: PropTypes.func.isRequired,
+    cancelClearCart: PropTypes.func
   }
 
   state = {
@@ -33,7 +34,7 @@ export default class Cart extends Component {
   }
 
   componentWillMount() {
-    const { fetchCards, cards = [], currentCart = {store: ''} } = this.props;
+    const { fetchCards, cards = [], currentCart = { store: '' } } = this.props;
     if (cards.length === 0 && currentCart.store === 'ypo') {
       fetchCards();
     }
@@ -58,14 +59,8 @@ export default class Cart extends Component {
       cartId = nextProps.cart_id || cart_id;
 
     if (cartId) {
-      if (cards.length === 0 && currentCart.store === 'ypo') {
-        fetchCards(cartId);
-      }
-      if (!user_account.id && !leader) {
-        replace(`/cart/${cartId}/m/signin`);
-      } else if (!!leader && !addingItem && this.props.addingItem !== addingItem && !!user_account.id) {
-        replace(`/cart/${cartId}/`);
-      }
+      if (cards.length === 0 && currentCart.store === 'ypo') fetchCards(cartId);
+      if (!!leader && !addingItem && this.props.addingItem !== addingItem && !!user_account.id) replace(`/cart/${cartId}/`);
     }
 
     if (items.quantity < nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
@@ -76,7 +71,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, cards, locked, updateCart, currentCart, cancelRemoveItem, clearCart, cancelClearCart, history: { push } } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, cards, locked, updateCart, currentCart, cancelRemoveItem, cancelClearCart, history: { push } } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
@@ -151,7 +146,8 @@ export default class Cart extends Component {
 class MyItems extends Component {
   static propTypes = {
     items: PropTypes.array.isRequired,
-    currentCart: PropTypes.object
+    currentCart: PropTypes.object,
+    user_account: PropTypes.object
   }
 
   renderList() {

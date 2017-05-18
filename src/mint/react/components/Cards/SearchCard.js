@@ -14,7 +14,8 @@ export default class SearchCard extends Component {
     image_url: PropTypes.string,
     cart_id: PropTypes.string,
     index: PropTypes.number,
-    unit_type: PropTypes.string
+    unit_type: PropTypes.string,
+    currentCart: PropTypes.object
   }
 
   render() {
