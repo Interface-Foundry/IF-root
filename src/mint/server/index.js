@@ -2,6 +2,7 @@
 const fs = require('fs'),
   os = require('os'),
   express = require('express'),
+  compress = require('compression'),
   app = express(),
   bodyParser = require('body-parser'),
   sessions = require('client-sessions'),
@@ -56,6 +57,7 @@ dbReady.then((models) => { db = models; })
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
  */
+app.use(compress()); 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.resolve(__dirname, '..', 'public')));
