@@ -64,6 +64,9 @@
           &:active, &:focus {
             border-color: $fifth-button-color;
           }
+          &.empty {
+            border-color: $third-button-color;
+          }
         }
         label {
           font-size: 10px;
