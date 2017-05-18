@@ -701,6 +701,11 @@ module.exports = function (router) {
 
     var stores = [];
     //sort by distance
+
+    if (process.env.NODE_ENV == 'production') {
+      stores = stores.filter( s => store.type !== 'ypo');
+    }
+
     stores = cart_types.sort(function (a, b) {
       // console.log('a', a, 'b', b)
       //if return -1 ==> a comes first
