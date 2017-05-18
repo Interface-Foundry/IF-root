@@ -644,6 +644,9 @@ module.exports = function (router) {
     }
 
     yield cartUtils.sendReceipt(cart, req)
+  }).catch(e => {
+    logging.error(e)
+    throw e
   }))
 
 
