@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const googl = require('goo.gl');
 const {OperationHelper} = require('apac');
 
 const LRU = require('lru-cache')
@@ -8,31 +9,63 @@ const asinCache = LRU({
   length: function () { return 1 } // every document just has length 1
 })
 
-var scraper = require('./scraper_amazon');
+var amazonScraper = require('./scraper_amazon');
+var amazonConstants = require('./amazon_constants');
 var emoji = require('../utilities/emoji_utils');
 
-// amazon creds -> move to constants later
-const amazonCreds = [{
-  'awsId': 'AKIAIQWK3QCI5BOJTT5Q',
-  'awsSecret': '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',
-  'assocId': 'motorwaytoros-20',
-  'maxRequestsPerSecond': 1
-}, {
-  'awsId': 'AKIAJLM6YRRSPF4UQHOA',
-  'awsSecret': '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',
-  'assocId': 'motorwaytoros-20',
-  'maxRequestsPerSecond': 1
-}];
+var db
+const dbReady = require('../../db')
+dbReady.then((models) => { db = models })
 
-const associateTag = 'motorwaytoros-20';
+/**
+ * List of aws product api operation helpers from the APAC npm library
+ * @type {Object}
+ */
+const opHelpers = {}
+Object.keys(amazonConstants.credentials).map(locale => {
+  // We'll just use the first one in the list for now TODO switch between the two api keys
+  opHelpers[locale] = new OperationHelper(amazonConstants.credentials[locale][0])
+})
 
-const opHelper = new OperationHelper(amazonCreds[0]);
+/**
+ * Default ophelper which is used to look up ASINS etc
+ * @type {[type]}
+ */
+const opHelper = opHelpers.US
 
+/**
+ * Gets associate tag for a locale
+ * @type {[type]}
+ */
+function localeTag(locale) {
+  return amazonConstants.credentials[locale][0].assocId
+}
+
+/**
+ * Checks the response from an amazon request for an error, and throws a nicer
+ * error if there was a request error
+ */
 const checkError = function (res) {
   if (_.get(res, 'Request.Errors.Error')) {
     var e = _.get(res, 'Request.Errors.Error.0') || _.get(res, 'Request.Errors.Error')
     throw new Error('Amazon Error [' + e.Code + ']: ' + e.Message)
   }
+}
+
+exports.itemPreview = function * (query, locale, page, category) {
+  var item
+  if (query.includes('amazon.com')) {
+    // probably a url
+    item = yield amazonScraper.scrapeUrl(query, locale)
+  } else if (query.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
+    // probably an asin
+    item = yield amazonScraper.scrapeAsin(query, locale)
+  } else {
+    // search query
+    // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
+    item = yield exports.searchAmazon(query, locale, page, category);
+  }
+  return item
 }
 
 /**
@@ -77,9 +110,9 @@ function checkAmazonItemInCart (item, cart) {
  * @param {string} original_url entered into box or whatever
  * @y just return item title for now
  */
-exports.getAmazonItem = function * (item_identifier) {
+exports.getAmazonItem = function * (item_identifier, locale) {
   var asin = exports.getAsin(item_identifier);
-  var res = yield exports.lookupAmazonItem(asin);
+  var res = yield exports.lookupAmazonItem(asin, locale);
   return res;
 };
 
@@ -90,22 +123,27 @@ exports.getAmazonItem = function * (item_identifier) {
 /**
  * search item by keyword(s)
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
- * lookup item by asin
  * @param {string} query search terms
- * @returns {[type]} amazon items
+ * @param {string} locale amazone website locale, can leave blank, defaults to US
+ * @param {number} page serach result page, starts at 1
+ * @param {string} category search index to use, I guess like "Gourmet Grocery" or whatever. can leave blank
+ * @returns {[db.Items]} amazon items
  */
-exports.searchAmazon = function * (query, index) {
+exports.searchAmazon = function * (query, locale, page, category) {
   query = emoji(query);
-  console.log('searching:', query)
+
   var amazonParams = {
     Availability: 'Available',
     Keywords: query,
     Condition: 'New',
-    SearchIndex: 'All', //the values for this vary by locale
+    SearchIndex: category || 'All', //the values for this vary by locale
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
-    ItemPage: index || 1
+    ItemPage: page || 1
   };
-  var results = yield opHelper.execute('ItemSearch', amazonParams);
+
+  logging.info('amazonParams:', amazonParams)
+
+  var results = yield opHelpers[locale].execute('ItemSearch', amazonParams);
   if (!results || !results.result.ItemSearchResponse.Items.Item) {
     if (!results) throw new Error('Error on search for query', query);
     else logging.error("Searching " + query + ' yielded no results');
@@ -113,7 +151,7 @@ exports.searchAmazon = function * (query, index) {
     // remove the last word, and try the search again
     var newQuery = query.split(/[^\w]/).slice(0, -1).join(' ')
     if (newQuery) {
-      var results = yield exports.searchAmazon(newQuery)
+      var results = yield exports.searchAmazon(newQuery, locale, page, category)
       return results
     } else {
       return [];
@@ -124,7 +162,7 @@ exports.searchAmazon = function * (query, index) {
     var items = results.result.ItemSearchResponse.Items.Item
     var validatedItems = [];
     yield items.map(function * (item) { //map of undefined
-      var dbItem = yield scraper.res2Item({Request: {IsValid: 'True'}, Item: item})
+      var dbItem = yield amazonScraper.res2Item({Request: {IsValid: 'True'}, Item: item})
       // logging.info(dbItem);
       if (dbItem) {
         dbItem.original_link = item.ItemLinks.ItemLink[0].URL
@@ -148,13 +186,16 @@ exports.searchAmazon = function * (query, index) {
  * @param {string} asin of item
  * @returns {[type]} [description]
  */
-exports.lookupAmazonItem = function * (asin) {
+exports.lookupAmazonItem = function * (asin, locale) {
   if (!asin) {
     throw new Error('No asin supplied')
   }
+  if (!locale) {
+    throw new Error('No locale supplied')
+  }
 
   // Check if we have run this lookup recently
-  const cachedValue = asinCache.get(asin)
+  const cachedValue = asinCache.get(asin + locale)
   if (cachedValue) {
     return cachedValue
   }
@@ -166,7 +207,7 @@ exports.lookupAmazonItem = function * (asin) {
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews'
   };
   try {
-    var results = yield opHelper.execute('ItemLookup', amazonParams)
+    var results = yield opHelpers[locale].execute('ItemLookup', amazonParams)
   } catch (err) {
     console.error(err)
     throw new Error('Error on ASIN lookup');
@@ -176,7 +217,7 @@ exports.lookupAmazonItem = function * (asin) {
   var item = results.result.ItemLookupResponse.Items.Item
   if (item.ParentASIN && item.ParentASIN !== item.ASIN) {
     // This item has a parent item, which means it probably has variations
-    var parent = yield module.exports.lookupAmazonItem(item.ParentASIN)
+    var parent = yield module.exports.lookupAmazonItem(item.ParentASIN, locale)
     var options = _.get(parent, 'Item.Variations.Item', [])
 
     // if there's only one variation, it won't be an array, so we'll array-ify it just in case
@@ -193,7 +234,7 @@ exports.lookupAmazonItem = function * (asin) {
   }
 
   // save value to cache
-  asinCache.set(asin, response)
+  asinCache.set(asin + locale, response)
 
   return response
 };
@@ -210,21 +251,24 @@ exports.lookupAmazonItem = function * (asin) {
       - SubTotal
       - CartItems
  */
-exports.createAmazonCart = function * (item) {
+exports.createAmazonCart = function * (item, locale) {
   if (item instanceof Array) {
     throw new Error('Only create cart for single item at a time');
+  }
+  if (!locale) {
+    throw new Error('No locale supplied')
   }
 
   if (_.get(item, 'OfferListingId')) {
     throw new Error('Need ASIN, not using OfferListingId for time being');
   }
   var amazonParams = {
-    'AssociateTag': associateTag,
+    'AssociateTag': localeTag(locale),
     'Item.1.ASIN': item.asin,
     'Item.1.Quantity': (item.quantity === undefined) ? 1 : item.quantity
   };
   try {
-    var cart = yield opHelper.execute('CartCreate', amazonParams);
+    var cart = yield opHelpers[locale].execute('CartCreate', amazonParams);
   } catch (err) {
     console.error(err)
     throw new Error('Error on creating cart')
@@ -272,9 +316,7 @@ function condenseItems(items) {
 
   // ability to use offerlistingid or asin later, just using asin rn
 
-  var amazonParams = {
-    'AssociateTag': associateTag,
-  }
+  var amazonParams = {}
 
   var condendesedItems = condenseItems(items)
   var k = 1
@@ -330,25 +372,29 @@ function getErrorsFromAmazonCartCreate (res) {
  */
 exports.getAmazonCart = function * (cart) {
   var amazonParams = {
-    'AssociateTag': associateTag,
+    'AssociateTag': localeTag(cart.store_locale),
     'CartId': cart.amazon_cartid,
     'HMAC': cart.amazon_hmac,
     'ResponseGroup': 'Cart',
   };
 
-  cart = yield opHelper.execute('CartGet', amazonParams);
+  cart = yield opHelpers[cart.store_locale].execute('CartGet', amazonParams);
   checkError(cart.result.CartGetResponse.Cart)
   return cart.result.CartGetResponse.Cart;
 };
 
 /**
  * creates the item in our cart from asin
- * doesnt
- * @param {string} item from asin
+ * @param {string} item which might be an asin itself or like {url: someurl}
+ * @param {string} locale US, UK, CA
  * @yield {object} created item
  */
-exports.addItemAmazon = function * (itemAsin) {
-  var item = yield scraper.scrapeAsin(itemAsin)
+exports.addItemAmazon = function * (item, locale) {
+  if (item.url) {
+    item = yield amazonScraper.scrapeUrl(item.url, locale)
+  } else {
+    item = yield amazonScraper.scrapeAsin(item, locale)
+  }
   return item
 };
 
@@ -366,17 +412,17 @@ exports.removeAmazonItemFromCart = function * (item, cart) {
 
 /**
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CartClear.html
- * @param {[type]} item          [description]
+ * @param {[type]} cart          [description]
  * @yield {[type]} [description]
  */
 exports.clearAmazonCart = function * (cart) {
   var amazonParams = {
-    'AssociateTag': associateTag,
+    'AssociateTag': localeTag(cart.store_locale),
     'CartId': cart.amazon_cartid,
     'HMAC': cart.amazon_hmac
   };
 
-  cart = yield opHelper.execute('CartClear', amazonParams);
+  cart = yield opHelpers[cart.store_locale].execute('CartClear', amazonParams);
   return cart;
 };
 
@@ -399,10 +445,39 @@ exports.syncAmazon = function * (cart) {
   }
 
   var cartAddAmazonParams = createAmazonCartWithItems(cart.items);
-  var res = yield opHelper.execute('CartCreate', cartAddAmazonParams);
+  cartAddAmazonParams.AssociateTag = localeTag(cart.store_locale)
+  var res = yield opHelpers[cart.store_locale].execute('CartCreate', cartAddAmazonParams);
   var amazonErrors = getErrorsFromAmazonCartCreate(res.result.CartCreateResponse.Cart)
   returnValue = res.result.CartCreateResponse.Cart
   cart.amazon_cartid = returnValue.CartId
   cart.amazon_hmac = returnValue.HMAC
   return returnValue
+}
+
+
+/**
+ * cart checkout for amazon
+ *
+ * @param      {object}  cart    the cart object
+ * @return     {response}  the response
+ */
+exports.checkout = function * (cart, req, res) {
+  var cartItems = cart.items;
+
+  if (cart.affiliate_checkout_url && cart.locked) {
+    res.redirect(cart.affiliate_checkout_url)
+  }
+
+  // make sure the amazon cart is in sync with the cart in our database
+  var amazonCart = yield exports.syncAmazon(cart)
+
+  // save the amazon purchase url
+  if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
+    cart.amazon_purchase_url = amazonCart.PurchaseURL
+    cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
+    yield cart.save()
+  }
+  // redirect to the cart url
+  res.redirect(cart.affiliate_checkout_url)
+  // redirect to the cart url
 }

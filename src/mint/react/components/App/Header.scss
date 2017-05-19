@@ -121,6 +121,11 @@
       }
       span {
         border-bottom: 3px solid $secondary-button-color;
+        max-width: 150px;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
   }

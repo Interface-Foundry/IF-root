@@ -39,6 +39,7 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   });
   middleware = [...middleware, loggerMiddleware];
 }
+
 const store = createStore(
   Reducers,
   applyMiddleware(...middleware)

@@ -20,16 +20,16 @@ export default class Feedback extends Component {
   }
 
   _toggleRating = (value) => {
-    this.setState({rating: value || !this.state.rating})
+    this.setState({ rating: value || !this.state.rating })
   }
 
   render() {
-    const { handleSubmit, value } = this.props;
+    const { handleSubmit } = this.props;
     const { rating } = this.state;
     const { _toggleRating } = this;
 
     return (
-        <form onSubmit={handleSubmit} className="modal__form">
+      <form onSubmit={handleSubmit} className="modal__form">
           <div>
             {
               rating ? <Field 
@@ -55,8 +55,16 @@ export default class Feedback extends Component {
 }
 
 class RatingField extends Component {
+
+  static propTypes = {
+    input: PropTypes.object,
+    label: PropTypes.string,
+    meta: PropTypes.object,
+    _toggleRating: PropTypes.func,
+  }
+
   render() {
-    const { input: { onChange, value }, label, handleSubmit, type, meta: { touched, error, warning }, _toggleRating } = this.props;
+    const { input: { onChange }, label, meta: { touched, error, warning }, _toggleRating } = this.props;
     return (
       <div className='feedback'>
         <h1>{label}</h1>
@@ -90,6 +98,16 @@ class RatingField extends Component {
 }
 
 class TextField extends Component {
+
+  static propTypes = {
+    input: PropTypes.object,
+    label: PropTypes.string,
+    meta: PropTypes.object,
+    _toggleRating: PropTypes.func,
+    placeholder: PropTypes.object,
+    handleSubmit: PropTypes.func,
+    type: PropTypes.object
+  }
 
   render() {
     const { input, label, placeholder, handleSubmit, type, meta: { touched, error, warning } } = this.props;

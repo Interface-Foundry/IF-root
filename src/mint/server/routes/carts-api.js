@@ -1,13 +1,22 @@
 const co = require('co')
 const _ = require('lodash')
-const moment = require('moment')
 const url = require('url')
 const amazonScraper = require('../cart/scraper_amazon')
+const amazonConstants = require('../cart/amazon_constants')
+const ypoConstants = require('../cart/ypo_constants')
 const amazon = require('../cart/amazon_cart')
 const cartUtils = require('../cart/cart_utils')
 const camel = require('../deals/deals')
 const googl = require('goo.gl')
+const path = require('path')
+const haversine = require('haversine')
+const stable = require('stable')
+const thunkify = require('thunkify')
+const ipinfo = thunkify(require('ipinfo'))
 
+const cart_types = require('../cart/cart_types').stores
+const countryCoordinates = require('../cart/cart_types').countryCoordinates
+const category_utils = require('../utilities/category_utils');
 
 if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
@@ -222,11 +231,19 @@ module.exports = function (router) {
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
+    const userId = req.UserSession.user_account.id
 
     // Make sure the cart exists
     const cart = yield db.Carts.findOne({id: req.params.cart_id})
     if (!cart) {
       throw new Error('Cart not found')
+    }
+
+    // make the user leader if no leader exists, otherwise make member
+    if (!cart.leader) {
+      cart.leader = userId
+    } else if (!cart.members.includes(userId)) {
+      cart.members.add(userId)
     }
 
     // Get or create the item, depending on if the user specifed a previewed item_id or a new url
@@ -242,27 +259,19 @@ module.exports = function (router) {
       item = yield db.Items.findOne({id: req.body.item_id})
     } else {
       // Create an item from the url
-      item = yield amazonScraper.scrapeUrl(req.body.url)
+      item = yield cartUtils.addItem(req.body, cart, 1)
     }
-    cart.items.add(item.id)
+
+    cart.items.add(_.get(item, 'id', item._id))
     item.cart = cart.id
 
-    // specify who added it
     logging.info('user id?', req.UserSession.user_account.id)
-    item.added_by = req.UserSession.user_account.id
-    yield item.save()
-
-    // make the user leader if no leader exists, otherwise make member
-    if (!cart.leader) {
-      cart.leader = req.UserSession.user_account.id
-    } else if (!cart.members.includes(req.UserSession.user_account.id)) {
-      cart.members.add(req.UserSession.user_account.id)
-    }
+    item.added_by = userId
 
     // Save all the weird shit we've added to this poor cart.
-    yield cart.save()
+    yield [item.save(), cart.save()]
+    // specify who added it
 
-    // And assuming it all went well we'll respond to the client with the saved item
     return res.send(item)
   }));
 
@@ -448,6 +457,8 @@ module.exports = function (router) {
     delete req.body.id
     delete req.body.leader
     delete req.body.items // need to go through post /api/cart/:cart_id/item route
+    delete req.body.store
+    delete req.body.store_locale
 
     _.merge(cart, req.body)
     yield cart.save()
@@ -492,6 +503,36 @@ module.exports = function (router) {
     });
     console.log('about to send the email to ' + (leader.email ? leader.email : '...' + leader.email_address)) ;
     yield share.send();
+  }))
+
+  /**
+   * @api {get} /api/views/:cart_id Get cart views
+   * @apiDescription Get the number of times a cart has been viewed
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id the id of the cart whose views we want to access
+   */
+  router.get('/views/:cart_id', (req, res) => co(function * () {
+    var cart = yield db.Carts.findOne({id: req.params.cart_id});
+    if (!cart) res.sendStatus(404);
+    else return res.send({
+      views: cart.views
+    });
+  }))
+
+  /**
+   * @api {put} /api/views/:cart_id increment cart views
+   * @apiDescription Increment the number of times a cart has been viewed
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id the id of the cart whose views we want to increment
+   */
+  router.put('/views/:cart_id', (req, res) => co(function * () {
+    var cart = yield db.Carts.findOne({id: req.params.cart_id});
+    if (!cart) return res.sendStatus(404);
+    else {
+      cart.views++;
+      yield cart.save();
+      return res.send(cart);
+    }
   }))
 
   /**
@@ -553,11 +594,12 @@ module.exports = function (router) {
 
 
   /**
-   * @api {get} /api/itempreview?q=:q Item Preview
+   * @api {get} /api/itempreview?q=:q&page=:page&category=:category Item Preview
    * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
    * @apiGroup Carts
    * @apiParam {String} :q either a url, asin, or search text
    * @apiParam {String} :page page of amazon search results
+   * @apiParam {String} :category category name to bound the results of the search
    *
    * @apiParamExample url preview
    * GET https://mint.kipthis.com/api/itempreview?q=https%3A%2F%2Fwww.amazon.com%2FOnitsuka-Tiger-Mexico-Classic-Running%2Fdp%2FB00L8IXMN0%2Fref%3Dsr_1_11%3Fs%3Dapparel%26ie%3DUTF8%26qid%3D1490047374%26sr%3D1-11%26nodeID%3D679312011%26psd%3D1%26keywords%3Dasics%252Bshoes%26th%3D1%26psc%3D1
@@ -575,17 +617,9 @@ module.exports = function (router) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
     }
 
-    if (q.includes('amazon.com')) {
-      // probably a url
-      var item = yield amazonScraper.scrapeUrl(q)
-    } else if (q.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
-      // probably an asin
-      var item = yield amazonScraper.scrapeAsin(q)
-    } else {
-      // search query
-      // throw new Error('only urls and asins supported right now sorry check back soon 감사합니다')
-      var item = yield amazon.searchAmazon(q, req.query.page);
-    }
+    const store = _.get(req, 'query.store', 'amazon')
+    const locale = _.get(req, 'query.store_locale', 'US')
+    const item = yield cartUtils.itemPreview(q, store, locale, (req.query.page || 1), req.query.category)
     res.send(item)
   }))
 
@@ -599,69 +633,10 @@ module.exports = function (router) {
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
     // logging.info('populated cart', cart);
-    var cartItems = cart.items;
 
-    if (cart.affiliate_checkout_url && cart.locked) {
-      res.redirect(cart.affiliate_checkout_url)
-    }
 
-    // make sure the amazon cart is in sync with the cart in our database
-    var amazonCart = yield amazon.syncAmazon(cart)
-
-    //send receipt email
-    if(req.UserSession.user_account) {
-      logging.info('creating receipt...')
-      var receipt = yield db.Emails.create({
-        recipients: req.UserSession.user_account.email_address,
-        sender: 'hello@kip.ai',
-        subject: `Kip Receipt for ${cart.name}`,
-        template_name: 'summary_email',
-        unsubscribe_group_id: 2485
-      });
-
-      var userItems = {}; //organize items according to which user added them
-      var items= []
-      var users = []
-      var total = 0;
-      var totalItems = 0;
-      cartItems.map(function (item) {
-        if (!userItems[item.added_by]) userItems[item.added_by] = [];
-        userItems[item.added_by].push(item);
-        logging.info('item', item) //undefined
-        totalItems += Number(item.quantity || 1);
-        total += (Number(item.price) * Number(item.quantity || 1));
-      });
-
-      for (var k in userItems) {
-        var addingUser = yield db.UserAccounts.findOne({id: k});
-        users.push(addingUser.name || addingUser.email_address);
-        items.push(userItems[k]);
-      }
-
-      yield receipt.template('summary_email', {
-        username: req.UserSession.user_account.name || req.UserSession.user_account.email_address,
-        baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
-        id: cart.id,
-        items: items,
-        users: users,
-        date: moment().format('dddd, MMMM Do, h:mm a'),
-        total: '$' + total.toFixed(2),
-        totalItems: totalItems,
-        cart: cart
-      })
-
-      yield receipt.send();
-      logging.info('receipt sent')
-    }
-
-    // save the amazon purchase url
-    if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
-      cart.amazon_purchase_url = amazonCart.PurchaseURL
-      cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
-      yield cart.save()
-    }
-    // redirect to the cart url
-    res.redirect(cart.affiliate_checkout_url)
+    yield cartUtils.checkout(cart, req, res)
+    yield cartUtils.sendReceipt(cart, req)
   }))
 
 
@@ -674,10 +649,10 @@ module.exports = function (router) {
    */
   router.get('/item/:item_id/clickthrough', (req, res) => co(function * () {
     // get the item
-    var item = yield db.Items.findOne({id: req.params.item_id})
+    var item = yield db.Items.findOne({id: req.params.item_id}).populate('cart')
 
     // let amazon compose a nice link for us
-    var amazonItem = yield amazon.lookupAmazonItem(item.asin)
+    var amazonItem = yield amazon.lookupAmazonItem(item.asin, item.cart.store_locale)
 
     // handle errors
     if (!_.get(amazonItem, 'Item.DetailPageURL')) {
@@ -692,4 +667,89 @@ module.exports = function (router) {
   }))
 
 
+  /**
+   * @api {get} /api/cart_type list of carts sorted by the user's location
+   * @apiDescription Retrieves a list of carts sorted by the user's IP location and country
+   * @apiGroup Carts
+   */
+  router.get('/cart_type', (req, res) => co(function * () {
+
+    // get customer IP
+    var ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
+    console.log('IP', ip)
+
+    var ipresponse = yield ipinfo(ip);
+
+    // if we can't tell where they are, assume the US
+    if (!ipresponse.country) {
+      ipresponse.country = 'US',
+      ipresponse.loc = '40.7449,-73.9782'
+    }
+
+    var country = ipresponse.country;
+    var userCoords = {
+      latitude: ipresponse.loc.split(',')[0],
+      longitude: ipresponse.loc.split(',')[1]
+    }
+    console.log('ipresponse', ipresponse)
+
+    // assemble list of stores
+    var stores = [];
+
+    // if we're in production, don't show YPO
+    if (process.env.NODE_ENV == 'production') {
+      stores = stores.filter( s => store.type !== 'ypo');
+    }
+
+    // first sort the stores by distance to / from the user
+    // using haversine, which calculates distance on a sphere
+    // because earth, unfortunately, is a sphere
+    stores = cart_types.sort(function (a, b) {
+      var coordsA = countryCoordinates[a.store_countries[0]]
+      var coordsB = countryCoordinates[b.store_countries[0]]
+      var havA = haversine(userCoords, {latitude: coordsA[0], longitude: coordsA[1]});
+      var havB = haversine(userCoords, {latitude: coordsB[0], longitude: coordsB[1]})
+      logging.info(a.store_name, 'havA', havA)
+      logging.info(b.store_name, 'havB', havB)
+      return Math.abs(havA) - Math.abs(havB)
+    })
+    // but since the geocoordinates of countries are pretty random,
+    // the country a user is in won't necessarily be the country that they're "closest" to
+    // so resort the list by "is this the right country",
+    // using a stable sort to keep everything else still ordered by distance
+    stores = stable(stores, function (a, b) {
+      if (a.store_countries.indexOf(country) > -1 && b.store_countries.indexOf(country) <= -1) return -1;
+      else if (b.store_countries.indexOf(country) > -1 && a.store_countries.indexOf(country) <= -1) return 1;
+      else return 0;
+    })
+
+    // logging.info('stores', stores)
+    res.send(stores)
+  }))
+
+  /**
+   * @api {get} /api/categories/:cart_id gets a list of item categories
+   * @apiDescription Retrieves a JSON of item categories -- currently just from a file for YPO
+   * @apiGroup Carts
+   * @apiParam {String} :cart_id the cart id
+   */
+  router.get('/categories/:cart_id', (req, res) => co(function * () {
+    // the cart has the store and locale information, which we need to know what cateogires to show
+    var cart = yield db.Carts.findOne({id: req.params.cart_id})
+
+    switch (cart.store) {
+      case 'amazon':
+        if (amazonConstants.categories[cart.store_locale]) {
+          res.send(amazonConstants.categories[cart.store_locale])
+        } else {
+          throw new Error('Cannot fetch categories for unhandled amazon store locale: ' + cart.store_locale)
+        }
+        break;
+      case 'ypo':
+        res.send(ypoConstants.categories)
+        break;
+      default:
+        throw new Error('Cannot fetch categories for unhandled cart type: ' + cart.store)
+    }
+  }))
 }

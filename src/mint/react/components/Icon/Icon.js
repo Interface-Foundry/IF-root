@@ -26,6 +26,7 @@ import {
   IoOutlet,
   IoPlusRound,
   IoChevronRight,
+  IoChevronLeft,
   IoLogIn
 } from 'react-icons/lib/io';
 import {
@@ -47,7 +48,7 @@ export default class Icon extends Component {
   render() {
     switch (this.props.icon) {
     case 'PriceTag':
-      return <IoPricetag/>
+      return <IoPricetag/>;
     case 'Hamburger':
       return <IoNaviconRound/>;
     case 'Email':
@@ -106,8 +107,10 @@ export default class Icon extends Component {
       return <IoPlusRound/>;
     case 'RightChevron':
       return <IoChevronRight />;
+    case 'LeftChevron':
+      return <IoChevronLeft />;
     case 'Login':
-      return <IoLogIn/>
+      return <IoLogIn/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }

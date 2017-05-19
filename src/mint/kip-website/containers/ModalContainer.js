@@ -1,15 +1,15 @@
 import { connect } from 'react-redux';
 import Modal from '../components/Modal';
 
-import { get } from '../actions';
+import { login, validateCode } from '../actions';
 
 const mapStateToProps = (state, props) => ({
-  	currentUser: state.auth.user_account
-})
+  user_account: state.auth.user_account
+});
 
 const mapDispatchToProps = dispatch => ({
-    get: (url, type) => dispatch(get(url, type))
-})
+  login: (cart_id, email) => dispatch(login(cart_id, email)),
+  validateCode: (email, code) => dispatch(validateCode(email, code)),
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Modal);
-

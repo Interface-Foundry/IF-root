@@ -2,6 +2,7 @@
 const fs = require('fs'),
   os = require('os'),
   express = require('express'),
+  compress = require('compression'),
   app = express(),
   bodyParser = require('body-parser'),
   sessions = require('client-sessions'),
@@ -12,6 +13,7 @@ const fs = require('fs'),
 
 // start any jobs
 var dailyDealsJob = require('./deals/send-daily-deals-job')
+
 
 // live reloading
 if (process.env.BUILD_MODE !== 'prebuilt') {
@@ -32,7 +34,6 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
   }));
 }
 
-
 require('colors');
 
 /**
@@ -46,6 +47,7 @@ dbReady.then((models) => { db = models; })
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
  */
+app.use(compress()); 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.resolve(__dirname, '..', 'public')));
@@ -62,6 +64,8 @@ app.use(sessions({
   secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw' + process.env.NODE_ENV, // `openssl rand -base64 24 `
   duration: 10 * 365 * 24 * 60 * 60 * 1000 // expire in 10 years
 }));
+
+console.log('4 && process.env.NODE_ENV: ', process.env.NODE_ENV)
 
 /**
  * Save user sessions to the database
@@ -128,6 +132,14 @@ app.get('/cart/*', (req, res) =>
   // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
   res.render('pages/cart')
 );
+app.get('/cart/*', (req, res) =>
+  // Get the user_accont info, if exists (might not if they are clicking a shared link)
+  // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
+  res.render('pages/cart')
+);
+app.get('/newcart', (req, res)=>{
+  res.render('pages/cart'); // render cart selection screen on server
+});
 app.get('/404', (_, res) => {
   res.render('pages/cart');
 });
@@ -137,7 +149,6 @@ app.get('/legal', (_, res) => {
 app.get('/s/*', (_, res) => {
   res.render('pages/index');
 });
-
 
 // Log errors to the database in production
 if (process.env.LOGGING_MODE === 'database') {

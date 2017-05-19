@@ -2,8 +2,9 @@
 
 import currentCart from './currentCart';
 import otherCarts from './otherCarts';
+import cartStores from './cartStores';
 import session from './session';
-import deals from './deals';
+import cards from './cards';
 import item from './item';
 import { combineReducers } from 'redux';
 import { routerReducer as routing } from 'react-router-redux';
@@ -12,11 +13,12 @@ import { reducer as form } from 'redux-form';
 export default combineReducers({
   currentCart,
   otherCarts,
-  deals,
+  cards,
   item,
   session,
   form,
-  routing
+  routing,
+  cartStores
 });
 
 // export selectors

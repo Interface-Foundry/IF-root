@@ -3,9 +3,8 @@
 import { connect } from 'react-redux';
 import { App } from '../components';
 import { fetchCart, fetchAllCarts, updateCart, checkoutCart } from '../actions/cart';
-import { logout, login } from '../actions/session';
-import { addItem, removeItem } from '../actions/item';
-import { removeDeal } from '../actions/deals';
+import { addItem, removeItem, clearItem } from '../actions/item';
+import { logout, login, validateCode } from '../actions/session';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
@@ -19,10 +18,10 @@ const mapStateToProps = (state, ownProps) => {
     status: status ? status[1] : null,
     leader: state.currentCart.leader,
     carts: state.otherCarts.carts,
-    currentUser: state.session.user_account,
+    user_account: state.session.user_account,
     newAccount: state.session.newAccount,
-    deals: state.deals.deals,
-    position: state.deals.position,
+    cards: state.cards.cards,
+    position: state.cards.position,
     item: state.item,
     currentCart: state.currentCart,
     cartName: state.currentCart.name ? state.currentCart.name : state.currentCart.leader ? state.currentCart.leader.name + '\'s Kip Cart' : 'New Kip Cart',
@@ -51,17 +50,14 @@ const mapDispatchToProps = dispatch => ({
   },
   fetchAllCarts: () => dispatch(fetchAllCarts()),
   updateCart: (cart) => dispatch(updateCart(cart)),
+  clearItem: () => dispatch(clearItem()),
   removeItem: (cart_id, item_id) => {
     ReactGA.event({ category: 'Cart', action: 'removed item from cart' });
     return dispatch(removeItem(cart_id, item_id));
   },
-  removeDeal: (index) => {
-    setTimeout(() => {
-      dispatch(removeDeal(index));
-    }, 100);
-  },
   checkoutCart: (cart_id) => dispatch(checkoutCart(cart_id)),
   login: (cart_id, email) => dispatch(login(cart_id, email)),
+  validateCode: (email, code) => dispatch(validateCode(email, code)),
   logout: () => dispatch(logout())
 });
 

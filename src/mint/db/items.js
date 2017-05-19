@@ -1,6 +1,7 @@
 var Waterline = require('waterline');
 var uuid = require('uuid');
 
+var constants = require('../server/constants.js');
 /**
  * Items collection holds all the COMMON FIELDS for any item
  * Fields which are specific to a certain provider are held in their respective tables
@@ -29,9 +30,7 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {string} the online retailer */
     store: {
       type: 'string',
-      enum: [
-        'amazon'
-      ]
+      enum: constants.STORES
     },
 
     /** @type {number} amount of this product in cart */

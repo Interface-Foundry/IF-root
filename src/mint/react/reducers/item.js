@@ -9,13 +9,16 @@ import {
   SEARCH_NEXT,
   SEARCH_PREV,
   SET_SEARCH_INDEX,
-  SELECT_DEAL
+  SELECT_CARD,
+  RECEIVE_CATEGORY,
+  LOGOUT
 } from '../constants/ActionTypes';
 
 export default function item(state = {}, action) {
   let nextItemNum;
   switch (action.type) {
   case CLEAR_ITEM:
+  case LOGOUT:
     return {};
   case RECEIVE_ITEM:
   case RECEIVE_INCREMENT_ITEM:
@@ -24,6 +27,7 @@ export default function item(state = {}, action) {
       ...state,
       ...action.item
     };
+  case RECEIVE_CATEGORY:
   case RECEIVE_SEARCH:
     nextItemNum = state.position ? state.position : 0;
     nextItemNum = action.index > action.items.length ? action.index % action.items.length : action.index < 0 ? -1 * (action.index % action.items.length) : nextItemNum; // try to keep it legal
@@ -52,9 +56,11 @@ export default function item(state = {}, action) {
       ...state,
       position: action.index
     };
-  case SELECT_DEAL:
+  case SELECT_CARD:
     return {
-      ...action.deal
+      ...state,
+      position: action.selectedIndex,
+      ...action.card
     };
   default:
     return state;

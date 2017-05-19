@@ -1,5 +1,8 @@
-const amazon = require('./amazon_cart.js');
+const moment = require('moment');
 
+const amazon = require('./amazon_cart.js');
+const ypo = require('./ypo_cart.js')
+const constants = require('../constants.js');
 /**
  * Models loaded from the waterline ORM
  */
@@ -7,20 +10,19 @@ var db;
 const dbReady = require('../../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
+// not necessary anymore but keeping for longevity
+function amazonHandlersMerge(fn) {
+  let obj = {}
+  constants.AMAZON_LOCALES.map(store => {
+    obj[store] = fn
+  })
+  return obj
+}
 
-/**
- * figure out who the retailer is for an item pasted,
- * very rudimentary since idk what to expect at this time
- * @param  {string} item is the way the item is passed in
- * @return {string} retail api one of: amazon,
+/************************************************
+ * generalized handlers
+ ************************************************
  */
-exports.getRetailer = function (item) {
-  if (item.includes('amazon.com')) {
-    return 'amazon'
-  } else {
-    throw new Error('Not currently supported')
-  }
-};
 
 const syncCartHandlers = {
   'amazon': amazon.syncAmazon
@@ -34,18 +36,62 @@ const getCartHandlers = {
   'amazon': amazon.getAmazonCart
 }
 
-const createCartHandlers = {
-  'amazon': amazon.createAmazonCart
-}
-
 const addItemHandlers = {
-  'amazon': amazon.addItemAmazon // uses asin
+  'amazon': amazon.addItemAmazon, // uses asin
+  'ypo': ypo.addItem
 }
 
 const clearCartHandlers = {
   'amazon': amazon.clearAmazonCart
 }
 
+const itemPreviewHandlers = {
+  'amazon': amazon.itemPreview,
+  'ypo': ypo.itemPreview,
+}
+
+const checkoutHandlers = {
+  'amazon': amazon.checkout,
+  'ypo': ypo.checkout
+}
+
+
+/************************************************
+ * functions for carts
+ ************************************************
+ */
+
+/**
+ * checkout for a specified cart
+ *
+ * @param      {object}  cart    The
+ * @param      {object}  res    The res
+ */
+exports.checkout = function * (cart, req, res) {
+  if (cart.store === undefined) {
+    throw new Error('Store required for checkout')
+  }
+
+  yield checkoutHandlers[cart.store](cart, req, res)
+}
+
+
+/**
+ * get info for item based on retailer
+ *
+ * @param      {string}  query   The query with asin/url/item code/title
+ * @param      {string}  store   The store type
+ * @return     {object}  item    the item preview object for that store
+ */
+exports.itemPreview = function * (query, store, locale, page, category) {
+  console.log('itemPreview', query, store, locale, page, category)
+  if (store === undefined) {
+    throw new Error('Store required for item preview')
+  }
+
+  const item = yield itemPreviewHandlers[store](query, locale, page, category)
+  return item
+}
 
 /**
  * the idea of this is that you can be agnostic if you match up the functionality
@@ -67,11 +113,7 @@ exports.syncCart = function * (cart) {
   return cart
 }
 
-exports.createCart = function * (item) {
-  var retailer = exports.getRetailer(item)
-  var cart = yield createCartHandlers[retailer](item)
-  return cart
-}
+
 
 exports.getCart = function * (cart, retailer) {
   var cart = yield getCartHandlers[retailer](cart)
@@ -83,6 +125,7 @@ exports.clearCart = function * (cart, retailer) {
 };
 
 exports.addItemToCart = function * (item, cart) {
+  // check for pasted URL
   var cart = yield addItemHandlers[retailer](item, cart)
 };
 
@@ -116,15 +159,14 @@ exports.deleteItemFromCart = function * (item, cart, userId) {
 }
 
 /**
- * create item by user in a cart
+ * create item in db.Items for a specified store
  *
- * @param      {string}  itemId  The item identifier/asin
- * @param      {string}          userId  The user identifier
+ * @param      {string}  item  The item, which who even fucking knows what it could be
  * @param      {string}          cartId  the cart identifier
  * @param      {number}          quantity the item quantity
  * @return     {object}          item object that was created
  */
-exports.addItemToCart = function * (itemId, cart, userId, quantity) {
+exports.addItem = function * (item, cart, quantity) {
   if (quantity === undefined) {
     quantity = 1
   }
@@ -134,14 +176,80 @@ exports.addItemToCart = function * (itemId, cart, userId, quantity) {
     throw new Error('Cart not found')
   }
 
-  let item = yield addItemHandlers[cart.store](itemId)
-  item.added_by = userId
-  item.cart = cart.id
-  item.quantity = quantity
-
-  cart.items.add(item.id)
-
-  yield [item.save(), cart.save()]
+  item = yield addItemHandlers[cart.store](item, cart.store_locale)
   return item
 }
 
+
+
+/**
+ * figure out who the retailer is for an item pasted,
+ * very rudimentary since idk what to expect at this time
+ * @param  {string} item is the way the item is passed in
+ * @return {string} retail api one of: amazon,
+ */
+exports.getRetailer = function (item) {
+  if (item.includes('amazon.com')) {
+    return 'amazon'
+  } else {
+    throw new Error('Not currently supported')
+  }
+};
+
+
+/**
+ * send generic receipt email
+ *
+ * @param      {<type>}  cart         The cartesian
+ * @param      {<type>}  userAccount  The user account
+ * @return     {<type>}  { description_of_the_return_value }
+ */
+exports.sendReceipt = function * (cart, req) {
+  const userAccount = req.UserSession.user_account
+  //send receipt email
+  const cartItems = cart.items;
+  logging.info('creating receipt...')
+  if (userAccount) {
+    var receipt = yield db.Emails.create({
+      recipients: userAccount.email_address,
+      sender: 'hello@kip.ai',
+      subject: `Kip Receipt for ${cart.name}`,
+      template_name: 'summary_email',
+      unsubscribe_group_id: 2485
+    });
+
+    var userItems = {}; //organize items according to which user added them
+    var items= []
+    var users = []
+    var total = 0;
+    var totalItems = 0;
+    cartItems.map(function (item) {
+      if (!userItems[item.added_by]) userItems[item.added_by] = [];
+      userItems[item.added_by].push(item);
+      logging.info('item', item) //undefined
+      totalItems += Number(item.quantity || 1);
+      total += (Number(item.price) * Number(item.quantity || 1));
+    });
+
+    for (var k in userItems) {
+      var addingUser = yield db.UserAccounts.findOne({id: k});
+      users.push(addingUser.name || addingUser.email_address);
+      items.push(userItems[k]);
+    }
+
+    yield receipt.template('summary_email', {
+      username: userAccount.name || userAccount.email_address,
+      baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
+      id: cart.id,
+      items: items,
+      users: users,
+      date: moment().format('dddd, MMMM Do, h:mm a'),
+      total: '$' + total.toFixed(2),
+      totalItems: totalItems,
+      cart: cart
+    })
+
+    yield receipt.send();
+    logging.info('receipt sent')
+  }
+}

@@ -56,10 +56,7 @@ module.exports = {
           options: {
             importLoaders: 1,
           }
-        },
-        // {
-        //   loader: 'postcss-loader'
-        // }
+        }
       ]
     }, {
       test: /\.scss$|\.sass$/,
@@ -73,9 +70,6 @@ module.exports = {
             importLoaders: 1,
           }
         },
-        // {
-        //   loader: 'postcss-loader'
-        // },
         {
           loader: 'sass-loader'
         }
