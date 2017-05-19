@@ -28,6 +28,13 @@ export default class Modal extends Component {
     return re.test(email);
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { _toggleModal } = this.props;
+    const { newAccount } = nextProps;
+    console.log(nextProps)
+    if (newAccount) _togglePopup();
+  }
+
   _updateMail = e => this.setState({ mail: { edited: true, val: e.target.value } })
   _updateCode = (e, pos) => {
     const { val } = this.state.code,
@@ -102,7 +109,7 @@ export default class Modal extends Component {
                   <input ref='code_1' className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 1)} value={code.val[1]||''} type="tel" pattern='[0-9]{3}' required placeholder='000'/>
                 </div>
           }
-          <button type='submit'  value='Submit'><Icon icon='Login'/>Send Email</button>
+          <button type='submit'  value='Submit'><Icon icon='Login'/>Log In</button>
           {
             !success 
             ? <div className='modal__description'>

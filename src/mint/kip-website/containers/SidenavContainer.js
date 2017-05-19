@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import Sidenav from '../components/Sidenav';
 
-import { get } from '../actions';
+import { get, logout } from '../actions';
 
 const mapStateToProps = (state, props) => ({
   	myCarts: state.auth.myCarts,
@@ -10,7 +10,8 @@ const mapStateToProps = (state, props) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    get: (url, type) => dispatch(get(url, type))
+    get: (url, type) => dispatch(get(url, type)),
+    logout: () =>dispatch(logout())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Sidenav);

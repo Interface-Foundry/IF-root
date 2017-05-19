@@ -1,5 +1,9 @@
 import { SubmissionError } from 'redux-form';
 
+export const logout = () => async dispatch => {
+  dispatch({ type: 'LOGOUT' });
+}
+
 export const get = (url, type) => async dispatch => {
   try {
 

@@ -68,6 +68,13 @@ export default class Popup extends Component {
     else if (res.newSession && res.newSession.ok) _togglePopup();
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { _togglePopup } = this.props;
+    const { newAccount } = nextProps;
+    console.log(nextProps)
+    if (newAccount) _togglePopup();
+  }
+
   render() {
     const {
       props: { _togglePopup },

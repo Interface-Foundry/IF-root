@@ -129,7 +129,6 @@ export default class App extends Component {
       state: { sidenav, isMobile, popup }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
-    const showSidenav = !location.pathname.includes('newcart');
 
     return (
       <section className='app'>
@@ -153,7 +152,7 @@ export default class App extends Component {
             </div>
           </div>
           { 
-            showSidenav && (sidenav || !isMobile) 
+            sidenav || !isMobile 
             ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} /> 
             : null
           }

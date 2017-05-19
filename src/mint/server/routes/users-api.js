@@ -44,7 +44,7 @@ module.exports = function (router) {
    * @apiSuccessExample Already Logged In
    *   {"ok":true,"loggedIn":true,"status":"Logged in already","user":{"email_address":"peter.m.brandt@gmail.com","createdAt":"2017-04-25T17:45:10.065Z","updatedAt":"2017-04-25T17:45:10.065Z","id":"62d8791b-3c15-4519-8fda-c3c0a3dd1e78"},"redirect":"/cart/15c0d2afa21f"}
    */
-  router.get('/login', (req, res) => co(function * () {
+  router.get('/login', (req, res) => co(function* () {
     const currentUser = _.get(req, 'UserSession.user_account', {})
     const email = decodeURIComponent(req.query.email.trim().toLowerCase())
 
@@ -74,6 +74,18 @@ module.exports = function (router) {
           email_address: email,
           name: normalizeEmailToName(email)
         })
+        // no need to verify email the first time 
+
+        req.UserSession.user_account = user.id
+        yield req.UserSession.save()
+        
+        return res.json({
+          ok: true,
+          newAccount: true,
+          status: 'LOG_IN',
+          message: 'user has been logged for first time',
+          user_account: user
+        });
       }
 
       // send the user a login link
@@ -96,7 +108,7 @@ module.exports = function (router) {
 
       // check to see if this user already has auth links and if so destroy them
       yield db.AuthenticationLinks.destroy({
-        id: {'not': link.id},
+        id: { 'not': link.id },
         user: user.id
       });
 
@@ -339,7 +351,7 @@ module.exports = function (router) {
    * @apiSuccessExample Response
    * {"email_address":"mctesty@example.com","createdAt":"2017-03-28T18:39:31.458Z","updatedAt":"2017-03-28T18:39:32.299Z","venmo_accepted":true,"venmo_id":"MoMcTesty","id":"0f30e352-f975-400a-b7bb-e46bc38e7649"}
    */
-  router.post('/user/:user_id', (req, res) => co(function * () {
+  router.post('/user/:user_id', (req, res) => co(function* () {
     // check permissions
     var currentUser = req.UserSession.user_account
     if (!currentUser || currentUser.id !== req.params.user_id) {
@@ -347,7 +359,7 @@ module.exports = function (router) {
     }
 
     // Find the user in the database
-    var user = yield db.UserAccounts.findOne({id: req.params.user_id})
+    var user = yield db.UserAccounts.findOne({ id: req.params.user_id })
 
     // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
     if (!user) {
@@ -386,7 +398,7 @@ module.exports = function (router) {
    *   "user_account": user_id
    * }
    */
-  router.post('/user/:user_id/address', (req, res) => co(function * () {
+  router.post('/user/:user_id/address', (req, res) => co(function* () {
     // check permissions
     var currentUser = req.UserSession.user_account
     if (!currentUser || currentUser.id !== req.params.user_id) {
@@ -394,7 +406,7 @@ module.exports = function (router) {
     }
 
     // Find the user in the database
-    var user = yield db.UserAccounts.findOne({id: req.params.user_id})
+    var user = yield db.UserAccounts.findOne({ id: req.params.user_id })
 
     // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
     if (!user) {
@@ -422,7 +434,7 @@ module.exports = function (router) {
    *  text: "can't add 36 oz beer bong to my cart. unacceptable."
    * }
    */
-  router.post('/feedback', (req, res) => co(function * () {
+  router.post('/feedback', (req, res) => co(function* () {
     var feedback = yield db.Feedback.create({
       user: _.get(req, 'UserSession.user_account.id'),
       session: req.UserSession.id,

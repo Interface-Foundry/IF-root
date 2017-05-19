@@ -3,5 +3,5 @@ export {
 } from './hero';
 
 export {
-	login, validateCode, get
+	login, validateCode, get, logout
 } from './async';
