@@ -649,10 +649,18 @@ module.exports = function (router) {
    */
   router.get('/item/:item_id/clickthrough', (req, res) => co(function * () {
     // get the item
-    var item = yield db.Items.findOne({id: req.params.item_id}).populate('cart')
+    var item = yield db.Items.findOne({id: req.params.item_id})
+
+    // get the item's locale
+    var locale = 'US'
+    if (item.original_link.match(/amazon.ca/)) {
+      locale = 'CA'
+    } else if (item.original_link.match(/amazon.co.uk/)) {
+      locale = 'UK'
+    }
 
     // let amazon compose a nice link for us
-    var amazonItem = yield amazon.lookupAmazonItem(item.asin, item.cart.store_locale)
+    var amazonItem = yield amazon.lookupAmazonItem(item.asin, locale)
 
     // handle errors
     if (!_.get(amazonItem, 'Item.DetailPageURL')) {

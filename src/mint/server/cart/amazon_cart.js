@@ -169,7 +169,6 @@ exports.searchAmazon = function * (query, locale, page, category) {
         yield dbItem.save();
       }
       validatedItems.push(dbItem);
-      console.log('added item to db');
     });
     validatedItems = validatedItems.filter(function (x) {
       if (x) return x;
