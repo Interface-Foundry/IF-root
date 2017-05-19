@@ -3,8 +3,7 @@ const path = require('path'),
   CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin'),
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
   CART_DIR = path.resolve(__dirname, 'react'),
-  HOME_DIR = path.resolve(__dirname, 'kip-website'),
-  CACHE_DIR = path.resolve(__dirname, 'webpack-cache');
+  HOME_DIR = path.resolve(__dirname, 'kip-website');
 
 module.exports = {
   entry: {

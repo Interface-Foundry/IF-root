@@ -64,6 +64,9 @@
           &:active, &:focus {
             border-color: $fifth-button-color;
           }
+          &:valid {
+            border-color: $third-button-color;
+          }
           &.empty {
             border-color: $third-button-color;
           }
