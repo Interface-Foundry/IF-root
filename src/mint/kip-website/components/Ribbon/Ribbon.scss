@@ -13,6 +13,7 @@
 	text-align: center;
 	background: transparent;
 	border-bottom: 1px solid transparent;
+	margin-top: $padding*2;
 	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
@@ -23,6 +24,7 @@
     &.background {
     	background: white;
 		border-bottom: 1px solid $borderColor;
+		margin-top: 0;
 		box-shadow: 0 4px 6px rgba(50,50,93,.33), 0 1px 3px rgba(0,0,0,.08);
     }
 
