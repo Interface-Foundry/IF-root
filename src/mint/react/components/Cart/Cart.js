@@ -225,7 +225,7 @@ class EmptyCart extends Component {
   render() {
     return (
       <li className='cart__items-empty'>
-        <h4>Looks like you havn't added any items. Get started by adding stuff to the cart, or invite others to add to the cart by tapping the Share button</h4>
+        <h4><span>Hello!</span><br></br>Looks like you haven't added any items yet. Search above to get started, or invite others to add to the cart by tapping the Share button below 😊</h4>
         <div className='image' style={{backgroundImage:'url(//storage.googleapis.com/kip-random/head_smaller.png)'}}/>
       </li>
     );

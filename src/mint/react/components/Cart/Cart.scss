@@ -232,13 +232,16 @@ $cart__add-height: $nav-height+$padding;
         animation-delay: 10s; //suprise!
       }
       h4 {
+        font-size:14px;
         position: relative;
         text-align: center;
         padding: $padding;
-        border: 3px solid $main-button-color;
+        border: 1px solid $kip-primary-color;
         border-radius: $padding;
         margin: $padding auto $padding*2;
         max-width: 300px;
+        background-color: #eaf9ff;
+        font-weight: normal;
         &:before {
           content:"";
           position: absolute;
@@ -247,9 +250,12 @@ $cart__add-height: $nav-height+$padding;
           height: 0;
           left: calc(50% - 15px);
           border-left: 13px solid transparent;
-          border-top: 15px solid $main-button-color;
+          border-top: 15px solid #eaf9ff;
           border-right: 13px solid transparent;
         }
+      }
+      span {
+        font-weight: bold;
       }
     }
   }

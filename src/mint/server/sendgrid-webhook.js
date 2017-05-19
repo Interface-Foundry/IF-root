@@ -10,22 +10,19 @@ const dbReady = require('../db');
 dbReady.then((models) => { db = models; })
   .catch(e => console.error(e));
 
-// //test route
-// router.get('/test', function (req, res) {
-//   console.log('this is a test');
-//   res.send('this is a test');
-// });
-
-//route sg will post to
+/**
+ * @api {post} /api/sendgrid
+ * @type {Object}
+ */
 router.post('/', (req, res) => co(function* () {
-
   console.log('req.body', req.body);
   yield db.EmailEvents.create(req.body);
   res.send('posted at by sendgrid');
 }));
 
-//~~~~~post request to send-grid api setting up the webhook~~~~~//
-
+//
+// Set up the sendgrid webhook
+//
 var options = {
   method: 'POST',
   uri: 'https://api.sendgrid.com/api/filter.setup.json',
@@ -48,15 +45,15 @@ var options = {
   }
 };
 
-// rp(options)
-//   .then(function (result) {
-//     console.log('successfully connected to sendgrid webhook');
-//     console.log(result);
-//   })
-//   .catch(function (error) {
-//     console.log('error with sendgrid webhook', error);
-//   });
-
-//~~~~~~~~~~//
+if (process.env.SEND_EMAILS) {
+  rp(options)
+    .then(function (result) {
+      console.log('successfully connected to sendgrid webhook');
+      console.log(result);
+    })
+    .catch(function (error) {
+      console.log('error with sendgrid webhook', error);
+    });
+}
 
 module.exports = router;
