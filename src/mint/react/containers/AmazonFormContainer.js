@@ -1,27 +1,33 @@
 // react/containers/AmazonFormContainer.js
 
 import { connect } from 'react-redux';
-import { reset, reduxForm } from 'redux-form';
+import { reduxForm } from 'redux-form';
 import { AmazonForm } from '../components';
 import { isUrl, addSearchHistory } from '../utils';
+import { previewAmazonItem } from '../actions/item';
 import { push } from 'react-router-redux';
 import ReactGA from 'react-ga';
+import { getLastSearch } from '../utils';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
-  item: state.item
+  storeName: state.currentCart.store,
+  item: state.item,
+  cardType: state.cards.type,
+  initialValues: {url: state.cards.type ? ( state.cards.type.includes('search') ? getLastSearch() : '' ) : ''}
 });
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: (values, e, state) => {
     ReactGA.event({
       category: 'Search',
-      action: `Searched for ${values.url}`
+      action: values.url
     });
     const { cart_id } = state;
-    dispatch(reset('AddItem'));
     if (!isUrl(values.url)) addSearchHistory(values.url);
-    return dispatch(push(`/cart/${cart_id}/m/item/0/${encodeURIComponent(values.url)}`));
+    else dispatch(push(`/cart/${cart_id}/m/item/0/${encodeURIComponent(values.url)}`));
+
+    return dispatch(previewAmazonItem(encodeURIComponent(values.url)))
   }
 });
 

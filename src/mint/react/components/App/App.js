@@ -3,10 +3,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-import ReactDOM from 'react-dom';
 
-import { CartContainer } from '../../containers';
-import { Overlay, Modal, Toast, ErrorPage, Popup } from '..';
+import { CartContainer, CartStoresContainer } from '../../containers';
+import { Modal, Toast, ErrorPage, Popup } from '..';
+
 import Header from './Header';
 import Sidenav from './Sidenav';
 import Footer from './Footer';
@@ -17,13 +17,13 @@ import ReactGA from 'react-ga';
 export default class App extends Component {
 
   static propTypes = {
-    cart_id: PropTypes.string.isRequired,
+    cart_id: PropTypes.string,
     leader: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
     modal: PropTypes.string,
     cartName: PropTypes.string,
     newAccount: PropTypes.bool,
-    currentUser: PropTypes.object,
+    user_account: PropTypes.object,
     match: PropTypes.object.isRequired,
     fetchCart: PropTypes.func.isRequired,
     fetchAllCarts: PropTypes.func.isRequired,
@@ -35,7 +35,8 @@ export default class App extends Component {
     items: PropTypes.array,
     toast: PropTypes.string,
     status: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    clearItem: PropTypes.func
   }
 
   state = {
@@ -70,8 +71,8 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    ReactDOM.findDOMNode(this);
-    if (window.innerWidth < 900) this.setState({ isMobile: true });
+    if (window.innerWidth < 900)
+      this.setState({ isMobile: true });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -82,13 +83,13 @@ export default class App extends Component {
         fetchAllCarts,
         cart_id,
         session_id,
+        user_account: { id },
         location: { pathname },
         history: { replace }
       }
     } = this;
-    const { cart_id: nextCart_id, session_id: nextSessionId, toast: newToast } = nextProps;
-
-    if (!session_id && nextSessionId) {
+    const { cart_id: nextCart_id, session_id: nextSessionId, toast: newToast, user_account: { id: nextId } } = nextProps;
+    if (!session_id && nextSessionId && process.env.GA) {
       ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
           userId: nextSessionId
@@ -97,12 +98,11 @@ export default class App extends Component {
 
       _logPageView(pathname, nextSessionId); //log initial load
     }
-    if (cart_id !== nextCart_id && nextCart_id) {
+    if ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id)) {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
       fetchAllCarts();
-    }
-    if (newToast && newToast.includes('Cart Updated')) fetchAllCarts();
+    } else if (newToast && newToast.includes('Cart Updated')) fetchAllCarts();
   }
 
   render() {
@@ -116,43 +116,52 @@ export default class App extends Component {
         cart_id,
         currentCart,
         updateCart,
-        newAccount,
         leader,
         carts,
-        currentUser,
+        user_account,
         location,
         logout,
+        clearItem,
         items,
+        fetchAllCarts,
         history: { replace }
       },
       state: { sidenav, isMobile, popup }
     } = this;
-    const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404');
-    const showSidenav = !location.pathname.includes('/m/signin');
-    if (newAccount === false) {
-      return <Overlay/>;
-    }
+    const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
+    const showSidenav = !location.pathname.includes('newcart');
+
     return (
       <section className='app'>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
           {popup ? <Popup {...props} cart_id={cart_id} _togglePopup={_togglePopup}/> : null}
           <div className={`app__view ${showFooter ? '' : 'large'}`}>
+            <div>
+              {/* Render Error Page */}
+              <Route path={'/404'} exact component={ErrorPage} />
 
-            {/* Render Error Page */}
-            <Route path={'/404'} exact component={ErrorPage} />
+              { /* Renders modal when route permits */ }
+              <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
 
-            { /* Renders modal when route permits */ }
-            <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
+              { /* Renders cart when route permits */ }
+              <Route path={'/cart/:cart_id'} exact component={CartContainer} />
+              <Route path={'/cart/:cart_id/address'} exact component={CartContainer} />
 
-            { /* Renders cart when route permits */ }
-            <Route path={'/cart/:cart_id'} exact component={CartContainer} />
-
+              { /* Renders cart choice if theres no store set */}
+              <Route path={'/newcart'} exact component={CartStoresContainer} />
+            </div>
           </div>
-          { showSidenav && ( sidenav || !isMobile )
-            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} currentUser={currentUser} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} /> 
-            : null }
-          {showFooter ? <Footer {...props} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> : null}
+          { 
+            showSidenav && (sidenav || !isMobile) 
+            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} /> 
+            : null
+          }
+          {
+            showFooter 
+            ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> 
+            : null
+          }
         </section>
     );
   }

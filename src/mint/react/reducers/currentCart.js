@@ -13,9 +13,11 @@ import {
   RECEIVE_INCREMENT_ITEM,
   RECEIVE_DECREMENT_ITEM,
   RECEIVE_UPDATE_ITEM,
+  REQUEST_SET_STORE,
   REQUEST_CLEAR_CART,
   CANCEL_CLEAR_CART,
-  RECEIVE_CLEAR_CART
+  RECEIVE_CLEAR_CART,
+  LOGOUT
 } from '../constants/ActionTypes';
 
 const initialState = {
@@ -27,6 +29,10 @@ const initialState = {
 
 export default function cart(state = initialState, action) {
   switch (action.type) {
+  case LOGOUT:
+    return {
+      ...state
+    };
   case ADDING_ITEM:
     return {
       ...state,
@@ -92,6 +98,11 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       items: state.items.map(item => item.id === action.old_item_id ? action.item : item)
+    };
+  case REQUEST_SET_STORE:
+    return {
+      ...state,
+      store: action.storeType
     };
   case REQUEST_CLEAR_CART:
     return {

@@ -1,12 +1,13 @@
 // react/containers/index.js
 
-export AppContainer from './AppContainer';
-export CartContainer from './CartContainer';
 export AddAmazonItemContainer from './AddAmazonItemContainer';
-export EmailFormContainer from './EmailFormContainer';
+export AddressFormContainer from './AddressFormContainer';
 export AmazonFormContainer from './AmazonFormContainer';
-export DealsContainer from './DealsContainer';
-export ItemContainer from './ItemContainer';
+export AppContainer from './AppContainer';
+export CardsContainer from './CardsContainer';
+export CartContainer from './CartContainer';
+export CartStoresContainer from './CartStoresContainer';
 export EditCartContainer from './EditCartContainer';
-export SettingsContainer from './SettingsContainer';
 export FeedbackContainer from './FeedbackContainer';
+export ItemContainer from './ItemContainer';
+export SettingsContainer from './SettingsContainer';

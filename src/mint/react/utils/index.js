@@ -39,6 +39,7 @@ from './cloudinary';
 
 export {
   getSearchHistory,
+  getLastSearch,
   addSearchHistory
 }
 from './search';

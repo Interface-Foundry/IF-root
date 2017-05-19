@@ -3,15 +3,16 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CartItem from './CartItem';
-import { AddAmazonItemContainer, DealsContainer } from '../../containers';
+import { AddAmazonItemContainer, CardsContainer, AddressFormContainer } from '../../containers';
 import { Icon } from '..';
 import { calculateItemTotal, displayCost } from '../../utils';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import moment from 'moment';
+import { Route } from 'react-router';
 
 export default class Cart extends Component {
   static propTypes = {
-    fetchDeals: PropTypes.func.isRequired,
+    fetchCards: PropTypes.func.isRequired,
     cart_id: PropTypes.string,
     members: PropTypes.arrayOf(PropTypes.object)
       .isRequired,
@@ -23,8 +24,9 @@ export default class Cart extends Component {
     locked: PropTypes.bool,
     updateCart: PropTypes.func,
     currentCart: PropTypes.object,
-    deals: PropTypes.array,
-    cancelRemoveItem: PropTypes.func.isRequired
+    cards: PropTypes.array,
+    cancelRemoveItem: PropTypes.func.isRequired,
+    cancelClearCart: PropTypes.func
   }
 
   state = {
@@ -32,9 +34,9 @@ export default class Cart extends Component {
   }
 
   componentWillMount() {
-    const { fetchDeals, deals } = this.props;
-    if (deals.length === 0) {
-      fetchDeals();
+    const { fetchCards, cards = [], currentCart = { store: '' } } = this.props;
+    if (cards.length === 0 && currentCart.store === 'ypo') {
+      fetchCards();
     }
   }
 
@@ -53,15 +55,12 @@ export default class Cart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, cart_id, items } = this.props, { leader, addingItem, user_account } = nextProps,
+    const { history: { replace }, fetchCards, cart_id, items, cards, currentCart } = this.props, { leader, addingItem, user_account } = nextProps,
       cartId = nextProps.cart_id || cart_id;
 
     if (cartId) {
-      if (!user_account.id && !leader) {
-        replace(`/cart/${cartId}/m/signin`);
-      } else if (!!leader && !addingItem && this.props.addingItem !== addingItem && !!user_account.id) {
-        replace(`/cart/${cartId}/`);
-      }
+      if (cards.length === 0 && currentCart.store === 'ypo') fetchCards(cartId);
+      if (!!leader && !addingItem && this.props.addingItem !== addingItem && !!user_account.id) replace(`/cart/${cartId}/`);
     }
 
     if (items.quantity < nextProps.items.quantity && items.quantity !== 0 && cart_id === nextProps.cart_id) {
@@ -72,7 +71,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, deals, locked, updateCart, currentCart, cancelRemoveItem, clearCart, cancelClearCart, history: { push } } = this.props, { animation } = this.state,
+    const { items, leader, members, user_account, cart_id, cards, locked, updateCart, currentCart, cancelRemoveItem, cancelClearCart, history: { push } } = this.props, { animation } = this.state,
       hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
@@ -80,10 +79,13 @@ export default class Cart extends Component {
         ...items.others.reduce((acc, member) => [...acc, ...member.items], [])
       ]);
     let cartItemIndex = items.my.length;
+
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
     return (
       <div className='cart'>
+        <Route path={'/cart/:cart_id/address'} exact component={AddressFormContainer}/>
         {
-          locked 
+          locked
           ? <div className='cart__locked'>
               <div className='cart__locked__actions'>
                 {/*<button className='primary'><Icon icon='Refresh'/><h1>RE-ORDER CART</h1></button>*/}
@@ -101,28 +103,24 @@ export default class Cart extends Component {
                   </button> : null
                 }
               </div>
-            </div> 
+            </div>
           : <div className='add__item'>
               <div className='cart__add'>
                 <AddAmazonItemContainer push={push} members={members}/>
               </div>
-              {
-                !!user_account.id && deals.length
-                  ? <DealsContainer isDropdown={false}/> 
-                  : null
-              }
+              {cards.length > 0 ? <CardsContainer isDropdown={false}/> : null}
             </div>
         }
         <div className={`cart__title ${animation || currentCart.itemDeleted || currentCart.oldItems.length  ? 'action' : ''}`}>
-          { animation 
+          { animation
             ? <h4>{animation}</h4>
             : currentCart.itemDeleted ? <h4 className='undo__button' onClick={cancelRemoveItem}>Item Removed. <a href='#'>Undo</a></h4>
             : currentCart.oldItems.length ? <h4 className='undo__button' onClick={cancelClearCart}>Cart cleared. <a href='#'>Undo</a></h4>
             : <h4>
-              { hasItems ? `${items.quantity} items in Kip Cart`  : 'Kip Cart' } 
+              { hasItems ? `${items.quantity} items in Kip Cart`  : 'Kip Cart' }
               {
-                !!leader && leader.id === user_account.id 
-                ?  <span> – <span className='price'>{displayCost(total)} Total</span></span> 
+                !!leader && leader.id === user_account.id
+                ?  <span> – <span className='price'>{displayCost(total, locale)} Total</span></span>
                 : null
               }
             </h4>
@@ -148,7 +146,8 @@ export default class Cart extends Component {
 class MyItems extends Component {
   static propTypes = {
     items: PropTypes.array.isRequired,
-    currentCart: PropTypes.object
+    currentCart: PropTypes.object,
+    user_account: PropTypes.object
   }
 
   renderList() {
@@ -166,20 +165,22 @@ class MyItems extends Component {
   }
 
   render() {
-    const { props: { items, user_account, currentCart: { locked } } } = this,
+    const { props: { items, user_account, currentCart: { locked }, currentCart } } = this,
     total = calculateItemTotal(items);
+
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
 
     return (
       <ul>
         {items.length ? <div className='cart__items__title'>{user_account.name} <span> - {items.length} Items</span></div> :null}
         <div className='cart__items__container'>
           {
-            items.length 
-            ? this.renderList() 
+            items.length
+            ? this.renderList()
             : <EmptyCart key="empty"/>
           }
         </div>
-        {items.length ? <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3>:null}
+        {items.length ? <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total, locale)}</span></h3>:null}
       </ul>
     );
   }
@@ -194,13 +195,14 @@ class OtherItems extends Component {
   }
 
   render() {
-    const { props, props: { isLeader, startIndex, member: { items, name, email, id }, currentCart: { locked, name: cartName } } } = this,
+    const { props, props: { isLeader, startIndex, member: { items, name, email, id }, currentCart: { locked, name: cartName }, currentCart } } = this,
     total = calculateItemTotal(items);
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
 
     return (
       <ul>
-       { 
-        email 
+       {
+        email
         ? <a href={`mailto:${email}?subject=From ${cartName}`}>
             <div key={id} className='cart__items__title'>{name}
               <br/><span className='email'>{email} <span>- {items.length} Items</span></span>
@@ -209,11 +211,11 @@ class OtherItems extends Component {
         : <div key={id} className='cart__items__title'>{name} <span>- {items.length} Items</span></div>
         }
         {
-          items.length 
+          items.length
           ? items.map((item, i) => <CartItem key={i} itemNumber={i + startIndex} isOwner={isLeader} item={item} {...props} />)
           : <EmptyCart />
         }
-        {isLeader ? <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total)}</span></h3> : null}
+        {isLeader ? <h3>Total: <span className={locked ? 'locked' : ''}>{displayCost(total, locale)}</span></h3> : null}
       </ul>
     );
   }

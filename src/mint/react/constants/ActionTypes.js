@@ -1,5 +1,7 @@
 // react/constants/ActionTypes.js
 
+export const LOGOUT = 'LOGOUT';
+
 // Session
 export const RECEIVE_SESSION = 'RECEIVE_SESSION';
 export const REQUEST_SESSION = 'REQUEST_SESSION';
@@ -25,11 +27,11 @@ export const REQUEST_CLEAR_CART = 'REQUEST_CLEAR_CART';
 export const RECEIVE_CLEAR_CART = 'RECEIVE_CLEAR_CART';
 export const CANCEL_CLEAR_CART = 'CANCEL_CLEAR_CART';
 
-// Deals
-export const REQUEST_DEALS = 'REQUEST_DEALS';
-export const RECEIVE_DEALS = 'RECEIVE_DEALS';
-export const SELECT_DEAL = 'SELECT_DEAL';
-export const REMOVE_DEAL = 'REMOVE_DEAL';
+// Cards
+export const REQUEST_CARDS = 'REQUEST_CARDS';
+export const RECEIVE_CARDS = 'RECEIVE_CARDS';
+export const SELECT_CARD = 'SELECT_CARD';
+export const REMOVE_CARD = 'REMOVE_CARD';
 
 // Item
 export const REQUEST_ITEM = 'REQUEST_ITEM';
@@ -45,6 +47,13 @@ export const REQUEST_INCREMENT_ITEM = 'REQUEST_INCREMENT_ITEM';
 export const RECEIVE_DECREMENT_ITEM = 'RECEIVE_DECREMENT_ITEM';
 export const REQUEST_DECREMENT_ITEM = 'REQUEST_DECREMENT_ITEM';
 export const RECEIVE_SEARCH = 'RECEIVE_SEARCH';
+export const RECEIVE_CATEGORY = 'RECEIVE_CATEGORY';
 export const SEARCH_NEXT = 'SEARCH_NEXT';
 export const SEARCH_PREV = 'SEARCH_PREV';
 export const SET_SEARCH_INDEX = 'SET_SEARCH_INDEX';
+
+//cart stores
+export const REQUEST_STORES = 'REQUEST_STORES';
+export const RECEIVE_STORES = 'RECEIVE_STORES';
+export const REQUEST_SET_STORE = 'REQUEST_SET_STORE';
+export const RECEIVE_SET_STORE = 'RECEIVE_SET_STORE';

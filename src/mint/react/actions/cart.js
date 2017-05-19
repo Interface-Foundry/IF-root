@@ -174,10 +174,28 @@ export function fetchItems(cart_id) {
 export function checkoutCart(cart_id) {
   return async dispatch => {
     dispatch(requestItems(cart_id));
-
     try {
       const response = await fetch(`/api/cart/${cart_id}/checkout`, {
         credentials: 'same-origin'
+      });
+      return dispatch(receiveItems(await response.json()));
+    } catch (e) {
+      throw 'error in cart fetchItems';
+    }
+  };
+}
+
+export function sendAddressData(user_id, full_name, line_1, line_2, city, region, code, country, delivery_message) {
+  return async dispatch => {
+    try {
+      const response = await fetch(`/api/user/${user_id}/address`, {
+        credentials: 'same-origin',
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        'body': JSON.stringify({ full_name, line_1, line_2, city, region, code, country, delivery_message })
       });
       return dispatch(receiveItems(await response.json()));
     } catch (e) {

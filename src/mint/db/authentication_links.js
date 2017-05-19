@@ -26,6 +26,15 @@ var authenticationLinksCollection = Waterline.Collection.extend({
 
     redirect_url: 'string',
 
+    code: 'string',
+
+    /** Number of times someone has tried to log into this email with the wrong code
+        Should never be higher than four. */
+    attempts: {
+      type: 'integer',
+      defaultsTo: 0
+    },
+
     user: Waterline.isA('user_accounts')
   }
 });

@@ -1,5 +1,6 @@
 const co = require('co')
 const _ = require('lodash')
+const randomstring = require('randomstring')
 const dealsDb = require('../deals/deals')
 var db
 const dbReady = require('../../db')
@@ -85,23 +86,41 @@ module.exports = function (router) {
         id: link.id
       }).populate('user')
 
+      logging.info('created this auth link:', link)
+
       if (process.env.NODE_ENV !== 'production') {
         console.log('http://localhost:3000/auth/' + link.id)
       }
 
       console.log('inside login', currentUser.name || email)
 
+      // check to see if this user already has auth links and if so destroy them
+      yield db.AuthenticationLinks.destroy({
+        id: {'not': link.id},
+        user: user.id
+      });
+
+      // generate magic code here
+      var code = randomstring.generate({
+        length: 6,
+        charset: 'numeric'
+      })
+      logging.info('code:', code)
+
+      // add code to auth link
+      link.code = code;
+      yield link.save();
+
       var loginEmail = yield db.Emails.create({
         recipients: email,
-        subject: 'Log in to Kip'
+        subject: `Log in to Kip with ${code}`
       })
 
       loginEmail.template('login_email', {
         link,
-        username: currentUser.name || email
+        username: currentUser.name || email.split('@')[0],
+        code: code
       })
-
-
 
       yield loginEmail.send()
       res.send({
@@ -130,7 +149,7 @@ module.exports = function (router) {
     // check if the user is already identified as this email
     var currentUser = req.UserSession.user_account
 
-    // IF they are already logged in as this email, probably in a weird state to be re-identifying
+    // If they are already logged in as this email, probably in a weird state to be re-identifying
     // idk maybe they have multiple tabs open or something, just roll with it
     if (currentUser && currentUser.email_address === email) {
       // make them the glorious cart leader if the cart is leaderless, otherwise a member
@@ -235,8 +254,9 @@ module.exports = function (router) {
     });
 
     // Sending to leader
+    var storeName = cart.store === 'ypo' ? 'YPO' : _.capitalize(cart.store);
     if (cart.leader == user.id) {
-      var subject = 'Your New Kip Cart'
+      var subject = `Your New ${storeName} Kip Cart`
       cart.leader = true
     }
     //Sending to member
@@ -345,6 +365,48 @@ module.exports = function (router) {
     yield user.save()
 
     res.send(user)
+  }))
+
+  /**
+   * @api {post} /api/user/:user_id/address Add address to user
+   * @apiDescription Creates a new address and associates it with a user
+   * @apiGroup Users
+   * @apiParam {string} :user_id id of the user to update
+   * @apiParam {json} body the properties of the new address we're creating
+   *
+   * @apiParamExample Request
+   * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b {
+   *   "full_name": 'Chris Barry',
+   *   "line_1": '2222 Fredrick Douglass Blvd',
+   *   "line_2": "Apt 2B",
+   *   "city": "New York",
+   *   "region": 'NY',
+   *   "code": 94306,
+   *   "country": 'USA',
+   *   "user_account": user_id
+   * }
+   */
+  router.post('/user/:user_id/address', (req, res) => co(function * () {
+    // check permissions
+    var currentUser = req.UserSession.user_account
+    if (!currentUser || currentUser.id !== req.params.user_id) {
+      throw new Error('Unauthorized')
+    }
+
+    // Find the user in the database
+    var user = yield db.UserAccounts.findOne({id: req.params.user_id})
+
+    // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
+    if (!user) {
+      throw new Error('Could not find user ' + req.params.user_id)
+    }
+
+    // create a new address associated with this user
+    var addr = yield db.Addresses.create(req.body);
+    addr.user_account = user.id;
+    yield addr.save();
+
+    res.send(addr);
   }))
 
   /**

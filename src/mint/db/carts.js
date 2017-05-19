@@ -71,10 +71,9 @@ var cartsCollection = Waterline.Collection.extend({
     /** @type {string} the online retailer */
     store: {
       type: 'string',
-      enum: [
-        'amazon',
-        'ypo'
-      ]
+      enum: constants.STORES,
+      defaultsTo: 'amazon',
+      required: true
     },
 
     /** @type {string} the cart's privacy setting*/
@@ -88,8 +87,19 @@ var cartsCollection = Waterline.Collection.extend({
       defaultsTo: 'public'
     },
 
-    archive: archive
+    archive: archive,
 
+    store_locale: {
+      type: 'string',
+      enum: constants.LOCALES,
+      required: true
+    },
+
+    /** @type {integer} the number of times this cart has been #viewed */
+    views: {
+      type: 'integer',
+      defaultsTo: '0'
+    }
   }
 });
 

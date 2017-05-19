@@ -7,6 +7,7 @@ import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
+  storeName: state.currentCart.store || '',
   numUserItems: state.session.user_account.id ? state.currentCart.items.filter(item =>
       (item.added_by === state.session.user_account.id))
     .length : 0,
