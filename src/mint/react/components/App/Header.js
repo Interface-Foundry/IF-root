@@ -28,10 +28,6 @@ export default class Header extends Component {
             <ModalHead text={'Add To Cart'} {...props}/>
           }
         />
-        <Route path={'/newcart'} exact component={() => 
-            <IntroHead text={'Create A Cart'} {...props}/>
-          }
-        />
         <Route path={'/cart/:cart_id/m/:type/:index/:asin/edit'} exact component={() => 
             <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: user_account.id}).my ? splitCartById(this.props, {id: user_account.id}).my.length : 0} type={'item'} {...props}/>
           }
@@ -41,7 +37,7 @@ export default class Header extends Component {
           }
         />
         <Route path={'/newcart'} exact component={() => 
-            <IntroHead text={'Choose a store for your cart'} {...props}/>
+            <IntroHead text={'Select Store'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/deal/:index/:dealId'} exact component={() => 

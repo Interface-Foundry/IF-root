@@ -98,7 +98,7 @@ export default class App extends Component {
 
       _logPageView(pathname, nextSessionId); //log initial load
     }
-    if ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id)) {
+    if (!pathname.includes('/newcart') && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
       fetchAllCarts();
