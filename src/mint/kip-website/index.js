@@ -11,7 +11,7 @@ import { Route } from 'react-router-dom';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import Reducers from './reducers';
 import { get } from './actions';
-import { App } from './components';
+import { AppContainer } from './containers';
 
 if (module.hot) {
   module.hot.accept();
@@ -49,7 +49,7 @@ store.dispatch(get('/api/session', 'SESSION'))
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <Route path="/" component={App}/>
+      <Route path="/" component={AppContainer}/>
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root')

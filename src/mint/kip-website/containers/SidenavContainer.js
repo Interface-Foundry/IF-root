@@ -1,7 +1,11 @@
 import { connect } from 'react-redux';
 import Sidenav from '../components/Sidenav';
 
-import { get } from '../actions';
+import { 
+	get,	
+	toggleModal,
+	toggleSidenav
+} from '../actions';
 
 const mapStateToProps = (state, props) => ({
   	myCarts: state.auth.myCarts,
@@ -10,7 +14,9 @@ const mapStateToProps = (state, props) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    get: (url, type) => dispatch(get(url, type))
+    get: (url, type) => dispatch(get(url, type)),
+    toggleModal: () => dispatch(toggleModal()),
+    toggleSidenav: () => dispatch(toggleSidenav())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Sidenav);

@@ -10,3 +10,4 @@ export Showcase from './Showcase';
 export Footer from './Footer';
 export Modal from './Modal';
 export Legal from './Legal';
+export Blog from './Blog';

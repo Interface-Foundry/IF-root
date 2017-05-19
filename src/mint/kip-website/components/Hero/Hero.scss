@@ -3,137 +3,147 @@
 
 .hero {
 	position: relative;
+	display: block;
 	overflow: hidden;
-	background: rgb(244, 233, 158);
-	height: 550px;
-	padding: 0;
+	background: #fff;
+	padding: 0 $padding*5;
 	width: 100%;
 
 	@media only screen and (max-width: 600px) {
 		height: 500px;
 	}
 
-	&.start {
-		.hero__kip {
-			@include animation(moveAround 15s infinite);
-			@media only screen and (max-width: 600px) {
-				@include animation(moveAroundMobile 15s infinite);
-			}
-		}
-	}
-
-	.hero__desktop {
-		position: absolute;
-		left: 75px;
-		bottom: 65px;
-		width: 650px;
-		z-index: 3;
-
-		h1 {
-			position: absolute;
-			left: 17%;
-			top: 24%;
-			color: $primaryColor;
-			font-weight: bold;
-			width: 69%;
-			font-size: 30px;
+	.hero__main {
+		position: relative;
+		display: table;
+		height: 650px;
+		width: 100%;
+	    max-width: 1200px;
+	    margin: 0 auto;
+		.headline {
+			display: table-cell;
+			vertical-align: middle;
+			padding:$padding 0;
 			text-align: left;
+
+			@media only screen and (max-width: 600px) {
+				* {
+					font-size: 27px;
+				}
+			}
+
+			h1 {
+				display: inline-block;
+				line-height: $ribbonHeight;
+				font-size: 30px;
+				color: $primaryColor;
+
+				&.hightlight {
+					background: $primaryColor;
+				}
+
+				@media only screen and (max-width: 600px) {
+					line-height: 40px;
+				}
+			}
+
+			p {
+				font-size: 18px;
+				color: darken($bgColor, 5);
+
+				span {
+					font-weight: 600;
+					border-bottom: 3px solid $secondaryColor;
+				}
+			}
+
+			.action {
+				padding: $padding*2 0 $padding*2;
+				button {
+					border: 0;
+					font-weight: bold;
+					border-radius: $padding/2;
+					background: white;
+					padding: $padding $padding*4;
+					font-size: 20px;
+					cursor: pointer;
+				    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+					&:focus {
+						@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+					}
+				}
+				a {
+					&:first-of-type {
+						button {
+							margin-right: $padding*2;
+							background: rgba($warningColor, 0.8);
+							color: white;
+
+							@media only screen and (max-width: 600px) {
+								margin: 0 0 $padding*2;
+							}
+						}
+					}
+				}
+			}
 		}
 
-		@media only screen and (max-width: 600px) {
-			left: 0;
-			bottom: 105px;
-			width: 100%;
-			h1 {
-			    font-size: 5vw;
-				left: 14%;
-				top: 17%;
-			    width: 70%;
+		.animation {
+			display: table-cell;
+			vertical-align: middle;
+			padding: 0;
+
+			.image {
+				background-image: url(https://storage.googleapis.com/kip-random/website/kip_collect.gif);
+				background-size: contain;
+				background-position: center;
+				height: 60%;
 			}
 		}
 	}
 
-	.hero__desk {
-		position: absolute;
-		left: -65px;
-		bottom: -200px;
-		width: 1150px;
-		z-index: 2;
-	}
-
-	.hero__background {
-	    position: absolute;
-	    width: 1800px;
-	    left: -150px;
-	    bottom: 0;
-	    top: -150px;
-	    z-index: -1;
-	}
-
-	.hero__kip {
-		position: absolute;
-		z-index: 1;
-		width: 200px;
-		bottom: 325px;
-		left: 625px;
-		transform: rotate(11deg);
-		@media only screen and (max-width: 600px) {
-			left: 155px;
-			transform: rotate(0);
-			bottom: 315px;
+	.more {
+		height: $ribbonHeight*2;
+		cursor: pointer;
+	    margin: 0 auto;
+	    display: inline-block;
+		h2 {
+			height: $ribbonHeight/2;
+			margin-bottom: $padding;
+			color: darken($bgColor, 5);
+			max-width: 500px;
+			span {
+				border-bottom: 3px solid $primaryColor;
+			}
+		}
+		p {
+			max-width: 500px;
+		}
+		svg {
+			margin-top: $padding;
+			width: $ribbonHeight;
+			height: $ribbonHeight/2;
+			@include animation(bounceDownSmall 3s infinite);
 		}
 	}
 
 
-	.hero__plant {
-		position: absolute;
-		z-index: 1;
-		width: 200px;
-		bottom: 325px;
-		left: 750px;
-		@media only screen and (max-width: 600px) {
-			left: 35px;
-			bottom: 315px;
+	.icons {
+		position: relative;
+		height: $ribbonHeight*3;
+		width: 100%;
+		padding: 0;
+		display: table;
+		background: white;
+		max-width: 1200px;
+		margin: 0 auto;
+
+		& > div {
+			display: table-cell;
+			vertical-align: middle;
+			fill: rgba($bgColor, 0.5);
+			padding: 0;
 		}
 	}
-
-	.sine {
-		fill: white;
-	    margin-left: -1px;
-	    margin-bottom: -1px;
-	    height: 150px;
-	    z-index: 40;
-	    width: calc(100% + 3px);
-
-	    @media only screen and (max-width: 600px) {
-	    	height: 100px;
-	    }
-	}
 }
 
-@keyframes moveAround {
-	0%, 10%, 90%, 100% {
-	  	transform: translate3d(0,0,0) rotate3d(0, 0, 0, 11deg);
-	}
-	15%, 50% {
-		transform: translate3d(0,25px,0) rotate3d(0, 0, 0, 11deg);
-	} 
-	55%, 80% {
-		transform: translate3d(125px, 25px,0) rotate3d(0, 0, 0, 0deg);
-	}
-	90% {
-		transform: translate3d(25px, 15px,0) rotate3d(0, 0, 0, -3deg);
-	}
-}
-
-@keyframes moveAroundMobile {
-	0%, 10%, 90%, 100% {
-		transform: translate3d(0,0,0) rotate3d(0, 0, 0, 0deg);
-	}
-	15%, 50% {
-		transform: translate3d(0,15px,0) rotate3d(0, 0, 0, 11deg);
-	} 
-	55%, 80% {
-		transform: translate3d(-120px,15px,0) rotate3d(0, 0, 0, 11deg);
-	}
-}

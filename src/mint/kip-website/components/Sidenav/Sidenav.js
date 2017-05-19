@@ -15,17 +15,17 @@ export default class Sidenav extends Component {
   }
 
   render() {
-    const { currentUser, _toggleSidenav, _toggleModal, myCarts, otherCarts, get } = this.props, 
+    const { currentUser, toggleSidenav, toggleModal, myCarts, otherCarts, get } = this.props, 
       { show } = this.state;
 
     return (
       <div className='sidenav'>
-        <div className='sidenav__overlay' onClick={_toggleSidenav}>
+        <div className='sidenav__overlay' onClick={toggleSidenav}>
         </div>
         <ul className='sidenav__list'>
           <li className='sidenav__list__header'>
             <p>{currentUser ? currentUser.email_address : 'Please Login'}</p>
-            <div className='icon' onClick={_toggleSidenav}>
+            <div className='icon' onClick={toggleSidenav}>
               <Icon icon='Clear'/>
             </div>
           </li>
@@ -34,7 +34,7 @@ export default class Sidenav extends Component {
             {myCarts.map((c, i) => {
               if(i > 1 && show !== 'me') return null;
               return ( 
-                <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                <li key={i} className='sidenav__list__leader' onClick={toggleSidenav}>
                   <div className='icon'/>
                   <a href={`/cart/${c.id}`}>
                     <p>
@@ -55,7 +55,7 @@ export default class Sidenav extends Component {
             {otherCarts.map((c, i) => {
               if(i > 1 && show !== 'other') return null
               return (
-                <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
+                <li key={i} className='sidenav__list__leader' onClick={toggleSidenav}>
                   <div className='icon'/>
                   <a href={`/cart/${c.id}`}>
                     <p>{c.name ? c.name : `${c.leader.name ? c.leader.name + '\'s ' : ''}Kip Cart`}</p>
@@ -82,7 +82,7 @@ export default class Sidenav extends Component {
                 <div className='icon'/>
                 New Cart
               </button> : <button className='share' onClick={(e) => {
-                e.preventDefault(); _toggleModal()
+                e.preventDefault(); toggleModal()
               }}>
                 <Icon icon='Login'/>
                 Login

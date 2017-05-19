@@ -152,6 +152,9 @@ app.get('/404', (_, res) => {
 app.get('/legal', (_, res) => {
   res.render('pages/index');
 });
+app.get('/blog', (_, res) => {
+  res.render('pages/index');
+});
 app.get('/s/*', (_, res) => {
   res.render('pages/index');
 });

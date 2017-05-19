@@ -1,0 +1,33 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.blog {
+	position: relative;
+	text-align: center;
+	.blog__post {
+		cursor: pointer;
+		display: block;
+		border-radius: $padding/2;
+		width: 650px;
+		height: 400px;
+		margin: $ribbonHeight auto;
+		border: 1px solid $borderColor;
+		text-align: left;
+
+		.image {
+			height: 250px;
+			margin: 25px 0;
+			width: 100%;
+			background-size: contain;
+		}
+
+		h1 {
+			width: 600px;
+			margin: 0 auto;
+		}
+		p {
+			width: 600px;
+			margin: 0 auto;
+		}
+	}
+}

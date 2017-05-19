@@ -9,14 +9,14 @@ import { Services } from '..';
 
 export default class Statement extends Component {
   	render() {
-  		const { _toggleModal, src } = this.props;
+  		const { src } = this.props;
 	    return (
 	      	<div className="statement">
 	      		{
 		      		src !== 'slack' ? <div className="col-12 row-1 action">
 		      			<a href='/newcart'>
 		        			<button>
-			        			Create New Cart <Icon icon='Right'/>
+			        			Create A Kip Cart <Icon icon='Right'/>
 			        		</button>
 		        		</a>
 		        	</div> : <div className="col-12 row-1 action">

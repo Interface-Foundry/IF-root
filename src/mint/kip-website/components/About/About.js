@@ -2,22 +2,6 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 
-import {
-  Burger,
-  Clock,
-  DesktopIcon,
-  Happy,
-  Layers,
-  Lightbulb,
-  Milk,
-  Mouse,
-  Paper,
-  Pencil,
-  Pizza
-} from '../../themes/kipsvg';
-
-const randomGifCacheNumber = Math.random(8000);
-
 export default class About extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -27,30 +11,9 @@ export default class About extends Component {
   }
 
   render() {
-    const icons = [
-      Burger,
-      Clock,
-      DesktopIcon,
-      Happy,
-      Layers,
-      Milk,
-      Mouse,
-      Paper,
-      Pencil,
-      Pizza,
-      Happy,
-      Lightbulb
-    ],
-    { animationState } = this.props;
-
     return (
       <div className="about"> 
-        {
-          icons.map((Component, i) => {
-            return <div key={i} style={{width: `${Math.floor(Math.random() * (40 - 15)) + 15}%`}} className={`icon`}><Component/></div>
-          })
-        }           
-        <div className={`image gif-${animationState}`} style={{ backgroundImage: animationState > -2 ? `url(https://storage.googleapis.com/kip-random/website/kip_star.gif?dummy=${randomGifCacheNumber})` : null }}/>
+        
       </div>
     );
   }

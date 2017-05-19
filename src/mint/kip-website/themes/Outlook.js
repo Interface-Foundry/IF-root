@@ -12,19 +12,7 @@ export default class Outlook extends Component {
             height="104.31332"
             viewBox="0 0 103.17322 104.31332"
             enableBackground="new 0 0 190 50"
-            xmlSpace="preserve"
-            pagecolor="#ffffff"
-            bordercolor="#666666"
-            borderopacity="1"
-            objecttolerance="10"
-            gridtolerance="10"
-            guidetolerance="10"
-            id="namedview41"
-            showgrid="false"
-            fitMarginTop="0"
-            fitMarginLeft="0"
-            fitMarginRight="0"
-            fitMarginBottom="0">
+            xmlSpace="preserve">
          <path
             d="m 64.566509,22.116383 v 20.404273 l 7.130526,4.489881 c 0.188058,0.05485 0.595516,0.05877 0.783574,0 L 103.16929,26.320259 c 0,-2.44867 -2.28412,-4.203876 -3.573094,-4.203876 H 64.566509 z"
             id="path3"

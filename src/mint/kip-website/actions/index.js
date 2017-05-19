@@ -1,6 +1,9 @@
 export {
-	shuffleItems
-} from './hero';
+	handleScroll,
+	toggleSidenav,
+	toggleModal,
+	registerHeight
+} from './app';
 
 export {
 	get

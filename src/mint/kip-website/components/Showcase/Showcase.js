@@ -53,15 +53,16 @@ export default class Showcase extends Component {
   }
 
   componentDidMount() {
-    const { _registerHeight } = this.props;
+    const { registerHeight } = this.props;
 
-    _registerHeight(ReactDOM.findDOMNode(this)
+    registerHeight(ReactDOM.findDOMNode(this)
       .offsetTop, ReactDOM.findDOMNode(this)
       .clientHeight)
   }
 
   render() {
     const { animationState } = this.props;
+    console.log('inside showcase: ', animationState)
     return (
       <div className={`showcase-${animationState}`}> 
         <svg className={`sine-${animationState}`} width="100%" height="50px" viewBox="0 0 100 31" preserveAspectRatio="none">
