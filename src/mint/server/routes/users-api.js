@@ -113,13 +113,13 @@ module.exports = function (router) {
 
       var loginEmail = yield db.Emails.create({
         recipients: email,
-        subject: `Log in to Kip with ${code}`
+        subject: `Log in to Kip with ${code.substr(0,3)} ${code.substr(3)}` // Alyx wants spaces so it's pretty
       })
 
       loginEmail.template('login_email', {
         link,
         username: currentUser.name || email.split('@')[0],
-        code: code
+        code: `${code.substr(0,3)} ${code.substr(3)}`
       })
 
       yield loginEmail.send()

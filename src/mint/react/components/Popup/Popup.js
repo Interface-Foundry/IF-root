@@ -31,7 +31,8 @@ export default class Popup extends Component {
   _updateMail = e => this.setState({ mail: { edited: true, val: e.target.value } })
   _updateCode = (e, pos) => {
     const { val } = this.state.code,
-      code = String(e.target.value);
+      code = String(e.target.value)
+      .replace(/[^0-9]/, '');
     if (code.length < 4) this.setState({ code: { edited: true, val: pos ? [val[0], code] : [code, val[1]] } });
     else this.setState({ code: { edited: true, val: [code.substr(0, 3), code.substr(3)] } });
 
@@ -83,7 +84,11 @@ export default class Popup extends Component {
           <div className='popup__card-icon' onClick={() =>  _togglePopup()}>
             <Icon icon='Clear'/>
           </div>
-          <h1>{!success ? 'Enter Email to Log In' : `I just sent a code to ${mail.val}`}</h1>
+          {
+            !success 
+            ? <h1>Enter Email to Log In</h1> 
+            : <div><h1>I just sent a code to</h1> <h2>{mail.val}</h2></div>
+          }
           {
             error 
               ? <span style={{color: '#ff6961'}}>{error}</span> 
@@ -97,7 +102,7 @@ export default class Popup extends Component {
                   <input ref='code_1' className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 1)} value={code.val[1]||''} type="tel" pattern='[0-9]{3}' required placeholder='000'/>
                 </div>
           }
-          <button type='submit'  value='Submit'><Icon icon='Login'/>{!success ? 'Send Login Email' : 'Log In'}</button>
+          <button type='submit'  value='Submit'><Icon icon='Login'/>{!success ? 'Send Email': 'Log In'}</button>
           {
             !success 
             ? <div className='popup__description'>
