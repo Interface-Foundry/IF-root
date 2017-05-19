@@ -333,6 +333,28 @@ module.exports = function (router) {
   }));
 
   /**
+   * @api {put} /api/cart/:cart_id/privacy/:setting Privacy setting
+   * @apiDescription Update cart privacy setting (default is 'public')
+   * Value of :setting must be 'public', 'private', or 'display'
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id cart whose privacy we are modifying
+   * @apiParam {string} :setting privacy setting we want the cart to have
+   */
+  router.put('/cart/:cart_id/privacy/:setting', (req, res) => co(function * () {
+    var cart = yield db.Carts.findOne({id: req.params.cart_id});
+    var setting = req.params.setting
+
+    if (!cart) return res.sendStatus(404);
+    if (setting !== 'public' && setting !== 'private' && setting != 'display') {
+      return res.sendStatus(400);
+    }
+
+    cart.privacy = setting;
+    yield cart.save()
+    return res.send(cart)
+  }))
+
+  /**
    * @api {delete} /api/cart/:cart_id/clear Clear
    * @apiDescription Clears all the items from the whole cart. rm -rf cart items.
    * @apiGroup Carts
