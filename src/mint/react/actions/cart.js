@@ -64,6 +64,25 @@ export const addingItem = (addingItem) => ({
   addingItem
 });
 
+export const privacyLevels = {
+  PUBLIC: 1,
+  PRIVATE: 2,
+  DISPLAY: 3
+};
+
+const getPrivacy = (lvl) => {
+  switch (Number(lvl)) {
+  case privacyLevels.PUBLIC:
+    return 'public';
+  case privacyLevels.PRIVATE:
+    return 'private';
+  case privacyLevels.DISPLAY:
+    return 'display';
+  default:
+    throw `${lvl} is not a valid privacy level`;
+  }
+};
+
 export const updateCartItem = newItem => ({});
 
 export function fetchCart(cart_id) {
@@ -97,6 +116,27 @@ export function updateCart(cart) {
         'body': JSON.stringify(cart)
       });
       return dispatch(recieveUpdate(await response.json()));
+    } catch (e) {
+      throw e;
+    }
+  };
+}
+
+export function updatePrivacy(cart_id, privacyLevel) {
+  const privacy = getPrivacy(privacyLevel);
+  return async dispatch => {
+    try {
+      const response = await fetch(`/api/cart/${cart_id}/privacy/${privacy}`, {
+        'method': 'PUT',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin'
+      });
+      const json = await response.json();
+      console.log(json);
+      return dispatch(recieveUpdate(json));
     } catch (e) {
       throw e;
     }

@@ -48,10 +48,8 @@ export default function cart(state = initialState, action) {
     if (action.updatedCart.id !== state.cart_id) return state;
     return {
       ...state,
-      locked: action.updatedCart.locked,
+      ...action.updatedCart,
       thumbnail_url: action.updatedCart.thumbnail_url || '//storage.googleapis.com/kip-random/head%40x2.png',
-      name: action.updatedCart.name,
-      cart_id: action.updatedCart.id
     };
   case RECEIVE_CART:
     return {
