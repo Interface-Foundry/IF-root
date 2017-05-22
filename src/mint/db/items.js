@@ -96,7 +96,10 @@ var itemsCollection = Waterline.Collection.extend({
       defaultsTo: false
     },
 
-    cart: Waterline.isA('carts')
+    cart: Waterline.isA('carts'),
+
+    /** @type {text} comment by the user who initially added the item */
+    comment: 'text'
   }
 });
 
