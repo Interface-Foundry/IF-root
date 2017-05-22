@@ -19,3 +19,7 @@ export Connected from './Connected';
 export Person from './Person';
 export Cloud from './Cloud';
 export Mapper from './Mapper'
+export DownArrow from './DownArrow';
+export DownLeft from './DownLeft';
+export DownRight from './DownRight';
+export Items from './Items';

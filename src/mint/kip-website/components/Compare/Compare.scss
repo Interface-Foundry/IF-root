@@ -10,12 +10,12 @@
 
 
 	@media only screen and (max-width: 600px) {
-		padding: $padding*5 $padding*2;
+		padding: 0 $padding*2 $padding*5;
 	}
 
 	h1 {
 		font-size: 28px;
-		padding: 0 0 $padding*5 0;
+		padding: 0;
 		color: #42403f;
 		z-index: 1;
 
@@ -26,7 +26,30 @@
 			}
 		}
 		@media only screen and (max-width: 600px) {
-			font-size: 27px;
+			font-size: 21px;
+			padding-top: 0;
+		}
+	}
+
+	h4 {
+		font-size: 18px;
+		font-weight: 100;
+		padding: 0 0 $padding*5;
+	    max-width: 500px;
+	    margin: 0 auto;
+		z-index: 1;
+
+		span {
+			font-weight: 600;
+			font-size: 18px;
+			color: $primaryColor;
+			@media only screen and (max-width: 600px) {
+				font-size: 14px;
+			}
+		}
+
+		@media only screen and (max-width: 600px) {
+			font-size: 14px;
 		}
 	}
 

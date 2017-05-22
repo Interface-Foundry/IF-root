@@ -52,6 +52,10 @@ export default class Compare extends Component {
   	render() {
 	    return (
 	      	<div className="compare col-12"> 
+      			<h1 className='tagline'><span>Not convinced?</span></h1>
+				<h4>
+					Just check out how we compare.
+				</h4>
 		      	<table>
 				  	<thead>
 				    	<tr>

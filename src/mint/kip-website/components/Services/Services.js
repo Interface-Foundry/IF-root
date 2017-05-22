@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
-import { Gift, Home, Stats, Right, Brush, Banner, Cloud, Connected, Person, Mapper } from '../../themes/newSvg';
+import { Gift, Home, Stats, Right, Brush, Banner, Cloud, Connected, Person, Mapper, Items, DownArrow, DownLeft, DownRight } from '../../themes/newSvg';
 import {
   Facebook,
   Outlook,
@@ -65,10 +65,17 @@ export default class About extends Component {
 				<div className="col-12">
 					<h1 className='tagline'><span>MEET OUR SOLUTION</span></h1>
 					<h4>
-						<span>KIP</span> is an A.I Penguin that helps you save money <br/>
+						<span>KIP</span> is an A.I Penguin that helps you save money
 						by splitting costs between you and your friends
 					</h4>
-			        
+					<section className='cluster'>
+			        	<Items/>
+			        	<div className='inline'>
+			        		<DownLeft/>
+			        		<DownArrow/>
+			        		<DownRight/>
+			        	</div>
+			        </section>
 			        <div className="col-4 row-1 services__details">
 				        <Mapper/>
 			        	<h4>
