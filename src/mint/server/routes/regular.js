@@ -255,7 +255,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   const user_id = _.get(req, 'UserSession.user_account.id')
   if (user_id) {
     cart.leader = user_id
-    cart.name = req.UserSession.user_account.name + '\'s Kip Cart'
+    cart.name = (new Date()).toString().split(/\d\d\:\d\d\:\d\d/)[0] + 'Kip Cart'
   }
 
   // This is all the investors care about right here. This is the money line.

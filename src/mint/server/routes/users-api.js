@@ -74,11 +74,11 @@ module.exports = function (router) {
           email_address: email,
           name: normalizeEmailToName(email)
         })
-        // no need to verify email the first time 
+        // no need to verify email the first time
 
         req.UserSession.user_account = user.id
         yield req.UserSession.save()
-        
+
         return res.json({
           ok: true,
           newAccount: true,
@@ -251,7 +251,7 @@ module.exports = function (router) {
 
     // Update cart name if not set
     if (!cart.name) {
-      cart.name = user.name + '\'s Kip Cart'
+      cart.name = (new Date()).toString().split(/\d\d\:\d\d\:\d\d/)[0] + 'Kip Cart'
       yield cart.save()
     }
 
