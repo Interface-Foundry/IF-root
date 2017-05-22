@@ -33,12 +33,12 @@ export default class Modal extends Component {
 	}
 
   	render() {
-  		const { props: { _toggleModal }, state: { error, success }, _onSubmit } = this;
+  		const { props: { toggleModal }, state: { error, success }, _onSubmit } = this;
 
 	    return (
-	      	<section className="modal" onClick={(e) => {if(e.target.className === "modal") _toggleModal()}}>
+	      	<section className="modal" onClick={(e) => {if(e.target.className === "modal") toggleModal()}}>
 	      		<form className="modal__card" onSubmit={_onSubmit}>
-	      			<div className="modal__card-icon" onClick={() =>  _toggleModal()}>
+	      			<div className="modal__card-icon" onClick={() =>  toggleModal()}>
 		      			<Icon icon='Clear'/>
 	      			</div>
 		      		<h1>Enter Email to Log In</h1>

@@ -16,13 +16,13 @@ import {
 	IoArrowGraphDownLeft,
 	IoHappy,
 	IoChevronUp,
-	IoClose,
+	IoCloseRound,
 	IoPlus,
 	IoLogOut,
 	IoLogIn,
 	IoSocialFacebook,
 	IoSocialTwitter,
-	IoCheckmark
+	IoCheckmarkRound
 } from 'react-icons/lib/io'
 
 import {
@@ -51,9 +51,9 @@ export default class Icon extends Component {
 			case 'Plus':
 				return <IoPlus/>
 			case 'Clear':
-				return <IoClose/>
+				return <IoCloseRound/>
 			case 'Check':
-    			return <IoCheckmark/>
+    			return <IoCheckmarkRound/>
 			case 'Up':
 				return <IoChevronUp/>
 	        case 'Down':

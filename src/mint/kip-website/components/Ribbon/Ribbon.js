@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
+import { Plus, Right } from '../../themes/newSvg';
 
 export default class Ribbon extends Component {
   shouldComponentUpdate(nextProps, nextState) {
@@ -38,7 +39,7 @@ export default class Ribbon extends Component {
 
           {
             currentUser && currentUser.email_address ? <div className="right row row-1">
-              <div className="right row row-1" onClick={() => toggleSidenav()}>
+              <div className="right menu row row-1" onClick={() => toggleSidenav()}>
                 <Icon icon='Menu' />
               </div>
             </div> : null     
@@ -47,7 +48,7 @@ export default class Ribbon extends Component {
           {
             currentUser && currentUser.email_address ? <div className="right row row-1 action2">
                 <a href='/newcart'><button>
-                  + New Cart
+                  <Plus/> New Cart
                 </button></a>
             </div> : null  
           }
@@ -55,7 +56,7 @@ export default class Ribbon extends Component {
           {
             currentUser ? null : ( src !== 'slack' ? <div className="right row row-1 action2">
                 <a href='/newcart'><button>
-                  Create New Cart
+                  <Plus/> New Cart
                 </button></a>
               </div> : <div className="right row row-1 action2">
                   <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button>

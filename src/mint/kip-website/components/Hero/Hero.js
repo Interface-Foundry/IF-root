@@ -4,9 +4,15 @@ import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import { Icon } from '../../themes';
-import { Desktop, Desk, KipHead, Plant } from '../../themes/kipsvg';
+import { Down, Right } from '../../themes/newSvg';
 
 export default class Hero extends Component {
+
+	componentWillMount() {
+		// Preload gif
+		let img = new Image()
+		img.src = 'https://storage.googleapis.com/kip-random/website/kip_collect.gif'
+	}
 
 	shouldComponentUpdate(nextProps, nextState) {
    		 // need this, otherwise page always rerender every scroll
@@ -19,11 +25,11 @@ export default class Hero extends Component {
   		const { animate, src } = this.props;
   		
 	    return (
-	      	<div className={`hero image ${animate ? 'start' : ''}`}>
+	      	<div className={`hero image ${animate ? 'start' : ''}`} style={{height: window.innerHeight}}>
 	      		<div className='hero__main'>
 		        	<div className="col-6 headline">
 		        		<h1>
-		        			THE SIMPLEST WAY TO SHOP WITH YOUR FRIENDS
+		        			The Simplest Way to Shop with your Friends
 		        		</h1>
 		        		<p>
 		        			Whether your in Canada, the U.K, or Singapore, <span>KIP</span> makes sure you never miss out on your friends shopping sprees or the best deals. 
@@ -32,7 +38,7 @@ export default class Hero extends Component {
 			      			src !== 'slack' ? <div className="col-12 action">
 				      			<a href='/newcart'>
 				        			<button>
-					        			Create KIP Cart <Icon icon='Right'/>
+					        			<span>Create KIP Cart <Right/></span>
 					        		</button>
 			        			</a>
 				        	</div> : <div className="col-12 action">
@@ -41,6 +47,11 @@ export default class Hero extends Component {
 			                  	</button></a>
 			              	</div>
 				      	}
+				      	<p className='subtext'>
+				      		<span>Easy Setup</span>
+				      		<span>Free</span>
+				      		<span>Cancel Anytime</span>
+				      	</p>
 		        	</div>
 		        	<div className="col-6 animation">
 		        		<div className='image'/>
@@ -48,16 +59,7 @@ export default class Hero extends Component {
 	        	</div>
 	        	<div className="more">
 	        		<h2><span>Learn More about Kip</span></h2>
-	        		<Icon icon='Down'/>
-	        	</div>
-				<div className="icons">
-					<div className="col-1"/>
-	        		<div className="col-2"><Icon icon='Amazon'/></div>
-	        		<div className="col-2"><Icon icon='Google'/></div>
-	        		<div className="col-2"><Icon icon='Slack'/></div>
-	        		<div className="col-2"><Icon icon='Microsoft'/></div>
-	        		<div className="col-2"><Icon icon='Delivery'/></div>
-	        		<div className="col-1"/>
+	        		<Down/>
 	        	</div>
 	      	</div>
 	    );

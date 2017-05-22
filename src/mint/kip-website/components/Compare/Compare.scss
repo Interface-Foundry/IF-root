@@ -1,0 +1,155 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.compare {
+	position: relative;
+	text-align: center;
+	background: transparent;
+	padding: $padding*5 $padding*2;
+	z-index: 1;
+
+
+	@media only screen and (max-width: 600px) {
+		padding: $padding*5 $padding*2;
+	}
+
+	h1 {
+		font-size: 28px;
+		padding: 0 0 $padding*5 0;
+		color: #42403f;
+		z-index: 1;
+
+		&:first-of-type {
+			padding-top: 0;
+			@media only screen and (max-width: 600px) {
+				padding-top: $padding*4;
+			}
+		}
+		@media only screen and (max-width: 600px) {
+			font-size: 27px;
+		}
+	}
+
+	h3 {
+		font-size: 27px;
+		margin: 0 0 $padding*6;
+		color: $primaryColor;
+	    line-height: 35px;
+
+		@media only screen and (max-width: 600px) {
+			margin: $padding*3 0;
+			font-size: 18px;
+			line-height: 25px;
+		}
+
+		span {
+			color: #42403f;
+			font-size: 20px;
+			line-height: 60px;
+			@media only screen and (max-width: 600px) {
+				font-size: 16px;
+			}
+		}
+	}
+
+
+	table {
+		position: relative;
+		width: 100%;
+		max-width: 900px;
+		margin: 0 auto;
+		border-radius: $padding/2;
+		padding: $padding*3 $padding*4;
+		background: white;
+		border: 3px solid mix(white, $primaryColor, 85%);
+
+		@media only screen and (max-width: 600px) {
+			padding: $padding;
+		}
+	}
+
+	table {
+		th {
+			.image {
+				background-size: contain;
+				background-repeat: no-repeat;
+				background-position: center;
+				height: 50px;
+				margin-bottom: $padding;
+			}
+
+			&:last-of-type {
+				.image {
+					background-size: contain;
+					background-repeat: no-repeat;
+					background-position: center;
+				}
+			}
+		}
+	}
+
+	td, th {
+		text-align: center;
+		vertical-align: middle;
+		padding: $padding;
+		font-size: 20px;
+		border-collapse: collapse;
+	}
+
+	td {
+	  	color: $warningColor;
+		font-size: 15px;
+
+		svg {
+			height: 50px;
+			width: 50%;
+			max-width: 50px;
+			padding: $padding;
+		}
+
+		&:nth-of-type(2) {
+			background-repeat: no-repeat;
+			background-position: center;
+		}
+	}
+
+	.check {
+	  color: darken(#d9f8f0, 25);;
+	  font-size: 30px;
+	}
+	.price {
+		color:  mix($bgColor, $primaryColor, 45%);
+	}
+	th:first-child,
+	td:first-child {
+	  	font-weight: 600;
+	  	text-align: left;
+		color:  mix($bgColor, $primaryColor, 45%);
+	}
+
+
+	@media screen and (max-width: 768px) {
+		tr {
+			display: flex;
+			flex-flow: row wrap;
+			justify-content: space-around;
+		}
+
+		td, th {
+			width: 33%;
+			vertical-align: middle;
+		}
+
+		th:first-child,
+		td:first-child {
+			text-align: center;
+			background: mix(white, $primaryColor, 85%);
+			width: 100%;
+		}
+
+		th:first-child {
+			display: none;
+		}
+	}
+
+}

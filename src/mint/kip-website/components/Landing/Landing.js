@@ -3,7 +3,9 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 
-import { Services, About, Showcase, Statement, Hero, Footer } from '..';
+import { Icon } from '../../themes';
+import { Banner } from '../../themes/newSvg';
+import { Services, Hero, Footer, Compare } from '..';
 
 
 export default class Landing extends Component {
@@ -25,7 +27,18 @@ export default class Landing extends Component {
     return (
       <div className="landing"> 
         <Hero animate={!fixed} src={src}/>
+        <div className="icons">
+          <div className="icon col-1"/>
+          <div className="icon col-1"><Icon icon='Amazon'/></div>
+          <div className="icon col-1"><Icon icon='Google'/></div>
+          <div className="icon col-1"><Icon icon='Slack'/></div>
+          <div className="icon col-1"><Icon icon='Microsoft'/></div>
+          <div className="icon col-1"><Icon icon='Delivery'/></div>
+          <div className="icon col-1"/>
+        </div>
+        
         <Services/>
+        <Compare/>
         <Footer/>
       </div>
     );

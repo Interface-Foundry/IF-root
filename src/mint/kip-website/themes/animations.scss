@@ -136,13 +136,21 @@
     transform: translate3d(0, 0, 0);
   }
   40% {
-    transform: translate3d(0, 5px, 0);
+    transform: translate3d(0, 10px, 0);
   }
   60% {
-    transform: translate3d(0, 2.5px, 0);
+    transform: translate3d(0, 5px, 0);
   }
 }
 
+@keyframes scrollLeftRight {
+  0%, 100% {
+    transform: translate3d(0%, 0, 0);
+  }
+  50% {
+    transform: translate3d(-60%, 0, 0);
+  }
+}
 
 
 @mixin animation($args) {

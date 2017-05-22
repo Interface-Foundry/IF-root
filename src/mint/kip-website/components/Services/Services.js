@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
-
+import { Gift, Home, Stats, Right, Brush, Banner } from '../../themes/newSvg';
 import {
   Facebook,
   Outlook,
@@ -61,79 +61,49 @@ export default class About extends Component {
 
   	render() {
 	    return (
-	      	<div className="services"> 
+	      	<div className="services col-12"> 
 				<div className="col-12">
-					<h1 className='tagline'>Empowering Consumers through Technology</h1>
+					<h1 className='tagline'><span>MEET OUR SOLUTION</span></h1>
+					<h4>
+						<span>KIP</span> is an A.I Penguin that helps you save money <br/>
+						by splitting costs between you and your friends
+					</h4>
+			        
 			        <div className="col-4 row-1 services__details">
-				       	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/slackClip.png")'}}/ >
-			        	<h2>Globaly Available Inventory</h2>
-		        		<p>No installs or download</p>
-			        	<p>Unique short URL to share</p>
-			        	<p>Invite friends with link or email</p>
+				        <Gift/>
+			        	<p>
+			        		No downloads or signups, Kip lets you shop from anywhere in the U.S, U.K, and Canada. <br/> 
+			        	</p>
 			        	<div className="col-12 row-1 action">
-			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button>Add to Slack</button></a>
+			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Add to Slack <Right/></span></button></a>
 			        	</div>
 			        </div>
 
 			       	<div className="col-4 row-1 services__details">
-				       	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/slackClip.png")'}}/ >
-			        	<h2>Easily Mannage Group Orders</h2>
-			        	<p>Great for teams already on Slack</p>
-			        	<p>Chat with Kip bot for essentials</p>
-			        	<p>Coordinate lunch delivery</p>
+				       	<Home/>
+			        	<p> 
+			        		Kip keeps your cart in the cloud and provides you with a unique short URL to share. <br/> 
+			        	</p>
 			        	<div className="col-12 row-1 action">
-			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button>Add to Slack</button></a>
+			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Add to Slack <Right/></span></button></a>
 			        	</div>
 			        </div>
 
 			       	<div className="col-4 row-1 services__details">
-				       	<div className="image" style={{backgroundImage: 'url("https://storage.googleapis.com/kip-random/website/slackClip.png")'}}/ >
-			        	<h2>Seamless International Payments</h2>
-			        	<p>Great for teams already on Slack</p>
-			        	<p>Chat with Kip bot for essentials</p>
-			        	<p>Coordinate lunch delivery</p>
+				       	<Stats/>
+			        	<p> 
+			        		Connect with you friends and never miss out on the things you need. 
+			        	</p>
 			        	<div className="col-12 row-1 action">
-			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button>Add to Slack</button></a>
+			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Add to Slack <Right/></span></button></a>
 			        	</div>
 			        </div>
-
-					<div className="col-12 row-1 services__comparison">
-						{
-							comparisonArray.map((app, i) => {
-								if(!app.nameSrc) return (
-									<ul key={i} className="app col-3 row-1">
-										<li></li>
-										<li><p>Order Management</p></li>
-										<li><p>Budget Setting</p></li>
-										<li><p>Track Orders</p></li>
-										<li><p>Multiple Vendors</p></li>
-										<li><p>No Signup/Download</p></li>
-										<li className='accessability'><p>Accessibility</p></li>
-										<li><p>Pricing</p></li>
-									</ul>
-								)
-
-								return (
-									<ul key={i} className={`app col-3 row-1 ${i === 1 ? 'kip' : ''}`}>
-										<li style={{backgroundImage: `url(${app.nameSrc})`}}></li>
-										<li className={app.order}>{app.order ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
-										<li className={app.budget}>{app.budget ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
-										<li className={app.tracking}>{app.tracking ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
-										<li className={app.vendors}>{app.vendors ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
-										<li className={app.noSignup}>{app.noSignup ? <Icon icon='Check'/> : <Icon icon='Clear'/>}</li>
-										<li className='accessability'>{
-											app.accessability.map((Svg, i) => {
-												return <Svg key={i}/>
-											})
-										}</li>
-										<li><p>{app.pricing}</p></li>
-									</ul>
-								)
-							})
-						}
-					</div>
 		        </div>
 	      	</div>
 	    );
   	}
 }
+
+
+        		// <p>No installs or download</p>
+			       //  	<p>Unique short URL to share.</p>

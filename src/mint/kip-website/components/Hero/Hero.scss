@@ -5,60 +5,96 @@
 	position: relative;
 	display: block;
 	overflow: hidden;
-	background: #fff;
+	background: transparent;
 	padding: 0 $padding*5;
 	width: 100%;
+	z-index: 1;
 
 	@media only screen and (max-width: 600px) {
-		height: 500px;
+		padding: $padding*7.5 $padding*3 0;
 	}
 
 	.hero__main {
 		position: relative;
 		display: table;
-		height: 650px;
+		height: calc(100% - #{$ribbonHeight*2});
 		width: 100%;
-	    max-width: 1200px;
+	    max-width: 900px;
 	    margin: 0 auto;
 		.headline {
 			display: table-cell;
 			vertical-align: middle;
 			padding:$padding 0;
 			text-align: left;
-
-			@media only screen and (max-width: 600px) {
-				* {
-					font-size: 27px;
-				}
-			}
+			background: rgba(white, 0.85);
 
 			h1 {
 				display: inline-block;
 				line-height: $ribbonHeight;
 				font-size: 30px;
-				color: $primaryColor;
+				// color: $primaryColor;
+				color: darken($bgColor, 15);
 
 				&.hightlight {
 					background: $primaryColor;
 				}
 
 				@media only screen and (max-width: 600px) {
-					line-height: 40px;
+					line-height: 30px;
+					font-size: 20px;
 				}
 			}
 
 			p {
 				font-size: 18px;
-				color: darken($bgColor, 5);
+				font-weight: 100;
+				color: rgba($bgColor, 0.7);
 
 				span {
 					font-weight: 600;
-					border-bottom: 3px solid $secondaryColor;
+					font-size: 18px;
+					color: $primaryColor;
+					@media only screen and (max-width: 600px) {
+						font-size: 14px;
+					}
+				}
+
+				@media only screen and (max-width: 600px) {
+					font-size: 14px;
+					color: rgba($bgColor, 0.9);
+				}
+
+				&.subtext {
+					font-size: 12px;
+					span {
+						color: rgba($bgColor, 0.6);
+						font-size: 12px;
+						font-weight: 400;
+						margin-right: $padding;
+						&:after {
+							content: '•';
+							position: relative;
+    						right: -5px;
+						}
+						&:last-of-type {
+							&:after {
+								content: '';
+							}
+						}
+						@media only screen and (max-width: 600px) {
+							font-size: 10px;
+						}
+					}
 				}
 			}
 
+
+
 			.action {
 				padding: $padding*2 0 $padding*2;
+				@media only screen and (max-width: 600px) {
+					padding: $padding*2 0 0;
+				}
 				button {
 					border: 0;
 					font-weight: bold;
@@ -68,19 +104,39 @@
 					font-size: 20px;
 					cursor: pointer;
 				    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+				    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+					&:hover {
+						svg {
+							transform: translate3d(5px,0,0)
+						}
+					}
+				    svg {
+				    	fill: white;
+				    	height: 25px;
+				    	width: 25px;
+				    	padding: 0;
+				    	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+				    	@media only screen and (max-width: 600px) {
+				    		height: 20px;
+				    	}
+				    }
 					&:focus {
 						@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+					}
+					@media only screen and (max-width: 600px) {
+						font-size: 14px;
 					}
 				}
 				a {
 					&:first-of-type {
 						button {
 							margin-right: $padding*2;
-							background: rgba($warningColor, 0.8);
+							background: $warningColor;
 							color: white;
 
 							@media only screen and (max-width: 600px) {
 								margin: 0 0 $padding*2;
+								padding: $padding $padding*2;
 							}
 						}
 					}
@@ -99,6 +155,19 @@
 				background-position: center;
 				height: 60%;
 			}
+
+			@media only screen and (max-width: 600px) {
+			    position: absolute;
+			    width: 100%;
+			    height: 100%;
+			    left: 0;
+			    bottom: 0;
+			    z-index: -1;
+
+			    .image {
+			    	height: 100%;
+			    }
+			}
 		}
 	}
 
@@ -107,42 +176,22 @@
 		cursor: pointer;
 	    margin: 0 auto;
 	    display: inline-block;
+	    color: $primaryColor;
+	    z-index: 1;
 		h2 {
 			height: $ribbonHeight/2;
 			margin-bottom: $padding;
-			color: darken($bgColor, 5);
+			color: $primaryColor;
 			max-width: 500px;
-			span {
-				border-bottom: 3px solid $primaryColor;
-			}
 		}
 		p {
 			max-width: 500px;
 		}
 		svg {
-			margin-top: $padding;
 			width: $ribbonHeight;
-			height: $ribbonHeight/2;
+			height: $ribbonHeight/1.3;
+			fill: $primaryColor;
 			@include animation(bounceDownSmall 3s infinite);
-		}
-	}
-
-
-	.icons {
-		position: relative;
-		height: $ribbonHeight*3;
-		width: 100%;
-		padding: 0;
-		display: table;
-		background: white;
-		max-width: 1200px;
-		margin: 0 auto;
-
-		& > div {
-			display: table-cell;
-			vertical-align: middle;
-			fill: rgba($bgColor, 0.5);
-			padding: 0;
 		}
 	}
 }

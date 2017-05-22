@@ -73,7 +73,6 @@ export default class Sidenav extends Component {
           <div className='sidenav__list__actions'>
             {currentUser ? <h4 onClick={() => {
               get('/api/logout', 'SESSION')
-              location.reload();
             }}><Icon icon='Logout'/>Logout</h4> : null}
           </div>
           <footer>

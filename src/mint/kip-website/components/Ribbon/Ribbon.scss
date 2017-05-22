@@ -8,11 +8,11 @@
 	left: 0;
 	pointer-events:none;
 	width: 100%;
-	height: $ribbonHeight;
+	height: $ribbonHeight + $padding;
 	z-index: 500;
 	text-align: center;
 	background: transparent;
-	border-bottom: 1px solid transparent;
+	border-bottom: 3px solid transparent;
 	margin-top: $padding*2;
 	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
@@ -23,9 +23,8 @@
 
     &.background {
     	background: white;
-		border-bottom: 1px solid $borderColor;
+		border-bottom: 2px solid mix(white, $primaryColor, 85%);
 		margin-top: 0;
-		box-shadow: 0 4px 6px rgba(50,50,93,.33), 0 1px 3px rgba(0,0,0,.08);
     }
 
 	* {
@@ -48,6 +47,7 @@
 			display: inline-block;
 			background-size: contain;
 			width: $ribbonHeight - 15px;
+			min-height: $ribbonHeight + $padding;
 		}
 		h1, a {
 			display: inline-block;
@@ -57,11 +57,20 @@
 
 		h1 {
 			font-size: 23px;
-			line-height: 50px;
+			line-height: $ribbonHeight + $padding;
+		}
+		.menu {
+			cursor: pointer;
+			svg {
+				width: 30px;
+				fill: $primaryColor;
+			}
 		}
 		svg {
-			width: 30px;
+			width: 20px;
 			height: 100%;
+			padding: $padding 0;
+			fill: white;
 			cursor: pointer;
 		}
 		&.right {
@@ -123,7 +132,7 @@
 			padding: 0 $padding;
 			font-size: 14px;
 			cursor: pointer;
-			margin-top: 10px;
+			margin-top: 15px;
 			height: 30px;
 			line-height: 30px;
 			color: #42403f;
@@ -135,7 +144,7 @@
 		a {
 			&:first-of-type {
 				button {
-					background: rgba($warningColor, 0.8);
+					background: $warningColor;
 					color: white;
 				}
 			}
