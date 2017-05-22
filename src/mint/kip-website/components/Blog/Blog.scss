@@ -16,9 +16,12 @@
 		width: 100%;
 		z-index: 1;
 
+		@media only screen and (max-width: 600px) {
+			padding: $padding*10 $padding*5 0;
+		}
+
 		.text {
 			position: relative;
-			top: 50px;
 			width: 100%;
 
 			h1 {
