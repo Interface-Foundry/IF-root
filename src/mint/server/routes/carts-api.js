@@ -13,6 +13,7 @@ const haversine = require('haversine')
 const stable = require('stable')
 const thunkify = require('thunkify')
 const ipinfo = thunkify(require('ipinfo'))
+const spliddit = require('spliddit')
 
 const cart_types = require('../cart/cart_types').stores
 const countryCoordinates = require('../cart/cart_types').countryCoordinates
@@ -621,6 +622,96 @@ module.exports = function (router) {
     res.send(item)
   }))
 
+
+  /**
+   * @api {get} /api/item/:item_id/reactions
+   * @apiDescription get all reactions on an item
+   * @apiGroup Carts
+   * @apiParam {String} :item_id
+   */
+  router.get('/item/:item_id/reactions', (req, res) => co(function * () {
+    var item = yield db.Items.findOne({id: req.params.item_id}).populate('reactions')
+    if (!item) return res.sendStatus(404);
+    return res.send(item.reactions);
+  }))
+
+  /**
+   * @api {get} /api/item/:item_id/reaction/:user_id
+   * @apiDescription get a single reaction on an item associated with a specific user
+   * @apiGroup Carts
+   * @apiParam {String} :item_id
+   * @apiParam {String} :user_id
+   */
+  router.get('/item/:item_id/reaction/:user_id', (req, res) => co(function * () {
+   var item = yield db.Items.findOne({id: req.params.item_id}).populate('reactions')
+   if (!item) return res.sendStatus(404);
+   var reaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
+   return res.send(reaction);
+  }))
+
+  /**
+   * @api {post} /api/item/:item_id/reaction/:user_id
+   * @apiDescription create a single reaction on an item associated with a specific user
+   * @apiGroup Carts
+   * @apiParam {String} :item_id
+   * @apiParam {String} :user_id
+   * @apiParam {String} emoji - the reaction should be posted in the body
+   */
+  router.post('/item/:item_id/reaction/:user_id', (req, res) => co(function * () {
+   var item = yield db.Items.findOne({
+     id: req.params.item_id
+   }).populate('reactions')
+   if (!item) {
+     logging.info('item not found')
+     return res.sendStatus(404);
+   }
+
+   //validate emoji as single character
+   logging.info('emoji:', req.body.emoji)
+
+   var emojiChars = spliddit(req.body.emoji)
+
+   if (emojiChars.length > 80) return res.send('input too long')
+
+   //has the user already reacted? if so, update the character
+   var previousReaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
+
+   logging.info('reaction to be replaced im yesh', previousReaction)
+
+   if (previousReaction) {
+     previousReaction.emoji = req.body.emoji;
+     yield previousReaction.save();
+     return res.send(previousReaction)
+   }
+   else {
+     logging.info('req.body.emoji:', req.body.emoji)
+     var newReaction = yield db.Reactions.create({
+       emoji: req.body.emoji,
+       user: req.params.user_id,
+       item: req.params.item_id
+     })
+     item.reactions.add(newReaction.id);
+     yield item.save()
+     return res.send(newReaction);
+   }
+  }))
+
+  /**
+   * @api {delete} /api/item/:item_id/reaction/:user_id
+   * @apiDescription remove a specific reaction off an item on behalf of a user
+   * @apiParam {String} :item_id
+   * @apiParam {String} :user_id
+   */
+  router.delete('/item/:item_id/reaction/:user_id', (req, res) => co(function * () {
+   var item = yield db.Items.findOne({id: req.params.item_id}).populate('reactions')
+   if (!item) return res.sendStatus(404);
+   logging.info('ITEM', item);
+   var reaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
+   item.reactions.remove(reaction.id);
+   yield item.save();
+   yield reaction.destroy();
+   res.send('success');
+  }))
 
   /**
    * @api {get} /api/itempreview?q=:q&page=:page&category=:category Item Preview

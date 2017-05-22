@@ -42,6 +42,9 @@ var itemsCollection = Waterline.Collection.extend({
     /** could be any type of option, size, color, style */
     options: Waterline.isMany('item_options'),
 
+    /** emoji reactions from other users */
+    reactions: Waterline.isMany('reactions'),
+
     /** @type {string} item name or whatever we present maybe */
     name: 'string',
 
@@ -93,7 +96,10 @@ var itemsCollection = Waterline.Collection.extend({
       defaultsTo: false
     },
 
-    cart: Waterline.isA('carts')
+    cart: Waterline.isA('carts'),
+
+    /** @type {text} comment by the user who initially added the item */
+    comment: 'text'
   }
 });
 
