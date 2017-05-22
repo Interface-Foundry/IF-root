@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
-import { Gift, Home, Stats, Right, Brush, Banner } from '../../themes/newSvg';
+import { Gift, Home, Stats, Right, Brush, Banner, Delete, Check } from '../../themes/newSvg';
 import {
   Facebook,
   Outlook,
@@ -70,7 +70,7 @@ export default class Compare extends Component {
 					  		<td>Order Management</td>
 				  			{
 					  			comparisonArray.map((app) => (
-					  				app.order ? <td className='check'> <Icon icon='Check'/> </td> : <td> <Icon icon='Clear'/> </td>
+					  				app.order ? <td className='check'> <Check/> </td> : <td>  <Delete/> </td>
 					  			))
 					  		}
 				  		</tr>
@@ -78,7 +78,7 @@ export default class Compare extends Component {
 					      	<td>Budget Setting</td>
 				  			{
 					  			comparisonArray.map((app) => (
-					  				app.budget ? <td className='check'> <Icon icon='Check'/> </td> : <td> <Icon icon='Clear'/> </td>
+					  				app.budget ? <td className='check'> <Check/> </td> : <td> <Delete/> </td>
 					  			))
 					  		}
 					    </tr>
@@ -86,7 +86,7 @@ export default class Compare extends Component {
 					      	<td>Track Orders</td>
 				  			{
 					  			comparisonArray.map((app) => (
-					  				app.tracking ? <td className='check'> <Icon icon='Check'/> </td> : <td> <Icon icon='Clear'/> </td>
+					  				app.tracking ? <td className='check'> <Check/> </td> : <td> <Delete/> </td>
 					  			))
 					  		}
 					    </tr>
@@ -94,7 +94,7 @@ export default class Compare extends Component {
 					      	<td>Multiple Vendors</td>
 				  			{
 					  			comparisonArray.map((app) => (
-					  				app.vendors ? <td className='check'> <Icon icon='Check'/> </td> : <td> <Icon icon='Clear'/> </td>
+					  				app.vendors ? <td className='check'> <Check/> </td> : <td> <Delete/> </td>
 					  			))
 					  		}
 					    </tr>
@@ -102,7 +102,7 @@ export default class Compare extends Component {
 					      	<td>No Signup/Download</td>
 				  			{
 					  			comparisonArray.map((app) => (
-					  				app.noSignup ? <td className='check'> <Icon icon='Check'/> </td> : <td> <Icon icon='Clear'/> </td>
+					  				app.noSignup ? <td className='check'> <Check/> </td> : <td> <Delete/> </td>
 					  			))
 					  		}
 					    </tr>

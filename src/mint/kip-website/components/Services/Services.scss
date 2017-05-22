@@ -74,7 +74,7 @@
 	.services__details {
 		position: relative;
 		padding: $padding*2 $padding*2 $padding*4;
-		text-align: center;
+		text-align: left;
 
 		svg {
 			width: 100%;
@@ -101,11 +101,12 @@
 		}
 
 
-		p {
+		h4 {
 			position: relative;
 			white-space: normal;
-			font-weight: 500;
+			font-weight: 100;
 			font-size: 15px;
+			padding: $padding*2 0 0;
 			color: rgba($bgColor, 1);
 			@media only screen and (max-width: 600px) {
 				padding: 0;
@@ -134,7 +135,7 @@
 			border-radius: $padding/2;
 			background: transparent;
 			color: $primaryColor;
-			padding: $padding $padding*4;
+			padding: 0;
 			font-size: 20px;
 			height: $ribbonHeight;
 			line-height: $ribbonHeight;

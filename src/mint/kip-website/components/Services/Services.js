@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
-import { Gift, Home, Stats, Right, Brush, Banner } from '../../themes/newSvg';
+import { Gift, Home, Stats, Right, Brush, Banner, Cloud, Connected, Person, Mapper } from '../../themes/newSvg';
 import {
   Facebook,
   Outlook,
@@ -70,30 +70,30 @@ export default class About extends Component {
 					</h4>
 			        
 			        <div className="col-4 row-1 services__details">
-				        <Gift/>
-			        	<p>
+				        <Mapper/>
+			        	<h4>
 			        		No downloads or signups, Kip lets you shop from anywhere in the U.S, U.K, and Canada. <br/> 
-			        	</p>
+			        	</h4>
 			        	<div className="col-12 row-1 action">
 			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Add to Slack <Right/></span></button></a>
 			        	</div>
 			        </div>
 
 			       	<div className="col-4 row-1 services__details">
-				       	<Home/>
-			        	<p> 
+				       	<Cloud/>
+			        	<h4> 
 			        		Kip keeps your cart in the cloud and provides you with a unique short URL to share. <br/> 
-			        	</p>
+			        	</h4>
 			        	<div className="col-12 row-1 action">
 			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Add to Slack <Right/></span></button></a>
 			        	</div>
 			        </div>
 
 			       	<div className="col-4 row-1 services__details">
-				       	<Stats/>
-			        	<p> 
+				       	<Person/>
+			        	<h4> 
 			        		Connect with you friends and never miss out on the things you need. 
-			        	</p>
+			        	</h4>
 			        	<div className="col-12 row-1 action">
 			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Add to Slack <Right/></span></button></a>
 			        	</div>

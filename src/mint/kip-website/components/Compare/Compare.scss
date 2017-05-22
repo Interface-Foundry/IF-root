@@ -97,7 +97,7 @@
 	}
 
 	td {
-	  	color: $warningColor;
+	  	fill: $warningColor;
 		font-size: 15px;
 
 		svg {
@@ -114,7 +114,7 @@
 	}
 
 	.check {
-	  color: darken(#d9f8f0, 25);;
+	  fill: darken(#d9f8f0, 25);;
 	  font-size: 30px;
 	}
 	.price {

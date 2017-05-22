@@ -12,3 +12,10 @@ export Brushstroke from './Brushstroke';
 export Circle from './Circle';
 export Hills from './Hills';
 export Banner from './Banner';
+
+export Check from './Check';
+export Delete from './Delete';
+export Connected from './Connected';
+export Person from './Person';
+export Cloud from './Cloud';
+export Mapper from './Mapper'
