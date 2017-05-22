@@ -12,12 +12,12 @@
 		display: block;
 		overflow: hidden;
 		background: transparent;
-		padding: $padding*5 $padding*5 0;
+		padding: $padding*10 $padding*5 0;
 		width: 100%;
 		z-index: 1;
 
 		@media only screen and (max-width: 600px) {
-			padding: $padding*10 $padding*5 0;
+			padding: $padding*5 $padding*5 0;
 		}
 
 		.text {
@@ -143,6 +143,7 @@
 
 	.blogs {
 		padding: $padding*2;
+		min-height: 500px;
 	}
 	.blog__post {
 		position: relative;
