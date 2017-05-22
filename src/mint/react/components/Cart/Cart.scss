@@ -37,7 +37,7 @@ $cart__add-height: $nav-height+$padding;
       button {
         height: $nav-height;
         width: 100%;
-        background: $secondary-button-color;
+        background: $secondaryColor;
         border: 0;
         color: white;
         padding: 0 $padding*2;
@@ -45,7 +45,7 @@ $cart__add-height: $nav-height+$padding;
         border-radius: 5px;
         text-align: center;
         font-weight: bold;
-        background: $secondary-button-color;
+        background: $secondaryColor;
         margin: 0 10px;
         overflow: hidden;
         display: flex;
@@ -70,7 +70,7 @@ $cart__add-height: $nav-height+$padding;
         }
         &.secondary {
           color: $header-color;
-          background: $main-button-color;
+          background: $mainColor;
           h1 {
             margin-top: 5px;
           }
@@ -155,7 +155,7 @@ $cart__add-height: $nav-height+$padding;
     @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
     &.action {
-      background: $main-button-color;
+      background: $mainColor;
     }
     .undo__button {
       font-weight: 500;

@@ -8,7 +8,7 @@
   bottom: 0;
   right: 0;
   z-index: 100;
-  background: rgba($secondary-button-color, 0.3);
+  background: rgba($secondaryColor, 0.3);
   @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
   @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
   @media (min-width: 900px) {
@@ -99,7 +99,7 @@
             background: transparent;
             border-radius: 5px 0 0 5px;
             &:hover {
-              background: darken($secondary-button-color, 5%);
+              background: darken($secondaryColor, 5%);
             }
           }
           &:last-child {
@@ -114,7 +114,7 @@
           width: 95%;
           @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
           &:hover {
-            background: rgba($secondary-button-color, 0.5);
+            background: rgba($secondaryColor, 0.5);
           }
         }
         p {
@@ -184,7 +184,7 @@
         cursor: pointer;
         border-radius: 5px;
         background: white;
-        background: $main-button-color;
+        background: $mainColor;
         border: 1px solid $border-color-light;
         font-weight: 600;
         width: 100%;
@@ -213,15 +213,15 @@
         }
         &.side__share {
           height: unset;
-          background: $secondary-button-color;
+          background: $secondaryColor;
           color: white;
         }
         &.side__new_cart {
           height: unset;
-          background: $main-button-color;
+          background: $mainColor;
           color: black;
           @media (min-width: 900px) {
-            background-color: $third-button-color;
+            background-color: $thirdColor;
             color: white;
           }
         }

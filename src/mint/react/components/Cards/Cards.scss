@@ -24,11 +24,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         cursor: pointer;
         font-weight: 500;
         padding: $padding/2 0;
-        border-bottom: 3px solid $main-button-color;
+        border-bottom: 3px solid $mainColor;
 
         &.yellow {
           padding: $padding/2 $padding;
-          background: $main-button-color;
+          background: $mainColor;
           border-bottom: 0;
           box-shadow: $card-box-shadow;
           border-radius: 5px;

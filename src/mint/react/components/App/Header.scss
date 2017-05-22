@@ -6,7 +6,7 @@
   line-height: $nav-height;
   font-family: 'Raleway';
   text-align: left;
-  background: $secondary-button-color;
+  background: $secondaryColor;
   color: white;
   border-bottom: 1px solid $border-color-light;
   @media (min-width: 900px) {
@@ -74,11 +74,11 @@
       margin-right: $padding;
       cursor: pointer;
       span {
-        border-bottom: 3px solid $main-button-color;
+        border-bottom: 3px solid $mainColor;
       }
     }
     a {
-      border-bottom: 3px solid $main-button-color;
+      border-bottom: 3px solid $mainColor;
     }
     .navbar__icon {
       display: flex;
@@ -103,7 +103,7 @@
       padding: 0;
 
       span {
-        border-bottom: 1px solid $secondary-button-color;;
+        border-bottom: 1px solid $secondaryColor;;
       }
     }
     .navbar__modal_head {
@@ -120,7 +120,7 @@
         }
       }
       span {
-        border-bottom: 3px solid $secondary-button-color;
+        border-bottom: 3px solid $secondaryColor;
         max-width: 150px;
         display: inline-block;
         overflow: hidden;

@@ -15,8 +15,7 @@ export default class Sidenav extends Component {
   }
 
   render() {
-    const { currentUser, _toggleSidenav, _toggleModal, myCarts, otherCarts, get } = this.props, 
-      { show } = this.state;
+    const { currentUser, _toggleSidenav, _toggleModal, myCarts, otherCarts, get, logout } = this.props, { show } = this.state;
 
     return (
       <div className='sidenav'>
@@ -72,8 +71,9 @@ export default class Sidenav extends Component {
           </div>
           <div className='sidenav__list__actions'>
             {currentUser ? <h4 onClick={() => {
-              get('/api/logout', 'SESSION')
-              location.reload();
+              get('/api/logout', 'SESSION');
+              logout();
+              _toggleSidenav();
             }}><Icon icon='Logout'/>Logout</h4> : null}
           </div>
           <footer>

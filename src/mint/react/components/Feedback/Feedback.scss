@@ -16,7 +16,7 @@
   		font-size: 15px;
   		line-height: $nav-height/1.5;
   		height: $nav-height/1.5;
-      color: $fifth-button-color;
+      color: $fifthColor;
       cursor: pointer;
 
       svg {
@@ -24,10 +24,10 @@
       }
 
       &:first-of-type {
-        color: $third-button-color;
+        color: $thirdColor;
       }
       &:last-of-type {
-        color: $fourth-button-color;
+        color: $fourthColor;
       }
   	}
   }
@@ -60,7 +60,7 @@
     font-size: 20px;
     font-weight: bold;
     color: white;
-    background: $third-button-color;
+    background: $thirdColor;
     margin-top: $padding*3;
     border-radius: 5px;
 

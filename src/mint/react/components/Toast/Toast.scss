@@ -22,10 +22,10 @@
     background: rgba($price-color, 0.98);
   }
   &.warn {
-    background: rgba($main-button-color, 0.98);
+    background: rgba($mainColor, 0.98);
   }
   &.success {
-    background: rgba($third-button-color, 0.98);
+    background: rgba($thirdColor, 0.98);
   }
 }
 
