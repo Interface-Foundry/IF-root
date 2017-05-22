@@ -56,7 +56,7 @@ export default class Blog extends Component {
       <div className="blog"> 
         <section className="blog__header" style={{height: window.innerHeight}}>
           <div className='text'>
-            <h1> We learn't alot when Builing <span>KIP</span></h1>
+            <h1> We learn't alot Builing <span>KIP</span></h1>
             <h4>Here is what we found</h4>
           </div>
           <div className="main">
