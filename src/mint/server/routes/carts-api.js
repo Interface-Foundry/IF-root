@@ -192,6 +192,9 @@ module.exports = function (router) {
       cart.members.add(req.params.user_id)
     }
 
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
+
     // Save all the weird shit we've added to this poor cart.
     yield cart.save()
 
@@ -268,6 +271,9 @@ module.exports = function (router) {
     logging.info('user id?', req.UserSession.user_account.id)
     item.added_by = userId
 
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
+
     // Save all the weird shit we've added to this poor cart.
     yield [item.save(), cart.save()]
     // specify who added it
@@ -311,6 +317,11 @@ module.exports = function (router) {
 
     cart = yield cartUtils.deleteItemFromCart(oldItem, cart, userId)
     const newItem = yield cartUtils.addItemToCart(newItemAsin, cart, userId, oldItem.quantity)
+
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
+    yield cart.save()
+
     return res.send(newItem)
   }));
 
@@ -333,6 +344,9 @@ module.exports = function (router) {
        throw new Error('Unauthorized, only cart leader can clear cart items')
      }
      cart.items.map(i => cart.items.remove(i.id))
+
+     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+     cart.dirty = true
      yield cart.save()
      res.status(200).end()
    }))
@@ -415,6 +429,10 @@ module.exports = function (router) {
 
     // Remove the cart-item association
     cart.items.remove(item.id)
+
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
+
     yield cart.save()
 
     // Just say ok
@@ -461,7 +479,11 @@ module.exports = function (router) {
     delete req.body.store_locale
 
     _.merge(cart, req.body)
+
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
     yield cart.save()
+
     res.send(cart)
   }))
 
@@ -576,6 +598,13 @@ module.exports = function (router) {
 
     _.merge(item, req.body)
     yield item.save()
+
+    // mark the cart as dirty
+    if (!cart.dirty) {
+      cart.dirty = true
+      yield cart.save()
+    }
+
     res.send(item)
   }))
 
