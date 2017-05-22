@@ -21,8 +21,12 @@ function formatAmazonPrice(amount) {
 function getItemPrice(item, priceType) {
   // place holder for time being since unsure what price to use
   const availablePrices = {}
+  var salePrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.SalePrice.Amount', 0))
   availablePrices.basicItemPrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.Price.Amount', 0))
   if (priceType === undefined) {
+    if (salePrice) {
+      return salePrice
+    }
     return availablePrices.basicItemPrice
   } else {
     // might be useful to return other possible prices in the future
