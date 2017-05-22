@@ -641,12 +641,8 @@ module.exports = function (router) {
    logging.info('emoji:', req.body.emoji)
 
    var emojiChars = spliddit(req.body.emoji)
-   logging.info('emojiChars', emojiChars)
-   emojiChars = emojiChars.filter(function (c) {
-     logging.info('c:', c)
-   })
-   logging.info('split version:', emojiChars)
-   if (emojiChars.length > 1) return res.send('input not an emoji')
+
+   if (emojiChars.length > 80) return res.send('input too long')
 
    //has the user already reacted? if so, update the character
    var previousReaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
