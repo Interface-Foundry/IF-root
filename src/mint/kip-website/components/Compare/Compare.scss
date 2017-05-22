@@ -109,6 +109,59 @@
 				}
 			}
 		}
+
+		.action {
+			padding: $padding*2 0 0;
+			text-align: center;
+			@media only screen and (max-width: 600px) {
+				padding: $padding*2 0 0;
+			}
+			button {
+				border: 0;
+				font-weight: bold;
+				border-radius: $padding/2;
+				background: white;
+				padding: $padding $padding*4;
+				font-size: 20px;
+				cursor: pointer;
+			    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+			    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+				&:hover {
+					svg {
+						transform: translate3d(5px,0,0)
+					}
+				}
+			    svg {
+			    	fill: white;
+			    	height: 25px;
+			    	width: 25px;
+			    	padding: 0;
+			    	@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+			    	@media only screen and (max-width: 600px) {
+			    		height: 20px;
+			    	}
+			    }
+				&:focus {
+					@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+				}
+				@media only screen and (max-width: 600px) {
+					font-size: 14px;
+				}
+			}
+			a {
+				&:first-of-type {
+					button {
+						background: $warningColor;
+						color: white;
+
+						@media only screen and (max-width: 600px) {
+							margin: 0 0 $padding*2;
+							padding: $padding $padding*2;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	td, th {
@@ -137,7 +190,7 @@
 	}
 
 	.check {
-	  fill: darken(#d9f8f0, 25);;
+	  fill: $thirdColor;
 	  font-size: 30px;
 	}
 	.price {

@@ -10,11 +10,18 @@
 	.blog__header {
 		position: relative;
 		display: block;
-		overflow: hidden;
 		background: transparent;
-		padding: $padding*10 $padding*5 0;
+		padding: $padding*10 0 0;
 		width: 100%;
 		z-index: 1;
+		background: white;
+		border-bottom: 3px solid mix(white, $thirdColor, 85%);
+
+		& > div {
+			display: table;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
 
 		@media only screen and (max-width: 600px) {
 			padding: $padding*5 $padding*5 0;
@@ -22,17 +29,35 @@
 
 		.text {
 			position: relative;
-			width: 100%;
+			width: 50%;
+		    min-width: 600px;
+			display: table-cell;
+			vertical-align: middle;
+			text-align: left;
+			padding: $padding*5 $padding*5 $padding*5 0;
 
 			h1 {
+				position: relative;
 				display: inline-block;
 				line-height: $ribbonHeight;
 				font-size: 30px;
-				// color: $primaryColor;
-				color: darken($bgColor, 15);
+				padding: $padding 0;
+				border-radius: 5px;
+				color: $bgColor;
 
-				&.hightlight {
-					background: $primaryColor;
+				span {
+					position: relative;
+					&:after {
+						content: '';
+						position: absolute;
+						height: 3px;
+						width: 100%;
+						left: 0;
+						bottom: -3px;
+						border-radius: 500px;
+						background: $thirdColor;
+						@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+					}
 				}
 
 				@media only screen and (max-width: 600px) {
@@ -41,92 +66,57 @@
 				}
 			}
 
-			h4 {
-				font-size: 18px;
-				font-weight: 100;
-				color: rgba($bgColor, 0.7);
-
+			.subtext {
+				font-size: 17px;
 				span {
-					font-weight: 600;
-					font-size: 18px;
-					color: $primaryColor;
+					color: rgba($bgColor, 0.6);
+					font-size: 17px;
+					font-weight: 100;
+					margin-right: $padding;
+					&:after {
+						content: '❄';
+						position: relative;
+						right: -5px;
+					}
+					&:last-of-type {
+						&:after {
+							content: '';
+						}
+					}
 					@media only screen and (max-width: 600px) {
 						font-size: 14px;
-					}
-				}
-
-				@media only screen and (max-width: 600px) {
-					font-size: 14px;
-					color: rgba($bgColor, 0.9);
-				}
-
-				&.subtext {
-					font-size: 12px;
-					span {
-						color: rgba($bgColor, 0.6);
-						font-size: 12px;
-						font-weight: 400;
-						margin-right: $padding;
-						&:after {
-							content: '•';
-							position: relative;
-    						right: -5px;
-						}
-						&:last-of-type {
-							&:after {
-								content: '';
-							}
-						}
-						@media only screen and (max-width: 600px) {
-							font-size: 10px;
-						}
 					}
 				}
 			}
 		}
 
-		.main {
-			position: relative;
-			display: table;
-			height: calc(100% - #{$ribbonHeight*4});
-			width: 100%;
-		    max-width: 900px;
-		    margin: 0 auto;
-
-		    .header {
-				display: table-cell;
-				vertical-align: middle;
-				padding: 0;
-				text-align: left;
-
-				.image {
-					background-size: contain;
-					background-position: center;
-					height: 60%;
-				}
-
-				p {
-					font-weight: 100;
-					font-size: 20px;
-					padding: $padding 0;
-					text-align: center;
-					max-width: 500px;
-					margin: 0 auto;
-				}
+		.icons {
+			display: table-cell;
+			vertical-align: middle;
+		    width: 50%;
+		    min-width: 600px;
+		    text-align: right;
+			svg {
+				fill: $primaryColor;
+				margin: 0 $padding;
+				height: $ribbonHeight/1.5;
+				width: $ribbonHeight/1.5;
+				z-index: 1;
 			}
 		}
 
 		.more {
 			height: $ribbonHeight*2;
 			cursor: pointer;
-		    margin: 0 auto;
+		    margin: 0 auto -50px;
+		    background: white;
 		    display: inline-block;
-		    color: $primaryColor;
 		    z-index: 1;
+		    padding: 0 $padding*2;
 			h2 {
 				height: $ribbonHeight/2;
 				margin-bottom: $padding;
-				color: $primaryColor;
+				color: $thirdColor;
 				max-width: 500px;
 			}
 			p {
@@ -135,7 +125,7 @@
 			svg {
 				width: $ribbonHeight;
 				height: $ribbonHeight/1.3;
-				fill: $primaryColor;
+				fill: $thirdColor;
 				@include animation(bounceDownSmall 3s infinite);
 			}
 		}
@@ -144,20 +134,21 @@
 	.blogs {
 		padding: $padding*2;
 		min-height: 500px;
+		max-width: 1200px;
+		margin: 0 auto;
 	}
 	.blog__post {
 		position: relative;
 		cursor: pointer;
 		border-radius: $padding/2;
-		width: 650px;
+		width: 33%;
 		height: 400px;
 		display: inline-block;
-		margin: $ribbonHeight;
-		border: 1px solid $borderColor;
+		margin: $ribbonHeight 0;
 		text-align: left;
 		z-index: 1;
 		background: white;
-		padding: $padding;
+		padding: $padding $padding*2 $padding*2;
 
 		@media only screen and (max-width: 600px) {
 			display: block;
@@ -168,7 +159,7 @@
 
 		.image {
 			height: 250px;
-			margin: 25px 0;
+			margin: 0 0 25px;
 			width: 100%;
 			background-size: contain;
 		}

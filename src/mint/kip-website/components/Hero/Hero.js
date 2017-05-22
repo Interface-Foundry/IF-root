@@ -38,7 +38,7 @@ export default class Hero extends Component {
 			      			src !== 'slack' ? <div className="col-12 action">
 				      			<a href='/newcart'>
 				        			<button>
-					        			<span>Create KIP Cart <Right/></span>
+					        			<span>Create Kip Cart <Right/></span>
 					        		</button>
 			        			</a>
 				        	</div> : <div className="col-12 action">

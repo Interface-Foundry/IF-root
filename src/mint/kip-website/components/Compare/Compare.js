@@ -52,7 +52,7 @@ export default class Compare extends Component {
   	render() {
 	    return (
 	      	<div className="compare col-12"> 
-      			<h1 className='tagline'><span>Not convinced?</span></h1>
+      			<h1 className='tagline'><span>NOT CONVINCED?</span></h1>
 				<h4>
 					Just check out how we compare.
 				</h4>
@@ -126,13 +126,20 @@ export default class Compare extends Component {
 					    </tr>
 					    <tr>
 					      	<td>Pricing</td>
-			  			{
+			  				{
 					  			comparisonArray.map((app) => (
 					  				<td className='price'> { app.pricing } </td>
 					  			))
 					  		}
 					    </tr>
 				  	</tbody>
+			  		<div className="col-12 action">
+		      			<a href='/newcart'>
+		        			<button>
+			        			<span>Create KIP Cart <Right/></span>
+			        		</button>
+	        			</a>
+		        	</div>
 				</table>
 	      	</div>
 	    );

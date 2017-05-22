@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
-import { Gift, Home, Stats, Right, Brush, Banner, Cloud, Connected, Person, Mapper, Items, DownArrow, DownLeft, DownRight } from '../../themes/newSvg';
+import { Right, Cloud, Person, Items, Mapper, Down } from '../../themes/newSvg';
 import {
   Facebook,
   Outlook,
@@ -71,9 +71,9 @@ export default class About extends Component {
 					<section className='cluster'>
 			        	<Items/>
 			        	<div className='inline'>
-			        		<DownLeft/>
-			        		<DownArrow/>
-			        		<DownRight/>
+			        		<Down/>
+			        		<Down/>
+			        		<Down/>
 			        	</div>
 			        </section>
 			        <div className="col-4 row-1 services__details">
@@ -82,7 +82,7 @@ export default class About extends Component {
 			        		No downloads or signups, Kip lets you shop from anywhere in the U.S, U.K, and Canada. <br/> 
 			        	</h4>
 			        	<div className="col-12 row-1 action">
-			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Add to Slack <Right/></span></button></a>
+			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a KIP Cart <Right/></span></button></a>
 			        	</div>
 			        </div>
 
@@ -92,7 +92,7 @@ export default class About extends Component {
 			        		Kip keeps your cart in the cloud and provides you with a unique short URL to share. <br/> 
 			        	</h4>
 			        	<div className="col-12 row-1 action">
-			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Add to Slack <Right/></span></button></a>
+			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a KIP Cart <Right/></span></button></a>
 			        	</div>
 			        </div>
 
@@ -102,7 +102,7 @@ export default class About extends Component {
 			        		Connect with you friends and never miss out on the things you need. 
 			        	</h4>
 			        	<div className="col-12 row-1 action">
-			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Add to Slack <Right/></span></button></a>
+			        		<a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a KIP Cart <Right/></span></button></a>
 			        	</div>
 			        </div>
 		        </div>
@@ -112,5 +112,9 @@ export default class About extends Component {
 }
 
 
-        		// <p>No installs or download</p>
-			       //  	<p>Unique short URL to share.</p>
+
+
+
+
+
+

@@ -6,72 +6,29 @@ import moment from 'moment';
 import { Footer } from '..';
 
 import { Icon } from '../../themes';
-import { Down, Right } from '../../themes/newSvg';
+import { Down, Right, EmailDrawn, FacebookDrawn, TwitterDrawn } from '../../themes/newSvg';
 
 export default class Blog extends Component {
-  constructor(props) {
-    super(props)
-    this._startAnimation = this._startAnimation.bind(this)
-    this.state = {
-      sliderIndex: 0
-    }
-  }
-
-  _startAnimation(stop) {
-    const { posts } = this.props,
-          { sliderIndex } = this.state,
-          length = posts.length - 1;
-
-    if(stop) {
-      if(self)
-        clearTimeout(self.timeout)
-
-      clearTimeout(this.timeout)
-    } else {
-      let self = this
-      self.timeout = setTimeout(() => {
-
-        this.setState({sliderIndex: sliderIndex === length ? 0 : sliderIndex+1})
-        self._startAnimation()
-      }, 7000);
-    }
-  }
-
-  componentWillMount() {
-    const { get, customer, account } = this.props
-
-    this._startAnimation()
-  }
-
-  componentWillUnmount() {
-    this._startAnimation(true)
-  }
 
   render() {
-    const { posts } = this.props,
-          { sliderIndex } = this.state;
+    const { posts } = this.props;
 
-    console.log(sliderIndex);
     return (
       <div className="blog"> 
-        <section className="blog__header" style={{height: window.innerHeight}}>
-          <div className='text'>
-            <h1> We learn't alot Builing <span>KIP</span></h1>
-            <h4>Here is what we found</h4>
-          </div>
-          <div className="main">
-            {
-              posts.map((post, i) => {
-                if(i !== sliderIndex) return null;
-
-                return (
-                  <div className="header">
-                    <div className='image' style={{backgroundImage: `url(${post.imageSrc || 'https://storage.googleapis.com/kip-random/head%40x2.png'})`}}/>
-                    <p>{post.title}</p>
-                  </div>
-                )
-              })
-            }
+        <section className="blog__header">
+          <div>
+            <div className='text'>
+              <h1><span>Conversations in Commerce</span></h1>
+              <p className='subtext'>
+                <span>Case Studies Findings</span>
+                <span>Thoughts on Building Kip</span>
+              </p>
+            </div>
+            <div className="icons">
+              <a href="mailto:hello@kipthis.com?subject=Subscribe"><EmailDrawn/></a>
+              <a href="//www.facebook.com/talkto.kip"><FacebookDrawn/></a>
+              <a href="//twitter.com/kiptalk"><TwitterDrawn/></a>
+            </div>
           </div>
           <div className="more">
             <h2><span>Read More</span></h2>
@@ -80,13 +37,13 @@ export default class Blog extends Component {
         </section>
         <section className="blogs">
           {
-            posts.map((post) => (
-              <a className='col-6 blog__post' href={post.postSrc}>
+            posts.map((post) => {
+              return <a className='col-6 blog__post' href={post.postSrc}>
                 <div className='image' style={{backgroundImage: `url(${post.imageSrc || 'https://storage.googleapis.com/kip-random/head%40x2.png'})`}}/>
                 <h1>{post.title}</h1>
                 <p>{moment(post.firstPublishedAt).format('LLL')}</p>
               </a>
-            ))
+            })
           }
         </section>
         <Footer/>

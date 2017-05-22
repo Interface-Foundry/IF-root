@@ -22,7 +22,7 @@ export default function reducer(state = initialState, action = {}) {
   case 'POSTS_SUCCESS':
     return {
       ...state,
-      posts: action.response
+      posts: action.response.filter((p, i) => !!p.imageSrc)
     }
   default:
     return state;
