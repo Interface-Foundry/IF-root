@@ -213,7 +213,7 @@ exports.sendReceipt = function * (cart, req) {
     var receipt = yield db.Emails.create({
       recipients: userAccount.email_address,
       sender: 'hello@kip.ai',
-      subject: `Kip Receipt for ${cart.name}`,
+      subject: `Kip Cart List for ${cart.name}`,
       template_name: 'summary_email',
       unsubscribe_group_id: 2485
     });
