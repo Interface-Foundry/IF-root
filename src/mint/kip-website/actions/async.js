@@ -30,13 +30,13 @@ export function login(cart_id, email) {
       const response = await fetch(`/api/login?email=${encodeURIComponent(email)}&redirect=/cart/${cart_id}`, {
         credentials: 'same-origin'
       });
-
+      const json = await response.json();
+      console.log(json);
       return dispatch({
-        type: 'LOGIN_SUCCESS',
-        response: await response.json(),
+        type: json.newAccount ? 'SESSION_SUCCESS' : 'LOGIN_SUCCESS',
+        response: json,
         receivedAt: Date.now()
       });
-
     } catch (e) {
       return new SubmissionError({ email: 'Something went wrong with login' });
     }

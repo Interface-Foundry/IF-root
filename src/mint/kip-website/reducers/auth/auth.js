@@ -7,6 +7,7 @@ const initialState = {
 
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
+  case 'LOGIN_SUCCESS':
   case 'SESSION_SUCCESS':
     return {
       ...state,
