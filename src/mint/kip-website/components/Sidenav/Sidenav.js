@@ -1,13 +1,21 @@
 // react/components/App/Sidenav.js
 
 import React, { Component } from 'react';
+import { PropTypes } from 'prop-types';
 import moment from 'moment';
 
 import { Icon } from '../../themes';
-
-const defaultRoute = 'localhost:3000'
-
 export default class Sidenav extends Component {
+
+  static propTypes = {
+    currentUser: PropTypes.object,
+    _toggleSidenav: PropTypes.func,
+    _toggleModal: PropTypes.func,
+    myCarts: PropTypes.array,
+    otherCarts: PropTypes.array,
+    logout: PropTypes.func,
+    get: PropTypes.func
+  }
 
   state = {
     show: null,
@@ -42,7 +50,7 @@ export default class Sidenav extends Component {
                     </p>
                   </a>
                 </li>
-              )
+              );
             })}
             {
               myCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
@@ -52,7 +60,7 @@ export default class Sidenav extends Component {
             }
             <h4>Other Kip Carts</h4>
             {otherCarts.map((c, i) => {
-              if(i > 1 && show !== 'other') return null
+              if(i > 1 && show !== 'other') return null;
               return (
                 <li key={i} className='sidenav__list__leader' onClick={_toggleSidenav}>
                   <div className='icon'/>
@@ -60,7 +68,7 @@ export default class Sidenav extends Component {
                     <p>{c.name ? c.name : `${c.leader.name ? c.leader.name + '\'s ' : ''}Kip Cart`}</p>
                   </a>
                 </li>
-              )
+              );
             })}
             {
               otherCarts.length > 2 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
@@ -82,7 +90,7 @@ export default class Sidenav extends Component {
                 <div className='icon'/>
                 New Cart
               </button> : <button className='share' onClick={(e) => {
-                e.preventDefault(); _toggleModal()
+                e.preventDefault(); _toggleModal();
               }}>
                 <Icon icon='Login'/>
                 Login

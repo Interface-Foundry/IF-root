@@ -4,6 +4,7 @@ export AddAmazonItemContainer from './AddAmazonItemContainer';
 export AddressFormContainer from './AddressFormContainer';
 export AmazonFormContainer from './AmazonFormContainer';
 export AppContainer from './AppContainer';
+export ArchivedCartsContainer from './ArchivedCartsContainer';
 export CardsContainer from './CardsContainer';
 export CartContainer from './CartContainer';
 export CartStoresContainer from './CartStoresContainer';

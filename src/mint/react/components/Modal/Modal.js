@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 
-import { AmazonFormContainer, ItemContainer, EditCartContainer, SettingsContainer, FeedbackContainer } from '../../containers';
+import { AmazonFormContainer, ItemContainer, EditCartContainer, SettingsContainer, FeedbackContainer, ArchivedCartsContainer } from '../../containers';
 import { Share } from '..';
 
 export default class SignIn extends Component {
@@ -25,6 +25,7 @@ export default class SignIn extends Component {
           <Route path={'/cart/:cart_id/m/share'} exact component={Share} />
           <Route path={'/cart/:cart_id/m/settings'} exact component={SettingsContainer} />
           <Route path={'/cart/:cart_id/m/feedback'} exact component={FeedbackContainer} />
+          <Route path={'/cart/:cart_id/m/archive'} exact component={ArchivedCartsContainer} />
         </Switch>
       </div>
     );

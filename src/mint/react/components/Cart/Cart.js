@@ -167,7 +167,14 @@ class MyItems extends Component {
   render() {
     const { props: { items, user_account, currentCart: { locked }, currentCart } } = this,
     total = calculateItemTotal(items),
-      locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
+    locale = currentCart.store
+      ? currentCart.store.includes('amazon')
+        ? currentCart.store_locale === 'UK' 
+           ? 'GBP' 
+           : 'USD'
+        : 'GBP'
+      : null;
+
     return (
       <ul>
         {items.length ? <div className='cart__items__title'>{user_account.name} <span> - {items.length} Items</span></div> :null}

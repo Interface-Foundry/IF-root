@@ -70,8 +70,6 @@ export const addingItem = (addingItem) => ({
   addingItem
 });
 
-
-
 export const updateCartItem = newItem => ({});
 
 export function fetchCart(cart_id) {

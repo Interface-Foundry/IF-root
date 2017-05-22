@@ -36,7 +36,8 @@ export default class App extends Component {
     toast: PropTypes.string,
     status: PropTypes.string,
     history: PropTypes.object,
-    clearItem: PropTypes.func
+    clearItem: PropTypes.func,
+    archivedCarts: PropTypes.arrayOf(PropTypes.object)
   }
 
   state = {
@@ -64,9 +65,24 @@ export default class App extends Component {
   }
 
   componentWillMount() {
-    const { props: { fetchCart, fetchAllCarts, cart_id, history: { replace } } } = this;
-    if (cart_id) fetchCart(cart_id)
-      .then(cart => !cart ? replace('/404') : null);
+    const {
+      props: {
+        fetchCart,
+        fetchAllCarts,
+        cart_id,
+        history: { replace },
+        location: { pathname }
+      }
+    } = this;
+    if (cart_id
+      && !pathname.includes('/newcart')
+      && !pathname.includes('/feedback')
+      && !pathname.includes('/archive')
+      && !pathname.includes('/404')) {
+      console.log('fetching mount', pathname)
+      fetchCart(cart_id)
+        .then(cart => !cart ? replace('/404') : null);
+    }
     fetchAllCarts();
   }
 
@@ -88,7 +104,7 @@ export default class App extends Component {
         history: { replace }
       }
     } = this;
-    const { cart_id: nextCart_id, session_id: nextSessionId, toast: newToast, user_account: { id: nextId } } = nextProps;
+    const { cart_id: nextCart_id, session_id: nextSessionId, user_account: { id: nextId } } = nextProps;
     if (!session_id && nextSessionId && process.env.GA) {
       ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
@@ -98,11 +114,16 @@ export default class App extends Component {
 
       _logPageView(pathname, nextSessionId); //log initial load
     }
-    if (!pathname.includes('/newcart') && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
+    if (!pathname.includes('/newcart')
+      && !pathname.includes('/feedback')
+      && !pathname.includes('/archive')
+      && !pathname.includes('/404')
+      && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
+      console.log('fetching mount', pathname)
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
       fetchAllCarts();
-    } else if (newToast && newToast.includes('Cart Updated')) fetchAllCarts();
+    }
   }
 
   render() {
@@ -123,13 +144,13 @@ export default class App extends Component {
         logout,
         clearItem,
         items,
+        archivedCarts,
         fetchAllCarts,
         history: { replace }
       },
       state: { sidenav, isMobile, popup }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
-
     return (
       <section className='app'>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
@@ -153,7 +174,7 @@ export default class App extends Component {
           </div>
           { 
             sidenav || !isMobile 
-            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} /> 
+            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} /> 
             : null
           }
           {

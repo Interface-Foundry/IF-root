@@ -27,7 +27,8 @@ import {
   IoPlusRound,
   IoChevronRight,
   IoChevronLeft,
-  IoLogIn
+  IoLogIn,
+  IoIosBox
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -83,6 +84,8 @@ export default class Icon extends Component {
       return <FaExternalLink/>;
     case 'Cart':
       return <IoAndroidCart/>;
+    case 'Archive':
+      return <IoIosBox/>;
     case 'Person':
       return <IoAndroidPersonAdd/>;
     case 'Plus':

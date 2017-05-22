@@ -3,6 +3,7 @@ export AddAmazonItem from './AddAmazonItem';
 export AmazonForm from './AmazonForm';
 export AddressForm from './AddressForm';
 export App from './App';
+export ArchivedCarts from './ArchivedCarts';
 export Cart from './Cart';
 export CartStore from './CartStore';
 export Cards from './Cards';

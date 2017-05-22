@@ -11,6 +11,7 @@ export default class Sidenav extends Component {
     cart_id: PropTypes.string,
     leader: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
+    archivedCarts: PropTypes.arrayOf(PropTypes.object),
     _toggleSidenav: PropTypes.func.isRequired,
     user_account: PropTypes.object.isRequired,
     replace: PropTypes.func,
@@ -51,7 +52,7 @@ export default class Sidenav extends Component {
   render() {
     const {
       _moveToFront,
-      props: { carts, _toggleSidenav, user_account, cart_id },
+      props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id },
       state: { show }
     } = this;
 
@@ -128,6 +129,11 @@ export default class Sidenav extends Component {
             }
           </li>
           <li className='sidenav__list__actions'>
+            {
+              archivedCarts.length
+              ? <Link to={`/cart/${cart_id}/m/archive`} onClick={_toggleSidenav}><h4><Icon icon='Archive'/> Archived Carts</h4></Link>
+              : null
+            }
             {user_account.name ? <Link to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></Link> : null }
             <Link to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></Link>
           </li>

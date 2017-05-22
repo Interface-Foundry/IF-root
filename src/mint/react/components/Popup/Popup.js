@@ -1,3 +1,5 @@
+// react/components/Popup/Popup.js
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from '..';
@@ -71,7 +73,6 @@ export default class Popup extends Component {
   componentWillReceiveProps(nextProps) {
     const { _togglePopup } = this.props;
     const { newAccount } = nextProps;
-    console.log(nextProps)
     if (newAccount) _togglePopup();
   }
 
