@@ -13,6 +13,7 @@ const haversine = require('haversine')
 const stable = require('stable')
 const thunkify = require('thunkify')
 const ipinfo = thunkify(require('ipinfo'))
+const spliddit = require('spliddit')
 
 const cart_types = require('../cart/cart_types').stores
 const countryCoordinates = require('../cart/cart_types').countryCoordinates
@@ -628,7 +629,6 @@ module.exports = function (router) {
    * @apiParam {String} emoji - the reaction should be posted in the body
    */
   router.post('/item/:item_id/reaction/:user_id', (req, res) => co(function * () {
-   logging.info('route hit')
    var item = yield db.Items.findOne({
      id: req.params.item_id
    }).populate('reactions')
@@ -637,9 +637,17 @@ module.exports = function (router) {
      return res.sendStatus(404);
    }
 
-   //  logging.info('item id:', req.params.item_id)
+   //validate emoji as single character
+   logging.info('emoji:', req.body.emoji)
 
-   logging.info('item', item)
+   var emojiChars = spliddit(req.body.emoji)
+   logging.info('emojiChars', emojiChars)
+   emojiChars = emojiChars.filter(function (c) {
+     logging.info('c:', c)
+   })
+   logging.info('split version:', emojiChars)
+   if (emojiChars.length > 1) return res.send('input not an emoji')
+
    //has the user already reacted? if so, update the character
    var previousReaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
 
@@ -677,7 +685,7 @@ module.exports = function (router) {
    item.reactions.remove(reaction.id);
    yield item.save();
    yield reaction.destroy();
-   res.send();
+   res.send('success');
   }))
 
   /**
