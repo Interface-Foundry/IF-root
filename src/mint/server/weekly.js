@@ -7,10 +7,21 @@ dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 co(function * () {
   console.log('running')
   yield dbReady;
-  var carts = yield db.Carts.find({}).populate('items');
+  var carts = yield db.Carts.find({}).populate('items').populate('leader');
   console.log('got carts')
-  carts = carts.filter(function (c) {
+  var emptyCarts = carts.filter(function (c) {
     return !c.items.length;
   })
   console.log('EMPTY CARTS:', carts);
+
+  yield emptyCarts.map(function * (cart) {
+    yield db.Emails.create({
+      sender: 'hello@kipthis.com',
+      recipients: cart.leader.email_address
+    })
+  })
+
+
+  // TODO send out reengagement email
+  // TODO with checkout link
 })
