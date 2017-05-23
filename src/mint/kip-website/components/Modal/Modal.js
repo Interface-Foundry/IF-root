@@ -32,7 +32,7 @@ export default class Modal extends Component {
     const { _toggleModal } = this.props;
     const { newAccount } = nextProps;
     console.log(nextProps)
-    if (newAccount) _togglePopup();
+    if (newAccount) _toggleModal();
   }
 
   _updateMail = e => this.setState({ mail: { edited: true, val: e.target.value } })

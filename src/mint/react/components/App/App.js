@@ -79,7 +79,6 @@ export default class App extends Component {
       && !pathname.includes('/feedback')
       && !pathname.includes('/archive')
       && !pathname.includes('/404')) {
-      console.log('fetching mount', pathname)
       fetchCart(cart_id)
         .then(cart => !cart ? replace('/404') : null);
     }
@@ -119,11 +118,15 @@ export default class App extends Component {
       && !pathname.includes('/archive')
       && !pathname.includes('/404')
       && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
-      console.log('fetching mount', pathname)
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
       fetchAllCarts();
     }
+  }
+
+  _handeKeyPress(e) {
+    const { cart_id, history: { replace } } = this.props;
+    if (e.keyCode === 27) replace(`/cart/${cart_id}`);
   }
 
   render() {
@@ -152,7 +155,7 @@ export default class App extends Component {
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
     return (
-      <section className='app'>
+      <section className='app' onKeyDown={::this._handeKeyPress}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
           {popup ? <Popup {...props} cart_id={cart_id} _togglePopup={_togglePopup}/> : null}

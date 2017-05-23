@@ -137,7 +137,7 @@ exports.searchAmazon = function * (query, locale, page, category) {
     Keywords: query,
     Condition: 'New',
     SearchIndex: category || 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews,EditorialReview',
     ItemPage: page || 1
   };
 
@@ -203,7 +203,7 @@ exports.lookupAmazonItem = function * (asin, locale) {
     Availability: 'Available',
     IdType: 'ASIN',
     ItemId: asin,
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews,EditorialReview'
   };
   try {
     var results = yield opHelpers[locale].execute('ItemLookup', amazonParams)

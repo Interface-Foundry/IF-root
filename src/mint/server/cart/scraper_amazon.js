@@ -5,7 +5,23 @@ const dbReady = require('../../db')
 dbReady.then((models) => { db = models })
 const amazon_cart = require('./amazon_cart')
 
+const bookProductGroups = ['Book', 'eBooks']
 
+/**
+ * gets the description for an item depending on if its a book or what
+ *
+ * @param      {<type>}  item The item
+ */
+function getDescription (item) {
+  if (bookProductGroups.includes(item.ItemAttributes.ProductGroup)) {
+    var editorialReview = _.get(item, 'EditorialReviews.EditorialReview', item.ItemAttributes.Feature)
+    if (editorialReview.length > 1) {
+      editorialReview = editorialReview[0]
+    }
+    return editorialReview.Content
+  }
+  return item.ItemAttributes.Feature
+}
 
 /**
  * format cents to nice price.  amazon returns amount in cents
@@ -80,6 +96,7 @@ module.exports.scrapeAsin = function (asin, locale) {
     return item
   })
 }
+
 
 
 /**
@@ -162,7 +179,7 @@ var res2Item = function (res) {
         store: 'amazon',
         name: i.ItemAttributes.Title,
         asin: i.ASIN,
-        description: i.ItemAttributes.Feature,
+        description: getDescription(i),
         price: price,
         thumbnail_url: thumbnail,
         main_image_url: mainImage,
