@@ -1,11 +1,16 @@
 import { connect } from 'react-redux';
-import Modal from '../components/Modal';
+import { LoginScreen } from '../../react-common/Components';
 
 import { login, validateCode } from '../actions';
 
 const mapStateToProps = (state, props) => ({
   user_account: state.auth.user_account,
-  newAccount: state.auth.newAccount
+  newAccount: state.auth.newAccount,
+  status: state.auth.status,
+  errors: state.auth.errors,
+  message: state.auth.message,
+  ok: state.auth.ok,
+  loggedIn: state.auth.loggedIn
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -13,4 +18,4 @@ const mapDispatchToProps = dispatch => ({
   validateCode: (email, code) => dispatch(validateCode(email, code)),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Modal);
+export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

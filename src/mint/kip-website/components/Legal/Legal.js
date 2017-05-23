@@ -9,7 +9,6 @@ import { animateScroll } from '../../reducers';
 import { Services, About, Showcase, Footer, Statement, Hero } from '..';
 import { SidenavContainer, ModalContainer, RibbonContainer } from '../../containers';
 
-
 export default class Landing extends Component {
 
   constructor(props) {
@@ -29,20 +28,23 @@ export default class Landing extends Component {
     };
   }
 
-  componentDidMount () {
-    ReactDOM.findDOMNode(this.landing).addEventListener('scroll', this._handleScroll);
+  componentDidMount() {
+    ReactDOM.findDOMNode(this.landing)
+      .addEventListener('scroll', this._handleScroll);
   }
 
-  componentWillUnmount () {
-    ReactDOM.findDOMNode(this.landing).removeEventListener('scroll', this._handleScroll);
+  componentWillUnmount() {
+    ReactDOM.findDOMNode(this.landing)
+      .removeEventListener('scroll', this._handleScroll);
   }
 
-  _handleScroll (e) {
-    const scrollTop = ReactDOM.findDOMNode(this.landing).scrollTop,
-      { state: { fixed, animationState, animationOffset, containerHeight }} = this;
+  _handleScroll(e) {
+    const scrollTop = ReactDOM.findDOMNode(this.landing)
+      .scrollTop,
+      { state: { fixed, animationState, animationOffset, containerHeight } } = this;
 
     // stops and starts header animation, and fixes navbar to top;
-    if(scrollTop > 400 && !fixed ||  scrollTop <= 400 && fixed) {
+    if (scrollTop > 400 && !fixed || scrollTop <= 400 && fixed) {
       this.setState({
         fixed: scrollTop > 400
       })
@@ -52,19 +54,19 @@ export default class Landing extends Component {
     this.setState(animateScroll(containerHeight, animationOffset, scrollTop, animationState))
   }
 
-  _toggleSidenav () {
+  _toggleSidenav() {
     const { sidenav } = this.state;
 
     this.setState({ sidenav: !sidenav });
   }
 
-  _toggleModal () {
+  _toggleModal() {
     const { modal } = this.state;
 
     this.setState({ modal: !modal });
   }
 
-  _registerHeight (heightFromTop, containerHeight) {
+  _registerHeight(heightFromTop, containerHeight) {
     this.setState({
       animationOffset: heightFromTop,
       containerHeight: containerHeight
@@ -72,7 +74,7 @@ export default class Landing extends Component {
   }
 
   render() {
-    const { state: { fixed, sidenav, modal, animationState }, props: { currentUser }, _handleScroll, _toggleSidenav, _toggleModal, _registerHeight } = this;
+    const { state: { fixed, sidenav, modal, animationState }, props: { user_account }, _handleScroll, _toggleSidenav, _toggleModal, _registerHeight } = this;
     return (
       <span>
         { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }

@@ -19,10 +19,16 @@ export default class Popup extends Component {
   }
 
   static propTypes = {
-    _togglePopup: PropTypes.func,
+    newAccount: PropTypes.bool,
+    ok: PropTypes.bool,
+    status: PropTypes.string,
+    loggedIn: PropTypes.bool,
+    message: PropTypes.string,
+    cart_id: PropTypes.string,
+    errors: PropTypes.array,
     login: PropTypes.func,
     validateCode: PropTypes.func,
-    cart_id: PropTypes.string
+    _toggleLoginScreen: PropTypes.func,
   }
 
   _validateEmail(email) {
@@ -31,6 +37,7 @@ export default class Popup extends Component {
   }
 
   _updateMail = e => this.setState({ mail: { edited: true, val: e.target.value } })
+
   _updateCode = (e, pos) => {
     const { val } = this.state.code,
       code = String(e.target.value)
@@ -62,23 +69,23 @@ export default class Popup extends Component {
     e.preventDefault();
     const {
       state: { mail: { val: mail }, code: { val: code } },
-      props: { validateCode, _togglePopup },
+      props: { validateCode },
     } = this;
-    const res = await validateCode(mail, String(code[0]) + String(code[1]));
-    if (res.errors) this.setState({ error: res.errors.message });
-    if (res.newSession && !res.newSession.ok) this.setState({ error: res.newSession.message });
-    else if (res.newSession && res.newSession.ok) _togglePopup();
+    await validateCode(mail, String(code[0]) + String(code[1]));
   }
 
   componentWillReceiveProps(nextProps) {
-    const { _togglePopup } = this.props;
-    const { newAccount } = nextProps;
-    if (newAccount) _togglePopup();
+    const { _toggleLoginScreen } = this.props;
+    const { newAccount, errors, ok, message, status } = nextProps;
+    if (newAccount) _toggleLoginScreen();
+    if (errors) this.setState({ error: errors.message });
+    if (!ok) this.setState({ error: message });
+    else if (status === 'LOG_IN' && ok) _toggleLoginScreen();
   }
 
   render() {
     const {
-      props: { _togglePopup },
+      props: { _toggleLoginScreen },
       state: { error, success, mail, code },
       _enterMail,
       _enterCode,
@@ -87,9 +94,9 @@ export default class Popup extends Component {
     } = this;
 
     return (
-      <section className='popup' onClick={(e) => {if(e.target.className === 'popup') _togglePopup();}}>
+      <section className='popup' onClick={(e) => {if(e.target.className === 'popup') _toggleLoginScreen();}}>
         <form className='popup__card' onSubmit={!success ? _enterMail : _enterCode}>
-          <div className='popup__card-icon' onClick={() =>  _togglePopup()}>
+          <div className='popup__card-icon' onClick={() =>  _toggleLoginScreen()}>
             <Icon icon='Clear'/>
           </div>
           {

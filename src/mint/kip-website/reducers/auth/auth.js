@@ -1,8 +1,8 @@
 const initialState = {
   loaded: false,
   loading: true,
-  myCarts: [],
-  otherCarts: []
+  carts: [],
+  archivedCarts: []
 };
 
 export default function reducer(state = initialState, action = {}) {

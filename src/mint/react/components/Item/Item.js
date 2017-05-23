@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { splitCartById } from '../../reducers';
 import { RouteTransition } from 'react-router-transition';
 import { Icon } from '../../../react-common/Components';
-import * as presets from '../../styles/RouteAnimations';
+import * as presets from '../../../react-common/Styles/RouteAnimations';
 import ItemVariationSelector from './ItemVariationSelector';
 import ProductDescription from './ProductDescription';
 import DealInfo from './DealInfo';
