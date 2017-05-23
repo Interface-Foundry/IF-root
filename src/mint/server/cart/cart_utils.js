@@ -176,7 +176,7 @@ exports.addItem = function * (item, cart, quantity) {
     throw new Error('Cart not found')
   }
 
-  item = yield addItemHandlers[cart.store](item, cart.store_locale)
+  item = yield addItemHandlers[cart.store](item, cart.store)
   return item
 }
 

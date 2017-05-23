@@ -318,10 +318,14 @@ module.exports = function (router) {
 
     cart = yield cartUtils.deleteItemFromCart(oldItem, cart, userId)
     const newItem = yield cartUtils.addItemToCart(newItemAsin, cart, userId, oldItem.quantity)
+    cart.items.add(newItem.id)
+    newItem.cart = cart.id
 
+    // specify who added it
+    newItem.added_by = userId
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
-    yield cart.save()
+    yield [newItem.save(), cart.save()]
 
     return res.send(newItem)
   }));
