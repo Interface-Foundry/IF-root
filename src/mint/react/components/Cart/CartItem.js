@@ -2,7 +2,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../utils';
-import { Icon } from '../../../react-common/Components';
+import { Icon } from '../../../react-common/components';
 import ProgressiveImage from 'react-progressive-image';
 
 export default class CartItem extends Component {

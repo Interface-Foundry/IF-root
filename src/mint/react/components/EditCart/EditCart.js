@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { cloudinary } from '../../utils';
 import ReactGA from 'react-ga';
 import Image from './Image';
-import { Icon } from '../../../react-common/Components';
+import { Icon } from '../../../react-common/components';
 
 class EditCart extends Component {
   static propTypes = {

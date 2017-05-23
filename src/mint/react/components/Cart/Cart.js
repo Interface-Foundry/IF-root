@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CartItem from './CartItem';
 import { AddAmazonItemContainer, CardsContainer, AddressFormContainer } from '../../containers';
-import { Icon } from '../../../react-common/Components';
+import { Icon } from '../../../react-common/components';
 import { calculateItemTotal, displayCost } from '../../utils';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import moment from 'moment';

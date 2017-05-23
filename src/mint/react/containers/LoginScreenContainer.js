@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { LoginScreen } from '../../react-common/Components';
+import { LoginScreen } from '../../react-common/components';
 
 import { login, validateCode } from '../actions/session';
 

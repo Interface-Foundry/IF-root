@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom';
 import CategoryCard from './CategoryCard';
 import SearchCard from './SearchCard';
 import { getLastSearch } from '../../utils';
-import { Icon } from '../../../react-common/Components';
+import { Icon } from '../../../react-common/components';
 
 export default class Cards extends Component {
   constructor(props) {

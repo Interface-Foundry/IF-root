@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-import { Icon } from '../../../react-common/Components';
+import { Icon } from '../../../react-common/components';
 import { splitCartById } from '../../reducers';
 
 export default class Header extends Component {
