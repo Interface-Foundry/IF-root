@@ -255,7 +255,10 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   const user_id = _.get(req, 'UserSession.user_account.id')
   if (user_id) {
     cart.leader = user_id
-    cart.name = (new Date()).toString().split(/\d\d\:\d\d\:\d\d/)[0] + 'Kip Cart'
+    var date = new Date()
+    if (cart.store_locale = 'US') var dateString = (date.getMonth() + 1) + '/' + date.getDate() + '/' + String(date.getFullYear()).slice(2)
+    else var dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + String(date.getFullYear()).slice(2)
+    cart.name = dateString + ' Kip Cart'
   }
 
   // This is all the investors care about right here. This is the money line.
