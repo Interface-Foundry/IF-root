@@ -1,6 +1,6 @@
 // react/components/Toast/Toast.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/Styles/Constants';
+@import '../../../react-common/Styles/Animations';
 
 .toast {
   @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.6s);

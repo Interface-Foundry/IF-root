@@ -3,9 +3,7 @@
 import App from './App';
 import './App.scss';
 import './Header.scss';
-import './Sidenav.scss';
 import './Footer.scss';
-import '../../styles/Grid.scss';
-import '../../styles/Animations.scss';
-
+import '../../../react-common/Styles/Grid.scss';
+import '../../../react-common/Styles/Animations.scss';
 export default App;

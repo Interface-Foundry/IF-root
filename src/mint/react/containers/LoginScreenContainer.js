@@ -1,16 +1,16 @@
 import { connect } from 'react-redux';
 import { LoginScreen } from '../../react-common/Components';
 
-import { login, validateCode } from '../actions';
+import { login, validateCode } from '../actions/session';
 
 const mapStateToProps = (state, props) => ({
-  user_account: state.auth.user_account,
-  newAccount: state.auth.newAccount,
-  status: state.auth.status,
-  errors: state.auth.errors,
-  message: state.auth.message,
-  ok: state.auth.ok,
-  loggedIn: state.auth.loggedIn
+  user_account: state.session.user_account,
+  newAccount: state.session.newAccount,
+  status: state.session.status,
+  errors: state.session.errors,
+  message: state.session.message,
+  ok: state.session.ok,
+  loggedIn: state.session.loggedIn
 });
 
 const mapDispatchToProps = dispatch => ({

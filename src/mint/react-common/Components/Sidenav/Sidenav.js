@@ -3,22 +3,24 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import LinkClass from './LinkClass';
 import moment from 'moment';
 import { Icon } from '..';
 
 export default class Sidenav extends Component {
   static propTypes = {
+    itemsLen: PropTypes.number,
     cart_id: PropTypes.string,
+    user_account: PropTypes.object.isRequired,
     leader: PropTypes.object,
+    currentCart: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
     archivedCarts: PropTypes.arrayOf(PropTypes.object),
+    fetchAllCarts: PropTypes.func,
     _toggleSidenav: PropTypes.func.isRequired,
-    user_account: PropTypes.object.isRequired,
     replace: PropTypes.func,
-    itemsLen: PropTypes.number,
     updateCart: PropTypes.func,
-    currentCart: PropTypes.object,
-    fetchAllCarts: PropTypes.func
+    logout: PropTypes.func
   }
 
   state = {
@@ -52,9 +54,12 @@ export default class Sidenav extends Component {
   render() {
     const {
       _moveToFront,
-      props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id },
+      props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id, logout },
       state: { show }
     } = this;
+
+    const SideNavLink = (window.location.pathname === '/')
+      ? LinkClass : Link;
 
     let leaderCarts = _moveToFront(
         carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id)),
@@ -63,7 +68,7 @@ export default class Sidenav extends Component {
         carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id)),
         cart_id);
     return (
-      <div className='sidenav'>
+      <div className={`sidenav ${window.location.pathname === '/' ? 'homesidenav' : 'cartsidenav'}`}>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
         </div>
         <ul className='sidenav__list'>
@@ -83,19 +88,19 @@ export default class Sidenav extends Component {
                     { c.locked 
                       ? <div className='icon'/> 
                       : !i 
-                        ? <Link className='editIcon' to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                        ? <SideNavLink className='editIcon' to={`/cart/${cart_id}/m/edit/${c.id}`}>
                             <div className='icon'>
                               <Icon icon='Edit'/>
                             </div>
-                          </Link>
+                          </SideNavLink>
                         : null
                     }
-                    <Link to={`/cart/${c.id}`}>
+                    <SideNavLink to={`/cart/${c.id}`}>
                       <p>
                         {c.name ? c.name : `${c.leader.name ? c.leader.name + '\'s ' : ''}Kip Cart`}
                         {c.locked ? <span><br/>{moment(c.updatedAt).format('L')}</span> : null}
                       </p>
-                    </Link>
+                    </SideNavLink>
                   </li>
                 );
               })}
@@ -114,9 +119,9 @@ export default class Sidenav extends Component {
                   <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} onClick={_toggleSidenav}>
                     <div className='icon'>
                     </div>
-                    <Link to={`/cart/${c.id}`}>
+                    <SideNavLink to={`/cart/${c.id}`}>
                       <p>{c.name ? c.name : `${c.leader.name ? c.leader.name + '\'s ' : ''}Kip Cart`}</p>
-                    </Link>
+                    </SideNavLink>
                   </li>
                 );
               })}
@@ -131,11 +136,15 @@ export default class Sidenav extends Component {
           <li className='sidenav__list__actions'>
             {
               archivedCarts.length
-              ? <Link to={`/cart/${cart_id}/m/archive`} onClick={_toggleSidenav}><h4><Icon icon='Archive'/> Archived Carts</h4></Link>
+              ? <SideNavLink to={`/cart/${cart_id}/m/archive`} onClick={_toggleSidenav}><h4><Icon icon='Archive'/> Archived Carts</h4></SideNavLink>
               : null
             }
-            {user_account.name ? <Link to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></Link> : null }
-            <Link to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></Link>
+            {user_account.name ? <SideNavLink to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></SideNavLink> : null }
+            <SideNavLink to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></SideNavLink>
+            {user_account.name ? <h4 onClick={() => { 
+              logout(); 
+              _toggleSidenav(); 
+            }}><Icon icon='Logout'/>Logout</h4> : null} 
           </li>
           <footer className='sidenav__footer'>
             <a href={`/cart/${cart_id}/m/share`} onClick={(e)=> {e.preventDefault(); _toggleSidenav(); ::this._handleShare();}}>

@@ -1,6 +1,6 @@
 // react/components/App/Header.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/Styles/Constants';
+@import '../../../react-common/Styles/Animations';
 .navbar {
   height: $nav-height;
   line-height: $nav-height;

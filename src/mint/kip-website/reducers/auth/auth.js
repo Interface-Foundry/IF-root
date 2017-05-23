@@ -1,8 +1,8 @@
 const initialState = {
   loaded: false,
   loading: true,
-  myCarts: [],
-  otherCarts: []
+  carts: [],
+  archivedCarts: []
 };
 
 export default function reducer(state = initialState, action = {}) {
@@ -16,8 +16,8 @@ export default function reducer(state = initialState, action = {}) {
   case 'CARTS_SUCCESS':
     return {
       ...state,
-      myCarts: action.response.filter((c, i) => c.leader.email_address === state.user_account.email_address),
-      otherCarts: action.response.filter((c, i) => c.leader.email_address !== state.user_account.email_address)
+      carts: action.response.filter(c => !c.locked),
+      archivedCarts: action.response.filter(c => c.locked)
     };
   case 'LOGOUT':
     return {

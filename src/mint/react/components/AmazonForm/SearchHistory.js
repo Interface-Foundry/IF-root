@@ -2,7 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/Components';
 import { getSearchHistory } from '../../utils';
 
 export default class SearchHistory extends Component {

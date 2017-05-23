@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { Field } from 'redux-form';
 import SearchHistory from './SearchHistory';
 import { PropTypes } from 'prop-types';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/Components';
 
 export default class AmazonForm extends Component {
   static propTypes = {

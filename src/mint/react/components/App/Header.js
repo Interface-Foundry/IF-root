@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/Components';
 import { splitCartById } from '../../reducers';
 
 export default class Header extends Component {
@@ -78,6 +78,10 @@ export default class Header extends Component {
         />
         <Route path={'/cart/:cart_id/address'} exact component={() => 
             <CartHead text={'Edit Cart'} {...props}/>
+          }
+        />
+        <Route path={'/cart/:cart_id/m/archive'} exact component={() => 
+            <ModalHead text={'Archived Carts'} {...props}/>
           }
         />
       </nav>

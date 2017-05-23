@@ -31,7 +31,6 @@ export function login(cart_id, email) {
         credentials: 'same-origin'
       });
       const json = await response.json();
-      console.log(json);
       return dispatch({
         type: json.newAccount ? 'SESSION_SUCCESS' : 'LOGIN_SUCCESS',
         response: json,

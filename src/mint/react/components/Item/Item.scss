@@ -1,6 +1,6 @@
 // react/components/Item/Item.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/Styles/Constants';
+@import '../../../react-common/Styles/Animations';
 .placeholder {
   height: 300px;
   background: linear-gradient(to right, rgba($kip-secondary-color, 0.3) 8%, rgba($kip-secondary-color, 0.9) 18%, rgba($kip-secondary-color, 0.3) 33%);

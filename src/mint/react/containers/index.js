@@ -12,3 +12,4 @@ export EditCartContainer from './EditCartContainer';
 export FeedbackContainer from './FeedbackContainer';
 export ItemContainer from './ItemContainer';
 export SettingsContainer from './SettingsContainer';
+export LoginScreenContainer from './LoginScreenContainer';

@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Field } from 'redux-form';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/Components';
 
 export default class Feedback extends Component {
   constructor(props) {

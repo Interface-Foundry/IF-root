@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { calculateItemTotal, displayCost } from '../../utils';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/Components';
 
 export default class Footer extends Component {
   static propTypes = {
@@ -182,17 +182,15 @@ class EditFooter extends Component {
 
 class SettingsFooter extends Component {
   static propTypes = {
-    cart_id: PropTypes.string,
-    history: PropTypes.object,
     logout: PropTypes.func
   }
 
   render() {
-    const { cart_id, history: { replace }, logout } = this.props;
+    const { logout } = this.props;
 
     return (
       <footer className='footer__settings'>
-        <button className='logout' onClick={() => {logout(); replace(`/cart/${cart_id}/`);}}>Logout</button> 
+        <button className='logout' onClick={() => {logout(); window.location.href='/';}}>Logout</button> 
       </footer>
     );
   }
