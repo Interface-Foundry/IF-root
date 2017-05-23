@@ -109,6 +109,10 @@
             div[class='responsive-image'] {
                 height: 50px !important;
             }
+            td[class='button'] {
+            	position: relative !important;
+                padding-top: 20px;
+            }
         }
     </style>
 </head>
@@ -122,9 +126,80 @@
     <!-- FULL WIDTH CONTAINER ALWAYS NEED THIS-->
     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #fff; color: #fcfcf9; max-width: 700px">
         <tr >
-            <td align="center" valign="middle">
-              Kip misses you! Buy things!
-              Your number is: <%=value%>
+            <td align="middle" valign="middle">
+				<img width="1300" src='https://storage.googleapis.com/kip-random/emailpink1.png' style="font-size: 28px; text-align: left; color: #fcfcf9; height: auto; width: 100%;">
+            </td>
+        </tr>
+    </table>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #fff;max-width: 700px">
+        <tr>
+            <td style="padding:40px 40px 10px; font-size: 18px; color: #000;" align="left">
+                Hi <span style="border-bottom: 3px solid #ccecf6"><%=username%></span>,
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:10px 40px 40px; font-size: 18px; color: #000;" align="left">
+                Thanks for using Kip! Below is a summary of your cart:
+            </td>
+        </tr>
+        <tr>
+            <td >
+                <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                    <tr>
+                        <td style="padding:0 40px 10px; font-size: 28px; font-weight: bold; color: #4a9ff1;" align="left">
+                            <%=cart.name%> Cart
+                        </td >
+                    </tr>
+                </table>
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" style=" background: #fff;">
+                    <tr>
+                        <td>
+                            <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                                <tr>
+                                    <td style=" padding: 0px 40px 33px; border-radius: 10px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
+                                         <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                                             <tr>
+                                                 <td align="left" style="position: relative; padding: 20px 30px; color:#000; border: 1px solid #4a9ff1; border-radius: 5px; background: #f4f4ec;font-weight: 500;">
+                                               		You haven't saved anything to your cart yet!
+
+                                                  <%=baseUrl%>/cart/<%=cart.id%>
+                                                 </td>
+                                             </tr>
+                                          </table>
+                                        </td>
+                                </tr>
+                                <tr>
+                                        <td>
+                                          <table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding: 0px 40px 33px;" class="mobile-button-container">
+                                                <tr>
+                                                    <td class="button" align="left" style="padding: 10px;position: absolute; right: 10px; bottom: 10px;" class="padding-copy">
+                                                        <table border="0" cellspacing="0" cellpadding="0" class="responsive-table">
+                                                            <tr>
+                                                                <td align="center"><a href="<%=baseUrl%>/cart/<%=cart.id%>" target="_blank" style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; font-weight: bold; color: #4f4d4c; text-decoration: none; background-color: #ffe94d; border-top: 15px solid #ffe94d; border-bottom: 15px solid #ffe94d; border-left: 25px solid #ffe94d; border-right: 25px solid #ffe94d; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px; display: inline-block;" class="mobile-button">GO TO YOUR CART &rarr;</a></td>
+                                                            </tr> <!--  -->
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                    </td >
+                                </tr>
+                                <tr>
+                                    <td style=" padding: 0px 40px 33px; border-radius: 10px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
+                                        <!-- You haven't saved anything to your cart yet. -->
+                                    </td >
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 40px; font-size: 18px; padding-top: 8px;" align="left">
+                            Too many emails? Change your email preferences below
+                          <br/>
+                        </td >
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>

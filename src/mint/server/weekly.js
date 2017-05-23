@@ -10,7 +10,7 @@ co(function * () {
   var carts = yield db.Carts.find({}).populate('items').populate('leader');
   console.log('got carts')
   var emptyCarts = carts.filter(function (c) {
-    return !c.items.length;
+    return !c.items.length && !c.reminded
   })
   console.log('EMPTY CARTS:', carts);
 
@@ -28,13 +28,19 @@ co(function * () {
     console.log('created email')
 
     yield email.template('reengagement', {
-      value: 88
+      cart_id: cart.id,
+      cart: cart,
+      baseUrl: `https://18e137de.ngrok.io`,
+      username: cart.leader.username || cart.leader.email_address.split('@')[0]
     })
 
     console.log('templated email')
 
     yield email.send();
     console.log('email sent')
+
+    cart.reminded = true;
+    yield cart.save();
   })
 
   console.log('all receipts sent')
