@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { calculateItemTotal, displayCost } from '../../utils';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/Components';
 
 export default class Footer extends Component {
   static propTypes = {

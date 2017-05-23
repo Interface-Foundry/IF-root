@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { splitCartById } from '../../reducers';
 import { RouteTransition } from 'react-router-transition';
-import Icon from '../Icon';
+import { Icon } from '../../../react-common/Components';
 import * as presets from '../../styles/RouteAnimations';
 import ItemVariationSelector from './ItemVariationSelector';
 import ProductDescription from './ProductDescription';

@@ -1,6 +1,6 @@
 // react/components/CartStore/CartStore.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/Styles/Constants';
+@import '../../../react-common/Styles/Animations';
 .cart_store {
   display: flex;
   flex-direction: row;

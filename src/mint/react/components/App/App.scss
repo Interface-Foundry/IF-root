@@ -1,6 +1,6 @@
 // react/components/App/App.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/Styles/Constants';
+@import '../../../react-common/Styles/Animations';
 body, html {
   margin: 0;
   overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css

@@ -20,7 +20,8 @@ export default class Modal extends Component {
     _toggleModal: PropTypes.func,
     login: PropTypes.func,
     validateCode: PropTypes.func,
-    cart_id: PropTypes.string
+    cart_id: PropTypes.string,
+    newAccount: PropTypes.bool
   }
 
   _validateEmail(email) {
@@ -29,9 +30,7 @@ export default class Modal extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { _toggleModal } = this.props;
-    const { newAccount } = nextProps;
-    console.log(nextProps)
+    const { newAccount, _toggleModal } = nextProps;
     if (newAccount) _toggleModal();
   }
 

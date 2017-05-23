@@ -2,7 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/Components';
 
 export default class AddressForm extends Component {
   state = {

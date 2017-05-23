@@ -90,7 +90,6 @@ export default class Landing extends Component {
 
     return (
       <span>
-        { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }
         { modal ? <ModalContainer _toggleModal={_toggleModal} /> : null }
 
         <div className="landing" ref={(landing) => this.landing = landing}> 
@@ -102,6 +101,7 @@ export default class Landing extends Component {
           <Services _toggleModal={_toggleModal}/>
           <Footer/>
         </div>
+        { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }
       </span>
     );
   }

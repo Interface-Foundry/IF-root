@@ -5,10 +5,11 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 
 import { CartContainer, CartStoresContainer } from '../../containers';
-import { Modal, Toast, ErrorPage, Popup } from '..';
+import { Modal, Toast, ErrorPage } from '..';
+import { LoginScreen } from '../../../react-common/Components'
 
 import Header from './Header';
-import Sidenav from './Sidenav';
+import { Sidenav } from '../../../react-common/Components';
 import Footer from './Footer';
 
 //Analytics!
@@ -158,7 +159,7 @@ export default class App extends Component {
       <section className='app' onKeyDown={::this._handeKeyPress}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
-          {popup ? <Popup {...props} cart_id={cart_id} _togglePopup={_togglePopup}/> : null}
+          {popup ? <LoginScreen {...props} cart_id={cart_id} _togglePopup={_togglePopup}/> : null}
           <div className={`app__view ${showFooter ? '' : 'large'}`}>
             <div>
               {/* Render Error Page */}

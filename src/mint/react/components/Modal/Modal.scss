@@ -1,6 +1,6 @@
 // react/components/Modal/Modal.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/Styles/Constants';
+@import '../../../react-common/Styles/Animations';
 .modal {
   position: absolute;
   background: $kip-primary-color;

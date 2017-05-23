@@ -8,18 +8,10 @@
   bottom: 0;
   right: 0;
   z-index: 100;
+  width: 100%;
   background: rgba($secondaryColor, 0.3);
   @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
   @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-  @media (min-width: 900px) {
-    position: relative;
-    width: 250px;
-    height: 100%;
-    float: right;
-    display: inline-block;
-    z-index: 0;
-    background: $kip-secondary-color;
-  }
   p {
     overflow: hidden;
   }
@@ -28,9 +20,6 @@
     background: transparent;
     height: 100%;
     float: left;
-    @media (min-width: 900px) {
-      display: none;
-    }
   }
   .sidenav__list {
     display: flex;
@@ -43,14 +32,10 @@
     border-left: 1px solid $border-color-light;
     @include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-    @media (min-width: 900px) {
-      background: white;
-      height: calc(100% - #{$nav-height});
-    }
     li {
       padding: 0 $padding 0 0;
       &.currentCart {
-        background: $kip-primary-color;
+        background: #f6f6f6;
       }
       h4 {
         text-align: right;
@@ -81,9 +66,6 @@
         }
         svg {
           height: 100%;
-        }
-        @media (min-width: 900px) {
-          display: none;
         }
       }
       &.sidenav__list__view {
@@ -128,10 +110,6 @@
             min-height: 20px;
             height: 100%;
           }
-        }
-        @media (min-width: 900px) {
-          padding: $padding 0;
-          overflow-y: auto;
         }
       }
       &.sidenav__list__actions {
@@ -228,5 +206,45 @@
       }
     }
   }
+}
+
+.cartsidenav {
+  @media (min-width: 900px) {
+    position: relative;
+    width: 250px;
+    height: 100%;
+    float: right;
+    display: inline-block;
+    z-index: 0;
+    background: $kip-secondary-color;
+  }
+  .sidenav__overlay {
+    @media (min-width: 900px) {
+      display: none;
+    }
+  }
+  .sidenav__list {
+    @media (min-width: 900px) {
+      background: white;
+      height: calc(100% - #{$nav-height});
+    }
+    li {
+      &.sidenav__list__header {
+        @media (min-width: 900px) {
+          display: none;
+        }
+      }
+      &.sidenav__list__view {
+        @media (min-width: 900px) {
+          padding: $padding 0;
+          overflow-y: auto;
+        }
+      }
+    }
+  }
+}
+
+.homesidenav {
+  top: 50px;
 }
 
