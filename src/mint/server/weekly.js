@@ -15,12 +15,29 @@ co(function * () {
   console.log('EMPTY CARTS:', carts);
 
   yield emptyCarts.map(function * (cart) {
-    yield db.Emails.create({
+
+    console.log('about to create email')
+
+    var email = yield db.Emails.create({
       sender: 'hello@kipthis.com',
-      recipients: cart.leader.email_address
+      recipients: cart.leader.email_address,
+      subject: `Add items to ${cart.name}!`,
+      unsubscribe_group_id: 2583
     })
+
+    console.log('created email')
+
+    yield email.template('reengagement', {
+      value: 88
+    })
+
+    console.log('templated email')
+
+    yield email.send();
+    console.log('email sent')
   })
 
+  console.log('all receipts sent')
 
   // TODO send out reengagement email
   // TODO with checkout link
