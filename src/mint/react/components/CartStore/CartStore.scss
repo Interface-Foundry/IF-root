@@ -25,6 +25,9 @@
       border: 1px $border-color-light solid;
       border-radius: $padding;
       background: white;
+      &:first-child {
+        border: green;
+      }
       .choice__details {
         display: flex;
         flex-direction: column;

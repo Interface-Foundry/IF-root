@@ -172,7 +172,7 @@ export default class App extends Component {
               <Route path={'/cart/:cart_id/address'} exact component={CartContainer} />
 
               { /* Renders cart choice if theres no store set */}
-              <Route path={'/newcart'} exact component={CartStoresContainer} />
+              <Route path={'/newcart'} exact component={(props) => <CartStoresContainer {...props} _toggleLoginScreen={_togglePopup}/>} />
             </div>
           </div>
           { 
