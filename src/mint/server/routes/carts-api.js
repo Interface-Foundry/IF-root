@@ -266,10 +266,11 @@ module.exports = function (router) {
       item = yield cartUtils.addItem(req.body, cart, 1)
     }
 
-    cart.items.add(_.get(item, 'id', item._id))
+    // join the two database documents
+    cart.items.add(item.id)
     item.cart = cart.id
 
-    logging.info('user id?', req.UserSession.user_account.id)
+    // specify who added it
     item.added_by = userId
 
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
@@ -277,7 +278,6 @@ module.exports = function (router) {
 
     // Save all the weird shit we've added to this poor cart.
     yield [item.save(), cart.save()]
-    // specify who added it
 
     return res.send(item)
   }));
@@ -496,16 +496,11 @@ module.exports = function (router) {
     *
     */
   router.post('/share/:cart_id', (req, res) => co(function * () {
-    // only available for logged-in Users
-    // if (!_.get(req, 'UserSession.user_account.id')) {
-    //   throw new Error('Unauthorized')
-    // }
-
     // get the cart and leader
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items');;
     var leader = yield db.UserAccounts.findOne({id: cart.leader});
 
-    //TODO send email
+    // send email
     var share = yield db.Emails.create({
       sender: 'Kip <hello@kip.ai>',
       recipients: (leader.email ? leader.email : leader.email_address),
@@ -526,6 +521,9 @@ module.exports = function (router) {
     });
     console.log('about to send the email to ' + (leader.email ? leader.email : '...' + leader.email_address)) ;
     yield share.send();
+
+    // Send a happy status that the sharing was successful
+    res.status(200).end()
   }))
 
   /**
