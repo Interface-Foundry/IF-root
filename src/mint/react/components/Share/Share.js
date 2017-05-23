@@ -1,7 +1,7 @@
 // react/components/Share/Share.js
 
 import React, { Component } from 'react';
-import { Icon } from '../../../react-common/Components';
+import { Icon } from '../../../react-common/components';
 import { addLinkToDeepLink } from '../../utils';
 import PropTypes from 'prop-types';
 

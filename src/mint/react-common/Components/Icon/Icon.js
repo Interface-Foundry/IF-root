@@ -40,7 +40,7 @@ import {
   Slack,
   Sms,
   Whatsapp,
-} from '../../Styles';
+} from '../../styles';
 
 export default class Icon extends Component {
   static propTypes = {

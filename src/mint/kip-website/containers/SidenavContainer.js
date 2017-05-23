@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { Sidenav } from '../../react-common/Components';
+import { Sidenav } from '../../react-common/components';
 
 import { get, logout } from '../actions';
 

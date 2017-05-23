@@ -8,7 +8,7 @@ import { CartContainer, CartStoresContainer, LoginScreenContainer } from '../../
 import { Modal, Toast, ErrorPage } from '..';
 
 import Header from './Header';
-import { Sidenav } from '../../../react-common/Components';
+import { Sidenav } from '../../../react-common/components';
 import Footer from './Footer';
 
 //Analytics!
