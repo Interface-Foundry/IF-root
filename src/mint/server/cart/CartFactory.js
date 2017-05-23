@@ -1,5 +1,6 @@
-const AmazonCart = require('./AmazonCart')
+const Cart = require('./Cart')
 const co = require('co')
+const GetStore = require('./StoreFactory').GetStore
 
 /**
  * Build the correct Cart class (this is the inversion of control part)
@@ -9,16 +10,7 @@ const co = require('co')
 function CartFactory(options) {
   const store_type = options.store.split('_')[0]
   const store_locale = options.store.split('_')[1]
-  switch(store_type) {
-    case 'amazon':
-      return new AmazonCart({
-        store: options.store,
-        store_locale: store_locale,
-        user_locale: options.user_locale
-      })
-    case 'ypo':
-      // similar to above, but probably the YpoCart constructor doesn't need store_locale since it's only available in the UK
-  }
+  return new Cart(options)
 }
 
 /**

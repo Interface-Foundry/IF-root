@@ -1,3 +1,4 @@
+const GetStore = require('./StoreFactory').GetStore
 const _ = require('lodash')
 
 class Cart {
@@ -8,6 +9,9 @@ class Cart {
 
     // set the properties from the options
     _.merge(this, options)
+
+    // add the store
+    this.store = GetStore(this)
   }
 
   // Save the cart to the db
@@ -16,8 +20,12 @@ class Cart {
   }
 
   add(item) {
-    this.items.push(item)
+    this.items.push(item.id)
     return Promise.resolve(this)
+  }
+
+  checkout() {
+    this.store.checkout(this)
   }
 }
 

@@ -1,27 +1,14 @@
 const CreateCart = require('./CartFactory').CreateCart
 const GetCart = require('./CartFactory').GetCart
-const AmazonStore = require('./AmazonStore')
+const GetStore = require('./StoreFactory').GetStore
 const co = require('co')
-
-//
-// Example Store usage
-//
-const amazon_us = new AmazonStore('US')
-
-// Example function to get the right store for a cart
-function StoreFor(cart) {
-  console.log(cart)
-  switch (cart.store) {
-    case 'amazon_us':
-      return amazon_us
-  }
-}
 
 co(function * () {
   //
   // Example store usage
   //
-  var searchResults = yield amazon_us.textSearch({
+  var store = GetStore({store: 'amazon_us'})
+  var searchResults = yield store.textSearch({
     text: 'vintage paperweight'
   })
   console.log('example search results:', searchResults)
@@ -41,9 +28,12 @@ co(function * () {
   var cart = yield GetCart('12345')
 
   // example looking for stuff
-  searchResults = yield StoreFor(cart).textSearch({
+  searchResults = yield cart.store.textSearch({
     text: 'red hat satire'
   })
+  console.log('example search results:', searchResults)
 
   yield cart.add(searchResults[0])
+
+  console.log(cart)
 }).catch(console.error.bind(console))

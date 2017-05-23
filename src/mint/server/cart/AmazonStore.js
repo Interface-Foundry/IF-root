@@ -19,8 +19,8 @@ class AmazonStore extends Store {
     // now perform the amazon search asynchronously
     return co(function * () {
       return [
-        {name: 'Sunscreen', price: '15.00'},
-        {name: 'Generic Sunscreen', price: '14.00'}
+        {name: 'Sunscreen', price: '15.00', id: 'A2356113'},
+        {name: 'Generic Sunscreen', price: '14.00', id: 'A8082983'}
       ]
     }).then(items => super.cleanSearchResults(items)) // when items are ready, we can call some common function to clean them
   }
