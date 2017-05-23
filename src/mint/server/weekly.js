@@ -39,12 +39,9 @@ co(function * () {
     yield email.send();
     console.log('email sent')
 
-    cart.reminded = true;
-    yield cart.save();
+    // cart.reminded = true;
+    // yield cart.save();
   })
 
-  console.log('all receipts sent')
-
-  // TODO send out reengagement email
-  // TODO with checkout link
+  console.log('all emails sent')
 })
