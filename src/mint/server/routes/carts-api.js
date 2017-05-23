@@ -750,6 +750,9 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart id
    */
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
+    // go to prototype
+    return res.redirect('/prototype/checkout')
+
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
     // logging.info('populated cart', cart);

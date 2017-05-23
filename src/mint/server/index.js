@@ -47,7 +47,7 @@ dbReady.then((models) => { db = models; })
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
  */
-app.use(compress()); 
+app.use(compress());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.resolve(__dirname, '..', 'public')));
@@ -112,6 +112,7 @@ if (process.env.LOGGING_MODE === 'database') {
 //
 // Back end routes
 //
+app.use('/prototype', require('./routes/global-direct-prototype.js'));
 app.use('/', require('./routes/regular.js'));
 app.use('/api', require('./routes/api.js'));
 app.use('/sendgrid', require('./routes/incoming-mail.js'));
