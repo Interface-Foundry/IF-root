@@ -318,14 +318,10 @@ module.exports = function (router) {
 
     cart = yield cartUtils.deleteItemFromCart(oldItem, cart, userId)
     const newItem = yield cartUtils.addItemToCart(newItemAsin, cart, userId, oldItem.quantity)
-    cart.items.add(newItem.id)
-    newItem.cart = cart.id
 
-    // specify who added it
-    newItem.added_by = userId
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
-    yield [newItem.save(), cart.save()]
+    yield cart.save()
 
     return res.send(newItem)
   }));
@@ -754,14 +750,14 @@ module.exports = function (router) {
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
-    // logging.info('populated cart', cart);
-
+    var items = cart.items.slice()
+    // checkout removes the items from the cart object, so we have to make a copy
 
     yield cartUtils.checkout(cart, req, res)
+
+    cart.items = items;
     yield cartUtils.sendReceipt(cart, req)
   }))
-
-
 
   /**
    * @api {get} /api/item/:item_id/clickthrough Item Clickthrough
