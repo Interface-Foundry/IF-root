@@ -90,13 +90,7 @@ var cartsCollection = Waterline.Collection.extend({
 
     dirty: 'boolean',
 
-    archive: archive,
-
-    /** @type {boolean} whether or not the leader has been reminded about this cart */
-    reminded: {
-      type: 'boolean',
-      defaultsTo: false
-    }
+    archive: archive
   }
 });
 

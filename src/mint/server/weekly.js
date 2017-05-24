@@ -18,7 +18,7 @@ var reengage = function * () {
 
   // filter for empty carts
   var emptyCarts = carts.filter(function (c) {
-    return !c.items.length && !c.reminded
+    return !c.items.length && !c.leader.reminded
   })
 
   // filter out carts less than a week old
@@ -44,7 +44,7 @@ var reengage = function * () {
     yield email.template('reengagement', {
       cart_id: cart.id,
       cart: cart,
-      baseUrl: `https://18e137de.ngrok.io`,
+      baseUrl: `https://mint-dev.kipthis.com`,
       username: cart.leader.username || cart.leader.email_address.split('@')[0]
     })
 
@@ -52,8 +52,8 @@ var reengage = function * () {
     console.log('email sent')
 
     // flip a reminded flag on the cart so that we don't email more than once per cart
-    cart.reminded = true;
-    yield cart.save();
+    cart.leader.reminded = true;
+    yield cart.leader.save();
   })
 
   console.log('all emails sent')
