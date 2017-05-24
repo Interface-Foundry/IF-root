@@ -37,7 +37,7 @@ export default class About extends Component {
           <div className="col-12">
             <h1 className='tagline'><span>WHY PENGUINS</span></h1>
             <h4>
-              <span>KIP</span> is an A.I Penguin that helps you save money
+              <span>Kip</span> is an A.I Penguin that helps you save money
               by splitting costs between you and your friends
             </h4>
             <section className='cluster'>
@@ -54,7 +54,7 @@ export default class About extends Component {
                 No downloads or signups, Kip lets you shop from anywhere in the U.S, U.K, and Canada. <br/> 
               </h4>
               <div className="col-12 row-1 action">
-                <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a KIP Cart <Right/></span></button></a>
+                <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a Kip Cart <Right/></span></button></a>
               </div>
             </div>
 
@@ -64,7 +64,7 @@ export default class About extends Component {
                 Kip keeps your cart in the cloud and provides you with a unique short URL to share. <br/> 
               </h4>
               <div className="col-12 row-1 action">
-                <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a KIP Cart <Right/></span></button></a>
+                <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a Kip Cart <Right/></span></button></a>
               </div>
             </div>
 
@@ -74,7 +74,7 @@ export default class About extends Component {
                 Connect with you friends and never miss out on the things you need. 
               </h4>
               <div className="col-12 row-1 action">
-                <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a KIP Cart <Right/></span></button></a>
+                <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a Kip Cart <Right/></span></button></a>
               </div>
             </div>
 

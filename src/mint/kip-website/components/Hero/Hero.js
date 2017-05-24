@@ -32,7 +32,7 @@ export default class Hero extends Component {
 		        			The Simplest Way to Shop with your Friends
 		        		</h1>
 		        		<p>
-		        			Whether your in Canada, the U.K, or Singapore, <span>KIP</span> makes sure you never miss out on your friends shopping sprees or the best deals. 
+		        			Whether your in Canada, the U.K, or Singapore, <span>Kip</span> makes sure you never miss out on your friends shopping sprees or the best deals. 
 		        		</p>
 		        		{
 			      			src !== 'slack' ? <div className="col-12 action">
