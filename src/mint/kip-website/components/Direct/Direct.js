@@ -74,7 +74,7 @@ export default class Direct extends Component {
       img.src = row.src;
     })
 
-    this._startLoop()
+    // this._startLoop()
   }
 
 
@@ -154,7 +154,6 @@ export default class Direct extends Component {
                           {
                             backgroundImage: `url(${i.src})`
                           }}>
-                          <Smartphone/>
                     </div>
                   )
                 })
