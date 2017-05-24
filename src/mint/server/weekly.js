@@ -5,17 +5,23 @@ var db;
 const dbReady = require('../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
-co(function * () {
-  console.log('running')
+// try to reengage cart owners at 11:00 on weekdays
+// var reengageJob = crontab.scheduleJob('0 11 * * 1-5', 'function')
+var reengageJob = crontab.scheduleJob('* * * * *', function () {
+  co(reengage)
+})
+
+var reengage = function * () {
+  console.log('running reengage')
   yield dbReady;
   var carts = yield db.Carts.find({}).populate('items').populate('leader');
-  console.log('got carts')
+
+  // filter for empty carts
   var emptyCarts = carts.filter(function (c) {
     return !c.items.length && !c.reminded
   })
-  // console.log('EMPTY CARTS:', carts);
 
-  //filter out carts less than a week old
+  // filter out carts less than a week old
   emptyCarts = emptyCarts.filter(function (cart) {
     var monthCreated = cart.createdAt.getMonth()
     var dateCreated = cart.createdAt.getDate()
@@ -26,18 +32,14 @@ co(function * () {
     return elapsedDays >= 7
   })
 
+  // email leaders of the carts we've selected
   yield emptyCarts.map(function * (cart) {
-
-    console.log('about to create email')
-
     var email = yield db.Emails.create({
       sender: 'hello@kipthis.com',
       recipients: cart.leader.email_address,
       subject: `Add items to ${cart.name}!`,
       unsubscribe_group_id: 2583
     })
-
-    console.log('created email')
 
     yield email.template('reengagement', {
       cart_id: cart.id,
@@ -46,14 +48,13 @@ co(function * () {
       username: cart.leader.username || cart.leader.email_address.split('@')[0]
     })
 
-    console.log('templated email')
-
     yield email.send();
     console.log('email sent')
 
+    // flip a reminded flag on the cart so that we don't email more than once per cart
     // cart.reminded = true;
     // yield cart.save();
   })
 
   console.log('all emails sent')
-})
+}
