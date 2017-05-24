@@ -6,10 +6,12 @@ const dbReady = require('../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 // try to reengage cart owners at 11:00 on weekdays
-// var reengageJob = crontab.scheduleJob('0 11 * * 1-5', 'function')
-var reengageJob = crontab.scheduleJob('* * * * *', function () {
-  co(reengage)
+var reengageJob = crontab.scheduleJob('0 11 * * 1-5', function () {
+// var reengageJob = crontab.scheduleJob('* * * * *', function () { //for testing
+  if (process.env.NODE_ENV !== 'production') co(reengage);
 })
+
+logging.info('reengagement email job scheduled')
 
 var reengage = function * () {
   console.log('running reengage')

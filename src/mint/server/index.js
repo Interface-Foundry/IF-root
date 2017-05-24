@@ -13,7 +13,7 @@ const fs = require('fs'),
 
 // start any jobs
 var dailyDealsJob = require('./deals/send-daily-deals-job')
-
+var reengagementEmailsJob = require('./send-reengagement-emails-job')
 
 // live reloading
 if (process.env.BUILD_MODE !== 'prebuilt') {
@@ -47,7 +47,7 @@ dbReady.then((models) => { db = models; })
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
  */
-app.use(compress()); 
+app.use(compress());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.resolve(__dirname, '..', 'public')));
