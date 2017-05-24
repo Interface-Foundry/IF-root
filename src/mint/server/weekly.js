@@ -52,8 +52,8 @@ var reengage = function * () {
     console.log('email sent')
 
     // flip a reminded flag on the cart so that we don't email more than once per cart
-    // cart.reminded = true;
-    // yield cart.save();
+    cart.reminded = true;
+    yield cart.save();
   })
 
   console.log('all emails sent')
