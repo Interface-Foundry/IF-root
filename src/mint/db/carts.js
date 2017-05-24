@@ -82,6 +82,9 @@ var cartsCollection = Waterline.Collection.extend({
       required: true
     },
 
+    /** cart can have one invoice */
+    invoice: Waterline.isA('invoice'),
+
     /** @type {integer} the number of times this cart has been #viewed */
     views: {
       type: 'integer',

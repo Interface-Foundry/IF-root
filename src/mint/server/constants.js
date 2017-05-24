@@ -5,5 +5,11 @@ module.exports = {
 
   // available stores we are supporting atm
   STORES: ['ypo', 'amazon'],
-  LOCALES: ['US', 'CA', 'UK']
+  LOCALES: ['US', 'CA', 'UK'],
+
+  // PAYMENTS/INVOICES
+  INVOICE_TYPE: ['mint', 'cafe'],
+
+  /** dont know if we will support paypal but just for example */
+  PAYMENT_SOURCE: ['amazon', 'stripe']
 };

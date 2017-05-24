@@ -1,40 +1,38 @@
 const Waterline = require('waterline')
-const uuid = require('uuid');
+const uuid = require('uuid')
+
+const constants = require('../server/constants.js')
+
 /**
- * Payments collection is the collection of payments
+ * Payments collection is the collection of payments to invoices
  */
 const paymentsCollection = Waterline.Collection.extend({
   identity: 'payments',
   connection: 'default',
   migrate: 'safe',
   attributes: {
-    /** Generated when a cart is paid */
+    /** Generated when a payment is made */
     id: {
       type: 'string',
       primaryKey: true,
       defaultsTo: () => uuid.v4()
     },
 
+    /** cart can have one invoice associated with the payment */
+    cart: Waterline.isA('invoice'),
 
-    payment_type: {
-      type: 'string',
-      enum: ['mint', 'cafe']
-    },
+    /** user can have many payments, payment would be one user */
+    user: Waterline.isA('user_accounts'),
 
-    /** cart associated with the payment */
-    cart: Waterline.isA('cart'),
-
-    /** Many-to-one relation with user accounts, so multiple users could pay */
-    user: Waterline.isMany('user_accounts'),
-
-    /** total of order */
-    total: {
+    /** amount user paid */
+    amount: {
       type: 'float'
     },
 
-    /** everything that would be a cafe db.payments*/
-    cafe: {
-      type: 'json',
+    payment_source: {
+      type: 'string',
+      enum: constants.PAYMENT_SOURCE,
+      required: true
     }
   }
 })
