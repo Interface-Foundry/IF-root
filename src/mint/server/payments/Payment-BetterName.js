@@ -55,10 +55,6 @@ class CafePayments {
   }
 }
 
-async function f1 () {
-  let user = await db.UserAccounts.findOne({_id: 'eff781b1-2d62-42f3-8eb8-b55ea240bcd0'})
-  console.log(user)
-}
 
 async function main() {
   console.log('awaiting db')
