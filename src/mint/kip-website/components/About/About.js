@@ -77,8 +77,17 @@ export default class About extends Component {
                 <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Create a KIP Cart <Right/></span></button></a>
               </div>
             </div>
+
+            <span className="col-12 action red">
+              <a href='/newcart'>
+                <button>
+                  <span>Try Kip Now <Right/></span>
+                </button>
+              </a>
+            </span>
           </div>
         </div>
+        <Footer/>
       </div>
     );
   }
