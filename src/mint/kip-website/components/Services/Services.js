@@ -14,49 +14,6 @@ import {
   GooglePlay
 } from '../../themes';
 
-const comparisonArray = [
-	{
-		nameSrc: null,
-		order: true,
-		budget: true,
-		tracking: true,
-		vendors: true,
-		noSignup: true,
-		accessability: [],
-		pricing: null
-	},
-	{
-		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_kip.svg',
-		order: true,
-		budget: true,
-		tracking: true,
-		vendors: true,
-		noSignup: true,
-		accessability: [Facebook, Gmail, SlackIcon, Outlook, Chrome],
-		pricing: 'FREE'
-	},
-	{
-		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_hivy.svg',
-		order: true,
-		budget: true,
-		tracking: false,
-		vendors: false,
-		noSignup: false,
-		accessability: [SlackIcon, Apple],
-		pricing: 'Credit Card Required'
-	},
-	{
-		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_q.svg',
-		order: true,
-		budget: false,
-		tracking: false,
-		vendors: true,
-		noSignup: false,
-		accessability: [GooglePlay, Apple],
-		pricing: 'Credit Card Required'
-	}
-]
-
 export default class About extends Component {
 
   	render() {
