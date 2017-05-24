@@ -1,4 +1,5 @@
 const co = require('co')
+const crontab = require('node-crontab')
 
 var db;
 const dbReady = require('../db');
@@ -12,7 +13,18 @@ co(function * () {
   var emptyCarts = carts.filter(function (c) {
     return !c.items.length && !c.reminded
   })
-  console.log('EMPTY CARTS:', carts);
+  // console.log('EMPTY CARTS:', carts);
+
+  //filter out carts less than a week old
+  emptyCarts = emptyCarts.filter(function (cart) {
+    var monthCreated = cart.createdAt.getMonth()
+    var dateCreated = cart.createdAt.getDate()
+    var yearCreated = cart.createdAt.getFullYear()
+    var now = new Date()
+    var elapsedDays = (now.getDate() - dateCreated) + (30*(now.getMonth() - monthCreated)) + (360*(yearCreated - now.getFullYear()));
+    console.log('elapsed days:', elapsedDays)
+    return elapsedDays >= 7
+  })
 
   yield emptyCarts.map(function * (cart) {
 
