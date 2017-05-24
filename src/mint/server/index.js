@@ -152,6 +152,9 @@ app.get('/blog', (_, res) => {
 app.get('/direct', (_, res) => {
   res.render('pages/index');
 });
+app.get('/about', (_, res) => {
+  res.render('pages/index');
+});
 app.get('/s/*', (_, res) => {
   res.render('pages/index');
 });

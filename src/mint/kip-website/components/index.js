@@ -8,3 +8,4 @@ export Legal from './Legal';
 export Blog from './Blog';
 export Compare from './Compare';
 export Direct from './Direct';
+export About from './About';

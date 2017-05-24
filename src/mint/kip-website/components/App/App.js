@@ -5,9 +5,8 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 import { PropTypes } from 'prop-types';
 
-import { Legal, Direct } from '..';
+import { Legal, Direct, About } from '..';
 import { SidenavContainer, ModalContainer, RibbonContainer, LandingContainer, BlogContainer } from '../../containers';
-
 
 import { Route } from 'react-router-dom';
 
@@ -63,6 +62,7 @@ export default class App extends Component {
 		      	<Route path={`${match.url}legal`} exact component={Legal}/>
 		      	<Route path={`${match.url}blog`} exact component={BlogContainer}/>
 		      	<Route path={`${match.url}direct`} exact component={Direct}/>
+		      	<Route path={`${match.url}about`} exact component={About}/>
 	      	</div>
 	      </div>
 	    );

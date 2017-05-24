@@ -196,34 +196,37 @@
 				height: 460px;
 				display: inline-block;
 				width: 260px;
-				margin: 100px 0;
+				margin: 50px 0;
 				background-size: contain;
 				background-repeat: no-repeat;
 				background-position: center;
 				border: 5px solid;
+				box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 
 				&:before {
 					content: '';
 					position: absolute;
-					border-radius: $padding/2 $padding/2 0 0;
-					top: -55px;
+					border-radius: $padding $padding 0 0;
+					top: -35px;
 					left: -5px;
 					width: 100%;
 					background: white;
-					height: 50px;
+					height: 30px;
 					border: 5px solid;
+					box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 				}
 
 				&:after {
 					content: '';
 					position: absolute;
-					border-radius: 0 0 $padding/2 $padding/2;
-					bottom: -83px;
+					border-radius: 0 0 $padding $padding;
+					bottom: -58px;
 					left: -5px;
 					width: 100%;
 					background: white;
-					height: 75px;
+					height: 50px;
 					border: 5px solid;
+					box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 				}
 
 				&.primary {

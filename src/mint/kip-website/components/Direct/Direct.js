@@ -74,7 +74,7 @@ export default class Direct extends Component {
       img.src = row.src;
     })
 
-    // this._startLoop()
+    this._startLoop()
   }
 
 

@@ -1,0 +1,102 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.about {
+	position: relative;
+	text-align: center;
+	padding: 0;
+	z-index: 1;
+
+	.about__header {
+		position: relative;
+		display: block;
+		background: transparent;
+		padding: $padding*10 0 0;
+		width: 100%;
+		z-index: 1;
+		background: white;
+		border-bottom: 3px solid mix(white, $primaryColor, 85%);
+
+		& > div {
+			display: table;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.video {
+			display: block;
+			height: 500px;
+			overflow: hidden;
+			border-radius: 5px;
+			margin-bottom: $padding*3;
+			border: 3px solid mix(white, $primaryColor, 85%);
+		}
+
+		@media only screen and (max-width: 600px) {
+			padding: $padding*5 $padding*5 0;
+		}
+
+		.more {
+			height: $ribbonHeight*2;
+			cursor: pointer;
+		    margin: 0 auto -50px;
+		    background: white;
+		    display: inline-block;
+		    z-index: 1;
+		    padding: 0 $padding*2;
+			h2 {
+				height: $ribbonHeight/2;
+				margin-bottom: $padding;
+				color: $thirdColor;
+				max-width: 500px;
+			}
+			p {
+				max-width: 500px;
+			}
+			svg {
+				width: $ribbonHeight;
+				height: $ribbonHeight/1.3;
+				fill: $thirdColor;
+				@include animation(bounceDownSmall 3s infinite);
+			}
+		}
+	}
+
+	.icons {
+		position: relative;
+		height: $ribbonHeight*3;
+		width: 100%;
+		padding: 0;
+		display: table;
+		background:  mix(white, $primaryColor, 95%);
+		margin: 0 auto;
+		white-space: nowrap;
+
+		& > div {
+			position: relative;
+			display: table-cell;
+			vertical-align: middle;
+			fill: rgba($bgColor, 0.5);
+			padding: $padding;
+			background:  mix(white, $primaryColor, 95%);
+
+			@media only screen and (max-width: 600px) {
+				display: inline-block;
+				height: 100%;
+				line-height: 100%;
+				padding: 20% 0;
+				width: 35%;
+				&:first-of-type {
+					display: none;
+				}
+				&:last-of-type {
+					display: none;
+				}
+			}
+		}
+
+		@media only screen and (max-width: 600px) {
+	    	@include animation(scrollLeftRight 25s infinite);
+		}
+	}
+}
