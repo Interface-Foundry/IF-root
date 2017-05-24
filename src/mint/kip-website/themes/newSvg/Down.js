@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 
-export default class Gift extends Component {
+export default class Down extends Component {
 	render() {
 	  	return (
 			<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-				 width="193.042px" height="193.041px" viewBox="0 0 193.042 193.041" enable-background="new 0 0 193.042 193.041"
+				 width="193.042px" height="193.041px" viewBox="0 0 193.042 193.041" enableBackground="new 0 0 193.042 193.041"
 				 xmlSpace="preserve">
 			<g>
 				<g>

@@ -9,6 +9,12 @@ import { Banner } from '../../themes/newSvg';
 import { Services, Hero, Footer, Compare } from '..';
 
 export default class Landing extends Component {
+
+  componentDidMount () {
+    const { registerHeight } = this.props;
+    registerHeight(ReactDOM.findDOMNode(this).offsetTop, ReactDOM.findDOMNode(this).clientHeight);
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
     if(
@@ -22,7 +28,7 @@ export default class Landing extends Component {
   }
 
   render() {
-    const { match: { params: { src }}, registerHeight, fixed, animationState }= this.props;
+    const { match: { params: { src }}, registerHeight, fixed, animationState } = this.props;
 
     return (
       <div className="landing"> 

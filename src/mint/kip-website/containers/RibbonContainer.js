@@ -8,7 +8,7 @@ import {
 
 const mapStateToProps = (state, props) => ({
   	user_account: state.auth.user_account,
-  	fixed: props.fixed
+  	fixed: state.app.fixed
 })
 
 const mapDispatchToProps = dispatch => ({

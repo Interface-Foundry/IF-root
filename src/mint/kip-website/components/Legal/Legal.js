@@ -31,7 +31,7 @@ export default class Landing extends Component {
 
             <li>    How we share information; and</li>
 
-              <li> The choices we offer.</li>
+            <li> The choices we offer.</li>
           </ul>
 
           <strong>Personally Identifiable Information That We Collect:</strong>

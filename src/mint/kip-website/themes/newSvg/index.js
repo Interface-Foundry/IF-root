@@ -8,6 +8,7 @@ export Hills from './Hills';
 export Plus from './Plus';
 export Right from './Right';
 export Down from './Down';
+export Smartphone from './Smartphone';
 
 export FacebookDrawn from './FacebookDrawn';
 export EmailDrawn from './EmailDrawn';

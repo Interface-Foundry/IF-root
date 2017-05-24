@@ -17,8 +17,8 @@ const mapStateToProps = (state, props) => ({
 
 const mapDispatchToProps = dispatch => ({
   get: (url, type) => dispatch(get(url, type)),
-  toggleModal: () => dispatch(toggleModal()),
-  toggleSidenav: () => dispatch(toggleSidenav()),
+  _toggleLoginScreen: () => dispatch(toggleModal()),
+  _toggleSidenav: () => dispatch(toggleSidenav()),
   logout: () => {
     dispatch(get('/api/logout', 'SESSION'));
     dispatch(logout());

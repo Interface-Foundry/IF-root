@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 import { PropTypes } from 'prop-types';
 
-import { Legal } from '..';
+import { Legal, Direct } from '..';
 import { SidenavContainer, ModalContainer, RibbonContainer, LandingContainer, BlogContainer } from '../../containers';
 
 
@@ -62,6 +62,7 @@ export default class App extends Component {
 	      		<Route path={`${match.url}s/:src`} exact component={LandingContainer}/>
 		      	<Route path={`${match.url}legal`} exact component={Legal}/>
 		      	<Route path={`${match.url}blog`} exact component={BlogContainer}/>
+		      	<Route path={`${match.url}direct`} exact component={Direct}/>
 	      	</div>
 	      </div>
 	    );

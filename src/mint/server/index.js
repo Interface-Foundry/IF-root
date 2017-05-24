@@ -149,6 +149,9 @@ app.get('/legal', (_, res) => {
 app.get('/blog', (_, res) => {
   res.render('pages/index');
 });
+app.get('/direct', (_, res) => {
+  res.render('pages/index');
+});
 app.get('/s/*', (_, res) => {
   res.render('pages/index');
 });

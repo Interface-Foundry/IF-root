@@ -1,5 +1,6 @@
 @import '../../themes/constants';
 @import '../../themes/grid';
+@import '../../themes/animations';
 
 // General
 body, html {
@@ -88,36 +89,13 @@ p {
 }
 	
 // overwrites
-.Typist {
-	@media only screen and (max-width: 600px) {
-		white-space: nowrap;
+.sidenav {
+	&.homesidenav {
+		top: 60px;
+		background: rgba(white, 0.6);
+		.sidenav__list{
+			border: 0;
+			@include animation(scrollInRight cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+		}
 	}
 }
-.Typist .Cursor--blinking { 
-	opacity: 1;
-	display: inline-block;
-	color: lighten($bgColor, 5%);
-	font-size: 12px;
-	animation: blink 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-	@media only screen and (max-width: 600px) {
-		margin-left: 0;
-	}
-}	
-.Static .Cursor--blinking {
-	opacity: 1;
-	display: inline-block;
-	color: lighten($bgColor, 5%);
-	font-size: 12px;
-	animation: blink 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-	@media only screen and (max-width: 600px) {
-		margin-left: 0;
-	}
-} 	
-
-@keyframes blink {
-  0% {
-    opacity: 1; }
-  50% {
-    opacity: 0; }
-  100% {
-    opacity: 1; } }

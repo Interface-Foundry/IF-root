@@ -22,7 +22,7 @@ const mapDispatchToProps = dispatch => ({
   login: (cart_id, email) => dispatch(login(cart_id, email)),
   validateCode: (email, code) => dispatch(validateCode(email, code)),
   get: (url, type) => dispatch(get(url, type)),
-  toggleModal: () => dispatch(toggleModal())
+  _toggleLoginScreen: () => dispatch(toggleModal())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

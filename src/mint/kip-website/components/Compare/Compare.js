@@ -61,8 +61,8 @@ export default class Compare extends Component {
 				    	<tr>
 						  	<th>&nbsp;</th>
 					  		{
-					  			comparisonArray.map((app) => (
-					  				<th>
+					  			comparisonArray.map((app, i) => (
+					  				<th key={i}>
 					  					<div className="image" style={{backgroundImage: `url(${app.nameSrc})`}}/>
 					  				</th>
 					  			))
@@ -73,48 +73,48 @@ export default class Compare extends Component {
 					  	<tr>
 					  		<td>Order Management</td>
 				  			{
-					  			comparisonArray.map((app) => (
-					  				app.order ? <td className='check'> <Check/> </td> : <td>  <Delete/> </td>
+					  			comparisonArray.map((app, i) => (
+					  				app.order ? <td key={i} className='check'> <Check/> </td> : <td key={i}>  <Delete/> </td>
 					  			))
 					  		}
 				  		</tr>
 					    <tr>
 					      	<td>Budget Setting</td>
 				  			{
-					  			comparisonArray.map((app) => (
-					  				app.budget ? <td className='check'> <Check/> </td> : <td> <Delete/> </td>
+					  			comparisonArray.map((app, i) => (
+					  				app.budget ? <td key={i} className='check'> <Check/> </td> : <td key={i}> <Delete/> </td>
 					  			))
 					  		}
 					    </tr>
 					    <tr>
 					      	<td>Track Orders</td>
 				  			{
-					  			comparisonArray.map((app) => (
-					  				app.tracking ? <td className='check'> <Check/> </td> : <td> <Delete/> </td>
+					  			comparisonArray.map((app, i) => (
+					  				app.tracking ? <td key={i} className='check'> <Check/> </td> : <td key={i}> <Delete/> </td>
 					  			))
 					  		}
 					    </tr>
 					    <tr>
 					      	<td>Multiple Vendors</td>
 				  			{
-					  			comparisonArray.map((app) => (
-					  				app.vendors ? <td className='check'> <Check/> </td> : <td> <Delete/> </td>
+					  			comparisonArray.map((app, i) => (
+					  				app.vendors ? <td key={i} className='check'> <Check/> </td> : <td key={i}> <Delete/> </td>
 					  			))
 					  		}
 					    </tr>
 					    <tr>
 					      	<td>No Signup/Download</td>
 				  			{
-					  			comparisonArray.map((app) => (
-					  				app.noSignup ? <td className='check'> <Check/> </td> : <td> <Delete/> </td>
+					  			comparisonArray.map((app, i) => (
+					  				app.noSignup ? <td key={i} className='check'> <Check/> </td> : <td key={i}> <Delete/> </td>
 					  			))
 					  		}
 					    </tr>
 					    <tr>
 					      	<td>Accessibility</td>
 					      	{
-					  			comparisonArray.map((app) => (
-					  				<td> 
+					  			comparisonArray.map((app, i) => (
+					  				<td key={i}> 
 					  					{
 					      					app.accessability.map((Svg, i) => {
 												return <Svg key={i}/>
@@ -127,19 +127,21 @@ export default class Compare extends Component {
 					    <tr>
 					      	<td>Pricing</td>
 			  				{
-					  			comparisonArray.map((app) => (
-					  				<td className='price'> { app.pricing } </td>
+					  			comparisonArray.map((app, i) => (
+					  				<td key={i} className='price'> { app.pricing } </td>
 					  			))
 					  		}
 					    </tr>
+					    <tr>
+					    	<td className="col-12 action">
+				      			<a href='/newcart'>
+				        			<button>
+					        			<span>Create KIP Cart <Right/></span>
+					        		</button>
+			        			</a>
+				        	</td>
+					    </tr>
 				  	</tbody>
-			  		<div className="col-12 action">
-		      			<a href='/newcart'>
-		        			<button>
-			        			<span>Create KIP Cart <Right/></span>
-			        		</button>
-	        			</a>
-		        	</div>
 				</table>
 	      	</div>
 	    );

@@ -11,6 +11,7 @@ export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
   case 'REGISTER_HEIGHT':
   case 'HANDLE_SCROLL':
+    console.log(action.response)
     return {
       ...state,
       ...action.response

@@ -8,6 +8,7 @@ import { Plus, Right } from '../../themes/newSvg';
 export default class Ribbon extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
+    console.log(nextProps.fixed !== this.props.fixed)
     if (
       nextProps.fixed !== this.props.fixed
       || nextProps.user_account !== this.props.user_account
@@ -21,8 +22,9 @@ export default class Ribbon extends Component {
   }
 
   render() {
-    const { fixed, toggleSidenav, toggleModal, currentUser, src } = this.props;
+    const { fixed, toggleSidenav, toggleModal, user_account, src } = this.props;
 
+    console.log(fixed)
     return (
       <nav className={`ribbon ${fixed ? 'background' : ''}`}>
         <div className='row-1'> 
@@ -39,7 +41,7 @@ export default class Ribbon extends Component {
           </div>
 
           {
-            currentUser && currentUser.email_address ? <div className="right row row-1">
+            user_account && user_account.email_address ? <div className="right row row-1">
               <div className="right menu row row-1" onClick={() => toggleSidenav()}>
                 <Icon icon='Menu' />
               </div>
