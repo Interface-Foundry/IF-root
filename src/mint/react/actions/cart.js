@@ -11,7 +11,8 @@ import {
   REQUEST_CARTS,
   REQUEST_CLEAR_CART,
   CANCEL_CLEAR_CART,
-  RECEIVE_CLEAR_CART
+  RECEIVE_CLEAR_CART,
+  DELETE_CART
 } from '../constants/ActionTypes';
 import { sleep } from '../utils';
 
@@ -57,6 +58,11 @@ const cancelClearCart = () => ({
 
 const receiveClearCart = () => ({
   type: RECEIVE_CLEAR_CART
+});
+
+const recieveDeleteCart = (cart_id) => ({
+  cart_id,
+  type: DELETE_CART
 });
 
 export const addingItem = (addingItem) => ({
@@ -130,6 +136,7 @@ export function deleteCart(cart_id) {
         method: 'DELETE',
         credentials: 'same-origin',
       });
+      dispatch(recieveDeleteCart(cart_id));
     } catch (e) {
       throw 'error in cart delete';
     }
@@ -185,7 +192,7 @@ export function checkoutCart(cart_id) {
   };
 }
 
-export function sendAddressData(user_id, full_name, line_1, line_2, city, region, code, country) {
+export function sendAddressData(user_id, full_name, line_1, line_2, city, region, code, country, delivery_message) {
   return async dispatch => {
     try {
       const response = await fetch(`/api/user/${user_id}/address`, {
@@ -195,7 +202,7 @@ export function sendAddressData(user_id, full_name, line_1, line_2, city, region
           Accept: 'application/json',
           'Content-Type': 'application/json'
         },
-        'body': JSON.stringify({ full_name, line_1, line_2, city, region, code, country })
+        'body': JSON.stringify({ full_name, line_1, line_2, city, region, code, country, delivery_message })
       });
       return dispatch(receiveItems(await response.json()));
     } catch (e) {

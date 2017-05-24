@@ -6,5 +6,5 @@ export {
 } from './app';
 
 export {
-	get
+	login, validateCode, get, logout
 } from './async';

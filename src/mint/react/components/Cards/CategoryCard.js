@@ -2,21 +2,19 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { displayCost } from '../../utils';
-import { Link } from 'react-router-dom';
 
 export default class CategoryCard extends Component {
 
   static propTypes = {
     humanName: PropTypes.string.isRequired,
     machineName: PropTypes.string.isRequired,
-    searchType: PropTypes.string.isRequired,
     itemCount: PropTypes.number.isRequired,
-    image: PropTypes.string.isRequired
+    image: PropTypes.string.isRequired,
+    previewAmazonItem: PropTypes.func
   }
 
   render() {
-    const { humanName, image, itemCount, machineName, searchType, previewAmazonItem } = this.props;
+    const { humanName, image, itemCount, machineName, previewAmazonItem } = this.props;
 
     return (
       <section className='card__type-category' onClick={() => {

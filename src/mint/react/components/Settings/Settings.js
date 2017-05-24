@@ -3,12 +3,12 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 
 export default class Settings extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
-    currentUser: PropTypes.object,
+    user_account: PropTypes.object,
     updateUser: PropTypes.func
   }
   state = {
@@ -17,7 +17,7 @@ export default class Settings extends Component {
   }
 
   componentDidMount() {
-    const { currentUser: { name, email_address } } = this.props;
+    const { user_account: { name, email_address } } = this.props;
     this.setState({
       name,
       mail: email_address
@@ -37,7 +37,7 @@ export default class Settings extends Component {
   }
 
   _saveName() {
-    const { props: { updateUser, currentUser: { id } }, state: { name } } = this;
+    const { props: { updateUser, user_account: { id } }, state: { name } } = this;
     this.setState({
       editName: false
     });
@@ -45,7 +45,7 @@ export default class Settings extends Component {
   }
 
   _saveMail() {
-    const { props: { updateUser, currentUser: { id } }, state: { mail } } = this;
+    const { props: { updateUser, user_account: { id } }, state: { mail } } = this;
     this.setState({
       editMail: false
     });
@@ -53,7 +53,7 @@ export default class Settings extends Component {
   }
 
   render() {
-    const { props: { cart_id, currentUser: { name, email_address } }, state: { editName, editMail } } = this;
+    const { props: { cart_id, user_account: { name, email_address } }, state: { editName, editMail } } = this;
     return (
       <div className='settings'>
         <ul>

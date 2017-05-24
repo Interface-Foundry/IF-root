@@ -1,5 +1,5 @@
 //react/components/EditCart/EditCart.scss
-@import '../../styles/Constants';
+@import '../../../react-common/styles/Constants';
 .editCart {
   overflow: scroll;
   height: 100%;
@@ -51,7 +51,7 @@
       border-radius: 4px 4px 0 0;
       .danger {
         color: white;
-        background: $fourth-button-color;
+        background: $fourthColor;
       }
     }
     td {

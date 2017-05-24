@@ -8,11 +8,12 @@ import { Plus, Right } from '../../themes/newSvg';
 export default class Ribbon extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
-    if(
-        nextProps.fixed !== this.props.fixed ||
-        nextProps.currentUser !== this.props.currentUser ||
-        nextProps.src !== this.props.src 
-      ) {
+    if (
+      nextProps.fixed !== this.props.fixed
+      || nextProps.user_account !== this.props.user_account
+      || nextProps.user_account.name !== this.props.user_account.name
+      || nextProps.src !== this.props.src
+    ) {
       return true;
     }
 
@@ -46,7 +47,7 @@ export default class Ribbon extends Component {
           }
 
           {
-            currentUser && currentUser.email_address ? <div className="right row row-1 action2">
+            user_account && user_account.email_address ? <div className="right row row-1 action2">
                 <a href='/newcart'><button>
                   <Plus/> New Cart
                 </button></a>
@@ -54,7 +55,7 @@ export default class Ribbon extends Component {
           }
 
           {
-            currentUser ? null : ( src !== 'slack' ? <div className="right row row-1 action2">
+            user_account ? null : ( src !== 'slack' ? <div className="right row row-1 action2">
                 <a href='/newcart'><button>
                   <Plus/> New Cart
                 </button></a>
@@ -67,7 +68,7 @@ export default class Ribbon extends Component {
           }
 
           {
-            currentUser ? null : <div className="right row row-1">
+            user_account ? null : <div className="right row row-1">
               <div className="col-12 row-1 action">
                 <button onClick={() => toggleModal()}>Log in</button>
               </div>
@@ -79,4 +80,3 @@ export default class Ribbon extends Component {
     );
   }
 }
-

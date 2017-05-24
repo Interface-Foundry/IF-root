@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 import { splitCartById } from '../../reducers';
 
 export default class Header extends Component {
@@ -11,13 +11,13 @@ export default class Header extends Component {
     item: PropTypes.object,
     items: PropTypes.arrayOf(PropTypes.object),
     cards: PropTypes.arrayOf(PropTypes.object),
-    currentUser: PropTypes.object,
+    user_account: PropTypes.object,
     currentCart: PropTypes.object,
   }
 
   render() {
-    const { props, props: { cards, currentUser, items, currentCart: { leader }, item: { search } } } = this,
-    isLeader = leader && (leader.id === currentUser.id);
+    const { props, props: { cards, user_account, items, currentCart: { leader }, item: { search } } } = this,
+    isLeader = leader && (leader.id === user_account.id);
     return (
       <nav className='navbar'>
         <Route path={'/404'} exact component={() => 
@@ -29,7 +29,7 @@ export default class Header extends Component {
           }
         />
         <Route path={'/cart/:cart_id/m/:type/:index/:asin/edit'} exact component={() => 
-            <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: currentUser.id}).my ? splitCartById(this.props, {id: currentUser.id}).my.length : 0} type={'item'} {...props}/>
+            <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: user_account.id}).my ? splitCartById(this.props, {id: user_account.id}).my.length : 0} type={'item'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/variant/:index/:item_id'} exact component={() => 
@@ -37,7 +37,7 @@ export default class Header extends Component {
           }
         />
         <Route path={'/newcart'} exact component={() => 
-            <IntroHead text={'Choose a store for your cart'} {...props}/>
+            <IntroHead text={'Select Store'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/deal/:index/:dealId'} exact component={() => 
@@ -53,7 +53,7 @@ export default class Header extends Component {
           }
         />
         <Route path={'/cart/:cart_id/m/signin'} exact component={() => 
-            <IntroHead text={'Add Item to Cart'} {...props}/>
+            <IntroHead text={'Sign In to Continue'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/settings'} exact component={() => 
@@ -80,6 +80,10 @@ export default class Header extends Component {
             <CartHead text={'Edit Cart'} {...props}/>
           }
         />
+        <Route path={'/cart/:cart_id/m/archive'} exact component={() => 
+            <ModalHead text={'Archived Carts'} {...props}/>
+          }
+        />
       </nav>
     );
   }
@@ -89,9 +93,10 @@ class CartHead extends Component {
   static propTypes = {
     cartName: PropTypes.string,
     _toggleSidenav: PropTypes.func,
-    currentUser: PropTypes.object,
+    user_account: PropTypes.object,
     currentCart: PropTypes.object,
-    isMobile: PropTypes.bool
+    isMobile: PropTypes.bool,
+    _togglePopup: PropTypes.func
   }
 
   state = {
@@ -107,7 +112,7 @@ class CartHead extends Component {
   render() {
     const {
       state: { bounce },
-      props: { currentUser: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader, store } }
+      props: { user_account: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader, store } }
     } = this;
     const displayStore = store === 'ypo' ? 'YPO' : _.capitalize(store);
     return (
@@ -218,6 +223,8 @@ class SettingsHeader extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
     history: PropTypes.object,
+    text: PropTypes.string,
+    icon: PropTypes.object
   }
 
   render() {

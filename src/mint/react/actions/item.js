@@ -132,8 +132,8 @@ export function previewAmazonItem(amazon_id, category) {
   return async function (dispatch, getState) {
     dispatch(request());
     try {
-      const response = await fetch(`/api/itempreview?q=${amazon_id}&store=${getState()
-        .currentCart.store}`, {
+      const cart = getState().currentCart
+      const response = await fetch(`/api/itempreview?q=${amazon_id}&store=${cart.store}&store_locale=${cart.store_locale}`, {
         credentials: 'same-origin'
       });
       const json = await response.json();

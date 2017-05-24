@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 
 class Image extends Component {
   static propTypes = {

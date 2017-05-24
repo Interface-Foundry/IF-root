@@ -165,7 +165,6 @@ module.exports = function (router) {
    * @apiParam {string} code the postal code we want addresses for
    * examples: https://www.pcapredict.com/support/webservice/postcodeanywhere/interactive/retrievebyid/1.3/
    */
-
   router.get('/postcode', (req, res) => co(function * () {
     var code = req.query.code;
     var pcaFindResult = yield request(`https://services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/Find/v1.10/json.ws?Key=UX83-MY94-GN78-FN27&Filter=None&SearchTerm=${code}`);
@@ -179,4 +178,15 @@ module.exports = function (router) {
 
     res.send(addresses);
   }));
+
+
+  /*
+   * Gets all themes
+   * @api {Get} /api/themes Gets all themes in the db
+   * @apiGroup Other
+   */
+  router.get('/themes', (req, res) => co(function * () {
+    var themes = yield db.Themes.find({});
+    res.send(themes);
+  }))
 }

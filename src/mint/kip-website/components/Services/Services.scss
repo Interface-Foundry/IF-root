@@ -25,6 +25,7 @@
 
 		svg {
 			height: 300px;
+			
 			@media only screen and (max-width: 600px) {
 				height: 350px;
 			}

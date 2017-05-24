@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { calculateItemTotal, displayCost } from '../../utils';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 
 export default class Footer extends Component {
   static propTypes = {
@@ -21,7 +21,6 @@ export default class Footer extends Component {
       <footer className='footer'>
         <Route path={'/cart/:cart_id/m/item/add'} exact component={() => <div className='empty'/>}/>
         <Route path={'/cart/:cart_id/m/share'} exact component={() => <div className='empty'/>}/>
-        <Route path={'/cart/:cart_id/m/signin'} exact component={() => <SignInFooter/>}/>
         <Route path={'/cart/:cart_id/m/item/:index/:item_id'} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={'/cart/:cart_id/m/variant/:index/:item_id'} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={'/cart/:cart_id/m/:type/:index/:item_id/edit'} exact component={() => <EditFooter {...props} item_id={item_id}/>}/>
@@ -35,23 +34,13 @@ export default class Footer extends Component {
   }
 }
 
-class SignInFooter extends Component {
-  render() {
-    return (
-      <p className='tos'>
-        By signing up you agree to the Kip <a href='https://www.kipthis.com/legal/'>Terms of Use</a>
-      </p>
-    );
-  }
-}
-
 class CartFooter extends Component {
   static propTypes = {
     history: PropTypes.object,
     cart_id: PropTypes.string,
     updateCart: PropTypes.func,
     currentCart: PropTypes.object,
-    currentUser: PropTypes.object,
+    user_account: PropTypes.object,
     leader: PropTypes.object
   }
 
@@ -73,10 +62,10 @@ class CartFooter extends Component {
   }
 
   render() {
-    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, currentUser, leader, items, isMobile, history: { replace, push } } = this.props;
-    const isLeader = !!currentUser.id && !!leader && (leader.id === currentUser.id);
+    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, user_account, leader, items, isMobile, history: { replace, push } } = this.props;
+    const isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
     const total = calculateItemTotal(items);
-    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'uk' ? 'GBP' : 'USD') : 'GBP' : null;
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
     if (locked) {
       return (
         <div className='footer__cart'>
@@ -84,12 +73,12 @@ class CartFooter extends Component {
             <Icon icon='Email'/>
             FEEDBACK
           </button>
-          <a 
+          <a
             className={items.length===0 ? 'disabled':''}
-            href={`/api/cart/${cart_id}/checkout`} 
+            href={`/api/cart/${cart_id}/checkout`}
             onClick={
-              (e) => { 
-                e.preventDefault(); 
+              (e) => {
+                e.preventDefault();
                 if (items.length > 0) {
                   if(currentCart.store === 'ypo'){
                     push(`/cart/${currentCart.id}/address`)
@@ -116,12 +105,12 @@ class CartFooter extends Component {
           <Icon icon='Person'/>
           <h4>Share</h4>
         </button>
-        <a 
+        <a
           className={items.length === 0 ? 'disabled':''}
-          href={`/api/cart/${cart_id}/checkout`} 
+          href={`/api/cart/${cart_id}/checkout`}
           onClick={
-            (e) => { 
-              e.preventDefault(); 
+            (e) => {
+              e.preventDefault();
               if (items.length > 0) {
                   if(currentCart.store === 'ypo'){
                     push(`/cart/${currentCart.id}/address`)
@@ -153,17 +142,17 @@ class ItemFooter extends Component {
     position: PropTypes.number,
     removeDeal: PropTypes.func,
     item_id: PropTypes.string,
-    currentUser: PropTypes.object
+    user_account: PropTypes.object
   }
 
   render() {
-    const { removeDeal, addItem, _togglePopup, item_id, position, cart_id, clearItem, currentUser, history: { replace, location: { pathname } } } = this.props,
+    const { removeDeal, addItem, _togglePopup, item_id, position, cart_id, clearItem, user_account, history: { replace, location: { pathname } } } = this.props,
       removeItem = pathname.includes('deal');
 
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
-        { !!currentUser.id ? 
+        { !!user_account.id ? 
           <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); clearItem(); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> 
           : <button className='add triple' onClick={() => _togglePopup()}>✓ Save to Cart</button> 
         }
@@ -193,17 +182,15 @@ class EditFooter extends Component {
 
 class SettingsFooter extends Component {
   static propTypes = {
-    cart_id: PropTypes.string,
-    history: PropTypes.object,
     logout: PropTypes.func
   }
 
   render() {
-    const { cart_id, history: { replace }, logout } = this.props;
+    const { logout } = this.props;
 
     return (
       <footer className='footer__settings'>
-        <button className='logout' onClick={() => {logout(); replace(`/cart/${cart_id}/`);}}>Logout</button>
+        <button className='logout' onClick={() => {logout(); window.location.href='/';}}>Logout</button> 
       </footer>
     );
   }

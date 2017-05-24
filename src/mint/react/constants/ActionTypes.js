@@ -1,5 +1,7 @@
 // react/constants/ActionTypes.js
 
+export const LOGOUT = 'LOGOUT';
+
 // Session
 export const RECEIVE_SESSION = 'RECEIVE_SESSION';
 export const REQUEST_SESSION = 'REQUEST_SESSION';
@@ -24,6 +26,7 @@ export const RECEIVE_UPDATE_CART = 'RECEIVE_UPDATE_CART';
 export const REQUEST_CLEAR_CART = 'REQUEST_CLEAR_CART';
 export const RECEIVE_CLEAR_CART = 'RECEIVE_CLEAR_CART';
 export const CANCEL_CLEAR_CART = 'CANCEL_CLEAR_CART';
+export const DELETE_CART = 'DELETE_CART';
 
 // Cards
 export const REQUEST_CARDS = 'REQUEST_CARDS';

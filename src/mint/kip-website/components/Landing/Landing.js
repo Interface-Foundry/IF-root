@@ -1,12 +1,12 @@
 /* eslint react/prefer-stateless-function: 0, react/forbid-prop-types: 0 */
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom';
+import { PropTypes } from 'prop-types';
 
 import { Icon } from '../../themes';
 import { Banner } from '../../themes/newSvg';
 import { Services, Hero, Footer, Compare } from '..';
-
 
 export default class Landing extends Component {
   shouldComponentUpdate(nextProps, nextState) {

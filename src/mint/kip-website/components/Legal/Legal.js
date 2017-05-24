@@ -4,7 +4,6 @@ import React, { Component } from 'react';
 
 import { Footer } from '..';
 
-
 export default class Landing extends Component {
   render() {
     return (

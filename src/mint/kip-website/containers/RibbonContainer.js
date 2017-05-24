@@ -7,8 +7,8 @@ import {
 } from '../actions';
 
 const mapStateToProps = (state, props) => ({
-  	currentUser: state.auth.user_account,
-  	fixed: state.app.fixed
+  	user_account: state.auth.user_account,
+  	fixed: props.fixed
 })
 
 const mapDispatchToProps = dispatch => ({

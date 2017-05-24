@@ -3,8 +3,11 @@
 
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
+import { PropTypes } from 'prop-types';
+
 import { Legal } from '..';
 import { SidenavContainer, ModalContainer, RibbonContainer, LandingContainer, BlogContainer } from '../../containers';
+
 
 import { Route } from 'react-router-dom';
 
@@ -64,4 +67,3 @@ export default class App extends Component {
 	    );
 	}
 }
-

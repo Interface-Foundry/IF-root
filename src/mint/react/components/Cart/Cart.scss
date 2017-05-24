@@ -1,6 +1,6 @@
 // react/components/Cart/Cart.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
 $cart__add-height: $nav-height+$padding;
 .cart {
   height: calc(100% - #{$nav-height});
@@ -37,7 +37,7 @@ $cart__add-height: $nav-height+$padding;
       button {
         height: $nav-height;
         width: 100%;
-        background: $secondary-button-color;
+        background: $secondaryColor;
         border: 0;
         color: white;
         padding: 0 $padding*2;
@@ -45,7 +45,7 @@ $cart__add-height: $nav-height+$padding;
         border-radius: 5px;
         text-align: center;
         font-weight: bold;
-        background: $secondary-button-color;
+        background: $secondaryColor;
         margin: 0 10px;
         overflow: hidden;
         display: flex;
@@ -70,7 +70,7 @@ $cart__add-height: $nav-height+$padding;
         }
         &.secondary {
           color: $header-color;
-          background: $main-button-color;
+          background: $mainColor;
           h1 {
             margin-top: 5px;
           }
@@ -155,7 +155,7 @@ $cart__add-height: $nav-height+$padding;
     @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
     &.action {
-      background: $main-button-color;
+      background: $mainColor;
     }
     .undo__button {
       font-weight: 500;
@@ -232,13 +232,16 @@ $cart__add-height: $nav-height+$padding;
         animation-delay: 10s; //suprise!
       }
       h4 {
+        font-size:14px;
         position: relative;
         text-align: center;
         padding: $padding;
-        border: 3px solid $main-button-color;
+        border: 1px solid $kip-primary-color;
         border-radius: $padding;
         margin: $padding auto $padding*2;
         max-width: 300px;
+        background-color: #eaf9ff;
+        font-weight: normal;
         &:before {
           content:"";
           position: absolute;
@@ -247,9 +250,12 @@ $cart__add-height: $nav-height+$padding;
           height: 0;
           left: calc(50% - 15px);
           border-left: 13px solid transparent;
-          border-top: 15px solid $main-button-color;
+          border-top: 15px solid #eaf9ff;
           border-right: 13px solid transparent;
         }
+      }
+      span {
+        font-weight: bold;
       }
     }
   }

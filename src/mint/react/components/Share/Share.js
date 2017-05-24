@@ -1,7 +1,7 @@
 // react/components/Share/Share.js
 
 import React, { Component } from 'react';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 import { addLinkToDeepLink } from '../../utils';
 import PropTypes from 'prop-types';
 
@@ -70,7 +70,7 @@ export default class Share extends Component {
   }
 
   render() {
-    const { location, location: { pathname } } = this.props, { tryToOpen } = this;
+    const { location: { pathname } } = this.props, { tryToOpen } = this;
     let shareUrl = window.location.href.match(/(.+)\/m\//);
     shareUrl = shareUrl ? shareUrl[1] : `http://kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`;
     const linkedIcons = addLinkToDeepLink(shareIcons, shareUrl);

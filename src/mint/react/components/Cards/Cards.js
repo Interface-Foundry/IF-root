@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom';
 import CategoryCard from './CategoryCard';
 import SearchCard from './SearchCard';
 import { getLastSearch } from '../../utils';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 
 export default class Cards extends Component {
   constructor(props) {
@@ -25,7 +25,9 @@ export default class Cards extends Component {
     selectCard: PropTypes.func,
     previewAmazonItem: PropTypes.func,
     position: PropTypes.number,
-    clearItem: PropTypes.func
+    clearItem: PropTypes.func,
+    storeName: PropTypes.string,
+    currentCart: PropTypes.object
   }
 
   state = {
@@ -42,36 +44,36 @@ export default class Cards extends Component {
     const element = ReactDOM.findDOMNode(this.refs.scroll)
 
     switch (direction) {
-      case 'left':
-        end = element.scrollLeft - 600 > 1 ? element.scrollLeft - 600 : 1;
-        cosParameter = end / 2;
+    case 'left':
+      end = element.scrollLeft - 600 > 1 ? element.scrollLeft - 600 : 1;
+      cosParameter = end / 2;
 
-        this.scrollInterval = setInterval(() => {
-          if (element.scrollLeft >= end) {
-            scrollCount = scrollCount + 1;
-            scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
-            element.scrollLeft = element.scrollLeft - scrollMargin;
-          } else {
-            clearInterval(this.scrollInterval);
-          }
-        }, 5);
+      this.scrollInterval = setInterval(() => {
+        if (element.scrollLeft >= end) {
+          scrollCount = scrollCount + 1;
+          scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
+          element.scrollLeft = element.scrollLeft - scrollMargin;
+        } else {
+          clearInterval(this.scrollInterval);
+        }
+      }, 5);
 
-        break;
-      case 'right':
-        end = element.scrollLeft + 600;
-        cosParameter = end / 2;
+      break;
+    case 'right':
+      end = element.scrollLeft + 600;
+      cosParameter = end / 2;
 
-        this.scrollInterval = setInterval(() => {
-          if (element.scrollLeft <= end) {
-            scrollCount = scrollCount + 1;
-            scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
-            element.scrollLeft = element.scrollLeft + scrollMargin;
-          } else {
-            clearInterval(this.scrollInterval);
-          }
-        }, 5);
+      this.scrollInterval = setInterval(() => {
+        if (element.scrollLeft <= end) {
+          scrollCount = scrollCount + 1;
+          scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
+          element.scrollLeft = element.scrollLeft + scrollMargin;
+        } else {
+          clearInterval(this.scrollInterval);
+        }
+      }, 5);
 
-        break;
+      break;
     }
   }
 
@@ -117,13 +119,14 @@ export default class Cards extends Component {
             </p> : null
           }
           <div className='icon left' onClick={() => {
-            _scrollHorizontal('left')
+            _scrollHorizontal('left');
           }}>
             <Icon icon='LeftChevron'/>
           </div> 
           { renderCards() }
-          <div className='icon right'onClick={() => {
-              _scrollHorizontal('right')
+          <div className='icon right'
+            onClick={() => {
+              _scrollHorizontal('right');
             }}>
             <Icon icon='RightChevron'/>
           </div>

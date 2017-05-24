@@ -14,12 +14,13 @@ export default class SearchCard extends Component {
     image_url: PropTypes.string,
     cart_id: PropTypes.string,
     index: PropTypes.number,
-    unit_type: PropTypes.string
+    unit_type: PropTypes.string,
+    currentCart: PropTypes.object
   }
 
   render() {
     const { thumbnail_url, image_url, name, price, cart_id, index, unit_type, currentCart } = this.props;
-    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'uk' ? 'GBP' : 'USD') : 'GBP' : null;
+    const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
 
     return (
       <Link to={`/cart/${cart_id}/m/search/${index}/${encodeURIComponent(getLastSearch())}`}>

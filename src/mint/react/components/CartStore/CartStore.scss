@@ -1,6 +1,6 @@
 // react/components/CartStore/CartStore.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
 .cart_store {
   display: flex;
   flex-direction: row;
@@ -29,9 +29,7 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        padding: $padding/2.5;
-        height: calc(100% - #{$nav-height/2});
-        .choice__name {}
+        padding: $padding/2.5 $padding/2.5 0 $padding/2.5;
         .choice__image {
           align-self: center;
           width: $nav-height + 75px;
@@ -45,24 +43,36 @@
           white-space: normal;
           color: #58595b;
           padding: 0;
-          min-height: 2.5em; //for safari
-          height: 2.5em;
           margin-bottom: $padding;
         }
       }
       .choice__select {
-        position: absolute;
+        position: relative;
         width: 100%;
         height: $nav-height/2;
         line-height: $nav-height/2;
-        left: 0;
-        bottom: 0;
         font-size: 10px;
         font-weight: 600;
         letter-spacing: 1px;
         text-transform: uppercase;
         background: $border-color-light;
         border-radius: 0 0 $padding - 1 $padding - 1;
+      }
+    }
+    &:first-child {
+      .cart__choice {
+        border-color: $thirdColor;
+      }
+      .choice__select {
+        background: $thirdColor;
+        color: white;
+        &:before {
+          content: '✔';
+          font-size: 24px;
+          position: absolute;
+          left: 30px;
+          top: -2px;
+        }
       }
     }
   }

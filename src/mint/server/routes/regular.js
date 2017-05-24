@@ -31,6 +31,8 @@ router.get('/', (req, res) => co(function* () {
  */
 router.post('/auth/quick/:code', (req, res) => co(function * () {
   var email = req.body.email;
+
+  // verifies that an account actually exists for the email
   var realUser = yield db.UserAccounts.findOne({email_address: email});
 
   if (!realUser) {
@@ -38,6 +40,7 @@ router.post('/auth/quick/:code', (req, res) => co(function * () {
     return res.status(404).end()
   }
 
+  // find the auth link that matches the user whose account we're trying to log into
   var realLink = yield db.AuthenticationLinks.findOne({
     user: realUser.id,
     code: {
@@ -45,16 +48,20 @@ router.post('/auth/quick/:code', (req, res) => co(function * () {
     }
   })
 
+  // find the auth link that matches the code that was passed in
   var link = yield db.AuthenticationLinks.findOne({code: req.params.code}).populate('user').populate('cart')
+
+  // if there isn't one, or if it doesn't match the email, do some stuff
   if (!link || !link.user || realLink.id != link.id) {
-    //augment counter for link actually associated w/ that email
+
     if (realLink) {
+      // augment counter for bad log in attempts on the link actually associated w/ that email
       realLink.attempts++;
       logging.info('bad attempt');
       yield realLink.save()
 
+      //if there have been too many attempts, scrap the log-in code and tell the front-end
       if (realLink.attempts >= 5) {
-        //if there have been too many attempts, scrap the code and tell the front-end
         realLink.code = null;
         realLink.attempts = 0;
         yield realLink.save();
@@ -119,7 +126,7 @@ router.post('/auth/quick/:code', (req, res) => co(function * () {
     newAccount: false,
     status: 'LOG_IN',
     message: 'user has been logged in via code',
-    userInfo: realUser
+    user_account: realUser
   });
 }))
 
@@ -221,28 +228,46 @@ router.get('/auth/:id', (req, res) => co(function * () {
 
 
 /**
- * @api {get} /newcart/:store New Cart for a specific store
+ * @api {get} /newcart/:store New Cart
  * @apiDescription create new cart for user, redirect them to /cart/:id and send an email
  * @apiGroup HTML
- * @apiParam {string} : the token from the auth db
+ * @apiParam {string} :store one of amazon_US, amazon_UK, amazon_CA, ypo (all defined in cart/cart_types.js)
  */
 router.get('/newcart/:store', (req, res) => co(function * () {
-  let cart = yield cartUtils.createCart(req.params.store)
-  const session = req.UserSession
+  // cart body, used in db.Carts.create(cart) later
+  var cart = {}
 
-  if (session.user_account) {
-    // make the first user the leader
-    const user = session.user_account
-    cart.leader = user.id
-    if (user.name) {
-      cart.name = user.name + "'s Kip Cart"
-    } else {
-      cart.name = user.email_address.replace(/@.*/, '') + "'s Kip Cart"
-    }
-    yield cart.save()
+  // Figure out what store they are shopping at and in what locale
+  if (!req.params.store) {
+    cart.store = 'amazon'
+    cart.store_locale = 'US'
+  } else if (req.params.store === 'ypo') {
+    cart.store = 'ypo'
+    cart.store_locale = 'UK'
+  } else if (req.params.store.includes('amazon')) {
+    cart.store = 'amazon'
+    cart.store_locale = req.params.store.split('_')[1]
+  } else {
+    throw new Error('Cannot create new cart for store ' + req.params.store)
   }
 
+  // Add the cart leader if they are logged in
+  const user_id = _.get(req, 'UserSession.user_account.id')
+  if (user_id) {
+    cart.leader = user_id
+    var date = new Date()
+    if (cart.store_locale = 'US') var dateString = (date.getMonth() + 1) + '/' + date.getDate() + '/' + String(date.getFullYear()).slice(2)
+    else var dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + String(date.getFullYear()).slice(2)
+    cart.name = dateString + ' Kip Cart'
+  }
+
+  // This is all the investors care about right here. This is the money line.
+  cart = yield db.Carts.create(cart)
+  console.log(cart)
+
   res.redirect(`/cart/${cart.id}/`);
+}).catch(e => {
+  console.log(e)
 }))
 
 

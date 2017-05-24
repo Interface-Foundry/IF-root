@@ -31,12 +31,15 @@ module.exports = {
     })
   ],
   module: {
-    loaders: [{
-      test: /\.jsx?$|\.js$/,
+    rules: [{
+      test: /\.jsx?$|\.js?$/,
       exclude: /node_modules/,
-      loader: 'babel-loader',
-      query: {
-        'presets': ['react', 'es2015', 'stage-0']
+      use: {
+        loader: 'babel-loader',
+        options: {
+          cacheDirectory: true,
+          'presets': ['react', 'es2015', 'stage-0']
+        }
       }
     }, {
       test: /\.json?$/,
@@ -52,10 +55,7 @@ module.exports = {
           options: {
             importLoaders: 1,
           }
-        },
-        // {
-        //   loader: 'postcss-loader'
-        // }
+        }
       ]
     }, {
       test: /\.scss$|\.sass$/,
@@ -69,9 +69,6 @@ module.exports = {
             importLoaders: 1,
           }
         },
-        // {
-        //   loader: 'postcss-loader'
-        // },
         {
           loader: 'sass-loader'
         }

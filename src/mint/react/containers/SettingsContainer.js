@@ -8,18 +8,17 @@ import ReactGA from 'react-ga';
 const mapStateToProps = (state, ownProps) => ({
   cart_id: state.currentCart.cart_id,
   currentCart: state.currentCart,
-  currentUser: state.session.user_account
+  user_account: state.session.user_account
 });
 
 const mapDispatchToProps = dispatch => ({
-  updateUser: (id, userInfo) => {
+  updateUser: (id, user_account) => {
     ReactGA.event({
       category: 'Person',
       action: 'Edited Info',
     });
-    return dispatch(updateUser(id, userInfo));
-  },
-
+    return dispatch(updateUser(id, user_account));
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

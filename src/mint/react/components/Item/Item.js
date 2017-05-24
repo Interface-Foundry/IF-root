@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { splitCartById } from '../../reducers';
 import { RouteTransition } from 'react-router-transition';
-import Icon from '../Icon';
-import * as presets from '../../styles/RouteAnimations';
+import { Icon } from '../../../react-common/components';
+import * as presets from '../../../react-common/styles/RouteAnimations';
 import ItemVariationSelector from './ItemVariationSelector';
 import ProductDescription from './ProductDescription';
 import DealInfo from './DealInfo';
@@ -36,8 +36,9 @@ export default class Item extends Component {
     setSearchIndex: PropTypes.func,
     location: PropTypes.object,
     selectCard: PropTypes.func,
-    currentUser: PropTypes.object,
-    currentCart: PropTypes.object
+    user_account: PropTypes.object,
+    currentCart: PropTypes.object,
+    store: PropTypes.object
   }
 
   componentWillMount() {
@@ -69,11 +70,6 @@ export default class Item extends Component {
     } else if ((nextProps.amazon_id !== amazon_id && nextCart.store !== store)) {
       previewAmazonItem(nextProps.amazon_id, nextCart.store);
     }
-  }
-
-  componentWillUnmount() {
-    const { clearItem } = this.props;
-    // clearItem();
   }
 
   determineNav() {
@@ -115,7 +111,7 @@ export default class Item extends Component {
       cart_id,
       type,
       items,
-      currentUser: { id },
+      user_account: { id },
       currentCart: { leader: { id: leaderId } },
       history: { replace }
     } = this.props;
@@ -146,7 +142,7 @@ export default class Item extends Component {
         location: { pathname },
         history: { replace },
         currentCart: { leader },
-        currentUser: { id },
+        user_account: { id },
         item: { description, name, options, iframe_review_url, main_image_url, asin } = item
       }
     } = this;

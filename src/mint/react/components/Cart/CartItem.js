@@ -2,9 +2,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../utils';
-import Icon from '../Icon';
+import { Icon } from '../../../react-common/components';
 import ProgressiveImage from 'react-progressive-image';
-import { Link } from 'react-router-dom';
 
 export default class CartItem extends Component {
   static propTypes = {
@@ -13,7 +12,8 @@ export default class CartItem extends Component {
     itemNumber: PropTypes.number.isRequired,
     cart_id: PropTypes.string.isRequired,
     isOwner: PropTypes.bool.isRequired,
-    locked: PropTypes.bool
+    locked: PropTypes.bool,
+    currentCart: PropTypes.object
   }
 
   render() {
@@ -23,7 +23,7 @@ export default class CartItem extends Component {
       : `/cart/${cart_id}/m/item/0/${asin}`;
 
     const locale = currentCart.store.includes('amazon') ? (currentCart.store_locale === 'uk' ? 'GBP' : 'USD') : 'GBP';
-    
+
     return (
       <li className='cartItem'>
 

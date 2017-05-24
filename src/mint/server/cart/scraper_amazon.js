@@ -5,7 +5,23 @@ const dbReady = require('../../db')
 dbReady.then((models) => { db = models })
 const amazon_cart = require('./amazon_cart')
 
+const bookProductGroups = ['Book', 'eBooks']
 
+/**
+ * gets the description for an item depending on if its a book or what
+ *
+ * @param      {<type>}  item The item
+ */
+function getDescription (item) {
+  if (bookProductGroups.includes(item.ItemAttributes.ProductGroup)) {
+    var editorialReview = _.get(item, 'EditorialReviews.EditorialReview', item.ItemAttributes.Feature)
+    if (editorialReview.length > 1) {
+      editorialReview = editorialReview[0]
+    }
+    return editorialReview.Content
+  }
+  return item.ItemAttributes.Feature
+}
 
 /**
  * format cents to nice price.  amazon returns amount in cents
@@ -21,8 +37,12 @@ function formatAmazonPrice(amount) {
 function getItemPrice(item, priceType) {
   // place holder for time being since unsure what price to use
   const availablePrices = {}
+  var salePrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.SalePrice.Amount', 0))
   availablePrices.basicItemPrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.Price.Amount', 0))
   if (priceType === undefined) {
+    if (salePrice) {
+      return salePrice
+    }
     return availablePrices.basicItemPrice
   } else {
     // might be useful to return other possible prices in the future
@@ -38,7 +58,7 @@ function getItemPrice(item, priceType) {
  * @param  {URL} uri a node.js URL object, see https://nodejs.org/docs/latest/api/url.html
  * @return {Promise<Item>} returns an item with the populated options
  */
-module.exports.scrapeUrl = function amazon_scraper (uri) {
+module.exports.scrapeUrl = function amazon_scraper (uri, locale) {
   return co(function * () {
     // Make double sure that we are parsing an amazon.com url
     if (!uri || !uri.match(/amazon.com/)) {
@@ -46,7 +66,7 @@ module.exports.scrapeUrl = function amazon_scraper (uri) {
     }
 
     // Scrape the item
-    var res = yield amazon_cart.getAmazonItem(uri)
+    var res = yield amazon_cart.getAmazonItem(uri, locale)
     var item = yield res2Item(res)
     item.original_link = uri
     yield item.save()
@@ -57,21 +77,26 @@ module.exports.scrapeUrl = function amazon_scraper (uri) {
 /**
  * Scrapes an item from an amazon.com ASIN
  * @param  {string} asin amazon.com asin, should match /^B[\dA-Z]{9}|\d{9}(X|\d)$/
+ * @param {string} locale US, UK, CA
  * @return {Promise<item>}      returns an item with the populated options
  */
-module.exports.scrapeAsin = function (asin) {
+module.exports.scrapeAsin = function (asin, locale) {
   return co(function * () {
     // Make double sure that we are parsing an amazon.com asin
     if (!asin || !asin.match(/^B[\dA-Z]{9}|\d{9}(X|\d)$/)) {
       throw new Error('Can only handle asins from amazon.com but got "' + asin + '"')
     }
+    if (!locale) {
+      throw new Error('No locale supplied')
+    }
 
     // Scrape the item
-    var res = yield amazon_cart.lookupAmazonItem(asin)
+    var res = yield amazon_cart.lookupAmazonItem(asin, locale)
     var item = yield res2Item(res)
     return item
   })
 }
+
 
 
 /**
@@ -154,7 +179,7 @@ var res2Item = function (res) {
         store: 'amazon',
         name: i.ItemAttributes.Title,
         asin: i.ASIN,
-        description: i.ItemAttributes.Feature,
+        description: getDescription(i),
         price: price,
         thumbnail_url: thumbnail,
         main_image_url: mainImage,

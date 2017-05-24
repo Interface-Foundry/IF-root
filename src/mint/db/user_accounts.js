@@ -31,7 +31,8 @@ var userAccountCollection = Waterline.Collection.extend({
     email_address: {
       type: 'string',
       unique: true,
-      email: true
+      email: true,
+      required: true
     },
 
     /**
@@ -39,7 +40,8 @@ var userAccountCollection = Waterline.Collection.extend({
      * @type {Object}
      */
     name: {
-      type: 'string'
+      type: 'string',
+      required: true
     },
 
     /**

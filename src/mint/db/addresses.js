@@ -12,6 +12,7 @@ var addressesCollection = Waterline.Collection.extend({
     region: 'string',
     code: 'string',
     country: 'string',
+    delivery_message: 'string',
 
     /** Many-to-many relation with user accounts */
     user_account: Waterline.isA('user_accounts')

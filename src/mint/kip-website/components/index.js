@@ -1,7 +1,6 @@
 export App from './App';
 export Landing from './Landing';
 export Ribbon from './Ribbon';
-export Sidenav from './Sidenav';
 export Hero from './Hero';
 export Services from './Services';
 export Footer from './Footer';
@@ -9,3 +8,4 @@ export Modal from './Modal';
 export Legal from './Legal';
 export Blog from './Blog';
 export Compare from './Compare';
+export Legal from './Legal';
