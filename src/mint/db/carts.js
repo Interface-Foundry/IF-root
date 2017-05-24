@@ -68,7 +68,7 @@ var cartsCollection = Waterline.Collection.extend({
     /** @type {String} amazon_purchase_url the url that goes directly to amazon */
     amazon_purchase_url: 'string',
 
-        /** @type {string} the online retailer */
+    /** @type {string} the online retailer */
     store: {
       type: 'string',
       enum: constants.STORES,
