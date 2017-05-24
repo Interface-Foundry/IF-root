@@ -176,7 +176,7 @@ exports.addItem = function * (item, cart, quantity) {
     throw new Error('Cart not found')
   }
 
-  item = yield addItemHandlers[cart.store](item, cart.store)
+  item = yield addItemHandlers[cart.store](item, cart.store_locale)
   return item
 }
 
@@ -205,6 +205,7 @@ exports.getRetailer = function (item) {
  * @return     {<type>}  { description_of_the_return_value }
  */
 exports.sendReceipt = function * (cart, req) {
+  logging.info('cart:', cart)
   const userAccount = req.UserSession.user_account
   //send receipt email
   const cartItems = cart.items;
@@ -231,9 +232,13 @@ exports.sendReceipt = function * (cart, req) {
       total += (Number(item.price) * Number(item.quantity || 1));
     });
 
+    logging.info('userItems:', userItems)
+
     for (var k in userItems) {
       var addingUser = yield db.UserAccounts.findOne({id: k});
-      users.push(addingUser.name || addingUser.email_address);
+      if (!addingUser.name) addingUser.name || addingUser.email
+      logging.info('addingUser:', addingUser)
+      users.push(addingUser);
       items.push(userItems[k]);
     }
 
