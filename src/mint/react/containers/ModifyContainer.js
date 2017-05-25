@@ -1,8 +1,7 @@
 // react/containers/ModifyContainer.js
 
 import { connect } from 'react-redux';
-import { removeItem } from '../actions/cart';
-import { updateItem } from '../actions/item';
+import { updateItem, removeItem } from '../actions/item';
 import { ModifyFooter } from '../components';
 
 const mapStateToProps = (state, ownProps) => ({
