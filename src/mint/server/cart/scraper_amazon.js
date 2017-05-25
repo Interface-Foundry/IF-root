@@ -120,19 +120,20 @@ var res2Item = function (res) {
     const nRatings = 0
 
     // Grab the images
-    var getImages = function (imageSet) {
+    var getImages = function (set) {
+      logging.info('IMAGE SET', set)
       const thumbnailMinSize = 50
       const imageKeys = ['SwatchImage', 'SmallImage', 'ThumbnailImage', 'TinyImage', 'MediumImage', 'LargeImage', 'HiResImage']
       var thumbnail = imageKeys.reduce((chosenImage, thisImage) => {
 
         // Do we have a small image available?
-        if(i.SmallImage && i.SmallImage.URL) return i.SmallImage.URL
+        if(i.SmallImage && i.SmallImage.URL) return set.SmallImage.URL
 
         // If we have already found an image that is good enough, return it
         if (chosenImage) return chosenImage
 
         // See if this item has this image type
-        var img = imageSet[thisImage]
+        var img = set[thisImage]
         if (!img) {
           return
         }
@@ -143,19 +144,19 @@ var res2Item = function (res) {
         }
       }, null)
 
-      const mainImage = imageKeys.reverse().reduce((chosenImage, thisImage) => {
+      var mainImage = imageKeys.reverse().reduce((chosenImage, thisImage) => {
 
         // Do we have a large normal image available?
-        if(i.LargeImage && i.LargeImage.URL) return i.LargeImage.URL
+        if(i.LargeImage && i.LargeImage.URL) return set.LargeImage.URL
 
         // Do we have a medium image available?
-        if(i.MediumImage && i.MediumImage.URL) return i.MediumImage.URL
+        if(i.MediumImage && i.MediumImage.URL) return set.MediumImage.URL
 
         // If we have already found an image that is good enough, return it
         if (chosenImage) return chosenImage
 
         // See if this item has this image type
-        var img = imageSet[thisImage]
+        var img = set[thisImage]
         if (img) {
           return img.URL
         }
@@ -169,16 +170,29 @@ var res2Item = function (res) {
 
         thumbnail = mainImage
       }
+      logging.info('MAIN IMAGE', mainImage)
+      logging.info('thumbnail', thumbnail)
 
       return {
-        mainImage: mainImage,
-        thumbnail: thumbnail
+        mainImage: mainImage.slice(),
+        thumbnail: thumbnail.slice()
       }
     }
 
-    const imageSet = _.get(i, 'ImageSets.ImageSet[0]') || _.get(i, 'ImageSets.ImageSet') || {}
+    // const imageSet = _.get(i, 'ImageSets.ImageSet[0]') || _.get(i, 'ImageSets.ImageSet') || {}
+    var imageSet = i.ImageSets.ImageSet
+    if (!Array.isArray(imageSet)) {
+      logging.error('uhoh imageSet is not an array')
+      logging.info(i.ImageSets)
+    }
+    logging.info('initial imageSet', imageSet)
+    logging.info('# of images:', imageSet.length)
 
-    var images = getImages(imageSet);
+    imageSet = imageSet.map(function (set) {
+      return getImages(set);
+    })
+
+    logging.info('imageSet', imageSet)
 
     // make sure db is ready
     yield dbReady
@@ -191,8 +205,8 @@ var res2Item = function (res) {
         asin: i.ASIN,
         description: getDescription(i),
         price: price,
-        thumbnail_url: images.thumbnail,
-        main_image_url: images.mainImage,
+        thumbnail_url: imageSet[0].thumbnail,
+        main_image_url: imageSet[0].mainImage,
         iframe_review_url: (i.CustomerReviews.HasReviews === 'true') ? i.CustomerReviews.IFrameURL : null
       })
     } catch (err) {
