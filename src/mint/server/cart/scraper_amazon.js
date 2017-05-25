@@ -120,55 +120,65 @@ var res2Item = function (res) {
     const nRatings = 0
 
     // Grab the images
-    const imageSet = _.get(i, 'ImageSets.ImageSet[0]') || _.get(i, 'ImageSets.ImageSet') || {}
-    const thumbnailMinSize = 50
-    const imageKeys = ['SwatchImage', 'SmallImage', 'ThumbnailImage', 'TinyImage', 'MediumImage', 'LargeImage', 'HiResImage']
-    var thumbnail = imageKeys.reduce((chosenImage, thisImage) => {
+    var getImages = function (imageSet) {
+      const thumbnailMinSize = 50
+      const imageKeys = ['SwatchImage', 'SmallImage', 'ThumbnailImage', 'TinyImage', 'MediumImage', 'LargeImage', 'HiResImage']
+      var thumbnail = imageKeys.reduce((chosenImage, thisImage) => {
 
-      // Do we have a small image available?
-      if(i.SmallImage && i.SmallImage.URL) return i.SmallImage.URL
+        // Do we have a small image available?
+        if(i.SmallImage && i.SmallImage.URL) return i.SmallImage.URL
 
-      // If we have already found an image that is good enough, return it
-      if (chosenImage) return chosenImage
+        // If we have already found an image that is good enough, return it
+        if (chosenImage) return chosenImage
 
-      // See if this item has this image type
-      var img = imageSet[thisImage]
-      if (!img) {
-        return
+        // See if this item has this image type
+        var img = imageSet[thisImage]
+        if (!img) {
+          return
+        }
+
+        // See if this image type is big enough for us
+        if (parseInt(img.Height._) >= thumbnailMinSize && parseInt(img.Width._) >= thumbnailMinSize) {
+          return img.URL
+        }
+      }, null)
+
+      const mainImage = imageKeys.reverse().reduce((chosenImage, thisImage) => {
+
+        // Do we have a large normal image available?
+        if(i.LargeImage && i.LargeImage.URL) return i.LargeImage.URL
+
+        // Do we have a medium image available?
+        if(i.MediumImage && i.MediumImage.URL) return i.MediumImage.URL
+
+        // If we have already found an image that is good enough, return it
+        if (chosenImage) return chosenImage
+
+        // See if this item has this image type
+        var img = imageSet[thisImage]
+        if (img) {
+          return img.URL
+        }
+      }, null)
+
+      // if no image was good enough to be a thumbnail, use the main image as the thumbnail
+      if (!thumbnail) {
+
+        // Do we have a medium image available?
+        if(i.MediumImage && i.MediumImage.URL) return i.MediumImage.URL
+
+        thumbnail = mainImage
       }
 
-      // See if this image type is big enough for us
-      if (parseInt(img.Height._) >= thumbnailMinSize && parseInt(img.Width._) >= thumbnailMinSize) {
-        return img.URL
+      return {
+        mainImage: mainImage,
+        thumbnail: thumbnail
       }
-    }, null)
-
-    const mainImage = imageKeys.reverse().reduce((chosenImage, thisImage) => {
-
-      // Do we have a large normal image available?
-      if(i.LargeImage && i.LargeImage.URL) return i.LargeImage.URL
-
-      // Do we have a medium image available?
-      if(i.MediumImage && i.MediumImage.URL) return i.MediumImage.URL
-
-      // If we have already found an image that is good enough, return it
-      if (chosenImage) return chosenImage
-
-      // See if this item has this image type
-      var img = imageSet[thisImage]
-      if (img) {
-        return img.URL
-      }
-    }, null)
-
-    // if no image was good enough to be a thumbnail, use the main image as the thumbnail
-    if (!thumbnail) {
-
-      // Do we have a medium image available?
-      if(i.MediumImage && i.MediumImage.URL) return i.MediumImage.URL
-
-      thumbnail = mainImage
     }
+
+    const imageSet = _.get(i, 'ImageSets.ImageSet[0]') || _.get(i, 'ImageSets.ImageSet') || {}
+
+    var images = getImages(imageSet);
 
     // make sure db is ready
     yield dbReady
@@ -181,8 +191,8 @@ var res2Item = function (res) {
         asin: i.ASIN,
         description: getDescription(i),
         price: price,
-        thumbnail_url: thumbnail,
-        main_image_url: mainImage,
+        thumbnail_url: images.thumbnail,
+        main_image_url: images.mainImage,
         iframe_review_url: (i.CustomerReviews.HasReviews === 'true') ? i.CustomerReviews.IFrameURL : null
       })
     } catch (err) {
