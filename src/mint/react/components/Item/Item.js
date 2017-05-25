@@ -46,11 +46,14 @@ export default class Item extends Component {
   componentWillMount() {
     const { props: { item_id, amazon_id, previewAmazonItem, cart_id, previewItem, type, items, index, setSearchIndex, currentCart, fetchCards } } = this;
     // only update item if there isn't one
-    if (item_id && currentCart.store) previewItem(item_id);
-    else if (amazon_id && (!items.length || !item_id) && currentCart.store) previewAmazonItem(amazon_id, currentCart.store, currentCart.store_locale);
+    if (type === 'search' && index && items.length) setSearchIndex(index);
+    else if (item_id && currentCart.store && !items.length) {
+      previewItem(item_id);
+    } else if (amazon_id && (!items.length || !item_id) && currentCart.store) {
+      previewAmazonItem(amazon_id, currentCart.store, currentCart.store_locale);
+    }
 
     if (type === 'card' && items.length === 0 && currentCart.store === 'ypo') fetchCards(cart_id);
-    else if (type === 'search' && index && items.length) setSearchIndex(index);
 
     this.determineNav = ::this.determineNav;
   }
@@ -84,12 +87,16 @@ export default class Item extends Component {
       push(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${nextAsin}`);
     } else if (cart_id && nextType === 'search' && !nextItems.length) {
       push(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
-    } else if (nextId !== item_id && nextId && !options) {
+    } else if (nextId !== item_id && nextId && !options && !nextItems) {
       previewItem(nextId);
-    } else if (nextStore && amazon_id !== nextAmazonId) {
+    } else if (nextStore && amazon_id !== nextAmazonId && !nextItems) {
       saveOldId(item_id);
       previewAmazonItem(nextAmazonId, nextStore, nextLocale);
     }
+  }
+  componentWillUnmount() {
+    const { clearItem } = this.props;
+    clearItem();
   }
 
   determineNav() {

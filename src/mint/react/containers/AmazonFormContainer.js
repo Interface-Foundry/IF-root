@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { reduxForm } from 'redux-form';
 import { AmazonForm } from '../components';
 import { isUrl, addSearchHistory, getLastSearch } from '../utils';
-import { previewAmazonItem } from '../actions/item';
+import { previewAmazonItem, clearItem } from '../actions/item';
 import { push } from 'react-router-redux';
 import ReactGA from 'react-ga';
 
@@ -27,11 +27,10 @@ const mapDispatchToProps = (dispatch) => ({
       action: values.url
     });
     const { cart_id } = state;
-
+    dispatch(clearItem());
     if (!isUrl(values.url)) addSearchHistory(values.url);
     else dispatch(push(`/cart/${cart_id}/m/item/0/${encodeURIComponent(values.url)}`));
     const currentState = await getState(dispatch);
-    console.log(currentState)
     return dispatch(previewAmazonItem(encodeURIComponent(values.url), currentState.currentCart.store, currentState.currentCart.store_locale));
   }
 });
