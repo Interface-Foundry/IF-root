@@ -14,6 +14,10 @@ const bookProductGroups = ['Book', 'eBooks']
  */
 function getDescription (item) {
   if (bookProductGroups.includes(item.ItemAttributes.ProductGroup)) {
+    if (!editorialReview) {
+      logging.error('editorial review missing')
+      return ''
+    }
     var editorialReview = _.get(item, 'EditorialReviews.EditorialReview', item.ItemAttributes.Feature)
     if (editorialReview.length > 1) {
       editorialReview = editorialReview[0]
@@ -182,19 +186,20 @@ var res2Item = function (res) {
     }
 
     // const imageSet = _.get(i, 'ImageSets.ImageSet[0]') || _.get(i, 'ImageSets.ImageSet') || {}
-    var imageSet = i.ImageSets.ImageSet
-    if (!Array.isArray(imageSet)) {
-      logging.error('uhoh imageSet is not an array')
-      logging.info(i.ImageSets)
+    if (i.ImageSets) {
+      var imageSet = i.ImageSets.ImageSet
+      if (!Array.isArray(imageSet)) {
+        logging.error('uhoh imageSet is not an array')
+        logging.info(i.ImageSets)
+        imageSet = [imageSet]
+      }
+      logging.info('initial imageSet', imageSet)
+      logging.info('# of images:', imageSet.length)
+
+      imageSet = imageSet.map(function (set) {
+        return getImages(set);
+      })
     }
-    logging.info('initial imageSet', imageSet)
-    logging.info('# of images:', imageSet.length)
-
-    imageSet = imageSet.map(function (set) {
-      return getImages(set);
-    })
-
-    logging.info('imageSet', imageSet)
 
     // make sure db is ready
     yield dbReady
@@ -215,22 +220,24 @@ var res2Item = function (res) {
     }
 
     // create images in the db
-    yield imageSet.map(function * (img) {
-      var image = yield db.Images.create({
-        thumbnail_url: img.thumbnail,
-        main_image_url: img.mainImage,
-        item: item.id
+    if (imageSet) {
+      yield imageSet.map(function * (img) {
+        var image = yield db.Images.create({
+          thumbnail_url: img.thumbnail,
+          main_image_url: img.mainImage,
+          item: item.id
+        })
+        logging.info(image)
+        if (img.$.Category === 'primary') {
+          item.primary_image = image.id
+        }
+        else item.secondary_images.add(image.id)
+        yield item.save();
       })
-      logging.info(image)
-      if (img.$.Category === 'primary') {
-        item.primary_image = image.id
-      }
-      else item.secondary_images.add(image.id)
-      yield item.save();
-    })
+    }
 
     // check to see if we get back the prime property
-    var prime = !!(i.Offers.Offer.OfferListing.IsEligibleForPrime)
+    const prime = _.get(i, 'Offers.Offer.OfferListing.IsEligibleForPrime', false)
     logging.info('prime:', prime)
     // create a new delivery details thing w/ the right value
     var details = yield db.DeliveryDetails.create({prime: prime})
