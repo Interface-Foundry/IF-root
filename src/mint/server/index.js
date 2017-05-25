@@ -65,8 +65,6 @@ app.use(sessions({
   duration: 10 * 365 * 24 * 60 * 60 * 1000 // expire in 10 years
 }));
 
-console.log('4 && process.env.NODE_ENV: ', process.env.NODE_ENV)
-
 /**
  * Save user sessions to the database
  */
