@@ -57,12 +57,6 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {number} item price per unit */
     price: 'float',
 
-    /** @type {string} small image */
-    thumbnail_url: 'string',
-
-    /** @type {string} larger image */
-    main_image_url: 'string',
-
     /** @type {number} stars out of five */
     rating: 'float',
 
@@ -102,7 +96,13 @@ var itemsCollection = Waterline.Collection.extend({
     comment: 'text',
 
     /** @type {delivery_details} whatever miscellaneous merchant-specific details we have no where to put */
-    details: Waterline.isA('delivery_details')
+    details: Waterline.isA('delivery_details'),
+
+    /** @type {images} primary image */
+    primary_image: Waterline.isA('images'),
+
+    /** @type {images} secondary images */
+    secondary_images: Waterline.isMany('images')
   }
 });
 

@@ -29,6 +29,7 @@ waterline.loadCollection(require('./delivery_details'))
 waterline.loadCollection(require('./email_events'))
 waterline.loadCollection(require('./emails'))
 waterline.loadCollection(require('./feedback'))
+waterline.loadCollection(require('./images'))
 waterline.loadCollection(require('./item_options'))
 waterline.loadCollection(require('./items'))
 waterline.loadCollection(require('./reactions'))
@@ -68,6 +69,7 @@ var initialize = new Promise((resolve, reject) => {
       EmailEvents: ontology.collections.email_events,
       Emails: ontology.collections.emails,
       Feedback: ontology.collections.feedback,
+      Images: ontology.collections.images,
       ItemOptions: ontology.collections.item_options,
       Items: ontology.collections.items,
       Reactions: ontology.collections.reactions,

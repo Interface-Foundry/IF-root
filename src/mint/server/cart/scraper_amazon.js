@@ -122,6 +122,7 @@ var res2Item = function (res) {
     // Grab the images
     var getImages = function (set) {
       logging.info('IMAGE SET', set)
+
       const thumbnailMinSize = 50
       const imageKeys = ['SwatchImage', 'SmallImage', 'ThumbnailImage', 'TinyImage', 'MediumImage', 'LargeImage', 'HiResImage']
       var thumbnail = imageKeys.reduce((chosenImage, thisImage) => {
@@ -175,7 +176,8 @@ var res2Item = function (res) {
 
       return {
         mainImage: mainImage.slice(),
-        thumbnail: thumbnail.slice()
+        thumbnail: thumbnail.slice(),
+        $: set.$
       }
     }
 
@@ -205,14 +207,27 @@ var res2Item = function (res) {
         asin: i.ASIN,
         description: getDescription(i),
         price: price,
-        thumbnail_url: imageSet[0].thumbnail,
-        main_image_url: imageSet[0].mainImage,
         iframe_review_url: (i.CustomerReviews.HasReviews === 'true') ? i.CustomerReviews.IFrameURL : null
       })
     } catch (err) {
       logging.error(err);
       return null;
     }
+
+    // create images in the db
+    yield imageSet.map(function * (img) {
+      var image = yield db.Images.create({
+        thumbnail_url: img.thumbnail,
+        main_image_url: img.mainImage,
+        item: item.id
+      })
+      logging.info(image)
+      if (img.$.Category === 'primary') {
+        item.primary_image = image.id
+      }
+      else item.secondary_images.add(image.id)
+      yield item.save();
+    })
 
     // check to see if we get back the prime property
     var prime = !!(i.Offers.Offer.OfferListing.IsEligibleForPrime)
@@ -278,8 +293,8 @@ var res2Item = function (res) {
     }
 
     // um let's just get the item fresh to make sure it's okay
-    item = yield db.Items.findOne({id: item.id}).populate('options')
-
+    item = yield db.Items.findOne({id: item.id}).populate('options').populate('secondary_images')
+    logging.info('ITEM:', item)
     return item
   })
 }
