@@ -191,7 +191,7 @@ var res2Item = function (res) {
     }
 
     // check to see if we get back the prime property
-    var prime = !!(i.Offers.Offer.OfferListing.IsEligibleForPrime)
+    const prime = !!_.get(i, 'Offers.Offer.OfferListing.IsEligibleForPrime', false)
     logging.info('prime:', prime)
     // create a new delivery details thing w/ the right value
     var details = yield db.DeliveryDetails.create({prime: prime})
