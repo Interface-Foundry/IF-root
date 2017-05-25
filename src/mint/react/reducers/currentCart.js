@@ -97,7 +97,7 @@ export default function cart(state = initialState, action) {
   case RECEIVE_UPDATE_ITEM:
     return {
       ...state,
-      items: state.items.map(item => item.id === action.old_item_id ? action.item : item)
+      items: state.items.map(item => item.id === action.old_item_id ? {...item, ...action.item} : item)
     };
   case REQUEST_SET_STORE:
     return {

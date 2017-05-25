@@ -12,6 +12,7 @@ export ErrorPage from './ErrorPage';
 export Feedback from './Feedback';
 export Item from './Item';
 export Modal from './Modal';
+export ModifyFooter from './ModifyFooter';
 export Settings from './Settings';
 export Share from './Share';
 export Toast from './Toast';

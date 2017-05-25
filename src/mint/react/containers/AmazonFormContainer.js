@@ -14,7 +14,7 @@ const mapStateToProps = (state, ownProps) => ({
   storeName: state.currentCart.store,
   item: state.item,
   cardType: state.cards.type,
-  initialValues: {url: state.cards.type ? ( state.cards.type.includes('search') ? getLastSearch() : '' ) : ''}
+  initialValues: { url: state.cards.type ? (state.cards.type.includes('search') ? getLastSearch() : '') : '' }
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -26,7 +26,6 @@ const mapDispatchToProps = dispatch => ({
     const { cart_id } = state;
     if (!isUrl(values.url)) addSearchHistory(values.url);
     else dispatch(push(`/cart/${cart_id}/m/item/0/${encodeURIComponent(values.url)}`));
-
     return dispatch(previewAmazonItem(encodeURIComponent(values.url)))
   }
 });

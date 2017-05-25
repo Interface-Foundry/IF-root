@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { calculateItemTotal, displayCost } from '../../utils';
 import { Icon } from '../../../react-common/components';
+import { ModifyContainer } from '../../containers';
 
 export default class Footer extends Component {
   static propTypes = {
@@ -23,6 +24,7 @@ export default class Footer extends Component {
         <Route path={'/cart/:cart_id/m/share'} exact component={() => <div className='empty'/>}/>
         <Route path={'/cart/:cart_id/m/item/:index/:item_id'} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
         <Route path={'/cart/:cart_id/m/variant/:index/:item_id'} exact component={() => <ItemFooter {...props} item_id={item_id}/>}/>
+        <Route path={'/cart/:cart_id/m/cartVariant/:index/:item_id'} exact component={()=> <ModifyContainer item_id={item_id} {...props}/>}/>
         <Route path={'/cart/:cart_id/m/:type/:index/:item_id/edit'} exact component={() => <EditFooter {...props} item_id={item_id}/>}/>
         <Route path={'/cart/:cart_id/m/edit'} exact component={() => <div className='empty'/>}/>
         <Route path={'/cart/:cart_id/m/settings'} exact component={() => <SettingsFooter {...props} item_id={item_id}/>}/>
