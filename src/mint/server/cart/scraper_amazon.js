@@ -189,6 +189,13 @@ var res2Item = function (res) {
       logging.error(err);
       return null;
     }
+    logging.info('i', Object.keys(i))
+    logging.info('i', i.Offers)
+
+    // 'i' is the raw amazon item
+    // check to see if we get back the prime property
+    // create a new delivery details thing w/ the right value
+    // associate it and 'item'
 
     // create new item options
     // this part is really really hard
