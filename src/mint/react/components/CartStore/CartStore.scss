@@ -58,13 +58,13 @@
         text-transform: uppercase;
         background: $border-color-light;
         border-radius: 0 0 $padding - 1 $padding - 1;
-      }
-    }
-    .cart__choice:hover {
-      border: 1px #ffdf4d solid !important;
-      .choice__select {
-        background-color: #ffdf4d !important;
-        color: #000 !important;
+        &:hover {
+          border: 1px #ffdf4d solid !important;
+          .choice__select {
+            background-color: #ffdf4d !important;
+            color: #000 !important;
+          }
+        }
       }
     }
     &:first-child {
