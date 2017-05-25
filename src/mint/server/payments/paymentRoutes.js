@@ -3,8 +3,8 @@ const express = require('express')
 const router = express() // for testing
 // const router = express.Router()
 
-const MintPayments = require('./mintPayment.js')
-const CafePayments = require('./cafePayment.js')
+const Payments = require('./Payment-BetterName.js')
+
 
 /**
  * payment Types Handlers
@@ -12,20 +12,38 @@ const CafePayments = require('./cafePayment.js')
  * @type       {<type>}
  */
 const paymentTypes = {
-  'mint': new MintPayments(),
-  'cafe': new CafePayments()
+  'mint': new Payments.MintPayments(),
+  'cafe': new Payments.CafePayments()
 }
 
 
+
+
+
+
+
+
+
+
+
+
 /**
- * @api {get} /session/:session_token
- * @apiDescription get session
- * @apiGroup Payments
+ * @api            {get}  /pay/:cart_id/:user_id
+ * @apiName        get payment info
+ * @apiGroup       Payments
  *
- * @apiParam {type}  - description of param
+ * @apiDescription Gets the user payment options for the specified cart.
  *
+ * @apiParam       {string}  cart_id      {description}
+ * @apiParam       {string}  user_id      {description}
  *
+ * @apiSuccess                                 <field>
  */
+router.get('/pay/:cart_id/:user_id', async (req, res) => {
+  const payment = new Payment(req.params.cart_id, req.params.user_id)
+})
+
+ap
 router.get('/session/:session_token', async (req, res) => {
   // clean special char
   const token = req.body.session_token.replace(/[^\w\s]/gi, '')
@@ -47,6 +65,12 @@ router.post('/charge/:cart_type/:id', async (req, res) => {
 })
 
 
+// remove later
+const PORT = process.env.PORT || 3000;
+
+router.listen(PORT, () => {
+  console.log(`App listening at http://127.0.0.1:${PORT}`);
+});
 
 
 

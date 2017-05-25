@@ -5,6 +5,7 @@ const constants = require('../server/constants.js')
 
 /**
  * Payments collection is the collection of payments
+ * http://schema.org/Invoice
  */
 const invoiceCollection = Waterline.Collection.extend({
   identity: 'invoice',
@@ -18,6 +19,9 @@ const invoiceCollection = Waterline.Collection.extend({
       defaultsTo: () => uuid.v4()
     },
 
+    /** is a leader for invoice necessary or is that cart leader? */
+    leader: Waterline.isA('user_accounts'),
+
     /** enter documentation here */
     invoice_type: {
       type: 'string',
@@ -29,6 +33,9 @@ const invoiceCollection = Waterline.Collection.extend({
 
     /** Many-to-one relation with user accounts, so multiple users could pay */
     payments: Waterline.isMany('payments'),
+
+    /** if the whole order has been paid for */
+    paid: 'boolean',
 
     /** total of order */
     total: {
