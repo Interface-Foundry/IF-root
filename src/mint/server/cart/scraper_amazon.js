@@ -190,6 +190,17 @@ var res2Item = function (res) {
       return null;
     }
 
+    // check to see if we get back the prime property
+    const prime = !!_.get(i, 'Offers.Offer.OfferListing.IsEligibleForPrime', false)
+    logging.info('prime:', prime)
+    // create a new delivery details thing w/ the right value
+    var details = yield db.DeliveryDetails.create({prime: prime})
+    // associate it and 'item'
+    details.item = item.id
+    yield details.save();
+    item.details = details.id;
+    yield item.save();
+
     // create new item options
     // this part is really really hard
     if (res.Options) {

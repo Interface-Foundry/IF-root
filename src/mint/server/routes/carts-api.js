@@ -295,16 +295,15 @@ module.exports = function (router) {
    *
    * @apiParamExample Item from Preview
    * PUT https://mint.kipthis.com/api/cart/123456/item {
-   *   new_item_asin: 'abc-123456',
-   *   user_id: '123456y'
+   *   new_item_id: 'abc-123456'
    * }
    */
   router.put('/cart/:cart_id/item/:item_id/update', (req, res) => co(function* () {
-    if (!_.get(req, 'body.new_item_asin')) {
-      throw new Error('Only accepting asins in new item at the moment')
+    if (!_.get(req, 'body.new_item_id')) {
+      throw new Error('Only accepting ids in new item at the moment')
     }
-    const newItemAsin = req.body.new_item_asin
-    const userId = req.UserSession.user_account.id
+    const newItemId = req.body.new_item_id
+    const user_id = req.UserSession.user_account.id
     let cart = yield db.Carts.findOne({id: req.params.cart_id})
     const oldItem = yield db.Items.findOne({id: req.params.item_id})
 
@@ -316,12 +315,19 @@ module.exports = function (router) {
       throw new Error('Old Item not found')
     }
 
-    cart = yield cartUtils.deleteItemFromCart(oldItem, cart, userId)
-    const newItem = yield cartUtils.addItemToCart(newItemAsin, cart, userId, oldItem.quantity)
+    cart = yield cartUtils.deleteItemFromCart(oldItem, cart, user_id)
+    const newItem = yield db.Items.findOne({id: newItemId})
+
+    // join the two database documents
+    cart.items.add(newItem.id)
+    newItem.cart = cart.id
+
+    // specify who added it
+    newItem.added_by = user_id
 
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
-    yield cart.save()
+    yield [newItem.save(), cart.save()]
 
     return res.send(newItem)
   }));

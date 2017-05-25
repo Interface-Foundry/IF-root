@@ -86,6 +86,7 @@
         }
       }
       &.loginMail {
+        font-size: 20px;
         &:invalid {
           border-color: $fourthColor;
         }

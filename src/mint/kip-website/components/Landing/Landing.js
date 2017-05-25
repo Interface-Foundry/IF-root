@@ -37,7 +37,7 @@ export default class Landing extends Component {
       return true;
     }
 
-    return false
+    return false;
   }
 
   render() {

@@ -210,22 +210,3 @@ export function sendAddressData(user_id, full_name, line_1, line_2, city, region
     }
   };
 }
-
-export function updateItem(cartId, currentId, new_item_id, user_id) {
-  return async dispatch => {
-    try {
-      const res = await fetch(`/cart/${cartId}/item/${currentId}/update`, {
-        method: 'PUT',
-        credentials: 'same-origin',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        'body': JSON.stringify({ new_item_id, user_id })
-      });
-      dispatch(updateCartItem(await res.json()));
-    } catch (e) {
-      throw e;
-    }
-  };
-}

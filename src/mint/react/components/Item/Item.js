@@ -38,38 +38,65 @@ export default class Item extends Component {
     selectCard: PropTypes.func,
     user_account: PropTypes.object,
     currentCart: PropTypes.object,
-    store: PropTypes.object
+    store: PropTypes.object,
+    search: PropTypes.string,
+    saveOldId: PropTypes.func
   }
 
   componentWillMount() {
-    const {
-      props: { item_id, amazon_id, previewAmazonItem, cart_id, previewItem, type, items, index, setSearchIndex, currentCart, fetchCards }
-    } = this;
+    const { props: { item_id, amazon_id, previewAmazonItem, cart_id, previewItem, type, items, index, setSearchIndex, currentCart, fetchCards } } = this;
     // only update item if there isn't one
-    if (item_id && currentCart.store) previewItem(item_id);
-    else if (amazon_id && items.length === 0 && currentCart.store) previewAmazonItem(amazon_id, currentCart.store);
+    if (type === 'search' && index && items.length) setSearchIndex(index);
+    else if (item_id && currentCart.store && !items.length) {
+      previewItem(item_id);
+    } else if (amazon_id && (!items.length || !item_id) && currentCart.store) {
+      previewAmazonItem(amazon_id, currentCart.store, currentCart.store_locale);
+    }
 
     if (type === 'card' && items.length === 0 && currentCart.store === 'ypo') fetchCards(cart_id);
-    else if (type === 'search' && index && items.length) setSearchIndex(index);
 
     this.determineNav = ::this.determineNav;
   }
 
   componentWillReceiveProps(nextProps) {
-    const { props: { cart_id, item_id, amazon_id, store, previewItem, previewAmazonItem, history: { push } } } = this;
-    const { currentCart: nextCart, type: nextType, item: nextItem, items: nextItems, index: nextIndex, item_id: nextId, item: { position: nextPos } } = nextProps;
-    //never replace cart_id if its undefined
-    if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) {
-      push(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
+    const {
+      props: {
+        cart_id,
+        item_id,
+        previewItem,
+        previewAmazonItem,
+        saveOldId,
+        amazon_id,
+        history: { push },
+        item: { asin, options }
+      }
+    } = this;
+    const {
+      type: nextType,
+      items: nextItems,
+      index: nextIndex,
+      search: nextSearch,
+      amazon_id: nextAmazonId,
+      item: { position: nextPos, asin: nextAsin, id: nextId },
+      currentCart: { store: nextStore, store_locale: nextLocale },
+    } = nextProps;
+
+    if (cart_id && nextType === 'item' && Array.isArray(nextSearch)) { //never replace cart_id if its undefined
+      push(`/cart/${cart_id}/m/search/${nextPos}/${nextAsin}`);
     } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItems.length) {
-      push(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
+      push(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${nextAsin}`);
     } else if (cart_id && nextType === 'search' && !nextItems.length) {
       push(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
-    } else if (nextId !== item_id) {
-      previewItem(nextProps.item_id);
-    } else if ((nextProps.amazon_id !== amazon_id && nextCart.store !== store)) {
-      previewAmazonItem(nextProps.amazon_id, nextCart.store);
+    } else if (nextId !== item_id && nextId && !options && !nextItems) {
+      previewItem(nextId);
+    } else if (nextStore && amazon_id !== nextAmazonId && !nextItems) {
+      saveOldId(item_id);
+      previewAmazonItem(nextAmazonId, nextStore, nextLocale);
     }
+  }
+  componentWillUnmount() {
+    const { clearItem } = this.props;
+    clearItem();
   }
 
   determineNav() {
@@ -227,7 +254,7 @@ export default class Item extends Component {
           </div>
           {
             (options && options.length)
-            ? <ItemVariationSelector replace={replace} options={options} defaultVal={asin} {...props} /> 
+            ? <ItemVariationSelector replace={replace} options={options} defaultVal={asin} inCart={type==='cartItem'||type==='cartVariant'} {...props} /> 
             : null
           }
         </div>

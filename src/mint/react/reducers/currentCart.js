@@ -49,7 +49,7 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       locked: action.updatedCart.locked,
-      thumbnail_url: action.updatedCart.thumbnail_url || '//storage.googleapis.com/kip-random/head%40x2.png',
+      thumbnail_url: action.updatedCart.thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png',
       name: action.updatedCart.name,
       cart_id: action.updatedCart.id
     };
@@ -57,7 +57,7 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       ...action.currentCart,
-      thumbnail_url: action.currentCart.thumbnail_url || '//storage.googleapis.com/kip-random/head%40x2.png',
+      thumbnail_url: action.currentCart.thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png',
       locked: action.currentCart.locked || false,
       cart_id: action.currentCart.id
     };
@@ -97,7 +97,7 @@ export default function cart(state = initialState, action) {
   case RECEIVE_UPDATE_ITEM:
     return {
       ...state,
-      items: state.items.map(item => item.id === action.old_item_id ? action.item : item)
+      items: state.items.map(item => item.id === action.old_item_id ? {...item, ...action.item} : item)
     };
   case REQUEST_SET_STORE:
     return {

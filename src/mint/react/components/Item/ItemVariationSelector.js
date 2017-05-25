@@ -79,12 +79,13 @@ class Dropdown extends Component {
     replace: PropTypes.func.isRequired,
     cart_id: PropTypes.string.isRequired,
     index: PropTypes.number.isRequired,
-    defaultVal: PropTypes.string
+    defaultVal: PropTypes.string,
+    inCart: PropTypes.bool
   }
 
   updatePage(choice) {
-    const { replace, cart_id } = this.props;
-    replace(`/cart/${cart_id}/m/variant/0/${choice.asin}`);
+    const { replace, cart_id, inCart } = this.props;
+    replace(`/cart/${cart_id}/m/${inCart ? 'cartVariant' : 'variant'}/0/${choice.asin}`);
   }
 
   render() {
