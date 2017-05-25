@@ -20,7 +20,6 @@ export default class Sidenav extends Component {
     _toggleSidenav: PropTypes.func.isRequired,
     replace: PropTypes.func,
     updateCart: PropTypes.func,
-    logout: PropTypes.func
   }
 
   state = {
@@ -54,7 +53,7 @@ export default class Sidenav extends Component {
   render() {
     const {
       _moveToFront,
-      props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id, logout },
+      props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id },
       state: { show }
     } = this;
 
@@ -141,10 +140,6 @@ export default class Sidenav extends Component {
             }
             {user_account.name ? <SideNavLink to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></SideNavLink> : null }
             <SideNavLink to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></SideNavLink>
-            {user_account.name ? <h4 onClick={() => { 
-              logout(); 
-              _toggleSidenav(); 
-            }}><Icon icon='Logout'/>Logout</h4> : null} 
           </li>
           <footer className='sidenav__footer'>
             <a href={`/cart/${cart_id}/m/share`} onClick={(e)=> {e.preventDefault(); _toggleSidenav(); ::this._handleShare();}}>

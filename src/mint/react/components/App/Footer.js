@@ -192,7 +192,7 @@ class SettingsFooter extends Component {
 
     return (
       <footer className='footer__settings'>
-        <button className='logout' onClick={() => {logout(); window.location.href='/';}}>Logout</button> 
+        <button className='logout' onClick={() => {logout()}}><Icon icon='Logout'/>Logout</button> 
       </footer>
     );
   }
