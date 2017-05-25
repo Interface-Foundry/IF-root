@@ -20,7 +20,7 @@ export default class SignIn extends Component {
         <Switch>
           <Route path={'/cart/:cart_id/m/item/add'} exact component={AmazonFormContainer} />
           <Route path={'/cart/:cart_id/m/:item_type/:index/:item_id/edit'} exact component={ItemContainer} />
-          <Route path={'/cart/:cart_id/m/:item_type/:index/:amazon_id'} exact component={ItemContainer} />
+          <Route path={'/cart/:cart_id/m/:item_type/:index/:item_id'} exact component={ItemContainer} />
           <Route path={'/cart/:cart_id/m/edit/:edit_cart_id'} exact component={EditCartContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={Share} />
           <Route path={'/cart/:cart_id/m/settings'} exact component={SettingsContainer} />

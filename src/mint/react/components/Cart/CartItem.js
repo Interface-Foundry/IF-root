@@ -20,7 +20,7 @@ export default class CartItem extends Component {
     const { itemNumber, locked, currentCart, isOwner, cart_id, history: { push }, item: { main_image_url, name, price, quantity, id, asin } } = this.props;
     const buttonUrl = isOwner
       ? `/cart/${cart_id}/m/cartItem/${itemNumber}/${id}/edit`
-      : `/cart/${cart_id}/m/item/0/${asin}`;
+      : `/cart/${cart_id}/m/cartView/0/${id}`;
 
     const locale = currentCart.store.includes('amazon') ? (currentCart.store_locale === 'uk' ? 'GBP' : 'USD') : 'GBP';
 

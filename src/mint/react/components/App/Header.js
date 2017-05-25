@@ -28,6 +28,10 @@ export default class Header extends Component {
             <ModalHead text={'Add To Cart'} {...props}/>
           }
         />
+        <Route path={'/cart/:cart_id/m/cartView/:index/:asin'} exact component={() => 
+            <ModalHead text={'Add To Cart'} {...props}/>
+          }
+        />
         <Route path={'/cart/:cart_id/m/:type/:index/:asin/edit'} exact component={() => 
             <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: user_account.id}).my ? splitCartById(this.props, {id: user_account.id}).my.length : 0} type={'item'} {...props}/>
           }
