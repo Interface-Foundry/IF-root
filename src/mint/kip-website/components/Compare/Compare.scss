@@ -170,6 +170,12 @@
 		padding: $padding;
 		font-size: 20px;
 		border-collapse: collapse;
+
+		&:nth-of-type(2) {
+			background-repeat: no-repeat;
+			background-position: center;
+			background: mix(white, $secondaryColor, 85%);
+		}
 	}
 
 	td {
@@ -181,11 +187,6 @@
 			width: 50%;
 			max-width: 50px;
 			padding: $padding;
-		}
-
-		&:nth-of-type(2) {
-			background-repeat: no-repeat;
-			background-position: center;
 		}
 	}
 

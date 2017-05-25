@@ -46,13 +46,14 @@
 		.image {
 			display: inline-block;
 			background-size: contain;
-			width: $ribbonHeight - 15px;
+			width: $ribbonHeight*2;
 			min-height: $ribbonHeight + $padding;
 		}
 		h1, a {
 			display: inline-block;
 			padding: 0 $padding/2;
 			font-size: 17px;
+			height: 100%;
 		}
 
 		h1 {
@@ -97,7 +98,7 @@
 			font-weight: bold;
 			border-radius: $padding/2;
 			background: transparent;
-			padding: 0 $padding*2;
+			padding: 0 $padding;
 			height: 100%;
 			font-size: 16px;
 			cursor: pointer;

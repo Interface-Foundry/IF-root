@@ -7,68 +7,30 @@
 	padding: 0;
 	z-index: 1;
 
-	.about__header {
+	& > h1 {
 		position: relative;
 		display: block;
-		background: transparent;
-		padding: $padding*10 0 0;
-		width: 100%;
-		z-index: 1;
-		background: white;
-		border-bottom: 3px solid mix(white, $primaryColor, 85%);
-
-		& > div {
-			display: table;
-			max-width: 1200px;
-			margin: 0 auto;
-		}
-
-		.video {
-			display: block;
-			height: 500px;
-			overflow: hidden;
-			border-radius: 5px;
-			margin-bottom: $padding*3;
-			border: 3px solid mix(white, $primaryColor, 85%);
-		}
+		text-align: left;
+		line-height: $ribbonHeight/2;
+		font-size: 25px;
+		padding: $padding*10 $padding*5 0;
+		border-radius: 5px;
+		color: $bgColor;
+		max-width: 1000px;
+		margin: 0 auto;
 
 		@media only screen and (max-width: 600px) {
-			padding: $padding*5 $padding*5 0;
-		}
-
-		.more {
-			height: $ribbonHeight*2;
-			cursor: pointer;
-		    margin: 0 auto -50px;
-		    background: white;
-		    display: inline-block;
-		    z-index: 1;
-		    padding: 0 $padding*2;
-			h2 {
-				height: $ribbonHeight/2;
-				margin-bottom: $padding;
-				color: $primaryColor;
-				max-width: 500px;
-			}
-			p {
-				max-width: 500px;
-			}
-			svg {
-				width: $ribbonHeight;
-				height: $ribbonHeight/1.3;
-				fill: $primaryColor;
-				@include animation(bounceDownSmall 3s infinite);
-			}
+			line-height: 30px;
+			font-size: 20px;
 		}
 	}
 
-	.icons {
+	.iconsRow {
 		position: relative;
 		height: $ribbonHeight*3;
 		width: 100%;
 		padding: 0;
 		display: table;
-		background:  mix(white, $primaryColor, 95%);
 		margin: 0 auto;
 		white-space: nowrap;
 
@@ -78,7 +40,6 @@
 			vertical-align: middle;
 			fill: rgba($bgColor, 0.5);
 			padding: $padding;
-			background:  mix(white, $primaryColor, 95%);
 
 			@media only screen and (max-width: 600px) {
 				display: inline-block;
@@ -122,23 +83,18 @@
 				margin: 0px;
 			}
 
-			svg {
-				height: 300px;
-				
-				@media only screen and (max-width: 600px) {
-					height: 350px;
-				}
-				g {
-					fill: white;
-	    			stroke: rgba($primaryColor, 0.8);
-	    			stroke-width: 20px;
-				}
+			.image {
+				margin-top: $padding*2;
+				height: 250px;
+				background-size: contain;
+				background-repeat: no-repeat;
 			}
+
 			.inline {
 				position: relative;
 				height: 100px;
 				width: 100%;
-				margin-top: -75px;
+				margin-top: -25px;
 
 				svg {
 					width: 125px;
@@ -254,6 +210,13 @@
 				transform: translate3d(0, -150px, 0);
 			}
 
+			.image {
+				width: 100%;
+				height: $ribbonHeight*2;
+				background-size: 150px;
+				background-repeat: no-repeat;
+			}
+
 			svg {
 				width: 100%;
 				height: $ribbonHeight*2;
@@ -261,12 +224,6 @@
 				fill: $warningColor;
 			}
 
-			.image {
-				width: 100%;
-				height: $ribbonHeight*2;
-				background-size: contain;
-				display: inline-block;
-			}
 
 			h2 {
 				display: inline-block;
@@ -303,6 +260,25 @@
 				}
 			}
 
+		}
+
+		.video {
+			height: 500px;
+			border-radius: $padding;
+			overflow: hidden;
+			padding: 0;
+			width: 700px;
+			margin: $padding*2 auto 0;
+			border: 3px solid mix(white, $primaryColor, 85%);
+
+			h2 {
+				height: 100px;
+				line-height: 100px;
+			}
+
+			iframe {
+				height: calc(100% - 100px) !important;
+			}
 		}
 
 		.action {

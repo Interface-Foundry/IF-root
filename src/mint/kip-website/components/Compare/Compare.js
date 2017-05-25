@@ -16,7 +16,7 @@ import {
 
 const comparisonArray = [
 	{
-		nameSrc: 'https://storage.googleapis.com/kip-random/website/chart_kip.svg',
+		nameSrc: 'https://storage.googleapis.com/kip-random/kip_logo_horizontal.svg',
 		order: true,
 		budget: true,
 		tracking: true,
@@ -136,7 +136,7 @@ export default class Compare extends Component {
 					    	<td className="col-12 action">
 				      			<a href='/newcart'>
 				        			<button>
-					        			<span>Create KIP Cart <Right/></span>
+					        			<span>Use Kip Now <Right/></span>
 					        		</button>
 			        			</a>
 				        	</td>

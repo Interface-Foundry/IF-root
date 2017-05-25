@@ -3,12 +3,13 @@
 import React, { Component } from 'react';
 
 import { Icon } from '../../themes';
+import { Link } from 'react-router-dom';
 import { Plus, Right } from '../../themes/newSvg';
 
 export default class Ribbon extends Component {
+
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
-    console.log(nextProps.fixed !== this.props.fixed)
     if (
       nextProps.fixed !== this.props.fixed
       || nextProps.user_account !== this.props.user_account
@@ -24,20 +25,18 @@ export default class Ribbon extends Component {
   render() {
     const { fixed, toggleSidenav, toggleModal, user_account, src } = this.props;
 
-    console.log(fixed)
     return (
       <nav className={`ribbon ${fixed ? 'background' : ''}`}>
         <div className='row-1'> 
           <div className="row row-1">
-            <a href="/">
+            <Link to="/">
               <div className="row-1">
                 <div className='image' style={
                   {
-                    backgroundImage: `url(https://storage.googleapis.com/kip-random/head%40x2.png)`
+                    backgroundImage: `url(https://storage.googleapis.com/kip-random/kip_logo_horizontal.svg)`
                   }}/>
-                <h1>Kip</h1>
               </div>
-            </a>
+            </Link>
           </div>
 
           {
@@ -51,7 +50,7 @@ export default class Ribbon extends Component {
           {
             user_account && user_account.email_address ? <div className="right row row-1 action2">
                 <a href='/newcart'><button>
-                  <Plus/> New Cart
+                  New Cart
                 </button></a>
             </div> : null  
           }
@@ -76,7 +75,21 @@ export default class Ribbon extends Component {
               </div>
             </div>
           }
-
+          <div className="right row row-1">
+            <div className="col-12 row-1 action">
+              <Link to='/help' ><button>Help</button></Link>
+            </div>
+          </div>
+          <div className="right row row-1">
+            <div className="col-12 row-1 action">
+              <Link to='/blog'><button>Blog</button></Link>
+            </div>
+          </div>
+          <div className="right row row-1">
+            <div className="col-12 row-1 action">
+              <Link to='/whykip' ><button>Why Kip</button></Link>
+            </div>
+          </div>
         </div>
       </nav>
     );

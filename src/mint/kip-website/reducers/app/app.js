@@ -4,14 +4,15 @@ const initialState = {
   modal: false,
   animationOffset: 0,
   containerHeight: 0,
-  animationState: -2
+  animationState: -2,
+  scrollTo: 0
 };
 
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
+  case 'SCROLL_TO':
   case 'REGISTER_HEIGHT':
   case 'HANDLE_SCROLL':
-    console.log(action.response)
     return {
       ...state,
       ...action.response
@@ -25,6 +26,11 @@ export default function reducer(state = initialState, action = {}) {
     return {
       ...state,
       modal: !state.modal
+    }
+  case '@@router/LOCATION_CHANGE':
+    return {
+      ...state,
+      scrollTo: 0
     }
   default:
     return state;

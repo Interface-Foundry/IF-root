@@ -7,5 +7,6 @@ export Footer from './Footer';
 export Legal from './Legal';
 export Blog from './Blog';
 export Compare from './Compare';
-export Direct from './Direct';
-export About from './About';
+export Help from './Help';
+export WhyKip from './WhyKip';
+export Header from './Header';

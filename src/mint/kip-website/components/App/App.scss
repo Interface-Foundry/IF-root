@@ -8,6 +8,7 @@ body, html {
 	font-family: $fontFamily;
 	color: darken($bgColor, 5);
 	overflow: hidden;
+	margin: 0;
 	line-height: 1.6;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
@@ -30,8 +31,11 @@ body, html {
 	height: 100%;
 	width: 100%;
 }
+input, textarea, select, a { 
+	outline: none; 
+}
 button {
-  cursor: pointer;
+  	cursor: pointer;
 	&:focus {
 		outline:0;
 	}
@@ -73,10 +77,10 @@ p {
 }
 
 .image {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-  min-height: 50px;
+  	background-repeat: no-repeat;
+  	background-position: center;
+ 	background-size: cover;
+  	min-height: 50px;
 }
 
 .sine {

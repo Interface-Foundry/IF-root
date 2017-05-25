@@ -1,135 +1,11 @@
 @import '../../themes/constants';
 @import '../../themes/animations';
 
-.direct {
+.Help {
 	position: relative;
 	text-align: center;
 	padding: 0;
 	z-index: 1;
-
-	.direct__header {
-		position: relative;
-		display: block;
-		background: transparent;
-		padding: $padding*10 0 0;
-		width: 100%;
-		z-index: 1;
-		background: white;
-
-		& > div {
-			display: table;
-			max-width: 1200px;
-			margin: 0 auto;
-		}
-
-		@media only screen and (max-width: 600px) {
-			padding: $padding*5 $padding*5 0;
-		}
-
-		.text {
-			position: relative;
-			width: 50%;
-		    min-width: 600px;
-			display: table-cell;
-			vertical-align: middle;
-			text-align: left;
-			padding: $padding*5 $padding*5 $padding*5 0;
-
-			h1 {
-				position: relative;
-				display: inline-block;
-				line-height: $ribbonHeight;
-				font-size: 30px;
-				padding: $padding 0;
-				border-radius: 5px;
-				color: $bgColor;
-
-				span {
-					position: relative;
-					&:after {
-						content: '';
-						position: absolute;
-						height: 3px;
-						width: 100%;
-						left: 0;
-						bottom: -3px;
-						border-radius: 500px;
-						background: $secondaryColor;
-						@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-					}
-				}
-
-				@media only screen and (max-width: 600px) {
-					line-height: 30px;
-					font-size: 20px;
-				}
-			}
-
-			.subtext {
-				font-size: 17px;
-				span {
-					color: rgba($bgColor, 0.6);
-					font-size: 17px;
-					font-weight: 100;
-					margin-right: $padding;
-					&:after {
-						content: '❄';
-						position: relative;
-						right: -5px;
-					}
-					&:last-of-type {
-						&:after {
-							content: '';
-						}
-					}
-					@media only screen and (max-width: 600px) {
-						font-size: 14px;
-					}
-				}
-			}
-		}
-
-		.icons {
-			display: table-cell;
-			vertical-align: middle;
-		    width: 50%;
-		    min-width: 600px;
-		    text-align: right;
-			svg {
-				fill: $primaryColor;
-				margin: 0 $padding;
-				height: $ribbonHeight/1.5;
-				width: $ribbonHeight/1.5;
-				z-index: 1;
-			}
-		}
-
-		.more {
-			height: $ribbonHeight*2;
-			cursor: pointer;
-		    margin: 0 auto -50px;
-		    background: white;
-		    display: inline-block;
-		    z-index: 1;
-		    padding: 0 $padding*2;
-		    border-radius: 0 0 $padding/2 $padding/2;
-			h2 {
-				height: $ribbonHeight/2;
-				margin-bottom: $padding;
-				color: $secondaryColor;
-				max-width: 500px;
-			}
-			p {
-				max-width: 500px;
-			}
-			svg {
-				width: $ribbonHeight;
-				height: $ribbonHeight/1.3;
-				fill: $secondaryColor;
-				@include animation(bounceDownSmall 3s infinite);
-			}
-		}
-	}
 
 	.tutorial {
 		position: relative;
@@ -197,56 +73,65 @@
 				display: inline-block;
 				width: 260px;
 				margin: 50px 0;
+				background: transparent;
 				background-size: contain;
 				background-repeat: no-repeat;
 				background-position: center;
-				border: 5px solid;
-				box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 
-				&:before {
-					content: '';
-					position: absolute;
-					border-radius: $padding $padding 0 0;
-					top: -35px;
-					left: -5px;
-					width: 100%;
-					background: white;
-					height: 30px;
-					border: 5px solid;
-					box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
-				}
+				.bubble {
+				    position: absolute;
+				    right: -120%;
+				    width: 250px;
+				    white-space: normal;
+				    background: white;
+				    padding: $padding*2;
+				    border-radius: $padding;
 
-				&:after {
-					content: '';
-					position: absolute;
-					border-radius: 0 0 $padding $padding;
-					bottom: -58px;
-					left: -5px;
-					width: 100%;
-					background: white;
-					height: 50px;
-					border: 5px solid;
-					box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+				    p {
+				    	font-size: 20px;
+				    	color: $bgColor;
+				    	text-align: left;
+				    	font-weight: bold;
+				    }
+
+				    &:after {
+				    	content: '';
+				    	position: absolute; 
+					  	left: -20px; 
+				  	    bottom: 30px;
+						border-top: 20px solid transparent;
+						border-bottom: 20px solid transparent; 
+						border-right:20px solid; 
+				    }
 				}
 
 				&.primary {
 					color:  mix(white, $primaryColor, 35%);
-					&:before, &:after {
-						background: mix(white, $primaryColor, 35%);
+					.bubble {
+						border: 3px solid mix(white, $primaryColor, 35%);
+						right: auto;
+						left: -120%;
+						&:after {
+						  	left: auto;
+						  	right: -20px;
+					  	    bottom: 30px;
+							border-right:0; 
+							border-left:20px solid; 
+						}
 					}
 				}
 
 				&.secondary {
 					color: mix(white, $secondaryColor, 35%);
-					&:before, &:after {
-						background: mix(white, $secondaryColor, 35%);
+					.bubble {
+						border: 3px solid mix(white, $secondaryColor, 35%);;
 					}
 				}
 
 				&.third {
 					color: mix(white, $thirdColor, 35%);
-					&:before, &:after {
-						background: mix(white, $thirdColor, 35%);
+					.bubble {
+						border: 3px solid mix(white, $thirdColor, 35%);;
 					}
 				}
 

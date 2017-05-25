@@ -34,6 +34,7 @@
 				font-size: 30px;
 				// color: $primaryColor;
 				color: darken($bgColor, 15);
+				line-height: 40px;
 
 				&.hightlight {
 					background: $primaryColor;
@@ -144,6 +145,7 @@
 			}
 		}
 
+		
 		.animation {
 			display: table-cell;
 			vertical-align: middle;

@@ -2,8 +2,10 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import ReactDOM from 'react-dom'
 
 import { Footer } from '..';
+import { HeaderContainer } from '../../containers';
 
 import { Icon } from '../../themes';
 import { Down, Right, EmailDrawn, FacebookDrawn, TwitterDrawn, Smartphone } from '../../themes/newSvg';
@@ -11,20 +13,23 @@ import { Down, Right, EmailDrawn, FacebookDrawn, TwitterDrawn, Smartphone } from
 
 const img_src = [
   {
-    src: 'https://storage.googleapis.com/kip-random/demo_1_desktop.gif',
+    src: 'https://storage.googleapis.com/kip-random/mint_1_desktop.gif',
     class: 'secondary',
+    bubble: 'Browse Items or Paste a URL to Add Things to Your Kip Cart',
     step: 'One',
     id: 1
   },
   {
-    src: 'https://storage.googleapis.com/kip-random/demo_2_desktop.gif',
+    src: 'https://storage.googleapis.com/kip-random/mint_2_desktop.gif',
     class: 'primary',
+    bubble: 'Use Kip to Store the Items you Love in the Cloud',
     step: 'Two',
     id: 2
   },
   {
-    src: 'https://storage.googleapis.com/kip-random/demo_3_desktop.gif',
+    src: 'https://storage.googleapis.com/kip-random/mint_3_desktop.gif',
     class: 'third',
+    bubble: 'Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees',
     step: 'Three',
     id: 3
   }
@@ -57,14 +62,15 @@ const FAQ = [
   }
 ]
 
-export default class Direct extends Component {
+export default class Help extends Component {
   constructor(props) {
     super(props)
     this._startLoop = this._startLoop.bind(this)
   }
 
   state = {
-    selectedIndex: 0
+    selectedIndex: 0,
+    offsetTop: 0
   }
 
   componentWillMount() {
@@ -75,6 +81,12 @@ export default class Direct extends Component {
     })
 
     this._startLoop()
+  }
+
+  componentDidMount() {
+    this.setState({
+      offsetTop: ReactDOM.findDOMNode(this.help).offsetTop + 50
+    })
   }
 
 
@@ -104,43 +116,24 @@ export default class Direct extends Component {
   }
 
   render() {
-    const { selectedIndex } = this.state;
+    const { selectedIndex, offsetTop } = this.state,
+      { _startLoop } = this;
 
     return (
-      <div className="direct"> 
-        <section className="direct__header">
-          <div>
-            <div className='text'>
-              <h1><span>Kip is one click easy</span></h1>
-              <p className='subtext'>
-                <span>No Signup</span>
-                <span>No Download</span>
-                <span>No Hassel</span>
-              </p>
-            </div>
-            <div className="icons">
-              <a href="mailto:hello@kipthis.com?subject=Subscribe"><EmailDrawn/></a>
-              <a href="//www.facebook.com/talkto.kip"><FacebookDrawn/></a>
-              <a href="//twitter.com/kiptalk"><TwitterDrawn/></a>
-            </div>
-          </div>
-          <div className="more">
-            <h2><span>Find Out More</span></h2>
-            <Down/>
-          </div>
-        </section>
-        <section className={`tutorial ${img_src[selectedIndex].class}`}> 
+      <div className="Help"> 
+        <HeaderContainer title={'Kip is 1 - Click Easy'} subtext={['No Fees', 'No Download', 'No Hassle']} color={img_src[selectedIndex].class} offsetTop={offsetTop}/>
+        <section className={`tutorial ${img_src[selectedIndex].class}`} ref={(help) => this.help = help}> 
           <nav className="col-12 row-1 services__navigation">
             {
               img_src.map((i, index) => (
-                <h2 key={i.id} onClick={() => this.setState({selectedIndex: index})} className={`row-1 col-4 ${index === selectedIndex ? 'selected' : ''}`}>
-                  Step  &nbsp;
+                <h2 key={i.id} onClick={() => { _startLoop(true); this.setState({selectedIndex: index}) }} className={`row-1 col-4 ${index === selectedIndex ? 'selected' : ''}`}>
+                  Step&nbsp;–&nbsp;
                   <span className={i.class}>{i.step}</span>
                 </h2>
               ))
             }
           </nav>
-          <div className="col-12 row-1 tutorial__slideshow">
+          <div className="col-12 row-1 tutorial__slideshow" >
             <CSSTransitionGroup
               transitionName="slide"
               transitionEnterTimeout={0}
@@ -151,9 +144,12 @@ export default class Direct extends Component {
 
                   return (
                     <div key={i.id} className={`image ${img_src[selectedIndex].class}`} style={
-                          {
-                            backgroundImage: `url(${i.src})`
-                          }}>
+                      {
+                        backgroundImage: `url(${i.src})`
+                      }}>                          
+                      <div className='bubble'>
+                        <p>{i.bubble}</p>
+                      </div>
                     </div>
                   )
                 })

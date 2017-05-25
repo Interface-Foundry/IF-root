@@ -149,10 +149,10 @@ app.get('/legal', (_, res) => {
 app.get('/blog', (_, res) => {
   res.render('pages/index');
 });
-app.get('/direct', (_, res) => {
+app.get('/help', (_, res) => {
   res.render('pages/index');
 });
-app.get('/about', (_, res) => {
+app.get('/whykip', (_, res) => {
   res.render('pages/index');
 });
 app.get('/s/*', (_, res) => {

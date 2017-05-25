@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 import { PropTypes } from 'prop-types';
 
-import { Legal, Direct, About } from '..';
+import { Legal, WhyKip, Help } from '..';
 import { SidenavContainer, ModalContainer, RibbonContainer, LandingContainer, BlogContainer } from '../../containers';
 
 import { Route } from 'react-router-dom';
@@ -29,15 +29,23 @@ export default class App extends Component {
 	shouldComponentUpdate(nextProps, nextState) {
    		 // need this, otherwise page always rerender every scroll
 	   	if(
+	   		nextProps.location.pathname !== this.props.location.pathname ||
 	   		nextProps.animate !== this.props.animate ||
 	   		nextProps.fixed !== this.props.fixed ||
 	   		nextProps.sidenav !== this.props.sidenav ||
 	   		nextProps.modal !== this.props.modal ||
 	   		nextProps.animationOffset !== this.props.animationOffset ||
-	   		nextProps.containerHeight !== this.props.containerHeight
+	   		nextProps.containerHeight !== this.props.containerHeight ||
+	   		nextProps.scrollTo !== this.props.scrollTo
 	   	) return true
 
     	return false
+  	}
+
+  	componentWillReceiveProps(nextProps) {
+  		if(nextProps.scrollTo !== this.props.scrollTo && nextProps.scrollTo !== 0) {
+  			ReactDOM.findDOMNode(this.scroll).scrollTop = nextProps.scrollTo
+  		}
   	}
 
 	_handleScroll (e) {
@@ -61,8 +69,8 @@ export default class App extends Component {
 	      		<Route path={`${match.url}s/:src`} exact component={LandingContainer}/>
 		      	<Route path={`${match.url}legal`} exact component={Legal}/>
 		      	<Route path={`${match.url}blog`} exact component={BlogContainer}/>
-		      	<Route path={`${match.url}direct`} exact component={Direct}/>
-		      	<Route path={`${match.url}about`} exact component={About}/>
+		      	<Route path={`${match.url}help`} exact component={Help}/>
+		      	<Route path={`${match.url}whykip`} exact component={WhyKip}/>
 	      	</div>
 	      </div>
 	    );

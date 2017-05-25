@@ -37,6 +37,7 @@
     "react-router-dom": "^4.0.0",
     "react-router-redux": "next",
     "react-router-transition": "0.0.6",
+    "react-scroll": "^1.5.2",
     "react-select": "^1.0.0-rc.3",
     "react-share": "^1.13.0",
     "react-transition-group": "^1.1.2",

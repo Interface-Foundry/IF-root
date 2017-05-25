@@ -1,7 +1,7 @@
 /* eslint react/prefer-stateless-function: 0, react/forbid-prop-types: 0 */
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { Link } from 'react-router-dom';
 
 import { Icon } from '../../themes';
 import { Down, Right } from '../../themes/newSvg';
@@ -16,29 +16,32 @@ export default class Hero extends Component {
 
 	shouldComponentUpdate(nextProps, nextState) {
    		 // need this, otherwise page always rerender every scroll
-	   	if(nextProps.animate !== this.props.animate) return true
+	   	if(
+	   		nextProps.animate !== this.props.animate || 
+	   		nextProps.offsetTop !== this.props.offsetTop
+	   	) return true
 
     	return false
   	}
 
   	render() {
-  		const { animate, src } = this.props;
+  		const { animate, src, scrollToPosition, offsetTop } = this.props;
   		
 	    return (
 	      	<div className={`hero image ${animate ? 'start' : ''}`} style={{height: window.innerHeight}}>
 	      		<div className='hero__main'>
 		        	<div className="col-6 headline">
 		        		<h1>
-		        			The Simplest Way to Shop with your Friends
+		        			Shop Online with Friends
 		        		</h1>
 		        		<p>
-		        			Whether your in Canada, the U.K, or Singapore, <span>Kip</span> makes sure you never miss out on your friends shopping sprees or the best deals. 
+		        			<span><Link to='/whykip'>Kip</Link></span>  saves you money on 3rd party fees with wholesale prices. Use Kip Now today!
 		        		</p>
 		        		{
 			      			src !== 'slack' ? <div className="col-12 action">
 				      			<a href='/newcart'>
 				        			<button>
-					        			<span>Create Kip Cart <Right/></span>
+					        			<span>Use Kip Now <Right/></span>
 					        		</button>
 			        			</a>
 				        	</div> : <div className="col-12 action">
@@ -48,16 +51,16 @@ export default class Hero extends Component {
 			              	</div>
 				      	}
 				      	<p className='subtext'>
-				      		<span>Easy Setup</span>
 				      		<span>Free</span>
-				      		<span>Cancel Anytime</span>
+				      		<span>No Setup</span>
+				      		<span>Secure</span>
 				      	</p>
 		        	</div>
-		        	<div className="col-6 animation">
-		        		<div className='image'/>
-		        	</div>
+		        	<Link className="col-6 animation" to='/whykip'>
+	        			<div className='image'/>
+		        	</Link>
 	        	</div>
-	        	<div className="more">
+	        	<div className="more" onClick={() => scrollToPosition(offsetTop)}>
 	        		<h2><span>Learn More about Kip</span></h2>
 	        		<Down/>
 	        	</div>

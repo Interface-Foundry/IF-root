@@ -20,3 +20,10 @@ export const registerHeight = (heightFromTop, containerHeight) => ({
     	containerHeight: containerHeight
     }
 })
+
+export const scrollToPosition = (position = 400) => ({
+	type: 'SCROLL_TO',
+	response: {
+		scrollTo: position
+	}
+})

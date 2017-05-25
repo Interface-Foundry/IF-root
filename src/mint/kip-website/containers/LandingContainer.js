@@ -3,7 +3,8 @@ import Landing from '../components/Landing';
 
 import { 	
 	get,
-	registerHeight 
+	registerHeight,
+	scrollToPosition
 } from '../actions';
 
 const mapStateToProps = (state, props) => ({
@@ -14,7 +15,8 @@ const mapStateToProps = (state, props) => ({
 
 const mapDispatchToProps = dispatch => ({
     registerHeight: (heightFromTop, containerHeight) => dispatch(registerHeight(heightFromTop, containerHeight)),
-    updateCarts: () => dispatch(get('/api/carts', 'CARTS'))
+    updateCarts: () => dispatch(get('/api/carts', 'CARTS')),
+    scrollToPosition: (pos) => dispatch(scrollToPosition(pos))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Landing);
