@@ -29,7 +29,7 @@ export default class CartItem extends Component {
 
         {locked 
           ? null 
-          : <ProgressiveImage src={main_image_url} placeholder='//storage.googleapis.com/kip-random/head%40x2.png'>
+          : <ProgressiveImage src={main_image_url} placeholder='//storage.googleapis.com/kip-random/kip_head_whitebg.png'>
               {(src) => 
                 <div 
                   className='cartItem__image image col-3 ' 

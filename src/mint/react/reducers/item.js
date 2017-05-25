@@ -11,7 +11,8 @@ import {
   SET_SEARCH_INDEX,
   SELECT_CARD,
   RECEIVE_CATEGORY,
-  LOGOUT
+  LOGOUT,
+  SET_OLD_ID
 } from '../constants/ActionTypes';
 
 export default function item(state = {}, action) {
@@ -61,6 +62,11 @@ export default function item(state = {}, action) {
       ...state,
       position: action.selectedIndex,
       ...action.card
+    };
+  case SET_OLD_ID:
+    return {
+      ...state,
+      old_item_id: action.old_item_id
     };
   default:
     return state;

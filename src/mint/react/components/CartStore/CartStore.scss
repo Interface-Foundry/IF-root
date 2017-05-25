@@ -2,48 +2,49 @@
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
 .cart_store {
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: $card-box-shadow;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-evenly;
-  border-radius: 5px;
-  box-shadow: $card-box-shadow;
-  background: white;
-  margin: $padding/2;
+  margin: $padding / 2;
+  padding: $padding * 2 0;
   a {
-    height: 150px;
-    display: inline-block;
-    padding: 1px;
-    margin: $padding/2 $padding/2;
-    font-size: 18px;
-    min-width: 150px;
-    width: 100px;
     cursor: pointer;
+    display: inline-block;
+    font-size: 18px;
+    height: 150px;
+    margin: $padding / 2;
+    min-width: 150px;
+    padding: 1px;
+    width: 100px;
     .cart__choice {
-      position: relative;
-      text-align: center;
+      background: white;
       border: 1px $border-color-light solid;
       border-radius: $padding;
-      background: white;
+      position: relative;
+      text-align: center;
       .choice__details {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        padding: $padding/2.5 $padding/2.5 0 $padding/2.5;
+        padding: $padding / 2.5 $padding / 2.5 0 $padding / 2.5;
         .choice__image {
           align-self: center;
-          width: $nav-height + 75px;
           height: $nav-height + 25px;
+          width: $nav-height + 75px;
         }
         .choice__domain {
-          hyphens: auto;
-          font-size: 0.7em;
-          position: relative;
-          overflow: hidden;
-          white-space: normal;
           color: #58595b;
-          padding: 0;
+          font-size: 0.7em;
+          hyphens: auto;
           margin-bottom: $padding;
+          overflow: hidden;
+          padding: 0;
+          position: relative;
+          white-space: normal;
         }
       }
       .choice__select {
@@ -57,6 +58,13 @@
         text-transform: uppercase;
         background: $border-color-light;
         border-radius: 0 0 $padding - 1 $padding - 1;
+        &:hover {
+          border: 1px #ffdf4d solid !important;
+          .choice__select {
+            background-color: #ffdf4d !important;
+            color: #000 !important;
+          }
+        }
       }
     }
     &:first-child {
@@ -68,13 +76,12 @@
         color: white;
         &:before {
           content: '✔';
-          font-size: 24px;
+          font-size: 15px;
           position: absolute;
           left: 30px;
-          top: -2px;
+          top: -1px;
         }
       }
     }
   }
 }
-

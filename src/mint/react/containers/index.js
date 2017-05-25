@@ -13,3 +13,4 @@ export FeedbackContainer from './FeedbackContainer';
 export ItemContainer from './ItemContainer';
 export SettingsContainer from './SettingsContainer';
 export LoginScreenContainer from './LoginScreenContainer';
+export ModifyContainer from './ModifyContainer';

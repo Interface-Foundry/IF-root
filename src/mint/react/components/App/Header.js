@@ -36,6 +36,10 @@ export default class Header extends Component {
             <ModalHead text={'Add to Cart'} {...props}/>
           }
         />
+        <Route path={'/cart/:cart_id/m/cartvariant/:index/:item_id'} exact component={() => 
+            <ModalHead text={'Modify Item'} {...props}/>
+          }
+        />
         <Route path={'/newcart'} exact component={() => 
             <IntroHead text={'Select Store'} {...props}/>
           }
@@ -125,7 +129,7 @@ class CartHead extends Component {
               </div> 
             : <div className={`image ${bounce ? 'bounce': ''}`} style={
                 {
-                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/head%40x2.png)'})`,
+                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png)'})`,
                 }
               }/>}
           <h3>
@@ -154,7 +158,7 @@ class IntroHead extends Component {
       <div className="header__left">
         <div className='image' style={
           {
-            backgroundImage: 'url(//storage.googleapis.com/kip-random/head%40x2.png)'
+            backgroundImage: 'url(//storage.googleapis.com/kip-random/kip_head_whitebg.png)'
           }
         }/>
         <h3>

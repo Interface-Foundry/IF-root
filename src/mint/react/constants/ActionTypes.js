@@ -52,6 +52,9 @@ export const RECEIVE_CATEGORY = 'RECEIVE_CATEGORY';
 export const SEARCH_NEXT = 'SEARCH_NEXT';
 export const SEARCH_PREV = 'SEARCH_PREV';
 export const SET_SEARCH_INDEX = 'SET_SEARCH_INDEX';
+export const SET_OLD_ID = 'SET_OLD_ID';
+export const RECEIVE_UPDATE_ITEM = 'RECEIVE_UPDATE_ITEM';
+export const REQUEST_UPDATE_ITEM = 'REQUEST_UPDATE_ITEM';
 
 //cart stores
 export const REQUEST_STORES = 'REQUEST_STORES';

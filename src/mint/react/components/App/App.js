@@ -78,6 +78,7 @@ export default class App extends Component {
       && !pathname.includes('/newcart')
       && !pathname.includes('/feedback')
       && !pathname.includes('/archive')
+      && !pathname.includes('/settings')
       && !pathname.includes('/404')) {
       fetchCart(cart_id)
         .then(cart => !cart ? replace('/404') : null);
@@ -116,6 +117,7 @@ export default class App extends Component {
     if (!pathname.includes('/newcart')
       && !pathname.includes('/feedback')
       && !pathname.includes('/archive')
+      && !pathname.includes('/settings')
       && !pathname.includes('/404')
       && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
       fetchCart(nextCart_id)

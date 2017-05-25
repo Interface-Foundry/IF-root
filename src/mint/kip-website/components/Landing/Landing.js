@@ -46,7 +46,6 @@ export default class Landing extends Component {
   componentWillReceiveProps(nextProps) {
     const { name, updateCarts } = this.props, { name: nextName } = nextProps;
     if (nextName !== name && nextName) {
-      console.log({ nextName, name })
       updateCarts();
     }
   }
@@ -102,7 +101,6 @@ export default class Landing extends Component {
   }
 
   render() {
-    console.log(this.props);
     const {
       state: { fixed, sidenav, modal, animationState },
       props: { match: { params: { src } } },

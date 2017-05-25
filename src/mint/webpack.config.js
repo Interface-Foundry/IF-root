@@ -38,6 +38,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
+            cacheDirectory: './webpack-cache',
             'presets': [
               'react',
               'es2015',

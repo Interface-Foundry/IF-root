@@ -38,7 +38,6 @@
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
-      background-color: white;
     }
     .members {
       position: absolute;
@@ -102,9 +101,9 @@
       color: $header-color;
       border-bottom: 1px solid $border-color-light;
       padding: 0;
-
       span {
-        border-bottom: 1px solid $secondaryColor;;
+        border-bottom: 1px solid $secondaryColor;
+        ;
       }
     }
     .navbar__modal_head {
@@ -145,4 +144,3 @@
     cursor: default;
   }
 }
-
