@@ -14,11 +14,12 @@ const bookProductGroups = ['Book', 'eBooks']
  */
 function getDescription (item) {
   if (bookProductGroups.includes(item.ItemAttributes.ProductGroup)) {
-    var editorialReview = _.get(item, 'EditorialReviews.EditorialReview', item.ItemAttributes.Feature)
-    if (editorialReview.length > 1) {
+    var editorialReview = _.get(item, 'EditorialReviews.EditorialReview')
+    if (editorialReview instanceof Array) {
       editorialReview = editorialReview[0]
     }
-    return editorialReview.Content
+
+    if (editorialReview && editorialReview.Content) return editorialReview.Content
   }
   return item.ItemAttributes.Feature
 }
@@ -35,21 +36,27 @@ function formatAmazonPrice(amount) {
 
 
 function getItemPrice(item, priceType) {
+  debugger;
   // place holder for time being since unsure what price to use
-  const availablePrices = {}
-  var salePrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.SalePrice.Amount', 0))
-  availablePrices.basicItemPrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.Price.Amount', 0))
-  if (priceType === undefined) {
-    if (salePrice) {
-      return salePrice
-    }
-    return availablePrices.basicItemPrice
-  } else {
-    // might be useful to return other possible prices in the future
-    availablePrices.lowestPrice = formatAmazonPrice(_.get(item, 'OfferSummary.LowestNewPrice.Amount', 0))
-    availablePrices.listPrice = formatAmazonPrice(_.get(item, 'ItemAttributes.ListPrice.Amount', 0))
-    return availablePrices[priceType]
+  const allPurchaseablePrices = [
+    _.get(item, 'Offers.Offer.OfferListing.SalePrice.Amount'),
+    _.get(item, 'Offers.Offer.OfferListing.Price.Amount'),
+    _.get(item, 'OfferSummary.LowestCollectiblePrice.Amount'),
+    _.get(item, 'OfferSummary.LowestRefurbishedPrice.Amount'),
+    _.get(item, 'OfferSummary.LowestUsedPrice.Amount')
+  ]
+
+  if (priceType == "listPrice") {
+    return formatAmazonPrice(_.get(item, 'ItemAttributes.ListPrice.Amount', 0))
   }
+
+  for (var i = 0; i < allPurchaseablePrices.length; i++) {
+    if (allPurchaseablePrices[i]) {
+      return formatAmazonPrice(allPurchaseablePrices[i])
+    }
+  }
+
+  return 0
 }
 
 
@@ -67,6 +74,7 @@ module.exports.scrapeUrl = function amazon_scraper (uri, locale) {
 
     // Scrape the item
     var res = yield amazon_cart.getAmazonItem(uri, locale)
+    console.log(res)
     var item = yield res2Item(res)
     item.original_link = uri
     yield item.save()
@@ -186,7 +194,7 @@ var res2Item = function (res) {
         iframe_review_url: (i.CustomerReviews.HasReviews === 'true') ? i.CustomerReviews.IFrameURL : null
       })
     } catch (err) {
-      logging.error(err);
+      console.error(err)
       return null;
     }
 
@@ -200,6 +208,8 @@ var res2Item = function (res) {
     yield details.save();
     item.details = details.id;
     yield item.save();
+
+    console.log('item', item)
 
     // create new item options
     // this part is really really hard
