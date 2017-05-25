@@ -60,6 +60,13 @@
         border-radius: 0 0 $padding - 1 $padding - 1;
       }
     }
+    .cart__choice:hover {
+      border: 1px #ffdf4d solid !important;
+      .choice__select {
+        background-color: #ffdf4d !important;
+        color: #000 !important;
+      }
+    }
     &:first-child {
       .cart__choice {
         border-color: $thirdColor;
@@ -69,10 +76,10 @@
         color: white;
         &:before {
           content: '✔';
-          font-size: 24px;
+          font-size: 15px;
           position: absolute;
           left: 30px;
-          top: -2px;
+          top: -1px;
         }
       }
     }
