@@ -300,7 +300,7 @@ var res2Item = function (res) {
     }
 
     // um let's just get the item fresh to make sure it's okay
-    item = yield db.Items.findOne({id: item.id}).populate('options').populate('secondary_images')
+    item = yield db.Items.findOne({id: item.id}).populate('options').populate('secondary_images').populate('primary_image')
     logging.info('ITEM:', item)
     return item
   })
