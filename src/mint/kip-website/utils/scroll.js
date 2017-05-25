@@ -5,13 +5,13 @@ export const animateScroll = (containerHeight, animationOffset, scrollTop, anima
   let animationStart = 0;
   let breakPointHeight = (containerHeight/8);
 
-  if(scrollTop > 400 && !fixed ||  scrollTop <= 400 && fixed) {
+  if(scrollTop > 150 && !fixed ||  scrollTop <= 150 && fixed) {
     newState = {
       ...newState,
       type: 'HANDLE_SCROLL',
       response: { 
         ...newState.response,
-        fixed: scrollTop > 400
+        fixed: scrollTop > 150
       }
     }
   }

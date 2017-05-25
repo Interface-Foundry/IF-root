@@ -31,19 +31,9 @@ export default class About extends Component {
     return (
       <div className="about"> 
         <HeaderContainer title={'A.I Penguin for Group Purchases'} subtext={[ 'Community Driven', 'Social Commerce', 'Machine Learning']} color="primary" offsetTop={offsetTop}/>
-        <h1><span>As Seen In</span></h1>
-        <div className="iconsRow">
-          <div className="icon col-1"/>
-          <div className="icon col-1"><Icon icon='Wallstreet'/></div>
-          <div className="icon col-1"><Icon icon='Fastcompany'/></div>
-          <div className="icon col-1"><Icon icon='Time'/></div>
-          <div className="icon col-1"><Icon icon='Venturebeat'/></div>
-          <div className="icon col-1"><Icon icon='Paymentsource'/></div>
-          <div className="icon col-1"/>
-        </div>
-
         <div className="why col-12" ref={(why) => this.why = why}> 
           <div className="col-12">
+            <h1>WHY PENGUINS?</h1>
             <h4>
               <span>Kip</span> brings a penguin's perspective to collective purchasing. 
             </h4>
@@ -58,7 +48,7 @@ export default class About extends Component {
             <div className="col-4 row-1 services__details">
               <div className='image' style={{backgroundImage: 'url(https://storage.googleapis.com/kip-random/many_kips/office.svg)'}}/>
               <h4>
-                Group together to share reasources and warmth. <br/> 
+                Group together to share resources and warmth. 
               </h4>
               <div className="col-12 row-1 action">
                 <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Use Kip Now <Right/></span></button></a>
@@ -68,7 +58,7 @@ export default class About extends Component {
             <div className="col-4 row-1 services__details">
               <div className='image' style={{backgroundImage: 'url(https://storage.googleapis.com/kip-random/many_kips/struggle.svg)'}}/>
               <h4> 
-                Help each other find the best spots to shop and fish. <br/> 
+                Help each other find the best spots to shop and fish. 
               </h4>
               <div className="col-12 row-1 action">
                 <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Use Kip Now <Right/></span></button></a>
@@ -84,21 +74,21 @@ export default class About extends Component {
                 <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>Use Kip Now <Right/></span></button></a>
               </div>
             </div>
-
-            <section className="col-12 row-1 video">
-              <h2>Want to Learn More?</h2>
-              <iframe width="100%" height="100%" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
-            </section>
-
-            <span className="col-12 action red">
-              <a href='/newcart'>
-                <button>
-                  <span>Try Kip Now <Right/></span>
-                </button>
-              </a>
-            </span>
           </div>
         </div>
+        <h1>AS SEEN IN</h1>
+        <section className="iconsRow">
+          <div className="icon col-1"/>
+          <div className="icon col-1"><Icon icon='Wallstreet'/></div>
+          <div className="icon col-1"><Icon icon='Fastcompany'/></div>
+          <div className="icon col-1"><Icon icon='Time'/></div>
+          <div className="icon col-1"><Icon icon='Venturebeat'/></div>
+          <div className="icon col-1"><Icon icon='Paymentsource'/></div>
+          <div className="icon col-1"/>
+        </section>
+        <section className="col-12 row-1 video">
+          <iframe width="100%" height="100%" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
+        </section>
         <Footer/>
       </div>
     );

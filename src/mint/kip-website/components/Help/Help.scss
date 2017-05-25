@@ -65,6 +65,8 @@
 
 			@media only screen and (max-width: 600px) {
 				padding: $padding*2 0;
+			    text-align: center;
+			    margin-left: -50%; 
 			}
 
 			.image {
@@ -87,11 +89,20 @@
 				    padding: $padding*2;
 				    border-radius: $padding;
 
+				    @media only screen and (max-width: 600px) {
+						right: -200px;
+						width: 150px;
+				    }
+
 				    p {
 				    	font-size: 20px;
 				    	color: $bgColor;
 				    	text-align: left;
 				    	font-weight: bold;
+
+				    	@media only screen and (max-width: 600px) {
+				    		font-size: 12px;
+				    	}
 				    }
 
 				    &:after {
@@ -117,6 +128,21 @@
 					  	    bottom: 30px;
 							border-right:0; 
 							border-left:20px solid; 
+							@media only screen and (max-width: 600px) {
+						    	position: absolute; 
+							  	left: -20px; 
+							  	right: auto;
+						  	    bottom: 30px;
+						  	    border-left: 0; 
+								border-top: 20px solid transparent;
+								border-bottom: 20px solid transparent; 
+								border-right:20px solid; 
+							}
+						}
+
+						@media only screen and (max-width: 600px) {
+							left: auto;
+							right: -200px;
 						}
 					}
 				}
@@ -138,6 +164,7 @@
 
 				@media only screen and (max-width: 600px) {
 					height: 180px;
+				    width: 80px;
 				}
 			}
 
@@ -164,6 +191,11 @@
 		margin: 0 auto;
 		overflow: hidden;
 		z-index: 1;
+
+		@media only screen and (max-width: 600px) {
+			padding: $padding*10 $padding*3;
+		}
+
 		h1 {
 			position: relative;
 			display: inline-block;
@@ -237,7 +269,9 @@
   0%   { opacity: 0; transform: translate3d(-100%, 0, 0); }
   100% { opacity: 1; transform: translate3d(50%, 0, 0); }
 }
+
 @keyframes fadeAndSlideOutLeft{
   0%   { opacity: 1; transform: translate3d(-50%, 0, 0); }
   100% { opacity: 0; transform: translate3d(100%, 0, 0); }
 }
+

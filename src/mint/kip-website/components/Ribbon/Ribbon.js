@@ -75,19 +75,21 @@ export default class Ribbon extends Component {
               </div>
             </div>
           }
-          <div className="right row row-1">
-            <div className="col-12 row-1 action">
-              <Link to='/help' ><button>Help</button></Link>
+          <div className="row row-1 second">
+            <div className="right row row-1">
+              <div className="col-12 row-1 action">
+                <Link to='/help' ><button>Help</button></Link>
+              </div>
             </div>
-          </div>
-          <div className="right row row-1">
-            <div className="col-12 row-1 action">
-              <Link to='/blog'><button>Blog</button></Link>
+            <div className="right row row-1">
+              <div className="col-12 row-1 action">
+                <Link to='/blog'><button>Blog</button></Link>
+              </div>
             </div>
-          </div>
-          <div className="right row row-1">
-            <div className="col-12 row-1 action">
-              <Link to='/whykip' ><button>Why Kip</button></Link>
+            <div className="right row row-1">
+              <div className="col-12 row-1 action">
+                <Link to='/whykip' ><button>Why Kip</button></Link>
+              </div>
             </div>
           </div>
         </div>

@@ -88,10 +88,13 @@
 		display: table;
 		max-width: 1200px;
 		margin: 0 auto;
+		@media only screen and (max-width: 600px) {
+			display: block;
+		}
 	}
 
 	@media only screen and (max-width: 600px) {
-		padding: $padding*5 $padding*5 0;
+		padding: $padding*5 $padding*3 0;
 	}
 
 	.text {
@@ -102,6 +105,13 @@
 		vertical-align: middle;
 		text-align: left;
 		padding: $padding*5 $padding*5 $padding*5 0;
+
+		@media only screen and (max-width: 600px) {
+			display: block;
+			width: 100%;
+			min-width: 0;
+			padding: $padding*5 0;
+		}
 
 		h1 {
 			position: relative;
@@ -149,9 +159,6 @@
 						content: '';
 					}
 				}
-				@media only screen and (max-width: 600px) {
-					font-size: 14px;
-				}
 			}
 		}
 	}
@@ -168,6 +175,10 @@
 			height: $ribbonHeight/1.5;
 			width: $ribbonHeight/1.5;
 			z-index: 1;
+		}
+
+		@media only screen and (max-width: 600px) {
+			display: none;
 		}
 	}
 

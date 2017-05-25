@@ -11,20 +11,37 @@
 	height: $ribbonHeight + $padding;
 	z-index: 500;
 	text-align: center;
-	background: transparent;
-	border-bottom: 3px solid transparent;
+	border-bottom: 2px solid transparent;
 	margin-top: $padding*2;
 	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
     @media only screen and (max-width: 600px) {
-    	padding: 0 $padding*2;
+    	border-bottom: 0px solid transparent;
+    	margin-top: 0;
+    	.second {
+    		height: 30px;
+    		line-height: 30px !important;
+    		width: 100%;
+    		border-bottom: 2px solid white;
+			padding: 0 0 $padding;
+			@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+    	}
     }
 
     &.background {
     	background: white;
 		border-bottom: 2px solid mix(white, $primaryColor, 85%);
 		margin-top: 0;
+
+		@media only screen and (max-width: 600px) {
+			border-bottom: 0px solid transparent;
+
+			.second {
+				background: white;
+				border-bottom: 2px solid mix(white, $primaryColor, 85%);
+			}
+		}
     }
 
 	* {
@@ -65,6 +82,10 @@
 			svg {
 				width: 30px;
 				fill: $primaryColor;
+			}
+
+			@media only screen and (max-width: 600px) {
+				margin-right: 10px;
 			}
 		}
 		svg {

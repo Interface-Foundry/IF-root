@@ -10,14 +10,16 @@
 	& > h1 {
 		position: relative;
 		display: block;
-		text-align: left;
+		text-align: center;
 		line-height: $ribbonHeight/2;
 		font-size: 25px;
-		padding: $padding*10 $padding*5 0;
+		padding: 0 $padding*5 0;
 		border-radius: 5px;
 		color: $bgColor;
-		max-width: 1000px;
-		margin: 0 auto;
+		max-width: 1100px;
+		margin: $padding*5 auto -25px;
+		z-index: 10;
+		color: rgba($bgColor, 0.8);
 
 		@media only screen and (max-width: 600px) {
 			line-height: 30px;
@@ -25,6 +27,17 @@
 		}
 	}
 
+
+	.video {
+		height: 500px;
+		border-radius: $padding;
+		overflow: hidden;
+		padding: 0;
+		width: 900px;
+		z-index: 10;
+		margin: 0 auto $padding*5;
+		border: 3px solid mix(white, $primaryColor, 85%);
+	}
 	.iconsRow {
 		position: relative;
 		height: $ribbonHeight*3;
@@ -33,6 +46,7 @@
 		display: table;
 		margin: 0 auto;
 		white-space: nowrap;
+		z-index: 10;
 
 		& > div {
 			position: relative;
@@ -65,7 +79,7 @@
 		position: relative;
 		text-align: center;
 		background: transparent;
-		padding: $padding*5 $padding*2 $padding*10;
+		padding: $padding*10 $padding*2 0;
 		z-index: 1;
 
 
@@ -260,25 +274,6 @@
 				}
 			}
 
-		}
-
-		.video {
-			height: 500px;
-			border-radius: $padding;
-			overflow: hidden;
-			padding: 0;
-			width: 700px;
-			margin: $padding*2 auto 0;
-			border: 3px solid mix(white, $primaryColor, 85%);
-
-			h2 {
-				height: 100px;
-				line-height: 100px;
-			}
-
-			iframe {
-				height: calc(100% - 100px) !important;
-			}
 		}
 
 		.action {

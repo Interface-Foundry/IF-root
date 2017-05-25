@@ -7,7 +7,7 @@
 	background: mix(white, $primaryColor, 95%);
 	color: white;
 	padding: 0 $padding*2 $padding*5;
-	z-index: 0;
+	z-index: -1;
 
 	p {
 		font-size: 12px;
