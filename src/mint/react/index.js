@@ -10,7 +10,7 @@ import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
 import Reducers from './reducers';
-import { session } from './actions';
+import { session, cart } from './actions';
 import { AppContainer } from './containers';
 
 //Analytics!
@@ -48,13 +48,15 @@ const store = createStore(
 );
 
 // update login status
-store.dispatch(session.update());
+store.dispatch(session.update()).then(() => {
+  store.dispatch(cart.fetchAllCarts())
+});
 
 ReactDOM.render(
   <Provider store={store}>
-   <ConnectedRouter history={history}>
-       <Route path="*" component={AppContainer} />
-   </ConnectedRouter>
- </Provider>,
+    <ConnectedRouter history={history}>
+      <Route path="*" component={AppContainer} />
+    </ConnectedRouter>
+  </Provider>,
   document.getElementById('root')
 );

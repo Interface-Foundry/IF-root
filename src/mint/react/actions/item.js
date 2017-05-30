@@ -112,6 +112,12 @@ const setOldId = (old_item_id) => ({
   old_item_id
 })
 
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+///// THIS IS WHERE ALL THE CONFUSION STEMS FROM //////
+/////////////////////// START /////////////////////////
+///////////////////////////////////////////////////////
+
 export function previewItem(item_id) {
   return async function (dispatch) {
     dispatch(request());
@@ -128,7 +134,7 @@ export function previewItem(item_id) {
   };
 }
 
-export function previewAmazonItem(amazon_id, store, locale) {
+export function search(amazon_id, store, locale) {
   return async function (dispatch) {
     dispatch(request());
     try {
@@ -139,10 +145,16 @@ export function previewAmazonItem(amazon_id, store, locale) {
       // if (store === 'ypo') return dispatch(receiveCategory(json));
       return Array.isArray(json) ? dispatch(receiveSearch(json)) : dispatch(receiveItem(json));
     } catch (e) {
-      throw 'error in cart previewAmazonItem';
+      throw 'error in cart search';
     }
   };
 }
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+///// THIS IS WHERE ALL THE CONFUSION STEMS FROM //////
+//////////////////////// END //////////////////////////
+///////////////////////////////////////////////////////
 
 export function addItem(cart_id, item_id) {
   return async dispatch => {

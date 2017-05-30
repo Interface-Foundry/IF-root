@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { reduxForm } from 'redux-form';
 import { AmazonForm } from '../components';
 import { isUrl, addSearchHistory, getLastSearch } from '../utils';
-import { previewAmazonItem, clearItem } from '../actions/item';
+import { search, clearItem } from '../actions/item';
 import { push } from 'react-router-redux';
 import ReactGA from 'react-ga';
 
@@ -28,10 +28,12 @@ const mapDispatchToProps = (dispatch) => ({
     });
     const { cart_id } = state;
     dispatch(clearItem());
+
+    // Check if URL. If search query add to SearchHistory and run search. Otherwise encode url and search from item.
     if (!isUrl(values.url)) addSearchHistory(values.url);
     else dispatch(push(`/cart/${cart_id}/m/item/0/${encodeURIComponent(values.url)}`));
     const currentState = await getState(dispatch);
-    return dispatch(previewAmazonItem(encodeURIComponent(values.url), currentState.currentCart.store, currentState.currentCart.store_locale));
+    return dispatch(search(encodeURIComponent(values.url), currentState.currentCart.store, currentState.currentCart.store_locale));
   }
 });
 

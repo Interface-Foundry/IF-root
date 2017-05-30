@@ -26,7 +26,6 @@ export default class App extends Component {
     user_account: PropTypes.object,
     match: PropTypes.object.isRequired,
     fetchCart: PropTypes.func.isRequired,
-    fetchAllCarts: PropTypes.func.isRequired,
     updateCart: PropTypes.func.isRequired,
     location: PropTypes.object.isRequired,
     session_id: PropTypes.string,
@@ -68,7 +67,6 @@ export default class App extends Component {
     const {
       props: {
         fetchCart,
-        fetchAllCarts,
         cart_id,
         history: { replace },
         location: { pathname }
@@ -83,7 +81,6 @@ export default class App extends Component {
       fetchCart(cart_id)
         .then(cart => !cart ? replace('/404') : null);
     }
-    fetchAllCarts();
   }
 
   componentDidMount() {
@@ -96,7 +93,6 @@ export default class App extends Component {
       _logPageView,
       props: {
         fetchCart,
-        fetchAllCarts,
         cart_id,
         session_id,
         user_account: { id },
@@ -122,7 +118,6 @@ export default class App extends Component {
       && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
-      fetchAllCarts();
     }
   }
 
@@ -150,7 +145,6 @@ export default class App extends Component {
         clearItem,
         items,
         archivedCarts,
-        fetchAllCarts,
         history: { replace }
       },
       state: { sidenav, isMobile, popup }
@@ -179,7 +173,7 @@ export default class App extends Component {
           </div>
           { 
             sidenav || !isMobile 
-            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} /> 
+            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} /> 
             : null
           }
           {

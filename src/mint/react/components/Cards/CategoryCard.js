@@ -10,15 +10,15 @@ export default class CategoryCard extends Component {
     machineName: PropTypes.string.isRequired,
     itemCount: PropTypes.number.isRequired,
     image: PropTypes.string.isRequired,
-    previewAmazonItem: PropTypes.func
+    search: PropTypes.func
   }
 
   render() {
-    const { humanName, image, itemCount, machineName, previewAmazonItem } = this.props;
+    const { humanName, image, itemCount, machineName, search } = this.props;
 
     return (
       <section className='card__type-category' onClick={() => {
-        previewAmazonItem(machineName, true)
+        search(machineName, true)
       }}>
         <div className='details'>
           <div className='details__image image' style={{backgroundImage:`url(${image})`}}/>
