@@ -5,7 +5,7 @@ var db;
 const dbReady = require('../db');
 dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
-if (process.env.SEND_EMAILS) {
+if (process.env.SEND_EMAILS && process.env.NODE_ENV !== 'production') {
   // try to reengage cart owners at 11:00 on weekdays
   var reengageJob = CronJob('0 0 11 * * 1-5', function () {
     co(reengage);
