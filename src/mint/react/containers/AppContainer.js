@@ -59,7 +59,11 @@ const mapDispatchToProps = dispatch => ({
   checkoutCart: (cart_id) => dispatch(checkoutCart(cart_id)),
   login: (cart_id, email) => dispatch(login(cart_id, email)),
   validateCode: (email, code) => dispatch(validateCode(email, code)),
-  logout: () => dispatch(logout())
+  logout: () => {
+    dispatch(logout());
+    // This needs a way to navigate to the home page
+    // window.location.href doesn't work tho
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

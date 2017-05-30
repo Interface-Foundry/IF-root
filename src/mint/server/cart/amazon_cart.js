@@ -214,6 +214,7 @@ exports.lookupAmazonItem = function * (asin, locale) {
 
   // Add some logic to find the available item variations
   var item = results.result.ItemLookupResponse.Items.Item
+
   if (item.ParentASIN && item.ParentASIN !== item.ASIN) {
     // This item has a parent item, which means it probably has variations
     var parent = yield module.exports.lookupAmazonItem(item.ParentASIN, locale)

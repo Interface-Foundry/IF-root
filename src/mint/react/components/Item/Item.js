@@ -100,7 +100,7 @@ export default class Item extends Component {
 
   componentWillMount() {
     const { props: { item_id, amazon_id, previewAmazonItem, cart_id, previewItem, type, item, items, index, setSearchIndex, currentCart, fetchCards } } = this;
-    
+
     if (!item && !items || (type === 'cartVariant' || type === 'cartItem' || type === 'cartVariant' || type === 'cartView')) {
       if (type === 'search' && index) setSearchIndex(index);
       else if (amazon_id && currentCart.store) previewAmazonItem(amazon_id, currentCart.store, currentCart.store_locale);
