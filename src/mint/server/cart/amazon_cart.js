@@ -234,7 +234,7 @@ exports.lookupAmazonItem = function * (asin, locale) {
   }
 
   // save value to cache
-  asinCache.set(asin + locale, response)
+  // asinCache.set(asin + locale, response)
 
   return response
 };
