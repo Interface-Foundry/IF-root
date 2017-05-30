@@ -626,6 +626,21 @@ module.exports = function (router) {
     res.send(item)
   }))
 
+  /**
+   * @api {get} /api/item/:item_id/similar
+   * @apiDescription Queries amazon for a list of similar items
+   * @apiGroup Carts
+   * @apiParam {String} :item_id the id of the item we want items similar to
+   */
+  router.get('/item/:item_id/similar', (req, res) => co(function * () {
+    //get locale
+    const locale = _.get(req, 'query.store_locale', 'US')
+    // get item asin for lookup
+    var item = yield db.Items.findOne({id: req.params.item_id})
+    // lookup similar items
+    var similar = yield amazon.similarityLookup(item.asin, locale)
+    res.send(similar);
+  }))
 
   /**
    * @api {get} /api/item/:item_id/reactions
