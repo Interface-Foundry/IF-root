@@ -843,11 +843,6 @@ module.exports = function (router) {
     // assemble list of stores
     var stores = [];
 
-    // if we're in production, don't show YPO
-    if (process.env.NODE_ENV == 'production') {
-      stores = stores.filter( s => store.type !== 'ypo');
-    }
-
     // first sort the stores by distance to / from the user
     // using haversine, which calculates distance on a sphere
     // because earth, unfortunately, is a sphere
@@ -869,6 +864,15 @@ module.exports = function (router) {
       else if (b.store_countries.indexOf(country) > -1 && a.store_countries.indexOf(country) <= -1) return 1;
       else return 0;
     })
+
+    // if we're in production, don't show YPO
+    var host = req.get('host')
+    if (host === 'kipthis.com') {
+      logging.info('hiding ypo on production')
+      stores = stores.filter(function (s) {
+        return s.store_type != 'ypo'
+      });
+    }
 
     // logging.info('stores', stores)
     res.send(stores)

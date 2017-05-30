@@ -189,10 +189,9 @@ class SettingsFooter extends Component {
 
   render() {
     const { logout } = this.props;
-
     return (
       <footer className='footer__settings'>
-        <button className='logout' onClick={() => {logout()}}><Icon icon='Logout'/>Logout</button> 
+        <button className='logout' onClick={logout}><Icon icon='Logout'/>Logout</button> 
       </footer>
     );
   }
