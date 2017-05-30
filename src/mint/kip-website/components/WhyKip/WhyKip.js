@@ -4,8 +4,7 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import ReactDOM from 'react-dom'
 
-import { Footer } from '..';
-import { HeaderContainer } from '../../containers';
+import { HeaderContainer, FooterContainer } from '../../containers';
 
 import { Icon } from '../../themes';
 import { Down, Right, Items, Mapper, Cloud, Person } from '../../themes/newSvg';
@@ -89,7 +88,7 @@ export default class About extends Component {
         <section className="col-12 row-1 video">
           <iframe width="100%" height="100%" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
         </section>
-        <Footer/>
+        <FooterContainer />
       </div>
     );
   }

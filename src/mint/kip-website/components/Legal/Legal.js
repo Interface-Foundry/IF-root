@@ -2,7 +2,7 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 
-import { Footer } from '..';
+import { FooterContainer } from '../../containers';
 
 export default class Landing extends Component {
   render() {
@@ -456,7 +456,7 @@ export default class Landing extends Component {
           <br></br>
           <br></br>
         </div>
-        <Footer/>
+        <FooterContainer />
       </div>
     );
   }

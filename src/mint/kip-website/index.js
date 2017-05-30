@@ -10,7 +10,7 @@ import thunkMiddleware from 'redux-thunk';
 import { Route } from 'react-router-dom';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import Reducers from './reducers';
-import { get } from './actions';
+import { get, getSiteState } from './actions';
 import { AppContainer } from './containers';
 
 if (module.hot) {
@@ -37,13 +37,9 @@ const store = createStore(
 );
 
 // Check session and prep carts and blogs
-store.dispatch(get('/api/session', 'SESSION'))
-  .then(() => {
-    store.dispatch(get('/api/carts', 'CARTS'));
-    store.dispatch(get('api/blog/posts', 'POSTS'));
-  });
-
-
+store.dispatch(getSiteState())
+  .then(() => store.dispatch(get('/api/session', 'SESSION')))
+  .then(() => Promise.all([store.dispatch(get('/api/carts', 'CARTS')), store.dispatch(get('api/blog/posts', 'POSTS'))]));
 
 // Configure View
 ReactDOM.render(

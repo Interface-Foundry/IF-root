@@ -2,10 +2,9 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom';
 
-import { Footer } from '..';
-import { HeaderContainer } from '../../containers';
+import { HeaderContainer, FooterContainer } from '../../containers';
 
 import { Icon } from '../../themes';
 import { Down, Right, EmailDrawn, FacebookDrawn, TwitterDrawn, Smartphone } from '../../themes/newSvg';
@@ -172,7 +171,7 @@ export default class Help extends Component {
             ))
           }
         </section>
-        <Footer/>
+        <FooterContainer />
       </div>
     );
   }

@@ -5,35 +5,40 @@ import ReactDOM from 'react-dom';
 import { PropTypes } from 'prop-types';
 
 import { Icon } from '../../themes';
-import { Banner } from '../../themes/newSvg';
-import { Services, Hero, Footer, Compare } from '..';
+import { HeroContainer, ServicesContainer, CompareContainer, FooterContainer } from '../../containers';
 
 export default class Landing extends Component {
 
-  constructor(props) {
-      super(props)
+  static propTypes = {
+    animationState: PropTypes.number,
+    fixed: PropTypes.bool,
+    registerHeight: PropTypes.number,
+    match: PropTypes.object
   }
 
   state = {
     offsetTop: 0
   }
 
-  componentDidMount () {
+  componentDidMount() {
     const { registerHeight } = this.props;
-    registerHeight(ReactDOM.findDOMNode(this).offsetTop, ReactDOM.findDOMNode(this).clientHeight);
+    registerHeight(ReactDOM.findDOMNode(this)
+      .offsetTop, ReactDOM.findDOMNode(this)
+      .clientHeight);
 
     this.setState({
-      offsetTop: ReactDOM.findDOMNode(this.landing).offsetTop - 50
-    })
+      offsetTop: ReactDOM.findDOMNode(this.landing)
+        .offsetTop - 50
+    });
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
-    if(
-        nextState.offsetTop !== this.state.offsetTop ||
-        nextProps.animationState !== this.props.animationState ||
-        nextProps.fixed !== this.props.fixed
-      ) {
+    if (
+      nextState.offsetTop !== this.state.offsetTop
+      || nextProps.animationState !== this.props.animationState
+      || nextProps.fixed !== this.props.fixed
+    ) {
       return true;
     }
 
@@ -41,12 +46,11 @@ export default class Landing extends Component {
   }
 
   render() {
-    const { match: { params: { src }}, fixed, animationState, scrollToPosition } = this.props,
-      { offsetTop } = this.state;
+    const { match: { params: { src } } } = this.props, { offsetTop } = this.state;
 
     return (
-      <div className="landing"> 
-        <Hero animate={!fixed} src={src} scrollToPosition={scrollToPosition} offsetTop={offsetTop}/>
+      <div className="landing">
+        <HeroContainer src={src} offsetTop={offsetTop}/>
         <div className="icons">
           <div className="icon col-1"/>
           <div className="icon col-1"><Icon icon='Amazon'/></div>
@@ -56,12 +60,12 @@ export default class Landing extends Component {
           <div className="icon col-1"><Icon icon='Delivery'/></div>
           <div className="icon col-1"/>
         </div>
-        
+
         <div ref={(landing) => this.landing = landing}>
-          <Services />
+          <ServicesContainer src={src} />
         </div>
-        <Compare/>
-        <Footer/>
+        <CompareContainer src={src} />
+        <FooterContainer />
       </div>
     );
   }

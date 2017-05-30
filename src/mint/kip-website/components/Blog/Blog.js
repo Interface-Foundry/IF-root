@@ -4,15 +4,14 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import ReactDOM from 'react-dom'
 
-import { Footer } from '..';
-import { HeaderContainer } from '../../containers';
+import { HeaderContainer, FooterContainer } from '../../containers';
 
 import { Icon } from '../../themes';
 import { Down, Right, EmailDrawn, FacebookDrawn, TwitterDrawn } from '../../themes/newSvg';
 
 export default class Blog extends Component {
   constructor(props) {
-      super(props)
+    super(props)
   }
 
   state = {
@@ -21,7 +20,8 @@ export default class Blog extends Component {
 
   componentDidMount() {
     this.setState({
-      offsetTop: ReactDOM.findDOMNode(this.blogs).offsetTop
+      offsetTop: ReactDOM.findDOMNode(this.blogs)
+        .offsetTop
     })
   }
 
@@ -42,7 +42,7 @@ export default class Blog extends Component {
             })
           }
         </section>
-        <Footer/>
+        <FooterContainer />
       </div>
     );
   }

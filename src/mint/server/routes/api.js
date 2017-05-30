@@ -82,6 +82,11 @@ router.get('/blog/posts', (req, res) => co(function * () {
   res.send(posts)
 }))
 
+router.get('/test/site', (req, res)=>{
+  var json = require('./site.json');
+  res.json(json);
+})
+
 function _formatPostObjects(body) {
   let json = JSON.parse(body);
 
