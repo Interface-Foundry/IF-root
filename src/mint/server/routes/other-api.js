@@ -146,7 +146,7 @@ module.exports = function (router) {
    * @type {Array} object of stores
    */
   router.get('/store_list', (req, res) => co(function * () {
-    const storesArray = constants.STORES.map( store => {
+    var storesArray = constants.STORES.map( store => {
       return {
         store_img: 'String',
         store_type: store,
@@ -155,6 +155,14 @@ module.exports = function (router) {
         store_countries: '[Array]'
       }
     })
+
+    //filter out YPO on production
+    if (host === 'kipthis.com') {
+      logging.info('hiding ypo on production')
+      storesArray = storesArray.filter(function (s) {
+        return s.store_type != 'ypo'
+      });
+    }
 
     res.send(storesArray)
   }))
