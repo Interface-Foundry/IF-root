@@ -47,7 +47,7 @@ var reengage = function * () {
     yield email.template('reengagement', {
       cart_id: cart.id,
       cart: cart,
-      baseUrl: `https://mint-dev.kipthis.com`,
+      baseUrl: `https://kipthis.com`,
       username: cart.leader.username || cart.leader.email_address.split('@')[0]
     })
 

@@ -12,8 +12,8 @@ const fs = require('fs'),
   co = require('co');
 
 // start any jobs
-var dailyDealsJob = require('./deals/send-daily-deals-job')
-var reengagementEmailsJob = require('./send-reengagement-emails-job')
+if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
+if (process.env.NODE_ENV !== 'production') var reengagementEmailsJob = require('./send-reengagement-emails-job')
 
 // live reloading
 if (process.env.BUILD_MODE !== 'prebuilt') {
