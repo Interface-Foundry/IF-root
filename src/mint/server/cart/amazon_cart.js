@@ -243,11 +243,10 @@ exports.lookupAmazonItem = function * (asin, locale) {
  * gets a list of similar items by ASIN
  * http://docs.aws.amazon.com/AWSECommerceService/latest/DG/SimilarityLookup.html
  * @param {string} ASIN
- * @return TODO
+ * @return {[item]} array of ten db items
  */
 
  exports.similarityLookup = function * (asin, locale) {
-
    if (!asin) {
      throw new Error('No asin supplied')
    }
@@ -261,20 +260,17 @@ exports.lookupAmazonItem = function * (asin, locale) {
    }
    var results = yield opHelpers[locale].execute('SimilarityLookup', amazonParams);
 
-   logging.info('results.result', Object.keys(results.result.SimilarityLookupResponse))
-
-   //copied from search
+   // handle errors
    if (!results || !results.result.SimilarityLookupResponse.Items.Item) {
      if (!results) throw new Error('Error finding similar items with', query);
      else logging.error("Searching " + query + ' yielded no similar items');
    }
    else {
-     //save new items to the db
-    //  var items = results.result.ItemSearchResponse.Items.Item
+     // save new items to the db
+     var items = results.result.SimilarityLookupResponse.Items.Item
      var validatedItems = [];
      yield items.map(function * (item) { //map of undefined
        var dbItem = yield amazonScraper.res2Item({Request: {IsValid: 'True'}, Item: item})
-       // logging.info(dbItem);
        if (dbItem) {
          dbItem.original_link = item.ItemLinks.ItemLink[0].URL
          yield dbItem.save();
