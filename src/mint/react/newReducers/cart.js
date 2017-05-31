@@ -1,11 +1,9 @@
 // react/reducers/currentCart.js
 
 import {
-  ADDING_ITEM,
   ADD_MEMBER_TO_CART,
   RECEIVE_CART,
   RECEIVE_UPDATE_CART,
-  RECEIVE_ITEMS,
   RECEIVE_ADD_ITEM,
   REQUEST_REMOVE_ITEM,
   RECEIVE_REMOVE_ITEM,
@@ -16,29 +14,11 @@ import {
   REQUEST_SET_STORE,
   REQUEST_CLEAR_CART,
   CANCEL_CLEAR_CART,
-  RECEIVE_CLEAR_CART,
-  LOGOUT
+  RECEIVE_CLEAR_CART
 } from '../constants/ActionTypes';
 
-const initialState = {
-  members: [],
-  items: [],
-  oldItems: [],
-  addingItem: false
-};
-
-export default function cart(state = initialState, action) {
+export default function cart(state = {}, action) {
   switch (action.type) {
-  case LOGOUT:
-    return {
-      ...state
-    };
-  case ADDING_ITEM:
-    return {
-      ...state,
-      addingItem: action.addingItem,
-
-    };
   case ADD_MEMBER_TO_CART:
     return {
       ...state,
@@ -53,18 +33,13 @@ export default function cart(state = initialState, action) {
       name: action.updatedCart.name,
       cart_id: action.updatedCart.id
     };
-  case 'CART_SUCCESS':
+  case RECEIVE_CART:
     return {
       ...state,
-      ...action.response,
-      thumbnail_url: action.response.thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png',
-      locked: action.response.locked || false,
-      cart_id: action.response.id
-    };
-  case RECEIVE_ITEMS:
-    return {
-      ...state,
-      items: action.items.reverse()
+      ...action.currentCart,
+      thumbnail_url: action.currentCart.thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png',
+      locked: action.currentCart.locked || false,
+      cart_id: action.currentCart.id
     };
   case RECEIVE_ADD_ITEM:
     return {
@@ -127,7 +102,7 @@ export default function cart(state = initialState, action) {
   }
 }
 
-// Selector
+// Selectors
 export const getMemberById = (state, props) => [...state.members, state.leader].find(member => member.id === props.id);
 
 export const splitCartById = (state, props) => {

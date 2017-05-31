@@ -63,26 +63,6 @@ export default class App extends Component {
     this.setState({ popup: !popup });
   }
 
-  componentWillMount() {
-    const {
-      props: {
-        fetchCart,
-        cart_id,
-        history: { replace },
-        location: { pathname }
-      }
-    } = this;
-    if (cart_id
-      && !pathname.includes('/newcart')
-      && !pathname.includes('/feedback')
-      && !pathname.includes('/archive')
-      && !pathname.includes('/settings')
-      && !pathname.includes('/404')) {
-      fetchCart(cart_id)
-        .then(cart => !cart ? replace('/404') : null);
-    }
-  }
-
   componentDidMount() {
     if (window.innerWidth < 900)
       this.setState({ isMobile: true });
@@ -152,36 +132,36 @@ export default class App extends Component {
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
-          <Toast toast={toast} status={status} loc={location} replace={replace}/>
-          <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
-          {popup ? <LoginScreenContainer _toggleLoginScreen={_togglePopup}/> : null}
-          <div className={`app__view ${showFooter ? '' : 'large'}`}>
-            <div>
-              {/* Render Error Page */}
-              <Route path={'/404'} exact component={ErrorPage} />
+        <Toast toast={toast} status={status} loc={location} replace={replace}/>
+        <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
+        {popup ? <LoginScreenContainer _toggleLoginScreen={_togglePopup}/> : null}
+        <div className={`app__view ${showFooter ? '' : 'large'}`}>
+          <div>
+            {/* Render Error Page */}
+            <Route path={'/404'} exact component={ErrorPage} />
 
-              { /* Renders modal when route permits */ }
-              <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
+            { /* Renders modal when route permits */ }
+            <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
 
-              { /* Renders cart when route permits */ }
-              <Route path={'/cart/:cart_id'} exact component={CartContainer} />
-              <Route path={'/cart/:cart_id/address'} exact component={CartContainer} />
+            { /* Renders cart when route permits */ }
+            <Route path={'/cart/:cart_id'} exact component={CartContainer} />
+            <Route path={'/cart/:cart_id/address'} exact component={CartContainer} />
 
-              { /* Renders cart choice if theres no store set */}
-              <Route path={'/newcart'} exact component={(props) => <CartStoresContainer {...props} _toggleLoginScreen={_togglePopup}/>} />
-            </div>
+            { /* Renders cart choice if theres no store set */}
+            <Route path={'/newcart'} exact component={(props) => <CartStoresContainer {...props} _toggleLoginScreen={_togglePopup}/>} />
           </div>
-          { 
-            sidenav || !isMobile 
-            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} /> 
-            : null
-          }
-          {
-            showFooter 
-            ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> 
-            : null
-          }
-        </section>
+        </div>
+        { 
+          sidenav || !isMobile 
+          ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} /> 
+          : null
+        }
+        {
+          showFooter 
+          ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> 
+          : null
+        }
+      </section>
     );
   }
 }

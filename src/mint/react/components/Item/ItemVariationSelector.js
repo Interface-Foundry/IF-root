@@ -3,7 +3,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Select from 'react-select';
-import './Dropdown.scss';
 
 export default class ItemVariationSelector extends Component {
   constructor(props) {

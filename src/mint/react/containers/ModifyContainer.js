@@ -1,4 +1,5 @@
 // react/containers/ModifyContainer.js
+// if possible merge into new footer container
 
 import { connect } from 'react-redux';
 import { updateItem, removeItem } from '../actions/item';

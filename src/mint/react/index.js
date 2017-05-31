@@ -9,9 +9,9 @@ import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
-import Reducers from './reducers';
-import { session, cart } from './actions';
-import { AppContainer } from './containers';
+import Reducers from './newReducers';
+import { checkSession, fetchCart, fetchCarts } from './newActions';
+import { AppContainer } from './newContainers';
 
 //Analytics!
 import ReactGA from 'react-ga';
@@ -48,8 +48,10 @@ const store = createStore(
 );
 
 // update login status
-store.dispatch(session.update()).then(() => {
-  store.dispatch(cart.fetchAllCarts())
+// After login return fetch cart
+store.dispatch(checkSession()).then(() => {
+  store.dispatch(fetchCarts())
+  store.dispatch(fetchCart(location.pathname.split('/')[2]))
 });
 
 ReactDOM.render(
