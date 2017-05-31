@@ -1,18 +1,12 @@
-const paymentUtils = require('./PaymentUtils.js')
 const _ = require('lodash')
+const request = require('request-promise')
+
+const constant = require('./payment_constants.js')
+const invoiceUtils = require('./InvoiceUtils.js')
 
 class Invoice {
-  constructor(invoiceType, leader, cart) {
+  constructor(invoiceType) {
     this.invoice = invoiceType
-    this.leader = leader
-    this.cart = cart
-  }
-
-  async createInvoice () {
-    const invoice = await db.Invoice.create({
-      cart: this.cart,
-      leader: this.leader
-    })
   }
 
   async checkForInvoice () {
@@ -23,9 +17,6 @@ class Invoice {
     return null
   }
 
-  createStripeCharge(args) {
-    paymentUtils.stripeChargeById(args)
-  }
 
 }
 
@@ -35,19 +26,41 @@ class Invoice {
  * @class      CafePayments (name)
  */
 class CafeInvoice extends Invoice {
-  constructor(user, cart) {
-    super('cafe', user, cart)
+  constructor(payment) {
+    super('cafe')
+    this.payment = payment
+  }
+
+  static get name() {
+    return 'cafe'
+  }
+
+  // async getDeliveryObject (cart) {
+  //   const req = await request({
+  //     uri: constant.CAFE.URI,
+  //     method: 'GET',
+
+  //   })
+  // }
+
+
+  async createStripeCharge (args) {
+
   }
 
   /**
-   * Creates a new payment thats specific to
+   * synonymous with creating a charge
    *
-   * @param      {<type>}  args    The arguments
+   * @return     {Promise}  { description_of_the_return_value }
    */
-  async createInvoice(args) {
-    //body
-  }
+  async createInvoice (args) {
+    const invoice = await db.Invoice.create({
+      cart: this.cart,
+      leader: this.leader
+    })
 
+    return invoice
+  }
 
   /**
    * post back to cafe server to do all the previous stuff that was done in payments server
@@ -56,7 +69,11 @@ class CafeInvoice extends Invoice {
    * @return     {Promise}  { description_of_the_return_value }
    */
   async postBackToCafe(args) {
-
+    await request({
+      uri: constant.CAFE.URI,
+      method: 'POST',
+      body: args
+    })
   }
 }
 
@@ -71,21 +88,21 @@ class MintInvoice extends Invoice {
     super('mint', user, cart)
   }
 
+  static get name() {
+    return 'mint'
+  }
+
 
   /**
    * we dont need to actually create a charge but after a user checks out an
    * amazon cart we should note what items or whatever were in the cart at this point
    */
-  createAmazonCharge() {
+  get createAmazonCharge() {
 
   }
 
   // methods
 }
-
-
-MintInvoice.factoryName = 'mint'
-CafeInvoice.factoryName = 'cafe'
 
 module.exports = {
   MintInvoice: MintInvoice,
