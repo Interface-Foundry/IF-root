@@ -373,11 +373,12 @@ module.exports = function (router) {
       id: req.params.cart_id
     }).populate('leader').populate('items')
 
-    console.log(cart)
+    console.log('cart??', cart)
 
     // if the cart doesn't exist, neat. congrats.
     if (!cart) {
-      res.status(200).end()
+      console.log('CART')
+      return res.sendStatus(200).end()
     }
 
     if (_.get(req, 'UserSession.user_account.id') !== _.get(cart, 'leader.id')) {
