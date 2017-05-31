@@ -20,7 +20,7 @@ const initialState = {
     slackText: '',
     subtext: [],
     learnMore: '',
-    imgUrl: 'https://storage.googleapis.com/kip-random/website/kip_collect.gif'
+    imgUrl: '//storage.googleapis.com/kip-random/website/kip_collect.gif'
   },
   services: {
     tagline: '',
@@ -45,9 +45,12 @@ const initialState = {
   help: {
     titleText: '',
     stepText: '',
-    subtext: [],
-    faq: [],
-    images: []
+    images: [],
+    faq: {
+      title: '',
+      subtext: '',
+      qs: []
+    }
   },
   blog: {
     titleText: '',

@@ -19,7 +19,7 @@
   },
   "hero": {
     "headline": "Shop Social for Best Prices",
-    "description": "Shop and save online with friends, ${Kip} gets you the lowest prices when you shop together. Use ${Kip} today!",
+    "description": "Shop and save online with friends, ${Kip} gets you the lowest prices when you shop together.${br}Use Kip today!",
     "buttonText": "Use Kip Now",
     "slackText": "Add to Slack",
     "subtext": ["Free", "No Setup", "Secure"],
@@ -91,8 +91,8 @@
       "id": 3
     }],
     "faq": [{
-      "title": "How do i talk to kip?",
-      "answer": "Kip only responds to Direct Messages. To send a Direct Message, tap Kip’s name in the Direct Messages list or + button next to it to send a message to Kip. Direct Messages help save on chatter so that you can focus on your work"
+      "title": "How do I use kip?",
+      "answer": "Start using Kip by clicking New Cart and enter your email address to login\nSelect your favorite store and add items to Kip cart using search or copy - paste URL.\nCheck out the tutorial on How It Works page "
     }, {
       "title": "Why can’t I remove items from my cart?",
       "answer": "Only Team Admins can add and remove other people’s items in the cart, change quantities and set budgets and prices. Team members can remove only their own items."

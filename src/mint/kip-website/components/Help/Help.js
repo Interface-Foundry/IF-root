@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import ReactDOM from 'react-dom';
 import { PropTypes } from 'prop-types';
-
+import { replaceMail, replaceNewLine } from '../../utils';
 import { HeaderContainer, FooterContainer } from '../../containers';
 
 export default class Help extends Component {
@@ -65,8 +65,8 @@ export default class Help extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return (
-      nextProps.helpTemplate.images.length !== this.props.helpTemplate.images.length ||
-      nextState.selectedIndex !== this.state.selectedIndex
+      nextProps.helpTemplate.images.length !== this.props.helpTemplate.images.length
+      || nextState.selectedIndex !== this.state.selectedIndex
     );
   }
 
@@ -110,16 +110,18 @@ export default class Help extends Component {
           </div>
         </section>
         <section className='FAQ'>
-          <h1><span>Frequently Asked Questions</span></h1>
-          <p className='subtext'>Cant find your answer? Contact us at <span>hello@kipthis.com</span></p>
+          <h1><span>{faq.title}</span></h1>
+          <p className='subtext'>
+            {replaceMail(faq.subtext)}
+          </p>
           {
-            faq.map((q, i) => (
+            faq.qs.map((q, i) => (
               <div key={i} className='question'>
                 <h2>
                   {`${i+1}. `}
                   {q.title}
                 </h2>
-                <p>{q.answer}</p>
+                <p>{replaceNewLine(q.answer)}</p>
               </div>
             ))
           }

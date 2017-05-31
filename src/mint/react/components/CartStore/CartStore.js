@@ -23,7 +23,8 @@ export default class CartStore extends Component {
   componentWillReceiveProps(nextProps) {
     const { choices } = this.props;
     const { choices: newStores, user_account, _toggleLoginScreen } = nextProps;
-    if (choices.length !== newStores.length && !user_account) {
+
+    if (choices.length !== newStores.length && !user_account.id) {
       _toggleLoginScreen();
     }
   }
@@ -36,7 +37,9 @@ export default class CartStore extends Component {
             <StoreChoice 
               key={choice.store_type} 
               {...choice} 
-              onClick={() => replace(`/newcart/${choice.store_type}`)} 
+              onClick={() => {
+                replace(`/newcart/${choice.store_type}`)
+              }} 
             />
           )
         }

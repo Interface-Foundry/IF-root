@@ -877,13 +877,31 @@ module.exports = function (router) {
     switch (cart.store) {
       case 'amazon':
         if (amazonConstants.categories[cart.store_locale]) {
-          res.send(amazonConstants.categories[cart.store_locale])
+          var amazonCategories = amazonConstants.categories[cart.store_locale]
+          var arrayCategories = Object.keys(amazonCategories).map(cat => {
+            return {
+              humanName: cat,
+              machineName: amazonCategories[cat],
+              searchType: 'category',
+              id: amazonCategories[cat]
+            }
+          })
+          return res.send(arrayCategories);
         } else {
           throw new Error('Cannot fetch categories for unhandled amazon store locale: ' + cart.store_locale)
         }
         break;
       case 'ypo':
-        res.send(ypoConstants.categories)
+        var ypoCategories = ypoConstants.categories;
+        var arrayCategories = Obejct.keys(ypoCategories).map(cat =>  {
+          return {
+            humanName: cat,
+            machineName: ypoCategories[cat],
+            searchType: 'category',
+            id: ypoCategories[cat]
+          }
+        })
+        res.send(arrayCategories)
         break;
       default:
         throw new Error('Cannot fetch categories for unhandled cart type: ' + cart.store)

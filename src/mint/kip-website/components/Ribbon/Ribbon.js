@@ -29,13 +29,13 @@ export default class Ribbon extends Component {
 
     return (
       <nav className={`ribbon ${fixed ? 'background' : ''}`}>
-        <div className='row-1'> 
+        <div className='row-1'>
           <div className="row row-1">
             <Link to="/">
               <div className="row-1">
                 <div className='image' style={
                   {
-                    backgroundImage: `url(https://storage.googleapis.com/kip-random/kip_logo_horizontal.svg)`
+                    backgroundImage: `url(//storage.googleapis.com/kip-random/kip_logo_horizontal.svg)`
                   }}/>
               </div>
             </Link>
@@ -46,7 +46,7 @@ export default class Ribbon extends Component {
               <div className="right menu row row-1" onClick={() => toggleSidenav()}>
                 <Icon icon='Menu' />
               </div>
-            </div> : null     
+            </div> : null
           }
 
           {
@@ -54,7 +54,7 @@ export default class Ribbon extends Component {
                 <a href='/newcart'><button>
                   {ribbonTemplate.right.newCartText}
                 </button></a>
-            </div> : null  
+            </div> : null
           }
 
           {
@@ -67,7 +67,7 @@ export default class Ribbon extends Component {
                     {ribbonTemplate.right.addToSlackText}
                   </button></a>
               </div>
-            )  
+            )
           }
 
           {
