@@ -268,7 +268,7 @@ module.exports = function (router) {
     //if the cart is private, the user must be in the same domain
     if (cart.privacy == 'private' && currentUser.email_address.split('@')[1] !== cart.leader.email_address.split('@')[1]) {
       return res.sendStatus(403);
-
+    }
     // make the user leader if no leader exists, otherwise make member
     if (!cart.leader) {
       cart.leader = userId
@@ -307,8 +307,6 @@ module.exports = function (router) {
 
     return res.send(item)
   }));
-
-
 
 
   /**
