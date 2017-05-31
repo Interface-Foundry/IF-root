@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import { Down, Right } from '../../themes/newSvg';
-
+import { replaceKip } from '../../utils'
 export default class Hero extends Component {
   static propTypes = {
     animate: PropTypes.bool,
@@ -38,7 +38,7 @@ export default class Hero extends Component {
                 {heroTemplate.headline}
               </h1>
               <p>
-                <span><Link to='/whykip'>Kip</Link></span>  {heroTemplate.description}
+                { replaceKip(heroTemplate.description) }
               </p>
               {
                 src !== 'slack' ? <div className="col-12 action">
@@ -57,7 +57,7 @@ export default class Hero extends Component {
                 {heroTemplate.subtext.map((text, i)=><span key={i}>{text}</span>)}
               </p>
             </div>
-            <Link className="col-6 animation" to='/whykip'>
+            <Link className="col-6 animation" to='/about'>
               <div className='image'/>
             </Link>
           </div>

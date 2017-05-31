@@ -12,7 +12,7 @@ export default class Landing extends Component {
   static propTypes = {
     animationState: PropTypes.number,
     fixed: PropTypes.bool,
-    registerHeight: PropTypes.number,
+    registerHeight: PropTypes.function,
     match: PropTypes.object
   }
 

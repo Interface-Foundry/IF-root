@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
 import { Right, Cloud, Person, Items, Mapper, Down } from '../../themes/newSvg';
-
+import { replaceKip } from '../../utils';
 export default class Services extends Component {
   static propTypes = {
     servicesTemplate: PropTypes.object,
@@ -23,9 +23,9 @@ export default class Services extends Component {
     return (
       <div className='services col-12'>
         <div className='col-12'>
-          <h1 className='tagline'><span>{servicesTemplate.tagLine}</span></h1>
+          <h1 className='tagline'><span>{servicesTemplate.tagline}</span></h1>
           <h4>
-            <span>Kip</span> {servicesTemplate.tagDescrip}
+            { replaceKip(servicesTemplate.tagDescrip) }
           </h4>
           <section className='cluster'>
             <Items/>

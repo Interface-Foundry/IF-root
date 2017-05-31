@@ -45,7 +45,7 @@ export function login(cart_id, email) {
 export function getSiteState() {
   return async dispatch => {
     try {
-      const response = await fetch('/api/test/site', {
+      const response = await fetch('/api/home/json', {
         credentials: 'same-origin'
       });
       return dispatch({

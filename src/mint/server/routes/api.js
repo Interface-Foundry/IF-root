@@ -1,7 +1,8 @@
 var express = require('express')
 var co = require('co')
 var _ = require('lodash')
-
+var fs = require('fs');
+var path = require('path');
 var router = express.Router();
 
 var db;
@@ -82,10 +83,19 @@ router.get('/blog/posts', (req, res) => co(function * () {
   res.send(posts)
 }))
 
-router.get('/test/site', (req, res)=>{
-  var json = require('./site.json');
-  res.json(json);
-})
+/**
+ * Returns a version of text for the site
+ * Used for A/B testing now, could be used for language later
+ * @returns a json file with all of the strings for the home page
+ */
+router.get('/home/json', async(req, res) => {
+  // need to check if we've already given them a version, and give the same version
+  const siteVersion = req.UserSession.siteVersion ? req.UserSession.siteVersion : _.sample(['A', 'B', 'C']);
+  req.UserSession.siteVersion = siteVersion;
+  await req.UserSession.save();
+  const json = fs.readFileSync(path.join(__dirname, `site${siteVersion}.json`), 'utf8');
+  res.json(JSON.parse(json));
+});
 
 function _formatPostObjects(body) {
   let json = JSON.parse(body);

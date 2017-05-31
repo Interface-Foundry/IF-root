@@ -13,22 +13,22 @@ export default class Compare extends Component {
   }
 
   generateSvgArray(arr) {
-    return arr.map(name => {
+    return arr.map((name, i) => {
       switch (name) {
       case 'Slack':
-        return <SlackIcon/>;
+        return <SlackIcon key={i}/>;
       case 'Play':
-        return <GooglePlay/>;
+        return <GooglePlay key={i}/>;
       case 'Apple':
-        return <Apple/>;
+        return <Apple key={i}/>;
       case 'Facebook':
-        return <Facebook/>;
+        return <Facebook key={i}/>;
       case 'Chrome':
-        return <Chrome/>;
+        return <Chrome key={i}/>;
       case 'Gmail':
-        return <Gmail/>;
+        return <Gmail key={i}/>;
       }
-    })
+    });
   }
 
   render() {
