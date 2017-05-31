@@ -59,9 +59,15 @@ export default class App extends Component {
     this.setState({ sidenav: !sidenav });
   }
 
-  _togglePopup = () => {
+  _togglePopup = (stop) => {
     const { popup } = this.state;
-    this.setState({ popup: !popup });
+    const { cart_id, user_account } = this.props;
+
+    if(cart_id || user_account.id) { 
+      this.setState({ popup: !popup });
+    } else {
+      this.setState({ popup: true });
+    }
   }
 
   componentWillMount() {
@@ -178,7 +184,7 @@ export default class App extends Component {
             </div>
           </div>
           { 
-            sidenav || !isMobile 
+            sidenav
             ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} /> 
             : null
           }

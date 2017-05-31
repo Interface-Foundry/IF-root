@@ -45,7 +45,7 @@ export default class Header extends Component {
           }
         />
         <Route path={'/newcart'} exact component={() => 
-            <IntroHead text={'Select Store'} {...props}/>
+            <CartHead text={'Select Store'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/deal/:index/:dealId'} exact component={() => 
@@ -120,9 +120,10 @@ class CartHead extends Component {
   render() {
     const {
       state: { bounce },
-      props: { user_account: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader, store } }
+      props: { user_account: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader, store, store_locale } }
     } = this;
-    const displayStore = store === 'ypo' ? 'YPO' : _.capitalize(store);
+
+    const displayStore = store === 'ypo' ? 'YPO' : _.capitalize(`${store} ${store_locale}`);
     return (
       <div>
         <div className='header__left'>
@@ -133,18 +134,21 @@ class CartHead extends Component {
               </div> 
             : <div className={`image ${bounce ? 'bounce': ''}`} style={
                 {
-                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png)'})`,
+                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`,
                 }
               }/>}
           <h3>
             {locked ? 'Checkout in Progress' : cartName}
           </h3>
-          <span className='members'>Created by: {leader ? leader.name : ''} | {displayStore} </span>
+          { leader ? <span className='members'>Created by: {leader ? leader.name : ''} | {displayStore} </span> : null }
           </a>
+          <div className='header__sub'>
+            <h1>Beta</h1>
+          </div>
         </div>
         <div className='header__right'>
           {!name ? <p onClick={() => _togglePopup()}><span>Login</span></p> : null}
-          {isMobile && name ? <div className='navbar__icon' onClick={_toggleSidenav}><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
+          {name ? <div className='navbar__icon' onClick={_toggleSidenav}><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
         </div>
       </div>
     );
