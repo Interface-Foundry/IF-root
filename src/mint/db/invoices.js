@@ -42,8 +42,8 @@ const invoiceCollection = Waterline.Collection.extend({
       type: 'float'
     },
 
-    /** everything that would be a cafe db.payments*/
-    cafe: {
+    /** everything that would be a order in old db.payments*/
+    cafe_order: {
       type: 'json',
     }
   }

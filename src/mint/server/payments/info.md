@@ -1,10 +1,21 @@
 keeping info here
 
+
+
 what an invoice, payment, etc is
 
-invoice is the conglomerate 
+- invoice is the conglomerate charge for mint/cafe/any other type thing, it is the main resource we should act on i.e. /:invoice_type/, 
+invoice should have id to look it up similar to cart
+
+- payment is a payment to an invoice i.e. a recurring stripe charge would pay towards an invoice total
+    + only handling one payment per invoice atm since im already confused
+
 
 ## plan for cafe:
+
+ideally user would select something like new card on slack, 
+would get url that goes to kipthis.com/pay/:invoice_id where enter stripe details and pay (and we save etc.)
+
 
 ### for saved card:
 1. from old handlers -> post to /cafe/stripe with body containing which card AND order info 

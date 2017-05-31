@@ -6,11 +6,16 @@ const paymentHandlers = {
 }
 
 
-module.exports.invoiceFactory = function invoiceFactory (invoice, user, cart) {
+function invoiceFactory (invoice, user, cart) {
   return new paymentHandlers[invoice](user, cart)
 }
 
+async function invoiceFromId(invoiceId) {
+  const invoice = await db.Invoice.findOne({id: invoiceId})
+  return invoice
+}
 
-var s = module.exports.invoiceFactory('mint', 'asdf', 'ca1')
-
-console.log(s.cart)
+module.exports = {
+  invoiceFactory: invoiceFactory,
+  invoiceFromId: invoiceFromId
+}

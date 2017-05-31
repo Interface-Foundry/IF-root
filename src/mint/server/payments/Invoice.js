@@ -35,14 +35,14 @@ class CafeInvoice extends Invoice {
     return 'cafe'
   }
 
-  // async getDeliveryObject (cart) {
-  //   const req = await request({
-  //     uri: constant.CAFE.URI,
-  //     method: 'GET',
-
-  //   })
-  // }
-
+  async newInvoice(paymentType, body) {
+    const payment = await db.Invoice({
+      invoice_type: this.invoice,
+      payment_type: paymentType,
+      cafe_order: body
+    })
+    return payment
+  }
 
   async createStripeCharge (args) {
 

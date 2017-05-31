@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const express = require('express')
 const router = express() // for testing
 // const router = express.Router()
@@ -7,42 +6,25 @@ const router = express() // for testing
 const invoiceFactory = require('./InvoiceFactory.js')
 
 
-/**
- * @api {post} /cafe/new
- * @apiDescription need to send to page where user can enter card details and posts to stripe
- * @apiGroup payments
- *
- * @apiParam {type} new - description of param
- */
-router.get('/cafe/:invoice_id', async (req, res) => {
-  const invoice = invoiceFactory('cafe', )
+// e.g. /cafe/stripe -> user is asking new card to be tied to account
+router.post('/:invoice_type/new/:payment_type', async (req, res) => {
+  const invoice = invoiceFactory(req.params.invoice_type)
+  const newCharge = invoice.newInvoice(req.params.payment_type, req.body)
+  // return res.send(newCharge)
 })
 
 
-/**
- * @api {post} /cafe/new
- * @apiDescription need to send to page where user can enter card details and posts to stripe
- * @apiGroup payments
- *
- * @apiParam {type} new - description of param
- */
-router.post('/cafe/new', async (req, res) => {
-  const invoice = invoiceFactory('cafe', req.body)
-  return res.send(invoice.newCharge())
+// e.g. /cafe/stripe -> would be creating recurring charge for something like stripe
+router.post('/:invoice_type/:payment_type', async (req, res) => {
+  const invoice = invoiceFactory(req.params.invoice_type)
+  let newCharge = await invoice.savedCard(req.params.payment_type, req.body)
+  return res.send(newCharge)
 })
 
-/**
- * @api {get} /cafe/:param
- * @apiDescription charge a presaved card
- * @apiGroup {GROUP}
- *
- * @apiParam {type} :param - description of param
- */
-router.post('/cafe/saved', async (req, res) => {
-  const invoice = invoiceFactory('cafe', )
-  const results = await invoice.charge()
-  return res.send(results)
-})
+
+
+
+
 
 /**
  * main route
@@ -52,61 +34,31 @@ router.post('/cafe/saved', async (req, res) => {
  *  cafe -
  *    /invoice/cafe/58be0af3c48b0f9f4ab41d84
  */
-router.route('/:invoice/:cart_id')
+router.route('/:invoice_id')
   /**
-   * @api {get} /:invoice
-   * @apiDescription description of the route
+   * @api {get} /:invoice_id
+   * @apiDescription present a page relevant to invoice_id, allow entering payment details for stripe/etc.
    * @apiGroup {GROUP}
    *
    * @apiParam {type} :param - description of param
    */
   .get(async (req, res) => {
-    const invoice = invoiceFactory(req.params.invoice)
-    return res.send(invoice.getInvoice)
+    const invoice = invoiceFactory(req.params.invoice_id)
+    return res.send(invoice.getPage())
   })
+
   /**
-  * @api {post} /:invoice/:cart_id
-  * @apiDescription create new invoice
+  * @api {post} /:invoice_id
+  * @apiDescription post a payment to an invoice
    * @apiGroup {GROUP}
    *
    * @apiParam {type} :card_id - description of param
    */
   .post(async (req, res) => {
-    const invoice = invoiceFactory(req.params.invoice_type)
+    const invoice = invoiceFromId(req.params.invoice_id)
     const newCharge = await invoice.createNewCharge(req.body)
     return res.send(newCharge)
   })
-
-
-
-
-/**
- * @api            {get}  /pay/:cart_id/:user_id
- * @apiName        get payment info
- * @apiGroup       Payments
- *
- * @apiDescription Gets the user payment options for the specified cart.
- *
- * @apiParam       {string}  cart_id      {description}
- * @apiParam       {string}  user_id      {description}
- *
- * @apiSuccess                                 <field>
- */
-router.get('/pay/:cart_id/:user_id', async (req, res) => {
-  const payment = (req.params.cart_id, req.params.user_id)
-})
-
-
-/**
- * @api {post} /charge/:cart_type
- * @apiDescription create charge or something
- * @apiGroup Payments
- *
- * @apiParam {string} :cart_type - description of param
- */
-router.post('/charge/:cart_type/:id', async (req, res) => {
-  await chargeHandlers[req.params.type](req.body)
-})
 
 
 // remove later
