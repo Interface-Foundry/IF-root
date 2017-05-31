@@ -11,7 +11,8 @@ const mapStateToProps = (state, props) => ({
   color: props.color,
   user_account: state.auth.user_account,
   fixed: state.app.fixed,
-  scrollTo: state.app.scrollTo
+  scrollTo: state.app.scrollTo,
+  headerTemplate: state.siteState.header
 })
 
 const mapDispatchToProps = dispatch => ({

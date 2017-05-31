@@ -1,7 +1,8 @@
 var express = require('express')
 var co = require('co')
 var _ = require('lodash')
-
+var fs = require('fs');
+var path = require('path');
 var router = express.Router();
 
 var db;
@@ -82,9 +83,9 @@ router.get('/blog/posts', (req, res) => co(function * () {
   res.send(posts)
 }))
 
-router.get('/test/site', (req, res)=>{
-  var json = require('./site.json');
-  res.json(json);
+router.get('/test/site', async(req, res) => {
+  const json = fs.readFileSync(path.join(__dirname, 'site.json'), 'utf8')
+  res.json(JSON.parse(json));
 })
 
 function _formatPostObjects(body) {

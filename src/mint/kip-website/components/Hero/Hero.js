@@ -38,7 +38,7 @@ export default class Hero extends Component {
                 {heroTemplate.headline}
               </h1>
               <p>
-                <span><Link to='/whykip'>Kip</Link></span>  {heroTemplate.description}
+                <span><Link to='/about'>Kip</Link></span>  {heroTemplate.description}
               </p>
               {
                 src !== 'slack' ? <div className="col-12 action">
@@ -57,7 +57,7 @@ export default class Hero extends Component {
                 {heroTemplate.subtext.map((text, i)=><span key={i}>{text}</span>)}
               </p>
             </div>
-            <Link className="col-6 animation" to='/whykip'>
+            <Link className="col-6 animation" to='/about'>
               <div className='image'/>
             </Link>
           </div>
