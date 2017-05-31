@@ -62,6 +62,19 @@ const post = function * (url, data, extended) {
   return body
 }
 
+const put = function * (url, data, extended) {
+  url = 'http://localhost:3000' + url
+  var body = yield request({
+    uri: url,
+    method: 'put',
+    jar: true,
+    json: true,
+    body: data,
+    resolveWithFullResponse: extended
+  })
+  return body
+}
+
 const del = function * (url, data) {
   url = 'http://localhost:3000' + url
   var body = yield request({
@@ -310,15 +323,69 @@ describe('api', function () {
     assert.equal(cart.id, mcTesty.cart_id)
   }))
 
-  //TODO privacy route tests
+  // privacy route tests
+  it('PUT /api/cart/:cart_id/privacy/:setting should let the admin change the privacy setting', () => co(function * () {
 
-  //TODO private cart describe block
+    // verify that mcTesty can update his cart's privacy setting
+    yield put('/api/cart/' + mcTesty.cart_id + '/privacy/display')
+    var cart = yield db.Carts.findOne({id: mcTesty.cart_id}).populate('members')
+    assert.equal(cart.privacy, 'display')
+
+    // create session for McFriend
+    const friendSession = yield request({
+      uri: 'http://localhost:3000/api/session',
+      method: 'GET',
+      jar: false,
+      json: true
+    })
+
+    var cookie = { session: friendSession.id }
+    var friendJar = request.jar()
+    friendJar.setCookie(cookie.toString(), 'http://localhost:3000')
+
+    // create user for McFriend and add him to the cart and session
+    const friend = yield db.UserAccounts.create({
+      email_address: mcFriend.email,
+      name: mcFriend.name
+    })
+
+    cart.members.add(friend.id)
+    yield cart.save()
+
+    var dbsession = yield db.Sessions.findOne({
+      id: friendSession.id
+    }).populate('user_account')
+    dbsession.user_account = friend.id
+    yield dbsession.save()
+
+    // this is mcFriend's session, yeah?
+    var sesh2 = yield db.Sessions.findOne({id: friendSession.id})
+    console.log(sesh2)
+
+    // save the id for later
+    mcFriend.id = friend.id
+    mcFriend.jar = friendJar
+
+    // TODO test that McFriend can't change the cart privacy settings
+    // yield put()
+    yield request({
+      uri: 'http://localhost:3000/api/cart/' + mcTesty.cart_id + '/privacy/private',
+      method: 'PUT',
+      jar: mcFriend.jar,
+      json: true
+    })
+    var cart = yield get('/api/cart/' + mcTesty.cart_id)
+    assert.notEqual(cart.privacy, 'private')
+    return true;
+  }))
+
+  //TODO private cart tests
   // --> set up and destroy private cart for this test
   // --> cannot view cart with wrong domain
   // --> cannot add items with wrong domain
   // --> cannot join cart with wrong domain
 
-  //TODO display cart describe block
+  //TODO display cart tests
   // --> set up and destroy display cart for this test
   // --> only leader can add items
   // --> only leader can join cart
