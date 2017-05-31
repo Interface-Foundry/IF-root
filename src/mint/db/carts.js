@@ -82,15 +82,17 @@ var cartsCollection = Waterline.Collection.extend({
       required: true
     },
 
+    dirty: 'boolean',
+
+    archive: archive,
+
+    // social validation metrics
+
     /** @type {integer} the number of times this cart has been #viewed */
     views: {
       type: 'integer',
       defaultsTo: '0'
-    },
-
-    dirty: 'boolean',
-
-    archive: archive
+    }
   }
 });
 
