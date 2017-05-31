@@ -877,7 +877,16 @@ module.exports = function (router) {
     switch (cart.store) {
       case 'amazon':
         if (amazonConstants.categories[cart.store_locale]) {
-          res.send(amazonConstants.categories[cart.store_locale])
+          var amazonCategories = amazonConstants.categories[cart.store_locale]
+          var arrayCategories = Object.keys(amazonCategories).map(cat => {
+            return {
+              humanName: cat,
+              machineName: amazonCategories[cat],
+              searchType: 'category',
+              id: amazonCategories[cat]
+            }
+          })
+          return res.send(arrayCategories);
         } else {
           throw new Error('Cannot fetch categories for unhandled amazon store locale: ' + cart.store_locale)
         }
