@@ -6,6 +6,7 @@ const router = express() // for testing
 const invoiceFactory = require('./InvoiceFactory.js')
 
 
+
 // e.g. /cafe/stripe -> user is asking new card to be tied to account
 router.post('/:invoice_type/new/:payment_type', async (req, res) => {
   const invoice = invoiceFactory(req.params.invoice_type)
@@ -23,16 +24,13 @@ router.post('/:invoice_type/:payment_type', async (req, res) => {
 
 
 
-
-
-
 /**
  * main route
  * e.g.
  *  mint -
- *    /invoice/mint/e2229dd4c012
+ *    /invoice/adsfe222asdfasfasfad9dd4c012
  *  cafe -
- *    /invoice/cafe/58be0af3c48b0f9f4ab41d84
+ *    /invoice/58beasdf0af3c48b0f9f4ab41d84
  */
 router.route('/:invoice_id')
   /**
@@ -43,8 +41,8 @@ router.route('/:invoice_id')
    * @apiParam {type} :param - description of param
    */
   .get(async (req, res) => {
-    const invoice = invoiceFactory(req.params.invoice_id)
-    return res.send(invoice.getPage())
+    const invoice = invoiceFactory(req.params.invoice_id, 'get')
+    return res.send(invoice.getData())
   })
 
   /**
@@ -55,7 +53,7 @@ router.route('/:invoice_id')
    * @apiParam {type} :card_id - description of param
    */
   .post(async (req, res) => {
-    const invoice = invoiceFromId(req.params.invoice_id)
+    const invoice = await invoiceFactory(req.params.invoice_id, 'get')
     const newCharge = await invoice.createNewCharge(req.body)
     return res.send(newCharge)
   })

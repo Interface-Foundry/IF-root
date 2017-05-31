@@ -2,6 +2,9 @@ const _ = require('lodash')
 const stripeTestID = 'sk_test_3dsHoF4cErzMfawpvrqVa9Mc'
 const stripe = require('stripe')(stripeTestID)
 
+
+const constants = require('./payment_constants.js')
+
 const logging = require('../../../logging.js')
 
 /**

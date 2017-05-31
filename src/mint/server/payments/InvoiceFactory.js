@@ -6,16 +6,26 @@ const paymentHandlers = {
 }
 
 
-function invoiceFactory (invoice, user, cart) {
-  return new paymentHandlers[invoice](user, cart)
-}
-
+// lookup an invoice
 async function invoiceFromId(invoiceId) {
   const invoice = await db.Invoice.findOne({id: invoiceId})
   return invoice
 }
 
-module.exports = {
-  invoiceFactory: invoiceFactory,
-  invoiceFromId: invoiceFromId
+// allow for invoice factory to do something other than instantiate invoice object
+const actionMap = {
+  'get': invoiceFromId
 }
+
+async function invoiceFactory (invoiceData, action) {
+  if (action === 'create' || action === undefined) {
+    return new paymentHandlers[invoiceData]()
+  }
+
+  const result = await actionMap[action](invoiceData)
+  return result
+}
+
+
+
+module.exports = invoiceFactory
