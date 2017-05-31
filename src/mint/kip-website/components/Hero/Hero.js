@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import { Down, Right } from '../../themes/newSvg';
-import { replaceKip } from '../../utils'
+import { replaceKip, replaceNewLine } from '../../utils';
 export default class Hero extends Component {
   static propTypes = {
     animate: PropTypes.bool,
@@ -29,7 +29,8 @@ export default class Hero extends Component {
 
   render() {
     const { animate, src, scrollToPosition, offsetTop, heroTemplate } = this.props;
-
+    const withKip = replaceKip(heroTemplate.description);
+    const withBr = withKip.length ? withKip.map(s => typeof (s) === 'string' ? replaceNewLine(s) : s) : [];
     return (
       <div className={`hero image ${animate ? 'start' : ''}`} style={{height: window.innerHeight}}>
           <div className='hero__main'>
@@ -38,7 +39,7 @@ export default class Hero extends Component {
                 {heroTemplate.headline}
               </h1>
               <p>
-                { replaceKip(heroTemplate.description) }
+                {withBr}
               </p>
               {
                 src !== 'slack' ? <div className="col-12 action">

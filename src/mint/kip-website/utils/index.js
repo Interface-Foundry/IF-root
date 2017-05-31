@@ -1,2 +1,2 @@
 export { animateScroll } from './scroll';
-export { replaceKip } from './replaceKip';
+export { replaceKip, replaceMail, replaceNewLine } from './replaceString';

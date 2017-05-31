@@ -1,57 +1,121 @@
 @import '../../themes/constants';
-
 @keyframes fadeIn {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes scrollInLeft {
-  0%   { opacity: 0; transform: translate3d(-200px, 0, 0)}
-  100% { opacity: 1; transform: translate3d(0px, 0, 0)}
+  0% {
+    opacity: 0;
+    transform: translate3d(-200px, 0, 0)
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0px, 0, 0)
+  }
 }
+
 @keyframes scrollOutRight {
-  0% { opacity: 1; transform: translate3d(0px, 0, 0)}
-  100% { opacity: 0; transform: translate3d(200px, 0, 0)}
+  0% {
+    opacity: 1;
+    transform: translate3d(0px, 0, 0)
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(200px, 0, 0)
+  }
 }
 
 @keyframes scrollInRight {
-  0%   { opacity: 0; transform: translate3d(50px, 0, 0)}
-  100% { opacity: 1; transform: translate3d(0px, 0, 0)}
+  0% {
+    opacity: 0;
+    transform: translate3d(50px, 0, 0)
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0px, 0, 0)
+  }
 }
 
 @keyframes fadeInDown {
-  0%   { opacity: 0; transform: translate3d(0, -30px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0px, 0); }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -30px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0px, 0);
+  }
 }
 
 @keyframes fadeInUp {
-  0%   { opacity: 0; transform: translate3d(0, 30px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0px, 0); }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0px, 0);
+  }
 }
 
 @keyframes fadeOutUp {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0); }
-  100% { opacity: 0; transform: translate3d(0, -30px, 0); }
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -30px, 0);
+  }
 }
 
 @keyframes fadeInUpSmall {
-  0%   { opacity: 0; transform: translate3d(0, 10px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0px, 0); }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0px, 0);
+  }
 }
 
 @keyframes fadeOutUpSmall {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0); }
-  100% { opacity: 0; transform: translate3d(0, -10px, 0); }
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
 }
 
 @keyframes fadeOutRight {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0); }
-  100% { opacity: 0; transform: translate3d(100%, 0, 0); }
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(100%, 0, 0);
+  }
 }
 
 @keyframes fallOutDown {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0); }
-  100% { opacity: 0; transform: translate3d(0, 100%, 0); }
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
 }
 
 @keyframes pulse {
@@ -90,19 +154,17 @@
   }
 }
 
-
 @keyframes pulseScale {
   0%, 10%, 50%, 80%, 100% {
-      transform: scale3d(0,0,0,1);
-    }
+    transform: scale3d(0, 0, 0, 1);
+  }
   30% {
-      transform: scale3d(0,0,0,1.066);
-    }
+    transform: scale3d(0, 0, 0, 1.066);
+  }
   60% {
-      transform: scale3d(0,0,0,1.033);
-    }
+    transform: scale3d(0, 0, 0, 1.033);
+  }
 }
-
 
 @keyframes blink {
   0% {
@@ -117,18 +179,36 @@
 }
 
 @keyframes fadeAndGrowInUp {
-  0%   { opacity: 0; transform: translate3d(0, 40px, 0) scale3d(0,0,0); }
-  100% { opacity: 1; transform: translate3d(0, 0px, 0) scale3d(1,1,1); }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0) scale3d(0, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0px, 0) scale3d(1, 1, 1);
+  }
 }
 
 @keyframes fadeAndZoomIn {
-  0%   { opacity: 0; transform: scale3d(0.4,0.4,0.4); }
-  100% { opacity: 1; transform: scale3d(1,1,1); }
+  0% {
+    opacity: 0;
+    transform: scale3d(0.4, 0.4, 0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
+  }
 }
 
 @keyframes fadeAndZoomOut {
-  0%   { opacity: 0; transform: scale3d(1.4, 1.4, 1.4); }
-  100% { opacity: 1; transform: scale3d(1, 1, 1); }
+  0% {
+    opacity: 0;
+    transform: scale3d(1.4, 1.4, 1.4);
+  }
+  100% {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
+  }
 }
 
 @keyframes bounceDownSmall {
@@ -152,7 +232,6 @@
   }
 }
 
-
 @mixin animation($args) {
   -webkit-animation: $args;
   -moz-animation: $args;
@@ -160,10 +239,9 @@
   animation: $args;
 }
 
- 
 @mixin transition($transition) {
   -webkit-transition: $transition;
   -moz-transition: $transition;
   -o-transition: $transition;
-  transition: $transition; 
+  transition: $transition;
 }

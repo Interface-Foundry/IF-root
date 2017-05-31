@@ -13,7 +13,7 @@
 	text-align: center;
 	border-bottom: 2px solid transparent;
 	margin-top: $padding*2;
-	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
+	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.7s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
     @media only screen and (max-width: 600px) {

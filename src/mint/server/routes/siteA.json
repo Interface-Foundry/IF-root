@@ -19,7 +19,7 @@
   },
   "hero": {
     "headline": "Shop Online with Friends",
-    "description": "${Kip} saves you money on 3rd party fees with wholesale prices. Use Kip Now today! ",
+    "description": "${Kip} saves you money on 3rd party fees with wholesale prices.${br}Use Kip Now today! ",
     "buttonText": "Use Kip Now",
     "slackText": "Add to Slack",
     "subtext": ["Free", "No Setup", "Secure"],
@@ -90,39 +90,46 @@
       "step": "Three",
       "id": 3
     }],
-    "faq": [{
-      "title": "How do i talk to kip?",
-      "answer": "Kip only responds to Direct Messages. To send a Direct Message, tap Kip’s name in the Direct Messages list or + button next to it to send a message to Kip. Direct Messages help save on chatter so that you can focus on your work"
-    }, {
-      "title": "Why can’t I remove items from my cart?",
-      "answer": "Only Team Admins can add and remove other people’s items in the cart, change quantities and set budgets and prices. Team members can remove only their own items."
-    }, {
-      "title": "I don’t see the my team name in the authorization page.",
-      "answer": "You may need additional admin privileges to add Kipbot to your team or channel. Check your admin levels by clicking your account profile on your Slack team."
-    }, {
-      "title": "I don’t use any platform but I want to try it.",
-      "answer": "We have a no frills, no download, no sign-in version available at kipthis.com/chat. If you have a chat service you want Kip to be on, drop us a note."
-    }, {
-      "title": "I can’t get Kip to work:(",
-      "answer": "If Kip isn’t working for you, drop us a message and we’ll get back to you ASAP."
-    }, {
-      "title": "Who is Kip?",
-      "answer": "Kip is a young digital penguin who is loves large groups of people. Being inside teams is like being in a community colony:). They are 5\"inches tall, very blue and hate missing a good sale. Their favorite food is emoji 🍋 🍉 🍇 if you send Kip emojis, they will get happy! Underneath their round black eyes, they have a personality like an iceberg…"
-    }]
+    "faq": {
+      "title": "FAQ",
+      "subtext": "Can't find your answer? Contact us at ${mail}",
+      "qs": [{
+        "title": "How do I use kip?",
+        "answer": "Start using Kip by clicking New Cart and enter your email address to login${br}Select your favorite store and add items to Kip cart using search or copy - paste URL.${br}Check out the tutorial on How It Works page "
+      }, {
+        "title": "How do I add other people to my Kip Cart?",
+        "answer": "Invite friends to Kip by clicking the +Share button on your Kip cart.${br}Copy the entire link and paste to share with anyone or tap the social media icons"
+      }, {
+        "title": "Is Kip Free?",
+        "answer": "Kip is 100% free for users. We make money through retailer affiliate fees to keep it free for you!"
+      }, {
+        "title": "How do I request a vendor/brand on Kip?",
+        "answer": "Tell us what brands and stores you want  or you can email, tweet or chat us directly!"
+      }, {
+        "title": "Is Kip available outside USA?",
+        "answer": "Yes! Learn more about Kip Global Direct and our shopping services into UK and Southeast Asia.${br}${br}If you don’t see your country, drop us a message on email, twitter or chat."
+      }, {
+        "title": "I have an idea! How do I request a feature?",
+        "answer": "Tell us what features you want here or you can email, tweet or chat us directly!"
+      }, {
+        "title": "Kip is broken, please help!",
+        "answer": "I’m sorry you’re having trouble. Contact us on email, twitter or chat and we will reply you ASAP. ${br}${br}Please describe the error and attach any screenshots if possible."
+      }]
+    }
   },
   "blog": {
     "titleText": "Conversations in Commerce",
     "subtext": ["Case Studies Findings", "Thoughts on building Kip"]
   },
   "about": {
-    "titleText": "A.I Penguin for Group Purchases",
+    "titleText": "Smart Penguin for Social Shopping",
     "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
     "why": {
-      "head": "WHY PENGUINS?",
+      "head": "HI I'M KIP THE PENGUIN",
       "actionText": "Use Kip Now",
       "description": "${Kip} brings a penguin's perspective to collective purchasing.",
       "images": ["//storage.googleapis.com/kip-random/many_kips/office.svg", "//storage.googleapis.com/kip-random/many_kips/struggle.svg", "//storage.googleapis.com/kip-random/many_kips/coupon_L.svg"],
-      "reasons": ["Group together to share resources and warmth.", "Help each other find the best spots to shop and fish.", "Swim through deals like a professional Penguin."]
+      "reasons": ["Penguins are loyal and trustworthy. Kip keeps your data safe, and doesn’t resell to 3rd parties.", "Penguins are friendly birds, Kip helps you leverage social power to get the best deals", "Penguins help each other out, let Kip take away the stress of organizing group orders"]
     }
   }
 }
