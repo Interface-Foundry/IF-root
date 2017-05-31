@@ -50,19 +50,19 @@ export default class About extends Component {
             {
               aboutTemplate.why.reasons.map((r, i) => (
                 <div key={i} className="col-4 row-1 services__details">
-                  <div className='image' style={{ backgroundImage: `url(${aboutTemplate.why.images[i]})` }} />
+                  <div className='image' style={{ backgroundImage: `url(${r.image})` }} />
                   <h4>
-                    {r}
+                    {r.text}
                   </h4>
                   <div className="col-12 row-1 action">
-                    <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank"><button><span>{aboutTemplate.why.actionText} <Right /></span></button></a>
+                    <a href='/newcart' target="_blank"><button><span>{aboutTemplate.why.actionText} <Right /></span></button></a>
                   </div>
                 </div>
               ))
             }
           </div>
         </div>
-        <h1>AS SEEN IN</h1>
+        <h1>{aboutTemplate.seenIn}</h1>
         <section className="iconsRow">
           <div className="icon col-1"/>
           <div className="icon col-1"><Icon icon='Wallstreet'/></div>

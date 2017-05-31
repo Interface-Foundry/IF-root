@@ -88,14 +88,14 @@ router.get('/blog/posts', (req, res) => co(function * () {
  * Used for A/B testing now, could be used for language later
  * @returns a json file with all of the strings for the home page
  */
-router.get('/home/json', function * (req, res) {
+router.get('/home/json', (req, res) => co(function* () {
   // need to check if we've already given them a version, and give the same version
   const siteVersion = req.UserSession.siteVersion ? req.UserSession.siteVersion : _.sample(['A', 'B', 'C']);
   req.UserSession.siteVersion = siteVersion;
   yield req.UserSession.save();
   const json = fs.readFileSync(path.join(__dirname, `site${siteVersion}.json`), 'utf8');
   res.json(JSON.parse(json));
-});
+}));
 
 function _formatPostObjects(body) {
   let json = JSON.parse(body);
