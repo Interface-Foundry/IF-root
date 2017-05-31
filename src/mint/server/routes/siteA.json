@@ -1,0 +1,128 @@
+{
+  "siteVersion": "A",
+  "ribbon": {
+    "left": [{
+      "title": "About",
+      "link": "/about"
+    }, {
+      "title": "Blog",
+      "link": "/blog"
+    }, {
+      "title": "How Kip Works",
+      "link": "/howitworks"
+    }],
+    "right": {
+      "loginText": "Log in",
+      "newCartText": "New Cart",
+      "addToSlackText": "Add To Slack"
+    }
+  },
+  "hero": {
+    "headline": "Shop Online with Friends",
+    "description": "${Kip} saves you money on 3rd party fees with wholesale prices. Use Kip Now today! ",
+    "buttonText": "Use Kip Now",
+    "slackText": "Add to Slack",
+    "subtext": ["Free", "No Setup", "Secure"],
+    "learnMore": "Learn More about Kip",
+    "imgUrl": "https: //storage.googleapis.com/kip-random/website/kip_collect.gif"
+  },
+  "header": {
+    "readMoreText": "Read More"
+  },
+  "services": {
+    "tagline": "Why Use Kip",
+    "tagDescrip": "${Kip} beats traditional web shopping by bringing all types of products into one place.",
+    "details": {
+      "descrips": ["Never create another account. Buy from anywhere with a single click.", "Share accounts like Amazon Prime without giving away passwords or personal data.", "Track orders and expenses through Slack, Email, and Facebook Messenger."],
+      "actionText": "Use Kip Now",
+      "slackActionText": "Add to Slack Now"
+    }
+  },
+  "compare": {
+    "tagline": "NOT CONVINCED?",
+    "subHead": "Just check out how we compare.",
+    "buttonText": "Use Kip Now",
+    "slackButtonText": "Add to Slack Now",
+    "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
+    "competitors": [{
+      "image": "https://storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
+      "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
+    }, {
+      "image": "https://storage.googleapis.com/kip-random/website/chart_hivy.svg",
+      "data": [true, true, false, false, false, ["Apple", "Slack"], "Credit Card Required"]
+    }, {
+      "image": "https://storage.googleapis.com/kip-random/website/chart_q.svg",
+      "data": [true, false, false, true, false, ["Apple", "Play"], "Credit Card Required"]
+    }]
+  },
+  "footer": {
+    "links": [{
+      "title": "Terms of Use",
+      "link": "/legal"
+    }, {
+      "title": "Blog",
+      "link": "/blog"
+    }, {
+      "title": "Become a Partner",
+      "link": "https://kip11.typeform.com/to/wYrY5w"
+    }]
+  },
+  "help": {
+    "stepText": "Step",
+    "titleText": "Kip is 1 - Click Easy",
+    "subtext": ["No Fees", "No Download", "No Hassle"],
+    "images": [{
+      "src": "https://storage.googleapis.com/kip-random/mint_1_desktop.gif",
+      "class": "secondary",
+      "bubble": "Browse Items or Paste a URL to Add Things to Your Kip Cart",
+      "step": "One",
+      "id": 1
+    }, {
+      "src": "https://storage.googleapis.com/kip-random/mint_2_desktop.gif",
+      "class": "primary",
+      "bubble": "Use Kip to Store the Items you Love in the Cloud",
+      "step": "Two",
+      "id": 2
+    }, {
+      "src": "https://storage.googleapis.com/kip-random/mint_3_desktop.gif",
+      "class": "third",
+      "bubble": "Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees",
+      "step": "Three",
+      "id": 3
+    }],
+    "faq": [{
+      "title": "How do i talk to kip?",
+      "answer": "Kip only responds to Direct Messages. To send a Direct Message, tap Kip’s name in the Direct Messages list or + button next to it to send a message to Kip. Direct Messages help save on chatter so that you can focus on your work"
+    }, {
+      "title": "Why can’t I remove items from my cart?",
+      "answer": "Only Team Admins can add and remove other people’s items in the cart, change quantities and set budgets and prices. Team members can remove only their own items."
+    }, {
+      "title": "I don’t see the my team name in the authorization page.",
+      "answer": "You may need additional admin privileges to add Kipbot to your team or channel. Check your admin levels by clicking your account profile on your Slack team."
+    }, {
+      "title": "I don’t use any platform but I want to try it.",
+      "answer": "We have a no frills, no download, no sign-in version available at kipthis.com/chat. If you have a chat service you want Kip to be on, drop us a note."
+    }, {
+      "title": "I can’t get Kip to work:(",
+      "answer": "If Kip isn’t working for you, drop us a message and we’ll get back to you ASAP."
+    }, {
+      "title": "Who is Kip?",
+      "answer": "Kip is a young digital penguin who is loves large groups of people. Being inside teams is like being in a community colony:). They are 5\"inches tall, very blue and hate missing a good sale. Their favorite food is emoji 🍋 🍉 🍇 if you send Kip emojis, they will get happy! Underneath their round black eyes, they have a personality like an iceberg…"
+    }]
+  },
+  "blog": {
+    "titleText": "Conversations in Commerce",
+    "subtext": ["Case Studies Findings", "Thoughts on building Kip"]
+  },
+  "about": {
+    "titleText": "A.I Penguin for Group Purchases",
+    "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
+    "why": {
+      "head": "WHY PENGUINS?",
+      "actionText": "Use Kip Now",
+      "description": "${Kip} brings a penguin's perspective to collective purchasing.",
+      "images": ["//storage.googleapis.com/kip-random/many_kips/office.svg", "//storage.googleapis.com/kip-random/many_kips/struggle.svg", "//storage.googleapis.com/kip-random/many_kips/coupon_L.svg"],
+      "reasons": ["Group together to share resources and warmth.", "Help each other find the best spots to shop and fish.", "Swim through deals like a professional Penguin."]
+    }
+  }
+}

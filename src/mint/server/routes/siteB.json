@@ -1,4 +1,5 @@
 {
+  "siteVersion": "B",
   "ribbon": {
     "left": [{
       "title": "About",
@@ -17,11 +18,11 @@
     }
   },
   "hero": {
-    "headline": "Shop Online with Friends",
-    "description": "saves you money on 3rd party fees with wholesale prices. Use Kip Now today!",
+    "headline": "Shop Social for Best Prices",
+    "description": "Shop and save online with friends, ${Kip} gets you the lowest prices when you shop together. Use ${Kip} today!",
     "buttonText": "Use Kip Now",
     "slackText": "Add to Slack",
-    "subtext": ["Free", "No Setup", "Secure", "Safe"],
+    "subtext": ["Free", "No Setup", "Secure"],
     "learnMore": "Learn More about Kip",
     "imgUrl": "https: //storage.googleapis.com/kip-random/website/kip_collect.gif"
   },
@@ -29,10 +30,10 @@
     "readMoreText": "Read More"
   },
   "services": {
-    "tagline": "THE KIP SOLUTION",
-    "tagDescrip": "beats traditional web shopping by bringing all types of products into one place.",
+    "tagline": "The Kip Way",
+    "tagDescrip": "${Kip} beats traditional web shopping by bringing all types of products into one place.",
     "details": {
-      "descrips": ["Never create another account. Buy from anywhere with a single click.", "Share accounts like Amazon Prime without giving away passwords or personal data.", "Track orders and expenses through Slack, Email, and Facebook Messenger."],
+      "descrips": ["Forgot password? Kip lets you shop across multiple stores with 1-login.", "Save on shipping and split Amazon Prime fees without sharing passwords.", "Create group orders through Slack, Email, and Facebook Messenger."],
       "actionText": "Use Kip Now",
       "slackActionText": "Add to Slack Now"
     }
@@ -119,7 +120,7 @@
     "why": {
       "head": "WHY PENGUINS?",
       "actionText": "Use Kip Now",
-      "description": "brings a penguin's perspective to collective purchasing.",
+      "description": "${Kip} brings a penguin's perspective to collective purchasing.",
       "images": ["//storage.googleapis.com/kip-random/many_kips/office.svg", "//storage.googleapis.com/kip-random/many_kips/struggle.svg", "//storage.googleapis.com/kip-random/many_kips/coupon_L.svg"],
       "reasons": ["Group together to share resources and warmth.", "Help each other find the best spots to shop and fish.", "Swim through deals like a professional Penguin."]
     }
