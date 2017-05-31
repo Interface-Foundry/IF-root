@@ -13,11 +13,20 @@ import Reducers from './reducers';
 import { get, getSiteState } from './actions';
 import { AppContainer } from './containers';
 
-if (module.hot) {
+//Analytics!
+import ReactGA from 'react-ga';
+
+if (module.hot
+  && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt'))
+  && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
   module.hot.accept();
 }
 
 const history = createHistory();
+history.listen((location, action) => {
+  ReactGA.set({ path: location.pathname });
+  ReactGA.pageview(location.pathname);
+});
 const historyMiddleware = routerMiddleware(history);
 
 let middleware = [thunkMiddleware, historyMiddleware];
@@ -39,7 +48,23 @@ const store = createStore(
 // Check session and prep carts and blogs
 store.dispatch(getSiteState())
   .then(() => store.dispatch(get('/api/session', 'SESSION')))
-  .then(() => Promise.all([store.dispatch(get('/api/carts', 'CARTS')), store.dispatch(get('api/blog/posts', 'POSTS'))]));
+  .then(() => Promise.all([store.dispatch(get('/api/carts', 'CARTS')), store.dispatch(get('api/blog/posts', 'POSTS'))]))
+  .then((...args) => {
+    const sessionId = store.getState()
+      .auth.id;
+    if (sessionId && process.env.GA) {
+      ReactGA.initialize('UA-51752546-10', {
+        gaOptions: {
+          userId: sessionId
+        }
+      });
+      ReactGA.event({
+        category: 'ABTest',
+        action: store.getState()
+          .siteState.siteVersion
+      });
+    }
+  });
 
 // Configure View
 ReactDOM.render(
