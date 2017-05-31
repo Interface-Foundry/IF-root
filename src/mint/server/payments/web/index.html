@@ -1,0 +1,117 @@
+<!doctype html>
+
+<!--
+    Kip Pay module
+
+      =()=
+  ,/'\_||_
+  ( (___  `.
+  `\./  `=='
+         |||
+         |||
+         |||                    _ ___  _               _ ___  _
+       ,;'''''''';,           ,;;;;;;;;;;,           .oooooooooo.
+     ,'  _o_o_o_o  ',        |';;;;;;;;;;'|         |'oooooooooo'|
+    ,,,;'        ';,'        |            |         |            |
+       '.________.'           '.________.'           '.________.'
+
+           Tako                  Tobiko                  Ikura
+         (Octopus)          (Flying Fish Roe)         (Salmon Roe)
+-->
+
+<html lang="en">
+<head>
+  <title>Kip Pay with Stripe</title>
+
+  <link rel="stylesheet" type="text/css" href="public/style.css" media="screen"/>
+  <link rel="stylesheet" type="text/css" href="public/normalize.css" media="screen"/>
+  <link rel="apple-touch-icon" sizes="57x57" href="img/favicon/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="img/favicon/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="img/favicon/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="img/favicon/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="img/favicon/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="img/favicon/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="img/favicon/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="img/favicon/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="img/favicon/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="img/favicon/favicon-194x194.png" sizes="194x194">
+  <link rel="icon" type="image/png" href="img/favicon/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="img/favicon/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="img/favicon/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="img/favicon/manifest.json">
+  <link rel="mask-icon" href="img/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="img/favicon/mstile-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="description" content="Kip Pay">
+  <meta name="author" content="Kip">
+</head>
+
+<body>
+
+<div id="wrap">
+  <div id="kipPay">
+    <div id="topPay">
+      <img id="kipHead" src="img/kip-head.png">
+    </div>
+    <div id="bodyPay">
+        <span id="headerText"></span> 
+        <span id="bodyTitle"></span>
+        <span id="bodyText"></span>
+    </div>
+    <div id="innerButton">
+      <!-- STRIPE.js -->  
+      <form id="payment-form" style="display:none;"> 
+        <div class="form-row">
+          <p class="centered" id="cafeInfo"></p>          
+          <label class="centered">
+            <span data-stripe="number"></span>
+            <p id="stripeEmail" style="opacity:0.5;"></p>
+          </label>
+        </div>
+
+        <hr style="opacity:0.3;">
+
+        <span class="payment-errors"></span>
+        <div class="form-input-set">
+          <div class="input-set-container">
+            <div class="form-row flexed">
+                <input id="s" autofocus class="full" type="tel" size="19" maxlength="19" data-stripe="number" autocomplete="cc-number" autocorrect="no" autocapitalize="no" inputmode="numeric" placeholder="Card number" spellcheck="no">
+            </div>
+            <div class="form-row flexed">
+                <input class="border-right" type="tel" size="2" maxlength="2" data-stripe="exp_month" autocomplete="cc-exp-month" autocorrect="no" autocapitalize="no" inputmode="numeric" placeholder="MM" spellcheck="no">
+              <input class="border-right" type="tel" size="2" maxlength="2" data-stripe="exp_year" autocomplete="cc-exp-year" autocorrect="no" autocapitalize="no" inputmode="numeric" placeholder="YY" spellcheck="no">
+                <input  type="tel" size="4" maxlength="4" data-stripe="cvc" autocomplete="cc-number" autocorrect="no" autocapitalize="no" inputmode="numeric" placeholder="CVC" spellcheck="no">          
+            </div>
+
+            <div class="form-row flexed">
+                <input class="no-bottom-border" type="tel" size="6" maxlength="6" placeholder="Zip code" data-zip-code="true" data-stripe="address_zip" id="postal-code" name="postal-code" autocomplete="shipping postal-code"  autocorrect="no" autocapitalize="no" inputmode="numeric" spellcheck="no">
+            </div>
+          </div>
+        </div>
+        <button type="submit" id="stripeJSButton" class="sButton submit" style="display:none;"></button>
+      </form>
+
+      <!--/ / / / / / / / -->
+
+      <button id="stripeButton" class="sButton">Click to Pay with Stripe</button>
+    </div>
+    <div class="footer-content">
+      <p id="terms">By using Kip you agree to our <a href="https://kipthis.com/legal.html" target="_blank" style="color:#fff;">Terms & Service</a></p>
+      <img id="stripe-logo" src="img/stripe-outline-light.svg">   
+    </div>
+</div>
+</div>
+<div id="stripeSuccess" style="display:none;"><p>✓ Success</p></div>
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+<script src="public/script.js"></script>
+
+</body>
+</html>
