@@ -91,6 +91,13 @@ var cartsCollection = Waterline.Collection.extend({
       defaultsTo: '0'
     },
 
+    /** @type {integer} the value of the cart */
+    subtotal: 'integer',
+
+    /** @type {string} the currency type of the cart if we get it */
+    currency_code: 'string',
+
+
     dirty: 'boolean',
 
     archive: archive
