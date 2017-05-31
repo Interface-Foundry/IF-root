@@ -7,22 +7,23 @@ const invoiceFactory = require('./InvoiceFactory.js')
 
 
 
-// e.g. /cafe/stripe -> user is asking new card to be tied to account
-router.post('/:invoice_type/new/:payment_type', async (req, res) => {
-  const invoice = invoiceFactory(req.params.invoice_type)
-  const newCharge = invoice.newInvoice(req.params.payment_type, req.body)
-  // return res.send(newCharge)
+
+/**
+ * @api {post} /invoice/:invoice_type/:cart_id
+ * @apiDescription create an invoice for the
+ * @apiGroup {GROUP}
+ *
+ * @apiParam {type} :invoice_type - description of param
+ */
+router.post('/:invoice_type/:cart_id', async (req, res) => {
+  const invoice = await invoiceFactory(req.params.invoice_type, req.params.cart_id)
+  const prevInvoice = await invoice.checkPrevInvoice()
+  if (prevInvoice) {
+    throw new Error('Previous invoice already created for this cart')
+  }
+  const newInvoice = await invoice.createNewInvoice()
+  return newInvoice
 })
-
-
-// e.g. /cafe/stripe -> would be creating recurring charge for something like stripe
-router.post('/:invoice_type/:payment_type', async (req, res) => {
-  const invoice = invoiceFactory(req.params.invoice_type)
-  let newCharge = await invoice.savedCard(req.params.payment_type, req.body)
-  return res.send(newCharge)
-})
-
-
 
 /**
  * main route
@@ -59,14 +60,26 @@ router.route('/:invoice_id')
   })
 
 
+
+
+// e.g. /cafe/stripe -> user is asking new card to be tied to account
+router.post('/:invoice_type/new/:payment_type', async (req, res) => {
+  const invoice = invoiceFactory(req.params.invoice_type)
+  const newCharge = invoice.newInvoice(req.params.payment_type, req.body)
+  // return res.send(newCharge)
+})
+
+
+// e.g. /cafe/stripe -> would be creating recurring charge for something like stripe
+router.post('/:invoice_type/:payment_type', async (req, res) => {
+  const invoice = invoiceFactory(req.params.invoice_type)
+  let newCharge = await invoice.savedCard(req.params.payment_type, req.body)
+  return res.send(newCharge)
+})
+
 // remove later
 const PORT = process.env.PORT || 3000;
 
 router.listen(PORT, () => {
   console.log(`App listening at http://127.0.0.1:${PORT}`);
 });
-
-
-
-// router.post('/process', (req, res) => co(function * () {
-// }))

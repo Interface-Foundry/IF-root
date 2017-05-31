@@ -1,8 +1,3 @@
-const _ = require('lodash')
-const stripeTestID = 'sk_test_3dsHoF4cErzMfawpvrqVa9Mc'
-const stripe = require('stripe')(stripeTestID)
-
-
 const constants = require('./payment_constants.js')
 
 const logging = require('../../../logging.js')
@@ -13,21 +8,7 @@ const logging = require('../../../logging.js')
  * @param      {<type>}   payment  The payment
  * @return     {Promise}  { description_of_the_return_value }
  */
-async function stripeChargeById (payment) {
-  const total = Math.round(payment.order.order.total)
 
-  try {
-    const charge = await stripe.charges.create({
-      amount: total, // Amount in cents
-      currency: 'usd',
-      customer: payment.order.saved_card.customer_id, // Previously stored, then retrieved
-      card: payment.order.saved_card.card_id
-    })
-  } catch (err) {
-    logging.error('error creating stripe charge', err)
-  }
-  return charge
-}
 
 
 //   if (charge) {
