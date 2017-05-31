@@ -328,7 +328,7 @@ module.exports = function (router) {
       throw new Error('Only accepting ids in new item at the moment')
     }
     const newItemId = req.body.new_item_id
-    const user_id = req.UserSession.user_account.id.populate('leader')
+    const user_id = req.UserSession.user_account.id
     let cart = yield db.Carts.findOne({id: req.params.cart_id})
     const oldItem = yield db.Items.findOne({id: req.params.item_id})
 
@@ -338,9 +338,6 @@ module.exports = function (router) {
     }
     if (!oldItem) {
       throw new Error('Old Item not found')
-    }
-    if (cart.leader.id !== user_id) {
-      res.sendStatus(403)
     }
 
     cart = yield cartUtils.deleteItemFromCart(oldItem, cart, user_id)
@@ -369,10 +366,14 @@ module.exports = function (router) {
    * @apiParam {string} :setting privacy setting we want the cart to have
    */
   router.put('/cart/:cart_id/privacy/:setting', (req, res) => co(function * () {
-    var cart = yield db.Carts.findOne({id: req.params.cart_id});
+    if (!req.UserSession) return res.sendStatus(401)
+
+    const user_id = req.UserSession.user_account.id
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('leader');
     var setting = req.params.setting
 
     if (!cart) return res.sendStatus(404);
+    if (cart.leader.id !== user_id) return res.sendStatus(403)
     if (setting !== 'public' && setting !== 'private' && setting != 'display') {
       return res.sendStatus(400);
     }

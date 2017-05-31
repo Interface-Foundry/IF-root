@@ -339,10 +339,6 @@ describe('api', function () {
       json: true
     })
 
-    var cookie = { session: friendSession.id }
-    var friendJar = request.jar()
-    friendJar.setCookie(cookie.toString(), 'http://localhost:3000')
-
     // create user for McFriend and add him to the cart and session
     const friend = yield db.UserAccounts.create({
       email_address: mcFriend.email,
@@ -358,16 +354,15 @@ describe('api', function () {
     dbsession.user_account = friend.id
     yield dbsession.save()
 
-    // this is mcFriend's session, yeah?
-    var sesh2 = yield db.Sessions.findOne({id: friendSession.id})
-    console.log(sesh2)
+    var cookie = { session: dbsession.id }
+    var friendJar = request.jar()
+    friendJar.setCookie(cookie.toString(), 'http://localhost:3000')
 
     // save the id for later
     mcFriend.id = friend.id
     mcFriend.jar = friendJar
 
-    // TODO test that McFriend can't change the cart privacy settings
-    // yield put()
+    // test that McFriend can't change the cart privacy settings
     yield request({
       uri: 'http://localhost:3000/api/cart/' + mcTesty.cart_id + '/privacy/private',
       method: 'PUT',
