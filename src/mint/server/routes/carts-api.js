@@ -251,6 +251,7 @@ module.exports = function (router) {
     }
 
     const currentUser = yield db.UserAccounts.findOne(_.get(req, 'UserSession.user_account.id'));
+    var userId = currentUser.id
 
     // Make sure the cart exists
     const cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('leader')

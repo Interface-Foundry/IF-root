@@ -75,7 +75,7 @@ const del = function * (url, data) {
 }
 
 describe('api', function () {
-  this.timeout(4000)
+  this.timeout(8000)
   before(() => co(function * () {
     // clean up the db
     yield dbReady
@@ -172,6 +172,9 @@ describe('api', function () {
     // make sure McTesty is the leader
     assert.equal(cart.leader.email_address, mcTesty.email)
     // assert.equal(cart.name, mcTesty.name + " Kip Cart")
+
+    // the default privacy status should be public
+    assert.equal(cart.privacy, 'public')
 
     // lets save this cart id for later
     mcTesty.cart_id = cart.id
@@ -306,6 +309,19 @@ describe('api', function () {
     assert.equal(cart.name, settings.name)
     assert.equal(cart.id, mcTesty.cart_id)
   }))
+
+  //TODO privacy route tests
+
+  //TODO private cart describe block
+  // --> set up and destroy private cart for this test
+  // --> cannot view cart with wrong domain
+  // --> cannot add items with wrong domain
+  // --> cannot join cart with wrong domain
+
+  //TODO display cart describe block
+  // --> set up and destroy display cart for this test
+  // --> only leader can add items
+  // --> only leader can join cart
 
   it('GET /api/user should return a user for an email address', () => co(function * () {
     var user = yield get('/api/user?email=' + encodeURIComponent(mcTesty.email))
