@@ -27,21 +27,20 @@ function deploy() {
       cwd: path.join(__dirname, '../../')
     })
     console.log(stdout.toString())
-    stdout = exec('rm -rf node_modules', {
+
+    stdout = exec('yarn install', {
       cwd: __dirname
     })
     console.log(stdout.toString())
-    stdout = exec('npm install', {
-      cwd: __dirname
-    })
-    console.log(stdout.toString())
-    stdout = exec('npm run build', {
+
+    stdout = exec('yarn build', {
       cwd: __dirname,
       env: _.merge(process.env, {
         NODE_PATH: './react'
       })
     })
     console.log(stdout.toString())
+
     resolve()
   })
 }

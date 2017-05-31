@@ -99,7 +99,11 @@ var cartsCollection = Waterline.Collection.extend({
     views: {
       type: 'integer',
       defaultsTo: '0'
-    }
+    },
+
+    dirty: 'boolean',
+
+    archive: archive
   }
 });
 

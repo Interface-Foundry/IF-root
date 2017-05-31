@@ -10,8 +10,8 @@ import thunkMiddleware from 'redux-thunk';
 import { Route } from 'react-router-dom';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import Reducers from './reducers';
-import { get } from './actions';
-import { App } from './components';
+import { get, getSiteState } from './actions';
+import { AppContainer } from './containers';
 
 if (module.hot) {
   module.hot.accept();
@@ -36,17 +36,16 @@ const store = createStore(
   applyMiddleware(...middleware)
 );
 
-// Check the session?? i guess
-store.dispatch(get('/api/session', 'SESSION'))
-  .then(() => {
-    store.dispatch(get('/api/carts', 'CARTS'));
-  });
+// Check session and prep carts and blogs
+store.dispatch(getSiteState())
+  .then(() => store.dispatch(get('/api/session', 'SESSION')))
+  .then(() => Promise.all([store.dispatch(get('/api/carts', 'CARTS')), store.dispatch(get('api/blog/posts', 'POSTS'))]));
 
 // Configure View
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <Route path="/" component={App}/>
+      <Route path="/" component={AppContainer}/>
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root')

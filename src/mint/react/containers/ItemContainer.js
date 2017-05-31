@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { Item } from '../components';
 import { fetchCards, selectCard } from '../actions/cards';
-import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, decrementItem, nextSearch, prevSearch, setSearchIndex, updateItem } from '../actions/item';
+import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, decrementItem, nextSearch, prevSearch, setSearchIndex, saveOldId } from '../actions/item';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -29,12 +29,12 @@ const mapDispatchToProps = dispatch => ({
     });
     return dispatch(previewItem(itemId));
   },
-  previewAmazonItem: (amazonId, store) => {
+  previewAmazonItem: (amazonId, store, locale) => {
     ReactGA.event({
       category: 'Item',
       action: 'Item Added',
     });
-    return dispatch(previewAmazonItem(amazonId, store));
+    return dispatch(previewAmazonItem(amazonId, store, locale));
   },
   clearItem: () => dispatch(clearItem()),
   removeItem: (cart_id, item_id) => {
@@ -50,7 +50,7 @@ const mapDispatchToProps = dispatch => ({
   prevSearch: () => dispatch(prevSearch()),
   selectCard: (cardIndex, card) => dispatch(selectCard(cardIndex, card)),
   setSearchIndex: (index) => dispatch(setSearchIndex(index)),
-  updateItem: (cart_id, old_item_id, new_item_id) => dispatch(updateItem(cart_id, old_item_id, new_item_id))
+  saveOldId: (item_id) => dispatch(saveOldId(item_id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Item);

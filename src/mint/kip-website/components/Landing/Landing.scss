@@ -1,15 +1,64 @@
 @import './../../themes/constants';
+@import '../../themes/animations';
 
 .landing {
-	position: absolute;
-	overflow: auto;
-	overflow-x: hidden;
-	-webkit-overflow-scrolling: touch;
-	top: 0;
-	text-align: center;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	height: 100%;
-	width: 100%;
+	overflow: hidden;
+	.icons {
+		position: relative;
+		height: $ribbonHeight*3;
+		width: 100%;
+		padding: 0;
+		display: table;
+		background:  mix(white, $primaryColor, 95%);
+		margin: $padding*5 auto;
+		white-space: nowrap;
+
+		& > div {
+			position: relative;
+			display: table-cell;
+			vertical-align: middle;
+			fill: rgba($bgColor, 0.5);
+			padding: $padding;
+			background:  mix(white, $primaryColor, 95%);
+
+			@media only screen and (max-width: 600px) {
+				display: inline-block;
+				height: 100%;
+				line-height: 100%;
+				padding: 20% 0;
+				width: 35%;
+				&:first-of-type {
+					display: none;
+				}
+				&:last-of-type {
+					display: none;
+				}
+			}
+		}
+
+		@media only screen and (max-width: 600px) {
+	    	@include animation(scrollLeftRight 25s infinite);
+		}
+	}
+
+	.blobs {
+	    position: absolute;
+	    left: 0;
+	    bottom: -$ribbonHeight*5.5;
+	    z-index: 0;
+	    width: 100%;
+	    height: $ribbonHeight*6;
+
+	    g, path {
+	    	fill: mix(white, $primaryColor, 90%) !important;
+	    	z-index: 0;
+	    }
+
+	    @media only screen and (max-width: 600px) {
+	    	left: -30%;
+	    	bottom: -$ribbonHeight*6;
+	    	width: 200%;
+		}
+	}
+
 }

@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { cloudinary } from '../../utils';
 import ReactGA from 'react-ga';
 import Image from './Image';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 
 class EditCart extends Component {
   static propTypes = {
@@ -57,7 +57,7 @@ class EditCart extends Component {
         <div className="input custom src">
             <Image input={{ 
               onChange: _updateImage, 
-              value: (cart ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/head%40x2.png') 
+              value: (cart ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png') 
             }} />
         </div>
          { 

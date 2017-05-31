@@ -64,5 +64,67 @@ router.get('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
   res.send(email.message_html)
 }))
 
+// Testing route for getting medium posts
+// curl -i -X GET http://127.0.0.1:3000/api/blog/posts
+router.get('/blog/posts', (req, res) => co(function * () {
+  function makeRequest() {
+    var res = request('https://medium.com/_/api/users/66b05b2821b1/profile/stream?limit=30&source=overview&page=5')
+    return res.then(body => {
+        return _formatPostObjects(body.split('])}while(1);</x>')[1]);
+      }).catch(err => {
+        console.log('bad', err);
+      });
+  }
+
+  logging.info('about to get posts');
+  var posts = yield makeRequest();
+
+  res.send(posts)
+}))
+
+router.get('/test/site', (req, res)=>{
+  var json = require('./site.json');
+  res.json(json);
+})
+
+function _formatPostObjects(body) {
+  let json = JSON.parse(body);
+
+  return _.reduce(json.payload.references.Post, (acc, post, key) => {
+    acc.push({
+      id: key,
+      title: post.title,
+      firstPublishedAt: post.firstPublishedAt,
+      imageSrc: post.previewContent.bodyModel.paragraphs[0].metadata ? `https://cdn-images-1.medium.com/${post.previewContent.bodyModel.paragraphs[0].metadata.id}` : null,
+      postSrc: `https://medium.com/@kipsearch/${post.uniqueSlug}`
+    })
+    return acc;
+  }, [])
+}
+
+
+/**
+ * Scrapes camelcamelcamel
+ * @returns full site HTML
+ * @param the mongoId (as a string) of the last camel item we've shown the user
+ */
+ var request = require('request-promise');
+var scrape = function * (previousId) {
+  function makeRequest(url) {
+    var res = process.env.NO_LUMINATI ? request(url) : proxy.luminatiRequest(url);
+    return res.then(body => {
+        // console.log('success', body);
+        console.log('success');
+        return body;
+      }).catch(err => {
+        console.log('bad', err);
+      });
+  }
+
+  logging.info('about to scrape');
+  var stuff = yield makeRequest(url);
+  return stuff;
+};
+
 
 module.exports = router;

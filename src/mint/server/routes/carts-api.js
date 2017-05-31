@@ -13,6 +13,7 @@ const haversine = require('haversine')
 const stable = require('stable')
 const thunkify = require('thunkify')
 const ipinfo = thunkify(require('ipinfo'))
+const spliddit = require('spliddit')
 
 const cart_types = require('../cart/cart_types').stores
 const countryCoordinates = require('../cart/cart_types').countryCoordinates
@@ -206,6 +207,9 @@ module.exports = function (router) {
       cart.members.add(req.params.user_id)
     }
 
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
+
     // Save all the weird shit we've added to this poor cart.
     yield cart.save()
 
@@ -288,15 +292,18 @@ module.exports = function (router) {
       item = yield cartUtils.addItem(req.body, cart, 1)
     }
 
-    cart.items.add(_.get(item, 'id', item._id))
+    // join the two database documents
+    cart.items.add(item.id)
     item.cart = cart.id
 
-    logging.info('user id?', req.UserSession.user_account.id)
+    // specify who added it
     item.added_by = userId
+
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
 
     // Save all the weird shit we've added to this poor cart.
     yield [item.save(), cart.save()]
-    // specify who added it
 
     return res.send(item)
   }));
@@ -314,16 +321,15 @@ module.exports = function (router) {
    *
    * @apiParamExample Item from Preview
    * PUT https://mint.kipthis.com/api/cart/123456/item {
-   *   new_item_asin: 'abc-123456',
-   *   user_id: '123456y'
+   *   new_item_id: 'abc-123456'
    * }
    */
   router.put('/cart/:cart_id/item/:item_id/update', (req, res) => co(function* () {
-    if (!_.get(req, 'body.new_item_asin')) {
-      throw new Error('Only accepting asins in new item at the moment')
+    if (!_.get(req, 'body.new_item_id')) {
+      throw new Error('Only accepting ids in new item at the moment')
     }
-    const newItemAsin = req.body.new_item_asin
-    const userId = req.UserSession.user_account.id
+    const newItemId = req.body.new_item_id
+    const user_id = req.UserSession.user_account.id
     let cart = yield db.Carts.findOne({id: req.params.cart_id})
     const oldItem = yield db.Items.findOne({id: req.params.item_id})
 
@@ -335,8 +341,20 @@ module.exports = function (router) {
       throw new Error('Old Item not found')
     }
 
-    cart = yield cartUtils.deleteItemFromCart(oldItem, cart, userId)
-    const newItem = yield cartUtils.addItemToCart(newItemAsin, cart, userId, oldItem.quantity)
+    cart = yield cartUtils.deleteItemFromCart(oldItem, cart, user_id)
+    const newItem = yield db.Items.findOne({id: newItemId})
+
+    // join the two database documents
+    cart.items.add(newItem.id)
+    newItem.cart = cart.id
+
+    // specify who added it
+    newItem.added_by = user_id
+
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
+    yield [newItem.save(), cart.save()]
+
     return res.send(newItem)
   }));
 
@@ -381,6 +399,9 @@ module.exports = function (router) {
        throw new Error('Unauthorized, only cart leader can clear cart items')
      }
      cart.items.map(i => cart.items.remove(i.id))
+
+     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+     cart.dirty = true
      yield cart.save()
      res.status(200).end()
    }))
@@ -463,6 +484,10 @@ module.exports = function (router) {
 
     // Remove the cart-item association
     cart.items.remove(item.id)
+
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
+
     yield cart.save()
 
     // Just say ok
@@ -509,7 +534,11 @@ module.exports = function (router) {
     delete req.body.store_locale
 
     _.merge(cart, req.body)
+
+    // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
+    cart.dirty = true
     yield cart.save()
+
     res.send(cart)
   }))
 
@@ -521,16 +550,11 @@ module.exports = function (router) {
     *
     */
   router.post('/share/:cart_id', (req, res) => co(function * () {
-    // only available for logged-in Users
-    // if (!_.get(req, 'UserSession.user_account.id')) {
-    //   throw new Error('Unauthorized')
-    // }
-
     // get the cart and leader
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items');;
     var leader = yield db.UserAccounts.findOne({id: cart.leader});
 
-    //TODO send email
+    // send email
     var share = yield db.Emails.create({
       sender: 'Kip <hello@kip.ai>',
       recipients: (leader.email ? leader.email : leader.email_address),
@@ -551,6 +575,9 @@ module.exports = function (router) {
     });
     console.log('about to send the email to ' + (leader.email ? leader.email : '...' + leader.email_address)) ;
     yield share.send();
+
+    // Send a happy status that the sharing was successful
+    res.status(200).end()
   }))
 
   /**
@@ -624,6 +651,13 @@ module.exports = function (router) {
 
     _.merge(item, req.body)
     yield item.save()
+
+    // mark the cart as dirty
+    if (!cart.dirty) {
+      cart.dirty = true
+      yield cart.save()
+    }
+
     res.send(item)
   }))
 
@@ -640,6 +674,96 @@ module.exports = function (router) {
     res.send(item)
   }))
 
+
+  /**
+   * @api {get} /api/item/:item_id/reactions
+   * @apiDescription get all reactions on an item
+   * @apiGroup Carts
+   * @apiParam {String} :item_id
+   */
+  router.get('/item/:item_id/reactions', (req, res) => co(function * () {
+    var item = yield db.Items.findOne({id: req.params.item_id}).populate('reactions')
+    if (!item) return res.sendStatus(404);
+    return res.send(item.reactions);
+  }))
+
+  /**
+   * @api {get} /api/item/:item_id/reaction/:user_id
+   * @apiDescription get a single reaction on an item associated with a specific user
+   * @apiGroup Carts
+   * @apiParam {String} :item_id
+   * @apiParam {String} :user_id
+   */
+  router.get('/item/:item_id/reaction/:user_id', (req, res) => co(function * () {
+   var item = yield db.Items.findOne({id: req.params.item_id}).populate('reactions')
+   if (!item) return res.sendStatus(404);
+   var reaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
+   return res.send(reaction);
+  }))
+
+  /**
+   * @api {post} /api/item/:item_id/reaction/:user_id
+   * @apiDescription create a single reaction on an item associated with a specific user
+   * @apiGroup Carts
+   * @apiParam {String} :item_id
+   * @apiParam {String} :user_id
+   * @apiParam {String} emoji - the reaction should be posted in the body
+   */
+  router.post('/item/:item_id/reaction/:user_id', (req, res) => co(function * () {
+   var item = yield db.Items.findOne({
+     id: req.params.item_id
+   }).populate('reactions')
+   if (!item) {
+     logging.info('item not found')
+     return res.sendStatus(404);
+   }
+
+   //validate emoji as single character
+   logging.info('emoji:', req.body.emoji)
+
+   var emojiChars = spliddit(req.body.emoji)
+
+   if (emojiChars.length > 80) return res.send('input too long')
+
+   //has the user already reacted? if so, update the character
+   var previousReaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
+
+   logging.info('reaction to be replaced im yesh', previousReaction)
+
+   if (previousReaction) {
+     previousReaction.emoji = req.body.emoji;
+     yield previousReaction.save();
+     return res.send(previousReaction)
+   }
+   else {
+     logging.info('req.body.emoji:', req.body.emoji)
+     var newReaction = yield db.Reactions.create({
+       emoji: req.body.emoji,
+       user: req.params.user_id,
+       item: req.params.item_id
+     })
+     item.reactions.add(newReaction.id);
+     yield item.save()
+     return res.send(newReaction);
+   }
+  }))
+
+  /**
+   * @api {delete} /api/item/:item_id/reaction/:user_id
+   * @apiDescription remove a specific reaction off an item on behalf of a user
+   * @apiParam {String} :item_id
+   * @apiParam {String} :user_id
+   */
+  router.delete('/item/:item_id/reaction/:user_id', (req, res) => co(function * () {
+   var item = yield db.Items.findOne({id: req.params.item_id}).populate('reactions')
+   if (!item) return res.sendStatus(404);
+   logging.info('ITEM', item);
+   var reaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
+   item.reactions.remove(reaction.id);
+   yield item.save();
+   yield reaction.destroy();
+   res.send('success');
+  }))
 
   /**
    * @api {get} /api/itempreview?q=:q&page=:page&category=:category Item Preview
@@ -680,13 +804,15 @@ module.exports = function (router) {
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
 
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
-    // logging.info('populated cart', cart);
+
+    var items = cart.items.slice()
+    // checkout removes the items from the cart object, so we have to make a copy
 
     yield cartUtils.checkout(cart, req, res)
+
+    cart.items = items;
     yield cartUtils.sendReceipt(cart, req)
   }))
-
-
 
   /**
    * @api {get} /api/item/:item_id/clickthrough Item Clickthrough
@@ -696,10 +822,18 @@ module.exports = function (router) {
    */
   router.get('/item/:item_id/clickthrough', (req, res) => co(function * () {
     // get the item
-    var item = yield db.Items.findOne({id: req.params.item_id}).populate('cart')
+    var item = yield db.Items.findOne({id: req.params.item_id})
+
+    // get the item's locale
+    var locale = 'US'
+    if (item.original_link.match(/amazon.ca/)) {
+      locale = 'CA'
+    } else if (item.original_link.match(/amazon.co.uk/)) {
+      locale = 'UK'
+    }
 
     // let amazon compose a nice link for us
-    var amazonItem = yield amazon.lookupAmazonItem(item.asin, item.cart.store_locale)
+    var amazonItem = yield amazon.lookupAmazonItem(item.asin, locale)
 
     // handle errors
     if (!_.get(amazonItem, 'Item.DetailPageURL')) {
@@ -743,11 +877,6 @@ module.exports = function (router) {
     // assemble list of stores
     var stores = [];
 
-    // if we're in production, don't show YPO
-    if (process.env.NODE_ENV == 'production') {
-      stores = stores.filter( s => store.type !== 'ypo');
-    }
-
     // first sort the stores by distance to / from the user
     // using haversine, which calculates distance on a sphere
     // because earth, unfortunately, is a sphere
@@ -769,6 +898,15 @@ module.exports = function (router) {
       else if (b.store_countries.indexOf(country) > -1 && a.store_countries.indexOf(country) <= -1) return 1;
       else return 0;
     })
+
+    // if we're in production, don't show YPO
+    var host = req.get('host')
+    if (host === 'kipthis.com') {
+      logging.info('hiding ypo on production')
+      stores = stores.filter(function (s) {
+        return s.store_type != 'ypo'
+      });
+    }
 
     // logging.info('stores', stores)
     res.send(stores)

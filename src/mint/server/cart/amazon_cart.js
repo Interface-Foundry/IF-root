@@ -137,7 +137,7 @@ exports.searchAmazon = function * (query, locale, page, category) {
     Keywords: query,
     Condition: 'New',
     SearchIndex: category || 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews,EditorialReview',
     ItemPage: page || 1
   };
 
@@ -169,7 +169,6 @@ exports.searchAmazon = function * (query, locale, page, category) {
         yield dbItem.save();
       }
       validatedItems.push(dbItem);
-      console.log('added item to db');
     });
     validatedItems = validatedItems.filter(function (x) {
       if (x) return x;
@@ -204,7 +203,7 @@ exports.lookupAmazonItem = function * (asin, locale) {
     Availability: 'Available',
     IdType: 'ASIN',
     ItemId: asin,
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews,EditorialReview'
   };
   try {
     var results = yield opHelpers[locale].execute('ItemLookup', amazonParams)
@@ -215,6 +214,7 @@ exports.lookupAmazonItem = function * (asin, locale) {
 
   // Add some logic to find the available item variations
   var item = results.result.ItemLookupResponse.Items.Item
+
   if (item.ParentASIN && item.ParentASIN !== item.ASIN) {
     // This item has a parent item, which means it probably has variations
     var parent = yield module.exports.lookupAmazonItem(item.ParentASIN, locale)
@@ -234,7 +234,7 @@ exports.lookupAmazonItem = function * (asin, locale) {
   }
 
   // save value to cache
-  asinCache.set(asin + locale, response)
+  // asinCache.set(asin + locale, response)
 
   return response
 };
@@ -444,16 +444,20 @@ exports.syncAmazon = function * (cart) {
     throw new Error('can only sync carts that have amazon items, and items must be populated')
   }
 
+  // to sync with amazon, we create a totally new cart
   var cartAddAmazonParams = createAmazonCartWithItems(cart.items);
   cartAddAmazonParams.AssociateTag = localeTag(cart.store_locale)
   var res = yield opHelpers[cart.store_locale].execute('CartCreate', cartAddAmazonParams);
   var amazonErrors = getErrorsFromAmazonCartCreate(res.result.CartCreateResponse.Cart)
-  returnValue = res.result.CartCreateResponse.Cart
-  cart.amazon_cartid = returnValue.CartId
-  cart.amazon_hmac = returnValue.HMAC
-  return returnValue
+  var amazonCart = res.result.CartCreateResponse.Cart
+  cart.amazon_cartid = amazonCart.CartId
+  cart.amazon_hmac = amazonCart.HMAC
+  cart.amazon_purchase_url = amazonCart.PurchaseURL
+  cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
+  cart.dirty = false
+  yield cart.save()
+  return amazonCart
 }
-
 
 /**
  * cart checkout for amazon
@@ -462,22 +466,13 @@ exports.syncAmazon = function * (cart) {
  * @return     {response}  the response
  */
 exports.checkout = function * (cart, req, res) {
-  var cartItems = cart.items;
-
-  if (cart.affiliate_checkout_url && cart.locked) {
+  if (!cart.dirty) {
+    // yay cart is locked so we're pretty sure it hasn't meen messed with
+    return res.redirect(cart.affiliate_checkout_url)
+  } else {
+    // make sure the amazon cart is in sync with the cart in our database
+    var amazonCart = yield exports.syncAmazon(cart)
+    // redirect to the cart url
     res.redirect(cart.affiliate_checkout_url)
   }
-
-  // make sure the amazon cart is in sync with the cart in our database
-  var amazonCart = yield exports.syncAmazon(cart)
-
-  // save the amazon purchase url
-  if (cart.amazon_purchase_url !== amazonCart.PurchaseURL) {
-    cart.amazon_purchase_url = amazonCart.PurchaseURL
-    cart.affiliate_checkout_url = yield googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(cart.amazon_purchase_url)}/id/mint/pid/shoppingcart`)
-    yield cart.save()
-  }
-  // redirect to the cart url
-  res.redirect(cart.affiliate_checkout_url)
-  // redirect to the cart url
 }

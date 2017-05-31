@@ -126,6 +126,7 @@ module.exports = function (router) {
        json: true
      })
 
+    //  console.log('SUPPRESSIONS', suppressions);
      suppressions = suppressions.suppressions.filter(sup => sup.suppressed);
      suppressions = suppressions.map(function (sup) {
        return {id: sup.id, name: sup.name, description: sup.description};
@@ -145,7 +146,7 @@ module.exports = function (router) {
    * @type {Array} object of stores
    */
   router.get('/store_list', (req, res) => co(function * () {
-    const storesArray = constants.STORES.map( store => {
+    var storesArray = constants.STORES.map( store => {
       return {
         store_img: 'String',
         store_type: store,
@@ -154,6 +155,14 @@ module.exports = function (router) {
         store_countries: '[Array]'
       }
     })
+
+    //filter out YPO on production
+    if (host === 'kipthis.com') {
+      logging.info('hiding ypo on production')
+      storesArray = storesArray.filter(function (s) {
+        return s.store_type != 'ypo'
+      });
+    }
 
     res.send(storesArray)
   }))
@@ -164,14 +173,12 @@ module.exports = function (router) {
    * @apiParam {string} code the postal code we want addresses for
    * examples: https://www.pcapredict.com/support/webservice/postcodeanywhere/interactive/retrievebyid/1.3/
    */
-
   router.get('/postcode', (req, res) => co(function * () {
     var code = req.query.code;
-    //query api to find addressses associated w/ the postcode by their internal ids
     var pcaFindResult = yield request(`https://services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/Find/v1.10/json.ws?Key=UX83-MY94-GN78-FN27&Filter=None&SearchTerm=${code}`);
+    // logging.info('pcaFind result', pcaFindResult)
 
     var addresses = yield JSON.parse(pcaFindResult).map(function * (item) {
-      // query their api again to get full details of those addresses
       var fullAddress = yield request(`https://services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/RetrieveById/v1.30/json.ws?Key=UX83-MY94-GN78-FN27&Id=${item.Id}`);
       // logging.info('full address:', fullAddress);
       return JSON.parse(fullAddress)
@@ -179,4 +186,15 @@ module.exports = function (router) {
 
     res.send(addresses);
   }));
+
+
+  /*
+   * Gets all themes
+   * @api {Get} /api/themes Gets all themes in the db
+   * @apiGroup Other
+   */
+  router.get('/themes', (req, res) => co(function * () {
+    var themes = yield db.Themes.find({});
+    res.send(themes);
+  }))
 }

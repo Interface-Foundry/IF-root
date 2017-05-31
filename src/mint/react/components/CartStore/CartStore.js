@@ -10,12 +10,22 @@ export default class CartStore extends Component {
     setStore: PropTypes.func,
     choices: PropTypes.array,
     cart_id: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    user_account: PropTypes.object,
+    _toggleLoginScreen: PropTypes.func
   }
 
   componentWillMount() {
     const { fetchStores } = this.props;
     fetchStores();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { choices } = this.props;
+    const { choices: newStores, user_account, _toggleLoginScreen } = nextProps;
+    if (choices.length !== newStores.length && !user_account) {
+      _toggleLoginScreen();
+    }
   }
 
   render() {

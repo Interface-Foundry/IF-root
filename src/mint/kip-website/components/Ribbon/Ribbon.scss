@@ -3,26 +3,45 @@
 
 .ribbon {
 	position: fixed;
-	padding: 0 $padding*12.5;
+	padding: 0;
 	top: 0;
+	left: 0;
 	pointer-events:none;
 	width: 100%;
-	height: $ribbonHeight;
+	height: $ribbonHeight + $padding;
 	z-index: 500;
 	text-align: center;
-	background: transparent;
-	border-bottom: 1px solid transparent;
+	border-bottom: 2px solid transparent;
+	margin-top: $padding*2;
 	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
     @media only screen and (max-width: 600px) {
-    	padding: 0 $padding*2;
+    	border-bottom: 0px solid transparent;
+    	margin-top: 0;
+    	.second {
+    		height: 30px;
+    		line-height: 30px !important;
+    		width: 100%;
+    		border-bottom: 2px solid white;
+			padding: 0 0 $padding;
+			@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+    	}
     }
 
     &.background {
     	background: white;
-		border-bottom: 1px solid $borderColor;
-		box-shadow: 0 4px 6px rgba(50,50,93,.33), 0 1px 3px rgba(0,0,0,.08);
+		border-bottom: 2px solid mix(white, $primaryColor, 85%);
+		margin-top: 0;
+
+		@media only screen and (max-width: 600px) {
+			border-bottom: 0px solid transparent;
+
+			.second {
+				background: white;
+				border-bottom: 2px solid mix(white, $primaryColor, 85%);
+			}
+		}
     }
 
 	* {
@@ -30,6 +49,8 @@
 	}
 	& > div {
 		text-align: left;
+	    max-width: 1200px;
+	    margin: 0 auto;
 	}
 	a {
 		color: inherit;
@@ -42,21 +63,36 @@
 		.image {
 			display: inline-block;
 			background-size: contain;
-			width: $ribbonHeight - 15px;
+			width: $ribbonHeight*2;
+			min-height: $ribbonHeight + $padding;
 		}
 		h1, a {
 			display: inline-block;
 			padding: 0 $padding/2;
 			font-size: 17px;
+			height: 100%;
 		}
 
 		h1 {
 			font-size: 23px;
-			line-height: 50px;
+			line-height: $ribbonHeight + $padding;
+		}
+		.menu {
+			cursor: pointer;
+			svg {
+				width: 30px;
+				fill: $primaryColor;
+			}
+
+			@media only screen and (max-width: 600px) {
+				margin-right: 10px;
+			}
 		}
 		svg {
-			width: 30px;
+			width: 20px;
 			height: 100%;
+			padding: $padding 0;
+			fill: white;
 			cursor: pointer;
 		}
 		&.right {
@@ -83,7 +119,7 @@
 			font-weight: bold;
 			border-radius: $padding/2;
 			background: transparent;
-			padding: 0 $padding*2;
+			padding: 0 $padding;
 			height: 100%;
 			font-size: 16px;
 			cursor: pointer;
@@ -118,7 +154,7 @@
 			padding: 0 $padding;
 			font-size: 14px;
 			cursor: pointer;
-			margin-top: 10px;
+			margin-top: 13px;
 			height: 30px;
 			line-height: 30px;
 			color: #42403f;
@@ -130,7 +166,8 @@
 		a {
 			&:first-of-type {
 				button {
-					background: $secondaryColor;
+					background: $warningColor;
+					color: white;
 				}
 			}
 		}

@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 
 export default class Settings extends Component {
   static propTypes = {
@@ -55,7 +55,7 @@ export default class Settings extends Component {
   render() {
     const { props: { cart_id, user_account: { name, email_address } }, state: { editName, editMail } } = this;
     return (
-      <div className='settings'>
+      <div className='settings-page'>
         <ul>
           { 
             editName
@@ -91,6 +91,7 @@ export default class Settings extends Component {
           
           <li><Link to={`/cart/${cart_id}/m/Feedback`}><Icon icon='Email'/> &nbsp; Send Feedback</Link></li>
         </ul>
+        <div className='reachKip'/>
         <h4>Kip Version 1.3 (Mint)</h4>
       </div>
     );

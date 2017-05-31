@@ -18,8 +18,7 @@ const mapDispatchToProps = dispatch => ({
       action: 'Edited Info',
     });
     return dispatch(updateUser(id, user_account));
-  },
-
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

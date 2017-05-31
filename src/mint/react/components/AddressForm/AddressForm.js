@@ -2,7 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 
 export default class AddressForm extends Component {
   state = {
@@ -82,8 +82,8 @@ export default class AddressForm extends Component {
       props: { cart_id, history: { replace } }
     } = this;
     return (
-      <div className='checkout_overlay'>
-        <div className='add_to_amazon'>
+      <div className='address_overlay'>
+        <div className='address_form'>
           <h1>
             <span onClick={()=>replace(`/cart/${cart_id}`)}><Icon icon='Clear'/></span>
             Just a couple more things before we can checkout your cart!

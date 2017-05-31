@@ -1,108 +1,72 @@
 /* eslint react/prefer-stateless-function: 0, react/forbid-prop-types: 0 */
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom'
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import ReactDOM from 'react-dom';
+import { PropTypes } from 'prop-types';
 
-import { animateScroll } from '../../utils';
-
-import { Services, About, Showcase, Footer, Statement, Hero } from '..';
-import { SidenavContainer, ModalContainer, RibbonContainer } from '../../containers';
-
+import { Icon } from '../../themes';
+import { HeroContainer, ServicesContainer, CompareContainer, FooterContainer } from '../../containers';
 
 export default class Landing extends Component {
 
-  constructor(props) {
-    super(props);
-    this._handleScroll = ::this._handleScroll;
-    this._toggleSidenav = ::this._toggleSidenav;
-    this._toggleModal = ::this._toggleModal;
-    this._registerHeight = ::this._registerHeight;
-
-    this.state = {
-      fixed: false,
-      sidenav: false,
-      modal: false,
-      animationOffset: 0,
-      containerHeight: 0,
-      animationState: -2
-    };
+  static propTypes = {
+    animationState: PropTypes.number,
+    fixed: PropTypes.bool,
+    registerHeight: PropTypes.number,
+    match: PropTypes.object
   }
 
-  componentDidMount () {
-    ReactDOM.findDOMNode(this.landing).addEventListener('scroll', this._handleScroll);
+  state = {
+    offsetTop: 0
   }
 
-  componentWillUnmount () {
-    ReactDOM.findDOMNode(this.landing).removeEventListener('scroll', this._handleScroll);
-  }
+  componentDidMount() {
+    const { registerHeight } = this.props;
+    registerHeight(ReactDOM.findDOMNode(this)
+      .offsetTop, ReactDOM.findDOMNode(this)
+      .clientHeight);
 
-  _handleScroll (e) {
-    const scrollTop = ReactDOM.findDOMNode(this.landing).scrollTop,
-      { state: { fixed, animationState, animationOffset, containerHeight }} = this;
-
-    // stops and starts header animation, and fixes navbar to top;
-    if(scrollTop > 400 && !fixed ||  scrollTop <= 400 && fixed) {
-      this.setState({
-        fixed: scrollTop > 400
-      })
-    }
-
-    // animate scroll, needs height of the container, and its distance from the top
-    this.setState(animateScroll(containerHeight, animationOffset, scrollTop, animationState))
-  }
-
-  _toggleSidenav () {
-    const { sidenav } = this.state;
-
-    this.setState({ sidenav: !sidenav });
-  }
-
-  _toggleModal () {
-    const { modal } = this.state;
-
-    this.setState({ modal: !modal });
-  }
-
-  _registerHeight (heightFromTop, containerHeight) {
     this.setState({
-      animationOffset: heightFromTop,
-      containerHeight: containerHeight
-    })
+      offsetTop: ReactDOM.findDOMNode(this.landing)
+        .offsetTop - 50
+    });
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
-    if(
-        nextState.animationState !== this.state.animationState ||
-        nextState.fixed !== this.state.fixed ||
-        nextState.sidenav !== this.state.sidenav ||
-        nextState.modal !== this.state.modal 
-      ) {
+    if (
+      nextState.offsetTop !== this.state.offsetTop
+      || nextProps.animationState !== this.props.animationState
+      || nextProps.fixed !== this.props.fixed
+    ) {
       return true;
     }
 
-    return false
+    return false;
   }
 
   render() {
-    const { state: { fixed, sidenav, modal, animationState }, props: { currentUser, match: { params: { src }} }, _handleScroll, _toggleSidenav, _toggleModal, _registerHeight } = this;
+    const { match: { params: { src } } } = this.props, { offsetTop } = this.state;
 
     return (
-      <span>
-        { sidenav ? <SidenavContainer _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/> : null }
-        { modal ? <ModalContainer _toggleModal={_toggleModal} /> : null }
-
-        <div className="landing" ref={(landing) => this.landing = landing}> 
-          <RibbonContainer fixed={fixed} src={src} _toggleSidenav={_toggleSidenav} _toggleModal={_toggleModal}/>
-          <Hero animate={!fixed} />
-          <Statement _toggleModal={_toggleModal} src={src}/>
-          <About animationState={animationState}/>
-          <Showcase animationState={animationState} _registerHeight={_registerHeight}/>
-          <Services _toggleModal={_toggleModal}/>
-          <Footer/>
+      <div className="landing">
+        <HeroContainer src={src} offsetTop={offsetTop}/>
+        <div className="icons">
+          <div className="icon col-1"/>
+          <div className="icon col-1"><Icon icon='Amazon'/></div>
+          <div className="icon col-1"><Icon icon='Google'/></div>
+          <div className="icon col-1"><Icon icon='Slack'/></div>
+          <div className="icon col-1"><Icon icon='Microsoft'/></div>
+          <div className="icon col-1"><Icon icon='Delivery'/></div>
+          <div className="icon col-1"/>
         </div>
-      </span>
+
+        <div ref={(landing) => this.landing = landing}>
+          <ServicesContainer src={src} />
+        </div>
+        <CompareContainer src={src} />
+        <FooterContainer />
+      </div>
     );
   }
 }

@@ -1,10 +1,20 @@
 import { connect } from 'react-redux';
 import Ribbon from '../components/Ribbon';
 
+import {
+  toggleModal,
+  toggleSidenav
+} from '../actions';
+
 const mapStateToProps = (state, props) => ({
-  	currentUser: state.auth.user_account,
-  	fixed: props.fixed
-})
+  user_account: state.auth.user_account,
+  fixed: state.app.fixed,
+  ribbonTemplate: state.siteState.ribbon
+});
 
-export default connect(mapStateToProps)(Ribbon);
+const mapDispatchToProps = dispatch => ({
+  toggleModal: () => dispatch(toggleModal()),
+  toggleSidenav: () => dispatch(toggleSidenav())
+});
 
+export default connect(mapStateToProps, mapDispatchToProps)(Ribbon);

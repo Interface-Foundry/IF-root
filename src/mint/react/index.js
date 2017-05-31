@@ -18,7 +18,9 @@ import ReactGA from 'react-ga';
 
 import 'whatwg-fetch';
 
-if (module.hot) {
+if (module.hot
+  && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt'))
+  && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
   module.hot.accept();
 }
 

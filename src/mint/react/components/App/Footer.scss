@@ -1,5 +1,5 @@
 // react/components/App/Footer.scss
-@import '../../styles/Constants';
+@import '../../../react-common/styles/Constants';
 .footer {
   position: relative;
   height: $nav-height;
@@ -49,7 +49,7 @@
       border-radius: 5px;
       border: 1px solid $border-color-light;
       font-weight: 600;
-      background: $main-button-color;
+      background: $mainColor;
       padding: 0;
       overflow: wrap;
       &>button {
@@ -79,11 +79,11 @@
         text-align: right;
       }
       &.green {
-        background: $third-button-color;
+        background: $thirdColor;
         color: white;
       }
       &.share {
-        background: $secondary-button-color;
+        background: $secondaryColor;
         color: white;
       }
       &.triple {

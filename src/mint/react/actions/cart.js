@@ -11,7 +11,8 @@ import {
   REQUEST_CARTS,
   REQUEST_CLEAR_CART,
   CANCEL_CLEAR_CART,
-  RECEIVE_CLEAR_CART
+  RECEIVE_CLEAR_CART,
+  DELETE_CART
 } from '../constants/ActionTypes';
 import { sleep } from '../utils';
 
@@ -57,6 +58,11 @@ const cancelClearCart = () => ({
 
 const receiveClearCart = () => ({
   type: RECEIVE_CLEAR_CART
+});
+
+const recieveDeleteCart = (cart_id) => ({
+  cart_id,
+  type: DELETE_CART
 });
 
 export const addingItem = (addingItem) => ({
@@ -130,6 +136,7 @@ export function deleteCart(cart_id) {
         method: 'DELETE',
         credentials: 'same-origin',
       });
+      dispatch(recieveDeleteCart(cart_id));
     } catch (e) {
       throw 'error in cart delete';
     }
@@ -200,25 +207,6 @@ export function sendAddressData(user_id, full_name, line_1, line_2, city, region
       return dispatch(receiveItems(await response.json()));
     } catch (e) {
       throw 'error in cart fetchItems';
-    }
-  };
-}
-
-export function updateItem(cartId, currentId, new_item_id, user_id) {
-  return async dispatch => {
-    try {
-      const res = await fetch(`/cart/${cartId}/item/${currentId}/update`, {
-        method: 'PUT',
-        credentials: 'same-origin',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        'body': JSON.stringify({ new_item_id, user_id })
-      });
-      dispatch(updateCartItem(await res.json()));
-    } catch (e) {
-      throw e;
     }
   };
 }

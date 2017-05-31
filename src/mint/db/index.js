@@ -25,11 +25,13 @@ waterline.loadCollection(require('./amazon_items'))
 waterline.loadCollection(require('./authentication_links'))
 waterline.loadCollection(require('./camel_items'))
 waterline.loadCollection(require('./carts'))
+waterline.loadCollection(require('./delivery_details'))
 waterline.loadCollection(require('./email_events'))
 waterline.loadCollection(require('./emails'))
 waterline.loadCollection(require('./feedback'))
 waterline.loadCollection(require('./item_options'))
 waterline.loadCollection(require('./items'))
+waterline.loadCollection(require('./reactions'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./ypo_inventory_items'))
@@ -62,11 +64,13 @@ var initialize = new Promise((resolve, reject) => {
       AuthenticationLinks: ontology.collections.authentication_links,
       CamelItems: ontology.collections.camel_items,
       Carts: ontology.collections.carts,
+      DeliveryDetails: ontology.collections.delivery_details,
       EmailEvents: ontology.collections.email_events,
       Emails: ontology.collections.emails,
       Feedback: ontology.collections.feedback,
       ItemOptions: ontology.collections.item_options,
       Items: ontology.collections.items,
+      Reactions: ontology.collections.reactions,
       Sessions: ontology.collections.sessions,
       UserAccounts: ontology.collections.user_accounts,
       YpoInventoryItems: ontology.collections.ypo_inventory_items

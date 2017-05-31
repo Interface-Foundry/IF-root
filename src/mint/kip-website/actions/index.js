@@ -1,7 +1,17 @@
 export {
-	shuffleItems
-} from './hero';
+  handleScroll,
+  toggleSidenav,
+  toggleModal,
+  registerHeight,
+  scrollToPosition
+}
+from './app';
 
 export {
-	login, validateCode, get
-} from './async';
+  login,
+  validateCode,
+  get,
+  logout,
+  getSiteState
+}
+from './async';
