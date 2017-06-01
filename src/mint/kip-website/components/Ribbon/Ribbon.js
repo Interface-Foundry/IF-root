@@ -84,7 +84,7 @@ export default class Ribbon extends Component {
                   <div className="col-12 row-1 action">
                     <Link to={button.link} ><button>{button.title}</button></Link>
                   </div>
-                </div>))
+                </div>)).reverse()
             }
           </div>
         </div>
