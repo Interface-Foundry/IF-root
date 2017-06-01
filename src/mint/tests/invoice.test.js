@@ -61,6 +61,23 @@ describe('invoice tests', () => {
     assert.equal(postResponse.id, getResponse.id)
   })
 
+
+  it.skip('create a stripe payment source', async () => {
+    // body...
+  })
+
+  it.skip('pay the entire invoice from a stripe payment', async () => {
+    // body...
+  })
+
+  it.skip('split an invoice in half and pay from two different stripe accounts', async () => {
+    //body
+  })
+
+  it.skip('post a payment from a stripe payment id to an invoice and get remaining balance', async () => {
+    // body...
+  })
+
   after(async () => {
     await db.Invoice.destroy({cart: 'test12345'})
     await db.Carts.destroy(mockCart)
