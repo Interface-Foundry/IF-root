@@ -124,12 +124,47 @@
   "about": {
     "titleText": "Smart Penguin for Social Shopping",
     "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
+    "seenIn": "Seen In",
+    "team": {
+      "title": "Meet the Team",
+      "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions",
+      "members": [{
+        "image": "",
+        "name": "Graham Annett"
+      }, {
+        "image": "",
+        "name": "Alyx Baldwin (CTO)"
+      }, {
+        "image": "",
+        "name": "Chris Barry"
+      }, {
+        "image": "",
+        "name": "Peter Brandt"
+      }, {
+        "image": "",
+        "name": "Hannah Katznelson"
+      }, {
+        "image": "",
+        "name": "Rachel Law (CEO)"
+      }, {
+        "image": "",
+        "name": "Koh Luce"
+      }]
+    },
     "why": {
       "head": "HI I'M KIP THE PENGUIN",
       "actionText": "Use Kip Now",
       "description": "${Kip} brings a penguin's perspective to collective purchasing.",
-      "images": ["//storage.googleapis.com/kip-random/many_kips/office.svg", "//storage.googleapis.com/kip-random/many_kips/struggle.svg", "//storage.googleapis.com/kip-random/many_kips/coupon_L.svg"],
-      "reasons": ["Penguins are loyal and trustworthy. Kip keeps your data safe, and doesn’t resell to 3rd parties.", "Penguins are friendly birds, Kip helps you leverage social power to get the best deals", "Penguins help each other out, let Kip take away the stress of organizing group orders"]
+      "reasons": [{
+        "image": "//storage.googleapis.com/kip-random/many_kips/office.svg",
+        "text": "Penguins are loyal and trustworthy. Kip keeps your data safe, and doesn’t resell to 3rd parties."
+      }, {
+        "image": "//storage.googleapis.com/kip-random/many_kips/struggle.svg",
+        "text": "Penguins are friendly birds, Kip helps you leverage social power to get the best deals"
+      }, {
+        "image": "//storage.googleapis.com/kip-random/many_kips/coupon_L.svg",
+        "text": "Penguins help each other out, let Kip take away the stress of organizing group orders"
+      }]
     }
   }
 }

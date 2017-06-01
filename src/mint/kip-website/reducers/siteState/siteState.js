@@ -59,11 +59,11 @@ const initialState = {
   about: {
     titleText: '',
     subtext: [],
+    seenIn: '',
     why: {
       head: '',
       description: '',
       actionText: '',
-      images: [],
       reasons: []
     }
   }

@@ -57,7 +57,7 @@ export default class App extends Component {
   }
 
   render() {
-    const { sidenav, modal, match } = this.props;
+    const { sidenav, modal, match, siteVersion } = this.props;
 
     return (
       <div className='app'>
