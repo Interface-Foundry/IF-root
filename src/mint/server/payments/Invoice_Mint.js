@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const Invoice = require('./Invoice.js')
 
 /**
@@ -7,9 +8,9 @@ const Invoice = require('./Invoice.js')
  */
 
 class MintInvoice extends Invoice {
-  constructor(cart) {
+  constructor(args) {
     super('mint')
-    this.cart = cart
+    Object.assign(this, args)
   }
 
   static get name() {
@@ -23,18 +24,6 @@ class MintInvoice extends Invoice {
     }
     return null
   }
-
-  async createInvoice() {
-    const cart = await db.Cart({id: this.cart})
-    const newInvoice = await db.Invoice.create({
-      leader: cart.leader,
-      invoice_type: 'mint',
-      cart: cart.id,
-      paid: false,
-      total: cart.subtotal
-    })
-  }
-
 
   /**
    * we dont need to actually create a charge but after a user checks out an
