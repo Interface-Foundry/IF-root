@@ -44,7 +44,7 @@
     "react-select": "^1.0.0-rc.3",
     "react-share": "^1.13.0",
     "react-transition-group": "^1.1.2",
-    "react-typist": "^1.1.0",
+    "react-typist": "^1.1.1",
     "redux": "^3.6.0",
     "redux-form": "^6.6.0",
     "redux-thunk": "^2.2.0",

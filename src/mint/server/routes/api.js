@@ -93,8 +93,7 @@ router.get('/home/json', (req, res) => co(function* () {
   const siteVersion = req.UserSession.siteVersion ? req.UserSession.siteVersion : _.sample(['A', 'B', 'C']);
   req.UserSession.siteVersion = siteVersion;
   yield req.UserSession.save();
-  const json = fs.readFileSync(path.join(__dirname, `site${siteVersion}.json`), 'utf8');
-  res.json(JSON.parse(json));
+  res.json({siteVersion});
 }));
 
 function _formatPostObjects(body) {
