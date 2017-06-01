@@ -5,7 +5,8 @@ const Invoice = require('./Invoice.js')
  *
  * @class      Mint (name)
  */
-export default class MintInvoice extends Invoice {
+
+class MintInvoice extends Invoice {
   constructor(cart) {
     super('mint')
     this.cart = cart
@@ -15,12 +16,23 @@ export default class MintInvoice extends Invoice {
     return 'mint'
   }
 
-  async checkForInvoice () {
+  async checkPrevInvoice () {
     const invoice = await db.Invoice.findOne({cart: this.cart})
     if (invoice) {
       return invoice
     }
     return null
+  }
+
+  async createInvoice() {
+    const cart = await db.Cart({id: this.cart})
+    const newInvoice = await db.Invoice.create({
+      leader: cart.leader,
+      invoice_type: 'mint',
+      cart: cart.id,
+      paid: false,
+      total: cart.subtotal
+    })
   }
 
 
@@ -34,3 +46,5 @@ export default class MintInvoice extends Invoice {
 
   // methods
 }
+
+module.exports = MintInvoice

@@ -8,10 +8,14 @@ const invoiceFactory = require('./InvoiceFactory.js')
 
 
 
+router.get('/test', async (req, res) => {
+  res.sendStatus(200)
+})
+
 /**
  * @api {post} /invoice/:invoice_type/:cart_id
  * @apiDescription create an invoice for the
- * @apiGroup {GROUP}
+ * @apiGroup {Invoice}
  *
  * @apiParam {type} :invoice_type - description of param
  */
@@ -77,9 +81,4 @@ router.post('/:invoice_type/:payment_type', async (req, res) => {
   return res.send(newCharge)
 })
 
-// remove later
-const PORT = process.env.PORT || 3000;
-
-router.listen(PORT, () => {
-  console.log(`App listening at http://127.0.0.1:${PORT}`);
-});
+module.exports = router

@@ -9,5 +9,4 @@ async function invoiceFactory (invoiceType, invoiceData) {
 }
 
 
-
 module.exports = invoiceFactory

@@ -1,7 +1,9 @@
 const constant = require('./payment_constants.js')
 
-export default class Invoice {
+class Invoice {
   constructor(invoiceType) {
     this.invoice = invoiceType
   }
 }
+
+module.exports = Invoice
