@@ -25,6 +25,7 @@ waterline.loadCollection(require('./amazon_items'))
 waterline.loadCollection(require('./authentication_links'))
 waterline.loadCollection(require('./camel_items'))
 waterline.loadCollection(require('./carts'))
+waterline.loadCollection(require('./checkout_events'))
 waterline.loadCollection(require('./delivery_details'))
 waterline.loadCollection(require('./email_events'))
 waterline.loadCollection(require('./emails'))
@@ -64,6 +65,7 @@ var initialize = new Promise((resolve, reject) => {
       AuthenticationLinks: ontology.collections.authentication_links,
       CamelItems: ontology.collections.camel_items,
       Carts: ontology.collections.carts,
+      CheckoutEvents: ontology.collection.checkout_events,
       DeliveryDetails: ontology.collections.delivery_details,
       EmailEvents: ontology.collections.email_events,
       Emails: ontology.collections.emails,
