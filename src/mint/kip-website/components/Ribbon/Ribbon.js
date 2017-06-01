@@ -73,7 +73,7 @@ export default class Ribbon extends Component {
           {
             user_account ? null : <div className="right row row-1">
               <div className="col-12 row-1 action">
-                <button onClick={() => toggleModal()}>{ribbonTemplate.right.loginText}</button>
+                <button onClick={() => toggleModal('Enter your email to Login', 'We\'ll send you a code to automagically log you in')}>{ribbonTemplate.right.loginText}</button>
               </div>
             </div>
           }

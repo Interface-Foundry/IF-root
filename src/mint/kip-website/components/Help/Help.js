@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import ReactDOM from 'react-dom';
 import { PropTypes } from 'prop-types';
-import { replaceMail, replaceNewLine } from '../../utils';
+import { replaceHtml } from '../../utils';
 import { HeaderContainer, FooterContainer } from '../../containers';
 
 export default class Help extends Component {
@@ -112,7 +112,7 @@ export default class Help extends Component {
         <section className='FAQ'>
           <h1><span>{faq.title}</span></h1>
           <p className='subtext'>
-            {replaceMail(faq.subtext)}
+            {replaceHtml(faq.subtext)}
           </p>
           {
             faq.qs.map((q, i) => (
@@ -121,7 +121,7 @@ export default class Help extends Component {
                   {`${i+1}. `}
                   {q.title}
                 </h2>
-                <p>{replaceNewLine(q.answer)}</p>
+                <p>{replaceHtml(q.answer)} </p>
               </div>
             ))
           }

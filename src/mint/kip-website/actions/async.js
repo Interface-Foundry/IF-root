@@ -45,12 +45,15 @@ export function login(cart_id, email) {
 export function getSiteState() {
   return async dispatch => {
     try {
-      const response = await fetch('/api/home/json', {
-        credentials: 'same-origin'
-      });
+      const version =
+        await fetch('/api/home/json', { credentials: 'same-origin' })
+        .then(json => json.json()),
+        site =
+        await fetch('/json/site.json')
+        .then(json => json.json());
       return dispatch({
         type: 'GOT_SITE',
-        response: await response.json(),
+        response: {siteVersion: version.siteVersion, ...site[version.siteVersion]},
         receivedAt: Date.now()
       });
     } catch (e) {

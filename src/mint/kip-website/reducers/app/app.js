@@ -25,7 +25,9 @@ export default function reducer(state = initialState, action = {}) {
   case 'TOGGLE_MODAL':
     return {
       ...state,
-      modal: !state.modal
+      modal: !state.modal,
+      loginText: action.loginText,
+      loginSubtext: action.loginSubtext
     }
   case '@@router/LOCATION_CHANGE':
     return {
