@@ -1,19 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-export const replaceKip = str =>
-  str.split('${Kip}')
-  .reduce(
-    (res, s, i) => [...res, <span key={i}><Link to='/about'>Kip</Link></span>, s]
-  );
+export const replaceHtml = str =>
+  str.split(/(\${[A-z]*})/)
+  .map(swapForHtml);
 
-export const replaceMail = str =>
-  str.split('${mail}')
-  .reduce(
-    (res, s, i) => [...res, <span key={i}><a href='mailto:hello@kipthis.com'>hello@kipthis.com</a></span>, s]
-  );
-
-export const replaceNewLine = str =>
-  str.split('${br}')
-  .reduce(
-    (res, s, i) => [...res, <br key={i}/>, s]
-  );
+const swapForHtml = (str, i) => {
+  switch (str) {
+  case '${Kip}':
+    return <span key={i}><Link to='/about'>Kip</Link></span>;
+  case '${mail}':
+    return <span key={i}><a href='mailto:hello@kipthis.com'>hello@kipthis.com</a></span>;
+  case '${br}':
+    return <br key={i}/>;
+  default:
+    return str;
+  }
+}

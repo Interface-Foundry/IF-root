@@ -13,7 +13,7 @@ const mapStateToProps = (state, props) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  toggleModal: () => dispatch(toggleModal()),
+  toggleModal: (loginText, loginSubtext) => dispatch(toggleModal(loginText, loginSubtext)),
   toggleSidenav: () => dispatch(toggleSidenav())
 });
 

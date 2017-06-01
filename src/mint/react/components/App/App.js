@@ -63,7 +63,7 @@ export default class App extends Component {
     const { popup } = this.state;
     const { cart_id, user_account } = this.props;
 
-    if(cart_id || user_account.id) { 
+    if (cart_id || user_account.id) {
       this.setState({ popup: !popup });
     } else {
       this.setState({ popup: true });
@@ -166,7 +166,22 @@ export default class App extends Component {
       <section className='app' onKeyDown={::this._handeKeyPress}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
-          {popup ? <LoginScreenContainer _toggleLoginScreen={_togglePopup}/> : null}
+          <div>
+            {
+              popup ?
+              <LoginScreenContainer
+                loginText={
+                  location.pathname.includes('newcart')
+                  ? 'Enter your email to sign up'
+                  : 'Enter your email to log in'}
+                loginSubtext={
+                  location.pathname.includes('newcart')
+                  ? 'One simple step and we\'ll be on our way'
+                  : 'Enter your email to log in'}
+                _toggleLoginScreen={_togglePopup}/>
+              : null
+            }
+          </div>
           <div className={`app__view ${showFooter ? '' : 'large'}`}>
             <div>
               {/* Render Error Page */}
@@ -183,14 +198,14 @@ export default class App extends Component {
               <Route path={'/newcart'} exact component={(props) => <CartStoresContainer {...props} _toggleLoginScreen={_togglePopup}/>} />
             </div>
           </div>
-          { 
+          {
             sidenav
-            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} /> 
+            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} />
             : null
           }
           {
-            showFooter 
-            ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> 
+            showFooter
+            ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/>
             : null
           }
         </section>

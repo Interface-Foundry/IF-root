@@ -24,7 +24,7 @@
       "slackText": "Add to Slack",
       "subtext": ["Free", "No Setup", "Secure"],
       "learnMore": "Learn More about Kip",
-      "imgUrl": "https: //storage.googleapis.com/kip-random/website/kip_collect.gif"
+      "imgUrl": "//storage.googleapis.com/kip-random/website/kip_collect.gif"
     },
     "header": {
       "readMoreText": "Read More"
@@ -45,13 +45,13 @@
       "slackButtonText": "Add to Slack Now",
       "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
       "competitors": [{
-        "image": "https://storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
+        "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
         "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
       }, {
-        "image": "https://storage.googleapis.com/kip-random/website/chart_hivy.svg",
+        "image": "//storage.googleapis.com/kip-random/website/chart_hivy.svg",
         "data": [true, true, false, false, false, ["Apple", "Slack"], "Credit Card Required"]
       }, {
-        "image": "https://storage.googleapis.com/kip-random/website/chart_q.svg",
+        "image": "//storage.googleapis.com/kip-random/website/chart_q.svg",
         "data": [true, false, false, true, false, ["Apple", "Play"], "Credit Card Required"]
       }]
     },
@@ -64,7 +64,7 @@
         "link": "/blog"
       }, {
         "title": "Become a Partner",
-        "link": "https://kip11.typeform.com/to/wYrY5w"
+        "link": "//kip11.typeform.com/to/wYrY5w"
       }]
     },
     "help": {
@@ -72,19 +72,19 @@
       "titleText": "Kip is 1 - Click Easy",
       "subtext": ["No Fees", "No Download", "No Hassle"],
       "images": [{
-        "src": "https://storage.googleapis.com/kip-random/mint_1_desktop.gif",
+        "src": "//storage.googleapis.com/kip-random/mint_1_desktop.gif",
         "class": "secondary",
         "bubble": "Browse Items or Paste a URL to Add Things to Your Kip Cart",
         "step": "One",
         "id": 1
       }, {
-        "src": "https://storage.googleapis.com/kip-random/mint_2_desktop.gif",
+        "src": "//storage.googleapis.com/kip-random/mint_2_desktop.gif",
         "class": "primary",
         "bubble": "Use Kip to Store the Items you Love in the Cloud",
         "step": "Two",
         "id": 2
       }, {
-        "src": "https://storage.googleapis.com/kip-random/mint_3_desktop.gif",
+        "src": "//storage.googleapis.com/kip-random/mint_3_desktop.gif",
         "class": "third",
         "bubble": "Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees",
         "step": "Three",
@@ -199,7 +199,7 @@
       "slackText": "Add to Slack",
       "subtext": ["Free", "No Setup", "Secure"],
       "learnMore": "Learn More about Kip",
-      "imgUrl": "https: //storage.googleapis.com/kip-random/website/kip_collect.gif"
+      "imgUrl": "//storage.googleapis.com/kip-random/website/kip_collect.gif"
     },
     "header": {
       "readMoreText": "Read More"
@@ -220,13 +220,13 @@
       "slackButtonText": "Add to Slack Now",
       "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
       "competitors": [{
-        "image": "https://storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
+        "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
         "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
       }, {
-        "image": "https://storage.googleapis.com/kip-random/website/chart_hivy.svg",
+        "image": "//storage.googleapis.com/kip-random/website/chart_hivy.svg",
         "data": [true, true, false, false, false, ["Apple", "Slack"], "Credit Card Required"]
       }, {
-        "image": "https://storage.googleapis.com/kip-random/website/chart_q.svg",
+        "image": "//storage.googleapis.com/kip-random/website/chart_q.svg",
         "data": [true, false, false, true, false, ["Apple", "Play"], "Credit Card Required"]
       }]
     },
@@ -239,7 +239,7 @@
         "link": "/blog"
       }, {
         "title": "Become a Partner",
-        "link": "https://kip11.typeform.com/to/wYrY5w"
+        "link": "//kip11.typeform.com/to/wYrY5w"
       }]
     },
     "help": {
@@ -247,19 +247,19 @@
       "titleText": "Kip is 1 - Click Easy",
       "subtext": ["No Fees", "No Download", "No Hassle"],
       "images": [{
-        "src": "https://storage.googleapis.com/kip-random/mint_1_desktop.gif",
+        "src": "//storage.googleapis.com/kip-random/mint_1_desktop.gif",
         "class": "secondary",
         "bubble": "Browse Items or Paste a URL to Add Things to Your Kip Cart",
         "step": "One",
         "id": 1
       }, {
-        "src": "https://storage.googleapis.com/kip-random/mint_2_desktop.gif",
+        "src": "//storage.googleapis.com/kip-random/mint_2_desktop.gif",
         "class": "primary",
         "bubble": "Use Kip to Store the Items you Love in the Cloud",
         "step": "Two",
         "id": 2
       }, {
-        "src": "https://storage.googleapis.com/kip-random/mint_3_desktop.gif",
+        "src": "//storage.googleapis.com/kip-random/mint_3_desktop.gif",
         "class": "third",
         "bubble": "Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees",
         "step": "Three",
@@ -374,7 +374,7 @@
       "slackText": "Add to Slack",
       "subtext": ["Free", "No Setup", "Secure"],
       "learnMore": "Learn More about Kip",
-      "imgUrl": "https: //storage.googleapis.com/kip-random/website/kip_collect.gif"
+      "imgUrl": "//storage.googleapis.com/kip-random/website/kip_collect.gif"
     },
     "header": {
       "readMoreText": "Read More"
@@ -395,13 +395,13 @@
       "slackButtonText": "Add to Slack Now",
       "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
       "competitors": [{
-        "image": "https://storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
+        "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
         "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
       }, {
-        "image": "https://storage.googleapis.com/kip-random/website/chart_hivy.svg",
+        "image": "//storage.googleapis.com/kip-random/website/chart_hivy.svg",
         "data": [true, true, false, false, false, ["Apple", "Slack"], "Credit Card Required"]
       }, {
-        "image": "https://storage.googleapis.com/kip-random/website/chart_q.svg",
+        "image": "//storage.googleapis.com/kip-random/website/chart_q.svg",
         "data": [true, false, false, true, false, ["Apple", "Play"], "Credit Card Required"]
       }]
     },
@@ -414,7 +414,7 @@
         "link": "/blog"
       }, {
         "title": "Become a Partner",
-        "link": "https://kip11.typeform.com/to/wYrY5w"
+        "link": "//kip11.typeform.com/to/wYrY5w"
       }]
     },
     "help": {
@@ -422,19 +422,19 @@
       "titleText": "Kip is 1 - Click Easy",
       "subtext": ["No Fees", "No Download", "No Hassle"],
       "images": [{
-        "src": "https://storage.googleapis.com/kip-random/mint_1_desktop.gif",
+        "src": "//storage.googleapis.com/kip-random/mint_1_desktop.gif",
         "class": "secondary",
         "bubble": "Browse Items or Paste a URL to Add Things to Your Kip Cart",
         "step": "One",
         "id": 1
       }, {
-        "src": "https://storage.googleapis.com/kip-random/mint_2_desktop.gif",
+        "src": "//storage.googleapis.com/kip-random/mint_2_desktop.gif",
         "class": "primary",
         "bubble": "Use Kip to Store the Items you Love in the Cloud",
         "step": "Two",
         "id": 2
       }, {
-        "src": "https://storage.googleapis.com/kip-random/mint_3_desktop.gif",
+        "src": "//storage.googleapis.com/kip-random/mint_3_desktop.gif",
         "class": "third",
         "bubble": "Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees",
         "step": "Three",

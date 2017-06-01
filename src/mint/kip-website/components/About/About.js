@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { PropTypes } from 'prop-types';
 import { HeaderContainer, FooterContainer } from '../../containers';
-import { replaceKip } from '../../utils';
+import { replaceHtml } from '../../utils';
 import { Icon } from '../../themes';
 import { Down, Right } from '../../themes/newSvg';
 
@@ -37,7 +37,7 @@ export default class About extends Component {
           <div className="col-12">
             <h1>{aboutTemplate.why.head}</h1>
             <h4>
-              {replaceKip(aboutTemplate.why.description)}
+              {replaceHtml(aboutTemplate.why.description)}
             </h4>
             <section className='cluster'>
               <div className='image' style={{backgroundImage: 'url(https://storage.googleapis.com/kip-random/many_kips/presents_smile.svg)'}}/>
