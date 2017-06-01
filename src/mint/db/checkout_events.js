@@ -12,10 +12,7 @@ var checkoutEventsCollection = Waterline.Collection.extend({
     user: Waterline.isA('user_accounts'),
 
     /** @type {cart} the cart from which the current cart was cloned */
-    original_cart: {
-      type: Waterline.isA('carts')
-      // defaultsTo: () => this.cart
-    }
+    original_cart: Waterline.isA('carts')
   }
 })
 

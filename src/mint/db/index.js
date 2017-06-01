@@ -65,7 +65,7 @@ var initialize = new Promise((resolve, reject) => {
       AuthenticationLinks: ontology.collections.authentication_links,
       CamelItems: ontology.collections.camel_items,
       Carts: ontology.collections.carts,
-      CheckoutEvents: ontology.collection.checkout_events,
+      CheckoutEvents: ontology.collections.checkout_events,
       DeliveryDetails: ontology.collections.delivery_details,
       EmailEvents: ontology.collections.email_events,
       Emails: ontology.collections.emails,

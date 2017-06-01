@@ -101,10 +101,10 @@ var cartsCollection = Waterline.Collection.extend({
     clone_count: function () { return this.clones.length },
 
     /** @type {cart} cart from which this cart was cloned (if applicable) */
-    original: Waterline.isA('cart'),
+    original: Waterline.isA('carts'),
 
-    /** @type {[user_accounts]} users who have checked this cart out */
-    checkout: Waterline.isMany('user_accounts')
+    /** @type {[user_accounts]} times this cart has been checked out */
+    checkouts: Waterline.isMany('checkout_events')
   }
 });
 
