@@ -8,7 +8,7 @@ module.exports = {
   LOCALES: ['US', 'CA', 'UK'],
 
   // PAYMENTS/INVOICES
-  INVOICE_TYPE: ['MintPayment', 'CafePayment'],
+  INVOICE_TYPE: ['mint', 'cafe'],
 
   /** dont know if we will support paypal but just for example */
   PAYMENT_SOURCE: ['amazon', 'stripe']

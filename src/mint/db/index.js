@@ -35,6 +35,8 @@ waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./ypo_inventory_items'))
 
+waterline.loadCollection(require('./invoice'))
+
 var config = {
   adapters: {
     'mongo': mongoAdapter
@@ -71,7 +73,8 @@ var initialize = new Promise((resolve, reject) => {
       Reactions: ontology.collections.reactions,
       Sessions: ontology.collections.sessions,
       UserAccounts: ontology.collections.user_accounts,
-      YpoInventoryItems: ontology.collections.ypo_inventory_items
+      YpoInventoryItems: ontology.collections.ypo_inventory_items,
+      Invoice: ontology.collections.invoice
     };
 
     // Programmatically make available the automatically generated schemas

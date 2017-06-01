@@ -29,10 +29,11 @@ const invoiceCollection = Waterline.Collection.extend({
     },
 
     /** cart associated with the payment */
-    cart: Waterline.isA('cart'),
+    // cart: Waterline.isA('cart'),
+    cart: 'string',
 
     /** Many-to-one relation with user accounts, so multiple users could pay */
-    payments: Waterline.isMany('payments'),
+    // payments: Waterline.isMany('payments'),
 
     /** if the whole order has been paid for */
     paid: 'boolean',

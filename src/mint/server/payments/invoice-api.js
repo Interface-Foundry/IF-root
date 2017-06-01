@@ -5,9 +5,7 @@ const router = express() // for testing
 // const Invoice = require('./Invoice.js')
 const invoiceFactory = require('./InvoiceFactory.js')
 
-
-
-
+// check if server up for api
 router.get('/test', async (req, res) => {
   res.sendStatus(200)
 })
