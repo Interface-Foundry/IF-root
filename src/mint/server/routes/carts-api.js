@@ -756,11 +756,25 @@ module.exports = function (router) {
    */
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
     // get the cart
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items')
-    var items = cart.items.slice()
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts')
     // checkout removes the items from the cart object, so we have to make a copy
+    var items = cart.items.slice()
+    var user_id = _.get(req, 'UserSession.user_account.id')
 
     yield cartUtils.checkout(cart, req, res)
+
+    // create a new checkout event for record-keeping purposes
+    var event = yield db.CheckoutEvents.create({
+      cart: cart.id,
+      user: user_id
+    })
+
+    // and attach it to the cart and the user
+    var user = yield db.UserAccounts.findOne({id: user_id}).populate('checkouts')
+    user.checkouts.add(event)
+    cart.checkouts.add(event)
+    yield user.save()
+    yield cart.save()
 
     cart.items = items;
     yield cartUtils.sendReceipt(cart, req)
