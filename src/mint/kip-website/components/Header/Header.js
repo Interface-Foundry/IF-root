@@ -36,15 +36,6 @@ export default class Header extends Component {
               }
             </p>
           </div>
-          <div className="icons">
-            <a href="mailto:hello@kipthis.com?subject=Subscribe"><EmailDrawn/></a>
-            <a href="//www.facebook.com/talkto.kip"><FacebookDrawn/></a>
-            <a href="//twitter.com/kiptalk"><TwitterDrawn/></a>
-          </div>
-        </div>
-        <div className="more" onClick={() => scrollToPosition(offsetTop)}>
-          <h2><span>{headerTemplate.readMoreText}</span></h2>
-          <Down/>
         </div>
       </section>
     );
