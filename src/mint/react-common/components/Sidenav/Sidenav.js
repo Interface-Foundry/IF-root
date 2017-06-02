@@ -139,7 +139,7 @@ export default class Sidenav extends Component {
               ? <SideNavLink to={`/cart/${cart_id}/m/archive`} onClick={_toggleSidenav}><h4><Icon icon='Archive'/> Archived Carts</h4></SideNavLink>
               : null
             }
-            {user_account.name ? <SideNavLink to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> Settings</h4></SideNavLink> : null }
+            {user_account.name ? <SideNavLink to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> My Settings</h4></SideNavLink> : null }
             <SideNavLink to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></SideNavLink>
           </li>
           <footer className='sidenav__footer'>

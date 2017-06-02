@@ -78,6 +78,7 @@ export default class About extends Component {
           }
           </ul>
         </section>
+        <h1><span>{aboutTemplate.seenIn}</span></h1>
         <section className="iconsRow">
           <div className="icon col-1"/>
           <div className="icon col-1"><Icon icon='Wallstreet'/></div>
@@ -87,6 +88,9 @@ export default class About extends Component {
           <div className="icon col-1"><Icon icon='Paymentsource'/></div>
           <div className="icon col-1"/>
         </section>
+
+        <h2><span>{aboutTemplate.videoTitle}</span></h2>
+        <hr/>
         <section className="col-12 row-1 video">
           <iframe width="100%" height="100%" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
         </section>
