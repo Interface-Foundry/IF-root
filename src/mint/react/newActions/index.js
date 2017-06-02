@@ -36,3 +36,9 @@ export {
 export { 
 	updateUser
 } from './user';
+
+export { 
+	submitQuery,
+	updateQuery,
+	toggleHistory
+} from './search';

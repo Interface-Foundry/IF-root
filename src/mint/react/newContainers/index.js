@@ -7,4 +7,5 @@ export StoresContainer from './StoresContainer';
 export SettingsContainer from './SettingsContainer';
 export FeedbackContainer from './FeedbackContainer';
 export EditCartContainer from './EditCartContainer';
+export SearchContainer from './SearchContainer';
 

@@ -12,6 +12,7 @@ import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
   return {
+  	user: state.user,
     cart: state.cart,
     sidenav: state.app.sidenav,
     popup: state.app.popup

@@ -23,37 +23,6 @@
       display: inline-block;
       min-width: 200px;
     }
-    .input {
-      position: relative;
-      display: inline-block;
-      width: 400px;
-      margin: 10px 0 10px 50px;
-      height: 30px;
-      border: 2px solid white;
-      overflow: hidden;
-
-      * {
-        height: 100%;
-      }
-
-      input {
-        width: calc(100% - #{$nav-height});
-        border: 0;
-        padding: 0 $padding;
-      }
-      button {
-        background: $color-blue;
-        width: $nav-height;
-        border: 0;
-        border-radius: 5px;
-        padding: 5px 0px;
-
-        svg {
-          width: 100%;
-          fill: white;
-        }
-      }
-    }
     .navbar__icon {
       display: inline-block;
       width: auto;

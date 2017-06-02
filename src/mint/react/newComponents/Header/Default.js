@@ -5,8 +5,8 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../../react-common/components';
-import { splitCartById } from '../../reducers';
-import Input from './Input';
+import { splitCartById } from '../../newReducers';
+import { SearchContainer } from '../../newContainers';
 
 export default class Default extends Component {
 
@@ -38,7 +38,7 @@ export default class Default extends Component {
               {cart.locked ? 'Checkout in Progress' : cart.name}
             </h3><span className='members'>Created by: {cart.leader ? cart.leader.name : ''} | {cart.store} {cart.store_locale} </span>
           </Link>
-          <Input cart={cart}/>
+          <SearchContainer />
         </div>
         <div className='header__right'>
           {!user.name ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : <p><Link to={`/cart/${cart.id}/m/settings`}><span>{user.name}</span></Link></p>}

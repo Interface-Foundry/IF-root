@@ -1,0 +1,80 @@
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+
+.search {
+  position: relative;
+  display: inline-block;
+  width: 600px;
+  margin: 10px 0 10px 50px;
+  height: 30px;
+  border: 2px solid white;
+
+  * {
+    height: 100%;
+  }
+
+  input {
+    width: calc(100% - #{$nav-height});
+    border: 0;
+    padding: 0 $padding;
+  }
+
+  button {
+    background: $color-blue;
+    width: $nav-height;
+    border: 0;
+    border-radius: 5px;
+    padding: 5px 0px;
+
+    svg {
+      width: 100%;
+      fill: white;
+    }
+  }
+
+  .history {
+    position: absolute;
+    max-height: 200px;
+    overflow: auto;
+    height: auto;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    width: calc(100% + 4px);
+    left: -2px;
+    top: 28px;
+    z-index: 100;
+    box-shadow: $card-box-shadow;
+
+    .history__term {
+      border-top: 0;
+      background: white;
+      line-height: 30px;
+      color: black;
+      cursor: pointer;
+
+      &:hover {
+        background: darken(white, 10%);
+      }
+
+      .history__term-icon {
+        display: inline-block;
+        width: $nav-height;
+        line-height: 30px;
+        padding: 0 $padding;
+      }
+
+      .history__term-query {
+        display: inline-block;
+        width: calc(100% - #{$nav-height});
+        text-align: left;
+        padding: 0;
+        line-height: 30px;
+
+        p {
+          font-size: 13px;
+          line-height: 30px;
+        }
+      }
+    }
+  }
+}

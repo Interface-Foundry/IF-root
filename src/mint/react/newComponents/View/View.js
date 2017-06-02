@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
 
-import Search from './Search';
+import Details from './Details'
 
 //Analytics!
 import ReactGA from 'react-ga';
@@ -23,7 +23,7 @@ export default class App extends Component {
     const { sidenav, cart, togglePopup, toggleSidenav } = this.props;
     return (
       <div className='view'>
-        <Search cart={cart}/>
+        <Details {...cart}/>
       </div>
     );
   }

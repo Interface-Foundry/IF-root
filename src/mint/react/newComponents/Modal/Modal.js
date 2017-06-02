@@ -8,11 +8,6 @@ import { SettingsContainer, FeedbackContainer, EditCartContainer } from '../../n
 import { Share } from '..';
 
 export default class SignIn extends Component {
-
-  static propTypes = {
-    match: PropTypes.object.isRequired,
-  }
-
   render() {
     // renders modal based on route
     return (

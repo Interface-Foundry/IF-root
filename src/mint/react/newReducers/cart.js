@@ -1,6 +1,16 @@
 // react/reducers/currentCart.js
 
-export default function cart(state = {}, action) {
+const initialState = { 
+  name: '',
+  leader: { 
+    name: '' 
+  },
+  store: '',
+  store_locale: '',
+  members: [] 
+} 
+
+export default function cart(state = initialState, action) {
   switch (action.type) {
     case 'CART_SUCCESS':
     case 'UPDATE_CART_SUCCESS':
@@ -9,7 +19,7 @@ export default function cart(state = {}, action) {
         ...action.response
       };
     case 'DELETE_CART_SUCCESS':
-      return {}
+      return initialState
     default:
       return state;
   }

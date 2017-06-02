@@ -1,0 +1,25 @@
+@import '../../../../react-common/styles/Constants';
+@import '../../../../react-common/styles/Animations';
+
+.details {
+	position: relative;
+	width: 100%;
+	height: auto;
+	margin: 0 auto;
+	border-spacing: $padding;
+
+	th {
+		text-align: center;
+	}
+
+	td {
+		font-size: 14px;
+		font-weight: 100;
+		text-align: center;
+		width: calc(100%/3);
+
+		span {
+			border-bottom: 3px solid $mainColor;
+		}
+	}
+}
