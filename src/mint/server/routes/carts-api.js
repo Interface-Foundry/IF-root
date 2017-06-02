@@ -244,6 +244,9 @@ module.exports = function (router) {
       throw new Error('Cart not found')
     }
 
+    // if this cart is a clone, it will become its own thing as a result of this modification
+    cart.original = null;
+
     // make the user leader if no leader exists, otherwise make member
     if (!cart.leader) {
       cart.leader = userId
@@ -326,6 +329,9 @@ module.exports = function (router) {
     // specify who added it
     newItem.added_by = user_id
 
+    // this is its own cart now
+    cart.original = null;
+
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
     yield [newItem.save(), cart.save()]
@@ -352,6 +358,9 @@ module.exports = function (router) {
        throw new Error('Unauthorized, only cart leader can clear cart items')
      }
      cart.items.map(i => cart.items.remove(i.id))
+
+     // this is its own cart now
+     cart.original = null;
 
      // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
      cart.dirty = true
@@ -417,7 +426,6 @@ module.exports = function (router) {
       throw new Error('Cart not found')
     }
 
-
     // Make sure they specified an item id
     if (!req.params.item_id) {
       throw new Error('Must specify item_id')
@@ -441,6 +449,9 @@ module.exports = function (router) {
 
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
+
+    // this is its own cart now
+    cart.original = null;
 
     yield cart.save()
 

@@ -95,10 +95,17 @@ var cartsCollection = Waterline.Collection.extend({
     },
 
     /** @type {[carts]} clones of this cart*/
-    clones: Waterline.isMany('carts'),
+    clones: {
+      collection: 'carts',
+      via: 'ancestors',
+      dominant: true
+    },
 
-    /** @type {cart} cart from which this cart was cloned (if applicable) */
-    original: Waterline.isA('carts'),
+    /** @type {carts} carts in the cloning-geneology of this cart */
+    ancestors: {
+      collection: 'carts',
+      via: 'clones'
+    },
 
     /** @type {[user_accounts]} times this cart has been checked out */
     checkouts: Waterline.isMany('checkout_events')

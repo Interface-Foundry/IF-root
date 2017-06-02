@@ -3,7 +3,7 @@ const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
 var clone = function * (cart_id, user_id) {
-  var original = yield db.Carts.findOne({id: cart_id}).populate('items').populate('clones')
+  var original = yield db.Carts.findOne({id: cart_id}).populate('items').populate('clones').populate('ancestors')
   var originalJson = original.toJSON();
 
   // delete association fields that do not carry over to the clone
@@ -53,17 +53,27 @@ var clone = function * (cart_id, user_id) {
   })
 
   // set original
-  clone.original = (original.original ? original.original : original.id)
+  logging.info('original.ancestors', original.ancestors)
+
+  if (original.ancestors) {
+    yield original.ancestors.map(function * (a) {
+      var ancestor = yield db.Carts.findOne({id: a.id}).populate('clones')
+      clone.ancestors.add(a.id)
+      ancestor.clones.add(clone.id)
+      yield ancestor.save()
+    })
+  }
+
+  logging.info(clone)
+  clone.ancestors.add(original.id)
   yield clone.save()
-
-  // logging.info('clone.original', clone.original)
-
-  // set new as clone of old
-  original = yield db.Carts.findOne({id: clone.original}).populate('clones')
   original.clones.add(clone.id)
   yield original.save()
 
-  clone = yield db.Carts.findOne({id: clone.id}).populate('items').populate('original')
+  logging.info('es gibt Zeit')
+  logging.info('clone.ancestry', clone.ancestors)
+
+  clone = yield db.Carts.findOne({id: clone.id}).populate('items')
   return clone;
 }
 
