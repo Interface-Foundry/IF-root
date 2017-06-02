@@ -389,7 +389,7 @@
       "tagline": "The Kip Advantage",
       "tagDescrip": "${Kip} beats traditional web shopping by bringing all types of products into one place.",
       "details": {
-        "descrips": ["Buy and manage orders from multiple stores with a single Kip. Coordinate group buys with1-click.", "Split and share accounts like Amazon Prime securely without giving away passowrds.", "Track expenses and set budgets on Slack, Email, and Facebook Messenger"],
+        "descrips": ["Buy and manage orders from multiple stores with a single Kip. Coordinate group buys with 1-click.", "Split and share accounts like Amazon Prime securely without giving away passwords.", "Track expenses and set budgets on Slack, Email, and Facebook Messenger."],
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
       }

@@ -893,7 +893,7 @@ module.exports = function (router) {
         break;
       case 'ypo':
         var ypoCategories = ypoConstants.categories;
-        var arrayCategories = Obejct.keys(ypoCategories).map(cat =>  {
+        var arrayCategories = Object.keys(ypoCategories).map(cat =>  {
           return {
             humanName: cat,
             machineName: ypoCategories[cat],
