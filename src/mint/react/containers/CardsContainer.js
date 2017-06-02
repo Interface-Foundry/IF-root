@@ -25,9 +25,9 @@ const mapDispatchToProps = dispatch => ({
     });
     return dispatch(selectCard(cardIndex, card));
   },
-  previewAmazonItem: (url, store, store_locale) => {
+  previewAmazonItem: (url, store, store_locale, machineName) => {
     addSearchHistory(url);
-    return dispatch(previewAmazonItem(url, store, store_locale));
+    return dispatch(previewAmazonItem(url, store, store_locale, machineName));
   },
   clearItem: () => dispatch(clearItem())
 });
