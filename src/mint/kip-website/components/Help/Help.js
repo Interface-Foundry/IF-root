@@ -118,15 +118,17 @@ export default class Help extends Component {
             </CSSTransitionGroup>
           </div>
         </section>
-        <div className="col-12 action">
-          <a href='/newcart'>
-            <button>
-              <span>{helpTemplate.buttonText} <Right/></span>
-            </button>
-          </a>
-        </div>
+        
         <section className='FAQ'>
+          <div className="action">
+            <a href='/newcart'>
+              <button>
+                <span>{helpTemplate.buttonText} <Right/></span>
+              </button>
+            </a>
+          </div>
           <h1><span>{faq.title}</span></h1>
+
           <p className='subtext'>
             {replaceHtml(faq.subtext)}
           </p>

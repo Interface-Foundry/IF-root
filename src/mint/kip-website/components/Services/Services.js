@@ -36,7 +36,7 @@ export default class Services extends Component {
           {
             servicesTemplate.details.descrips.map((d, i) =>(
               <div key={i} className='col-4 row-1 services__details'>
-                <div className='image serviceImage' style={{maskImage: `url(${d.image})`}}/>
+                <div className='image serviceImage' style={{backgroundImage: `url(${d.image})`}}/>
                 <h4>
                   {d.text}
                 </h4>

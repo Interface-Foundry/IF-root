@@ -128,16 +128,10 @@
     &:last-of-type {
       transform: translate3d(0, -150px, 0);
     }
-    .serviceImage {
-      width: 100%;
-      height: $ribbonHeight*2;
-      padding: $padding/2;
-    }
     .image {
       width: 100%;
       height: $ribbonHeight*2;
-      mask-position: center;
-      mask-repeat: no-repeat;
+      background-size: contain;
       display: inline-block;
     }
     h2 {
@@ -158,14 +152,6 @@
       color: rgba($bgColor, 1);
       @media only screen and (max-width: 600px) {
         padding: 0;
-      }
-    }
-    &:first-of-type {
-      .serviceImage {
-      }
-    }
-    &:nth-of-type(3) {
-      .serviceImage {
       }
     }
   }
