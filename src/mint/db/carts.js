@@ -97,9 +97,6 @@ var cartsCollection = Waterline.Collection.extend({
     /** @type {[carts]} clones of this cart*/
     clones: Waterline.isMany('carts'),
 
-    /** @type {integer} the number of times this cart has been cloned */
-    clone_count: function () { return this.clones.length },
-
     /** @type {cart} cart from which this cart was cloned (if applicable) */
     original: Waterline.isA('carts'),
 
