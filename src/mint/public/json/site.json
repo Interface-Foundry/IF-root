@@ -134,10 +134,10 @@
       "titleText": "Smart Penguin for Social Shopping",
       "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
       "seenIn": "Seen In",
-      "videoTitle": "Meet Kip the Office Penguin",
+      "videoTitle": "Meet Kip",
       "team": {
         "title": "Meet the Team",
-        "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions",
+        "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions.",
         "members": [{
           "image": "/kip.png",
           "name": "Graham Annett"
@@ -166,14 +166,14 @@
         "actionText": "Use Kip Now",
         "description": "${Kip} brings a penguin's perspective to collective purchasing.",
         "reasons": [{
-          "image": "//storage.googleapis.com/kip-random/many_kips/office.svg",
-          "text": "Penguins are loyal and trustworthy. Kip keeps your data safe, and doesn’t resell to 3rd parties."
+          "image": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
+          "text": "Penguins protect each other. Kip keeps your data safe, and doesn’t resell to 3rd parties."
         }, {
-          "image": "//storage.googleapis.com/kip-random/many_kips/struggle.svg",
-          "text": "Penguins are friendly birds, Kip helps you leverage social power to get the best deals"
+          "image": "//storage.googleapis.com/kip-random/many_kips/present_both_kips_sk.svg",
+          "text": "Penguins help each other out, Kip helps you split and share account fees like Amazon Prime with your team."
         }, {
-          "image": "//storage.googleapis.com/kip-random/many_kips/coupon_L.svg",
-          "text": "Penguins help each other out, let Kip take away the stress of organizing group orders"
+          "image": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
+          "text": "Penguins are social, Kip takes away the stress of coordinating team purchasing."
         }]
       }
     }
@@ -313,10 +313,10 @@
       "titleText": "Smart Penguin for Group Shopping",
       "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
       "seenIn": "Seen In",
-      "videoTitle": "Meet Kip the Office Penguin",
+      "videoTitle": "Meet Kip",
       "team": {
         "title": "Meet the Team",
-        "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions",
+        "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions.",
         "members": [{
           "image": "/kip.png",
           "name": "Graham Annett"
@@ -345,13 +345,13 @@
         "actionText": "Use Kip Now",
         "description": "${Kip} brings a penguin's perspective to collective purchasing.",
         "reasons": [{
-          "image": "//storage.googleapis.com/kip-random/many_kips/office.svg",
+          "image": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
           "text": "Penguins protect each other. Kip keeps your data safe, and doesn’t resell to 3rd parties."
         }, {
-          "image": "//storage.googleapis.com/kip-random/many_kips/struggle.svg",
+          "image": "//storage.googleapis.com/kip-random/many_kips/present_both_kips_sk.svg",
           "text": "Penguins help each other out, Kip helps you split and share account fees like Amazon Prime with your team."
         }, {
-          "image": "//storage.googleapis.com/kip-random/many_kips/coupon_L.svg",
+          "image": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
           "text": "Penguins are social, Kip takes away the stress of coordinating team purchasing."
         }]
       }
@@ -492,10 +492,10 @@
       "titleText": "Intelligent Penguin for Team Shopping",
       "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
       "seenIn": "Seen In",
-      "videoTitle": "Meet Kip the Office Penguin",
+      "videoTitle": "Meet Kip",
       "team": {
         "title": "Meet the Team",
-        "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions",
+        "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions.",
         "members": [{
           "image": "/kip.png",
           "name": "Graham Annett"
@@ -524,13 +524,13 @@
         "actionText": "Use Kip Now",
         "description": "${Kip} brings a penguin's perspective to collective purchasing.",
         "reasons": [{
-          "image": "//storage.googleapis.com/kip-random/many_kips/office.svg",
+          "image": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
           "text": "Penguins protect each other. Kip keeps your data safe, and doesn’t resell to 3rd parties."
         }, {
-          "image": "//storage.googleapis.com/kip-random/many_kips/struggle.svg",
+          "image": "//storage.googleapis.com/kip-random/many_kips/present_both_kips_sk.svg",
           "text": "Penguins help each other out, Kip helps you split and share account fees like Amazon Prime with your team."
         }, {
-          "image": "//storage.googleapis.com/kip-random/many_kips/coupon_L.svg",
+          "image": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
           "text": "Penguins are social, Kip takes away the stress of coordinating team purchasing."
         }]
       }
