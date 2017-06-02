@@ -900,15 +900,7 @@ module.exports = function (router) {
         }
         break;
       case 'ypo':
-        var ypoCategories = ypoConstants.categories;
-        var arrayCategories = Object.keys(ypoCategories).map(cat =>  {
-          return {
-            humanName: cat,
-            machineName: ypoCategories[cat],
-            searchType: 'category',
-            id: ypoCategories[cat]
-          }
-        })
+        var arrayCategories = yield category_utils.getYpoCategories()
         res.send(arrayCategories)
         break;
       default:

@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from '..';
+import { Down, Right } from '../../../kip-website/themes/newSvg';
 
 export default class Popup extends Component {
 
@@ -28,6 +29,8 @@ export default class Popup extends Component {
     errors: PropTypes.array,
     login: PropTypes.func,
     validateCode: PropTypes.func,
+    loginText: PropTypes.string,
+    loginSubtext: PropTypes.string,
     _toggleLoginScreen: PropTypes.func,
   }
 
@@ -85,7 +88,7 @@ export default class Popup extends Component {
 
   render() {
     const {
-      props: { _toggleLoginScreen },
+      props: { _toggleLoginScreen, loginText = 'Enter Email to Sign Up', loginSubtext = '' },
       state: { error, success, mail, code },
       _enterMail,
       _enterCode,
@@ -100,28 +103,28 @@ export default class Popup extends Component {
             <Icon icon='Clear'/>
           </div>
           {
-            !success 
-            ? <h1>Enter Email to Log In</h1> 
+            !success
+            ? <h1>{ loginText }</h1>
             : <div><h1>I just sent a code to</h1> <h2>{mail.val}</h2></div>
           }
           {
-            error 
-              ? <span style={{color: '#ff6961'}}>{error}</span> 
+            error
+              ? <span style={{color: '#ff6961'}}>{error}</span>
               : null
           }
           {
-            !success 
-              ? <input className={`loginMail ${!mail.edited ? 'empty' : ''}`} onChange={_updateMail} value={mail.val} type='email' required autoFocus placeholder='Enter your email'/> 
+            !success
+              ? <input className={`loginMail ${!mail.edited ? 'empty' : ''}`} onChange={_updateMail} value={mail.val} type='email' required autoFocus placeholder='Enter your email'/>
               : <div className='autoTab'>
                   <input ref='code_0' className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 0)} value={code.val[0]||''} type="tel" pattern='[0-9]{3}' required autoFocus placeholder='000'/>
                   <input ref='code_1' className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 1)} value={code.val[1]||''} type="tel" pattern='[0-9]{3}' required placeholder='000'/>
                 </div>
           }
-          <button type='submit'  value='Submit'><Icon icon='Login'/>{!success ? 'Send Email': 'Log In'}</button>
+          <button type='submit'  value='Submit'>{!success ? 'Sign Up ': 'Log In '} <Right/></button>
           {
-            !success 
+            !success
             ? <div className='popup__description'>
-                <p>We will send you a code to automagically log you in</p>
+                <p>{loginSubtext} </p>
               </div>
             : null
           }

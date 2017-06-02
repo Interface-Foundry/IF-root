@@ -74,7 +74,7 @@ export function logout() {
 
       return dispatch(logoutAll());
     } catch (e) {
-      return new SubmissionError({ email: 'You are already signed in, check your email!' });
+      return new SubmissionError({ email: 'Please try logging out again' });
     }
   };
 }

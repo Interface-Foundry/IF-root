@@ -239,7 +239,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   // use the new_cart email template
   email.template('new_cart', {
     cart: cart,
-    deals: []
+    username: _.get(req, 'UserSession.user_account.name', '')
   })
 
   // remember to actually send it

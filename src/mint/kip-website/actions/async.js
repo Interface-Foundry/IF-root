@@ -53,7 +53,7 @@ export function getSiteState() {
         .then(json => json.json());
       return dispatch({
         type: 'GOT_SITE',
-        response: site[version.siteVersion],
+        response: {siteVersion: version.siteVersion, ...site[version.siteVersion]},
         receivedAt: Date.now()
       });
     } catch (e) {

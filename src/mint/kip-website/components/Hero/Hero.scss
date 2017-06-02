@@ -18,12 +18,14 @@
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
+    @media only screen and (max-width: 600px) {
+      margin-top: 8%;
+    }
     .headline {
       display: table-cell;
       vertical-align: middle;
       padding: $padding 0;
       text-align: left;
-      background: rgba(white, 1);
       h1 {
         display: inline-block;
         line-height: $ribbonHeight;
@@ -131,11 +133,13 @@
       vertical-align: middle;
       padding: 0;
       .image {
-        background-image: url(//storage.googleapis.com/kip-random/website/kip_collect.gif);
+        background-image: url('//storage.googleapis.com/kip-random/website/kip_collect.gif');
         background-size: contain;
         background-position: center;
         height: 60%;
         min-height: 400px; //fixes firefox for some reason
+        max-width: 357px;
+        margin-left: 13%;
       }
       @media only screen and (max-width: 600px) {
         position: absolute;
@@ -143,9 +147,52 @@
         height: 100%;
         left: 0;
         bottom: 0;
-        z-index: -1;
+        z-index: 0;
         .image {
           height: 100%;
+          margin-top: -48.4%;
+          width: 53%;
+          margin-left: 19%;
+          clip-path: polygon(-54% 13%, 164% 54%, 131% 58%, 19% 58%);
+          &:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            opacity: .6; 
+            background-image: -moz-linear-gradient(top, rgba(255,255,255,0) 19%, rgba(255,255,255,1) 30%); /* FF3.6-15 */
+            background-image: -webkit-linear-gradient(top, rgba(255,255,255,0) 19%,rgba(255,255,255,1) 30%); /* Chrome10-25,Safari5.1-6 */
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0) 19%,rgba(255,255,255,1) 30%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+          }
+        }
+      }
+      @media only screen and (max-width: 320px) {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        bottom: 0;
+        z-index: 0;
+        .image {
+          height: 100%;
+          margin-top: -64.4%;
+          width: 31%;
+          margin-left: 0.5%;
+          clip-path: polygon(-54% 13%, 164% 54%, 131% 58%, 19% 58%);
+          &:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            opacity: .6; 
+            background-image: -moz-linear-gradient(top, rgba(255,255,255,0) 15%, rgba(255,255,255,1) 21%); /* FF3.6-15 */
+            background-image: -webkit-linear-gradient(top, rgba(255,255,255,0) 15%,rgba(255,255,255,1) 21%); /* Chrome10-25,Safari5.1-6 */
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0) 15%,rgba(255,255,255,1) 21%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+          }
         }
       }
     }
@@ -171,6 +218,10 @@
       height: $ribbonHeight/1.3;
       fill: $primaryColor;
       @include animation(bounceDownSmall 3s infinite);
+    }
+
+    @media only screen and (max-width: 600px) {
+      margin-top: -6%;
     }
   }
 }

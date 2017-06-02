@@ -14,8 +14,8 @@ module.exports.categories = Object.keys(categoryFile)
     count: Object.keys(categoryFile[category]).reduce((count, subcategory) => count + categoryFile[category][subcategory], 0)
   }))
   .sort((a, b) => b.count - a.count)
-  .map(categoryInfo => categoryInfo.category)
-  .reduce((categories, category) => {
-    categories[category] = category
-    return categories
-  }, {})
+  // .map(categoryInfo => categoryInfo.category)
+  // .reduce((categories, category) => {
+    // categories[category] = category
+    // return categories
+  // }, {})

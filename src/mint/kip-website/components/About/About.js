@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { PropTypes } from 'prop-types';
 import { HeaderContainer, FooterContainer } from '../../containers';
-import { replaceKip } from '../../utils';
+import { replaceHtml } from '../../utils';
 import { Icon } from '../../themes';
 import { Down, Right } from '../../themes/newSvg';
 
@@ -33,11 +33,11 @@ export default class About extends Component {
     return (
       <div className="about">
         <HeaderContainer title={aboutTemplate.titleText} subtext={aboutTemplate.subtext} color="primary" offsetTop={offsetTop}/>
-        <div className="why col-12" ref={(why) => this.why = why}>
+        <section className="why col-12" ref={(why) => this.why = why}>
           <div className="col-12">
             <h1>{aboutTemplate.why.head}</h1>
             <h4>
-              {replaceKip(aboutTemplate.why.description)}
+              {replaceHtml(aboutTemplate.why.description)}
             </h4>
             <section className='cluster'>
               <div className='image' style={{backgroundImage: 'url(https://storage.googleapis.com/kip-random/many_kips/presents_smile.svg)'}}/>
@@ -61,8 +61,24 @@ export default class About extends Component {
               ))
             }
           </div>
-        </div>
-        <h1>{aboutTemplate.seenIn}</h1>
+        </section>
+        <section className='team col-12'>
+          <h1 className='team__title'><span>{aboutTemplate.team.title}</span></h1>
+          <p className='team__mission'>{replaceHtml(aboutTemplate.team.mission)}</p>
+          <ul className='team__members'>
+          {
+            aboutTemplate.team.members.map((m,i)=>
+              (
+                <li key={i} className='team__member'>
+                  <img className='member__image' src={m.image}/>
+                  <span className='member__name'>{m.name}</span>
+                </li>
+              )
+            )
+          }
+          </ul>
+        </section>
+        <h1><span>{aboutTemplate.seenIn}</span></h1>
         <section className="iconsRow">
           <div className="icon col-1"/>
           <div className="icon col-1"><Icon icon='Wallstreet'/></div>
@@ -72,6 +88,9 @@ export default class About extends Component {
           <div className="icon col-1"><Icon icon='Paymentsource'/></div>
           <div className="icon col-1"/>
         </section>
+
+        <h2><span>{aboutTemplate.videoTitle}</span></h2>
+        <hr/>
         <section className="col-12 row-1 video">
           <iframe width="100%" height="100%" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
         </section>

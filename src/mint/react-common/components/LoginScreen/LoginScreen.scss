@@ -69,7 +69,7 @@
     }
     input {
       border: none;
-      border-bottom: 4px solid $thirdColor;
+      border-bottom: 3px solid $color-blue;
       background: transparent;
       width: 75%;
       text-align: center;
@@ -88,16 +88,16 @@
       &.loginMail {
         font-size: 20px;
         &:invalid {
-          border-color: $fourthColor;
+          border-color: $fifthColor;
         }
         &:required {
           box-shadow: none;
         }
         &:active, &:focus {
-          border-color: $fifthColor;
+          border-color: $thirdColor;
         }
         &.empty {
-          border-color: $thirdColor;
+          border-color: $color-blue;
         }
         &:valid {
           border-color: $thirdColor;
@@ -105,7 +105,7 @@
       }
     }
     button {
-      background: $secondaryColor;
+      background: $warningColor;
       border: 0;
       margin: $padding*4 0 $padding;
       padding: $padding $padding*5;
@@ -119,9 +119,20 @@
         opacity: 0.4;
         cursor: not-allowed;
       }
+      &:hover {
+        svg {
+          transform: translate3d(5px, 0, 0)
+        }
+      }
       svg {
-        margin-right: $padding;
-        font-size: 18px;
+        fill: white;
+        height: 25px;
+        width: 25px;
+        padding: 0;
+        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+        @media only screen and (max-width: 600px) {
+          height: 20px;
+        }
       }
     }
   }
