@@ -19,17 +19,17 @@ export default class Details extends Component {
           total = calculateItemTotal(items);
 
     return (
-        <table className='details'>
-          	<tr>
+      <table className='details'>
+        <tr>
 			    <th colSpan='100%'><span>{name}</span></th>
-			</tr>
-        	<tr>
-	        	<td><span>Created By: {leader.name}</span></td>
-	        	<td><span>Store: {store} | {store_locale}</span></td>
-	        	<td><span>Number of Members: {members.length}</span></td>
-            <td><span>Total: ${total}</span></td>
-        	</tr>
-        </table>
+        </tr>
+        <tr>
+        	<td><span>Created By: {leader.name}</span></td>
+        	<td><span>Store: {store} | {store_locale}</span></td>
+        	<td><span>Number of Members: {members.length}</span></td>
+          <td><span>Total: ${total}</span></td>
+      	</tr>
+      </table>
     );
   }
 }
