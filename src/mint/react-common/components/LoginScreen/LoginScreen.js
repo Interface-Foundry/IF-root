@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from '..';
+import { Down, Right } from '../../../kip-website/themes/newSvg';
 
 export default class Popup extends Component {
 
@@ -119,7 +120,7 @@ export default class Popup extends Component {
                   <input ref='code_1' className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 1)} value={code.val[1]||''} type="tel" pattern='[0-9]{3}' required placeholder='000'/>
                 </div>
           }
-          <button type='submit'  value='Submit'><Icon icon='Login'/>{!success ? 'Send Email': 'Log In'}</button>
+          <button type='submit'  value='Submit'>{!success ? 'Sign Up ': 'Log In '} <Right/></button>
           {
             !success
             ? <div className='popup__description'>
