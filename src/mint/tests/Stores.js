@@ -7,7 +7,7 @@ const dbReady = require('../db')
 dbReady.then((models) => { db = models }).catch(e => console.error(e))
 
 var stores = [{
-  skip: true,
+  skip: false,
   name: 'amazon_us',
   searches: [
     {
@@ -37,6 +37,7 @@ var stores = [{
         results[0].name.should.equal('HiLetgo New Version NodeMCU LUA WiFi Internet ESP8266 Development')
       }
     },{
+      skip: true,
       options: {
         text: 'B01GF5ACUG'
       },
@@ -59,7 +60,7 @@ var stores = [{
       }
     },{
       options: {
-        text: 'Home and Office'
+        text: 'Curriculum' // this is a category
       },
       check(results) {
         results.length.should.equal(10)

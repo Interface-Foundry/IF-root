@@ -44,7 +44,7 @@ class YPOStore extends Store {
   async categorySearch(options) {
     const category = options.text
     const items = await db.YpoInventoryItems.find({category: category})
-      .skip(10 * (page - 1))
+      .skip(10 * (options.page - 1))
       .limit(10)
 
     return items
