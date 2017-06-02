@@ -32,6 +32,8 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
     path: '/__webpack_hmr',
     heartbeat: 10 * 1000
   }));
+} else {
+  app.get('/__webpack_hmr', (req, res) => res.status(200).end())
 }
 
 require('colors');
@@ -110,6 +112,7 @@ if (process.env.LOGGING_MODE === 'database') {
 //
 // Back end routes
 //
+app.use('/prototype', require('./routes/global-direct-prototype.js'));
 app.use('/', require('./routes/regular.js'));
 app.use('/api', require('./routes/api.js'));
 app.use('/sendgrid', require('./routes/incoming-mail.js'));

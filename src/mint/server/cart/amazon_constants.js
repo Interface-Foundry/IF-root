@@ -45,6 +45,22 @@ module.exports.credentials = {
 }
 
 /**
+ * General data for each amazon locale
+ * @type {Object}
+ */
+module.exports.locales = {
+  US: {
+    domain: 'amazon.com'
+  },
+  UK: {
+    domain: 'amazon.co.uk'
+  },
+  CA: {
+    domain: 'amazon.ca'
+  }
+}
+
+/**
  * Mapping of human-readable category names to amazon search index names for each locale
  * @type {Object}
  */
