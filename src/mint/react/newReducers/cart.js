@@ -7,7 +7,8 @@ const initialState = {
   },
   store: '',
   store_locale: '',
-  members: [] 
+  members: [],
+  items: [] 
 } 
 
 export default function cart(state = initialState, action) {
