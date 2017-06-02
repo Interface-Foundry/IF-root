@@ -18,6 +18,7 @@ const spliddit = require('spliddit')
 const cart_types = require('../cart/cart_types').stores
 const countryCoordinates = require('../cart/cart_types').countryCoordinates
 const category_utils = require('../utilities/category_utils');
+const cloning_utils = require('../utilities/cloning_utils');
 
 if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
@@ -748,75 +749,19 @@ module.exports = function (router) {
     res.send(item)
   }))
 
-  //TODO clone a cart
+  /**
+   * @api {get} /api/cart/:cart_id/clone
+   * @apiDescription Creates a copy of the cart without reactions or members
+   * @apiGroup Carts
+   * @apiParam {String} :cart_id the id of the cart to be copied
+   */
   router.get('/cart/:cart_id/clone', (req, res) => co(function * () {
     var user_id = _.get(req, 'UserSession.user_account.id')
     //for testing:
     var user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
-    var original = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('clones')
-    var originalJson = original.toJSON();
 
-    // delete association fields that do not carry over to the clone
-    // social metrics like views and checkouts will only be stored on the original
-    delete originalJson.id
-    delete originalJson.items
-    delete originalJson.original
-    delete originalJson.clones
-    delete originalJson.checkouts
-    delete originalJson.members
-    delete originalJson.leader
-    delete originalJson.views
-
-    // logging.info('originalJson', originalJson)
-
-    // create new cart
-    var clone = yield db.Carts.create(originalJson)
-
-    // change leader
-    clone.leader = user_id
-    clone.dirty = false;
-
-    console.log(original.items)
-    // clone items in the cart
-    yield original.items.map(function * (item) { //this line is throwing a weird exception for some reason?
-
-      item = yield db.Items.findOne({id: item.id}).populate('details')
-      console.log('item:', item)
-
-      //create new item
-      var itemJson = item.toJSON();
-
-      delete itemJson.id
-      delete itemJson.options
-      delete itemJson.reactions
-      delete itemJson.added_by
-      delete itemJson.cart
-      delete itemJson.details
-
-      //create new item
-      var clonedItem = yield db.Items.create(itemJson)
-      clonedItem.cart = clone.id
-      clonedItem.added_by = user_id
-      clonedItem.details = item.details.id
-
-      yield clonedItem.save()
-
-      clone.items.add(clonedItem.id)
-    })
-
-    // set original
-    clone.original = (original.original ? original.original : original.id)
-    yield clone.save()
-
-    logging.info('clone.original', clone.original)
-
-    // set new as clone of old
-    original = yield db.Carts.findOne({id: clone.original}).populate('clones')
-    original.clones.add(clone.id)
-    yield original.save()
-
-    clone = yield db.Carts.findOne({id: clone.id}).populate('items').populate('original')
-    return res.send(clone)
+    var clone = yield cloning_utils.clone(req.params.cart_id, user_id);
+    return res.send(clone);
   }))
 
   /**
