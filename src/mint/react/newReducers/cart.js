@@ -1,104 +1,17 @@
 // react/reducers/currentCart.js
 
-import {
-  ADD_MEMBER_TO_CART,
-  RECEIVE_CART,
-  RECEIVE_UPDATE_CART,
-  RECEIVE_ADD_ITEM,
-  REQUEST_REMOVE_ITEM,
-  RECEIVE_REMOVE_ITEM,
-  CANCEL_REMOVE_ITEM,
-  RECEIVE_INCREMENT_ITEM,
-  RECEIVE_DECREMENT_ITEM,
-  RECEIVE_UPDATE_ITEM,
-  REQUEST_SET_STORE,
-  REQUEST_CLEAR_CART,
-  CANCEL_CLEAR_CART,
-  RECEIVE_CLEAR_CART
-} from '../constants/ActionTypes';
-
 export default function cart(state = {}, action) {
   switch (action.type) {
-  case ADD_MEMBER_TO_CART:
-    return {
-      ...state,
-      members: [...state.members, action.newMember]
-    };
-  case RECEIVE_UPDATE_CART:
-    if (action.updatedCart.id !== state.cart_id) return state;
-    return {
-      ...state,
-      locked: action.updatedCart.locked,
-      thumbnail_url: action.updatedCart.thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png',
-      name: action.updatedCart.name,
-      cart_id: action.updatedCart.id
-    };
-  case RECEIVE_CART:
-    return {
-      ...state,
-      ...action.currentCart,
-      thumbnail_url: action.currentCart.thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png',
-      locked: action.currentCart.locked || false,
-      cart_id: action.currentCart.id
-    };
-  case RECEIVE_ADD_ITEM:
-    return {
-      ...state,
-      items: [...state.items, action.item].reverse()
-    };
-  case REQUEST_REMOVE_ITEM: // now that we have an undo, we remove this locally first
-    return {
-      ...state,
-      itemDeleted: state.items.find(item => item.id === action.itemToRemove), //save item
-      items: state.items.filter(item => item.id !== action.itemToRemove)
-    };
-  case CANCEL_REMOVE_ITEM:
-    return {
-      ...state,
-      items: [state.itemDeleted, ...state.items],
-      itemDeleted: null, // clear saved item if canceled
-    };
-  case RECEIVE_REMOVE_ITEM:
-    return {
-      ...state,
-      itemDeleted: null
-    };
-  case RECEIVE_INCREMENT_ITEM:
-  case RECEIVE_DECREMENT_ITEM:
-    return {
-      ...state,
-      items: state.items.map(item => item.id === action.item.id ? action.item : item) //replace item that matches with new one
-    };
-  case RECEIVE_UPDATE_ITEM:
-    return {
-      ...state,
-      items: state.items.map(item => item.id === action.old_item_id ? {...item, ...action.item} : item)
-    };
-  case REQUEST_SET_STORE:
-    return {
-      ...state,
-      store: action.storeType
-    };
-  case REQUEST_CLEAR_CART:
-    return {
-      ...state,
-      items: [],
-      oldItems: state.items
-    };
-  case CANCEL_CLEAR_CART:
-    return {
-      ...state,
-      items: state.oldItems,
-      oldItems: []
-    };
-  case RECEIVE_CLEAR_CART:
-    return {
-      ...state,
-      items: [],
-      oldItems: []
-    };
-  default:
-    return state;
+    case 'CART_SUCCESS':
+    case 'UPDATE_CART_SUCCESS':
+      return {
+        ...state,
+        ...action.response
+      };
+    case 'DELETE_CART_SUCCESS':
+      return {}
+    default:
+      return state;
   }
 }
 

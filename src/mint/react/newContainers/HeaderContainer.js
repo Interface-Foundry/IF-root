@@ -1,8 +1,7 @@
 import { connect } from 'react-redux';
-import { Sidenav } from '../../react-common/components';
+import { Header } from '../newComponents';
 
 import { 
-	get,
   logout,	
 	toggleModal,
 	toggleSidenav
@@ -10,16 +9,12 @@ import {
 
 const mapStateToProps = (state, props) => {
   return {
-    cart_id: state.cart.id,
-    carts: state.carts.carts || [],
-    archivedCarts: state.carts.archivedCarts || [],
-    user_account: state.user,
-    currentCart: state.cart
+    cart: state.cart,
+    user: state.user
   }
 };
 
 const mapDispatchToProps = dispatch => ({
-  get: (url, type) => dispatch(get(url, type)),
   _toggleLoginScreen: () => dispatch(toggleModal()),
   _toggleSidenav: () => dispatch(toggleSidenav()),
   logout: () => {
@@ -28,4 +23,4 @@ const mapDispatchToProps = dispatch => ({
   }
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Sidenav);
+export default connect(mapStateToProps, mapDispatchToProps)(Header);

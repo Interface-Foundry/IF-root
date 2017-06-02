@@ -1,18 +1,18 @@
 // react/containers/AppContainer.js
 
 import { connect } from 'react-redux';
-import { App } from '../newComponents';
+import { View } from '../newComponents';
 
 import { 
   toggleSidenav,
   togglePopup
-} from '../actions';
+} from '../newActions';
 
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    cart_id: state.cart.cart_id,
+    cart: state.cart,
     sidenav: state.app.sidenav,
     popup: state.app.popup
   };
@@ -23,7 +23,7 @@ const mapDispatchToProps = dispatch => ({
   toggleSidenav: () => dispatch(toggleSidenav())
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(View);
 
 
 

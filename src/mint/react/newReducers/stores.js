@@ -2,18 +2,16 @@
 
 import { RECEIVE_STORES, LOGOUT } from '../constants/ActionTypes';
 
-const initialState = {
-  stores: []
-};
+const initialState = [];
 
 export default (state = initialState, action) => {
   switch (action.type) {
-  case LOGOUT:
+  case 'LOGOUT':
     return initialState;
-  case RECEIVE_STORES:
-    return {
-      stores: action.stores
-    };
+  case 'STORES_SUCCESS':
+    return [
+      ...action.response
+    ];
   default:
     return state;
   }

@@ -1,4 +1,5 @@
 export {
+	postFeedback,
 	toggleSidenav,
 	togglePopup
 } from './app';
@@ -11,7 +12,8 @@ export {
 
 export { 
 	get,
-	post
+	post,
+	del
 } from './async';
 
 export { 
@@ -20,5 +22,17 @@ export {
 
 export { 
 	fetchCart,
-	fetchCarts
+	fetchCarts,
+	updateCart, 
+	clearCart, 
+	deleteCart 
 } from './cart';
+
+export { 
+	fetchStores,
+	setStore
+} from './store';
+
+export { 
+	updateUser
+} from './user';

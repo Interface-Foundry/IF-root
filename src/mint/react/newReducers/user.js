@@ -7,24 +7,20 @@ import {
   LOGOUT
 } from '../constants/ActionTypes';
 
+const initialState = {
+  id: null,
+  name: '',
+  email_address: ''
+};
+
 export default (state = {}, action) => {
   switch (action.type) {
-  case LOGOUT:
+  case 'LOGOUT':
     return {};
-  case RECEIVE_SESSION:
+  case 'SESSION_SUCCESS':
     return {
       ...state,
-      ...action.newSession.user_account
-    };
-  case RECEIVE_UPDATE_SESSION:
-    return {
-      ...state,
-      ...action.newSession.user_account,
-    };
-  case UPDATE_USER:
-    return {
-      ...state,
-      ...action.user_account
+      ...action.response.user_account
     };
   default:
     return state;

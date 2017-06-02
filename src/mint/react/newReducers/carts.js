@@ -9,38 +9,16 @@ const initialState = {
 
 export default function otherCarts(state = initialState, action) {
   switch (action.type) {
-    case RECEIVE_CARTS:
-      let carts = action.carts.map(c => ({ ...c, locked: c.locked || false }));
+    case 'CARTS_SUCCESS':
       return {
         ...state,
-        archivedCarts: carts.filter(cart => cart.locked)
-          .reverse(),
-        carts: carts.filter(cart => !cart.locked)
-          .reverse(),
+        ...action.response
       };
-    case RECEIVE_UPDATE_CART:
-      carts = state.carts.map(c => ({ ...c, locked: c.locked || false }));
-      const archivedCarts = state.archivedCarts.map(c => ({ ...c, locked: c.locked || false }));
+    case 'DELETE_CART_SUCCESS':
       return {
         ...state,
-        carts: carts
-          .map(c => (
-            c.id === action.updatedCart.id
-            ? { ...c, ...action.updatedCart }
-            : c))
-          .reverse(),
-        archivedCarts: archivedCarts
-          .map(c => (
-            c.id === action.updatedCart.id
-            ? { ...c, ...action.updatedCart }
-            : c))
-          .reverse()
-      };
-    case DELETE_CART:
-      return {
-        ...state,
-        carts: state.carts.filter(c => c.id !== action.cart_id),
-        archivedCarts: [...state.carts.filter(c => c.id === action.cart_id), ...state.archivedCarts]
+        carts: state.carts.filter(c => c.id !== action.response),
+        archivedCarts: [...state.carts.filter(c => c.id === action.response), ...state.archivedCarts]
       };
     default:
       return state;

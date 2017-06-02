@@ -1,13 +1,14 @@
 // mint/react/components/App/App.js
 
+// NOTES: Try to keep any or all state/prop changes out of here otherwise it will bleed down all the way to the smallest component. 
+// If change needed here please add the addition shouldComponentUpdate
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Route } from 'react-router';
+import { Route, Switch } from 'react-router';
 
-import { CartContainer, CartStoresContainer, LoginScreenContainer, SidenavContainer } from '../../containers';
-import { Modal, ErrorPage } from '../../components';
-
-import { Sidenav } from '../../../react-common/components';
+import { HeaderContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../newContainers';
+import { ErrorPage, Modal } from '..';
 
 //Analytics!
 import ReactGA from 'react-ga';
@@ -27,26 +28,37 @@ export default class App extends Component {
     if (e.keyCode === 27) replace(`/cart/${cart_id}`);
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { fetchCart, match } = this.props;
+
+    if (nextProps.match.url.split('/')[2] !== match.url.split('/')[2])
+      fetchCart(nextProps.match.url.split('/')[2])
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    // need this, otherwise page always rerender every scroll
+    if(
+      nextProps.sidenav !== this.props.sidenav ||
+      nextProps.match.url !== this.props.match.url
+    ) return true
+
+    return false
+  }
+
   render() {
-    const { sidenav, togglePopup, toggleSidenav } = this.props;
+    const { sidenav, popup, togglePopup, toggleSidenav } = this.props;
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
-        <div className='app__view'>
-          {/* Render Error Page */}
+        { popup ? <LoginScreenContainer _toggleLoginScreen={_togglePopup}/> : null }
+        <Route path={'/cart/:cart_id'} component={HeaderContainer} />
+        <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
+          <Route path={'/cart/:cart_id/m/*'} component={Modal} />
+
+          <Route path={'/newcart'} exact component={StoresContainer} />
+          <Route path={'/cart/:cart_id'} exact component={ViewContainer} />
           <Route path={'/404'} exact component={ErrorPage} />
-
-          { /* Renders modal when route permits */ }
-          <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
-
-          { /* Renders cart when route permits */ }
-          <Route path={'/cart/:cart_id'} exact component={CartContainer} />
-          
         </div>
-        { 
-          sidenav 
-          ? <Sidenav _toggleSidenav={toggleSidenav} /> 
-          : null
-        }
+        { sidenav ? <SidenavContainer /> : null }  
       </section>
     );
   }

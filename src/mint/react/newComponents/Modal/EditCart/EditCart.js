@@ -2,10 +2,10 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { cloudinary } from '../../utils';
+import { cloudinary } from '../../../utils';
 import ReactGA from 'react-ga';
 import Image from './Image';
-import { Icon } from '../../../react-common/components';
+import { Icon } from '../../../../react-common/components';
 
 class EditCart extends Component {
   static propTypes = {
@@ -45,7 +45,7 @@ class EditCart extends Component {
 
   render() {
     const {
-      props: { clearCart, deleteCart, cart_id, cart, history: { replace } },
+      props: { clearCart, deleteCart, cart_id, cart, history: { push } },
       state: { editingName },
       _changeName,
       _saveName,
@@ -83,7 +83,7 @@ class EditCart extends Component {
                 <p>This will permanently remove everything from your cart!</p>
               </td>
               <td>
-                <button onClick={() => {clearCart(cart_id); replace(`/cart/${cart.id}`);}}>Empty Cart</button>
+                <button onClick={() => {clearCart(cart_id); push(`/cart/${cart.id}`);}}>Empty Cart</button>
               </td>
             </tr>
             <tr>
@@ -92,7 +92,7 @@ class EditCart extends Component {
                 <p>This will permanently delete your cart, there's no going back from here!</p>
               </td>
               <td>
-                <button onClick={()=> {deleteCart(cart_id); replace('/newcart');  }}>Delete Cart</button>
+                <button onClick={()=> {deleteCart(cart_id); push('/newcart');  }}>Delete Cart</button>
               </td>
             </tr>
           </tbody>

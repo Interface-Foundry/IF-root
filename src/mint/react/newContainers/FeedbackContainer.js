@@ -2,13 +2,13 @@
 
 import { connect } from 'react-redux';
 import { reset, reduxForm } from 'redux-form';
-import { Feedback } from '../components';
+import { Feedback } from '../newComponents';
 import ReactGA from 'react-ga';
-import { postFeedback } from '../actions/session';
+import { postFeedback } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    cart_id: state.currentCart.cart_id
+    cart_id: state.cart.id
   };
 };
 

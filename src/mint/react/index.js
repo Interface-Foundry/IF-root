@@ -10,7 +10,7 @@ import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
 import Reducers from './newReducers';
-import { checkSession, fetchCart, fetchCarts } from './newActions';
+import { checkSession, fetchCart, fetchCarts, fetchStores } from './newActions';
 import { AppContainer } from './newContainers';
 
 //Analytics!
@@ -47,10 +47,12 @@ const store = createStore(
   applyMiddleware(...middleware)
 );
 
-// update login status
-// After login return fetch cart
+// Basically our initialization sequence
+// Check session
+// Fetch everything required for the app to not break
 store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchCarts())
+  store.dispatch(fetchStores())
   store.dispatch(fetchCart(location.pathname.split('/')[2]))
 });
 

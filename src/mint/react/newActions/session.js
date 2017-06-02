@@ -1,5 +1,11 @@
 import { get, post } from './async'
 
-export function checkSession() {
-  return get('/api/session', 'SESSION');
-}
+export const checkSession = () => get(
+	'/api/session',
+	'SESSION',
+	(type, json) => ({
+		type: `${type}_SUCCESS`,
+		response: json,
+		receivedAt: Date.now()
+	})
+)

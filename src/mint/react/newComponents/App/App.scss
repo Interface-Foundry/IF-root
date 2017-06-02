@@ -46,6 +46,7 @@ body {
 
 .app__view {
   position: relative;
+  width: 100%;
   overflow: hidden;
   overflow-y: scroll;
   text-align: left;
@@ -57,8 +58,10 @@ body {
   @media (min-width: 900px) {
     display: inline-block;
     overflow-y: auto;
-    width: calc(100% - 250px);
     height: calc(100% - #{$nav-height*2});
+    &.squeeze {
+      width: calc(100% - 250px);
+    }
   }
 }
 

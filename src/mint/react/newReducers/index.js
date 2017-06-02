@@ -3,7 +3,7 @@
 import app from './app';
 import cart from './cart';
 import carts from './carts';
-import store from './store';
+import stores from './stores';
 import session from './session';
 import search from './search';
 import item from './item';
@@ -17,7 +17,7 @@ export default combineReducers({
   app,
   cart,
   carts,
-  store,
+  stores,
   session,
   search,
   item,

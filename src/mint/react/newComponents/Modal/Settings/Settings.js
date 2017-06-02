@@ -3,21 +3,22 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
-import { Icon } from '../../../react-common/components';
+import { Icon } from '../../../../react-common/components';
 
 export default class Settings extends Component {
   static propTypes = {
-    cart_id: PropTypes.string,
-    user_account: PropTypes.object,
+    cart: PropTypes.object,
+    user: PropTypes.object,
     updateUser: PropTypes.func
   }
+
   state = {
     editName: false,
     editMail: false
   }
 
   componentDidMount() {
-    const { user_account: { name, email_address } } = this.props;
+    const { user: { name, email_address } } = this.props;
     this.setState({
       name,
       mail: email_address
@@ -37,7 +38,7 @@ export default class Settings extends Component {
   }
 
   _saveName() {
-    const { props: { updateUser, user_account: { id } }, state: { name } } = this;
+    const { props: { updateUser, user: { id } }, state: { name } } = this;
     this.setState({
       editName: false
     });
@@ -45,15 +46,15 @@ export default class Settings extends Component {
   }
 
   _saveMail() {
-    const { props: { updateUser, user_account: { id } }, state: { mail } } = this;
+    const { props: { updateUser, user: { id } }, state: { mail } } = this;
     this.setState({
       editMail: false
     });
     updateUser(id, { email_address: mail });
   }
 
-  render() {
-    const { props: { cart_id, user_account: { name, email_address } }, state: { editName, editMail } } = this;
+  render() {    
+    const { props: { cart, user: { name, email_address } }, state: { editName, editMail } } = this;
     return (
       <div className='settings-page'>
         <ul>
@@ -89,7 +90,7 @@ export default class Settings extends Component {
               : <li onClick={::this._editMail}><p>{email_address}  &nbsp;<Icon icon='Edit'/></p></li>
           }
           
-          <li><Link to={`/cart/${cart_id}/m/Feedback`}><Icon icon='Email'/> &nbsp; Send Feedback</Link></li>
+          <li><Link to={`/cart/${cart.id}/m/feedback`}><Icon icon='Email'/> &nbsp; Send Feedback</Link></li>
         </ul>
         <div className='reachKip'/>
         <h4>Kip Version 1.3 (Mint)</h4>

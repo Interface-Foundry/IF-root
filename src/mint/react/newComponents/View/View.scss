@@ -1,0 +1,18 @@
+// react/components/CartStore/CartStore.scss
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+
+.view {
+	position: relative;
+	max-width: 900px;
+	height: 100%;
+	margin: 0 auto;
+	padding: $nav-height*2 0 0 0;
+	.card {
+		background-color: $kip-primary-color;
+	    border-radius: $padding/2;
+	    box-shadow: $card-box-shadow;
+	    padding: $padding $padding*2;
+	    margin: 10px 2px 0;
+	}
+}

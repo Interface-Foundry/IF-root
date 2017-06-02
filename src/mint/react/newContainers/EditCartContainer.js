@@ -1,15 +1,14 @@
 // react/containers/EditCartContainer.js
 
 import { connect } from 'react-redux';
-import { EditCart } from '../components';
-import { getCartById } from '../reducers';
-import { updateCart, clearCart, deleteCart } from '../actions/cart';
+import { EditCart } from '../newComponents';
+import { getCartById } from '../newReducers';
+import { updateCart, clearCart, deleteCart } from '../newActions';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    cart_id: state.currentCart.cart_id,
-    cart: getCartById(state, { id: ownProps.match.params.edit_cart_id }),
-    initialValues: getCartById(state, { id: ownProps.match.params.edit_cart_id })
+    cart_id: state.cart.id,
+    cart: state.cart
   };
 };
 
