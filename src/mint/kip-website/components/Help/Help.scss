@@ -5,11 +5,62 @@
   text-align: center;
   padding: 0;
   z-index: 1;
+  .action {
+    padding: $padding*2 0 $padding*2;
+    @media only screen and (max-width: 600px) {
+      padding: $padding*2 0 0;
+    }
+    button {
+      border: 0;
+      font-weight: bold;
+      border-radius: $padding/2;
+      background: white;
+      padding: $padding $padding*4;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
+      @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+      &:hover {
+        svg {
+          transform: translate3d(5px, 0, 0)
+        }
+      }
+      svg {
+        fill: white;
+        height: 25px;
+        width: 25px;
+        padding: 0;
+        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+        @media only screen and (max-width: 600px) {
+          height: 20px;
+        }
+      }
+      &:focus {
+        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+      }
+      @media only screen and (max-width: 600px) {
+        font-size: 14px;
+      }
+    }
+    a {
+      &:first-of-type {
+        button {
+          margin-right: $padding*2;
+          background: $warningColor;
+          color: white;
+          @media only screen and (max-width: 600px) {
+            margin: 0 0 $padding*2;
+            padding: $padding $padding*2;
+          }
+        }
+      }
+    }
+  }
   .tutorial {
     position: relative;
     text-align: center;
     background: mix(white, $secondaryColor, 85%);
-    padding: $padding*10 $padding*2;
+    padding: $padding $padding*2;
     overflow: hidden;
     &.primary {
       background: mix(white, $primaryColor, 85%);
@@ -20,70 +71,90 @@
     &.third {
       background: mix(white, $thirdColor, 85%);
     }
-    h2 {
-      color: rgba($bgColor, 0.7);
-      display: inline-block;
-      font-size: 18px;
-      width: 220px;
-      opacity: 0.5;
-      background: white;
-      padding: $padding;
-      margin: 0 $padding*2 $padding*3;
-      border-radius: $padding/2;
-      cursor: pointer;
-      &.selected {
-        box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-        opacity: 1;
+    @media only screen and (max-width: 870px) {
+      height: 560px;
+    }
+    .services__navigation {
+      h2 {
+        color: rgba($bgColor, 0.7);
+        display: inline-block;
+        font-size: 18px;
+        width: 220px;
+        opacity: 0.5;
+        background: white;
+        padding: $padding;
+        margin: 0 $padding*2 $padding*3;
+        border-radius: $padding/2;
+        cursor: pointer;
+        &.selected {
+          box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+          opacity: 1;
+        }
+        .primary {
+          color: $primaryColor;
+        }
+        .secondary {
+          color: $secondaryColor;
+        }
+        .third {
+          color: $thirdColor;
+        }
       }
-      .primary {
-        color: $primaryColor;
-      }
-      .secondary {
-        color: $secondaryColor;
-      }
-      .third {
-        color: $thirdColor;
-      }
-      @media only screen and (max-width: 600px) {
-        width: 100%;
-        margin: 0 0 $padding;
+      ul {
+        @media only screen and (max-width: 870px) {
+          position: absolute;
+          left: 10px;
+          top: 30%;
+        }
+        li {
+          display: inline-block;
+          @media only screen and (max-width: 870px) {
+            display: block;
+            h2 {
+              width: 50px;
+              border-radius: 40px;
+              .stepText {
+                display: none;
+              }
+            }
+          }
+        }
       }
     }
     .tutorial__slideshow {
-      padding: $padding*2 $padding*5;
-      @media only screen and (max-width: 600px) {
-        padding: $padding*2 0;
+      padding: 0 $padding*5;
+      @media only screen and (max-width: 870px) {
         text-align: center;
-        margin-left: -50%;
       }
       .image {
         position: relative;
-        height: 460px;
+        height: 560px;
         display: inline-block;
-        width: 260px;
-        margin: 50px 0;
+        width: 280px;
         background: transparent;
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
         .bubble {
           position: absolute;
-          right: -120%;
+          right: -100%;
+          top: 20%;
           width: 250px;
           white-space: normal;
           background: white;
           padding: $padding*2;
           border-radius: $padding;
-          @media only screen and (max-width: 600px) {
-            right: -200px;
-            width: 150px;
+          @media only screen and (max-width: 870px) {
+            top: -150px;
+            left: 0;
+            width: 180px;
           }
           p {
             font-size: 20px;
             color: $bgColor;
             text-align: left;
             font-weight: bold;
-            @media only screen and (max-width: 600px) {
+            @media only screen and (max-width: 870px) {
               font-size: 12px;
             }
           }
@@ -95,35 +166,17 @@
             border-top: 20px solid transparent;
             border-bottom: 20px solid transparent;
             border-right: 20px solid;
+            @media only screen and (max-width: 870px) {
+              left: 80px;
+              bottom: -30px;
+              transform: rotate(-90deg);
+            }
           }
         }
         &.primary {
           color: mix(white, $primaryColor, 35%);
           .bubble {
             border: 3px solid mix(white, $primaryColor, 35%);
-            right: auto;
-            left: -120%;
-            &:after {
-              left: auto;
-              right: -20px;
-              bottom: 30px;
-              border-right: 0;
-              border-left: 20px solid;
-              @media only screen and (max-width: 600px) {
-                position: absolute;
-                left: -20px;
-                right: auto;
-                bottom: 30px;
-                border-left: 0;
-                border-top: 20px solid transparent;
-                border-bottom: 20px solid transparent;
-                border-right: 20px solid;
-              }
-            }
-            @media only screen and (max-width: 600px) {
-              left: auto;
-              right: -200px;
-            }
           }
         }
         &.secondary {
@@ -137,12 +190,12 @@
           color: mix(white, $thirdColor, 35%);
           .bubble {
             border: 3px solid mix(white, $thirdColor, 35%);
-            ;
           }
         }
-        @media only screen and (max-width: 600px) {
-          height: 180px;
-          width: 80px;
+        @media only screen and (max-width: 870px) {
+          top: 150px;
+          height: 360px;
+          width: 180px;
         }
       }
       span {
@@ -257,3 +310,4 @@
     transform: translate3d(100%, 0, 0);
   }
 }
+
