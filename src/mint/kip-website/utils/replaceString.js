@@ -18,7 +18,7 @@ const swapForHtml = (str, i) => {
   if (link && text) return <span key={i}><a href={link[1]}>{text[1]}</a></span>;
   switch (str) {
   case '${Kip}':
-    return <span key={i}><Link to='/about'>Kip</Link></span>;
+    return <span key={i}><Link to='/howitworks'>Kip</Link></span>;
   case '${mail}':
     return <span key={i}><a href='mailto:hello@kipthis.com'>hello@kipthis.com</a></span>;
   case '${br}':

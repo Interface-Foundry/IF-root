@@ -45,7 +45,7 @@
       "slackButtonText": "Add to Slack Now",
       "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
       "competitors": [{
-        "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
+        "image": "/kip.png",
         "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
       }, {
         "image": "//storage.googleapis.com/kip-random/website/chart_hivy.svg",
@@ -138,25 +138,25 @@
         "title": "Meet the Team",
         "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions",
         "members": [{
-          "image": "",
+          "image": "/kip.png",
           "name": "Graham Annett"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Alyx Baldwin (CTO)"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Chris Barry"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Peter Brandt"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Hannah Katznelson"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Rachel Law (CEO)"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Koh Luce"
         }]
       },
@@ -223,7 +223,7 @@
       "slackButtonText": "Add to Slack Now",
       "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
       "competitors": [{
-        "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
+        "image": "/kip.png",
         "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
       }, {
         "image": "//storage.googleapis.com/kip-random/website/chart_hivy.svg",
@@ -316,25 +316,25 @@
         "title": "Meet the Team",
         "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions",
         "members": [{
-          "image": "",
+          "image": "/kip.png",
           "name": "Graham Annett"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Alyx Baldwin (CTO)"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Chris Barry"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Peter Brandt"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Hannah Katznelson"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Rachel Law (CEO)"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Koh Luce"
         }]
       },
@@ -401,7 +401,7 @@
       "slackButtonText": "Add to Slack Now",
       "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
       "competitors": [{
-        "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
+        "image": "/kip.png",
         "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
       }, {
         "image": "//storage.googleapis.com/kip-random/website/chart_hivy.svg",
@@ -494,25 +494,25 @@
         "title": "Meet the Team",
         "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions",
         "members": [{
-          "image": "",
+          "image": "/kip.png",
           "name": "Graham Annett"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Alyx Baldwin (CTO)"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Chris Barry"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Peter Brandt"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Hannah Katznelson"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Rachel Law (CEO)"
         }, {
-          "image": "",
+          "image": "/kip.png",
           "name": "Koh Luce"
         }]
       },
