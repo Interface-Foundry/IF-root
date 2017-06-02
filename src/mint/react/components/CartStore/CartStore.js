@@ -15,35 +15,42 @@ export default class CartStore extends Component {
     _toggleLoginScreen: PropTypes.func
   }
 
-  componentWillMount() {
-    const { fetchStores } = this.props;
-    fetchStores();
+  componentDidMount() {
+    const { choices, fetchStores } = this.props;
+    if (!choices.length) fetchStores();
   }
 
   componentWillReceiveProps(nextProps) {
     const { choices } = this.props;
     const { choices: newStores, user_account, _toggleLoginScreen } = nextProps;
 
-    if (choices.length !== newStores.length && !user_account.id) {
-      _toggleLoginScreen();
-    }
+    if (choices.length !== newStores.length && !user_account.id) _toggleLoginScreen();
   }
 
   render() {
-    const { choices, history: { replace } } = this.props;
+    const { choices } = this.props;
+    const suggested = choices.shift() || [];
     return (
-      <ul className="cart_store">
-        {choices.map(choice => 
-            <StoreChoice 
-              key={choice.store_type} 
-              {...choice} 
-              onClick={() => {
-                replace(`/newcart/${choice.store_type}`)
-              }} 
-            />
-          )
-        }
-      </ul>
+      <section>
+        <div className='cart_store'> 
+          <h3>Suggested For You</h3>
+          <ul className='cart_store__list suggested'>
+            <StoreChoice key={suggested.store_type} {...suggested} />
+          </ul>
+        </div>
+        <div className='cart_store'> 
+          <h3>Other Stores</h3>
+          <ul className='cart_store__list'>
+            {choices.map(choice => 
+                <StoreChoice 
+                  key={choice.store_type} 
+                  {...choice} 
+                />
+              )
+            }
+          </ul>
+        </div>
+      </section>
     );
   }
 }

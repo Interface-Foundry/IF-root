@@ -191,6 +191,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   var cart = {}
 
   // Figure out what store they are shopping at and in what locale
+  console.log('req.params.store', req.params)
   if (!req.params.store) {
     cart.store = 'amazon'
     cart.store_locale = 'US'
@@ -204,17 +205,24 @@ router.get('/newcart/:store', (req, res) => co(function * () {
     throw new Error('Cannot create new cart for store ' + req.params.store)
   }
 
+  console.log('cart parte 1', cart)
+
   // Add the cart leader if they are logged in
   const user_id = _.get(req, 'UserSession.user_account.id')
   if (user_id) {
     cart.leader = user_id
-    var date = new Date()
-    if (cart.store_locale = 'US') var dateString = (date.getMonth() + 1) + '/' + date.getDate() + '/' + String(date.getFullYear()).slice(2)
-    else var dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + String(date.getFullYear()).slice(2)
-    cart.name = dateString + ' Kip Cart'
   }
+  
+  var date = new Date()
+  if (cart.store_locale === 'US') {
+    var dateString = (date.getMonth() + 1) + '/' + date.getDate() + '/' + String(date.getFullYear()).slice(2)
+  } else {
+    var dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + String(date.getFullYear()).slice(2)
+  }
+  cart.name = dateString + ' Kip Cart'
 
   // This is all the investors care about right here. This is the money line.
+  console.log('creating cart', cart)
   cart = yield db.Carts.create(cart)
   console.log(cart)
 

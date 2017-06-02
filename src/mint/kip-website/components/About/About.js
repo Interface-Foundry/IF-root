@@ -40,7 +40,7 @@ export default class About extends Component {
               {replaceHtml(aboutTemplate.why.description)}
             </h4>
             <section className='cluster'>
-              <div className='image' style={{backgroundImage: 'url(https://storage.googleapis.com/kip-random/many_kips/presents_smile.svg)'}}/>
+              <div className='image' style={{backgroundImage: 'url(https://storage.googleapis.com/kip-random/many_kips/presents_stare_sk.svg)'}}/>
               <div className='inline'>
                 <Down/>
                 <Down/>
@@ -62,7 +62,7 @@ export default class About extends Component {
             }
           </div>
         </section>
-        <section className='team col-12'>
+        <section className='team col-9'>
           <h1 className='team__title'><span>{aboutTemplate.team.title}</span></h1>
           <p className='team__mission'>{replaceHtml(aboutTemplate.team.mission)}</p>
           <ul className='team__members'>
@@ -89,8 +89,10 @@ export default class About extends Component {
           <div className="icon col-1"/>
         </section>
 
-        <h2><span>{aboutTemplate.videoTitle}</span></h2>
         <hr/>
+        <h1><span>{aboutTemplate.videoTitle}</span></h1>
+        <br></br>
+        <br></br>
         <section className="col-12 row-1 video">
           <iframe width="100%" height="100%" src="https://www.youtube.com/embed/QPlBeTJqF1Y?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
         </section>

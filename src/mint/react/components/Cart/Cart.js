@@ -35,6 +35,7 @@ export default class Cart extends Component {
 
   componentWillMount() {
     const { fetchCards, cards = [], currentCart = { store: '' } } = this.props;
+
     if (cards.length === 0 && currentCart.store === 'ypo') {
       fetchCards();
     }
@@ -58,8 +59,8 @@ export default class Cart extends Component {
     const { history: { replace }, fetchCards, cart_id, items, cards, currentCart } = this.props, { leader, addingItem, user_account } = nextProps,
       cartId = nextProps.cart_id || cart_id;
 
-    if (cartId) {
-      if (cards.length === 0 && currentCart.store === 'ypo') fetchCards(cartId);
+    if (cartId) {      
+      if (cards.length === 0 && nextProps.currentCart.store === 'ypo') fetchCards(cartId);
       if (!!leader && !addingItem && this.props.addingItem !== addingItem && !!user_account.id) replace(`/cart/${cartId}/`);
     }
 
@@ -81,6 +82,7 @@ export default class Cart extends Component {
     let cartItemIndex = items.my.length;
 
     const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
+
     return (
       <div className='cart'>
         <Route path={'/cart/:cart_id/address'} exact component={AddressFormContainer}/>

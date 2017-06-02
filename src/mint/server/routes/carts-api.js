@@ -14,6 +14,7 @@ const stable = require('stable')
 const thunkify = require('thunkify')
 const ipinfo = thunkify(require('ipinfo'))
 const spliddit = require('spliddit')
+const StoreFactory = require('../cart/StoreFactory')
 
 const cart_types = require('../cart/cart_types').stores
 const countryCoordinates = require('../cart/cart_types').countryCoordinates
@@ -747,7 +748,7 @@ module.exports = function (router) {
    * @apiParamExample query preview
    * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
    */
-  router.get('/itempreview', (req, res) => co(function * () {
+  router.get('/itempreview', (req, res) => (async function () {
     // parse the incoming text to extract either an asin, url, or search query
     const q = (req.query.q || '').trim()
     if (!q) {
@@ -756,9 +757,13 @@ module.exports = function (router) {
 
     const store = _.get(req, 'query.store', 'amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
-    const item = yield cartUtils.itemPreview(q, store, locale, (req.query.page || 1), req.query.category)
-    res.send(item)
-  }))
+    var storeInstance = StoreFactory.GetStore({store: store + '_' + locale.toLowerCase()})
+    console.log('store instance', (storeInstance || {}).name)
+    var results = await storeInstance.search({
+      text: q
+    })
+    res.send(results)
+  })())
 
   /**
    * @api {get} /api/cart/:cart_id/clone
@@ -782,6 +787,9 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart id
    */
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
+    // go to prototype
+    // return res.redirect('/prototype/checkout')
+
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts')
     // checkout removes the items from the cart object, so we have to make a copy
