@@ -132,7 +132,6 @@
       width: 100%;
       height: $ribbonHeight*2;
       padding: $padding/2;
-      background-color: $warningColor;
     }
     .image {
       width: 100%;
@@ -163,12 +162,10 @@
     }
     &:first-of-type {
       .serviceImage {
-        background-color: $thirdColor;
       }
     }
     &:nth-of-type(3) {
       .serviceImage {
-        background-color: darken(#eaf9ff, 40);
       }
     }
   }
