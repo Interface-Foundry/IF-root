@@ -2,86 +2,86 @@
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
 .cart_store {
+  h3 {
+    margin-top: -15px;
+  }
   background: #fff;
   border-radius: 5px;
   box-shadow: $card-box-shadow;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
   margin: $padding / 2;
-  padding: $padding * 2 0;
-  a {
-    cursor: pointer;
-    display: inline-block;
-    font-size: 18px;
-    height: 150px;
-    margin: $padding / 2;
-    min-width: 150px;
-    padding: 1px;
-    width: 100px;
-    .cart__choice {
-      background: white;
-      border: 1px $border-color-light solid;
-      border-radius: $padding;
-      position: relative;
-      text-align: center;
-      .choice__details {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: $padding / 2.5 $padding / 2.5 0 $padding / 2.5;
-        .choice__image {
-          align-self: center;
-          height: $nav-height + 25px;
-          width: $nav-height + 75px;
-        }
-        .choice__domain {
-          color: #58595b;
-          font-size: 0.7em;
-          hyphens: auto;
-          margin-bottom: $padding;
-          overflow: hidden;
-          padding: 0;
-          position: relative;
-          white-space: normal;
-        }
-      }
-      .choice__select {
+  padding: $padding * 2 $padding;
+  .cart_store__list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    margin: 0 auto;
+    a {
+      cursor: pointer;
+      display: inline-block;
+      font-size: 18px;
+      height: 150px;
+      margin: $padding / 2;
+      min-width: 150px;
+      padding: 1px;
+      width: 100px;
+      .cart__choice {
+        background: white;
+        border: 1px $border-color-light solid;
+        border-radius: $padding;
         position: relative;
-        width: 100%;
-        height: $nav-height/2;
-        line-height: $nav-height/2;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        background: $border-color-light;
-        border-radius: 0 0 $padding - 1 $padding - 1;
-        &:hover {
-          border: 1px #ffdf4d solid !important;
-          .choice__select {
-            background-color: #ffdf4d !important;
-            color: #000 !important;
+        text-align: center;
+        .choice__details {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: $padding / 2.5 $padding / 2.5 0 $padding / 2.5;
+          .choice__image {
+            align-self: center;
+            height: $nav-height + 25px;
+            width: $nav-height + 75px;
+          }
+          .choice__domain {
+            color: #58595b;
+            font-size: 0.7em;
+            hyphens: auto;
+            margin-bottom: $padding;
+            overflow: hidden;
+            padding: 0;
+            position: relative;
+            white-space: normal;
           }
         }
+        .choice__select {
+          position: relative;
+          width: 100%;
+          height: $nav-height/2;
+          line-height: $nav-height/2;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          background: $border-color-light;
+          border-radius: 0 0 $padding - 1 $padding - 1;
+        }
       }
-    }
-    &:first-child {
-      .cart__choice {
-        border-color: $thirdColor;
-      }
-      .choice__select {
-        background: $thirdColor;
-        color: white;
-        &:before {
-          content: '✔';
-          font-size: 15px;
-          position: absolute;
-          left: 30px;
-          top: -1px;
+      &:hover {
+        .cart__choice {
+          border-color: $thirdColor;
+        }
+        .choice__select {
+          background: $thirdColor;
+          color: white;
+          &:before {
+            content: '✔';
+            font-size: 15px;
+            position: absolute;
+            left: 35px;
+            top: -1px;
+          }
         }
       }
     }
   }
 }
+
