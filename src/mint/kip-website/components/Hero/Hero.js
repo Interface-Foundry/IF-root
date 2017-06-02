@@ -16,7 +16,6 @@ export default class Hero extends Component {
   componentWillMount() {
     // Preload gif
     const { heroTemplate: { imgUrl } } = this.props;
-    console.log(imgUrl);
     let img = new Image();
     img.src = imgUrl;
   }

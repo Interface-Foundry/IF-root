@@ -172,8 +172,8 @@ export default class App extends Component {
               <LoginScreenContainer
                 loginText={
                   location.pathname.includes('newcart')
-                  ? 'Enter your email to sign up'
-                  : 'Enter your email to log in'}
+                  ? 'Join Kip today'
+                  : 'Enter Your email to Log In'}
                 loginSubtext={
                   location.pathname.includes('newcart')
                   ? 'One simple step and we\'ll be on our way'

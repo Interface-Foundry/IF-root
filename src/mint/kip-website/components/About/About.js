@@ -33,7 +33,7 @@ export default class About extends Component {
     return (
       <div className="about">
         <HeaderContainer title={aboutTemplate.titleText} subtext={aboutTemplate.subtext} color="primary" offsetTop={offsetTop}/>
-        <div className="why col-12" ref={(why) => this.why = why}>
+        <section className="why col-12" ref={(why) => this.why = why}>
           <div className="col-12">
             <h1>{aboutTemplate.why.head}</h1>
             <h4>
@@ -61,8 +61,23 @@ export default class About extends Component {
               ))
             }
           </div>
-        </div>
-        <h1>{aboutTemplate.seenIn}</h1>
+        </section>
+        <section className='team col-12'>
+          <h1 className='team__title'><span>{aboutTemplate.team.title}</span></h1>
+          <p className='team__mission'>{replaceHtml(aboutTemplate.team.mission)}</p>
+          <ul className='team__members'>
+          {
+            aboutTemplate.team.members.map((m,i)=>
+              (
+                <li key={i} className='team__member'>
+                  <img className='member__image' src={m.image}/>
+                  <span className='member__name'>{m.name}</span>
+                </li>
+              )
+            )
+          }
+          </ul>
+        </section>
         <section className="iconsRow">
           <div className="icon col-1"/>
           <div className="icon col-1"><Icon icon='Wallstreet'/></div>
