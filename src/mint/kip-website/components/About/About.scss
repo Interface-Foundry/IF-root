@@ -288,7 +288,7 @@
     }
   }
   .team {
-    background: mix(white, $thirdColor, 80%);
+    background: mix(white, $primaryColor, 85%);
     margin: 0 auto;
     max-width: 1200px;
     overflow: hidden;
@@ -339,5 +339,11 @@
         }
       }
     }
+  }
+  hr {
+    height: 1px;
+    border: 0.5px solid mix(white, $primaryColor, 85%);
+    margin-left: $padding;
+    margin-right: $padding;
   }
 }
