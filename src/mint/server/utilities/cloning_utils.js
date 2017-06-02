@@ -10,7 +10,7 @@ var clone = function * (cart_id, user_id) {
   // social metrics like views and checkouts will only be stored on the original
   delete originalJson.id
   delete originalJson.items
-  delete originalJson.original
+  delete originalJson.ancestors
   delete originalJson.clones
   delete originalJson.checkouts
   delete originalJson.members
@@ -24,12 +24,10 @@ var clone = function * (cart_id, user_id) {
   clone.leader = user_id
   clone.dirty = false;
 
-  console.log(original.items)
   // clone items in the cart
   yield original.items.map(function * (item) { //this line is throwing a weird exception for some reason?
 
     item = yield db.Items.findOne({id: item.id}).populate('details')
-    console.log('item:', item)
 
     //create new item
     var itemJson = item.toJSON();
@@ -64,16 +62,13 @@ var clone = function * (cart_id, user_id) {
     })
   }
 
-  logging.info(clone)
+  // logging.info('clone:', clone)
   clone.ancestors.add(original.id)
   yield clone.save()
   original.clones.add(clone.id)
   yield original.save()
 
-  logging.info('es gibt Zeit')
-  logging.info('clone.ancestry', clone.ancestors)
-
-  clone = yield db.Carts.findOne({id: clone.id}).populate('items')
+  clone = yield db.Carts.findOne({id: clone.id}).populate('items').populate('ancestors')
   return clone;
 }
 
