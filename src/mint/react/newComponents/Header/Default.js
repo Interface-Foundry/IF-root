@@ -35,8 +35,8 @@ export default class Default extends Component {
                 }}/>
             }
             <h3>
-              {cart.locked ? 'Checkout in Progress' : cart.name}
-            </h3><span className='members'>Created by: {cart.leader ? cart.leader.name : ''} | {cart.store} {cart.store_locale} </span>
+              Kip
+            </h3>
           </Link>
           <SearchContainer />
         </div>

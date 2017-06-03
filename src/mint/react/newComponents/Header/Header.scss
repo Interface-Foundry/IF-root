@@ -21,7 +21,6 @@
     white-space: nowrap;
     a {
       display: inline-block;
-      min-width: 200px;
     }
     .navbar__icon {
       display: inline-block;
@@ -35,7 +34,7 @@
     }
     .image {
       display: inline-block;
-      margin: $padding;
+      margin: $padding $padding/2 $padding $padding*2;
       height: $nav-height - $padding*2;
       width: $nav-height - $padding*2;
       border-radius: 100%;
@@ -55,9 +54,9 @@
     h3 {
       display: inline-block;
       white-space: nowrap;
-      height: 40px;
-      line-height: 40px;
-      font-size: 21px;
+      height: 50px;
+      line-height: 50px;
+      font-size: 27px;
       @media (min-width: 900px) {
         width: auto;
       }

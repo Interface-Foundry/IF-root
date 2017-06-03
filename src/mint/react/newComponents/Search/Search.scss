@@ -5,9 +5,8 @@
   position: relative;
   display: inline-block;
   width: 600px;
-  margin: 10px 0 10px 50px;
+  margin: 10px 0 10px 30px;
   height: 30px;
-  border: 2px solid white;
 
   * {
     height: 100%;
@@ -17,13 +16,15 @@
     width: calc(100% - #{$nav-height});
     border: 0;
     padding: 0 $padding;
+    border-radius: 5px 0 0 5px;
+    font-size: 14px;
   }
 
   button {
-    background: $color-blue;
+    background: $mainColor;
     width: $nav-height;
     border: 0;
-    border-radius: 5px;
+    border-radius: 0 5px 5px 0;
     padding: 5px 0px;
 
     svg {
@@ -39,9 +40,9 @@
     height: auto;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
-    width: calc(100% + 4px);
-    left: -2px;
-    top: 28px;
+    width: 100%;
+    left: 0;
+    top: 27px;
     z-index: 100;
     box-shadow: $card-box-shadow;
 
