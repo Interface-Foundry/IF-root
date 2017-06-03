@@ -27,7 +27,7 @@ class YPOStore extends Store {
    * @param  {Object}  options the search options
    */
   getSearchType(options) {
-    if (ypoConstants.categories[options.text]) {
+    if (_.get(options, 'category')) {
       return 'categorySearch'
     } else if (options.text && options.text.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
       return 'catalogLookup'
@@ -42,8 +42,8 @@ class YPOStore extends Store {
    * @return {[amazonItem]}         the amazon item response
    */
   async categorySearch(options) {
-    const category = options.text
-    const items = await db.YpoInventoryItems.find({category: category})
+    const category = options.category
+    const items = await db.YpoInventoryItems.find({category_2: category})
       .skip(10 * (options.page - 1))
       .limit(10)
 

@@ -742,14 +742,15 @@ module.exports = function (router) {
     if (!q) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
     }
-
+    const searchOpts = _.omitBy({
+      text: q,
+      category: _.get(req, 'query.category')
+      }, _.isUndefined)
     const store = _.get(req, 'query.store', 'amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
     var storeInstance = StoreFactory.GetStore({store: store + '_' + locale.toLowerCase()})
     console.log('store instance', (storeInstance || {}).name)
-    var results = await storeInstance.search({
-      text: q
-    })
+    var results = await storeInstance.search(searchOpts)
     res.send(results)
   })())
 
