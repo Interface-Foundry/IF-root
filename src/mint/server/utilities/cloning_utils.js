@@ -64,6 +64,7 @@ var clone = function * (cart_id, user_id) {
 
   // logging.info('clone:', clone)
   clone.ancestors.add(original.id)
+  clone.ancestor = original.id
   yield clone.save()
   original.clones.add(clone.id)
   yield original.save()

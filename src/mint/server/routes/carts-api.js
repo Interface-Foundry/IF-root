@@ -516,6 +516,22 @@ module.exports = function (router) {
   }))
 
   /**
+   * @api {get} /api/views/:cart_id Get social engagement metrics
+   * @apiDescription Get the number of times a cart has been viewed, rekipped, and checked out
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id the id of the cart whose data we want to access
+   */
+  router.get('/cart/:cart_id/metrics', (req, res) => co(function * () {
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('clones');
+    if (!cart) res.sendStatus(404);
+    else return res.send({
+      views: cart.views,
+      clones: cart.clones.length,
+      checkouts: cart.checkouts.length
+    });
+  }))
+
+  /**
     * @api {post} /api/share/:cart_id Share
     * @apiGroup Carts
     * @apiDescription Sends the share cart email to the cart leader
@@ -551,20 +567,6 @@ module.exports = function (router) {
 
     // Send a happy status that the sharing was successful
     res.status(200).end()
-  }))
-
-  /**
-   * @api {get} /api/views/:cart_id Get cart views
-   * @apiDescription Get the number of times a cart has been viewed
-   * @apiGroup Carts
-   * @apiParam {string} :cart_id the id of the cart whose views we want to access
-   */
-  router.get('/views/:cart_id', (req, res) => co(function * () {
-    var cart = yield db.Carts.findOne({id: req.params.cart_id});
-    if (!cart) res.sendStatus(404);
-    else return res.send({
-      views: cart.views
-    });
   }))
 
   /**
