@@ -148,7 +148,7 @@ class CartHead extends Component {
         </div>
         <div className='header__right'>
           {!name ? <p onClick={() => _togglePopup()}><span>Login</span></p> : null}
-          {name ? <div className='navbar__icon' onClick={_toggleSidenav}><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
+          {name ? <div className='navbar__icon' onClick={_toggleSidenav}><p>{name} </p><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
         </div>
       </div>
     );

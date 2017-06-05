@@ -5,6 +5,7 @@ import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import ReactDOM from 'react-dom';
 import { PropTypes } from 'prop-types';
 import { replaceHtml } from '../../utils';
+import { Right } from '../../themes/newSvg';
 import { HeaderContainer, FooterContainer } from '../../containers';
 
 export default class Help extends Component {
@@ -55,7 +56,7 @@ export default class Help extends Component {
         })
 
         self._startLoop()
-      }, 5000);
+      }, 7500);
     }
   }
 
@@ -76,15 +77,23 @@ export default class Help extends Component {
       <div className="Help">
         <HeaderContainer title={helpTemplate.titleText} subtext={helpTemplate.subtext} color={images.length ? images[selectedIndex].class: ''} offsetTop={offsetTop}/>
         <section className={`tutorial ${images.length ? images[selectedIndex].class : ''}`} ref={(help) => this.help = help}>
-          <nav className="col-12 row-1 services__navigation">
-            {
-              images.map((i, index) => (
-                <h2 key={i.id} onClick={() => { _startLoop(true); this.setState({selectedIndex: index}) }} className={`row-1 col-4 ${index === selectedIndex ? 'selected' : ''}`}>
-                  {helpTemplate.stepText}&nbsp;–&nbsp;
-                  <span className={i.class}>{i.step}</span>
-                </h2>
-              ))
-            }
+          <nav className="services__navigation">
+            <ul>
+              {
+                images.map((i, index) => (
+                  <li key={i.id}>
+                    <h2 onClick={() => { 
+                      _startLoop(true);
+                       this.setState({selectedIndex: index}) 
+                     }
+                     } className={`row-1 col-4 ${index === selectedIndex ? 'selected' : ''}`}>
+                      <span className='stepText'>{helpTemplate.stepText}&nbsp;</span>
+                      <span className={i.class}>{i.step}</span>
+                    </h2>
+                  </li>
+                ))
+              }
+            </ul>
           </nav>
           <div className="col-12 row-1 tutorial__slideshow" >
             <CSSTransitionGroup
@@ -109,8 +118,17 @@ export default class Help extends Component {
             </CSSTransitionGroup>
           </div>
         </section>
+        
         <section className='FAQ'>
+          <div className="action">
+            <a href='/newcart'>
+              <button>
+                <span>{helpTemplate.buttonText} <Right/></span>
+              </button>
+            </a>
+          </div>
           <h1><span>{faq.title}</span></h1>
+
           <p className='subtext'>
             {replaceHtml(faq.subtext)}
           </p>

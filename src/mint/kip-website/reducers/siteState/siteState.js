@@ -45,6 +45,7 @@ const initialState = {
   help: {
     titleText: '',
     stepText: '',
+    buttonText: '',
     images: [],
     faq: {
       title: '',
