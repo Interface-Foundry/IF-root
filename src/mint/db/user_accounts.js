@@ -109,12 +109,6 @@ var userAccountCollection = Waterline.Collection.extend({
      * @type {String}
      */
     ypo_voucher_code: 'string',
-
-    /** @type {boolean} whether or not the leader has been reminded about this cart */
-    reminded: {
-      type: 'boolean',
-      defaultsTo: false
-    }
   }
 })
 

@@ -68,23 +68,35 @@ var cartsCollection = Waterline.Collection.extend({
     /** @type {String} amazon_purchase_url the url that goes directly to amazon */
     amazon_purchase_url: 'string',
 
-        /** @type {string} the online retailer */
+    /** @type {string} the online retailer */
     store: {
       type: 'string',
+      enum: constants.STORES,
       defaultsTo: 'amazon',
       required: true
     },
 
     store_locale: {
       type: 'string',
+      enum: constants.LOCALES,
       required: true
     },
+
+    /** cart can have one invoice */
+    // invoice: Waterline.isA('invoice'),
 
     /** @type {integer} the number of times this cart has been #viewed */
     views: {
       type: 'integer',
       defaultsTo: '0'
     },
+
+    /** @type {integer} the value of the cart */
+    subtotal: 'integer',
+
+    /** @type {string} the currency type of the cart if we get it */
+    currency_code: 'string',
+
 
     dirty: 'boolean',
 

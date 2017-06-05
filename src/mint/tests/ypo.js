@@ -127,7 +127,7 @@ describe('api', function () {
 
     // make sure McTesty is the leader
     assert.equal(cart.leader.email_address, mcTesty.email)
-    // assert.equal(cart.name, mcTesty.name + "'s Kip Cart")
+    assert.equal(cart.name, mcTesty.name + "'s Kip Cart")
 
     // lets save this cart id for later
     mcTesty.cart_id = cart.id
