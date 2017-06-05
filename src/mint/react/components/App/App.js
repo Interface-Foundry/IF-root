@@ -43,7 +43,7 @@ export default class App extends Component {
   state = {
     sidenav: false,
     popup: false,
-    isMobile: false
+    isMobile: false,
   }
 
   _logPageView(path, userId) {
@@ -90,11 +90,12 @@ export default class App extends Component {
         .then(cart => !cart ? replace('/404') : null);
     }
     fetchAllCarts();
+    if (window.innerWidth > 900) this.setState({ sidenav: true });
   }
 
   componentDidMount() {
-    if (window.innerWidth < 900)
-      this.setState({ isMobile: true });
+    if (window.innerWidth < 900) this.setState({ isMobile: true });
+    else this.setState({ sidenav: true });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -129,6 +130,7 @@ export default class App extends Component {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
       fetchAllCarts();
+      if (window.innerWidth > 900) this.setState({ sidenav: true });
     }
   }
 
@@ -162,6 +164,7 @@ export default class App extends Component {
       state: { sidenav, isMobile, popup }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
+
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
@@ -200,7 +203,7 @@ export default class App extends Component {
           </div>
           {
             sidenav
-            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} />
+            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={()=>window.innerWidth < 900 ? _toggleSidenav() : null} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} />
             : null
           }
           {
