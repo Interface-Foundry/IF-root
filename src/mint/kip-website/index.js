@@ -65,6 +65,7 @@ store.dispatch(getSiteState())
   .then(() => {
     const sessionId = store.getState()
       .auth.id;
+    console.log(sessionId)
     if (sessionId && process.env.GA) {
       ReactGA.initialize('UA-51752546-10', {
         gaOptions: {

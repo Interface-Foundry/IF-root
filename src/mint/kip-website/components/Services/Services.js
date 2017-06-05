@@ -2,7 +2,7 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
-import { Right, Cloud, Person, Items, Mapper, Down } from '../../themes/newSvg';
+import { Right, Items, Down } from '../../themes/newSvg';
 import { replaceHtml } from '../../utils';
 export default class Services extends Component {
   static propTypes = {
