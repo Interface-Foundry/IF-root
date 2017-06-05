@@ -14,7 +14,8 @@
       "BASEURL": "http://mint-dev.kipthis.com",
       "LOGGING_MODE": "database",
       "LOGGING_LEVEL": "info",
-      "BUILD_MODE": "prebuilt"
+      "BUILD_MODE": "prebuilt",
+      "YPO_ENABLED": "true"
     }
   }, {
     "name": "ci",

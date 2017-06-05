@@ -15,7 +15,8 @@
       "LOGGING_MODE": "database",
       "LOGGING_LEVEL": "info",
       "BUILD_MODE": "prebuilt",
-      "SENDGRID_WEBHOOK": "https://kipthis.com/sg/"
+      "SENDGRID_WEBHOOK": "https://kipthis.com/sg/",
+      "YPO_ENABLED": false
     }
   }]
 }
