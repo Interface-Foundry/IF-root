@@ -92,24 +92,27 @@ var cartsCollection = Waterline.Collection.extend({
       defaultsTo: '0'
     },
 
-    /** @type {[carts]} clones of this cart*/
-    clones: {
-      collection: 'carts',
-      via: 'ancestors',
-      dominant: true
-    },
-
-    /** @type {carts} carts in the cloning-geneology of this cart */
-    ancestors: {
-      collection: 'carts',
-      via: 'clones'
-    },
+    // /** @type {[carts]} clones of this cart*/
+    // descendants_clone: {
+    //   collection: 'carts',
+    //   via: 'ancestors',
+    //   dominant: true
+    // },
+    //
+    // /** @type {carts} carts in the cloning-geneology of this cart */
+    // ancestors_clone: {
+    //   collection: 'carts',
+    //   via: 'clones'
+    // },
 
     /** @type {cart} if this is a clone, specific cart this cart was cloned from */
-    ancestor: Waterline.isA('carts'),
+    parent_clone: Waterline.isA('carts'),
+
+    /** @type {cart} if this is a reorder, specific cart this cart was cloned from */
+    parent_reorder: Waterline.isA('carts'),
 
     /** @type {[user_accounts]} times this cart has been checked out */
-    checkouts: Waterline.isMany('checkout_events')
+    checkouts: Waterline.isMany('checkout_events'),
   }
 });
 

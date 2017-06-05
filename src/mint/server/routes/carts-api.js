@@ -791,6 +791,32 @@ module.exports = function (router) {
   }))
 
   /**
+   * @api {get} /api/cart/:cart_id/parents
+   * @apiDescription Get all of the parents of this cart
+   * @apiGroup Carts
+   * @apiParam {String} :cart_id the id of the cart whose parents we're getting
+   */
+  router.get('/cart/:cart_id/parents', (req, res) => co(function * () {
+    var parents = yield cloning_utils.getParents(req.params.cart_id, 'clone')
+    res.send(parents)
+  }))
+
+  /**
+   * @api {get} /api/cart/:cart_id/reorder
+   * @apiDescription Creates a more complete copy of the cart, with everything except for reactions
+   * @apiGroup Carts
+   * @apiParam {String} :cart_id the id of the cart to be copied
+   */
+  router.get('/cart/:cart_id/reorder', (req, res) => co(function * () {
+    var user_id = _.get(req, 'UserSession.user_account.id')
+    //for testing:
+    if (!user_id) user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
+
+    var clone = yield cloning_utils.reorder(req.params.cart_id, user_id);
+    return res.send(clone);
+  }))
+
+  /**
    * @api {get} /api/cart/:cart_id/checkout Checkout
    * @apiDescription Does some upkeep on the back end (like locking items) and redirects to the amazon cart page
    * @apiGroup Carts
