@@ -791,7 +791,9 @@ module.exports = function (router) {
     // return res.redirect('/prototype/checkout')
 
     // get the cart
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts')
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts').populate('ancestors')
+    logging.info("cart ancestors", cart.ancestors)
+
     // checkout removes the items from the cart object, so we have to make a copy
     var items = cart.items.slice()
     var user_id = _.get(req, 'UserSession.user_account.id')
@@ -803,6 +805,15 @@ module.exports = function (router) {
       cart: cart.id,
       user: user_id
     })
+    logging.info("cart ancestors", cart.ancestors)
+    yield cart.ancestors.map(function * (a) {
+      logging.info('a', a)
+      event.cart_ancestors.add(a.id)
+      var ancestor = yield db.Carts.findOne({id: a.id})
+      ancestor.checkouts.add(event.id)
+      yield ancestor.save()
+    })
+    yield event.save()
 
     // and attach it to the cart and the user
     var user = yield db.UserAccounts.findOne({id: user_id}).populate('checkouts')
@@ -813,6 +824,8 @@ module.exports = function (router) {
     cart.items = items;
     yield cart.save()
 
+    var test = yield db.CheckoutEvents.findOne({id: event.id}).populate('cart_ancestors')
+    logging.info('test', test)
     yield cartUtils.sendReceipt(cart, req)
   }))
 

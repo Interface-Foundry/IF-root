@@ -11,8 +11,8 @@ var checkoutEventsCollection = Waterline.Collection.extend({
     /** @type {user} the user that checks the cart out */
     user: Waterline.isA('user_accounts'),
 
-    /** @type {cart} the cart from which the current cart was cloned */
-    original_cart: Waterline.isA('carts')
+    /** @type {[carts]} the ancestors of the cart that's been checked out */
+    cart_ancestors: Waterline.isMany('carts')
   }
 })
 
