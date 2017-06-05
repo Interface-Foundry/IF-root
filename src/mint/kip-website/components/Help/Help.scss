@@ -137,7 +137,7 @@
         background-position: center;
         .bubble {
           position: absolute;
-          right: -100%;
+          left: -100%;
           top: 20%;
           width: 250px;
           white-space: normal;
@@ -150,7 +150,7 @@
             width: 180px;
           }
           p {
-            font-size: 20px;
+            font-size: 18px;
             color: $bgColor;
             text-align: left;
             font-weight: bold;
@@ -161,13 +161,14 @@
           &:after {
             content: '';
             position: absolute;
-            left: -20px;
-            bottom: 30px;
+            right: -20px;
+            bottom: 35%;
             border-top: 20px solid transparent;
             border-bottom: 20px solid transparent;
             border-right: 20px solid;
+            transform: rotate(180deg);
             @media only screen and (max-width: 870px) {
-              left: 80px;
+              right: 75px;
               bottom: -30px;
               transform: rotate(-90deg);
             }

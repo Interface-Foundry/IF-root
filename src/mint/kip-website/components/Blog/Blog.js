@@ -12,7 +12,8 @@ export default class Blog extends Component {
   }
   static propTypes = {
     posts: PropTypes.array,
-    blogTemplate: PropTypes.object
+    blogTemplate: PropTypes.object,
+    scrollToPosition: PropTypes.func
   }
 
   state = {
@@ -20,10 +21,12 @@ export default class Blog extends Component {
   }
 
   componentDidMount() {
+    const { scrollToPosition } = this.props;
     this.setState({
       offsetTop: ReactDOM.findDOMNode(this.blogs)
         .offsetTop
     });
+    // scrollToPosition(0);
   }
 
   render() {

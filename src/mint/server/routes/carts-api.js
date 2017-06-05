@@ -955,7 +955,7 @@ module.exports = function (router) {
 
     // if we're in production, don't show YPO
     var host = req.get('host')
-    if (host === 'kipthis.com') {
+    if (host === 'kipthis.com' || process.env.NODE_ENV === 'production') {
       logging.info('hiding ypo on production')
       stores = stores.filter(function (s) {
         return s.store_type != 'ypo'

@@ -30,25 +30,25 @@
       "readMoreText": "Read More"
     },
     "services": {
-      "tagline": "Kip Benefits",
+      "tagline": "WHY USE KIP",
       "tagDescrip": "${Kip} beats traditional web shopping by bringing all types of products into one place.",
       "details": {
         "descrips": [{
           "text": "Never create another account. Buy from anywhere with a single click.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_1.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_3.svg"
         }, {
           "text": "Share accounts like Amazon Prime without giving away passwords or personal data.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_cloud.svg"
         }, {
           "text": "Track orders and expenses through Slack, Email, and Facebook Messenger.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_3.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
         }],
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
       }
     },
     "compare": {
-      "tagline": "NOT CONVINCED?",
+      "tagline": "Kip Benefits",
       "subHead": "Just check out how we compare.",
       "buttonText": "Use Kip Now",
       "slackButtonText": "Add to Slack Now",
@@ -74,7 +74,7 @@
       }, {
         "title": "Add to Slack",
         "link": "//slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459"
-      },{
+      }, {
         "title": "Become a Partner",
         "link": "//kip11.typeform.com/to/wYrY5w"
       }]
@@ -147,7 +147,7 @@
       "titleText": "Smart Penguin for Social Shopping",
       "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
       "seenIn": "Seen In",
-      "videoTitle": "Meet Kip",
+      "videoTitle": "See Kip in Action",
       "team": {
         "title": "Meet the Team",
         "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions.",
@@ -222,25 +222,25 @@
       "readMoreText": "Read More"
     },
     "services": {
-      "tagline": "The Kip Advantage",
+      "tagline": "THE KIP WAY",
       "tagDescrip": "${Kip} beats traditional web shopping by bringing all types of products into one place.",
       "details": {
         "descrips": [{
           "text": "Forgot password? Kip lets you shop across multiple stores with 1-login.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_1.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_3.svg"
         }, {
           "text": "Save on shipping and split Amazon Prime fees without sharing passwords.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_cloud.svg"
         }, {
           "text": "Create group orders through Slack, Email, and Facebook Messenger.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_3.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
         }],
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
       }
     },
     "compare": {
-      "tagline": "NOT CONVINCED?",
+      "tagline": "Kip Benefits",
       "subHead": "Just check out how we compare.",
       "buttonText": "Use Kip Now",
       "slackButtonText": "Add to Slack Now",
@@ -266,7 +266,7 @@
       }, {
         "title": "Add to Slack",
         "link": "//slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459"
-      },{
+      }, {
         "title": "Become a Partner",
         "link": "//kip11.typeform.com/to/wYrY5w"
       }]
@@ -339,7 +339,7 @@
       "titleText": "Smart Penguin for Group Shopping",
       "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
       "seenIn": "Seen In",
-      "videoTitle": "Meet Kip",
+      "videoTitle": "See Kip in Action",
       "team": {
         "title": "Meet the Team",
         "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions.",
@@ -414,25 +414,25 @@
       "readMoreText": "Read More"
     },
     "services": {
-      "tagline": "The Kip Advantage",
+      "tagline": "THE KIP SOLUTION",
       "tagDescrip": "${Kip} beats traditional web shopping by bringing all types of products into one place.",
       "details": {
         "descrips": [{
           "text": "Buy and manage orders from multiple stores with a single Kip. Coordinate group buys with 1-click.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_1.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_3.svg"
         }, {
           "text": "Split and share accounts like Amazon Prime securely without giving away passwords.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_cloud.svg"
         }, {
           "text": "Track expenses and set budgets on Slack, Email, and Facebook Messenger.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_3.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
         }],
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
       }
     },
     "compare": {
-      "tagline": "NOT CONVINCED?",
+      "tagline": "Kip Benefits",
       "subHead": "Just check out how we compare.",
       "buttonText": "Use Kip Now",
       "slackButtonText": "Add to Slack Now",
@@ -458,7 +458,7 @@
       }, {
         "title": "Add to Slack",
         "link": "//slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459"
-      },{
+      }, {
         "title": "Become a Partner",
         "link": "//kip11.typeform.com/to/wYrY5w"
       }]
@@ -531,7 +531,7 @@
       "titleText": "Intelligent Penguin for Team Shopping",
       "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
       "seenIn": "Seen In",
-      "videoTitle": "Meet Kip",
+      "videoTitle": "See Kip in Action",
       "team": {
         "title": "Meet the Team",
         "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions.",

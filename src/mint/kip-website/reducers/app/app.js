@@ -32,7 +32,7 @@ export default function reducer(state = initialState, action = {}) {
   case '@@router/LOCATION_CHANGE':
     return {
       ...state,
-      scrollTo: 0
+      scrollTo: state.scrollTo ? 0 : 1
     }
   default:
     return state;
