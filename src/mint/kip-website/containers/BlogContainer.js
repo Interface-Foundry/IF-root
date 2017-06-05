@@ -10,7 +10,6 @@ const mapStateToProps = (state, props) => ({
 
 const mapDispatchToProps = dispatch => ({
   get: (url, type) => dispatch(get(url, type)),
-  scrollToPosition: (pos) => dispatch(scrollToPosition(pos))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Blog);
