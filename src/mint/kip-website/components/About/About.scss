@@ -85,7 +85,7 @@
       }
       .image {
         margin-top: $padding*2;
-        height: 250px;
+        height: 180px;
         background-size: contain;
         background-repeat: no-repeat;
       }
@@ -104,11 +104,11 @@
             stroke: none;
           }
           &:first-of-type {
-            transform: rotate(60deg) translate3d(-50px, 25px, 0);
+            transform: rotate(50deg) translate3d(-50px, 25px, 0);
             text-align: right;
           }
           &:last-of-type {
-            transform: rotate(-60deg) translate3d(50px, 25px, 0);
+            transform: rotate(-50deg) translate3d(50px, 25px, 0);
             text-align: left;
           }
         }
@@ -192,7 +192,7 @@
       .image {
         width: 100%;
         height: $ribbonHeight*2;
-        background-size: 150px;
+        background-size: 180px;
         background-repeat: no-repeat;
       }
       svg {

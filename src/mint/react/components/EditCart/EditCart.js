@@ -73,7 +73,7 @@ class EditCart extends Component {
         <div className='pad'/>
         <table className='dangerzone'>
           <caption>
-            <h1 className='danger'> Danger Will Robinson!</h1>
+            <h1 className='danger'> Danger Zone</h1>
             <h3>Buttons in this area can ruin your perfect cart permanently!</h3>
           </caption>
           <tbody>
