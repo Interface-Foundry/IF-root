@@ -41,7 +41,7 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.scrollTo !== this.props.scrollTo && nextProps.scrollTo !== 0) {
+    if (nextProps.scrollTo !== this.props.scrollTo) {
       ReactDOM.findDOMNode(this.scroll)
         .scrollTop = nextProps.scrollTo
     }

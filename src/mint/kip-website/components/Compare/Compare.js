@@ -12,21 +12,21 @@ export default class Compare extends Component {
     src: PropTypes.string
   }
 
-  generateSvgArray(arr) {
+  generateSvgArray(arr, useLink = false) {
     return arr.map((name, i) => {
       switch (name) {
       case 'Slack':
-        return <SlackIcon key={i}/>;
+        return useLink ? <a href='https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459'><SlackIcon key={i}/></a> : <SlackIcon key={i}/>;
       case 'Play':
         return <GooglePlay key={i}/>;
       case 'Apple':
         return <Apple key={i}/>;
       case 'Facebook':
-        return <Facebook key={i}/>;
+        return useLink ? <a href='//m.me/talkto.kip'><Facebook key={i}/></a> : <Facebook key={i}/>
       case 'Chrome':
-        return <Chrome key={i}/>;
+        return useLink ? <a href='/newcart'><Chrome key={i}/></a> : <Chrome key={i}/>
       case 'Gmail':
-        return <Gmail key={i}/>;
+        return useLink ? <a href='/newcart'><Gmail key={i}/></a> : <Gmail key={i}/>
       }
     });
   }
@@ -70,7 +70,7 @@ export default class Compare extends Component {
                             ? <td key={counter++} className='check'> <Check /> </td>
                             : <td key={counter++}> <Delete /> </td>
                         : typeof (comp.data[i]) === 'object'
-                          ? <td key={counter++}>{::this.generateSvgArray(comp.data[i])}</td>
+                          ? <td key={counter++}>{::this.generateSvgArray(comp.data[i], j === 0)}</td>
                           : <td key={counter++}>{comp.data[i]}</td>
                       )
                     }

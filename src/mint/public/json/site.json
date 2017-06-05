@@ -41,7 +41,7 @@
           "image": "//storage.googleapis.com/kip-random/website/sym_cloud.svg"
         }, {
           "text": "Track orders and expenses through Slack, Email, and Facebook Messenger.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_1.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
         }],
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
@@ -233,7 +233,7 @@
           "image": "//storage.googleapis.com/kip-random/website/sym_cloud.svg"
         }, {
           "text": "Create group orders through Slack, Email, and Facebook Messenger.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_1.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
         }],
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
@@ -425,7 +425,7 @@
           "image": "//storage.googleapis.com/kip-random/website/sym_cloud.svg"
         }, {
           "text": "Track expenses and set budgets on Slack, Email, and Facebook Messenger.",
-          "image": "//storage.googleapis.com/kip-random/website/sym_1.svg"
+          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
         }],
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
