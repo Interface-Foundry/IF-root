@@ -30,6 +30,19 @@ body {
   background: $kip-secondary-color;
 }
 
+@media only screen and (max-width: 600px) {
+  table {
+    overflow-x: auto;
+    display: block;
+
+    td {
+      width: 100%;
+      display: block;
+    }
+  }
+}
+
+
 .app, #root {
   position: fixed;
   top: 0;
@@ -51,14 +64,14 @@ body {
   overflow-y: scroll;
   text-align: left;
   -webkit-overflow-scrolling: touch;
-  height: calc(100% - #{$nav-height*2 });
+  height: calc(100% - #{$nav-height });
   &.large {
     height: calc(100% - #{$nav-height});
   }
   @media (min-width: 900px) {
     display: inline-block;
     overflow-y: auto;
-    height: calc(100% - #{$nav-height*2});
+    height: calc(100% - #{$nav-height});
     &.squeeze {
       width: calc(100% - 250px);
     }

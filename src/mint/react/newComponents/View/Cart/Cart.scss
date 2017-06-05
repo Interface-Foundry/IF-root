@@ -1,0 +1,165 @@
+@import '../../../../react-common/styles/Constants';
+@import '../../../../react-common/styles/Animations';
+
+$colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
+
+.cart {
+	position: relative;
+	width: 100%;
+	height: auto;
+	margin: 0 auto;
+	border-spacing: $padding*2 $padding;
+
+	@media only screen and (max-width: 600px) {
+		border-spacing: 0;
+	}
+
+	.price {
+		color: $price-color;
+	}
+
+	.action {
+		padding: $padding/2 0 0;
+		text-align: right;
+
+		button {
+			border: 0;
+			background: 0;
+			height: 25px;
+			line-height: 25px;
+			color: #333;
+			font-size: 12px;
+			opacity: 0.4;
+
+			span {
+				border-bottom: 3px solid #333;
+
+				svg {
+					fill: #333;
+				    height: 25px;
+				    display: inline-block;
+				    width: 10px;
+					@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+				}
+			}
+
+			&:hover {
+				svg {
+					transform: translate3d(3px, 0, 0);
+				}
+			}
+		}
+	}
+
+	td, th {
+		padding: $padding/3 $padding/2;
+		.card {
+			position: relative;
+			padding: $padding $padding*3;
+			text-align: left;
+			background: white;
+			border-radius: 5px;
+			box-shadow: $card-box-shadow;
+
+			@media only screen and (max-width: 600px) {
+				padding: $padding $padding;
+			}
+
+			& > h1 {
+				position: relative;
+				display: inline-block;
+				width: 50%;
+				overflow: hidden;
+				font-size: 16px;
+				line-height: 20px;
+				font-weight: 100;
+
+				span {
+					opacity: 0.3;
+					font-size: 12px;
+				}
+
+				&:last-of-type {
+					text-align: right;
+					font-size: 12px;
+				}
+			}
+
+			& > h4 {
+				font-weight: 100;
+			}
+
+			ul {
+				border-radius: 5px;
+				padding: $padding 0;
+				margin: $padding*2 auto $padding;
+			}
+
+			li {
+				position: relative;
+				padding: $padding/2 $padding*2;
+
+				@media only screen and (max-width: 600px) {
+					padding: $padding/2 0;
+				}
+
+				.image {
+					width: $nav-height*2;
+					height: $nav-height*2;
+					display: inline-block;
+				}
+				.text {
+					display: inline-block;
+					padding: 0 $padding;
+					width: calc(100% - #{$nav-height*2});
+
+
+					h1 {
+						position: relative;
+						overflow: hidden;
+						font-size: 14px;
+						line-height: 20px;
+						height: 45px;
+						&:after {
+						  content: "";
+						  text-align: right;
+						  position: absolute;
+						  bottom: 5px;
+						  right: 0;
+						  width: 70%;
+						  height: 20px;
+						  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 80%);
+						}
+					}
+					p {
+						font-size: 10px;
+						line-height: 10px;
+						opacity: 0.5;
+						padding: 0 0 $padding;
+					}
+					h4 {
+						font-size: 10px;
+						line-height: 20px;
+						opacity: 0.8;
+					}
+				}
+			}
+		}
+	}
+	@media only screen and (max-width: 600px) {
+	    overflow-x: auto;
+	    display: block;
+
+	    td, th {
+	      width: 100% !important;
+	      display: block;
+	      padding: 0 3px;
+	      margin: 5px 0 10px;
+
+	      &:last-of-type {
+	      	margin: 5px 0 5px;
+	      }
+	    }
+	}
+}
+

@@ -41,6 +41,9 @@ import {
   Sms,
   Whatsapp,
 } from '../../styles';
+import {
+  Share
+} from '../../kipsvg';
 
 export default class Icon extends Component {
   static propTypes = {
@@ -114,6 +117,8 @@ export default class Icon extends Component {
       return <IoChevronLeft />;
     case 'Login':
       return <IoLogIn/>;
+    case 'Share':
+      return <Share/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }

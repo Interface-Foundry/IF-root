@@ -8,7 +8,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	width: 100%;
 	height: auto;
 	margin: 0 auto;
-	border-spacing: $padding;
+	border-spacing: $padding*2 $padding;
+
+	@media only screen and (max-width: 600px) {
+		border-spacing: $padding $padding;
+	}
 
 	th {
 		text-align: left;
@@ -46,28 +50,35 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 				}
 			}
 		}
+		.buttons {
+			display: inline-block;
+			@media only screen and (max-width: 600px) {
+				display: none;
+			}
+		}
 	}
 
 	td {
 		font-size: 14px;
 		font-weight: 500;
 		text-align: left;
-		width: calc(100%/4);
+		width: 100%;
 
 		span {
+			display: inline-block;
 			border-radius: 5px;
-			padding: $padding/2 $padding*3;
+			padding: $padding/4 $padding*1;
 			margin-right: $padding*2;
-			box-shadow: $card-box-shadow;
+			background: white;
+
+			@media only screen and (max-width: 600px) {
+				margin: $padding/2;
+			}
 
 			&.price {
 				color: $price-color;
 			}
-			@for $i from 1 through length($colorList) {
-		        &:nth-of-type(#{length($colorList)}n+#{$i}) {
-		            background: nth($colorList, $i);
-		        }
-		    }
 		}
 	}
 }
+

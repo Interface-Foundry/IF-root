@@ -48,6 +48,14 @@ export const deleteCart = cart_id => del(
 	})
 )
 
-export const clearCart = cart_id => {
+export const addItem = (cart_id, item_id) => post(
+	`/api/cart/${cart_id}/item`, 
+	'ADD_ITEM',
+	{ item_id }, 
+	(type, json) => ({
+  		type: `${type}_SUCCESS`,
+  		response: json,
+  		receivedAt: Date.now()
+	})
+)
 
-}

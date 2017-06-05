@@ -3,7 +3,7 @@ import { Header } from '../newComponents';
 
 import { 
   logout,	
-	toggleModal,
+	togglePopup,
 	toggleSidenav
 } from '../newActions';
 
@@ -15,7 +15,7 @@ const mapStateToProps = (state, props) => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  _toggleLoginScreen: () => dispatch(toggleModal()),
+  _toggleLoginScreen: () => dispatch(togglePopup()),
   _toggleSidenav: () => dispatch(toggleSidenav()),
   logout: () => {
     dispatch(get('/api/logout', 'SESSION'));

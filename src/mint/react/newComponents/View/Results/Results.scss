@@ -1,0 +1,165 @@
+@import '../../../../react-common/styles/Constants';
+@import '../../../../react-common/styles/Animations';
+
+$colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
+
+.results {
+	position: relative;
+	width: 100%;
+	height: auto;
+	margin: 0 auto;
+	padding: $padding 0;
+	border-collapse: collapse;
+
+	.price {
+		color: $price-color;
+	}
+
+	.action {
+		padding: $padding/2 0 0;
+		text-align: right;
+
+		button {
+			border: 0;
+			background: 0;
+			height: 25px;
+			line-height: 25px;
+			color: $warningColor;
+			font-size: 12px;
+
+			span {
+				border-bottom: 3px solid $warningColor;
+
+				svg {
+					fill: $warningColor;
+				    height: 25px;
+				    display: inline-block;
+				    width: 10px;
+					@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+				}
+			}
+
+			&:hover {
+				svg {
+					transform: translate3d(3px, 0, 0);
+				}
+			}
+		}
+	}
+
+	th {
+		nav {
+			padding: 0 $padding*2;
+			p {
+				display: inline-block;
+				font-size: 14px;
+				font-weight: 500;
+				@media only screen and (max-width: 600px) {
+					padding: $padding $padding 0;
+				}
+			}
+
+			button {
+				display: inline-block;
+				margin-right: $padding;
+			}
+
+			@media only screen and (max-width: 600px) {
+				padding: 0 $padding;
+			}
+		}
+	}
+
+	td {
+		padding: $padding/3 $padding/2;
+		width: (100%/3);
+		.card {
+			position: relative;
+			padding: $padding;
+			text-align: left;
+			background: white;
+			border-radius: 5px;
+			box-shadow: $card-box-shadow;
+
+			&.incart {
+				opacity: 0.6;
+				box-shadow: none;
+
+				&:after {
+					content: 'IN CART';
+					position: absolute;
+					top: -$padding;
+					right: $padding;
+					background: $thirdColor;
+					color: white;
+					padding: $padding/2 $padding*2;
+					border-radius: 5px;
+					font-weight: bold;
+					font-size: 10px;
+					box-shadow: $card-box-shadow;
+
+					@media only screen and (max-width: 600px) {
+						top: -$padding/2;
+						box-shadow: none;
+					}
+				}
+			}
+			.image {
+				width: $nav-height*2;
+				height: $nav-height*2;
+				display: inline-block;
+			}
+			.text {
+				display: inline-block;
+				padding: 0 $padding;
+				width: calc(100% - #{$nav-height*2});
+
+
+				h1 {
+					position: relative;
+					overflow: hidden;
+					font-size: 14px;
+					line-height: 20px;
+					height: 65px;
+					&:after {
+					  content: "";
+					  text-align: right;
+					  position: absolute;
+					  bottom: 5px;
+					  right: 0;
+					  width: 70%;
+					  height: 20px;
+					  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 80%);
+					}
+				}
+				p {
+					font-size: 10px;
+					line-height: 10px;
+					opacity: 0.5;
+					padding: 0 0 $padding;
+				}
+				h4 {
+					font-size: 10px;
+					line-height: 20px;
+					opacity: 0.8;
+				}
+			}
+		}
+	}
+	@media only screen and (max-width: 600px) {
+	    overflow-x: auto;
+	    display: block;
+
+	    td {
+	      width: 100% !important;
+	      display: block;
+	      padding: 0 3px;
+	      margin: 5px 0 10px;
+
+	      &:last-of-type {
+	      	margin: 5px 0 5px;
+	      }
+	    }
+	}
+}
+

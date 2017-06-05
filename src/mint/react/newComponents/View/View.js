@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 
 import Details from './Details'
+import { ResultsContainer, SearchContainer, ButtonsContainer, CartContainer } from '../../newContainers';
 
 //Analytics!
 import ReactGA from 'react-ga';
@@ -20,10 +21,13 @@ export default class App extends Component {
   }
 
   render() {
-    const { sidenav, cart, togglePopup, toggleSidenav } = this.props;
+    const { search, cart } = this.props;
     return (
       <div className='view'>
+        <SearchContainer />
         <Details {...cart}/>
+        { search ? <ResultsContainer/> : <CartContainer/> }
+        <ButtonsContainer/>
       </div>
     );
   }

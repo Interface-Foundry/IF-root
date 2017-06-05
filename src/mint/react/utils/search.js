@@ -2,7 +2,7 @@ export const getSearchHistory = (filter) => {
   if (!localStorage.searchHistory) return [];
 
   return localStorage.searchHistory.split('-')
-    .filter((pSearch) => pSearch.includes(filter));
+    .filter((pSearch) => pSearch.includes(filter)).reverse();
 };
 
 export const getLastSearch = () => {

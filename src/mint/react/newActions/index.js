@@ -17,7 +17,9 @@ export {
 } from './async';
 
 export { 
-	checkSession
+	checkSession,
+	login,
+	validateCode
 } from './session';
 
 export { 
@@ -25,7 +27,8 @@ export {
 	fetchCarts,
 	updateCart, 
 	clearCart, 
-	deleteCart 
+	deleteCart,
+	addItem 
 } from './cart';
 
 export { 

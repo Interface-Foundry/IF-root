@@ -1,0 +1,63 @@
+// react/components/App/Header.scss
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+
+.buttons {
+	position: relative;
+	height: $nav-height;
+	padding: 0 $padding*2;
+	button {
+		position: relative;
+		margin: $padding/2 $padding;
+		height: 100%;
+		line-height: $nav-height - $padding;
+		height: $nav-height - $padding;
+		padding: 0 $padding*3;	
+		font-size: 18px;
+		font-weight: bold;
+		border-radius: 5px;
+		border: 0;
+
+		svg {
+			display: inline-block;
+			width: $nav-height - $padding;
+			height: $nav-height - $padding;
+
+			path {
+				fill: black;
+			    stroke: black;
+			    stroke-width: $padding;
+			}
+		}
+
+		div {
+			display: inline-block;
+		}
+
+		&.sub {
+			line-height: $nav-height - $padding*2.5;
+			span {
+				height: $padding;
+				line-height: $padding;
+				font-size: 14px;
+				bottom: 0;
+			}
+		}
+
+		&.blue {
+			background: $color-blue;
+			color: white;
+			svg {
+				path {
+					fill: white;
+				    stroke: white;
+				    stroke-width: $padding;
+				}
+			}
+		}
+
+		&.yellow {
+			background: $mainColor;
+		}
+	}
+}

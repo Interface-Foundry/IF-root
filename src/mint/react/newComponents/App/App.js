@@ -39,6 +39,7 @@ export default class App extends Component {
     // need this, otherwise page always rerender every scroll
     if(
       nextProps.sidenav !== this.props.sidenav ||
+      nextProps.popup !== this.props.popup ||
       nextProps.match.url !== this.props.match.url
     ) return true
 
@@ -49,7 +50,7 @@ export default class App extends Component {
     const { sidenav, popup, togglePopup, toggleSidenav } = this.props;
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
-        { popup ? <LoginScreenContainer _toggleLoginScreen={_togglePopup}/> : null }
+        { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }
         <Route path={'/cart/:cart_id'} component={HeaderContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />

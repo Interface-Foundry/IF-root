@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import { Sidenav } from '../../react-common/components';
+import { push } from 'react-router-redux';
 
 import { 
 	get,
@@ -25,7 +26,8 @@ const mapDispatchToProps = dispatch => ({
   logout: () => {
     dispatch(get('/api/logout', 'SESSION'));
     dispatch(logout());
-  }
+  },
+  push: (url) => dispatch(push(url))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Sidenav);

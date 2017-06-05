@@ -17,6 +17,7 @@ export default (state = {}, action) => {
   switch (action.type) {
   case 'LOGOUT':
     return {};
+  case 'CODE_SUCCESS':
   case 'SESSION_SUCCESS':
     return {
       ...state,

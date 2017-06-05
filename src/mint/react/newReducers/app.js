@@ -10,10 +10,15 @@ export default (state = initialState, action = {}) => {
       ...state,
       sidenav: !state.sidenav
     }
+  case 'CODE_SUCCESS':
+    return {
+      ...state,
+      popup: false
+    }
   case 'TOGGLE_POPUP':
     return {
       ...state,
-      popup: !state.modal
+      popup: !state.popup
     }
   case '@@router/LOCATION_CHANGE':
     return {

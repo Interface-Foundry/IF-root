@@ -15,7 +15,8 @@ const mapStateToProps = (state, ownProps) => {
   	user: state.user,
     cart: state.cart,
     sidenav: state.app.sidenav,
-    popup: state.app.popup
+    popup: state.app.popup,
+    search: state.search.search
   };
 };
 

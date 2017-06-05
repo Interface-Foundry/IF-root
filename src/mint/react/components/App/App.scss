@@ -30,6 +30,13 @@ body {
   background: $kip-secondary-color;
 }
 
+@media only screen and (max-width: 600px) {
+  table {
+    overflow-x: auto;
+    display: block;
+  }
+}
+
 .app, #root {
   position: fixed;
   top: 0;

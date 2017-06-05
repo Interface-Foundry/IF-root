@@ -1,4 +1,4 @@
-// react/reducers/currentCart.js
+// react/reducers/cart.js
 
 const initialState = { 
   name: '',
@@ -19,6 +19,17 @@ export default function cart(state = initialState, action) {
         ...state,
         ...action.response
       };
+    case 'ADD_ITEM_SUCCESS': {
+      return {
+        ...state,
+        items: [ ...state.items, action.response]
+      };
+    }
+  case 'CODE_SUCCESS':
+    return {
+      ...state,
+      members: [ ...state.members, action.response.user_account ]
+    };
     case 'DELETE_CART_SUCCESS':
       return initialState
     default:
@@ -32,9 +43,9 @@ export const getMemberById = (state, props) => [...state.members, state.leader].
 export const splitCartById = (state, props) => {
   const id = props ? props.id : null;
 
-  return state.currentCart.items.reduce((acc, item) => {
+  return state.cart.items.reduce((acc, item) => {
     acc.quantity = acc.quantity + (item.quantity || 1);
-    let linkedMember = getMemberById(state.currentCart, { id: item.added_by });
+    let linkedMember = getMemberById(state.cart, { id: item.added_by });
 
     if (id === item.added_by) {
       acc['my'].push(item);
