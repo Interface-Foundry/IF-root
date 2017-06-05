@@ -1,8 +1,8 @@
 const express = require('express')
-const router = express() // for testing
-// const router = express.Router()
+const router = express()
 
-const InvoiceFactory = require('./InvoiceFactory.js')
+const Invoice = require('./Invoice.js')
+const PaymentSource = require('./PaymentSources.js')
 
 
 // for mocha tests - check if server up
@@ -13,78 +13,96 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 /**
- * @api {post} /invoice/:invoice_type/:cart_id
- * @apiDescription create an invoice for the
- * @apiGroup {Invoice}
+ * @api {post} /invoice/:invoice_type/:cart_id create invoice
+ * @apiDescription create an invoice for the specified cart
+ * @apiGroup Invoice
  *
- * @apiParam {type} :invoice_type - description of param
+ * @apiParam {string} :invoice_type - description of param
+ * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
  */
 router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
-  const invoice = InvoiceFactory.Create(req.params.invoice_type, {cart: req.params.cart_id})
+  const invoice = Invoice.Create(req.params.invoice_type, {cart: req.params.cart_id})
   const newInvoice = await invoice.createInvoice()
   return res.send(newInvoice)
 })
 
 
-
-
 /**
- * @api {post} /payment/:invoice_type/:payment_type
- * @apiDescription
- * @apiGroup {Payments}
+ * @api {post} /invoice/:invoice_id/payment use payment source on invoice
+ * @apiDescription post a payment to an invoice
+ * @apiGroup Invoice
  *
- * @apiParam {type} :invoice_type - mint, cafe, etc
- * @apiParam {type} :payment_type - stripe, etc
+ * @apiParam {string} :invoice_id - id of invoice to post payment to
+ * @apiParam {string} payment_source - id of payment source we are using
+ * @apiParam {number} payment_amount - amount of invoice to pay
  */
-router.post('/payment/:invoice_type/:payment_type', async (req, res) => {
-  const invoice = InvoiceFactory.Create(req.params.invoice_type)
-  const newCharge = invoice.newInvoice(req.params.payment_type, req.body)
-  return res.send(newCharge)
+router.post('/invoice/:invoice_id/payment', async (req, res) => {
+  if (!_.get(req, 'body.payment_source')) {
+    throw new Error('Need invoice id to post payment to')
+  }
+  if (!_.get(req, 'body.payment_amount')) {
+    throw new Error('Need amount we are paying')
+  }
+  const invoice = await Invoice.GetById(req.params.invoice_id)
+  const paymentSource = await PaymentSource.GetById(req.body.payment_source)
+  const paymentAmount = req.body.payment_amount
+  const payment = await paymentSource.pay(invoice, paymentAmount)
+  return res.send(payment)
 })
 
 
+// ------------------------------------
+// ------- GENERAL ROUTES BELOW -------
+// ------------------------------------
 
 /**
- * @api {post} /{route}/:param
- * @apiDescription description of the route
- * @apiGroup {GROUP}
+ * main invoice route
+ */
+router.route('/invoice/:invoice_id')
+/**
+ * @api {get} /invoice/:invoice_id get
+ * @apiDescription present a page relevant to invoice_id, allow entering payment details for stripe/etc.
+ * @apiGroup Invoice
  *
  * @apiParam {type} :param - description of param
  */
-router.post('/payment/:invoice_id/:payment_id', async (req, res) => {
-  const invoice = InvoiceFactory(req.params.invoice_type)
-  let newCharge = await invoice.savedCard(req.params.payment_type, req.body)
-  return res.send(newCharge)
-})
+  .get(async (req, res) => {
+    const invoice = await Invoice.GetById(req.params.invoice_id)
+    return res.send(invoice)
+  })
+
+  /**
+  * @api {post} /invoice/:invoice_id post info to invoice
+  * @apiDescription post info to an invoice, (info, emails, etc.), not payment stuff
+   * @apiGroup Invoice
+   *
+   * @apiParam {type} :invoice_id - id of invoice you are posting to
+   */
+  .post(async (req, res) => {
+    const invoice = await Invoice.GetById(req.params.invoice_id)
+    return res.send(invoice)
+  })
 
 
 /**
- * main route
- * /:invoice_id
+ * main payment route
  */
-router.route('/invoice/:invoice_id')
+router.route('/payment')
   /**
-   * @api {get} /:invoice_id
-   * @apiDescription present a page relevant to invoice_id, allow entering payment details for stripe/etc.
-   * @apiGroup {GROUP}
+   * @api {post} /payment create payment source
+   * @apiDescription create a new payment source
+   * @apiGroup PaymentSources
    *
-   * @apiParam {type} :param - description of param
-   */
-  .get(async (req, res) => {
-    const invoice = await InvoiceFactory.GetById(req.params.invoice_id)
-    return res.send(invoice)
-  })
-
-  /**
-  * @api {post} /:invoice_id
-  * @apiDescription post a payment to an invoice
-   * @apiGroup {GROUP}
-   *
-   * @apiParam {type} :card_id - description of param
    */
   .post(async (req, res) => {
-    const invoice = await InvoiceFactory.GetById(req.params.invoice_id)
-    return res.send(invoice)
+    if (!_.get(req, 'body.payment_info')) {
+      throw new Error('need payment info')
+    }
+    const paymentSource = await PaymentSource.Create(req.body.payment_info)
+    return res.send(paymentSource)
   })
+
+
+
 
 module.exports = router

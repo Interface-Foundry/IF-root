@@ -7,6 +7,34 @@ class Invoice {
     this.invoice = invoiceType
   }
 
+  /**
+   * Gets the Invoice by id
+   *
+   * @class      GetById (name)
+   * @param      {string}   invoiceId  The invoice identifier
+   * @return     {Promise}  The invoice db object into class object
+   */
+  static async GetById (invoiceId) {
+    const invoice = await db.Invoice.findOne({id: invoiceId})
+    if (!invoice) {
+      throw new Error('no invoice found')
+    }
+    return new invoiceHandlers[invoice.invoice_type](invoice)
+  }
+
+
+  /**
+   * create a new invoice of type with data
+   *
+   * @class      Create (name)
+   * @param      {string}           invoiceType  The invoice type
+   * @param      {object}           invoiceData  The invoice data
+   * @return     {invoiceHandlers}  instantiation of the class
+   */
+  static Create (invoiceType, invoiceData) {
+    return new invoiceHandlers[invoiceType](invoiceData)
+  }
+
 
   /**
    * Creates an invoice.
@@ -28,5 +56,41 @@ class Invoice {
     return newInvoice
   }
 }
+
+
+class MintInvoice extends Invoice {
+  constructor(args) {
+    super('mint')
+    Object.assign(this, args)
+  }
+
+  static get name() {
+    return 'mint'
+  }
+
+  async checkPrevInvoice () {
+    const invoice = await db.Invoice.findOne({cart: this.cart})
+    if (invoice) {
+      return invoice
+    }
+    return null
+  }
+
+  /**
+   * we dont need to actually create a charge but after a user checks out an
+   * amazon cart we should note what items or whatever were in the cart at this point
+   */
+  get createAmazonCharge() {
+
+  }
+
+  // methods
+}
+
+
+const invoiceHandlers = {
+  [MintInvoice.name]: MintInvoice,
+}
+
 
 module.exports = Invoice
