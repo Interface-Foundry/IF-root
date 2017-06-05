@@ -90,6 +90,13 @@ module.exports = function (router) {
     res.send(carts)
   }))
 
+  //FOR TESTING
+  router.get('/cart/:cart_id/clones', (req, res) => co(function * () {
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('clones')
+    if (cart) res.send(cart.clones)
+    else res.sendStatus(404)
+  }))
+
   /**
    * @api {get} /api/cart/:cart_id Cart
    * @apiDescription Gets a single cart, does not have to be logged in
@@ -775,7 +782,7 @@ module.exports = function (router) {
   router.get('/cart/:cart_id/clone', (req, res) => co(function * () {
     var user_id = _.get(req, 'UserSession.user_account.id')
     //for testing:
-    var user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
+    if (!user_id) user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
 
     var clone = yield cloning_utils.clone(req.params.cart_id, user_id);
     return res.send(clone);
@@ -794,6 +801,7 @@ module.exports = function (router) {
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts').populate('ancestors')
     logging.info("cart ancestors", cart.ancestors)
+    var ancestors = cart.ancestors
 
     // checkout removes the items from the cart object, so we have to make a copy
     var items = cart.items.slice()
@@ -804,14 +812,19 @@ module.exports = function (router) {
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({
       cart: cart.id,
-      user: user_id
+      user: user_id,
+      real_checkout: true
     })
-    logging.info("cart ancestors", cart.ancestors)
-    yield cart.ancestors.map(function * (a) {
-      logging.info('a', a)
-      event.cart_ancestors.add(a.id)
+    yield ancestors.map(function * (a) {
+      //create checkout events to give credit to all of the ancestor carts
+      var vanity_event = yield db.CheckoutEvents.create({
+        cart: a.id,
+        real_cart: cart.id,
+        real: false,
+        user: user_id
+      })
       var ancestor = yield db.Carts.findOne({id: a.id})
-      ancestor.checkouts.add(event.id)
+      ancestor.checkouts.add(vanity_event.id)
       yield ancestor.save()
     })
     yield event.save()
@@ -824,9 +837,6 @@ module.exports = function (router) {
 
     cart.items = items;
     yield cart.save()
-
-    var test = yield db.CheckoutEvents.findOne({id: event.id}).populate('cart_ancestors')
-    logging.info('test', test)
     yield cartUtils.sendReceipt(cart, req)
   }))
 
