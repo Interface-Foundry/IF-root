@@ -30,7 +30,7 @@
       padding: $padding 0;
       text-align: left;
       @media only screen and (max-width: 600px) {
-        margin-top: -85px;
+        margin-top: -65px;
       }
       @media only screen and (max-width: 320px) {
         margin-top: 0px;
@@ -141,6 +141,7 @@
       display: table-cell;
       vertical-align: middle;
       padding: 0;
+      margin-top: -50px;
       .image {
         background-image: url('//storage.googleapis.com/kip-random/website/kip_collect.gif');
         background-size: contain;
@@ -154,10 +155,10 @@
         display: inline-block;
         order: -1;
         .image {
-          min-height: 300px;
-          max-height: 300px;
-          min-width: 300px;
-          max-width: 300px;
+          min-height: 200px;
+          max-height: 200px;
+          min-width: 200px;
+          max-width: 200px;
           margin: 0 auto;
           padding: 0;
           &:after {
@@ -176,7 +177,7 @@
           max-height: 110px;
           min-width: 110px;
           max-width: 110px;
-          align-self: left;
+          margin-top: 20px;
           &:after {
             display: none;
           }

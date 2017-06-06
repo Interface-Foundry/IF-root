@@ -249,6 +249,18 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   console.log(e)
 }))
 
+router.get('/version/:version', (req, res)=> co(function *() {
+  let version = req.params.version.toUpperCase();
+  version = (version === 'A' || version === 'B' || version === 'C' ) 
+    ? version 
+    : res.session.siteVersion 
+      ? res.session.siteVersion 
+      : _.sample(['A','B','C']);
+  req.UserSession.siteVersion = version;
+  yield req.UserSession.save();
+  res.redirect('/');
+}))
+
 
 /**
  * @api {get} /testoptions Test Options
