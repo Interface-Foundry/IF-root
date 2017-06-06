@@ -513,19 +513,14 @@ module.exports = function (router) {
    */
   router.get('/cart/:cart_id/metrics', (req, res) => co(function * () {
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('checkouts');
-    logging.info('have the cart:', cart)
     if (!cart) return res.sendStatus(404);
-    logging.info('did not send a 404 status')
     var clones = yield cloning_utils.getChildren(cart.id, 'clone')
-    logging.info('got clones:', clones)
     //count checkouts for all of the clones
     clones = yield clones.map(function * (clone_id) {
       var clone = yield db.Carts.findOne({id: clone_id}).populate('checkouts')
       return clone.checkouts.length
     })
-    logging.info('list of checkout counts', clones)
     var checkouts = cart.checkouts.length + clones.reduce((a, b) => a + b, 0)
-    logging.info('total # of checkouts', checkouts)
     return res.send({
       views: cart.views, // views is just for the current cart; not its descendents
       clones: clones.length,
@@ -555,7 +550,6 @@ module.exports = function (router) {
 
     //pull most recent camel deals from db
     var deals = yield camel.getDeals(6);
-    logging.info('allDeals', deals)
     deals = [deals.slice(0, 2), deals.slice(2, 4), deals.slice(4, 6)];
 
     yield share.template('share_cart_demo', {
@@ -704,9 +698,6 @@ module.exports = function (router) {
 
    //has the user already reacted? if so, update the character
    var previousReaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
-
-   logging.info('reaction to be replaced im yesh', previousReaction)
-
    if (previousReaction) {
      previousReaction.emoji = req.body.emoji;
      yield previousReaction.save();
@@ -734,7 +725,6 @@ module.exports = function (router) {
   router.delete('/item/:item_id/reaction/:user_id', (req, res) => co(function * () {
    var item = yield db.Items.findOne({id: req.params.item_id}).populate('reactions')
    if (!item) return res.sendStatus(404);
-   logging.info('ITEM', item);
    var reaction = item.reactions.filter(r => r.user == req.params.user_id)[0]
    item.reactions.remove(reaction.id);
    yield item.save();
@@ -818,17 +808,12 @@ module.exports = function (router) {
     // return res.redirect('/prototype/checkout')
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts')
-    logging.info('parent?', cart.parent_clone)
 
     // checkout removes the items from the cart object, so we have to make a copy
     var items = cart.items.slice()
     var user_id = _.get(req, 'UserSession.user_account.id')
 
-    logging.info('do you have a parent', cart.parent_clone)
-
     yield cartUtils.checkout(cart, req, res)
-
-    logging.info('no really do you', cart.parent_clone)
 
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({

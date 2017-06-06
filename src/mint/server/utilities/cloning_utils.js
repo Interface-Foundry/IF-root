@@ -56,7 +56,6 @@ var clone = function * (cart_id, user_id, reorder) {
   yield clone.save()
 
   clone = yield db.Carts.findOne({id: clone.id}).populate('items')
-  logging.info('do you have a parent, mr peanutbutter?', original.parent_clone)
   return clone;
 }
 
@@ -120,7 +119,6 @@ var getChildren = function * (cart_id, type) {
     logging.info('cart_id:', cart_id)
     if (type === 'clone') var children = yield db.Carts.find({parent_clone: cart_id})
     else var children = yield db.Carts.find({parent_reorder: cart_id})
-    logging.info('and we must save the children', children)
     if (children.length) {
       children.map(c => {
         if (c.id !== cart_id) all_children.push(c.id)
