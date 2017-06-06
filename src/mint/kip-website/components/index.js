@@ -2,6 +2,7 @@ export About from './About';
 export App from './App';
 export Blog from './Blog';
 export Compare from './Compare';
+export ComparisonPage from './ComparisonPage';
 export Footer from './Footer';
 export Header from './Header';
 export Help from './Help';

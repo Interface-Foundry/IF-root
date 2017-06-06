@@ -2,8 +2,7 @@ export {
   handleScroll,
   toggleSidenav,
   toggleModal,
-  registerHeight,
-  scrollToPosition
+  registerHeight
 }
 from './app';
 
@@ -12,6 +11,7 @@ export {
   validateCode,
   get,
   logout,
-  getSiteState
+  getSiteState,
+  scrollToPosition
 }
 from './async';

@@ -57,6 +57,7 @@
     text-align: left;
     pointer-events: auto;
     display: inline-block;
+    border: none;
     .image {
       display: inline-block;
       background-size: contain;
@@ -147,7 +148,6 @@
       cursor: pointer;
       margin-top: 13px;
       height: 30px;
-      line-height: 30px;
       color: #42403f;
       box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
       &:focus {

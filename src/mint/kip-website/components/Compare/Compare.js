@@ -16,17 +16,17 @@ export default class Compare extends Component {
     return arr.map((name, i) => {
       switch (name) {
       case 'Slack':
-        return useLink ? <a href='https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459'><SlackIcon key={i}/></a> : <SlackIcon key={i}/>;
+        return useLink ? <a key={i} href='https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459'><SlackIcon /></a> : <SlackIcon key={i}/>;
       case 'Play':
         return <GooglePlay key={i}/>;
       case 'Apple':
         return <Apple key={i}/>;
       case 'Facebook':
-        return useLink ? <a href='//m.me/talkto.kip'><Facebook key={i}/></a> : <Facebook key={i}/>
+        return useLink ? <a key={i} href='//m.me/talkto.kip'><Facebook/></a> : <Facebook key={i}/>
       case 'Chrome':
-        return useLink ? <a href='/newcart'><Chrome key={i}/></a> : <Chrome key={i}/>
+        return useLink ? <a key={i} href='/newcart'><Chrome/></a> : <Chrome key={i}/>
       case 'Gmail':
-        return useLink ? <a href='/newcart'><Gmail key={i}/></a> : <Gmail key={i}/>
+        return useLink ? <a key={i} href='/newcart'><Gmail/></a> : <Gmail key={i}/>
       }
     });
   }

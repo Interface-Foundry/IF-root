@@ -29,7 +29,8 @@ export default class CartStore extends Component {
 
   render() {
     const { choices } = this.props;
-    const suggested = choices.shift() || [];
+    const newChoices = choices.slice() || [];
+    const suggested = newChoices.shift() || [];
     return (
       <section>
         <div className='cart_store'> 
@@ -41,7 +42,7 @@ export default class CartStore extends Component {
         <div className='cart_store'> 
           <h3>Other Stores</h3>
           <ul className='cart_store__list'>
-            {choices.map(choice => 
+            {newChoices.map(choice => 
                 <StoreChoice 
                   key={choice.store_type} 
                   {...choice} 
