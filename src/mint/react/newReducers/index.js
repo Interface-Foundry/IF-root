@@ -6,7 +6,6 @@ import carts from './carts';
 import stores from './stores';
 import session from './session';
 import search from './search';
-import item from './item';
 import user from './user';
 
 import { combineReducers } from 'redux';
@@ -20,7 +19,6 @@ export default combineReducers({
   stores,
   session,
   search,
-  item,
   user,
   routing
 });

@@ -41,6 +41,7 @@ export {
 } from './user';
 
 export { 
+	selectItem,
 	submitQuery,
 	updateQuery,
 	toggleHistory

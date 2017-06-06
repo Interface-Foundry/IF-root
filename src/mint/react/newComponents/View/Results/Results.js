@@ -6,6 +6,9 @@ import React, { Component } from 'react';
 import { displayCost } from '../../../utils';
 import { Right } from '../../../../react-common/kipsvg';
 
+import Default from './Default';
+import Selected from './Selected';
+
 //Analytics!
 import ReactGA from 'react-ga';
 
@@ -16,9 +19,10 @@ export default class Results extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
     if(
+      nextProps.selectedItemId !== this.props.selectedItemId ||
       nextProps.results.length !== this.props.results.length ||
       nextProps.cart.items.length !== this.props.cart.items.length ||
-      nextProps.results[0] && nextProps.results[0].asin !== this.props.results[0].asin
+      nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id
     ) return true
 
     return false
@@ -26,12 +30,18 @@ export default class Results extends Component {
 
 
   render() {
-    const { cart, query, results, addItem } = this.props,
+    // Add
+    const { cart, query, results, addItem, selectedItemId, selectItem } = this.props,
           numResults = results.length,
           cartAsins = cart.items.map((item) => item.asin),
-          showcase = results.splice(0, 1)[0],
-          partitionResults = results.map( (e,i) => (i % size === 0) ? results.slice(i, i + size) : null ).filter( (e) => e );
+          partitionResults = results.reduce((acc, result, i) => {
+            if(i % size === 0) acc.push([])
+            acc[acc.length - 1].push(result)
 
+            if(result.id === selectedItemId) acc.splice(acc.length - 1, 0, [{...result, selected: true}]);
+
+            return acc;
+          }, []);
 
     return (
       <table className='results'>
@@ -44,46 +54,28 @@ export default class Results extends Component {
               </nav>
             </th>
           </tr>
-          <tr>
-            {
-              showcase ? <td colSpan='100%'>
-                <div className='card'>
-                  <div className={`image`} style={{
-                    backgroundImage: `url(${showcase.main_image_url})`,
-                  }}/>
-                  <div className='text'> 
-                    <h1>{showcase.name}</h1>
-                    <p> Store: {showcase.store} | {cart.store_locale} </p>
-                    <h4> Price: <span className='price'>{displayCost(showcase.price)}</span> </h4>
-                  </div> 
-                  <div className='action'>
-                    <button onClick={() => addItem(cart.id, showcase.id)}><span>Add to Cart <Right/></span></button>
-                  </div>
-                </div>
-              </td> : null
-            }
-          </tr>
           {
             partitionResults.map((itemrow, i) => (
-              <tr key={i}>
+              <tr key={i} >
                 {
-                  itemrow.map((item) => (
-                    <td key={item.id}>
-                      <div className={`card ${cartAsins.includes(item.asin) ? 'incart' : ''}`}>
-                        <div className={`image`} style={{
-                          backgroundImage: `url(${item.main_image_url})`,
-                        }}/>
-                        <div className='text'> 
-                          <h1>{item.name}</h1>
-                          <p> Store: {item.store} | {cart.store_locale} </p>
-                          <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
-                        </div> 
-                        <div className='action'>
-                          <button onClick={() => addItem(cart.id, item.id)}><span>Add to Cart <Right/></span></button>
-                        </div>
-                      </div>
-                    </td>
-                  ))
+                  itemrow.map(item => {
+                    return item.selected ? (
+                      <Selected 
+                        item={item} 
+                        cart={cart} 
+                        cartAsins={cartAsins}
+                        addItem={addItem} 
+                        selectedItemId={selectedItemId}/>
+                      ) : ( 
+                        <Default 
+                          item={item} 
+                          cart={cart} 
+                          cartAsins={cartAsins}
+                          addItem={addItem} 
+                          selectedItemId={selectedItemId} 
+                          selectItem={selectItem}/>
+                      )
+                  })
                 }
               </tr>
             ))

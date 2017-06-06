@@ -73,6 +73,31 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	td {
 		padding: $padding/3 $padding/2;
 		width: (100%/3);
+
+		&.selected {
+			padding: $padding*2 $padding/2;
+			.card {
+				opacity: 1 !important;
+				border-radius: 0px;
+				box-shadow: none;
+				background: transparent;
+				border-top: 3px solid lighten( $secondaryColor, 20% );
+				border-bottom: 3px solid lighten( $secondaryColor, 20% );
+				padding: $padding*5 $padding*2;
+
+				.text {
+					h1 {
+						font-size: 14px;
+						line-height: 20px;
+						min-height: 65px;	
+						&:after {
+						  content: none;
+						}
+					}
+				}
+			}
+		}
+
 		.card {
 			position: relative;
 			padding: $padding;
@@ -80,6 +105,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 			background: white;
 			border-radius: 5px;
 			box-shadow: $card-box-shadow;
+
+
 
 			&.incart {
 				opacity: 0.6;
