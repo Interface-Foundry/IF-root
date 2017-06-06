@@ -1,207 +1,178 @@
 @import '../../themes/constants';
 @import '../../themes/animations';
-
 .header {
-	position: relative;
-	display: block;
-	background: transparent;
-	padding: $padding*10 0 0;
-	width: 100%;
-	z-index: 1;
-	background: white;
-	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-
-	&.primary {
-		border-bottom: 3px solid mix(white, $primaryColor, 85%);
-
-		.text {
-			h1 {
-				span {
-					&:after {
-						background: $primaryColor;
-						@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-					}
-				}
-			}
-		}
-
-		.more {
-			h2 {
-				color: $primaryColor;
-			}
-
-			svg {
-				fill: $primaryColor;
-			}
-		}
-	}
-
-	&.secondary {
-		border-bottom: 3px solid mix(white, $secondaryColor, 85%);
-
-		.text {
-			h1 {
-				span {
-					&:after {
-						background: $secondaryColor;
-					}
-				}
-			}
-		}
-
-		.more {
-			h2 {
-				color: $secondaryColor;
-			}
-
-			svg {
-				fill: $secondaryColor;
-			}
-		}
-	}
-
-	&.third {
-		border-bottom: 3px solid mix(white, $thirdColor, 85%);
-
-		.text {
-			h1 {
-				span {
-					&:after {
-						background: $thirdColor;
-					}
-				}
-			}
-		}
-
-		.more {
-			h2 {
-				color: $thirdColor;
-			}
-
-			svg {
-				fill: $thirdColor;
-			}
-		}
-	}
-
-	& > div {
-		display: table;
-		max-width: 1200px;
-		margin: 0 auto;
-		@media only screen and (max-width: 600px) {
-			display: block;
-		}
-	}
-
-	@media only screen and (max-width: 600px) {
-		padding: $padding*5 $padding*3 0;
-	}
-
-	.text {
-		position: relative;
-		width: 50%;
-	    min-width: 600px;
-		display: table-cell;
-		vertical-align: middle;
-		text-align: left;
-		padding: $padding*5 $padding*5 $padding*5 0;
-
-		@media only screen and (max-width: 600px) {
-			display: block;
-			width: 100%;
-			min-width: 0;
-			padding: $padding*5 0;
-		}
-
-		h1 {
-			position: relative;
-			display: inline-block;
-			line-height: $ribbonHeight/1.3;
-			font-size: 30px;
-			padding: $padding 0;
-			border-radius: 5px;
-			color: $bgColor;
-
-			span {
-				position: relative;
-				&:after {
-					content: '';
-					position: absolute;
-					height: 3px;
-					width: 100%;
-					left: 0;
-					bottom: -3px;
-					border-radius: 500px;
-					@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-				}
-			}
-
-			@media only screen and (max-width: 600px) {
-				line-height: 30px;
-				font-size: 20px;
-			}
-		}
-
-		.subtext {
-			font-size: 12px;
-			span {
-				color: rgba($bgColor, 0.6);
-				font-size: 12px;
-				font-weight: 100;
-				margin-right: $padding;
-				&:after {
-					content: '❄';
-					position: relative;
-					right: -5px;
-				}
-				&:last-of-type {
-					&:after {
-						content: '';
-					}
-				}
-			}
-		}
-	}
-
-	.icons {
-		display: table-cell;
-		vertical-align: middle;
-	    width: 50%;
-	    min-width: 600px;
-	    text-align: right;
-		svg {
-			fill: $primaryColor;
-			margin: 0 $padding;
-			height: $ribbonHeight/1.5;
-			width: $ribbonHeight/1.5;
-			z-index: 1;
-		}
-
-		@media only screen and (max-width: 600px) {
-			display: none;
-		}
-	}
-
-	.more {
-		height: $ribbonHeight*2;
-		cursor: pointer;
-	    margin: 0 auto -50px;
-	    background: white;
-	    display: inline-block;
-	    z-index: 1;
-	    padding: 0 $padding*2;
-		h2 {
-			height: $ribbonHeight/2;
-			margin-bottom: $padding;
-			max-width: 500px;
-		}
-		p {
-			max-width: 500px;
-		}
-		svg {
-			width: $ribbonHeight;
-			height: $ribbonHeight/1.3;
-			@include animation(bounceDownSmall 3s infinite);
-		}
-	}
+  position: relative;
+  background: transparent;
+  padding: $padding*5 0 0;
+  width: 100%;
+  z-index: 1;
+  background: white;
+  @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.7s);
+  &.primary {
+    border-bottom: 3px solid mix(white, $primaryColor, 85%);
+    .text {
+      h1 {
+        span {
+          &:after {
+            background: $primaryColor;
+            @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+          }
+        }
+      }
+    }
+    .more {
+      h2 {
+        color: $primaryColor;
+      }
+      svg {
+        fill: $primaryColor;
+      }
+    }
+  }
+  &.secondary {
+    border-bottom: 3px solid mix(white, $secondaryColor, 85%);
+    .text {
+      h1 {
+        span {
+          &:after {
+            background: $secondaryColor;
+          }
+        }
+      }
+    }
+    .more {
+      h2 {
+        color: $secondaryColor;
+      }
+      svg {
+        fill: $secondaryColor;
+      }
+    }
+  }
+  &.third {
+    border-bottom: 3px solid mix(white, $thirdColor, 85%);
+    .text {
+      h1 {
+        span {
+          &:after {
+            background: $thirdColor;
+          }
+        }
+      }
+    }
+    .more {
+      h2 {
+        color: $thirdColor;
+      }
+      svg {
+        fill: $thirdColor;
+      }
+    }
+  }
+  &>div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    @media only screen and (max-width: 600px) {
+      display: block;
+    }
+  }
+  .text {
+    position: relative;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: left;
+    padding: $padding*5 $padding*5 $padding*5 18px;
+    @media only screen and (max-width: 600px) {
+      display: block;
+      width: 100%;
+      min-width: 0;
+    }
+    h1 {
+      position: relative;
+      display: inline-block;
+      line-height: $ribbonHeight/1.3;
+      font-size: 30px;
+      padding: $padding 0;
+      border-radius: 5px;
+      color: $bgColor;
+      span {
+        position: relative;
+        &:after {
+          content: '';
+          position: absolute;
+          height: 3px;
+          width: 100%;
+          left: 0;
+          bottom: -3px;
+          border-radius: 500px;
+          @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+        }
+      }
+      @media only screen and (max-width: 600px) {
+        line-height: 30px;
+        font-size: 20px;
+      }
+    }
+    .subtext {
+      font-size: 12px;
+      span {
+        color: rgba($bgColor, 0.6);
+        font-size: 12px;
+        font-weight: 100;
+        margin-right: $padding;
+        &:after {
+          content: '❄';
+          position: relative;
+          right: -5px;
+        }
+        &:last-of-type {
+          &:after {
+            content: '';
+          }
+        }
+      }
+    }
+  }
+  .icons {
+    padding-right: 18px;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: right;
+    svg {
+      fill: $primaryColor;
+      margin: 0 $padding;
+      height: $ribbonHeight/1.5;
+      width: $ribbonHeight/1.5;
+      z-index: 1;
+    }
+    @media only screen and (max-width: 600px) {
+      display: none;
+    }
+  }
+  .more {
+    height: $ribbonHeight*2;
+    cursor: pointer;
+    margin: 0 auto -50px;
+    background: white;
+    display: inline-block;
+    z-index: 1;
+    padding: 0 $padding*2;
+    h2 {
+      height: $ribbonHeight/2;
+      margin-bottom: $padding;
+      max-width: 500px;
+    }
+    p {
+      max-width: 500px;
+    }
+    svg {
+      width: $ribbonHeight;
+      height: $ribbonHeight/1.3;
+      @include animation(bounceDownSmall 3s infinite);
+    }
+  }
 }

@@ -36,6 +36,8 @@ waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./ypo_inventory_items'))
 
+waterline.loadCollection(require('./invoice'))
+
 var config = {
   adapters: {
     'mongo': mongoAdapter
@@ -68,6 +70,7 @@ var initialize = new Promise((resolve, reject) => {
       EmailEvents: ontology.collections.email_events,
       Emails: ontology.collections.emails,
       Feedback: ontology.collections.feedback,
+      Invoice: ontology.collections.invoice,
       ItemOptions: ontology.collections.item_options,
       Items: ontology.collections.items,
       Reactions: ontology.collections.reactions,

@@ -2,18 +2,16 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
-import { Right, Cloud, Person, Items, Mapper, Down } from '../../themes/newSvg';
-
+import { Right, Items, Down } from '../../themes/newSvg';
+import { replaceHtml } from '../../utils';
 export default class Services extends Component {
   static propTypes = {
     servicesTemplate: PropTypes.object,
     src: PropTypes.string
   }
 
-  icons = [<Mapper key={1}/>, <Cloud key={2}/>, <Person key={3}/>]
-
   render() {
-    const { icons, props: { servicesTemplate, src } } = this;
+    const { servicesTemplate, src } = this.props;
     const linkLoc = src === 'slack'
       ? 'https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459'
       : '/newcart';
@@ -23,9 +21,9 @@ export default class Services extends Component {
     return (
       <div className='services col-12'>
         <div className='col-12'>
-          <h1 className='tagline'><span>{servicesTemplate.tagLine}</span></h1>
+          <h1 className='tagline'><span>{servicesTemplate.tagline}</span></h1>
           <h4>
-            <span>Kip</span> {servicesTemplate.tagDescrip}
+            { replaceHtml(servicesTemplate.tagDescrip) }
           </h4>
           <section className='cluster'>
             <Items/>
@@ -36,11 +34,11 @@ export default class Services extends Component {
             </div>
           </section>
           {
-            icons.map((icon, i) =>(
+            servicesTemplate.details.descrips.map((d, i) =>(
               <div key={i} className='col-4 row-1 services__details'>
-                {icon}
+                <div className='image serviceImage' style={{backgroundImage: `url(${d.image})`}}/>
                 <h4>
-                  {servicesTemplate.details.descrips[i]}
+                  {d.text}
                 </h4>
                 <div className='col-12 row-1 action'>
                   <a href={linkLoc} target='_blank'><button><span>{actionText} <Right/></span></button></a>

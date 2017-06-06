@@ -34,6 +34,7 @@ export default function kipForm(state = initialState, action) {
       cards: action.items
     };
   case RECEIVE_CATEGORY:
+    console.log('in card')
     return {
       ...state,
       type: 'categories-search',

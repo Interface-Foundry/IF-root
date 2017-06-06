@@ -1,43 +1,72 @@
 const initialState = {
-  'ribbon': {
-    'left': [{
-      'title': '',
-      'link': ''
+  ribbon: {
+    left: [{
+      title: '',
+      link: ''
     }],
-    'right': {
-      'loginText': '',
-      'newCartText': '',
-      'addToSlackText': ''
+    right: {
+      loginText: '',
+      newCartText: '',
+      addToSlackText: ''
     }
   },
-  'hero': {
-    'headline': '',
-    'description': '',
-    'buttonText': '',
-    'slackText': '',
-    'subtext': [],
-    'learnMore': '',
-    'imgUrl': 'https://storage.googleapis.com/kip-random/website/kip_collect.gif'
+  header: {
+    readMoreText: ''
   },
-  'services': {
-    'tagline': '',
-    'tagDescrip': '',
-    'details': {
-      'descrips': [],
-      'actionText': '',
-      'slackActionText': ''
+  hero: {
+    headline: '',
+    description: '',
+    buttonText: '',
+    slackText: '',
+    subtext: [],
+    learnMore: '',
+    imgUrl: '//storage.googleapis.com/kip-random/website/kip_collect.gif'
+  },
+  services: {
+    tagline: '',
+    tagDescrip: '',
+    details: {
+      descrips: [],
+      actionText: '',
+      slackActionText: ''
     }
   },
-  'compare': {
-    'tagline': '',
-    'subHead': '',
-    'buttonText': '',
-    'slackButtonText': '',
-    'categories': [],
-    'competitors': [{ image: '', data: [] }]
+  compare: {
+    tagline: '',
+    subHead: '',
+    buttonText: '',
+    slackButtonText: '',
+    categories: [],
+    competitors: [{ image: '', data: [] }]
   },
-  'footer': {
-    'links': []
+  footer: {
+    links: []
+  },
+  help: {
+    titleText: '',
+    stepText: '',
+    buttonText: '',
+    images: [],
+    faq: {
+      title: '',
+      subtext: '',
+      qs: []
+    }
+  },
+  blog: {
+    titleText: '',
+    subtext: []
+  },
+  about: {
+    titleText: '',
+    subtext: [],
+    seenIn: '',
+    why: {
+      head: '',
+      description: '',
+      actionText: '',
+      reasons: []
+    }
   }
 };
 

@@ -13,7 +13,8 @@ const mapStateToProps = (state, props) => ({
   animationState: state.app.animationState,
   animationOffset: state.app.animationOffset,
   containerHeight: state.app.containerHeight,
-  scrollTo: state.app.scrollTo
+  scrollTo: state.app.scrollTo,
+  siteVersion: state.siteState.siteVersion
 })
 
 const mapDispatchToProps = dispatch => ({

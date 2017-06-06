@@ -16,7 +16,7 @@ import { AppContainer } from './containers';
 //Analytics!
 import ReactGA from 'react-ga';
 
-import 'whatwg-fetch';
+// import 'whatwg-fetch';
 
 if (module.hot
   && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt'))

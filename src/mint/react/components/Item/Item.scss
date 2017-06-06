@@ -217,11 +217,21 @@
         font-size: 13px;
       }
     }
-    .review__iframe {
-      width: 100%;
-      margin-top: 10px;
-      border: none;
-      height: 170px;
+    .review__wrapper {
+      .review__iframe {
+        width: 100%;
+        margin-top: 10px;
+        border: none;
+        height: 170px;
+      }
+      .review__overlay {
+        background: $kip-primary-color;
+        height: 170px;
+        margin-top: -170px;
+        mix-blend-mode: multiply;
+        position: absolute;
+        width: 100%;
+      }
     }
     .item__view__amazon__link {
       color: $kip-faded-color;

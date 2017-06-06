@@ -24,6 +24,8 @@
     "React": true
   },
   "rules": {
+    "no-console": "off",
+    "semi": [0, "always"],
     "camelcase": 0,
     "eqeqeq": 1,
     "space-before-function-paren": 0,
@@ -31,10 +33,6 @@
     "quotes": [
       1,
       "single"
-    ],
-    "semi": [
-      1,
-      "always"
     ],
     "no-extra-semi": 2,
     "semi-spacing": [

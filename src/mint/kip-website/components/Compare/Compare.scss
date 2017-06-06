@@ -92,6 +92,22 @@
           background-position: center;
         }
       }
+      &:not(:nth-of-type(2)) {
+        .image {
+          height: 70%;
+          width: 70%;
+          max-width: 70%;
+          margin: 0 auto;
+        }
+      }
+      &:nth-of-type(2){
+        .image{
+          max-width: 70%;
+          width: 70%;
+          margin: 0 auto;
+        }
+        
+      }
     }
     .action {
       padding: $padding*2 0 0;

@@ -43,7 +43,7 @@ export default class App extends Component {
   state = {
     sidenav: false,
     popup: false,
-    isMobile: false
+    isMobile: false,
   }
 
   _logPageView(path, userId) {
@@ -59,9 +59,15 @@ export default class App extends Component {
     this.setState({ sidenav: !sidenav });
   }
 
-  _togglePopup = () => {
+  _togglePopup = (stop) => {
     const { popup } = this.state;
-    this.setState({ popup: !popup });
+    const { cart_id, user_account } = this.props;
+
+    if (cart_id || user_account.id) {
+      this.setState({ popup: !popup });
+    } else {
+      this.setState({ popup: true });
+    }
   }
 
   componentWillMount() {
@@ -84,11 +90,12 @@ export default class App extends Component {
         .then(cart => !cart ? replace('/404') : null);
     }
     fetchAllCarts();
+    if (window.innerWidth > 900) this.setState({ sidenav: true });
   }
 
   componentDidMount() {
-    if (window.innerWidth < 900)
-      this.setState({ isMobile: true });
+    if (window.innerWidth < 900) this.setState({ isMobile: true });
+    else this.setState({ sidenav: true });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -123,6 +130,7 @@ export default class App extends Component {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
       fetchAllCarts();
+      if (window.innerWidth > 900) this.setState({ sidenav: true });
     }
   }
 
@@ -156,11 +164,27 @@ export default class App extends Component {
       state: { sidenav, isMobile, popup }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
+
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
-          {popup ? <LoginScreenContainer _toggleLoginScreen={_togglePopup}/> : null}
+          <div>
+            {
+              popup ?
+              <LoginScreenContainer
+                loginText={
+                  location.pathname.includes('newcart')
+                  ? 'Join Kip today'
+                  : 'Enter Your email to Log In'}
+                loginSubtext={
+                  location.pathname.includes('newcart')
+                  ? 'One simple step and we\'ll be on our way'
+                  : 'Enter your email to log in'}
+                _toggleLoginScreen={_togglePopup}/>
+              : null
+            }
+          </div>
           <div className={`app__view ${showFooter ? '' : 'large'}`}>
             <div>
               {/* Render Error Page */}
@@ -177,14 +201,14 @@ export default class App extends Component {
               <Route path={'/newcart'} exact component={(props) => <CartStoresContainer {...props} _toggleLoginScreen={_togglePopup}/>} />
             </div>
           </div>
-          { 
-            sidenav || !isMobile 
-            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} /> 
+          {
+            sidenav
+            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={()=>window.innerWidth < 900 ? _toggleSidenav() : null} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} />
             : null
           }
           {
-            showFooter 
-            ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> 
+            showFooter
+            ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/>
             : null
           }
         </section>

@@ -71,13 +71,13 @@ class EditCart extends Component {
     return (
       <div className='editCart'>
         <div className="input custom src">
-            <Image input={{ 
-              onChange: _updateImage, 
-              value: (cart ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png') 
+            <Image input={{
+              onChange: _updateImage,
+              value: (cart ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png')
             }} />
         </div>
-         { 
-          editingName 
+         {
+          editingName
           ? <div className="input name">
               <input name="name" type="text" placeholder="Add Cart Name" onChange={_changeName} value={this.state.cartName}/>
               <button onClick={()=>{this.setState({editingName: false}); _saveName();}}>Save</button>
@@ -97,12 +97,12 @@ class EditCart extends Component {
         <div className='pad'/>
         <table className='dangerzone'>
           <caption>
-            <h1 className='danger'> Danger Will Robinson!</h1>
+            <h1 className='danger'> Danger Zone</h1>
             <h3>Buttons in this area can ruin your perfect cart permanently!</h3>
           </caption>
           <tbody>
             <tr>
-              <td> 
+              <td>
                 <h2>Empty Cart</h2>
                 <p>This will permanently remove everything from your cart!</p>
               </td>
@@ -116,7 +116,7 @@ class EditCart extends Component {
                 <p>This will permanently delete your cart, there's no going back from here!</p>
               </td>
               <td>
-                <button onClick={()=> {deleteCart(cart_id); replace('/newcart');  }}>Delete Cart</button>
+                <button onClick={()=> {deleteCart(cart_id); window.location.href = `${window.location.origin}/newcart?toast=Cart Deleted&status=success`;  }}>Delete Cart</button>
               </td>
             </tr>
           </tbody>

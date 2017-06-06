@@ -9,21 +9,16 @@ export const toggleSidenav = () => ({
   type: 'TOGGLE_SIDENAV'
 })
 
-export const toggleModal = () => ({
-  type: 'TOGGLE_MODAL'
-})
+export const toggleModal = (loginText = '', loginSubtext = '') => ({
+  type: 'TOGGLE_MODAL',
+  loginText,
+  loginSubtext
+});
 
 export const registerHeight = (heightFromTop, containerHeight) => ({
   type: 'REGISTER_HEIGHT',
   response: {
     animationOffset: heightFromTop,
     containerHeight: containerHeight
-  }
-})
-
-export const scrollToPosition = (position = 400) => ({
-  type: 'SCROLL_TO',
-  response: {
-    scrollTo: position
   }
 })

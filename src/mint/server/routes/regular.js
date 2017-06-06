@@ -191,6 +191,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   var cart = {}
 
   // Figure out what store they are shopping at and in what locale
+  console.log('req.params.store', req.params)
   if (!req.params.store) {
     cart.store = 'amazon'
     cart.store_locale = 'US'
@@ -204,17 +205,24 @@ router.get('/newcart/:store', (req, res) => co(function * () {
     throw new Error('Cannot create new cart for store ' + req.params.store)
   }
 
+  console.log('cart parte 1', cart)
+
   // Add the cart leader if they are logged in
   const user_id = _.get(req, 'UserSession.user_account.id')
   if (user_id) {
     cart.leader = user_id
-    var date = new Date()
-    if (cart.store_locale = 'US') var dateString = (date.getMonth() + 1) + '/' + date.getDate() + '/' + String(date.getFullYear()).slice(2)
-    else var dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + String(date.getFullYear()).slice(2)
-    cart.name = dateString + ' Kip Cart'
   }
+  
+  var date = new Date()
+  if (cart.store_locale === 'US') {
+    var dateString = (date.getMonth() + 1) + '/' + date.getDate() + '/' + String(date.getFullYear()).slice(2)
+  } else {
+    var dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + String(date.getFullYear()).slice(2)
+  }
+  cart.name = dateString + ' Kip Cart'
 
   // This is all the investors care about right here. This is the money line.
+  console.log('creating cart', cart)
   cart = yield db.Carts.create(cart)
   console.log(cart)
 
@@ -231,7 +239,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   // use the new_cart email template
   email.template('new_cart', {
     cart: cart,
-    deals: []
+    username: _.get(req, 'UserSession.user_account.name', '')
   })
 
   // remember to actually send it
@@ -239,6 +247,37 @@ router.get('/newcart/:store', (req, res) => co(function * () {
 
 }).catch(e => {
   console.log(e)
+}))
+
+/**
+ * @api {get} /version/:version Set A/B test version
+ * @apiDescription sets the key for a/b tests, or picks a random one if invalid
+ * @apiGroup HTML
+ * @apiParam {string} :version key for ab testing, right now its A, B, or C
+ */
+router.get('/version/:version', (req, res)=> co(function *() {
+  let version = req.params.version.toUpperCase();
+  version = (version === 'A' || version === 'B' || version === 'C' ) 
+    ? version 
+    : res.session.siteVersion 
+      ? res.session.siteVersion 
+      : _.sample(['A','B','C']);
+  req.UserSession.siteVersion = version;
+  yield req.UserSession.save();
+  res.redirect('/');
+}))
+
+/**
+ * @api {get} /lang/:lang Set language version
+ * @apiDescription sets the key for language
+ * @apiGroup HTML
+ * @apiParam {string} :lang key for language, probably EN, CN, JP, GB, etc.
+ */
+router.get('/lang/:lang', (req, res)=> co(function *() {
+  let lang = req.params.lang.toUpperCase();
+  req.UserSession.siteVersion = lang;
+  yield req.UserSession.save();
+  res.redirect('/');
 }))
 
 
