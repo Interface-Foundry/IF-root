@@ -55,6 +55,22 @@ class Invoice {
     })
     return newInvoice
   }
+
+  /**
+   * check if invoice is paid off by all its payments
+   *
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  async paidInFull() {
+    const payments = await db.Payment.find({id: this.invoice_id})
+    const amountPaid = payments.reduce((curr, prev) => {
+      return prev += curr.amount
+    }, 0)
+    if (amountPaid > this.total) {
+      return true
+    }
+    return false
+  }
 }
 
 

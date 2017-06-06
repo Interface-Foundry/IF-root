@@ -27,30 +27,6 @@ router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
 })
 
 
-/**
- * @api {post} /invoice/:invoice_id/payment use payment source on invoice
- * @apiDescription post a payment to an invoice
- * @apiGroup Invoice
- *
- * @apiParam {string} :invoice_id - id of invoice to post payment to
- * @apiParam {string} payment_source - id of payment source we are using
- * @apiParam {number} payment_amount - amount of invoice to pay
- */
-router.post('/invoice/:invoice_id/payment', async (req, res) => {
-  if (!_.get(req, 'body.payment_source')) {
-    throw new Error('Need invoice id to post payment to')
-  }
-  if (!_.get(req, 'body.payment_amount')) {
-    throw new Error('Need amount we are paying')
-  }
-  const invoice = await Invoice.GetById(req.params.invoice_id)
-  const paymentSource = await PaymentSource.GetById(req.body.payment_source)
-  const paymentAmount = req.body.payment_amount
-  const payment = await paymentSource.pay(invoice, paymentAmount)
-  return res.send(payment)
-})
-
-
 // ------------------------------------
 // ------- GENERAL ROUTES BELOW -------
 // ------------------------------------
@@ -64,7 +40,7 @@ router.route('/invoice/:invoice_id')
  * @apiDescription present a page relevant to invoice_id, allow entering payment details for stripe/etc.
  * @apiGroup Invoice
  *
- * @apiParam {type} :param - description of param
+ * @apiParam {string} :invoice_id - id of invoice
  */
   .get(async (req, res) => {
     const invoice = await Invoice.GetById(req.params.invoice_id)
@@ -76,23 +52,85 @@ router.route('/invoice/:invoice_id')
   * @apiDescription post info to an invoice, (info, emails, etc.), not payment stuff
    * @apiGroup Invoice
    *
-   * @apiParam {type} :invoice_id - id of invoice you are posting to
+   * @apiParam {string} :invoice_id - id of invoice
    */
   .post(async (req, res) => {
     const invoice = await Invoice.GetById(req.params.invoice_id)
     return res.send(invoice)
   })
 
+/**
+ * invoice routes related to payments for an invoice (collecting/getting payments,)
+ */
+router.route('/invoice/:invoice_id/payment')
+  /**
+   * @api {get} /invoice/:invoice_id/payment get/collect payments for invoice
+   * @apiDescription collect payments for an invoice, either via email, alert, etc
+   * @apiGroup Payments
+   *
+   * @apiParam {string} :invoice_id - invoice id
+   * @apiParam {string} collection_metho (optional) - preference for how to bother users
+   */
+  .get(async (req, res) => {
+    const collectionType = _.get(req, 'query.collection_method', 'email')
+    const invoice = await Invoice.GetById(req.params.invoice_id)
+    const paymentComplete = await invoice.paidInFull()
+    if (paymentComplete) {
+      return res.send(paymentComplete)
+    }
+
+    // ping users
+    const paymentStatus = await invoice.collectPayments(collectionType)
+    return res.send(paymentStatus)
+  })
+
+
+  /**
+   * @api {post} /invoice/:invoice_id/payment post payment source to invoice
+   * @apiDescription post a payment to an invoice
+   * @apiGroup Payments
+   *
+   * @apiParam {string} :invoice_id - id of invoice to post payment to
+   * @apiParam {string} payment_source - id of payment source we are using
+   * @apiParam {number} payment_amount - amount of invoice to pay
+   */
+  .post(async (req, res) => {
+    if (!_.get(req, 'body.payment_source')) {
+      throw new Error('Need invoice id to post payment to')
+    }
+    if (!_.get(req, 'body.payment_amount')) {
+      throw new Error('Need amount we are paying')
+    }
+    const invoice = await Invoice.GetById(req.params.invoice_id)
+    const paymentSource = await PaymentSource.GetById(req.body.payment_source)
+    const paymentAmount = req.body.payment_amount
+    const payment = await paymentSource.pay(invoice, paymentAmount)
+    return res.send(payment)
+  })
+
 
 /**
  * main payment route
  */
-router.route('/payment')
+router.route('/payment/:user_id')
   /**
-   * @api {post} /payment create payment source
-   * @apiDescription create a new payment source
+   * @api {get} /payment/:user_id get payment sources
+   * @apiDescription get payment sources for a user (i.e. stripe, venmo, etc.)
    * @apiGroup PaymentSources
    *
+   * @apiParam {string} :user_id - which user
+   */
+  .get(async (req, res) => {
+    // need some check probably
+  })
+
+  /**
+   * @api {post} /payment/:user_id create payment source for user_id
+   * @apiDescription create a new payment source for a user
+   * @apiGroup PaymentSources
+   *
+   * @apiParam {string} :user_id - which user
+   * @apiParam {json} payment_info - whatever response from specific payment source
    */
   .post(async (req, res) => {
     if (!_.get(req, 'body.payment_info')) {
