@@ -33,7 +33,7 @@ var cartsCollection = Waterline.Collection.extend({
     items: Waterline.isMany('items'),
 
     /**
-     * THe name of the cart, if one exists
+     * The name of the cart, if one exists
      * @type {String}
      */
     name: 'string',
@@ -91,19 +91,6 @@ var cartsCollection = Waterline.Collection.extend({
       type: 'integer',
       defaultsTo: '0'
     },
-
-    // /** @type {[carts]} clones of this cart*/
-    // descendants_clone: {
-    //   collection: 'carts',
-    //   via: 'ancestors',
-    //   dominant: true
-    // },
-    //
-    // /** @type {carts} carts in the cloning-geneology of this cart */
-    // ancestors_clone: {
-    //   collection: 'carts',
-    //   via: 'clones'
-    // },
 
     /** @type {cart} if this is a clone, specific cart this cart was cloned from */
     parent_clone: Waterline.isA('carts'),

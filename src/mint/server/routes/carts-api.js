@@ -252,9 +252,6 @@ module.exports = function (router) {
       throw new Error('Cart not found')
     }
 
-    // if this cart is a clone, it will become its own thing as a result of this modification
-    cart.original = null;
-
     // make the user leader if no leader exists, otherwise make member
     if (!cart.leader) {
       cart.leader = userId
@@ -337,9 +334,6 @@ module.exports = function (router) {
     // specify who added it
     newItem.added_by = user_id
 
-    // this is its own cart now
-    cart.original = null;
-
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
     yield [newItem.save(), cart.save()]
@@ -366,9 +360,6 @@ module.exports = function (router) {
        throw new Error('Unauthorized, only cart leader can clear cart items')
      }
      cart.items.map(i => cart.items.remove(i.id))
-
-     // this is its own cart now
-     cart.original = null;
 
      // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
      cart.dirty = true
@@ -458,9 +449,6 @@ module.exports = function (router) {
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
 
-    // this is its own cart now
-    cart.original = null;
-
     yield cart.save()
 
     // Just say ok
@@ -522,12 +510,24 @@ module.exports = function (router) {
    * @apiParam {string} :cart_id the id of the cart whose data we want to access
    */
   router.get('/cart/:cart_id/metrics', (req, res) => co(function * () {
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('clones');
-    if (!cart) res.sendStatus(404);
-    else return res.send({
-      views: cart.views,
-      clones: cart.clones.length,
-      checkouts: cart.checkouts.length
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('checkouts');
+    logging.info('have the cart:', cart)
+    if (!cart) return res.sendStatus(404);
+    logging.info('did not send a 404 status')
+    var clones = yield cloning_utils.getChildren(cart.id, 'clone')
+    logging.info('got clones:', clones)
+    //count checkouts for all of the clones
+    clones = yield clones.map(function * (clone_id) {
+      var clone = yield db.Carts.findOne({id: clone_id}).populate('checkouts')
+      return clone.checkouts.length
+    })
+    logging.info('list of checkout counts', clones)
+    var checkouts = cart.checkouts.length + clones.reduce((a, b) => a + b, 0)
+    logging.info('total # of checkouts', checkouts)
+    return res.send({
+      views: cart.views, // views is just for the current cart; not its descendents
+      clones: clones.length,
+      checkouts: checkouts
     });
   }))
 
@@ -791,17 +791,6 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/cart/:cart_id/parents
-   * @apiDescription Get all of the parents of this cart
-   * @apiGroup Carts
-   * @apiParam {String} :cart_id the id of the cart whose parents we're getting
-   */
-  router.get('/cart/:cart_id/parents', (req, res) => co(function * () {
-    var parents = yield cloning_utils.getParents(req.params.cart_id, 'clone')
-    res.send(parents)
-  }))
-
-  /**
    * @api {get} /api/cart/:cart_id/reorder
    * @apiDescription Creates a more complete copy of the cart, with everything except for reactions
    * @apiGroup Carts
@@ -827,9 +816,7 @@ module.exports = function (router) {
     // return res.redirect('/prototype/checkout')
 
     // get the cart
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts').populate('ancestors')
-    logging.info("cart ancestors", cart.ancestors)
-    var ancestors = cart.ancestors
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts')
 
     // checkout removes the items from the cart object, so we have to make a copy
     var items = cart.items.slice()
@@ -840,22 +827,8 @@ module.exports = function (router) {
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({
       cart: cart.id,
-      user: user_id,
-      real_checkout: true
+      user: user_id
     })
-    yield ancestors.map(function * (a) {
-      //create checkout events to give credit to all of the ancestor carts
-      var vanity_event = yield db.CheckoutEvents.create({
-        cart: a.id,
-        real_cart: cart.id,
-        real: false,
-        user: user_id
-      })
-      var ancestor = yield db.Carts.findOne({id: a.id})
-      ancestor.checkouts.add(vanity_event.id)
-      yield ancestor.save()
-    })
-    yield event.save()
 
     // and attach it to the cart and the user
     var user = yield db.UserAccounts.findOne({id: user_id}).populate('checkouts')

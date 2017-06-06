@@ -9,13 +9,7 @@ var checkoutEventsCollection = Waterline.Collection.extend({
     cart: Waterline.isA('carts'),
 
     /** @type {user} the user that checks the cart out */
-    user: Waterline.isA('user_accounts'),
-
-    /** @type {boolean} whether or not this was a real checkout (as opposed to a clone-checkout this cart is getting vanity credit for)*/
-    real_checkout: 'boolean',
-
-    /** @type {cart} if this is a vanity checkout, the clone that was actually checked out */
-    real_cart: Waterline.isA('carts')
+    user: Waterline.isA('user_accounts')
   }
 })
 

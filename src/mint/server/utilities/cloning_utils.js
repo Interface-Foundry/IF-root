@@ -11,14 +11,12 @@ var clone = function * (cart_id, user_id, reorder) {
   // social metrics like views and checkouts will only be stored on the original
   delete originalJson.id
   delete originalJson.items
-  delete originalJson.ancestors
-  delete originalJson.clones
   delete originalJson.checkouts
   delete originalJson.members
   delete originalJson.leader
   delete originalJson.views
-  delete originalJson.prior_orders
-  delete originalJson.reorders
+  delete originalJson.parent_clone
+  delete originalJson.parent_reorder
 
   // create new cart
   var clone = yield db.Carts.create(originalJson)
@@ -49,24 +47,9 @@ var clone = function * (cart_id, user_id, reorder) {
     clone.items.add(clonedItem.id)
   })
 
-  // set original
-
-  // if (original.ancestors) {
-  //   yield original.ancestors.map(function * (a) {
-  //     var ancestor = yield db.Carts.findOne({id: a.id}).populate('clones')
-  //     clone.ancestors.add(a.id)
-  //     ancestor.clones.add(clone.id)
-  //     yield ancestor.save()
-  //   })
-  // }
-
-  // logging.info('clone:', clone)
-  // clone.ancestors.add(original.id)
   if (reorder) clone.parent_reorder = original.id
   else clone.parent_clone = original.id
   yield clone.save()
-  // original.clones.add(clone.id)
-  // yield original.save()
 
   clone = yield db.Carts.findOne({id: clone.id}).populate('items')
   return clone;
@@ -106,14 +89,14 @@ var reorder = function * (cart_id, user_id) {
   logging.info('copy:', copy_test)
 }
 
-//type is either the string 'clone' or 'reorder'
+// type is either the string 'clone' or 'reorder'
+// returns an array of cart ids
 var getParents = function * (cart_id, type) {
   var parent = 'parent_' + type
   var parentsHelper = function * (cart_id, parents) {
-    logging.info('cart_id:', cart_id)
+    // logging.info('cart_id:', cart_id)
     parents.push(cart_id);
     var cart = yield db.Carts.findOne({id: cart_id}).populate(parent)
-    logging.info(cart)
     if (cart[parent]) return yield parentsHelper(cart[parent].id, parents)
     else return parents
   }
@@ -121,8 +104,26 @@ var getParents = function * (cart_id, type) {
   return ancestors.slice(1); // slice off original cart from list of parents
 }
 
-var getChildren = function * () {
+// type is either the string 'clone' or 'reorder'
+// returns an array of cart ids
+var getChildren = function * (cart_id, type) {
+  logging.info('getting children of type ' + type + ' for cart ' + cart_id)
+  // var parent = 'parent_' + type
+  var all_children = []
 
+  var childrenHelper = function * (cart_id) {
+    logging.info('cart_id:', cart_id)
+    if (type === 'clone') var children = yield db.Carts.find({parent_clone: cart_id})
+    else var children = yield db.Carts.find({parent_reorder: cart_id})
+    logging.info('and we must save the children', children)
+    if (children.length) {
+      children.map(c => all_children.push(c.id))
+      // yield children.map(function * (c) { yield childrenHelper(c.id) })
+    }
+  }
+
+  yield childrenHelper(cart_id)
+  return all_children
 }
 
 module.exports = {
