@@ -153,6 +153,9 @@ app.get('/blog', (_, res) => {
 app.get('/howitworks', (_, res) => {
   res.render('pages/index');
 });
+app.get('/compare', (_, res) => {
+  res.render('pages/index');
+});
 app.get('/about', (_, res) => {
   res.render('pages/index');
 });

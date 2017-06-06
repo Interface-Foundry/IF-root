@@ -249,6 +249,12 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   console.log(e)
 }))
 
+/**
+ * @api {get} /version/:version Set A/B test version
+ * @apiDescription sets the key for a/b tests, or picks a random one if invalid
+ * @apiGroup HTML
+ * @apiParam {string} :version key for ab testing, right now its A, B, or C
+ */
 router.get('/version/:version', (req, res)=> co(function *() {
   let version = req.params.version.toUpperCase();
   version = (version === 'A' || version === 'B' || version === 'C' ) 
@@ -257,6 +263,19 @@ router.get('/version/:version', (req, res)=> co(function *() {
       ? res.session.siteVersion 
       : _.sample(['A','B','C']);
   req.UserSession.siteVersion = version;
+  yield req.UserSession.save();
+  res.redirect('/');
+}))
+
+/**
+ * @api {get} /lang/:lang Set language version
+ * @apiDescription sets the key for language
+ * @apiGroup HTML
+ * @apiParam {string} :lang key for language, probably EN, CN, JP, GB, etc.
+ */
+router.get('/lang/:lang', (req, res)=> co(function *() {
+  let lang = req.params.lang.toUpperCase();
+  req.UserSession.siteVersion = lang;
   yield req.UserSession.save();
   res.redirect('/');
 }))
