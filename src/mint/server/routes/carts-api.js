@@ -493,6 +493,8 @@ module.exports = function (router) {
     delete req.body.items // need to go through post /api/cart/:cart_id/item route
     delete req.body.store
     delete req.body.store_locale
+    delete req.body.parent_clone
+    delete req.body.parent_reorder
 
     _.merge(cart, req.body)
 
@@ -814,15 +816,19 @@ module.exports = function (router) {
   router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
     // go to prototype
     // return res.redirect('/prototype/checkout')
-
     // get the cart
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts')
+    logging.info('parent?', cart.parent_clone)
 
     // checkout removes the items from the cart object, so we have to make a copy
     var items = cart.items.slice()
     var user_id = _.get(req, 'UserSession.user_account.id')
 
+    logging.info('do you have a parent', cart.parent_clone)
+
     yield cartUtils.checkout(cart, req, res)
+
+    logging.info('no really do you', cart.parent_clone)
 
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({

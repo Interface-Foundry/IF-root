@@ -48,10 +48,15 @@ var clone = function * (cart_id, user_id, reorder) {
   })
 
   if (reorder) clone.parent_reorder = original.id
-  else clone.parent_clone = original.id
+  else {
+    clone.parent_clone = original.id
+    // original.children_clone.add(clone.id)
+    // yield original.save()
+  }
   yield clone.save()
 
   clone = yield db.Carts.findOne({id: clone.id}).populate('items')
+  logging.info('do you have a parent, mr peanutbutter?', original.parent_clone)
   return clone;
 }
 
@@ -117,8 +122,10 @@ var getChildren = function * (cart_id, type) {
     else var children = yield db.Carts.find({parent_reorder: cart_id})
     logging.info('and we must save the children', children)
     if (children.length) {
-      children.map(c => all_children.push(c.id))
-      // yield children.map(function * (c) { yield childrenHelper(c.id) })
+      children.map(c => {
+        if (c.id !== cart_id) all_children.push(c.id)
+      })
+      yield children.map(function * (c) { if (c.id !== cart_id) yield childrenHelper(c.id) })
     }
   }
 

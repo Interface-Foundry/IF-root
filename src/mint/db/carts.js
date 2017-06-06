@@ -93,10 +93,10 @@ var cartsCollection = Waterline.Collection.extend({
     },
 
     /** @type {cart} if this is a clone, specific cart this cart was cloned from */
-    parent_clone: Waterline.isA('carts'),
+    parent_clone: 'string',
 
     /** @type {cart} if this is a reorder, specific cart this cart was cloned from */
-    parent_reorder: Waterline.isA('carts'),
+    parent_reorder: 'string',
 
     /** @type {[user_accounts]} times this cart has been checked out */
     checkouts: Waterline.isMany('checkout_events'),
