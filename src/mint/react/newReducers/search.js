@@ -2,7 +2,6 @@
 
 const initialState = { 
   selectedItemId: 0,
-  search: false,
   history: false,
   results: [], 
   query: '' 
@@ -19,8 +18,7 @@ export default (state = initialState, action) => {
     case 'SEARCH_SUCCESS':
       return {
         ...state,
-        ...action.response,
-        search: true
+        ...action.response
       }
     case 'TOGGLE_HISTORY':
       return {

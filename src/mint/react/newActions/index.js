@@ -1,7 +1,8 @@
 export {
 	postFeedback,
 	toggleSidenav,
-	togglePopup
+	togglePopup,
+	selectTab
 } from './app';
 
 export { 

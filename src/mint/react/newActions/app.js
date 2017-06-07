@@ -8,6 +8,13 @@ export const togglePopup = () => ({
 	type: 'TOGGLE_POPUP'
 })
 
+export const selectTab = tab => ({
+  type: 'SELECT_VIEW_TAB',
+  response: {
+    tab
+  }
+})
+
 export const postFeedback = (feedback) => (
   post(
     '/api/feedback', 

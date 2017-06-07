@@ -23,11 +23,6 @@ export default class App extends Component {
     });
   }
 
-  _handeKeyPress(e) {
-    const { cart_id, history: { replace } } = this.props;
-    if (e.keyCode === 27) replace(`/cart/${cart_id}`);
-  }
-
   componentWillReceiveProps(nextProps) {
     const { fetchCart, match } = this.props;
 
@@ -49,7 +44,7 @@ export default class App extends Component {
   render() {
     const { sidenav, popup, togglePopup, toggleSidenav } = this.props;
     return (
-      <section className='app' onKeyDown={::this._handeKeyPress}>
+      <section className='app'>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }
         <Route path={'/cart/:cart_id'} component={HeaderContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>

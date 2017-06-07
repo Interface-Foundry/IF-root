@@ -75,7 +75,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 		width: (100%/3);
 
 		&.selected {
-			padding: $padding/3 $padding/2 $padding;
+			padding: $padding $padding/2 $padding/3;
 			.card {
 				opacity: 1 !important;
 				padding: $padding $padding*2;
@@ -136,11 +136,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 				&:after {
 					content:"";
 					position: absolute;
-					bottom: -15px;
+					top: -15px;
 					width: 0;
 					height: 0;
 					border-right: 13px solid transparent;
-					border-top: 15px solid white;
+					border-bottom: 15px solid white;
 					border-left: 13px solid transparent;
 				}
 				&.left {

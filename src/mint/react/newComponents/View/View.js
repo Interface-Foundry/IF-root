@@ -7,26 +7,25 @@ import { Route } from 'react-router';
 import Details from './Details'
 import { ResultsContainer, SearchContainer, ButtonsContainer, CartContainer } from '../../newContainers';
 
-//Analytics!
-import ReactGA from 'react-ga';
+const containers = {
+  'results': ResultsContainer,
+  'cart': CartContainer
+}
 
 export default class App extends Component {
-
-  _logPageView(path, userId) {
-    ReactGA.set({ userId });
-    ReactGA.event({
-      category: 'User',
-      action: 'Initial Load'
-    });
-  }
-
   render() {
-    const { search, cart } = this.props;
+    const { tab, cart } = this.props,
+          containers = {
+            'results': ResultsContainer,
+            'cart': CartContainer
+          },
+          Component = containers[tab];
+
     return (
       <div className='view'>
         <SearchContainer />
         <Details {...cart}/>
-        { search ? <ResultsContainer/> : <CartContainer/> }
+        { Component ? <Component /> : null }
         <ButtonsContainer/>
       </div>
     );

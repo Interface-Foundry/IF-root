@@ -1,6 +1,7 @@
 const initialState = {
   sidenav: false,
-  popup: false
+  popup: false,
+  viewTab: 'cart'
 };
 
 export default (state = initialState, action = {}) => {
@@ -19,6 +20,12 @@ export default (state = initialState, action = {}) => {
     return {
       ...state,
       popup: !state.popup
+    }
+  case 'SEARCH_SUCCESS':
+  case 'SELECT_VIEW_TAB':
+    return {
+      ...state,
+      viewTab: action.response.tab
     }
   case '@@router/LOCATION_CHANGE':
     return {

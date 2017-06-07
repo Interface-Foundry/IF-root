@@ -26,7 +26,8 @@ export const submitQuery = (query, store, locale) => get(
     type: `${type}_SUCCESS`,
     response: {
       results: [...json],
-      history: false
+      history: false,
+      tab: 'results'
     },
     receivedAt: Date.now()
   })
