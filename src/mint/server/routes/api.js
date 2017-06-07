@@ -1,7 +1,7 @@
 var express = require('express')
 var co = require('co')
 var _ = require('lodash')
-var fs = require('fs');
+var fs = require('fs')
 var path = require('path');
 var router = express.Router();
 
@@ -88,13 +88,16 @@ router.get('/blog/posts', (req, res) => co(function * () {
  * Used for A/B testing now, could be used for language later
  * @returns a json file with all of the strings for the home page
  */
-router.get('/home/json', (req, res) => co(function* () {
+router.get('/home/json', async(req, res) => {
   // need to check if we've already given them a version, and give the same version
   const siteVersion = req.UserSession.siteVersion ? req.UserSession.siteVersion : _.sample(['A', 'B', 'C']);
   req.UserSession.siteVersion = siteVersion;
-  yield req.UserSession.save();
-  res.json({siteVersion});
-}));
+  await req.UserSession.save();
+  // TODO: if anyone has a more efficient way to do this...
+  const json = JSON.parse(fs.readFileSync(path.join(__dirname, 'site.json'), 'utf8'))[siteVersion];
+  json.siteVersion = siteVersion;
+  res.json(json);
+});
 
 function _formatPostObjects(body) {
   let json = JSON.parse(body);
