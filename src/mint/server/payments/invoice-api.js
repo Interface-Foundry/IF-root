@@ -21,7 +21,10 @@ if (process.env.NODE_ENV !== 'production') {
  * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
  */
 router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
-  const invoice = Invoice.Create(req.params.invoice_type, {cart: req.params.cart_id})
+  const invoice = Invoice.Create(req.params.invoice_type, _.omitBy({
+    cart: req.params.cart_id,
+    split: _.get(req, 'params.split_type', 'equal')
+  }, _.isUndefined))
   const newInvoice = await invoice.createInvoice()
   return res.send(newInvoice)
 })
@@ -53,9 +56,15 @@ router.route('/invoice/:invoice_id')
    * @apiGroup Invoice
    *
    * @apiParam {string} :invoice_id - id of invoice
+   * @apiParam {string} option - type of thing we are doing
    */
   .post(async (req, res) => {
     const invoice = await Invoice.GetById(req.params.invoice_id)
+    if (_.get(req, 'body.option_chage')) {
+      await invoice.optionUpdate(req.body.option_change, req.body.option_data)
+    } else if (_.get(req, 'body.action')) {
+      await invoice.doAction(req.body.action)
+    }
     return res.send(invoice)
   })
 

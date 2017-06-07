@@ -36,6 +36,19 @@ class Invoice {
   }
 
 
+  optionUpdate(option, optionData) {
+    Object.assign(this, {[option]: optionData})
+  }
+
+
+  actionHandler(action, actionData) {
+    const handlers = {
+      email: this.emailUsers
+    }
+
+    return handlers[action](actionData)
+  }
+
   /**
    * Creates an invoice.
    *
@@ -54,6 +67,28 @@ class Invoice {
       total: cart.subtotal
     })
     return newInvoice
+
+  }
+
+  /**
+   * email all users about this invoice
+   *
+   * @param      {array}   users   The users
+   */
+  async emailUsers (users) {
+    users.map(async (user) => {
+      const email = await db.Emails.create({
+        recipients:'user.email',
+        subject: 'Payment Subject',
+        cart: this.cart
+      })
+
+      email.template('payment', {
+        username: user.name
+      })
+
+      await email.send();
+    })
   }
 
   /**

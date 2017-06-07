@@ -37,6 +37,9 @@ const paymentSourceCollection = Waterline.Collection.extend({
     card_alias: 'string',
 
     card: 'json',
+
+    /** peripheral data if needed */
+    data: 'json'
   }
 })
 

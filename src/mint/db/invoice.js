@@ -43,6 +43,17 @@ const invoiceCollection = Waterline.Collection.extend({
       type: 'float'
     },
 
+    /**
+     * how are we splitting the invoice:
+     *  - single: one person pays
+     *  - split_equal: each person pays total/users.length
+     *  - split_per_item: each person pays for item they added
+     */
+    split_type: {
+      type: 'string',
+      enum: ['single', 'split_equal', 'split_per_item']
+    },
+
     /** everything that would be a order in old db.payments*/
     cafe_order: {
       type: 'json',

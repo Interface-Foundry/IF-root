@@ -12,8 +12,8 @@ class PaymentSource {
     return new paymentSourceHandlers[paymentSource.source](paymentSource)
   }
 
-  static async CreatePaymentSource (source) {
-    //
+  static async CreatePaymentSource (source, sourceData) {
+    return new paymentSourceHandlers[source](sourceData)
   }
 }
 
@@ -21,9 +21,12 @@ class PaymentSource {
 class StripePaymentSource extends PaymentSource {
   constructor(args) {
     super('stripe')
+    Object.assign(this, args)
   }
 
-  // methods
+  async add (stripeSource) {
+
+  }
 }
 
 
