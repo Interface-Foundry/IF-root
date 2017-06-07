@@ -31,6 +31,7 @@ export default class Results extends Component {
 
   render() {
     // Add
+    let arrow;
     const { cart, query, results, addItem, selectedItemId, selectItem } = this.props,
           numResults = results.length,
           cartAsins = cart.items.map((item) => item.asin),
@@ -38,7 +39,10 @@ export default class Results extends Component {
             if(i % size === 0) acc.push([])
             acc[acc.length - 1].push(result)
 
-            if(result.id === selectedItemId) acc.splice(acc.length - 1, 0, [{...result, selected: true}]);
+            if(result.id === selectedItemId) {
+              acc.splice(acc.length - 1, 0, [{...result, selected: true}]);
+              arrow = acc[acc.length - 1].length - 1;
+            }
 
             return acc;
           }, []);
@@ -63,6 +67,7 @@ export default class Results extends Component {
                       <Selected 
                         item={item} 
                         cart={cart} 
+                        arrow={arrow}
                         cartAsins={cartAsins}
                         addItem={addItem} 
                         selectedItemId={selectedItemId}/>

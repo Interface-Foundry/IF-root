@@ -13,6 +13,9 @@ export default class Default extends Component {
     return (
         <td onClick={() => selectItem(item.id)}>
           <div className={`card ${cartAsins.includes(item.asin) ? 'incart' : ''}`}>
+            {
+              cartAsins.includes(item.asin) ? <span className='incart'> In Cart </span> : null
+            }
             <div className={`image`} style={{
               backgroundImage: `url(${item.main_image_url})`,
             }}/>

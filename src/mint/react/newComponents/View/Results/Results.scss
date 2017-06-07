@@ -75,17 +75,14 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 		width: (100%/3);
 
 		&.selected {
-			padding: $padding*2 $padding/2;
+			padding: $padding/3 $padding/2 $padding;
 			.card {
 				opacity: 1 !important;
-				border-radius: 0px;
-				box-shadow: none;
-				background: transparent;
-				border-top: 3px solid lighten( $secondaryColor, 20% );
-				border-bottom: 3px solid lighten( $secondaryColor, 20% );
-				padding: $padding*5 $padding*2;
+				padding: $padding $padding*2;
+				box-shadow: $card-box-shadow !important;
 
 				.text {
+					width: calc(100% - #{$nav-height*5});
 					h1 {
 						font-size: 14px;
 						line-height: 20px;
@@ -93,6 +90,72 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 						&:after {
 						  content: none;
 						}
+					}
+
+					.text__expanded {
+						display: inline-block;
+						padding: $padding 0 0;
+
+						p {
+							font-size: 16px;
+							line-height: 18px;	
+							padding: 0;						
+						}
+					}
+				}
+
+				.iframe {
+					position: relative;
+					overflow: hidden;
+					width: 100%;
+					padding: $padding*2 0 0; 
+
+					iframe {
+						width: 100%;
+						border: 0;
+						overflow: hidden;						
+					}
+				}
+
+				.image {
+					width: $nav-height*5;
+					height: $nav-height*5;
+					display: inline-block;
+				}
+
+				.action {
+					position: absolute;
+					bottom: $padding*2;
+					right: $padding*2;
+				}
+
+				.padding {
+					height: 50px;
+				}
+
+				&:after {
+					content:"";
+					position: absolute;
+					bottom: -15px;
+					width: 0;
+					height: 0;
+					border-right: 13px solid transparent;
+					border-top: 15px solid white;
+					border-left: 13px solid transparent;
+				}
+				&.left {
+					&:after {
+						left: 15%;
+					}
+				}
+				&.middle {
+					&:after {
+						left: calc(50% - 15px);
+					}
+				}
+				&.right {
+					&:after {
+						left: calc(85% - 15px);
 					}
 				}
 			}
@@ -112,14 +175,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 				opacity: 0.6;
 				box-shadow: none;
 
-				&:after {
-					content: 'IN CART';
+				.incart {
 					position: absolute;
 					top: -$padding;
 					right: $padding;
 					background: $thirdColor;
 					color: white;
-					padding: $padding/2 $padding*2;
+					padding: $padding/2 $padding;
 					border-radius: 5px;
 					font-weight: bold;
 					font-size: 10px;
