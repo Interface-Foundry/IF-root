@@ -6,11 +6,12 @@ const initialState = {
   archivedCarts: []
 };
 export default function otherCarts(state = initialState, action) {
+  let carts;
   switch (action.type) {
   case LOGOUT:
     return initialState;
   case RECEIVE_CARTS:
-    let carts = action.carts.map(c => ({ ...c, locked: c.locked || false }));
+    carts = action.carts.map(c => ({ ...c, locked: c.locked || false }));
     return {
       ...state,
       archivedCarts: carts.filter(cart => cart.locked)
