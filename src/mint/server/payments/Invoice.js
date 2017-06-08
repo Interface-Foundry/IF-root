@@ -2,6 +2,13 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
+
+const userPaymentAmountHandler = {
+  'split_equal': function(invoice) {
+    return
+  }
+}
+
 class Invoice {
   constructor(invoiceType) {
     this.invoice = invoiceType
@@ -107,6 +114,11 @@ class Invoice {
       return true
     }
     return false
+  }
+
+
+  async determineUserPaymentAmount() {
+    userPaymentAmountHandler[this.split_type]()
   }
 }
 

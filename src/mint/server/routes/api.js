@@ -31,6 +31,7 @@ methods.map(method => {
   }
 })
 
+require('./invoice-api.js')(router)
 // Load routes
 require('./other-api')(router)
 require('./carts-api')(router)
