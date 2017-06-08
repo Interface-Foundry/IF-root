@@ -40,6 +40,15 @@ export default class Details extends Component {
               <span>Updated {timeFromDate(updatedAt)}</span>
             </td>
         	</tr>
+          <tr>
+            <td>
+              <div className='tags'>
+                <h1>Cart</h1>
+                <h1 className='selected'>Search</h1>
+                <h1>Payment</h1>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     );

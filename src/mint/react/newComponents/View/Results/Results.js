@@ -63,7 +63,6 @@ export default class Results extends Component {
           <tr>
             <th colSpan='100%'>
               <nav>
-                <button>Back</button>
                 <p> Showing {numResults} results for: <span className='price'>"{query}"</span>  </p>
               </nav>
             </th>

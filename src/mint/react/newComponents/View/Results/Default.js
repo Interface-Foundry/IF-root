@@ -7,7 +7,6 @@ import { Right } from '../../../../react-common/kipsvg';
 
 export default class Default extends Component {
   render() {
-    // Add
     const { cart, item, cartAsins, selectItem, addItem } = this.props;
 
     return (
