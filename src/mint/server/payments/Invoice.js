@@ -15,7 +15,7 @@ class Invoice {
    * @return     {Promise}  The invoice db object into class object
    */
   static async GetById (invoiceId) {
-    const invoice = await db.Invoice.findOne({id: invoiceId})
+    const invoice = await db.Invoice.findOne({id: invoiceId}).populate('leader').populate('cart').populate('members')
     if (!invoice) {
       throw new Error('no invoice found')
     }
@@ -50,24 +50,26 @@ class Invoice {
   }
 
   /**
-   * Creates an invoice.
+   * Creates an invoice in the database.
    *
    * @return     {Promise}  returns the new object created in db
    */
   async createInvoice () {
-    const cart = await db.Carts.findOne({id: this.cart})
+    const cart = await db.Carts.findOne({id: this.cart}).populate('members')
     if (!cart) {
       throw new Error('Invoice needs to be attached to invoice')
     }
+
     const newInvoice = await db.Invoice.create({
       leader: cart.leader,
+      members: cart.members.map(member => member.id),
       invoice_type: this.invoice,
       cart: cart.id,
       paid: false,
       total: cart.subtotal
     })
-    return newInvoice
 
+    return newInvoice
   }
 
   /**

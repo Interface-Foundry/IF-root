@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const express = require('express')
 const router = express()
 
@@ -7,6 +8,14 @@ const PaymentSource = require('./PaymentSources.js')
 
 // for mocha tests - check if server up
 if (process.env.NODE_ENV !== 'production') {
+  const bodyParser = require('body-parser')
+
+  router.use(bodyParser.json());
+  router.use(bodyParser.urlencoded({
+    extended: true
+  }))
+
+  // test route
   router.get('/test', async (req, res) => {
     res.sendStatus(200)
   })
@@ -21,10 +30,12 @@ if (process.env.NODE_ENV !== 'production') {
  * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
  */
 router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
-  const invoice = Invoice.Create(req.params.invoice_type, _.omitBy({
+  const invoiceData = _.omitBy({
     cart: req.params.cart_id,
     split: _.get(req, 'params.split_type', 'equal')
-  }, _.isUndefined))
+  }, _.isUndefined)
+
+  const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
   const newInvoice = await invoice.createInvoice()
   return res.send(newInvoice)
 })
@@ -139,14 +150,17 @@ router.route('/payment/:user_id')
    * @apiGroup PaymentSources
    *
    * @apiParam {string} :user_id - which user
+   * @apiParam {string} body.payment_source - which type of payment source we are creating
    * @apiParam {json} payment_info - whatever response from specific payment source
    */
   .post(async (req, res) => {
-    if (!_.get(req, 'body.payment_info')) {
-      throw new Error('need payment info')
+    if (!_.get(req, 'body.payment_source')) {
+      throw new Error('If creating new payment source need source specified')
     }
-    const paymentSource = await PaymentSource.Create(req.body.payment_info)
-    return res.send(paymentSource)
+    const paymentType = req.body.payment_source
+    const paymentSource = await PaymentSource.Create(paymentType, {user: req.params.user_id})
+    const createdSource = await paymentSource.createPaymentSource(req.body)
+    return res.send(createdSource)
   })
 
 

@@ -25,12 +25,17 @@ const invoiceCollection = Waterline.Collection.extend({
     /** enter documentation here */
     invoice_type: {
       type: 'string',
-      enum: constants.INVOICE_TYPE
+      enum: ['mint']
     },
 
     /** cart associated with the payment */
     // cart: Waterline.isA('cart'),
-    cart: 'string',
+    cart: Waterline.isA('carts'),
+
+    /**
+     * which members are part of the cart
+     */
+    members: Waterline.isMany('user_accounts'),
 
     /** Many-to-one relation with user accounts, so multiple users could pay */
     // payments: Waterline.isMany('payments'),

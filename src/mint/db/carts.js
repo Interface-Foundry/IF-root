@@ -88,6 +88,9 @@ var cartsCollection = Waterline.Collection.extend({
 
     dirty: 'boolean',
 
+    /** cart subtotal from store */
+    subtotal: 'float',
+
     archive: archive
   }
 });
