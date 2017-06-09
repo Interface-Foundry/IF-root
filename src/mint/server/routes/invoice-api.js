@@ -21,28 +21,8 @@ const PaymentSource = require('../payments/PaymentSources.js')
 // }
 
 module.exports = function (router) {
-  /**
-   * @api {post} /invoice/:invoice_type/:cart_id create invoice
-   * @apiDescription create an invoice for the specified cart
-   * @apiGroup Invoice
-   *
-   * @apiParam {string} :invoice_type - description of param
-   * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
-   */
-  router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
-    const invoiceData = _.omitBy({
-      cart: req.params.cart_id,
-      split: _.get(req, 'params.split_type', 'equal')
-    }, _.isUndefined)
-
-    const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
-    const newInvoice = await invoice.createInvoice()
-    return res.send(newInvoice)
-  })
-
-
   // ------------------------------------
-  // ------- GENERAL ROUTES BELOW -------
+  // --------- GENERAL ROUTES  ----------
   // ------------------------------------
 
   /**
@@ -82,9 +62,9 @@ module.exports = function (router) {
   /**
    * invoice routes related to payments for an invoice (collecting/getting payments,)
    */
-  router.route('/invoice/:invoice_id/payment')
+  router.route('/invoice/payment/:invoice_id')
     /**
-     * @api {get} /invoice/:invoice_id/payment get/collect payments for invoice
+     * @api {get} /invoice/payment/:invoice_id get/collect payments for invoice
      * @apiDescription collect payments for an invoice, either via email, alert, etc
      * @apiGroup Payments
      *
@@ -162,4 +142,23 @@ module.exports = function (router) {
       const createdSource = await paymentSource.createPaymentSource(req.body)
       return res.send(createdSource)
     })
+
+  /**
+  * @api {post} /invoice/:invoice_type/:cart_id create invoice
+  * @apiDescription create an invoice for the specified cart
+  * @apiGroup Invoice
+  *
+  * @apiParam {string} :invoice_type - description of param
+  * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
+  */
+  router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
+    const invoiceData = _.omitBy({
+      cart: req.params.cart_id,
+      split: _.get(req, 'params.split_type', 'equal')
+    }, _.isUndefined)
+
+    const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
+    const newInvoice = await invoice.createInvoice()
+    return res.send(newInvoice)
+  })
 }
