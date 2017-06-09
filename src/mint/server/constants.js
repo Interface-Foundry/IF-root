@@ -5,5 +5,6 @@ module.exports = {
 
   // available stores we are supporting atm
   STORES: ['ypo', 'amazon'],
-  LOCALES: ['US', 'CA', 'UK']
+  LOCALES: ['US', 'CA', 'UK'],
+  PAYMENT_SOURCE: ['stripe']
 };

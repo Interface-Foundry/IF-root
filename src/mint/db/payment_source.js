@@ -22,21 +22,14 @@ const paymentSourceCollection = Waterline.Collection.extend({
     /** is a leader for invoice necessary or is that cart leader? */
     user: Waterline.isA('user_accounts'),
 
-    invoice: Waterline.isA('invoice'),
-
     /** enter documentation here */
     payment_vendor: {
       type: 'string',
       enum: constants.PAYMENT_SOURCE
     },
 
-    customer_id: 'string',
-
-    company_card: 'boolean',
-
-    card_alias: 'string',
-
-    card: 'json',
+    /** peripheral data from source */
+    data: 'json'
   }
 })
 

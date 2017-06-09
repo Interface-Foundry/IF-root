@@ -1,8 +1,6 @@
 const Waterline = require('waterline')
 const uuid = require('uuid')
 
-const constants = require('../server/constants.js')
-
 /**
  * Payments collection is the collection of payments to invoices
  */
@@ -24,16 +22,17 @@ const paymentsCollection = Waterline.Collection.extend({
     /** user can have many payments, payment would be one user */
     user: Waterline.isA('user_accounts'),
 
-    /** amount user paid */
-    amount: {
-      type: 'float'
-    },
+    /**
+     * the source id
+     */
+    payment_source: Waterline.isA('payment_source'),
 
-    payment_source: {
-      type: 'string',
-      enum: constants.PAYMENT_SOURCE,
-      required: true
-    }
+    /** amount user paid */
+    amount: 'float',
+
+    /** allow for generalized response back from stripe/coinbase/etc
+     * i guess after posting payment?*/
+    data: 'json'
   }
 })
 

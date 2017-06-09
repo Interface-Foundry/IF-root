@@ -37,10 +37,13 @@ would get url that goes to kipthis.com/pay/:invoice_id where enter stripe detail
 ---
 
 # todo
+- tests
+- backend
+- frontend
 
+
+# todo - cafe - a.k.a. irrelevant for time being 
 - old cafe stuff: 
     + probably need a way to get the delivery document related to a cart back to mint stuff in another route
     + everything that was done in kip_pay stuff that shared db needs now to be sent to a cafe route and updated there, (credit card info off the top of my head)
     + store credit card -> move to webserver.js
-- tests
-    + creating tests should 
