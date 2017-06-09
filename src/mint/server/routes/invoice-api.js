@@ -29,7 +29,7 @@ module.exports = function (router) {
    * @apiParam {string} :invoice_type - description of param
    * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
    */
-  router.post('/invoice/:invoice_type/cart/:cart_id/', async (req, res) => {
+  router.post('/invoice/:invoice_type/cart/:cart_id/', async (req, res) => { //this path was conflicting with something so I added the "cart"
     const invoiceData = _.omitBy({
       cart: req.params.cart_id,
       split: _.get(req, 'params.split_type', 'equal')
@@ -37,6 +37,12 @@ module.exports = function (router) {
 
     const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
     const newInvoice = await invoice.createInvoice()
+
+    //~~~~~send charge emails to users / members / w/e~~~~~//
+      //do that here
+    await invoice.emailUsers()
+    //~~~~~~~~~~//
+
     return res.send(newInvoice)
   })
 

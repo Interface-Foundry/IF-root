@@ -85,6 +85,7 @@ class Invoice {
    * @param      {array}   users   The users
    */
   async emailUsers (users) {
+    logging.info('THIS', this)
     users.map(async (user) => {
       const email = await db.Emails.create({
         recipients:'user.email',
