@@ -25,8 +25,9 @@ class PaymentSource {
   }
 
   static async GetById (paymentSourceId) {
-    const paymentSource = await db.PaymentSource({id: paymentSourceId})
-    return new paymentSourceHandlers[paymentSource.source](paymentSource)
+    const paymentSource = await db.PaymentSource.findOne({id: paymentSourceId})
+    logging.info('paymentSource', paymentSource)
+    return new paymentSourceHandlers[paymentSource.payment_vendor](paymentSource)
   }
 
   static async Create (source, sourceData) {

@@ -29,7 +29,7 @@ module.exports = function (router) {
    * @apiParam {string} :invoice_type - description of param
    * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
    */
-  router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
+  router.post('/invoice/:invoice_type/cart/:cart_id/', async (req, res) => {
     const invoiceData = _.omitBy({
       cart: req.params.cart_id,
       split: _.get(req, 'params.split_type', 'equal')
@@ -92,6 +92,7 @@ module.exports = function (router) {
      * @apiParam {string} collection_metho (optional) - preference for how to bother users
      */
     .get(async (req, res) => {
+      logging.info('get payment called')
       const collectionType = _.get(req, 'query.collection_method', 'email')
       const invoice = await Invoice.GetById(req.params.invoice_id)
       const paymentComplete = await invoice.paidInFull()
@@ -122,9 +123,21 @@ module.exports = function (router) {
         throw new Error('Need amount we are paying')
       }
       const invoice = await Invoice.GetById(req.params.invoice_id)
+      // logging.info('got our invoice')
       const paymentSource = await PaymentSource.GetById(req.body.payment_source)
+      // logging.info('got our payment source')
       const paymentAmount = req.body.payment_amount
       const payment = await paymentSource.pay(invoice, paymentAmount)
+      logging.info('paid')
+
+      //~~~~~if this invoice has been fully paid, fire off whatever emails~~~~~//
+      var done = await invoice.paidInFull()
+      if (done) {
+        //send off w/e emails
+        logging.info('all payments complete')
+      }
+      //~~~~~~~~~~//
+
       return res.send(payment)
     })
 
@@ -160,6 +173,7 @@ module.exports = function (router) {
       const paymentType = req.body.payment_source
       const paymentSource = await PaymentSource.Create(paymentType, {user: req.params.user_id})
       const createdSource = await paymentSource.createPaymentSource(req.body)
+      logging.info('new payment source:', createdSource)
       return res.send(createdSource)
     })
 }
