@@ -67,7 +67,7 @@ module.exports = function (router) {
       // get or create a user for this email
       var user = yield db.UserAccounts.findOne({
         email_address: email
-      })
+      }).populate('addresses')
 
       if (!user) {
         var user = yield db.UserAccounts.create({
