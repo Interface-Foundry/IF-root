@@ -14,7 +14,6 @@ export default class Details extends Component {
   render() {
     const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, createdAt,  views, tab, selectTab } = this.props,
           total = calculateItemTotal(items);
-    console.log(thumbnail_url)
     return (
       <table className='details'>
         <tbody>
