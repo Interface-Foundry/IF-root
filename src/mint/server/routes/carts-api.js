@@ -570,19 +570,20 @@ module.exports = function (router) {
    * @apiParam {string} :cart_id the id of the cart whose data we want to access
    */
   router.get('/cart/:cart_id/metrics', (req, res) => co(function * () {
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('checkouts');
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('checkouts').populate('likes');
     if (!cart) return res.sendStatus(404);
     var clones = yield cloning_utils.getChildren(cart.id, 'clone')
     //count checkouts for all of the clones
-    clones = yield clones.map(function * (clone_id) {
+    clone_checkouts = yield clones.map(function * (clone_id) {
       var clone = yield db.Carts.findOne({id: clone_id}).populate('checkouts')
       return clone.checkouts.length
     })
-    var checkouts = cart.checkouts.length + clones.reduce((a, b) => a + b, 0)
+    var checkouts = cart.checkouts.length + clone_checkouts.reduce((a, b) => a + b, 0)
     return res.send({
       views: cart.views, // views is just for the current cart; not its descendents
       clones: clones.length,
-      checkouts: checkouts
+      checkouts: checkouts,
+      likes: cart.likes.length
     });
   }))
 
