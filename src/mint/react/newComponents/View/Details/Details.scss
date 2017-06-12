@@ -11,18 +11,36 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	border-collapse: collapse;
 
 	@media only screen and (max-width: 600px) {
-		border-spacing: $padding $padding;
+	    overflow-x: auto;
+	    display: block;
+	}
+
+	* {
+		@media only screen and (max-width: 600px) {
+		    display: block;
+		}
 	}
 
 	th {
 		text-align: left;
 		padding: 0 0 $padding;
 
+		@media only screen and (max-width: 600px) {
+			padding: 0 3px;
+			display: block;
+		}
+
 		.card {
 			border: 1px solid $secondaryColor;
+
 			.left {
 				display: inline-block;
 				min-width: 50%;
+
+				@media only screen and (max-width: 600px) {
+					display: block;
+					width: 100%;
+				}
 				.image {
 					height: $nav-height;
 					width: $nav-height;
