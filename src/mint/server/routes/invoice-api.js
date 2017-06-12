@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const moment = require('moment');
 
 const Invoice = require('../payments/Invoice.js')
 const PaymentSource = require('../payments/PaymentSources.js')
@@ -121,6 +122,30 @@ module.exports = function (router) {
       if (done) {
         //send off w/e emails
         logging.info('all payments complete')
+        var paidEmail = await db.Emails.create({
+          recipients: invoice.leader.email_address, //TODO all members also??
+          sender: 'hello@kipthis.com',
+          subject: 'Payment Collected!',
+          sent_at: moment().format('dddd, MMMM Do, h:mm a'),
+          template_name: 'summary_email', //TODO
+          cart: invoice.cart
+        })
+
+        const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items')
+
+        logging.info('invoice', invoice)
+        // logging.info('cart:', cart)
+
+        await paidEmail.template('summary_email', {
+          username: invoice.leader.name || invoice.leader.email_address,
+          baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
+          id: cart.id,
+          items: cart.items,
+          total: '$' + invoice.total.toFixed(2),
+          cart: cart,
+          totalItems: 'what is this'
+        })
+        await paidEmail.send()
       }
       //~~~~~~~~~~//
 
