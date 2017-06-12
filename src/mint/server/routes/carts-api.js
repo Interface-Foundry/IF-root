@@ -117,6 +117,20 @@ module.exports = function (router) {
       .populate('members', selectMembersWithoutEmail)
       .populate('items')
 
+    if (cart && cart.privacy == 'private') {
+      // if the cart is set to "private", check to see if they're logged in and if they're a member of the cart
+      if (!_.get(req, 'UserSession.user_account.id')) {
+        // if they're not logged in they can't see the cart
+        res.sendStatus(401)
+      }
+      else {
+        //if they're logged in but don't have the right email domain, they can't see the cart
+        var userDomain = _.get(req, 'UserSession.user_account.email_address').split('@')[1]
+        var leaderDomain = cart.leader.email_address.split('@')[1]
+        if (userDomain !== leaderDomain) res.sendStatus(403);
+      }
+    }
+
     if (cart) {
       res.send(cart);
     } else {
@@ -244,14 +258,27 @@ module.exports = function (router) {
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
-    const userId = req.UserSession.user_account.id
+
+    const currentUser = yield db.UserAccounts.findOne(_.get(req, 'UserSession.user_account.id'));
+    var userId = currentUser.id
 
     // Make sure the cart exists
-    const cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    const cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('leader')
     if (!cart) {
       throw new Error('Cart not found')
     }
 
+    logging.info('current privacy setting:', cart.privacy)
+
+    //if the cart is display, the user must be the cart leader
+    if (cart.privacy == 'display' && currentUser.id !== cart.leader.id) {
+      return res.sendStatus(403);
+    }
+
+    //if the cart is private, the user must be in the same domain
+    if (cart.privacy == 'private' && currentUser.email_address.split('@')[1] !== cart.leader.email_address.split('@')[1]) {
+      return res.sendStatus(403);
+    }
     // make the user leader if no leader exists, otherwise make member
     if (!cart.leader) {
       cart.leader = userId
@@ -337,6 +364,32 @@ module.exports = function (router) {
 
     return res.send(newItem)
   }));
+
+  /**
+   * @api {put} /api/cart/:cart_id/privacy/:setting Privacy setting
+   * @apiDescription Update cart privacy setting (default is 'public')
+   * Value of :setting must be 'public', 'private', or 'display'
+   * @apiGroup Carts
+   * @apiParam {string} :cart_id cart whose privacy we are modifying
+   * @apiParam {string} :setting privacy setting we want the cart to have
+   */
+  router.put('/cart/:cart_id/privacy/:setting', (req, res) => co(function * () {
+    if (!req.UserSession) return res.sendStatus(401)
+
+    const user_id = req.UserSession.user_account.id
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('leader');
+    var setting = req.params.setting
+
+    if (!cart) return res.sendStatus(404);
+    if (cart.leader.id !== user_id) return res.sendStatus(403)
+    if (setting !== 'public' && setting !== 'private' && setting != 'display') {
+      return res.sendStatus(400);
+    }
+
+    cart.privacy = setting;
+    yield cart.save()
+    return res.send(cart)
+  }))
 
   /**
    * @api {delete} /api/cart/:cart_id/clear Clear

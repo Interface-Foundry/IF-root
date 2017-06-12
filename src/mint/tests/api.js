@@ -63,6 +63,19 @@ const post = function * (url, data, extended) {
   return body
 }
 
+const put = function * (url, data, extended) {
+  url = 'http://localhost:3000' + url
+  var body = yield request({
+    uri: url,
+    method: 'put',
+    jar: true,
+    json: true,
+    body: data,
+    resolveWithFullResponse: extended
+  })
+  return body
+}
+
 const del = function * (url, data) {
   url = 'http://localhost:3000' + url
   var body = yield request({
@@ -76,7 +89,7 @@ const del = function * (url, data) {
 }
 
 describe('api', function () {
-  this.timeout(4000)
+  this.timeout(8000)
   before(() => co(function * () {
     // clean up the db
     yield dbReady
@@ -173,6 +186,9 @@ describe('api', function () {
     // make sure McTesty is the leader
     assert.equal(cart.leader.email_address, mcTesty.email)
     // assert.equal(cart.name, mcTesty.name + " Kip Cart")
+
+    // the default privacy status should be public
+    assert.equal(cart.privacy, 'public')
 
     // lets save this cart id for later
     mcTesty.cart_id = cart.id
