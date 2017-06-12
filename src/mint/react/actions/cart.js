@@ -14,6 +14,7 @@ import {
   RECEIVE_CLEAR_CART,
   DELETE_CART
 } from '../constants/ActionTypes';
+import { push } from 'react-router-redux';
 import { sleep } from '../utils';
 
 const receive = (currentCart) => ({
@@ -177,6 +178,7 @@ export function deleteCart(cart_id) {
         credentials: 'same-origin',
       });
       dispatch(recieveDeleteCart(cart_id));
+      dispatch(push('/newcart?toast=Cart Deleted&status=success'));
     } catch (e) {
       throw 'error in cart delete';
     }

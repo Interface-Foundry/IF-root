@@ -33,7 +33,7 @@ var cartsCollection = Waterline.Collection.extend({
     items: Waterline.isMany('items'),
 
     /**
-     * THe name of the cart, if one exists
+     * The name of the cart, if one exists
      * @type {String}
      */
     name: 'string',
@@ -93,13 +93,29 @@ var cartsCollection = Waterline.Collection.extend({
       required: true
     },
 
+    dirty: 'boolean',
+
+    archive: archive,
+
+    // social validation metrics
+
     /** @type {integer} the number of times this cart has been #viewed */
     views: {
       type: 'integer',
       defaultsTo: '0'
     },
 
-    dirty: 'boolean',
+    /** @type {cart} if this is a clone, specific cart this cart was cloned from */
+    parent_clone: 'string',
+
+    /** @type {cart} if this is a reorder, specific cart this cart was cloned from */
+    parent_reorder: 'string',
+
+    /** @type {[user_accounts]} times this cart has been checked out */
+    checkouts: Waterline.isMany('checkout_events'),
+
+    /** cart subtotal from store */
+    subtotal: 'float',
 
     archive: archive
   }

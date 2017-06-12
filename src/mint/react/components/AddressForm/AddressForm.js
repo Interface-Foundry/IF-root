@@ -6,81 +6,65 @@ import { Icon } from '../../../react-common/components';
 
 export default class AddressForm extends Component {
   state = {
-    name: '',
-    line_1: '',
-    line_2: '',
-    city: '',
-    region: '',
-    code: '',
-    country: '',
-    deliveryMessage: '',
-    accountNumber: '',
-    accountName: '',
-    voucherCode: ''
+    form: {}
   }
 
+  /**
+   * formData is an array of the following format
+   *   formData = [{
+   *      head: 'Your YPO Account',
+   *      fields: [{
+   *          name: 'ypoName',
+   *          placeholder: 'YPO Account Name',
+   *          label: 'YPO Account Name',
+   *          type: 'text',
+   *          autocomplete: 'address',
+   *          required: true,
+   *          autoFocus: true, //there can only be one autofocus
+   *        }, ...]
+   *    }, ...]
+   */
   static propTypes = {
-    sendAddressData: PropTypes.func,
-    sendYPOData: PropTypes.func,
+    submitForm: PropTypes.func,
+    formData: PropTypes.array,
     history: PropTypes.object,
     user_id: PropTypes.string,
     cart_id: PropTypes.string
   }
 
-  // address things
-  _updateName = (e) => this.setState({ name: { val: e.target.value, modified: true } })
-  _updateLine1 = (e) => this.setState({ line_1: { val: e.target.value, modified: true } })
-  _updateLine2 = (e) => this.setState({ line_2: { val: e.target.value, modified: true } })
-  _updateCity = (e) => this.setState({ city: { val: e.target.value, modified: true } })
-  _updateRegion = (e) => this.setState({ region: { val: e.target.value, modified: true } })
-  _updateCode = (e) => this.setState({ code: { val: e.target.value, modified: true } })
-  _updateCountry = (e) => this.setState({ country: { val: e.target.value, modified: true } })
-  _updateDelieveryMessage = (e) => this.setState({ deliveryMessage: { val: e.target.value, modified: true } })
+  componentDidMount() {
+    const { formData = [] } = this.props, form = {};
+    // flatten and initialize all of the values so that we can prefill
+    formData.forEach((d) => d.fields.forEach(f => form[f.name] = { val: f.value || '' }));
+    this.setState({ form });
+  }
 
-  // ypo things
-  _updateAccountNumber = (e) => this.setState({ accountNumber: { val: e.target.value, modified: true } })
-  _updateAccountName = (e) => this.setState({ accountName: { val: e.target.value, modified: true } })
-  _updateVoucherCode = (e) => this.setState({ voucherCode: { val: e.target.value, modified: true } })
+  _updateField = (val, field) => this.setState(s => {
+    const form = {
+      ...s.form
+    }; //make sure its a copy
+    form[field] = { val, modified: true };
+    return form;
+  });
 
   _checkout = (e) => {
     e.preventDefault();
     const {
-      props: { sendAddressData, sendYPOData, user_id, cart_id, history: { replace } },
-      state: {
-        name,
-        line_1,
-        line_2,
-        city,
-        region,
-        code,
-        country,
-        deliveryMessage,
-        accountName,
-        accountNumber,
-        voucherCode
-      }
+      props: { submitForm, user_id, cart_id, history: { replace } },
+      state: { form }
     } = this;
-    sendAddressData(user_id, name.val, line_1.val, line_2.val, city.val, region.val, code.val, country.val, deliveryMessage.val);
-    sendYPOData(user_id, accountNumber.val, accountName.val, voucherCode.val);
+    submitForm(user_id, form);
     replace(`/cart/${cart_id}`);
     window.open(`/api/cart/${cart_id}/checkout`); // ¯\_(ツ)_/¯
   }
+
   render() {
     const {
-      _updateName,
-      _updateLine1,
-      _updateLine2,
-      _updateCity,
-      _updateRegion,
-      _updateCode,
-      _updateCountry,
-      _updateDelieveryMessage,
-      _updateAccountName,
-      _updateAccountNumber,
-      _updateVoucherCode,
+      _updateField,
       _checkout,
-      props: { cart_id, history: { replace } }
+      props: { cart_id, formData = [], history: { replace } }
     } = this;
+
     return (
       <div className='address_overlay'>
         <div className='address_form'>
@@ -90,63 +74,36 @@ export default class AddressForm extends Component {
           </h1>
           <form onSubmit={_checkout}>
             <ul>
-              <li> 
-                <h2>Your YPO Account</h2>
-                <ul>
-                  <li>
-                    <p><input className={this.state.accountName.modified ? '' : 'empty'} onChange={_updateAccountName} placeholder='YPO Account Name' type='text' required autoFocus/></p>
-                    <p><label>YPO Account Name</label></p>
+              {
+                formData.map((d,i) =>
+                  <li key={i}> 
+                    <h2>{d.head}</h2>
+                    <ul>
+                      {
+                        d.fields.map((f, j)=>
+                          <li key={j}>
+                            <p>
+                              <input 
+                                className={this.state[f.name] && this.state[f.name].modified ? '' : 'empty'} 
+                                onChange={(e) => _updateField(e.target.value, f.name)} 
+                                placeholder={f.placeholder} 
+                                type={f.type} 
+                                required={f.required} 
+                                autoFocus={f.autofocus}
+                                value={this.state[f.name] ? this.state[f.name].val : (f.value || '')}
+                              />
+                            </p>
+                            <p>
+                              <label>{f.label}</label>
+                            </p>
+                          </li>       
+                        )
+                      }
+                    </ul>
                   </li>
-                  <li>
-                    <p><input className={this.state.accountNumber.modified ? '' : 'empty'} onChange={_updateAccountNumber} placeholder='YPO Account Number' type='number' required/></p>
-                    <p><label>YPO Account Number</label></p>
-                  </li>
-                  <li>
-                    <p><input onChange={_updateVoucherCode} placeholder='YPO Voucher Code' type='text'/></p>
-                    <p><label>YPO Account Name</label></p>
-                  </li>
-                </ul>
-              </li>
-              <li> 
-                <h2>Your Address</h2>
-                <ul>
-                  <li>
-                    <p><input className={this.state.name.modified ? '' : 'empty'} onChange={_updateName} placeholder='Full Name' autoComplete='name' type='text' required/></p>
-                    <p><label>Full Name</label></p>
-                  </li>
-                  <li>
-                    <p><input className={this.state.line_1.modified ? '' : 'empty'} onChange={_updateLine1} placeholder='Address Line 1' autoComplete='street-address' type='text'  required/></p>
-                    <p><label>Street address, P.O. box, company name, c/o</label></p>
-                  </li>
-                  <li>
-                    <p><input className={this.state.line_2.modified ? '' : 'empty'} onChange={_updateLine2} placeholder='Address Line 2' autoComplete='address-line2' type='text' /></p>
-                    <p><label>Apartment, suite, unit, building, floor, etc.</label></p>
-                  </li>
-                  <li>
-                    <p><input className={this.state.city.modified ? '' : 'empty'} onChange={_updateCity} placeholder='City'  type='text' required/></p>
-                    <p><label>City</label></p>
-                  </li>
-                  <li>
-                    <p><input className={this.state.region.modified ? '' : 'empty'} onChange={_updateRegion} placeholder='State/Province/Region' type='text' required/></p>
-                    <p><label>State/Province/Region</label></p>
-                  </li>
-                  <li>
-                    <p><input className={this.state.code.modified ? '' : 'empty'} onChange={_updateCode} placeholder='Zip/Postal Code' autoComplete='postal-code' type='text' required/></p>
-                    <p><label>Zip/Postal Code</label></p>
-                  </li>
-                  <li>
-                    <p><input className={this.state.country.modified ? '' : 'empty'} onChange={_updateCountry} placeholder='Country' autoComplete='country' type='text' required/></p>
-                    <p><label>Country</label></p>
-                  </li>
-                  <li>
-                    <p><input onChange={_updateDelieveryMessage} placeholder='Delievery Message' type='text'/></p>
-                    <p><label>Delievery Message</label></p>
-                  </li>
-                  <li>
-                    <button type='submit'><h4>Checkout</h4></button>
-                  </li>
-                </ul>
-              </li>
+                )
+              }
+              <li><button type='submit'><h4>Checkout</h4></button></li>           
             </ul>
           </form>
         </div>

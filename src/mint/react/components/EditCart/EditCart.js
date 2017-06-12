@@ -18,6 +18,7 @@ class EditCart extends Component {
     cart_id: PropTypes.string,
     history: PropTypes.object,
     privacyLevel: PropTypes.object,
+    prevCartId: PropTypes.string,
   }
 
   state = {
@@ -60,7 +61,7 @@ class EditCart extends Component {
 
   render() {
     const {
-      props: { clearCart, deleteCart, cart_id, cart, history: { replace } },
+      props: { clearCart, deleteCart, prevCartId, cart, history: { replace } },
       state: { editingName },
       _changeName,
       _saveName,
@@ -97,7 +98,7 @@ class EditCart extends Component {
         <div className='pad'/>
         <table className='dangerzone'>
           <caption>
-            <h1 className='danger'> Danger Zone</h1>
+            <h1 className='danger'>Danger Zone</h1>
             <h3>Buttons in this area can ruin your perfect cart permanently!</h3>
           </caption>
           <tbody>
@@ -107,7 +108,7 @@ class EditCart extends Component {
                 <p>This will permanently remove everything from your cart!</p>
               </td>
               <td>
-                <button onClick={() => {clearCart(cart_id); replace(`/cart/${cart.id}`);}}>Empty Cart</button>
+                <button onClick={() => {clearCart(cart.id); replace(`/cart/${prevCartId}`);}}>Empty Cart</button>
               </td>
             </tr>
             <tr>
@@ -116,7 +117,7 @@ class EditCart extends Component {
                 <p>This will permanently delete your cart, there's no going back from here!</p>
               </td>
               <td>
-                <button onClick={()=> {deleteCart(cart_id); window.location.href = `${window.location.origin}/newcart?toast=Cart Deleted&status=success`;  }}>Delete Cart</button>
+                <button onClick={()=> {deleteCart(cart.id);  }}>Delete Cart</button>
               </td>
             </tr>
           </tbody>

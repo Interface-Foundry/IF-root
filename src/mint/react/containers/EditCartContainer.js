@@ -7,7 +7,7 @@ import { updateCart, clearCart, deleteCart, updatePrivacy, privacyLevels } from 
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    cart_id: state.currentCart.cart_id,
+    prevCartId: state.currentCart.cart_id,
     cart: getCartById(state, { id: ownProps.match.params.edit_cart_id }),
     initialValues: getCartById(state, { id: ownProps.match.params.edit_cart_id }),
     privacyLevels: privacyLevels

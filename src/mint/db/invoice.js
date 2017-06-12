@@ -25,12 +25,17 @@ const invoiceCollection = Waterline.Collection.extend({
     /** enter documentation here */
     invoice_type: {
       type: 'string',
-      enum: constants.INVOICE_TYPE
+      enum: ['mint']
     },
 
     /** cart associated with the payment */
     // cart: Waterline.isA('cart'),
-    cart: 'string',
+    cart: Waterline.isA('carts'),
+
+    /**
+     * which members are part of the cart
+     */
+    members: Waterline.isMany('user_accounts'),
 
     /** Many-to-one relation with user accounts, so multiple users could pay */
     // payments: Waterline.isMany('payments'),
@@ -41,6 +46,17 @@ const invoiceCollection = Waterline.Collection.extend({
     /** total of order */
     total: {
       type: 'float'
+    },
+
+    /**
+     * how are we splitting the invoice:
+     *  - single: one person pays
+     *  - split_equal: each person pays total/users.length
+     *  - split_per_item: each person pays for item they added
+     */
+    split_type: {
+      type: 'string',
+      enum: ['single', 'split_equal', 'split_per_item']
     },
 
     /** everything that would be a order in old db.payments*/
