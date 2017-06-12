@@ -3,6 +3,10 @@ const _ = require('lodash')
 const Invoice = require('../payments/Invoice.js')
 const PaymentSource = require('../payments/PaymentSources.js')
 
+var db
+const dbReady = require('../../db')
+dbReady.then((models) => { db = models; })
+
 // for mocha tests - check if server up
 // if (process.env.NODE_ENV !== 'production') {
 //   const bodyParser = require('body-parser')
@@ -88,7 +92,7 @@ module.exports = function (router) {
 
 
     /**
-     * @api {post} /invoice/:invoice_id/payment post payment source to invoice
+     * @api {post} /invoice/payment/:invoice_idpost payment source to invoice
      * @apiDescription post a payment to an invoice
      * @apiGroup Payments
      *
@@ -97,6 +101,7 @@ module.exports = function (router) {
      * @apiParam {number} payment_amount - amount of invoice to pay
      */
     .post(async (req, res) => {
+      logging.info('posted to payment route')
       if (!_.get(req, 'body.payment_source')) {
         throw new Error('Need invoice id to post payment to')
       }
@@ -104,9 +109,9 @@ module.exports = function (router) {
         throw new Error('Need amount we are paying')
       }
       const invoice = await Invoice.GetById(req.params.invoice_id)
-      // logging.info('got our invoice')
+      logging.info('got our invoice')
       const paymentSource = await PaymentSource.GetById(req.body.payment_source)
-      // logging.info('got our payment source')
+      logging.info('got our payment source')
       const paymentAmount = req.body.payment_amount
       const payment = await paymentSource.pay(invoice, paymentAmount)
       logging.info('paid')
