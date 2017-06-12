@@ -107,10 +107,15 @@ class Invoice {
    * @return     {Promise}  { description_of_the_return_value }
    */
   async paidInFull() {
-    const payments = await db.Payments.find({id: this.invoice_id})
-    const amountPaid = payments.reduce((curr, prev) => {
+    const payments = await db.Payments.find({invoice: this.invoice_id})
+    logging.info('payments', payments)
+    const amountPaid = payments.reduce((prev, curr) => {
+      logging.info('prev', prev)
       return prev += curr.amount
     }, 0)
+
+    logging.info('AMOUNT PAID:', JSON.stringify(amountPaid))
+    logging.info('TOTAL:', this.total)
     if (amountPaid > this.total) {
       return true
     }

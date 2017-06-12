@@ -40,7 +40,7 @@ class PaymentSource {
     //create payments
     // logging.info('this', this)
     var payment = await db.Payments.create({
-      cart: invoice.cart,
+      invoice: invoice.id,
       user: this.user,
       payment_source: this.id,
       amount: amount
