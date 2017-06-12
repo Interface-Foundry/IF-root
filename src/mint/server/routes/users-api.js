@@ -317,11 +317,11 @@ module.exports = function (router) {
     if (_.get(req, 'query.email')) {
       user = yield db.UserAccounts.findOne({
         email_address: req.query.email.toLowerCase()
-      });
+      }).populate('addresses');
     } else if (_.get(req, 'query.id')) {
       user = yield db.UserAccounts.findOne({
         id: req.query.id
-      });
+      }).populate('addresses');
     } else {
       throw new Error('Cannot find user');
     }
@@ -362,7 +362,7 @@ module.exports = function (router) {
     }
 
     // Find the user in the database
-    var user = yield db.UserAccounts.findOne({ id: req.params.user_id })
+    var user = yield db.UserAccounts.findOne({ id: req.params.user_id }).populate('addresses')
 
     // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
     if (!user) {
@@ -420,6 +420,24 @@ module.exports = function (router) {
     var addr = yield db.Addresses.create(req.body);
     addr.user_account = user.id;
     yield addr.save();
+
+    res.send(addr);
+  }))
+
+  router.get('/user/:user_id/address', (req, res) => co(function* () {
+    // check permissions
+    var currentUser = req.UserSession.user_account
+    if (!currentUser || currentUser.id !== req.params.user_id) {
+      throw new Error('Unauthorized')
+    }
+
+    // Find the user in the database
+    var addr = yield db.Addresses.findOne({ user_account: req.params.user_id }).populate('addresses')
+
+    // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
+    if (!addr) {
+      res.send({});
+    }
 
     res.send(addr);
   }))
