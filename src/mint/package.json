@@ -138,7 +138,7 @@
     "backend": "SEND_EMAILS=; nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common ",
     "dev": "npm run backend",
     "cleanup": "rm -r public/build",
-    "test": "mocha tests",
+    "test": "env BUILD_MODE=prebuilt mocha --bail tests/all.js",
     "email": "SEND_EMAILS=1 nodemon ./server/index.js",
     "react-test": "node_modules/.bin/karma start karma.conf.js",
     "apidoc": "npm run apidocs",
