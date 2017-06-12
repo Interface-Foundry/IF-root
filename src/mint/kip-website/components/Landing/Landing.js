@@ -21,11 +21,11 @@ export default class Landing extends Component {
   }
 
   componentDidMount() {
-    const { registerHeight } = this.props;
+    const { registerHeight, match: { params: { src } } } = this.props;
     registerHeight(ReactDOM.findDOMNode(this)
       .offsetTop, ReactDOM.findDOMNode(this)
       .clientHeight);
-
+    sessionStorage.src = src ? src : sessionStorage.src ? sessionStorage.src : '';
     this.setState({
       offsetTop: ReactDOM.findDOMNode(this.landing)
         .offsetTop - 50
@@ -35,9 +35,7 @@ export default class Landing extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
     if (
-      nextState.offsetTop !== this.state.offsetTop
-      || nextProps.animationState !== this.props.animationState
-      || nextProps.fixed !== this.props.fixed
+      nextState.offsetTop !== this.state.offsetTop || nextProps.animationState !== this.props.animationState || nextProps.fixed !== this.props.fixed
     ) {
       return true;
     }
@@ -46,11 +44,10 @@ export default class Landing extends Component {
   }
 
   render() {
-    const { match: { params: { src } } } = this.props, { offsetTop } = this.state;
-
+    const { offsetTop } = this.state;
     return (
       <div className="landing">
-        <HeroContainer src={src} offsetTop={offsetTop}/>
+        <HeroContainer offsetTop={offsetTop}/>
         <div className="icons">
           <div className="icon col-1"/>
           <div className="icon col-1"><Icon icon='Amazon'/></div>
@@ -62,9 +59,9 @@ export default class Landing extends Component {
         </div>
 
         <div ref={(landing) => this.landing = landing}>
-          <ServicesContainer src={src} />
+          <ServicesContainer />
         </div>
-        <CompareContainer src={src} />
+        <CompareContainer />
         <FooterContainer />
       </div>
     );

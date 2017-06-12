@@ -41,22 +41,22 @@ export default class Cart extends Component {
       label: 'YPO Account Name',
       type: 'text',
       required: true,
-      autofocus: true //there can only be one autofocus
-
+      autofocus: true, //there can only be one autofocus
+      value: 'Chris' //should come from saved data
     }, {
       name: 'ypo_account_number',
       placeholder: 'YPO Account Number',
       label: 'YPO Account Number',
       type: 'number',
-      required: true
-
+      required: true,
+      value: '1234'
     }, {
       name: 'ypo_voucher_code',
       placeholder: 'YPO Voucher Code',
       label: 'YPO Voucher Code',
       type: 'text',
-      required: true
-
+      required: true,
+      value: 'ChrisVoucher'
     }]
   }, {
     head: 'Your Address',
@@ -65,49 +65,49 @@ export default class Cart extends Component {
       placeholder: 'Full Name',
       label: 'Full Name',
       type: 'text',
-      required: true
-
+      required: true,
+      value: 'Chris Barry'
     }, {
       name: 'line_1',
       placeholder: 'Address Line 1',
       label: 'Street Address, P.O. Box, Company Name, C/O',
       type: 'text',
-      required: true
-
+      required: true,
+      value: '180 Prospect'
     }, {
       name: 'line_2',
       placeholder: 'Address Line 2',
       label: 'Apartment, Suite, Unit, Building, Floor, etc.',
-      type: 'text'
-
+      type: 'text',
+      value: 'Apt 4 D'
     }, {
       name: 'city',
       placeholder: 'City',
       label: 'City',
       type: 'text',
-      required: true
-
+      required: true,
+      value: 'Brooklyn'
     }, {
       name: 'region',
       placeholder: 'State/Province/Region',
       label: 'State/Province/Region',
       type: 'text',
-      required: true
-
+      required: true,
+      value: 'NY'
     }, {
       name: 'code',
       placeholder: 'Zip/Postal Code',
       label: 'Zip/Postal Code',
       type: 'text',
-      required: true
-
+      required: true,
+      value: '18014'
     }, {
       name: 'country',
       placeholder: 'Country',
       label: 'Country',
       type: 'text',
-      required: true
-
+      required: true,
+      value: 'USA'
     }, {
       name: 'delivery_message',
       placeholder: 'Delivery Message',

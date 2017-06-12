@@ -46,11 +46,11 @@ const store = createStore(
 );
 
 // Check session and prep carts and blogs
-store.dispatch(getSiteState())
+store.dispatch(getSiteState(window.location.pathname))
   .then(() => {
     // idk if this is an ok thing, but it keeps the site
     // from rendering before it recieves the json file of text
-    // probably a better way tbh
+    // there's probably a better way tbh
     ReactDOM.render(
       <Provider store={store}>
       <ConnectedRouter history={history}>
@@ -61,7 +61,7 @@ store.dispatch(getSiteState())
     );
     store.dispatch(get('/api/session', 'SESSION'));
   })
-  .then(() => Promise.all([store.dispatch(get('/api/carts', 'CARTS')), store.dispatch(get('api/blog/posts', 'POSTS'))]))
+  .then(() => Promise.all([store.dispatch(get('/api/carts', 'CARTS')), store.dispatch(get('/api/blog/posts', 'POSTS'))]))
   .then(() => {
     const sessionId = store.getState()
       .auth.id;
