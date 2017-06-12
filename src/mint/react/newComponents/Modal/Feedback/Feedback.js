@@ -104,13 +104,14 @@ class TextField extends Component {
     label: PropTypes.string,
     meta: PropTypes.object,
     _toggleRating: PropTypes.func,
-    placeholder: PropTypes.object,
+    placeholder: PropTypes.string,
     handleSubmit: PropTypes.func,
-    type: PropTypes.object
+    type: PropTypes.string
   }
 
   render() {
     const { input, label, placeholder, handleSubmit, type, meta: { touched, error, warning } } = this.props;
+    
     return (
       <div className='feedback'>
         <h1>{label}</h1>

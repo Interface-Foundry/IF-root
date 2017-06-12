@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Settings } from '../newComponents';
-import { updateUser } from '../actions';
+import { updateUser } from '../newActions';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({

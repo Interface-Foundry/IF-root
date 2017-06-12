@@ -2,11 +2,13 @@ import { get, post } from './async'
 
 export const updateUser = (id, user) => post(
   `/api/user/${id}`, 
-  'STORES',
+  'UPDATE_USER',
   user, 
   (type, json) => ({
     type: `${type}_SUCCESS`,
-    response: json,
+    response: {
+    	user_account: json
+    },
     receivedAt: Date.now()
   })
 )
