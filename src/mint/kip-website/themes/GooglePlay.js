@@ -10,19 +10,7 @@ export default class GooglePlay extends Component {
             y="0px"
             viewBox="0 0 120.92399 129.16047"
             enableBackground="new 0 0 841.89 595.28"
-            xmlSpace="preserve"
-            pagecolor="#ffffff"
-            bordercolor="#666666"
-            borderopacity="1"
-            objecttolerance="10"
-            gridtolerance="10"
-            guidetolerance="10"
-            id="namedview51"
-            showgrid="false"
-            fitMarginTop="0"
-            fitMarginLeft="0"
-            fitMarginRight="0"
-            fitMarginBottom="0">
+            xmlSpace="preserve">
 
             <linearGradient
                id="SVGID_1_"

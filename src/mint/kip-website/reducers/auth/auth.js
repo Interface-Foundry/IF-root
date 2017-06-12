@@ -1,12 +1,14 @@
 const initialState = {
   loaded: false,
   loading: true,
-  myCarts: [],
-  otherCarts: []
+  posts: [],
+  carts: [],
+  archivedCarts: []
 };
 
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
+  case 'LOGIN_SUCCESS':
   case 'SESSION_SUCCESS':
     return {
       ...state,
@@ -15,9 +17,14 @@ export default function reducer(state = initialState, action = {}) {
   case 'CARTS_SUCCESS':
     return {
       ...state,
-      myCarts: action.response.filter((c, i) => c.leader.email_address === state.user_account.email_address),
-      otherCarts: action.response.filter((c, i) => c.leader.email_address !== state.user_account.email_address)
-    };
+      carts: action.response.filter(c => !c.locked),
+      archivedCarts: action.response.filter(c => c.locked)
+    }
+  case 'POSTS_SUCCESS':
+    return {
+      ...state,
+      posts: action.response.filter((p, i) => !!p.imageSrc)
+    }
   case 'LOGOUT':
     return {
       ...initialState

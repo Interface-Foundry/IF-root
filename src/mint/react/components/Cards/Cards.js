@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom';
 import CategoryCard from './CategoryCard';
 import SearchCard from './SearchCard';
 import { getLastSearch } from '../../utils';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 
 export default class Cards extends Component {
   constructor(props) {
@@ -83,7 +83,7 @@ export default class Cards extends Component {
     const activeCards = cards.map((card, i) => {
       return <li key={card._id || card.id} onClick={(e) => selectCard(i + 1, card)}>
         {
-          cardType.includes('search')  ? <SearchCard {...card} currentCart={currentCart} cart_id={cart_id} index={i}/> : <CategoryCard {...card} cart_id={cart_id} index={i} previewAmazonItem={previewAmazonItem}/>
+          cardType.includes('search')  ? <SearchCard {...card} currentCart={currentCart} cart_id={cart_id} index={i}/> : <CategoryCard {...card} cart_id={cart_id} currentCart={currentCart} index={i} previewAmazonItem={previewAmazonItem}/>
         }
       </li>;
     });

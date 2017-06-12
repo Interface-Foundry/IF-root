@@ -1,6 +1,6 @@
 // react/components/Cart/Cart.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
 $cart__add-height: $nav-height+$padding;
 .cart {
   height: calc(100% - #{$nav-height});

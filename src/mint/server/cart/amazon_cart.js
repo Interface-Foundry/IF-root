@@ -137,7 +137,7 @@ exports.searchAmazon = function * (query, locale, page, category) {
     Keywords: query,
     Condition: 'New',
     SearchIndex: category || 'All', //the values for this vary by locale
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews,EditorialReview',
     ItemPage: page || 1
   };
 
@@ -203,7 +203,7 @@ exports.lookupAmazonItem = function * (asin, locale) {
     Availability: 'Available',
     IdType: 'ASIN',
     ItemId: asin,
-    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews'
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews,EditorialReview'
   };
   try {
     var results = yield opHelpers[locale].execute('ItemLookup', amazonParams)
@@ -214,6 +214,7 @@ exports.lookupAmazonItem = function * (asin, locale) {
 
   // Add some logic to find the available item variations
   var item = results.result.ItemLookupResponse.Items.Item
+
   if (item.ParentASIN && item.ParentASIN !== item.ASIN) {
     // This item has a parent item, which means it probably has variations
     var parent = yield module.exports.lookupAmazonItem(item.ParentASIN, locale)
@@ -233,7 +234,7 @@ exports.lookupAmazonItem = function * (asin, locale) {
   }
 
   // save value to cache
-  asinCache.set(asin + locale, response)
+  // asinCache.set(asin + locale, response)
 
   return response
 };
@@ -449,6 +450,7 @@ exports.syncAmazon = function * (cart) {
   var res = yield opHelpers[cart.store_locale].execute('CartCreate', cartAddAmazonParams);
   var amazonErrors = getErrorsFromAmazonCartCreate(res.result.CartCreateResponse.Cart)
   var amazonCart = res.result.CartCreateResponse.Cart
+  cart.subtotal = amazonCart.SubTotal.Amount / 100.00
   cart.amazon_cartid = amazonCart.CartId
   cart.amazon_hmac = amazonCart.HMAC
   cart.amazon_purchase_url = amazonCart.PurchaseURL

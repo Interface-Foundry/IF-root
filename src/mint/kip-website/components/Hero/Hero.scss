@@ -1,139 +1,215 @@
 @import '../../themes/constants';
 @import '../../themes/animations';
-
 .hero {
-	position: relative;
-	overflow: hidden;
-	background: rgb(244, 233, 158);
-	height: 550px;
-	padding: 0;
-	width: 100%;
-
-	@media only screen and (max-width: 600px) {
-		height: 500px;
-	}
-
-	&.start {
-		.hero__kip {
-			@include animation(moveAround 15s infinite);
-			@media only screen and (max-width: 600px) {
-				@include animation(moveAroundMobile 15s infinite);
-			}
-		}
-	}
-
-	.hero__desktop {
-		position: absolute;
-		left: 75px;
-		bottom: 65px;
-		width: 650px;
-		z-index: 3;
-
-		h1 {
-			position: absolute;
-			left: 17%;
-			top: 24%;
-			color: $primaryColor;
-			font-weight: bold;
-			width: 69%;
-			font-size: 30px;
-			text-align: left;
-		}
-
-		@media only screen and (max-width: 600px) {
-			left: 0;
-			bottom: 105px;
-			width: 100%;
-			h1 {
-			    font-size: 5vw;
-				left: 14%;
-				top: 17%;
-			    width: 70%;
-			}
-		}
-	}
-
-	.hero__desk {
-		position: absolute;
-		left: -65px;
-		bottom: -200px;
-		width: 1150px;
-		z-index: 2;
-	}
-
-	.hero__background {
-	    position: absolute;
-	    width: 1800px;
-	    left: -150px;
-	    bottom: 0;
-	    top: -150px;
-	    z-index: -1;
-	}
-
-	.hero__kip {
-		position: absolute;
-		z-index: 1;
-		width: 200px;
-		bottom: 325px;
-		left: 625px;
-		transform: rotate(11deg);
-		@media only screen and (max-width: 600px) {
-			left: 155px;
-			transform: rotate(0);
-			bottom: 315px;
-		}
-	}
-
-
-	.hero__plant {
-		position: absolute;
-		z-index: 1;
-		width: 200px;
-		bottom: 325px;
-		left: 750px;
-		@media only screen and (max-width: 600px) {
-			left: 35px;
-			bottom: 315px;
-		}
-	}
-
-	.sine {
-		fill: white;
-	    margin-left: -1px;
-	    margin-bottom: -1px;
-	    height: 150px;
-	    z-index: 40;
-	    width: calc(100% + 3px);
-
-	    @media only screen and (max-width: 600px) {
-	    	height: 100px;
-	    }
-	}
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: transparent;
+  padding: 0 $padding*5;
+  width: 100%;
+  z-index: 1;
+  @media only screen and (max-width: 600px) {
+    padding: $padding*7.5 $padding*3 0;
+  }
+  .hero__main {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    height: calc(100% - #{$ribbonHeight*2});
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    @media only screen and (max-width: 600px) {
+      margin-top: 8%;
+      align-content: flex-start;
+    }
+    .headline {
+      display: table-cell;
+      vertical-align: middle;
+      padding: $padding 0;
+      text-align: left;
+      @media only screen and (max-width: 600px) {
+        margin-top: -65px;
+      }
+      @media only screen and (max-width: 320px) {
+        margin-top: 0px;
+      }
+      h1 {
+        display: inline-block;
+        line-height: $ribbonHeight;
+        font-size: 30px;
+        color: darken($bgColor, 15);
+        line-height: 40px;
+        &.hightlight {
+          background: $primaryColor;
+        }
+        @media only screen and (max-width: 600px) {
+          line-height: 30px;
+          font-size: 20px;
+        }
+      }
+      p {
+        font-size: 18px;
+        font-weight: 100;
+        color: rgba($bgColor, 0.7);
+        span {
+          font-weight: 600;
+          font-size: 18px;
+          color: $primaryColor;
+          @media only screen and (max-width: 600px) {
+            font-size: 14px;
+          }
+        }
+        @media only screen and (max-width: 600px) {
+          font-size: 14px;
+          color: rgba($bgColor, 0.9);
+        }
+        &.subtext {
+          font-size: 12px;
+          span {
+            color: rgba($bgColor, 0.6);
+            font-size: 12px;
+            font-weight: 400;
+            margin-right: $padding;
+            &:after {
+              content: '❄';
+              position: relative;
+              right: -5px;
+            }
+            &:last-of-type {
+              &:after {
+                content: '';
+              }
+            }
+          }
+        }
+      }
+      .action {
+        padding: $padding*2 0 $padding*2;
+        @media only screen and (max-width: 600px) {
+          padding: $padding*2 0 0;
+        }
+        button {
+          border: 0;
+          font-weight: bold;
+          border-radius: $padding/2;
+          background: white;
+          padding: $padding $padding*4;
+          font-size: 20px;
+          cursor: pointer;
+          box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
+          @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+          &:hover {
+            svg {
+              transform: translate3d(5px, 0, 0)
+            }
+          }
+          svg {
+            fill: white;
+            height: 25px;
+            width: 25px;
+            padding: 0;
+            @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+            @media only screen and (max-width: 600px) {
+              height: 20px;
+            }
+          }
+          &:focus {
+            @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+          }
+          @media only screen and (max-width: 600px) {
+            font-size: 14px;
+          }
+        }
+        a {
+          &:first-of-type {
+            button {
+              margin-right: $padding*2;
+              background: $warningColor;
+              color: white;
+              @media only screen and (max-width: 600px) {
+                margin: 0 0 $padding*2;
+                padding: $padding $padding*2;
+              }
+            }
+          }
+        }
+      }
+    }
+    .animation {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 0;
+      margin-top: -50px;
+      .image {
+        background-image: url('//storage.googleapis.com/kip-random/website/kip_collect.gif');
+        background-size: contain;
+        background-position: center;
+        height: 60%;
+        min-height: 400px; //fixes firefox for some reason
+        max-width: 357px;
+        margin-left: 13%;
+      }
+      @media only screen and (max-width: 600px) {
+        display: inline-block;
+        order: -1;
+        .image {
+          min-height: 200px;
+          max-height: 200px;
+          min-width: 200px;
+          max-width: 200px;
+          margin: 0 auto;
+          padding: 0;
+          &:after {
+            content: '';
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            display: inline-block;
+            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 40%, white 75%)
+          }
+        }
+      }
+      @media only screen and (max-width: 320px) {
+        .image {
+          min-height: 110px;
+          max-height: 110px;
+          min-width: 110px;
+          max-width: 110px;
+          margin-top: 20px;
+          &:after {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+  .more {
+    height: $ribbonHeight*2;
+    cursor: pointer;
+    margin: 0 auto;
+    display: inline-block;
+    color: $primaryColor;
+    z-index: 1;
+    h2 {
+      height: $ribbonHeight/2;
+      margin-bottom: $padding;
+      color: $primaryColor;
+      max-width: 500px;
+    }
+    p {
+      max-width: 500px;
+    }
+    svg {
+      width: $ribbonHeight;
+      height: $ribbonHeight/1.3;
+      fill: $primaryColor;
+      @include animation(bounceDownSmall 3s infinite);
+    }
+    @media only screen and (max-width: 600px) {
+      margin-top: -6%;
+    }
+  }
 }
 
-@keyframes moveAround {
-	0%, 10%, 90%, 100% {
-	  	transform: translate3d(0,0,0) rotate3d(0, 0, 0, 11deg);
-	}
-	15%, 50% {
-		transform: translate3d(0,25px,0) rotate3d(0, 0, 0, 11deg);
-	} 
-	55%, 80% {
-		transform: translate3d(125px, 25px,0) rotate3d(0, 0, 0, 0deg);
-	}
-	90% {
-		transform: translate3d(25px, 15px,0) rotate3d(0, 0, 0, -3deg);
-	}
-}
-
-@keyframes moveAroundMobile {
-	0%, 10%, 90%, 100% {
-		transform: translate3d(0,0,0) rotate3d(0, 0, 0, 0deg);
-	}
-	15%, 50% {
-		transform: translate3d(0,15px,0) rotate3d(0, 0, 0, 11deg);
-	} 
-	55%, 80% {
-		transform: translate3d(-120px,15px,0) rotate3d(0, 0, 0, 11deg);
-	}
-}

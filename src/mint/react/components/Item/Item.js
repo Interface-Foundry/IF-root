@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { splitCartById } from '../../reducers';
 import { RouteTransition } from 'react-router-transition';
-import Icon from '../Icon';
-import * as presets from '../../styles/RouteAnimations';
+import { Icon } from '../../../react-common/components';
+import * as presets from '../../../react-common/styles/RouteAnimations';
 import ItemVariationSelector from './ItemVariationSelector';
 import ProductDescription from './ProductDescription';
 import DealInfo from './DealInfo';
@@ -38,38 +38,9 @@ export default class Item extends Component {
     selectCard: PropTypes.func,
     user_account: PropTypes.object,
     currentCart: PropTypes.object,
-    store: PropTypes.object
-  }
-
-  componentWillMount() {
-    const {
-      props: { item_id, amazon_id, previewAmazonItem, cart_id, previewItem, type, items, index, setSearchIndex, currentCart, fetchCards }
-    } = this;
-    // only update item if there isn't one
-    if (item_id && currentCart.store) previewItem(item_id);
-    else if (amazon_id && items.length === 0 && currentCart.store) previewAmazonItem(amazon_id, currentCart.store);
-
-    if (type === 'card' && items.length === 0 && currentCart.store === 'ypo') fetchCards(cart_id);
-    else if (type === 'search' && index && items.length) setSearchIndex(index);
-
-    this.determineNav = ::this.determineNav;
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { props: { cart_id, item_id, amazon_id, store, previewItem, previewAmazonItem, history: { push } } } = this;
-    const { currentCart: nextCart, type: nextType, item: nextItem, items: nextItems, index: nextIndex, item_id: nextId, item: { position: nextPos } } = nextProps;
-    //never replace cart_id if its undefined
-    if (cart_id && nextType === 'item' && Array.isArray(nextItem.search)) {
-      push(`/cart/${cart_id}/m/search/${nextItem.position}/${amazon_id}`);
-    } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItems.length) {
-      push(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${amazon_id}`);
-    } else if (cart_id && nextType === 'search' && !nextItems.length) {
-      push(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
-    } else if (nextId !== item_id) {
-      previewItem(nextProps.item_id);
-    } else if ((nextProps.amazon_id !== amazon_id && nextCart.store !== store)) {
-      previewAmazonItem(nextProps.amazon_id, nextCart.store);
-    }
+    store: PropTypes.object,
+    search: PropTypes.string,
+    saveOldId: PropTypes.func
   }
 
   determineNav() {
@@ -90,7 +61,7 @@ export default class Item extends Component {
         ? (pageIndex === items.length - 1) ? 0 : pageIndex + 1
         : (pageIndex === 0) ? items.length - 1 : pageIndex - 1;
       if (type === 'deal')::this.navDeal(newIndex); //look ma, no constructor!
-      else if (type === 'cartItem')::this.navCart(newIndex);
+      else if (type === 'cartItem' || type === 'cartVariant')::this.navCart(newIndex);
     }
   }
 
@@ -127,6 +98,59 @@ export default class Item extends Component {
     replace(`/cart/${cart_id}/m/${type}/${ind}/${myItems[ind].id}/edit`);
   }
 
+  componentWillMount() {
+    const { props: { item_id, amazon_id, previewAmazonItem, cart_id, previewItem, type, item, items, index, setSearchIndex, currentCart, fetchCards } } = this;
+
+    if (!item && !items || (type === 'cartVariant' || type === 'cartItem' || type === 'cartVariant' || type === 'cartView')) {
+      if (type === 'search' && index) setSearchIndex(index);
+      else if (amazon_id && currentCart.store) previewAmazonItem(amazon_id, currentCart.store, currentCart.store_locale);
+      else if (currentCart.store) previewItem(item_id);
+      else if (type === 'card' && currentCart.store === 'ypo') fetchCards(cart_id);
+    }
+    this.determineNav = ::this.determineNav;
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const {
+      props: {
+        cart_id,
+        item_id,
+        previewItem,
+        previewAmazonItem,
+        saveOldId,
+        amazon_id,
+        history: { push },
+        item: { asin, options }
+      }
+    } = this;
+    const {
+      type: nextType,
+      items: nextItems,
+      index: nextIndex,
+      search: nextSearch,
+      amazon_id: nextAmazonId,
+      item: { position: nextPos, asin: nextAsin, id: nextId },
+      currentCart: { store: nextStore, store_locale: nextLocale },
+    } = nextProps;
+
+    if (cart_id && nextType === 'item' && Array.isArray(nextSearch)) { //never replace cart_id if its undefined
+      push(`/cart/${cart_id}/m/search/${nextPos}/${nextAsin}`);
+    } else if (cart_id && nextType === 'search' && nextPos !== nextIndex && nextItems.length) {
+      push(`/cart/${cart_id}/m/${nextType}/${nextPos || 0}/${nextAsin}`);
+    } else if (cart_id && nextType === 'search' && !nextItems.length) {
+      push(`/cart/${cart_id}?toast=No Search Results 😅&status=err`);
+    } else if (nextId !== item_id && nextId && !options) {
+      previewItem(nextId);
+    } else if (nextStore && amazon_id !== nextAmazonId) {
+      saveOldId(item_id);
+      previewAmazonItem(nextAmazonId, nextStore, nextLocale);
+    }
+  }
+  componentWillUnmount() {
+    const { clearItem } = this.props;
+    clearItem();
+  }
+
   render() {
     const {
       determineNav,
@@ -159,16 +183,16 @@ export default class Item extends Component {
         if (type === 'search') return nextSearch();
         const newIndex = (index >= items.length - 1) ? 0 : index + 1;
         if (type === 'deal')::this.navDeal(newIndex);
-        else if (type === 'cartItem')::this.navCart(newIndex);
+        else if (type === 'cartItem' || type === 'cartVariant')::this.navCart(newIndex);
       },
       prev = () => {
         this.setState({ animation: 'slideRight' });
         if (type === 'search') return prevSearch();
         const newIndex = (index <= 0) ? items.length - 1 : index - 1;
         if (type === 'deal')::this.navDeal(newIndex);
-        else if (type === 'cartItem')::this.navCart(newIndex);
+        else if (type === 'cartItem' || type === 'cartVariant')::this.navCart(newIndex);
       },
-      showButton = type === 'deal' || type === 'search' || (type === 'cartItem' && myItems.length > 1);
+      showButton = type === 'deal' || type === 'search' || (type === 'cartItem' || type === 'cartVariant' && myItems.length > 1);
 
     if (!imageUrl) return (
       <div className='placeholder' src='//storage.googleapis.com/kip-random/head_smaller.png'>
@@ -213,7 +237,7 @@ export default class Item extends Component {
               <ProductDescription description={description} />
               {
                 iframe_review_url 
-                  ? <iframe className='review__iframe' src={iframe_review_url}/>
+                  ? <div className='review__wrapper'><iframe className='review__iframe' src={iframe_review_url}/><div className='review__overlay'/></div>
                   : null
               }
               {
@@ -227,7 +251,7 @@ export default class Item extends Component {
           </div>
           {
             (options && options.length)
-            ? <ItemVariationSelector replace={replace} options={options} defaultVal={asin} {...props} /> 
+            ? <ItemVariationSelector replace={replace} options={options} defaultVal={asin} inCart={type==='cartItem'||type==='cartVariant'} {...props} /> 
             : null
           }
         </div>

@@ -1,5 +1,5 @@
 //react/components/EditCart/EditCart.scss
-@import '../../styles/Constants';
+@import '../../../react-common/styles/Constants';
 .editCart {
   overflow: scroll;
   height: 100%;
@@ -36,6 +36,7 @@
   }
   .pad {
     flex: 1 1 auto;
+    min-height: 75px;
   }
   .dangerzone {
     text-align: left;

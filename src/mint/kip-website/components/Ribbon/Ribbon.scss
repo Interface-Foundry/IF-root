@@ -1,138 +1,199 @@
 @import '../../themes/constants';
 @import '../../themes/animations';
-
 .ribbon {
-	position: fixed;
-	padding: 0 $padding*12.5;
-	top: 0;
-	pointer-events:none;
-	width: 100%;
-	height: $ribbonHeight;
-	z-index: 500;
-	text-align: center;
-	background: transparent;
-	border-bottom: 1px solid transparent;
-	@include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 3s);
-    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  position: fixed;
+  padding: 0;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  width: 100%;
+  height: $ribbonHeight + $padding;
+  z-index: 500;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  margin-top: $padding*2;
+  @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.7s);
+  @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+  @media only screen and (max-width: 600px) {
+    border-bottom: 0px solid transparent;
+    margin-top: 0;
+    .second {
+      height: 30px;
+      line-height: 30px !important;
+      width: 100%;
+      border-bottom: 2px solid white;
+      padding: 0 0 $padding;
+      @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+    }
+  }
+  &.background {
+    background: white;
+    border-bottom: 2px solid mix(white, $primaryColor, 85%);
+    margin-top: 0;
     @media only screen and (max-width: 600px) {
-    	padding: 0 $padding*2;
+      border-bottom: 0px solid transparent;
+      .second {
+        background: white;
+        border-bottom: 2px solid mix(white, $primaryColor, 85%);
+      }
     }
-
-    &.background {
-    	background: white;
-		border-bottom: 1px solid $borderColor;
-		box-shadow: 0 4px 6px rgba(50,50,93,.33), 0 1px 3px rgba(0,0,0,.08);
+  }
+  * {
+    color: $primaryColor;
+  }
+  &>div {
+    text-align: left;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  a {
+    color: inherit;
+    cursor: pointer;
+  }
+  .row {
+    text-align: left;
+    pointer-events: auto;
+    display: inline-block;
+    border: none;
+    .image {
+      display: inline-block;
+      background-size: contain;
+      width: $ribbonHeight*2;
+      min-height: $ribbonHeight + $padding;
     }
-
-	* {
-		color: $primaryColor;
-	}
-	& > div {
-		text-align: left;
-	}
-	a {
-		color: inherit;
-		cursor: pointer;
-	}
-	.row {
-		text-align: left;
-		pointer-events: auto;
-		display: inline-block;
-		.image {
-			display: inline-block;
-			background-size: contain;
-			width: $ribbonHeight - 15px;
-		}
-		h1, a {
-			display: inline-block;
-			padding: 0 $padding/2;
-			font-size: 17px;
-		}
-
-		h1 {
-			font-size: 23px;
-			line-height: 50px;
-		}
-		svg {
-			width: 30px;
-			height: 100%;
-			cursor: pointer;
-		}
-		&.right {
-			float: right;
-			padding: 0 10px;
-			@media only screen and (max-width: 600px) {
-				padding: 0 ;
-			}
-		}
-
-		@media only screen and (max-width: 600px) {
-			&.desktop {
-				display: none;
-			}
-		}
-	}
-
-	.action {
-		padding: $padding/2;
-		button {
-		    text-align: center;
-			border: 0px solid $primaryColor;
-			white-space: nowrap;
-			font-weight: bold;
-			border-radius: $padding/2;
-			background: transparent;
-			padding: 0 $padding*2;
-			height: 100%;
-			font-size: 16px;
-			cursor: pointer;
-			&:focus {
-				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-			}
-			&.slack {
-				margin-right: $padding*2;
-				background: white;
-			}
-			svg {
-				height: 100%;
-				background: transparent;
-			}
-			@media only screen and (max-width: 600px) {
-			    padding: 0px $padding/2;
-			    font-size: 12px;
-			}
-		}
-	}
-
-	.action2 {
-		padding: 0;
-		button {
-			display: table-cell;
-		    vertical-align: middle;
-		    text-align: center;
-			border: 0px solid #eccd46;
-			font-weight: bold;
-			border-radius: $padding/2;
-			background: white;
-			padding: 0 $padding;
-			font-size: 14px;
-			cursor: pointer;
-			margin-top: 10px;
-			height: 30px;
-			line-height: 30px;
-			color: #42403f;
-		    box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
-			&:focus {
-				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-			}
-		}
-		a {
-			&:first-of-type {
-				button {
-					background: $secondaryColor;
-				}
-			}
-		}
-	}
+    h1, a {
+      display: inline-block;
+      padding: 0 $padding/2;
+      font-size: 17px;
+      height: 100%;
+    }
+    h1 {
+      font-size: 23px;
+      line-height: $ribbonHeight + $padding;
+    }
+    .menu {
+      cursor: pointer;
+      svg {
+        width: 30px;
+        fill: $primaryColor;
+      }
+      @media only screen and (max-width: 600px) {
+        margin-right: 10px;
+      }
+    }
+    svg {
+      width: 20px;
+      height: 100%;
+      padding: $padding 0;
+      fill: white;
+      cursor: pointer;
+    }
+    &.right {
+      padding: 0 10px;
+      @media only screen and (max-width: 600px) {
+        padding: 0;
+      }
+    }
+    @media only screen and (max-width: 600px) {
+      &.desktop {
+        display: none;
+      }
+    }
+  }
+  .action {
+    padding: $padding/2;
+    button {
+      text-align: center;
+      border: 0px solid $primaryColor;
+      white-space: nowrap;
+      font-weight: bold;
+      border-radius: $padding/2;
+      background: transparent;
+      padding: 0 $padding;
+      height: 100%;
+      font-size: 16px;
+      cursor: pointer;
+      &:focus {
+        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+      }
+      &.slack {
+        margin-right: $padding*2;
+        background: white;
+      }
+      svg {
+        height: 100%;
+        background: transparent;
+      }
+      @media only screen and (max-width: 700px) {
+        padding: 0px $padding/2;
+        font-size: 12px;
+      }
+    }
+  }
+  .action2 {
+    padding: 0;
+    button {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+      border: 0px solid #eccd46;
+      font-weight: bold;
+      border-radius: $padding/2;
+      background: white;
+      padding: 0 $padding;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 13px;
+      height: 30px;
+      color: #42403f;
+      box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
+      &:focus {
+        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+      }
+    }
+    a {
+      &:first-of-type {
+        button {
+          background: $warningColor;
+          color: white;
+        }
+      }
+    }
+  }
+  .nav-items {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-items: flex-start;
+    .right, .row, .ribbon, .action {
+      height: unset;
+      a {
+        height: unset;
+        display: block;
+      }
+    }
+    @media only screen and (max-width: 700px) {
+      order: 3;
+      margin: 0 auto;
+      padding-left: 5px;
+      flex: 1 0 0;
+    }
+  }
+  .cart {
+    display: flex;
+    justify-content: flex-end;
+    @media only screen and (max-width: 700px) {
+      flex: 1 1 auto;
+      min-width: 280px;
+    }
+    @media only screen and (max-width: 500px) {
+      min-width: unset;
+      flex: 1 1 auto;
+    }
+  }
 }
+

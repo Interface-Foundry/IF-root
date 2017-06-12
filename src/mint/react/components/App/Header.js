@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 import { splitCartById } from '../../reducers';
 
 export default class Header extends Component {
@@ -28,6 +28,10 @@ export default class Header extends Component {
             <ModalHead text={'Add To Cart'} {...props}/>
           }
         />
+        <Route path={'/cart/:cart_id/m/cartView/:index/:asin'} exact component={() => 
+            <ModalHead text={'Add To Cart'} {...props}/>
+          }
+        />
         <Route path={'/cart/:cart_id/m/:type/:index/:asin/edit'} exact component={() => 
             <EnumeratedHead text={`${isLeader? '': 'My' } Cart Items`} length={isLeader ? items.length : splitCartById(this.props, {id: user_account.id}).my ? splitCartById(this.props, {id: user_account.id}).my.length : 0} type={'item'} {...props}/>
           }
@@ -36,8 +40,12 @@ export default class Header extends Component {
             <ModalHead text={'Add to Cart'} {...props}/>
           }
         />
+        <Route path={'/cart/:cart_id/m/cartvariant/:index/:item_id'} exact component={() => 
+            <ModalHead text={'Modify Item'} {...props}/>
+          }
+        />
         <Route path={'/newcart'} exact component={() => 
-            <IntroHead text={'Select Store'} {...props}/>
+            <CartHead text={'Select Store'} {...props}/>
           }
         />
         <Route path={'/cart/:cart_id/m/deal/:index/:dealId'} exact component={() => 
@@ -80,6 +88,10 @@ export default class Header extends Component {
             <CartHead text={'Edit Cart'} {...props}/>
           }
         />
+        <Route path={'/cart/:cart_id/m/archive'} exact component={() => 
+            <ModalHead text={'Archived Carts'} {...props}/>
+          }
+        />
       </nav>
     );
   }
@@ -108,9 +120,10 @@ class CartHead extends Component {
   render() {
     const {
       state: { bounce },
-      props: { user_account: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader, store } }
+      props: { user_account: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader, store, store_locale } }
     } = this;
-    const displayStore = store === 'ypo' ? 'YPO' : _.capitalize(store);
+
+    const displayStore = store === 'ypo' ? 'YPO' : _.capitalize(`${store} ${store_locale}`);
     return (
       <div>
         <div className='header__left'>
@@ -121,18 +134,21 @@ class CartHead extends Component {
               </div> 
             : <div className={`image ${bounce ? 'bounce': ''}`} style={
                 {
-                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/head%40x2.png)'})`,
+                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`,
                 }
               }/>}
           <h3>
             {locked ? 'Checkout in Progress' : cartName}
           </h3>
-          <span className='members'>Created by: {leader ? leader.name : ''} | {displayStore} </span>
+          { leader ? <span className='members'>Created by: {leader ? leader.name : ''} | {displayStore} </span> : null }
           </a>
+          <div className='header__sub'>
+            <h1>Beta</h1>
+          </div>
         </div>
         <div className='header__right'>
           {!name ? <p onClick={() => _togglePopup()}><span>Login</span></p> : null}
-          {isMobile && name ? <div className='navbar__icon' onClick={_toggleSidenav}><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
+          {name ? <div className='navbar__icon' onClick={_toggleSidenav}><p>{name} </p><Icon icon='Hamburger'/></div> : <p><a href={`/cart/${cart_id}/m/settings`}>{name}</a></p>}
         </div>
       </div>
     );
@@ -150,7 +166,7 @@ class IntroHead extends Component {
       <div className="header__left">
         <div className='image' style={
           {
-            backgroundImage: 'url(//storage.googleapis.com/kip-random/head%40x2.png)'
+            backgroundImage: 'url(//storage.googleapis.com/kip-random/kip_head_whitebg.png)'
           }
         }/>
         <h3>

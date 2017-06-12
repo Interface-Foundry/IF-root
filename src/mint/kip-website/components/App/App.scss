@@ -1,61 +1,90 @@
 @import '../../themes/constants';
 @import '../../themes/grid';
-
+@import '../../themes/animations';
 // General
 body, html {
-	height: 100%;
-	font-family: $fontFamily;
-	color: darken($bgColor, 5);
-	overflow: hidden;
-	line-height: 1.6;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
-	* {
-		box-sizing: border-box;
-		vertical-align: top;
-	}
+  height: 100%;
+  font-family: $fontFamily;
+  color: darken($bgColor, 5);
+  overflow: hidden;
+  margin: 0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+  * {
+    box-sizing: border-box;
+    vertical-align: top;
+  }
 }
+
+.app__view {
+  position: absolute;
+  overflow: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  top: 0;
+  text-align: center;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+}
+
+input, textarea, select, a {
+  outline: none;
+}
+
 button {
   cursor: pointer;
-	&:focus {
-		outline:0;
-	}
+  &:focus {
+    outline: 0;
+  }
 }
+
 a {
-	text-decoration: none;
-	color: inherit;
+  text-decoration: none;
+  color: inherit;
 }
+
 ul {
-	margin: 0;
-	padding: 0;
+  margin: 0;
+  padding: 0;
 }
+
 li {
-	list-style: none;
+  list-style: none;
 }
-h1,h2,h3,h4,p {
-	margin: 0;
-	letter-spacing: 0.75px;
+
+h1, h2, h3, h4, p {
+  margin: 0;
+  letter-spacing: 0.75px;
 }
+
 h1 {
-	font-family: $secondaryFontFamily;
-	font-size: 20px;
+  font-family: $secondaryFontFamily;
+  font-size: 20px;
 }
+
 h2 {
-	font-family: $secondaryFontFamily;
-	font-size: 18px;
+  font-family: $secondaryFontFamily;
+  font-size: 18px;
 }
+
 h3 {
-	font-family: $secondaryFontFamily;
-	font-size: 16px;
+  font-family: $secondaryFontFamily;
+  font-size: 16px;
 }
+
 h4 {
-	font-family: $secondaryFontFamily;
-	font-size: 14px;
+  font-family: $secondaryFontFamily;
+  font-size: 14px;
 }
+
 p {
-	font-family: $fontFamily;
-	font-size: 12px;
+  font-family: $fontFamily;
+  font-size: 12px;
 }
 
 .image {
@@ -66,45 +95,23 @@ p {
 }
 
 .sine {
-	position: absolute;
-	width: 100%;
-	height: 50px;
-	bottom: 0;
-	left: 0;
-	fill: #fcfcf9;
+  position: absolute;
+  width: 100%;
+  height: 50px;
+  bottom: 0;
+  left: 0;
+  fill: #fcfcf9;
 }
-	
-// overwrites
-.Typist {
-	@media only screen and (max-width: 600px) {
-		white-space: nowrap;
-	}
-}
-.Typist .Cursor--blinking { 
-	opacity: 1;
-	display: inline-block;
-	color: lighten($bgColor, 5%);
-	font-size: 12px;
-	animation: blink 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-	@media only screen and (max-width: 600px) {
-		margin-left: 0;
-	}
-}	
-.Static .Cursor--blinking {
-	opacity: 1;
-	display: inline-block;
-	color: lighten($bgColor, 5%);
-	font-size: 12px;
-	animation: blink 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-	@media only screen and (max-width: 600px) {
-		margin-left: 0;
-	}
-} 	
 
-@keyframes blink {
-  0% {
-    opacity: 1; }
-  50% {
-    opacity: 0; }
-  100% {
-    opacity: 1; } }
+// overwrites
+.sidenav {
+  &.homesidenav {
+    top: 0;
+    background: rgba(white, 0.6);
+    z-index: 1000;
+    .sidenav__list {
+      border: 0;
+      @include animation(scrollInRight cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+    }
+  }
+}

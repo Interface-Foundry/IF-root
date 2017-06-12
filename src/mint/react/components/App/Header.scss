@@ -1,6 +1,6 @@
 // react/components/App/Header.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
 .navbar {
   height: $nav-height;
   line-height: $nav-height;
@@ -17,7 +17,7 @@
     flex-grow: 1;
     flex-basis: 0;
     white-space: nowrap;
-    overflow: hidden;
+    overflow-y: visible;
     .navbar__icon {
       display: inline-block;
       width: auto;
@@ -26,6 +26,22 @@
       cursor: pointer;
       svg {
         height: 100%;
+      }
+    }
+    .header__sub {
+      position: absolute;
+      color: $secondaryColor;
+      background: white;
+      border-radius: 5px;
+      left: -10px;
+      z-index: 10;
+      border: 1px solid $border-color-light;
+      padding: 0 $padding/2 0 $padding*2;
+      bottom: -9px; 
+      h1 {
+        line-height: 15px;
+        font-size: 10px;
+        font-weight: 100;
       }
     }
     .image {
@@ -101,9 +117,9 @@
       color: $header-color;
       border-bottom: 1px solid $border-color-light;
       padding: 0;
-
       span {
-        border-bottom: 1px solid $secondaryColor;;
+        border-bottom: 1px solid $secondaryColor;
+        ;
       }
     }
     .navbar__modal_head {
@@ -144,4 +160,3 @@
     cursor: default;
   }
 }
-

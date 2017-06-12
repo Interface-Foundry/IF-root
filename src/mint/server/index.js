@@ -12,8 +12,8 @@ const fs = require('fs'),
   co = require('co');
 
 // start any jobs
-var dailyDealsJob = require('./deals/send-daily-deals-job')
-
+if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
+if (process.env.NODE_ENV !== 'production') var reengagementEmailsJob = require('./send-reengagement-emails-job')
 
 // live reloading
 if (process.env.BUILD_MODE !== 'prebuilt') {
@@ -32,6 +32,8 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
     path: '/__webpack_hmr',
     heartbeat: 10 * 1000
   }));
+} else {
+  app.get('/__webpack_hmr', (req, res) => res.status(200).end())
 }
 
 require('colors');
@@ -47,7 +49,7 @@ dbReady.then((models) => { db = models; })
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
  */
-app.use(compress()); 
+app.use(compress());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.resolve(__dirname, '..', 'public')));
@@ -64,8 +66,6 @@ app.use(sessions({
   secret: 'H68ccVhbqS5VgdB47/PdtByL983ERorw' + process.env.NODE_ENV, // `openssl rand -base64 24 `
   duration: 10 * 365 * 24 * 60 * 60 * 1000 // expire in 10 years
 }));
-
-console.log('4 && process.env.NODE_ENV: ', process.env.NODE_ENV)
 
 /**
  * Save user sessions to the database
@@ -112,6 +112,7 @@ if (process.env.LOGGING_MODE === 'database') {
 //
 // Back end routes
 //
+app.use('/prototype', require('./routes/global-direct-prototype.js'));
 app.use('/', require('./routes/regular.js'));
 app.use('/api', require('./routes/api.js'));
 app.use('/sendgrid', require('./routes/incoming-mail.js'));
@@ -144,6 +145,18 @@ app.get('/404', (_, res) => {
   res.render('pages/cart');
 });
 app.get('/legal', (_, res) => {
+  res.render('pages/index');
+});
+app.get('/blog', (_, res) => {
+  res.render('pages/index');
+});
+app.get('/howitworks', (_, res) => {
+  res.render('pages/index');
+});
+app.get('/compare', (_, res) => {
+  res.render('pages/index');
+});
+app.get('/about', (_, res) => {
   res.render('pages/index');
 });
 app.get('/s/*', (_, res) => {

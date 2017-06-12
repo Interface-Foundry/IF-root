@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from '..';
+import { Icon } from '../../../react-common/components';
 
 class Image extends Component {
   static propTypes = {
@@ -18,7 +18,7 @@ class Image extends Component {
             <div>
               <div className='image column-2' style={
                 {
-                  backgroundImage: `url(${value ? value : '//storage.googleapis.com/kip-random/head%40x2.png'})`,
+                  backgroundImage: `url(${value ? value : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`,
                 backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'center',
                   backgroundSize: 'contain'

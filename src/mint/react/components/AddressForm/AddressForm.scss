@@ -1,5 +1,5 @@
 // react/components/AddressForm/AddressForm.scss
-@import '../../styles/Constants';
+@import '../../../react-common/styles/Constants';
 .address_overlay {
   font-family: $secondary-font;
   letter-spacing: 1;
@@ -55,6 +55,7 @@
           border-bottom: 4px solid $thirdColor;
           background: transparent;
           width: 75%;
+          font-size: 20px;
           &:invalid {
             border-color: $fourthColor;
           }

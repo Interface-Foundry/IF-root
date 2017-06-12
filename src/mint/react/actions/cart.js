@@ -14,6 +14,7 @@ import {
   RECEIVE_CLEAR_CART,
   DELETE_CART
 } from '../constants/ActionTypes';
+import { push } from 'react-router-redux';
 import { sleep } from '../utils';
 
 const receive = (currentCart) => ({
@@ -69,8 +70,6 @@ export const addingItem = (addingItem) => ({
   type: ADDING_ITEM,
   addingItem
 });
-
-
 
 export const updateCartItem = newItem => ({});
 
@@ -139,6 +138,7 @@ export function deleteCart(cart_id) {
         credentials: 'same-origin',
       });
       dispatch(recieveDeleteCart(cart_id));
+      dispatch(push('/newcart?toast=Cart Deleted&status=success'));
     } catch (e) {
       throw 'error in cart delete';
     }
@@ -209,25 +209,6 @@ export function sendAddressData(user_id, full_name, line_1, line_2, city, region
       return dispatch(receiveItems(await response.json()));
     } catch (e) {
       throw 'error in cart fetchItems';
-    }
-  };
-}
-
-export function updateItem(cartId, currentId, new_item_id, user_id) {
-  return async dispatch => {
-    try {
-      const res = await fetch(`/cart/${cartId}/item/${currentId}/update`, {
-        method: 'PUT',
-        credentials: 'same-origin',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        'body': JSON.stringify({ new_item_id, user_id })
-      });
-      dispatch(updateCartItem(await res.json()));
-    } catch (e) {
-      throw e;
     }
   };
 }

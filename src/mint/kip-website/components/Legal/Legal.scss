@@ -3,8 +3,54 @@
 
 .legal {
 	position: absolute;
+	padding: $padding*10 0 0;
+	text-align: left;
+	width: 100%;
+
+	@media only screen and (max-width: 600px) {
+		padding: $padding*10 0 0;
+	}
+
+	.image {
+		background: url(https://storage.googleapis.com/kip-random/kiplegal.png);
+		background-size: contain;
+		background-position: center;
+		background-repeat: no-repeat;
+		height: 200px;
+		width: 100%;
+		margin-top: 10px;
+		margin-bottom: -39px;
+	}
+
+	.view {
+		padding: 0 $padding*5 $padding*50;
+		max-width: 1200px;
+		margin: 0 auto;
+
+		@media only screen and (max-width: 600px) {
+			padding: 0 $padding*3 $padding*20;
+		}
+		h2 {
+			color: #4a9ff1;
+			font-size: 27px;
+			height: $ribbonHeight*3;
+			line-height: $ribbonHeight*3;
+			text-align: center;
+
+			@media only screen and (max-width: 600px) {
+				font-size: 20px;
+				white-space: normal;
+			}
+		}
+
+		ul {
+			text-align: left;
+			padding: $padding*2;
+			li {
+				text-align: left;
+			}
+		}
+	}
+
 }
 
-h2 {
-	color: #4a9ff1;
-}

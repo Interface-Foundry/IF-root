@@ -4,7 +4,6 @@ import {
   REQUEST_ITEM,
   RECEIVE_ITEM,
   RECEIVE_SEARCH,
-  RECEIVE_CATEGORY,
   CLEAR_ITEM,
   REQUEST_ADD_ITEM,
   RECEIVE_ADD_ITEM,
@@ -19,7 +18,8 @@ import {
   RECEIVE_UPDATE_ITEM,
   SEARCH_PREV,
   SEARCH_NEXT,
-  SET_SEARCH_INDEX
+  SET_SEARCH_INDEX,
+  SET_OLD_ID
 } from '../constants/ActionTypes';
 
 import { sleep } from '../utils';
@@ -31,11 +31,6 @@ const receiveItem = (item) => ({
 
 const receiveSearch = (items) => ({
   type: RECEIVE_SEARCH,
-  items
-});
-
-const receiveCategory = (items) => ({
-  type: RECEIVE_CATEGORY,
   items
 });
 
@@ -112,6 +107,11 @@ const setSearch = (index) => ({
   index
 });
 
+const setOldId = (old_item_id) => ({
+  type: SET_OLD_ID,
+  old_item_id
+})
+
 export function previewItem(item_id) {
   return async function (dispatch) {
     dispatch(request());
@@ -128,16 +128,15 @@ export function previewItem(item_id) {
   };
 }
 
-export function previewAmazonItem(amazon_id, category) {
-  return async function (dispatch, getState) {
+export function previewAmazonItem(amazon_id, store, locale, category) {
+  return async function (dispatch) {
     dispatch(request());
     try {
-      const cart = getState().currentCart
-      const response = await fetch(`/api/itempreview?q=${amazon_id}&store=${cart.store}&store_locale=${cart.store_locale}`, {
+      const response = await fetch(`/api/itempreview?q=${amazon_id}&store=${store}&store_locale=${locale}${category ? `&category=${category}` : ''}`, {
         credentials: 'same-origin'
       });
       const json = await response.json();
-      if (category) return dispatch(receiveCategory(json));
+      // if (store === 'ypo') return dispatch(receiveCategory(json));
       return Array.isArray(json) ? dispatch(receiveSearch(json)) : dispatch(receiveItem(json));
     } catch (e) {
       throw 'error in cart previewAmazonItem';
@@ -240,7 +239,7 @@ export function updateItem(cart_id, old_item_id, new_item_id) {
   return async dispatch => {
     dispatch(requestUpdateItem());
     try {
-      const response = await fetch(`/api/cart/${cart_id}/item/${old_item_id}`, {
+      const response = await fetch(`/api/cart/${cart_id}/item/${old_item_id}/update`, {
         method: 'PUT',
         credentials: 'same-origin',
         headers: {
@@ -272,4 +271,7 @@ export function prevSearch() {
 
 export function setSearchIndex(index) {
   return async dispatch => dispatch(setSearch(index));
+}
+export function saveOldId(old_item_id) {
+  return async dispatch => dispatch(setOldId(old_item_id));
 }

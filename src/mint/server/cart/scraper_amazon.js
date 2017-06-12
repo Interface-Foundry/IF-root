@@ -5,7 +5,24 @@ const dbReady = require('../../db')
 dbReady.then((models) => { db = models })
 const amazon_cart = require('./amazon_cart')
 
+const bookProductGroups = ['Book', 'eBooks']
 
+/**
+ * gets the description for an item depending on if its a book or what
+ *
+ * @param      {<type>}  item The item
+ */
+function getDescription (item) {
+  if (bookProductGroups.includes(item.ItemAttributes.ProductGroup)) {
+    var editorialReview = _.get(item, 'EditorialReviews.EditorialReview')
+    if (editorialReview instanceof Array) {
+      editorialReview = editorialReview[0]
+    }
+
+    if (editorialReview && editorialReview.Content) return editorialReview.Content
+  }
+  return item.ItemAttributes.Feature
+}
 
 /**
  * format cents to nice price.  amazon returns amount in cents
@@ -19,17 +36,27 @@ function formatAmazonPrice(amount) {
 
 
 function getItemPrice(item, priceType) {
+  debugger;
   // place holder for time being since unsure what price to use
-  const availablePrices = {}
-  availablePrices.basicItemPrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.Price.Amount', 0))
-  if (priceType === undefined) {
-    return availablePrices.basicItemPrice
-  } else {
-    // might be useful to return other possible prices in the future
-    availablePrices.lowestPrice = formatAmazonPrice(_.get(item, 'OfferSummary.LowestNewPrice.Amount', 0))
-    availablePrices.listPrice = formatAmazonPrice(_.get(item, 'ItemAttributes.ListPrice.Amount', 0))
-    return availablePrices[priceType]
+  const allPurchaseablePrices = [
+    _.get(item, 'Offers.Offer.OfferListing.SalePrice.Amount'),
+    _.get(item, 'Offers.Offer.OfferListing.Price.Amount'),
+    _.get(item, 'OfferSummary.LowestCollectiblePrice.Amount'),
+    _.get(item, 'OfferSummary.LowestRefurbishedPrice.Amount'),
+    _.get(item, 'OfferSummary.LowestUsedPrice.Amount')
+  ]
+
+  if (priceType == "listPrice") {
+    return formatAmazonPrice(_.get(item, 'ItemAttributes.ListPrice.Amount', 0))
   }
+
+  for (var i = 0; i < allPurchaseablePrices.length; i++) {
+    if (allPurchaseablePrices[i]) {
+      return formatAmazonPrice(allPurchaseablePrices[i])
+    }
+  }
+
+  return 0
 }
 
 
@@ -47,6 +74,7 @@ module.exports.scrapeUrl = function amazon_scraper (uri, locale) {
 
     // Scrape the item
     var res = yield amazon_cart.getAmazonItem(uri, locale)
+    console.log(res)
     var item = yield res2Item(res)
     item.original_link = uri
     yield item.save()
@@ -76,6 +104,7 @@ module.exports.scrapeAsin = function (asin, locale) {
     return item
   })
 }
+
 
 
 /**
@@ -158,16 +187,29 @@ var res2Item = function (res) {
         store: 'amazon',
         name: i.ItemAttributes.Title,
         asin: i.ASIN,
-        description: i.ItemAttributes.Feature,
+        description: getDescription(i),
         price: price,
         thumbnail_url: thumbnail,
         main_image_url: mainImage,
         iframe_review_url: (i.CustomerReviews.HasReviews === 'true') ? i.CustomerReviews.IFrameURL : null
       })
     } catch (err) {
-      logging.error(err);
+      console.error(err)
       return null;
     }
+
+    // check to see if we get back the prime property
+    const prime = !!_.get(i, 'Offers.Offer.OfferListing.IsEligibleForPrime', false)
+    logging.info('prime:', prime)
+    // create a new delivery details thing w/ the right value
+    var details = yield db.DeliveryDetails.create({prime: prime})
+    // associate it and 'item'
+    details.item = item.id
+    yield details.save();
+    item.details = details.id;
+    yield item.save();
+
+    console.log('item', item)
 
     // create new item options
     // this part is really really hard

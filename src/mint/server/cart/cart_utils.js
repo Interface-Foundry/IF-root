@@ -205,6 +205,7 @@ exports.getRetailer = function (item) {
  * @return     {<type>}  { description_of_the_return_value }
  */
 exports.sendReceipt = function * (cart, req) {
+  logging.info('cart:', cart)
   const userAccount = req.UserSession.user_account
   //send receipt email
   const cartItems = cart.items;
@@ -213,7 +214,7 @@ exports.sendReceipt = function * (cart, req) {
     var receipt = yield db.Emails.create({
       recipients: userAccount.email_address,
       sender: 'hello@kip.ai',
-      subject: `Kip Receipt for ${cart.name}`,
+      subject: `Kip Cart List for ${cart.name}`,
       template_name: 'summary_email',
       unsubscribe_group_id: 2485
     });
@@ -231,9 +232,13 @@ exports.sendReceipt = function * (cart, req) {
       total += (Number(item.price) * Number(item.quantity || 1));
     });
 
+    logging.info('userItems:', userItems)
+
     for (var k in userItems) {
       var addingUser = yield db.UserAccounts.findOne({id: k});
-      users.push(addingUser.name || addingUser.email_address);
+      if (!addingUser.name) addingUser.name || addingUser.email
+      logging.info('addingUser:', addingUser)
+      users.push(addingUser);
       items.push(userItems[k]);
     }
 

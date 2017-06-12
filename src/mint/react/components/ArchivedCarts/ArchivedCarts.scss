@@ -1,0 +1,26 @@
+// react/components/ArchivedCarts/ArchivedCarts.scss
+@import '../../../react-common/styles/Constants';
+.archivedCarts {
+  .archivedCart {
+    text-align: left;
+    padding: 2 * $padding;
+    margin: $padding;
+    background: white;
+    border: 2px solid $kip-faded-color;
+    border-radius: $padding;
+    display: flex;
+    align-content: stretch;
+    justify-content: stretch;
+    filter: grayscale(70%);
+    &:hover {
+      filter: grayscale(0%);
+    }
+    .image {
+      height: 70px;
+      width: 70px;
+      border-radius: 35px;
+      margin: $padding * 2;
+    }
+  }
+}
+

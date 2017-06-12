@@ -137,29 +137,6 @@ module.exports = function (router) {
 
 
   /**
-   * @api {get} /api/store_list/ possible stores
-   * @apiDescription Sends possible stores available
-   * @apiGroup Other
-   * @apiParamExample Request
-   * get https://mint.kipthis.com/api/store_list
-   *
-   * @type {Array} object of stores
-   */
-  router.get('/store_list', (req, res) => co(function * () {
-    const storesArray = constants.STORES.map( store => {
-      return {
-        store_img: 'String',
-        store_type: store,
-        store_name: store,
-        store_domain: 'String',
-        store_countries: '[Array]'
-      }
-    })
-
-    res.send(storesArray)
-  }))
-
-  /**
    * @api {Get} /api/postcode/:code looks up a list of addresses associated with a british postal code
    * @apiGroup Other
    * @apiParam {string} code the postal code we want addresses for

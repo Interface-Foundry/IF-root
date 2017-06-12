@@ -30,15 +30,30 @@ export function login(cart_id, email) {
       const response = await fetch(`/api/login?email=${encodeURIComponent(email)}&redirect=/cart/${cart_id}`, {
         credentials: 'same-origin'
       });
-
+      const json = await response.json();
       return dispatch({
-        type: 'LOGIN_SUCCESS',
-        response: await response.json(),
+        type: json.newAccount ? 'SESSION_SUCCESS' : 'LOGIN_SUCCESS',
+        response: json,
         receivedAt: Date.now()
       });
-
     } catch (e) {
       return new SubmissionError({ email: 'Something went wrong with login' });
+    }
+  };
+}
+
+export function getSiteState() {
+  return async dispatch => {
+    try {
+      const site = await fetch('/api/home/json', { credentials: 'same-origin' })
+        .then(json => json.json());
+      return dispatch({
+        type: 'GOT_SITE',
+        response: site,
+        receivedAt: Date.now()
+      });
+    } catch (e) {
+      throw 'Error getting site state';
     }
   };
 }
@@ -65,3 +80,29 @@ export function validateCode(email, code) {
     }
   };
 }
+
+export const scrollToPosition = (scrollTo, scrollFrom = 0) =>
+  async dispatch => {
+    let scrollPos = scrollFrom;
+    const interval = setInterval(() => {
+      if (scrollTo - scrollPos < 6) {
+        clearInterval(interval);
+        dispatch({
+          type: 'HANDLE_SCROLL',
+          response: {
+            scrollTo,
+            fixed: scrollPos > 2
+          }
+        });
+      } else {
+        scrollPos = scrollPos + 10;
+        dispatch({
+          type: 'HANDLE_SCROLL',
+          response: {
+            scrollTo: scrollPos,
+            fixed: scrollPos > 2
+          }
+        });
+      }
+    }, 1);
+  }

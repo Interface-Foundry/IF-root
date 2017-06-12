@@ -1,6 +1,6 @@
 // react/components/Cart/CartItem.scss
-@import '../../styles/Constants';
-@import '../../styles/Animations';
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
 .cartItem {
   padding: $padding*2;
   background: $kip-primary-color;
