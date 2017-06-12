@@ -383,7 +383,7 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {post} /api/user/:user_id/address Add address to user
+   * @api {post} /api/user/:user_id/address Add Address
    * @apiDescription Creates a new address and associates it with a user
    * @apiGroup Users
    * @apiParam {string} :user_id id of the user to update
@@ -424,6 +424,12 @@ module.exports = function (router) {
     res.send(addr);
   }))
 
+  /**
+   * @api {get} Get Address
+   * @apiDescription Gets a user's address
+   * @apiGroup Users
+   * @type {[type]}
+   */
   router.get('/user/:user_id/address', (req, res) => co(function* () {
     // check permissions
     var currentUser = req.UserSession.user_account
