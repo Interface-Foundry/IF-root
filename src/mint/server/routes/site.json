@@ -51,7 +51,7 @@
       "tagline": "Kip Benefits",
       "subHead": "Just check out how we compare.",
       "buttonText": "Use Kip Now",
-      "slackButtonText": "Add to Slack Now",
+      "slackText": "Add to Slack Now",
       "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
       "competitors": [{
         "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
@@ -81,6 +81,7 @@
     },
     "help": {
       "buttonText": "Use Kip Now",
+      "slackText": "Add To Slack",
       "stepText": "Step",
       "titleText": "Kip is 1 - Click Easy",
       "subtext": ["No Fees", "No Download", "No Hassle"],
@@ -100,6 +101,25 @@
         "src": "//storage.googleapis.com/kip-random/mint_3_desktop.gif",
         "class": "third",
         "bubble": "Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees",
+        "step": "3",
+        "id": 3
+      }],
+      "slackImages": [{
+        "src": "//storage.googleapis.com/kip-random/slack_1_desktop.png",
+        "class": "secondary",
+        "bubble": "Invite your whole team to order items",
+        "step": "1",
+        "id": 1
+      }, {
+        "src": "//storage.googleapis.com/kip-random/slack_2_desktop.png",
+        "class": "primary",
+        "bubble": "Search for things your team needs",
+        "step": "2",
+        "id": 2
+      }, {
+        "src": "//storage.googleapis.com/kip-random/slack_3_desktop.png",
+        "class": "third",
+        "bubble": "Check out everyone's items at once",
         "step": "3",
         "id": 3
       }],
@@ -243,7 +263,7 @@
       "tagline": "Kip Benefits",
       "subHead": "Just check out how we compare.",
       "buttonText": "Use Kip Now",
-      "slackButtonText": "Add to Slack Now",
+      "slackText": "Add to Slack Now",
       "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
       "competitors": [{
         "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
@@ -273,6 +293,7 @@
     },
     "help": {
       "buttonText": "Use Kip Now",
+      "slackText": "Add To Slack",
       "stepText": "Step",
       "titleText": "Kip is 1 - Click Easy",
       "subtext": ["No Fees", "No Download", "No Hassle"],
@@ -292,6 +313,25 @@
         "src": "//storage.googleapis.com/kip-random/mint_3_desktop.gif",
         "class": "third",
         "bubble": "Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees",
+        "step": "3",
+        "id": 3
+      }],
+      "slackImages": [{
+        "src": "//storage.googleapis.com/kip-random/slack_1_desktop.png",
+        "class": "secondary",
+        "bubble": "Invite your whole team to order items",
+        "step": "1",
+        "id": 1
+      }, {
+        "src": "//storage.googleapis.com/kip-random/slack_2_desktop.png",
+        "class": "primary",
+        "bubble": "Search for things your team needs",
+        "step": "2",
+        "id": 2
+      }, {
+        "src": "//storage.googleapis.com/kip-random/slack_3_desktop.png",
+        "class": "third",
+        "bubble": "Check out everyone's items at once",
         "step": "3",
         "id": 3
       }],
@@ -402,7 +442,7 @@
       }
     },
     "hero": {
-      "headline": "Shop Online with Friends",
+      "headline": "Manage Orders with Kip AI",
       "description": "Use ${Kip} to manage your team purchases and track expenses. Organize orders with ${Kip} now!",
       "buttonText": "Use Kip Now",
       "slackText": "Add to Slack",
@@ -435,7 +475,7 @@
       "tagline": "Kip Benefits",
       "subHead": "Just check out how we compare.",
       "buttonText": "Use Kip Now",
-      "slackButtonText": "Add to Slack Now",
+      "slackText": "Add to Slack Now",
       "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
       "competitors": [{
         "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
@@ -465,6 +505,7 @@
     },
     "help": {
       "buttonText": "Use Kip Now",
+      "slackText": "Add To Slack",
       "stepText": "Step",
       "titleText": "Kip is 1 - Click Easy",
       "subtext": ["No Fees", "No Download", "No Hassle"],
@@ -484,6 +525,25 @@
         "src": "//storage.googleapis.com/kip-random/mint_3_desktop.gif",
         "class": "third",
         "bubble": "Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees",
+        "step": "3",
+        "id": 3
+      }],
+      "slackImages": [{
+        "src": "//storage.googleapis.com/kip-random/slack_1_desktop.png",
+        "class": "secondary",
+        "bubble": "Invite your whole team to order items",
+        "step": "1",
+        "id": 1
+      }, {
+        "src": "//storage.googleapis.com/kip-random/slack_2_desktop.png",
+        "class": "primary",
+        "bubble": "Search for things your team needs",
+        "step": "2",
+        "id": 2
+      }, {
+        "src": "//storage.googleapis.com/kip-random/slack_3_desktop.png",
+        "class": "third",
+        "bubble": "Check out everyone's items at once",
         "step": "3",
         "id": 3
       }],

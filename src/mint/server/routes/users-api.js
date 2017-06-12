@@ -424,23 +424,34 @@ module.exports = function (router) {
     res.send(addr);
   }))
 
-  /**
-   * @api {get} Get Address
-   * @apiDescription Gets a user's address
+ /**
+   * @api {get} /api/user/address return a list of user addresses
+   * @apiDescription Returns all of the addresses associated with a user
    * @apiGroup Users
-   * @type {[type]}
+   *
+   * @apiParamExample Request
+   * get /api/user/address 
+   *
+   *  @apiSuccessExample Response
+   * [{
+   *   "full_name": 'Chris Barry',
+   *   "line_1": '2222 Fredrick Douglass Blvd',
+   *   "line_2": "Apt 2B",
+   *   "city": "New York",
+   *   "region": 'NY',
+   *   "code": 94306,
+   *   "country": 'USA',
+   *   "user_account": user_id
+   * }]
    */
-  router.get('/user/:user_id/address', (req, res) => co(function* () {
-    // check permissions
+
+  router.get('/user/address', (req, res) => co(function* () {
     var currentUser = req.UserSession.user_account
-    if (!currentUser || currentUser.id !== req.params.user_id) {
-      throw new Error('Unauthorized')
-    }
 
     // Find the user in the database
-    var addr = yield db.Addresses.findOne({ user_account: req.params.user_id }).populate('addresses')
+    var addr = yield db.Addresses.find({ user_account: currentUser.id })
 
-    // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
+    // in case there isn't an address
     if (!addr) {
       res.send({});
     }

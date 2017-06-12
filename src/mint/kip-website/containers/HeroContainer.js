@@ -7,7 +7,8 @@ import {
 
 const mapStateToProps = (state, props) => ({
   animate: !state.app.fixed,
-  heroTemplate: state.siteState.hero
+  heroTemplate: state.siteState.hero,
+  src: sessionStorage.src
 });
 
 const mapDispatchToProps = dispatch => ({
