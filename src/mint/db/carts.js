@@ -100,6 +100,11 @@ var cartsCollection = Waterline.Collection.extend({
 
     /** @type {[user_accounts]} times this cart has been checked out */
     checkouts: Waterline.isMany('checkout_events'),
+
+    /** cart subtotal from store */
+    subtotal: 'float',
+
+    archive: archive
   }
 });
 

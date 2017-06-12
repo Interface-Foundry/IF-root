@@ -23,8 +23,8 @@
     "selector_separator_newline": false // Separate selectors with newline or not (e.g. "a,\nbr" or "a, br")
   },
   "js": {
-    "brace_style": "collapse,preserve-inline",
-    "break_chained_methods": true,
+    "brace_style": "collapse-preserve-inline",
+    "break_chained_methods": false,
     "eol": "\n",
     "eval_code": true,
     "indent_char": " ",

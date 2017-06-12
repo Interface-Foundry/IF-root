@@ -33,6 +33,89 @@ export default class Cart extends Component {
     animation: false
   }
 
+  addressFormData = [{
+    head: 'Your YPO Account',
+    fields: [{
+      name: 'ypo_account_name',
+      placeholder: 'YPO Account Name',
+      label: 'YPO Account Name',
+      type: 'text',
+      required: true,
+      autofocus: true //there can only be one autofocus
+
+    }, {
+      name: 'ypo_account_number',
+      placeholder: 'YPO Account Number',
+      label: 'YPO Account Number',
+      type: 'number',
+      required: true
+
+    }, {
+      name: 'ypo_voucher_code',
+      placeholder: 'YPO Voucher Code',
+      label: 'YPO Voucher Code',
+      type: 'text',
+      required: true
+
+    }]
+  }, {
+    head: 'Your Address',
+    fields: [{
+      name: 'full_name',
+      placeholder: 'Full Name',
+      label: 'Full Name',
+      type: 'text',
+      required: true
+
+    }, {
+      name: 'line_1',
+      placeholder: 'Address Line 1',
+      label: 'Street Address, P.O. Box, Company Name, C/O',
+      type: 'text',
+      required: true
+
+    }, {
+      name: 'line_2',
+      placeholder: 'Address Line 2',
+      label: 'Apartment, Suite, Unit, Building, Floor, etc.',
+      type: 'text'
+
+    }, {
+      name: 'city',
+      placeholder: 'City',
+      label: 'City',
+      type: 'text',
+      required: true
+
+    }, {
+      name: 'region',
+      placeholder: 'State/Province/Region',
+      label: 'State/Province/Region',
+      type: 'text',
+      required: true
+
+    }, {
+      name: 'code',
+      placeholder: 'Zip/Postal Code',
+      label: 'Zip/Postal Code',
+      type: 'text',
+      required: true
+
+    }, {
+      name: 'country',
+      placeholder: 'Country',
+      label: 'Country',
+      type: 'text',
+      required: true
+
+    }, {
+      name: 'delivery_message',
+      placeholder: 'Delivery Message',
+      label: 'Delivery Message',
+      type: 'text'
+    }]
+  }]
+
   componentWillMount() {
     const { fetchCards, cards = [], currentCart = { store: '' } } = this.props;
 
@@ -56,10 +139,10 @@ export default class Cart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { history: { replace }, fetchCards, cart_id, items, cards, currentCart } = this.props, { leader, addingItem, user_account } = nextProps,
+    const { history: { replace }, fetchCards, cart_id, items, cards } = this.props, { leader, addingItem, user_account } = nextProps,
       cartId = nextProps.cart_id || cart_id;
 
-    if (cartId) {      
+    if (cartId) {
       if (cards.length === 0 && nextProps.currentCart.store === 'ypo') fetchCards(cartId);
       if (!!leader && !addingItem && this.props.addingItem !== addingItem && !!user_account.id) replace(`/cart/${cartId}/`);
     }
@@ -72,8 +155,25 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { items, leader, members, user_account, cart_id, cards, locked, updateCart, currentCart, cancelRemoveItem, cancelClearCart, history: { push } } = this.props, { animation } = this.state,
-      hasItems = items.quantity > 0,
+    const {
+      props: {
+        items,
+        leader,
+        members,
+        user_account,
+        cart_id,
+        cards,
+        locked,
+        updateCart,
+        currentCart,
+        cancelRemoveItem,
+        cancelClearCart,
+        history: { push }
+      },
+      state: { animation },
+      addressFormData
+    } = this,
+    hasItems = items.quantity > 0,
       isLeader = !!user_account.id && !!leader && (leader.id === user_account.id),
       total = calculateItemTotal([
         ...items.my,
@@ -85,7 +185,7 @@ export default class Cart extends Component {
 
     return (
       <div className='cart'>
-        <Route path={'/cart/:cart_id/address'} exact component={AddressFormContainer}/>
+        <Route path={'/cart/:cart_id/address'} exact component={(props) => <AddressFormContainer {...props} formData={addressFormData}/>}/>
         {
           locked
           ? <div className='cart__locked'>
@@ -169,13 +269,7 @@ class MyItems extends Component {
   render() {
     const { props: { items, user_account, currentCart: { locked }, currentCart } } = this,
     total = calculateItemTotal(items),
-    locale = currentCart.store
-      ? currentCart.store.includes('amazon')
-        ? currentCart.store_locale === 'UK' 
-           ? 'GBP' 
-           : 'USD'
-        : 'GBP'
-      : null;
+      locale = currentCart.store ? currentCart.store.includes('amazon') ? currentCart.store_locale === 'UK' ? 'GBP' : 'USD' : 'GBP' : null;
 
     return (
       <ul>

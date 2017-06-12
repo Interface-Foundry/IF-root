@@ -10,7 +10,6 @@ const logging = require('../../../logging.js')
  */
 
 
-
 //   if (charge) {
 //     payment.charge = charge
 //     yield payment.save()

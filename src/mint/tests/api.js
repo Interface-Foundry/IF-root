@@ -2,6 +2,7 @@ const request = require('request-promise')
 const co = require('co')
 const assert = require('assert')
 require('should')
+require('../server/index')
 
 /**
  * We will use the db to circumvent the whole email checking process

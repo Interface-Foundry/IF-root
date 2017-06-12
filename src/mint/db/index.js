@@ -38,6 +38,7 @@ waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./ypo_inventory_items'))
 
 waterline.loadCollection(require('./invoice'))
+waterline.loadCollection(require('./payment_source'))
 
 var config = {
   adapters: {
@@ -75,6 +76,7 @@ var initialize = new Promise((resolve, reject) => {
       Invoice: ontology.collections.invoice,
       ItemOptions: ontology.collections.item_options,
       Items: ontology.collections.items,
+      PaymentSource: ontology.collections.payment_source,
       Reactions: ontology.collections.reactions,
       Sessions: ontology.collections.sessions,
       UserAccounts: ontology.collections.user_accounts,

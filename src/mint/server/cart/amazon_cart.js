@@ -450,6 +450,7 @@ exports.syncAmazon = function * (cart) {
   var res = yield opHelpers[cart.store_locale].execute('CartCreate', cartAddAmazonParams);
   var amazonErrors = getErrorsFromAmazonCartCreate(res.result.CartCreateResponse.Cart)
   var amazonCart = res.result.CartCreateResponse.Cart
+  cart.subtotal = amazonCart.SubTotal.Amount / 100.00
   cart.amazon_cartid = amazonCart.CartId
   cart.amazon_hmac = amazonCart.HMAC
   cart.amazon_purchase_url = amazonCart.PurchaseURL

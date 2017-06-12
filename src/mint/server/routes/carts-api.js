@@ -573,7 +573,7 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/views/:cart_id Get cart views
+   * @api {get} /api/views/:cart_id Get Views
    * @apiDescription Get the number of times a cart has been viewed
    * @apiGroup Carts
    * @apiParam {string} :cart_id the id of the cart whose views we want to access
@@ -587,7 +587,7 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {put} /api/views/:cart_id increment cart views
+   * @api {put} /api/views/:cart_id Views++
    * @apiDescription Increment the number of times a cart has been viewed
    * @apiGroup Carts
    * @apiParam {string} :cart_id the id of the cart whose views we want to increment
@@ -668,7 +668,7 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/item/:item_id/reactions
+   * @api {get} /api/item/:item_id/reactions Get Reactions
    * @apiDescription get all reactions on an item
    * @apiGroup Carts
    * @apiParam {String} :item_id
@@ -681,7 +681,7 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/item/:item_id/reaction/:user_id
+   * @api {get} /api/item/:item_id/reaction/:user_id Get User Reactions
    * @apiDescription get a single reaction on an item associated with a specific user
    * @apiGroup Carts
    * @apiParam {String} :item_id
@@ -740,7 +740,8 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {delete} /api/item/:item_id/reaction/:user_id
+   * @api {delete} /api/item/:item_id/reaction/:user_id Delete Reaction
+   * @apiGroup Carts
    * @apiDescription remove a specific reaction off an item on behalf of a user
    * @apiParam {String} :item_id
    * @apiParam {String} :user_id
@@ -890,8 +891,8 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/cart_type list of carts sorted by the user's location
-   * @apiDescription Retrieves a list of carts sorted by the user's IP location and country
+   * @api {get} /api/cart_type Get Types
+   * @apiDescription Retrieves a list of cart types sorted by the user's IP location and country
    * @apiGroup Carts
    */
   router.get('/cart_type', (req, res) => co(function* () {
@@ -954,7 +955,7 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get} /api/categories/:cart_id gets a list of item categories
+   * @api {get} /api/categories/:cart_id Get Categories
    * @apiDescription Retrieves a JSON of item categories -- currently just from a file for YPO
    * @apiGroup Carts
    * @apiParam {String} :cart_id the cart id
