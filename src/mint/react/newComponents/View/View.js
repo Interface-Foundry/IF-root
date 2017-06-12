@@ -14,7 +14,7 @@ const containers = {
 
 export default class App extends Component {
   render() {
-    const { tab, cart } = this.props,
+    const { tab, cart, selectTab } = this.props,
           containers = {
             'results': ResultsContainer,
             'cart': CartContainer
@@ -24,7 +24,7 @@ export default class App extends Component {
     return (
       <div className='view'>
         <SearchContainer />
-        <Details {...cart}/>
+        <Details {...cart} tab={tab} selectTab={selectTab}/>
         { Component ? <Component /> : null }
         <ButtonsContainer/>
       </div>

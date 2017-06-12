@@ -9,11 +9,17 @@ import { ButtonsContainer } from '../../../newContainers';
 //Analytics!
 import ReactGA from 'react-ga';
 
+const tabs = [
+  'Cart',
+  'Results',
+  'Payment',
+  'Archive'
+]
 
 export default class Details extends Component {
 
   render() {
-    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, views } = this.props,
+    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, views, tab, selectTab } = this.props,
           total = calculateItemTotal(items);
 
     return (
@@ -43,9 +49,11 @@ export default class Details extends Component {
           <tr>
             <td>
               <div className='tags'>
-                <h1>Cart</h1>
-                <h1 className='selected'>Search</h1>
-                <h1>Payment</h1>
+                {
+                  tabs.map((t) => (
+                    <h1 onClick={() => selectTab(t.toLowerCase())} className={`${tab.toUpperCase() === t.toUpperCase() ? 'selected' : ''}`}>{t}</h1>
+                  ))
+                }
               </div>
             </td>
           </tr>

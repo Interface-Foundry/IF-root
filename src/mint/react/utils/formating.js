@@ -52,3 +52,9 @@ const formatLinkForApp = (app, link) => {
 export const calculateItemTotal = (items) => {
   return items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 };
+
+export const removeDangerousCharacterFromString = (string) => {
+  allowedTags = [ 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
+  'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
+  'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre' ]
+}

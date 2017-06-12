@@ -32,7 +32,6 @@ export default class Results extends Component {
     debugger
   }
 
-
   render() {
     // Add
     let arrow, selected;

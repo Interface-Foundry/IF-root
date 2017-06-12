@@ -19,7 +19,7 @@ const mapDispatchToProps = dispatch => ({
   	updateQuery: (query) => dispatch(updateQuery(query)),
   	submitQuery: (query, store, locale) => {
   		if (!isUrl(query)) addSearchHistory(query);
-  		return dispatch(submitQuery(query, store, locale))
+  		return dispatch(submitQuery(encodeURIComponent(query), store, locale))
   	}
 });
 

@@ -1,5 +1,9 @@
 import { get, post, del} from './async'
 
+export const editItem = () => ({
+	type: 'EDIT_ITEM'
+})
+
 export const fetchCart = cart_id => get(
 	`/api/cart/${cart_id}`, 
 	'CART', 

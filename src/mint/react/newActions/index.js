@@ -29,7 +29,8 @@ export {
 	updateCart, 
 	clearCart, 
 	deleteCart,
-	addItem 
+	addItem,
+	editItem
 } from './cart';
 
 export { 

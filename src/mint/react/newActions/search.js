@@ -25,7 +25,7 @@ export const submitQuery = (query, store, locale) => get(
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: {
-      results: [...json],
+      results: json.asin ? [json] : [...json],
       history: false,
       tab: 'results'
     },

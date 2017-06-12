@@ -51,11 +51,17 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 		nav {
 			padding: 0 $padding*2;
 			p {
+				position: relative;
 				display: inline-block;
 				font-size: 14px;
 				font-weight: 500;
 				@media only screen and (max-width: 600px) {
 					padding: $padding $padding 0;
+				}
+
+				.price {
+					max-width: 900px;
+					width: 100%;
 				}
 			}
 
@@ -97,7 +103,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 						padding: $padding 0 0;
 
 						p {
-							font-size: 16px;
+							font-size: 14px;
 							line-height: 18px;	
 							padding: 0;						
 						}

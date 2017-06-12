@@ -8,7 +8,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	width: 100%;
 	height: auto;
 	margin: 0 auto;
-	border-spacing: $padding*2 $padding;
+    border-collapse: collapse;
 
 	@media only screen and (max-width: 600px) {
 		border-spacing: 0;
